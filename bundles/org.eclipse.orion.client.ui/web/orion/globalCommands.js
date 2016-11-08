@@ -618,9 +618,11 @@ define([
 
 		var themeVal = localStorage.getItem("pageTheme");
 		if (themeVal && typeof themeVal === "string" || themeVal instanceof String && themeVal.length > 0) {
-			if (!document.body.classList.contains(themeVal)) {
-				document.body.classList.add(themeVal);
-			}
+			themeVal.split(" ").forEach(function(clazz) {
+				if (!document.body.classList.contains(clazz)) {
+					document.body.classList.add(clazz);
+				}
+			});
 		}
 		
 		// forward the preference service on to the command registry
@@ -711,7 +713,7 @@ define([
 					closeByDefault: closeSplitter
 				});
 				var toggleSidePanelCommand = new mCommands.Command({
-					name: messages["Toggle side panel"],
+					name: messages["Toggle Side Panel"],
 					tooltip: messages["Open or close the side panel"],
 					id: "orion.toggleSidePane", //$NON-NLS-0$
 					callback: function () {
@@ -799,7 +801,7 @@ define([
 		} else {
 			// Toggle trim command
 			var toggleBanner = new mCommands.Command({
-				name: messages["Toggle banner and footer"],
+				name: messages["Toggle Banner and Footer"],
 				tooltip: messages["HideShowBannerFooter"],
 				id: "orion.toggleTrim", //$NON-NLS-0$
 				callback: toggleBannerFunc

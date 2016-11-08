@@ -17,7 +17,7 @@
 				if (sessionStorage.editSplashShown) {
 					load();
 				} else {
-					sessionStorage.editSplashShown = true;
+					//sessionStorage.editSplashShown = true;
 					require(["orion/splash"], load, load);
 				}
 			});
@@ -25,8 +25,8 @@
 	</head>
 
 	<body id="orion-editor" spellcheck="false" class="orionPage">
-		<!-- file input doesn't function properly on all web browsers if it is dynamically generated, we don't want the input to be visible -->
-		<input id="fileSelectorInput" type="file" multiple style="position:fixed; top: -100px;"/>
+		<!-- file input doesn't function properly on all web browsers if it is dynamically generated, we don't want the input to be visible or tabbable -->
+		<input id="fileSelectorInput" type="file" multiple style="position:fixed; top: -100px; visibility: hidden;" tabindex="-1" aria-hidden="true"/>
 		<nav id="sideMenu" class="sideMenu"></nav>
 		<div id="pageContent" class="content-fixedHeight">
 			<div id="sideMenuToggle" class="sideMenuToggle"></div>
@@ -51,18 +51,24 @@
 		<div class="footer-fixed-bottom footer" id="footer">
 		</div>
 		<div id="contentassist" class="contentassist" role="listbox" tabindex="-1"></div>
+		<div id="splash" class="splash">
+			<div id="splashContainer" class="splashContainer">
+				<div class="splashLoadingImage initial"></div>
+			</div>
+		</div>
 		<script>
-			if (!sessionStorage.editSplashShown) {
-				var splash = document.createElement("div");
-				splash.id = splash.className = "splash";
-				document.body.appendChild(splash);
+			if (sessionStorage.editSplashShown) {
+				var splash = document.querySelector("#splash");
+				splash.parentNode.removeChild(splash);
 			}
 
 			var themeVal = localStorage.getItem("pageTheme");
 			if (themeVal && typeof themeVal === "string" || themeVal instanceof String && themeVal.length > 0) {
-				if (!document.body.classList.contains(themeVal)) {
-					document.body.classList.add(themeVal);
-				}
+				themeVal.split(" ").forEach(function(clazz) {
+					if (!document.body.classList.contains(clazz)) {
+						document.body.classList.add(clazz);
+					}
+				});
 			}
 		</script>
 	</body>

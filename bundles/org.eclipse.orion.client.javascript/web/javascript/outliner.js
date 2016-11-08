@@ -18,12 +18,14 @@ define([
 	 * @name javascript.JSOutliner
 	 * @description creates a new instance of the outliner
 	 * @param {Worker} ternWorker The backing Tern worker 
+	 * @param {Boolean} displayAST <code>True</code> to return the AST rather than a source outline
 	 * @constructor
 	 * @public
 	 * @param {Worker} ternWorker
 	 */
-	function JSOutliner(ternWorker) {
+	function JSOutliner(ternWorker, displayAST) {
 		this.ternWorker = ternWorker;
+		this.displayAST = displayAST;
 	}
 	
 	/**
@@ -43,7 +45,7 @@ define([
 		editorContext.getFileMetadata().then(function(meta) {
 			editorContext.getText().then(function(text) {
 				var files = [{type: "full", name: meta.location, text: text}]; //$NON-NLS-1$
-				this.ternWorker.postMessage({request: "outline", args: {files: files, meta: {location: meta.location}}}, function(response, error) { //$NON-NLS-1$
+				this.ternWorker.postMessage({request: "outline", args: {ast: this.displayAST, files: files, meta: {location: meta.location}}}, function(response, error) { //$NON-NLS-1$
 				if(response.outline) {
 					deferred.resolve(response.outline);
 				} else if(error) {
@@ -51,7 +53,6 @@ define([
 				}
 			});
 			}.bind(this));
-			
 		}.bind(this));
 		return deferred;
 	};

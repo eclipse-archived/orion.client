@@ -581,7 +581,34 @@ define([
 				var text = "this.a(); var o = {'p': this.a();}; this.a();";
 				return computeOccurrences(text, getOptions(done, 38, 38), [{start:0, end:4}, {start:36, end:40}]);
 			});
-			
+			/**
+			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=501447
+			 */
+			it('This with computed property 1', function(done) {
+				var text = "var key = 'one'; this[key] = 10;";
+				return computeOccurrences(text, getOptions(done, 23, 23), [{start:4, end:7}, {start:22, end:25}]);
+			});
+			/**
+			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=501447
+			 */
+			it('This with computed property 2', function(done) {
+				var text = "var key = 'one'; function f() {this[key] = 10;}";
+				return computeOccurrences(text, getOptions(done, 37, 37), [{start:4, end:7}, {start:36, end:39}]);
+			});
+			/**
+			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=501447
+			 */
+			it('This with computed property 3', function(done) {
+				var text = "var key = 'one'; function f() {this[key] = 10; this.key = 'not me'}";
+				return computeOccurrences(text, getOptions(done, 37, 37), [{start:4, end:7}, {start:36, end:39}]);
+			});
+			/**
+			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=501447
+			 */
+			it('This with computed property 4', function(done) {
+				var text = "var key = 'one'; this[key] = 10; this.key = 'not me'";
+				return computeOccurrences(text, getOptions(done, 23, 23), [{start:4, end:7}, {start:22, end:25}]);
+			});
 			/**
 			 * Tests logic expressions that contain identifier nodes
 			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=426933

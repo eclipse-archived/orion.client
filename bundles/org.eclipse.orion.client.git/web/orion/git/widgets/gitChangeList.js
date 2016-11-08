@@ -929,6 +929,7 @@ define([
 						textArea.type = "textarea"; //$NON-NLS-0$
 						textArea.id = "nameparameterCollector"; //$NON-NLS-0$
 						textArea.placeholder = messages["SmartCommit"];
+						textArea.setAttribute("aria-label", messages["SmartCommitLabel"]);
 						textArea.classList.add("parameterInput"); //$NON-NLS-0$
 						textArea.addEventListener("keyup", function() { //$NON-NLS-0$
 							textArea.parentNode.classList.remove("invalidParam"); //$NON-NLS-0$

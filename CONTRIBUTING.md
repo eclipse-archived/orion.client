@@ -13,7 +13,15 @@ IDE experience in a browser tab.
 
 Developer resources
 --------------------
-Information regarding source code management, builds, coding standards, and more.
+####IMPORTANT: Orion Development happens at Eclipse.org, not GitHub.com.  Please Contribute using Eclipse.org tooling.
+
+Everything you would ever want to know about how to contribute to Orion can
+be [found on the contributing wiki](http://wiki.eclipse.org/Orion/Contributing_Code).
+
+Preferably, code contributions should be made using Gerrit. While we can work with pull requests on GitHub, 
+the code there acts solely as a mirror, and is not used for development.
+
+More information regarding source code management, builds, coding standards, and more.
 
 - [https://projects.eclipse.org/projects/ecd.orion/developer](https://projects.eclipse.org/projects/ecd.orion/developer)
 

@@ -17,7 +17,7 @@
 				if (sessionStorage.gitSplashShown) {
 					load();
 				} else {
-					sessionStorage.gitSplashShown = true;
+					//sessionStorage.gitSplashShown = true;
 					require.config({config: {"orion/splash": {splashID: "Git"}}});
 					require(["orion/splash"], load, load);
 				}
@@ -44,18 +44,25 @@
 			</div>
 		</div>
 		<div class="footer-fixed-bottom footer" id="footer"></div>
+		<div id="splash" class="splash">
+			<div id="splashContainer" class="splashContainer">
+				<div class="splashLoadingImage initial"></div>
+			</div>
+		</div>
 		<script>
-			if (!sessionStorage.gitSplashShown) {
-				var splash = document.createElement("div");
-				splash.id = splash.className = "splash";
-				document.body.appendChild(splash);
+			if (sessionStorage.editSplashShown) {
+				var splash = document.querySelector("#splash");
+				splash.parentNode.removeChild(splash);
 			}
+
 
 			var themeVal = localStorage.getItem("pageTheme");
 			if (themeVal && typeof themeVal === "string" || themeVal instanceof String && themeVal.length > 0) {
-				if (!document.body.classList.contains(themeVal)) {
-					document.body.classList.add(themeVal);
-				}
+				themeVal.split(" ").forEach(function(clazz) {
+					if (!document.body.classList.contains(clazz)) {
+						document.body.classList.add(clazz);
+					}
+				});
 			}
 		</script>
 	</body>

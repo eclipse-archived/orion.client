@@ -22,6 +22,8 @@ define({
 	'prefPotentialProblems':'Potential Programming Problems',
 	'sourceOutline' : 'Source Outline',
 	'sourceOutlineTitle': 'JavaScript source outline',
+	'astOutline' : 'AST Outline',
+	'astOutlineTitle': 'JavaScript AST outline',
 	'contentAssist' : 'JavaScript content assist',
 	'eslintValidator' : 'JavaScript Validator',
 	'missingCurly' : 'Statements not enclosed in braces:',
@@ -254,7 +256,6 @@ define({
 	'no-else-return' : 'Unnecessary else after return:',
 	'no-empty-label' : 'No empty labels:',
 	'no-self-compare' : 'Disallow self compare:',
-	'no-irregular-whitespace' : 'Disallow irregular whitespace:',
 	'no-self-assign' : 'Disallow self assignment:',
 	'noShadowFixName' : 'Rename in scope',
 	'type-checked-consistent-return' : 'Discouraged inconsistent returns:',
@@ -310,6 +311,16 @@ define({
 	'outlinerPluginDescription': 'Provides JavaScript outlining',
 	"fixesPluginName": "JavaScript quick fixes",
 	"fixesPluginDescription": "Provides quick fixes for Orion ESLint problems",
+	'astPluginName': 'AST (acorn) plugin for Tern',
+	'astPluginDescription': 'Provides AST (acorn) for Tern',
+	'templatesPlugin': 'Orion code templates',
+	'templatesPluginDescription': 'Provides a variety of code templates for JavaScript in Orion.',
+	'beautifierPluginName' : 'JSBeautify plugin for Tern',
+	'beautifierPluginDescription' : 'Provides JS formatting for Tern',
+	'resolverPluginName' : 'Resolver plugin for Tern',
+	'resolverPluginDescription' : 'Resolves Orion file paths for other Tern plugins.',
+	
+	// Tern indexes
 	'browser': 'Browser global variables.',
 	'node': 'Node.js global variables and Node.js scoping.',
 	'commonjs': 'CommonJS global variables and CommonJS scoping (use this for browser-only code that uses Browserify/WebPack).',
@@ -332,10 +343,6 @@ define({
 	'embertest': 'Ember test helper globals.',
 	'webextensions': 'WebExtensions globals.',
 	'es6': 'Enable all ECMAScript 6 features except for modules.',
-	'astPluginName': 'AST (acorn) plugin for Tern',
-	'astPluginDescription': 'Provides AST (acorn) for Tern',
-	'templatesPlugin': 'Orion code templates',
-	'templatesPluginDescription': 'Provides a variety of code templates for JavaScript in Orion.',
 	
 	// JSDoc types
 	'jsDocEmptyObjDesc': ' - Empty object',
@@ -345,11 +352,8 @@ define({
 	'jsDocAnyTypeDesc': ' - No type information',
 	'jsDocAnyTypeDoc': 'Represents that no type information is known. The type is described as the \'any\' type.',
 	
-	'beautifierPluginName' : 'JSBeautify plugin for Tern',
-	'beautifierPluginDescription' : 'Provides JS formatting for Tern',
-	'javascriptFormatter' : 'Javascript Formatter',
-
 	// JS formatting settings
+	'javascriptFormatter' : 'Javascript Formatter',
 	'javascriptFormattingSettings' : 'Formatting Settings for Javascript',
 	'javascriptFormatting' : 'Javascript Formatting',
 	'js_indent_size' : 'Indention size:',

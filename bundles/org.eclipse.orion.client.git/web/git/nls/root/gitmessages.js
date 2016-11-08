@@ -81,6 +81,7 @@ define({//Default message bundle
 	"CommitTooltip": "Commit the selected files with the given message.", //$NON-NLS-0$  //$NON-NLS-1$
 	"AuthMsgLink":"Authentication required for: ${0}. <a target=\"_blank\" href=\"${1}\">${2}</a> and re-try the request. </span>", //$NON-NLS-0$  //$NON-NLS-1$
 	"SmartCommit": "Enter the commit message", //$NON-NLS-0$  //$NON-NLS-1$
+	"SmartCommitLabel": "Commit message", //$NON-NLS-0$  //$NON-NLS-1$
 	"SmartCountCommit": "Commit ${0} file(s)", //$NON-NLS-0$  //$NON-NLS-1$
 	"Amend last commit": "Amend last commit", //$NON-NLS-0$  //$NON-NLS-1$
 	" Amend": " Amend", //$NON-NLS-0$  //$NON-NLS-1$
@@ -624,6 +625,7 @@ define({//Default message bundle
 	"OpenGithubPullRequest": "Open Github Page", //$NON-NLS-0$  //$NON-NLS-1$
 	"OpenGithubPullRequestMsg": "Open the Github page for this Pull Request.", //$NON-NLS-0$  //$NON-NLS-1$
 	"AllowPopUpMsg": "Please allow popups for this site.", //$NON-NLS-0$  //$NON-NLS-1$
+	"ShowGraph":"Show graphical history viewer", //$NON-NLS-0$  //$NON-NLS-1$
 	"ToggleGraph":"Toggles the graphical representation of the commit history", //$NON-NLS-0$  //$NON-NLS-1$
 	"Annotated":"Annotated" //$NON-NLS-0$  //$NON-NLS-1$
 });

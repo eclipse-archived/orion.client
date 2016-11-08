@@ -43,13 +43,17 @@ function mark(name) {
 step.prototype.complete = function() {
 	mark("end splash step " + this.id);
 	this.state = this.COMPLETED;
-	this.domNode.className = 'splashSuccessImage';
+	if (this.domNode) {
+		this.domNode.className = 'splashSuccessImage';
+	}
 };
 
 step.prototype.spin = function(){
 	mark("start splash step " + this.id);
 	this.state = this.HAPPENING;
-	this.domNode.className = 'splashLoadingImage';
+	if (this.domNode) {
+		this.domNode.className = 'splashLoadingImage';
+	}
 };
 
 step.prototype.getStepNode = function() {
@@ -110,12 +114,17 @@ function loader( domNode, title ){
 						'</div>' +
 					'</div>';   
 	
-	this.initialize();
-	
 	this.interval;
 	
 	this.currentStep = -1;
 }
+
+loader.prototype.showSteps = function() {
+	this.stepsShown = true;
+	this.initialize();
+	this.drawSteps();
+	this.update();
+};
 
 loader.prototype.showFillerProgress = function(){
 	var cs = this.getStep();
@@ -141,7 +150,7 @@ loader.prototype.stopFillerProgress = function () {
 };
 
 loader.prototype.nextStep = function(){
-			
+	
 	var myStep;
 	
 	/* complete current step */
@@ -213,6 +222,7 @@ loader.prototype.getStep = function(id){
 };
 
 loader.prototype.drawSteps = function(){
+	if (!this.stepsShown) return;
 	
 	this.emptySteps();
 	
@@ -242,6 +252,8 @@ loader.prototype.worked = function(increment){
 };
 
 loader.prototype.update = function(){
+	if (!this.stepsShown) return;
+
 	var cs = this.getStep();
 	if (!cs) return;
 	
@@ -284,6 +296,7 @@ loader.prototype.update = function(){
 
 loader.prototype.takeDown = function() {
 	if (!pageLoader) return;
+	pageLoader = null;
 	if (this.pluginRegistry) {
 		this.pluginRegistry.removeEventListener("started", this._pluginListener);
 		this.pluginRegistry.removeEventListener("lazy activation", this._pluginListener);
@@ -294,7 +307,6 @@ loader.prototype.takeDown = function() {
 	if (splash && splash.parentNode) {
 		splash.parentNode.removeChild(splash);
 	}
-	pageLoader = null;
 };
 
 loader.prototype.createStep = function(id, description, type, total) {
@@ -321,22 +333,18 @@ function start() {
 	
 	var splash = document.getElementById("splash");
 	if (!splash) return;
-	var container = document.createElement("div");
-	var showTimeout = 500;
+
+	var showTimeout = 3000;
 	if (localStorage.showSplashTimeout) {
 		try {
 			showTimeout = parseInt(localStorage.showSplashTimeout, 10);
 		} catch (ex) {}
 	}
-	if (showTimeout !== 0) {
-		container.style.display = "none";
-		setTimeout(function() {
-			container.style.display = "";
-		}, showTimeout);
-	}
-	container.id = container.className = "splashContainer";
-	splash.appendChild(container);
-	
+	setTimeout(function() {
+		if (!pageLoader) return;
+		pageLoader.showSteps();
+	}, showTimeout);
+
 	var config = module.config();
 	pageLoader = new loader('splashContainer', messages["SplashTitle" + (config.splashID || "")]);
 	var initial = new step("orion.splash.page", messages.LoadingPage, 0, 50);

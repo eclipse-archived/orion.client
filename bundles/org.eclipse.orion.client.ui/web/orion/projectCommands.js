@@ -716,7 +716,7 @@ define(['require', 'i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 
 				}
 
 				var func = arguments.callee;
-				var params = handleParamsInCommand(func, data, messages["deploy"] + item.Name);
+				var params = handleParamsInCommand(func, data, i18nUtil.formatMessage(messages["deployItem"], item.Name));
 				if(!params){
 					return;
 				}
@@ -779,7 +779,7 @@ define(['require', 'i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 
 				}
 
 				var func = arguments.callee;
-				var params = handleParamsInCommand(func, data, messages["deploy"] + item.Name);
+				var params = handleParamsInCommand(func, data, i18nUtil.formatMessage(messages["deployItem"], item.Name));
 				if(!params){
 					return;
 				}

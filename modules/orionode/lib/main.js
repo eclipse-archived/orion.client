@@ -99,11 +99,21 @@ function addNewTab(id, iframe) {
 	}
 
 	tab.addEventListener("click", function(evt) {
-		setActive();
-		evt.preventDefault();
-		evt.stopPropagation();
-		var menu = document.querySelector("#context-menu");
-		menu.classList.remove('context-menu-items-open');
+		if (evt.button === 1 && tabParent.childNodes.length > 1) {
+			// middle button clicked, close the tab if there are two or more
+			// tabs around
+			iframe.parentNode.removeChild(iframe);
+			tab.parentNode.removeChild(tab);
+			update();
+			evt.preventDefault();
+			evt.stopPropagation();
+		} else {
+			setActive();
+			evt.preventDefault();
+			evt.stopPropagation();
+			var menu = document.querySelector("#context-menu");
+			menu.classList.remove('context-menu-items-open');
+		}
 	});
 
 	tab.addEventListener('dragstart', function(evt) {

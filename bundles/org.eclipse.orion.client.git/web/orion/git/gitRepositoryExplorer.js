@@ -66,7 +66,7 @@ define([
 	function compareLocation(s1, s2) {
 		return compare(s1, s2, {Location: ""});
 	}
-
+	
 	/**
 	 * Creates a new Git repository explorer.
 	 * @class Git repository explorer
@@ -502,7 +502,7 @@ define([
 			noTwistie: true,
 			preferenceService: this.preferencesService
 		});
-		section.getHeaderElement().setAttribute("aria-labelledby", id + "Label " + id + "Title"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		section.getHeaderElement().setAttribute("aria-labelledby", this.repositoriesLabel.id + " " + section.getTitleElement().id); //$NON-NLS-1$ //$NON-NLS-0$
 		
 		var selection = this.repositoriesSelection = new mSelection.Selection(this.registry, "orion.selection.repo"); //$NON-NLS-0$
 		selection.addEventListener("selectionChanged", function(e) { //$NON-NLS-0$
@@ -561,7 +561,7 @@ define([
 			noTwistie: true,
 			preferenceService: this.preferencesService
 		});
-		section.getHeaderElement().setAttribute("aria-labelledby", id + "Label " + id + "Title"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		section.getHeaderElement().setAttribute("aria-labelledby", this.branchesLabel.id + " " + section.getTitleElement().id); //$NON-NLS-1$ //$NON-NLS-0$
 
 		var selection = this.branchesSelection = new mSelection.Selection(this.registry, "orion.selection.ref"); //$NON-NLS-0$
 		selection.addEventListener("selectionChanged", function(e) { //$NON-NLS-0$

@@ -132,6 +132,12 @@ define([
 							if (identifier.type === Estraverse.Syntax.AssignmentPattern && identifier.left){
 								identifier = identifier.left;
 							}
+							if(identifier.type === Estraverse.Syntax.ObjectPattern) {
+								identifier.properties.forEach(function(prop) {
+									checkId(prop.key, node, true, false);
+									checkId(prop.value, node);
+								});
+							} else
 							if(checkId(identifier, node, true)) {
 								return Estraverse.VisitorOption.Skip;
 							}
@@ -153,7 +159,20 @@ define([
 					checkId(node.superClass, node);
 					break;
 				case Estraverse.Syntax.AssignmentExpression:
-					checkId(node.left, node);
+					if(node.left.type === Estraverse.Syntax.ArrayPattern) {
+						//Destructuring assignment
+						node.left.elements.forEach(function(element) {
+							checkId(element, node.left);
+						});
+					} else if(node.left.type === Estraverse.Syntax.ObjectPattern) {
+						//Destructuring object assignment
+						node.left.properties.forEach(function(prop) {
+							checkId(prop.key, node.left);
+						});
+					} else {
+						//Basic identifier check
+						checkId(node.left, node);
+					}
 					checkId(node.right, node);
 					break;
 				case Estraverse.Syntax.ExpressionStatement:
@@ -227,7 +246,28 @@ define([
 					}
 					break;
 				case Estraverse.Syntax.VariableDeclarator:
-					checkId(node.id, node, true);
+					if(node.id.type === Estraverse.Syntax.ArrayPattern) {
+						//Destructuring array assignment
+						node.id.elements.forEach(function(element) {
+							if(element.type === Estraverse.Syntax.AssignmentPattern) {
+								//Destructured default values
+								checkId(element.left, element, true);
+								checkId(element.right, element);
+							} else {
+								checkId(element, node.id, true);
+							}
+						});
+					} else if(node.id.type === Estraverse.Syntax.ObjectPattern) {
+						//Destructuring object assignment
+						node.id.properties.forEach(function(prop) {
+							checkId(prop.key, node.id, true, false);
+							if(prop.key !== prop.value) {
+								checkId(prop.value, node.id);
+							}
+						});
+					} else {
+						checkId(node.id, node, true);
+					}
 					checkId(node.init, node);
 					break;
 				case Estraverse.Syntax.NewExpression:
@@ -268,6 +308,11 @@ define([
                     checkId(node.left, node);
                     checkId(node.right, node);
                     break;
+                case Estraverse.Syntax.ForOfStatement: {
+                	checkId(node.left, node);
+                	checkId(node.right, node);
+                	break;
+                }
 				case Estraverse.Syntax.WithStatement:
                     checkId(node.object, node);
                     break;
@@ -517,10 +562,22 @@ define([
 			// See if we are doing an object property check
 			objectPropCheck = false;
 			if (parent && parent.type === Estraverse.Syntax.Property){
-				// Object property key is selected
-				objectPropCheck = context.token === parent.key;
+				var grandparent = parent.parent;
+				if(!grandparent) {
+					grandparent = cntxt.token.parents && cntxt.token.parents.length > 1 ? cntxt.token.parents[cntxt.token.parents.length-2] : null;
+				}
+				if(grandparent) {
+					if(grandparent.type !== Estraverse.Syntax.ObjectPattern) {
+						// Object property key is selected
+						objectPropCheck = context.token === parent.key;
+					}
+				} else {
+					//no grand parent context, assume an object expression
+					objectPropCheck = context.token === parent.key;
+				}
+
 			} else if (parent && (parent.type === Estraverse.Syntax.MemberExpression)){
-				if (parent.object && parent.object.type === Estraverse.Syntax.ThisExpression){
+				if (parent.object && parent.object.type === Estraverse.Syntax.ThisExpression && !parent.computed){
 					// Usage of this within an object
 					objectPropCheck = true;
 				} else if (!parent.computed && parent.property && context.start >= parent.property.range[0] && context.end <= parent.property.range[1]){
@@ -578,7 +635,7 @@ define([
 				if(token.type === 'Punctuator') {
 					var index = token.index;
 					//only check back if we are at the start of the punctuator i.e. here -> {
-					if(offset === token.range[0] && index != null && index > 0) {
+					if(offset === token.range[0] && index !== null && index > 0) {
 						var prev = ast.tokens[index-1];
 						if(prev.range[1] !== token.range[0]) {
 							return null;

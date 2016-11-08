@@ -160,7 +160,128 @@ define([
 				occurrences = new Occurrences.JavaScriptOccurrences(worker);
 				worker.start(done,  {options:{ecmaVersion:6, sourceType:"module"}});
 			});
-			
+			describe("Destructuring Assignments", function() {
+				/**
+				 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=506358
+				 * @since 13.0
+				 */
+				it("Simple array assignment", function(done) {
+					var text = "var [a, b] = [1, 2];if(a === 10 || b === 10) {}";
+					return computeOccurrences(text, getOptions(done, 5, 6), [{start:5, end:6}, {start:23, end:24}]);
+				});
+				/**
+				 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=506358
+				 * @since 13.0
+				 */
+				it("Extrenal declaration array assignment", function(done) {
+					var text = "var c, d;[c, d] = [3, 4];if(c === 10 || d === 10) {}";
+					return computeOccurrences(text, getOptions(done, 4, 5), [{start:4, end:5}, {start:10, end:11}, {start:28, end:29}]);
+				});
+				/**
+				 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=506358
+				 * @since 13.0
+				 */
+				it("Array re-assignment", function(done) {
+					var text = "var e = [5, 6];var [f, g] = e;if(f === 10 || g === 10) {}";
+					return computeOccurrences(text, getOptions(done, 20, 21), [{start:20, end:21}, {start:33, end:34}]);
+				});
+				/**
+				 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=506358
+				 * @since 13.0
+				 */
+				it("Default values array assignment", function(done) {
+					var text = "var [h=1, i=2] = [3, 4];if(h === 10 || i === 10) {}";
+					return computeOccurrences(text, getOptions(done, 5, 6), [{start:5, end:6}, {start:27, end:28}]);
+				});
+				/**
+				 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=506358
+				 * @since 13.0
+				 */
+				it("Array value swap array assignment", function(done) {
+					var text = "var j = 2, k = 3;[j, k] = [k, j];";
+					return computeOccurrences(text, getOptions(done, 4, 5), [{start:4, end:5}, {start:18, end:19}, {start:30, end:31}]);
+				});
+				/**
+				 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=506358
+				 * @since 13.0
+				 */
+				it("Sparse array assignment", function(done) {
+					var text = "[l, ,n] = [1, 2, 3, 4, 5];if(l === 10 || n === 10) {}";
+					return computeOccurrences(text, getOptions(done, 1, 2), [{start:1, end:2}, {start:29, end:30}]);
+				});
+				/**
+				 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=506358
+				 * @since 13.0
+				 */
+				it("Simple object assignment", function(done) {
+					var text = "var {a, b} = {a: 1, b:2};if(a || b) {}";
+					return computeOccurrences(text, getOptions(done, 5, 6), [{start:5, end:6}, {start:28, end:29}]);
+				});
+				/**
+				 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=506358
+				 * @since 13.0
+				 */
+				it("Assignment external declaration object assignment", function(done) {
+					var text = "var c, d;({c, d} = {c:1, d:2});if(c || d) {}";
+					return computeOccurrences(text, getOptions(done, 4, 5), [{start:4, end:5}, {start:11, end:12}, {start:34, end:35}]);
+				});
+				/**
+				 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=506358
+				 * @since 13.0
+				 */
+				it("Default values object assignment", function(done) {
+					var text = "var {e=10, f=5} = {e: 3};if(e || f) {}";
+					return computeOccurrences(text, getOptions(done, 5, 6), [{start:5, end:6}, {start:28, end:29}]);
+				});
+				/**
+				 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=506358
+				 * @since 13.0
+				 */
+				it("Default values object assignment", function(done) {
+					var text = "var {e=10, f=5} = {e: 3};if(e || f) {}";
+					return computeOccurrences(text, getOptions(done, 5, 6), [{start:5, end:6}, {start:28, end:29}]);
+				});
+				/**
+				 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=506358
+				 * @since 13.0
+				 */
+				it("Function expression default values object assignment", function(done) {
+					var text = "(function fun({aa = 1, bb = { x: 0, y: 0 }, cc = 2} = {}) {console.log(aa, bb, cc);})();";
+					return computeOccurrences(text, getOptions(done, 15, 17), [{start:15, end:17}, {start:71, end:73}]);
+				});
+				/**
+				 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=506358
+				 * @since 13.0
+				 */
+				it("For-of default values object assignment", function(done) {
+					var text = "for (var {aaa: a1, bbb: { ccc: c1 } } of {}) {console.log(a1, c1);}";
+					return computeOccurrences(text, getOptions(done, 15, 17), [{start:15, end:17}, {start:58, end:60}]);
+				});
+				/**
+				 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=506358
+				 * @since 13.0
+				 */
+				it("Let-computed key object assignment", function(done) {
+					var text = 'let key = "z";let { [key]: h } = { z: "bar" };';
+					return computeOccurrences(text, getOptions(done, 4, 7), [{start:4, end:7}, {start:21, end:24}]);
+				});
+			});
+			describe("For-of", function() {
+				/**
+				 * @since 13.0
+				 */
+				it("Simple for-of", function(done) {
+					var text = "for(a of {}) {console.log(a);}";
+					return computeOccurrences(text, getOptions(done, 4, 5), [{start:4, end:5}, {start:26, end:27}]);
+				});
+				/**
+				 * @since 13.0
+				 */
+				it("Simple for-of object variable", function(done) {
+					var text = "for(a of b) {console.log(a, b);}";
+					return computeOccurrences(text, getOptions(done, 4, 5), [{start:4, end:5}, {start:25, end:26}]);
+				});
+			});
 			describe('Arrow Function', function(){
 				/**
 				 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=471011

@@ -24,7 +24,7 @@ define([
 	 * @name orion.widgets.Section
 	 * @class Generates a section
 	 * @param {DomNode} parent parent node
-	 * @param {DomNode} sibling if specified, the section will be inserted after the sibling
+	 * @param {DomNode} sibling if specified, the section will be inserted before the sibling
 	 * @param {String} options.id id of the section header
 	 * @param {String} options.title title (in HTML) of the section
 	 * @param {orion.preferences.PreferencesService} [options.preferenceService] used to store the hidden/shown state of the section if specified
@@ -37,8 +37,9 @@ define([
 	 * @param {Boolean} [options.hidden] if true section will be hidden at first display
 	 * @param {Boolean} [options.useAuxStyle] if true the section will be styled for an auxiliary pane
 	 * @param {Boolean} [options.keepHeader] if true the embedded explorer will keep its header
-	 * @param {Boolean} [options.noTwisties] if true the twisties will not be displayed
+	 * @param {Boolean} [options.noTwistie] if true the twisties will not be displayed
 	 * @param {Boolean} [options.dropdown] if true the section is dropdown
+	 * @param {Boolean} [options.noArrow] if true no dropdown arrow
 	 * @param {Function} [options.onExpandCollapse] a function that will be called when the expanded/collapsed state changes
 	 *
 	 * @borrows orion.editor.EventTarget#addEventListener as #addEventListener
@@ -117,6 +118,18 @@ define([
 					}
 				}
 			}, false);
+			
+			// if dropdown, mark up domNode as either combo or dialog button
+			if (options.dropdown) {
+				if (options.iconClass) {
+					this.domNode.setAttribute("role", "button"); //$NON-NLS-1$ //$NON-NLS-0$
+				} else {
+					this.domNode.setAttribute("role", "combobox"); //$NON-NLS-1$ //$NON-NLS-0$
+					this.domNode.setAttribute("aria-readonly", "true"); //$NON-NLS-1$ //$NON-NLS-0$
+				}
+				this.domNode.setAttribute("aria-haspopup", "dialog"); //$NON-NLS-1$ //$NON-NLS-0$
+				this.domNode.setAttribute("aria-expanded", "false"); //$NON-NLS-1$ //$NON-NLS-0$
+			}
 		}
 		var classes;
 		if(options.iconClass){
@@ -151,6 +164,13 @@ define([
 		this.titleNode.classList.add("sectionAnchor"); //$NON-NLS-0$
 		this.titleNode.classList.add("sectionTitle"); //$NON-NLS-0$
 		this.titleNode.classList.add("layoutLeft"); //$NON-NLS-0$
+		
+		// if dropdown and not icon, mark up titleNode as textbox child of combo
+		if (options.dropdown && !options.iconClass) {
+			this.titleNode.setAttribute("role", "textbox"); //$NON-NLS-1$ //$NON-NLS-0$
+			this.titleNode.setAttribute("aria-readonly", "true"); //$NON-NLS-1$ //$NON-NLS-0$
+			this.domNode.setAttribute("aria-labelledby", this.titleNode.id); //$NON-NLS-1$ //$NON-NLS-0$
+		}
 		this.domNode.appendChild(this.titleNode);
 		this.titleNode.textContent = options.title;
 
@@ -220,11 +240,17 @@ define([
 
 		this._contentParent = document.createElement("div"); //$NON-NLS-0$
 		this._contentParent.id = this.id + "Content"; //$NON-NLS-0$
-		this._contentParent.setAttribute("role", "region"); //$NON-NLS-2$ //$NON-NLS-1$
 		this._contentParent.classList.add("sectionTable"); //$NON-NLS-0$
 		this._contentParent.setAttribute("aria-labelledby", this.titleNode.id); //$NON-NLS-0$
+
+		// if dropdown, mark up _contentParent as combo's dropdown or dialog button's popup
 		if (options.dropdown) {
 			this._contentParent.classList.add("sectionDropdown");
+			this._contentParent.setAttribute("role", "dialog"); //$NON-NLS-1$ //$NON-NLS-0$
+			this.titleNode.setAttribute("aria-controls", this._contentParent.id); //$NON-NLS-0$
+			this.domNode.setAttribute("aria-owns", this._contentParent.id); //$NON-NLS-0$
+		} else {
+			this._contentParent.setAttribute("role", "region"); //$NON-NLS-1$ //$NON-NLS-0$
 		}
 		// initially style as hidden until we determine what needs to happen
 		this._collapse();
@@ -280,6 +306,12 @@ define([
 				}
 				this.setHidden(true);
 			}.bind(this));
+			this._contentParent.addEventListener("keydown", function(evt) { //$NON-NLS-0$
+				if(evt.keyCode === lib.KEY.ESCAPE) {
+					that.setHidden(true);
+					that.domNode.focus();
+				}
+			}, false);
 		}
 		this._commandService = options.commandService;
 		this._lastMonitor = 0;
@@ -330,8 +362,8 @@ define([
 		},
 		
 		/**
-		 * Get the title DOM node
-		 * @returns {DomNode} The dom node that holds the section title.
+		 * Get the action DOM node
+		 * @returns {DomNode} The dom node that holds the section actions.
 		 */
 		getActionElement: function(){
 			return this._toolActionsNode;
@@ -511,7 +543,7 @@ define([
 			if (this.hidden){
 				this._expand();
 				var nextTabbable = lib.firstTabbable(this.domNode.nextElementSibling);
-				if (nextTabbable && nextTabbable.tagName === "INPUT") nextTabbable.focus(); //$NON-NLS-0$
+				if (nextTabbable && (nextTabbable.tagName === "INPUT" || nextTabbable.tabIndex >= 0)) nextTabbable.focus(); //$NON-NLS-0$
 			} else {
 				this._collapse();
 			}
@@ -553,6 +585,10 @@ define([
 			if (this.domNode) {
 				this.domNode.classList.remove("sectionClosed"); //$NON-NLS-0$
 				this.domNode.classList.add("sectionOpened"); //$NON-NLS-0$
+				this.domNode.setAttribute("aria-owns", this._contentParent.id);
+				if (this.dropdown) {
+					this.domNode.setAttribute("aria-expanded", "true"); //$NON-NLS-1$ //$NON-NLS-0$
+				}
 			}
 			this.hidden = false;
 		},
@@ -592,6 +628,10 @@ define([
 			if (this.domNode) {
 				this.domNode.classList.add("sectionClosed"); //$NON-NLS-0$
 				this.domNode.classList.remove("sectionOpened"); //$NON-NLS-0$
+				this.domNode.removeAttribute("aria-owns");
+				if (this.dropdown) {
+					this.domNode.setAttribute("aria-expanded", "false"); //$NON-NLS-1$ //$NON-NLS-0$
+				}
 			}
 		}
 	};

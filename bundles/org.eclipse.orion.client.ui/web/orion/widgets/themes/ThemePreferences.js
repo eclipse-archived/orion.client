@@ -57,7 +57,6 @@ define([], function() {
 			}
 			if (!selected || selected[themeInfo.selectedKey] === undefined) {
 				selected = selected || {};
-				selected[themeInfo.selectedKey] = themeInfo.defaultTheme;
 				prefs['selected'] = selected; //$NON-NLS-0$
 			}
 			// prefs have now been updated

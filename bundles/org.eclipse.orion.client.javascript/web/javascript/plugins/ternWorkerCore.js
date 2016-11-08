@@ -467,7 +467,8 @@ function(Tern, defaultOptions, Deferred, Objects, Serialize, Messages, i18nUtil)
 			ternserver.request({
 					query: {
 						type: "outline", //$NON-NLS-1$
-						file: args.meta.location
+						file: args.meta.location,
+						ast: args.ast
 					},
 					files: args.files
 				},
@@ -787,7 +788,7 @@ function(Tern, defaultOptions, Deferred, Objects, Serialize, Messages, i18nUtil)
 		if(projectLoc) {
 			loc = projectLoc + loc;
 		}
-		if(!/$.json/i.test(def)) {
+		if(!/\.json$/i.test(def)) {
 			loc = loc + '.json'; //$NON-NLS-1$
 		}
 		var deferred = new Deferred();

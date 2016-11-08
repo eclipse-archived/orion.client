@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2014 IBM Corporation and others.
+ * Copyright (c) 2014, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -19,7 +19,7 @@ define("webtools/htmlOutliner", [
 	 * @description Creates a new validator
 	 * @constructor
 	 * @public
-	 * @param {Object} htmlAstManager The back AST manager to provide shared HTML DOMs 
+	 * @param {?} htmlAstManager The back AST manager to provide shared HTML DOMs 
 	 * @since 6.0
 	 */
 	function HtmlOutliner(htmlAstManager) {
@@ -32,10 +32,13 @@ define("webtools/htmlOutliner", [
 		 * @callback
 		 */
 		computeOutline: function(editorContext, options) {
-		    var that = this;
-		    return that.htmlAstManager.getAST(editorContext).then(function(ast){
-    			return that.domToOutline(ast);
-		    });
+		    return this.htmlAstManager.getAST(editorContext).then(function(ast){
+    			var out = this.domToOutline(ast.children);
+    			if(!Array.isArray(out)) {
+    				return [];
+    			}
+    			return out;
+		    }.bind(this));
 		},
 	
 		/**
@@ -79,13 +82,12 @@ define("webtools/htmlOutliner", [
 				var element = {
 					label: this.domToLabel(node),
 					children: this.domToOutline(node.children),
-					line: node.location.line,
-					offset: node.location.col,
-					length: node.name.length
+					start: node.range[0],
+					end: node.range[1]
 				};
 				outline.push(element);
 			}
-			if (outline.length > 0){
+			if(outline.length > 0) {
 				return outline;
 			}
 			return null;
@@ -111,15 +113,9 @@ define("webtools/htmlOutliner", [
 			}
 	
 			//skip paragraphs and other blocks of formatted text
-			if (node.name === "p" || node.name === "tt" || node.name === "code" || node.name === "blockquote") { //$NON-NLS-0$ //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			if (node.name === "tt" || node.name === "code" || node.name === "blockquote") { //$NON-NLS-0$ //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 				return true;
 			}
-	
-			//skip anchors
-			if (node.name === "a") { //$NON-NLS-0$
-				return true;
-			}
-	
 			//include the element if we have no reason to skip it
 			return false;
 		},
