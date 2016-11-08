@@ -276,7 +276,7 @@ define([
 										return editorContext.getText().then(function(text) {
 											var word = Finder.findWord(text, selection.start);
 											if(word) {
-												return Deferred.all(convertToRefResults(locations)).then(function(refResults) {
+												return Deferred.all(convertToRefResults(locations, metadata.location, text)).then(function(refResults) {
 													var result = {
 														searchParams: {
 															keyword: word,
@@ -316,7 +316,7 @@ define([
 		);
 		
 				
-		function convertToRefResults(locations) {
+		function convertToRefResults(locations, editorLocation, text) {
 			// edit has a uri for the file location and a range
 			// we need to answer a ref result that contains:
 			/*
@@ -393,7 +393,7 @@ define([
 			});
 			return returnedValue.map(function(element) {
 				// convert each match
-				return convertEachMatch(element);
+				return convertEachMatch(element, editorLocation, text);
 			});
 		}
 
@@ -401,9 +401,22 @@ define([
 			return text.split(/\r\n|\r|\n|\u2028|\u2029/g);
 		}
 
-		function convertEachMatch(element) {
-			return project.getFile(element.path).then(function(file) {
+		function convertEachMatch(element, editorLocation, text) {
+			if (editorLocation === element.location) {
 				var deferred = new Deferred();
+				var allLines = split_linebreaks(text);
+				element.contents = allLines;
+				var textModel = new TextModel.TextModel(text, "auto");
+				element.children.map(function(child) {
+					child.name = allLines[child.lineNumber - 1]; // line number is 0-based
+					return Deferred.all(convertMatchRange(textModel, child.matches)).then(function(selections) {
+						deferred.resolve(element);
+					});
+				});
+				return deferred;
+			}
+			return project.getFile(element.path).then(function(file) {
+				var newDeferred = new Deferred();
 				if (file) {
 					var contents = file.contents;
 					var allLines = split_linebreaks(contents);
@@ -412,13 +425,13 @@ define([
 					element.children.map(function(child) {
 						child.name = allLines[child.lineNumber - 1]; // line number is 0-based
 						return Deferred.all(convertMatchRange(textModel, child.matches)).then(function(selections) {
-							deferred.resolve(element);
+							newDeferred.resolve(element);
 						});
 					});
 				} else {
-					deferred.resolve();
+					newDeferred.resolve();
 				}
-				return deferred;
+				return newDeferred;
 			});
 		}
 
