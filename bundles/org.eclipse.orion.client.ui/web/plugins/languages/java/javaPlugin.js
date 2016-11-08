@@ -271,7 +271,6 @@ define([
 						return editorContext.getSelection().then(function(selection) {
 							return getPosition(editorContext, selection.start).then(function(start) {
 								return ipc.references(metadata.location, start, {includeDeclaration: true}).then(function(locations) {
-									console.log(locations);
 									if (Array.isArray(locations) && locations.length !== 0) {
 										return editorContext.getText().then(function(text) {
 											var word = Finder.findWord(text, selection.start);
