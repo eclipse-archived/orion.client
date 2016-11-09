@@ -189,10 +189,29 @@ body {
 	border-left-color: #1BB199;
 }
 
+.lightPage .tabContent,
+.lightPage .tabs li,
+.lightPage .tabs,
+.lightPage body{
+	background: white;
+	color:black;
+}
+.lightPage .tabs li:hover,
+.lightPage .tabs li.active{
+	color: rgb(61, 114, 179)
+}
+
+.lightPage .close:hover,
+.lightPage .tabButton:hover {
+	background:rgb(61, 114, 179);
+	color:white;
+}
+
+
 </style>
 <script type="text/javascript" src="main.js"></script>
 </head>
-<body onload="load()">
+<body onload="load()" class="lightPage">
 	<nav class="tabs" id="bar"></nav>
 	<nav>
 	  <ul id='context-menu' class="context-menu-items">
