@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2013 IBM Corporation and others.
+ * Copyright (c) 2013, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License v1.0
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution
@@ -109,6 +109,11 @@ define([
 					project.ContentLocation = project.Location;
 					return project;
 				});
+			}
+			if (!metadata.Directory) {
+				// climbed the metadata and still a file,
+				// must be a file in the workspace root and therefore has no validly associated project
+				return new Deferred().resolve(null);
 			}
 			metadata.ContentLocation = metadata.Location;
 			return new Deferred().resolve(metadata);
