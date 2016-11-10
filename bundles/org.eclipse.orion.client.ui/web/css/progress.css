@@ -54,8 +54,10 @@
 	height: 16px;
 	background: transparent;
 	border: none;
+	margin-top: -2px;
 	margin-right: 6px;
 	margin-left: 12px;
+	padding: 1px;
 	flex: 0 0 auto;
 	-ms-flex: 0 0 auto;
 	-webkit-flex: 0 0 auto;
