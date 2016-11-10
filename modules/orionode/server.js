@@ -62,53 +62,56 @@ function startServer(cb) {
 			console.log(util.format('Using password from file: %s', passwordFile));
 		}
 		console.log(util.format('Using workspace: %s', workspaceDir));
-		
-		var server;
-		try {
-			// create web server
-			var app = express();
-			if (configParams["orion.https.key"] && configParams["orion.https.cert"]) {
-				server = https.createServer({
-					key: fs.readFileSync(configParams["orion.https.key"]),
-					cert: fs.readFileSync(configParams["orion.https.cert"])
-				}, app);
-			} else {
-				server = http.createServer(app);
-			}
-
-			// Configure middleware
-			if (log) {
-				app.use(express.logger('tiny'));
-			}
-			if (password || configParams.pwd) {
-				app.use(auth(password || configParams.pwd));
-			}
-			
-			app.use(compression());
-			app.use(orion({
-				workspaceDir: workspaceDir,
-				configParams: configParams,
-				maxAge: dev ? 0 : undefined,
-			}));
-			var io = socketio.listen(server, { 'log level': 1 });
-			ttyShell.install({ io: io, fileRoot: '/file', workspaceDir: workspaceDir });
-
-			server.on('listening', function() {
-				console.log(util.format('Listening on port %d...', port));
-				if (cb) {
-					cb();
+		var indexDir = path.join(__dirname, '.indexDir');
+		argslib.createDirs([indexDir],function(){
+			var server;
+			try {
+				// create web server
+				var app = express();
+				if (configParams["orion.https.key"] && configParams["orion.https.cert"]) {
+					server = https.createServer({
+						key: fs.readFileSync(configParams["orion.https.key"]),
+						cert: fs.readFileSync(configParams["orion.https.cert"])
+					}, app);
+				} else {
+					server = http.createServer(app);
 				}
-			});
-			server.on('error', function(err) {
-				if (err.code === "EADDRINUSE") {
-					port = Math.floor(Math.random() * (PORT_HIGH - PORT_LOW) + PORT_LOW);
-					server.listen(port);
+	
+				// Configure middleware
+				if (log) {
+					app.use(express.logger('tiny'));
 				}
-			});
-			server.listen(port);
-		} catch (e) {
-			console.error(e && e.stack);
-		}
+				if (password || configParams.pwd) {
+					app.use(auth(password || configParams.pwd));
+				}
+				
+				app.use(compression());
+				app.use(orion({
+					workspaceDir: workspaceDir,
+					indexDir:indexDir,
+					configParams: configParams,
+					maxAge: dev ? 0 : undefined,
+				}));
+				var io = socketio.listen(server, { 'log level': 1 });
+				ttyShell.install({ io: io, fileRoot: '/file', workspaceDir: workspaceDir });
+	
+				server.on('listening', function() {
+					console.log(util.format('Listening on port %d...', port));
+					if (cb) {
+						cb();
+					}
+				});
+				server.on('error', function(err) {
+					if (err.code === "EADDRINUSE") {
+						port = Math.floor(Math.random() * (PORT_HIGH - PORT_LOW) + PORT_LOW);
+						server.listen(port);
+					}
+				});
+				server.listen(port);
+			} catch (e) {
+				console.error(e && e.stack);
+			}
+		});
 	});
 	});
 }

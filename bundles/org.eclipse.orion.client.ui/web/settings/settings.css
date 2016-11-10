@@ -875,3 +875,36 @@ input[type=color]::-webkit-color-swatch
     border-radius: 10px;
     border: 1px solid whitesmoke;
 }
+.orion-chip{
+	display: inline-block;
+    padding: 0px 25px;
+    margin: 5px;
+    height: 40px;
+    font-size: 16px;
+    line-height: 40px;
+    border-radius: 25px;
+    color : #fff;
+    background-color: #34495E;
+}
+.orion-chip-content{
+	display: inline-block;
+    font-size: 16px;
+    line-height: 40px;
+}
+.chip-close-btn{
+	padding-left: 10px;
+    color: #888;
+    font-weight: bold;
+    float: right;
+    font-size: 20px;
+    cursor: pointer;
+}
+.chip-close-btn:hover{
+	color: #000;
+}
+.orion-chips{
+	margin-bottom: 10px;
+}
+.orion-chip-input-box{
+	margin-left: 20px;
+}
