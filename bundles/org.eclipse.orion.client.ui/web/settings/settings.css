@@ -875,3 +875,11 @@ input[type=color]::-webkit-color-swatch
     border-radius: 10px;
     border: 1px solid whitesmoke;
 }
+.setting-table-header-field{
+	width: 130px;
+	display: inline-block;
+	text-align: center;
+}
+.setting-table-header{
+	width:90%;
+}
