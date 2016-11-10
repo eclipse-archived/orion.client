@@ -14,13 +14,8 @@
 				function load() {
 					require(["git/git-repository"], null, config.errback);
 				}
-				if (sessionStorage.gitSplashShown) {
-					load();
-				} else {
-					//sessionStorage.gitSplashShown = true;
-					require.config({config: {"orion/splash": {splashID: "Git"}}});
-					require(["orion/splash"], load, load);
-				}
+				require.config({config: {"orion/splash": {splashID: "Git"}}});
+				require(["orion/splash"], load, load);
 			});
 		</script>
 </head>
@@ -50,12 +45,6 @@
 			</div>
 		</div>
 		<script>
-			if (sessionStorage.editSplashShown) {
-				var splash = document.querySelector("#splash");
-				splash.parentNode.removeChild(splash);
-			}
-
-
 			var themeVal = localStorage.getItem("pageTheme");
 			if (themeVal && typeof themeVal === "string" || themeVal instanceof String && themeVal.length > 0) {
 				themeVal.split(" ").forEach(function(clazz) {

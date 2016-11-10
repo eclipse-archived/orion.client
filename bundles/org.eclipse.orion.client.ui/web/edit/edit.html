@@ -14,12 +14,7 @@
 				function load() {
 					require(["edit/edit"], null, config.errback);
 				}
-				if (sessionStorage.editSplashShown) {
-					load();
-				} else {
-					//sessionStorage.editSplashShown = true;
-					require(["orion/splash"], load, load);
-				}
+				require(["orion/splash"], load, load);
 			});
 		</script>
 	</head>
@@ -57,11 +52,6 @@
 			</div>
 		</div>
 		<script>
-			if (sessionStorage.editSplashShown) {
-				var splash = document.querySelector("#splash");
-				splash.parentNode.removeChild(splash);
-			}
-
 			var themeVal = localStorage.getItem("pageTheme");
 			if (themeVal && typeof themeVal === "string" || themeVal instanceof String && themeVal.length > 0) {
 				themeVal.split(" ").forEach(function(clazz) {
