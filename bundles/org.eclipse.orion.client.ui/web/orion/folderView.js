@@ -209,20 +209,6 @@ define([
 			}
 			return true;
 		},
-		displayWorkspaceView: function(){
-			var _self = this;
-			if(!this._node){
-				this._node = document.createElement("div"); //$NON-NLS-0$
-			}
-			this._parent.appendChild(this._node);
-			
-			if(this.showProjectView){
-				var div = document.createElement("div"); //$NON-NLS-0$
-				_self._node.appendChild(div);
-				this.projectView.display(this._metadata, div);
-				this.projectView.setCommandsVisible(this._isCommandsVisible());
-			}
-		},
 		displayFolderView: function(root){
 			var children = root.Children;
 			var projectJson;
@@ -299,9 +285,6 @@ define([
 			}
 		},
 		create: function() {
-			if(this._metadata.Projects){ //this is a workspace root
-				this.displayWorkspaceView();
-			}
 			if(this._metadata.Children){
 				this.displayFolderView(this._metadata);
 			} else if(this._metadata.ChildrenLocation){
