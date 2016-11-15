@@ -72,6 +72,7 @@ define(['i18n!orion/widgets/nls/messages', 'orion/webui/littlelib', 'orion/webui
 			}, false);
 
 			this._bindElements(this.$parent);
+			this.$parent.setAttribute("aria-labelledby", this.$DialogTitle.id); //$NON-NLS-2$ //$NON-NLS-1$
 			if (typeof this._bindToDom === "function") { //$NON-NLS-0$
 				this._bindToDom(this.$parent);
 			}
@@ -85,6 +86,9 @@ define(['i18n!orion/widgets/nls/messages', 'orion/webui/littlelib', 'orion/webui
 				var child = node.childNodes[i];
 				if (child.id) {
 					this['$'+child.id] = child; //$NON-NLS-0$
+					if (child.id.indexOf("DialogTitle") !== -1) {
+						this['$DialogTitle'] = child; //$NON-NLS-0$
+					}
 				}
 				this._bindElements(child);
 			}
