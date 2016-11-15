@@ -193,9 +193,8 @@ define("orion/editor/contentAssist", [ //$NON-NLS-0$
 			var proposalText = typeof proposal === "string" ? proposal : proposal.proposal; //$NON-NLS-0$
 			view.setText(proposalText, start, end);
 			if (proposal.additionalEdits) {
-				var edit;
-				for (var i = 0; i < proposal.additionalEdits.length; i++) {
-					edit = proposal.additionalEdits[i];
+				for (var i = proposal.additionalEdits.length - 1; i >= 0 ; i--) {
+					var edit = proposal.additionalEdits[i];
 					view.setText(edit.text, edit.offset, edit.offset + edit.length);
 				}
 			}

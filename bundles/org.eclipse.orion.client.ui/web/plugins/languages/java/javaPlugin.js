@@ -101,23 +101,8 @@ define([
 							return ipc.completion(meta.location, position).then(function(results) {
 									var items  = results.items;
 									if (Array.isArray(items) && items.length > 0) {
-										return items.map(function(item) {
-											var temp = {
-												name: item.label,
-												proposal: item.insertText,
-												description: ' (' + resolveCompletionKind(item.kind) + ')',
-												relevance: 100,
-												style: 'emphasis', //$NON-NLS-1$
-												overwrite: true,
-												kind: 'java' //$NON-NLS-1$
-											};
-											if (item.documentation) {
-												temp.hover = {
-													content: item.documentation,
-													type: 'markdown'
-												};
-											}
-											return temp;
+										return Deferred.all(convertToCompletionProposals(editorContext, items)).then(function(proposals) {
+											return new Deferred().resolve(proposals);
 										});
 									}
 									return new Deferred().resolve([]);
@@ -138,6 +123,61 @@ define([
 				excludedStyles: "(string.*)"  //$NON-NLS-1$
 			}
 		);
+		
+		function convertToCompletionProposals(editorContext, items) {
+			var tempArray = items.map(function(item) {
+				var temp = {
+					name: item.label,
+					proposal: item.insertText,
+					description: ' (' + resolveCompletionKind(item.kind) + ')',
+					relevance: 100,
+					style: 'emphasis', //$NON-NLS-1$
+					overwrite: true,
+					kind: 'java' //$NON-NLS-1$
+				};
+				if (item.documentation) {
+					temp.hover = {
+						content: item.documentation,
+						type: 'markdown'
+					};
+				}
+				if (Array.isArray(item.additionalTextEdits) && item.additionalTextEdits.length !== 0) {
+					var tempEdits = [];
+					item.additionalTextEdits.forEach(function(additionalEdit) {
+						var newEdit = Object.create(null);
+						newEdit.text = additionalEdit.newText;
+						newEdit.range = additionalEdit.range;
+						tempEdits.push(newEdit);
+					});
+					temp.additionalEdits = tempEdits;
+				}
+				return temp;
+			});
+			return tempArray.map(function(proposal) {
+				return convertEachProposal(editorContext, proposal);
+			});
+		}
+		
+		function convertEachProposal(editorContext, proposal) {
+			var deferred = new Deferred();
+			if (proposal.additionalEdits) {
+				var additionalEditsLength = proposal.additionalEdits.length;
+				proposal.additionalEdits.forEach(function(edit, index) {
+					return convertEdit(editorContext, edit).then(function(newAdditionalEdit) {
+						edit.offset = newAdditionalEdit.start;
+						edit.length = newAdditionalEdit.end - edit.offset;
+						delete edit.range;
+						if (index === additionalEditsLength - 1) {
+							deferred.resolve(proposal);
+						}
+					});
+				});
+			} else {
+				deferred.resolve(proposal);
+			}
+			return deferred;
+		}
+
 		/**
 		 * Symbol outline
 		 */
@@ -192,6 +232,19 @@ define([
 			return editorContext.getLineStart(range.start.line).then(function(startLineOffset) {
 				return editorContext.getLineStart(range.end.line).then(function(endLineOffset) {
 					return {
+						start: range.start.character+startLineOffset,
+						end: range.end.character+endLineOffset,
+					};
+				});
+			});
+		}
+
+		function convertEdit(editorContext, edit) {
+			var range = edit.range;
+			return editorContext.getLineStart(range.start.line).then(function(startLineOffset) {
+				return editorContext.getLineStart(range.end.line).then(function(endLineOffset) {
+					return {
+						text: edit.newText,
 						start: range.start.character+startLineOffset,
 						end: range.end.character+endLineOffset,
 					};
@@ -522,6 +575,9 @@ define([
 							return ipc.hover(meta.location, position).then(function(result) {
 								var hover = {type: 'markdown'};
 								if(typeof result.contents === 'string') {
+									if (result.contents.length === 0) {
+										return new Deferred().resolve('');
+									}
 									hover.content = result.contents;
 								} else if(result.contents !== null && typeof result.contents === 'object') {
 									hover.content = result.contents.value;
@@ -630,21 +686,6 @@ define([
 	 * @returns {Deferred} Return a deferred that will resolve to a position object for the protocol textDocument requests
 	 */
 	function getPosition(editorContext, offset) {
-		return editorContext.getLineAtOffset(offset).then(function(line) {
-			return editorContext.getLineStart(line).then(function(lineOffset) {
-				return {line: line, character: offset-lineOffset};
-			});
-		});
-	}
-	
-	/**
-	 * @name getOffset
-	 * @description Return a document offset based on a position
-	 * @param {?} editorContext The backing editor context
-	 * @param {Position} position The given position from the protocol
-	 * @returns {Deferred} Return a deferred that will resolve to a position object for the protocol textDocument requests
-	 */
-	function getOffset(editorContext, offset) {
 		return editorContext.getLineAtOffset(offset).then(function(line) {
 			return editorContext.getLineStart(line).then(function(lineOffset) {
 				return {line: line, character: offset-lineOffset};
