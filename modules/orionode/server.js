@@ -321,13 +321,18 @@ if (process.versions.electron) {
 					nextWindow.destroy();
 				}
 				event.preventDefault();
+				nextWindow.webContents.send('toCollectTabsUrl');
 				if (updateDownloaded) {
 					nextWindow.webContents.session.clearCache(function() {
-						exit();
 					});
-				} else {
-					exit();
 				}
+				var ipcMain  = electron.ipcMain ;
+				ipcMain.on("collectTabsUrl", function(event, args){
+					var allPrefs = prefs.readPrefs();
+					allPrefs.user.workspace.lastOpenedTabUrls = args;
+					prefs.writePrefs(allPrefs);
+					exit();
+				});
 			});
 			nextWindow.webContents.once("did-frame-finish-load", function () {
 				if (feedURL) {
@@ -338,7 +343,19 @@ if (process.versions.electron) {
 			return nextWindow;
 		}
 		startServer(function() {
-			var mainWindow = createWindow("http://localhost:" + port);
+			var mainWindow,
+			 	hostUrl = "http://localhost:" + port,
+			 	lastOpenedTabUrls = allPrefs.user && allPrefs.user.workspace && allPrefs.user.workspace.lastOpenedTabUrls; 
+			if(lastOpenedTabUrls.length > 0 && lastOpenedTabUrls[0] !== 'about:blank'){
+				mainWindow = createWindow(hostUrl + "/" + lastOpenedTabUrls[0]); 
+				for(var i = 1; i < lastOpenedTabUrls.length; i++ ){
+					if(lastOpenedTabUrls[i] !== 'about:blank'){
+						mainWindow.webContents.executeJavaScript('window.open("' + hostUrl + "/" + lastOpenedTabUrls[i] + '");');
+					}
+				}
+			}else{
+				mainWindow = createWindow(hostUrl);
+			}
 			mainWindow.on('closed', function() {
 				mainWindow = null;
 			});
