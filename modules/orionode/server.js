@@ -226,6 +226,19 @@ if (process.versions.electron) {
 				}else if(stats.isDirectory()){
 					configParams.workspace = readyToOpenDir;
 				}
+				allPrefs.user.workspace.currentWorkspace = configParams.workspace;
+				var RECENT_ARRAY_LENGTH = 10;
+				var oldIndex = recentWorkspaces.indexOf(configParams.workspace);
+				if(oldIndex !== -1){
+					allPrefs.user.workspace.recentWorkspaces.splice(oldIndex,1);
+				}
+				if(recentWorkspaces.length < RECENT_ARRAY_LENGTH){
+					allPrefs.user.workspace.recentWorkspaces.unshift(configParams.workspace);
+				}else if(recentWorkspaces.length === RECENT_ARRAY_LENGTH){
+					allPrefs.user.workspace.recentWorkspaces.pop();
+					allPrefs.user.workspace.recentWorkspaces.unshift(configParams.workspace);
+				}
+				prefs.writePrefs(allPrefs);
 			}catch(e){}
 		}
 		if (process.platform === 'darwin') {
@@ -304,7 +317,6 @@ if (process.versions.electron) {
 				});
 				updateDialog = true;
 			}
-
 		});
 
 		function scheduleUpdateChecks () {
@@ -342,16 +354,25 @@ if (process.versions.electron) {
 					allPrefs.windowBounds = nextWindow.getBounds();
 					allPrefs.windowBounds.maximized = nextWindow.isMaximized();
 					prefs.writePrefs(allPrefs);
-					nextWindow.destroy();
+					if (updateDownloaded) {
+						nextWindow.webContents.session.clearCache(function() {
+							nextWindow.destroy();
+						});
+					}else{
+						nextWindow.destroy();
+					}
 				}
 				event.preventDefault();
-				if (updateDownloaded) {
-					nextWindow.webContents.session.clearCache(function() {
-						exit();
-					});
-				} else {
+				var currentAllPrefs = prefs.readPrefs();
+				var currentWorkSpace = currentAllPrefs.user && currentAllPrefs.user.workspace && currentAllPrefs.user.workspace.currentWorkspace;
+				nextWindow.webContents.send('toCollectTabsUrl');
+				var ipcMain  = electron.ipcMain ;
+				ipcMain.on("collectTabsUrl", function(event, args){
+					var allPrefs = prefs.readPrefs();
+					allPrefs.user.workspace.lastOpenedTabUrls = args;
+					prefs.writePrefs(allPrefs);
 					exit();
-				}
+				});
 			});
 			nextWindow.webContents.once("did-frame-finish-load", function () {
 				if (feedURL) {
@@ -362,11 +383,28 @@ if (process.versions.electron) {
 			return nextWindow;
 		}
 		startServer(function() {
-			var initialUrl = "http://localhost:" + port;
-			if(relativeFileUrl){ // Works in Mac Open Command Only
-				initialUrl = initialUrl + "/edit/edit.html#/file" + relativeFileUrl;
+			var mainWindow,
+			 	hostUrl = "http://localhost:" + port,
+			 	lastOpenedTabUrls = allPrefs.user && allPrefs.user.workspace && allPrefs.user.workspace.lastOpenedTabUrls || [];
+			
+			if(relativeFileUrl){
+				var fileUrl = hostUrl + "/edit/edit.html#/file" + relativeFileUrl;
+				lastOpenedTabUrls.unshift("edit/edit.html#/file" + relativeFileUrl);
 			}
-			var mainWindow = createWindow(initialUrl);
+			if(readyToOpenDir && prefsWorkspace !== configParams.workspace){
+				mainWindow = createWindow(fileUrl ? fileUrl : hostUrl);
+			}else{
+				if(lastOpenedTabUrls.length > 0 && lastOpenedTabUrls[0] !== 'about:blank'){
+					mainWindow = createWindow(hostUrl + "/" + lastOpenedTabUrls[0]); 
+					for(var i = 1; i < lastOpenedTabUrls.length; i++ ){
+						if(lastOpenedTabUrls[i] !== 'about:blank'){
+							mainWindow.webContents.executeJavaScript('window.open("' + hostUrl + "/" + lastOpenedTabUrls[i] + '");');
+						}
+					}
+				}else{ // if user open Orion for the first time
+					mainWindow = createWindow(hostUrl);
+				}
+			}
 			mainWindow.on('closed', function() {
 				mainWindow = null;
 			});

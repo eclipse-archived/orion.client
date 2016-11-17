@@ -215,6 +215,7 @@ function load() {
 		}, 50);
 	});
 	registerContextMenu();
+	collectTabsUrl();
 }
 
 function createTab(url) {
@@ -350,4 +351,14 @@ function getPosition(e) {
 		x: posx,
 		y: posy
 	};
+}
+function collectTabsUrl(){
+	var ipcRenderer = electron.ipcRenderer;
+	ipcRenderer.on('toCollectTabsUrl',function(){
+		var iframes = document.querySelectorAll(".tabContent");
+		var tabUrls = Array.prototype.map.call(iframes,function(iframe){
+			return iframe.contentWindow.location.href.replace(/http:\/\/localhost:\w+\//, "");
+		});
+		ipcRenderer.send("collectTabsUrl",tabUrls);
+	});
 }
