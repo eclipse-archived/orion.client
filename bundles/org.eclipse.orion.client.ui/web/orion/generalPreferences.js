@@ -20,7 +20,9 @@ define([
 	var GENERAL_KEY = "generalSettings"; //$NON-NLS-0$
 	
 	var defaults = {
-		desktopSelectionPolicy: true
+		desktopSelectionPolicy: true,
+		filenameSearchPolicy:false,
+		indexExcludeFileNames:["node_modules"]
 	};
 
 	function GeneralPreferences(preferences, callback) {
