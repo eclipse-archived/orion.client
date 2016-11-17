@@ -1004,6 +1004,17 @@ define([
 				}
 				var thenNode = node.consequent;
 				var elseNode = node.alternate;
+				var parent = node.parent || {};
+				// Replace else statement with newline.
+				var replacement = '\n';
+				if (parent.type === 'BlockStatement' || parent.type === 'IfStatement') {
+					// Preserve whitespace if inside of a block.
+					replacement = node.sourceFile.text.substring(parent.start + 1, parent.body[0].start);
+					if (replacement.charAt(0) !== '\n') {
+						replacement = '\n' + replacement;
+					}
+				}
+
 				if (elseNode.type === 'BlockStatement') {
 					// need to remove the else { and the closing brace }
 					// check the first statement inside the block for trailing comment
@@ -1019,7 +1030,7 @@ define([
 						closingStart = trailingComments[trailingComments.length - 1].end;
 					}
 					return [
-						{ text: '', start: thenNode.end + 1, end: start },
+						{ text: replacement, start: thenNode.end, end: start },
 						{ text: '', start:  closingStart, end: elseNode.end },
 					];
 				}
@@ -1029,7 +1040,7 @@ define([
 					start = elseNode.leadingComments[0].start;
 				}
 				return {
-					text: '',
+					text: replacement,
 					start: thenNode.end + 1,
 					end: start
 				};
