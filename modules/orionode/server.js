@@ -304,7 +304,6 @@ if (process.versions.electron) {
 				});
 				updateDialog = true;
 			}
-
 		});
 
 		function scheduleUpdateChecks () {
@@ -342,16 +341,34 @@ if (process.versions.electron) {
 					allPrefs.windowBounds = nextWindow.getBounds();
 					allPrefs.windowBounds.maximized = nextWindow.isMaximized();
 					prefs.writePrefs(allPrefs);
-					nextWindow.destroy();
+					if (updateDownloaded) {
+						nextWindow.webContents.session.clearCache(function() {
+							nextWindow.destroy();
+						});
+					}else{
+						nextWindow.destroy();
+					}
 				}
 				event.preventDefault();
-				if (updateDownloaded) {
-					nextWindow.webContents.session.clearCache(function() {
+				var currentAllPrefs = prefs.readPrefs();
+				var currentWorkSpace = currentAllPrefs.user && currentAllPrefs.user.workspace && currentAllPrefs.user.workspace.currentWorkspace;
+				if(readyToOpenDir){
+					if(currentWorkSpace !== prefsWorkspace || prefsWorkspace === readyToOpenDir){
+						// User use open command in Mac, and opened new folder in Orion; Or user use open command opened a folder happened to be last workspace
+						nextWindow.webContents.send('toCollectTabsUrl');
+					}else if(relativeFileUrl || prefsWorkspace !== readyToOpenDir){
 						exit();
-					});
-				} else {
-					exit();
+					}
+				}else{
+					nextWindow.webContents.send('toCollectTabsUrl');
 				}
+				var ipcMain  = electron.ipcMain ;
+				ipcMain.on("collectTabsUrl", function(event, args){
+					var allPrefs = prefs.readPrefs();
+					allPrefs.user.workspace.lastOpenedTabUrls = args;
+					prefs.writePrefs(allPrefs);
+					exit();
+				});
 			});
 			nextWindow.webContents.once("did-frame-finish-load", function () {
 				if (feedURL) {
@@ -362,11 +379,27 @@ if (process.versions.electron) {
 			return nextWindow;
 		}
 		startServer(function() {
-			var initialUrl = "http://localhost:" + port;
-			if(relativeFileUrl){ // Works in Mac Open Command Only
-				initialUrl = initialUrl + "/edit/edit.html#/file" + relativeFileUrl;
+			var mainWindow,
+			 	hostUrl = "http://localhost:" + port,
+			 	lastOpenedTabUrls = allPrefs.user && allPrefs.user.workspace && allPrefs.user.workspace.lastOpenedTabUrls;
+
+			if(relativeFileUrl){ // open file using Mac open command
+				hostUrl = hostUrl + "/edit/edit.html#/file" + relativeFileUrl;
+				mainWindow = createWindow(hostUrl);
+			}else if(readyToOpenDir && prefsWorkspace !== configParams.workspace){ // open folder using Mac open command, the folder is not last workspace
+				mainWindow = createWindow(hostUrl);
+			}else{
+				if(lastOpenedTabUrls && lastOpenedTabUrls.length > 0 && lastOpenedTabUrls[0] !== 'about:blank'){
+					mainWindow = createWindow(hostUrl + "/" + lastOpenedTabUrls[0]); 
+					for(var i = 1; i < lastOpenedTabUrls.length; i++ ){
+						if(lastOpenedTabUrls[i] !== 'about:blank'){
+							mainWindow.webContents.executeJavaScript('window.open("' + hostUrl + "/" + lastOpenedTabUrls[i] + '");');
+						}
+					}
+				}else{ // if user open Orion for the first time
+					mainWindow = createWindow(hostUrl);
+				}
 			}
-			var mainWindow = createWindow(initialUrl);
 			mainWindow.on('closed', function() {
 				mainWindow = null;
 			});
