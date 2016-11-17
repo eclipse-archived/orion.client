@@ -309,7 +309,7 @@ exports.handleFilePOST = function(fileRoot, req, res, destFilepath, metadataMixi
 			api.writeError(500, res, err.message);
 		});
 	};
-	fs.statAsync(destFilepath)
+	return fs.statAsync(destFilepath)
 	.catchReturn({ code: 'ENOENT' }, null) // suppress reject when file does not exist
 	.then(function(stats) {
 		return !!stats; // just return whether the file existed
