@@ -138,7 +138,11 @@ module.exports = function(options) {
 			// Create a project
 			fs.mkdir(fileUtil.safeFilePath(req.user.workspaceDir, projectName), parseInt('0755', 8), function(error) {
 				if (error) {
-					api.writeError(400, res, error);
+					if (error.code === 'EEXIST') {
+						api.writeError(400, res, "Duplicate project name: " + projectName);
+					} else {
+						api.writeError(400, res, error);
+					}
 				} else {
 					api.write(201, res, null, {
 						Id: projectName,
