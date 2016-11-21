@@ -238,7 +238,7 @@ define(['i18n!orion/sites/nls/messages', 'orion/commandRegistry', 'orion/command
 			name: messages["Add to site"],
 			tooltip: messages["Add the file to this site"],
 			id: "orion.site.add-to", //$NON-NLS-0$
-			imageClass: "core-sprite-add", //$NON-NLS-0$
+			// imageClass: "core-sprite-add", //$NON-NLS-0$
 			visibleWhen: function(item) {
 				// Model tells us whether the file is running on the site configuration
 				return !item.IsFileRunningOn;
