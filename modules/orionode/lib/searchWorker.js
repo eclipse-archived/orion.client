@@ -120,7 +120,7 @@ try {
 						}.bind(this));
 					}
 				} else if(term.indexOf(":") > -1) {
-					//an unknown term has been sent, ignore it
+					//unknown search term
 					continue;
 				} else {
 					this.searchTerm = decodeURIComponent(term);

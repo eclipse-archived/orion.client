@@ -191,6 +191,26 @@ define([
 					}
 				});
 			});
+			/**
+			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=506987
+			 */
+			it('test method definitions 1', function(callback) {
+				var r = setup(callback, "class C {f() {return {};}}");
+				r.outliner.computeOutline(r.editorContext).then(function(outline) {
+					try {
+						if(!outline || outline.length < 1) {
+							assert.fail("There should be one outline element");
+						}
+						assertElement(outline[0], "class C", 6, 7);
+						assertElement(outline[0].children[0], "f()", 9, 25);
+						assertElement(outline[0].children[0].children[0], "return {...}", 14, 20);
+						callback();
+					}
+					catch(err) {
+						callback(err);
+					}
+				});
+			});
 		});
 	};
 });

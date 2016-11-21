@@ -14,18 +14,13 @@
 				function load() {
 					require(["settings/settings"], null, config.errback);
 				}
-				if (sessionStorage.settingsSplashShown) {
-					load();
-				} else {
-					//sessionStorage.settingsSplashShown = true;
-					require.config({config: {"orion/splash": {splashID: "Settings"}}});
-					require(["orion/splash"], load, load);
-				}
+				require.config({config: {"orion/splash": {splashID: "Settings"}}});
+				require(["orion/splash"], load, load);
 			});
 		</script>
 	</head>
 	
-	<body id="orion-settings" class="orionPage">
+	<body id="orion-settings" class="orionPage lightPage">
 		<nav id="sideMenu" class="sideMenu"></nav>
 		<div id="pageContent" class="content-fixedHeight">
 			<div id="sideMenuToggle" class="sideMenuToggle"></div>
@@ -54,11 +49,6 @@
 			</div>
 		</div>
 		<script>
-			if (sessionStorage.editSplashShown) {
-				var splash = document.querySelector("#splash");
-				splash.parentNode.removeChild(splash);
-			}
-
 			var themeVal = localStorage.getItem("pageTheme");
 			if (themeVal && typeof themeVal === "string" || themeVal instanceof String && themeVal.length > 0) {
 				themeVal.split(" ").forEach(function(clazz) {

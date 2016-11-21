@@ -82,7 +82,6 @@ define({//Default message bundle
 	"Global search" : "Global search",
 	"Orion Home" : "Home",
 	"Close notification" : "Close notification",
-	"OpPressSpaceMsg" : "Operations - Press spacebar to show current operations",
 	"Toggle Side Panel" : "Toggle Side Panel",
 	"Open or close the side panel": "Open or close the side panel",
 	"Projects" : "Projects",

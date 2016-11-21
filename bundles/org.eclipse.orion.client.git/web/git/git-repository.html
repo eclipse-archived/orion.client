@@ -14,17 +14,12 @@
 				function load() {
 					require(["git/git-repository"], null, config.errback);
 				}
-				if (sessionStorage.gitSplashShown) {
-					load();
-				} else {
-					//sessionStorage.gitSplashShown = true;
-					require.config({config: {"orion/splash": {splashID: "Git"}}});
-					require(["orion/splash"], load, load);
-				}
+				require.config({config: {"orion/splash": {splashID: "Git"}}});
+				require(["orion/splash"], load, load);
 			});
 		</script>
 </head>
-	<body id="orion-repository" class="orionPage">
+	<body id="orion-repository" class="orionPage lightPage">
 		<nav id="sideMenu" class="sideMenu"></nav>
 		<div id="pageContent" class="content-fixedHeight">
 			<div id="sideMenuToggle" class="sideMenuToggle"></div>
@@ -50,12 +45,6 @@
 			</div>
 		</div>
 		<script>
-			if (sessionStorage.editSplashShown) {
-				var splash = document.querySelector("#splash");
-				splash.parentNode.removeChild(splash);
-			}
-
-
 			var themeVal = localStorage.getItem("pageTheme");
 			if (themeVal && typeof themeVal === "string" || themeVal instanceof String && themeVal.length > 0) {
 				themeVal.split(" ").forEach(function(clazz) {

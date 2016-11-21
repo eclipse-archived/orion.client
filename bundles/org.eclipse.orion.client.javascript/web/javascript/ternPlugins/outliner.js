@@ -92,6 +92,7 @@ define([
 								if(item) {
 									scope.push(item);
 								}
+								node.value.md = true; //tag the function expression to know to skip
 								delete node.sig;
 								break;
 							}
@@ -103,6 +104,10 @@ define([
 								break;
 							}
 							case Estraverse.Syntax.FunctionExpression: {
+								if(node.md) {
+									delete node.sig;
+									break;
+								}
 								item = addElement(Signatures.computeSignature(node));
 								if(item) {
 									scope.push(item);
@@ -179,12 +184,21 @@ define([
 						switch(node.type) {
 							case Estraverse.Syntax.ObjectExpression :
 							case Estraverse.Syntax.FunctionDeclaration :
-							case Estraverse.Syntax.FunctionExpression :
 							case Estraverse.Syntax.ClassDeclaration :
 							case Estraverse.Syntax.ClassExpression :
 							case Estraverse.Syntax.MethodDefinition :
-							case Estraverse.Syntax.ArrowFunctionExpression :
+							case Estraverse.Syntax.ArrowFunctionExpression : {
 								scope.pop();
+								break;
+							}
+							case Estraverse.Syntax.FunctionExpression : {
+								if(node.md) {
+									delete node.md;
+									break;
+								}
+								scope.pop();
+								break;
+							}
 						}
 					}
 				});

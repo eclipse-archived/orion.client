@@ -4996,7 +4996,7 @@ define([
 			describe("no-else-return", function() {
 				it("no-else-return 1", function(done) {
 					var rule = createTestRule("no-else-return");
-					var expected = {value: "", start: 47, end: 52};
+					var expected = {value: "\n", start: 47, end: 52};
 					return getFixes({
 						buffer: "function foo(i)\n{" +
 								"	if (i > 10) {\n" +
@@ -5012,7 +5012,7 @@ define([
 				it("no-else-return 2", function(done) {
 					var rule = createTestRule("no-else-return");
 					var expected = [
-						{value: "", start: 47, end: 54},
+						{value: "\n", start: 46, end: 54},
 						{value: "", start: 64, end: 66},
 					];
 					return getFixes({
@@ -5030,7 +5030,7 @@ define([
 				it("no-else-return 3", function(done) {
 					var rule = createTestRule("no-else-return");
 					var expected = [
-						{value: "", start: 47, end: 54},
+						{value: "\n", start: 46, end: 54},
 						{value: "", start: 96, end: 98},
 					];
 					return getFixes({

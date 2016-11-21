@@ -117,7 +117,7 @@ define([
 
 	function startProgressService(serviceRegistry) {
 		var progressPane = lib.node("progressPane"); //$NON-NLS-0$
-		progressPane.setAttribute("aria-label", messages['OpPressSpaceMsg']); //$NON-NLS-1$ //$NON-NLS-0$
+		progressPane.setAttribute("aria-label", messages['Operations']); //$NON-NLS-1$ //$NON-NLS-0$
 		var progressService = serviceRegistry.getService("orion.page.progress"); //$NON-NLS-0$
 		if (progressService) {
 			progressService.init.bind(progressService)("progressPane"); //$NON-NLS-0$

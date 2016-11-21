@@ -18,6 +18,7 @@ var yaml = require("js-yaml");
 var yamlAstParser = require("yaml-ast-parser");
 var target = require("./target");
 var tasks = require("../tasks");
+var crypto = require('crypto');
 
 module.exports.router = function() {
 	
@@ -66,7 +67,7 @@ function retrieveManifestFile(req, manifestAbsoluteLocation){
 		var manifest = yaml.safeLoad(fileContent);
 		var manifestAST = yamlAstParser.load(fileContent);
 		transformManifest(manifest);
-		// TODO when meet the case where need to do symbolResolver (as in JAVA) then implement.
+		symbolResolve(manifest);
 		return analyzeManifest(manifest, manifestAST, fileContent)
 		.then(function(){
 			return setDefaultManifestProperties(req, manifest);
@@ -89,7 +90,7 @@ function setDefaultManifestProperties(req, manifest){
 		name : getDefaultName(rawDefaultProjectName),
 		host : getDefaultHost(rawDefaultProjectName),
 		memory : "512M",
-		instances : "1",
+		instances : 1,
 		path: "."
 	};
 	if (!manifest) {
@@ -126,6 +127,21 @@ function transformManifest(manifest){
 			}
 		}
 	});
+}
+function symbolResolve(manifestNode){
+	if(Array.isArray(manifestNode)){
+		manifestNode.forEach(function(subNode){
+			symbolResolve(subNode);
+		});
+	}
+	Object.keys(manifestNode).forEach(function(key){
+		if(typeof manifestNode[key] === 'string'){
+			manifestNode[key] =  manifestNode[key].replace(/\$\{random-word\}/g, crypto.randomBytes(15).toString('hex'));		
+		}else{
+			symbolResolve(manifestNode[key]);
+		}
+	});
+	// Java code also handles ${target-base} case, but it seems useless, will implement when necessary.
 }
 function analyzeManifest(manifest, manifestAST, fileContent){
 	if(!manifest.applications){
