@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012 IBM Corporation and others.
+ * Copyright (c) 2012, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -28,14 +28,14 @@ function orionTasksAPI(options) {
 		next();
 	})
 	.get('/id/:id', function(req, res/*, next*/) {
+		if (!checkAccess(req)) return writeError(404, res);
 		var id = req.id;
-		if (!taskList[id]) return writeError(404, res);
 		res.json(taskList[id].toJSON(true));
 	})
 	.delete('/id/:id', deleteOperation)
 	.get('/temp/:id', function(req, res/*, next*/) {
+		if (!checkAccess(req)) return writeError(404, res);
 		var id = req.id;
-		if (!taskList[id]) return writeError(404, res);
 		res.json(taskList[id].toJSON(false));
 	})
 	.delete('/temp/:id', deleteOperation);
@@ -49,6 +49,7 @@ function Task(res, cancelable, lengthComputable, wait, keep) {
 	this.keep = !!keep; 
 	this.total = this.loaded = 0;
 	this.type = "loadstart";
+	this.username = res.req.user.username;
 	this.res = res;
 	//TODO temporarily disabled timeout to work around client bug.
 	if (true || wait === 0) {
@@ -143,10 +144,22 @@ Task.prototype = {
 	}
 };
 
+function checkAccess(req) {
+	// check that the task exists and that the user id of the request
+	// matches the user id of the task originator, even if the id is
+	// correct, if the user ids don't match, then we want to disallow
+	// access to the task
+	return taskList[req.id] && taskList[req.id].username === req.user.username;
+}
+
 function deleteOperation(req, res/*, next*/){
 	var id = req.id;
-	delete taskList[id];
-	res.status(200).json({});
+	if (checkAccess(req)) {
+		delete taskList[id];
+		res.status(200).json({});
+	} else {
+		writeError(404, res, "Task does not exist: " + id);
+	}
 }
 
 module.exports = {
