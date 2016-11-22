@@ -47,14 +47,26 @@ function getIndex(req, res) {
 		index = indexResult;
 		var indexEntry = index.getByPath(filePath);
 		if (!indexEntry) {
-			// new untracked file, return "" as its index content
-			return "";
+			// new untracked file that's not in the index
+			var readIfExists = req.headers ? Boolean(req.headers['read-if-exists']).valueOf() : false;
+			if (typeof readIfExists === 'boolean' && readIfExists) {
+				return 204;
+			}
+			return 404;
 		}
 		return git.Blob.lookup(repo, indexEntry.id);
 	})
 	.then(function(blob) {
-		res.write(blob.toString());
-		res.status(200).end();
+		if (typeof blob === 'number') {
+			if (blob === 204) {
+				res.sendStatus(204);
+			} else {
+				writeError(404, res, filePath + " not found in index");
+			}
+		} else {
+			res.write(blob.toString());
+			res.status(200).end();
+		}
 	})
 	.catch(function(err) {
 		writeError(404, res, err.message);
