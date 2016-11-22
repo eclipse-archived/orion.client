@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2010, 2014 IBM Corporation and others.
+ * Copyright (c) 2010, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -479,7 +479,7 @@ exports.ResourceComparer = (function() {
 			return Deferred.all(promises, function(error) { return {_error: error}; });
 	    },
 	    _loadSingleFile: function(file) {
-	        return this._progressFunc(this._fileClient.read(file.URL), //$NON-NLS-0$
+	        return this._progressFunc(this._fileClient.read(file.URL, false, { readIfExists: true }), //$NON-NLS-0$
 	                   i18nUtil.formatMessage(messages["readingFile"], file.URL)).then( //$NON-NLS-0$
 		        function(contents) {
 					file.Content = contents;
