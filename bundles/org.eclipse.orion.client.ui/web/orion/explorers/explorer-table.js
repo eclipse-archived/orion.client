@@ -21,7 +21,9 @@ define([
 	'orion/objects',
 	'orion/util'
 ], function(messages, Deferred, lib, i18nUtil, mFileUtils, mExplorer, EventTarget, objects, util){
-
+/*
+ * 
+ */
 	/**
 	 * Tree model used by the FileExplorer
 	 */
@@ -249,7 +251,7 @@ define([
 				return null;
 			}
 			var elementNode;
-			if(loc === "/file" && util.isElectron){
+			if(loc === "/file" && (util.isElectron || localStorage.getItem("darklaunch.createAtRoot"))){
 				// Special case in electron, need to find the workspace element to create file at workspace level.
 				elementNode = this.model.root;
 			}else{

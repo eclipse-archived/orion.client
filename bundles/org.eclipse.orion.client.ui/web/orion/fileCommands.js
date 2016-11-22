@@ -18,6 +18,13 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/i18n
 	'orion/EventTarget', 'orion/form', 'orion/xsrfUtils', 'orion/bidiUtils', 'orion/util'],
 	function(messages, lib, i18nUtil, mUIUtils, mFileUtils, mCommands, mFileDownloader, mCommandRegistry, mContentTypes, mCompareUtils, Deferred, DirPrompter, SFTPDialog, EventTarget, form, xsrfUtils, bidiUtils, util){
 
+	function initialize_darklaunch() {
+		localStorage.setItem("darklaunch.createFileAtRoot", "true");
+		localStorage.setItem("darklaunch.createFolderAtRoot", "true");
+		localStorage.setItem("darklaunch.enableNewProject", "false");
+		localStorage.setItem("darklaunch.enableLinkProject", "false");
+	}
+
 	/**
 	 * Utility methods
 	 * @class This class contains static utility methods for creating and managing commands 
@@ -376,6 +383,9 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/i18n
 	fileCommandUtils.createFileCommands = function(serviceRegistry, commandService, fileClient) {
 		progressService = serviceRegistry.getService("orion.page.progress"); //$NON-NLS-0$
 		var dispatchModelEvent = dispatchModelEventOn.bind(null);
+
+		//Enable experimental features.
+		initialize_darklaunch();
 
 		function contains(arr, item) {
 			return arr.indexOf(item) !== -1;
@@ -916,7 +926,8 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/i18n
 			var createFunction = function(name) {
 				if (name) {
 					var location = parentItem.Location;
-					if(location === "/workspace/orionode" && util.isElectron && !isDirectory ){
+					if(location === "/workspace/orionode" && (util.isElectron && !isDirectory) ||
+					localStorage.getItem("darklaunch.createFileAtRoot") || localStorage.getItem("darklaunch.createFolderAtRoot")){
 						// Special case for electron only to create files at workspace level.
 						location = "/file";
 					}
@@ -970,7 +981,7 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/i18n
 				createNewArtifact(messages["New File"], item, false);
 			},
 			visibleWhen: function(item) {
-				return checkFolderSelection(item) || util.isElectron;
+				return checkFolderSelection(item) || util.isElectron || localStorage.getItem("darklaunch.createFileAtRoot") === 'true';
 			}
 		});
 		commandService.addCommand(newFileCommand);
@@ -985,7 +996,7 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/i18n
 				createNewArtifact(messages["New Folder"], item, true);
 			},
 			visibleWhen: function(item) {
-				return checkFolderSelection(item) && !mFileUtils.isAtRoot(item.Location);
+				return localStorage.getItem("darklaunch.createFolderAtRoot") === 'true' || checkFolderSelection(item) && !mFileUtils.isAtRoot(item.Location);
 			}
 		});
 		commandService.addCommand(newFolderCommand);
@@ -1035,7 +1046,9 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/i18n
 					});
 				} 
 			},
-			visibleWhen: canCreateProject
+			visibleWhen: function(item) {
+				return canCreateProject && localStorage.getItem("darklaunch.enableNewProject") !== "false";
+			} 
 		});
 		commandService.addCommand(newProjectCommand);
 		
@@ -1060,7 +1073,10 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/i18n
 					errorHandler(messages["NameLocationNotClear"]);
 				}
 			},
-			visibleWhen: canCreateProject
+			visibleWhen: function (item) {
+				canCreateProject  && localStorage.getItem("darklaunch.enableLinkProject") !== 'false';
+			}
+
 		});
 		commandService.addCommand(linkProjectCommand);
 		
