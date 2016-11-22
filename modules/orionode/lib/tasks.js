@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012 IBM Corporation and others.
+ * Copyright (c) 2012, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -49,6 +49,7 @@ function Task(res, cancelable, lengthComputable, wait, keep) {
 	this.keep = !!keep; 
 	this.total = this.loaded = 0;
 	this.type = "loadstart";
+	this.username = res.req.user.username;
 	this.res = res;
 	//TODO temporarily disabled timeout to work around client bug.
 	if (true || wait === 0) {
@@ -145,8 +146,16 @@ Task.prototype = {
 
 function deleteOperation(req, res/*, next*/){
 	var id = req.id;
-	delete taskList[id];
-	res.status(200).json({});
+	if (!taskList[id] || taskList[id].username !== req.user.username) {
+		// even if the task exists, if the username doesn't match,
+		// just write a regular 404 back, notifying the client that the
+		// username is wrong would inadvertently be leaking private
+		// information about other user's running tasks to a client
+		writeError(404, res, "Task does not exist: " + id);
+	} else {
+		delete taskList[id];
+		res.status(200).json({});
+	}
 }
 
 module.exports = {
