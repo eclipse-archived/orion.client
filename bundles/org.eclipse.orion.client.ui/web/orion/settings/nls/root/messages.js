@@ -286,4 +286,10 @@ define({//Default message bundle
     'moreEditorSettings': 'Editor Settings...',
     'SettingWarning' : '${0} Warning: Global settings for \'${2}\' are overriden by the settings defined in: ${1}',
     "version": "Version ${0}",
+    "filenameSearchPolicy": "Indexed File Search Mode",
+	"filenameSearchPolicyTooltip": "Use an index to speed up file name search and tooling.",
+	"Selection": "Selection",
+	"File Search": "File Search",
+	"ExcludeNames": "Skip folder or file names(with extention) when opening files.",
+	"ExcludeNamesToolTip": "All folders and files of the following names will be skiped when searching, works only for opening file(ctrl+shit+F)."
 });
