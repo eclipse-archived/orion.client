@@ -208,6 +208,7 @@ function getActiveTab() {
 function load() {
 	redrawButtons();
 	createTab(window.location.hash.substr(1));
+	createNewTabButton(window.location.hash.substr(1));
 	window.addEventListener("resize", function() {
 		if (this.timeout) window.clearTimeout(this.timeout);
 		this.timeout = window.setTimeout(function() {
@@ -215,6 +216,17 @@ function load() {
 		}, 50);
 	});
 	registerContextMenu();
+}
+
+function createNewTabButton(url){
+	var bar = document.querySelector("#bar");
+	var newTabButton = document.createElement("a");
+	newTabButton.innerHTML = "+";
+	newTabButton.classList.add("openNewTab");
+	newTabButton.addEventListener("click", function(evt) {
+		createTab(url);
+	});
+	bar.appendChild(newTabButton);
 }
 
 function createTab(url) {
@@ -273,7 +285,6 @@ function registerContextMenu() {
 			if(allTabButtons.length > 1){
 				Array.prototype.forEach.call(allTabButtons, function(eachOne) {
 					if(eachOne.id !== contextSrcEl.id){
-						console.log(eachOne);
 						contextSrcEl.parentNode.removeChild(eachOne);
 					}
 				});
