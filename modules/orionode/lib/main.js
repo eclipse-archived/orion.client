@@ -72,6 +72,9 @@ function addNewTab(id, iframe) {
 	var text = document.createElement("span");
 	text.classList.add("tabLabel");
 	text.textContent = title;
+	var icon = document.createElement("img");
+	icon.classList.add("tabIcon");
+	tab.appendChild(icon);
 	tab.appendChild(text);
 	tab.title = title;
 
@@ -171,6 +174,16 @@ function setTabLabel(id, str) {
 	var text = tab.querySelector(".tabLabel");
 	tab.title = text.textContent = str;
 }
+function setTabIcon(id,head) {
+	var linkIconElement = Array.prototype.find.call(head.childNodes, function(node){
+		return node.nodeName === 'LINK' && node.rel === 'icon';
+	});
+	if(linkIconElement && linkIconElement.href){
+		var tab = document.getElementById("tab" + id);
+		var icon = tab.querySelector(".tabIcon");
+		icon.src = linkIconElement.href;
+	}
+}
 
 function update() {
 	var bar = document.querySelector("#bar");
@@ -234,6 +247,7 @@ function createTab(url) {
 			var observer = new window.WebKitMutationObserver(function(mutations) {
 				if (mutations) {
 					setTabLabel(id, iframe.contentDocument.title);
+					setTabIcon(id,iframe.contentDocument.head);
 				}
 			});
 			observer.observe(target, {
@@ -243,6 +257,7 @@ function createTab(url) {
 			});
 		}
 		setTabLabel(id, iframe.contentDocument.title);
+		setTabIcon(id, iframe.contentDocument.head);
 		iframe.contentWindow.addEventListener("click", function() {
 			var menu = document.querySelector("#context-menu");
 			var activeClassName = "context-menu-items-open";
