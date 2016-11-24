@@ -139,7 +139,7 @@ function parseMessage(data, workspaceUrl, sock) {
 			var headerSizeIndex = dataContents.indexOf('\r\n\r\n', headerIndex + CONTENT_LENGTH_SIZE, 'utf-8');
 			if (headerSizeIndex !== -1) {
 				var messageSize = Number(dataContents.slice(headerIndex + CONTENT_LENGTH_SIZE, headerSizeIndex));
-				if (messageSize + headerSizeIndex > dataContents.length) {
+				if (messageSize + headerSizeIndex >= dataContents.length) {
 					// not enough data
 					offset = headerIndex;
 					break loop;
@@ -151,7 +151,12 @@ function parseMessage(data, workspaceUrl, sock) {
 				};
 				// enough data to get the message contents
 				var contents = dataContents.slice(headerSizeIndex + 4, headerSizeIndex + 4 + messageSize);
-				var json = JSON.parse(contents);
+				var json = null;
+				try {
+					json = JSON.parse(contents);
+				} catch(e) {
+					console.log(e);
+				}
 				message.content = json;
 				if (json) {
 					if (json.params) {
