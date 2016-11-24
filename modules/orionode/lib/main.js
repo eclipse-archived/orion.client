@@ -33,15 +33,18 @@ function redrawButtons() {
 		active.contentWindow.history.forward();
 	}
 	back.addEventListener("click", historyBack);
+	back.title = "Back";
 	buttons.appendChild(back);
 	var forward = document.createElement("button");
 	forward.textContent = ">";
 	forward.classList.add("tabButton");
+	forward.title = "Forward";
 	forward.addEventListener("click", historyForward);
 	buttons.appendChild(forward);
 	var refresh = document.createElement("button");
 	refresh.textContent = "\u27F2";
 	refresh.classList.add("tabButton");
+	refresh.title = "Refresh";
 	refresh.addEventListener("click", function() {
 		var active = getActiveTab();
 		if (!active) return;
