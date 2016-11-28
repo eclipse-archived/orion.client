@@ -222,6 +222,10 @@ define([
         });
 
         function showImportThemeDialog(data) {
+        	//Remove focus so when the dialog is closed this element is no longer selected.
+        	if (data && data.domNode) {
+        		data.domNode.blur();
+        	}
             new ImportThemeDialog(data).show();
         }
         ThemeImporter.prototype.showImportThemeDialog = showImportThemeDialog;
