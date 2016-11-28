@@ -379,7 +379,7 @@ function(messages, i18nUtil, mCommands, mCommandRegistry, lib, mTooltip, mSetup,
 			name: messages.Export,
 			tooltip: messages['Export a theme'], //$NON-NLS-0$
 			id: "orion.exportTheme", //$NON-NLS-0$
-			callback: exportTheme
+			callback: exportTheme.bind(this)
 		});
 
 		this.commandService.addCommand(exportCommand);
@@ -607,7 +607,12 @@ function(messages, i18nUtil, mCommands, mCommandRegistry, lib, mTooltip, mSetup,
 	}
 	ThemeBuilder.prototype.saveTheme = saveTheme;
 	
-	function exportTheme() {
+	function exportTheme(data) {
+    	//Remove focus so the element no longer appears to be hovered.
+		if (data && data.domNode) {
+			data.domNode.blur();
+		}
+		
 		var themeString = JSON.stringify(currentTheme);
 
 		if (window.navigator.msSaveOrOpenBlob) { // Save blob from IE
