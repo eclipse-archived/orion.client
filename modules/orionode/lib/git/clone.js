@@ -88,7 +88,7 @@ function getRepoByPath(filePath,workspaceDir) {
 		filePath = path.dirname(filePath);
 		if (filePath.length <= workspaceDir) return Promise.reject(new Error("Forbidden"));
 	}
-	var ceiling = options.options.configParams.isElectron ? "" : workspaceDir ; 
+ 	var ceiling = path.dirname(workspaceDir);
 	return git.Repository.discover(filePath, 0, ceiling).then(function(buf) {
 		return git.Repository.open(buf.toString());
 	});

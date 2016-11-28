@@ -512,7 +512,7 @@ define(['require', 'i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 
 				if(!data.parameters){
 					messageService.setProgressResult({
 						Message: errorMessage,
-						Severity: "Info" //$NON-NLS-0$
+						Severity: "Warning" //$NON-NLS-0$
 					});
 					
 					var options = objects.mixin({}, commonRetryOptions, {
