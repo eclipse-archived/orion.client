@@ -4,7 +4,7 @@ Thanks for your interest in this project.
 
 #Steps to reproduce:
 
-1) Clone the git repository : [https://git.eclipse.org/r/orion/org.eclipse.orion.client] and checkout the branch mrennie/languageServer.
+1) Clone the git repository : [https://git.eclipse.org/r/orion/org.eclipse.orion.client] and checkout the branch java-lsp.
 
 2) Get the lsp server from git repo: [https://github.com/gorkem/java-language-server] and follow the README.md to build it.
 
