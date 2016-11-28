@@ -4,7 +4,7 @@ function die () {
     echo "Error:" "$1" >&2
     exit 1
 }
-npm --version
+
 DOWNLOADS=/home/data/httpd/download.eclipse.org
 
 (npm install --no-optional) || die "Failed to install dependencies, consult the npm log to find out why."
@@ -24,4 +24,4 @@ sed -i "s/orion\.buildId\=/orion\.buildId\=${1}/" orionode/orion.conf
 sed -i "s/var BUILD_ID \= \"unknown\"\;/var BUILD_ID \= \"${1}\"\;/" orionode/lib/version.js
 
 tar -czf "lsporionode_$1.tar.gz" orionode/
-cp "lpsorionode_$1.tar.gz" ${DOWNLOADS}/orion/lsporionode/
+cp "lsporionode_$1.tar.gz" ${DOWNLOADS}/orion/lsporionode/
