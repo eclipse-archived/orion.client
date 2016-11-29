@@ -1,11 +1,11 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2013 IBM Corporation and others. 
- * All rights reserved. This program and the accompanying materials are made 
- * available under the terms of the Eclipse Public License v1.0 
- * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
- * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html). 
- * 
+ * Copyright (c) 2013, 2016 IBM Corporation and others.
+ * All rights reserved. This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License v1.0
+ * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution
+ * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html).
+ *
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 /*eslint-env browser, amd*/
@@ -28,20 +28,22 @@ define([
 		CommonNavExplorer.apply(this, arguments);
 		var sidebarNavInputManager = this.sidebarNavInputManager;
 		if (sidebarNavInputManager) {
-			var _self = this;
 			// Broadcast changes of our explorer root to the sidebarNavInputManager
-			this.addEventListener("rootChanged", function(event) { //$NON-NLS-0$
-				_self.sidebarNavInputManager.dispatchEvent({type: "InputChanged", input: event.root.ChildrenLocation}); //$NON-NLS-0$
-			});
+			this.addEventListener("rootChanged", function(evnt) {
+				this.sidebarNavInputManager.dispatchEvent({
+					type: "InputChanged",
+					input: evnt.root.ChildrenLocation
+				});
+			}.bind(this));
 			sidebarNavInputManager.setInput = function(input) {
-				if (_self.treeRoot && _self.treeRoot.ChildrenLocation !== input) {
-					_self.loadRoot(input).then(function() {
-						_self.updateCommands();
-						var fileMetadata = _self.editorInputManager.getFileMetadata();
-						_self.reveal(fileMetadata, false);
-					});
+				if (this.treeRoot && this.treeRoot.ChildrenLocation !== input) {
+					this.loadRoot(input).then(function() {
+						this.updateCommands();
+						var fileMetadata = this.editorInputManager.getFileMetadata();
+						this.reveal(fileMetadata, false);
+					}.bind(this));
 				}
-			};
+			}.bind(this);
 		}
 	}
 	MiniNavExplorer.prototype = Object.create(CommonNavExplorer.prototype);
@@ -58,13 +60,13 @@ define([
 			}.bind(this));
 		},
 		onModelCreate: function(evt) {
-			return CommonNavExplorer.prototype.onModelCreate.call(this, evt).then(function () {
-				if(evt && !evt.select) {
+			return CommonNavExplorer.prototype.onModelCreate.call(this, evt).then(function() {
+				if (evt && !evt.select) {
 					var fileMetadata = this.editorInputManager.getFileMetadata();
 					this.reveal(fileMetadata, true);
 				}
 			}.bind(this));
-		},
+		}
 	});
 
 	function MiniNavRenderer() {
@@ -94,8 +96,8 @@ define([
 		this.lastRoot = null;
 		var _self = this;
 		//store the last root just in case we switch between two view modes
-		this.sidebarNavInputManager.addEventListener("InputChanged", function(event){ //$NON-NLS-0$
-			_self.lastRoot = event.input;
+		this.sidebarNavInputManager.addEventListener("InputChanged", function(evnt) {
+			_self.lastRoot = evnt.input;
 		});
 		this.sidebar.addViewMode(this.id, this);
 	}
@@ -117,7 +119,7 @@ define([
 						checkbox: false,
 						treeTableClass: "miniNavTreeTable",
 						cachePrefix: "MiniNav" //$NON-NLS-0$
-					}, explorer, _self.commandRegistry, _self.contentTypeRegistry); //$NON-NLS-0$
+					}, explorer, _self.commandRegistry, _self.contentTypeRegistry);
 				},
 				serviceRegistry: this.serviceRegistry,
 				toolbarNode: this.toolbarNode,
@@ -135,19 +137,19 @@ define([
 			});
 
 			var params = PageUtil.matchResourceParameters();
-			var navigate = params.navigate, resource = params.resource;
-			var root = navigate || this.lastRoot || this.fileClient.fileServiceRootURL(resource || ""); //$NON-NLS-0$
+			var navigate = params.navigate,
+				resource = params.resource;
+			var root = navigate || this.lastRoot || this.fileClient.fileServiceRootURL(resource || "");
 			this.explorer.display(root).then(function() {
 				if (sessionStorage.navSelection) {
 					try {
 						JSON.parse(sessionStorage.navSelection).forEach(function(sel) {
 							this.explorer.select(sel, true);
 						}.bind(this));
-					} catch (e) {
-					} finally {
+					} catch (e) {} finally {
 						delete sessionStorage.navSelection;
 					}
-					
+
 				}
 			}.bind(this));
 		},
