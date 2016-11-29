@@ -15,6 +15,8 @@ var cp = require('child_process');
 var rimraf = require('rimraf');
 var api = require('./api');
 var net = require('net');
+var fs = require('fs');
+
 var IN_PORT = 8123;
 var OUT_PORT = 8124;
 
@@ -84,26 +86,37 @@ function runJavaServer(javaHome) {
 				params.push('-Dlog.protocol=true');
 			}
 
-			params.push('-jar');
-			params.push(path.resolve(__dirname, '../server/plugins/org.eclipse.equinox.launcher_1.4.0.v20160926-1553.jar'));
-			//params.push(path.resolve('C:/devops/git/java-language-server/org.jboss.tools.vscode.product/target/repository/plugins/plugins/org.eclipse.equinox.launcher_1.3.200.v20160318-1642.jar'));
+			var pluginsFolder = path.resolve(__dirname, '../server/plugins');
+			return fs.readdirAsync(pluginsFolder).then(function(files) {
+				console.log(files);
+				if (Array.isArray(files) && files.length !== 0) {
+					for (var i = 0, length = files.length; i < length; i++) {
+						var file = files[i];
+						var indexOf = file.indexOf('org.eclipse.equinox.launcher_');
+						if (indexOf !== -1) {
+							params.push('-jar');
+							console.log(file);
+							params.push(path.resolve(__dirname, '../server/plugins/' + file));
+				
+							//select configuration directory according to OS
+							var configDir = 'config_win';
+							if (process.platform === 'darwin') {
+								configDir = 'config_mac';
+							} else if (process.platform === 'linux') {
+								configDir = 'config_linux';
+							}
+							params.push('-configuration');
+							params.push(path.resolve(__dirname, '../server', configDir));
+							params.push('-data');
+							params.push(workspacePath);
 
-			//select configuration directory according to OS
-			var configDir = 'config_win';
-			if (process.platform === 'darwin') {
-				configDir = 'config_mac';
-			} else if (process.platform === 'linux') {
-				configDir = 'config_linux';
-			}
-			params.push('-configuration');
-			//params.push(path.resolve( 'C:/devops/git/java-language-server/org.jboss.tools.vscode.product/target/repository', configDir));
-			params.push(path.resolve(__dirname, '../server', configDir));
-			params.push('-data');
-			params.push(workspacePath);
-
-			fork(child, params, {}, function(err, result) {
-				if (err) reject(err);
-				if (result) resolve(result);
+							return fork(child, params, {}, function(err, result) {
+								if (err) reject(err);
+								if (result) resolve(result);
+							});
+						}
+					}
+				}
 			});
 		});
 	});
