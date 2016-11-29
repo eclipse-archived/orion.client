@@ -85,7 +85,7 @@ function runJavaServer(javaHome) {
 			}
 
 			params.push('-jar');
-			params.push(path.resolve(__dirname, '../server/plugins/org.eclipse.equinox.launcher_1.3.200.v20160318-1642.jar'));
+			params.push(path.resolve(__dirname, '../server/plugins/org.eclipse.equinox.launcher_1.4.0.v20160926-1553.jar'));
 			//params.push(path.resolve('C:/devops/git/java-language-server/org.jboss.tools.vscode.product/target/repository/plugins/plugins/org.eclipse.equinox.launcher_1.3.200.v20160318-1642.jar'));
 
 			//select configuration directory according to OS
