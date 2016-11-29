@@ -88,14 +88,12 @@ function runJavaServer(javaHome) {
 
 			var pluginsFolder = path.resolve(__dirname, '../server/plugins');
 			return fs.readdirAsync(pluginsFolder).then(function(files) {
-				console.log(files);
 				if (Array.isArray(files) && files.length !== 0) {
 					for (var i = 0, length = files.length; i < length; i++) {
 						var file = files[i];
 						var indexOf = file.indexOf('org.eclipse.equinox.launcher_');
 						if (indexOf !== -1) {
 							params.push('-jar');
-							console.log(file);
 							params.push(path.resolve(__dirname, '../server/plugins/' + file));
 				
 							//select configuration directory according to OS
