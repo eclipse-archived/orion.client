@@ -29,17 +29,6 @@ define(['orion/plugin',
 			}]
 		});
 		/**
-		 * Register content type
-		 */
-		pluginProvider.registerServiceProvider("orion.core.contenttype", {}, {
-			contentTypes: [{
-				id: "application/json", //$NON-NLS-1$
-				"extends": "text/plain", //$NON-NLS-1$ //$NON-NLS-1$
-				name: "JSON", //$NON-NLS-1$
-				extension: ["json"]
-			}]
-		});
-		/**
 		 * Validation
 		 */
 		pluginProvider.registerService(["orion.edit.validator"], new mValidator(), { //$NON-NLS-1$
