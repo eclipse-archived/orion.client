@@ -249,7 +249,7 @@ define([
 				return null;
 			}
 			var elementNode;
-			if(loc === "/file" && util.isElectron){
+			if(loc === "/file" && (util.isElectron || localStorage.getItem("darklaunch.createAtRoot") === "true")){
 				// Special case in electron, need to find the workspace element to create file at workspace level.
 				elementNode = this.model.root;
 			}else{

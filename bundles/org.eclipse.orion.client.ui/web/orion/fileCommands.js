@@ -916,7 +916,8 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/i18n
 			var createFunction = function(name) {
 				if (name) {
 					var location = parentItem.Location;
-					if(location === "/workspace/orionode" && util.isElectron && !isDirectory ){
+					if(location === "/workspace/orionode" && ((util.isElectron && !isDirectory)
+					|| localStorage.getItem("darklaunch.createFileAtRoot") === "true" || localStorage.getItem("darklaunch.createFolderAtRoot")  === "true" )) {
 						// Special case for electron only to create files at workspace level.
 						location = "/file";
 					}
@@ -970,7 +971,7 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/i18n
 				createNewArtifact(messages["New File"], item, false);
 			},
 			visibleWhen: function(item) {
-				return checkFolderSelection(item) || util.isElectron;
+				return checkFolderSelection(item) || util.isElectron || localStorage.getItem("darklaunch.createFileAtRoot") === "true";
 			}
 		});
 		commandService.addCommand(newFileCommand);
@@ -985,7 +986,7 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/i18n
 				createNewArtifact(messages["New Folder"], item, true);
 			},
 			visibleWhen: function(item) {
-				return checkFolderSelection(item) && !mFileUtils.isAtRoot(item.Location);
+				return (checkFolderSelection(item) && !mFileUtils.isAtRoot(item.Location)) || localStorage.getItem("darklaunch.createFolderAtRoot") === "true";
 			}
 		});
 		commandService.addCommand(newFolderCommand);
@@ -1035,7 +1036,9 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/i18n
 					});
 				} 
 			},
-			visibleWhen: canCreateProject
+			visibleWhen: function(item) {
+				return canCreateProject(item) && localStorage.getItem("darklaunch.enableNewProject") !== "false";
+			}
 		});
 		commandService.addCommand(newProjectCommand);
 		
@@ -1060,7 +1063,10 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/i18n
 					errorHandler(messages["NameLocationNotClear"]);
 				}
 			},
-			visibleWhen: canCreateProject
+			visibleWhen: function (item) {
+				canCreateProject(item)  && localStorage.getItem("darklaunch.enableLinkProject") !== "false";
+			}
+
 		});
 		commandService.addCommand(linkProjectCommand);
 		
