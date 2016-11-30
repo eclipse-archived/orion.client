@@ -60,6 +60,7 @@ define([
 		editor = edit({
 			parent: editorDomNode,
 			lang: lang,
+			readonly: true,
 			contents: text, //$NON-NLS-0$
 			statusReporter: statusReporter
 		});
