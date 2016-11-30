@@ -61,11 +61,25 @@ function redrawButtons() {
 	buttons.appendChild(refresh);
 	bar.appendChild(buttons);
 
-	var _globalShortcut = electron.remote.globalShortcut;
-	_globalShortcut.unregister('Alt+Right');
-	_globalShortcut.unregister('Alt+Left');
-	_globalShortcut.register('Alt+Right', historyForward);
-	_globalShortcut.register('Alt+Left', historyBack);
+	var Menu = electron.remote.Menu;
+	var menu = Menu.getApplicationMenu();
+	if(process.platform === "darwin"){
+		menu.append(createPageNavigationMenuItems("CmdOrCtrl"));
+	}else{
+		menu.append(createPageNavigationMenuItems("Alt"));
+	}
+	Menu.setApplicationMenu(menu);
+	function createPageNavigationMenuItems(acceleratorKey1){
+		return new electron.remote.MenuItem( // The main purpose of creating menu if for key binding
+			{
+				label: "Navigation",  
+				submenu: [
+					{label: "Back", accelerator: acceleratorKey1 + "+Left", click: historyBack},
+					{label: "Forward", accelerator: acceleratorKey1 + "+Right", click: historyForward}
+				]
+			}
+		);
+	}
 }
 
 function addNewTab(id, iframe) {
