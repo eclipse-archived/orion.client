@@ -50,11 +50,10 @@ function redrawButtons() {
 	buttons.appendChild(refresh);
 	bar.appendChild(buttons);
 
-	var _globalShortcut = electron.remote.globalShortcut;
-	_globalShortcut.unregister('Alt+Right');
-	_globalShortcut.unregister('Alt+Left');
-	_globalShortcut.register('Alt+Right', historyForward);
-	_globalShortcut.register('Alt+Left', historyBack);
+	var ipcRender = electron.ipcRenderer;
+	ipcRender.send("registerShortCuts");
+	ipcRender.on("historyBack",historyBack);
+	ipcRender.on("historyForward",historyForward);
 }
 
 function addNewTab(id, iframe) {
