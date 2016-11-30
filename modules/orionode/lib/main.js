@@ -17,7 +17,10 @@ function redrawButtons() {
 	var bar = document.querySelector("#bar");
 	var buttons = document.createElement("span");
 	buttons.classList.add("tabButtons");
-	var back = document.createElement("button");
+	var back = document.createElement("button"),
+		backTitle = "Back";
+	back.title = backTitle;
+	back.setAttribute("aria-label", backTitle);
 	back.textContent = "<";
 	back.classList.add("tabButton");
 
@@ -33,18 +36,23 @@ function redrawButtons() {
 		active.contentWindow.history.forward();
 	}
 	back.addEventListener("click", historyBack);
-	back.title = "Back";
 	buttons.appendChild(back);
-	var forward = document.createElement("button");
+	
+	var forward = document.createElement("button"),
+		forwardTitle = "Forward";
+	forward.title = forwardTitle;
+	forward.setAttribute("aria-label", forwardTitle);
 	forward.textContent = ">";
 	forward.classList.add("tabButton");
-	forward.title = "Forward";
 	forward.addEventListener("click", historyForward);
 	buttons.appendChild(forward);
-	var refresh = document.createElement("button");
+	
+	var refresh = document.createElement("button"),
+		refreshTitle = "Refresh";
+	refresh.title = refreshTitle;
+	refresh.setAttribute("aria-label", refreshTitle);
 	refresh.textContent = "\u27F2";
 	refresh.classList.add("tabButton");
-	refresh.title = "Refresh";
 	refresh.addEventListener("click", function() {
 		var active = getActiveTab();
 		if (!active) return;
