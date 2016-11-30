@@ -61,11 +61,18 @@ function redrawButtons() {
 	buttons.appendChild(refresh);
 	bar.appendChild(buttons);
 
-	var _globalShortcut = electron.remote.globalShortcut;
-	_globalShortcut.unregister('Alt+Right');
-	_globalShortcut.unregister('Alt+Left');
-	_globalShortcut.register('Alt+Right', historyForward);
-	_globalShortcut.register('Alt+Left', historyBack);
+	var Menu = electron.remote.Menu;
+	var menu = Menu.getApplicationMenu();
+	menu.append(new electron.remote.MenuItem( // The main purpose of creating menu if for key binding
+		{
+			label: "Navigation",  
+			submenu: [
+				{label: "Back", accelerator:process.platform === "darwin"? "CmdOrCtrl+Left" :"Alt+Left", click: historyBack},
+				{label: "Forward", accelerator:process.platform === "darwin"? "CmdOrCtrl+Right" :"Alt+Right", click: historyForward}
+			]
+		}
+	));
+	Menu.setApplicationMenu(menu);
 }
 
 function addNewTab(id, iframe) {
