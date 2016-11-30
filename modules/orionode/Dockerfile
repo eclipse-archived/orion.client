@@ -53,11 +53,9 @@ RUN cp -R /home/java-language-server/ /home/orion/orionode/server
 WORKDIR /home/orion/orionode
 
 # install sample project for demoing
-RUN mkdir -p /home/example
-WORKDIR /home/example
-RUN git clone https://github.com/burrsutter/vertx-game-server.git
+RUN mkdir -p /home/workspace
 
 EXPOSE 8081
 
 WORKDIR /home/orion/orionode
-CMD [ "node", "server.js","-w","/home/example" ]
+CMD [ "node", "server.js","-w","/home/workspace" ]
