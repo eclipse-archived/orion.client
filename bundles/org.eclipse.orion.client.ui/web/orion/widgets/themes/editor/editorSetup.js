@@ -61,6 +61,7 @@ define([
 			parent: editorDomNode,
 			lang: lang,
 			readonly: true,
+			noFocus: true,
 			contents: text, //$NON-NLS-0$
 			statusReporter: statusReporter
 		});
