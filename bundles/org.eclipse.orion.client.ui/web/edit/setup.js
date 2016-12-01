@@ -847,11 +847,17 @@ objects.mixin(EditorSetup.prototype, {
 	load: function() {
 		var lastEditedFile = sessionStorage.lastFile;
 		var currentHash = PageUtil.hash();
-		// lastEditedFile exists in session storage and if the project didn't change.
-		if (lastEditedFile && lastEditedFile.lastIndexOf(currentHash, 0) === 0 && lastEditedFile !== currentHash) {
-			window.location.hash = currentHash = lastEditedFile;
+		var justRemovedRepoName = sessionStorage.justRemovedRepo;
+		// justRemovedRepo doesn't exsits in session storage or if the lastEditedFile deson't belongs to the just deleted repo.
+		if(!justRemovedRepoName || lastEditedFile.lastIndexOf("#/file/"+justRemovedRepoName,0) !== 0 ){
+			// lastEditedFile exists in session storage and if the project didn't change.
+			if (lastEditedFile && currentHash && lastEditedFile.lastIndexOf(currentHash, 0) === 0 && lastEditedFile !== currentHash) {
+				window.location.hash = currentHash = lastEditedFile;
+			}			
 		}
-
+		if(sessionStorage.justRemovedRepo){
+			delete sessionStorage.justRemovedRepo;
+		}
 		this.setInput(currentHash);
 		window.addEventListener("hashchange", function() { //$NON-NLS-0$
 			this.setInput(PageUtil.hash());
