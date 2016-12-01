@@ -251,8 +251,13 @@ function load() {
 
 function createNewTabButton(url){
 	var bar = document.querySelector("#bar");
-	var newTabButton = document.createElement("a");
-	newTabButton.innerHTML = "+";
+	var newTabButton = document.createElement("a"),
+		newTabButtonTitle = "New Tab",
+		newTabButtonText = "+";
+	
+	newTabButton.title = newTabButtonTitle;
+	newTabButton.setAttribute("aria-label", newTabButtonTitle);
+	newTabButton.innerHTML = newTabButtonText;
 	newTabButton.classList.add("openNewTab");
 	newTabButton.addEventListener("click", function(evt) {
 		createTab(url);
