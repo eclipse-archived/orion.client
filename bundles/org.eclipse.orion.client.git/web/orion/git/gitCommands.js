@@ -1759,6 +1759,7 @@ var exports = {};
 				} else {
 					commandService.confirm(data.domNode, i18nUtil.formatMessage(messages['Are you sure you want to delete ${0}?'], item.Name), messages.OK, messages.Cancel, false, function(doit) {
 						if (!doit) return;
+						sessionStorage.justRemovedRepo = item.Name;
 						var msg1 = i18nUtil.formatMessage(messages["Removing repository ${0}"], item.Name);
 						progress.progress(gitService.removeGitRepository(item.Location), msg1).then(
 							function(){
