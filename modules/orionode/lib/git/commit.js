@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012 IBM Corporation and others.
+ * Copyright (c) 2012, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -390,15 +390,19 @@ function getCommitRefs(repo, fileDir, commits) {
 						})
 						.then(function(){
 							commit = map[id];
-							var tags = commit.Tags || (commit.Tags = []);
-							tags.push(mTags.tagJSON(fullName, shortName, id, undefined, fileDir));
+							if (commit) {
+								var tags = commit.Tags || (commit.Tags = []);
+								tags.push(mTags.tagJSON(fullName, shortName, id, undefined, fileDir));
+							}
 							cb();
 						});
 					} 
 					id = oid.toString();
 					commit = map[id];
-					var branches = commit.Branches || (commit.Branches = []);
-					branches.push({FullName: ref});
+					if (commit) {
+						var branches = commit.Branches || (commit.Branches = []);
+						branches.push({FullName: ref});
+					}
 					cb();
 				})
 				.catch(function() {
