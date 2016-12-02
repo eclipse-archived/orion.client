@@ -28,7 +28,7 @@
     "mongodb": "^2.1.7",
     "mongoose": "^4.4.6",
     "multiparty": "^4.1.2",
-    "nodegit": "0.13.0",
+    "nodegit": "0.16.0",
     "nodemailer": "^2.3.0",
     "passport": "^0.3.2",
     "passport-github2": "^0.1.10",
@@ -50,7 +50,7 @@
   },
   "devDependencies": {
     "chai": "^3.5.0",
-    "electron-prebuilt": "^1.2.7",
+    "electron-prebuilt": "^1.4.10",
     "grunt": "~0.4.5",
     "grunt-cli": "~0.1.13",
     "grunt-contrib-clean": "~0.5.0",
@@ -80,7 +80,7 @@
   "build": {
     "appId": "org.eclipse.orion",
     "asar": false,
-    "electronVersion": "1.2.7",
+    "electronVersion": "1.4.10",
     "compression": "maximum",
     "osx": {
       "title": "Orion",
