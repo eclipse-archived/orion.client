@@ -4,8 +4,9 @@ define([
 	'orion/section', //$NON-NLS-0$
 	'orion/webui/littlelib', //$NON-NLS-0$
 	'orion/objects', //$NON-NLS-0$
-	'orion/widgets/input/SettingsCheckbox'], 
-function(messages, mSection, lib, objects, SettingsCheckbox) {
+	'orion/widgets/input/SettingsCheckbox',
+	'orion/widgets/input/SettingsTextfield'
+], function(messages, mSection, lib, objects, SettingsCheckbox, SettingsTextfield) {
 	function GeneralSettings(options, node) {
 		objects.mixin(this, options);
 		this.node = node;
@@ -22,7 +23,12 @@ function(messages, mSection, lib, objects, SettingsCheckbox) {
 				this.generalFields = [
 				    new SettingsCheckbox( {fieldlabel: messages["desktopSelectionPolicy"], 
 				    	fieldTitle: messages["desktopSelectionPolicyTooltip"],
-				    	postChange: this.setDesktopPolicy.bind(this)})  //$NON-NLS-0$
+				    	postChange: this.setDesktopPolicy.bind(this)}),  //$NON-NLS-0$
+				    new SettingsTextfield({
+				    	fieldlabel: messages["filteredResources"], 
+				    	fieldTitle: messages["filteredResourcesTooltip"],
+				    	postChange: this.setFilteredResources.bind(this)
+				    })
 				];
 				new mSection.Section(this.node, {
 					id: "fileNavigation", //$NON-NLS-0$
@@ -47,14 +53,32 @@ function(messages, mSection, lib, objects, SettingsCheckbox) {
 				this.preferences.setPrefs({desktopSelectionPolicy: deskTopSelectionEnabled});
 			},
 
+			/**
+			 * @name setFilteredResources
+			 * @description Sets the string of filtered options
+			 * @function
+			 * @since 13.0
+			 */
+			setFilteredResources: function setFilteredResources() {
+				this.preferences.setPrefs({filteredResources: this.generalFields[1].getValue()});
+			},
+			
 			show:function(node, callback){
 				if (node) {
 					this.node = node;
 				}
 				this.createElements();
-				this.preferences.getPrefs().then(function (genealPrefs) {
-					this.generalFields[0].setSelection(genealPrefs.desktopSelectionPolicy);
+				this.preferences.getPrefs().then(function (generalPrefs) {
+					this.generalFields[0].setSelection(generalPrefs.desktopSelectionPolicy);
 					this.generalFields[0].show();
+					
+					//filtered resources
+					if(typeof generalPrefs.filteredResources !== 'string') {
+						this.generalFields[1].setValue(".git"); //default
+					} else {
+						this.generalFields[1].setValue(generalPrefs.filteredResources);
+					}
+					this.generalFields[1].show();
 					if (callback) {
 						callback();
 					}

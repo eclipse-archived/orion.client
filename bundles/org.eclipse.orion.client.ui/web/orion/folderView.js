@@ -23,8 +23,10 @@ define([
 	'orion/util',
 	'orion/Deferred',
 	'orion/projects/projectView',
+	'orion/generalPreferences',
 	'orion/section'
-], function(mGlobalCommands, mExplorerTable, mNavigatorRenderer, FileCommands, mMarkdownView, mProjectEditor, PageUtil, URITemplate, lib, objects, util, Deferred, mProjectView, mSection) {
+], function(mGlobalCommands, mExplorerTable, mNavigatorRenderer, FileCommands, mMarkdownView, mProjectEditor, PageUtil, 
+			URITemplate, lib, objects, util, Deferred, mProjectView, mGeneralPrefs, mSection) {
 
 	var ID_COUNT = 0;
 
@@ -172,6 +174,7 @@ define([
 		this.contentTypeRegistry = options.contentTypeRegistry;
 		this.editorInputManager = options.inputManager;
 		this.preferences = options.preferences;
+		this.generalPrefs = new mGeneralPrefs.GeneralPreferences(this.preferences);
 		this.showProjectView = options.showProjectView === undefined ? true : options.showProjectView;
 		this.showFolderNav = true;
 		this._init();
@@ -238,7 +241,7 @@ define([
 			}
 			this._parent.appendChild(this._node);
 
-			function renderSections(sectionsOrder, sectionNames) {
+			function renderSections(sectionsOrder, sectionNames, filteredResources) {
 				sectionsOrder.forEach(function(sectionName) {
 					if (sectionName === "project") {
 						if (projectJson && this.showProjectView) {
@@ -265,7 +268,8 @@ define([
 								fileClient: this.fileClient,
 								editorInputManager: this.editorInputManager,
 								commandRegistry: this.commandRegistry,
-								contentTypeRegistry: this.contentTypeRegistry
+								contentTypeRegistry: this.contentTypeRegistry,
+								filteredResources: filteredResources
 							});
 							foldersSection.embedExplorer(this.folderNavExplorer);
 							this.folderNavExplorer.setCommandsVisible(this._isCommandsVisible());
@@ -284,11 +288,18 @@ define([
 			var sectionsOrder = ["project", "folderNav", "readme"]; //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			var sectionNames = {};
 			if (this.preferences) {
-				this.preferences.get("/sectionsOrder").then(function(sectionsOrderPrefs) { //$NON-NLS-0$
-					sectionNames = sectionsOrderPrefs["folderViewNames"] || sectionNames;
-					sectionsOrder = sectionsOrderPrefs["folderView"] || sectionsOrder;
-					renderSections.apply(this, [sectionsOrder, sectionNames]);
-				}.bind(this), function(error) {
+				Deferred.all([this.preferences.get("/sectionsOrder"), this.generalPrefs.getPrefs()]).then(function(prefs) {
+					sectionNames = prefs[0]["folderViewNames"] || sectionNames;
+					sectionsOrder = prefs[0]["folderView"] || sectionsOrder;
+					var res = Object.create(null);
+					if(prefs[1] && typeof prefs[1].filteredResources === 'string') {
+						prefs[1].filteredResources.split(',').forEach(function(item) {
+							res[item] = true;
+						});
+					}
+					renderSections.apply(this, [sectionsOrder, sectionNames, res]);
+				}.bind(this),
+				function(error) {
 					renderSections.apply(this, [sectionsOrder, sectionNames]);
 					window.console.error(error);
 				}.bind(this));
