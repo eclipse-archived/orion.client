@@ -24,8 +24,15 @@ define([
 
 	/**
 	 * Tree model used by the FileExplorer
+	 * @param {?} serviceRegistry The backing registry
+	 * @param {?} root The root item for the model
+	 * @param {FileClient} fileClient The backing FileClient instance
+	 * @param {string} idPrefix The prefix to  use for the new model nodes
+	 * @param {boolean} excludeFiles The optional flag for if files should be left out of the model
+	 * @param {boolean} excludeFolders The optional flag for if folders should be left out of the model
+	 * @param {?} filteredResources The optional map of names to be left out of the model (filtered)
 	 */
-	function FileModel(serviceRegistry, root, fileClient, idPrefix, excludeFiles, excludeFolders) {
+	function FileModel(serviceRegistry, root, fileClient, idPrefix, excludeFiles, excludeFolders, filteredResources) {
 		this.registry = serviceRegistry;
 		this.root = root;
 		this.fileClient = fileClient;
@@ -33,8 +40,9 @@ define([
 		if (typeof this.idPrefix !== "string") {
 			this.idPrefix = this.idPrefix.id;
 		}
-		this.excludeFiles = !!excludeFiles;
-		this.excludeFolders = !!excludeFolders;
+		this.excludeFiles = Boolean(excludeFiles);
+		this.excludeFolders = Boolean(excludeFolders);
+		this.filteredResources = filteredResources;
 	}
 	FileModel.prototype = new mExplorer.ExplorerModel();
 	objects.mixin(FileModel.prototype, /** @lends orion.explorer.FileModel.prototype */ {
@@ -45,16 +53,19 @@ define([
 		/*
 		 *	Process the parent and children, doing any filtering or sorting that may be necessary.
 		 */
-		processParent: function(parent, children) {
+		processParent: function(parentItem, children) {
 			// Note that the Parents property is not available for metadatas retrieved with fetchChildren().
-			var parents = parent.Projects ? [] : [parent].concat(parent.Parents || []);
-			if (this.excludeFiles || this.excludeFolders) {
+			var parents = parentItem.Projects ? [] : [parentItem].concat(parentItem.Parents || []);
+			if (this.excludeFiles || this.excludeFolders || this.filteredResources) {
 				var filtered = [];
 				children.forEach(function(child) {
 					var exclude = child.Directory ? this.excludeFolders : this.excludeFiles;
+					if(this.filteredResources) {
+						exclude = exclude || this.filteredResources[child.Name];
+					}
 					if (!exclude) {
 						filtered.push(child);
-						child.parent = parent;
+						child.parent = parentItem;
 						if (!child.Parents) {
 							child.Parents = parents;
 						}
@@ -63,7 +74,7 @@ define([
 				children = filtered;
 			} else {
 				children.forEach(function(child) {
-					child.parent = parent;
+					child.parent = parentItem;
 					if (!child.Parents) {
 						child.Parents = parents;
 					}
@@ -71,11 +82,11 @@ define([
 			}
 
 			//link the parent and children together
-			parent.children = children;
+			parentItem.children = children;
 
 			// not ideal, but for now, sort here so it's done in one place.
 			// this should really be something pluggable that the UI defines
-			parent.children.sort(this.sortChildren);
+			parentItem.children.sort(this.sortChildren);
 			return children;
 		},
 
@@ -97,14 +108,13 @@ define([
 		},
 
 		getChildren: function(parentItem, /* function(items) */ onComplete) {
-			var self = this;
 			// the parent already has the children fetched
 			if (parentItem.children) {
 				onComplete(parentItem.children);
 			} else if (parentItem.Directory !== undefined && parentItem.Directory === false) {
 				onComplete([]);
 			} else if (parentItem.Children) {
-				onComplete(self.processParent(parentItem, parentItem.Children));
+				onComplete(this.processParent(parentItem, parentItem.Children));
 			} else if (parentItem.Location) {
 				var progress = null;
 				if (this.registry) {
@@ -112,11 +122,11 @@ define([
 				}
 				(progress ? progress.progress(this.fileClient.fetchChildren(parentItem.ChildrenLocation), messages["Fetching children of "] + parentItem.Name) : this.fileClient.fetchChildren(parentItem.ChildrenLocation)).then(
 					function(children) {
-						if (self.destroyed) {
+						if (this.destroyed) {
 							return;
 						}
-						onComplete(self.processParent(parentItem, children));
-					},
+						onComplete(this.processParent(parentItem, children));
+					}.bind(this),
 					function() {
 						onComplete([]);
 					}
@@ -191,6 +201,7 @@ define([
 		this.myTree = null;
 		this.checkbox = false;
 		this._hookedDrag = false;
+		this.filteredResources = options.filteredResources;
 		var modelEventDispatcher = options.modelEventDispatcher ? options.modelEventDispatcher : new EventTarget();
 		this.modelEventDispatcher = modelEventDispatcher;
 		//Listen to all resource changed events
@@ -1020,7 +1031,7 @@ define([
 		 * @returns {orion.explorer.FileModel}
 		 */
 		createModel: function() {
-			return new FileModel(this.registry, this.treeRoot, this.fileClient, this.parentId, this.excludeFiles, this.excludeFolders);
+			return new FileModel(this.registry, this.treeRoot, this.fileClient, this.parentId, this.excludeFiles, this.excludeFolders, this.filteredResources);
 		},
 
 		/**
