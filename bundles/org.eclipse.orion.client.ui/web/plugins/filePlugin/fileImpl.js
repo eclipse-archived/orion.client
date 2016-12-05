@@ -495,6 +495,10 @@ define(["orion/Deferred", "orion/xhr", "orion/URL-shim", "orion/operation", "ori
 		 * @return A deferred that will be provided with the contents or metadata when available
 		 */
 		read: function(loc, isMetadata, acceptPatch, options) {
+			if(typeof acceptPatch === 'object') {
+				options = acceptPatch;
+				acceptPatch = false;
+			}
 			var url = new URL(loc, self.location);
 			if (isMetadata) {
 				if (options && options.parts !== undefined) {
