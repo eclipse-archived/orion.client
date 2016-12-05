@@ -79,7 +79,7 @@
   },
   "build": {
     "appId": "org.eclipse.orion",
-    "asar": false,
+    "asar": true,
     "electronVersion": "1.4.10",
     "compression": "maximum",
     "osx": {
