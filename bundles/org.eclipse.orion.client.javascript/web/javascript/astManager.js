@@ -24,8 +24,8 @@ define([
 	 * Provides a shared AST.
 	 * @name javascript.ASTManager
 	 * @class Provides a shared AST.
-	 * @param {Object} esprima The esprima parser that this ASTManager will use.
-	 * @param {Object} serviceRegistry The platform service registry
+	 * @param {?} serviceRegistry The platform service registry
+	 * @param {?} servjsProject The backing project context
 	 */
 	function ASTManager(serviceRegistry, jsProject) {
 		this.cache = new LRU(10);
@@ -33,7 +33,7 @@ define([
 		this.jsProject = jsProject;
 		registry = serviceRegistry;
 	}
-	
+
 	/**
 	 * @description Delegate to log timings to the metrics service
 	 * @param {Number} end The end time
@@ -47,7 +47,7 @@ define([
 			}
 		}
 	}
-	
+
 	Objects.mixin(ASTManager.prototype, /** @lends javascript.ASTManager.prototype */ {
 		/**
 		 * @param {orion.editor.EditorContext} editorContext
@@ -117,7 +117,7 @@ define([
 			logTiming(Date.now() - start);
 			return ast;
 		},
-		
+
 		/**
 		 * Callback from the orion.edit.model service
 		 * @param {Object} event An <tt>orion.edit.model</tt> event.
