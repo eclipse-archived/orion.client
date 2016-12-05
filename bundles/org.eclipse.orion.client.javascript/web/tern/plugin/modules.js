@@ -1,12 +1,13 @@
-/* eslint-disable */
+  /* eslint-disable */
 (function(mod) {
   if (typeof exports == "object" && typeof module == "object") // CommonJS
     return mod(require("../lib/infer"), require("../lib/tern"), require("../lib/signal"), require)
   if (typeof define == "function" && define.amd) // AMD
-    return define(["../lib/infer", "../lib/tern", "../lib/signal", "javascript/ternPlugins/resolver"], mod)
+    return define(["../lib/infer", "../lib/tern", "../lib/signal"], mod)
   mod(tern, tern, tern.signal)
-})(function(infer, tern, signal, resolver, require) {
+})(function(infer, tern, signal, require) {
   "use strict"
+
   function Modules(server, options) {
     this.server = server
     this.options = options || {}
@@ -42,7 +43,6 @@
     },
 
     resolveModule: function(name, parentFile) {
-      var modName = name; //ORION tag module with original name
       var over = this.maybeOverride(name)
       if (over) return over
       var known = this.knownModules[name]
@@ -59,28 +59,16 @@
       if (!resolved) return infer.ANull
       if (typeof resolved != "string") {
         if (!relative) this.nonRelative[name] = true
-        resolved.modName = modName; //ORION tag module with original name
         return resolved
       }
-		
-	 // ORION Get the resolved file from Orion resolver plugin
-  	 var resolvedFile = resolver.getResolved(name);
-  	 if (resolvedFile && resolvedFile.file) {
-  	 	  resolved = resolvedFile.file;
-  	 	  var known = this.modules[resolved]
-	      if (known) {
-	      	known.modName = modName; //ORION tag module with original name
-	      	return known
-	  	  }
-	      if (/\.js$|(?:^\/)[^\.]+$/.test(resolved))
-	        this.server.addFile(resolvedFile.file, resolvedFile.contents, parentFile);
-	      if (!relative) this.nonRelative[name] = resolved
-	      this.modules[resolved] = new infer.AVal;
-	      this.modules[resolved].modName = modName; //ORION tag module with original name
-	      return this.modules[resolved];
-	  } else {
-	  	return new infer.AVal();
-	  }
+
+      var known = this.modules[resolved]
+      if (known) return known
+
+      if (/\.js$|(?:^\/)[^\.]+$/.test(resolved))
+        this.server.addFile(resolved, null, parentFile)
+      if (!relative) this.nonRelative[name] = resolved
+      return this.modules[resolved] = new infer.AVal
     },
 
     findIn: function(array, node, pos) {
@@ -106,7 +94,7 @@
 
       fromObj(this.knownModules, true)
       if (this.options.modules) fromObj(this.options.modules, false)
-      
+
       var pathsSeen = Object.create(null)
       for (var prop in this.nonRelative) {
         var val = this.nonRelative[prop]
@@ -144,6 +132,7 @@
       }
       if (modName == null) return
 
+		// TODO Orion check that node.sourceFile is actually available, ast is not
       var type = this.resolveModule(modName, node.sourceFile.name)
       if (prop) {
         var obj = type.getObjType()
@@ -184,9 +173,6 @@
     var server = infer.cx().parent
     if (server.findFile(path)) return path
     if (server.findFile(path + ".js")) return path + ".js"
-    
-    // ORION The default resolver must return something to get to using our resolver plugin
-    return path;
   }
 
   // Under node, replace completeFileName with a version that actually
@@ -280,7 +266,7 @@
     var expr = infer.findExpressionAround(file.ast, null, wordEnd, file.scope,
                                           function(type) { return type in types })
     if (!expr) return null
-	
+
     if (me.isModName(expr.node, wordEnd) != null)
       return findModuleCompletions(me, file, query, expr.node, wordEnd)
 
@@ -294,6 +280,7 @@
     var word = node.name ? node.name.slice(0, wordEnd - node.start) : ""
     if (query.caseInsensitive) word = word.toLowerCase()
 
+	// TODO Orion make sure node.sourceFile is available, AST is not
     var modType = me.resolveModule(imp.name, node.sourceFile.name).getType()
     if (!modType) return null
     infer.forAllPropertiesOf(modType, function(prop, obj, depth) {
@@ -331,6 +318,7 @@
       isProperty: false,
       completions: completions.map(function(rec) {
         var name = typeof rec == "string" ? rec : rec.name
+        
         // TODO ORION: Stringify the name adds the quotes around the proposal which Orion doesn't handle in sortProposals
         var string = name;
 //        var string = JSON.stringify(name)
@@ -345,43 +333,15 @@
 
   tern.registerPlugin("modules", function(server, options) {
     server.mod.modules = new Modules(server, options)
-    
-    /**
-	 * @description Returns whether the given file is using a dependency system handled by this modules plugin ('node' and 'es_modules')
-	 * @param {Object} file The file object
-	 * @returns {Boolean} If we should modify scopes or do other work with this plugin
-	 * Orion
-	 */
-	function isUsingModules(file) {
-		if(file.ast){
-			if (file.ast.environments && (file.ast.environments.node || file.ast.environments.es_modules)) {
-				return true;
-			} else if (file.ast.dependencies){
-				for (var i=0; i<file.ast.dependencies.length; i++) {
-					var dep = file.ast.dependencies[i];
-					if (dep.env === 'node' || dep.env === 'es_modules'){
-						return true;
-					}
-				}
-			}
-      	}
-      	return false;
-	}
 
     server.on("beforeLoad", function(file) {
-      // ORION Only modify the scope if we are using node for dependencies in this file or we cannot use globals from other files
-      if (isUsingModules(file)){
-      	file.scope = this.mod.modules.buildWrappingScope(file.scope, file.name, file.ast)
-  	  }
+      file.scope = this.mod.modules.buildWrappingScope(file.scope, file.name, file.ast)
     })
 
     server.on("afterLoad", function(file) {
-      // ORION Only collect exports for this file if we are using for dependencies in this file
-      if (isUsingModules(file)){
-        var mod = this.mod.modules.get(file.name)
-        mod.origin = file.name
-        this.mod.modules.signal("getExports", file, mod)
-      }
+      var mod = this.mod.modules.get(file.name)
+      mod.origin = file.name
+      this.mod.modules.signal("getExports", file, mod)
     })
 
     server.on("reset", function() {
@@ -391,15 +351,7 @@
     server.on("preCondenseReach", preCondenseReach)
     server.on("postLoadDef", postLoadDef)
     server.on("typeAt", findTypeAt)
-    server.on("completion", findCompletions);
-    
-    // ORION Hook into postParse, preInfer events
-    server.on("postParse", function(ast, text){
-    	resolver.doPostParse(server, ast, infer.cx().definitions, null);
-    });
-    server.on("preInfer", function(ast, scope){
-    	resolver.doPreInfer(server);
-    });
+    server.on("completion", findCompletions)
   })
 
   tern.defineQueryType("exports", {

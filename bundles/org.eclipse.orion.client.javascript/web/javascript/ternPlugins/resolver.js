@@ -11,10 +11,31 @@
  *******************************************************************************/
 /*eslint-env amd, browser*/
 define([
-	'orion/editor/templates'
-], function(mTemplates) {
+	"tern/lib/tern",
+	"tern/lib/infer"
+], function(tern, infer) {
 	
 	var _resolved = Object.create(null);
+	
+	function moduleResolve(_name, parentFile) {
+		var resolved = getResolved(_name);
+		if (resolved && resolved.file){
+			return resolved.file;
+		}
+		return null;
+//		var resolved = resolveToFile(name, parentFile)
+//		return resolved && infer.cx().parent.normalizeFilename(resolved)
+	}
+	
+	/**
+	 * @description Get the resolved file for the given logical name
+	 * @param {String} _name The logical name 
+	 * @sinnce 9.0
+	 */
+	function getResolved(_name) {
+		return _resolved[_name];
+	}
+	
 	/**
 	 * @description Resolves the computed dependencies
 	 * @param {TernServer} server The Tern server
@@ -161,18 +182,20 @@ define([
 		return null;
 	}
 	
-	/**
-	 * @description Get the resolved file for the given logical name
-	 * @param {String} _name The logical name 
-	 * @sinnce 9.0
-	 */
-	function getResolved(_name) {
-		return _resolved[_name];
-	}
-	
-	return {
-		doPostParse: doPostParse,
-		doPreInfer: doPreInfer,
-		getResolved: getResolved
-	};
+	tern.registerPlugin("resolver", /* @callback */ function(server, options) { //$NON-NLS-1$
+	    server.loadPlugin("modules"); //$NON-NLS-1$
+	    server.mod.modules.resolvers.push(moduleResolve);
+	    server.on("postParse", function(ast, text){ //$NON-NLS-1$
+	    	doPostParse(server, ast, infer.cx().definitions, null);
+	    });
+	    server.on("preInfer", function(ast, scope){ //$NON-NLS-1$
+	    	doPreInfer(server);
+	    });
+  });
+  
+  return {
+			doPostParse: doPostParse,
+			doPreInfer: doPreInfer,
+			getResolved: getResolved
+		};
 });
