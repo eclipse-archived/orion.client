@@ -425,7 +425,7 @@ define([
 						});
 				});
 				it("Mixed unused import and unused var", function(callback) {
-					var topic = 'import foo from "./exports.js"; function myFunc(){};';
+					var topic = 'import foo from "./exports"; function myFunc(){};';
 					var config = { rules: {} };
 					var createFiles = [{name: './exports', text: ''}];
 					config.rules[RULE_ID] = 1;
