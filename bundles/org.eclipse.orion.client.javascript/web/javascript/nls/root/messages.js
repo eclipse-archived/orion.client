@@ -358,7 +358,7 @@ define({
 	'javascriptFormatting' : 'Javascript Formatting',
 	'js_indent_size' : 'Indention size:',
 	'js_indent_char' : 'Indentation character:',
-	'js_eol' : 'Charater(s) to use as line terminators:',
+	'js_eol' : 'Character(s) to use as line terminators:',
 	'js_end_with_newline' : 'End ouput with newline:',
 	'indentation_unix' : 'Unix',
 	'indentation_mac' : 'Mac',

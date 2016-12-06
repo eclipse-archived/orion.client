@@ -22,6 +22,6 @@ define({
 	'indentation_unix': 'Unix',
 	'indentation_mac': 'Mac',
 	'indentation_windows': 'Windows',
-	'json_eol': 'Charater(s) to use as line terminators:',
+	'json_eol': 'Character(s) to use as line terminators:',
 	'json_end_with_newline': 'End ouput with newline:'
 });
