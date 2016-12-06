@@ -1,9 +1,9 @@
 /*eslint-env browser */
 define([
-	'i18n!orion/settings/nls/messages', //$NON-NLS-0$
-	'orion/section', //$NON-NLS-0$
-	'orion/webui/littlelib', //$NON-NLS-0$
-	'orion/objects', //$NON-NLS-0$
+	'i18n!orion/settings/nls/messages',
+	'orion/section',
+	'orion/webui/littlelib',
+	'orion/objects',
 	'orion/widgets/input/SettingsCheckbox',
 	'orion/widgets/input/SettingsTextfield'
 ], function(messages, mSection, lib, objects, SettingsCheckbox, SettingsTextfield) {
@@ -23,7 +23,7 @@ define([
 				this.generalFields = [
 				    new SettingsCheckbox( {fieldlabel: messages["desktopSelectionPolicy"], 
 				    	fieldTitle: messages["desktopSelectionPolicyTooltip"],
-				    	postChange: this.setDesktopPolicy.bind(this)}),  //$NON-NLS-0$
+				    	postChange: this.setDesktopPolicy.bind(this)}),
 				    new SettingsTextfield({
 				    	fieldlabel: messages["filteredResources"], 
 				    	fieldTitle: messages["filteredResourcesTooltip"],
@@ -36,7 +36,7 @@ define([
 					content: '<section class="setting-row" role="region" aria-labelledby="GeneralSettingsTitle" id="setting-row-general">', //$NON-NLS-0$
 				});	
 				
-				var settingsContentElement = document.createElement('div'); //$NON-NLS-0$
+				var settingsContentElement = document.createElement('div');
 				settingsContentElement.className = 'setting-content'; //$NON-NLS-0$
 				settingsContentElement.style.paddingLeft = "30px";
 				

@@ -42,7 +42,10 @@ define([
 		}
 		this.excludeFiles = Boolean(excludeFiles);
 		this.excludeFolders = Boolean(excludeFolders);
-		this.filteredResources = filteredResources;
+		if(!this.filteredResources) {
+			//is set from project nav not via arguments
+			this.filteredResources = filteredResources;
+		}
 	}
 	FileModel.prototype = new mExplorer.ExplorerModel();
 	objects.mixin(FileModel.prototype, /** @lends orion.explorer.FileModel.prototype */ {

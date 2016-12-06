@@ -20,19 +20,21 @@ define([
 	'orion/PageUtil',
 	'orion/URITemplate',
 	'orion/Deferred',
-	'orion/bidiUtils'
+	'orion/bidiUtils',
+	'orion/generalPreferences'
 ], function(messages, i18nUtil, objects, lib, mExplorer, mCommonNav, ProjectCommands,
-	PageUtil, URITemplate, Deferred, bidiUtils) {
+	PageUtil, URITemplate, Deferred, bidiUtils, mGeneralPreferences) {
 
 	var CommonNavExplorer = mCommonNav.CommonNavExplorer;
 	var CommonNavRenderer = mCommonNav.CommonNavRenderer;
 	var FileModel = mExplorer.FileModel;
 	var uriTemplate = new URITemplate("#{,resource,params*}"); //$NON-NLS-0$
 
-	function ProjectNavModel(serviceRegistry, root, fileClient, idPrefix, excludeFiles, excludeFolders, projectClient, fileMetadata) {
+	function ProjectNavModel(serviceRegistry, root, fileClient, idPrefix, excludeFiles, excludeFolders, projectClient, fileMetadata, filteredResources) {
 		this.projectClient = projectClient;
 		this.project = root;
 		this.fileMetadata = fileMetadata;
+		this.filteredResources = filteredResources;
 		FileModel.apply(this, arguments);
 	}
 
@@ -102,7 +104,7 @@ define([
 		CommonNavExplorer.apply(this, arguments);
 
 		var _self = this;
-
+		this.generalPreferences = new mGeneralPreferences.GeneralPreferences(this.preferences);
 		this.dependenciesDisplatcher = ProjectCommands.getDependencyDispatcher();
 		/**
 		 * @callback
@@ -177,7 +179,7 @@ define([
 			}
 		},
 		createModel: function() {
-			return new ProjectNavModel(this.registry, this.treeRoot, this.fileClient, this.parentId, this.excludeFiles, this.excludeFolders, this.projectClient, this.fileMetadata);
+			return new ProjectNavModel(this.registry, this.treeRoot, this.fileClient, this.parentId, this.excludeFiles, this.excludeFolders, this.projectClient, this.fileMetadata, this.filteredResources);
 		},
 		reroot: function(item) {
 			var defer = new Deferred();
@@ -311,30 +313,38 @@ define([
 		label: messages["Project"],
 		id: "projectNav", //$NON-NLS-0$
 		create: function() {
-			var _self = this;
-			this.explorer = new ProjectNavExplorer({
-				preferences: this.preferences,
-				commandRegistry: this.commandRegistry,
-				fileClient: this.fileClient,
-				editorInputManager: this.editorInputManager,
-				sidebar: this.sidebar,
-				sidebarNavInputManager: this.sidebarNavInputManager,
-				parentId: this.parentNode.id,
-				projectClient: this.projectClient,
-				rendererFactory: function(explorer) {
-					return new ProjectNavRenderer({
-						checkbox: false,
-						treeTableClass: "miniNavTreeTable", //$NON-NLS-0$
-						cachePrefix: "ProjectNav" //$NON-NLS-0$
-					}, explorer, _self.commandRegistry, _self.contentTypeRegistry);
-				},
-				serviceRegistry: this.serviceRegistry,
-				toolbarNode: this.toolbarNode,
-				progressService: this.progressService
-			});
-			this.explorer.workspaceMetadata = this.workspaceMetadata;
-			this.explorer.display(this.editorInputManager.getFileMetadata());
-			this.toolbarNode.parentNode.classList.add("projectNavSidebarWrapper"); //$NON-NLS-0$
+			new mGeneralPreferences.GeneralPreferences(this.preferences).getPrefs().then(function(prefs) {
+				var res = Object.create(null);
+				if(typeof prefs.filteredResources === 'string') {
+					prefs.filteredResources.split(',').forEach(function(item) {
+						res[item] = true;
+					});
+				}
+				this.explorer = new ProjectNavExplorer({
+					preferences: this.preferences,
+					commandRegistry: this.commandRegistry,
+					fileClient: this.fileClient,
+					editorInputManager: this.editorInputManager,
+					sidebar: this.sidebar,
+					sidebarNavInputManager: this.sidebarNavInputManager,
+					parentId: this.parentNode.id,
+					projectClient: this.projectClient,
+					rendererFactory: function(explorer) {
+						return new ProjectNavRenderer({
+							checkbox: false,
+							treeTableClass: "miniNavTreeTable", //$NON-NLS-0$
+							cachePrefix: "ProjectNav" //$NON-NLS-0$
+						}, explorer, this.commandRegistry, this.contentTypeRegistry);
+					}.bind(this),
+					serviceRegistry: this.serviceRegistry,
+					toolbarNode: this.toolbarNode,
+					progressService: this.progressService,
+					filteredResources: res
+				});
+				this.explorer.workspaceMetadata = this.workspaceMetadata;
+				this.explorer.display(this.editorInputManager.getFileMetadata());
+				this.toolbarNode.parentNode.classList.add("projectNavSidebarWrapper"); //$NON-NLS-0$
+			}.bind(this));
 		},
 		destroy: function() {
 			if (this.explorer) {
