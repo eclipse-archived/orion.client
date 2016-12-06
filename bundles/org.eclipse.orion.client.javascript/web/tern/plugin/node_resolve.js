@@ -3,9 +3,9 @@
   if (typeof exports == "object" && typeof module == "object") // CommonJS
     return mod(require("../lib/infer"), require("../lib/tern"), require("./commonjs"), require)
   if (typeof define == "function" && define.amd) // AMD
-    return define(["../lib/infer", "../lib/tern", "./commonjs",  "javascript/ternPlugins/resolver"], mod)
+    return define(["../lib/infer", "../lib/tern", "./commonjs"], mod)
   mod(tern, tern)
-})(function(infer, tern, _, resolver, require) {
+})(function(infer, tern, _, require) {
   "use strict"
 
   function resolve(name, parentFile) {

@@ -93,7 +93,7 @@ define([
 			function assertProblems(computed, expected) {
 				try {
 					var problems = computed.problems;
-					assert.equal(problems.length, expected.length, "The wrong number of problems was computed");
+					assert.equal(problems.length, expected.length, "The wrong number of problems was computed\n " + _problemToString(computed, expected));
 					for(var i = 0; i < problems.length; i++) {
 						var pb = problems[i];
 						var expb = expected[i];
@@ -131,6 +131,20 @@ define([
 					worker.getTestState().callback(err);
 				}
 			}
+			
+			function _problemToString(computed, expected){
+				var result;
+				result += 'Expected: ' + expected.length + '\n';
+				for (var i=0; i<expected.length; i++){
+					result += expected[i].description + '\n';
+				}
+				result += 'Actual: ' + computed.length + '\n';
+				for (var i=0; i<computed.length; i++){
+					result += computed[i].description + '\n';
+				}
+				return result;
+			}
+			
 			it("Test EOF 1", function(callback) {
 				validate({buffer: "function", callback: callback}).then(function (problems) {
 						assertProblems(problems, [
@@ -5513,8 +5527,9 @@ define([
 					it("Ignore define", function(callback) {
 						var topic = "define(['define', 'define2', 'define3'])";
 						var config = { rules: {} };
+						var createFiles = [{name: 'define', text: ''},{name: 'define2', text: ''},{name: 'define3', text: ''},];
 						config.rules[RULE_ID] = 1;
-						validate({buffer: topic, callback: callback, config: config}).then(
+						validate({buffer: topic, callback: callback, config: config, createFiles: createFiles}).then(
 							function (problems) {
 								assertProblems(problems, []);
 							},
@@ -10207,7 +10222,7 @@ define([
 						it("no-unused-vars import", function(callback) {
 							var topic = 'import { cube } from "./exports"; cube(4)';
 							var config = { rules: {} };
-							var createFiles = [{name: './exports.js', text: 'export function cube(x) {return x * x * x;}'}];
+							var createFiles = [{name: './exports', text: 'export function cube(x) {return x * x * x;}'}];
 							config.rules[RULE_ID] = 2;
 							validate({buffer: topic, callback: callback, config: config, createFiles: createFiles}).then(
 								function (problems) {
