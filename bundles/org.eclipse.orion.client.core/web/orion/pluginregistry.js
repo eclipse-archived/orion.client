@@ -1204,6 +1204,10 @@ define(["orion/Deferred", "orion/EventTarget", "orion/URL-shim"], function(Defer
             	return null;
             },
             persist: function(url, manifest) {
+            	if (!manifest || !manifest.services || !manifest.services.length) {
+            		_storage.removeItem("plugin." + url);
+            		return;
+            	}
                 _storage.setItem("plugin." + url, JSON.stringify(manifest)); //$NON-NLS-0$
             },
             postMessage: function(message, channel) {

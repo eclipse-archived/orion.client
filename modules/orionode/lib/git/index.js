@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012 IBM Corporation and others.
+ * Copyright (c) 2012, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -46,11 +46,27 @@ function getIndex(req, res) {
 	.then(function(indexResult) {
 		index = indexResult;
 		var indexEntry = index.getByPath(filePath);
+		if (!indexEntry) {
+			// new untracked file that's not in the index
+			var readIfExists = req.headers ? Boolean(req.headers['read-if-exists']).valueOf() : false;
+			if (typeof readIfExists === 'boolean' && readIfExists) {
+				return 204;
+			}
+			return 404;
+		}
 		return git.Blob.lookup(repo, indexEntry.id);
 	})
 	.then(function(blob) {
-		res.write(blob.toString());
-		res.status(200).end();
+		if (typeof blob === 'number') {
+			if (blob === 204) {
+				res.sendStatus(204);
+			} else {
+				writeError(404, res, filePath + " not found in index");
+			}
+		} else {
+			res.write(blob.toString());
+			res.status(200).end();
+		}
 	})
 	.catch(function(err) {
 		writeError(404, res, err.message);

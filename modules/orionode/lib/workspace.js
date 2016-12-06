@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012 IBM Corporation and others.
+ * Copyright (c) 2012, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -138,8 +138,11 @@ module.exports = function(options) {
 			// Create a project
 			fs.mkdir(fileUtil.safeFilePath(req.user.workspaceDir, projectName), parseInt('0755', 8), function(error) {
 				if (error) {
-					err = {Message: error};
-					res.status(400).json(err);
+					if (error.code === 'EEXIST') {
+						api.writeError(400, res, "Duplicate project name: " + projectName);
+					} else {
+						api.writeError(400, res, error);
+					}
 				} else {
 					api.write(201, res, null, {
 						Id: projectName,

@@ -63,7 +63,7 @@ define({//Default message bundle
 	"html_preserve_new_lines" : "Preserve line-breaks:",
 	"html_max_preserve_new_lines" : "Number of line-breaks to be preserved in one chunk:",
 	"html_brace_style" : "Brace Style:",
-	"html_wrap_line_length" : "Wrap lines at next opportunity after N characters: (0 for unlimited)",
+	"html_wrap_line_length" : "Wrap lines at next opportunity after N characters (0 for unlimited):",
 	"indent_inner_html" : "Indent <head> and <body> sections:",
 	"indent_handlebars" : "Format and indent {{#foo}} and {{/foo}}:",
 	"wrap_attributes" : "Wrap attributes to new lines:",

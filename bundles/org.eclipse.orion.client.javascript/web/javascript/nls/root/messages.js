@@ -385,7 +385,7 @@ define({
 	'keep_array_indentation' : 'Preserve array indentation:',
 	'space_before_conditional' : 'Space before condition:',
 	'unescape_strings' : 'Decode printable characters encoded in xNN notation:',
-	'js_wrap_line_length' : 'Wrap lines at next opportunity after N characters: (0 for unlimited)',
+	'js_wrap_line_length' : 'Wrap lines at next opportunity after N characters (0 for unlimited):',
 	'e4x' : 'Pass E4X xml literal through untouched:',
 	'comma_first' : 'Put commas at the beginning of new line instead of end:',
 	'operator_position' : 'Position for operator:',

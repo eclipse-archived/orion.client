@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2014 IBM Corporation and others.
+ * Copyright (c) 2014, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -78,16 +78,20 @@ define(["orion/xhr", "orion/Deferred", "orion/encoding-shim", "orion/URL-shim"],
 		copyFile: function(sourceLocation, targetLocation, name) {
 			throw new Error("Not supported"); //$NON-NLS-0$ 
 		},
-		read: function(location, isMetadata) {
+		read: function(location, isMetadata, options) {
 			var url = new URL(location, window.location);
 			if (isMetadata) {
 				url.query.set("parts", "meta"); //$NON-NLS-0$  //$NON-NLS-1$
 			}
-			return xhr("GET", url.href, {
+			var opts = {
 				timeout: GIT_TIMEOUT,
 				headers: { "Orion-Version": "1" }, //$NON-NLS-0$  //$NON-NLS-1$
 				log: false
-			}).then(function(result) {
+			};
+			if (options && typeof options.readIfExists === 'boolean') {
+				opts.headers["read-if-exists"] = Boolean(options.readIfExists).toString();
+			}
+			return xhr("GET", url.href, opts).then(function(result) {
 				if (isMetadata) {
 					return result.response ? JSON.parse(result.response) : null;
 				} else {

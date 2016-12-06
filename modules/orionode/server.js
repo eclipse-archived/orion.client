@@ -15,6 +15,7 @@ var auth = require('./lib/middleware/auth'),
 	https = require('https'),
 	fs = require('fs'),
 	os = require('os'),
+	api = require('./lib/api'),
 	compression = require('compression'),
 	path = require('path'),
 	socketio = require('socket.io'),
@@ -184,28 +185,41 @@ if (process.versions.electron) {
 		return;
 	}
 
-	/**
-	 * @description Toggle the dev tools on or off
-	 * @since 13.0
-	 */
-	function toggleDevTools() {
-		var win = electron.BrowserWindow.getFocusedWindow();
-		if (win) {
-			win.webContents.toggleDevTools();
-		}
-	}
-
+	var readyToOpenDir, relativeFileUrl;
+	electron.app.on('open-file', function(event, path) {
+		readyToOpenDir = path;
+	});
 	electron.app.on('ready', function() {
 		var updateDownloaded  = false,
 			updateDialog = false,
 			linuxDialog = false,
-			prefsWorkspace = allPrefs.user && allPrefs.user.workspace && allPrefs.user.workspace.currentWorkspace;
+			prefsWorkspace = allPrefs.user && allPrefs.user.workspace && allPrefs.user.workspace.currentWorkspace,
+			recentWorkspaces = allPrefs.user && allPrefs.user.workspace && allPrefs.user.workspace.recentWorkspaces,
+			Menu = electron.Menu;
 			
 		if (prefsWorkspace) {
 			configParams.workspace = prefsWorkspace;
 		}
+		if(readyToOpenDir){
+			try{
+				var stats = fs.statSync(readyToOpenDir);
+				if(stats.isFile()){
+					var parentDir = path.dirname(readyToOpenDir);
+					var similarity = 0;
+					configParams.workspace = parentDir;
+					recentWorkspaces.forEach(function(eachRecent){
+						if(parentDir.lastIndexOf(eachRecent,0) === 0 && eachRecent.length > similarity){
+							similarity = eachRecent.length;
+							return configParams.workspace = eachRecent;
+						}
+					});
+					relativeFileUrl = api.toURLPath(readyToOpenDir.substring(configParams.workspace.length));
+				}else if(stats.isDirectory()){
+					configParams.workspace = readyToOpenDir;
+				}
+			}catch(e){}
+		}
 		if (process.platform === 'darwin') {
-			var Menu = electron.Menu;
 			if (!Menu.getApplicationMenu()) {
 				var template = [{
 					label: "Application",
@@ -222,25 +236,35 @@ if (process.versions.electron) {
 						{ label: "Cut", accelerator: "CmdOrCtrl+X", selector: "cut:" },
 						{ label: "Copy", accelerator: "CmdOrCtrl+C", selector: "copy:" },
 						{ label: "Paste", accelerator: "CmdOrCtrl+V", selector: "paste:" },
-						{ label: "Select All", accelerator: "CmdOrCtrl+A", selector: "selectAll:" }
+						{ label: "Select All", accelerator: "CmdOrCtrl+A", selector: "selectAll:" },
+						{ label: "openDevTool", accelerator: "Cmd+Option+I",visible:false, click: function (item, focusedWindow) {
+							//if windows, add F12 to also open dev tools - depending on electron / windows versions this might not be allowed to be rebound
+							if (focusedWindow) focusedWindow.webContents.toggleDevTools();
+						}}
 					]}
 				];
 				Menu.setApplicationMenu(Menu.buildFromTemplate(template));
 			}
-			electron.globalShortcut.register('Cmd+Option+I', function() {
-				toggleDevTools();
-			});
 		} else {
 			//always add Ctrl+Shift+I for non-MacOS platforms - matches the browser devs tools shortcut
-			electron.globalShortcut.register('Ctrl+Shift+I', function() {
-				toggleDevTools();
-			});
+			var template = [makeDevToolMenuItem("Devtool","Ctrl+Shift+I")];
+			Menu.setApplicationMenu(Menu.buildFromTemplate(template));
 		}
 		if(process.platform === "win32") {
+			var menu = Menu.getApplicationMenu();
 			//if windows, add F12 to also open dev tools - depending on electron / windows versions this might not be allowed to be rebound
-			electron.globalShortcut.register('F12', function() {
-				toggleDevTools();
-			});
+			menu.append(new electron.MenuItem(makeDevToolMenuItem("DevtoolforWin32","F12")));
+			Menu.setApplicationMenu(menu);
+		}
+		function makeDevToolMenuItem(label, accelerator){
+			return {
+				label: label,
+				submenu: [
+					{ label: "openDevTool", accelerator: accelerator, click: function (item, focusedWindow) {
+			          if (focusedWindow) focusedWindow.webContents.toggleDevTools();
+			        }}
+				]
+			}
 		}
 		autoUpdater.on("error", function(error) {
 			console.log(error);
@@ -280,7 +304,6 @@ if (process.versions.electron) {
 				});
 				updateDialog = true;
 			}
-
 		});
 
 		function scheduleUpdateChecks () {
@@ -296,6 +319,7 @@ if (process.versions.electron) {
 			windowOptions.title = "Orion";
 			windowOptions.icon = "icon/256x256/orion.png";
 			var nextWindow = new electron.BrowserWindow(windowOptions);
+			nextWindow.setMenuBarVisibility(false);	// This line only work for Window and Linux
 			if (windowOptions.maximized) {
 				nextWindow.maximize();
 			}
@@ -338,7 +362,11 @@ if (process.versions.electron) {
 			return nextWindow;
 		}
 		startServer(function() {
-			var mainWindow = createWindow("http://localhost:" + port);
+			var initialUrl = "http://localhost:" + port;
+			if(relativeFileUrl){ // Works in Mac Open Command Only
+				initialUrl = initialUrl + "/edit/edit.html#/file" + relativeFileUrl;
+			}
+			var mainWindow = createWindow(initialUrl);
 			mainWindow.on('closed', function() {
 				mainWindow = null;
 			});
