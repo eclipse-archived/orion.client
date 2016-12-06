@@ -5327,8 +5327,7 @@ define([
 						['XPathResult()', 'XPathResult()']
 					]);
 				});
-				// At some point Tern stopped including global properties in window
-				it.skip('browser awareness 9', function(done) {
+				it('browser awareness 9', function(done) {
 					var options = {
 						buffer: "/*eslint-env browser */var xx = 9;window.x",
 						prefix: "x",

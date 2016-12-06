@@ -24,8 +24,8 @@ define([
 	"tern/plugin/doc_comment",
 	"tern/plugin/es_modules",
 	'tern/plugin/node',
-	'tern/plugin/commonjs',
 	'tern/plugin/requirejs',
+	'tern/plugin/commonjs',
 	
 	//orion defaults
 	"javascript/ternPlugins/amqp",
@@ -45,8 +45,7 @@ define([
 	"javascript/ternPlugins/refs",
 	"javascript/ternPlugins/templates",
 	"javascript/ternPlugins/quickfixes",
-	"javascript/ternPlugins/beautifier",
-	"javascript/ternPlugins/resolver",
+	"javascript/ternPlugins/beautifier"
 ], function(Messages, ecma5, ecma6, ecma7, browser, chai) {
 	var defs = [ecma5, ecma6, ecma7, browser, chai];
 	var defNames = ["ecma5", "ecma6", "ecma7", "browser", "chai"]; //these are in the same order to avoid a walk of the array
@@ -117,11 +116,6 @@ define([
 			"beautifier": {
 				"name": Messages["beautifierPluginName"],
 				"description": Messages["beautifierPluginDescription"],
-				"version": "1.0"
-			},
-			"resolver": {
-				"name": Messages["resolverPluginName"],
-				"description": Messages["resolverPluginDescription"],
 				"version": "1.0"
 			},
 		},

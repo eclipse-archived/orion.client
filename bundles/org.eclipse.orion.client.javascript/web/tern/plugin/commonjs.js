@@ -53,22 +53,10 @@
     var arg = node.arguments[0]
     if (arg && arg.type == "Literal" && typeof arg.value == "string") return arg.value
   }
-  
-  function _getAST(node){
-  	// ORION In our version of Acorn the AST is not available on the given node
-    var ast = node.sourceFile.ast;
-    if (!ast){
-        var server = infer.cx().parent;
-        ast = server.fileMap[node.sourceFile.name];
-        if (!ast) return;
-        ast = ast.ast;
-    }
-    return ast;
-  }
 
   function isModuleName(node) {
     if (node.type != "Literal" || typeof node.value != "string") return
-    var call = infer.findExpressionAround(_getAST(node), null, node.end, null,
+    var call = infer.findExpressionAround(node.sourceFile.ast, null, node.end, null,
                                           function(_, n) { return isStaticRequire(n) != null })
     if (call && call.node.arguments[0] == node) return node.value
   }
@@ -76,7 +64,16 @@
   function isImport(node) {
     if (node.type != "Identifier") return
     
-    var decl = infer.findExpressionAround(_getAST(node), null, node.end, null, "VariableDeclarator"), name
+    // ORION In our version of Acorn the AST is not available on the given node
+    var ast = node.sourceFile.ast;
+    if (!ast){
+        var server = infer.cx().parent;
+        ast = server.fileMap[node.sourceFile.name];
+        if (!ast) return;
+        ast = ast.ast;
+    }
+
+    var decl = infer.findExpressionAround(ast, null, node.end, null, "VariableDeclarator"), name
     if (!decl || decl.node.id != node) return
     var init = decl.node.init
     if (init && (name = isStaticRequire(init)) != null)

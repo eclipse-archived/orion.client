@@ -291,8 +291,6 @@ define([
 						createFiles: [{name: "c", text: ""}]
 					};
 					testProposals(options, [
-						// TODO Temp workaround for Bug 508687
-						['c', 'c'],
 						['', 'node'],
 						['child_process', 'child_process : child_process'],
 						['cluster', 'cluster : cluster'],
@@ -309,8 +307,6 @@ define([
 							createFiles: [{name: "e", text: ""}]
 						};
 						testProposals(options, [
-							// TODO Temp workaround for Bug 508687
-							['e', 'e'],
 							['', 'express'],
 							['express()', 'express() : app'],
 							['', 'node'],
@@ -383,8 +379,7 @@ define([
 					]);
 				});
 			});
-			// TODO Module name completion for RequireJS is broken
-			describe.skip('RequireJS', function() {
+			describe('RequireJS', function() {
 				before('Restart with the requirejs plugin', function(done) {
 					worker.start(done, {options: {plugins: {requirejs: {}}, libs: []}});
 				});
