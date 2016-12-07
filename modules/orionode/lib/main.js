@@ -244,6 +244,16 @@ function load() {
 }
 
 function registerElectronMenu(pageControlCallbacks, newTabCallback){
+	function switchForwardTabs(){
+		var activeTab = document.querySelector(".tabItem.active");
+		var nextTabButton = activeTab.nextSibling;
+		nextTabButton ? nextTabButton.click() : activeTab.parentNode.firstChild.click();
+	}
+	function switchBackwardTabs(){
+		var activeTab = document.querySelector(".tabItem.active");
+		var previousTabButton = activeTab.previousSibling;
+		previousTabButton ? previousTabButton.click() : activeTab.parentNode.lastChild.click();
+	}
 	var Menu = electron.remote.Menu;
 	var menu = Menu.getApplicationMenu();
 	menu.append(new electron.remote.MenuItem( // The main purpose of creating menu if for key binding
@@ -254,7 +264,9 @@ function registerElectronMenu(pageControlCallbacks, newTabCallback){
 				{label: "Forward", accelerator:process.platform === "darwin"? "CmdOrCtrl+Right" :"Alt+Right", click: pageControlCallbacks.historyForward},
 				{label: "Refresh", accelerator:process.platform === "darwin"? "CmdOrCtrl+R" :"Ctrl+R", click: pageControlCallbacks.refreshPage},
 				{label: "RefreshOnF5", accelerator:process.platform === "darwin"? "" :"F5", visible:false, click: pageControlCallbacks.refreshPage},
-				{label: "New Tab", accelerator:process.platform === "darwin"? "CmdOrCtrl+T" :"Ctrl+T", click: newTabCallback.newTab}
+				{label: "New Tab", accelerator:process.platform === "darwin"? "CmdOrCtrl+T" :"Ctrl+T", click: newTabCallback.newTab},
+				{label: "Move to Next Tab", accelerator:process.platform === "darwin"? "Ctrl+Tab" :"Ctrl+Tab", click: switchForwardTabs},
+				{label: "Move to Previous Tab", accelerator:process.platform === "darwin"? "Ctrl+Shift+Tab" :"Ctrl+Shift+Tab", click: switchBackwardTabs}
 			]
 		}
 	));
