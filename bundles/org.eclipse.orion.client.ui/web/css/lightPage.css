@@ -212,9 +212,13 @@
 	color: #cdcdcd;
 }
 
+.lightPage .textviewTooltip {
+	background-color: rgb(61, 114, 179);
+}
+
 .lightPage .textviewTooltip .commandButton { /* Styling quickfixes */
 	border-color: white;
-	border: 1px solid #325C80;
+	border: 1px solid white;
 	background-color: inherit;
 	color: white;
 	margin-bottom: 2px;
