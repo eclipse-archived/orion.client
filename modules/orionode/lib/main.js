@@ -35,6 +35,11 @@ function redrawButtons() {
 		if (!active) return;
 		active.contentWindow.history.forward();
 	}
+	function refreshPage() {
+		var active = getActiveTab();
+		if (!active) return;
+		active.contentWindow.location.reload();
+	}
 	back.addEventListener("click", historyBack);
 	buttons.appendChild(back);
 	
@@ -53,11 +58,7 @@ function redrawButtons() {
 	refresh.setAttribute("aria-label", refreshTitle);
 	refresh.textContent = "\u27F2";
 	refresh.classList.add("tabButton");
-	refresh.addEventListener("click", function() {
-		var active = getActiveTab();
-		if (!active) return;
-		active.contentWindow.location.reload();
-	});
+	refresh.addEventListener("click", refreshPage);
 	buttons.appendChild(refresh);
 	bar.appendChild(buttons);
 
@@ -68,7 +69,9 @@ function redrawButtons() {
 			label: "Navigation",  
 			submenu: [
 				{label: "Back", accelerator:process.platform === "darwin"? "CmdOrCtrl+Left" :"Alt+Left", click: historyBack},
-				{label: "Forward", accelerator:process.platform === "darwin"? "CmdOrCtrl+Right" :"Alt+Right", click: historyForward}
+				{label: "Forward", accelerator:process.platform === "darwin"? "CmdOrCtrl+Right" :"Alt+Right", click: historyForward},
+				{label: "RefreshOnCtrlR", accelerator:process.platform === "darwin"? "CmdOrCtrl+R" :"Ctrl+R", visible:false, click: refreshPage},
+				{label: "RefreshOnF5", accelerator:process.platform === "darwin"? "" :"F5", visible:false, click: refreshPage}
 			]
 		}
 	));
