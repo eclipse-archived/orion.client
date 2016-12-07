@@ -17,13 +17,6 @@ function redrawButtons() {
 	var bar = document.querySelector("#bar");
 	var buttons = document.createElement("span");
 	buttons.classList.add("tabButtons");
-	var back = document.createElement("button"),
-		backTitle = "Back";
-	back.title = backTitle;
-	back.setAttribute("aria-label", backTitle);
-	back.textContent = "<";
-	back.classList.add("tabButton");
-
 	function historyBack() {
 		var active = getActiveTab();
 		if (!active) return;
@@ -40,11 +33,17 @@ function redrawButtons() {
 		if (!active) return;
 		active.contentWindow.location.reload();
 	}
+	var back = document.createElement("button"),
+		backTitle = process.platform === "darwin"? "Back (⌘+Left)" :"Back (Alt+Left)";
+	back.title = backTitle;
+	back.setAttribute("aria-label", backTitle);
+	back.textContent = "<";
+	back.classList.add("tabButton");
 	back.addEventListener("click", historyBack);
 	buttons.appendChild(back);
 	
 	var forward = document.createElement("button"),
-		forwardTitle = "Forward";
+		forwardTitle = process.platform === "darwin"? "Forward (⌘+Right)" :"Forward (Alt+Right)";
 	forward.title = forwardTitle;
 	forward.setAttribute("aria-label", forwardTitle);
 	forward.textContent = ">";
@@ -53,29 +52,20 @@ function redrawButtons() {
 	buttons.appendChild(forward);
 	
 	var refresh = document.createElement("button"),
-		refreshTitle = "Refresh";
+		refreshTitle = process.platform === "darwin"? "Refresh (⌘+R)" :"Refresh (Ctrl+R)";
 	refresh.title = refreshTitle;
 	refresh.setAttribute("aria-label", refreshTitle);
 	refresh.textContent = "\u27F2";
 	refresh.classList.add("tabButton");
 	refresh.addEventListener("click", refreshPage);
 	buttons.appendChild(refresh);
+	
 	bar.appendChild(buttons);
-
-	var Menu = electron.remote.Menu;
-	var menu = Menu.getApplicationMenu();
-	menu.append(new electron.remote.MenuItem( // The main purpose of creating menu if for key binding
-		{
-			label: "Navigation",  
-			submenu: [
-				{label: "Back", accelerator:process.platform === "darwin"? "CmdOrCtrl+Left" :"Alt+Left", click: historyBack},
-				{label: "Forward", accelerator:process.platform === "darwin"? "CmdOrCtrl+Right" :"Alt+Right", click: historyForward},
-				{label: "RefreshOnCtrlR", accelerator:process.platform === "darwin"? "CmdOrCtrl+R" :"Ctrl+R", visible:false, click: refreshPage},
-				{label: "RefreshOnF5", accelerator:process.platform === "darwin"? "" :"F5", visible:false, click: refreshPage}
-			]
-		}
-	));
-	Menu.setApplicationMenu(menu);
+	return {
+		refreshPage:refreshPage,
+		historyForward:historyForward,
+		historyBack:historyBack
+	};
 }
 
 function addNewTab(id, iframe) {
@@ -240,9 +230,10 @@ function getActiveTab() {
 }
 
 function load() {
-	redrawButtons();
+	var pageControlCallbacks = redrawButtons();
 	createTab(window.location.hash.substr(1));
-	createNewTabButton(window.location.hash.substr(1));
+	var newTabCallback = createNewTabButton(window.location.hash.substr(1));
+	registerElectronMenu(pageControlCallbacks, newTabCallback);
 	window.addEventListener("resize", function() {
 		if (this.timeout) window.clearTimeout(this.timeout);
 		this.timeout = window.setTimeout(function() {
@@ -252,20 +243,42 @@ function load() {
 	registerContextMenu();
 }
 
+function registerElectronMenu(pageControlCallbacks, newTabCallback){
+	var Menu = electron.remote.Menu;
+	var menu = Menu.getApplicationMenu();
+	menu.append(new electron.remote.MenuItem( // The main purpose of creating menu if for key binding
+		{
+			label: "Navigation",  
+			submenu: [
+				{label: "Back", accelerator:process.platform === "darwin"? "CmdOrCtrl+Left" :"Alt+Left", click: pageControlCallbacks.historyBack},
+				{label: "Forward", accelerator:process.platform === "darwin"? "CmdOrCtrl+Right" :"Alt+Right", click: pageControlCallbacks.historyForward},
+				{label: "Refresh", accelerator:process.platform === "darwin"? "CmdOrCtrl+R" :"Ctrl+R", click: pageControlCallbacks.refreshPage},
+				{label: "RefreshOnF5", accelerator:process.platform === "darwin"? "" :"F5", visible:false, click: pageControlCallbacks.refreshPage},
+				{label: "New Tab", accelerator:process.platform === "darwin"? "CmdOrCtrl+T" :"Ctrl+T", click: newTabCallback.newTab}
+			]
+		}
+	));
+	Menu.setApplicationMenu(menu);
+}
+
 function createNewTabButton(url){
 	var bar = document.querySelector("#bar");
 	var newTabButton = document.createElement("a"),
-		newTabButtonTitle = "New Tab",
+		newTabButtonTitle = process.platform === "darwin"? "New Tab (⌘+T)" :"New Tab (Ctrl+T)",
 		newTabButtonText = "+";
 	
 	newTabButton.title = newTabButtonTitle;
 	newTabButton.setAttribute("aria-label", newTabButtonTitle);
 	newTabButton.innerHTML = newTabButtonText;
 	newTabButton.classList.add("openNewTab");
-	newTabButton.addEventListener("click", function(evt) {
+	function newTab() {
 		createTab(url);
-	});
+	}
+	newTabButton.addEventListener("click", newTab);
 	bar.appendChild(newTabButton);
+	return {
+		newTab:newTab
+	};
 }
 
 function createTab(url) {
