@@ -73,11 +73,23 @@
       }
     })
   }
+  
+  function _getAST(node){
+  	// ORION In our version of Acorn the AST is not available on the given node
+    var ast = node.sourceFile.ast;
+    if (!ast){
+        var server = infer.cx().parent;
+        ast = server.fileMap[node.sourceFile.name];
+        if (!ast) return;
+        ast = ast.ast;
+    }
+    return ast;
+  }
 
   function isModuleName(node) {
     if (node.type != "Literal" || typeof node.value != "string") return
 
-    var decl = infer.findExpressionAround(node.sourceFile.ast, null, node.end, null, function(_, node) {
+    var decl = infer.findExpressionAround(_getAST(node), null, node.end, null, function(_, node) {
       return node.type == "ImportDeclaration" || /Export(All|Named)Declaration/.test(node.type)
     })
     if (!decl || decl.node.source != node) return
@@ -86,7 +98,7 @@
 
   function isImport(node, pos) {
     if (node.type == "Identifier") {
-      var imp = infer.findExpressionAround(node.sourceFile.ast, null, node.end, null, "ImportDeclaration")
+      var imp = infer.findExpressionAround(_getAST(node), null, node.end, null, "ImportDeclaration")
       if (!imp) return
       var specs = imp.node.specifiers
       for (var i = 0; i < specs.length; i++) {
@@ -97,6 +109,7 @@
         else if (spec.type == "ImportSpecifier") result.prop = spec.imported.name
         return result
       }
+     // TODO Orion the sourceFile may not have contents available, see _getAST(node)
     } else if (node.type == "ImportDeclaration" &&
                /^import\s+\{\s*([\w$]+\s*,\s*)*$/.test(node.sourceFile.text.slice(node.start, pos))) {
       return {name: node.source.value, prop: ""}

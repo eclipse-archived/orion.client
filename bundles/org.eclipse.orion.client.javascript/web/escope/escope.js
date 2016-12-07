@@ -1,2 +1,2143 @@
-define(function(){return function(e){function t(i){if(n[i])return n[i].exports;var r=n[i]={exports:{},id:i,loaded:!1};return e[i].call(r.exports,r,r.exports,t),r.loaded=!0,r.exports}var n={};return t.m=e,t.c=n,t.p="",t(0)}([function(e,t,n){"use strict";function i(e){return e&&e.__esModule?e:{"default":e}}function r(){return{optimistic:!1,directive:!1,nodejsScope:!1,impliedStrict:!1,sourceType:"script",ecmaVersion:5,childVisitorKeys:null,fallback:"iteration"}}function s(e,t){function n(e){return"object"===("undefined"==typeof e?"undefined":a(e))&&e instanceof Object&&!(e instanceof Array)&&!(e instanceof RegExp)}var i,r;for(i in t)t.hasOwnProperty(i)&&(r=t[i],n(r)?n(e[i])?s(e[i],r):e[i]=s({},r):e[i]=r);return e}function o(e,t){var n,i,o;return o=s(r(),t),n=new c["default"](o),i=new p["default"](o,n),i.visit(e),n}Object.defineProperty(t,"__esModule",{value:!0}),t.ScopeManager=t.Scope=t.Variable=t.Reference=t.version=void 0;var a="function"==typeof Symbol&&"symbol"==typeof Symbol.iterator?function(e){return typeof e}:function(e){return e&&"function"==typeof Symbol&&e.constructor===Symbol?"symbol":typeof e};t.analyze=o;var l=n(11),c=i(l),u=n(10),p=i(u),f=n(3),h=i(f),d=n(1),m=i(d),_=n(6),y=i(_),v="3.6.0";t.version=v,t.Reference=h["default"],t.Variable=m["default"],t.Scope=y["default"],t.ScopeManager=c["default"]},function(e,t){"use strict";function n(e,t){if(!(e instanceof t))throw new TypeError("Cannot call a class as a function")}Object.defineProperty(t,"__esModule",{value:!0});var i=function r(e,t){n(this,r),this.name=e,this.identifiers=[],this.references=[],this.defs=[],this.tainted=!1,this.stack=!0,this.scope=t};t["default"]=i,i.CatchClause="CatchClause",i.Parameter="Parameter",i.FunctionName="FunctionName",i.ClassName="ClassName",i.Variable="Variable",i.ImportBinding="ImportBinding",i.TDZ="TDZ",i.ImplicitGlobalVariable="ImplicitGlobalVariable"},function(e,t,n){"use strict";var i="function"==typeof Symbol&&"symbol"==typeof Symbol.iterator?function(e){return typeof e}:function(e){return e&&"function"==typeof Symbol&&e.constructor===Symbol?"symbol":typeof e};!function r(e){function t(){}function s(e){var t,n,r={};for(t in e)e.hasOwnProperty(t)&&(n=e[t],"object"===("undefined"==typeof n?"undefined":i(n))&&null!==n?r[t]=s(n):r[t]=n);return r}function o(e){var t,n={};for(t in e)e.hasOwnProperty(t)&&(n[t]=e[t]);return n}function a(e,t){var n,i,r,s;for(i=e.length,r=0;i;)n=i>>>1,s=r+n,t(e[s])?i=n:(r=s+1,i-=n+1);return r}function l(e,t){var n,i,r,s;for(i=e.length,r=0;i;)n=i>>>1,s=r+n,t(e[s])?(r=s+1,i-=n+1):i=n;return r}function c(e,t){var n,i,r,s=k(t);for(i=0,r=s.length;r>i;i+=1)n=s[i],e[n]=t[n];return e}function u(e,t){this.parent=e,this.key=t}function p(e,t,n,i){this.node=e,this.path=t,this.wrap=n,this.ref=i}function f(){}function h(e){return null==e?!1:"object"===("undefined"==typeof e?"undefined":i(e))&&"string"==typeof e.type}function d(e,t){return(e===g.ObjectExpression||e===g.ObjectPattern)&&"properties"===t}function m(e,t){var n=new f;return n.traverse(e,t)}function _(e,t){var n=new f;return n.replace(e,t)}function y(e,t){var n;return n=a(t,function(t){return t.range[0]>e.range[0]}),e.extendedRange=[e.range[0],e.range[1]],n!==t.length&&(e.extendedRange[1]=t[n].range[0]),n-=1,n>=0&&(e.extendedRange[0]=t[n].range[1]),e}function v(e,t,n){var i,r,o,a,l=[];if(!e.range)throw new Error("attachComments needs range information");if(!n.length){if(t.length){for(o=0,r=t.length;r>o;o+=1)i=s(t[o]),i.extendedRange=[0,e.range[0]],l.push(i);e.leadingComments=l}return e}for(o=0,r=t.length;r>o;o+=1)l.push(y(s(t[o]),n));return a=0,m(e,{enter:function(e){for(var t;a<l.length&&(t=l[a],!(t.extendedRange[1]>e.range[0]));)t.extendedRange[1]===e.range[0]?(e.leadingComments||(e.leadingComments=[]),e.leadingComments.push(t),l.splice(a,1)):a+=1;return a===l.length?b.Break:l[a].extendedRange[0]>e.range[1]?b.Skip:void 0}}),a=0,m(e,{leave:function(e){for(var t;a<l.length&&(t=l[a],!(e.range[1]<t.extendedRange[0]));)e.range[1]===t.extendedRange[0]?(e.trailingComments||(e.trailingComments=[]),e.trailingComments.push(t),l.splice(a,1)):a+=1;return a===l.length?b.Break:l[a].extendedRange[0]>e.range[1]?b.Skip:void 0}}),e}var g,S,b,E,x,k,w,C,D;return S=Array.isArray,S||(S=function(e){return"[object Array]"===Object.prototype.toString.call(e)}),t(o),t(l),x=Object.create||function(){function e(){}return function(t){return e.prototype=t,new e}}(),k=Object.keys||function(e){var t,n=[];for(t in e)n.push(t);return n},g={AssignmentExpression:"AssignmentExpression",AssignmentPattern:"AssignmentPattern",ArrayExpression:"ArrayExpression",ArrayPattern:"ArrayPattern",ArrowFunctionExpression:"ArrowFunctionExpression",AwaitExpression:"AwaitExpression",BlockStatement:"BlockStatement",BinaryExpression:"BinaryExpression",BreakStatement:"BreakStatement",CallExpression:"CallExpression",CatchClause:"CatchClause",ClassBody:"ClassBody",ClassDeclaration:"ClassDeclaration",ClassExpression:"ClassExpression",ComprehensionBlock:"ComprehensionBlock",ComprehensionExpression:"ComprehensionExpression",ConditionalExpression:"ConditionalExpression",ContinueStatement:"ContinueStatement",DebuggerStatement:"DebuggerStatement",DirectiveStatement:"DirectiveStatement",DoWhileStatement:"DoWhileStatement",EmptyStatement:"EmptyStatement",ExportAllDeclaration:"ExportAllDeclaration",ExportDefaultDeclaration:"ExportDefaultDeclaration",ExportNamedDeclaration:"ExportNamedDeclaration",ExportSpecifier:"ExportSpecifier",ExpressionStatement:"ExpressionStatement",ForStatement:"ForStatement",ForInStatement:"ForInStatement",ForOfStatement:"ForOfStatement",FunctionDeclaration:"FunctionDeclaration",FunctionExpression:"FunctionExpression",GeneratorExpression:"GeneratorExpression",Identifier:"Identifier",IfStatement:"IfStatement",ImportDeclaration:"ImportDeclaration",ImportDefaultSpecifier:"ImportDefaultSpecifier",ImportNamespaceSpecifier:"ImportNamespaceSpecifier",ImportSpecifier:"ImportSpecifier",Literal:"Literal",LabeledStatement:"LabeledStatement",LogicalExpression:"LogicalExpression",MemberExpression:"MemberExpression",MetaProperty:"MetaProperty",MethodDefinition:"MethodDefinition",ModuleSpecifier:"ModuleSpecifier",NewExpression:"NewExpression",ObjectExpression:"ObjectExpression",ObjectPattern:"ObjectPattern",Program:"Program",Property:"Property",RestElement:"RestElement",ReturnStatement:"ReturnStatement",SequenceExpression:"SequenceExpression",SpreadElement:"SpreadElement",Super:"Super",SwitchStatement:"SwitchStatement",SwitchCase:"SwitchCase",TaggedTemplateExpression:"TaggedTemplateExpression",TemplateElement:"TemplateElement",TemplateLiteral:"TemplateLiteral",ThisExpression:"ThisExpression",ThrowStatement:"ThrowStatement",TryStatement:"TryStatement",UnaryExpression:"UnaryExpression",UpdateExpression:"UpdateExpression",VariableDeclaration:"VariableDeclaration",VariableDeclarator:"VariableDeclarator",WhileStatement:"WhileStatement",WithStatement:"WithStatement",YieldExpression:"YieldExpression"},E={AssignmentExpression:["left","right"],AssignmentPattern:["left","right"],ArrayExpression:["elements"],ArrayPattern:["elements"],ArrowFunctionExpression:["params","body"],AwaitExpression:["argument"],BlockStatement:["body"],BinaryExpression:["left","right"],BreakStatement:["label"],CallExpression:["callee","arguments"],CatchClause:["param","body"],ClassBody:["body"],ClassDeclaration:["id","superClass","body"],ClassExpression:["id","superClass","body"],ComprehensionBlock:["left","right"],ComprehensionExpression:["blocks","filter","body"],ConditionalExpression:["test","consequent","alternate"],ContinueStatement:["label"],DebuggerStatement:[],DirectiveStatement:[],DoWhileStatement:["body","test"],EmptyStatement:[],ExportAllDeclaration:["source"],ExportDefaultDeclaration:["declaration"],ExportNamedDeclaration:["declaration","specifiers","source"],ExportSpecifier:["exported","local"],ExpressionStatement:["expression"],ForStatement:["init","test","update","body"],ForInStatement:["left","right","body"],ForOfStatement:["left","right","body"],FunctionDeclaration:["id","params","body"],FunctionExpression:["id","params","body"],GeneratorExpression:["blocks","filter","body"],Identifier:[],IfStatement:["test","consequent","alternate"],ImportDeclaration:["specifiers","source"],ImportDefaultSpecifier:["local"],ImportNamespaceSpecifier:["local"],ImportSpecifier:["imported","local"],Literal:[],LabeledStatement:["label","body"],LogicalExpression:["left","right"],MemberExpression:["object","property"],MetaProperty:["meta","property"],MethodDefinition:["key","value"],ModuleSpecifier:[],NewExpression:["callee","arguments"],ObjectExpression:["properties"],ObjectPattern:["properties"],Program:["body"],Property:["key","value"],RestElement:["argument"],ReturnStatement:["argument"],SequenceExpression:["expressions"],SpreadElement:["argument"],Super:[],SwitchStatement:["discriminant","cases"],SwitchCase:["test","consequent"],TaggedTemplateExpression:["tag","quasi"],TemplateElement:[],TemplateLiteral:["quasis","expressions"],ThisExpression:[],ThrowStatement:["argument"],TryStatement:["block","handler","finalizer"],UnaryExpression:["argument"],UpdateExpression:["argument"],VariableDeclaration:["declarations"],VariableDeclarator:["id","init"],WhileStatement:["test","body"],WithStatement:["object","body"],YieldExpression:["argument"]},w={},C={},D={},b={Break:w,Skip:C,Remove:D},u.prototype.replace=function(e){this.parent[this.key]=e},u.prototype.remove=function(){return S(this.parent)?(this.parent.splice(this.key,1),!0):(this.replace(null),!1)},f.prototype.path=function(){function e(e,t){if(S(t))for(i=0,r=t.length;r>i;++i)e.push(t[i]);else e.push(t)}var t,n,i,r,s,o;if(!this.__current.path)return null;for(s=[],t=2,n=this.__leavelist.length;n>t;++t)o=this.__leavelist[t],e(s,o.path);return e(s,this.__current.path),s},f.prototype.type=function(){var e=this.current();return e.type||this.__current.wrap},f.prototype.parents=function(){var e,t,n;for(n=[],e=1,t=this.__leavelist.length;t>e;++e)n.push(this.__leavelist[e].node);return n},f.prototype.current=function(){return this.__current.node},f.prototype.__execute=function(e,t){var n,i;return i=void 0,n=this.__current,this.__current=t,this.__state=null,e&&(i=e.call(this,t.node,this.__leavelist[this.__leavelist.length-1].node)),this.__current=n,i},f.prototype.notify=function(e){this.__state=e},f.prototype.skip=function(){this.notify(C)},f.prototype["break"]=function(){this.notify(w)},f.prototype.remove=function(){this.notify(D)},f.prototype.__initialize=function(e,t){this.visitor=t,this.root=e,this.__worklist=[],this.__leavelist=[],this.__current=null,this.__state=null,this.__fallback=null,"iteration"===t.fallback?this.__fallback=k:"function"==typeof t.fallback&&(this.__fallback=t.fallback),this.__keys=E,t.keys&&(this.__keys=c(x(this.__keys),t.keys))},f.prototype.traverse=function(e,t){var n,i,r,s,o,a,l,c,u,f,m,_;for(this.__initialize(e,t),_={},n=this.__worklist,i=this.__leavelist,n.push(new p(e,null,null,null)),i.push(new p(null,null,null,null));n.length;)if(r=n.pop(),r!==_){if(r.node){if(a=this.__execute(t.enter,r),this.__state===w||a===w)return;if(n.push(_),i.push(r),this.__state===C||a===C)continue;if(s=r.node,o=s.type||r.wrap,f=this.__keys[o],!f){if(!this.__fallback)throw new Error("Unknown node type "+o+".");f=this.__fallback(s)}for(c=f.length;(c-=1)>=0;)if(l=f[c],m=s[l])if(S(m)){for(u=m.length;(u-=1)>=0;)if(m[u]){if(d(o,f[c]))r=new p(m[u],[l,u],"Property",null);else{if(!h(m[u]))continue;r=new p(m[u],[l,u],null,null)}n.push(r)}}else h(m)&&n.push(new p(m,l,null,null))}}else if(r=i.pop(),a=this.__execute(t.leave,r),this.__state===w||a===w)return},f.prototype.replace=function(e,t){function n(e){var t,n,r,s;if(e.ref.remove())for(n=e.ref.key,s=e.ref.parent,t=i.length;t--;)if(r=i[t],r.ref&&r.ref.parent===s){if(r.ref.key<n)break;--r.ref.key}}var i,r,s,o,a,l,c,f,m,_,y,v,g;for(this.__initialize(e,t),y={},i=this.__worklist,r=this.__leavelist,v={root:e},l=new p(e,null,null,new u(v,"root")),i.push(l),r.push(l);i.length;)if(l=i.pop(),l!==y){if(a=this.__execute(t.enter,l),void 0!==a&&a!==w&&a!==C&&a!==D&&(l.ref.replace(a),l.node=a),this.__state!==D&&a!==D||(n(l),l.node=null),this.__state===w||a===w)return v.root;if(s=l.node,s&&(i.push(y),r.push(l),this.__state!==C&&a!==C)){if(o=s.type||l.wrap,m=this.__keys[o],!m){if(!this.__fallback)throw new Error("Unknown node type "+o+".");m=this.__fallback(s)}for(c=m.length;(c-=1)>=0;)if(g=m[c],_=s[g])if(S(_)){for(f=_.length;(f-=1)>=0;)if(_[f]){if(d(o,m[c]))l=new p(_[f],[g,f],"Property",new u(_,f));else{if(!h(_[f]))continue;l=new p(_[f],[g,f],null,new u(_,f))}i.push(l)}}else h(_)&&i.push(new p(_,g,null,new u(s,g)))}}else if(l=r.pop(),a=this.__execute(t.leave,l),void 0!==a&&a!==w&&a!==C&&a!==D&&l.ref.replace(a),this.__state!==D&&a!==D||n(l),this.__state===w||a===w)return v.root;return v.root},e.version=n(14).version,e.Syntax=g,e.traverse=m,e.replace=_,e.attachComments=v,e.VisitorKeys=E,e.VisitorOption=b,e.Controller=f,e.cloneEnvironment=function(){return r({})},e}(t)},function(e,t){"use strict";function n(e,t){if(!(e instanceof t))throw new TypeError("Cannot call a class as a function")}Object.defineProperty(t,"__esModule",{value:!0});var i=function(){function e(e,t){for(var n=0;n<t.length;n++){var i=t[n];i.enumerable=i.enumerable||!1,i.configurable=!0,"value"in i&&(i.writable=!0),Object.defineProperty(e,i.key,i)}}return function(t,n,i){return n&&e(t.prototype,n),i&&e(t,i),t}}(),r=1,s=2,o=r|s,a=function(){function e(t,i,r,s,o,a,l){n(this,e),this.identifier=t,this.from=i,this.tainted=!1,this.resolved=null,this.flag=r,this.isWrite()&&(this.writeExpr=s,this.partial=a,this.init=l),this.__maybeImplicitGlobal=o}return i(e,[{key:"isStatic",value:function(){return!this.tainted&&this.resolved&&this.resolved.scope.isStatic()}},{key:"isWrite",value:function(){return!!(this.flag&e.WRITE)}},{key:"isRead",value:function(){return!!(this.flag&e.READ)}},{key:"isReadOnly",value:function(){return this.flag===e.READ}},{key:"isWriteOnly",value:function(){return this.flag===e.WRITE}},{key:"isReadWrite",value:function(){return this.flag===e.RW}}]),e}();t["default"]=a,a.READ=r,a.WRITE=s,a.RW=o},function(e,t,n){"use strict";var i="function"==typeof Symbol&&"symbol"==typeof Symbol.iterator?function(e){return typeof e}:function(e){return e&&"function"==typeof Symbol&&e.constructor===Symbol?"symbol":typeof e};!function(){function e(e){return null==e?!1:"object"===("undefined"==typeof e?"undefined":i(e))&&"string"==typeof e.type}function r(e,t){return(e===a.Syntax.ObjectExpression||e===a.Syntax.ObjectPattern)&&"properties"===t}function s(e,t){t=t||{},this.__visitor=e||this,this.__childVisitorKeys=t.childVisitorKeys?o({},a.VisitorKeys,t.childVisitorKeys):a.VisitorKeys,"iteration"===t.fallback?this.__fallback=c:"function"==typeof t.fallback&&(this.__fallback=t.fallback)}var o,a,l,c;o=n(8),a=n(7),l=Array.isArray||function(e){return"[object Array]"===Object.prototype.toString.call(e)},c=Object.keys||function(e){var t,n=[];for(t in e)n.push(t);return n},s.prototype.visitChildren=function(t){var n,i,s,o,c,u,p;if(null!=t){if(n=t.type||a.Syntax.Property,i=this.__childVisitorKeys[n],!i){if(!this.__fallback)throw new Error("Unknown node type "+n+".");i=this.__fallback(t)}for(s=0,o=i.length;o>s;++s)if(p=t[i[s]])if(l(p))for(c=0,u=p.length;u>c;++c)p[c]&&(e(p[c])||r(n,i[s]))&&this.visit(p[c]);else e(p)&&this.visit(p)}},s.prototype.visit=function(e){var t;if(null!=e)return t=e.type||a.Syntax.Property,this.__visitor[t]?void this.__visitor[t].call(this,e):void this.visitChildren(e)},t.version=n(13).version,t.Visitor=s,t.visit=function(e,t,n){var i=new s(t,n);i.visit(e)}}()},function(e,t,n){"use strict";function i(e){return e&&e.__esModule?e:{"default":e}}function r(e,t){if(!e)throw new ReferenceError("this hasn't been initialised - super() hasn't been called");return!t||"object"!=typeof t&&"function"!=typeof t?e:t}function s(e,t){if("function"!=typeof t&&null!==t)throw new TypeError("Super expression must either be null or a function, not "+typeof t);e.prototype=Object.create(t&&t.prototype,{constructor:{value:e,enumerable:!1,writable:!0,configurable:!0}}),t&&(Object.setPrototypeOf?Object.setPrototypeOf(e,t):e.__proto__=t)}function o(e,t){if(!(e instanceof t))throw new TypeError("Cannot call a class as a function")}Object.defineProperty(t,"__esModule",{value:!0}),t.Definition=t.ParameterDefinition=void 0;var a=n(1),l=i(a),c=function p(e,t,n,i,r,s){o(this,p),this.type=e,this.name=t,this.node=n,this.parent=i,this.index=r,this.kind=s};t["default"]=c;var u=function(e){function t(e,n,i,s){o(this,t);var a=r(this,Object.getPrototypeOf(t).call(this,l["default"].Parameter,e,n,null,i,null));return a.rest=s,a}return s(t,e),t}(c);t.ParameterDefinition=u,t.Definition=c},function(e,t,n){"use strict";function i(e){return e&&e.__esModule?e:{"default":e}}function r(e,t){if(!e)throw new ReferenceError("this hasn't been initialised - super() hasn't been called");return!t||"object"!=typeof t&&"function"!=typeof t?e:t}function s(e,t){if("function"!=typeof t&&null!==t)throw new TypeError("Super expression must either be null or a function, not "+typeof t);e.prototype=Object.create(t&&t.prototype,{constructor:{value:e,enumerable:!1,writable:!0,configurable:!0}}),t&&(Object.setPrototypeOf?Object.setPrototypeOf(e,t):e.__proto__=t)}function o(e,t){if(!(e instanceof t))throw new TypeError("Cannot call a class as a function")}function a(e,t,n,i){var r,s,o,a,l;if(e.upper&&e.upper.isStrict)return!0;if(t.type===f.Syntax.ArrowFunctionExpression)return!0;if(n)return!0;if("class"===e.type||"module"===e.type)return!0;if("block"===e.type||"switch"===e.type)return!1;if("function"===e.type)r=t.type===f.Syntax.Program?t:t.body;else{if("global"!==e.type)return!1;r=t}if(i){for(s=0,o=r.body.length;o>s&&(a=r.body[s],a.type===f.Syntax.DirectiveStatement);++s)if('"use strict"'===a.raw||"'use strict'"===a.raw)return!0}else for(s=0,o=r.body.length;o>s&&(a=r.body[s],a.type===f.Syntax.ExpressionStatement)&&(l=a.expression,l.type===f.Syntax.Literal&&"string"==typeof l.value);++s)if(null!=l.raw){if('"use strict"'===l.raw||"'use strict'"===l.raw)return!0}else if("use strict"===l.value)return!0;return!1}function l(e,t){var n;e.scopes.push(t),n=e.__nodeToScope.get(t.block),n?n.push(t):e.__nodeToScope.set(t.block,[t])}function c(e){return e.type===_["default"].ClassName||e.type===_["default"].Variable&&"var"!==e.parent.kind}Object.defineProperty(t,"__esModule",{value:!0}),t.ClassScope=t.ForScope=t.FunctionScope=t.SwitchScope=t.BlockScope=t.TDZScope=t.WithScope=t.CatchScope=t.FunctionExpressionNameScope=t.ModuleScope=t.GlobalScope=void 0;var u=function S(e,t,n){null===e&&(e=Function.prototype);var i=Object.getOwnPropertyDescriptor(e,t);if(void 0===i){var r=Object.getPrototypeOf(e);return null===r?void 0:S(r,t,n)}if("value"in i)return i.value;var s=i.get;if(void 0!==s)return s.call(n)},p=function(){function e(e,t){for(var n=0;n<t.length;n++){var i=t[n];i.enumerable=i.enumerable||!1,i.configurable=!0,"value"in i&&(i.writable=!0),Object.defineProperty(e,i.key,i)}}return function(t,n,i){return n&&e(t.prototype,n),i&&e(t,i),t}}(),f=n(2),h=n(3),d=i(h),m=n(1),_=i(m),y=n(5),v=i(y),g=function(){function e(t,n,i,r,s){o(this,e),this.type=n,this.set=new Map,this.taints=new Map,this.dynamic="global"===this.type||"with"===this.type,this.block=r,this.through=[],this.variables=[],this.references=[],this.variableScope="global"===this.type||"function"===this.type||"module"===this.type?this:i.variableScope,this.functionExpressionScope=!1,this.directCallToEvalScope=!1,this.thisFound=!1,this.__left=[],this.upper=i,this.isStrict=a(this,r,s,t.__useDirective()),this.childScopes=[],this.upper&&this.upper.childScopes.push(this),this.__declaredVariables=t.__declaredVariables,l(t,this)}return p(e,[{key:"__shouldStaticallyClose",value:function(e){return!this.dynamic||e.__isOptimistic()}},{key:"__shouldStaticallyCloseForGlobal",value:function(e){var t=e.identifier.name;if(!this.set.has(t))return!1;var n=this.set.get(t),i=n.defs;return i.length>0&&i.every(c)}},{key:"__staticCloseRef",value:function(e){this.__resolve(e)||this.__delegateToUpperScope(e)}},{key:"__dynamicCloseRef",value:function(e){var t=this;do t.through.push(e),t=t.upper;while(t)}},{key:"__globalCloseRef",value:function(e){this.__shouldStaticallyCloseForGlobal(e)?this.__staticCloseRef(e):this.__dynamicCloseRef(e)}},{key:"__close",value:function(e){var t;t=this.__shouldStaticallyClose(e)?this.__staticCloseRef:"global"!==this.type?this.__dynamicCloseRef:this.__globalCloseRef;for(var n=0,i=this.__left.length;i>n;++n){var r=this.__left[n];t.call(this,r)}return this.__left=null,this.upper}},{key:"__resolve",value:function(e){var t,n;return n=e.identifier.name,this.set.has(n)?(t=this.set.get(n),t.references.push(e),t.stack=t.stack&&e.from.variableScope===this.variableScope,e.tainted&&(t.tainted=!0,this.taints.set(t.name,!0)),e.resolved=t,!0):!1}},{key:"__delegateToUpperScope",value:function(e){this.upper&&this.upper.__left.push(e),this.through.push(e)}},{key:"__addDeclaredVariablesOfNode",value:function(e,t){if(null!=t){var n=this.__declaredVariables.get(t);null==n&&(n=[],this.__declaredVariables.set(t,n)),-1===n.indexOf(e)&&n.push(e)}}},{key:"__defineGeneric",value:function(e,t,n,i,r){var s;s=t.get(e),s||(s=new _["default"](e,this),t.set(e,s),n.push(s)),r&&(s.defs.push(r),r.type!==_["default"].TDZ&&(this.__addDeclaredVariablesOfNode(s,r.node),this.__addDeclaredVariablesOfNode(s,r.parent))),i&&s.identifiers.push(i)}},{key:"__define",value:function(e,t){e&&e.type===f.Syntax.Identifier&&this.__defineGeneric(e.name,this.set,this.variables,e,t)}},{key:"__referencing",value:function(e,t,n,i,r,s){if(e&&e.type===f.Syntax.Identifier&&"super"!==e.name){var o=new d["default"](e,this,t||d["default"].READ,n,i,!!r,!!s);this.references.push(o),this.__left.push(o)}}},{key:"__detectEval",value:function(){var e;e=this,this.directCallToEvalScope=!0;do e.dynamic=!0,e=e.upper;while(e)}},{key:"__detectThis",value:function(){this.thisFound=!0}},{key:"__isClosed",value:function(){return null===this.__left}},{key:"resolve",value:function(e){var t,n,i;for(n=0,i=this.references.length;i>n;++n)if(t=this.references[n],t.identifier===e)return t;return null}},{key:"isStatic",value:function(){return!this.dynamic}},{key:"isArgumentsMaterialized",value:function(){return!0}},{key:"isThisMaterialized",value:function(){return!0}},{key:"isUsedName",value:function(e){if(this.set.has(e))return!0;for(var t=0,n=this.through.length;n>t;++t)if(this.through[t].identifier.name===e)return!0;return!1}}]),e}();t["default"]=g;t.GlobalScope=function(e){function t(e,n){o(this,t);var i=r(this,Object.getPrototypeOf(t).call(this,e,"global",null,n,!1));return i.implicit={set:new Map,variables:[],left:[]},i}return s(t,e),p(t,[{key:"__close",value:function(e){for(var n=[],i=0,r=this.__left.length;r>i;++i){var s=this.__left[i];s.__maybeImplicitGlobal&&!this.set.has(s.identifier.name)&&n.push(s.__maybeImplicitGlobal)}for(var o=0,a=n.length;a>o;++o){var l=n[o];this.__defineImplicit(l.pattern,new v["default"](_["default"].ImplicitGlobalVariable,l.pattern,l.node,null,null,null))}return this.implicit.left=this.__left,u(Object.getPrototypeOf(t.prototype),"__close",this).call(this,e)}},{key:"__defineImplicit",value:function(e,t){e&&e.type===f.Syntax.Identifier&&this.__defineGeneric(e.name,this.implicit.set,this.implicit.variables,e,t)}}]),t}(g),t.ModuleScope=function(e){function t(e,n,i){return o(this,t),r(this,Object.getPrototypeOf(t).call(this,e,"module",n,i,!1))}return s(t,e),t}(g),t.FunctionExpressionNameScope=function(e){function t(e,n,i){o(this,t);var s=r(this,Object.getPrototypeOf(t).call(this,e,"function-expression-name",n,i,!1));return s.__define(i.id,new v["default"](_["default"].FunctionName,i.id,i,null,null,null)),s.functionExpressionScope=!0,s}return s(t,e),t}(g),t.CatchScope=function(e){function t(e,n,i){return o(this,t),r(this,Object.getPrototypeOf(t).call(this,e,"catch",n,i,!1))}return s(t,e),t}(g),t.WithScope=function(e){function t(e,n,i){return o(this,t),r(this,Object.getPrototypeOf(t).call(this,e,"with",n,i,!1))}return s(t,e),p(t,[{key:"__close",value:function(e){if(this.__shouldStaticallyClose(e))return u(Object.getPrototypeOf(t.prototype),"__close",this).call(this,e);for(var n=0,i=this.__left.length;i>n;++n){var r=this.__left[n];r.tainted=!0,this.__delegateToUpperScope(r)}return this.__left=null,this.upper}}]),t}(g),t.TDZScope=function(e){function t(e,n,i){return o(this,t),r(this,Object.getPrototypeOf(t).call(this,e,"TDZ",n,i,!1))}return s(t,e),t}(g),t.BlockScope=function(e){function t(e,n,i){return o(this,t),r(this,Object.getPrototypeOf(t).call(this,e,"block",n,i,!1))}return s(t,e),t}(g),t.SwitchScope=function(e){function t(e,n,i){return o(this,t),r(this,Object.getPrototypeOf(t).call(this,e,"switch",n,i,!1))}return s(t,e),t}(g),t.FunctionScope=function(e){function t(e,n,i,s){o(this,t);var a=r(this,Object.getPrototypeOf(t).call(this,e,"function",n,i,s));return a.block.type!==f.Syntax.ArrowFunctionExpression&&a.__defineArguments(),a}return s(t,e),p(t,[{key:"isArgumentsMaterialized",value:function(){if(this.block.type===f.Syntax.ArrowFunctionExpression)return!1;if(!this.isStatic())return!0;var e=this.set.get("arguments");return e.tainted||0!==e.references.length}},{key:"isThisMaterialized",value:function(){return this.isStatic()?this.thisFound:!0}},{key:"__defineArguments",value:function(){this.__defineGeneric("arguments",this.set,this.variables,null,null),this.taints.set("arguments",!0)}}]),t}(g),t.ForScope=function(e){function t(e,n,i){return o(this,t),r(this,Object.getPrototypeOf(t).call(this,e,"for",n,i,!1))}return s(t,e),t}(g),t.ClassScope=function(e){function t(e,n,i){return o(this,t),r(this,Object.getPrototypeOf(t).call(this,e,"class",n,i,!1))}return s(t,e),t}(g)},function(e,t,n){"use strict";var i="function"==typeof Symbol&&"symbol"==typeof Symbol.iterator?function(e){return typeof e}:function(e){return e&&"function"==typeof Symbol&&e.constructor===Symbol?"symbol":typeof e};!function r(e){function t(){}function s(e){var t,n,r={};for(t in e)e.hasOwnProperty(t)&&(n=e[t],"object"===("undefined"==typeof n?"undefined":i(n))&&null!==n?r[t]=s(n):r[t]=n);return r}function o(e){var t,n={};for(t in e)e.hasOwnProperty(t)&&(n[t]=e[t]);return n}function a(e,t){var n,i,r,s;for(i=e.length,r=0;i;)n=i>>>1,s=r+n,t(e[s])?i=n:(r=s+1,i-=n+1);return r}function l(e,t){var n,i,r,s;for(i=e.length,r=0;i;)n=i>>>1,s=r+n,t(e[s])?(r=s+1,i-=n+1):i=n;return r}function c(e,t){var n,i,r,s=k(t);for(i=0,r=s.length;r>i;i+=1)n=s[i],e[n]=t[n];return e}function u(e,t){this.parent=e,this.key=t}function p(e,t,n,i){this.node=e,this.path=t,this.wrap=n,this.ref=i}function f(){}function h(e){return null==e?!1:"object"===("undefined"==typeof e?"undefined":i(e))&&"string"==typeof e.type}function d(e,t){return(e===g.ObjectExpression||e===g.ObjectPattern)&&"properties"===t}function m(e,t){var n=new f;return n.traverse(e,t)}function _(e,t){var n=new f;return n.replace(e,t)}function y(e,t){var n;return n=a(t,function(t){return t.range[0]>e.range[0]}),e.extendedRange=[e.range[0],e.range[1]],n!==t.length&&(e.extendedRange[1]=t[n].range[0]),n-=1,n>=0&&(e.extendedRange[0]=t[n].range[1]),e}function v(e,t,n){var i,r,o,a,l=[];if(!e.range)throw new Error("attachComments needs range information");if(!n.length){if(t.length){for(o=0,r=t.length;r>o;o+=1)i=s(t[o]),i.extendedRange=[0,e.range[0]],l.push(i);e.leadingComments=l}return e}for(o=0,r=t.length;r>o;o+=1)l.push(y(s(t[o]),n));return a=0,m(e,{enter:function(e){for(var t;a<l.length&&(t=l[a],!(t.extendedRange[1]>e.range[0]));)t.extendedRange[1]===e.range[0]?(e.leadingComments||(e.leadingComments=[]),e.leadingComments.push(t),l.splice(a,1)):a+=1;return a===l.length?b.Break:l[a].extendedRange[0]>e.range[1]?b.Skip:void 0}}),a=0,m(e,{leave:function(e){for(var t;a<l.length&&(t=l[a],!(e.range[1]<t.extendedRange[0]));)e.range[1]===t.extendedRange[0]?(e.trailingComments||(e.trailingComments=[]),e.trailingComments.push(t),l.splice(a,1)):a+=1;return a===l.length?b.Break:l[a].extendedRange[0]>e.range[1]?b.Skip:void 0}}),e}var g,S,b,E,x,k,w,C,D;return S=Array.isArray,S||(S=function(e){return"[object Array]"===Object.prototype.toString.call(e)}),t(o),t(l),x=Object.create||function(){function e(){}return function(t){return e.prototype=t,new e}}(),k=Object.keys||function(e){var t,n=[];for(t in e)n.push(t);return n},g={AssignmentExpression:"AssignmentExpression",AssignmentPattern:"AssignmentPattern",ArrayExpression:"ArrayExpression",ArrayPattern:"ArrayPattern",ArrowFunctionExpression:"ArrowFunctionExpression",AwaitExpression:"AwaitExpression",BlockStatement:"BlockStatement",BinaryExpression:"BinaryExpression",BreakStatement:"BreakStatement",CallExpression:"CallExpression",CatchClause:"CatchClause",ClassBody:"ClassBody",ClassDeclaration:"ClassDeclaration",ClassExpression:"ClassExpression",ComprehensionBlock:"ComprehensionBlock",ComprehensionExpression:"ComprehensionExpression",ConditionalExpression:"ConditionalExpression",ContinueStatement:"ContinueStatement",DebuggerStatement:"DebuggerStatement",DirectiveStatement:"DirectiveStatement",DoWhileStatement:"DoWhileStatement",EmptyStatement:"EmptyStatement",ExportAllDeclaration:"ExportAllDeclaration",ExportDefaultDeclaration:"ExportDefaultDeclaration",ExportNamedDeclaration:"ExportNamedDeclaration",ExportSpecifier:"ExportSpecifier",ExpressionStatement:"ExpressionStatement",ForStatement:"ForStatement",ForInStatement:"ForInStatement",ForOfStatement:"ForOfStatement",FunctionDeclaration:"FunctionDeclaration",FunctionExpression:"FunctionExpression",GeneratorExpression:"GeneratorExpression",Identifier:"Identifier",IfStatement:"IfStatement",ImportDeclaration:"ImportDeclaration",ImportDefaultSpecifier:"ImportDefaultSpecifier",ImportNamespaceSpecifier:"ImportNamespaceSpecifier",ImportSpecifier:"ImportSpecifier",Literal:"Literal",LabeledStatement:"LabeledStatement",LogicalExpression:"LogicalExpression",MemberExpression:"MemberExpression",MetaProperty:"MetaProperty",MethodDefinition:"MethodDefinition",ModuleSpecifier:"ModuleSpecifier",NewExpression:"NewExpression",ObjectExpression:"ObjectExpression",ObjectPattern:"ObjectPattern",Program:"Program",Property:"Property",RestElement:"RestElement",ReturnStatement:"ReturnStatement",SequenceExpression:"SequenceExpression",SpreadElement:"SpreadElement",Super:"Super",SwitchStatement:"SwitchStatement",SwitchCase:"SwitchCase",TaggedTemplateExpression:"TaggedTemplateExpression",TemplateElement:"TemplateElement",TemplateLiteral:"TemplateLiteral",ThisExpression:"ThisExpression",ThrowStatement:"ThrowStatement",TryStatement:"TryStatement",UnaryExpression:"UnaryExpression",UpdateExpression:"UpdateExpression",VariableDeclaration:"VariableDeclaration",VariableDeclarator:"VariableDeclarator",WhileStatement:"WhileStatement",WithStatement:"WithStatement",YieldExpression:"YieldExpression"},E={AssignmentExpression:["left","right"],AssignmentPattern:["left","right"],ArrayExpression:["elements"],ArrayPattern:["elements"],ArrowFunctionExpression:["params","body"],AwaitExpression:["argument"],BlockStatement:["body"],BinaryExpression:["left","right"],BreakStatement:["label"],CallExpression:["callee","arguments"],CatchClause:["param","body"],ClassBody:["body"],ClassDeclaration:["id","superClass","body"],ClassExpression:["id","superClass","body"],ComprehensionBlock:["left","right"],ComprehensionExpression:["blocks","filter","body"],ConditionalExpression:["test","consequent","alternate"],ContinueStatement:["label"],DebuggerStatement:[],DirectiveStatement:[],DoWhileStatement:["body","test"],EmptyStatement:[],ExportAllDeclaration:["source"],ExportDefaultDeclaration:["declaration"],ExportNamedDeclaration:["declaration","specifiers","source"],ExportSpecifier:["exported","local"],ExpressionStatement:["expression"],ForStatement:["init","test","update","body"],ForInStatement:["left","right","body"],ForOfStatement:["left","right","body"],FunctionDeclaration:["id","params","body"],FunctionExpression:["id","params","body"],GeneratorExpression:["blocks","filter","body"],Identifier:[],IfStatement:["test","consequent","alternate"],ImportDeclaration:["specifiers","source"],
-ImportDefaultSpecifier:["local"],ImportNamespaceSpecifier:["local"],ImportSpecifier:["imported","local"],Literal:[],LabeledStatement:["label","body"],LogicalExpression:["left","right"],MemberExpression:["object","property"],MetaProperty:["meta","property"],MethodDefinition:["key","value"],ModuleSpecifier:[],NewExpression:["callee","arguments"],ObjectExpression:["properties"],ObjectPattern:["properties"],Program:["body"],Property:["key","value"],RestElement:["argument"],ReturnStatement:["argument"],SequenceExpression:["expressions"],SpreadElement:["argument"],Super:[],SwitchStatement:["discriminant","cases"],SwitchCase:["test","consequent"],TaggedTemplateExpression:["tag","quasi"],TemplateElement:[],TemplateLiteral:["quasis","expressions"],ThisExpression:[],ThrowStatement:["argument"],TryStatement:["block","handler","finalizer"],UnaryExpression:["argument"],UpdateExpression:["argument"],VariableDeclaration:["declarations"],VariableDeclarator:["id","init"],WhileStatement:["test","body"],WithStatement:["object","body"],YieldExpression:["argument"]},w={},C={},D={},b={Break:w,Skip:C,Remove:D},u.prototype.replace=function(e){this.parent[this.key]=e},u.prototype.remove=function(){return S(this.parent)?(this.parent.splice(this.key,1),!0):(this.replace(null),!1)},f.prototype.path=function(){function e(e,t){if(S(t))for(i=0,r=t.length;r>i;++i)e.push(t[i]);else e.push(t)}var t,n,i,r,s,o;if(!this.__current.path)return null;for(s=[],t=2,n=this.__leavelist.length;n>t;++t)o=this.__leavelist[t],e(s,o.path);return e(s,this.__current.path),s},f.prototype.type=function(){var e=this.current();return e.type||this.__current.wrap},f.prototype.parents=function(){var e,t,n;for(n=[],e=1,t=this.__leavelist.length;t>e;++e)n.push(this.__leavelist[e].node);return n},f.prototype.current=function(){return this.__current.node},f.prototype.__execute=function(e,t){var n,i;return i=void 0,n=this.__current,this.__current=t,this.__state=null,e&&(i=e.call(this,t.node,this.__leavelist[this.__leavelist.length-1].node)),this.__current=n,i},f.prototype.notify=function(e){this.__state=e},f.prototype.skip=function(){this.notify(C)},f.prototype["break"]=function(){this.notify(w)},f.prototype.remove=function(){this.notify(D)},f.prototype.__initialize=function(e,t){this.visitor=t,this.root=e,this.__worklist=[],this.__leavelist=[],this.__current=null,this.__state=null,this.__fallback="iteration"===t.fallback,this.__keys=E,t.keys&&(this.__keys=c(x(this.__keys),t.keys))},f.prototype.traverse=function(e,t){var n,i,r,s,o,a,l,c,u,f,m,_;for(this.__initialize(e,t),_={},n=this.__worklist,i=this.__leavelist,n.push(new p(e,null,null,null)),i.push(new p(null,null,null,null));n.length;)if(r=n.pop(),r!==_){if(r.node){if(a=this.__execute(t.enter,r),this.__state===w||a===w)return;if(n.push(_),i.push(r),this.__state===C||a===C)continue;if(s=r.node,o=s.type||r.wrap,f=this.__keys[o],!f){if(!this.__fallback)throw new Error("Unknown node type "+o+".");f=k(s)}for(c=f.length;(c-=1)>=0;)if(l=f[c],m=s[l])if(S(m)){for(u=m.length;(u-=1)>=0;)if(m[u]){if(d(o,f[c]))r=new p(m[u],[l,u],"Property",null);else{if(!h(m[u]))continue;r=new p(m[u],[l,u],null,null)}n.push(r)}}else h(m)&&n.push(new p(m,l,null,null))}}else if(r=i.pop(),a=this.__execute(t.leave,r),this.__state===w||a===w)return},f.prototype.replace=function(e,t){function n(e){var t,n,r,s;if(e.ref.remove())for(n=e.ref.key,s=e.ref.parent,t=i.length;t--;)if(r=i[t],r.ref&&r.ref.parent===s){if(r.ref.key<n)break;--r.ref.key}}var i,r,s,o,a,l,c,f,m,_,y,v,g;for(this.__initialize(e,t),y={},i=this.__worklist,r=this.__leavelist,v={root:e},l=new p(e,null,null,new u(v,"root")),i.push(l),r.push(l);i.length;)if(l=i.pop(),l!==y){if(a=this.__execute(t.enter,l),void 0!==a&&a!==w&&a!==C&&a!==D&&(l.ref.replace(a),l.node=a),this.__state!==D&&a!==D||(n(l),l.node=null),this.__state===w||a===w)return v.root;if(s=l.node,s&&(i.push(y),r.push(l),this.__state!==C&&a!==C)){if(o=s.type||l.wrap,m=this.__keys[o],!m){if(!this.__fallback)throw new Error("Unknown node type "+o+".");m=k(s)}for(c=m.length;(c-=1)>=0;)if(g=m[c],_=s[g])if(S(_)){for(f=_.length;(f-=1)>=0;)if(_[f]){if(d(o,m[c]))l=new p(_[f],[g,f],"Property",new u(_,f));else{if(!h(_[f]))continue;l=new p(_[f],[g,f],null,new u(_,f))}i.push(l)}}else h(_)&&i.push(new p(_,g,null,new u(s,g)))}}else if(l=r.pop(),a=this.__execute(t.leave,l),void 0!==a&&a!==w&&a!==C&&a!==D&&l.ref.replace(a),this.__state!==D&&a!==D||n(l),this.__state===w||a===w)return v.root;return v.root},e.version=n(12).version,e.Syntax=g,e.traverse=m,e.replace=_,e.attachComments=v,e.VisitorKeys=E,e.VisitorOption=b,e.Controller=f,e.cloneEnvironment=function(){return r({})},e}(t)},function(e,t){"use strict";function n(e){if(null===e||void 0===e)throw new TypeError("Object.assign cannot be called with null or undefined");return Object(e)}function i(){try{if(!Object.assign)return!1;var e=new String("abc");if(e[5]="de","5"===Object.getOwnPropertyNames(e)[0])return!1;for(var t={},n=0;10>n;n++)t["_"+String.fromCharCode(n)]=n;var i=Object.getOwnPropertyNames(t).map(function(e){return t[e]});if("0123456789"!==i.join(""))return!1;var r={};return"abcdefghijklmnopqrst".split("").forEach(function(e){r[e]=e}),"abcdefghijklmnopqrst"===Object.keys(Object.assign({},r)).join("")}catch(s){return!1}}var r=Object.prototype.hasOwnProperty,s=Object.prototype.propertyIsEnumerable;e.exports=i()?Object.assign:function(e,t){for(var i,o,a=n(e),l=1;l<arguments.length;l++){i=Object(arguments[l]);for(var c in i)r.call(i,c)&&(a[c]=i[c]);if(Object.getOwnPropertySymbols){o=Object.getOwnPropertySymbols(i);for(var u=0;u<o.length;u++)s.call(i,o[u])&&(a[o[u]]=i[o[u]])}}return a}},function(e,t,n){"use strict";function i(e){return e&&e.__esModule?e:{"default":e}}function r(e,t){if(!(e instanceof t))throw new TypeError("Cannot call a class as a function")}function s(e,t){if(!e)throw new ReferenceError("this hasn't been initialised - super() hasn't been called");return!t||"object"!=typeof t&&"function"!=typeof t?e:t}function o(e,t){if("function"!=typeof t&&null!==t)throw new TypeError("Super expression must either be null or a function, not "+typeof t);e.prototype=Object.create(t&&t.prototype,{constructor:{value:e,enumerable:!1,writable:!0,configurable:!0}}),t&&(Object.setPrototypeOf?Object.setPrototypeOf(e,t):e.__proto__=t)}function a(e){return e[e.length-1]||null}Object.defineProperty(t,"__esModule",{value:!0});var l=function(){function e(e,t){for(var n=0;n<t.length;n++){var i=t[n];i.enumerable=i.enumerable||!1,i.configurable=!0,"value"in i&&(i.writable=!0),Object.defineProperty(e,i.key,i)}}return function(t,n,i){return n&&e(t.prototype,n),i&&e(t,i),t}}(),c=n(2),u=n(4),p=i(u),f=function(e){function t(e,n,i){r(this,t);var o=s(this,Object.getPrototypeOf(t).call(this,null,e));return o.rootPattern=n,o.callback=i,o.assignments=[],o.rightHandNodes=[],o.restElements=[],o}return o(t,e),l(t,null,[{key:"isPattern",value:function(e){var t=e.type;return t===c.Syntax.Identifier||t===c.Syntax.ObjectPattern||t===c.Syntax.ArrayPattern||t===c.Syntax.SpreadElement||t===c.Syntax.RestElement||t===c.Syntax.AssignmentPattern}}]),l(t,[{key:"Identifier",value:function(e){var t=a(this.restElements);this.callback(e,{topLevel:e===this.rootPattern,rest:null!=t&&t.argument===e,assignments:this.assignments})}},{key:"Property",value:function(e){e.computed&&this.rightHandNodes.push(e.key),this.visit(e.value)}},{key:"ArrayPattern",value:function(e){var t,n,i;for(t=0,n=e.elements.length;n>t;++t)i=e.elements[t],this.visit(i)}},{key:"AssignmentPattern",value:function(e){this.assignments.push(e),this.visit(e.left),this.rightHandNodes.push(e.right),this.assignments.pop()}},{key:"RestElement",value:function(e){this.restElements.push(e),this.visit(e.argument),this.restElements.pop()}},{key:"MemberExpression",value:function(e){e.computed&&this.rightHandNodes.push(e.property),this.rightHandNodes.push(e.object)}},{key:"SpreadElement",value:function(e){this.visit(e.argument)}},{key:"ArrayExpression",value:function(e){e.elements.forEach(this.visit,this)}},{key:"AssignmentExpression",value:function(e){this.assignments.push(e),this.visit(e.left),this.rightHandNodes.push(e.right),this.assignments.pop()}},{key:"CallExpression",value:function(e){var t=this;e.arguments.forEach(function(e){t.rightHandNodes.push(e)}),this.visit(e.callee)}}]),t}(p["default"].Visitor);t["default"]=f},function(e,t,n){"use strict";function i(e){return e&&e.__esModule?e:{"default":e}}function r(e,t){if(!(e instanceof t))throw new TypeError("Cannot call a class as a function")}function s(e,t){if(!e)throw new ReferenceError("this hasn't been initialised - super() hasn't been called");return!t||"object"!=typeof t&&"function"!=typeof t?e:t}function o(e,t){if("function"!=typeof t&&null!==t)throw new TypeError("Super expression must either be null or a function, not "+typeof t);e.prototype=Object.create(t&&t.prototype,{constructor:{value:e,enumerable:!1,writable:!0,configurable:!0}}),t&&(Object.setPrototypeOf?Object.setPrototypeOf(e,t):e.__proto__=t)}function a(e,t,n,i){var r=new y["default"](e,t,i);r.visit(t),null!=n&&r.rightHandNodes.forEach(n.visit,n)}Object.defineProperty(t,"__esModule",{value:!0});var l=function(){function e(e,t){for(var n=0;n<t.length;n++){var i=t[n];i.enumerable=i.enumerable||!1,i.configurable=!0,"value"in i&&(i.writable=!0),Object.defineProperty(e,i.key,i)}}return function(t,n,i){return n&&e(t.prototype,n),i&&e(t,i),t}}(),c=n(2),u=n(4),p=i(u),f=n(3),h=i(f),d=n(1),m=i(d),_=n(9),y=i(_),v=n(5),g=function(e){function t(e,n){r(this,t);var i=s(this,Object.getPrototypeOf(t).call(this,null,n.options));return i.declaration=e,i.referencer=n,i}return o(t,e),l(t,[{key:"visitImport",value:function(e,t){var n=this;this.referencer.visitPattern(e,function(e){n.referencer.currentScope().__define(e,new v.Definition(m["default"].ImportBinding,e,t,n.declaration,null,null))})}},{key:"ImportNamespaceSpecifier",value:function(e){var t=e.local||e.id;t&&this.visitImport(t,e)}},{key:"ImportDefaultSpecifier",value:function(e){var t=e.local||e.id;this.visitImport(t,e)}},{key:"ImportSpecifier",value:function(e){var t=e.local||e.id;e.name?this.visitImport(e.name,e):this.visitImport(t,e)}}]),t}(p["default"].Visitor),S=function(e){function t(e,n){r(this,t);var i=s(this,Object.getPrototypeOf(t).call(this,null,e));return i.options=e,i.scopeManager=n,i.parent=null,i.isInnerMethodDefinition=!1,i}return o(t,e),l(t,[{key:"currentScope",value:function(){return this.scopeManager.__currentScope}},{key:"close",value:function(e){for(;this.currentScope()&&e===this.currentScope().block;)this.scopeManager.__currentScope=this.currentScope().__close(this.scopeManager)}},{key:"pushInnerMethodDefinition",value:function(e){var t=this.isInnerMethodDefinition;return this.isInnerMethodDefinition=e,t}},{key:"popInnerMethodDefinition",value:function(e){this.isInnerMethodDefinition=e}},{key:"materializeTDZScope",value:function(e,t){this.scopeManager.__nestTDZScope(e,t),this.visitVariableDeclaration(this.currentScope(),m["default"].TDZ,t.left,0,!0)}},{key:"materializeIterationScope",value:function(e){var t,n=this;this.scopeManager.__nestForScope(e),t=e.left,this.visitVariableDeclaration(this.currentScope(),m["default"].Variable,t,0),this.visitPattern(t.declarations[0].id,function(t){n.currentScope().__referencing(t,h["default"].WRITE,e.right,null,!0,!0)})}},{key:"referencingDefaultValue",value:function(e,t,n,i){var r=this.currentScope();t.forEach(function(t){r.__referencing(e,h["default"].WRITE,t.right,n,e!==t.left,i)})}},{key:"visitPattern",value:function(e,t,n){"function"==typeof t&&(n=t,t={processRightHandNodes:!1}),a(this.options,e,t.processRightHandNodes?this:null,n)}},{key:"visitFunction",value:function(e){var t,n,i=this;for(e.type===c.Syntax.FunctionDeclaration&&this.currentScope().__define(e.id,new v.Definition(m["default"].FunctionName,e.id,e,null,null,null)),e.type===c.Syntax.FunctionExpression&&e.id&&this.scopeManager.__nestFunctionExpressionNameScope(e),this.scopeManager.__nestFunctionScope(e,this.isInnerMethodDefinition),t=0,n=e.params.length;n>t;++t)this.visitPattern(e.params[t],{processRightHandNodes:!0},function(n,r){i.currentScope().__define(n,new v.ParameterDefinition(n,e,t,r.rest)),i.referencingDefaultValue(n,r.assignments,null,!0)});e.rest&&this.visitPattern({type:"RestElement",argument:e.rest},function(t){i.currentScope().__define(t,new v.ParameterDefinition(t,e,e.params.length,!0))}),e.body.type===c.Syntax.BlockStatement?this.visitChildren(e.body):this.visit(e.body),this.close(e)}},{key:"visitClass",value:function(e){e.type===c.Syntax.ClassDeclaration&&this.currentScope().__define(e.id,new v.Definition(m["default"].ClassName,e.id,e,null,null,null)),this.visit(e.superClass),this.scopeManager.__nestClassScope(e),e.id&&this.currentScope().__define(e.id,new v.Definition(m["default"].ClassName,e.id,e)),this.visit(e.body),this.close(e)}},{key:"visitProperty",value:function(e){var t,n;e.computed&&this.visit(e.key),n=e.type===c.Syntax.MethodDefinition,n&&(t=this.pushInnerMethodDefinition(!0)),this.visit(e.value),n&&this.popInnerMethodDefinition(t)}},{key:"visitForIn",value:function(e){var t=this;e.left.type===c.Syntax.VariableDeclaration&&"var"!==e.left.kind?(this.materializeTDZScope(e.right,e),this.visit(e.right),this.close(e.right),this.materializeIterationScope(e),this.visit(e.body),this.close(e)):(e.left.type===c.Syntax.VariableDeclaration?(this.visit(e.left),this.visitPattern(e.left.declarations[0].id,function(n){t.currentScope().__referencing(n,h["default"].WRITE,e.right,null,!0,!0)})):this.visitPattern(e.left,{processRightHandNodes:!0},function(n,i){var r=null;t.currentScope().isStrict||(r={pattern:n,node:e}),t.referencingDefaultValue(n,i.assignments,r,!1),t.currentScope().__referencing(n,h["default"].WRITE,e.right,r,!0,!1)}),this.visit(e.right),this.visit(e.body))}},{key:"visitVariableDeclaration",value:function(e,t,n,i,r){var s,o,a=this;s=n.declarations[i],o=s.init,this.visitPattern(s.id,{processRightHandNodes:!r},function(l,c){e.__define(l,new v.Definition(t,l,s,n,i,n.kind)),r||a.referencingDefaultValue(l,c.assignments,null,!0),o&&a.currentScope().__referencing(l,h["default"].WRITE,o,null,!c.topLevel,!0)})}},{key:"AssignmentExpression",value:function(e){var t=this;y["default"].isPattern(e.left)?"="===e.operator?this.visitPattern(e.left,{processRightHandNodes:!0},function(n,i){var r=null;t.currentScope().isStrict||(r={pattern:n,node:e}),t.referencingDefaultValue(n,i.assignments,r,!1),t.currentScope().__referencing(n,h["default"].WRITE,e.right,r,!i.topLevel,!1)}):this.currentScope().__referencing(e.left,h["default"].RW,e.right):this.visit(e.left),this.visit(e.right)}},{key:"CatchClause",value:function(e){var t=this;this.scopeManager.__nestCatchScope(e),this.visitPattern(e.param,{processRightHandNodes:!0},function(n,i){t.currentScope().__define(n,new v.Definition(m["default"].CatchClause,e.param,e,null,null,null)),t.referencingDefaultValue(n,i.assignments,null,!0)}),this.visit(e.body),this.close(e)}},{key:"Program",value:function(e){this.scopeManager.__nestGlobalScope(e),this.scopeManager.__isNodejsScope()&&(this.currentScope().isStrict=!1,this.scopeManager.__nestFunctionScope(e,!1)),this.scopeManager.__isES6()&&this.scopeManager.isModule()&&this.scopeManager.__nestModuleScope(e),this.scopeManager.isStrictModeSupported()&&this.scopeManager.isImpliedStrict()&&(this.currentScope().isStrict=!0),this.visitChildren(e),this.close(e)}},{key:"Identifier",value:function(e){this.currentScope().__referencing(e)}},{key:"UpdateExpression",value:function(e){y["default"].isPattern(e.argument)?this.currentScope().__referencing(e.argument,h["default"].RW,null):this.visitChildren(e)}},{key:"MemberExpression",value:function(e){this.visit(e.object),e.computed&&this.visit(e.property)}},{key:"Property",value:function(e){this.visitProperty(e)}},{key:"MethodDefinition",value:function(e){this.visitProperty(e)}},{key:"BreakStatement",value:function(){}},{key:"ContinueStatement",value:function(){}},{key:"LabeledStatement",value:function(e){this.visit(e.body)}},{key:"ForStatement",value:function(e){e.init&&e.init.type===c.Syntax.VariableDeclaration&&"var"!==e.init.kind&&this.scopeManager.__nestForScope(e),this.visitChildren(e),this.close(e)}},{key:"ClassExpression",value:function(e){this.visitClass(e)}},{key:"ClassDeclaration",value:function(e){this.visitClass(e)}},{key:"CallExpression",value:function(e){this.scopeManager.__ignoreEval()||e.callee.type!==c.Syntax.Identifier||"eval"!==e.callee.name||this.currentScope().variableScope.__detectEval(),this.visitChildren(e)}},{key:"BlockStatement",value:function(e){this.scopeManager.__isES6()&&this.scopeManager.__nestBlockScope(e),this.visitChildren(e),this.close(e)}},{key:"ThisExpression",value:function(){this.currentScope().variableScope.__detectThis()}},{key:"WithStatement",value:function(e){this.visit(e.object),this.scopeManager.__nestWithScope(e),this.visit(e.body),this.close(e)}},{key:"VariableDeclaration",value:function(e){var t,n,i,r;for(t="var"===e.kind?this.currentScope().variableScope:this.currentScope(),n=0,i=e.declarations.length;i>n;++n)r=e.declarations[n],this.visitVariableDeclaration(t,m["default"].Variable,e,n),r.init&&this.visit(r.init)}},{key:"SwitchStatement",value:function(e){var t,n;for(this.visit(e.discriminant),this.scopeManager.__isES6()&&this.scopeManager.__nestSwitchScope(e),t=0,n=e.cases.length;n>t;++t)this.visit(e.cases[t]);this.close(e)}},{key:"FunctionDeclaration",value:function(e){this.visitFunction(e)}},{key:"FunctionExpression",value:function(e){this.visitFunction(e)}},{key:"ForOfStatement",value:function(e){this.visitForIn(e)}},{key:"ForInStatement",value:function(e){this.visitForIn(e)}},{key:"ArrowFunctionExpression",value:function(e){this.visitFunction(e)}},{key:"ImportDeclaration",value:function(e){var t;t=new g(e,this),t.visit(e)}},{key:"visitExportDeclaration",value:function(e){return e.source?void 0:e.declaration?void this.visit(e.declaration):void this.visitChildren(e)}},{key:"ExportDeclaration",value:function(e){this.visitExportDeclaration(e)}},{key:"ExportNamedDeclaration",value:function(e){this.visitExportDeclaration(e)}},{key:"ExportSpecifier",value:function(e){var t=e.id||e.local;this.visit(t)}},{key:"MetaProperty",value:function(){}}]),t}(p["default"].Visitor);t["default"]=S},function(e,t,n){"use strict";function i(e){return e&&e.__esModule?e:{"default":e}}function r(e,t){if(!(e instanceof t))throw new TypeError("Cannot call a class as a function")}Object.defineProperty(t,"__esModule",{value:!0});var s=function(){function e(e,t){for(var n=0;n<t.length;n++){var i=t[n];i.enumerable=i.enumerable||!1,i.configurable=!0,"value"in i&&(i.writable=!0),Object.defineProperty(e,i.key,i)}}return function(t,n,i){return n&&e(t.prototype,n),i&&e(t,i),t}}(),o=n(6),a=(i(o),function(){function e(t){r(this,e),this.scopes=[],this.globalScope=null,this.__nodeToScope=new WeakMap,this.__currentScope=null,this.__options=t,this.__declaredVariables=new WeakMap}return s(e,[{key:"__useDirective",value:function(){return this.__options.directive}},{key:"__isOptimistic",value:function(){return this.__options.optimistic}},{key:"__ignoreEval",value:function(){return this.__options.ignoreEval}},{key:"__isNodejsScope",value:function(){return this.__options.nodejsScope}},{key:"isModule",value:function(){return"module"===this.__options.sourceType}},{key:"isImpliedStrict",value:function(){return this.__options.impliedStrict}},{key:"isStrictModeSupported",value:function(){return this.__options.ecmaVersion>=5}},{key:"__get",value:function(e){return this.__nodeToScope.get(e)}},{key:"getDeclaredVariables",value:function(e){return this.__declaredVariables.get(e)||[]}},{key:"acquire",value:function(e,t){function n(e){return"function"===e.type&&e.functionExpressionScope?!1:"TDZ"!==e.type}var i,r,s,o;if(i=this.__get(e),!i||0===i.length)return null;if(1===i.length)return i[0];if(t){for(s=i.length-1;s>=0;--s)if(r=i[s],n(r))return r}else for(s=0,o=i.length;o>s;++s)if(r=i[s],n(r))return r;return null}},{key:"acquireAll",value:function(e){return this.__get(e)}},{key:"release",value:function(e,t){var n,i;return n=this.__get(e),n&&n.length?(i=n[0].upper,i?this.acquire(i.block,t):null):null}},{key:"attach",value:function(){}},{key:"detach",value:function(){}},{key:"__nestScope",value:function(e){return e instanceof o.GlobalScope&&(this.globalScope=e),this.__currentScope=e,e}},{key:"__nestGlobalScope",value:function(e){return this.__nestScope(new o.GlobalScope(this,e))}},{key:"__nestBlockScope",value:function(e,t){return this.__nestScope(new o.BlockScope(this,this.__currentScope,e))}},{key:"__nestFunctionScope",value:function(e,t){return this.__nestScope(new o.FunctionScope(this,this.__currentScope,e,t))}},{key:"__nestForScope",value:function(e){return this.__nestScope(new o.ForScope(this,this.__currentScope,e))}},{key:"__nestCatchScope",value:function(e){return this.__nestScope(new o.CatchScope(this,this.__currentScope,e))}},{key:"__nestWithScope",value:function(e){return this.__nestScope(new o.WithScope(this,this.__currentScope,e))}},{key:"__nestClassScope",value:function(e){return this.__nestScope(new o.ClassScope(this,this.__currentScope,e))}},{key:"__nestSwitchScope",value:function(e){return this.__nestScope(new o.SwitchScope(this,this.__currentScope,e))}},{key:"__nestModuleScope",value:function(e){return this.__nestScope(new o.ModuleScope(this,this.__currentScope,e))}},{key:"__nestTDZScope",value:function(e){return this.__nestScope(new o.TDZScope(this,this.__currentScope,e))}},{key:"__nestFunctionExpressionNameScope",value:function(e){return this.__nestScope(new o.FunctionExpressionNameScope(this,this.__currentScope,e))}},{key:"__isES6",value:function(){return this.__options.ecmaVersion>=6}}]),e}());t["default"]=a},function(e,t){e.exports={_args:[["estraverse@~4.1.0","c:\\Users\\mrennie\\git\\escope\\node_modules\\esrecurse"]],_from:"estraverse@>=4.1.0 <4.2.0",_id:"estraverse@4.1.1",_inCache:!0,_installable:!0,_location:"/esrecurse/estraverse",_nodeVersion:"4.1.1",_npmUser:{email:"utatane.tea@gmail.com",name:"constellation"},_npmVersion:"2.14.4",_phantomChildren:{},_requested:{name:"estraverse",raw:"estraverse@~4.1.0",rawSpec:"~4.1.0",scope:null,spec:">=4.1.0 <4.2.0",type:"range"},_requiredBy:["/esrecurse"],_resolved:"https://registry.npmjs.org/estraverse/-/estraverse-4.1.1.tgz",_shasum:"f6caca728933a850ef90661d0e17982ba47111a2",_shrinkwrap:null,_spec:"estraverse@~4.1.0",_where:"c:\\Users\\mrennie\\git\\escope\\node_modules\\esrecurse",bugs:{url:"https://github.com/estools/estraverse/issues"},dependencies:{},description:"ECMAScript JS AST traversal functions",devDependencies:{chai:"^2.1.1","coffee-script":"^1.8.0",espree:"^1.11.0",gulp:"^3.8.10","gulp-bump":"^0.2.2","gulp-filter":"^2.0.0","gulp-git":"^1.0.1","gulp-tag-version":"^1.2.1",jshint:"^2.5.6",mocha:"^2.1.0"},directories:{},dist:{shasum:"f6caca728933a850ef90661d0e17982ba47111a2",tarball:"https://registry.npmjs.org/estraverse/-/estraverse-4.1.1.tgz"},engines:{node:">=0.10.0"},gitHead:"bbcccbfe98296585e4311c8755e1d00dcd581e3c",homepage:"https://github.com/estools/estraverse",license:"BSD-2-Clause",main:"estraverse.js",maintainers:[{email:"utatane.tea@gmail.com",name:"constellation"},{email:"npm@michael.ficarra.me",name:"michaelficarra"},{email:"nicholas@nczconsulting.com",name:"nzakas"}],name:"estraverse",optionalDependencies:{},readme:"ERROR: No README data found!",repository:{type:"git",url:"git+ssh://git@github.com/estools/estraverse.git"},scripts:{lint:"jshint estraverse.js",test:"npm run-script lint && npm run-script unit-test","unit-test":"mocha --compilers coffee:coffee-script/register"},version:"4.1.1"}},function(e,t){e.exports={_args:[["esrecurse@^4.1.0","c:\\Users\\mrennie\\git\\escope"]],_from:"esrecurse@>=4.1.0 <5.0.0",_id:"esrecurse@4.1.0",_inCache:!0,_installable:!0,_location:"/esrecurse",_nodeVersion:"0.12.9",_npmOperationalInternal:{host:"packages-13-west.internal.npmjs.com",tmp:"tmp/esrecurse-4.1.0.tgz_1457712782215_0.15950557170435786"},_npmUser:{email:"nicholas@nczconsulting.com",name:"nzakas"},_npmVersion:"2.14.9",_phantomChildren:{},_requested:{name:"esrecurse",raw:"esrecurse@^4.1.0",rawSpec:"^4.1.0",scope:null,spec:">=4.1.0 <5.0.0",type:"range"},_requiredBy:["/"],_resolved:"https://registry.npmjs.org/esrecurse/-/esrecurse-4.1.0.tgz",_shasum:"4713b6536adf7f2ac4f327d559e7756bff648220",_shrinkwrap:null,_spec:"esrecurse@^4.1.0",_where:"c:\\Users\\mrennie\\git\\escope",bugs:{url:"https://github.com/estools/esrecurse/issues"},dependencies:{estraverse:"~4.1.0","object-assign":"^4.0.1"},description:"ECMAScript AST recursive visitor",devDependencies:{chai:"^3.3.0","coffee-script":"^1.9.1",esprima:"^2.1.0",gulp:"^3.9.0","gulp-bump":"^1.0.0","gulp-eslint":"^1.0.0","gulp-filter":"^3.0.1","gulp-git":"^1.1.0","gulp-mocha":"^2.1.3","gulp-tag-version":"^1.2.1",jsdoc:"^3.3.0-alpha10",minimist:"^1.1.0"},directories:{},dist:{shasum:"4713b6536adf7f2ac4f327d559e7756bff648220",tarball:"https://registry.npmjs.org/esrecurse/-/esrecurse-4.1.0.tgz"},engines:{node:">=0.10.0"},gitHead:"63a34714834bd7ad2063054bd4abb24fb82ca667",homepage:"https://github.com/estools/esrecurse",license:"BSD-2-Clause",main:"esrecurse.js",maintainers:[{email:"utatane.tea@gmail.com",name:"constellation"},{email:"npm@michael.ficarra.me",name:"michaelficarra"},{email:"nicholas@nczconsulting.com",name:"nzakas"}],name:"esrecurse",optionalDependencies:{},readme:"ERROR: No README data found!",repository:{type:"git",url:"git+https://github.com/estools/esrecurse.git"},scripts:{lint:"gulp lint",test:"gulp travis","unit-test":"gulp test"},version:"4.1.0"}},function(e,t){e.exports={_args:[["estraverse@^4.1.1","c:\\Users\\mrennie\\git\\escope"]],_from:"estraverse@>=4.1.1 <5.0.0",_id:"estraverse@4.2.0",_inCache:!0,_installable:!0,_location:"/estraverse",_nodeVersion:"0.12.9",_npmOperationalInternal:{host:"packages-12-west.internal.npmjs.com",tmp:"tmp/estraverse-4.2.0.tgz_1457646738925_0.7118953282479197"},_npmUser:{email:"nicholas@nczconsulting.com",name:"nzakas"},_npmVersion:"2.14.9",_phantomChildren:{},_requested:{name:"estraverse",raw:"estraverse@^4.1.1",rawSpec:"^4.1.1",scope:null,spec:">=4.1.1 <5.0.0",type:"range"},_requiredBy:["/"],_resolved:"https://registry.npmjs.org/estraverse/-/estraverse-4.2.0.tgz",_shasum:"0dee3fed31fcd469618ce7342099fc1afa0bdb13",_shrinkwrap:null,_spec:"estraverse@^4.1.1",_where:"c:\\Users\\mrennie\\git\\escope",bugs:{url:"https://github.com/estools/estraverse/issues"},dependencies:{},description:"ECMAScript JS AST traversal functions",devDependencies:{"babel-preset-es2015":"^6.3.13","babel-register":"^6.3.13",chai:"^2.1.1",espree:"^1.11.0",gulp:"^3.8.10","gulp-bump":"^0.2.2","gulp-filter":"^2.0.0","gulp-git":"^1.0.1","gulp-tag-version":"^1.2.1",jshint:"^2.5.6",mocha:"^2.1.0"},directories:{},dist:{shasum:"0dee3fed31fcd469618ce7342099fc1afa0bdb13",tarball:"https://registry.npmjs.org/estraverse/-/estraverse-4.2.0.tgz"},engines:{node:">=0.10.0"},gitHead:"6f6a4e99653908e859c7c10d04d9518bf4844ede",homepage:"https://github.com/estools/estraverse",license:"BSD-2-Clause",main:"estraverse.js",maintainers:[{email:"utatane.tea@gmail.com",name:"constellation"},{email:"npm@michael.ficarra.me",name:"michaelficarra"},{email:"nicholas@nczconsulting.com",name:"nzakas"}],name:"estraverse",optionalDependencies:{},readme:"ERROR: No README data found!",repository:{type:"git",url:"git+ssh://git@github.com/estools/estraverse.git"},scripts:{lint:"jshint estraverse.js",test:"npm run-script lint && npm run-script unit-test","unit-test":"mocha --compilers js:babel-register"},version:"4.2.0"}}])});
+/*eslint-disable */
+(function (global, factory) {
+  typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports, require('estraverse/estraverse'), require('esrecurse/esrecurse')) :
+  typeof define === 'function' && define.amd ? define(['exports', 'estraverse/estraverse', 'esrecurse/esrecurse'], factory) :
+  (factory((global.escope = global.escope || {}),global.estraverse,global.esrecurse));
+}(this, (function (exports,estraverse_estraverse,esrecurse) { 'use strict';
+
+esrecurse = 'default' in esrecurse ? esrecurse['default'] : esrecurse;
+
+/*
+  Copyright (C) 2015 Yusuke Suzuki <utatane.tea@gmail.com>
+
+  Redistribution and use in source and binary forms, with or without
+  modification, are permitted provided that the following conditions are met:
+
+    * Redistributions of source code must retain the above copyright
+      notice, this list of conditions and the following disclaimer.
+    * Redistributions in binary form must reproduce the above copyright
+      notice, this list of conditions and the following disclaimer in the
+      documentation and/or other materials provided with the distribution.
+
+  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+  ARE DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY
+  DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+  (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+  ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
+  THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+*/
+
+var READ = 0x1;
+var WRITE = 0x2;
+var RW = READ | WRITE;
+
+/**
+ * A Reference represents a single occurrence of an identifier in code.
+ * @class Reference
+ */
+var Reference = function Reference(ident, scope, flag,writeExpr, maybeImplicitGlobal, partial, init) {
+      /**
+       * Identifier syntax node.
+       * @member {esprima#Identifier} Reference#identifier
+       */
+      this.identifier = ident;
+      /**
+       * Reference to the enclosing Scope.
+       * @member {Scope} Reference#from
+       */
+      this.from = scope;
+      /**
+       * Whether the reference comes from a dynamic scope (such as 'eval',
+       * 'with', etc.), and may be trapped by dynamic scopes.
+       * @member {boolean} Reference#tainted
+       */
+      this.tainted = false;
+      /**
+       * The variable this reference is resolved with.
+       * @member {Variable} Reference#resolved
+       */
+      this.resolved = null;
+      /**
+       * The read-write mode of the reference. (Value is one of {@link
+       * Reference.READ}, {@link Reference.RW}, {@link Reference.WRITE}).
+       * @member {number} Reference#flag
+       * @private
+       */
+      this.flag = flag;
+      if (this.isWrite()) {
+          /**
+           * If reference is writeable, this is the tree being written to it.
+           * @member {esprima#Node} Reference#writeExpr
+           */
+          this.writeExpr = writeExpr;
+          /**
+           * Whether the Reference might refer to a partial value of writeExpr.
+           * @member {boolean} Reference#partial
+           */
+          this.partial = partial;
+          /**
+           * Whether the Reference is to write of initialization.
+           * @member {boolean} Reference#init
+           */
+          this.init = init;
+      }
+      this.__maybeImplicitGlobal = maybeImplicitGlobal;
+  };
+
+  /**
+   * Whether the reference is static.
+   * @method Reference#isStatic
+   * @return {boolean}
+   */
+  Reference.prototype.isStatic = function isStatic () {
+      return !this.tainted && this.resolved && this.resolved.scope.isStatic();
+  };
+
+  /**
+   * Whether the reference is writeable.
+   * @method Reference#isWrite
+   * @return {boolean}
+   */
+  Reference.prototype.isWrite = function isWrite () {
+      return !!(this.flag & Reference.WRITE);
+  };
+
+  /**
+   * Whether the reference is readable.
+   * @method Reference#isRead
+   * @return {boolean}
+   */
+  Reference.prototype.isRead = function isRead () {
+      return !!(this.flag & Reference.READ);
+  };
+
+  /**
+   * Whether the reference is read-only.
+   * @method Reference#isReadOnly
+   * @return {boolean}
+   */
+  Reference.prototype.isReadOnly = function isReadOnly () {
+      return this.flag === Reference.READ;
+  };
+
+  /**
+   * Whether the reference is write-only.
+   * @method Reference#isWriteOnly
+   * @return {boolean}
+   */
+  Reference.prototype.isWriteOnly = function isWriteOnly () {
+      return this.flag === Reference.WRITE;
+  };
+
+  /**
+   * Whether the reference is read-write.
+   * @method Reference#isReadWrite
+   * @return {boolean}
+   */
+  Reference.prototype.isReadWrite = function isReadWrite () {
+      return this.flag === Reference.RW;
+  };
+
+/**
+ * @constant Reference.READ
+ * @private
+ */
+Reference.READ = READ;
+/**
+ * @constant Reference.WRITE
+ * @private
+ */
+Reference.WRITE = WRITE;
+/**
+ * @constant Reference.RW
+ * @private
+ */
+Reference.RW = RW;
+
+/* vim: set sw=4 ts=4 et tw=80 : */
+
+/*
+  Copyright (C) 2015 Yusuke Suzuki <utatane.tea@gmail.com>
+
+  Redistribution and use in source and binary forms, with or without
+  modification, are permitted provided that the following conditions are met:
+
+    * Redistributions of source code must retain the above copyright
+      notice, this list of conditions and the following disclaimer.
+    * Redistributions in binary form must reproduce the above copyright
+      notice, this list of conditions and the following disclaimer in the
+      documentation and/or other materials provided with the distribution.
+
+  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+  ARE DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY
+  DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+  (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+  ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
+  THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+*/
+
+/**
+ * A Variable represents a locally scoped identifier. These include arguments to
+ * functions.
+ * @class Variable
+ */
+var Variable = function Variable(name, scope) {
+      /**
+       * The variable name, as given in the source code.
+       * @member {String} Variable#name
+       */
+      this.name = name;
+      /**
+       * List of defining occurrences of this variable (like in 'var ...'
+       * statements or as parameter), as AST nodes.
+       * @member {esprima.Identifier[]} Variable#identifiers
+       */
+      this.identifiers = [];
+      /**
+       * List of {@link Reference|references} of this variable (excluding parameter entries)
+       * in its defining scope and all nested scopes. For defining
+       * occurrences only see {@link Variable#defs}.
+       * @member {Reference[]} Variable#references
+       */
+      this.references = [];
+
+      /**
+       * List of defining occurrences of this variable (like in 'var ...'
+       * statements or as parameter), as custom objects.
+       * @member {Definition[]} Variable#defs
+       */
+      this.defs = [];
+
+      this.tainted = false;
+      /**
+       * Whether this is a stack variable.
+       * @member {boolean} Variable#stack
+       */
+      this.stack = true;
+      /**
+       * Reference to the enclosing Scope.
+       * @member {Scope} Variable#scope
+       */
+      this.scope = scope;
+  };
+
+Variable.CatchClause = 'CatchClause';
+Variable.Parameter = 'Parameter';
+Variable.FunctionName = 'FunctionName';
+Variable.ClassName = 'ClassName';
+Variable.Variable = 'Variable';
+Variable.ImportBinding = 'ImportBinding';
+Variable.TDZ = 'TDZ';
+Variable.ImplicitGlobalVariable = 'ImplicitGlobalVariable';
+
+/* vim: set sw=4 ts=4 et tw=80 : */
+
+/*
+  Copyright (C) 2015 Yusuke Suzuki <utatane.tea@gmail.com>
+
+  Redistribution and use in source and binary forms, with or without
+  modification, are permitted provided that the following conditions are met:
+
+    * Redistributions of source code must retain the above copyright
+      notice, this list of conditions and the following disclaimer.
+    * Redistributions in binary form must reproduce the above copyright
+      notice, this list of conditions and the following disclaimer in the
+      documentation and/or other materials provided with the distribution.
+
+  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+  ARE DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY
+  DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+  (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+  ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
+  THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+*/
+
+/**
+ * @class Definition
+ */
+var Definition = function Definition(type, name, node, parent, index, kind) {
+      /**
+       * @member {String} Definition#type - type of the occurrence (e.g. "Parameter", "Variable", ...).
+       */
+      this.type = type;
+      /**
+       * @member {esprima.Identifier} Definition#name - the identifier AST node of the occurrence.
+       */
+      this.name = name;
+      /**
+       * @member {esprima.Node} Definition#node - the enclosing node of the identifier.
+       */
+      this.node = node;
+      /**
+       * @member {esprima.Node?} Definition#parent - the enclosing statement node of the identifier.
+       */
+      this.parent = parent;
+      /**
+       * @member {Number?} Definition#index - the index in the declaration statement.
+       */
+      this.index = index;
+      /**
+       * @member {String?} Definition#kind - the kind of the declaration statement.
+       */
+      this.kind = kind;
+  };
+
+/**
+ * @class ParameterDefinition
+ */
+var ParameterDefinition = (function (Definition) {
+  function ParameterDefinition(name, node, index, rest) {
+        Definition.call(this, Variable.Parameter, name, node, null, index, null);
+        /**
+         * Whether the parameter definition is a part of a rest parameter.
+         * @member {boolean} ParameterDefinition#rest
+         */
+        this.rest = rest;
+    }
+
+  if ( Definition ) ParameterDefinition.__proto__ = Definition;
+  ParameterDefinition.prototype = Object.create( Definition && Definition.prototype );
+  ParameterDefinition.prototype.constructor = ParameterDefinition;
+
+  return ParameterDefinition;
+}(Definition));
+
+/*
+  Copyright (C) 2015 Yusuke Suzuki <utatane.tea@gmail.com>
+
+  Redistribution and use in source and binary forms, with or without
+  modification, are permitted provided that the following conditions are met:
+
+    * Redistributions of source code must retain the above copyright
+      notice, this list of conditions and the following disclaimer.
+    * Redistributions in binary form must reproduce the above copyright
+      notice, this list of conditions and the following disclaimer in the
+      documentation and/or other materials provided with the distribution.
+
+  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+  ARE DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY
+  DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+  (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+  ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
+  THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+*/
+
+function isStrictScope(scope, block, isMethodDefinition, useDirective) {
+    var body, i, iz, stmt, expr;
+
+    // When upper scope is exists and strict, inner scope is also strict.
+    if (scope.upper && scope.upper.isStrict) {
+        return true;
+    }
+
+    // ArrowFunctionExpression's scope is always strict scope.
+    if (block.type === estraverse_estraverse.Syntax.ArrowFunctionExpression) {
+        return true;
+    }
+
+    if (isMethodDefinition) {
+        return true;
+    }
+
+    if (scope.type === 'class' || scope.type === 'module') {
+        return true;
+    }
+
+    if (scope.type === 'block' || scope.type === 'switch') {
+        return false;
+    }
+
+    if (scope.type === 'function') {
+        if (block.type === estraverse_estraverse.Syntax.Program) {
+            body = block;
+        } else {
+            body = block.body;
+        }
+    } else if (scope.type === 'global') {
+        body = block;
+    } else {
+        return false;
+    }
+
+    // Search 'use strict' directive.
+    if (useDirective) {
+        for (i = 0, iz = body.body.length; i < iz; ++i) {
+            stmt = body.body[i];
+            if (stmt.type !== estraverse_estraverse.Syntax.DirectiveStatement) {
+                break;
+            }
+            if (stmt.raw === '"use strict"' || stmt.raw === '\'use strict\'') {
+                return true;
+            }
+        }
+    } else {
+        for (i = 0, iz = body.body.length; i < iz; ++i) {
+            stmt = body.body[i];
+            if (stmt.type !== estraverse_estraverse.Syntax.ExpressionStatement) {
+                break;
+            }
+            expr = stmt.expression;
+            if (expr.type !== estraverse_estraverse.Syntax.Literal || typeof expr.value !== 'string') {
+                break;
+            }
+            if (expr.raw !== null) {
+                if (expr.raw === '"use strict"' || expr.raw === '\'use strict\'') {
+                    return true;
+                }
+            } else {
+                if (expr.value === 'use strict') {
+                    return true;
+                }
+            }
+        }
+    }
+    return false;
+}
+
+function registerScope(scopeManager, scope) {
+    var scopes;
+
+    scopeManager.scopes.push(scope);
+
+    scopes = scopeManager.__nodeToScope.get(scope.block);
+    if (scopes) {
+        scopes.push(scope);
+    } else {
+        scopeManager.__nodeToScope.set(scope.block, [ scope ]);
+    }
+}
+
+function shouldBeStatically(def) {
+    return (
+        (def.type === Variable.ClassName) ||
+        (def.type === Variable.Variable && def.parent.kind !== 'var')
+    );
+}
+
+/**
+ * @class Scope
+ */
+var Scope = function Scope(scopeManager, type, upperScope, block, isMethodDefinition) {
+      /**
+       * One of 'TDZ', 'module', 'block', 'switch', 'function', 'catch', 'with', 'function', 'class', 'global'.
+       * @member {String} Scope#type
+       */
+      this.type = type;
+       /**
+       * The scoped {@link Variable}s of this scope, as <code>{ Variable.name
+       * : Variable }</code>.
+       * @member {Map} Scope#set
+       */
+      this.set = new Map();
+      /**
+       * The tainted variables of this scope, as <code>{ Variable.name :
+       * boolean }</code>.
+       * @member {Map} Scope#taints */
+      this.taints = new Map();
+      /**
+       * Generally, through the lexical scoping of JS you can always know
+       * which variable an identifier in the source code refers to. There are
+       * a few exceptions to this rule. With 'global' and 'with' scopes you
+       * can only decide at runtime which variable a reference refers to.
+       * Moreover, if 'eval()' is used in a scope, it might introduce new
+       * bindings in this or its parent scopes.
+       * All those scopes are considered 'dynamic'.
+       * @member {boolean} Scope#dynamic
+       */
+      this.dynamic = this.type === 'global' || this.type === 'with';
+      /**
+       * A reference to the scope-defining syntax node.
+       * @member {esprima.Node} Scope#block
+       */
+      this.block = block;
+       /**
+       * The {@link Reference|references} that are not resolved with this scope.
+       * @member {Reference[]} Scope#through
+       */
+      this.through = [];
+       /**
+       * The scoped {@link Variable}s of this scope. In the case of a
+       * 'function' scope this includes the automatic argument <em>arguments</em> as
+       * its first element, as well as all further formal arguments.
+       * @member {Variable[]} Scope#variables
+       */
+      this.variables = [];
+       /**
+       * Any variable {@link Reference|reference} found in this scope. This
+       * includes occurrences of local variables as well as variables from
+       * parent scopes (including the global scope). For local variables
+       * this also includes defining occurrences (like in a 'var' statement).
+       * In a 'function' scope this does not include the occurrences of the
+       * formal parameter in the parameter list.
+       * @member {Reference[]} Scope#references
+       */
+      this.references = [];
+
+       /**
+       * For 'global' and 'function' scopes, this is a self-reference. For
+       * other scope types this is the <em>variableScope</em> value of the
+       * parent scope.
+       * @member {Scope} Scope#variableScope
+       */
+      this.variableScope =
+          (this.type === 'global' || this.type === 'function' || this.type === 'module') ? this : upperScope.variableScope;
+       /**
+       * Whether this scope is created by a FunctionExpression.
+       * @member {boolean} Scope#functionExpressionScope
+       */
+      this.functionExpressionScope = false;
+       /**
+       * Whether this is a scope that contains an 'eval()' invocation.
+       * @member {boolean} Scope#directCallToEvalScope
+       */
+      this.directCallToEvalScope = false;
+       /**
+       * @member {boolean} Scope#thisFound
+       */
+      this.thisFound = false;
+
+      this.__left = [];
+
+       /**
+       * Reference to the parent {@link Scope|scope}.
+       * @member {Scope} Scope#upper
+       */
+      this.upper = upperScope;
+       /**
+       * Whether 'use strict' is in effect in this scope.
+       * @member {boolean} Scope#isStrict
+       */
+      this.isStrict = isStrictScope(this, block, isMethodDefinition, scopeManager.__useDirective());
+
+       /**
+       * List of nested {@link Scope}s.
+       * @member {Scope[]} Scope#childScopes
+       */
+      this.childScopes = [];
+      if (this.upper) {
+          this.upper.childScopes.push(this);
+      }
+
+      this.__declaredVariables = scopeManager.__declaredVariables;
+
+      registerScope(scopeManager, this);
+  };
+
+  Scope.prototype.__shouldStaticallyClose = function __shouldStaticallyClose (scopeManager) {
+      return (!this.dynamic || scopeManager.__isOptimistic());
+  };
+
+  Scope.prototype.__shouldStaticallyCloseForGlobal = function __shouldStaticallyCloseForGlobal (ref) {
+      // On global scope, let/const/class declarations should be resolved statically.
+      var name = ref.identifier.name;
+      if (!this.set.has(name)) {
+          return false;
+      }
+
+      var variable = this.set.get(name);
+      var defs = variable.defs;
+      return defs.length > 0 && defs.every(shouldBeStatically);
+  };
+
+  Scope.prototype.__staticCloseRef = function __staticCloseRef (ref) {
+      if (!this.__resolve(ref)) {
+          this.__delegateToUpperScope(ref);
+      }
+  };
+
+  Scope.prototype.__dynamicCloseRef = function __dynamicCloseRef (ref) {
+      // notify all names are through to global
+      var current = this;
+      do {
+          current.through.push(ref);
+          current = current.upper;
+      } while (current);
+  };
+
+  Scope.prototype.__globalCloseRef = function __globalCloseRef (ref) {
+      // let/const/class declarations should be resolved statically.
+      // others should be resolved dynamically.
+      if (this.__shouldStaticallyCloseForGlobal(ref)) {
+          this.__staticCloseRef(ref);
+      } else {
+          this.__dynamicCloseRef(ref);
+      }
+  };
+
+  Scope.prototype.__close = function __close (scopeManager) {
+        var this$1 = this;
+
+      var closeRef;
+      if (this.__shouldStaticallyClose(scopeManager)) {
+          closeRef = this.__staticCloseRef;
+      } else if (this.type !== 'global') {
+          closeRef = this.__dynamicCloseRef;
+      } else {
+          closeRef = this.__globalCloseRef;
+      }
+
+      // Try Resolving all references in this scope.
+      for (var i = 0, iz = this.__left.length; i < iz; ++i) {
+          var ref = this$1.__left[i];
+          closeRef.call(this$1, ref);
+      }
+      this.__left = null;
+
+      return this.upper;
+  };
+
+  Scope.prototype.__resolve = function __resolve (ref) {
+      var variable, name;
+      name = ref.identifier.name;
+      if (this.set.has(name)) {
+          variable = this.set.get(name);
+          variable.references.push(ref);
+          variable.stack = variable.stack && ref.from.variableScope === this.variableScope;
+          if (ref.tainted) {
+              variable.tainted = true;
+              this.taints.set(variable.name, true);
+          }
+          ref.resolved = variable;
+          return true;
+      }
+      return false;
+  };
+
+  Scope.prototype.__delegateToUpperScope = function __delegateToUpperScope (ref) {
+      if (this.upper) {
+          this.upper.__left.push(ref);
+      }
+      this.through.push(ref);
+  };
+
+  Scope.prototype.__addDeclaredVariablesOfNode = function __addDeclaredVariablesOfNode (variable, node) {
+      if (!node) {
+          return;
+      }
+
+      var variables = this.__declaredVariables.get(node);
+      if (!Array.isArray(variables)) {
+          variables = [];
+          this.__declaredVariables.set(node, variables);
+      }
+      if (variables.indexOf(variable) === -1) {
+          variables.push(variable);
+      }
+  };
+
+  Scope.prototype.__defineGeneric = function __defineGeneric (name, set, variables, node, def) {
+      var variable;
+
+      variable = set.get(name);
+      if (!variable) {
+          variable = new Variable(name, this);
+          set.set(name, variable);
+          variables.push(variable);
+      }
+
+      if (def) {
+          variable.defs.push(def);
+          if (def.type !== Variable.TDZ) {
+              this.__addDeclaredVariablesOfNode(variable, def.node);
+              this.__addDeclaredVariablesOfNode(variable, def.parent);
+          }
+      }
+      if (node) {
+          variable.identifiers.push(node);
+      }
+  };
+
+  Scope.prototype.__define = function __define (node, def) {
+      if (node && node.type === estraverse_estraverse.Syntax.Identifier) {
+          this.__defineGeneric(
+                  node.name,
+                  this.set,
+                  this.variables,
+                  node,
+                  def);
+      }
+  };
+
+  Scope.prototype.__referencing = function __referencing (node, assign, writeExpr, maybeImplicitGlobal, partial, init) {
+      // because Array element may be null
+      if (!node || node.type !== estraverse_estraverse.Syntax.Identifier) {
+          return;
+      }
+
+      // Specially handle like `this`.
+      if (node.name === 'super') {
+          return;
+      }
+
+      var ref = new Reference(node, this, assign || Reference.READ, writeExpr, maybeImplicitGlobal, !!partial, !!init);
+      this.references.push(ref);
+      this.__left.push(ref);
+  };
+
+  Scope.prototype.__detectEval = function __detectEval () {
+      var current;
+      current = this;
+      this.directCallToEvalScope = true;
+      do {
+          current.dynamic = true;
+          current = current.upper;
+      } while (current);
+  };
+
+  Scope.prototype.__detectThis = function __detectThis () {
+      this.thisFound = true;
+  };
+
+  Scope.prototype.__isClosed = function __isClosed () {
+      return this.__left === null;
+  };
+
+  /**
+   * returns resolved {Reference}
+   * @method Scope#resolve
+   * @param {Esprima.Identifier} ident - identifier to be resolved.
+   * @return {Reference}
+   */
+  Scope.prototype.resolve = function resolve (ident) {
+        var this$1 = this;
+
+      var ref, i, iz;
+      if(!this.__isClosed()) {
+        	throw new Error("Scope should be closed.");
+      }
+      if(ident.type !== estraverse_estraverse.Syntax.Identifier) {
+        	throw new Error('Target should be identifier.');
+      }
+      for (i = 0, iz = this.references.length; i < iz; ++i) {
+          ref = this$1.references[i];
+          if (ref.identifier === ident) {
+              return ref;
+          }
+      }
+      return null;
+  };
+
+  /**
+   * returns this scope is static
+   * @method Scope#isStatic
+   * @return {boolean}
+   */
+  Scope.prototype.isStatic = function isStatic () {
+      return !this.dynamic;
+  };
+
+  /**
+   * returns this scope has materialized arguments
+   * @method Scope#isArgumentsMaterialized
+   * @return {boolean}
+   */
+  Scope.prototype.isArgumentsMaterialized = function isArgumentsMaterialized () {
+      return true;
+  };
+
+  /**
+   * returns this scope has materialized `this` reference
+   * @method Scope#isThisMaterialized
+   * @return {boolean}
+   */
+  Scope.prototype.isThisMaterialized = function isThisMaterialized () {
+      return true;
+  };
+
+  Scope.prototype.isUsedName = function isUsedName (name) {
+        var this$1 = this;
+
+      if (this.set.has(name)) {
+          return true;
+      }
+      for (var i = 0, iz = this.through.length; i < iz; ++i) {
+          if (this$1.through[i].identifier.name === name) {
+              return true;
+          }
+      }
+      return false;
+  };
+
+var GlobalScope = (function (Scope) {
+  function GlobalScope(scopeManager, block) {
+        Scope.call(this, scopeManager, 'global', null, block, false);
+        this.implicit = {
+            set: new Map(),
+            variables: [],
+            /**
+            * List of {@link Reference}s that are left to be resolved (i.e. which
+            * need to be linked to the variable they refer to).
+            * @member {Reference[]} Scope#implicit#left
+            */
+            left: []
+        };
+    }
+
+  if ( Scope ) GlobalScope.__proto__ = Scope;
+  GlobalScope.prototype = Object.create( Scope && Scope.prototype );
+  GlobalScope.prototype.constructor = GlobalScope;
+
+    GlobalScope.prototype.__close = function __close (scopeManager) {
+        var this$1 = this;
+
+        var implicit = [];
+        for (var i = 0, iz = this.__left.length; i < iz; ++i) {
+            var ref = this$1.__left[i];
+            if (ref.__maybeImplicitGlobal && !this$1.set.has(ref.identifier.name)) {
+                implicit.push(ref.__maybeImplicitGlobal);
+            }
+        }
+
+        // create an implicit global variable from assignment expression
+        for (var i$1 = 0, iz$1 = implicit.length; i$1 < iz$1; ++i$1) {
+            var info = implicit[i$1];
+            this$1.__defineImplicit(info.pattern,
+                    new Definition(
+                        Variable.ImplicitGlobalVariable,
+                        info.pattern,
+                        info.node,
+                        null,
+                        null,
+                        null
+                    ));
+
+        }
+
+        this.implicit.left = this.__left;
+
+        return Scope.prototype.__close.call(this, scopeManager);
+    };
+
+    GlobalScope.prototype.__defineImplicit = function __defineImplicit (node, def) {
+        if (node && node.type === estraverse_estraverse.Syntax.Identifier) {
+            this.__defineGeneric(
+                    node.name,
+                    this.implicit.set,
+                    this.implicit.variables,
+                    node,
+                    def);
+        }
+    };
+
+  return GlobalScope;
+}(Scope));
+
+var ModuleScope = (function (Scope) {
+  function ModuleScope(scopeManager, upperScope, block) {
+        Scope.call(this, scopeManager, 'module', upperScope, block, false);
+    }
+
+  if ( Scope ) ModuleScope.__proto__ = Scope;
+  ModuleScope.prototype = Object.create( Scope && Scope.prototype );
+  ModuleScope.prototype.constructor = ModuleScope;
+
+  return ModuleScope;
+}(Scope));
+
+var FunctionExpressionNameScope = (function (Scope) {
+  function FunctionExpressionNameScope(scopeManager, upperScope, block) {
+        Scope.call(this, scopeManager, 'function-expression-name', upperScope, block, false);
+        this.__define(block.id,
+                new Definition(
+                    Variable.FunctionName,
+                    block.id,
+                    block,
+                    null,
+                    null,
+                    null
+                ));
+        this.functionExpressionScope = true;
+    }
+
+  if ( Scope ) FunctionExpressionNameScope.__proto__ = Scope;
+  FunctionExpressionNameScope.prototype = Object.create( Scope && Scope.prototype );
+  FunctionExpressionNameScope.prototype.constructor = FunctionExpressionNameScope;
+
+  return FunctionExpressionNameScope;
+}(Scope));
+
+var CatchScope = (function (Scope) {
+  function CatchScope(scopeManager, upperScope, block) {
+        Scope.call(this, scopeManager, 'catch', upperScope, block, false);
+    }
+
+  if ( Scope ) CatchScope.__proto__ = Scope;
+  CatchScope.prototype = Object.create( Scope && Scope.prototype );
+  CatchScope.prototype.constructor = CatchScope;
+
+  return CatchScope;
+}(Scope));
+
+var WithScope = (function (Scope) {
+  function WithScope(scopeManager, upperScope, block) {
+        Scope.call(this, scopeManager, 'with', upperScope, block, false);
+    }
+
+  if ( Scope ) WithScope.__proto__ = Scope;
+  WithScope.prototype = Object.create( Scope && Scope.prototype );
+  WithScope.prototype.constructor = WithScope;
+
+    WithScope.prototype.__close = function __close (scopeManager) {
+        var this$1 = this;
+
+        if (this.__shouldStaticallyClose(scopeManager)) {
+            return Scope.prototype.__close.call(this, scopeManager);
+        }
+
+        for (var i = 0, iz = this.__left.length; i < iz; ++i) {
+            var ref = this$1.__left[i];
+            ref.tainted = true;
+            this$1.__delegateToUpperScope(ref);
+        }
+        this.__left = null;
+
+        return this.upper;
+    };
+
+  return WithScope;
+}(Scope));
+
+var TDZScope = (function (Scope) {
+  function TDZScope(scopeManager, upperScope, block) {
+        Scope.call(this, scopeManager, 'TDZ', upperScope, block, false);
+    }
+
+  if ( Scope ) TDZScope.__proto__ = Scope;
+  TDZScope.prototype = Object.create( Scope && Scope.prototype );
+  TDZScope.prototype.constructor = TDZScope;
+
+  return TDZScope;
+}(Scope));
+
+var BlockScope = (function (Scope) {
+  function BlockScope(scopeManager, upperScope, block) {
+        Scope.call(this, scopeManager, 'block', upperScope, block, false);
+    }
+
+  if ( Scope ) BlockScope.__proto__ = Scope;
+  BlockScope.prototype = Object.create( Scope && Scope.prototype );
+  BlockScope.prototype.constructor = BlockScope;
+
+  return BlockScope;
+}(Scope));
+
+var SwitchScope = (function (Scope) {
+  function SwitchScope(scopeManager, upperScope, block) {
+        Scope.call(this, scopeManager, 'switch', upperScope, block, false);
+    }
+
+  if ( Scope ) SwitchScope.__proto__ = Scope;
+  SwitchScope.prototype = Object.create( Scope && Scope.prototype );
+  SwitchScope.prototype.constructor = SwitchScope;
+
+  return SwitchScope;
+}(Scope));
+
+var FunctionScope = (function (Scope) {
+  function FunctionScope(scopeManager, upperScope, block, isMethodDefinition) {
+        Scope.call(this, scopeManager, 'function', upperScope, block, isMethodDefinition);
+
+        // section 9.2.13, FunctionDeclarationInstantiation.
+        // NOTE Arrow functions never have an arguments objects.
+        if (this.block.type !== estraverse_estraverse.Syntax.ArrowFunctionExpression) {
+            this.__defineArguments();
+        }
+    }
+
+  if ( Scope ) FunctionScope.__proto__ = Scope;
+  FunctionScope.prototype = Object.create( Scope && Scope.prototype );
+  FunctionScope.prototype.constructor = FunctionScope;
+
+    FunctionScope.prototype.isArgumentsMaterialized = function isArgumentsMaterialized () {
+        // TODO(Constellation)
+        // We can more aggressive on this condition like this.
+        //
+        // function t() {
+        //     // arguments of t is always hidden.
+        //     function arguments() {
+        //     }
+        // }
+        if (this.block.type === estraverse_estraverse.Syntax.ArrowFunctionExpression) {
+            return false;
+        }
+
+        if (!this.isStatic()) {
+            return true;
+        }
+
+        var variable = this.set.get('arguments');
+        if(!variable) {
+        	throw new Error('Always have arguments variable.');
+        }
+        return variable.tainted || variable.references.length  !== 0;
+    };
+
+    FunctionScope.prototype.isThisMaterialized = function isThisMaterialized () {
+        if (!this.isStatic()) {
+            return true;
+        }
+        return this.thisFound;
+    };
+
+    FunctionScope.prototype.__defineArguments = function __defineArguments () {
+        this.__defineGeneric(
+                'arguments',
+                this.set,
+                this.variables,
+                null,
+                null);
+        this.taints.set('arguments', true);
+    };
+
+  return FunctionScope;
+}(Scope));
+
+var ForScope = (function (Scope) {
+  function ForScope(scopeManager, upperScope, block) {
+        Scope.call(this, scopeManager, 'for', upperScope, block, false);
+    }
+
+  if ( Scope ) ForScope.__proto__ = Scope;
+  ForScope.prototype = Object.create( Scope && Scope.prototype );
+  ForScope.prototype.constructor = ForScope;
+
+  return ForScope;
+}(Scope));
+
+var ClassScope = (function (Scope) {
+  function ClassScope(scopeManager, upperScope, block) {
+        Scope.call(this, scopeManager, 'class', upperScope, block, false);
+    }
+
+  if ( Scope ) ClassScope.__proto__ = Scope;
+  ClassScope.prototype = Object.create( Scope && Scope.prototype );
+  ClassScope.prototype.constructor = ClassScope;
+
+  return ClassScope;
+}(Scope));
+
+/* vim: set sw=4 ts=4 et tw=80 : */
+
+/*
+  Copyright (C) 2015 Yusuke Suzuki <utatane.tea@gmail.com>
+
+  Redistribution and use in source and binary forms, with or without
+  modification, are permitted provided that the following conditions are met:
+
+    * Redistributions of source code must retain the above copyright
+      notice, this list of conditions and the following disclaimer.
+    * Redistributions in binary form must reproduce the above copyright
+      notice, this list of conditions and the following disclaimer in the
+      documentation and/or other materials provided with the distribution.
+
+  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+  ARE DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY
+  DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+  (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+  ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
+  THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+*/
+
+/**
+ * @class ScopeManager
+ */
+var ScopeManager = function ScopeManager(options) {
+      this.scopes = [];
+      this.globalScope = null;
+      this.__nodeToScope = new WeakMap();
+      this.__currentScope = null;
+      this.__options = options;
+      this.__declaredVariables = new WeakMap();
+  };
+
+  ScopeManager.prototype.__useDirective = function __useDirective () {
+      return this.__options.directive;
+  };
+
+  ScopeManager.prototype.__isOptimistic = function __isOptimistic () {
+      return this.__options.optimistic;
+  };
+
+  ScopeManager.prototype.__ignoreEval = function __ignoreEval () {
+      return this.__options.ignoreEval;
+  };
+
+  ScopeManager.prototype.__isNodejsScope = function __isNodejsScope () {
+      return this.__options.nodejsScope;
+  };
+
+  ScopeManager.prototype.isModule = function isModule () {
+      return this.__options.sourceType === 'module';
+  };
+
+  ScopeManager.prototype.isImpliedStrict = function isImpliedStrict () {
+      return this.__options.impliedStrict;
+  };
+
+  ScopeManager.prototype.isStrictModeSupported = function isStrictModeSupported () {
+      return this.__options.ecmaVersion >= 5;
+  };
+
+  // Returns appropriate scope for this node.
+  ScopeManager.prototype.__get = function __get (node) {
+      return this.__nodeToScope.get(node);
+  };
+
+  /**
+   * Get variables that are declared by the node.
+   *
+   * "are declared by the node" means the node is same as `Variable.defs[].node` or `Variable.defs[].parent`.
+   * If the node declares nothing, this method returns an empty array.
+   * CAUTION: This API is experimental. See https://github.com/estools/escope/pull/69 for more details.
+   *
+   * @param {Esprima.Node} node - a node to get.
+   * @returns {Variable[]} variables that declared by the node.
+   */
+  ScopeManager.prototype.getDeclaredVariables = function getDeclaredVariables (node) {
+      return this.__declaredVariables.get(node) || [];
+  };
+
+  /**
+   * acquire scope from node.
+   * @method ScopeManager#acquire
+   * @param {Esprima.Node} node - node for the acquired scope.
+   * @param {boolean=} inner - look up the most inner scope, default value is false.
+   * @return {Scope?}
+   */
+  ScopeManager.prototype.acquire = function acquire (node, inner) {
+      var scopes, scope, i, iz;
+
+      function predicate(scope) {
+          if (scope.type === 'function' && scope.functionExpressionScope) {
+              return false;
+          }
+          if (scope.type === 'TDZ') {
+              return false;
+          }
+          return true;
+      }
+
+      scopes = this.__get(node);
+      if (!scopes || scopes.length === 0) {
+          return null;
+      }
+
+      // Heuristic selection from all scopes.
+      // If you would like to get all scopes, please use ScopeManager#acquireAll.
+      if (scopes.length === 1) {
+          return scopes[0];
+      }
+
+      if (inner) {
+          for (i = scopes.length - 1; i >= 0; --i) {
+              scope = scopes[i];
+              if (predicate(scope)) {
+                  return scope;
+              }
+          }
+      } else {
+          for (i = 0, iz = scopes.length; i < iz; ++i) {
+              scope = scopes[i];
+              if (predicate(scope)) {
+                  return scope;
+              }
+          }
+      }
+
+      return null;
+  };
+
+  /**
+   * acquire all scopes from node.
+   * @method ScopeManager#acquireAll
+   * @param {Esprima.Node} node - node for the acquired scope.
+   * @return {Scope[]?}
+   */
+  ScopeManager.prototype.acquireAll = function acquireAll (node) {
+      return this.__get(node);
+  };
+
+  /**
+   * release the node.
+   * @method ScopeManager#release
+   * @param {Esprima.Node} node - releasing node.
+   * @param {boolean=} inner - look up the most inner scope, default value is false.
+   * @return {Scope?} upper scope for the node.
+   */
+  ScopeManager.prototype.release = function release (node, inner) {
+      var scopes, scope;
+      scopes = this.__get(node);
+      if (scopes && scopes.length) {
+          scope = scopes[0].upper;
+          if (!scope) {
+              return null;
+          }
+          return this.acquire(scope.block, inner);
+      }
+      return null;
+  };
+
+  ScopeManager.prototype.attach = function attach () { };
+
+  ScopeManager.prototype.detach = function detach () { };
+
+  ScopeManager.prototype.__nestScope = function __nestScope (scope) {
+      if (scope instanceof GlobalScope) {
+        	if(this.__currentScope !== null) {
+        		throw new Error("_currentScope is not null trying to nest scopes.");
+        	}
+          this.globalScope = scope;
+      }
+      this.__currentScope = scope;
+      return scope;
+  };
+
+  ScopeManager.prototype.__nestGlobalScope = function __nestGlobalScope (node) {
+      return this.__nestScope(new GlobalScope(this, node));
+  };
+
+  ScopeManager.prototype.__nestBlockScope = function __nestBlockScope (node, isMethodDefinition) {
+      return this.__nestScope(new BlockScope(this, this.__currentScope, node));
+  };
+
+  ScopeManager.prototype.__nestFunctionScope = function __nestFunctionScope (node, isMethodDefinition) {
+      return this.__nestScope(new FunctionScope(this, this.__currentScope, node, isMethodDefinition));
+  };
+
+  ScopeManager.prototype.__nestForScope = function __nestForScope (node) {
+      return this.__nestScope(new ForScope(this, this.__currentScope, node));
+  };
+
+  ScopeManager.prototype.__nestCatchScope = function __nestCatchScope (node) {
+      return this.__nestScope(new CatchScope(this, this.__currentScope, node));
+  };
+
+  ScopeManager.prototype.__nestWithScope = function __nestWithScope (node) {
+      return this.__nestScope(new WithScope(this, this.__currentScope, node));
+  };
+
+  ScopeManager.prototype.__nestClassScope = function __nestClassScope (node) {
+      return this.__nestScope(new ClassScope(this, this.__currentScope, node));
+  };
+
+  ScopeManager.prototype.__nestSwitchScope = function __nestSwitchScope (node) {
+      return this.__nestScope(new SwitchScope(this, this.__currentScope, node));
+  };
+
+  ScopeManager.prototype.__nestModuleScope = function __nestModuleScope (node) {
+      return this.__nestScope(new ModuleScope(this, this.__currentScope, node));
+  };
+
+  ScopeManager.prototype.__nestTDZScope = function __nestTDZScope (node) {
+      return this.__nestScope(new TDZScope(this, this.__currentScope, node));
+  };
+
+  ScopeManager.prototype.__nestFunctionExpressionNameScope = function __nestFunctionExpressionNameScope (node) {
+      return this.__nestScope(new FunctionExpressionNameScope(this, this.__currentScope, node));
+  };
+
+  ScopeManager.prototype.__isES6 = function __isES6 () {
+      return this.__options.ecmaVersion >= 6;
+  };
+
+/*
+  Copyright (C) 2015 Yusuke Suzuki <utatane.tea@gmail.com>
+
+  Redistribution and use in source and binary forms, with or without
+  modification, are permitted provided that the following conditions are met:
+
+    * Redistributions of source code must retain the above copyright
+      notice, this list of conditions and the following disclaimer.
+    * Redistributions in binary form must reproduce the above copyright
+      notice, this list of conditions and the following disclaimer in the
+      documentation and/or other materials provided with the distribution.
+
+  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+  ARE DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY
+  DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+  (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+  ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
+  THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+*/
+
+function getLast(xs) {
+    return xs[xs.length - 1] || null;
+}
+
+var PatternVisitor = (function (superclass) {
+  function PatternVisitor(options, rootPattern, callback) {
+        superclass.call(this, null, options);
+        this.rootPattern = rootPattern;
+        this.callback = callback;
+        this.assignments = [];
+        this.rightHandNodes = [];
+        this.restElements = [];
+    }
+
+  if ( superclass ) PatternVisitor.__proto__ = superclass;
+  PatternVisitor.prototype = Object.create( superclass && superclass.prototype );
+  PatternVisitor.prototype.constructor = PatternVisitor;
+
+    PatternVisitor.isPattern = function isPattern (node) {
+        var nodeType = node.type;
+        return (
+            nodeType === estraverse_estraverse.Syntax.Identifier ||
+            nodeType === estraverse_estraverse.Syntax.ObjectPattern ||
+            nodeType === estraverse_estraverse.Syntax.ArrayPattern ||
+            nodeType === estraverse_estraverse.Syntax.SpreadElement ||
+            nodeType === estraverse_estraverse.Syntax.RestElement ||
+            nodeType === estraverse_estraverse.Syntax.AssignmentPattern
+        );
+    };
+
+  PatternVisitor.prototype.Identifier = function Identifier (pattern) {
+        var lastRestElement = getLast(this.restElements);
+        this.callback(pattern, {
+            topLevel: pattern === this.rootPattern,
+            rest: lastRestElement != null && lastRestElement.argument === pattern,
+            assignments: this.assignments
+        });
+    };
+
+    PatternVisitor.prototype.Property = function Property (property) {
+        // Computed property's key is a right hand node.
+        if (property.computed) {
+            this.rightHandNodes.push(property.key);
+        }
+
+        // If it's shorthand, its key is same as its value.
+        // If it's shorthand and has its default value, its key is same as its value.left (the value is AssignmentPattern).
+        // If it's not shorthand, the name of new variable is its value's.
+        this.visit(property.value);
+    };
+
+    PatternVisitor.prototype.ArrayPattern = function ArrayPattern (pattern) {
+        var this$1 = this;
+
+        var i, iz, element;
+        for (i = 0, iz = pattern.elements.length; i < iz; ++i) {
+            element = pattern.elements[i];
+            this$1.visit(element);
+        }
+    };
+
+    PatternVisitor.prototype.AssignmentPattern = function AssignmentPattern (pattern) {
+        this.assignments.push(pattern);
+        this.visit(pattern.left);
+        this.rightHandNodes.push(pattern.right);
+        this.assignments.pop();
+    };
+
+    PatternVisitor.prototype.RestElement = function RestElement (pattern) {
+        this.restElements.push(pattern);
+        this.visit(pattern.argument);
+        this.restElements.pop();
+    };
+
+    PatternVisitor.prototype.MemberExpression = function MemberExpression (node) {
+        // Computed property's key is a right hand node.
+        if (node.computed) {
+            this.rightHandNodes.push(node.property);
+        }
+        // the object is only read, write to its property.
+        this.rightHandNodes.push(node.object);
+    };
+
+    //
+    // ForInStatement.left and AssignmentExpression.left are LeftHandSideExpression.
+    // By spec, LeftHandSideExpression is Pattern or MemberExpression.
+    //   (see also: https://github.com/estree/estree/pull/20#issuecomment-74584758)
+    // But espree 2.0 and esprima 2.0 parse to ArrayExpression, ObjectExpression, etc...
+    //
+
+    PatternVisitor.prototype.SpreadElement = function SpreadElement (node) {
+        this.visit(node.argument);
+    };
+
+    PatternVisitor.prototype.ArrayExpression = function ArrayExpression (node) {
+        node.elements.forEach(this.visit, this);
+    };
+
+    PatternVisitor.prototype.AssignmentExpression = function AssignmentExpression (node) {
+        this.assignments.push(node);
+        this.visit(node.left);
+        this.rightHandNodes.push(node.right);
+        this.assignments.pop();
+    };
+
+    PatternVisitor.prototype.CallExpression = function CallExpression (node) {
+        var this$1 = this;
+
+        // arguments are right hand nodes.
+        node.arguments.forEach(function (a) { this$1.rightHandNodes.push(a); });
+        this.visit(node.callee);
+    };
+
+  return PatternVisitor;
+}(esrecurse.Visitor));
+
+/*
+  Copyright (C) 2015 Yusuke Suzuki <utatane.tea@gmail.com>
+
+  Redistribution and use in source and binary forms, with or without
+  modification, are permitted provided that the following conditions are met:
+
+    * Redistributions of source code must retain the above copyright
+      notice, this list of conditions and the following disclaimer.
+    * Redistributions in binary form must reproduce the above copyright
+      notice, this list of conditions and the following disclaimer in the
+      documentation and/or other materials provided with the distribution.
+
+  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+  ARE DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY
+  DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+  (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+  ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
+  THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+*/
+function traverseIdentifierInPattern(options, rootPattern, referencer, callback) {
+    // Call the callback at left hand identifier nodes, and Collect right hand nodes.
+    var visitor = new PatternVisitor(options, rootPattern, callback);
+    visitor.visit(rootPattern);
+
+    // Process the right hand nodes recursively.
+    if (referencer != null) {
+        visitor.rightHandNodes.forEach(referencer.visit, referencer);
+    }
+}
+
+// Importing ImportDeclaration.
+// http://people.mozilla.org/~jorendorff/es6-draft.html#sec-moduledeclarationinstantiation
+// https://github.com/estree/estree/blob/master/es6.md#importdeclaration
+// FIXME: Now, we don't create module environment, because the context is
+// implementation dependent.
+
+var Importer = (function (superclass) {
+  function Importer(declaration, referencer) {
+        superclass.call(this, null, referencer.options);
+        this.declaration = declaration;
+        this.referencer = referencer;
+    }
+
+  if ( superclass ) Importer.__proto__ = superclass;
+  Importer.prototype = Object.create( superclass && superclass.prototype );
+  Importer.prototype.constructor = Importer;
+
+    Importer.prototype.visitImport = function visitImport (id, specifier) {
+        var this$1 = this;
+
+        this.referencer.visitPattern(id, function (pattern) {
+            this$1.referencer.currentScope().__define(pattern,
+                new Definition(
+                    Variable.ImportBinding,
+                    pattern,
+                    specifier,
+                    this$1.declaration,
+                    null,
+                    null
+                    ));
+        });
+    };
+
+    Importer.prototype.ImportNamespaceSpecifier = function ImportNamespaceSpecifier (node) {
+        var local = (node.local || node.id);
+        if (local) {
+            this.visitImport(local, node);
+        }
+    };
+
+    Importer.prototype.ImportDefaultSpecifier = function ImportDefaultSpecifier (node) {
+        var local = (node.local || node.id);
+        this.visitImport(local, node);
+    };
+
+    Importer.prototype.ImportSpecifier = function ImportSpecifier (node) {
+        var local = (node.local || node.id);
+        if (node.name) {
+            this.visitImport(node.name, node);
+        } else {
+            this.visitImport(local, node);
+        }
+    };
+
+  return Importer;
+}(esrecurse.Visitor));
+
+// Referencing variables and creating bindings.
+var Referencer = (function (superclass) {
+  function Referencer(options, scopeManager) {
+        superclass.call(this, null, options);
+        this.options = options;
+        this.scopeManager = scopeManager;
+        this.parent = null;
+        this.isInnerMethodDefinition = false;
+    }
+
+  if ( superclass ) Referencer.__proto__ = superclass;
+  Referencer.prototype = Object.create( superclass && superclass.prototype );
+  Referencer.prototype.constructor = Referencer;
+
+    Referencer.prototype.currentScope = function currentScope () {
+        return this.scopeManager.__currentScope;
+    };
+
+    Referencer.prototype.close = function close (node) {
+        var this$1 = this;
+
+        while (this.currentScope() && node === this.currentScope().block) {
+            this$1.scopeManager.__currentScope = this$1.currentScope().__close(this$1.scopeManager);
+        }
+    };
+
+    Referencer.prototype.pushInnerMethodDefinition = function pushInnerMethodDefinition (isInnerMethodDefinition) {
+        var previous = this.isInnerMethodDefinition;
+        this.isInnerMethodDefinition = isInnerMethodDefinition;
+        return previous;
+    };
+
+    Referencer.prototype.popInnerMethodDefinition = function popInnerMethodDefinition (isInnerMethodDefinition) {
+        this.isInnerMethodDefinition = isInnerMethodDefinition;
+    };
+
+    Referencer.prototype.materializeTDZScope = function materializeTDZScope (node, iterationNode) {
+        // http://people.mozilla.org/~jorendorff/es6-draft.html#sec-runtime-semantics-forin-div-ofexpressionevaluation-abstract-operation
+        // TDZ scope hides the declaration's names.
+        this.scopeManager.__nestTDZScope(node, iterationNode);
+        this.visitVariableDeclaration(this.currentScope(), Variable.TDZ, iterationNode.left, 0, true);
+    };
+
+    Referencer.prototype.materializeIterationScope = function materializeIterationScope (node) {
+        var this$1 = this;
+
+        // Generate iteration scope for upper ForIn/ForOf Statements.
+        var letOrConstDecl;
+        this.scopeManager.__nestForScope(node);
+        letOrConstDecl = node.left;
+        this.visitVariableDeclaration(this.currentScope(), Variable.Variable, letOrConstDecl, 0);
+        this.visitPattern(letOrConstDecl.declarations[0].id, function (pattern) {
+            this$1.currentScope().__referencing(pattern, Reference.WRITE, node.right, null, true, true);
+        });
+    };
+
+    Referencer.prototype.referencingDefaultValue = function referencingDefaultValue (pattern, assignments, maybeImplicitGlobal, init) {
+        var scope = this.currentScope();
+        assignments.forEach(function (assignment) {
+            scope.__referencing(
+                pattern,
+                Reference.WRITE,
+                assignment.right,
+                maybeImplicitGlobal,
+                pattern !== assignment.left,
+                init);
+        });
+    };
+
+    Referencer.prototype.visitPattern = function visitPattern (node, options, callback) {
+        if (typeof options === 'function') {
+            callback = options;
+            options = {processRightHandNodes: false}
+        }
+        traverseIdentifierInPattern(
+            this.options,
+            node,
+            options.processRightHandNodes ? this : null,
+            callback);
+    };
+
+    Referencer.prototype.visitFunction = function visitFunction (node) {
+        var this$1 = this;
+
+        var i, iz;
+        // FunctionDeclaration name is defined in upper scope
+        // NOTE: Not referring variableScope. It is intended.
+        // Since
+        //  in ES5, FunctionDeclaration should be in FunctionBody.
+        //  in ES6, FunctionDeclaration should be block scoped.
+        if (node.type === estraverse_estraverse.Syntax.FunctionDeclaration) {
+            // id is defined in upper scope
+            this.currentScope().__define(node.id,
+                    new Definition(
+                        Variable.FunctionName,
+                        node.id,
+                        node,
+                        null,
+                        null,
+                        null
+                    ));
+        }
+
+        // FunctionExpression with name creates its special scope;
+        // FunctionExpressionNameScope.
+        if (node.type === estraverse_estraverse.Syntax.FunctionExpression && node.id) {
+            this.scopeManager.__nestFunctionExpressionNameScope(node);
+        }
+
+        // Consider this function is in the MethodDefinition.
+        this.scopeManager.__nestFunctionScope(node, this.isInnerMethodDefinition);
+
+        // Process parameter declarations.
+        for (i = 0, iz = node.params.length; i < iz; ++i) {
+            this$1.visitPattern(node.params[i], {processRightHandNodes: true}, function (pattern, info) {
+                this$1.currentScope().__define(pattern,
+                    new ParameterDefinition(
+                        pattern,
+                        node,
+                        i,
+                        info.rest
+                    ));
+
+                this$1.referencingDefaultValue(pattern, info.assignments, null, true);
+            });
+        }
+
+        // if there's a rest argument, add that
+        if (node.rest) {
+            this.visitPattern({
+                type: 'RestElement',
+                argument: node.rest
+            }, function (pattern) {
+                this$1.currentScope().__define(pattern,
+                    new ParameterDefinition(
+                        pattern,
+                        node,
+                        node.params.length,
+                        true
+                    ));
+            });
+        }
+
+        // Skip BlockStatement to prevent creating BlockStatement scope.
+        if (node.body.type === estraverse_estraverse.Syntax.BlockStatement) {
+            this.visitChildren(node.body);
+        } else {
+            this.visit(node.body);
+        }
+
+        this.close(node);
+    };
+
+    Referencer.prototype.visitClass = function visitClass (node) {
+        if (node.type === estraverse_estraverse.Syntax.ClassDeclaration) {
+            this.currentScope().__define(node.id,
+                    new Definition(
+                        Variable.ClassName,
+                        node.id,
+                        node,
+                        null,
+                        null,
+                        null
+                    ));
+        }
+
+        // FIXME: Maybe consider TDZ.
+        this.visit(node.superClass);
+
+        this.scopeManager.__nestClassScope(node);
+
+        if (node.id) {
+            this.currentScope().__define(node.id,
+                    new Definition(
+                        Variable.ClassName,
+                        node.id,
+                        node
+                    ));
+        }
+        this.visit(node.body);
+
+        this.close(node);
+    };
+
+    Referencer.prototype.visitProperty = function visitProperty (node) {
+        var previous, isMethodDefinition;
+        if (node.computed) {
+            this.visit(node.key);
+        }
+
+        isMethodDefinition = node.type === estraverse_estraverse.Syntax.MethodDefinition;
+        if (isMethodDefinition) {
+            previous = this.pushInnerMethodDefinition(true);
+        }
+        this.visit(node.value);
+        if (isMethodDefinition) {
+            this.popInnerMethodDefinition(previous);
+        }
+    };
+
+    Referencer.prototype.visitForIn = function visitForIn (node) {
+        var this$1 = this;
+
+        if (node.left.type === estraverse_estraverse.Syntax.VariableDeclaration && node.left.kind !== 'var') {
+            this.materializeTDZScope(node.right, node);
+            this.visit(node.right);
+            this.close(node.right);
+
+            this.materializeIterationScope(node);
+            this.visit(node.body);
+            this.close(node);
+        } else {
+            if (node.left.type === estraverse_estraverse.Syntax.VariableDeclaration) {
+                this.visit(node.left);
+                this.visitPattern(node.left.declarations[0].id, function (pattern) {
+                    this$1.currentScope().__referencing(pattern, Reference.WRITE, node.right, null, true, true);
+                });
+            } else {
+                this.visitPattern(node.left, {processRightHandNodes: true}, function (pattern, info) {
+                    var maybeImplicitGlobal = null;
+                    if (!this$1.currentScope().isStrict) {
+                        maybeImplicitGlobal = {
+                            pattern: pattern,
+                            node: node
+                        };
+                    }
+                    this$1.referencingDefaultValue(pattern, info.assignments, maybeImplicitGlobal, false);
+                    this$1.currentScope().__referencing(pattern, Reference.WRITE, node.right, maybeImplicitGlobal, true, false);
+                });
+            }
+            this.visit(node.right);
+            this.visit(node.body);
+        }
+    };
+
+    Referencer.prototype.visitVariableDeclaration = function visitVariableDeclaration (variableTargetScope, type, node, index, fromTDZ) {
+        var this$1 = this;
+
+        // If this was called to initialize a TDZ scope, this needs to make definitions, but doesn't make references.
+        var decl, init;
+
+        decl = node.declarations[index];
+        init = decl.init;
+        this.visitPattern(decl.id, {processRightHandNodes: !fromTDZ}, function (pattern, info) {
+            variableTargetScope.__define(pattern,
+                new Definition(
+                    type,
+                    pattern,
+                    decl,
+                    node,
+                    index,
+                    node.kind
+                ));
+
+            if (!fromTDZ) {
+                this$1.referencingDefaultValue(pattern, info.assignments, null, true);
+            }
+            if (init) {
+                this$1.currentScope().__referencing(pattern, Reference.WRITE, init, null, !info.topLevel, true);
+            }
+        });
+    };
+
+    Referencer.prototype.AssignmentExpression = function AssignmentExpression (node) {
+        var this$1 = this;
+
+        if (PatternVisitor.isPattern(node.left)) {
+            if (node.operator === '=') {
+                this.visitPattern(node.left, {processRightHandNodes: true}, function (pattern, info) {
+                    var maybeImplicitGlobal = null;
+                    if (!this$1.currentScope().isStrict) {
+                        maybeImplicitGlobal = {
+                            pattern: pattern,
+                            node: node
+                        };
+                    }
+                    this$1.referencingDefaultValue(pattern, info.assignments, maybeImplicitGlobal, false);
+                    this$1.currentScope().__referencing(pattern, Reference.WRITE, node.right, maybeImplicitGlobal, !info.topLevel, false);
+                });
+            } else {
+                this.currentScope().__referencing(node.left, Reference.RW, node.right);
+            }
+        } else {
+            this.visit(node.left);
+        }
+        this.visit(node.right);
+    };
+
+    Referencer.prototype.CatchClause = function CatchClause (node) {
+        var this$1 = this;
+
+        this.scopeManager.__nestCatchScope(node);
+
+        this.visitPattern(node.param, {processRightHandNodes: true}, function (pattern, info) {
+            this$1.currentScope().__define(pattern,
+                new Definition(
+                    Variable.CatchClause,
+                    node.param,
+                    node,
+                    null,
+                    null,
+                    null
+                ));
+            this$1.referencingDefaultValue(pattern, info.assignments, null, true);
+        });
+        this.visit(node.body);
+
+        this.close(node);
+    };
+
+    Referencer.prototype.Program = function Program (node) {
+        this.scopeManager.__nestGlobalScope(node);
+
+        if (this.scopeManager.__isNodejsScope()) {
+            // Force strictness of GlobalScope to false when using node.js scope.
+            this.currentScope().isStrict = false;
+            this.scopeManager.__nestFunctionScope(node, false);
+        }
+
+        if (this.scopeManager.__isES6() && this.scopeManager.isModule()) {
+            this.scopeManager.__nestModuleScope(node);
+        }
+
+        if (this.scopeManager.isStrictModeSupported() && this.scopeManager.isImpliedStrict()) {
+            this.currentScope().isStrict = true;
+        }
+
+        this.visitChildren(node);
+        this.close(node);
+    };
+
+    Referencer.prototype.Identifier = function Identifier (node) {
+        this.currentScope().__referencing(node);
+    };
+
+    Referencer.prototype.UpdateExpression = function UpdateExpression (node) {
+        if (PatternVisitor.isPattern(node.argument)) {
+            this.currentScope().__referencing(node.argument, Reference.RW, null);
+        } else {
+            this.visitChildren(node);
+        }
+    };
+
+    Referencer.prototype.MemberExpression = function MemberExpression (node) {
+        this.visit(node.object);
+        if (node.computed) {
+            this.visit(node.property);
+        }
+    };
+
+    Referencer.prototype.Property = function Property (node) {
+        this.visitProperty(node);
+    };
+
+    Referencer.prototype.MethodDefinition = function MethodDefinition (node) {
+        this.visitProperty(node);
+    };
+
+    Referencer.prototype.BreakStatement = function BreakStatement () {};
+
+    Referencer.prototype.ContinueStatement = function ContinueStatement () {};
+
+    Referencer.prototype.LabeledStatement = function LabeledStatement (node) {
+        this.visit(node.body);
+    };
+
+    Referencer.prototype.ForStatement = function ForStatement (node) {
+        // Create ForStatement declaration.
+        // NOTE: In ES6, ForStatement dynamically generates
+        // per iteration environment. However, escope is
+        // a static analyzer, we only generate one scope for ForStatement.
+        if (node.init && node.init.type === estraverse_estraverse.Syntax.VariableDeclaration && node.init.kind !== 'var') {
+            this.scopeManager.__nestForScope(node);
+        }
+
+        this.visitChildren(node);
+
+        this.close(node);
+    };
+
+    Referencer.prototype.ClassExpression = function ClassExpression (node) {
+        this.visitClass(node);
+    };
+
+    Referencer.prototype.ClassDeclaration = function ClassDeclaration (node) {
+        this.visitClass(node);
+    };
+
+    Referencer.prototype.CallExpression = function CallExpression (node) {
+        // Check this is direct call to eval
+        if (!this.scopeManager.__ignoreEval() && node.callee.type === estraverse_estraverse.Syntax.Identifier && node.callee.name === 'eval') {
+            // NOTE: This should be `variableScope`. Since direct eval call always creates Lexical environment and
+            // let / const should be enclosed into it. Only VariableDeclaration affects on the caller's environment.
+            this.currentScope().variableScope.__detectEval();
+        }
+        this.visitChildren(node);
+    };
+
+    Referencer.prototype.BlockStatement = function BlockStatement (node) {
+        if (this.scopeManager.__isES6()) {
+            this.scopeManager.__nestBlockScope(node);
+        }
+
+        this.visitChildren(node);
+
+        this.close(node);
+    };
+
+    Referencer.prototype.ThisExpression = function ThisExpression () {
+        this.currentScope().variableScope.__detectThis();
+    };
+
+    Referencer.prototype.WithStatement = function WithStatement (node) {
+        this.visit(node.object);
+        // Then nest scope for WithStatement.
+        this.scopeManager.__nestWithScope(node);
+
+        this.visit(node.body);
+
+        this.close(node);
+    };
+
+    Referencer.prototype.VariableDeclaration = function VariableDeclaration (node) {
+        var this$1 = this;
+
+        var variableTargetScope, i, iz, decl;
+        variableTargetScope = (node.kind === 'var') ? this.currentScope().variableScope : this.currentScope();
+        for (i = 0, iz = node.declarations.length; i < iz; ++i) {
+            decl = node.declarations[i];
+            this$1.visitVariableDeclaration(variableTargetScope, Variable.Variable, node, i);
+            if (decl.init) {
+                this$1.visit(decl.init);
+            }
+        }
+    };
+
+    // sec 13.11.8
+    Referencer.prototype.SwitchStatement = function SwitchStatement (node) {
+        var this$1 = this;
+
+        var i, iz;
+
+        this.visit(node.discriminant);
+
+        if (this.scopeManager.__isES6()) {
+            this.scopeManager.__nestSwitchScope(node);
+        }
+
+        for (i = 0, iz = node.cases.length; i < iz; ++i) {
+            this$1.visit(node.cases[i]);
+        }
+
+        this.close(node);
+    };
+
+    Referencer.prototype.FunctionDeclaration = function FunctionDeclaration (node) {
+        this.visitFunction(node);
+    };
+
+    Referencer.prototype.FunctionExpression = function FunctionExpression (node) {
+        this.visitFunction(node);
+    };
+
+    Referencer.prototype.ForOfStatement = function ForOfStatement (node) {
+        this.visitForIn(node);
+    };
+
+    Referencer.prototype.ForInStatement = function ForInStatement (node) {
+        this.visitForIn(node);
+    };
+
+    Referencer.prototype.ArrowFunctionExpression = function ArrowFunctionExpression (node) {
+        this.visitFunction(node);
+    };
+
+    Referencer.prototype.ImportDeclaration = function ImportDeclaration (node) {
+        var importer;
+		if(!this.scopeManager.__isES6() || !this.scopeManager.isModule()) {
+			// ORION throw new Error('ImportDeclaration should appear when the mode is ES6 and in the module context.');
+		}
+        importer = new Importer(node, this);
+        importer.visit(node);
+    };
+
+    Referencer.prototype.visitExportDeclaration = function visitExportDeclaration (node) {
+        if (node.source) {
+            return;
+        }
+        if (node.declaration) {
+            this.visit(node.declaration);
+            return;
+        }
+
+        this.visitChildren(node);
+    };
+
+    Referencer.prototype.ExportDeclaration = function ExportDeclaration (node) {
+        this.visitExportDeclaration(node);
+    };
+
+    Referencer.prototype.ExportNamedDeclaration = function ExportNamedDeclaration (node) {
+        this.visitExportDeclaration(node);
+    };
+
+    Referencer.prototype.ExportSpecifier = function ExportSpecifier (node) {
+        var local = (node.id || node.local);
+        this.visit(local);
+    };
+
+    Referencer.prototype.MetaProperty = function MetaProperty () {
+        // do nothing.
+    };
+
+  return Referencer;
+}(esrecurse.Visitor));
+
+/*
+  Copyright (C) 2012-2014 Yusuke Suzuki <utatane.tea@gmail.com>
+  Copyright (C) 2013 Alex Seville <hi@alexanderseville.com>
+  Copyright (C) 2014 Thiago de Arruda <tpadilha84@gmail.com>
+
+  Redistribution and use in source and binary forms, with or without
+  modification, are permitted provided that the following conditions are met:
+
+    * Redistributions of source code must retain the above copyright
+      notice, this list of conditions and the following disclaimer.
+    * Redistributions in binary form must reproduce the above copyright
+      notice, this list of conditions and the following disclaimer in the
+      documentation and/or other materials provided with the distribution.
+
+  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+  ARE DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY
+  DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+  (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+  ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
+  THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+*/
+
+/**
+ * Escope (<a href="http://github.com/estools/escope">escope</a>) is an <a
+ * href="http://www.ecma-international.org/publications/standards/Ecma-262.htm">ECMAScript</a>
+ * scope analyzer extracted from the <a
+ * href="http://github.com/estools/esmangle">esmangle project</a/>.
+ * <p>
+ * <em>escope</em> finds lexical scopes in a source program, i.e. areas of that
+ * program where different occurrences of the same identifier refer to the same
+ * variable. With each scope the contained variables are collected, and each
+ * identifier reference in code is linked to its corresponding variable (if
+ * possible).
+ * <p>
+ * <em>escope</em> works on a syntax tree of the parsed source code which has
+ * to adhere to the <a
+ * href="https://developer.mozilla.org/en-US/docs/SpiderMonkey/Parser_API">
+ * Mozilla Parser API</a>. E.g. <a href="http://esprima.org">esprima</a> is a parser
+ * that produces such syntax trees.
+ * <p>
+ * The main interface is the {@link analyze} function.
+ * @module escope
+ */
+
+/*jslint bitwise:true */
+
+function defaultOptions() {
+    return {
+        optimistic: false,
+        directive: false,
+        nodejsScope: false,
+        impliedStrict: false,
+        sourceType: 'script',  // one of ['script', 'module']
+        ecmaVersion: 5,
+        childVisitorKeys: null,
+        fallback: 'iteration'
+    };
+}
+
+function updateDeeply(target, override) {
+    var key, val;
+
+    function isHashObject(target) {
+        return typeof target === 'object' && target instanceof Object && !(target instanceof Array) && !(target instanceof RegExp);
+    }
+
+    for (key in override) {
+        if (override.hasOwnProperty(key)) {
+            val = override[key];
+            if (isHashObject(val)) {
+                if (isHashObject(target[key])) {
+                    updateDeeply(target[key], val);
+                } else {
+                    target[key] = updateDeeply({}, val);
+                }
+            } else {
+                target[key] = val;
+            }
+        }
+    }
+    return target;
+}
+
+/**
+ * Main interface function. Takes an Esprima syntax tree and returns the
+ * analyzed scopes.
+ * @function analyze
+ * @param {esprima.Tree} tree
+ * @param {Object} providedOptions - Options that tailor the scope analysis
+ * @param {boolean} [providedOptions.optimistic=false] - the optimistic flag
+ * @param {boolean} [providedOptions.directive=false]- the directive flag
+ * @param {boolean} [providedOptions.ignoreEval=false]- whether to check 'eval()' calls
+ * @param {boolean} [providedOptions.nodejsScope=false]- whether the whole
+ * script is executed under node.js environment. When enabled, escope adds
+ * a function scope immediately following the global scope.
+ * @param {boolean} [providedOptions.impliedStrict=false]- implied strict mode
+ * (if ecmaVersion >= 5).
+ * @param {string} [providedOptions.sourceType='script']- the source type of the script. one of 'script' and 'module'
+ * @param {number} [providedOptions.ecmaVersion=5]- which ECMAScript version is considered
+ * @param {Object} [providedOptions.childVisitorKeys=null] - Additional known visitor keys. See [esrecurse](https://github.com/estools/esrecurse)'s the `childVisitorKeys` option.
+ * @param {string} [providedOptions.fallback='iteration'] - A kind of the fallback in order to encounter with unknown node. See [esrecurse](https://github.com/estools/esrecurse)'s the `fallback` option.
+ * @return {ScopeManager}
+ */
+function analyze(tree, providedOptions) {
+    var scopeManager, referencer, options;
+
+    options = updateDeeply(defaultOptions(), providedOptions);
+
+    scopeManager = new ScopeManager(options);
+
+    referencer = new Referencer(options, scopeManager);
+    referencer.visit(tree);
+
+    if(scopeManager.__currentScope !== null) {
+    	throw new Error('currentScope should be null.');
+	}
+    return scopeManager;
+}
+var version = "3.6.0";
+
+exports.analyze = analyze;
+exports.version = version;
+exports.Reference = Reference;
+exports.Variable = Variable;
+exports.Scope = Scope;
+exports.ScopeManager = ScopeManager;
+
+Object.defineProperty(exports, '__esModule', { value: true });
+
+})));

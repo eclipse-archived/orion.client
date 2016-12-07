@@ -52,7 +52,6 @@ body {
 	list-style: none;
 	-webkit-margin-before: 0;
 	-webkit-padding-start: 0;
-	-webkit-padding-end: 10px;
 	margin: 0;
 	display: flex;
 	align-items: center;
@@ -191,7 +190,30 @@ body {
 	background-color: rgba(27,177,153, 0.1);
 	border-left-color: #1BB199;
 }
-
+.openNewTab{
+	position: relative;
+	-webkit-padding-end: 10px;
+    box-sizing: border-box;
+    border-left: none;
+    font-size: 1.5em;
+    border: 1px solid #676f73;
+    margin-top: 3px;
+    text-align: center;
+    width: 30px;
+    border-top-left-radius: 4px;
+    border-top-right-radius: 4px;
+    padding: 2px 5px 0 5px;
+    height: 27px;
+    background: #3b4b54;
+}
+.openNewTab:hover {
+	color: white;
+}
+.lightPage .openNewTab{
+	border: 1px solid #c4c5c8;
+	background: #f5f7fa;
+	border-left: none;
+}
 .lightPage .tabContent,
 .lightPage .tabs li,
 .lightPage .tabs,
@@ -219,6 +241,7 @@ body {
 	border-bottom-color: transparent;
 }
 .lightPage .close:hover,
+.lightPage .openNewTab:hover,
 .lightPage .tabButton:hover {
 	background:rgb(61, 114, 179);
 	color:white;

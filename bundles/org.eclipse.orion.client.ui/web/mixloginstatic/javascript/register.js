@@ -78,7 +78,7 @@ define(['domReady', 'orion/xhr', 'orion/xsrfUtils', './common'], function(domRea
 	}
 
 	function generateRandomPassword() {
-		// Passwords are a mix of both alpha and non-alpha charaters
+		// Passwords are a mix of both alpha and non-alpha characters
 		var alphaCharacters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
 		var nonAlphaCharacters = "0123456789";
 		var minLength = 7;

@@ -1,9 +1,9 @@
 /*******************************************************************************
  * @license
  * Copyright (c) 2014, 2016 IBM Corporation and others.
- * All rights reserved. This program and the accompanying materials are made 
- * available under the terms of the Eclipse Public License v1.0 
- * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
+ * All rights reserved. This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License v1.0
+ * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution
  * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html).
  *
  * Contributors:
@@ -25,17 +25,17 @@ define([
 	'mocha/mocha', //must stay at the end, not a module
 ], function(QuickFixes, Validator, chai, Deferred, ASTManager, CUProvider, RenameCommand, GenerateDocCommand, mServiceRegistry, JSProject) {
 	var assert = chai.assert;
-	
+
 	return function(worker) {
 		describe('Quick Fix Tests',function() {
 			this.timeout(10000);
 			before('Reset Tern Server', function(done) {
 				worker.start(done); // Reset the tern server state to remove any prior files
 			});
-			
+
 			/**
 			 * @description Sets up the test
-			 * 
+			 *
 			 * Supported options include:
 			 * -    `buffer` - the source to process
 			 * -    `contentType` - the content type to load, defaults to application/javascript if not specified
@@ -70,15 +70,15 @@ define([
 						}
 						return new Deferred().resolve(buffer.slice(start, end));
 					},
-					
+
 					setText: function(text, start, end) {
 						return new Deferred().resolve(assertFixes(text, start, end, options.expected));
 					},
-					
+
 					getSelections: function(){
 						return new Deferred().resolve([]);
 					},
-					
+
 					getFileMetadata:function() {
 						var o = Object.create(null);
 						o.contentType = Object.create(null);
@@ -107,7 +107,7 @@ define([
 					loc: loc
 				};
 			}
-		
+
 			/**
 			 * @callback from Mocha after each test run
 			 */
@@ -115,7 +115,7 @@ define([
 				CUProvider.onModelChanging({file: {location: 'quickfix_test_script.js'}});
 				CUProvider.onModelChanging({file: {location: 'quickfix_test_script.html'}});
 			});
-		
+
 			/**
 			 * @description Checks the state of the linked models
 			 * @param {Object} linkedModel The linked model from the platform
@@ -150,7 +150,7 @@ define([
 					worker.getTestState().callback(err);
 				}
 			}
-		
+
 			/**
 			 * @description Runs the validator on the given options and computes fixes for those problems
 			 * @param {Object} options {buffer, contentType, rule}
@@ -221,7 +221,7 @@ define([
 							worker.getTestState().callback(error);
 					});
 			}
-		
+
 			/**
 			 * @description Compares the computed fixes set against the expected ones
 			 * @param {Array.<orion.Fix>} computed The computed set of fixes
@@ -234,7 +234,7 @@ define([
 						assert(Array.isArray(computed.text), "Expected multiple quick fix text edits");
 						assert(Array.isArray(computed.selection), "Expected multiple quick fix selections");
 						assert.equal(computed.text.length, expected.length, "Wrong number of quick fix text edits");
-						assert.equal(computed.selection.length, expected.length, "Wrong number of quick fix selections");						
+						assert.equal(computed.selection.length, expected.length, "Wrong number of quick fix selections");
 						for (var i=0; i<expected.length; i++) {
 							assert(computed.text[i] === expected[i].value, 'The fix: \"'+computed.text[i]+'\" does not match the expected fix of: \"'+expected[i].value + '\"');
 							assert.equal(computed.selection[i].start, expected[i].start, 'The fix starts do not match');
@@ -311,7 +311,7 @@ define([
 						expected: expected,
 						callback: done
 					});
-				}); 
+				});
 				it("function declaration params", function(done) {
 					var rule = createTestRule("missing-doc");
 					var expected = {
@@ -1391,7 +1391,7 @@ define([
 					};
 					return getFixes({
 						buffer: "debugger",
-						rule: rule, 
+						rule: rule,
 						expected: expected,
 						callback: done
 					});
@@ -1405,7 +1405,7 @@ define([
 					};
 					return getFixes({
 						buffer: "debugger;",
-						rule: rule, 
+						rule: rule,
 						expected: expected,
 						callback: done
 					});
@@ -1418,7 +1418,7 @@ define([
 					];
 					return getFixes({
 						buffer: "debugger\ndebugger",
-						rule: rule, 
+						rule: rule,
 						expected: expected,
 						callback: done
 					});
@@ -1431,7 +1431,7 @@ define([
 					];
 					return getFixes({
 						buffer: "debugger;\ndebugger;",
-						rule: rule, 
+						rule: rule,
 						expected: expected,
 						callback: done
 					});
@@ -1439,13 +1439,13 @@ define([
 				it("no-debugger semicolon mixed multi", function(done) {
 					var rule = createTestRule("no-debugger");
 					var expected = [
-							{value: "",	start: 0, end: 8}, 
+							{value: "",	start: 0, end: 8},
 							{value: "", 	start: 9, end: 18},
 							{value: "", 	start: 19, end: 27}
 					];
 					return getFixes({
 						buffer: "debugger\ndebugger;\ndebugger",
-						rule: rule, 
+						rule: rule,
 						expected: expected,
 						callback: done
 					});
@@ -2029,9 +2029,9 @@ define([
 				it("Test no-comma-dangle-1", function(callback) {
 					var rule = createTestRule('no-comma-dangle');
 					var expected = {value: "",
-									start: 15, 
+									start: 15,
 									end: 16};
-					return getFixes({buffer: 'f({one:1, two:2,});', 
+					return getFixes({buffer: 'f({one:1, two:2,});',
 									  rule: rule,
 									  expected: expected,
 									  callback: callback});
@@ -2039,9 +2039,9 @@ define([
 				it("Test no-comma-dangle-2", function(callback) {
 					var rule = createTestRule('no-comma-dangle');
 					var expected = {value: "",
-									start: 21, 
+									start: 21,
 									end: 22};
-					return getFixes({buffer: 'var f = {one:1, two:2,};', 
+					return getFixes({buffer: 'var f = {one:1, two:2,};',
 									  rule: rule,
 									  expected: expected,
 									  callback: callback});
@@ -2049,9 +2049,9 @@ define([
 				it("Test no-comma-dangle-3", function(callback) {
 					var rule = createTestRule('no-comma-dangle');
 					var expected = {value: "",
-									start: 22, 
+									start: 22,
 									end: 23};
-					return getFixes({buffer: 'var f = [{one:1, two:2,}];', 
+					return getFixes({buffer: 'var f = [{one:1, two:2,}];',
 									  rule: rule,
 									  expected: expected,
 									  callback: callback});
@@ -2059,9 +2059,9 @@ define([
 				it("Test no-comma-dangle-html-1", function(callback) {
 					var rule = createTestRule('no-comma-dangle');
 					var expected = {value: "",
-									start: 35, 
+									start: 35,
 									end: 36};
-					return getFixes({buffer: '<html><head><script>f({one:1, two:2,});</script></head></html>', 
+					return getFixes({buffer: '<html><head><script>f({one:1, two:2,});</script></head></html>',
 									  rule: rule,
 									  expected: expected,
 									  callback: callback,
@@ -2070,9 +2070,9 @@ define([
 				it("Test no-comma-dangle-html-2", function(callback) {
 					var rule = createTestRule('no-comma-dangle');
 					var expected = {value: "",
-									start: 41, 
+									start: 41,
 									end: 42};
-					return getFixes({buffer: '<html><head><script>var f = {one:1, two:2,};</script></head></html>', 
+					return getFixes({buffer: '<html><head><script>var f = {one:1, two:2,};</script></head></html>',
 									  rule: rule,
 									  expected: expected,
 									  callback: callback,
@@ -2081,9 +2081,9 @@ define([
 				it("Test no-comma-dangle-html-3", function(callback) {
 					var rule = createTestRule('no-comma-dangle');
 					var expected = {value: "",
-									start: 42, 
+									start: 42,
 									end: 43};
-					return getFixes({buffer: '<html><head><script>var f = [{one:1, two:2,}];</script></head></html>', 
+					return getFixes({buffer: '<html><head><script>var f = [{one:1, two:2,}];</script></head></html>',
 									  rule: rule,
 									  expected: expected,
 									  callback: callback,
@@ -2092,9 +2092,9 @@ define([
 				it("Test no-comma-dangle-html-4", function(callback) {
 					var rule = createTestRule('no-comma-dangle');
 					var expected = {value: "",
-									start: 59, 
+									start: 59,
 									end: 60};
-					return getFixes({buffer: '<html><head><script></script><script>var f = [{one:1, two:2,}];</script></head></html>', 
+					return getFixes({buffer: '<html><head><script></script><script>var f = [{one:1, two:2,}];</script></head></html>',
 									  rule: rule,
 									  expected: expected,
 									  callback: callback,
@@ -2104,13 +2104,13 @@ define([
 					var rule = createTestRule('no-comma-dangle');
 					var expected = [
 									{value: "",
-									start: 15, 
+									start: 15,
 									end: 16},
 									{value: "",
-									start: 35, 
+									start: 35,
 									end: 36}
 									];
-					return getFixes({buffer: 'f({one:1, two:2,}); f({one:1, two:2,});', 
+					return getFixes({buffer: 'f({one:1, two:2,}); f({one:1, two:2,});',
 									  rule: rule,
 									  expected: expected,
 									  callback: callback});
@@ -2119,13 +2119,13 @@ define([
 					var rule = createTestRule('no-comma-dangle');
 					var expected = [
 									{value: "",
-									start: 15, 
+									start: 15,
 									end: 16},
 									{value: "",
-									start: 41, 
+									start: 41,
 									end: 42}
 									];
-					return getFixes({buffer: 'f({one:1, two:2,});\nvar f = {one:1, two:2,};', 
+					return getFixes({buffer: 'f({one:1, two:2,});\nvar f = {one:1, two:2,};',
 									  rule: rule,
 									  expected: expected,
 									  callback: callback});
@@ -2134,16 +2134,16 @@ define([
 					var rule = createTestRule('no-comma-dangle');
 					var expected = [
 									{value: "",
-									start: 15, 
+									start: 15,
 									end: 16},
 									{value: "",
-									start: 41, 
+									start: 41,
 									end: 42},
 									{value: "",
-									start: 67, 
+									start: 67,
 									end: 68}
 									];
-					return getFixes({buffer: 'f({one:1, two:2,}); var f = {one:1, two:2,}; var f = [{one:1, two:2,}];', 
+					return getFixes({buffer: 'f({one:1, two:2,}); var f = {one:1, two:2,}; var f = [{one:1, two:2,}];',
 									  rule: rule,
 									  expected: expected,
 									  callback: callback});
@@ -2154,42 +2154,42 @@ define([
 				it("Test no-empty-block-1", function(callback) {
 					var rule = createTestRule('no-empty-block');
 					var expected = {value: "//TODO empty block",
-									start: 14, 
+									start: 14,
 									end: 14};
-					return getFixes({buffer: 'function f() {}', 
+					return getFixes({buffer: 'function f() {}',
 									  rule: rule,
 									  expected: expected,
 									  callback: callback});
 				});
-				
+
 				it("Test no-empty-block-2",function(callback) {
 					var rule = createTestRule('no-empty-block');
 					var expected = {value: "//TODO empty block",
-									start: 39, 
+									start: 39,
 									end: 39};
-					return getFixes({buffer: 'var f = {f: function() { function q() {}}}', 
+					return getFixes({buffer: 'var f = {f: function() { function q() {}}}',
 									  rule: rule,
 									  expected: expected,
 									  callback: callback});
 				});
-				
+
 				it("Test no-empty-block-3",function(callback) {
 					var rule = createTestRule('no-empty-block');
 					var expected = {value: "//TODO empty block",
-									start: 25, 
+									start: 25,
 									end: 25};
-					return getFixes({buffer: 'var f = { f: function() {}};', 
+					return getFixes({buffer: 'var f = { f: function() {}};',
 									  rule: rule,
 									  expected: expected,
 									  callback: callback});
 				});
-				
+
 				it("Test no-empty-block-4",function(callback) {
 					var rule = createTestRule('no-empty-block');
 					var expected = {value: "//TODO empty block",
-									start: 10, 
+									start: 10,
 									end: 10};
-					return getFixes({buffer: 'while(f) {}', 
+					return getFixes({buffer: 'while(f) {}',
 									  rule: rule,
 									  expected: expected,
 									  callback: callback});
@@ -2197,9 +2197,9 @@ define([
 				it("Test no-empty-block-5",function(callback) {
 					var rule = createTestRule('no-empty-block');
 					var expected = {value: "//TODO empty block",
-									start: 7, 
+									start: 7,
 									end: 7};
-					return getFixes({buffer: 'if(f) {}', 
+					return getFixes({buffer: 'if(f) {}',
 									  rule: rule,
 									  expected: expected,
 									  callback: callback});
@@ -2207,9 +2207,9 @@ define([
 				it("Test no-empty-block-6",function(callback) {
 					var rule = createTestRule('no-empty-block');
 					var expected = {value: "//TODO empty block",
-									start: 17, 
+									start: 17,
 									end: 17};
-					return getFixes({buffer: 'if(f) {while(f) {}}', 
+					return getFixes({buffer: 'if(f) {while(f) {}}',
 									  rule: rule,
 									  expected: expected,
 									  callback: callback});
@@ -2217,45 +2217,45 @@ define([
 				it("Test no-empty-block-html-1",function(callback) {
 					var rule = createTestRule('no-empty-block');
 					var expected = {value: "//TODO empty block",
-									start: 34, 
+									start: 34,
 									end: 34};
-					return getFixes({buffer: '<html><head><script>function f() {}</script></head></html>', 
+					return getFixes({buffer: '<html><head><script>function f() {}</script></head></html>',
 									  rule: rule,
 									  expected: expected,
 									  callback: callback,
 									  contentType: 'text/html'});
 				});
-				
+
 				it("Test no-empty-block-html-2",function(callback) {
 					var rule = createTestRule('no-empty-block');
 					var expected = {value: "//TODO empty block",
-									start: 59, 
+									start: 59,
 									end: 59};
-					return getFixes({buffer: '<html><head><script>var f = {f: function() { function q() {}}}</script></head></html>', 
+					return getFixes({buffer: '<html><head><script>var f = {f: function() { function q() {}}}</script></head></html>',
 									  rule: rule,
 									  expected: expected,
 									  callback: callback,
 									  contentType: 'text/html'});
 				});
-				
+
 				it("Test no-empty-block-html-3",function(callback) {
 					var rule = createTestRule('no-empty-block');
 					var expected = {value: "//TODO empty block",
-									start: 45, 
+									start: 45,
 									end: 45};
-					return getFixes({buffer: '<html><head><script>var f = { f: function() {}};</script></head></html>', 
+					return getFixes({buffer: '<html><head><script>var f = { f: function() {}};</script></head></html>',
 									  rule: rule,
 									  expected: expected,
 									  callback: callback,
 									  contentType: 'text/html'});
 				});
-				
+
 				it("Test no-empty-block-html-4",function(callback) {
 					var rule = createTestRule('no-empty-block');
 					var expected = {value: "//TODO empty block",
-									start: 30, 
+									start: 30,
 									end: 30};
-					return getFixes({buffer: '<html><head><script>while(f) {}</script></head></html>', 
+					return getFixes({buffer: '<html><head><script>while(f) {}</script></head></html>',
 									  rule: rule,
 									  expected: expected,
 									  callback: callback,
@@ -2264,9 +2264,9 @@ define([
 				it("Test no-empty-block-html-5",function(callback) {
 					var rule = createTestRule('no-empty-block');
 					var expected = {value: "//TODO empty block",
-									start: 27, 
+									start: 27,
 									end: 27};
-					return getFixes({buffer: '<html><head><script>if(f) {}</script></head></html>', 
+					return getFixes({buffer: '<html><head><script>if(f) {}</script></head></html>',
 									  rule: rule,
 									  expected: expected,
 									  callback: callback,
@@ -2275,9 +2275,9 @@ define([
 				it("Test no-empty-block-html-6",function(callback) {
 					var rule = createTestRule('no-empty-block');
 					var expected = {value: "//TODO empty block",
-									start: 37, 
+									start: 37,
 									end: 37};
-					return getFixes({buffer: '<html><head><script>if(f) {while(f) {}}</script></head></html>', 
+					return getFixes({buffer: '<html><head><script>if(f) {while(f) {}}</script></head></html>',
 									  rule: rule,
 									  expected: expected,
 									  callback: callback,
@@ -2286,9 +2286,9 @@ define([
 				it("Test no-empty-block-html-7",function(callback) {
 					var rule = createTestRule('no-empty-block');
 					var expected = {value: "//TODO empty block",
-									start: 54, 
+									start: 54,
 									end: 54};
-					return getFixes({buffer: '<html><head><script></script><script>if(f) {while(f) {}}</script></head></html>', 
+					return getFixes({buffer: '<html><head><script></script><script>if(f) {while(f) {}}</script></head></html>',
 									  rule: rule,
 									  expected: expected,
 									  callback: callback,
@@ -2301,13 +2301,13 @@ define([
 					var rule = createTestRule('no-extra-parens', 2, {"conditionalAssign": false, "returnAssign": false, "nestedBinaryExpressions": true});
 					 var expected = [
 					 				{value: "",
-									start: 10, 
+									start: 10,
 									end: 11},
 									{value: "",
-									start: 12, 
+									start: 12,
 									end: 13}
 									];
-					return getFixes({buffer: 'if (a === (b)){}', 
+					return getFixes({buffer: 'if (a === (b)){}',
 									  rule: rule,
 									  expected: expected,
 									  callback: callback});
@@ -2316,13 +2316,13 @@ define([
 					var rule = createTestRule('no-extra-parens');
 					 var expected = [
 					 				{value: " ",
-									start: 10, 
+									start: 10,
 									end: 11},
 									{value: "",
-									start: 12, 
+									start: 12,
 									end: 13}
 									];
-					return getFixes({buffer: 'if (typeof(a) === "object"){}', 
+					return getFixes({buffer: 'if (typeof(a) === "object"){}',
 									  rule: rule,
 									  expected: expected,
 									  callback: callback});
@@ -2331,13 +2331,13 @@ define([
 					var rule = createTestRule('no-extra-parens');
 					 var expected = [
 					 				{value: "",
-									start: 10, 
+									start: 10,
 									end: 11},
 									{value: "",
-									start: 13, 
+									start: 13,
 									end: 14}
 									];
-					return getFixes({buffer: 'if (typeof( a) === "object"){}', 
+					return getFixes({buffer: 'if (typeof( a) === "object"){}',
 									  rule: rule,
 									  expected: expected,
 									  callback: callback});
@@ -2346,13 +2346,13 @@ define([
 					var rule = createTestRule('no-extra-parens');
 					 var expected = [
 					 				{value: "",
-									start: 11, 
+									start: 11,
 									end: 12},
 									{value: "",
-									start: 13, 
+									start: 13,
 									end: 14}
 									];
-					return getFixes({buffer: 'if (typeof (a) === "object"){}', 
+					return getFixes({buffer: 'if (typeof (a) === "object"){}',
 									  rule: rule,
 									  expected: expected,
 									  callback: callback});
@@ -2361,19 +2361,19 @@ define([
 					var rule = createTestRule('no-extra-parens');
 					 var expected = [
 					 				{value: "",
-									start: 8, 
+									start: 8,
 									end: 9},
 									{value: "",
-									start: 12, 
+									start: 12,
 									end: 13},
 									{value: "",
-									start: 23, 
+									start: 23,
 									end: 24},
 									{value: "",
-									start: 27, 
+									start: 27,
 									end: 28}
 									];
-					return getFixes({buffer: 'var a = (1+1);\nvar b = (1-1);', 
+					return getFixes({buffer: 'var a = (1+1);\nvar b = (1-1);',
 									  rule: rule,
 									  expected: expected,
 									  callback: callback});
@@ -2382,19 +2382,19 @@ define([
 					var rule = createTestRule('no-extra-parens', 2, {"conditionalAssign": false, "returnAssign": false, "nestedBinaryExpressions": true});
 					 var expected = [
 					 				{value: "",
-									start: 8, 
+									start: 8,
 									end: 10},
 									{value: "",
-									start: 11, 
+									start: 11,
 									end: 12},
 									{value: "",
-									start: 13, 
+									start: 13,
 									end: 14},
 									{value: "",
-									start: 15, 
+									start: 15,
 									end: 17},
 									];
-					return getFixes({buffer: 'var a = ((1)+(1));', 
+					return getFixes({buffer: 'var a = ((1)+(1));',
 									  rule: rule,
 									  expected: expected,
 									  callback: callback});
@@ -2404,13 +2404,13 @@ define([
 					var rule = createTestRule('no-extra-parens');
 					 var expected = [
 					 				{value: "",
-									start: 10, 
+									start: 10,
 									end: 11},
 									{value: "",
-									start: 12, 
+									start: 12,
 									end: 13},
 									];
-					return getFixes({buffer: 'var a = (((1)));', 
+					return getFixes({buffer: 'var a = (((1)));',
 									  rule: rule,
 									  expected: expected,
 									  callback: callback});
@@ -2419,13 +2419,13 @@ define([
 					var rule = createTestRule('no-extra-parens', 2, {"conditionalAssign": false, "returnAssign": false, "nestedBinaryExpressions": true});
 					 var expected = [
 					 				{value: "",
-									start: 18, 
+									start: 18,
 									end: 19},
 									{value: "",
-									start: 20, 
+									start: 20,
 									end: 21}
 									];
-					return getFixes({buffer: '<script>if (a === (b)){}</script>', 
+					return getFixes({buffer: '<script>if (a === (b)){}</script>',
 									  rule: rule,
 									  expected: expected,
 									  callback: callback,
@@ -2435,13 +2435,13 @@ define([
 					var rule = createTestRule('no-extra-parens');
 					 var expected = [
 					 				{value: " ",
-									start: 18, 
+									start: 18,
 									end: 19},
 									{value: "",
-									start: 20, 
+									start: 20,
 									end: 21}
 									];
-					return getFixes({buffer: '<script>if (typeof(a) === "object"){}</script>', 
+					return getFixes({buffer: '<script>if (typeof(a) === "object"){}</script>',
 									  rule: rule,
 									  expected: expected,
 									  callback: callback,
@@ -2451,19 +2451,19 @@ define([
 					var rule = createTestRule('no-extra-parens');
 					 var expected = [
 					 				{value: "",
-									start: 16, 
+									start: 16,
 									end: 17},
 									{value: "",
-									start: 20, 
+									start: 20,
 									end: 21},
 									{value: "",
-									start: 31, 
+									start: 31,
 									end: 32},
 									{value: "",
-									start: 35, 
+									start: 35,
 									end: 36}
 									];
-					return getFixes({buffer: '<script>var a = (1+1);\nvar b = (1-1);</script>', 
+					return getFixes({buffer: '<script>var a = (1+1);\nvar b = (1-1);</script>',
 									  rule: rule,
 									  expected: expected,
 									  callback: callback,
@@ -2473,19 +2473,19 @@ define([
 					var rule = createTestRule('no-extra-parens', 2, {"conditionalAssign": false, "returnAssign": false, "nestedBinaryExpressions": true});
 					 var expected = [
 					 				{value: "",
-									start: 16, 
+									start: 16,
 									end: 18},
 									{value: "",
-									start: 19, 
+									start: 19,
 									end: 20},
 									{value: "",
-									start: 21, 
+									start: 21,
 									end: 22},
 									{value: "",
-									start: 23, 
+									start: 23,
 									end: 25},
 									];
-					return getFixes({buffer: '<script>var a = ((1)+(1));</script>', 
+					return getFixes({buffer: '<script>var a = ((1)+(1));</script>',
 									  rule: rule,
 									  expected: expected,
 									  callback: callback,
@@ -2495,13 +2495,13 @@ define([
 					var rule = createTestRule('no-extra-parens', 2, {"conditionalAssign": false, "returnAssign": false, "nestedBinaryExpressions": true});
 					 var expected = [
 					 				{value: "",
-									start: 10, 
+									start: 10,
 									end: 11},
 									{value: "",
-									start: 14, 
+									start: 14,
 									end: 15}
 									];
-					return getFixes({buffer: 'if (a === (\nb\n)){}', 
+					return getFixes({buffer: 'if (a === (\nb\n)){}',
 									  rule: rule,
 									  expected: expected,
 									  callback: callback});
@@ -2510,13 +2510,13 @@ define([
 					var rule = createTestRule('no-extra-parens', 2, {"conditionalAssign": false, "returnAssign": false, "nestedBinaryExpressions": true});
 					 var expected = [
 					 				{value: "",
-									start: 10, 
+									start: 10,
 									end: 11},
 									{value: "",
-									start: 13, 
+									start: 13,
 									end: 14}
 									];
-					return getFixes({buffer: 'if (a === (b )){}', 
+					return getFixes({buffer: 'if (a === (b )){}',
 									  rule: rule,
 									  expected: expected,
 									  callback: callback});
@@ -2527,9 +2527,9 @@ define([
 				it("Test no-extra-semi-1",function(callback) {
 					var rule = createTestRule('no-extra-semi');
 					 var expected = {value: "",
-									start: 15, 
+									start: 15,
 									end: 16};
-					return getFixes({buffer: 'function f() {};', 
+					return getFixes({buffer: 'function f() {};',
 									  rule: rule,
 									  expected: expected,
 									  callback: callback});
@@ -2537,9 +2537,9 @@ define([
 				it("Test no-extra-semi-2",function(callback) {
 					var rule = createTestRule('no-extra-semi');
 					var expected = {value: "",
-									start: 13, 
+									start: 13,
 									end: 14};
-					return getFixes({buffer: 'var foo = 10;;', 
+					return getFixes({buffer: 'var foo = 10;;',
 									  rule: rule,
 									  expected: expected,
 									  callback: callback});
@@ -2547,9 +2547,9 @@ define([
 				it("Test no-extra-semi-3",function(callback) {
 					var rule = createTestRule('no-extra-semi');
 					var expected = {value: "",
-									start: 13, 
+									start: 13,
 									end: 14};
-					return getFixes({buffer: 'var foo = {};;', 
+					return getFixes({buffer: 'var foo = {};;',
 									  rule: rule,
 									  expected: expected,
 									  callback: callback});
@@ -2557,9 +2557,9 @@ define([
 				it("Test no-extra-semi-4",function(callback) {
 					var rule = createTestRule('no-extra-semi');
 					var expected = {value: "",
-									start: 0, 
+									start: 0,
 									end: 1};
-					return getFixes({buffer: ';', 
+					return getFixes({buffer: ';',
 									  rule: rule,
 									  expected: expected,
 									  callback: callback});
@@ -2567,9 +2567,9 @@ define([
 				it("Test no-extra-semi-html-1",function(callback) {
 					var rule = createTestRule('no-extra-semi');
 					 var expected = {value: "",
-									start: 35, 
+									start: 35,
 									end: 36};
-					return getFixes({buffer: '<html><head><script>function f() {};</script></head></html>', 
+					return getFixes({buffer: '<html><head><script>function f() {};</script></head></html>',
 									  rule: rule,
 									  expected: expected,
 									  callback: callback,
@@ -2578,9 +2578,9 @@ define([
 				it("Test no-extra-semi-html-2",function(callback) {
 					var rule = createTestRule('no-extra-semi');
 					var expected = {value: "",
-									start: 33, 
+									start: 33,
 									end: 34};
-					return getFixes({buffer: '<html><head><script>var foo = 10;;</script></head></html>', 
+					return getFixes({buffer: '<html><head><script>var foo = 10;;</script></head></html>',
 									  rule: rule,
 									  expected: expected,
 									  callback: callback,
@@ -2589,9 +2589,9 @@ define([
 				it("Test no-extra-semi-html-3",function(callback) {
 					var rule = createTestRule('no-extra-semi');
 					var expected = {value: "",
-									start: 33, 
+									start: 33,
 									end: 34};
-					return getFixes({buffer: '<html><head><script>var foo = {};;</script></head></html>', 
+					return getFixes({buffer: '<html><head><script>var foo = {};;</script></head></html>',
 									  rule: rule,
 									  expected: expected,
 									  callback: callback,
@@ -2600,9 +2600,9 @@ define([
 				it("Test no-extra-semi-html-4",function(callback) {
 					var rule = createTestRule('no-extra-semi');
 					var expected = {value: "",
-									start: 20, 
+									start: 20,
 									end: 21};
-					return getFixes({buffer: '<html><head><script>;</script></head></html>', 
+					return getFixes({buffer: '<html><head><script>;</script></head></html>',
 									  rule: rule,
 									  expected: expected,
 									  callback: callback,
@@ -2611,9 +2611,9 @@ define([
 				it("Test no-extra-semi-html-5",function(callback) {
 					var rule = createTestRule('no-extra-semi');
 					var expected = {value: "",
-									start: 37, 
+									start: 37,
 									end: 38};
-					return getFixes({buffer: '<html><head><script></script><script>;</script></head></html>', 
+					return getFixes({buffer: '<html><head><script></script><script>;</script></head></html>',
 									  rule: rule,
 									  expected: expected,
 									  callback: callback,
@@ -2623,13 +2623,13 @@ define([
 					var rule = createTestRule('no-extra-semi');
 					 var expected = [
 					 				{value: "",
-									start: 15, 
+									start: 15,
 									end: 16},
 									{value: "",
-									start: 32, 
+									start: 32,
 									end: 33}
 									];
-					return getFixes({buffer: 'function f() {}; function g() {};', 
+					return getFixes({buffer: 'function f() {}; function g() {};',
 									  rule: rule,
 									  expected: expected,
 									  callback: callback});
@@ -2638,10 +2638,10 @@ define([
 					var rule = createTestRule('no-extra-semi');
 					 var expected = [
 					 				{value: "",
-									start: 11, 
+									start: 11,
 									end: 14}
 									];
-					return getFixes({buffer: 'var a = 10;;;;', 
+					return getFixes({buffer: 'var a = 10;;;;',
 									  rule: rule,
 									  expected: expected,
 									  callback: callback});
@@ -2650,10 +2650,10 @@ define([
 					var rule = createTestRule('no-extra-semi');
 					 var expected = [
 					 				{value: "",
-									start: 14, 
+									start: 14,
 									end: 17}
 									];
-					return getFixes({buffer: 'function f(){};;;', 
+					return getFixes({buffer: 'function f(){};;;',
 									  rule: rule,
 									  expected: expected,
 									  callback: callback});
@@ -2662,19 +2662,19 @@ define([
 					var rule = createTestRule('no-extra-semi');
 					 var expected = [
 					 				{value: "",
-									start: 0, 
+									start: 0,
 									end: 1},
 									{value: "",
-									start: 17, 
+									start: 17,
 									end: 18},
 									{value: "",
-									start: 29, 
+									start: 29,
 									end: 30},
 									{value: "",
-									start: 42, 
+									start: 42,
 									end: 43}
 									];
-					return getFixes({buffer: '; function f() {}; var a = 0;; var b = {};;', 
+					return getFixes({buffer: '; function f() {}; var a = 0;; var b = {};;',
 									  rule: rule,
 									  expected: expected,
 									  callback: callback});
@@ -2683,10 +2683,10 @@ define([
 					var rule = createTestRule('no-extra-semi');
 					var expected = [
 					 				{value: "",
-									start: 18, 
+									start: 18,
 									end: 21}
 									];
-					return getFixes({buffer: '<script>var a = 0;;;;</script>', 
+					return getFixes({buffer: '<script>var a = 0;;;;</script>',
 									  rule: rule,
 									  expected: expected,
 									  callback: callback,
@@ -2695,9 +2695,9 @@ define([
 				it("Test no-extra-semi-2",function(callback) {
 					var rule = createTestRule('no-extra-semi');
 					var expected = {value: "",
-									start: 13, 
+									start: 13,
 									end: 14};
-					return getFixes({buffer: 'var foo = 10;;', 
+					return getFixes({buffer: 'var foo = 10;;',
 									  rule: rule,
 									  expected: expected,
 									  callback: callback});
@@ -2705,9 +2705,9 @@ define([
 				it("Test no-extra-semi-3",function(callback) {
 					var rule = createTestRule('no-extra-semi');
 					var expected = {value: "",
-									start: 13, 
+									start: 13,
 									end: 14};
-					return getFixes({buffer: 'var foo = {};;', 
+					return getFixes({buffer: 'var foo = {};;',
 									  rule: rule,
 									  expected: expected,
 									  callback: callback});
@@ -2715,25 +2715,25 @@ define([
 				it("Test no-extra-semi-4",function(callback) {
 					var rule = createTestRule('no-extra-semi');
 					var expected = {value: "",
-									start: 0, 
+									start: 0,
 									end: 1};
-					return getFixes({buffer: ';', 
+					return getFixes({buffer: ';',
 									  rule: rule,
 									  expected: expected,
 									  callback: callback});
 				});
-				
-				
-				
+
+
+
 			});
 			//NO-FALLTHROUGH
 			describe("no-fallthrough", function() {
 				it("Test no-fallthrough-1",function(callback) {
 					var rule = createTestRule('no-fallthrough');
 					var expected = {value: "//$FALLTHROUGH$",
-									start: 30, 
+									start: 30,
 									end: 30};
-					return getFixes({buffer: 'switch(num) {case 1:{code();} case 2:{}}', 
+					return getFixes({buffer: 'switch(num) {case 1:{code();} case 2:{}}',
 									  rule: rule,
 									  expected: expected,
 									  callback: callback});
@@ -2741,9 +2741,9 @@ define([
 				it("Test no-fallthrough-2",function(callback) {
 					var rule = createTestRule('no-fallthrough');
 					var expected = {value: "//$FALLTHROUGH$",
-									start: 46, 
+									start: 46,
 									end: 46};
-					return getFixes({buffer: 'switch(num) {case 1:{break;} case 2:{code();} default: {}}', 
+					return getFixes({buffer: 'switch(num) {case 1:{break;} case 2:{code();} default: {}}',
 									  rule: rule,
 									  expected: expected,
 									  callback: callback});
@@ -2751,9 +2751,9 @@ define([
 				it("Test no-fallthrough-html-1",function(callback) {
 					var rule = createTestRule('no-fallthrough');
 					var expected = {value: "//$FALLTHROUGH$",
-									start: 50, 
+									start: 50,
 									end: 50};
-					return getFixes({buffer: '<html><head><script>switch(num) {case 1:{code();} case 2:{}}</script></head></html>', 
+					return getFixes({buffer: '<html><head><script>switch(num) {case 1:{code();} case 2:{}}</script></head></html>',
 									  rule: rule,
 									  expected: expected,
 									  callback: callback,
@@ -2762,9 +2762,9 @@ define([
 				it("Test no-fallthrough-html-2",function(callback) {
 					var rule = createTestRule('no-fallthrough');
 					var expected = {value: "//$FALLTHROUGH$",
-									start: 66, 
+									start: 66,
 									end: 66};
-					return getFixes({buffer: '<html><head><script>switch(num) {case 1:{break;} case 2:{code();} default: {}}</script></head></html>', 
+					return getFixes({buffer: '<html><head><script>switch(num) {case 1:{break;} case 2:{code();} default: {}}</script></head></html>',
 									  rule: rule,
 									  expected: expected,
 									  callback: callback,
@@ -2773,9 +2773,9 @@ define([
 				it("Test no-fallthrough-html-3",function(callback) {
 					var rule = createTestRule('no-fallthrough');
 					var expected = {value: "//$FALLTHROUGH$",
-									start: 83, 
+									start: 83,
 									end: 83};
-					return getFixes({buffer: '<html><head><script></script><script>switch(num) {case 1:{break;} case 2:{code();} default: {}}</script></head></html>', 
+					return getFixes({buffer: '<html><head><script></script><script>switch(num) {case 1:{break;} case 2:{code();} default: {}}</script></head></html>',
 									  rule: rule,
 									  expected: expected,
 									  callback: callback,
@@ -2784,9 +2784,9 @@ define([
 				it("Test no-fallthrough-break-1",function(callback) {
 					var rule = createTestRule('no-fallthrough');
 					var expected = {value: "break;",
-									start: 30, 
+									start: 30,
 									end: 30};
-					return getFixes({buffer: 'switch(num) {case 1:{code();} case 2:{}}', 
+					return getFixes({buffer: 'switch(num) {case 1:{code();} case 2:{}}',
 									  rule: rule,
 									  expected: expected,
 									  callback: callback,
@@ -2795,9 +2795,9 @@ define([
 				it("Test no-fallthrough-break-2",function(callback) {
 					var rule = createTestRule('no-fallthrough');
 					var expected = {value: "break;",
-									start: 46, 
+									start: 46,
 									end: 46};
-					return getFixes({buffer: 'switch(num) {case 1:{break;} case 2:{code();} default: {}}', 
+					return getFixes({buffer: 'switch(num) {case 1:{break;} case 2:{code();} default: {}}',
 									  rule: rule,
 									  expected: expected,
 									  callback: callback,
@@ -2806,9 +2806,9 @@ define([
 				it("Test no-fallthrough-break-html-1",function(callback) {
 					var rule = createTestRule('no-fallthrough');
 					var expected = {value: "break;",
-									start: 50, 
+									start: 50,
 									end: 50};
-					return getFixes({buffer: '<html><head><script>switch(num) {case 1:{code();} case 2:{}}</script></head></html>', 
+					return getFixes({buffer: '<html><head><script>switch(num) {case 1:{code();} case 2:{}}</script></head></html>',
 									  rule: rule,
 									  expected: expected,
 									  callback: callback,
@@ -2818,9 +2818,9 @@ define([
 				it("Test no-fallthrough-break-html-2",function(callback) {
 					var rule = createTestRule('no-fallthrough');
 					var expected = {value: "break;",
-									start: 66, 
+									start: 66,
 									end: 66};
-					return getFixes({buffer: '<html><head><script>switch(num) {case 1:{break;} case 2:{code();} default: {}}</script></head></html>', 
+					return getFixes({buffer: '<html><head><script>switch(num) {case 1:{break;} case 2:{code();} default: {}}</script></head></html>',
 									  rule: rule,
 									  expected: expected,
 									  callback: callback,
@@ -2830,9 +2830,9 @@ define([
 				it("Test no-fallthrough-break-html-3",function(callback) {
 					var rule = createTestRule('no-fallthrough');
 					var expected = {value: "break;",
-									start: 83, 
+									start: 83,
 									end: 83};
-					return getFixes({buffer: '<html><head><script></script><script>switch(num) {case 1:{break;} case 2:{code();} default: {}}</script></head></html>', 
+					return getFixes({buffer: '<html><head><script></script><script>switch(num) {case 1:{break;} case 2:{code();} default: {}}</script></head></html>',
 									  rule: rule,
 									  expected: expected,
 									  callback: callback,
@@ -3007,9 +3007,9 @@ define([
 				 it("Test no-undef-defined-existing-doc",function(callback) {
 					var rule = createTestRule('no-undef');
 					var expected = {value: "/*globals aa:true */",
-									start: 0, 
+									start: 0,
 									end: 0};
-					return getFixes({buffer: '/** @returns {Object} */ function f() {aa = 10;}', 
+					return getFixes({buffer: '/** @returns {Object} */ function f() {aa = 10;}',
 										rule: rule,
 										expected: expected,
 										callback: callback});
@@ -3020,9 +3020,9 @@ define([
 				 it("Test no-undef-defined-existing-doc 2",function(callback) {
 					var rule = createTestRule('no-undef');
 					var expected = {value: "/*globals aa:true */",
-									start: 25, 
+									start: 25,
 									end: 25};
-					return getFixes({buffer: '/** just some comment */ function f() {aa = 10;}', 
+					return getFixes({buffer: '/** just some comment */ function f() {aa = 10;}',
 										rule: rule,
 										expected: expected,
 										callback: callback});
@@ -3033,9 +3033,9 @@ define([
 				 it("Test no-undef-defined-existing-doc 3",function(callback) {
 					var rule = createTestRule('no-undef');
 					var expected = {value: "/*globals Foo */",
-									start: 0, 
+									start: 0,
 									end: 0};
-					return getFixes({buffer: '/** @returns {Object} */ Foo["bar"] =function() {};', 
+					return getFixes({buffer: '/** @returns {Object} */ Foo["bar"] =function() {};',
 										rule: rule,
 										expected: expected,
 										callback: callback});
@@ -3046,9 +3046,9 @@ define([
 				 it("Test no-undef-defined-existing-doc 4",function(callback) {
 					var rule = createTestRule('no-undef');
 					var expected = {value: "/*globals Foo */",
-									start: 25, 
+									start: 25,
 									end: 25};
-					return getFixes({buffer: '/** just some comment */ Foo["bar"] =function() {};', 
+					return getFixes({buffer: '/** just some comment */ Foo["bar"] =function() {};',
 									rule: rule,
 									expected: expected,
 									callback: callback});
@@ -3056,10 +3056,10 @@ define([
 				it("Test no-undef-defined-1",function(callback) {
 					var rule = createTestRule('no-undef');
 					var expected = {value: "/*eslint-env browser */",
-									start: 0, 
+									start: 0,
 									end: 0};
 					return getFixes(
-									{buffer: 'console.log(10);', 
+									{buffer: 'console.log(10);',
 									rule: rule,
 									expected: expected,
 									callback: callback});
@@ -3070,10 +3070,10 @@ define([
 				it("Test no-undef-defined-1a",function(callback) {
 					var rule = createTestRule('no-undef');
 					var expected = {value: "/*eslint-env node */",
-									start: 0, 
+									start: 0,
 									end: 0};
 					return getFixes(
-									{buffer: 'var v = require("");\nconsole.log(10);', 
+									{buffer: 'var v = require("");\nconsole.log(10);',
 									rule: rule,
 									pbcount: 2,
 									expected: expected,
@@ -3085,10 +3085,10 @@ define([
 				it("Test no-undef-defined-1b",function(callback) {
 					var rule = createTestRule('no-undef');
 					var expected = {value: "/*eslint-env browser */",
-									start: 0, 
+									start: 0,
 									end: 0};
 					return getFixes(
-									{buffer: 'define([], function() {console.log(10);});', 
+									{buffer: 'define([], function() {console.log(10);});',
 									rule: rule,
 									pbcount: 2,
 									pbindex: 1,
@@ -3101,10 +3101,10 @@ define([
 				it("Test no-undef-defined-1c",function(callback) {
 					var rule = createTestRule('no-undef');
 					var expected = {value: "/*eslint-env browser */",
-									start: 0, 
+									start: 0,
 									end: 0};
 					return getFixes(
-									{buffer: 'define([], function(require) { var v = require("");\nconsole.log(10);});', 
+									{buffer: 'define([], function(require) { var v = require("");\nconsole.log(10);});',
 									rule: rule,
 									pbcount: 2,
 									pbindex: 1,
@@ -3117,10 +3117,10 @@ define([
 				it("Test no-undef-defined-1d",function(callback) {
 					var rule = createTestRule('no-undef');
 					var expected = {value: "/*eslint-env browser */",
-									start: 0, 
+									start: 0,
 									end: 0};
 					return getFixes(
-									{buffer: 'define("", [], function() {console.log(10);});', 
+									{buffer: 'define("", [], function() {console.log(10);});',
 									rule: rule,
 									pbcount: 2,
 									pbindex: 1,
@@ -3133,10 +3133,10 @@ define([
 				it("Test no-undef-defined-1e",function(callback) {
 					var rule = createTestRule('no-undef');
 					var expected = {value: "/*eslint-env browser */",
-									start: 0, 
+									start: 0,
 									end: 0};
 					return getFixes(
-									{buffer: 'define(function() {console.log(10);});', 
+									{buffer: 'define(function() {console.log(10);});',
 									rule: rule,
 									pbcount: 2,
 									pbindex: 1,
@@ -3149,10 +3149,10 @@ define([
 				it("Test no-undef-defined-1f",function(callback) {
 					var rule = createTestRule('no-undef');
 					var expected = {value: "/*eslint-env browser */",
-									start: 0, 
+									start: 0,
 									end: 0};
 					return getFixes(
-									{buffer: 'require({}); console.log(10);', 
+									{buffer: 'require({}); console.log(10);',
 									rule: rule,
 									pbcount: 2,
 									pbindex: 1,
@@ -3165,10 +3165,10 @@ define([
 				it("Test no-undef-defined-1g",function(callback) {
 					var rule = createTestRule('no-undef');
 					var expected = {value: "/*eslint-env browser */",
-									start: 0, 
+									start: 0,
 									end: 0};
 					return getFixes(
-									{buffer: 'require([""]); console.log(10);', 
+									{buffer: 'require([""]); console.log(10);',
 									rule: rule,
 									pbcount: 2,
 									pbindex: 1,
@@ -3178,10 +3178,10 @@ define([
 				it("Test no-undef-defined-2",function(callback) {
 					var rule = createTestRule('no-undef');
 					var expected = {value: "/*globals foo */",
-									start: 0, 
+									start: 0,
 									end: 0};
 					return getFixes(
-									{buffer: 'foo(10);', 
+									{buffer: 'foo(10);',
 									rule: rule,
 									expected: expected,
 									callback: callback});
@@ -3189,10 +3189,10 @@ define([
 				it("Test no-undef-defined-3",function(callback) {
 					var rule = createTestRule('no-undef');
 					var expected = {value: "globals foo bar",
-									start: 2, 
+									start: 2,
 									end: 14};
 					return getFixes(
-									{buffer: '/*globals foo */ foo(10); bar();', 
+									{buffer: '/*globals foo */ foo(10); bar();',
 									rule: rule,
 									expected: expected,
 									callback: callback});
@@ -3200,9 +3200,9 @@ define([
 				it("Test no-undef-defined-4",function(callback) {
 					var rule = createTestRule('no-undef');
 					var expected = {value: "globals bar foo:true",
-									start: 2, 
+									start: 2,
 									end: 13};
-					return getFixes({buffer: '/*globals bar*/ foo++; bar();', 
+					return getFixes({buffer: '/*globals bar*/ foo++; bar();',
 										rule: rule,
 										expected: expected,
 										callback: callback});
@@ -3210,9 +3210,9 @@ define([
 				it("Test no-undef-defined-5",function(callback) {
 					var rule = createTestRule('no-undef');
 					var expected = {value: "globals bar foo:true",
-									start: 2, 
+									start: 2,
 									end: 13};
-					return getFixes({buffer: '/*globals bar*/ foo = bar; bar();', 
+					return getFixes({buffer: '/*globals bar*/ foo = bar; bar();',
 									  rule: rule,
 									  expected: expected,
 									callback: callback});
@@ -3220,9 +3220,9 @@ define([
 				it("Test no-undef-defined-eslint-env-4",function(callback) {
 					var rule = createTestRule('no-undef');
 					var expected = {value: "eslint-env node, browser",
-									start: 2, 
+									start: 2,
 									end: 18};
-					return getFixes({buffer: '/*eslint-env node */ console.log(10); window.open();', 
+					return getFixes({buffer: '/*eslint-env node */ console.log(10); window.open();',
 									  rule: rule,
 									  expected: expected,
 									callback: callback});
@@ -3230,9 +3230,9 @@ define([
 				it("Test no-undef-defined-indent-1",function(callback) {
 					var rule = createTestRule('no-undef');
 					var expected = {value: "/*globals foo */\n\t\t",
-									start: 2, 
+									start: 2,
 									end: 2};
-					return getFixes({buffer: '\t\tfoo(10);', 
+					return getFixes({buffer: '\t\tfoo(10);',
 									  rule: rule,
 									  expected: expected,
 									callback: callback});
@@ -3240,9 +3240,9 @@ define([
 				it("Test no-undef-defined-indent-2",function(callback) {
 					var rule = createTestRule('no-undef');
 					var expected = {value: "/*globals foo */\n    ",
-									start: 4, 
+									start: 4,
 									end: 4};
-					return getFixes({buffer: '    foo(10);', 
+					return getFixes({buffer: '    foo(10);',
 									  rule: rule,
 									  expected: expected,
 									callback: callback});
@@ -3250,9 +3250,9 @@ define([
 				it("Test no-undef-defined-indent-3",function(callback) {
 					var rule = createTestRule('no-undef');
 					var expected = {value: "/*globals foo */\n\t  \t",
-									start: 4, 
+									start: 4,
 									end: 4};
-					return getFixes({buffer: '\t  \tfoo(10);', 
+					return getFixes({buffer: '\t  \tfoo(10);',
 									  rule: rule,
 									  expected: expected,
 									callback: callback});
@@ -3260,9 +3260,9 @@ define([
 				it("Test no-undef-defined-indent-4",function(callback) {
 					var rule = createTestRule('no-undef');
 					var expected = {value: "/*eslint-env browser */\n\t\t",
-									start: 2, 
+									start: 2,
 									end: 2};
-					return getFixes({buffer: '\t\tconsole.log(10);', 
+					return getFixes({buffer: '\t\tconsole.log(10);',
 									  rule: rule,
 									  expected: expected,
 									callback: callback});
@@ -3270,9 +3270,9 @@ define([
 				it("Test no-undef-defined-indent-5",function(callback) {
 					var rule = createTestRule('no-undef');
 					var expected = {value: "/*eslint-env browser */\n    ",
-									start: 4, 
+									start: 4,
 									end: 4};
-					return getFixes({buffer: '    console.log(10);', 
+					return getFixes({buffer: '    console.log(10);',
 									  rule: rule,
 									  expected: expected,
 									callback: callback});
@@ -3280,9 +3280,9 @@ define([
 				it("Test no-undef-defined-indent-6",function(callback) {
 					var rule = createTestRule('no-undef');
 					var expected = {value: "/*eslint-env browser */\n\t  \t",
-									start: 4, 
+									start: 4,
 									end: 4};
-					return getFixes({buffer: '\t  \tconsole.log(10);', 
+					return getFixes({buffer: '\t  \tconsole.log(10);',
 									  rule: rule,
 									  expected: expected,
 									callback: callback});
@@ -3293,9 +3293,9 @@ define([
 				 it("Navigate to definition in file",function(callback) {
 					var rule = createTestRule('no-undef-expression');
 					var expected = {file: 'quickfix_test_script.js',
-									start: 8, 
+									start: 8,
 									end: 15};
-					return getFixes({buffer: 'var a = {b: ""}; var c = a; c.d();', 
+					return getFixes({buffer: 'var a = {b: ""}; var c = a; c.d();',
 										rule: rule,
 										expected: expected,
 										callback: callback});
@@ -3309,7 +3309,7 @@ define([
 					var expected = {value: "",
 									start: 11,
 									end: 12};
-					return getFixes({buffer: 'function f(p) {}', 
+					return getFixes({buffer: 'function f(p) {}',
 										rule: rule,
 										expected: expected,
 										callback: callback});
@@ -3319,7 +3319,7 @@ define([
 					var expected = {value: "",
 									start: 12,
 									end: 16};
-					return getFixes({buffer: 'function f(p, p2, p3) {p(); p3();}', 
+					return getFixes({buffer: 'function f(p, p2, p3) {p(); p3();}',
 									  rule: rule,
 									  expected: expected,
 									callback: callback});
@@ -3329,7 +3329,7 @@ define([
 					var expected = {value: "",
 									start:16,
 									end:20};
-					return getFixes({buffer: 'function f(p, p2, p3) {p(); p2();}', 
+					return getFixes({buffer: 'function f(p, p2, p3) {p(); p2();}',
 									  rule: rule,
 									  expected: expected,
 									callback: callback});
@@ -3337,9 +3337,9 @@ define([
 				it("Test no-unused-params-4",function(callback) {
 					var rule = createTestRule('no-unused-params');
 					var expected = {value: "/* @callback */",
-									start: 11, 
+									start: 11,
 									end: 11};
-					return getFixes({buffer: 'define([], function(p, p2, p3) {p(); p2();});', 
+					return getFixes({buffer: 'define([], function(p, p2, p3) {p(); p2();});',
 									  rule: rule,
 									  expected: expected,
 									callback: callback});
@@ -3347,9 +3347,9 @@ define([
 				it("Test no-unused-params-5",function(callback) {
 					var rule = createTestRule('no-unused-params');
 					var expected = {value: "/**\n * @callback\n */",
-									start: 10, 
+									start: 10,
 									end: 10};
-					return getFixes({buffer: 'var f = { one: function(p, p2, p3) {p(); p2();}};', 
+					return getFixes({buffer: 'var f = { one: function(p, p2, p3) {p(); p2();}};',
 									  rule: rule,
 									  expected: expected,
 									callback: callback});
@@ -3360,9 +3360,9 @@ define([
 				it("Test no-unused-params-existing-doc-1",function(callback) {
 					var rule = createTestRule('no-unused-params');
 					var expected = {value: "* @callback\n",
-									start: 25, 
+									start: 25,
 									end: 25};
-					return getFixes({buffer: 'var f = { /**\n *@see\n *\n */\none: function(p, p2, p3) {p(); p2();}};', 
+					return getFixes({buffer: 'var f = { /**\n *@see\n *\n */\none: function(p, p2, p3) {p(); p2();}};',
 									  rule: rule,
 									  expected: expected,
 									callback: callback});
@@ -3374,9 +3374,9 @@ define([
 				it("Test no-unused-params-assignment-1",function(callback) {
 					var rule = createTestRule('no-unused-params');
 					var expected = {value: "* @callback\n",
-									start: 4, 
+									start: 4,
 									end: 4};
-					return getFixes({buffer: '/** */a.b.c = function(p1) {};', 
+					return getFixes({buffer: '/** */a.b.c = function(p1) {};',
 									  rule: rule,
 									  expected: expected,
 									callback: callback});
@@ -3388,9 +3388,9 @@ define([
 				it("Test no-unused-params-assignment-2",function(callback) {
 					var rule = createTestRule('no-unused-params');
 					var expected = {value: "* @callback\n",
-									start: 4, 
+									start: 4,
 									end: 4};
-					return getFixes({buffer: '/** */f = function(p1) {};', 
+					return getFixes({buffer: '/** */f = function(p1) {};',
 									  rule: rule,
 									  expected: expected,
 									callback: callback});
@@ -3402,9 +3402,9 @@ define([
 				it("Test no-unused-params-assignment-3",function(callback) {
 					var rule = createTestRule('no-unused-params');
 					var expected = {value: "* @callback\n",
-									start: 4, 
+									start: 4,
 									end: 4};
-					return getFixes({buffer: '/** */var f = function(p1) {};', 
+					return getFixes({buffer: '/** */var f = function(p1) {};',
 									  rule: rule,
 									  expected: expected,
 									callback: callback});
@@ -3416,9 +3416,9 @@ define([
 				it("Test no-unused-params-assignment-4",function(callback) {
 					var rule = createTestRule('no-unused-params');
 					var expected = {value: "* @callback\n",
-									start: 16, 
+									start: 16,
 									end: 16};
-					return getFixes({buffer: 'var f = 10, /** */g = function(p1) {};', 
+					return getFixes({buffer: 'var f = 10, /** */g = function(p1) {};',
 									  rule: rule,
 									  expected: expected,
 									callback: callback});
@@ -3430,9 +3430,9 @@ define([
 				it("Test no-unused-params-assignment-5",function(callback) {
 					var rule = createTestRule('no-unused-params');
 					var expected = {value: "/**\n * @callback\n */\n",
-									start: 0, 
+									start: 0,
 									end: 0};
-					return getFixes({buffer: 'a.b.c = function(p1) {};', 
+					return getFixes({buffer: 'a.b.c = function(p1) {};',
 									  rule: rule,
 									  expected: expected,
 									callback: callback});
@@ -3444,9 +3444,9 @@ define([
 				it("Test no-unused-params-assignment-6",function(callback) {
 					var rule = createTestRule('no-unused-params');
 					var expected = {value: "/**\n * @callback\n */\n",
-									start: 0, 
+									start: 0,
 									end: 0};
-					return getFixes({buffer: 'f = function(p1) {};', 
+					return getFixes({buffer: 'f = function(p1) {};',
 									  rule: rule,
 									  expected: expected,
 									callback: callback});
@@ -3458,9 +3458,9 @@ define([
 				it("Test no-unused-params-assignment-7",function(callback) {
 					var rule = createTestRule('no-unused-params');
 					var expected = {value: "/**\n * @callback\n */\n",
-									start: 0, 
+									start: 0,
 									end: 0};
-					return getFixes({buffer: 'var f = function(p1) {};', 
+					return getFixes({buffer: 'var f = function(p1) {};',
 									  rule: rule,
 									  expected: expected,
 									callback: callback});
@@ -3472,9 +3472,9 @@ define([
 				it("Test no-unused-params-assignment-8",function(callback) {
 					var rule = createTestRule('no-unused-params');
 					var expected = {value: "/**\n * @callback\n */\n",
-									start: 12, 
+									start: 12,
 									end: 12};
-					return getFixes({buffer: 'var f = 10, g = function(p1) {};', 
+					return getFixes({buffer: 'var f = 10, g = function(p1) {};',
 									  rule: rule,
 									  expected: expected,
 									callback: callback});
@@ -3485,9 +3485,9 @@ define([
 				it("Test no-unused-params-leading-line-comment-1",function(callback) {
 					var rule = createTestRule('no-unused-params');
 					var expected = {value: "/**\n  * @callback\n  */\n ",
-									start: 16, 
+									start: 16,
 									end: 16};
-					return getFixes({buffer: 'var f = {//foo\n one: function(p, p2, p3) {p(); p2();}};', 
+					return getFixes({buffer: 'var f = {//foo\n one: function(p, p2, p3) {p(); p2();}};',
 									  rule: rule,
 									  expected: expected,
 									callback: callback});
@@ -3497,7 +3497,7 @@ define([
 					var expected = {value: "",
 									start: 31,
 									end: 32};
-					return getFixes({buffer: '<html><head><script>function f(p) {}</script></head></html>', 
+					return getFixes({buffer: '<html><head><script>function f(p) {}</script></head></html>',
 									  rule: rule,
 									  expected: expected,
 									callback: callback,
@@ -3508,7 +3508,7 @@ define([
 					var expected = {value: "",
 									start: 32,
 									end: 36};
-					return getFixes({buffer: '<html><head><script>function f(p, p2, p3) {p(); p3();}</script></head></html>', 
+					return getFixes({buffer: '<html><head><script>function f(p, p2, p3) {p(); p3();}</script></head></html>',
 									  rule: rule,
 									  expected: expected,
 									callback: callback,
@@ -3519,7 +3519,7 @@ define([
 					var expected = {value: "",
 									start:36,
 									end:40};
-					return getFixes({buffer: '<html><head><script>function f(p, p2, p3) {p(); p2();}</script></head></html>', 
+					return getFixes({buffer: '<html><head><script>function f(p, p2, p3) {p(); p2();}</script></head></html>',
 									  rule: rule,
 									  expected: expected,
 									callback: callback,
@@ -3528,9 +3528,9 @@ define([
 				it("Test no-unused-params-html-4",function(callback) {
 					var rule = createTestRule('no-unused-params');
 					var expected = {value: "/* @callback */",
-									start: 31, 
+									start: 31,
 									end: 31};
-					return getFixes({buffer: '<html><head><script>define([], function(p, p2, p3) {p(); p2();});</script></head></html>', 
+					return getFixes({buffer: '<html><head><script>define([], function(p, p2, p3) {p(); p2();});</script></head></html>',
 									  rule: rule,
 									  expected: expected,
 									callback: callback,
@@ -3539,9 +3539,9 @@ define([
 				it("Test no-unused-params-html-5",function(callback) {
 					var rule = createTestRule('no-unused-params');
 					var expected = {value: "/**\n * @callback\n */\n",
-									start: 30, 
+									start: 30,
 									end: 30};
-					return getFixes({buffer: '<html><head><script>var f = { one: function(p, p2, p3) {p(); p2();}};</script></head></html>', 
+					return getFixes({buffer: '<html><head><script>var f = { one: function(p, p2, p3) {p(); p2();}};</script></head></html>',
 									  rule: rule,
 									  expected: expected,
 									  callback: callback,
@@ -3553,22 +3553,22 @@ define([
 				it("Test no-unused-params-html-existing-doc-1",function(callback) {
 					var rule = createTestRule('no-unused-params');
 					var expected = {value: "* @callback",
-									start: 45, 
+									start: 45,
 									end: 45};
-					return getFixes({buffer: '<html><head><script>var f = { /**\n *@see\n *\n */\none: function(p, p2, p3) {p(); p2();}};</script></head></html>', 
+					return getFixes({buffer: '<html><head><script>var f = { /**\n *@see\n *\n */\none: function(p, p2, p3) {p(); p2();}};</script></head></html>',
 									  rule: rule,
 									  expected: expected,
 									callback: callback,
 									  contentType: 'text/html'});
 				});
-	
+
 				/**
 				 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=488790
 				 */
 				 it("Test no-unused-params-update-doc-1", function(callback){
 				 	var rule = createTestRule('no-unused-params');
 				 	var expected = [{value: '',
-									start: 18, 
+									start: 18,
 									end: 72},
 									{value:'',
 									start: 94,
@@ -3579,11 +3579,11 @@ define([
 				 					callback: callback,
 				 					fixid: "no-unused-params"});
 				 });
-	
+
 				 it("Test no-unused-params-update-doc-2", function(callback){
 				 	var rule = createTestRule('no-unused-params');
 				 	var expected = [{value: '',
-									start: 12, 
+									start: 12,
 									end: 66},
 									{value:'',
 									start: 132,
@@ -3594,11 +3594,11 @@ define([
 				 					callback: callback,
 				 					fixid: "no-unused-params"});
 				 });
-	
+
 				 it("Test no-unused-params-update-doc-3", function(callback){
 				 	var rule = createTestRule('no-unused-params');
 				 	var expected = [{value: '',
-									start: 57, 
+									start: 57,
 									end: 100},
 									{value:'',
 									start: 123,
@@ -3609,7 +3609,7 @@ define([
 				 					callback: callback,
 				 					fixid: "no-unused-params"});
 				 });
-	
+
 				 /**
 				 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=490109
 				 */
@@ -3631,7 +3631,7 @@ define([
 				 		callback: callback
 				 	});
 				 });
-	
+
 				 it("Test no-unused-params-fix-all-2", function(callback){
 				 	var rule = createTestRule('no-unused-params');
 				 	var expected = [{
@@ -3650,7 +3650,7 @@ define([
 				 		callback: callback
 				 	});
 				 });
-	
+
 				 it("Test no-unused-params-fix-all-3", function(callback){
 				 	var rule = createTestRule('no-unused-params');
 				 	var expected = [{
@@ -3669,7 +3669,7 @@ define([
 				 		callback: callback
 				 	});
 				 });
-	
+
 				 it("Test no-unused-params-fix-all-4", function(callback){
 				 	var rule = createTestRule('no-unused-params');
 				 	var expected = [{
@@ -3685,7 +3685,7 @@ define([
 				 		fixid: "no-unused-params"
 				 	});
 				 });
-	
+
 				 it("Test no-unused-params-fix-all-5", function(callback){
 				 	var rule = createTestRule('no-unused-params');
 				 	var expected = [{
@@ -3705,7 +3705,7 @@ define([
 				 		fixid: "no-unused-params"
 				 	});
 				 });
-	
+
 				 it("Test no-unused-params-fix-all-6", function(callback){
 				 	var rule = createTestRule('no-unused-params');
 				 	var expected = [{
@@ -3756,9 +3756,9 @@ define([
 				it("Test eqeqeq-1",function(callback) {
 					var rule = createTestRule('eqeqeq');
 					var expected = {value: "===",
-									start: 5, 
+									start: 5,
 									end: 7};
-					return getFixes({buffer: 'if(1 == 3) {}', 
+					return getFixes({buffer: 'if(1 == 3) {}',
 									  rule: rule,
 									  expected: expected,
 									callback: callback});
@@ -3766,9 +3766,9 @@ define([
 				it("Test eqeqeq-2",function(callback) {
 					var rule = createTestRule('eqeqeq');
 					var expected = {value: "===",
-									start: 12, 
+									start: 12,
 									end: 14};
-					return getFixes({buffer: 'if(typeof f == "undefined") {}', 
+					return getFixes({buffer: 'if(typeof f == "undefined") {}',
 									  rule: rule,
 									  expected: expected,
 									callback: callback});
@@ -3776,9 +3776,9 @@ define([
 				it("Test eqeqeq-3",function(callback) {
 					var rule = createTestRule('eqeqeq');
 					var expected = {value: "!==",
-									start: 5, 
+									start: 5,
 									end: 7};
-					return getFixes({buffer: 'if(1 != 3) {}', 
+					return getFixes({buffer: 'if(1 != 3) {}',
 									  rule: rule,
 									  expected: expected,
 									callback: callback});
@@ -3786,9 +3786,9 @@ define([
 				it("Test eqeqeq-4",function(callback) {
 					var rule = createTestRule('eqeqeq');
 					var expected = {value: "!==",
-									start: 12, 
+									start: 12,
 									end: 14};
-					return getFixes({buffer: 'if(typeof f != "undefined") {}', 
+					return getFixes({buffer: 'if(typeof f != "undefined") {}',
 									  rule: rule,
 									  expected: expected,
 									callback: callback});
@@ -3796,9 +3796,9 @@ define([
 				it("Test eqeqeq-html-1",function(callback) {
 					var rule = createTestRule('eqeqeq');
 					var expected = {value: "===",
-									start: 25, 
+									start: 25,
 									end: 27};
-					return getFixes({buffer: '<html><head><script>if(1 == 3) {}</script></head></html>', 
+					return getFixes({buffer: '<html><head><script>if(1 == 3) {}</script></head></html>',
 									  rule: rule,
 									  expected: expected,
 									callback: callback,
@@ -3807,9 +3807,9 @@ define([
 				it("Test eqeqeq-html-2",function(callback) {
 					var rule = createTestRule('eqeqeq');
 					var expected = {value: "===",
-									start: 32, 
+									start: 32,
 									end: 34};
-					return getFixes({buffer: '<html><head><script>if(typeof f == "undefined") {}</script></head></html>', 
+					return getFixes({buffer: '<html><head><script>if(typeof f == "undefined") {}</script></head></html>',
 									  rule: rule,
 									  expected: expected,
 									  callback: callback,
@@ -3818,9 +3818,9 @@ define([
 				it("Test eqeqeq-html-3",function(callback) {
 					var rule = createTestRule('eqeqeq');
 					var expected = {value: "!==",
-									start: 25, 
+									start: 25,
 									end: 27};
-					return getFixes({buffer: '<html><head><script>if(1 != 3) {}</script></head></html>', 
+					return getFixes({buffer: '<html><head><script>if(1 != 3) {}</script></head></html>',
 									  rule: rule,
 									  expected: expected,
 									  callback: callback,
@@ -3829,9 +3829,9 @@ define([
 				it("Test eqeqeq-html-4",function(callback) {
 					var rule = createTestRule('eqeqeq');
 					var expected = {value: "!==",
-									start: 32, 
+									start: 32,
 									end: 34};
-					return getFixes({buffer: '<html><head><script>if(typeof f != "undefined") {}</script></head></html>', 
+					return getFixes({buffer: '<html><head><script>if(typeof f != "undefined") {}</script></head></html>',
 									  rule: rule,
 									  expected: expected,
 									callback: callback,
@@ -3840,9 +3840,9 @@ define([
 				it("Test eqeqeq-html-5",function(callback) {
 					var rule = createTestRule('eqeqeq');
 					var expected = {value: "!==",
-									start: 49, 
+									start: 49,
 									end: 51};
-					return getFixes({buffer: '<html><head><script></script><script>if(typeof f != "undefined") {}</script></head></html>', 
+					return getFixes({buffer: '<html><head><script></script><script>if(typeof f != "undefined") {}</script></head></html>',
 									  rule: rule,
 									  expected: expected,
 									  callback: callback,
@@ -3851,13 +3851,13 @@ define([
 				it("Test eqeqeq fix all 1",function(callback) {
 					var rule = createTestRule('eqeqeq');
 					var expected = [{value: "===",
-									start: 5, 
+									start: 5,
 									end: 7},
 									{value: "===",
 									start: 20,
 									end: 22}
 									];
-					return getFixes({buffer: 'if(1 == 3) {} if (1 == 4) {}', 
+					return getFixes({buffer: 'if(1 == 3) {} if (1 == 4) {}',
 									  rule: rule,
 									  expected: expected,
 									callback: callback});
@@ -3865,13 +3865,13 @@ define([
 				it("Test eqeqeq fix all 2",function(callback) {
 					var rule = createTestRule('eqeqeq');
 					var expected = [{value: "!==",
-									start: 5, 
+									start: 5,
 									end: 7},
 									{value: "!==",
 									start: 20,
 									end: 22}
 									];
-					return getFixes({buffer: 'if(1 != 3) {} if (1 != 4) {}', 
+					return getFixes({buffer: 'if(1 != 3) {} if (1 != 4) {}',
 									  rule: rule,
 									  expected: expected,
 									callback: callback});
@@ -3879,13 +3879,13 @@ define([
 				it("Test eqeqeq fix all 3",function(callback) {
 					var rule = createTestRule('eqeqeq');
 					var expected = [{value: "===",
-									start: 5, 
+									start: 5,
 									end: 7},
 									{value: "!==",
 									start: 20,
 									end: 22}
 									];
-					return getFixes({buffer: 'if(1 == 3) {} if (1 != 4) {}', 
+					return getFixes({buffer: 'if(1 == 3) {} if (1 != 4) {}',
 									  rule: rule,
 									  expected: expected,
 									callback: callback});
@@ -3896,9 +3896,9 @@ define([
 				it("Test no-unreachable-1",function(callback) {
 					var rule = createTestRule('no-unreachable');
 					var expected = {value: "",
-									start: 30, 
+									start: 30,
 									end: 36};
-					return getFixes({buffer: 'function foo(){var f;return 1;f = 9;}', 
+					return getFixes({buffer: 'function foo(){var f;return 1;f = 9;}',
 									  rule: rule,
 									  expected: expected,
 									  callback: callback});
@@ -3906,9 +3906,9 @@ define([
 				it("Test no-unreachable-2",function(callback) {
 					var rule = createTestRule('no-unreachable');
 					var expected = {value: "",
-									start: 32, 
+									start: 32,
 									end: 39};
-					return getFixes({buffer: 'switch(num) { case 1: {throw e; f = 10;}}', 
+					return getFixes({buffer: 'switch(num) { case 1: {throw e; f = 10;}}',
 									  rule: rule,
 									  expected: expected,
 									  callback: callback});
@@ -3916,9 +3916,9 @@ define([
 				it("Test no-unreachable-html-1",function(callback) {
 					var rule = createTestRule('no-unreachable');
 					var expected = {value: "",
-									start: 43, 
+									start: 43,
 									end: 51};
-					return getFixes({buffer: '<html><head><script>function f(p) {return; foo = 9;}</script></head></html>', 
+					return getFixes({buffer: '<html><head><script>function f(p) {return; foo = 9;}</script></head></html>',
 									  rule: rule,
 									  expected: expected,
 									callback: callback,
@@ -3927,9 +3927,9 @@ define([
 				it("Test no-unreachable-html-2",function(callback) {
 					var rule = createTestRule('no-unreachable');
 					var expected = {value: "",
-									start: 52, 
+									start: 52,
 									end: 59};
-					return getFixes({buffer: '<html><head><script>switch(num) { case 1: {throw e; f = 10;}}</script></head></html>', 
+					return getFixes({buffer: '<html><head><script>switch(num) { case 1: {throw e; f = 10;}}</script></head></html>',
 									  rule: rule,
 									  expected: expected,
 									callback: callback,
@@ -3941,9 +3941,9 @@ define([
 				it("Test no-sparse-arrays-1",function(callback) {
 					var rule = createTestRule('no-sparse-arrays');
 					var expected = {value: "[1, 2]",
-									start: 8, 
+									start: 8,
 									end: 16};
-					return getFixes({buffer: 'var a = [1, , 2]', 
+					return getFixes({buffer: 'var a = [1, , 2]',
 									  rule: rule,
 									  expected: expected,
 									callback: callback});
@@ -3951,9 +3951,9 @@ define([
 				it("Test no-sparse-arrays-2",function(callback) {
 					var rule = createTestRule('no-sparse-arrays');
 					var expected = {value: "[1, 2]",
-									start: 8, 
+									start: 8,
 									end: 20};
-					return getFixes({buffer: 'var a = [1, , 2, , ]', 
+					return getFixes({buffer: 'var a = [1, , 2, , ]',
 									  rule: rule,
 									  expected: expected,
 									callback: callback});
@@ -3961,9 +3961,9 @@ define([
 				it("Test no-sparse-arrays-3",function(callback) {
 					var rule = createTestRule('no-sparse-arrays');
 					var expected = {value: "[1, 2]",
-									start: 8, 
+									start: 8,
 									end: 24};
-					return getFixes({buffer: 'var a = [, , 1, , 2, , ]', 
+					return getFixes({buffer: 'var a = [, , 1, , 2, , ]',
 									  rule: rule,
 									  expected: expected,
 									callback: callback});
@@ -3971,9 +3971,9 @@ define([
 				it("Test no-sparse-arrays-4",function(callback) {
 					var rule = createTestRule('no-sparse-arrays');
 					var expected = {value: "[1, 2]",
-									start: 8, 
+									start: 8,
 									end: 27};
-					return getFixes({buffer: 'var a = [, , \n1, \n, 2, \n, ]', 
+					return getFixes({buffer: 'var a = [, , \n1, \n, 2, \n, ]',
 									  rule: rule,
 									  expected: expected,
 									callback: callback});
@@ -3981,9 +3981,9 @@ define([
 				it("Test no-sparse-arrays-5",function(callback) {
 					var rule = createTestRule('no-sparse-arrays');
 					var expected = {value: "[1, 2, 3]",
-									start: 8, 
+									start: 8,
 									end: 28};
-					return getFixes({buffer: 'var a = [, , \n1, \n, 2, \n, 3]', 
+					return getFixes({buffer: 'var a = [, , \n1, \n, 2, \n, 3]',
 									  rule: rule,
 									  expected: expected,
 									callback: callback});
@@ -3991,9 +3991,9 @@ define([
 				it("Test no-sparse-arrays-6",function(callback) {
 					var rule = createTestRule('no-sparse-arrays');
 					var expected = {value: "[1, 2, 3]",
-									start: 8, 
+									start: 8,
 									end: 41};
-					return getFixes({buffer: 'var a = [, ,,,, \n1, \n, , ,, ,\n,, 2, \n, 3]', 
+					return getFixes({buffer: 'var a = [, ,,,, \n1, \n, , ,, ,\n,, 2, \n, 3]',
 									  rule: rule,
 									  expected: expected,
 									callback: callback});
@@ -4001,9 +4001,9 @@ define([
 				it("Test no-sparse-arrays-7",function(callback) {
 					var rule = createTestRule('no-sparse-arrays');
 					var expected = {value: "[1, 2]",
-									start: 8, 
+									start: 8,
 									end: 20};
-					return getFixes({buffer: 'var a = [1, , 2, , ];', 
+					return getFixes({buffer: 'var a = [1, , 2, , ];',
 									  rule: rule,
 									  expected: expected,
 									  callback: callback});
@@ -4011,9 +4011,9 @@ define([
 				it("Test no-sparse-arrays-8",function(callback) {
 					var rule = createTestRule('no-sparse-arrays');
 					var expected = {value: "[1, 2]",
-									start: 8, 
+									start: 8,
 									end: 27};
-					return getFixes({buffer: 'var a = [, , \n1, \n, 2, \n, ];', 
+					return getFixes({buffer: 'var a = [, , \n1, \n, 2, \n, ];',
 									  rule: rule,
 									  expected: expected,
 									  callback: callback});
@@ -4024,9 +4024,9 @@ define([
 				it("Test no-sparse-arrays-no-spacing-1",function(callback) {
 					var rule = createTestRule('no-sparse-arrays');
 					var expected = {value: "[1, 2]",
-									start: 8, 
+									start: 8,
 									end: 22};
-					return getFixes({buffer: 'var a = [,,\n1,\n,2,\n,,]', 
+					return getFixes({buffer: 'var a = [,,\n1,\n,2,\n,,]',
 									  rule: rule,
 									  expected: expected,
 									  callback: callback});
@@ -4037,9 +4037,9 @@ define([
 				it("Test no-sparse-arrays-no-spacing-2",function(callback) {
 					var rule = createTestRule('no-sparse-arrays');
 					var expected = {value: "[1, 2]",
-									start: 0, 
+									start: 0,
 									end: 14};
-					return getFixes({buffer: '[,,\n1,\n,2,\n,,]', 
+					return getFixes({buffer: '[,,\n1,\n,2,\n,,]',
 									  rule: rule,
 									  expected: expected,
 									  callback: callback,
@@ -4051,9 +4051,9 @@ define([
 				it("Test no-sparse-arrays-no-spacing-3",function(callback) {
 					var rule = createTestRule('no-sparse-arrays');
 					var expected = {value: "[1, 2]",
-									start: 8, 
+									start: 8,
 									end: 22};
-					return getFixes({buffer: 'var a = [,,\n1,\n,2,\n,,];', 
+					return getFixes({buffer: 'var a = [,,\n1,\n,2,\n,,];',
 									  rule: rule,
 									  expected: expected,
 									callback: callback});
@@ -4064,9 +4064,9 @@ define([
 				it("Test no-sparse-arrays-no-spacing-4",function(callback) {
 					var rule = createTestRule('no-sparse-arrays');
 					var expected = {value: "[1, 2]",
-									start: 8, 
+									start: 8,
 									end: 22};
-					return getFixes({buffer: 'var a = [,,\n1,\n,2,\n,,]\nvar foo = "bar";', 
+					return getFixes({buffer: 'var a = [,,\n1,\n,2,\n,,]\nvar foo = "bar";',
 									  rule: rule,
 									  expected: expected,
 									callback: callback});
@@ -4074,9 +4074,9 @@ define([
 				it("Test no-sparse-arrays-html-1",function(callback) {
 					var rule = createTestRule('no-sparse-arrays');
 					var expected = {value: "[1, 2]",
-									start: 28, 
+									start: 28,
 									end: 36};
-					return getFixes({buffer: '<html><head><script>var a = [1, , 2]</script></head></html>', 
+					return getFixes({buffer: '<html><head><script>var a = [1, , 2]</script></head></html>',
 									  rule: rule,
 									  expected: expected,
 									callback: callback,
@@ -4085,9 +4085,9 @@ define([
 				it("Test no-sparse-arrays-html-2",function(callback) {
 					var rule = createTestRule('no-sparse-arrays');
 					var expected = {value: "[1, 2]",
-									start: 28, 
+									start: 28,
 									end: 40};
-					return getFixes({buffer: '<html><head><script>var a = [1, , 2, , ]</script></head></html>', 
+					return getFixes({buffer: '<html><head><script>var a = [1, , 2, , ]</script></head></html>',
 									  rule: rule,
 									  expected: expected,
 									callback: callback,
@@ -4096,9 +4096,9 @@ define([
 				it("Test no-sparse-arrays-html-3",function(callback) {
 					var rule = createTestRule('no-sparse-arrays');
 					var expected = {value: "[1, 2]",
-									start: 28, 
+									start: 28,
 									end: 44};
-					return getFixes({buffer: '<html><head><script>var a = [, , 1, , 2, , ]</script></head></html>', 
+					return getFixes({buffer: '<html><head><script>var a = [, , 1, , 2, , ]</script></head></html>',
 									  rule: rule,
 									  expected: expected,
 									callback: callback,
@@ -4107,9 +4107,9 @@ define([
 				it("Test no-sparse-arrays-html-4",function(callback) {
 					var rule = createTestRule('no-sparse-arrays');
 					var expected = {value: "[1, 2]",
-									start: 28, 
+									start: 28,
 									end: 46};
-					return getFixes({buffer: '<html><head><script>var a = [, , 1, \n, 2, \n, ]</script></head></html>', 
+					return getFixes({buffer: '<html><head><script>var a = [, , 1, \n, 2, \n, ]</script></head></html>',
 									  rule: rule,
 									  expected: expected,
 									callback: callback,
@@ -4118,9 +4118,9 @@ define([
 				it("Test no-sparse-arrays-html-5",function(callback) {
 					var rule = createTestRule('no-sparse-arrays');
 					var expected = {value: "[1, 2, 3]",
-									start: 28, 
+									start: 28,
 									end: 48};
-					return getFixes({buffer: '<html><head><script>var a = [, , \n1, \n, 2, \n, 3]</script></head></html>', 
+					return getFixes({buffer: '<html><head><script>var a = [, , \n1, \n, 2, \n, 3]</script></head></html>',
 									  rule: rule,
 									  expected: expected,
 									callback: callback,
@@ -4129,9 +4129,9 @@ define([
 				it("Test no-sparse-arrays-html-6",function(callback) {
 					var rule = createTestRule('no-sparse-arrays');
 					var expected = {value: "[1, 2, 3]",
-									start: 28, 
+									start: 28,
 									end: 61};
-					return getFixes({buffer: '<html><head><script>var a = [, ,,,, \n1, \n, , ,, ,\n,, 2, \n, 3]</script></head></html>', 
+					return getFixes({buffer: '<html><head><script>var a = [, ,,,, \n1, \n, , ,, ,\n,, 2, \n, 3]</script></head></html>',
 									  rule: rule,
 									  expected: expected,
 									callback: callback,
@@ -4140,9 +4140,9 @@ define([
 				it("Test no-sparse-arrays-html-7",function(callback) {
 					var rule = createTestRule('no-sparse-arrays');
 					var expected = {value: "[1, 2]",
-									start: 28, 
+									start: 28,
 									end: 40};
-					return getFixes({buffer: '<html><head><script>var a = [1, , 2, , ];</script></head></html>', 
+					return getFixes({buffer: '<html><head><script>var a = [1, , 2, , ];</script></head></html>',
 									  rule: rule,
 									  expected: expected,
 									callback: callback,
@@ -4151,35 +4151,35 @@ define([
 				it("Test no-sparse-arrays-html-8",function(callback) {
 					var rule = createTestRule('no-sparse-arrays');
 					var expected = {value: "[1, 2]",
-									start: 28, 
+									start: 28,
 									end: 47};
-					return getFixes({buffer: '<html><head><script>var a = [, , \n1, \n, 2, \n, ];</script></head></html>', 
+					return getFixes({buffer: '<html><head><script>var a = [, , \n1, \n, 2, \n, ];</script></head></html>',
 									  rule: rule,
 									  expected: expected,
 									callback: callback,
 									  contentType: 'text/html'});
 				});
-	
+
 				/**
 				 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=489146
 				 */
 				it("Test no-sparse-arrays-empty-array-1",function(callback) {
 					var rule = createTestRule('no-sparse-arrays');
 					var expected = {value: "",
-									start: 9, 
+									start: 9,
 									end: 24};
-					return getFixes({buffer: 'var a = [, , \n, \n, , \n, ];', 
+					return getFixes({buffer: 'var a = [, , \n, \n, , \n, ];',
 									  rule: rule,
 									  expected: expected,
 									  callback: callback});
 				});
-	
+
 				it("Test no-sparse-arrays-empty-array-2",function(callback) {
 					var rule = createTestRule('no-sparse-arrays');
 					var expected = {value: "",
-									start: 9, 
+									start: 9,
 									end: 13};
-					return getFixes({buffer: 'var a = [, , ]', 
+					return getFixes({buffer: 'var a = [, , ]',
 									  rule: rule,
 									  expected: expected,
 									callback: callback});
@@ -4187,9 +4187,9 @@ define([
 				it("Test no-sparse-arrays-empty-array-3",function(callback) {
 					var rule = createTestRule('no-sparse-arrays');
 					var expected = {value: "",
-									start: 10, 
+									start: 10,
 									end: 22};
-					return getFixes({buffer: 'var a = \n[, , , , , , ]', 
+					return getFixes({buffer: 'var a = \n[, , , , , , ]',
 									  rule: rule,
 									  expected: expected,
 									callback: callback});
@@ -4197,9 +4197,9 @@ define([
 				it("Test no-sparse-arrays-empty-array-4",function(callback) {
 					var rule = createTestRule('no-sparse-arrays');
 					var expected = {value: "",
-									start: 9, 
+									start: 9,
 									end: 24};
-					return getFixes({buffer: 'var a = [, , \n, \n, , \n, ]\n;', 
+					return getFixes({buffer: 'var a = [, , \n, \n, , \n, ]\n;',
 									  rule: rule,
 									  expected: expected,
 									callback: callback});
@@ -4210,9 +4210,9 @@ define([
 				it("Test semi-1",function(callback) {
 					var rule = createTestRule('semi');
 					var expected = {value: ";",
-									start: 14, 
+									start: 14,
 									end: 14};
-					return getFixes({buffer: 'var a = [1, 2]', 
+					return getFixes({buffer: 'var a = [1, 2]',
 									  rule: rule,
 									  expected: expected,
 									callback: callback});
@@ -4220,9 +4220,9 @@ define([
 				it("Test semi-2",function(callback) {
 					var rule = createTestRule('semi');
 					var expected = {value: ";",
-									start: 5, 
+									start: 5,
 									end: 5};
-					return getFixes({buffer: 'foo()', 
+					return getFixes({buffer: 'foo()',
 									  rule: rule,
 									  expected: expected,
 									callback: callback});
@@ -4230,9 +4230,9 @@ define([
 				it("Test semi-3",function(callback) {
 					var rule = createTestRule('semi');
 					var expected = {value: ";",
-									start: 10, 
+									start: 10,
 									end: 10};
-					return getFixes({buffer: 'var a = {}', 
+					return getFixes({buffer: 'var a = {}',
 									  rule: rule,
 									  expected: expected,
 									callback: callback});
@@ -4240,9 +4240,9 @@ define([
 				it("Test semi-html-1",function(callback) {
 					var rule = createTestRule('semi');
 					var expected = {value: ";",
-									start: 34, 
+									start: 34,
 									end: 34};
-					return getFixes({buffer: '<html><head><script>var a = [1, 2]</script></head></html>', 
+					return getFixes({buffer: '<html><head><script>var a = [1, 2]</script></head></html>',
 									  rule: rule,
 									  expected: expected,
 									callback: callback,
@@ -4251,9 +4251,9 @@ define([
 				it("Test semi-html-2",function(callback) {
 					var rule = createTestRule('semi');
 					var expected = {value: ";",
-									start: 25, 
+									start: 25,
 									end: 25};
-					return getFixes({buffer: '<html><head><script>foo()</script></head></html>', 
+					return getFixes({buffer: '<html><head><script>foo()</script></head></html>',
 									  rule: rule,
 									  expected: expected,
 									callback: callback,
@@ -4262,9 +4262,9 @@ define([
 				it("Test semi-html-3",function(callback) {
 					var rule = createTestRule('semi');
 					var expected = {value: ";",
-									start: 30, 
+									start: 30,
 									end: 30};
-					return getFixes({buffer: '<html><head><script>var a = {}</script></head></html>', 
+					return getFixes({buffer: '<html><head><script>var a = {}</script></head></html>',
 									  rule: rule,
 									  expected: expected,
 									callback: callback,
@@ -4274,13 +4274,13 @@ define([
 					var rule = createTestRule('semi');
 					var expected = [
 									{value: ";",
-									start: 14, 
+									start: 14,
 									end: 14},
 									{value: ";",
-									start: 29, 
+									start: 29,
 									end: 29}
 									];
-					return getFixes({buffer: 'var a = [1, 2]\nvar b = [1, 2]', 
+					return getFixes({buffer: 'var a = [1, 2]\nvar b = [1, 2]',
 									  rule: rule,
 									  expected: expected,
 									callback: callback});
@@ -4289,13 +4289,13 @@ define([
 					var rule = createTestRule('semi');
 					var expected = [
 									{value: ";",
-									start: 5, 
+									start: 5,
 									end: 5},
 									{value: ";",
-									start: 11, 
+									start: 11,
 									end: 11}
 									];
-					return getFixes({buffer: 'foo()\nfoo()', 
+					return getFixes({buffer: 'foo()\nfoo()',
 									  rule: rule,
 									  expected: expected,
 									callback: callback});
@@ -4304,13 +4304,13 @@ define([
 					var rule = createTestRule('semi');
 					var expected = [
 									{value: ";",
-									start: 10, 
+									start: 10,
 									end: 10},
 									{value: ";",
-									start: 21, 
+									start: 21,
 									end: 21}
 									];
-					return getFixes({buffer: 'var a = {}\nvar a = {}', 
+					return getFixes({buffer: 'var a = {}\nvar a = {}',
 									  rule: rule,
 									  expected: expected,
 									callback: callback});
@@ -4319,16 +4319,16 @@ define([
 					var rule = createTestRule('semi');
 					var expected = [
 									{value: ";",
-									start: 14, 
+									start: 14,
 									end: 14},
 									{value: ";",
-									start: 20, 
+									start: 20,
 									end: 20},
 									{value: ";",
-									start: 31, 
+									start: 31,
 									end: 31}
 									];
-					return getFixes({buffer: 'var a = [1, 2]\nfoo()\nvar a = {}', 
+					return getFixes({buffer: 'var a = [1, 2]\nfoo()\nvar a = {}',
 									  rule: rule,
 									  expected: expected,
 									callback: callback});
@@ -4339,9 +4339,9 @@ define([
 				it("Test no-unused-vars-unused-1",function(callback) {
 					var rule = createTestRule('no-unused-vars');
 					var expected = {value: "",
-									start: 0, 
+									start: 0,
 									end: 6};
-					return getFixes({buffer: 'var a;', 
+					return getFixes({buffer: 'var a;',
 									  rule: rule,
 									  expected: expected,
 									  callback: callback,
@@ -4350,9 +4350,9 @@ define([
 				it("Test no-unused-vars-unused-2",function(callback) {
 					var rule = createTestRule('no-unused-vars');
 					var expected = {value: "",
-									start: 10, 
+									start: 10,
 									end: 13};
-					return getFixes({buffer: 'var a = 10, b;', 
+					return getFixes({buffer: 'var a = 10, b;',
 									  rule: rule,
 									  expected: expected,
 									  callback: callback,
@@ -4361,9 +4361,9 @@ define([
 				it("Test no-unused-vars-unused-3",function(callback) {
 					var rule = createTestRule('no-unused-vars');
 					var expected = {value: "",
-									start: 10, 
+									start: 10,
 									end: 13};
-					return getFixes({buffer: 'var a = 10, b, c = 1;', 
+					return getFixes({buffer: 'var a = 10, b, c = 1;',
 									  rule: rule,
 									  expected: expected,
 									  callback: callback,
@@ -4372,9 +4372,9 @@ define([
 				it("Test no-unused-vars-unused-funcdecl-1",function(callback) {
 					var rule = createTestRule('no-unused-vars');
 					var expected = {value: "",
-									start: 0, 
+									start: 0,
 									end: 15};
-					return getFixes({buffer: 'function f() {}', 
+					return getFixes({buffer: 'function f() {}',
 									  rule: rule,
 									  expected: expected,
 									  callback: callback,
@@ -4383,9 +4383,9 @@ define([
 				it("Test no-unused-vars-unused-funcdecl-2",function(callback) {
 					var rule = createTestRule('no-unused-vars');
 					var expected = {value: "",
-									start: 26, 
+									start: 26,
 									end: 41};
-					return getFixes({buffer: 'var a = {one: function() {function f() {}}}', 
+					return getFixes({buffer: 'var a = {one: function() {function f() {}}}',
 									  rule: rule,
 									  expected: expected,
 									  callback: callback,
@@ -4394,9 +4394,9 @@ define([
 				it("Test no-unused-vars-unused-html-1",function(callback) {
 					var rule = createTestRule('no-unused-vars');
 					var expected = {value: "",
-									start: 20, 
+									start: 20,
 									end: 26};
-					return getFixes({buffer: '<html><head><script>var a;</script></head></html>', 
+					return getFixes({buffer: '<html><head><script>var a;</script></head></html>',
 									  rule: rule,
 									  expected: expected,
 									callback: callback,
@@ -4406,9 +4406,9 @@ define([
 				it("Test no-unused-vars-unused-html-2",function(callback) {
 					var rule = createTestRule('no-unused-vars');
 					var expected = {value: "",
-									start: 30, 
+									start: 30,
 									end: 33};
-					return getFixes({buffer: '<html><head><script>var a = 10, b;</script></head></html>', 
+					return getFixes({buffer: '<html><head><script>var a = 10, b;</script></head></html>',
 									  rule: rule,
 									  expected: expected,
 									callback: callback,
@@ -4418,9 +4418,9 @@ define([
 				it("Test no-unused-vars-unused-html-3",function(callback) {
 					var rule = createTestRule('no-unused-vars');
 					var expected = {value: "",
-									start: 30, 
+									start: 30,
 									end: 33};
-					return getFixes({buffer: '<html><head><script>var a = 10, b, c = 1;</script></head></html>', 
+					return getFixes({buffer: '<html><head><script>var a = 10, b, c = 1;</script></head></html>',
 									  rule: rule,
 									  expected: expected,
 									callback: callback,
@@ -4430,9 +4430,9 @@ define([
 				it("Test no-unused-vars-unused-funcdecl-html-1",function(callback) {
 					var rule = createTestRule('no-unused-vars');
 					var expected = {value: "",
-									start: 20, 
+									start: 20,
 									end: 35};
-					return getFixes({buffer: '<html><head><script>function f() {}</script></head></html>', 
+					return getFixes({buffer: '<html><head><script>function f() {}</script></head></html>',
 									  rule: rule,
 									  expected: expected,
 									callback: callback,
@@ -4442,9 +4442,9 @@ define([
 				it("Test no-unused-vars-unused-funcdecl-html-2",function(callback) {
 					var rule = createTestRule('no-unused-vars');
 					var expected = {value: "",
-									start: 46, 
+									start: 46,
 									end: 61};
-					return getFixes({buffer: '<html><head><script>var a = {one: function() {function f() {}}}</script></head></html>', 
+					return getFixes({buffer: '<html><head><script>var a = {one: function() {function f() {}}}</script></head></html>',
 									  rule: rule,
 									  expected: expected,
 									callback: callback,
@@ -4457,9 +4457,9 @@ define([
 				it("Test no-unused-vars-unread-1",function(callback) {
 					var rule = createTestRule('no-unused-vars');
 					var expected = {value: "",
-									start: 0, 
+									start: 0,
 									end: 10};
-					return getFixes({buffer: 'var a = 4;', 
+					return getFixes({buffer: 'var a = 4;',
 									  rule: rule,
 									  expected: expected,
 									  callback: callback,
@@ -4468,9 +4468,9 @@ define([
 				it("Test no-unused-vars-unread-2",function(callback) {
 					var rule = createTestRule('no-unused-vars');
 					var expected = {value: "",
-									start: 4, 
+									start: 4,
 									end: 12};
-					return getFixes({buffer: 'var a = 10, b;', 
+					return getFixes({buffer: 'var a = 10, b;',
 									  rule: rule,
 									  expected: expected,
 									  callback: callback,
@@ -4479,9 +4479,9 @@ define([
 				it("Test no-unused-vars-unread-3",function(callback) {
 					var rule = createTestRule('no-unused-vars');
 					var expected = {value: "",
-									start: 5, 
+									start: 5,
 									end: 12};
-					return getFixes({buffer: 'var a, b = 4;', 
+					return getFixes({buffer: 'var a, b = 4;',
 									  rule: rule,
 									  expected: expected,
 									  callback: callback,
@@ -4493,9 +4493,9 @@ define([
 				it("Test missing-nls-1", function(callback) {
 					var rule = createTestRule('missing-nls');
 					var expected = {value: " //$NON-NLS-1$",
-									start: 12, 
+									start: 12,
 									end: 12};
-					return getFixes({buffer: 'var a = "a";', 
+					return getFixes({buffer: 'var a = "a";',
 									  rule: rule,
 									  expected: expected,
 									  callback: callback,
@@ -4504,9 +4504,9 @@ define([
 				it("Test missing-nls-2",function(callback) {
 					var rule = createTestRule('missing-nls');
 					var expected = {value: " //$NON-NLS-2$",
-									start: 39, 
+									start: 39,
 									end: 39};
-					return getFixes({buffer: 'var a = "a"; var b = "b"; //$NON-NLS-1$', 
+					return getFixes({buffer: 'var a = "a"; var b = "b"; //$NON-NLS-1$',
 									  rule: rule,
 									  expected: expected,
 									callback: callback,
@@ -4515,9 +4515,9 @@ define([
 				it("Test missing-nls-3",function(callback) {
 					var rule = createTestRule('missing-nls');
 					var expected = {value: " //$NON-NLS-1$",
-									start: 39, 
+									start: 39,
 									end: 39};
-					return getFixes({buffer: 'var a = "a"; var b = "b"; //$NON-NLS-2$', 
+					return getFixes({buffer: 'var a = "a"; var b = "b"; //$NON-NLS-2$',
 									  rule: rule,
 									  expected: expected,
 									callback: callback,
@@ -4553,9 +4553,9 @@ define([
 				it("Test unnecessary-nls-1", function(callback) {
 					var rule = createTestRule('unnecessary-nls');
 					var expected = {value: "",
-									start: 10, 
+									start: 10,
 									end: 24};
-					return getFixes({buffer: 'var a = 1; //$NON-NLS-0$', 
+					return getFixes({buffer: 'var a = 1; //$NON-NLS-0$',
 									  rule: rule,
 									  expected: expected,
 									  callback: callback,
@@ -4564,9 +4564,9 @@ define([
 				it("Test unnecessary-nls-2", function(callback) {
 					var rule = createTestRule('unnecessary-nls');
 					var expected = {value: "",
-									start: 10, 
+									start: 10,
 									end: 24};
-					return getFixes({buffer: 'var a = 1; //$NON-NLS-1$', 
+					return getFixes({buffer: 'var a = 1; //$NON-NLS-1$',
 									  rule: rule,
 									  expected: expected,
 									  callback: callback,
@@ -4575,9 +4575,9 @@ define([
 				it("Test unnecessary-nls-3", function(callback) {
 					var rule = createTestRule('unnecessary-nls');
 					var expected = {value: "",
-									start: 10, 
+									start: 10,
 									end: 24};
-					return getFixes({buffer: 'var a = 1; //$NON-NLS-2$', 
+					return getFixes({buffer: 'var a = 1; //$NON-NLS-2$',
 									  rule: rule,
 									  expected: expected,
 									  callback: callback,
@@ -4586,9 +4586,9 @@ define([
 				it("Test unnecessary-nls-4", function(callback) {
 					var rule = createTestRule('unnecessary-nls');
 					var expected = {value: "",
-									start: 13, 
+									start: 13,
 									end: 24};
-					return getFixes({buffer: 'var a = 1; //$NON-NLS-1$ foo', 
+					return getFixes({buffer: 'var a = 1; //$NON-NLS-1$ foo',
 									  rule: rule,
 									  expected: expected,
 									  callback: callback,
@@ -4597,9 +4597,9 @@ define([
 				it("Test unnecessary-nls-5", function(callback) {
 					var rule = createTestRule('unnecessary-nls');
 					var expected = {value: "",
-									start: 26, 
+									start: 26,
 									end: 40};
-					return getFixes({buffer: 'var a = "a"; //$NON-NLS-1$ //$NON-NLS-2$', 
+					return getFixes({buffer: 'var a = "a"; //$NON-NLS-1$ //$NON-NLS-2$',
 									  rule: rule,
 									  expected: expected,
 									  callback: callback,
@@ -4608,9 +4608,9 @@ define([
 				it("Test unnecessary-nls-6", function(callback) {
 					var rule = createTestRule('unnecessary-nls');
 					var expected = {value: "",
-									start: 12, 
+									start: 12,
 									end: 26};
-					return getFixes({buffer: 'var a = "a"; //$NON-NLS-2$ //$NON-NLS-1$', 
+					return getFixes({buffer: 'var a = "a"; //$NON-NLS-2$ //$NON-NLS-1$',
 									  rule: rule,
 									  expected: expected,
 									  callback: callback,
@@ -4620,14 +4620,14 @@ define([
 					var rule = createTestRule('unnecessary-nls');
 					var expected = [
 									{value: "",
-									start: 10, 
+									start: 10,
 									end: 24},
 									{value: "",
-									start: 35, 
+									start: 35,
 									end: 49},
 									];
-	
-					return getFixes({buffer: 'var a = 1; //$NON-NLS-0$\nvar b = 1; //$NON-NLS-0$', 
+
+					return getFixes({buffer: 'var a = 1; //$NON-NLS-0$\nvar b = 1; //$NON-NLS-0$',
 									  rule: rule,
 									  expected: expected,
 									  callback: callback,
@@ -4637,11 +4637,11 @@ define([
 					var rule = createTestRule('unnecessary-nls');
 					var expected = [
 									{value: "",
-									start: 10, 
+									start: 10,
 									end: 38}
 									];
-	
-					return getFixes({buffer: 'var a = 1; //$NON-NLS-0$ //$NON-NLS-1$', 
+
+					return getFixes({buffer: 'var a = 1; //$NON-NLS-0$ //$NON-NLS-1$',
 									  rule: rule,
 									  expected: expected,
 									  callback: callback,
@@ -4651,14 +4651,14 @@ define([
 					var rule = createTestRule('unnecessary-nls');
 					var expected = [
 									{value: "",
-									start: 12, 
+									start: 12,
 									end: 26},
 									{value: "",
-									start: 40, 
+									start: 40,
 									end: 54},
 									];
-	
-					return getFixes({buffer: 'var a = "a"; //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-9$', 
+
+					return getFixes({buffer: 'var a = "a"; //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-9$',
 									  rule: rule,
 									  expected: expected,
 									  callback: callback,
@@ -4668,11 +4668,11 @@ define([
 					var rule = createTestRule('unnecessary-nls');
 					var expected = [
 									{value: "",
-									start: 11, 
+									start: 11,
 									end: 40}
 									];
-	
-					return getFixes({buffer: 'var v = 10; //$NON-NLS-1$  //$NON-NLS-2$\nvar v2;', 
+
+					return getFixes({buffer: 'var v = 10; //$NON-NLS-1$  //$NON-NLS-2$\nvar v2;',
 									  rule: rule,
 									  expected: expected,
 									  callback: callback,
@@ -4682,11 +4682,11 @@ define([
 					var rule = createTestRule('unnecessary-nls');
 					var expected = [
 									{value: "",
-									start: 11, 
+									start: 11,
 									end: 40}
 									];
-	
-					return getFixes({buffer: 'var v = 10; //$NON-NLS-1$  //$NON-NLS-2$     \nvar v2;', 
+
+					return getFixes({buffer: 'var v = 10; //$NON-NLS-1$  //$NON-NLS-2$     \nvar v2;',
 									  rule: rule,
 									  expected: expected,
 									  callback: callback,
@@ -4724,9 +4724,9 @@ define([
 				it("Test use-isnan-1",function(callback) {
 					var rule = createTestRule('use-isnan');
 					var expected = {value: "isNaN(foo)",
-									start: 3, 
+									start: 3,
 									end: 14};
-					return getFixes({buffer: 'if(foo === NaN){}', 
+					return getFixes({buffer: 'if(foo === NaN){}',
 									  rule: rule,
 									  expected: expected,
 									  callback: callback,
@@ -4735,9 +4735,9 @@ define([
 				it("Test use-isnan-2",function(callback) {
 					var rule = createTestRule('use-isnan');
 					var expected = {value: "isNaN(foo)",
-									start: 3, 
+									start: 3,
 									end: 14};
-					return getFixes({buffer: 'if(NaN === foo){}', 
+					return getFixes({buffer: 'if(NaN === foo){}',
 									  rule: rule,
 									  expected: expected,
 									  callback: callback,
@@ -4746,9 +4746,9 @@ define([
 				it("Test use-isnan-3",function(callback) {
 					var rule = createTestRule('use-isnan');
 					var expected = {value: "isNaN(foo+23)",
-									start: 3, 
+									start: 3,
 									end: 19};
-					return getFixes({buffer: 'if((foo+23) === NaN){}', 
+					return getFixes({buffer: 'if((foo+23) === NaN){}',
 									  rule: rule,
 									  expected: expected,
 									  callback: callback,
@@ -4757,9 +4757,9 @@ define([
 				it("Test use-isnan-4",function(callback) {
 					var rule = createTestRule('use-isnan');
 					var expected = {value: "isNaN(foo+23)",
-									start: 3, 
+									start: 3,
 									end: 19};
-					return getFixes({buffer: 'if(NaN === (foo+23)){}', 
+					return getFixes({buffer: 'if(NaN === (foo+23)){}',
 									  rule: rule,
 									  expected: expected,
 									  callback: callback,
@@ -4768,9 +4768,90 @@ define([
 				it("Test use-isnan-5",function(callback) {
 					var rule = createTestRule('use-isnan');
 					var expected = {value: "isNaN(45 === (foo+23))",
-									start: 3, 
+									start: 3,
 									end: 28};
-					return getFixes({buffer: 'if(NaN === (45 === (foo+23))){}', 
+					return getFixes({buffer: 'if(NaN === (45 === (foo+23))){}',
+									  rule: rule,
+									  expected: expected,
+									  callback: callback,
+									  pid: 'use-isnan'});
+				});
+				it("Test use-isnan multi fix 1", function(done) {
+					var rule = createTestRule("use-isnan");
+					var expected = [
+						{value: "isNaN(foo)", start: 3,	end: 14},
+						{value: "isNaN(bar)", start: 21,	end: 32}
+					];
+					return getFixes({
+						buffer: "if(foo === NaN){} if(NaN === bar){}",
+						rule: rule,
+						expected: expected,
+						callback: done
+					});
+				});
+				it("Test use-isnan multi fix 2", function(done) {
+					var rule = createTestRule("use-isnan");
+					var expected = [
+						{value: "isNaN(foo)", start: 3,	end: 14},
+						{value: "isNaN(bar)", start: 18,	end: 29}
+					];
+					return getFixes({
+						buffer: "if(foo === NaN || NaN === bar){}",
+						rule: rule,
+						expected: expected,
+						callback: done
+					});
+				});
+				it("Test use-isnan-not-1",function(callback) {
+					var rule = createTestRule('use-isnan');
+					var expected = {value: "!isNaN(foo)",
+									start: 3,
+									end: 14};
+					return getFixes({buffer: 'if(foo !== NaN){}',
+									  rule: rule,
+									  expected: expected,
+									  callback: callback,
+									  pid: 'use-isnan'});
+				});
+				it("Test use-isnan-not-2",function(callback) {
+					var rule = createTestRule('use-isnan');
+					var expected = {value: "!isNaN(foo)",
+									start: 3,
+									end: 14};
+					return getFixes({buffer: 'if(NaN !== foo){}',
+									  rule: rule,
+									  expected: expected,
+									  callback: callback,
+									  pid: 'use-isnan'});
+				});
+				it("Test use-isnan-not-3",function(callback) {
+					var rule = createTestRule('use-isnan');
+					var expected = {value: "!isNaN(foo+23)",
+									start: 3,
+									end: 19};
+					return getFixes({buffer: 'if((foo+23) !== NaN){}',
+									  rule: rule,
+									  expected: expected,
+									  callback: callback,
+									  pid: 'use-isnan'});
+				});
+				it("Test use-isnan-not-4",function(callback) {
+					var rule = createTestRule('use-isnan');
+					var expected = {value: "!isNaN(foo+23)",
+									start: 3,
+									end: 19};
+					return getFixes({buffer: 'if(NaN !== (foo+23)){}',
+									  rule: rule,
+									  expected: expected,
+									  callback: callback,
+									  pid: 'use-isnan'});
+				});
+				it("Test use-isnan-not-5",function(callback) {
+					var rule = createTestRule('use-isnan');
+					var expected = {value: "!isNaN(45 === (foo+23))",
+									start: 3,
+									end: 28};
+					return getFixes({buffer: 'if(NaN !== (45 === (foo+23))){}',
 									  rule: rule,
 									  expected: expected,
 									  callback: callback,
@@ -5074,7 +5155,7 @@ define([
 							{value: "(", start: 29, end: 29},
 							{value: ")", start: 34, end: 34}
 					];
-					return getFixes({buffer: 'var i = 0; if (i = 0) {} if (i = 1) {}', 
+					return getFixes({buffer: 'var i = 0; if (i = 0) {} if (i = 1) {}',
 									  rule: rule,
 									  expected: expected,
 									  callback: callback});

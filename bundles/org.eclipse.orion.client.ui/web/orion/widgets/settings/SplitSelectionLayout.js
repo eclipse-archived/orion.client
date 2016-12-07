@@ -115,24 +115,26 @@ define(['orion/webui/littlelib', 'orion/objects'], function(lib, objects) {
 		
 		
 		drawUserInterface: function() {
-			lib.empty(this.navbar);
-
-			var that = this, click;
-			this.navbar.addEventListener('keydown', function(evt) { //$NON-NLS-0$
-				if (evt.keyCode === lib.KEY.LEFT || evt.keyCode === lib.KEY.UP) {
-					if (that.selectedCategory.previousSibling) {
-						click = document.createEvent("MouseEvents"); //$NON-NLS-0$
-						click.initMouseEvent("click", true, true, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null); //$NON-NLS-0$
-						that.selectedCategory.previousSibling.dispatchEvent(click);
+			if (this.navbar.hasChildNodes()) {
+				lib.empty(this.navbar);
+			} else {
+				var that = this, click;
+				this.navbar.addEventListener('keydown', function(evt) { //$NON-NLS-0$
+					if (evt.keyCode === lib.KEY.LEFT || evt.keyCode === lib.KEY.UP) {
+						if (that.selectedCategory.previousSibling) {
+							click = document.createEvent("MouseEvents"); //$NON-NLS-0$
+							click.initMouseEvent("click", true, true, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null); //$NON-NLS-0$
+							that.selectedCategory.previousSibling.dispatchEvent(click);
+						}
+					} else if (evt.keyCode === lib.KEY.RIGHT || evt.keyCode === lib.KEY.DOWN) {
+						if (that.selectedCategory.nextSibling) {
+							click = document.createEvent("MouseEvents"); //$NON-NLS-0$
+							click.initMouseEvent("click", true, true, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null); //$NON-NLS-0$
+							that.selectedCategory.nextSibling.dispatchEvent(click);
+						}
 					}
-				} else if (evt.keyCode === lib.KEY.RIGHT || evt.keyCode === lib.KEY.DOWN) {
-					if (that.selectedCategory.nextSibling) {
-						click = document.createEvent("MouseEvents"); //$NON-NLS-0$
-						click.initMouseEvent("click", true, true, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null); //$NON-NLS-0$
-						that.selectedCategory.nextSibling.dispatchEvent(click);
-					}
-				}
-			});
+				});
+			}
 		}
 	});
 	return SplitSelectionLayout;

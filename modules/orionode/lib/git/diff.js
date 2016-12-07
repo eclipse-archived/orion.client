@@ -384,29 +384,35 @@ function applyPatch(req, res) {
 						}
 						fs.readFile(this.getFile(index.oldFileName), "utf8", cb);
 					},
-					patched: function(index, content) {
+					patched: function(index, content, cb) {
 						if (content === false || !index.newFileName) {
 							failed.push(index);
+							cb();
 							return;
 						}
 						successed.push(index);
 						if (index.newFileName === "/dev/null") {
 							fs.unlink(this.getFile(index.oldFileName));
+							cb();
 							return;
 						}
 						var fileName = this.getFile(index.newFileName);
 						mkdirp(path.dirname(fileName), function (err) {
 							if (err) {
 								failed.push(index);
+								cb(err);
 								return;
 							}
 							fs.writeFile(fileName, content, "utf8", function(err) {
 								if (err) {
 									failed.push(index);
+									cb(err);
 									return;
 								}
 							});
 						});
+						cb();
+						return;
 					},
 					complete: function(err) {
 						if (err) return writeError(404, res, err.message);

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012 IBM Corporation and others.
+ * Copyright (c) 2012, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -97,15 +97,6 @@ function getCommitLog(req, res) {
 		if (fromDateFilter && commit.timeMs() < fromDateFilter) return true;
 		if (toDateFilter && commit.timeMs() > toDateFilter) return true;
 		return false;
-	}
-	function filterCommitPath(diff,filterPath){
-		if (!filterPath || !diff) return false;
-		for(var n = 0; n < diff.Children.length; n++){
-			if(diff.Children[n]["NewPath"].startsWith(filterPath)){
-				return false;
-			}
-		}
-		return true;
 	}
 	var commits = []	, repo;
 	function writeResponse(over) {
@@ -215,28 +206,36 @@ function getCommitLog(req, res) {
 
 	function log(repo, ref) {
 		var revWalk = repo.createRevWalk();
-		revWalk.sorting(git.Revwalk.SORT.TOPOLOGICAL);
-		git.Reference.dwim(repo, ref).then(
-			function(reference) {
-				return ref =  reference.name();
-			},
-			function rejected(){
-				return;
-			}
-		)
-		.then(function(){
-			if (ref.indexOf("..") !== -1) {
-					revWalk.pushRange(ref);
-			} else {
-				try {
-					revWalk.push(ref);
-				} catch (ex) {
-					revWalk.pushRef( ref );
+		function setupRevWalk(callback) {
+			revWalk.sorting(git.Revwalk.SORT.TOPOLOGICAL);
+			git.Reference.dwim(repo, ref).then(
+				function(reference) {
+					return ref =  reference.name();
+				},
+				function rejected(){
+					return;
 				}
+			)
+			.then(function(){
+				if (ref.indexOf("..") !== -1) {
+						revWalk.pushRange(ref);
+				} else {
+					try {
+						revWalk.push(ref);
+					} catch (ex) {
+						revWalk.pushRef( ref );
+					}
+				}
+				return;
+			}).then(callback);
+		}
+
+		setupRevWalk(function() {
+			if (filterPath) {
+				fileHistoryWalk();
+			} else {
+				walk();
 			}
-			return;
-		}).then(function(){
-			walk();
 		});
 
 		var count = 0;
@@ -250,11 +249,11 @@ function getCommitLog(req, res) {
 				}
 				return repo.getCommit(oid)
 				.then(function(commit) {
-					function applyFilter(diff) {
-						if (filterCommit(commit) || filterCommitPath(diff, filterPath) || page && count++ < skipCount) {//skip pages
+					function applyFilter() {
+						if (filterCommit(commit) || page && count++ < skipCount) {//skip pages
 							return walk();
 						}
-						return Promise.all([diff || getDiff(repo, commit, fileDir), getCommitParents(repo, commit, fileDir)])
+						return Promise.all([getDiff(repo, commit, fileDir), getCommitParents(repo, commit, fileDir)])
 						.then(function(stuff) {
 							commits.push(commitJSON(commit, fileDir, stuff[0], stuff[1]));
 							if (pageSize && commits.length === pageSize) {//page done
@@ -263,10 +262,6 @@ function getCommitLog(req, res) {
 							}
 							walk();
 						});
-					}
-					// get diff before filtering by path
-					if (filterPath) {
-						return getDiff(repo, commit, fileDir).then(applyFilter);
 					}
 					applyFilter();
 				});
@@ -284,6 +279,70 @@ function getCommitLog(req, res) {
 						Severity: "Error"
 					});
 				}
+			});
+		}
+
+		function fileHistoryWalk() {
+			revWalk.getCommitsUntil(function(commit) {
+				// iterate through the entire history until we have no more commits
+				var parentId = commit.parentId(0);
+				return parentId !== null && parentId !== undefined;
+			}).then(function(array) {
+				setupRevWalk(function() {
+					// run a full history walk on the desired file
+					revWalk.fileHistoryWalk(filterPath, array.length).then(function(fileCommits) {
+						// client trying to skip more commits than that which affects the specified file,
+						// respond that we're done and there is nothing left
+						if (skipCount >= fileCommits.length) {
+							writeResponse(true);
+							return;
+						}
+
+						// remove the elements that need to be skipped over
+						fileCommits.splice(0, skipCount);
+						var done = true;
+						if (fileCommits.length > pageSize) {
+							// we have more commits than the page size, we won't be done
+							done = false;
+							// remove the extra commits as they don't need to be processed
+							fileCommits.splice(pageSize, fileCommits.length - pageSize);
+						}
+						var fullCommits = [];
+						function getFullCommits(fileCommits, idx) {
+							repo.getCommit(fileCommits[idx].commit.id()).then(function(c) {
+								fullCommits.push(c);
+
+								// when we've retrieved everything, iterate over them
+								if (fullCommits.length === fileCommits.length) {
+									processCommits(fullCommits, 0);	
+								} else {
+									// get the full commit of the next commit
+									getFullCommits(fileCommits, idx + 1);
+								}
+							});
+						}
+						// the commit objects from fileHistoryWalk(*) fail on getTree()
+						// which prevents us from grabbing a diff,
+						// grab a full commit from the repo using the oid
+						getFullCommits(fileCommits, 0);
+
+						function processCommits(fullCommits, idx) {
+							var commit = fullCommits[idx];
+							return Promise.all(
+								[ getDiff(repo, commit, fileDir), getCommitParents(repo, commit, fileDir) ]
+							).then(function(stuff) {
+								commits.push(commitJSON(commit, fileDir, stuff[0], stuff[1]));
+								if (idx === fullCommits.length - 1) {
+									// we're at the end, stop iterating
+									// and write the response
+									writeResponse(done);
+									return;
+								}
+								processCommits(fullCommits, idx + 1);
+							});
+						}
+					});
+				});
 			});
 		}
 	}
@@ -390,15 +449,19 @@ function getCommitRefs(repo, fileDir, commits) {
 						})
 						.then(function(){
 							commit = map[id];
-							var tags = commit.Tags || (commit.Tags = []);
-							tags.push(mTags.tagJSON(fullName, shortName, id, undefined, fileDir));
+							if (commit) {
+								var tags = commit.Tags || (commit.Tags = []);
+								tags.push(mTags.tagJSON(fullName, shortName, id, undefined, fileDir));
+							}
 							cb();
 						});
 					} 
 					id = oid.toString();
 					commit = map[id];
-					var branches = commit.Branches || (commit.Branches = []);
-					branches.push({FullName: ref});
+					if (commit) {
+						var branches = commit.Branches || (commit.Branches = []);
+						branches.push({FullName: ref});
+					}
 					cb();
 				})
 				.catch(function() {

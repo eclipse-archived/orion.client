@@ -87,6 +87,7 @@
 .lightPage .tooltip h2,
 .lightPage .tooltip .operationError,
 .lightPage .checkedRow .gitStatusTitle,
+.lightPage .checkedRow .gitCommitMore,
 .lightPage .checkedRow .gitStatusIcon {
 	color: white !important;
 }
