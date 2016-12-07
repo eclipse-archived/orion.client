@@ -17,13 +17,6 @@ function redrawButtons() {
 	var bar = document.querySelector("#bar");
 	var buttons = document.createElement("span");
 	buttons.classList.add("tabButtons");
-	var back = document.createElement("button"),
-		backTitle = "Back";
-	back.title = backTitle;
-	back.setAttribute("aria-label", backTitle);
-	back.textContent = "<";
-	back.classList.add("tabButton");
-
 	function historyBack() {
 		var active = getActiveTab();
 		if (!active) return;
@@ -40,6 +33,12 @@ function redrawButtons() {
 		if (!active) return;
 		active.contentWindow.location.reload();
 	}
+	var back = document.createElement("button"),
+		backTitle = "Back";
+	back.title = backTitle;
+	back.setAttribute("aria-label", backTitle);
+	back.textContent = "<";
+	back.classList.add("tabButton");
 	back.addEventListener("click", historyBack);
 	buttons.appendChild(back);
 	
@@ -60,22 +59,13 @@ function redrawButtons() {
 	refresh.classList.add("tabButton");
 	refresh.addEventListener("click", refreshPage);
 	buttons.appendChild(refresh);
+	
 	bar.appendChild(buttons);
-
-	var Menu = electron.remote.Menu;
-	var menu = Menu.getApplicationMenu();
-	menu.append(new electron.remote.MenuItem( // The main purpose of creating menu if for key binding
-		{
-			label: "Navigation",  
-			submenu: [
-				{label: "Back", accelerator:process.platform === "darwin"? "CmdOrCtrl+Left" :"Alt+Left", click: historyBack},
-				{label: "Forward", accelerator:process.platform === "darwin"? "CmdOrCtrl+Right" :"Alt+Right", click: historyForward},
-				{label: "RefreshOnCtrlR", accelerator:process.platform === "darwin"? "CmdOrCtrl+R" :"Ctrl+R", visible:false, click: refreshPage},
-				{label: "RefreshOnF5", accelerator:process.platform === "darwin"? "" :"F5", visible:false, click: refreshPage}
-			]
-		}
-	));
-	Menu.setApplicationMenu(menu);
+	return {
+		refreshPage:refreshPage,
+		historyForward:historyForward,
+		historyBack:historyBack
+	};
 }
 
 function addNewTab(id, iframe) {
@@ -240,9 +230,10 @@ function getActiveTab() {
 }
 
 function load() {
-	redrawButtons();
+	var pageControlCallbacks = redrawButtons();
 	createTab(window.location.hash.substr(1));
-	createNewTabButton(window.location.hash.substr(1));
+	var newTabCallback = createNewTabButton(window.location.hash.substr(1));
+	registerElectronMenu(pageControlCallbacks, newTabCallback);
 	window.addEventListener("resize", function() {
 		if (this.timeout) window.clearTimeout(this.timeout);
 		this.timeout = window.setTimeout(function() {
@@ -250,6 +241,24 @@ function load() {
 		}, 50);
 	});
 	registerContextMenu();
+}
+
+function registerElectronMenu(pageControlCallbacks, newTabCallback){
+	var Menu = electron.remote.Menu;
+	var menu = Menu.getApplicationMenu();
+	menu.append(new electron.remote.MenuItem( // The main purpose of creating menu if for key binding
+		{
+			label: "Navigation",  
+			submenu: [
+				{label: "Back", accelerator:process.platform === "darwin"? "CmdOrCtrl+Left" :"Alt+Left", click: pageControlCallbacks.historyBack},
+				{label: "Forward", accelerator:process.platform === "darwin"? "CmdOrCtrl+Right" :"Alt+Right", click: pageControlCallbacks.historyForward},
+				{label: "RefreshOnCtrlR", accelerator:process.platform === "darwin"? "CmdOrCtrl+R" :"Ctrl+R", visible:false, click: pageControlCallbacks.refreshPage},
+				{label: "RefreshOnF5", accelerator:process.platform === "darwin"? "" :"F5", visible:false, click: pageControlCallbacks.refreshPage},
+				{label: "New Tab", accelerator:process.platform === "darwin"? "CmdOrCtrl+T" :"Ctrl+T", visible:false, click: newTabCallback.newTab}
+			]
+		}
+	));
+	Menu.setApplicationMenu(menu);
 }
 
 function createNewTabButton(url){
@@ -262,10 +271,14 @@ function createNewTabButton(url){
 	newTabButton.setAttribute("aria-label", newTabButtonTitle);
 	newTabButton.innerHTML = newTabButtonText;
 	newTabButton.classList.add("openNewTab");
-	newTabButton.addEventListener("click", function(evt) {
+	function newTab() {
 		createTab(url);
-	});
+	}
+	newTabButton.addEventListener("click", newTab);
 	bar.appendChild(newTabButton);
+	return {
+		newTab:newTab
+	};
 }
 
 function createTab(url) {
