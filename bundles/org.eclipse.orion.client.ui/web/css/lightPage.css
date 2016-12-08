@@ -1,4 +1,4 @@
-
+/*
 .lightPage .dropdownTrigger:not(.dropdownDefaultButton),
 .lightPage .mainToolbar .commandImage.dropdownTrigger,
 .lightPage .dropdownButtonWithIcon,
@@ -181,7 +181,7 @@
  	color: white !important;
 }
 
-.lightPage .primaryButton {  /* from git.css */
+.lightPage .primaryButton { 
 	background-color: rgb(61, 114, 179) !important;
 	color: white !important;
 	border: 1px solid rgb(61, 114, 179) !important;
@@ -216,7 +216,7 @@
 	background-color: rgb(61, 114, 179);
 }
 
-.lightPage .textviewTooltip .commandButton { /* Styling quickfixes */
+.lightPage .textviewTooltip .commandButton {
 	border-color: white;
 	border: 1px solid white;
 	background-color: inherit;
@@ -254,7 +254,7 @@
 	margin: 5px;
 	width: calc(100% - 17px);
 }
-
+*/
 .lightPage .splashLoadingImage {
 	display: inline-block;
 	background: none;

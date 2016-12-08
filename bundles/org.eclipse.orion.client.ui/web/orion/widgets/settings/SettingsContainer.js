@@ -24,16 +24,19 @@ define([
 	'orion/operationsClient',
 	'orion/URITemplate',
 	'orion/widgets/themes/ThemeBuilder',
+	'orion/widgets/themes/ContainerThemeBuilder',
 	'orion/settings/ui/PluginSettings',
 	'orion/status',
 	'orion/widgets/themes/ThemePreferences',
 	'orion/widgets/themes/editor/ThemeData',
+	'orion/widgets/themes/container/ThemeData',
 	'orion/widgets/themes/ThemeImporter',
 	'orion/widgets/settings/SplitSelectionLayout',
 	'orion/widgets/plugin/PluginList',
 	'orion/widgets/settings/GitSettings',
 	'orion/widgets/settings/EditorSettings',
 	'orion/widgets/settings/ThemeSettings',
+	'orion/widgets/settings/ContainerThemeSettings',
 	'orion/widgets/settings/UserSettings',
 	'orion/widgets/settings/GlobalizationSettings',
 	'orion/widgets/settings/GeneralSettings',
@@ -42,8 +45,8 @@ define([
 	'orion/metrics',
 	'orion/util',
 ], function(messages, mCommands, mGlobalCommands, PageUtil, lib, i18nUtil, objects, mOperationsClient, URITemplate, 
-		ThemeBuilder, SettingsList, mStatus, mThemePreferences, editorThemeData, editorThemeImporter, SplitSelectionLayout, PluginList, 
-		GitSettings, EditorSettings, ThemeSettings, UserSettings, GlobalizationSettings, GeneralSettings, mEditorPreferences, mGeneralPreferences, mMetrics, util) {
+		ThemeBuilder, ContainerThemeBuilder, SettingsList, mStatus, mThemePreferences, editorThemeData, containerThemeData, editorThemeImporter, SplitSelectionLayout, PluginList, 
+		GitSettings, EditorSettings, ThemeSettings, ContainerThemeSettings, UserSettings, GlobalizationSettings, GeneralSettings, mEditorPreferences, mGeneralPreferences, mMetrics, util) {
 
 	
 	/**
@@ -116,6 +119,14 @@ define([
 						id: "themeSettings", //$NON-NLS-0$
 						textContent: messages.Theme,
 						show: _self.showThemeSettings
+					});
+				}
+				
+				if (categories.showContainerThemeSettings === undefined || categories.showContainerThemeSettings) {
+					_self.settingsCategories.push({
+						id: "conatinerThemeSettings", //$NON-NLS-0$
+						textContent: "Container Theme",
+						show: _self.showContainerThemeSettings
 					});
 				}
 				
@@ -332,6 +343,39 @@ define([
 			}, themeSettingsNode);
 
 			this.themeSettings.show();
+		},
+		
+		/*
+		 * Construct Theme Data Settings!!!
+		 */
+		showContainerThemeSettings: function(id){
+			this.selectCategory(id);
+			lib.empty(this.table);
+			this.updateToolbar(id);
+			var themeSettingsNode = document.createElement('div');
+			this.table.appendChild(themeSettingsNode);
+			
+			var containerTheme = new containerThemeData.ThemeData();
+			var themePreferences = new mThemePreferences.ThemePreferences(this.preferences, containerTheme);
+			var containerThemeWidget = new ContainerThemeBuilder({
+				commandService: this.commandService, 
+				preferences: themePreferences, 
+				themeData: containerTheme, 
+				toolbarId: 'editorThemeSettingsToolActionsArea', 
+				serviceRegistry: this.registry});
+			
+			this.containerThemeSettings = new ContainerThemeSettings({
+				registry: this.registry,
+				themePreferences: themePreferences,
+				containerThemeWidget: containerThemeWidget,
+				statusService: this.preferencesStatusService,
+				dialogService: this.preferenceDialogService,
+				commandService: this.commandService,
+				userClient: this.userClient
+			}, themeSettingsNode);
+			
+			this.containerThemeSettings.show();
+			
 		},
 		
 		showGlobalizationSettings: function(id){

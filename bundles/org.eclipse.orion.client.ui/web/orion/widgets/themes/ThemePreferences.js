@@ -7,6 +7,7 @@
  * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html).
  *
  * Contributors:  IBM Corporation - initial API and implementation
+ *                Casey Flynn - Google Inc
  ******************************************************************************/
 /*eslint-env browser, amd*/
 
@@ -265,6 +266,8 @@ define([], function() {
 		setTheme: function(name, styles) {
 			var themeData = this._themeData;
 			var themeInfo = themeData.getThemeStorageInfo();
+			//TODO(caseyflynn): disable cache for testing.
+			//return this._preferences.get(themeInfo.storage, true).then(function(prefs) {
 			return this._preferences.get(themeInfo.storage).then(function(prefs) {
 				this._initialize(themeInfo, themeData, prefs);
 				var selected = this._parse(prefs['selected']); //$NON-NLS-0$
