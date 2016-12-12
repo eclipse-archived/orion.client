@@ -15,173 +15,113 @@ define(['i18n!orion/settings/nls/messages',
 		'orion/commandRegistry', 
 		'orion/webui/littlelib', 
 		'orion/webui/tooltip',
-		'orion/widgets/themes/editor/editorSetup',
 		'orion/widgets/themes/colors',
 		'orion/util',
-		'text!examples/js-demo.js',
-		'text!examples/html-demo.html',
-		'text!examples/css-demo.css',
-		'text!examples/java-demo.java'],
-function(messages, i18nUtil, mCommands, mCommandRegistry, lib, mTooltip, mSetup, colors, util, jsExample, htmlExample, cssExample, javaExample) {
-
-	var editorLanguage, editorTheme, originalTheme, currentTheme, revertBtn, deleteBtn ,saveBtn, themeNameInput;
+],
+function(messages, i18nUtil, mCommands, mCommandRegistry, lib, mTooltip, colors, util) {
+	var editorTheme, originalTheme, currentTheme, revertBtn, deleteBtn, saveBtn, themeNameInput, setup;
 	var protectedThemes = [];
 	var defaultColor = "#ff80c0";
-	var htmlExclusions = [];
-	var jsExclusions = ["editorThemePropertyName", "editorThemeMetaTag", "editorThemeMetaTagAttribute"];
-	var javaExclusions = ["editorThemeColorEntityColor", "editorThemeFunctionParameterColor", "editorThemePropertyName", "editorThemeMetaTag", "editorThemeMetaTagAttribute"];
-	var cssExclusions = ["editorThemeColorEntityColor", "editorThemeControlColor", "editorThemeLanguageVariableColor", "editorThemeOperatorColor", "editorThemeFunctionParameterColor", "editorThemeLogicalOperatorColor", "editorThemeMetaTag", "editorThemeMetaTagAttribute"];
+	var scopeList;
+	
+	var extractHexRegEx = /(#[0-9A-F]{6})|(#[0-9A-F]{3})/i;
+	var rgbaExtractRegEx = /(.*?rgba?[\s+]?\()[\s+]?(\d+)[\s+]?,[\s+]?(\d+)[\s+]?,[\s+]?(\d+)[\s+]?,?[\s+]?(0?\.?\d+)?[\s+]?(.*)/i;
 
-	var scopeList = [
-		{
-			display: messages["editorTheme font size"], //$NON-NLS-0$
-			objPath: ["styles.fontSize"], //$NON-NLS-0$
-			id: "editorThemeFontSize", //$NON-NLS-0$
-			value: "" //$NON-NLS-0$
-		}, {
-			display: messages["editorTheme background"], //$NON-NLS-0$
-			objPath: ["styles.backgroundColor"], //$NON-NLS-0$
-			id: "editorThemeBackground", //$NON-NLS-0$
-			value: defaultColor
-		}, {
-			display: messages["editorTheme font color"], //$NON-NLS-0$
-			objPath: ["styles.color"], //$NON-NLS-0$
-			id: "editorThemeColor", //$NON-NLS-0$
-			value: defaultColor
-		}, {
-			display: messages["editorTheme ruler background"], //$NON-NLS-0$
-			objPath: ["styles.ruler.backgroundColor", "styles.ruler.overview.backgroundColor","styles.ruler.annotations.backgroundColor"],  //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-			id: "editorThemeRulerBackground", //$NON-NLS-0$
-			value: defaultColor
-		}, {
-			display: messages["editorTheme ruler color"],//$NON-NLS-0$
-			objPath: ["styles.rulerLines.color","styles.rulerLines.odd.color","styles.rulerLines.even.color"],  //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-			id: "editorThemeRulerColor", //$NON-NLS-0$
-			value: defaultColor
-		}, {
-			display: messages["editorTheme ruler border color"],//$NON-NLS-0$
-			objPath: ["styles.textviewLeftRuler.borderColor","styles.textviewRightRuler.borderColor"],  //$NON-NLS-1$ //$NON-NLS-0$
-			id: "editorThemeRulerBorderColor", //$NON-NLS-0$
-			value: defaultColor
-		}, {
-			display: messages["editorTheme current line background"],//$NON-NLS-0$
-			objPath: ["styles.annotationLine.currentLine.backgroundColor"],  //$NON-NLS-0$
-			id: "editorThemeColorCurrentLineBackground",  //$NON-NLS-0$
-			value: defaultColor
-		}, {
-			display: messages["editorTheme comment"],//$NON-NLS-0$
-			objPath: ["styles.comment.color","styles.comment.block.color","styles.comment.line.color"],  //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-			id: "editorThemeCommentColor",  //$NON-NLS-0$
-			value: defaultColor
-		}, {
-			display: messages["editorTheme language variable"],//$NON-NLS-0$
-			objPath: ["styles.variable.language.color"], //$NON-NLS-0$
-			id: "editorThemeLanguageVariableColor",  //$NON-NLS-0$
-			value: defaultColor
-		}, {
-			display: messages["editorTheme language constant"],//$NON-NLS-0$
-			objPath: ["styles.constant.color"], //$NON-NLS-0$
-			id: "editorThemeConstantColor",  //$NON-NLS-0$
-			value: defaultColor
-		}, {
-			display: messages["editorTheme number"],//$NON-NLS-0$
-			objPath: ["styles.constant.numeric.color","styles.constant.numeric.hex.color"], //$NON-NLS-1$ //$NON-NLS-0$
-			id: "editorThemeNumericConstantColor",  //$NON-NLS-0$
-			value: defaultColor
-		}, {
-			display: messages["editorTheme string"],//$NON-NLS-0$
-			objPath: ["styles.string.color","styles.string.quoted.double.color","styles.string.quoted.single.color"], //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-			id: "editorThemeStringColor",  //$NON-NLS-0$
-			value: defaultColor
-		}, {
-			display: messages["editorTheme entity"],//$NON-NLS-0$
-			objPath: ["styles.entity.name.color","styles.entity.name.function.color"], //$NON-NLS-1$ //$NON-NLS-0$
-			id: "editorThemeColorEntityColor",  //$NON-NLS-0$
-			value: defaultColor
-		}, {
-			display: messages["editorTheme keyword (control)"],//$NON-NLS-0$
-			objPath: ["styles.keyword.control.color"], //$NON-NLS-0$
-			id: "editorThemeControlColor", //$NON-NLS-0$
-			value: defaultColor
-		}, {
-			display: messages["editorTheme keyword (operator)"],//$NON-NLS-0$
-			objPath: ["styles.keyword.operator.color"], //$NON-NLS-0$
-			id: "editorThemeOperatorColor", //$NON-NLS-0$
-			value: defaultColor
-		}, {
-			display: messages["editorTheme function parameter"],//$NON-NLS-0$
-			objPath: ["styles.variable.parameter.color"], //$NON-NLS-0$
-			id: "editorThemeFunctionParameterColor", //$NON-NLS-0$
-			value: defaultColor
-		}, {
-			display: messages["editorTheme comparison and logical operators"], //$NON-NLS-0$
-			objPath: ["styles.punctuation.operator.color"], //$NON-NLS-0$
-			id: "editorThemeLogicalOperatorColor", //$NON-NLS-0$
-			value: defaultColor
-		}, {
-			display: messages["editorTheme write occurrence background"], //$NON-NLS-0$
-			objPath: ["styles.annotationRange.writeOccurrence.backgroundColor"], //$NON-NLS-0$
-			id: "editorThemeWriteOccurrence", //$NON-NLS-0$
-			value: defaultColor
-		}, {
-			display: messages["editorTheme matching bracket background"],//$NON-NLS-0$
-			objPath: ["styles.annotationRange.matchingBracket.backgroundColor", "styles.annotationRange.currentBracket.backgroundColor"],  //$NON-NLS-0$
-			id: "editorThemeMatchingBracket", //$NON-NLS-0$
-			value: defaultColor
-		}, {
-			display: messages["editorTheme matching search background"],//$NON-NLS-0$
-			objPath: ["styles.annotationRange.matchingSearch.backgroundColor"], //$NON-NLS-0$
-			id: "editorThemeMatchingSearch", //$NON-NLS-0$
-			value: defaultColor
-		}, {
-			display: messages["editorTheme current search background"],//$NON-NLS-0$
-			objPath: ["styles.annotationRange.matchingSearch.currentSearch.backgroundColor"], //$NON-NLS-0$
-			id: "editorThemeCurrentSearch", //$NON-NLS-0$
-			value: defaultColor
-		}, {
-			display: messages["editorTheme documentation task color"],//$NON-NLS-0$
-			objPath: ["styles.keyword.other.documentation.task.color"], //$NON-NLS-0$
-			id: "editorThemeDocumentationTask", //$NON-NLS-0$
-			value: defaultColor
-		}, {
-			display: messages["editorTheme property name color"],//$NON-NLS-0$
-			objPath: ["styles.support.type.propertyName.color"], //$NON-NLS-0$
-			id: "editorThemePropertyName", //$NON-NLS-0$
-			value: defaultColor
-		}, {
-			display: messages["editorTheme tag"],//$NON-NLS-0$
-			objPath: ["styles.meta.tag.color"], //$NON-NLS-0$
-			id: "editorThemeMetaTag", //$NON-NLS-0$
-			value: defaultColor
-		}, {
-			display: messages["editorTheme tag attribute"],//$NON-NLS-0$
-			objPath: ["styles.meta.tag.attribute.color"], //$NON-NLS-0$
-			id: "editorThemeMetaTagAttribute", //$NON-NLS-0$
-			value: defaultColor
-		}, {
-			display: messages["editorTheme selection background"],//$NON-NLS-0$
-			objPath: ["styles.textviewContent ::selection.backgroundColor", "styles.textviewContent ::-moz-selection.backgroundColor", "styles.textviewSelection.backgroundColor", "styles.textviewSelectionUnfocused.backgroundColor"], //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-			id: "editorSelection", //$NON-NLS-0$
-			value: defaultColor
+	function hexToRGB(hex) {
+		if (!extractHexRegEx.test(hex)) {
+			//invalid hex string
+			throw new Error("Invalid HEX string provided.");
 		}
-	];
+		hex = hex.substring(1);
+		var rgb, r, g, b;
+		if (hex.length === 6) {
+			rgb = parseInt(hex,16);
+			r = (rgb >> 16) & 0xff;
+			g = (rgb >>  8) & 0xff;
+			b = (rgb >>  0) & 0xff;
+			return {r: r, g: g, b: b };
+		} 
+		if (hex.length === 3) {
+			rgb = parseInt(hex, 16);
+			r = (rgb >> 8) & 0xf;
+			g = (rgb >> 4) & 0xf;
+			b = (rgb >> 0) & 0xf;
+			
+			r = (r << 4) | r;
+			g = (g << 4) | g;
+			b = (b << 4) | b;
+			return { r: r, g:g, b:b};
+		}
+		
+	}
+	ThemeBuilder.prototype.hexToRGB = hexToRGB;
+	
+	function updateValue(target, value) {
+		//if the value is a hex color
+		if (extractHexRegEx.test(value)) {
+			//if the target is hex
+			if (extractHexRegEx.test(target)) {
+				return target.replace(extractHexRegEx, value);
+			}
+			
+			//if the target is rgb or rgba
+			var rgba = target.match(rgbaExtractRegEx);
+			if (rgba) {
+				//convert hex to rgb
+				var rgb = hexToRGB(value);
+				//if the 'a' value exists, return rgba, else return rgb
+				return rgba[1] + rgb.r + ", " + rgb.g + ", " + rgb.b + (rgba[5] ? ", " + rgba[5] : "") + rgba[6];
+			}
+		}
+		return value;
+	}
+	ThemeBuilder.prototype.updateValue = updateValue;
+	
+	/*
+	 * Checks the target value for an embeded hex, rgb, or rgba string
+	 * if found, returns the given value in hex otherwise it
+	 * returns the provided value.
+	 */
+	function getValue(value) {
+		//hex
+		if (extractHexRegEx.test(value))
+		{
+			return value.match(extractHexRegEx)[0];
+		} 
+		//rgb \ rgba
+		var rgba = value.match(rgbaExtractRegEx);
+		if (rgba) {
+            var red = parseInt(rgba[2], 10);
+            var green = parseInt(rgba[3], 10);
+            var blue = parseInt(rgba[4], 10);
+            var rgb = blue | (green << 8) | (red << 16) | (1 << 24);
+			return "#" + rgb.toString(16).substring(1,8).toUpperCase();
+		}
+		return value;
+	}
+	ThemeBuilder.prototype.getValue = getValue;	
+
 
 	//initializes the default html structure
-	function init() {
-		ThemeBuilder.prototype.template = "<div class='editorSection'>" + //$NON-NLS-0$
-												"<div class='editorSectionHeader'>" +
-													"<label for='editorLanguage'>${Display Language: }</label>" + 
-													"<select id='editorLanguage'>" + 
-														"<option value='javascript' selected='selected'>javascript</option>" +
-														"<option value='java'>java</option>" +
-														"<option value='html'>HTML</option>" +
-														"<option value='css'>CSS</option>" +
-													"</select>" + 
-												"</div>" +
-												"<div id='editor' class='themeDisplayEditor' class='editor_group'></div>" +
-											"</div>";//$NON-NLS-0$
-		//populate list of changable scopes for the theme
-		populateScopes();
+	function init(exclusions) {
+		ThemeBuilder.prototype.template = '<div class="themeController">' +//$NON-NLS-0$
+			'<div class="scopeListHeader" id="scopeOriginal">'+
+				'<label for="editorTheme">${Theme: }</label>' + 
+				'<select id="editorTheme">' +
+				'</select>'+
+				'<button id="editorThemeDelete" class="editorThemeCleanButton"><span class="core-sprite-trashcan editorThemeButton"></span></button>'+
+			'</div>' +
+			'<div class="scopeListHeader hide" id="scopeChanged">'+
+				'<label for="editorThemeName">${Theme: }</label>' + 
+				'<input id="editorThemeName" type="text">' +
+				'<button id="editorThemeSave" class="editorThemeCleanButton"><span class="core-sprite-save editorThemeButton"></span></button>'+
+				'<button id="editorThemeRevert" class="editorThemeCleanButton"><span class="git-sprite-revert editorThemeButton"></span></button>'+
+			'</div>' +
+			'<ul class="scopeList" id="scopeList">' +
+				generateScopeList(exclusions) +
+			'</ul>' +
+		'</div>' +
+		'<div id="previewWidget"></div>';
 	}
 	
 	//populates theme selections 
@@ -205,29 +145,6 @@ function(messages, i18nUtil, mCommands, mCommandRegistry, lib, mTooltip, mSetup,
 		}.bind(this));
 	}
 	ThemeBuilder.prototype.populateThemes = populateThemes;
-	
-	//initialize html structure for listing changable scopes for the theme (left side)
-	function populateScopes(){
-		ThemeBuilder.prototype.template = 
-			'<div class="themeController">' +//$NON-NLS-0$
-				'<div class="scopeListHeader" id="scopeOriginal">'+
-					'<label for="editorTheme">${Theme: }</label>' + 
-					'<select id="editorTheme">' +
-					'</select>'+
-					'<button id="editorThemeDelete" class="editorThemeCleanButton"><span class="core-sprite-trashcan editorThemeButton"></span></button>'+
-				'</div>' +
-				'<div class="scopeListHeader hide" id="scopeChanged">'+
-					'<label for="editorThemeName">${Theme: }</label>' + 
-					'<input id="editorThemeName" type="text">' +
-					'<button id="editorThemeSave" class="editorThemeCleanButton"><span class="core-sprite-save editorThemeButton"></span></button>'+
-					'<button id="editorThemeRevert" class="editorThemeCleanButton"><span class="git-sprite-revert editorThemeButton"></span></button>'+
-				'</div>' +
-				'<ul class="scopeList" id="scopeList">' +
-					generateScopeList(jsExclusions) +
-				'</ul>' +
-			'</div>' +//$NON-NLS-0$
-			ThemeBuilder.prototype.template;
-	}
 	
 	//adds status class to scopes 
 	function checkForChanges(){
@@ -275,7 +192,7 @@ function(messages, i18nUtil, mCommands, mCommandRegistry, lib, mTooltip, mSetup,
 					for (var l = 0; l < scopeList[i].objPath.length; l++){
 						setValueToPath(currentTheme, scopeList[i].objPath[l], scopeList[i].value);
 					}
-					mSetup.processTheme("editorTheme", currentTheme); //$NON-NLS-0$
+					setup.processTheme("editorTheme", currentTheme);
 				}
 			}
 			checkForChanges();
@@ -290,23 +207,23 @@ function(messages, i18nUtil, mCommands, mCommandRegistry, lib, mTooltip, mSetup,
 	ThemeBuilder.prototype.updateScopeValue = updateScopeValue;
 	
 	function getValueFromPath(obj, keys) {
-		var nodes = keys.split('.');
+		var nodes = keys.split(' ');
 		for (var i = 0; i < nodes.length; i++) {
 			if (!obj[nodes[i]]) {
 				return "";
 			}
 			obj = obj[nodes[i]];
 		}
-		return obj;
+		return getValue(obj);
 	}
 	
 	function setValueToPath (obj, path, val){
-		var nodes = path.split('.');
+		var nodes = path.split(' ');		
 		try {
 			for (var i = 0; i < nodes.length - 1; i++) {
 				obj = obj[nodes[i]] || (obj[nodes[i]] = {});
 			}
-			obj[nodes[i]] = val;
+			obj[nodes[i]] = updateValue(obj[nodes[i]], val);
 		} catch (e) {
 			return false;
 		}
@@ -333,6 +250,7 @@ function(messages, i18nUtil, mCommands, mCommandRegistry, lib, mTooltip, mSetup,
 	
 	//generates the html structure for list of scopes
 	function generateScopeList(hiddenValues){
+		hiddenValues = hiddenValues || [];
 		var htmlString = "";
 		var ieClass = util.isIE ? "-ie" : ""; //$NON-NLS-0$
 
@@ -362,28 +280,15 @@ function(messages, i18nUtil, mCommands, mCommandRegistry, lib, mTooltip, mSetup,
 		this.serviceRegistry = args.serviceRegistry;
 		protectedThemes = this.themeData ? (this.themeData.getProtectedThemes ? this.themeData.getProtectedThemes() : []) : [];
 		this.messageService = this.serviceRegistry.getService("orion.page.message"); //$NON-NLS-0$
+		this.previewWidget = args.previewWidget;
+		setup = args.setup;
+		scopeList = args.scopeList || [];
+		var exclusions = (this.previewWidget && this.previewWidget.getSelectedExclusions) ? this.previewWidget.getSelectedExclusions() : [];
 
-		init();
-
-		var commandTemplate = '<div id="commandButtons">' + //$NON-NLS-0$
-			'<div id="userCommands" class="layoutRight sectionActions"></div>' +
-			'</div>'; //$NON-NLS-0$
-
-		var commandArea = document.getElementById('pageActions'); //$NON-NLS-0$
-		commandArea.innerHTML = commandTemplate;
+		init(exclusions);
 
 		this.commandService = args.commandService;
 		this.preferences = args.preferences;
-
-		var exportCommand = new mCommands.Command({
-			name: messages.Export,
-			tooltip: messages['Export a theme'], //$NON-NLS-0$
-			id: "orion.exportTheme", //$NON-NLS-0$
-			callback: exportTheme.bind(this)
-		});
-
-		this.commandService.addCommand(exportCommand);
-		this.commandService.registerCommandContribution('themeCommands', "orion.exportTheme", 5); //$NON-NLS-1$ //$NON-NLS-0$
 	}
 	
 	function addAdditionalCommand(commandData) {
@@ -415,7 +320,7 @@ function(messages, i18nUtil, mCommands, mCommandRegistry, lib, mTooltip, mSetup,
 				//originalTheme is used for reverting
 				originalTheme = JSON.parse(JSON.stringify(style));
 				currentTheme = JSON.parse(JSON.stringify(style));
-				mSetup.processTheme("editorTheme", currentTheme);
+				setup.processTheme("editorTheme", currentTheme);
 				break;
 			}
 		}
@@ -425,8 +330,13 @@ function(messages, i18nUtil, mCommands, mCommandRegistry, lib, mTooltip, mSetup,
 	
 	function renderData(anchor, state) {
 		anchor.innerHTML = this.template; // ok--this is a fixed value
+		var previewNode = document.getElementById("previewWidget");
+		
+		if (this.previewWidget && this.previewWidget.renderData) {
+			this.previewWidget.renderData(previewNode);
+		}
+
 		lib.processTextNodes(anchor, messages);
-		mSetup.setupView(jsExample, "js"); //$NON-NLS-0$
 		
 		this.commandService.renderCommands('themeCommands', document.getElementById(this.toolbarId || "userCommands"), this, this, "button"); //$NON-NLS-1$ //$NON-NLS-0$
 		
@@ -437,9 +347,6 @@ function(messages, i18nUtil, mCommands, mCommandRegistry, lib, mTooltip, mSetup,
 		}
 		
 		this.populateThemes();
-		
-		editorLanguage = document.getElementById("editorLanguage"); //$NON-NLS-0$
-		editorLanguage.onchange = this.changeLanguage.bind(this);
 		
 		editorTheme = document.getElementById("editorTheme");
 		editorTheme.onchange = this.changeTheme.bind(this);
@@ -490,45 +397,6 @@ function(messages, i18nUtil, mCommands, mCommandRegistry, lib, mTooltip, mSetup,
 		this.settings['name'] = theme;
 	}
 	ThemeBuilder.prototype.changeTheme = changeTheme;
-
-	function changeLanguage(){
-		var language = editorLanguage.options[editorLanguage.selectedIndex].value;
-
-		switch (language) {
-			case "javascript":
-				mSetup.setupView(jsExample, "js"); //$NON-NLS-0$
-				this.updateLHS(jsExclusions);
-				break;
-			case "html":
-				mSetup.setupView(htmlExample, "html"); //$NON-NLS-0$
-				this.updateLHS(htmlExclusions);
-				break;
-			case "css":
-				mSetup.setupView(cssExample, "css"); //$NON-NLS-0$
-				this.updateLHS(cssExclusions);
-				break;
-			case "java":
-				mSetup.setupView(javaExample, "java"); //$NON-NLS-0$
-				this.updateLHS(javaExclusions);
-				break;
-		}
-
-		return true;
-	}
-	ThemeBuilder.prototype.changeLanguage = changeLanguage;
-
-	function updateLHS(exclusions) {
-		for (var i = scopeList.length - 1; i >= 0; i--) {
-			document.getElementById(scopeList[i].id).parentNode.style.display = "";
-		}
-
-		if (exclusions && exclusions.length > 0) {
-			for (i = exclusions.length - 1; i >= 0; i--) {
-				document.getElementById(exclusions[i]).parentNode.style.display = "none";
-			}
-		}
-	}
-	ThemeBuilder.prototype.updateLHS = updateLHS;
 
 	function selectTheme(name) {
 		this.preferences.getTheme(function(themeStyles) {
