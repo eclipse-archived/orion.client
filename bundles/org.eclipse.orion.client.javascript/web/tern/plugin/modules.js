@@ -98,7 +98,8 @@
       var pathsSeen = Object.create(null)
       for (var prop in this.nonRelative) {
         var val = this.nonRelative[prop]
-        if (val == true || prop.indexOf("/") == -1) {
+        // ORION We want to always include name completions that have a slash
+        if (val || prop.indexOf("/") == -1) {
           if (filter(word, prop, query)) tern.addCompletion(query, completions, prop)
         } else if (prop.indexOf(word) == 0 && word.indexOf("/") > -1) {
           var afterSlash = /.*?\/(.*)/.exec(prop)[1]
