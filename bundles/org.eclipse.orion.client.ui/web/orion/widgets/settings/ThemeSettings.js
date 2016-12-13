@@ -7,6 +7,7 @@
  * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html).
  *
  * Contributors: Anton McConville - IBM Corporation - initial API and implementation
+ *               Casey Flynn - Google Inc
  ******************************************************************************/
 /*eslint-env browser, amd*/
 define("orion/widgets/settings/ThemeSettings", //$NON-NLS-0$
@@ -39,14 +40,14 @@ define("orion/widgets/settings/ThemeSettings", //$NON-NLS-0$
 			}
 		},
 		createSections: function() {
-			if (!this.local && this.editorThemeWidget) {
-				this.editorThemeSection = new mSection.Section(this.sections, {
-					id: "editorThemeSettings", //$NON-NLS-0$
-					title: messages.EditorThemes,
+			if (!this.local && this.themeWidget) {
+				this.themeSection = new mSection.Section(this.sections, {
+					id: this.id,
+					title: this.title,
 					slideout: true
 				});
 
-				this.editorThemeWidget.renderData( this.editorThemeSection.getContentElement(), 'INITIALIZE' ); //$NON-NLS-0$
+				this.themeWidget.renderData( this.themeSection.getContentElement(), 'INITIALIZE' ); //$NON-NLS-0$
 			} 
 		},
 		validate: function(prefs) {
