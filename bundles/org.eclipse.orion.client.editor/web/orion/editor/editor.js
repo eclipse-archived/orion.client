@@ -373,7 +373,6 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 		 * @param {Number} start The start offset of the annotation in the text model.
 		 * @param {Number} end The end offset of the annotation in the text model.
 		 * @returns {orion.editor.FoldingAnnotation} The FoldingAnnotation added to the editor.
-		 * @since 13
 		 */
 		addFoldingAnnotation: function(start, end) {
 			var annotationModel = this.getAnnotationModel();
