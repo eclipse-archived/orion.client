@@ -104,6 +104,7 @@ function exitSuccess() { process.exit(0); }
 
 var folderTemplate = [
 	'org.eclipse.orion.client.webtools/web/webtools/nls/dummy_language/messages',
+	'org.eclipse.orion.client.webtools/web/webtools/nls/dummy_language/problems',
 	'org.eclipse.orion.client.cf/web/cfui/nls/dummy_language/messages',
 	'org.eclipse.orion.client.users/web/profile/nls/dummy_language/messages',
 	'org.eclipse.orion.client.javascript/web/javascript/nls/dummy_language/messages',
