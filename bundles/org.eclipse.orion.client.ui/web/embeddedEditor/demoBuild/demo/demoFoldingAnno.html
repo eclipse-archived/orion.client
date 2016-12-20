@@ -1,0 +1,108 @@
+<!doctype html>
+<html>
+    <head>
+		<meta name="copyright" content="Copyright (c) IBM Corporation and others 2010, 2014." >
+		<meta http-equiv="Content-Language" content="en-us">
+		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+		<title>Pluggable Editor Demo</title>
+		<style type="text/css">
+			.demoTitle{
+				border: none;
+				vertical-align: middle;
+				overflow: hidden;
+				text-align: left;
+				margin-left: 15%;
+				margin-right: 15%;
+				padding-bottom: 5px;
+				position: relative;
+			}
+			.demoBody{
+				border: 1px solid;
+				vertical-align: middle;
+				border-color: blue;
+				overflow: hidden;
+				text-align: left;
+				margin-left: 15%;
+				margin-right: 15%;
+				margin-bottom: 15px;
+				padding-bottom: 5px;
+				position: relative;
+				height: 450px;
+			}
+		</style>
+	    <link rel="stylesheet" type="text/css" href="editorBuild/code_edit/built-codeEdit.css"/>
+		<script src="editorBuild/code_edit/built-codeEdit.js"></script>
+		<script>
+			/*globals orion */
+			window.onload=function(){
+				var codeEdit = new orion.codeEdit();
+				var contents = 'FOLD\n' +
+									 "111;\n" + 
+									 "111\n" + 
+									 "DLOF\n" + 
+									 "222\n" + 
+									 "\n" + 
+									 "FOLD\n" + 
+									 "333\n" + 
+									"333\n" +
+									 "DLOF\n"; 
+				codeEdit.create({parent: "embeddedEditor", contentType: "application/foo", contents: contents}).then(function(editorViewer) {
+					document.getElementById("progressMessageDiv").textContent = "Plugins loaded!";
+					//Use the editor text model to listen to the editor contents change.
+					var editorModel = editorViewer.editor.getModel();
+					var foldingAnnotations = [];
+					editorViewer.editor.addEventListener("TextViewInstalled", function(evt) {
+						console.log(evt);
+					});
+					
+					editorModel.addEventListener("Changed", function(/*evt*/) {
+						//			var modelChangedEvent = {
+						//				type: "Changed", //$NON-NLS-0$
+						//				start: eventStart,
+						//				removedCharCount: removedCharCount,
+						//				addedCharCount: addedCharCount,
+						//				removedLineCount: removedLineCount,
+						//				addedLineCount: addedLineCount
+						//			};
+						
+						//Remove all the customized folding annotation first
+						var annotationModel = editorViewer.editor.getAnnotationModel();
+						foldingAnnotations.forEach(function(anno){
+							annotationModel.removeAnnotation(anno);
+						});
+						foldingAnnotations = [];
+						var text = editorModel.getText();
+						//Use this regex to find all the blocks like "FOLD ******** DLOF" in the editor contents
+						var regEx = /^FOLD([\s\S]*?)DLOF$/gm;
+						var match = regEx.exec(text);
+						window.setTimeout(function(){
+							while (match !== null) {
+								if(match.index !== null && match[0]) {
+									//Create a single folding annotation based on a blok "FOLD ******** DLOF"
+									var fAnno = editorViewer.editor.addFoldingAnnotation(match.index, match.index + match[0].length);
+									if(fAnno) {
+										foldingAnnotations.push(fAnno);
+									}
+									match = regEx.exec(text);
+								}
+							}
+						}, 0);
+					});
+				});
+			};
+		</script>
+    </head>
+	<body id="orion-browser" spellcheck="false" class="orionPage">
+		<div class="demoTitle">
+			<p>This is a demo for the <b>Orion Code Edit</b> widget. This demo consumes the <b>built version</b> of the widget.</p> 
+			<p>Keep editing in this demo and try:</p>
+			<ol>
+			</ol>
+		</div>
+		<div class="demoTitle">
+			<span id = "progressMessageDiv" style="color: green">Loading language tooling plugins...</span>
+		</div>
+		<div class="demoBody" id="embeddedEditor">
+		</div>
+	</body>
+</html>
