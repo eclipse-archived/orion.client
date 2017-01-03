@@ -834,8 +834,8 @@ function Tooltip (view, editor) {
 				this._tooltipDiv.classList.add("textviewTooltipCodeProjection"); //$NON-NLS-0$
 				var size = contentsView.computeSize();
 				// Adjust the size for the padding
-				contentsDiv.style.width = (size.width+8) + "px"; //$NON-NLS-0$
-				contentsDiv.style.height = (size.height+8) + "px"; //$NON-NLS-0$
+				contentsDiv.style.width = (size.width+16) + "px"; //$NON-NLS-0$
+				contentsDiv.style.height = (size.height+16) + "px"; //$NON-NLS-0$
 				contentsView.resize();
 				this._tooltipDiv.removeChild(contentsDiv);
 				return true;
