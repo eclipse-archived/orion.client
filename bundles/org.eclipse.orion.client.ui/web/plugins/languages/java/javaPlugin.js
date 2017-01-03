@@ -128,13 +128,23 @@ define([
 			var tempArray = items.map(function(item) {
 				var temp = {
 					name: item.label,
-					proposal: item.insertText,
 					description: ' (' + resolveCompletionKind(item.kind) + ')',
 					relevance: 100,
 					style: 'emphasis', //$NON-NLS-1$
 					overwrite: true,
 					kind: 'java' //$NON-NLS-1$
 				};
+				if (item.textEdit) {
+					temp.proposal = item.textEdit.newText;
+				} else if (item.insertText) {
+					temp.proposal = item.insertText;
+				} else {
+					temp.proposal = item.label;
+				}
+				if (temp.proposal) {
+					// remove {{ and }} around parameter's names
+					temp.proposal = temp.proposal.replace(/{{/gi, "").replace(/}}/gi, "");
+				}
 				if (item.documentation) {
 					temp.hover = {
 						content: item.documentation,
