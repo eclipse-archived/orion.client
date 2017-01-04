@@ -415,7 +415,7 @@ define(["orion/util"], function(util) {
 		DOWN: 40,
 		INSERT: 45,
 		DEL: 46,
-		COMMAND: 991
+		COMMAND: 91
 	};
 	/**
 	 * Maps a <code>keyCode</code> to <tt>KEY</tt> name. This is the inverse of {@link orion.webui.littlelib.KEY}.

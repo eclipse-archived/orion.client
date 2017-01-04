@@ -180,11 +180,11 @@ define([
 			var formatKBEdit = function(e) {
 				this._keyCode = e.keyCode;
 				this._altDown = e.altKey;
-				this._ctrlDown = e.ctrlKey;
+				this._ctrlDown = util.isMac ? e.metaKey : e.ctrlKey;
 				this._shiftDown = e.shiftKey;
-				this._commandDown = e.metaKey;
+				this._commandDown = util.isMac ? e.ctrlKey : e.metaKey;
 				
-				var testBinding = new keyBinding.KeyStroke(this._keyCode, e.ctrlKey, e.shiftKey, e.altKey, e.metaKey);
+				var testBinding = new keyBinding.KeyStroke(this._keyCode, this._ctrlDown, this._shiftDown, this._altDown, this._commandDown);
 				var bindingString = UIUtil.getUserKeyString(testBinding);
 				this.keyAssistKBEdit.value = bindingString;
 			}.bind(this);
