@@ -383,9 +383,8 @@ define([
 					]);
 				});
 			});
-			// TODO Module name completion for RequireJS is broken
-			describe.skip('RequireJS', function() {
-				before('Restart with the requirejs plugin', function(done) {
+			describe('RequireJS', function() {
+				beforeEach('Restart with the requirejs plugin', function(done) {
 					worker.start(done, {options: {plugins: {requirejs: {}}, libs: []}});
 				});
 				it('No existing define deps', function(done) {
@@ -407,13 +406,36 @@ define([
 						createFiles: [{name: "a/existingDep", text: "function foo(){}"},{name: "a/existingDep2", text: "function foo2(){}"}]
 					};
 					testProposals(options, [
-						['', 'a/existingDep'],
-						['a/existingDep', 'a/existingDep : any'],
-						['', 'a/existingDep2'],
-						['a/existingDep2', 'a/existingDep2 : any'],
+						['a/existingDep', 'a/existingDep'],
+						['a/existingDep2', 'a/existingDep2'],
 					]);
 				});
 				it('Existing deps - Prefix Ex', function(done) {
+					var options = {
+						buffer: "/* eslint-env amd */\ndefine('foo', ['b/prefixExisting', 'b/notPrefixExisting', 'b/pref'], function(importname) {});",
+						prefix: "b/pref",
+						offset: 86,
+						callback: done,
+						createFiles: [{name: "b/prefixExisting", text: "function foo(){}"},{name: "b/notPrefixExisting", text: "function foo(){}"},{name: "b/pref", text: ""}]
+					};
+					testProposals(options, [
+						['b/prefixExisting', 'b/prefixExisting'],
+					]);
+				});
+				it('Existing deps with module name', function(done) {
+					var options = {
+						buffer: "/* eslint-env amd */\ndefine('foo', ['a/existingDep', 'a/existingDep2', ''], function(importname) {});",
+						prefix: "",
+						offset: 72,
+						callback: done,
+						createFiles: [{name: "a/existingDep", text: "function foo(){}"},{name: "a/existingDep2", text: "function foo2(){}"}]
+					};
+					testProposals(options, [
+						['a/existingDep', 'a/existingDep'],
+						['a/existingDep2', 'a/existingDep2'],
+					]);
+				});
+				it('Existing deps with module name - Prefix Ex', function(done) {
 					var options = {
 						buffer: "/* eslint-env amd */\ndefine(['b/prefixExisting', 'b/notPrefixExisting', 'b/pref'], function(importname) {});",
 						prefix: "b/pref",
@@ -422,8 +444,20 @@ define([
 						createFiles: [{name: "b/prefixExisting", text: "function foo(){}"},{name: "b/notPrefixExisting", text: "function foo(){}"},{name: "b/pref", text: ""}]
 					};
 					testProposals(options, [
-						['', 'b/prefixExisting'],
-						['b/prefixExisting', 'b/prefixExisting : any'],
+						['b/prefixExisting', 'b/prefixExisting'],
+					]);
+				});
+				it('Existing deps with module name - module name completions', function(done) {
+					var options = {
+						buffer: "/* eslint-env amd */\ndefine('', ['a/existingDep', 'a/existingDep2', ''], function(importname) {});",
+						prefix: "",
+						offset: 29,
+						callback: done,
+						createFiles: [{name: "a/existingDep", text: "function foo(){}"},{name: "a/existingDep2", text: "function foo2(){}"}]
+					};
+					testProposals(options, [
+						['a/existingDep', 'a/existingDep'],
+						['a/existingDep2', 'a/existingDep2'],
 					]);
 				});
 			});

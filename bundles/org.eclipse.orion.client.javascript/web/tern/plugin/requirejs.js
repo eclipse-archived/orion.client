@@ -203,10 +203,8 @@
       this.mod.requireJS.require = null;
     });
 
-//    server.on("preCondenseReach", preCondenseReach)
-//    server.on("postLoadDef", postLoadD)
-//    server.on("typeAt", findType    server.mod.modules.modNameTests.push(isModuleName)
-    // TODO Do we need to handle separate imports vs module name completions
+    server.mod.modules.modNameTests.push(isModuleName)
+    // TODO Do we need a separate import checker?
 //    server.mod.modules.importTests.push(isImport)
     server.mod.modules.completableTypes.Identifier = true;
     server.mod.modules.completableTypes.Literal = true;
@@ -215,24 +213,6 @@
     
 });
 
-    
-//  function findTypeAt(_file, _pos, expr, type{
-//    if (!expr || expr.node.type != "Literal"|
-//        typeof expr.node.value != "string" || !expr.node.requir)
-//      return ty;/
-//    // The `type` is a value shared for all string litera.
-//    // We must create a copy before modifying `origin` and `originNod.
-//    // Otherwise all string literals would point to the last jump locatn
-//    type = Object.create(typ;/
-//    // Provide a custom origin location pointing to the require()d fe
-//    var exportedType = expr.node.requir;
-//    type.origin = exportedType.orig;
-//    type.originNode = exportedType.originNo;
-//    if (exportedType.doc) type.doc = exportedType.c
-//    if (exportedType.url) type.url = exportedType.l
-//    return ty;
-
-  
   function _getAST(node){
   	// ORION In our version of Acorn the AST is not available on the given node
     var ast = node.sourceFile.ast;
@@ -251,9 +231,9 @@
     var callExpr = infer.findExpressionAround(_getAST(node), null, node.end, null, "CallExpression");
     if (!callExpr) return;
     var callNode = callExpr.node;
-    if (callNode.callee.type != "Identifier" ||
-        !(callNode.callee.name == "define" || callNode.callee.name == "require" || callNode.callee.name == "requirejs")||
-        callNode.arguments.length < 1 || callNode.arguments[0].type != "ArrayExpression") return;
+    if (callNode.callee.type != "Identifier") return;
+    if (!(callNode.callee.name == "define" || callNode.callee.name == "require" || callNode.callee.name == "requirejs")) return
+    if (callNode.arguments.length < 1 || (callNode.arguments[0].type != "ArrayExpression" && (callNode.arguments.length < 2 || callNode.arguments[1].type != "ArrayExpression"))) return;
     return node.value;
   }
 

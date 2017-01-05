@@ -36,10 +36,10 @@ define(['orion/webui/littlelib', 'orion/objects'], function(lib, objects) {
 	objects.mixin(SplitSelectionLayout.prototype, /** @lends orion.widgets.settings.SplitSelectionLayout.prototype */ {
 		categoriesTemplateString: '' + //$NON-NLS-0$
 				'<div id="categoryNode" class="sidePanelMargins">' + //$NON-NLS-0$
-					'<ul class="navbar" role="tablist" aria-labelledby="categoriesTitle"></ul>' +  //$NON-NLS-0$
+					'<ul class="navbar" role="tablist" aria-orientation="vertical" aria-labelledby="categoriesTitle"></ul>' +  //$NON-NLS-0$
 				'</div>', //$NON-NLS-0$
 		contentTemplateString: '' + //$NON-NLS-0$
-			'<div class="settings" role="tabpanel">' + //$NON-NLS-0$
+			'<div class="settings">' + //$NON-NLS-0$
 			'	<div class="split-selection-table"></div>' + //$NON-NLS-0$
 			'</div>', //$NON-NLS-0$
 
@@ -94,6 +94,7 @@ define(['orion/webui/littlelib', 'orion/objects'], function(lib, objects) {
 			if (this.selectedCategory) {
 				this.selectedCategory.classList.remove("navbar-item-selected"); //$NON-NLS-0$
 				this.selectedCategory.setAttribute("aria-selected", "false"); //$NON-NLS-1$ //$NON-NLS-0$
+				this.selectedCategory.removeAttribute("aria-controls"); //$NON-NLS-0$
 				this.selectedCategory.tabIndex = -1;
 			}
 
@@ -103,7 +104,8 @@ define(['orion/webui/littlelib', 'orion/objects'], function(lib, objects) {
 
 			this.selectedCategory.classList.add("navbar-item-selected"); //$NON-NLS-0$
 			this.selectedCategory.setAttribute("aria-selected", "true"); //$NON-NLS-1$ //$NON-NLS-0$
-			this.contentNode.setAttribute("aria-labelledby", id); //$NON-NLS-0$
+			this.selectedCategory.setAttribute("aria-controls", "settings"); //$NON-NLS-1$ //$NON-NLS-0$
+			this.contentNode.setAttribute("aria-labelledby", this.selectedCategory.id); //$NON-NLS-0$
 			this.selectedCategory.tabIndex = 0;
 			this.selectedCategory.focus();
 		},
