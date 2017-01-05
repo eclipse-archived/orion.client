@@ -1,17 +1,17 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2009, 2013 IBM Corporation and others.
- * All rights reserved. This program and the accompanying materials are made 
- * available under the terms of the Eclipse Public License v1.0 
- * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
- * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html). 
+ * Copyright (c) 2009, 2017 IBM Corporation and others.
+ * All rights reserved. This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License v1.0
+ * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution
+ * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html).
  *
  * Contributors: IBM Corporation - _initial API and implementation
  *******************************************************************************/
 /*eslint-env browser, amd*/
 define([
 	'i18n!orion/nls/messages',
-	'orion/i18nUtil', 
+	'orion/i18nUtil',
 	'orion/webui/littlelib',
 	'orion/globalCommands',
 	'marked/marked',
@@ -24,7 +24,7 @@ define([
 	function getPageLoader() {
 		return require.specified("orion/splash") && require("orion/splash").getPageLoader(); //$NON-NLS-1$
 	}
-	
+
 	function mark(name) {
 		if (window.performance && window.performance.mark) {
 			window.performance.mark("orion-" + name);
@@ -53,11 +53,11 @@ define([
 		this._cancelMsg = null;
 		this.statusMessage = this.progressMessage = null;
 	}
- 
+
 	StatusReportingService.prototype = /** @lends orion.status.StatusReportingService.prototype */ {
-	
+
 		_init: function() {
-			var closeButton = lib.node(closeButtonDomId); //$NON-NLS-0$
+			var closeButton = lib.node(closeButtonDomId);
 			if (closeButton && !this._hookedClose) {
 				closeButton.style.cursor = "pointer"; //$NON-NLS-0$
 				this._hookedClose = true;
@@ -67,11 +67,11 @@ define([
 						this.close();
 					}
 				}.bind(this));
-				closeButton.addEventListener("click", function() { //$NON-NLS-0$
+				closeButton.addEventListener("click", function() {
 					this.close();
 				}.bind(this));
-				container.addEventListener("click", function(evt) { //$NON-NLS-0$
-					if(evt && evt.target && evt.target.nodeName.toLowerCase() === "a") { //$NON-NLS-0$)
+				container.addEventListener("click", function(evt) {
+					if(evt && evt.target && evt.target.nodeName.toLowerCase() === "a") { //)
 						var anchors = lib.$$("a", container);//$NON-NLS-0$) //lib.container.getElementsByTagName("a");
 						if(anchors && anchors.length && anchors.length === 1) {// We should only auto dismiss the status bar if there is only one "a" element in the bar.
 							this.close();
@@ -80,17 +80,17 @@ define([
 				}.bind(this));
 			}
 		},
-		
+
 		_takeDownSplash: function() {
 			var pageLoader = getPageLoader();
 			if (pageLoader) {
 				pageLoader.takeDown();
 			}
 		},
-		
+
 		close: function(){
 			window.clearTimeout(this._timer);
-			var closeButton = lib.node(closeButtonDomId); //$NON-NLS-0$
+			var closeButton = lib.node(closeButtonDomId);
 			if(this._cancelMsg && this._cancelFunc && closeButton) {
 				closeButton.innerHTML = "";
 				closeButton.classList.remove("cancelButton"); //$NON-NLS-0$
@@ -100,10 +100,10 @@ define([
 				this._cancelFunc();
 				this._cancelMsg = null;
 			} else {
-				this.setProgressMessage(""); 
+				this.setProgressMessage("");
 			}
 		},
-		
+
 		_getNotifierElements: function() {
 			if (!this._notifierElements) {
 				this._notifierElements = mGlobalCommands.getToolbarElements(this.notificationContainerDomId);
@@ -121,7 +121,7 @@ define([
 			this._init();
 			this.statusMessage = msg;
 			var node = lib.node(this.domId);
-			if(typeof(isAccessible) === "boolean") { //$NON-NLS-0$
+			if(typeof isAccessible === "boolean") {
 				// this is kind of a hack; when there is good screen reader support for aria-busy,
 				// this should be done by toggling that instead
 				var readSetting = node.getAttribute("aria-live"); //$NON-NLS-0$
@@ -134,25 +134,25 @@ define([
 					}
 				}.bind(this), 100);
 			}
-			else { 
+			else {
 				lib.empty(node);
 				node.appendChild(document.createTextNode(msg));
 			}
-			if (typeof(timeout) === "number") { //$NON-NLS-0$
+			if (typeof timeout === "number") {
 				window.setTimeout(function() {
 					if (msg === this.statusMessage) {
 						lib.empty(node);
-						node.appendChild(document.createTextNode("")); //$NON-NLS-0$
+						node.appendChild(document.createTextNode(""));
 					}
 				}.bind(this), timeout);
 			}
 		},
-	
+
 		/**
 		 * Displays an error message to the user.
 		 *
 		 * @param {String|orionError} st The error to display. Can be a simple String,
-		 * or an error object from a  XHR error callback, or the body of an error response 
+		 * or an error object from a  XHR error callback, or the body of an error response
 		 * from the Orion server.
 		 */
 		setErrorMessage : function(st) {
@@ -169,23 +169,23 @@ define([
 					//it is not JSON, just continue;
 				}
 			}
-			var message = _status.Message || _status;
+			var message = _status.DetailedMessage || _status.Message || _status;
 			var color = "red"; //$NON-NLS-0$
 			if (_status.Severity) {
 				switch (_status.Severity) {
-				case SEV_WARNING: //$NON-NLS-0$
+				case SEV_WARNING:
 					color = "#FFCC00"; //$NON-NLS-0$
 					break;
-				case SEV_ERROR: //$NON-NLS-0$
+				case SEV_ERROR:
 					color = "red"; //$NON-NLS-0$
 					break;
-				case SEV_INFO: //$NON-NLS-0$
-				case SEV_OK: //$NON-NLS-0$
+				case SEV_INFO:
+				case SEV_OK:
 					color = "green"; //$NON-NLS-0$
 					break;
 				}
 			}
-			var span = document.createElement("span");  //$NON-NLS-0$
+			var span = document.createElement("span");
 			span.style.color = color;
 			span.appendChild(document.createTextNode(message));
 			var node = lib.node(this.domId);
@@ -193,19 +193,19 @@ define([
 			node.appendChild(span);
 			this._takeDownSplash();
 		},
-		
+
 		/**
 		 * Set a message that will be shown in the progress reporting area on the page.
-		 * @param {String} message The progress message to display. 
+		 * @param {String} message The progress message to display.
 		 */
 		setProgressMessage : function(message) {
 			this._clickToDisMiss = false;
 			this._init();
 			this.progressMessage = message;
-			
+
 			var pageLoader = getPageLoader();
 			if (pageLoader) {
-				
+
 				var step = pageLoader.getStep();
 				if(step) {
 					if (typeof message === "object") {
@@ -219,7 +219,7 @@ define([
 					return;
 				}
 			}
-			
+
 			var node = lib.node(this.progressDomId);
 			lib.empty(node);
 			node.appendChild(document.createTextNode(message));
@@ -236,19 +236,19 @@ define([
 				container.classList.add("notificationHide"); //$NON-NLS-0$
 			}
 		},
-		
+
 		/**
 		 * Set a callback function for a cancellation, which can be triggered by the close button
-		 * @param {Function} cancelFunc The callback back function for the cancellation. 
+		 * @param {Function} cancelFunc The callback back function for the cancellation.
 		 */
 		setCancelFunction: function(cancelFunc) {
 			this._cancelFunc = cancelFunc;
 		},
-		
+
 		/**
 		 * Set a message that indicates that a long-running (progress) operation is complete.
 		 * @param {String|orionError} message The error to display. Can be a simple String,
-		 * or an error object from a XHR error callback, or the body of an error response 
+		 * or an error object from a XHR error callback, or the body of an error response
 		 * from the Orion server.
 		 */
 		setProgressResult : function(message, cancelMsg) {
@@ -271,7 +271,7 @@ define([
 			this._init();
 
 			// Create the message
-			var msg = _status.Message || _status.toString();
+			var msg = _status.DetailedMessage || _status.Message || _status.toString();
 			if (msg === Object.prototype.toString()) {
 				// Last ditch effort to prevent user from seeing meaningless "[object Object]" message
 				msg = messages.UnknownError;
@@ -285,14 +285,14 @@ define([
 			var removedClasses = [];
 			if (_status.Severity) {
 				switch (_status.Severity) {
-				case SEV_WARNING: //$NON-NLS-0$
+				case SEV_WARNING:
 					extraClass="progressWarning"; //$NON-NLS-0$
 					removedClasses.push("progressInfo"); //$NON-NLS-1$
 					removedClasses.push("progressError"); //$NON-NLS-1$
 					removedClasses.push("progressNormal"); //$NON-NLS-0$
 					this._clickToDisMiss = true;
 					break;
-				case SEV_ERROR: //$NON-NLS-0$
+				case SEV_ERROR:
 					extraClass="progressError"; //$NON-NLS-0$
 					removedClasses.push("progressWarning"); //$NON-NLS-1$
 					removedClasses.push("progressInfo"); //$NON-NLS-1$
@@ -317,7 +317,7 @@ define([
 			container.classList.add("notificationShow"); //$NON-NLS-0$
 
 			// Set up the close button
-			var closeButton = lib.node(closeButtonDomId); //$NON-NLS-0$
+			var closeButton = lib.node(closeButtonDomId);
 			if(closeButton){
 				if(this._cancelMsg) {
 					closeButton.classList.add("cancelButton"); //$NON-NLS-0$
@@ -345,13 +345,13 @@ define([
 		createMessage: function(_status, msg) {
 			if (_status.HTML) {
 				// msg is HTML to be inserted directly
-				var span = document.createElement("span"); //$NON-NLS-0$
+				var span = document.createElement("span");
 				span.innerHTML = msg;
 				return span;
 			}
 			// Check for Markdown
 			var markdownSource;
-			if (_status.type === "markdown") { //$NON-NLS-0$
+			if (_status.type === "markdown") {
 				markdownSource = _status.content || msg;
 			} else {
 				// Attempt to parse the msg field as Markdown
@@ -369,7 +369,7 @@ define([
 
 			var msgNode, links = [];
 			if (html) {
-				msgNode = document.createElement("div"); //$NON-NLS-0$
+				msgNode = document.createElement("div");
 				msgNode.innerHTML = html;
 				// All status links open in new window
 				links = lib.$$("a", msgNode); //$NON-NLS-0$
@@ -405,17 +405,17 @@ define([
 				that.setProgressMessage(message);
 				var finish = function(){
 					if(message === that.progressMessage){
-						that.setProgressMessage(""); //$NON-NLS-0$
+						that.setProgressMessage("");
 					}
 				};
 				deferred.then(finish, finish);
 			}
 			return deferred;
 		},
-		
+
 		_lastProgressId: 0,
 		_progressMonitors: {length: 0},
-		
+
 		/**
 		 * Creates a ProgressMonitor that will be displayed on the status area.
 		 * @param {Deferred} deferred [optional] that updates this monitor
@@ -425,7 +425,7 @@ define([
 		createProgressMonitor: function(deferred, message){
 			return new ProgressMonitor(this, ++this._lastProgressId, deferred, message);
 		},
-		
+
 		_renderOngoingMonitors: function(){
 			var msg = "";
 			var title = "";
@@ -447,36 +447,36 @@ define([
 				}
 			}
 			if (pageLoader) {
-				this.setProgressMessage({message: title, detailedMessage: msg});			
+				this.setProgressMessage({message: title, detailedMessage: msg});
 				return;
 			}
 			this.setProgressMessage(msg);
 		},
-		
+
 		_beginProgressMonitor: function(monitor){
 			this._progressMonitors[monitor.progressId] = monitor;
 			this._progressMonitors.length++;
 			this._renderOngoingMonitors();
 		},
-		
+
 		_workedProgressMonitor: function(monitor){
 			this._progressMonitors[monitor.progressId] = monitor;
 			this._renderOngoingMonitors();
 		},
-		
+
 		_doneProgressMonitor: function(monitor){
 			delete this._progressMonitors[monitor.progressId];
 			this._progressMonitors.length--;
 			if(monitor.status){
 				this.setProgressResult(monitor.status);
-			}else{				
+			}else{
 				this._renderOngoingMonitors();
 			}
 		}
-		
+
 	};
 	StatusReportingService.prototype.constructor = StatusReportingService;
-	
+
 	function ProgressMonitor(statusService, progressId, deferred, message){
 		this.statusService = statusService;
 		this.progressId = progressId;
@@ -496,7 +496,7 @@ define([
 						if (progress.message) {
 							var msg = progress.message;
 							if (typeof progress.loaded === "number" && typeof progress.total === "number") {
-								if (progress.loaded > progress.total) progress.loaded = progress.total;
+								if (progress.loaded > progress.total) { progress.loaded = progress.total; }
 								msg = i18nUtil.formatMessage(messages["workedProgress"], msg, progress.loaded, progress.total);
 							}
 							that.worked(msg);
@@ -504,7 +504,7 @@ define([
 					});
 		}
 	}
-	
+
 	/**
 	 * Starts the progress monitor. Message will be shown in the status area.
 	 * @param {String} message
@@ -518,7 +518,7 @@ define([
 	 * Sets the progress monitor as done. If no status is provided the message will be
 	 * removed from the status.
 	 * @param {String|orionError} _status [optional] The error to display. Can be a simple String,
-	 * or an error object from a XHR error callback, or the body of an error response 
+	 * or an error object from a XHR error callback, or the body of an error response
 	 * from the Orion server.
 	 */
 	ProgressMonitor.prototype.done = function(_status){
@@ -534,7 +534,7 @@ define([
 				this.status = message;
 				this.statusService._workedProgressMonitor(this);
 			};
-	
+
 	ProgressMonitor.prototype.constructor = ProgressMonitor;
 
 	//return module exports
