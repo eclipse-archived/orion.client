@@ -35,7 +35,7 @@ function(messages, lib, mSetup, jsExample, htmlExample, cssExample, javaExample)
 													"<option value='css'>CSS</option>" +
 												"</select>" + 
 											"</div>" +
-											"<div id='editor' class='themeDisplayEditor' class='editor_group'></div>" +
+											"<div id='editor' class='themeDisplayEditor'></div>" +
 										"</div>";
 
 	function EditorWidget(args) {
