@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2016 IBM Corporation and others.
+ * Copyright (c) 2016, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -92,6 +92,21 @@ define("webtools/htmlValidator", [
 			var dom = ast;
 			if (!Array.isArray(ast) && ast.children){
 				dom = ast.children;
+			}
+			if(Array.isArray(ast.errors) && ast.errors.length > 0) {
+				ast.errors.forEach(function(error) {
+					if(error.error) {
+						var e = error.error;
+						problems.push({
+							id: "htmlParseFailure",
+							description: e.message,
+							start: error.range[0],
+							end: error.range[1],
+							severity: 'error' //$NON-NLS-1$
+						});
+					}
+
+				});
 			}
 			Visitor.visit(dom, {
 	            visitNode: function(node) {
