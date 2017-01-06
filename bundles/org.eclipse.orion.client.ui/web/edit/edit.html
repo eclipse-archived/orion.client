@@ -10,12 +10,20 @@
 		<script src="../requirejs/require.js"></script>
 		<script>
 			/*eslint-env browser, amd*/
-			require(["../orion/require-config.js"], function(config){
-				function load() {
-					require(["edit/edit"], null, config.errback);
-				}
-				require(["orion/splash"], load, load);
-			});
+			try{
+				require(["../orion/require-config.js"], function(config){
+					function load() {
+						require(["edit/edit"], null, config.errback);
+					}
+					require(["orion/splash"], load, load);
+				});
+			} catch (err){
+				document.addEventListener("DOMContentLoaded", function(event) { 
+				  	var splash = document.getElementById("splash");
+					splash.parentNode.removeChild(splash);
+					document.getElementById("pageContent").innerHTML = "There was a problem loading the page. The error was: " + err;
+				});
+			}
 		</script>
 	</head>
 
