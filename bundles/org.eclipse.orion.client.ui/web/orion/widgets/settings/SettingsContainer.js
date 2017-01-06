@@ -7,6 +7,7 @@
  * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html). 
  * 
  * Contributors: Anton McConville - IBM Corporation - initial API and implementation
+ *               Casey Flynn - Google Inc - Addition of Platform Styles.
  ******************************************************************************/
 /*eslint-env browser, amd*/
 
@@ -356,7 +357,7 @@ define([
 			});
 			this.commandService.addCommand(command);
 			this.commandService.registerCommandContribution('themeCommands', "orion.importTheme", 4); //$NON-NLS-1$ //$NON-NLS-2$
-						
+
 			var editorPreferences = new mEditorPreferences.EditorPreferences (this.preferences);
 
 			this.themeSettings = new ThemeSettings({
@@ -395,15 +396,19 @@ define([
 				commandService: this.commandService, 
 				preferences: themePreferences, 
 				themeData: containerTheme, 
-				toolbarId: 'editorThemeSettingsToolActionsArea', 
+				toolbarId: 'containerThemeSettingsToolActionsArea',
 				scopeList: scopeList,
 				previewWidget: previewWidget,
 				setup: setup,
 				serviceRegistry: this.registry});
+
+			// Currently there is no support for exporting / importing container themes.
+			this.commandService.unregisterCommandContribution('themeCommands', "orion.importTheme");
+			this.commandService.unregisterCommandContribution('themeCommands', "orion.exportTheme");
 			
 			var editorPreferences = new mEditorPreferences.EditorPreferences (this.preferences);
 			this.containerThemeSettings = new ThemeSettings({
-				id: "editorThemeSettings",
+				id: "containerThemeSettings",
 				title: messages.ContainerThemes,
 				registry: this.registry,
 				preferences: editorPreferences,
