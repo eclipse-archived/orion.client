@@ -1,10 +1,10 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2016 IBM Corporation and others.
- * All rights reserved. This program and the accompanying materials are made 
- * available under the terms of the Eclipse Public License v1.0 
- * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
- * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html). 
+ * Copyright (c) 2016, 2017 IBM Corporation and others.
+ * All rights reserved. This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License v1.0
+ * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution
+ * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html).
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
@@ -24,31 +24,31 @@ define("webtools/htmlValidator", [
 	 * @since 6.0
 	 */
 	function HtmlValidator(htmlAstManager) {
-	    this.htmlAstManager = htmlAstManager;
+		this.htmlAstManager = htmlAstManager;
 	}
-	
+
 	var options = {
-	    'attr-bans': 0,
-	    'attr-bans-config': [
-	        'align', //$NON-NLS-1$
-	        'background', //$NON-NLS-1$
-	        'bgcolor', //$NON-NLS-1$
-	        'border', //$NON-NLS-1$
-	        'frameborder', //$NON-NLS-1$
-	        'longdesc', //$NON-NLS-1$
-	        'marginwidth', //$NON-NLS-1$
-	        'marginheight', //$NON-NLS-1$
-	        'scrolling', //$NON-NLS-1$
-	        'style', //$NON-NLS-1$
-	        'width' //$NON-NLS-1$
-	    ],
-	    'fig-req-figcaption': 1,
-	    'img-req-alt': 1,
-	    'tag-close': 1,
+		'attr-bans': 0,
+		'attr-bans-config': [
+			'align', //$NON-NLS-1$
+			'background', //$NON-NLS-1$
+			'bgcolor', //$NON-NLS-1$
+			'border', //$NON-NLS-1$
+			'frameborder', //$NON-NLS-1$
+			'longdesc', //$NON-NLS-1$
+			'marginwidth', //$NON-NLS-1$
+			'marginheight', //$NON-NLS-1$
+			'scrolling', //$NON-NLS-1$
+			'style', //$NON-NLS-1$
+			'width' //$NON-NLS-1$
+		],
+		'fig-req-figcaption': 1,
+		'img-req-alt': 1,
+		'tag-close': 1
 	};
 
 	Objects.mixin(HtmlValidator.prototype, /** @lends webtools.CssValidator.prototype*/ {
-		
+
 		/**
 		 * @description Callback to create problems from orion.edit.validator
 		 * @function
@@ -60,13 +60,13 @@ define("webtools/htmlValidator", [
 		 */
 		computeProblems: function(editorContext, context) {
 			var that = this;
-		    return that.htmlAstManager.getAST(editorContext).then(function(ast) {
+			return that.htmlAstManager.getAST(editorContext).then(function(ast) {
 				return that._computeProblems(ast, context);
 			});
 		},
-		
+
 		/**
-		 * @description Create the problems 
+		 * @description Create the problems
 		 * @function
 		 * @private
 		 * @param {String} contents The file contents
@@ -74,14 +74,15 @@ define("webtools/htmlValidator", [
 		 * @callback
 		 */
 		_computeProblems: function(ast, context) {
-		    if (!ast){
+			if (!ast) {
 				return null;
 			}
 
-		    var problems = [];
-			function addProblems(newProblems){
-				if (newProblems){
-					if (Array.isArray(newProblems)){
+			var problems = [];
+
+			function addProblems(newProblems) {
+				if (newProblems) {
+					if (Array.isArray(newProblems)) {
 						problems = problems.concat(newProblems);
 					} else {
 						problems.push(newProblems);
@@ -90,38 +91,55 @@ define("webtools/htmlValidator", [
 			}
 			var ruleMap = Rules.ruleMap(options);
 			var dom = ast;
-			if (!Array.isArray(ast) && ast.children){
+			if (!Array.isArray(ast) && ast.children) {
 				dom = ast.children;
 			}
+			if (Array.isArray(ast.errors) && ast.errors.length > 0) {
+				ast.errors.forEach(function(error) {
+					if (error.error) {
+						var e = error.error;
+						problems.push({
+							id: "htmlParseFailure",
+							description: e.message,
+							start: error.range[0],
+							end: error.range[1],
+							severity: 'error' //$NON-NLS-1$
+						});
+					}
+
+				});
+			}
 			Visitor.visit(dom, {
-	            visitNode: function(node) {
-					if (node.type === 'tag'){
+				visitNode: function(node) {
+					if (node.type === 'tag') {
 						var rules = ruleMap['tag'];
-						if (rules){
+						if (rules) {
 							for (var i = 0; i < rules.length; i++) {
 								addProblems(rules[i](node));
 							}
 						}
-						if (node.name){
+						if (node.name) {
 							rules = ruleMap[node.name.toLowerCase()];
-							if (rules){
+							if (rules) {
 								for (i = 0; i < rules.length; i++) {
 									addProblems(rules[i](node));
 								}
 							}
 						}
 					}
-	            },
-	            /**
-	             * @callback
-	             */
-	            endVisitNode: function(node) {
-	            	
-	            }
-	        });
-			return {problems: problems};
+				},
+				/**
+				 * @callback
+				 */
+				endVisitNode: function(node) {
+
+				}
+			});
+			return {
+				problems: problems
+			};
 		},
-		
+
 		/**
 		 * @description Callback from orion.cm.managedservice
 		 * @function
@@ -132,17 +150,18 @@ define("webtools/htmlValidator", [
 			if (!properties) {
 				return;
 			}
-			function setOption(rule, value){
-				if (typeof value === 'number' && value >= 0 && value < 3){
+
+			function setOption(rule, value) {
+				if (typeof value === 'number' && value >= 0 && value < 3) {
 					options[rule] = value;
 				}
 			}
 			setOption('attr-bans', properties.validate_attr_bans); //$NON-NLS-1$
-		    setOption('fig-req-figcaption', properties.validate_fig_req_figcaption); //$NON-NLS-1$
-		    setOption('img-req-alt', properties.validate_img_req_alt); //$NON-NLS-1$
-		    setOption('tag-close', properties.validate_tag_close); //$NON-NLS-1$
+			setOption('fig-req-figcaption', properties.validate_fig_req_figcaption); //$NON-NLS-1$
+			setOption('img-req-alt', properties.validate_img_req_alt); //$NON-NLS-1$
+			setOption('tag-close', properties.validate_tag_close); //$NON-NLS-1$
 		}
 	});
-	
+
 	return HtmlValidator;
 });

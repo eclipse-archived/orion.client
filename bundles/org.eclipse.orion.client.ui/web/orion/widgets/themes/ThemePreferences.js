@@ -7,6 +7,7 @@
  * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html).
  *
  * Contributors:  IBM Corporation - initial API and implementation
+ *                Casey Flynn - Google Inc
  ******************************************************************************/
 /*eslint-env browser, amd*/
 
