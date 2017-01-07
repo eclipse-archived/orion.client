@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2012, 2016 IBM Corporation and others.
+ * Copyright (c) 2012, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -146,7 +146,16 @@ define(['orion/webui/littlelib'], function(lib) {
 			return this._tip;
 		},
 		
-		_positionTip: function(position, force) {
+		/**
+		 * @description Positions the tooltip relative to its parent
+		 * @function
+		 * @private
+		 * @param position {String} above, below, left or right
+		 * @param allowMove {Boolean} whether the tooltip can be shifted over to avoid extending over the browser window
+		 * @param force {Boolean} whether to force the tooltip into the position even if it overlaps the parent
+		 * @returns returns {Boolean} whether the tooltip was successfully positioned
+		 */
+		_positionTip: function(position, allowMove, force) {
 			this._makeTipNode();  // lazy initialize
 			
 			this._tip.classList.add("tooltipShowing"); //$NON-NLS-0$
@@ -187,6 +196,7 @@ define(['orion/webui/littlelib'], function(lib) {
 					break;
 			}
 			//Checking if the tooltip will fit inside the viewport of the browser
+			var tailChanged = false;
 			var body = document.body, html = document.documentElement;
 			var vPortLeft = Math.max(html.scrollLeft, body.scrollLeft);
 			var vPortTop = Math.max(html.scrollTop, body.scrollTop);
@@ -194,15 +204,17 @@ define(['orion/webui/littlelib'], function(lib) {
 			var vPortBottom = vPortTop + html.clientHeight;			
 			
 			if (top + tipRect.height > vPortBottom) {
-				if (force) {
+				if (force || (allowMove && (position === "left" || position === "right"))) {
 					top = vPortBottom - tipRect.height - 1;
+					tailChanged = true;
 				} else {
 					return false;
 				}
 			}
 			if (left + tipRect.width > vPortRight) {
-				if (force) {
+				if (force || (allowMove && (position === "above" || position === "below"))) {
 					left = vPortRight - tipRect.width - 1;
+					tailChanged = true;
 				} else {
 					return false;
 				}
@@ -210,6 +222,7 @@ define(['orion/webui/littlelib'], function(lib) {
 			if (left < vPortLeft) {
 				if (force) {
 					left = vPortLeft + 4;
+					tailChanged = true;
 				} else {
 					return false;
 				}
@@ -217,12 +230,13 @@ define(['orion/webui/littlelib'], function(lib) {
 			if (top < vPortTop) {
 				if (force) {
 					top = vPortTop + 4;
+					tailChanged = true;
 				} else {
 					return false;
 				}
 			}
 			
-			if (this._tail && (this._tail.previousPosition !== position)) {
+			if (this._tail && (this._tail.previousPosition !== position || tailChanged)) {
 				//position has changed, tail needs to be modified
 				this._tip.removeChild(this._tail);
 				this._tail = null;
@@ -237,7 +251,18 @@ define(['orion/webui/littlelib'], function(lib) {
 				} else {
 					this._tip.insertBefore(this._tail, this._tipInner);
 				}
-				this._tail.previousPosition = position;
+				// Move the tail to match up with the anchor
+				if (tailChanged){
+					if (position === "above" || position === "below") { //$NON-NLS-1$//$NON-NLS-0$
+						// tip goes after content
+						this._tail.style.left = (rect.left - left + this._tailSize) + "px";
+					} else {
+						this._tail.style.top = (rect.top - top + this._tailSize) + "px";
+					}
+					this._tail.previousPosition = null;
+				} else {
+					this._tail.previousPosition = position;
+				}
 			}
 			this._tip.style.top = top + "px"; //$NON-NLS-0$
 			this._tip.style.left = left + "px"; //$NON-NLS-0$ 
@@ -277,12 +302,20 @@ define(['orion/webui/littlelib'], function(lib) {
 		_showImmediately: function() {
 			var positioned = false;
 			var index = 0;
+			// See if the tooltip can fit anywhere around the anchor
 			while (!positioned && index < this._position.length) {
 				positioned = this._positionTip(this._position[index]);
 				index++;
 			}
+			index = 0;
+			// See if the tooltip can be moved over to fit around the anchor
+			while (!positioned && index < this._position.length) {
+				positioned = this._positionTip(this._position[index], true, false);
+				index++;
+			}
+			// Place the tooltip even if it overlaps the anchor
 			if (!positioned) {
-				this._positionTip(this._position[0], true);  // force it in, it doesn't fit anywhere
+				this._positionTip(this._position[0], false, true);  // force it in, it doesn't fit anywhere
 			}
 			if (this._afterShowing) {
 				this._afterShowing();
