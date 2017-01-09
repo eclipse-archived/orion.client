@@ -780,7 +780,7 @@ function merge(req, res, commitToMerge, squash) {
 	.then(function() {
 		var mergeResult = "MERGED";
 		if (!paths) {
-			if (oid && oid.toString() === head.id().toString()) mergeResult = "ALREADY_UPDATE";
+			if (oid && oid.toString() === head.id().toString()) mergeResult = "ALREADY_UP_TO_DATE";
 			else if (oid && oid.toString() === commit.id().toString()) mergeResult = "FAST_FORWARD";
 		}
 		res.status(200).json({
