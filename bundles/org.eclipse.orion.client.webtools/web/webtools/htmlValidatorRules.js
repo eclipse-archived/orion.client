@@ -55,11 +55,45 @@ define([
 			if (!opts['tag-close']) {
 				return [];
 			}
+			
+			// Check whether the tag is considered optional in html5 spec https://www.w3.org/TR/html5/syntax.html#optional-tags
+			// Tag following another tag is handled in the htmlparser2 code (see parser.js)
+			function isOptionalClose(elementToCheck){
+				var	closeOnNoContent = ["p", "li", "dd", "rb", "rt", "rtc", "rp", "optgroup", "option", "tbody", "tfoot"];
+				if (closeOnNoContent.indexOf(elementToCheck.name) >= 0){
+					var parent = elementToCheck.parent;
+					if (!parent || !parent.children || parent.children.length === 0){
+						return false;
+					}
+					if (parent.children[parent.children.length-1].range.start !== elementToCheck.range.start){
+						return false;
+					}
+					if (elementToCheck.children && elementToCheck.children.length > 0){
+						return false;
+					}
+					if (elementToCheck.name === "p" && parent.name === "a"){
+						// p elements inside of a elements must have end tag
+						return false;
+					}
+					return true;
+				}
+				switch (elementToCheck.name) {
+					case "html": // If no comment
+					case "body": // If no comment
+					case "head": // If no whitespace or comment
+					case "colgroup": // If no whitespace or comment
+						// TODO We don't have source here so can't check for whitespace
+						return !elementToCheck.children || elementToCheck.children.length === 0 || elementToCheck.children[0].type !== "comment";
+				}
+				return false;
+			}
 
 			if (element.name && element.openrange) {
 				if (!element.endrange || (element.endrange[0] === element.openrange[1] && element.endrange[1] === element.openrange[1])) {
 					if (Tags.voidElements.indexOf(element.name) < 0) {
-						return createProblem(element.openrange, 'tag-close', i18nUtil.formatMessage(Messages['tag-close'], element.name), opts['tag-close']); //$NON-NLS-1$
+						if (!isOptionalClose(element)){
+							return createProblem(element.openrange, 'tag-close', i18nUtil.formatMessage(Messages['tag-close'], element.name), opts['tag-close']); //$NON-NLS-1$
+						}
 					}
 				}
 			}

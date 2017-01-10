@@ -61,19 +61,33 @@ define([
     	 */
     	function assertProblems(computed, expected) {
     	    var problems = computed.problems;
-    	    assert.equal(problems.length, expected.length, "The wrong number of problems was computed");
+    	    assert.equal(problems.length, expected.length, "The wrong number of problems was computed" + toStringProblems(problems, expected));
     	    for(var i = 0; i < problems.length; i++) {
     	        var pb = problems[i];
     	        var expb = expected[i];
-    	        assert.equal(pb.start, expb.start, "Wrong problem start");
-    	        assert.equal(pb.end, expb.end, "Wrong problem end");
-    	        assert.equal(pb.description, expb.description, "Wrong problem message");
-    	        assert.equal(pb.severity, expb.severity, "Wrong problem severity");
+    	        assert.equal(pb.start, expb.start, "Wrong problem start" + toStringProblems(problems, expected));
+    	        assert.equal(pb.end, expb.end, "Wrong problem end" + toStringProblems(problems, expected));
+    	        assert.equal(pb.description, expb.description, "Wrong problem message" + toStringProblems(problems, expected));
+    	        assert.equal(pb.severity, expb.severity, "Wrong problem severity" + toStringProblems(problems, expected));
     	        if(pb.descriptionArgs) {
     	            assert(expb.descriptionArgs, "Missing expected description arguments");
     	            assert.equal(pb.descriptionArgs.nls, expb.descriptionArgs.nls, "Missing NLS description argument key");
     	        }
     	    }
+	    }
+	    
+	    function toStringProblems(computed, expected){
+	    	var result = "\nEXPECTED:\n";
+	    	for (var i = 0; i < expected.length; i++) {
+	    		var pb = expected[i];
+	    		result += '{start: ' + pb.start + ', end: ' + pb.end + ', severity: "' + pb.severity + '", description: "' + pb.description + '"},\n';
+	    	}
+	    	result += "ACTUAL:\n";
+	    	for (i = 0; i < computed.length; i++) {
+	    		pb = computed[i];
+	    		result += '{start: ' + pb.start + ', end: ' + pb.end + ', severity: "' + pb.severity + '", description: "' + pb.description + '"},\n';
+	    	}
+	    	return result;
 	    }
 
 		// TODO ATTR-BAN rule is disabled by default currently
@@ -198,11 +212,6 @@ define([
 			    var val = setup({buffer: '<html> \n\n ', rule: {id:null, severity:1}});
 				return validator.computeProblems(val.editorContext).then(function(result) {
 					assertProblems(result, [
-					    {start: 0,
-					     end: 6,
-					     severity: 'warning',
-					     description: "No matching closing tag for 'html'."
-					    }
 					]);
 				});
 			});
@@ -210,11 +219,6 @@ define([
 			    var val = setup({buffer: '<html><a></a>', rule: {id:null, severity:1}});
 				return validator.computeProblems(val.editorContext).then(function(result) {
 					assertProblems(result, [
-					    {start: 0,
-					     end: 6,
-					     severity: 'warning',
-					     description: "No matching closing tag for 'html'."
-					    }
 					]);
 				});
 			});
@@ -356,6 +360,236 @@ define([
 					    }
 					]);
 				});
+			});
+			describe('tag-close HTML5 Optional', function(){
+				describe('No content following, implemented in HTML Validator Rules', function(){
+					it("tag-close optional html tag 1", function() {
+					    var val = setup({buffer: '<html>', rule: {id:null, severity:1}});
+						return validator.computeProblems(val.editorContext).then(function(result) {
+							assertProblems(result, [
+							]);
+						});
+					});
+					it("tag-close optional html tag 2", function() {
+					    var val = setup({buffer: '<html><!-- comment -->', rule: {id:null, severity:1}});
+						return validator.computeProblems(val.editorContext).then(function(result) {
+							assertProblems(result, [
+								{start: 0,
+							     end: 6,
+							     severity: 'warning',
+							     description: "No matching closing tag for 'html'."
+						    	}
+							]);
+						});
+					});
+					it("tag-close optional body tag 1", function() {
+					    var val = setup({buffer: '<html><body></html>', rule: {id:null, severity:1}});
+						return validator.computeProblems(val.editorContext).then(function(result) {
+							assertProblems(result, [
+							]);
+						});
+					});
+					it("tag-close optional body tag 2", function() {
+					    var val = setup({buffer: '<html><body><!-- comment --></html>', rule: {id:null, severity:1}});
+						return validator.computeProblems(val.editorContext).then(function(result) {
+							assertProblems(result, [
+								{start: 6,
+							     end: 12,
+							     severity: 'warning',
+							     description: "No matching closing tag for 'body'."
+						    	}
+							]);
+						});
+					});
+					it("tag-close optional head tag 1", function() {
+					    var val = setup({buffer: '<html><head></html>', rule: {id:null, severity:1}});
+						return validator.computeProblems(val.editorContext).then(function(result) {
+							assertProblems(result, [
+							]);
+						});
+					});
+					it("tag-close optional head tag 2", function() {
+					    var val = setup({buffer: '<html><head><!-- comment --></html>', rule: {id:null, severity:1}});
+						return validator.computeProblems(val.editorContext).then(function(result) {
+							assertProblems(result, [
+								{start: 6,
+							     end: 12,
+							     severity: 'warning',
+							     description: "No matching closing tag for 'head'."
+						    	}
+							]);
+						});
+					});
+					// TODO No checking for whitespace in validator
+					it.skip("tag-close optional head tag 3", function() {
+					    var val = setup({buffer: '<html><head> \nTest\n</html>', rule: {id:null, severity:1}});
+						return validator.computeProblems(val.editorContext).then(function(result) {
+							assertProblems(result, [
+								{start: 6,
+							     end: 12,
+							     severity: 'warning',
+							     description: "No matching closing tag for 'head'."
+						    	}
+							]);
+						});
+					});
+					it("tag-close optional colgroup tag 1", function() {
+					    var val = setup({buffer: '<html><colgroup></html>', rule: {id:null, severity:1}});
+						return validator.computeProblems(val.editorContext).then(function(result) {
+							assertProblems(result, [
+							]);
+						});
+					});
+					it("tag-close optional colgroup tag 2", function() {
+					    var val = setup({buffer: '<html><colgroup><!-- comment --></html>', rule: {id:null, severity:1}});
+						return validator.computeProblems(val.editorContext).then(function(result) {
+							assertProblems(result, [
+								{start: 6,
+							     end: 16,
+							     severity: 'warning',
+							     description: "No matching closing tag for 'colgroup'."
+						    	}
+							]);
+						});
+					});
+					// TODO No checking for whitespace in validator
+					it.skip("tag-close optional colgroup tag 3", function() {
+					    var val = setup({buffer: '<html><colgroup> \nTest\n</html>', rule: {id:null, severity:1}});
+						return validator.computeProblems(val.editorContext).then(function(result) {
+							assertProblems(result, [
+								{start: 6,
+							     end: 12,
+							     severity: 'warning',
+							     description: "No matching closing tag for 'colgroup'."
+						    	}
+							]);
+						});
+					});
+					it("tag-close optional li tag 1 (content after)", function() {
+					    var val = setup({buffer: '<html><li><b>fefefe</b></html>', rule: {id:null, severity:1}});
+						return validator.computeProblems(val.editorContext).then(function(result) {
+							assertProblems(result, [
+								{start: 6,
+								end: 10,
+								severity: "warning",
+								description: "No matching closing tag for 'li'."},
+							]);
+						});
+					});
+					it("tag-close optional li tag 2 (content after)", function() {
+					    var val = setup({buffer: '<html><li></html>', rule: {id:null, severity:1}});
+						return validator.computeProblems(val.editorContext).then(function(result) {
+							assertProblems(result, [
+							]);
+						});
+					});
+					it("tag-close optional p tag 1 (content after)", function() {
+					    var val = setup({buffer: '<html><p></html>', rule: {id:null, severity:1}});
+						return validator.computeProblems(val.editorContext).then(function(result) {
+							assertProblems(result, [
+							]);
+						});
+					});
+					it("tag-close optional p tag 2 (content after)", function() {
+					    var val = setup({buffer: '<html><p><b></b></html>', rule: {id:null, severity:1}});
+						return validator.computeProblems(val.editorContext).then(function(result) {
+							assertProblems(result, [
+								{start: 6,
+								end: 9,
+								severity: "warning",
+								description: "No matching closing tag for 'p'."},
+							]);
+						});
+					});
+					it("tag-close optional p tag 3 (content after)", function() {
+					    var val = setup({buffer: '<html><a><p></a></html>', rule: {id:null, severity:1}});
+						return validator.computeProblems(val.editorContext).then(function(result) {
+							assertProblems(result, [
+								{start: 9,
+								end: 12,
+								severity: "warning",
+								description: "No matching closing tag for 'p'."},
+							]);
+						});
+					});
+					it("tag-close optional p tag 4 (content after)", function() {
+					    var val = setup({buffer: '<html><a><p><b></b></a></html>', rule: {id:null, severity:1}});
+						return validator.computeProblems(val.editorContext).then(function(result) {
+							assertProblems(result, [
+								{start: 9,
+								end: 12,
+								severity: "warning",
+								description: "No matching closing tag for 'p'."},
+							]);
+						});
+					});
+
+
+				});
+				describe('Specific tag following, implemented in htmlparser2', function(){
+					it("tag-close optional li tag 1", function() {
+					    var val = setup({buffer: '<html><li><li></li></html>', rule: {id:null, severity:1}});
+						return validator.computeProblems(val.editorContext).then(function(result) {
+							assertProblems(result, [
+							]);
+						});
+					});
+					it("tag-close optional li tag 2", function() {
+					    var val = setup({buffer: '<html><li><li><b></b></html>', rule: {id:null, severity:1}});
+						return validator.computeProblems(val.editorContext).then(function(result) {
+							assertProblems(result, [
+								{start: 10,
+							     end: 14,
+							     severity: 'warning',
+							     description: "No matching closing tag for 'li'."
+						    	}
+							]);
+						});
+					});
+					it("tag-close optional dd tag", function() {
+					    var val = setup({buffer: '<html><dd><dd></dd><dd><dt></dt></html>', rule: {id:null, severity:1}});
+						return validator.computeProblems(val.editorContext).then(function(result) {
+							assertProblems(result, [
+							]);
+						});
+					});
+					it("tag-close optional dt tag", function() {
+					    var val = setup({buffer: '<html><dt><dd></dd><dt><dt></dt></html>', rule: {id:null, severity:1}});
+						return validator.computeProblems(val.editorContext).then(function(result) {
+							assertProblems(result, [
+							]);
+						});
+					});
+					it("tag-close optional p tag", function() {
+					    var val = setup({buffer: '<html><p><address></address><p><div></div><p><h3></h3><p><main></main><p><table></table></html>', rule: {id:null, severity:1}});
+						return validator.computeProblems(val.editorContext).then(function(result) {
+							assertProblems(result, [
+							]);
+						});
+					});
+					it("tag-close optional tr tag", function() {
+					    var val = setup({buffer: '<html><tr><tr></tr></html>', rule: {id:null, severity:1}});
+						return validator.computeProblems(val.editorContext).then(function(result) {
+							assertProblems(result, [
+							]);
+						});
+					});
+					it("tag-close optional td tag", function() {
+					    var val = setup({buffer: '<html><td><tr></tr><td><td></td></html>', rule: {id:null, severity:1}});
+						return validator.computeProblems(val.editorContext).then(function(result) {
+							assertProblems(result, [
+							]);
+						});
+					});
+					it("tag-close optional th tag", function() {
+					    var val = setup({buffer: '<html><th><th></th><th><td></td><th><tr></tr></html>', rule: {id:null, severity:1}});
+						return validator.computeProblems(val.editorContext).then(function(result) {
+							assertProblems(result, [
+							]);
+						});
+					});
+				});
+
 			});
 		});
 	});

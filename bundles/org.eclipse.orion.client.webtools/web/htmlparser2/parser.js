@@ -61,6 +61,51 @@ define([
 		optgroup: { optgroup:true }
 	};
 	
+	// ORION Implement the HTML5 optional close tags spec
+	// right side describes the end tag that is optional, the left side describes what the following element must be
+	var openImpliesCloseHTML5 = {
+		li      : { li:true },
+		dd      : { dd:true, dt:true },
+		dt      : { dd:true, dt:true },
+		address	: { p:true },
+		article	: { p:true },
+		aside	: { p:true },
+		blockquote	: { p:true },
+		div		: { p:true },
+		dl		: { p:true },
+		fieldset: { p:true },
+		footer	: { p:true },
+		form	: { p:true },
+		h1      : { p:true },
+		h2      : { p:true },
+		h3      : { p:true },
+		h4      : { p:true },
+		h5      : { p:true },
+		h6      : { p:true },
+		header	: { p:true },
+		hgroup	: { p:true },
+		hr		: { p:true },
+		main	: { p:true },
+		nav		: { p:true },
+		ol		: { p:true },
+		p		: { p:true },
+		pre		: { p:true },
+		section	: { p:true },
+		table	: { p:true },
+		ul		: { p:true },
+		rb		: { rb:true, rt:true, rtc:true, rp:true},
+		rt		: { rb:true, rt:true, rp:true}, // rtc does no end followed by an rt
+		rtc		: { rb:true, rt:true, rtc:true, rp:true},
+		rp		: { rb:true, rt:true, rtc:true, rp:true},	
+		optgroup: { optgroup:true, option:true },
+		option	: { option:true },
+		tbody	: { tbody:true, tfoot:true, thead:true },
+		tfoot 	: { tbody:true, thead:true },
+		tr      : { tr:true, th:true, td:true },
+		th      : { th:true },
+		td      : { thead:true, th:true, td:true },
+	};
+	
 	var voidElements = {
 		__proto__: null,
 		area: true,
@@ -160,12 +205,13 @@ define([
 		}
 	
 		this._tagname = name;
-	
-		if(!this._options.xmlMode && name in openImpliesClose) {
+		
+		// ORION Use the HTML 5 optional tag spec for open implies close
+		if(!this._options.xmlMode && name in openImpliesCloseHTML5) {
 			for(
 				var el;
-				(el = this._stack[this._stack.length - 1]) in openImpliesClose[name];
-				this.onclosetag(el)
+				(el = this._stack[this._stack.length - 1]) in openImpliesCloseHTML5[name];
+				this.onclosetag(el, true) // ORION Don't update position when closing a tag this way
 			);
 		}
 	
@@ -192,8 +238,11 @@ define([
 		this._tagname = "";
 	};
 	
-	Parser.prototype.onclosetag = function(name){
-		this._updatePosition(1);
+	Parser.prototype.onclosetag = function(name, skipPositionUpdate){
+		// ORION Allow skipping of position update when closing a tag due to HTML optional tag rules
+		if (!skipPositionUpdate){
+			this._updatePosition(1);
+		}
 	
 		if(this._lowerCaseTagNames){
 			name = name.toLowerCase();
