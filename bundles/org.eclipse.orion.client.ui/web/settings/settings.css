@@ -826,6 +826,7 @@ html[dir="rtl"] .editorSection { /* ACGC */
 
 #editorThemeDelete, #editorThemeRevert, #editorThemeSave {
     float: right;
+    margin-right: 10px;
 }
 
 html[dir="rtl"] #editorThemeDelete, #editorThemeRevert, #editorThemeSave { /* ACGC */
@@ -853,10 +854,6 @@ html[dir="rtl"] #editorThemeDelete, #editorThemeRevert, #editorThemeSave { /* AC
 .git-sprite-revert:before{
 	font-family: 'Orion Icon Font';
 	content: '\E021';
-}
-
-#editorThemeRevert {
-    margin-right: 10px;
 }
 
 html[dir="rtl"] #editorThemeRevert { /* ACGC */

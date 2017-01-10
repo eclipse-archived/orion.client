@@ -14,9 +14,9 @@
 
 define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/i18nUtil', 'orion/uiUtils', 'orion/fileUtils', 'orion/commands', 'orion/fileDownloader',
 	'orion/commandRegistry', 'orion/contentTypes', 'orion/compare/compareUtils', 
-	'orion/Deferred', 'orion/webui/dialogs/DirectoryPrompterDialog', 'orion/webui/dialogs/SFTPConnectionDialog',
+	'orion/Deferred', 'orion/webui/dialogs/DirectoryPrompterDialog',
 	'orion/EventTarget', 'orion/form', 'orion/xsrfUtils', 'orion/bidiUtils', 'orion/util'],
-	function(messages, lib, i18nUtil, mUIUtils, mFileUtils, mCommands, mFileDownloader, mCommandRegistry, mContentTypes, mCompareUtils, Deferred, DirPrompter, SFTPDialog, EventTarget, form, xsrfUtils, bidiUtils, util){
+	function(messages, lib, i18nUtil, mUIUtils, mFileUtils, mCommands, mFileDownloader, mCommandRegistry, mContentTypes, mCompareUtils, Deferred, DirPrompter, EventTarget, form, xsrfUtils, bidiUtils, util){
 
 	/**
 	 * Utility methods
@@ -1139,67 +1139,6 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/i18n
 			visibleWhen: checkFolderSelection
 		});
 		commandService.addCommand(importCommand);
-	
-		var importSFTPCommand = new mCommands.Command({
-			name : messages["SFTP from..."],
-			tooltip: messages["CpyFrmSftp"],
-			imageClass: "core-sprite-transferin", //$NON-NLS-0$
-			id: "orion.importSFTP", //$NON-NLS-0$
-			callback : function(data) {
-				var item = getTargetFolder(data.items);
-				var dialog = new SFTPDialog.SFTPConnectionDialog({
-					func:  function(host,port,path,user,password, overwriteOptions){
-						var optionHeader = overwriteOptions ? "sftp,"+overwriteOptions : "sftp"; //$NON-NLS-1$ //$NON-NLS-0$
-						var importOptions = {"OptionHeader":optionHeader,"Host":host,"Port":port,"Path":path,"UserName":user,"Passphrase":password}; //$NON-NLS-5$ //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-						var deferred = fileClient.remoteImport(item.ImportLocation, importOptions, item.Location);
-						progressService.showWhile(deferred, i18nUtil.formatMessage(messages["Importing from ${0}"], host)).then(
-							function(result) {
-								errorHandler(result);
-							},
-							errorHandler
-						);//refresh the root
-					}
-				});
-				dialog.show();
-			},
-			visibleWhen: checkFolderSelection
-		});
-		commandService.addCommand(importSFTPCommand);
-	
-		var exportSFTPCommand = new mCommands.Command({
-			name : messages["SFTP to..."],
-			tooltip: messages["CpyToSftp"],
-			imageClass: "core-sprite-transferout", //$NON-NLS-0$
-			id: "eclipse.exportSFTPCommand", //$NON-NLS-0$
-			callback : function(data) {
-				var item = forceSingleItem(data.items);
-				var dialog = new SFTPDialog.SFTPConnectionDialog({
-					func: function(host, port, path, user, password, overwriteOptions){
-						var optionHeader = overwriteOptions ? ("sftp," + overwriteOptions) : "sftp"; //$NON-NLS-1$ //$NON-NLS-0$
-						var exportOptions = {
-							OptionHeader: optionHeader,
-							Host: host,
-							Port: port,
-							Path: path,
-							UserName: user,
-							Passphrase: password
-						};
-						var deferred = fileClient.remoteExport(item.ExportLocation, exportOptions);
-						progressService.showWhile(deferred, i18nUtil.formatMessage(messages["Exporting"], host)).then(
-							errorHandler, errorHandler);
-					}
-				});
-				dialog.show();
-			},
-			visibleWhen: function(item) {
-				if (!explorer || !explorer.isCommandsVisible()) {
-					return false;
-				}
-				item = forceSingleItem(item);
-				return item.ExportLocation && item.Directory;
-			}
-		});
-		commandService.addCommand(exportSFTPCommand);
 		
 		var copyCommand = new mCommands.Command({
 			name : messages["Copy to"],
