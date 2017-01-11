@@ -36,11 +36,18 @@ define(['require', 'orion/Deferred', 'orion/EventTarget', 'orion/xhr'], function
 				if (item === null) {
 					return null;
 				}
-				var cached = JSON.parse(item);
-				if (ignoreExpires || expiresSeconds === -1 || (cached._expires && cached._expires > Date.now())) {
-					delete cached._expires;
-					return cached;
+				
+				try {
+					var cached = JSON.parse(item);
+					if (ignoreExpires || expiresSeconds === -1 || (cached._expires && cached._expires > Date.now())) {
+						delete cached._expires;
+						return cached;
+					}
+				} catch (e) {
+					//invalid value; remove from cache.
+					localStorage.removeItem(prefix + namespace);
 				}
+				
 				return null;
 			},
 			set: function(namespace, data) {
@@ -484,6 +491,7 @@ define(['require', 'orion/Deferred', 'orion/EventTarget', 'orion/xhr'], function
 		}
 	};
 	return {
-		PreferencesService: PreferencesService
+		PreferencesService: PreferencesService,
+		Cache: Cache
 	};
 });
