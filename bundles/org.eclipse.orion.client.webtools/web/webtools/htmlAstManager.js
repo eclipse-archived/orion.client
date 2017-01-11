@@ -40,6 +40,11 @@ define([
 			for (var i = 0; i < this.attribstack.length; i++) {
 				var attrib = this.attribstack[i];
 				if (attrib.name) {
+					if (node.attributes[attrib.name]) {
+						// Store duplicate attributes for later linting
+						if (!node.duplicateAttributes) node.duplicateAttributes = [];
+						node.duplicateAttributes.push(node.attributes[attrib.name]);
+					}
 					node.attributes[attrib.name] = attrib;
 				}
 			}

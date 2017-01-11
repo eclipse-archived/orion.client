@@ -54,6 +54,7 @@ define({
 	
 	// HTML lint messages
 	'attr-bans': 'The \'${0}\' attribute is not recommended.',
+	'attr-no-dup': 'The \'${0}\' attribute is duplicated.',
 	'tag-close': 'No matching closing tag for \'${0}\'.',
 	'img-req-alt': 'The \'alt\' property must be set for image tags (for accessibility).',
 	'fig-req-figcaption': '\'figure\' must have a \'figcaption\', \'figcaption\' must be in a \'figure\' (for accessibility).',

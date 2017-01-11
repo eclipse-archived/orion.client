@@ -42,6 +42,7 @@ define("webtools/htmlValidator", [
 			'style', //$NON-NLS-1$
 			'width' //$NON-NLS-1$
 		],
+		'attr-no-dup': 1,
 		'fig-req-figcaption': 1,
 		'img-req-alt': 1,
 		'tag-close': 1
@@ -157,6 +158,7 @@ define("webtools/htmlValidator", [
 				}
 			}
 			setOption('attr-bans', properties.validate_attr_bans); //$NON-NLS-1$
+			setOption('attr-no-dup', properties.validate_attr_no_dup); //$NON-NLS-1$
 			setOption('fig-req-figcaption', properties.validate_fig_req_figcaption); //$NON-NLS-1$
 			setOption('img-req-alt', properties.validate_img_req_alt); //$NON-NLS-1$
 			setOption('tag-close', properties.validate_tag_close); //$NON-NLS-1$

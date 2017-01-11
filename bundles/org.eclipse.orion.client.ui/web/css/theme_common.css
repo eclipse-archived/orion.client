@@ -1046,7 +1046,6 @@ a.breadcrumb.currentLocation {
 	color: #222;
 	background-color: #fbfbfb;
 	border-radius: 2px;
-	border: 1px solid #BBB;
 	box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
 	padding-bottom:5px;
 }
