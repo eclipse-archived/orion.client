@@ -179,7 +179,9 @@ define(['i18n!orion/settings/nls/messages'
 				"styles .tooltipTailFromright:after border-right-color",
 				"styles .tooltipTailFromright:before border-right-color",
 				"styles .treeIterationCursorRow background-color",
-				"styles .treeIterationCursorRow_Dotted background-color"
+				"styles .treeIterationCursorRow_Dotted background-color",
+				"styles .treeTableRow span.core-sprite-closedarrow:hover color",
+				"styles .treeTableRow span.core-sprite-openarrow:hover color"
 			],
 			id: "flavorColor",
 			value: defaultColor

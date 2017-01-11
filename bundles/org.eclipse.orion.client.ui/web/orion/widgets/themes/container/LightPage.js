@@ -409,6 +409,14 @@ define({
 		".treeIterationCursorRow_Dotted": {
 			"background-color": "rgba(61,114,179,0.25)"
 		},
+		".treeTableRow": {
+			"span.core-sprite-closedarrow:hover" : {
+				"color": "#3D72B3"
+			},
+			"span.core-sprite-openarrow:hover" : {
+				"color": "#3D72B3"
+			}
+		},
 		".workingTarget": {
 			"background-color": "#FFFFFF"
 		},
