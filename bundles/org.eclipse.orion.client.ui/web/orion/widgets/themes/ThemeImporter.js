@@ -131,8 +131,21 @@ define([
             },
             appendThemeList: function() {
                 var docFragment = document.createDocumentFragment(),
+                    importInput = document.createElement("input"),
+                    importLabel = document.createElement("label"),
                     dropZone = document.createElement("div"), //$NON-NLS-0$
                     textBox = document.createElement("textarea"); //$NON-NLS-0$
+
+                importInput.id = "fileInput";
+                importInput.type = "file";
+                importInput.addEventListener("change", this.importOnSelect.bind(this));
+                docFragment.appendChild(importInput);
+
+                importLabel.id = "fileInputLabel";
+                importLabel.className = "orionButton commandButton";
+                importLabel.htmlFor = importInput.id;
+                importLabel.innerHTML = messages["importThemeButton"];
+                docFragment.appendChild(importLabel);
 
                 dropZone.className = "drop-zone"; //$NON-NLS-0$
                 dropZone.id = "dropZone"; //$NON-NLS-0$
@@ -188,6 +201,20 @@ define([
                     if (e.target.readyState === FileReader.DONE) {
                         var dropZone = document.getElementById("dropZone"); //$NON-NLS-0$
                         dropZone.className = "drop-zone"; //$NON-NLS-0$
+                        self.importTheme(self, e.target.result);
+                    }
+                };
+                reader.readAsText(file);
+            },
+            importOnSelect: function(e) {
+                e.stopPropagation();
+                e.preventDefault();
+                var file = e.target.files[0],
+                    reader = new FileReader(),
+                    self = this;
+
+                reader.onloadend = function(e) {
+                    if (e.target.readyState === FileReader.DONE) {
                         self.importTheme(self, e.target.result);
                     }
                 };
