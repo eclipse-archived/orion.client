@@ -98,6 +98,23 @@ define([
 				}
 			}
 		});
+		// No duplicate attributes
+		addRule('tag', function(element) { //$NON-NLS-1$
+			if (!opts['attr-no-dup']) {
+				return [];
+			}
+
+			if (!element.duplicateAttributes) {
+				return [];
+			}
+			
+			var issues = [];
+			var attrs = element.duplicateAttributes;
+			for (var i = 0; i < attrs.length; i++) {
+				issues.push(createProblem(attrs[i], 'attr-no-dup', i18nUtil.formatMessage(Messages['attr-no-dup'], attrs[i].name), opts['attr-no-dup']));
+			}
+			return issues;
+		});
 		// Require img alt
 		addRule('img', function(element) { //$NON-NLS-1$
 			if (!opts['img-req-alt']) {

@@ -79,6 +79,7 @@ define({//Default message bundle
 	
 	// HTML Validator Settings
 	"attr_bans": "Disallow the following attributes: align, background, bgcolor, frameborder, longdesc, marginwidth, marginheight, scrolling, style, width:",
+	"attr_no_dup": "Disallow attributes to be duplicated in the same element:",
 	"fig_req_figcaption": "Require all <figure> tags to have a <figcaption> tag:",
 	"img_req_alt": "Require all <img> tags to have the alt attribute:",
 	"tag_close": "Require all open tags have matching close tags:",

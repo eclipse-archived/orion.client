@@ -124,6 +124,52 @@ define([
 				});
 			});
 		});
+		describe('attr-no-dup', function(){
+			it("attr-no-dup duplicate align in p", function() {
+			    var val = setup({buffer: '<html><body><p align="left" align="right"></p></body></html>', rule: {id:null, severity:1}});
+				return validator.computeProblems(val.editorContext).then(function(result) {
+					assertProblems(result, [
+					    {start: 15,
+					     end: 27,
+					     severity: 'warning',
+					     description: "The 'align' attribute is duplicated."
+					    }
+					]);
+				});
+			});
+			it("attr-no-dup duplicate lang in html different quote", function() {
+			    var val = setup({buffer: '<html lang="en" lang=\'fr\' lang=jp></html>', rule: {id:null, severity:1}});
+				return validator.computeProblems(val.editorContext).then(function(result) {
+					assertProblems(result, [
+					    {start: 6, end: 15, severity: "warning", description: "The 'lang' attribute is duplicated."},
+						{start: 16, end: 25, severity: "warning", description: "The 'lang' attribute is duplicated."}		
+					]);
+				});
+			});
+			it("attr-no-dup three duplicate align in p", function() {
+			    var val = setup({buffer: '<html><body><p align="left" align="right" align="center"></p></body></html>', rule: {id:null, severity:1}});
+				return validator.computeProblems(val.editorContext).then(function(result) {
+					assertProblems(result, [
+						{start: 15, end: 27, severity: "warning", description: "The 'align' attribute is duplicated."},
+						{start: 28, end: 41, severity: "warning", description: "The 'align' attribute is duplicated."}
+					]);
+				});
+			});
+			it("attr-no-dup no duplicates", function() {
+			    var val = setup({buffer: '<html><body><p align="left" valign="top"></p></body></html>', rule: {id:null, severity:1}});
+				return validator.computeProblems(val.editorContext).then(function(result) {
+					assertProblems(result, [
+					]);
+				});
+			});
+			it("attr-no-dup duplicates in different elements", function() {
+			    var val = setup({buffer: '<html><body align="left"><p align="left"></p></body></html>', rule: {id:null, severity:1}});
+				return validator.computeProblems(val.editorContext).then(function(result) {
+					assertProblems(result, [
+					]);
+				});
+			});
+		});
 		describe('img-req-alt', function(){
 			it("img-req-alt no attr", function() {
 			    var val = setup({buffer: '<html><img></img></html>', rule: {id:null, severity:1}});
