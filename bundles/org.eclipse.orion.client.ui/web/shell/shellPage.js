@@ -874,7 +874,7 @@ define(["require", "i18n!orion/shell/nls/messages", "orion/bootstrap", "orion/co
 
 		shell.setFocusToInput();
 
-		shellPageFileService = new mShellPageFileService.ShellPageFileService();
+		shellPageFileService = new mShellPageFileService.ShellPageFileService(serviceRegistry, fileClient);
 		var defaultLocationFn = function(location, replace) {
 			var successFn = function(node) {
 				setCWD(node, replace);
