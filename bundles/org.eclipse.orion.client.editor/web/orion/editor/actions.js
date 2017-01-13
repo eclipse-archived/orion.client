@@ -468,15 +468,16 @@ define("orion/editor/actions", [ //$NON-NLS-0$
 			var list = editor.getOverviewRuler() || editor.getAnnotationStyler();
 			if (!list) { return true; }
 
-			var that = this;
-			function ignore(annotation) {
-				switch (that._iterationMode) {
+			function ignore(annotation, iterationMode) {
+				switch (iterationMode) {
 					case AT.ANNOTATION_ERROR:
 						return annotation.type !== AT.ANNOTATION_ERROR && annotation.type !== AT.ANNOTATION_WARNING;
 					case AT.ANNOTATION_READ_OCCURRENCE:
 						return annotation.type !== AT.ANNOTATION_READ_OCCURRENCE && annotation.type !== AT.ANNOTATION_WRITE_OCCURRENCE;
 					case AT.ANNOTATION_CURRENT_SEARCH:
 						return annotation.type !== AT.ANNOTATION_CURRENT_SEARCH && annotation.type !== AT.ANNOTATION_MATCHING_SEARCH;
+					case AT.ANNOTATION_TASK:
+						return annotation.type !== AT.ANNOTATION_TASK && annotation.type !== AT.ANNOTATION_BOOKMARK;
 				}
 				return true;
 			}
@@ -495,7 +496,9 @@ define("orion/editor/actions", [ //$NON-NLS-0$
 						break;
 					} else if (theMode !== AT.ANNOTATION_ERROR && annotation.type === AT.ANNOTATION_READ_OCCURRENCE || annotation.type === AT.ANNOTATION_WRITE_OCCURRENCE) {
 						theMode = AT.ANNOTATION_READ_OCCURRENCE;
-					} else if (theMode !== AT.ANNOTATION_ERROR && theMode !== AT.ANNOTATION_READ_OCCURRENCE && annotation.type === AT.ANNOTATION_CURRENT_SEARCH || annotation.type === AT.ANNOTATION_MATCHING_SEARCH) {
+					} else if (theMode !== AT.ANNOTATION_ERROR && theMode !== AT.ANNOTATION_READ_OCCURRENCE && annotation.type === AT.ANNOTATION_TASK || annotation.type === AT.ANNOTATION_BOOKMARK) {
+						theMode = AT.ANNOTATION_TASK;
+					} else if (!theMode) {
 						theMode = AT.ANNOTATION_CURRENT_SEARCH;
 					}
 				}
@@ -511,7 +514,7 @@ define("orion/editor/actions", [ //$NON-NLS-0$
 				} else {
 					if (annotation.start >= currentOffset) { continue; }
 				}
-				if (ignore(annotation)) {
+				if (ignore(annotation, this._iterationMode)) {
 					continue;
 				}
 				foundAnnotation = annotation;
@@ -524,7 +527,7 @@ define("orion/editor/actions", [ //$NON-NLS-0$
 				annotations = annotationModel.getAnnotations(foundAnnotation.start, foundAnnotation.start);
 				while (annotations.hasNext()) {
 					annotation = annotations.next();
-					if (annotation !== foundAnnotation && !ignore(annotation)) {
+					if (annotation !== foundAnnotation && !ignore(annotation, this._iterationMode)) {
 						foundAnnotations.push(annotation);
 					}
 				}
