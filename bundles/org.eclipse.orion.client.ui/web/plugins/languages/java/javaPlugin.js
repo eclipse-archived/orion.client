@@ -584,12 +584,17 @@ define([
 						return getPosition(editorContext, args.offset).then(function(position) {
 							return ipc.hover(meta.location, position).then(function(result) {
 								var hover = {type: 'markdown'};
-								if(typeof result.contents === 'string') {
+								if (Array.isArray(result.contents)) {
+									if (result.contents.length === 0) {
+										return new Deferred().resolve('');
+									}
+									hover.content = result.contents[0];
+								} else if (typeof result.contents === 'string') {
 									if (result.contents.length === 0) {
 										return new Deferred().resolve('');
 									}
 									hover.content = result.contents;
-								} else if(result.contents !== null && typeof result.contents === 'object') {
+								} else if (result.contents !== null && typeof result.contents === 'object') {
 									hover.content = result.contents.value;
 								}
 								return new Deferred().resolve(hover);
