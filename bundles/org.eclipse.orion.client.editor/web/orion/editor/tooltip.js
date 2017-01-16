@@ -249,8 +249,6 @@ function Tooltip (view, editor) {
 			this._tooltipDiv.style.overflowX = "";
 			this._tooltipDiv.style.overflowY = "";
 			
-			this._giveFocus = undefined;
-			
 			this._anchorArea = undefined;  // Area of text/ruler/etc. we are showing a tooltip for
 			this._tooltipArea = undefined;  // The area the tooltip covers
 			this._outerArea = undefined; // The rectangle encapsulating both anchor and tooltip areas where we want to keep the tooltip open

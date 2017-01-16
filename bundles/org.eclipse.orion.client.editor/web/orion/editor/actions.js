@@ -494,11 +494,11 @@ define("orion/editor/actions", [ //$NON-NLS-0$
 					if (annotation.type === AT.ANNOTATION_ERROR || annotation.type === AT.ANNOTATION_WARNING) {
 						theMode = AT.ANNOTATION_ERROR;
 						break;
-					} else if (theMode !== AT.ANNOTATION_ERROR && annotation.type === AT.ANNOTATION_READ_OCCURRENCE || annotation.type === AT.ANNOTATION_WRITE_OCCURRENCE) {
+					} else if (annotation.type === AT.ANNOTATION_READ_OCCURRENCE || annotation.type === AT.ANNOTATION_WRITE_OCCURRENCE) {
 						theMode = AT.ANNOTATION_READ_OCCURRENCE;
-					} else if (theMode !== AT.ANNOTATION_ERROR && theMode !== AT.ANNOTATION_READ_OCCURRENCE && annotation.type === AT.ANNOTATION_TASK || annotation.type === AT.ANNOTATION_BOOKMARK) {
+					} else if (annotation.type === AT.ANNOTATION_TASK || annotation.type === AT.ANNOTATION_BOOKMARK && theMode !== AT.ANNOTATION_READ_OCCURRENCE) {
 						theMode = AT.ANNOTATION_TASK;
-					} else if (!theMode) {
+					} else if (annotation.type === AT.ANNOTATION_CURRENT_SEARCH || annotation.type === AT.ANNOTATION_MATCHING_SEARCH && !theMode) {
 						theMode = AT.ANNOTATION_CURRENT_SEARCH;
 					}
 				}
