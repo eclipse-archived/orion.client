@@ -1,0 +1,54 @@
+
+.keyAssistFloat {
+}
+
+.keyAssistContents {
+	overflow-y: auto;
+}
+
+.keyAssistInput {
+    font-size: x-small;
+}
+
+.keyAssistBindingInput {
+}
+
+.keyAssistList {
+}
+
+.keyAssistItem {
+}
+
+.keyAssistItem.selected {
+}
+
+.keyAssistItem:hover {
+}
+
+.keyAssistEditButton {
+}
+
+.keyAssistEditButtonVisible {
+}
+
+.keyAssistActions {
+}
+
+.keyAssistItem:hover .keyAssistEditButton  {
+}
+
+.keyAssistSpacer {
+}
+
+.keyAssistFloat h2 {
+	font-size: small;
+}
+
+.keyAssistName {
+    font-size: x-small;
+}
+
+.keyAssistAccel {
+    font-size: x-small;
+}
+
