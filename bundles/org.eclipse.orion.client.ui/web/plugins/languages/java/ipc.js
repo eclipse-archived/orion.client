@@ -44,6 +44,12 @@ define([
 		 */
 		shutdown: 'shutdown',
 		/**
+		 * @description The base protocol offers support for request cancellation.
+		 * @kind request
+		 * https://github.com/Microsoft/language-server-protocol/blob/master/protocol.md#cancelRequest
+		 */
+		cancelRequest: '$/cancelRequest',
+		/**
 		 * @kind notification
 		 * @see https://github.com/Microsoft/language-server-protocol/blob/master/protocol.md#status-notification
 		 */
@@ -64,7 +70,7 @@ define([
 		 * @kind request
 		 * @see https://github.com/Microsoft/language-server-protocol/blob/master/protocol.md#showmessage-request
 		 */
-		showMessageRequest: 'winow/showMessageRequest',
+		showMessageRequest: 'window/showMessageRequest',
 		/**
 		 * @kind notification
 		 * @see https://github.com/Microsoft/language-server-protocol/blob/master/protocol.md#logmessage-notification
@@ -75,6 +81,19 @@ define([
 		 * @see https://github.com/Microsoft/language-server-protocol/blob/master/protocol.md#telemetry-notification
 		 */
 		telemetryEvent: 'telemetry/event',
+		/**
+		 * @description The client/registerCapability request is sent from the server to the client to register for a new capability on the client side.
+		 * Not all clients need to support dynamic capability registration. A client opts in via the ClientCapabilities.dynamicRegistration property.
+		 * @kind request
+		 * @see https://github.com/Microsoft/language-server-protocol/blob/master/protocol.md#client_registerCapability
+		 */
+		registerCapability: 'client/registerCapability',
+		/**
+		 * @description The client/unregisterCapability request is sent from the server to the client to unregister a previously register capability.
+		 * @kind request
+		 * @see https://github.com/Microsoft/language-server-protocol/blob/master/protocol.md#client_unregisterCapability
+		 */
+		unregisterCapability : 'client/unregisterCapability',
 		/**
 		 * @kind notification
 		 * @see https://github.com/Microsoft/language-server-protocol/blob/master/protocol.md#didchangeconfiguration-notification
@@ -92,16 +111,30 @@ define([
 		 */
 		workspaceSymbol: 'workspace/symbol',
 		/**
+		 * @description The workspace/executeCommand request is sent from the client to the server to trigger command execution on the server.
+		 * In most cases the server creates a WorkspaceEdit structure and applies the changes to the workspace using the request workspace/applyEdit
+		 * which is sent from the server to the client.
+		 * @kind request
+		 * @see https://github.com/othomann/language-server-protocol/blob/master/protocol.md#workspace_executeCommand
+		 */
+		workspaceExecuteCommand: 'workspace/executeCommand',
+		/**
+		 * @description The workspace/applyEdit request is sent from the server to the client to modify resource on the client side.
+		 * @kind request
+		 * @see https://github.com/othomann/language-server-protocol/blob/master/protocol.md#workspace_applyEdit
+		 */
+		workspaceApplyEdit: 'workspace/applyEdit',
+		/**
 		 * @description The code action request is sent from the client to the server to compute commands for a given text document and range. 
 		 * The request is triggered when the user moves the cursor into a problem marker in the editor or presses the lightbulb associated with a marker.
 		 * @kind request
-		 * @see https://github.com/Microsoft/language-server-protocol/blob/master/protocol.md#code-action
+		 * @see https://github.com/othomann/language-server-protocol/blob/master/protocol.md#textDocument_codeAction
 		 */
 		codeAction: 'textDocument/codeAction',
 		/**
 		 * @description The code lens request is sent from the client to the server to compute code lenses for a given text document.
 		 * @kind request
-		 * @see https://github.com/Microsoft/language-server-protocol/blob/master/protocol.md#code-lens
+		 * @see https://github.com/othomann/language-server-protocol/blob/master/protocol.md#textDocument_codeLens
 		 */
 		codeLens: 'textDocument/codeLens',
 		/**
@@ -109,106 +142,133 @@ define([
 		 * Completion items are presented in the IntelliSense user interface. If computing full completion items is expensive, 
 		 * servers can additionally provide a handler for the completion item resolve request. This request is sent when a completion item is selected in the user interface.
 		 * @kind request
-		 * @see https://github.com/Microsoft/language-server-protocol/blob/master/protocol.md#completion-request
+		 * @see https://github.com/othomann/language-server-protocol/blob/master/protocol.md#textDocument_completion
 		 */
 		completion: 'textDocument/completion',
 		/**
 		 * @description The goto definition request is sent from the client to the server to resolve the definition location of a symbol at a given text document position.
 		 * @kind request
-		 * @see https://github.com/Microsoft/language-server-protocol/blob/master/protocol.md#goto-definition
+		 * @see https://github.com/othomann/language-server-protocol/blob/master/protocol.md#textDocument_definition
 		 */
 		definition: 'textDocument/definition',
 		/**
 		 * @kind notification
-		 * @see https://github.com/Microsoft/language-server-protocol/blob/master/protocol.md#didopentextdocument-notification
+		 * @see https://github.com/othomann/language-server-protocol/blob/master/protocol.md#textDocument_didOpen
 		 */
 		didOpen: 'textDocument/didOpen',
 		/**
 		 * @kind notification
-		 * @see https://github.com/Microsoft/language-server-protocol/blob/master/protocol.md#didchangetextdocument-notification
+		 * @see https://github.com/othomann/language-server-protocol/blob/master/protocol.md#textDocument_didChange
 		 */
 		didChange: 'textDocument/didChange',
 		/**
 		 * @kind notification
-		 * @see https://github.com/Microsoft/language-server-protocol/blob/master/protocol.md#didclosetextdocument-notification
+		 * @see https://github.com/othomann/language-server-protocol/blob/master/protocol.md#textDocument_didClose
 		 */
 		didClose: 'textDocument/didClose',
 		/**
 		 * @kind notification
-		 * @see https://github.com/Microsoft/language-server-protocol/blob/master/protocol.md#didsavetextdocument-notification
+		 * @see https://github.com/othomann/language-server-protocol/blob/master/protocol.md#textDocument_didSave
 		 */
 		didSave: 'textDocument/didSave',
 		/**
 		 * @description The document highlight request is sent from the client to the server to resolve a document highlights for a given text document position.
 		 * @kind request
-		 * @see https://github.com/Microsoft/language-server-protocol/blob/master/protocol.md#document-highlights
+		 * @see https://github.com/othomann/language-server-protocol/blob/master/protocol.md#textDocument_documentHighlight
 		 */
 		documentHighlight: 'textDocument/documentHighlight',
 		/**
 		 * @description The document symbol request is sent from the client to the server to list all symbols found in a given text document.
 		 * @kind request
-		 * @see https://github.com/Microsoft/language-server-protocol/blob/master/protocol.md#document-symbols
+		 * @see https://github.com/othomann/language-server-protocol/blob/master/protocol.md#textDocument_documentSymbol
 		 */
 		documentSymbol: 'textDocument/documentSymbol',
 		/**
 		 * @description The document formatting request is sent from the server to the client to format a whole document.
 		 * @kind request
-		 * @see https://github.com/Microsoft/language-server-protocol/blob/master/protocol.md#document-formatting
+		 * @see https://github.com/othomann/language-server-protocol/blob/master/protocol.md#textDocument_formatting
 		 */
 		formatting: 'textDocument/formatting',
 		/**
 		 * @description The hover request is sent from the client to the server to request hover information at a given text document position.
 		 * @kind request
-		 * @see https://github.com/Microsoft/language-server-protocol/blob/master/protocol.md#hover
+		 * @see https://github.com/othomann/language-server-protocol/blob/master/protocol.md#textDocument_hover
 		 */
 		hover: 'textDocument/hover',
 		/**
 		 * @description The document on type formatting request is sent from the client to the server to format parts of the document during typing.
 		 * @kind request
-		 * @see https://github.com/Microsoft/language-server-protocol/blob/master/protocol.md#document-on-type-formatting
+		 * @see https://github.com/othomann/language-server-protocol/blob/master/protocol.md#textDocument_onTypeFormatting
 		 */
 		onTypeFormatting: 'textDocument/onTypeFormatting',
 		/**
 		 * @kind notification
-		 * @see https://github.com/Microsoft/language-server-protocol/blob/master/protocol.md#publishdiagnostics-notification
+		 * @see https://github.com/othomann/language-server-protocol/blob/master/protocol.md#textDocument_publishDiagnostics
 		 */
 		publishDiagnostics: 'textDocument/publishDiagnostics',
 		/**
 		 * @description The document range formatting request is sent from the client to the server to format a given range in a document.
 		 * @kind request
-		 * @see https://github.com/Microsoft/language-server-protocol/blob/master/protocol.md#document-range-formatting
+		 * @see https://github.com/othomann/language-server-protocol/blob/master/protocol.md#textDocument_rangeFormatting
 		 */
 		rangeFormatting: 'textDocument/rangeFormatting',
 		/**
 		 * @description The references request is sent from the client to the server to resolve project-wide references for the symbol denoted by the given text document position.
 		 * @kind request
-		 * @see https://github.com/Microsoft/language-server-protocol/blob/master/protocol.md#find-references
+		 * @see https://github.com/othomann/language-server-protocol/blob/master/protocol.md#textDocument_references
 		 */
 		references: 'textDocument/references',
 		/**
 		 * @description The rename request is sent from the client to the server to perform a workspace-wide rename of a symbol.
 		 * @kind request
-		 * @see https://github.com/Microsoft/language-server-protocol/blob/master/protocol.md#rename
+		 * @see https://github.com/othomann/language-server-protocol/blob/master/protocol.md#textDocument_rename
 		 */
 		rename: 'textDocument/rename',
 		/**
 		 * @description The signature help request is sent from the client to the server to request signature information at a given cursor position.
 		 * @kind request
-		 * @see https://github.com/Microsoft/language-server-protocol/blob/master/protocol.md#signature-help
+		 * @see https://github.com/othomann/language-server-protocol/blob/master/protocol.md#textDocument_signatureHelp
 		 */
 		signatureHelp: 'textDocument/signatureHelp',
 		/**
 		 * @description The request is sent from the client to the server to resolve additional information for a given completion item.
 		 * @kind request
-		 * @see https://github.com/Microsoft/language-server-protocol/blob/master/protocol.md#completion-item-resolve-request
+		 * @see https://github.com/othomann/language-server-protocol/blob/master/protocol.md#completionItem_resolve
 		 */
 		completionItemResolve: 'completionItem/resolve',
 		/**
 		 * @description The code lens resolve request is sent from the client to the server to resolve the command for a given code lens item.
 		 * @kind request
-		 * @see https://github.com/Microsoft/language-server-protocol/blob/master/protocol.md#code-lens-resolve
+		 * @see https://github.com/othomann/language-server-protocol/blob/master/protocol.md#codeLens_resolve
 		 */
-		codeLensResolve: 'codeLens/resolve'
+		codeLensResolve: 'codeLens/resolve',
+		/**
+		 * @description The document will save notification is sent from the client to the server before the document is actually saved.
+		 * @kind notification
+		 * @see https://github.com/othomann/language-server-protocol/blob/master/protocol.md#textDocument_willSave
+		 */
+		willSave : 'textDocument/willSave',
+		/**
+		 * @description The document will save request is sent from the client to the server before the document is actually saved.
+		 * The request can return an array of TextEdits which will be applied to the text document before it is saved.
+		 * Please note that clients might drop results if computing the text edits took too long or if a server constantly fails on this request.
+		 * This is done to keep the save fast and reliable.
+		 * @kind request
+		 * @see https://github.com/othomann/language-server-protocol/blob/master/protocol.md#textDocument_willSaveWaitUntil
+		 */
+		willSaveWaitUntil: 'textDocument/willSaveWaitUntil',
+		/**
+		 * @description The document links request is sent from the client to the server to request the location of links in a document.
+		 * @kind request
+		 * @see https://github.com/othomann/language-server-protocol/blob/master/protocol.md#textDocument_documentLink
+		 */
+		documentLink: 'textDocument/documentLink',
+		/**
+		 * @description The document link resolve request is sent from the client to the server to resolve the target of a given document link.
+		 * @kind request
+		 * @see https://github.com/othomann/language-server-protocol/blob/master/protocol.md#documentLink_resolve
+		 */
+		documentLinkResolve: 'documentLink/resolve'
 	};
 
 	/**
@@ -692,7 +752,7 @@ define([
 	 * @name IPC.prototype.codLensResolve
 	 * @description he code lens resolve request is sent from the client to the server to resolve the command for a given code lens item.
 	 * @function
-	 * @param {?} codeLens The result froma codeLens request
+	 * @param {?} codeLens The result from a codeLens request
 	 * @returns {Deferred} The deferred to return the results of the request
 	 */
 	IPC.prototype.codLensResolve = function codeLensResolve(codeLens) {
