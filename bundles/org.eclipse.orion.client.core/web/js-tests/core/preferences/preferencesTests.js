@@ -1,16 +1,15 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2011, 2016 IBM Corporation and others.
- * All rights reserved. This program and the accompanying materials are made 
- * available under the terms of the Eclipse Public License v1.0 
- * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
- * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html). 
- * 
+ * Copyright (c) 2011, 2017 IBM Corporation and others.
+ * All rights reserved. This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License v1.0
+ * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution
+ * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html).
+ *
  * Contributors: IBM Corporation - initial API and implementation
+ * 				 Google Inc. - Casey Flynn (caseyflynn@google.com)
  ******************************************************************************/
 /*eslint-env browser, amd, mocha*/
-/* eslint-disable missing-nls */
-/*globals localSettings:true */
 define([
 	"chai/chai",
 	"orion/Deferred",
@@ -20,20 +19,20 @@ define([
 	var assert = chai.assert;
 
 	function saveStorage(storage) {
-		storage = storage || localStorage;
+		var strage = storage || localStorage;
 		var stash = [], i, len, key;
-		for (i = 0, len = storage.length; i < len; i++) {
-			key = storage.key(i);
-			stash.push({key:key, value:storage.getItem(key)});
+		for (i = 0, len = strage.length; i < len; i++) {
+			key = strage.key(i);
+			stash.push({key:key, value:strage.getItem(key)});
 		}
 		return stash;
 	}
 
 	function restoreStorage(stash, storage) {
 		var i, len;
-		storage = storage || localStorage;
+		var strage = storage || localStorage;
 		for (i = 0, len = stash.length; i < len; i++) {
-			storage.setItem(stash[i].key, stash[i].value);
+			strage.setItem(stash[i].key, stash[i].value);
 		}
 	}
 	describe("preferences", function() {
@@ -70,14 +69,14 @@ define([
 		});
 
 		describe.skip("DISABLING FOR NOW test storage eventing", function() {
-			var d = new Deferred();	
+			var d = new Deferred();
 			function handleStorage(evnt) {
-				evnt = evnt || window.event;
-				if (!evnt.key) {
+				var e = evnt || window.event;
+				if (!e.key) {
 					return;
 				}
-				console.log("key=" + evnt.key + ", oldValue=" + evnt.oldValue + ", newValue=" + evnt.newValue);
-				if (evnt.newValue === null) {
+				console.log("key=" + e.key + ", oldValue=" + e.oldValue + ", newValue=" + e.newValue);
+				if (e.newValue === null) {
 					d.resolve(true);
 				}
 			}
@@ -113,13 +112,13 @@ define([
 			var setUp = function() {
 				pageLocalStorage = window.localStorage;
 				Object.defineProperty(window, "localStorage", {
-				  value: mockLocalStorage,
+				  value: mockLocalStorage
 				});
 			};
 
 			var tearDown = function() {
 				Object.defineProperty(window, "localStorage", {
-				  value: pageLocalStorage,
+				  value: pageLocalStorage
 				});
 			};
 
