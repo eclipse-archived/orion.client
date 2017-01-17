@@ -199,6 +199,9 @@ define({
 			".commandImage.dropdownTrigger": {
 				"color": "#FFFFFF !important"
 			},
+			".commandImage.dropdownTrigger.dropdownTriggerOpen": {
+				"color": "#26343F !important"
+			},
 			".gitSectionLabel": {
 				"background-color": "#1BB199 !important",
 				"color": "#FFFFFF !important"
@@ -409,6 +412,14 @@ define({
 		},
 		".treeIterationCursorRow_Dotted": {
 			"background-color": "rgba(27,177,153,0.25)"
+		},
+		".treeTableRow": {
+			"span.core-sprite-closedarrow:hover" : {
+				"color": "#1BB199"
+			},
+			"span.core-sprite-openarrow:hover" : {
+				"color": "#1BB199"
+			}
 		},
 		".workingTarget": {
 			"background-color": "#FFFFFF"
