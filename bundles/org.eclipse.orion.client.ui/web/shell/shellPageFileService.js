@@ -19,15 +19,10 @@ define(["i18n!orion/shell/nls/messages", "orion/bootstrap", "orion/fileClient", 
 	var orion = {};
 	orion.shellPage = {};
 
-	var fileClient, serviceRegistry;
-
-	mBootstrap.startup().then(function(core) {
-		serviceRegistry = core.serviceRegistry;
-		fileClient = new mFileClient.FileClient(serviceRegistry);
-	});
-
 	orion.shellPage.ShellPageFileService = (function() {
-		function ShellPageFileService() {
+		function ShellPageFileService(serviceRegistry, fileClient) {
+			this.serviceRegistry = serviceRegistry;
+			this.fileClient = fileClient;
 			this.currentDirectory = null;
 			this.withNode(
 				this.SEPARATOR,
@@ -41,6 +36,7 @@ define(["i18n!orion/shell/nls/messages", "orion/bootstrap", "orion/fileClient", 
 		ShellPageFileService.prototype = {
 			SEPARATOR: "/", //$NON-NLS-0$
 			computePathString: function(node) {
+				var fileClient = this.fileClient;
 				if (node.Location === this.SEPARATOR) {
 					return this.SEPARATOR;
 				}
@@ -226,13 +222,17 @@ define(["i18n!orion/shell/nls/messages", "orion/bootstrap", "orion/fileClient", 
 				return node.parent;
 			},
 			loadWorkspace: function(path) {
+				var serviceRegistry = this.serviceRegistry;
+				var fileClient = this.fileClient;
 				var progress = serviceRegistry.getService("orion.page.progress"); //$NON-NLS-0$
 				return (progress ? progress.progress(fileClient.loadWorkspace(path), "Loading workspace " + path) : fileClient.loadWorkspace(path)); //$NON-NLS-0$
 			},
 			read: function(node) {
+				var fileClient = this.fileClient;
 				return fileClient.read(node.Location, false);
 			},
 			readBlob: function(node) {
+				var fileClient = this.fileClient;
 				var sourceService = fileClient._getService(node.Location);
 				if (!sourceService.readBlob) {
 					var promise = new Deferred();
@@ -255,6 +255,8 @@ define(["i18n!orion/shell/nls/messages", "orion/bootstrap", "orion/fileClient", 
 						func(node.Children);
 					}
 				} else if (node.ChildrenLocation) {
+					var serviceRegistry = this.serviceRegistry;
+					var fileClient = this.fileClient;
 					var progress = serviceRegistry.getService("orion.page.progress"); //$NON-NLS-0$
 					(progress ? progress.progress(fileClient.fetchChildren(node.ChildrenLocation), "Getting children of " + node.Name) : fileClient.fetchChildren(node.ChildrenLocation)).then( //$NON-NLS-0$
 						function(children) {
@@ -285,6 +287,8 @@ define(["i18n!orion/shell/nls/messages", "orion/bootstrap", "orion/fileClient", 
 				}
 			},
 			withNode: function(location, func, errorFunc) {
+				var serviceRegistry = this.serviceRegistry;
+				var fileClient = this.fileClient;
 				var progress = serviceRegistry.getService("orion.page.progress"); //$NON-NLS-0$
 				(progress ? progress.progress(fileClient.loadWorkspace(location), "Loading workspace " + location) : fileClient.loadWorkspace(location)).then( //$NON-NLS-0$
 					function(node) {
@@ -293,9 +297,11 @@ define(["i18n!orion/shell/nls/messages", "orion/bootstrap", "orion/fileClient", 
 					errorFunc);
 			},
 			write: function(node, content) {
+				var fileClient = this.fileClient;
 				return fileClient.write(node.Location, content);
 			},
 			writeBlob: function(node, content) {
+				var fileClient = this.fileClient;
 				var targetService = fileClient._getService(node.Location);
 				if (!targetService.writeBlob) {
 					var promise = new Deferred();
@@ -308,6 +314,7 @@ define(["i18n!orion/shell/nls/messages", "orion/bootstrap", "orion/fileClient", 
 			/** @private */
 
 			_createResource: function(parentNode, name, isDirectory) {
+				var fileClient = this.fileClient;
 				var key = parentNode.Location + this.SEPARATOR + name;
 				var result = new Deferred();
 				var retrievals = this.currentRetrievals[key] || [];
@@ -349,6 +356,8 @@ define(["i18n!orion/shell/nls/messages", "orion/bootstrap", "orion/fileClient", 
 				return result;
 			},
 			_retrieveNode: function(node, func, errorFunc) {
+				var serviceRegistry = this.serviceRegistry;
+				var fileClient = this.fileClient;
 				if (node.parent && node.Children) {
 					if (func) {
 						func(node);

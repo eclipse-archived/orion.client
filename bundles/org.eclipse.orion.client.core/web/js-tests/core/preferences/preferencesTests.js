@@ -10,11 +10,13 @@
  ******************************************************************************/
 /*eslint-env browser, amd, mocha*/
 /* eslint-disable missing-nls */
+/*globals localSettings:true */
 define([
 	"chai/chai",
 	"orion/Deferred",
+	"orion/preferences",
 	"mocha/mocha"
-], function(chai, Deferred) {
+], function(chai, Deferred, Preferences) {
 	var assert = chai.assert;
 
 	function saveStorage(storage) {
@@ -34,7 +36,6 @@ define([
 			storage.setItem(stash[i].key, stash[i].value);
 		}
 	}
-
 	describe("preferences", function() {
 		it("localStorage", function() {
 			var stash = saveStorage();
@@ -86,6 +87,97 @@ define([
 			top.localStorage.setItem("test", "test-value");
 			top.localStorage.removeItem("test");
 			return d;
+		});
+		describe("Cache", function(){
+			var pageLocalStorage;
+
+			var mockLocalStorage = (function() {
+				var s = {};
+				return {
+					getItem: function (key) {
+						return s.hasOwnProperty(key) ? s[key] : null;
+					},
+					setItem: function (key, value) {
+						console.log("setting:" + key + " val:" + value);
+						s[key] = value;
+					},
+					removeItem: function (key) {
+						if (s.hasOwnProperty(key)) {
+							delete s[key];
+						}
+					},
+					storage : s
+				};
+			})();
+
+			var setUp = function() {
+				pageLocalStorage = window.localStorage;
+				Object.defineProperty(window, "localStorage", {
+				  value: mockLocalStorage,
+				});
+			};
+
+			var tearDown = function() {
+				Object.defineProperty(window, "localStorage", {
+				  value: pageLocalStorage,
+				});
+			};
+
+			beforeEach(setUp);
+			afterEach(tearDown);
+
+			it("Should successfully set a value", function(){
+				var cache = new Preferences.Cache("test/", 60*60);
+				var expectedValue = "value";
+				var expectedJSON = JSON.stringify(expectedValue);
+				cache.set("key", expectedValue);
+				assert.equal(mockLocalStorage.storage["test/key"], expectedJSON);
+			});
+
+			it("Should successfully get a value", function(){
+				var cache = new Preferences.Cache("test/", 60*60);
+				var expectedValue = "value";
+				mockLocalStorage.storage["test/key"] = JSON.stringify(expectedValue);
+				var actualValue = cache.get("key", true);
+				assert.equal(expectedValue, actualValue);
+			});
+
+			it("Should successfully delete a value", function(){
+				var cache = new Preferences.Cache("test/", 60*60);
+				var expectedValue = "value";
+				mockLocalStorage.storage["test/key"] = JSON.stringify(expectedValue);
+				assert.property(mockLocalStorage.storage, "test/key");
+				cache.remove("key");
+				assert.notProperty(mockLocalStorage.storage, "test/key");
+			});
+
+			it("Should return null for missing value", function() {
+				var cache = new Preferences.Cache("test/", 60*60);
+				var actual = cache.get("DoesNotExist", true);
+				assert.isNull(actual);
+			});
+
+			it("Should return null due to zero cache time", function() {
+				var cache = new Preferences.Cache("test/", 0);
+				cache.set("key", "value");
+				var actual = cache.get("key", false);
+				assert.isNull(actual);
+			});
+
+			it("Should return null due to cache expire", function() {
+				var cache = new Preferences.Cache("test/", 0.0001);
+				cache.set("key", "value");
+				var actual = cache.get("key", false);
+				assert.isNull(actual);
+			});
+
+			it("Should return null due to JSON parse error", function() {
+				var cache = new Preferences.Cache("test/", 60*60);
+				mockLocalStorage.storage["test/key"] = "NotValidJSON";
+				var actual = cache.get("key", true);
+				assert.isNull(actual);
+				assert.notProperty(mockLocalStorage.storage, "test/key");
+			});
 		});
 	});
 });

@@ -31,6 +31,7 @@
 			}
 		</style>
 	    <link rel="stylesheet" type="text/css" href="editorBuild/code_edit/built-codeEdit.css"/>
+	    <link rel="stylesheet" type="text/css" href="./keyAssist.css"/>
 		<script src="editorBuild/code_edit/built-codeEdit.js"></script>
 		<script>
 			/*globals orion */
@@ -46,16 +47,17 @@
 									 "333\n" + 
 									"333\n" +
 									 "DLOF\n"; 
-				codeEdit.create({parent: "embeddedEditor", contentType: "application/foo", contents: contents}).then(function(editorViewer) {
+				codeEdit.create({parent: "embeddedEditor", contentType: "application/javascript", contents: contents}).then(function(editorViewer) {
 					document.getElementById("progressMessageDiv").textContent = "Plugins loaded!";
 					//Use the editor text model to listen to the editor contents change.
 					var editorModel = editorViewer.editor.getModel();
+					var editorModelVisual = editorViewer.editor.getTextView().getModel();
 					var foldingAnnotations = [];
 					editorViewer.editor.addEventListener("TextViewInstalled", function(evt) {
 						console.log(evt);
 					});
 					
-					editorModel.addEventListener("Changed", function(/*evt*/) {
+					editorModel.addEventListener("Changed", function(evt) {
 						//			var modelChangedEvent = {
 						//				type: "Changed", //$NON-NLS-0$
 						//				start: eventStart,
@@ -65,10 +67,14 @@
 						//				addedLineCount: addedLineCount
 						//			};
 						
+						var start = evt.start;
+						var removedCharCount = evt.removedCharCount;
+						var end = start + removedCharCount;
 						//Remove all the customized folding annotation first
 						var annotationModel = editorViewer.editor.getAnnotationModel();
 						foldingAnnotations.forEach(function(anno){
 							annotationModel.removeAnnotation(anno);
+							anno.expand();
 						});
 						foldingAnnotations = [];
 						var text = editorModel.getText();
