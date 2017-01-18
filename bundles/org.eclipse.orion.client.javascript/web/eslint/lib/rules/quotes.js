@@ -14,17 +14,20 @@ define([
 		double: {
 			quote: "\"",
 			alternateQuote: "'",
-			description: "doublequote"
+			description: "doublequote",
+			nlsDescription: ProblemMessages.doublequote
 		},
 		single: {
 			quote: "'",
 			alternateQuote: "\"",
-			description: "singlequote"
+			description: "singlequote",
+			nlsDescription: ProblemMessages.singlequote
 		},
 		backtick: {
 			quote: "`",
 			alternateQuote: "\"",
-			description: "backtick"
+			description: "backtick",
+			nlsDescription: ProblemMessages.backtick
 		}
 	};
 
@@ -161,7 +164,7 @@ define([
 					if (!isValid) {
 						var data = Object.create(null);
 						data.quote = QUOTE_SETTINGS[quoteOption].quote;
-						context.report(node, ProblemMessages.wrongQuotes, {description: settings.description, data: data});
+						context.report(node, settings.nlsDescription, {data: data});
 					}
 				}
 			},
@@ -179,7 +182,7 @@ define([
 					var data = Object.create(null);
 					data.quote = QUOTE_SETTINGS[quoteOption].quote;
 					data.oldQuote = '`';
-					context.report(node, ProblemMessages.wrongQuotes, {description: settings.description, data: data});
+					context.report(node, settings.nlsDescription, {data: data});
 				}
 			}
 		};
