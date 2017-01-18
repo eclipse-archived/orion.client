@@ -145,7 +145,8 @@ define({//Default message bundle
 	"ContainerThemes": "Platform Styles",
 	"defaultImportedThemeName": "New Theme",
 	"nameImportedTheme": "Please enter a name for this new theme:",
-	"dndTheme": "Drag and drop here...",
+	"importThemeButton": "Select a file to import",
+	"dndTheme": "...or drag and drop a file here...",
 	"textTheme": "...or paste editor styles here",
 	"Import": "Import",
 	"Import a theme": "Import a theme",
@@ -296,4 +297,4 @@ define({//Default message bundle
     'moreEditorSettings': 'Editor Settings...',
     'SettingWarning' : '${0} Warning: Global settings for \'${2}\' are overriden by the settings defined in: ${1}',
     "version": "Version ${0}",
-});
+});

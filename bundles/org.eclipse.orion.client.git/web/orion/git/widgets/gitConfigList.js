@@ -13,13 +13,14 @@
 
 define([
 	'i18n!git/nls/gitmessages',
+	'orion/bidiUtils',
 	'orion/explorers/explorer',
 	'orion/Deferred',
 	'orion/git/gitCommands',
 	'orion/i18nUtil',
 	'orion/git/uiUtil',
 	'orion/objects'
-], function(messages, mExplorer, Deferred, mGitCommands, i18nUtil, uiUtil, objects) {
+], function(messages, bidiUtils, mExplorer, Deferred, mGitCommands, i18nUtil, uiUtil, objects) {
 
 	function GitConfigListModel(options) {
 		this.root = options.root;
@@ -227,6 +228,9 @@ define([
 					var valueNode = document.createElement("div"); //$NON-NLS-0$
 					valueNode.className = "gitConfigValue"; //$NON-NLS-0$
 					valueNode.textContent = item.Value[item.index || 0];
+					if (bidiUtils.isBidiEnabled()) {
+						valueNode.dir = bidiUtils.getTextDirection(valueNode.textContent);
+					}
 					div.appendChild(valueNode);
 					break;
 				case 1:

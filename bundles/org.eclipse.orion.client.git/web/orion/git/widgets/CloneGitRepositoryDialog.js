@@ -12,7 +12,8 @@
 /*eslint-env browser, amd*/
 /*eslint no-unused-params:0*/
 
-define([ 'i18n!git/nls/gitmessages', 'orion/webui/dialogs/DirectoryPrompterDialog', 'orion/webui/dialog', 'orion/URITemplate', 'require' ], function(messages, DirPrompter, mDialog, URITemplate, require) {
+define([ 'i18n!git/nls/gitmessages', 'orion/bidiUtils',
+'orion/webui/dialogs/DirectoryPrompterDialog', 'orion/webui/dialog', 'orion/URITemplate', 'require' ], function(messages, bidiUtils, DirPrompter, mDialog, URITemplate, require) {
 
 	var editTemplate = new URITemplate("edit/edit.html#{,resource,params*}"); //$NON-NLS-0$
 	
@@ -132,6 +133,7 @@ define([ 'i18n!git/nls/gitmessages', 'orion/webui/dialogs/DirectoryPrompterDialo
 		if (this.alwaysShowAdvanced) {
 			this._showAdvanced();
 		}
+		bidiUtils.initInputField(this.$gitName);
 	};
 	
 	CloneGitRepositoryDialog.prototype._checkGitUrl = function() {
