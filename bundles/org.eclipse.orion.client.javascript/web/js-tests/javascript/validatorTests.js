@@ -14041,7 +14041,7 @@ define([
 									{
 										id: "quotes",
 										severity: 'error',
-										description: 'Strings must use singlequote.',
+										description: 'Strings must use single quotes (\').',
 										start: 8,
 										end: 16
 									}]);
@@ -14061,7 +14061,7 @@ define([
 									{
 										id: "quotes",
 										severity: 'error',
-										description: 'Strings must use singlequote.',
+										description: 'Strings must use single quotes (\').',
 										start: 16,
 										end: 53
 									}]);
@@ -14081,7 +14081,7 @@ define([
 									{
 										id: "quotes",
 										severity: 'error',
-										description: 'Strings must use doublequote.',
+										description: 'Strings must use double quotes (").',
 										start: 13,
 										end: 21
 									}]);

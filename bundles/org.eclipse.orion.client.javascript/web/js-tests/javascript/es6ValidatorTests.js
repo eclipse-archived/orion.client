@@ -1342,7 +1342,7 @@ define([
 							{
 								id: "quotes",
 								severity: 'error',
-								description: 'Strings must use doublequote.',
+								description: 'Strings must use double quotes (").',
 								start: 13,
 								end: 21
 							}]);
@@ -1362,7 +1362,7 @@ define([
 							{
 								id: "quotes",
 								severity: 'error',
-								description: 'Strings must use singlequote.',
+								description: 'Strings must use single quotes (\').',
 								start: 13,
 								end: 21
 							}]);
@@ -1382,7 +1382,7 @@ define([
 							{
 								id: "quotes",
 								severity: 'error',
-								description: 'Strings must use backtick.',
+								description: 'Strings must use backtick quotes (`).',
 								start: 13,
 								end: 21
 							}]);
@@ -1402,7 +1402,7 @@ define([
 							{
 								id: "quotes",
 								severity: 'error',
-								description: 'Strings must use backtick.',
+								description: 'Strings must use backtick quotes (`).',
 								start: 16,
 								end: 49
 							}]);
@@ -1422,7 +1422,7 @@ define([
 							{
 								id: "quotes",
 								severity: 'error',
-								description: 'Strings must use backtick.',
+								description: 'Strings must use backtick quotes (`).',
 								start: 13,
 								end: 21
 							}]);
