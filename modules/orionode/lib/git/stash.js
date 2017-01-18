@@ -22,6 +22,11 @@ module.exports.router = function(options) {
 	var fileRoot = options.fileRoot;
 	if (!fileRoot) { throw new Error('options.root is required'); }
 	
+	if(!options.options.configParams.isElectron){
+		var indexWorker = require('../indexWorker');
+		var Indexer = indexWorker.getIndexer(options.options.indexDir);
+	}
+	
 	return express.Router()
 	.use(bodyParser.json())
 	.get('*', getStash)
@@ -96,6 +101,7 @@ function putStash(req, res) {
 	})
 	.then(function() {
 		res.status(200).end();
+		Indexer && Indexer.indexAfterAllDone(Indexer.LONG_WAITING, req.user.workspaceDir, req.user.username);
 	})
 	.catch(function(err) {
 		if (err.message === "Reference 'refs/stash' not found"){
@@ -147,6 +153,7 @@ function postStash(req, res) {
 	})
 	.then(function() {
 		res.status(200).end();
+		Indexer && Indexer.indexAfterAllDone(Indexer.LONG_WAITING, req.user.workspaceDir, req.user.username);
 	})
 	.catch(function(err) {
 		writeError(404, res, err.message);

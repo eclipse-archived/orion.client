@@ -21,7 +21,9 @@ define([
 
 	var defaults = {
 		desktopSelectionPolicy: true,
-		filteredResources: '.git'
+		filteredResources: '.git',
+		filenameSearchPolicy:false,
+		indexExcludeFileNames:["node_modules"]
 	};
 
 	function GeneralPreferences(preferences, callback) {

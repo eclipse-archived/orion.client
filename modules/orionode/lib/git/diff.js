@@ -30,6 +30,11 @@ module.exports.router = function(options) {
 	var fileRoot = options.fileRoot;
 	if (!fileRoot) { throw new Error('options.root is required'); }
 
+	if(!options.options.configParams.isElectron){
+		var indexWorker = require('../indexWorker');
+		var Indexer = indexWorker.getIndexer(options.options.indexDir);
+	}
+
 	module.exports.changeType = changeType;
 
 	return express.Router()
@@ -436,6 +441,7 @@ function applyPatch(req, res) {
 							HttpCode: 200,
 							JsonData: jsonData
 						});
+						Indexer && Indexer.indexAfterAllDone(Indexer.LONG_WAITING, req.user.workspaceDir, req.user.username);
 					}
 				});
 			}

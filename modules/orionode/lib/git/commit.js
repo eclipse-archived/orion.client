@@ -34,6 +34,10 @@ module.exports.router = function(options) {
 	module.exports.commitJSON = commitJSON;
 	module.exports.getDiff = getDiff;
 	module.exports.getCommitParents = getCommitParents;
+	if(!options.options.configParams.isElectron){
+		var indexWorker = require('../indexWorker');
+		var Indexer = indexWorker.getIndexer(options.options.indexDir);
+	}
 
 	return express.Router()
 	.use(bodyParser.json())
@@ -595,6 +599,7 @@ function revert(req, res, commitToRevert) {
 		res.status(200).json({
 			"Result": theRC ? "FAILURE" : "OK"
 		});
+		Indexer && Indexer.indexAfterAllDone(Indexer.LONG_WAITING, req.user.workspaceDir, req.user.username);
 	})
 	.then(function() {
 		return git.Reflog.read(theRepo, "HEAD").then(function(reflog) {
@@ -637,6 +642,7 @@ function cherryPick(req, res, commitToCherrypick) {
 			"Result": theRC ? "FAILED" : "OK",
 			"HeadUpdated": !theRC && theHead !== newHead
 		});
+		Indexer && Indexer.indexAfterAllDone(Indexer.LONG_WAITING, req.user.workspaceDir, req.user.username);
 	})
 	.then(function() {
 		return git.Reflog.read(theRepo, "HEAD").then(function(reflog) {
@@ -736,6 +742,7 @@ function rebase(req, res, commitToRebase, rebaseOperation) {
 		res.status(200).json({
 			"Result": rebaseResult
 		});
+		Indexer && Indexer.indexAfterAllDone(Indexer.LONG_WAITING, req.user.workspaceDir, req.user.username);
 	})
 	.catch(function(err) {
 		writeError(400, res, err.message);
@@ -787,6 +794,7 @@ function merge(req, res, commitToMerge, squash) {
 			"Result": paths ? "CONFLICTING" : mergeResult,
 			"FailingPaths": paths
 		});
+		Indexer && Indexer.indexAfterAllDone(Indexer.LONG_WAITING, req.user.workspaceDir, req.user.username);
 	})
 	.catch(function(err) {
 		writeError(400, res, err.message);
