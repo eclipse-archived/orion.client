@@ -491,6 +491,13 @@ define(['orion/plugin',
     							options: severities
     						},
     						{
+    							id: "validate_attr_no_dup", //$NON-NLS-1$
+    							name: messages["attr_no_dup"],
+    							type: "number", //$NON-NLS-1$
+    							defaultValue: warning,
+    							options: severities
+    						},
+    						{
     							id: "validate_fig_req_figcaption", //$NON-NLS-1$
     							name: messages["fig_req_figcaption"],
     							type: "number", //$NON-NLS-1$

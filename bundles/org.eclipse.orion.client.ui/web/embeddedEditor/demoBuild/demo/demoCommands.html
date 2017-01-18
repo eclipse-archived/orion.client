@@ -1,0 +1,78 @@
+<!doctype html>
+<html>
+    <head>
+		<meta name="copyright" content="Copyright (c) IBM Corporation and others 2010, 2014." >
+		<meta http-equiv="Content-Language" content="en-us">
+		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+		<title>Pluggable Editor Demo</title>
+		<style type="text/css">
+			.demoTitle{
+				border: none;
+				vertical-align: middle;
+				overflow: hidden;
+				text-align: left;
+				margin-left: 15%;
+				margin-right: 15%;
+				padding-bottom: 5px;
+				position: relative;
+			}
+			.demoBody{
+				border: 1px solid;
+				vertical-align: middle;
+				border-color: blue;
+				overflow: hidden;
+				text-align: left;
+				margin-left: 15%;
+				margin-right: 15%;
+				margin-bottom: 15px;
+				padding-bottom: 5px;
+				position: relative;
+				height: 450px;
+			}
+		</style>
+	    <link rel="stylesheet" type="text/css" href="editorBuild/code_edit/built-codeEdit.css"/>
+	    <link rel="stylesheet" type="text/css" href="./keyAssist.css"/>
+		<script src="editorBuild/code_edit/built-codeEdit.js"></script>
+		<script>
+			/*globals orion */
+			window.onload=function(){
+				var codeEdit = new orion.codeEdit();
+				var contents = 'var foo = "bar";\n' +
+									 "var bar = foo;\n" + 
+									 "/*\n" + 
+									 " * test demo\n" + 
+									 "*/\n" + 
+									 "function test(){\n" + 
+									 "	var foo1 = bar.lastIndexOf(char, from);\n" + 
+									 "}\n" + 
+									"//Keep editing in this demo and try the content assist, problem validations and hover service!\n" +
+									 "var foo2 = foo."; 
+				codeEdit.create({parent: "embeddedEditor", contentType: "application/javascript", contents: contents}).then(function(editorViewer) {
+					document.getElementById("progressMessageDiv").textContent = "Plugins loaded!";
+					function simpleCommand(param) {
+						if(param && param.setText) {
+							param.setText("//my command execution!\n", 0, 0);
+						}
+					}
+					editorViewer.serviceRegistry.registerService('orion.edit.command', {execute: simpleCommand}, {
+						name: 'my command',
+						id: 'my customized command',
+						key: ['l', true, true],
+						contentType: ["application/javascript"]
+					});		
+					//You can call APIs from editorViewer.editor  for further actions.
+				});
+			};
+		</script>
+    </head>
+	<body id="orion-browser" spellcheck="false" class="orionPage">
+		<div class="demoTitle">
+			<p>This is a demo for the <b>Orion Code Edit</b> widget. This demo consumes the <b>built version</b> of the widget.</p> 
+		</div>
+		<div class="demoTitle">
+			<span id = "progressMessageDiv" style="color: green">Loading language tooling plugins...</span>
+		</div>
+		<div class="demoBody" id="embeddedEditor">
+		</div>
+	</body>
+</html>
