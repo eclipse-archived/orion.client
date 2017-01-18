@@ -1,14 +1,14 @@
 /******************************************************************************
  * Copyright (c) 2017 Remy Suen and others.
- * All rights reserved. This program and the accompanying materials are made 
- * available under the terms of the Eclipse Public License v1.0 
- * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
- * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html). 
+ * All rights reserved. This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License v1.0
+ * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution
+ * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html).
  *
  * Contributors:
  *     Remy Suen - initial API and implementation
  *****************************************************************************/
-/*eslint-env node, mocha*/
+/*eslint-env node, mocha, assert, express*/
 var assert = require('assert');
 var express = require('express');
 var supertest = require('supertest');
@@ -24,10 +24,10 @@ var app = express()
 	next();
 })
 .use(CONTEXT_PATH + '/taskHelper', require('./support/task_helper').router({
-	root: '/taskHelper',
+	root: '/taskHelper'
 }))
 .use(CONTEXT_PATH + '/task', tasks.router({
-	root: '/task',
+	root: '/task'
 }));
 
 var request = supertest.bind(null, app);
@@ -49,7 +49,7 @@ describe("Tasks API", function() {
 				finished();
 			});
 		});
-		
+
 		it('one running task', function(finished) {
 			// create a task
 			request()
@@ -89,7 +89,7 @@ describe("Tasks API", function() {
 				});
 			});
 		});
-		
+
 		it('one running task, one completed', function(finished) {
 			// spawn a running task
 			request()
