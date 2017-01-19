@@ -130,9 +130,8 @@ define([
 				
 				if (categories.showContainerThemeSettings === undefined || categories.showContainerThemeSettings) {
 					_self.settingsCategories.push({
-						id: "conatinerThemeSettings", //$NON-NLS-0$
-						//TODO(caseyflynn): Add to messages.ContainerTheme
-						textContent: "Platform Styles",
+						id: "ideThemeSettings", //$NON-NLS-0$
+						textContent: messages.IDETheme,
 						show: _self.showContainerThemeSettings
 					});
 				}
@@ -396,7 +395,7 @@ define([
 				commandService: this.commandService, 
 				preferences: themePreferences, 
 				themeData: containerTheme, 
-				toolbarId: 'containerThemeSettingsToolActionsArea',
+				toolbarId: 'ideThemeSettingsToolActionsArea',
 				scopeList: scopeList,
 				previewWidget: previewWidget,
 				setup: setup,
@@ -408,8 +407,8 @@ define([
 			
 			var editorPreferences = new mEditorPreferences.EditorPreferences (this.preferences);
 			this.containerThemeSettings = new ThemeSettings({
-				id: "containerThemeSettings",
-				title: messages.ContainerThemes,
+				id: "ideThemeSettings",
+				title: messages.IDEThemes,
 				registry: this.registry,
 				preferences: editorPreferences,
 				themePreferences: themePreferences,
