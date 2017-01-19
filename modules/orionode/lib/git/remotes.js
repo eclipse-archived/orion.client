@@ -26,19 +26,20 @@ module.exports = {};
 module.exports.router = function(options) {
 	var fileRoot = options.fileRoot;
 	if (!fileRoot) { throw new Error('options.root is required'); }
+	var contextPath = options.options.configParams["orion.context.path"] || "";
 	
 	module.exports.remoteBranchJSON = remoteBranchJSON;
 	module.exports.remoteJSON = remoteJSON;
 
 	return express.Router()
 	.use(bodyParser.json())
-	.get('/file*', getRemotes)
-	.get('/:remoteName/file*', getRemotes)
-	.get('/:remoteName/:branchName/file*', getRemotes)
-	.delete('/:remoteName/file*', deleteRemote)
-	.post('/file*', addRemote)
-	.post('/:remoteName/file*', postRemote)
-	.post('/:remoteName/:branchName/file*', postRemote);
+	.get(contextPath + '/file*', getRemotes)
+	.get('/:remoteName'+ contextPath + '/file*', getRemotes)
+	.get('/:remoteName/:branchName'+ contextPath + '/file*', getRemotes)
+	.delete('/:remoteName'+ contextPath + '/file*', deleteRemote)
+	.post(contextPath + '/file*', addRemote)
+	.post('/:remoteName'+ contextPath + '/file*', postRemote)
+	.post('/:remoteName/:branchName'+ contextPath + '/file*', postRemote);
 	
 function remoteBranchJSON(remoteBranch, commit, remote, fileDir, branch){
 	var fullName, shortName, remoteURL;
@@ -53,17 +54,17 @@ function remoteBranchJSON(remoteBranch, commit, remote, fileDir, branch){
 		remoteURL = api.join(util.encodeURIComponent(remote.name()), util.encodeURIComponent(branch.Name));
 	}
 	return {
-		"CloneLocation": "/gitapi/clone" + fileDir,
-		"CommitLocation": "/gitapi/commit/" + util.encodeURIComponent(fullName) + fileDir,
-		"DiffLocation": "/gitapi/diff/" + util.encodeURIComponent(shortName) + fileDir,
+		"CloneLocation": contextPath + "/gitapi/clone" + fileDir,
+		"CommitLocation": contextPath + "/gitapi/commit/" + util.encodeURIComponent(fullName) + fileDir,
+		"DiffLocation": contextPath + "/gitapi/diff/" + util.encodeURIComponent(shortName) + fileDir,
 		"FullName": fullName,
 		"GitUrl": remote.url(),
-		"HeadLocation": "/gitapi/commit/HEAD" + fileDir,
+		"HeadLocation": contextPath + "/gitapi/commit/HEAD" + fileDir,
 		"Id": remoteBranch && commit ? commit.sha() : undefined,
-		"IndexLocation": "/gitapi/index" + fileDir,
-		"Location": "/gitapi/remote/" + remoteURL + fileDir,
+		"IndexLocation": contextPath + "/gitapi/index" + fileDir,
+		"Location": contextPath + "/gitapi/remote/" + remoteURL + fileDir,
 		"Name": shortName,
-		"TreeLocation": "/gitapi/tree" + fileDir + "/" + util.encodeURIComponent(shortName),
+		"TreeLocation": contextPath + "/gitapi/tree" + fileDir + "/" + util.encodeURIComponent(shortName),
 		"Type": "RemoteTrackingBranch"
 	};
 }
@@ -71,11 +72,11 @@ function remoteBranchJSON(remoteBranch, commit, remote, fileDir, branch){
 function remoteJSON(remote, fileDir, branches) {
 	var name = remote.name();
 	return {
-		"CloneLocation": "/gitapi/clone" + fileDir,
+		"CloneLocation": contextPath + "/gitapi/clone" + fileDir,
 		"IsGerrit": false, // should check 
 		"GitUrl": remote.url(),
 		"Name": name,
-		"Location": "/gitapi/remote/" + util.encodeURIComponent(name) + fileDir,
+		"Location": contextPath + "/gitapi/remote/" + util.encodeURIComponent(name) + fileDir,
 		"Type": "Remote",
 		"Children": branches
 	};
@@ -200,7 +201,7 @@ function addRemote(req, res) {
 		var configFile = api.join(repo.path(), "config");
 		function done () {
 			res.status(201).json({
-				"Location": "/gitapi/remote/" + util.encodeURIComponent(remoteName) + fileDir
+				"Location": contextPath + "/gitapi/remote/" + util.encodeURIComponent(remoteName) + fileDir
 			});
 		}
 		args.readConfigFile(configFile, function(err, config) {

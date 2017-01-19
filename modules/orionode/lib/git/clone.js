@@ -28,6 +28,7 @@ module.exports = {};
 module.exports.router = function(options) {
 	var fileRoot = options.fileRoot;
 	if (!fileRoot) { throw new Error('options.root is required'); }
+	var contextPath = options.options.configParams["orion.context.path"] || "";
 
 	module.exports.getRepo = getRepo;
 	module.exports.getClones = getClones;
@@ -45,36 +46,36 @@ module.exports.router = function(options) {
 
 	return express.Router()
 	.use(bodyParser.json())
-	.get('/workspace*', getClone)
-	.get('/file/:rootDir*', getClone)
-	.get('/file', getClone)
-	.put('/file*', putClone)
-	.delete('/file*', deleteClone)
+	.get(contextPath + '/workspace*', getClone)
+	.get(contextPath + '/file/:rootDir*', getClone)
+	.get(contextPath + '/file', getClone)
+	.put(contextPath + '/file*', putClone)
+	.delete(contextPath + '/file*', deleteClone)
 	.post('*', postInit);
 
 function cloneJSON(base, location, giturl, parents, submodules) {
 	var result = {
-		"BranchLocation": "/gitapi/branch" + location,
-		"CommitLocation": "/gitapi/commit" + location,
-		"ConfigLocation": "/gitapi/config/clone" + location,
+		"BranchLocation": contextPath + "/gitapi/branch" + location,
+		"CommitLocation": contextPath + "/gitapi/commit" + location,
+		"ConfigLocation": contextPath + "/gitapi/config/clone" + location,
 		"ContentLocation": location,
-		"DiffLocation": "/gitapi/diff/Default" + location,
-		"HeadLocation": "/gitapi/commit/HEAD" + location,
-		"IndexLocation": "/gitapi/index" + location,
-		"Location": "/gitapi/clone" + location,
+		"DiffLocation": contextPath + "/gitapi/diff/Default" + location,
+		"HeadLocation": contextPath + "/gitapi/commit/HEAD" + location,
+		"IndexLocation": contextPath + "/gitapi/index" + location,
+		"Location": contextPath + "/gitapi/clone" + location,
 		"Name": base,
 		"GitUrl": giturl,
 		"Children": submodules && submodules.length ? submodules : undefined,
 		"Parents": parents && parents.length ? parents : undefined,
-		"RemoteLocation": "/gitapi/remote" + location,
-		"StashLocation": "/gitapi/stash" + location,
-		"StatusLocation": "/gitapi/status" + location,
-		"SubmoduleLocation": "/gitapi/submodule" + location,
-		"TagLocation": "/gitapi/tag" + location,
+		"RemoteLocation": contextPath + "/gitapi/remote" + location,
+		"StashLocation": contextPath + "/gitapi/stash" + location,
+		"StatusLocation": contextPath + "/gitapi/status" + location,
+		"SubmoduleLocation": contextPath + "/gitapi/submodule" + location,
+		"TagLocation": contextPath + "/gitapi/tag" + location,
 		"Type": "Clone"
 	};
 	if (giturl && isGithubURL(giturl)){
-		result["PullRequestLocation"] = "/gitapi/pullRequest" + location;
+		result["PullRequestLocation"] = contextPath + "/gitapi/pullRequest" + location;
 	}
 	function isGithubURL(checkUrl){
 		var hostname = url.parse(checkUrl)["hostname"];
@@ -173,7 +174,7 @@ function getClones(req, res, callback) {
 	});
 	
 	function pushRepo(repos, repo, base, location, url, parents, cb) {
-		Promise.all([url || getURL(repo), getSubmodules(repo, location, parents.slice(0).concat(["/gitapi/clone" + location]))]).then(function(results) {
+		Promise.all([url || getURL(repo), getSubmodules(repo, location, parents.slice(0).concat([contextPath + "/gitapi/clone" + location]))]).then(function(results) {
 			var json = cloneJSON(base, location, results[0], parents, results[1]);
 			repos.push(json);
 			cb(json);
@@ -335,7 +336,7 @@ function postInit(req, res) {
 			})
 			.then(function() {
 				res.status(201).json({
-					"Location": "/gitapi/clone/file/" + req.body.Name
+					"Location": contextPath + "/gitapi/clone"+ contextPath + "/file/" + req.body.Name
 				});
 			})
 			.catch(function(err){
@@ -603,7 +604,7 @@ function postClone(req, res) {
 			Code: 0,
 			DetailedMessage: "OK",
 			JsonData: {
-				Location: "/gitapi/clone" + fileRoot + "/" + dirName
+				Location: contextPath + "/gitapi/clone" + fileRoot + "/" + dirName
 			},
 			Message: "OK",
 			Severity: "Ok"

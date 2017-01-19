@@ -25,6 +25,7 @@ function getParam(req, paramName) {
 module.exports = function(options) {
 	var fileRoot = options.root;
 	if (!fileRoot) { throw new Error('options.root is required'); }
+	var contextPath = options.options.configParams["orion.context.path"] || "";
 
 	var writeFileMetadata = function() {
 		var args = Array.prototype.slice.call(arguments, 0);
@@ -140,7 +141,7 @@ module.exports = function(options) {
 								writeError(500, res, error);
 								return;
 							}
-							writeFileMetadata(req, res, patchPath, stats, ETag.fromString(newContents) /*the new ETag*/);
+							writeFileMetadata(req, res, contextPath, patchPath, stats, ETag.fromString(newContents) /*the new ETag*/);
 						});
 					});
 					
@@ -171,7 +172,7 @@ module.exports = function(options) {
 				writeFileContents(res, filepath, stats, etag);
 			} else {
 				var depth = stats.isDirectory() && Number(getParam(req, 'depth')) || 0;
-				writeFileMetadata(req, res, filepath, stats, etag, depth);
+				writeFileMetadata(req, res, contextPath, filepath, stats, etag, depth);
 			}
 		});
 	});
@@ -192,7 +193,7 @@ module.exports = function(options) {
 						res.status(404).end();
 						return;
 					}
-					writeFileMetadata(req, res, filepath, stats, etag);
+					writeFileMetadata(req, res, contextPath, filepath, stats, etag);
 				});
 			});
 			ws.on('error', function(err) {
@@ -230,7 +231,7 @@ module.exports = function(options) {
 		}
 
 		var filepath = getSafeFilePath(req, nodePath.join(rest, name));
-		fileUtil.handleFilePOST(fileRoot, req, res, filepath);
+		fileUtil.handleFilePOST(contextPath, fileRoot, req, res, filepath);
 	});
 
 	// DELETE - no request body

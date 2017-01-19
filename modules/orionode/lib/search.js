@@ -16,6 +16,7 @@ var express = require('express');
 
 module.exports = function(options) {
 	var USE_WORKERS = options.configParams.isElectron, search;
+	var contextPath = options.configParams["orion.context.path"] || "";
 	if (USE_WORKERS) {
 		var requests = {};
 		var WORKER_COUNT = 5;
@@ -48,7 +49,7 @@ module.exports = function(options) {
 	return express.Router()
 	.use(bodyParser.json())
 	.get('*', function(req, res) {
-		search(req.originalUrl, req.user.workspaceDir, req.contextPath)
+		search(req.originalUrl, req.user.workspaceDir, req.contextPath, contextPath)
 		.then(function(result) {
 			res.json(result);
 		})

@@ -30,7 +30,7 @@ var args = argslib.parseArgs(process.argv);
 
 var PORT_LOW = 8082;
 var PORT_HIGH = 10082;
-var port = args.port || args.p || process.env.PORT || 8081;
+var port = args.port || args.p || process.env.PORT || 8083;
 var configFile = args.config || args.c || path.join(__dirname, 'orion.conf');
 
 var configParams = argslib.readConfigFileSync(configFile) || {};
@@ -39,6 +39,7 @@ function startServer(cb) {
 	
 	var workspaceArg = args.workspace || args.w;
 	var workspaceConfigParam = configParams.workspace;
+	var contextPath = configParams["orion.context.path"];
 	var workspaceDir;
 	if (workspaceArg) {
 		// -workspace passed in command line is relative to cwd
@@ -86,13 +87,13 @@ function startServer(cb) {
 			}
 			
 			app.use(compression());
-			app.use(orion({
+			app.use(contextPath,orion({
 				workspaceDir: workspaceDir,
 				configParams: configParams,
 				maxAge: dev ? 0 : undefined,
 			}));
 			var io = socketio.listen(server, { 'log level': 1 });
-			ttyShell.install({ io: io, fileRoot: '/file', workspaceDir: workspaceDir });
+			ttyShell.install({ io: io, fileRoot: contextPath + '/file', workspaceDir: workspaceDir });
 
 			server.on('listening', function() {
 				console.log(util.format('Listening on port %d...', port));

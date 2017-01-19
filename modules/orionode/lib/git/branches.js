@@ -23,6 +23,7 @@ module.exports = {};
 
 module.exports.router = function(options) {
 	var fileRoot = options.fileRoot;
+	var contextPath = options.options.configParams["orion.context.path"] || "";
 	if (!fileRoot) { throw new Error('options.root is required'); }
 	
 	module.exports.branchJSON = branchJSON;
@@ -31,7 +32,7 @@ module.exports.router = function(options) {
 
 	return express.Router()
 	.use(bodyParser.json())
-	.get('/file*', getBranches)
+	.get(contextPath + '/file*', getBranches)
 	.get('/:branchName*', getBranches)
 	.delete('/:branchName*', deleteBranch)
 	.post('*', createBranch);
@@ -42,17 +43,17 @@ module.exports.router = function(options) {
 		var branchURL = util.encodeURIComponent(fullName);
 		var current = !!ref.isHead() || repo.headDetached() && ref.name() === "HEAD";
 		return {
-			"CloneLocation": "/gitapi/clone"+ fileDir,
-			"CommitLocation": "/gitapi/commit/" + branchURL + fileDir,
+			"CloneLocation": contextPath + "/gitapi/clone"+ fileDir,
+			"CommitLocation": contextPath + "/gitapi/commit/" + branchURL + fileDir,
 			"Current": current,
 			"Detached": current && !!repo.headDetached(),
-			"DiffLocation": "/gitapi/diff/" + util.encodeURIComponent(shortName) + fileDir,
+			"DiffLocation": contextPath + "/gitapi/diff/" + util.encodeURIComponent(shortName) + fileDir,
 			"FullName": fullName,
-			"HeadLocation": "/gitapi/commit/HEAD" + fileDir,
-			"Location": "/gitapi/branch/" + util.encodeURIComponent(shortName) + fileDir,
+			"HeadLocation": contextPath + "/gitapi/commit/HEAD" + fileDir,
+			"Location": contextPath + "/gitapi/branch/" + util.encodeURIComponent(shortName) + fileDir,
 			"Name": shortName,
 			"RemoteLocation": [],
-			"TreeLocation": "/gitapi/tree" + fileDir + "/" + branchURL,
+			"TreeLocation": contextPath + "/gitapi/tree" + fileDir + "/" + branchURL,
 			"Type": "Branch"
 		};
 	}

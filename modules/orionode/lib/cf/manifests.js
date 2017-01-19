@@ -20,14 +20,14 @@ var target = require("./target");
 var tasks = require("../tasks");
 var crypto = require('crypto');
 
-module.exports.router = function() {
-	
+module.exports.router = function(options) {
+	var contextPath = options.options.configParams["orion.context.path"] || "";
 	module.exports.retrieveManifestFile = retrieveManifestFile;
 	module.exports.retrieveProjectFilePath = retrieveProjectFilePath;
 
 	return express.Router()
 	.use(bodyParser.json())
-	.get("/file*", getManifests)
+	.get(contextPath + "/file*", getManifests)
 	.get("*", getManifests);
 	
 function getManifests(req, res){

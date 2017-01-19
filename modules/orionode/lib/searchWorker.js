@@ -69,7 +69,7 @@ try {
 		return searchTerm;
 	}
 
-	function SearchOptions(originalUrl, contextPath){
+	function SearchOptions(originalUrl, contextPath, orionContextPath){
 		this.defaultLocation = null;
 		this.fileContentSearch = false;
 		this.filenamePattern = null;
@@ -128,7 +128,7 @@ try {
 				}
 			}
 
-			this.defaultLocation = "/file/" + workspaceId;
+			this.defaultLocation = orionContextPath + "/file/" + workspaceId;
 		};
 	}
 
@@ -197,7 +197,7 @@ try {
 	// Note that while this function creates and returns many promises, they fulfill to undefined,
 	// and are used only for flow control.
 	// TODO clean up
-	function searchFile(workspaceDir, dirLocation, filename, searchPattern, filenamePatterns, results, excluded) {
+	function searchFile(orionContextPath, workspaceDir, dirLocation, filename, searchPattern, filenamePatterns, results, excluded) {
 		if(excluded[filename]) {
 			return;
 		}
@@ -216,7 +216,7 @@ try {
 				return fs.readdirAsync(filePath)
 				.then(function(directoryFiles) {
 					return Promise.map(directoryFiles, function(entry) {
-						return searchFile(workspaceDir, filePath, entry, searchPattern, filenamePatterns, results, excluded);
+						return searchFile(orionContextPath, workspaceDir, filePath, entry, searchPattern, filenamePatterns, results, excluded);
 					}, { concurrency: SUBDIR_SEARCH_CONCURRENCY });
 				});
 			}
@@ -234,7 +234,7 @@ try {
 					"Directory": stats.isDirectory(),
 					"LastModified": stats.mtime.getTime(),
 					"Length": stats.size,
-					"Location": toURLPath("/file" + filePathFromWorkspace),
+					"Location": toURLPath(orionContextPath + "/file" + filePathFromWorkspace),
 					"Name": filename,
 					"Path": toURLPath(filePathFromWorkspace.substring(1))
 				});
@@ -252,8 +252,8 @@ try {
 		});
 	}
 	
-	function search(originalUrl, workspaceDir, contextPath) {
-		var searchOpt = new SearchOptions(originalUrl, contextPath);
+	function search(originalUrl, workspaceDir, contextPath,orionContextPath) {
+		var searchOpt = new SearchOptions(originalUrl, contextPath, orionContextPath);
 		searchOpt.buildSearchOptions();
 
 		var searchPattern, filenamePattern;
@@ -266,7 +266,10 @@ try {
 
 		var searchScope;
 		try {
-			var loc = searchOpt.location.replace(/^\/file/, "");
+			var filePath = orionContextPath + "/file";
+			var searchTerm = "^" + filePath.replace(/\//g, "\/");
+			var regex = new RegExp(searchTerm);
+			var loc = searchOpt.location.replace(regex, "");
 			loc = loc.replace(/\*$/, "");
 			searchScope = safeFilePath(workspaceDir, loc);
 		} catch (ex) {
@@ -281,7 +284,7 @@ try {
 			var results = [];
 
 			return Promise.map(children, function(child) {
-				return searchFile(workspaceDir, searchScope, child, searchPattern, filenamePattern, results, searchOpt.exclude);
+				return searchFile(orionContextPath, workspaceDir, searchScope, child, searchPattern, filenamePattern, results, searchOpt.exclude);
 			}, { concurrency: SUBDIR_SEARCH_CONCURRENCY })
 			.catch(function(/*err*/) {
 				// Probably an error reading some file or directory -- ignore
