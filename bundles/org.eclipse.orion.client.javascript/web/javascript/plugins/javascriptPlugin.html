@@ -12,6 +12,9 @@
 				baseUrl: "../../"
 			});
 			require(["javascript/plugins/javascriptPlugin"], null, config.errback);
+		}, function(err) {
+			alert("Please try refreshing the page.\n\nRequireJS error \'" + err.requireType + 
+					"\'' occurred loading module:\n \'" + err.requireModules + "\'.");
 		});
 	</script>
 </head>

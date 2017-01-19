@@ -17,4 +17,7 @@ require(["../../orion/require-config.js"], function(config){
 		baseUrl: "../../"
 	});
 	require(["javascript/plugins/ternWorkerCore"], null, config.errback);
+}, function(err) {
+	alert("Please try refreshing the page.\n\nRequireJS error \'" + err.requireType + 
+			"\'' occurred loading module:\n \'" + err.requireModules + "\'.");
 });

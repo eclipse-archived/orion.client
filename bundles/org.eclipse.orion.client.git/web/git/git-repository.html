@@ -16,6 +16,9 @@
 				}
 				require.config({config: {"orion/splash": {splashID: "Git"}}});
 				require(["orion/splash"], load, load);
+			}, function(err) {
+				alert("Please try refreshing the page.\n\nRequireJS error \'" + err.requireType + 
+						"\'' occurred loading module:\n \'" + err.requireModules + "\'.");
 			});
 		</script>
 </head>
