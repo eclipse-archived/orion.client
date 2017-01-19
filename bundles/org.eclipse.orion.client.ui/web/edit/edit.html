@@ -15,6 +15,9 @@
 					require(["edit/edit"], null, config.errback);
 				}
 				require(["orion/splash"], load, load);
+			}, function(err) {
+				alert("Please try refreshing the page.\n\nRequireJS error \'" + err.requireType + 
+						"\'' occurred loading module:\n \'" + err.requireModules + "\'.");
 			});
 		</script>
 	</head>

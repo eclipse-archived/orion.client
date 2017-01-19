@@ -12,6 +12,9 @@
 		/*eslint-env browser, amd*/
 		require(["../orion/require-config.js"], function(config){
 			require(["shell/shellPage"], null, config.errback);
+		}, function(err) {
+			alert("Please try refreshing the page.\n\nRequireJS error \'" + err.requireType + 
+					"\'' occurred loading module:\n \'" + err.requireModules + "\'.");
 		});
 	</script>
 </head>

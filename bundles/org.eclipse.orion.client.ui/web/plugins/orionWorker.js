@@ -16,4 +16,7 @@ require(["../orion/require-config.js"], function(config){
 	require(["plugins/orionPlugin"], function(plugin){
 		plugin.connect(pluginProvider);
 	}, config.errback);
+}, function(err) {
+	alert("Please try refreshing the page.\n\nRequireJS error \'" + err.requireType + 
+			"\'' occurred loading module:\n \'" + err.requireModules + "\'.");
 });
