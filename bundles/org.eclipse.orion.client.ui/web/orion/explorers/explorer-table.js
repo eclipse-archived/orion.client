@@ -1,12 +1,14 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2009, 2016 IBM Corporation and others.
+ * Copyright (c) 2009, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License v1.0
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution
  * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html).
  *
- * Contributors: IBM Corporation - initial API and implementation
+ * Contributors: 
+ *     IBM Corporation - initial API and implementation
+ *     Casey Flynn - Google Inc.
  ******************************************************************************/
 
 /*eslint-env browser, amd*/
@@ -271,8 +273,9 @@ define([
 				return null;
 			}
 			var elementNode;
-			if (loc === "/file" && util.isElectron) {
-				// Special case in electron, need to find the workspace element to create file at workspace level.
+			if (loc === "/file") {
+				// Special case in electron, or when create file at root enabled.
+				// Need to find the workspace element to create file at workspace level.
 				elementNode = this.model.root;
 			} else {
 				var elementId = this.model.getId({
