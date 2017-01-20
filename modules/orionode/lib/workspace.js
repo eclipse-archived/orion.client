@@ -24,6 +24,7 @@ module.exports = function(options) {
 	if (!workspaceRoot) {
 		throw new Error('options.root path required');
 	}
+	var contextPath = options.options.configParams["orion.context.path"] || "";
 
 	var workspaceId = 'orionode';
 
@@ -128,7 +129,7 @@ module.exports = function(options) {
 				var filepath = fileUtil.safeFilePath(req.user.workspaceDir, projectName);
 				// Call the File POST helper to handle the filesystem operation. We inject the Project-specific metadata
 				// into the resulting File object.
-				fileUtil.handleFilePOST(fileRoot, req, res, filepath, {
+				fileUtil.handleFilePOST(contextPath, fileRoot, req, res, filepath, {
 					Id: projectName,
 					ContentLocation: makeProjectContentLocation(req, projectName),
 					Location: makeProjectLocation(req, projectName)

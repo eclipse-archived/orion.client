@@ -27,10 +27,11 @@ module.exports = {};
 module.exports.router = function(options) {
 	var fileRoot = options.fileRoot;
 	if (!fileRoot) { throw new Error('options.root is required'); }
+	var contextPath = options.options.configParams["orion.context.path"] || "";
 
 	return express.Router()
 	.use(bodyParser.json())
-	.post('/file*', getPullRequest);
+	.post(contextPath + '/file*', getPullRequest);
 	
 function pullRequestJSON(cloneDir,remoteDir,bodyJson) {
 	var children = [];
@@ -87,8 +88,8 @@ function getPullRequest(req, res) {
 	clone.getRepo(req)
 	.then(function(repo) {
 		fileDir = clone.getfileDir(repo,req); 
-		cloneDir = "/gitapi/clone" + fileDir;
-		remoteDir = "/gitapi/remote" + fileDir;
+		cloneDir = contextPath + "/gitapi/clone" + fileDir;
+		remoteDir = contextPath + "/gitapi/remote" + fileDir;
 		return request(userAgentHeader, function (error, response, body) {
 				if (!error && response.statusCode === 200) {
 					bodyJson = JSON.parse(body);

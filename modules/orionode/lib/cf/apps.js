@@ -28,7 +28,8 @@ var bluebirdfs = Promise.promisifyAll(require("fs"));
 var crypto = require("crypto");
 var extService = require("./extService");
 
-module.exports.router = function() {
+module.exports.router = function(options) {
+	var contextPath = options.options.configParams["orion.context.path"] || "";
 	
 	module.exports._getAppwithAppName = _getAppwithAppName;
 	module.exports.getServiceGuid = getServiceGuid;
@@ -139,13 +140,15 @@ function _getAppwithAppName(userId, encodeName, appTarget){
 	});
 }
 function toOrionLocation(req, location){
-	if(location && location.length !== 0 && location.indexOf("/file") === 0){
-		return path.join(req.user.workspaceDir, location.substring(5)); 
+	var contextPath = contextPath + "/file";
+	if(location && location.length !== 0 && location.indexOf(contextPath) === 0){
+		return path.join(req.user.workspaceDir, location.substring(contextPath.length)); 
 	}
 }
 function toAppLocation(req,location){
-	if(location && location.length !== 0 && location.indexOf("/file") === 0){
-		var foldername = location.split("/")[2];
+	var contextPath = contextPath + "/file";
+	if(location && location.length !== 0 && location.indexOf(contextPath) === 0){
+		var foldername = contextPath ==="/file" ? location.split("/")[2] : location.split("/")[4] ;
 		return path.join(req.user.workspaceDir, foldername); 
 	}
 }

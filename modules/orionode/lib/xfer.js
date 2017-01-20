@@ -29,6 +29,7 @@ var crypto = require('crypto');
 module.exports = function(options) {
 	module.exports.write = write;
 	module.exports.getUploadDir = getUploadDir;
+	var contextPath = options.configParams["orion.context.path"] || "";
 	
 	var UPLOADS_FOLDER = path.join(options.configParams['orion.single.user'] ?
 			path.join(os.homedir(), ".orion") : options.workspaceDir, ".uploads");
@@ -187,7 +188,7 @@ function completeTransfer(req, res, tempFile, filePath, fileName, xferOptions, s
 			if (failed.length) {
 				return overrideError(failed);
 			}
-			res.setHeader("Location", "/file" + filePath.substring(req.user.workspaceDir.length));
+			res.setHeader("Location", contextPath + "/file" + filePath.substring(req.user.workspaceDir.length));
 			res.status(201).end();
 		});
 	} else {
@@ -199,7 +200,7 @@ function completeTransfer(req, res, tempFile, filePath, fileName, xferOptions, s
 			if (err) {
 				return writeError(400, res, "Transfer failed");
 			}
-			res.setHeader("Location", "/file" + filePath.substring(req.user.workspaceDir.length));
+			res.setHeader("Location", contextPath + "/file" + filePath.substring(req.user.workspaceDir.length));
 			res.status(201).end();
 		});
 	}

@@ -15,12 +15,12 @@ var util = require('./util');
 
 module.exports = {};
 	
-module.exports.gitFileDecorator = function(rootName, req, filepath, originalJson){
+module.exports.gitFileDecorator = function(contextPath, rootName, req, filepath, originalJson){
 	var result = originalJson;
-	if (!"/file" === rootName && !"/workspace" ===rootName) {//$NON-NLS-1$ //$NON-NLS-2$
+	if (!contextPath + "/file" === rootName && !contextPath + "/workspace" ===rootName) {//$NON-NLS-1$ //$NON-NLS-2$
 		return; 
 	}
-	var isWorkspace = "/workspace"=== rootName;	
+	var isWorkspace = contextPath + "/workspace"=== rootName;	
 	if (isWorkspace && req.method === "GET") {
 		var children = result.Children;
 		return Promise.all(children.map(function(child){
@@ -90,18 +90,18 @@ function addGitLinks(comingJson,branchname,fileDir){
 	var fileTarget = comingJson.Location.substr(fileDir.length);
 	if(fileTarget === "/") fileTarget = "";
 	comingJson.Git ={
-		"BlameLocation": "/gitapi/blame/HEAD" + fileDir + fileTarget,
-		"CloneLocation": "/gitapi/clone" + fileDir,
-		"CommitLocation": "/gitapi/commit/" + util.encodeURIComponent(branchname) + fileDir + fileTarget,
-		"ConfigLocation": "/gitapi/config/clone" + fileDir + fileTarget,
-		"DefaultRemoteBranchLocation": "/gitapi/remote/origin/"+ util.encodeURIComponent(branchname) + fileDir,
-		"DiffLocation": "/gitapi/diff/Default" + fileDir + fileTarget,
-		"HeadLocation": "/gitapi/commit/HEAD" + fileDir + fileTarget,
-		"IndexLocation": "/gitapi/index" + fileDir + fileTarget,
-		"RemoteLocation": "/gitapi/remote" + fileDir + fileTarget,
-		"StatusLocation": "/gitapi/status" + fileDir + fileTarget,
-		"TagLocation": "/gitapi/tag" + fileDir + fileTarget,
-		"TreeLocation": "/gitapi/tree" + fileDir + "HEAD/" + fileTarget
+		"BlameLocation": contextPath + "/gitapi/blame/HEAD" + fileDir + fileTarget,
+		"CloneLocation": contextPath + "/gitapi/clone" + fileDir,
+		"CommitLocation": contextPath + "/gitapi/commit/" + util.encodeURIComponent(branchname) + fileDir + fileTarget,
+		"ConfigLocation": contextPath + "/gitapi/config/clone" + fileDir + fileTarget,
+		"DefaultRemoteBranchLocation": contextPath + "/gitapi/remote/origin/"+ util.encodeURIComponent(branchname) + fileDir,
+		"DiffLocation": contextPath + "/gitapi/diff/Default" + fileDir + fileTarget,
+		"HeadLocation": contextPath + "/gitapi/commit/HEAD" + fileDir + fileTarget,
+		"IndexLocation": contextPath + "/gitapi/index" + fileDir + fileTarget,
+		"RemoteLocation": contextPath + "/gitapi/remote" + fileDir + fileTarget,
+		"StatusLocation": contextPath + "/gitapi/status" + fileDir + fileTarget,
+		"TagLocation": contextPath + "/gitapi/tag" + fileDir + fileTarget,
+		"TreeLocation": contextPath + "/gitapi/tree" + fileDir + "HEAD/" + fileTarget
 	};
 	if(!branchname){
 		delete comingJson.Git.CommitLocation;

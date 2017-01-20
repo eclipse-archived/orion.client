@@ -128,7 +128,7 @@ try {
 				}
 			}
 
-			this.defaultLocation = "/file/" + workspaceId;
+			this.defaultLocation = contextPath + "/file/" + workspaceId;
 		};
 	}
 
@@ -197,7 +197,7 @@ try {
 	// Note that while this function creates and returns many promises, they fulfill to undefined,
 	// and are used only for flow control.
 	// TODO clean up
-	function searchFile(workspaceDir, dirLocation, filename, searchPattern, filenamePatterns, results, excluded) {
+	function searchFile(contextPath, workspaceDir, dirLocation, filename, searchPattern, filenamePatterns, results, excluded) {
 		if(excluded[filename]) {
 			return;
 		}
@@ -216,7 +216,7 @@ try {
 				return fs.readdirAsync(filePath)
 				.then(function(directoryFiles) {
 					return Promise.map(directoryFiles, function(entry) {
-						return searchFile(workspaceDir, filePath, entry, searchPattern, filenamePatterns, results, excluded);
+						return searchFile(contextPath, workspaceDir, filePath, entry, searchPattern, filenamePatterns, results, excluded);
 					}, { concurrency: SUBDIR_SEARCH_CONCURRENCY });
 				});
 			}
@@ -234,7 +234,7 @@ try {
 					"Directory": stats.isDirectory(),
 					"LastModified": stats.mtime.getTime(),
 					"Length": stats.size,
-					"Location": toURLPath("/file" + filePathFromWorkspace),
+					"Location": toURLPath(contextPath + "/file" + filePathFromWorkspace),
 					"Name": filename,
 					"Path": toURLPath(filePathFromWorkspace.substring(1))
 				});
@@ -281,7 +281,7 @@ try {
 			var results = [];
 
 			return Promise.map(children, function(child) {
-				return searchFile(workspaceDir, searchScope, child, searchPattern, filenamePattern, results, searchOpt.exclude);
+				return searchFile(contextPath, workspaceDir, searchScope, child, searchPattern, filenamePattern, results, searchOpt.exclude);
 			}, { concurrency: SUBDIR_SEARCH_CONCURRENCY })
 			.catch(function(/*err*/) {
 				// Probably an error reading some file or directory -- ignore

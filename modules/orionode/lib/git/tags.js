@@ -23,12 +23,13 @@ module.exports = {};
 module.exports.router = function(options) {
 	var fileRoot = options.fileRoot;
 	if (!fileRoot) { throw new Error('options.root is required'); }
+	var contextPath = options.options.configParams["orion.context.path"] || "";
 	
 	module.exports.tagJSON = tagJSON;
 
 	return express.Router()
 	.use(bodyParser.json())
-	.get('/file*', getTags)
+	.get(contextPath + '/file*', getTags)
 	.get('/:tagName*', getTags)
 	.delete('/:tagName*', deleteTag);
 
@@ -36,12 +37,12 @@ function tagJSON(fullName, shortName, sha, timestamp, fileDir) {
 	return {
 		"FullName": fullName,
 		"Name": shortName,
-		"CloneLocation": "/gitapi/clone" + fileDir,
-		"CommitLocation": "/gitapi/commit/" + sha + fileDir,
+		"CloneLocation": contextPath + "/gitapi/clone" + fileDir,
+		"CommitLocation": contextPath + "/gitapi/commit/" + sha + fileDir,
 		"LocalTimeStamp": timestamp,
-		"Location": "/gitapi/tag/" + util.encodeURIComponent(shortName) + fileDir,
+		"Location": contextPath + "/gitapi/tag/" + util.encodeURIComponent(shortName) + fileDir,
 		"TagType": "LIGHTWEIGHT",
-		"TreeLocation": "/gitapi/tree" + fileDir + "/" + util.encodeURIComponent(shortName),
+		"TreeLocation": contextPath + "/gitapi/tree" + fileDir + "/" + util.encodeURIComponent(shortName),
 		"Type": "Tag"
 	};
 }

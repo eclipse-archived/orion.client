@@ -16,11 +16,12 @@ var path = require("path");
 var manifests = require("./manifests");
 var api = require("../api"), writeError = api.writeError;
 
-module.exports.router = function() {
+module.exports.router = function(options) {
+	var contextPath = options.options.configParams["orion.context.path"] || "";
 
 	return express.Router()
 	.use(bodyParser.json())
-	.get("/file*", getplans);
+	.get(contextPath + "/file*", getplans);
 	
 function planJson(type, manifest, planner, wizard, required){
 	return {
