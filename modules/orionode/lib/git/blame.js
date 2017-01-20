@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012 IBM Corporation and others.
+ * Copyright (c) 2012, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -21,11 +21,12 @@ module.exports = {};
 
 module.exports.router = function(options) {
 	var fileRoot = options.fileRoot;
+	var contextPath = options.options.configParams["orion.context.path"] || "";
 	if (!fileRoot) { throw new Error('options.root is required'); }
 
 	return express.Router()
 	.use(bodyParser.json())
-	.get('/:refName/file/*', getBlame);
+	.get('/:refName'+ contextPath + '/file/*', getBlame);
 	
 function getBlame(req, res) {
 	var blamerepo,fileDir, fileRelativePath;
@@ -49,8 +50,8 @@ function getBlame(req, res) {
 			var sendingBlamejason;
 			sendingBlamejason = {
 				"Children" : blamejason,
-				"CloneLocation": "/gitapi/clone" + fileDir ,
-				"Location": "/gitapi/blame/"+ req.params.refName + fileDir + fileRelativePath,
+				"CloneLocation": contextPath + "/gitapi/clone" + fileDir ,
+				"Location": contextPath + "/gitapi/blame/"+ req.params.refName + fileDir + fileRelativePath,
 				"Type" : "Blame"
 			};
 			res.status(200).json(sendingBlamejason);

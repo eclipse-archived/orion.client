@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016 IBM Corporation and others.
+ * Copyright (c) 2016, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -28,7 +28,8 @@ var bluebirdfs = Promise.promisifyAll(require("fs"));
 var crypto = require("crypto");
 var extService = require("./extService");
 
-module.exports.router = function() {
+module.exports.router = function(options) {
+	var contextPath = options.options.configParams["orion.context.path"] || "";
 	
 	module.exports._getAppwithAppName = _getAppwithAppName;
 	module.exports.getServiceGuid = getServiceGuid;
@@ -139,13 +140,15 @@ function _getAppwithAppName(userId, encodeName, appTarget){
 	});
 }
 function toOrionLocation(req, location){
-	if(location && location.length !== 0 && location.indexOf("/file") === 0){
-		return path.join(req.user.workspaceDir, location.substring(5)); 
+	var orionPath = contextPath + "/file";
+	if(location && location.length !== 0 && location.indexOf(orionPath) === 0){
+		return path.join(req.user.workspaceDir, location.substring(orionPath.length)); 
 	}
 }
 function toAppLocation(req,location){
-	if(location && location.length !== 0 && location.indexOf("/file") === 0){
-		var foldername = location.split("/")[2];
+	var orionPath = contextPath + "/file";
+	if(location && location.length !== 0 && location.indexOf(orionPath) === 0){
+		var foldername = orionPath ==="/file" ? location.split("/")[2] : location.split("/")[4] ;
 		return path.join(req.user.workspaceDir, foldername); 
 	}
 }

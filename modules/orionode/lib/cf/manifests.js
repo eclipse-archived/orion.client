@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016 IBM Corporation and others.
+ * Copyright (c) 2016, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -20,14 +20,14 @@ var target = require("./target");
 var tasks = require("../tasks");
 var crypto = require('crypto');
 
-module.exports.router = function() {
-	
+module.exports.router = function(options) {
+	var contextPath = options.options.configParams["orion.context.path"] || "";
 	module.exports.retrieveManifestFile = retrieveManifestFile;
 	module.exports.retrieveProjectFilePath = retrieveProjectFilePath;
 
 	return express.Router()
 	.use(bodyParser.json())
-	.get("/file*", getManifests)
+	.get(contextPath + "/file*", getManifests)
 	.get("*", getManifests);
 	
 function getManifests(req, res){

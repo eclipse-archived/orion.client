@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2013 IBM Corporation and others.
+ * Copyright (c) 2013, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -26,6 +26,7 @@ function startServer(options) {
 	options = options || {};
 	options.configParams = options.configParams || {};
 	options.maxAge = typeof options.maxAge === "number" ? options.maxAge : undefined;
+	var contextPath = options && options.configParams["orion.context.path"] || "";
 	if (typeof options.workspaceDir !== "string") {
 		throw new Error("workspaceDir is required");
 	}
@@ -61,12 +62,12 @@ function startServer(options) {
 			app.use(require('./lib/user')(options));
 		}
 		app.use('/site', checkAuthenticated, require('./lib/sites')(options));
-		app.use('/task', checkAuthenticated, require('./lib/tasks').router({ root: '/task' }));
+		app.use('/task', checkAuthenticated, require('./lib/tasks').router({ root: contextPath + '/task' }));
 		app.use('/filesearch', checkAuthenticated, require('./lib/search')(options));
-		app.use('/file*', checkAuthenticated, require('./lib/file')({ root: '/file', options: options }));
-		app.use('/workspace*', checkAuthenticated, require('./lib/workspace')({ root: '/workspace', fileRoot: '/file', options: options }));
-		app.use('/gitapi', checkAuthenticated, require('./lib/git')({ root: '/gitapi', fileRoot: '/file', options: options}));
-		app.use('/cfapi', checkAuthenticated, require('./lib/cf')({ root: '/cfapi',  options: options}));
+		app.use('/file*', checkAuthenticated, require('./lib/file')({ root: contextPath + '/file', options: options }));
+		app.use('/workspace*', checkAuthenticated, require('./lib/workspace')({ root: contextPath + '/workspace', fileRoot: contextPath + '/file', options: options }));
+		app.use('/gitapi', checkAuthenticated, require('./lib/git')({ root: contextPath + '/gitapi', fileRoot: contextPath + '/file', options: options}));
+		app.use('/cfapi', checkAuthenticated, require('./lib/cf')({ root: contextPath + '/cfapi',  options: options}));
 		app.use('/prefs', checkAuthenticated, require('./lib/controllers/prefs').router(options));
 		app.use('/xfer', checkAuthenticated, require('./lib/xfer')(options));
 		app.use('/metrics', require('./lib/metrics').router(options));
