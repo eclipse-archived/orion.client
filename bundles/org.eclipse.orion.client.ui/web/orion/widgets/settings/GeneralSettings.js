@@ -21,13 +21,14 @@ define([
 			createSections: function(){
 				/* - desktop selection policy fields ----------------------------------------------------- */
 				this.generalFields = [
-				    new SettingsCheckbox( {fieldlabel: messages["desktopSelectionPolicy"], 
-				    	fieldTitle: messages["desktopSelectionPolicyTooltip"],
-				    	postChange: this.setDesktopPolicy.bind(this)}),
-				    new SettingsTextfield({
-				    	fieldlabel: messages["filteredResources"], 
-				    	fieldTitle: messages["filteredResourcesTooltip"],
-				    	postChange: this.setFilteredResources.bind(this)
+					new SettingsCheckbox( {fieldlabel: messages["desktopSelectionPolicy"],
+						fieldTitle: messages["desktopSelectionPolicyTooltip"],
+						postChange: this.setPreferences.bind(this)
+				    }),
+					new SettingsTextfield({
+						fieldlabel: messages["filteredResources"],
+						fieldTitle: messages["filteredResourcesTooltip"],
+						postChange: this.setPreferences.bind(this)
 				    })
 				];
 				new mSection.Section(this.node, {
@@ -44,25 +45,18 @@ define([
 
 				this.generalFields.forEach(function(child) {
 					settingsContentElement.appendChild(child.node);
-					//child.show();
 				});
 			},
-					
-			setDesktopPolicy: function() {
-				var deskTopSelectionEnabled = this.generalFields[0].isChecked();
-				this.preferences.setPrefs({desktopSelectionPolicy: deskTopSelectionEnabled});
+
+			setPreferences: function() {
+				// Return the promise for test purposes.
+				return this.preferences.getPrefs().then(function (generalPrefs) {
+					generalPrefs.desktopSelectionPolicy = this.generalFields[0].isChecked();
+					generalPrefs.filteredResources = this.generalFields[1].getValue();
+					this.preferences.setPrefs(generalPrefs);
+				}.bind(this));
 			},
 
-			/**
-			 * @name setFilteredResources
-			 * @description Sets the string of filtered options
-			 * @function
-			 * @since 13.0
-			 */
-			setFilteredResources: function setFilteredResources() {
-				this.preferences.setPrefs({filteredResources: this.generalFields[1].getValue()});
-			},
-			
 			show:function(node, callback){
 				if (node) {
 					this.node = node;
@@ -79,6 +73,7 @@ define([
 						this.generalFields[1].setValue(generalPrefs.filteredResources);
 					}
 					this.generalFields[1].show();
+
 					if (callback) {
 						callback();
 					}
