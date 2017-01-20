@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012, 2016 IBM Corporation and others.
+ * Copyright (c) 2012, 2016, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -24,6 +24,7 @@ module.exports = function(options) {
 	if (!workspaceRoot) {
 		throw new Error('options.root path required');
 	}
+	var contextPath = options.options.configParams["orion.context.path"] || "";
 
 	var workspaceId = 'orionode';
 
@@ -128,7 +129,7 @@ module.exports = function(options) {
 				var filepath = fileUtil.safeFilePath(req.user.workspaceDir, projectName);
 				// Call the File POST helper to handle the filesystem operation. We inject the Project-specific metadata
 				// into the resulting File object.
-				fileUtil.handleFilePOST(fileRoot, req, res, filepath, {
+				fileUtil.handleFilePOST(contextPath, fileRoot, req, res, filepath, {
 					Id: projectName,
 					ContentLocation: makeProjectContentLocation(req, projectName),
 					Location: makeProjectLocation(req, projectName)

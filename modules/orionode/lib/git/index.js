@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012, 2016 IBM Corporation and others.
+ * Copyright (c) 2012, 2016, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -22,12 +22,13 @@ module.exports = {};
 module.exports.router = function(options) {
 	var fileRoot = options.fileRoot;
 	if (!fileRoot) { throw new Error('options.root is required'); }
+	var contextPath = options.options.configParams["orion.context.path"] || "";
 
 	return express.Router()
 	.use(bodyParser.json())
-	.get('/file*', getIndex)
-	.put('/file*', putIndex)
-	.post('/file*', postIndex);
+	.get(contextPath + '/file*', getIndex)
+	.put(contextPath + '/file*', putIndex)
+	.post(contextPath + '/file*', postIndex);
 
 function getIndex(req, res) {
 	var repo;
