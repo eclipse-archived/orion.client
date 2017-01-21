@@ -206,11 +206,17 @@ maybeDescribe("git", function() {
 			it('GET commit (listing commits revision)', function(finished) {
 				request()
 				.get(CONTEXT_PATH + '/gitapi/commit/master%5E..master/file/' + TEST_REPO_NAME)
-				.expect(200)
+				.expect(202)
 				.end(function(err, res) {
 					assert.ifError(err);
-					assert.equal(res.body.Children[0].Message, message);
-					finished();
+					getGitResponse(res).then(function(res2) {
+						assert.equal(res2.JsonData.Children[0].Message, message);
+						finished();
+					})
+					.catch(function(err) {
+						assert.ifError(err);
+						finished();
+					});
 				});
 			});
 
