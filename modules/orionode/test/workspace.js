@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2013 IBM Corporation and others.
+ * Copyright (c) 2013, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -17,8 +17,8 @@ var testData = require('./support/test_data');
 
 var CONTEXT_PATH = '';
 var PREFIX = CONTEXT_PATH + '/workspace', PREFIX_FILE = CONTEXT_PATH + '/file';
+var TEST_WORKSPACE_NAME = '.test_workspace';
 var WORKSPACE = path.join(__dirname, '.test_workspace');
-var DEFAULT_WORKSPACE_NAME = 'Orionode Workspace';
 
 var app = express();
 app.use(/* @callback */ function(req, res, next) {
@@ -83,7 +83,7 @@ describe('Workspace API', function() {
 				assert.ok(res.body.Workspaces[0].Id);
 				assert.ok(res.body.Workspaces[0].Location);
 				assert.equal(res.body.Workspaces[0].Location, PREFIX + "/orionode");
-				assert.equal(res.body.Workspaces[0].Name, DEFAULT_WORKSPACE_NAME);
+				assert.equal(res.body.Workspaces[0].Name, TEST_WORKSPACE_NAME);
 				done();
 			});
 		});
@@ -101,7 +101,7 @@ describe('Workspace API', function() {
 				.end(function(e, res) {
 					throwIfError(e, "Failed to get metadata from " + workspace.Location);
 					assert.ok(res.body.Id);
-					assert.equal(res.body.Name, DEFAULT_WORKSPACE_NAME);
+					assert.equal(res.body.Name, TEST_WORKSPACE_NAME);
 					// Orionode doesn't have "projects" so don't check res.body.Projects
 					assert.ok(Array.isArray(res.body.Children));
 					res.body.Children.sort(byName);
