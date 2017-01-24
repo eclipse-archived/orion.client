@@ -3,6 +3,7 @@
 <head>
 	<meta charset="UTF-8">
 	<title>Orion JavaScript Support</title>
+	<script src="../../orion/requireErrorHandler.js"></script>
 	<script src="../../requirejs/require.js"></script>
 	<script>
 		/*eslint-env browser, amd*/	
@@ -11,11 +12,8 @@
 			require.config({
 				baseUrl: "../../"
 			});
-			require(["javascript/plugins/javascriptPlugin"], null, config.errback);
-		}, function(err) {
-			alert("Please try refreshing the page.\n\nRequireJS error \'" + err.requireType + 
-					"\'' occurred loading module:\n \'" + err.requireModules + "\'.");
-		});
+			require(["javascript/plugins/javascriptPlugin"], null, errback);
+		}, errback);
 	</script>
 </head>
 <body>
