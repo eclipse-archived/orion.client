@@ -41,12 +41,12 @@ define("orion/editor/textStyler", ['orion/editor/annotations', 'orion/editor/eve
 		return JSON.parse(JSON.stringify(object));
 	}
 
-	var createPatternBasedAdapter = function(grammars, rootId, contentType) {
-		return new PatternBasedAdapter(grammars, rootId, contentType);
+	var createPatternBasedAdapter = function(grammars, rootIds, contentType) {
+		return new PatternBasedAdapter(grammars, rootIds, contentType);
 	};
 
-	function PatternBasedAdapter(grammars, rootId, contentType) {
-		this._patternManager = new PatternManager(grammars, rootId);
+	function PatternBasedAdapter(grammars, rootIds, contentType) {
+		this._patternManager = new PatternManager(grammars, rootIds);
 		this._contentType = contentType;
 	}
 	PatternBasedAdapter.prototype = {
@@ -245,6 +245,9 @@ define("orion/editor/textStyler", ['orion/editor/annotations', 'orion/editor/eve
 					newBlock.enclosurePatterns = {};
 					this._initPatterns(this._patternManager, newBlock);
 				}.bind(this));
+		},
+		destroy: function() {
+			this._styler.getTextModel().removeEventListener("Changed", this._listener); //$NON-NLS-0$
 		},
 		getBlockCommentDelimiters: function(index) {
 			var languageBlock = this._getLanguageBlock(index);
@@ -469,7 +472,14 @@ define("orion/editor/textStyler", ['orion/editor/annotations', 'orion/editor/eve
 			});
 		},
 		setStyler: function(styler) {
+			if (this._styler) {
+				this._styler.getTextModel().removeEventListener("Changed", this._listener); //$NON-NLS-0$
+			}
 			this._styler = styler;
+			this._listener = this._onModelChanged.bind(this);
+			var model = this._styler.getTextModel();
+			model.addEventListener("Changed", this._listener); //$NON-NLS-0$
+			this._patternManager.firstLineChanged(model.getLine(0));
 		},
 		verifyBlock: function(baseModel, text, ancestorBlock, changeCount) {
 			var result = null;
@@ -703,6 +713,17 @@ define("orion/editor/textStyler", ['orion/editor/annotations', 'orion/editor/eve
 				resultStyles.push({start: i, end: fullStyle.end, style: fullStyle.style});
 			}
 		},
+		_onModelChanged: function(e) {
+			var model = this._styler.getTextModel();
+			var startLine = model.getLineAtOffset(e.start);
+			if (startLine === 0) {
+				/* a change in the first line can change the grammar to be applied throughout */
+				if (this._patternManager.firstLineChanged(model.getLine(0))) {
+					/* the grammar has changed */
+					this._styler.computeRootBlock(model);
+				}
+			}
+		},
 		_substituteCaptureValues: function(regex, resolvedResult) {
 			var regexString = regex.toString();
 			this._captureReferenceRegex.lastIndex = 0;
@@ -748,19 +769,32 @@ define("orion/editor/textStyler", ['orion/editor/annotations', 'orion/editor/eve
 		_PUNCTUATION_SECTION_END: ".end" //$NON-NLS-0$
 	};
 
-	function PatternManager(grammars, rootId) {
+	function PatternManager(grammars, rootIds) {
 		this._unnamedCounter = 0;
 		this._patterns = [];
-		this._rootId = rootId;
+		this._firstLineMatches = {};
+		this._rootIds = rootIds;
 		grammars.forEach(function(grammar) {
 			this._addRepositoryPatterns(grammar.repository || {}, grammar.id);
 			this._addPatterns(grammar.patterns || [], grammar.id);
+			if (grammar.firstLineMatch) {
+				this._firstLineMatches[grammar.id] = new RegExp(grammar.firstLineMatch);
+			}
 		}.bind(this));
 	}
 	PatternManager.prototype = {
+		firstLineChanged: function(text) {
+			var newId = this._computeRootId(text);
+			var changed = this._rootId !== newId;
+			this._rootId = newId;
+			return changed;
+		},
 		getPatterns: function(pattern) {
 			var parentId;
 			if (!pattern) {
+				if (!this._rootId) { /* currently no root id */
+					return [];
+				}
 				parentId = this._rootId + "#" + this._NO_ID;
 			} else {
 				if (typeof(pattern) === "string") { //$NON-NLS-0$
@@ -815,6 +849,19 @@ define("orion/editor/textStyler", ['orion/editor/annotations', 'orion/editor/eve
 			keys.forEach(function(key) {
 				this._addPattern(repository[key], key, parentId);
 			}.bind(this));
+		},
+		_computeRootId: function(firstLineText) {
+			var defaultId = null; /* an acceptable fallback if no firstLineMatches are made */
+			var matchId = null;
+			for (var i = 0; i < this._rootIds.length; i++) {
+				var firstLineMatch = this._firstLineMatches[this._rootIds[i]]; 
+				if (!firstLineMatch) {
+					defaultId = this._rootIds[i];
+				} else if (firstLineMatch.test(firstLineText)) {
+					matchId = this._rootIds[i];
+				}
+			}
+			return matchId || defaultId; 
 		},
 		_processInclude: function(pattern, indexCounter, resultObject) {
 			var searchExp;
@@ -944,34 +991,7 @@ define("orion/editor/textStyler", ['orion/editor/annotations', 'orion/editor/eve
 		view.addEventListener("Selection", this._listener.onSelection); //$NON-NLS-0$
 		view.addEventListener("Destroy", this._listener.onDestroy); //$NON-NLS-0$
 		view.addEventListener("LineStyle", this._listener.onLineStyle); //$NON-NLS-0$
-
-		var charCount = model.getCharCount();
-		var rootBounds = {start: 0, contentStart: 0, end: charCount, contentEnd: charCount};
-		if (charCount >= 50000) {
-			var startTime = Date.now();
-		}
-		this._rootBlock = this._stylerAdapter.createBlock(rootBounds, this, model, null);
-		if (startTime) {
-			var interval = Date.now() - startTime;
-			if (interval > 10) {
-				mMetrics.logTiming(
-					"editor", //$NON-NLS-0$
-					"styler compute blocks (ms/50000 chars)", //$NON-NLS-0$
-					interval * 50000 / charCount,
-					stylerAdapter.getContentType());
-			}
-		}
-		if (annotationModel) {
-			var add = [];
-			annotationModel.removeAnnotations(mAnnotations.AnnotationType.ANNOTATION_FOLDING);
-			this._computeFolding(this._rootBlock.getBlocks(), view.getModel(), add);
-			if (this._detectTasks) {
-				annotationModel.removeAnnotations(mAnnotations.AnnotationType.ANNOTATION_TASK);
-				this._computeTasks(this._rootBlock, model, add);
-			}
-			this._replaceAnnotations([], add);
-		}
-		view.redrawLines();
+		this.computeRootBlock(model);
 	}
 	TextStyler.prototype = {
 		addAnnotationProvider: function(value) {
@@ -982,7 +1002,37 @@ define("orion/editor/textStyler", ['orion/editor/annotations', 'orion/editor/eve
 		computeBlocks: function(model, text, block, offset, startIndex, endIndex, maxBlockCount) {
 			return this._stylerAdapter.computeBlocks(model, text, block, offset, startIndex, endIndex, maxBlockCount);
 		},
+		computeRootBlock: function(model) {
+			var charCount = model.getCharCount();
+			var rootBounds = {start: 0, contentStart: 0, end: charCount, contentEnd: charCount};
+			if (charCount >= 50000) {
+				var startTime = Date.now();
+			}
+			this._rootBlock = this._stylerAdapter.createBlock(rootBounds, this, model, null);
+			if (startTime) {
+				var interval = Date.now() - startTime;
+				if (interval > 10) {
+					mMetrics.logTiming(
+						"editor", //$NON-NLS-0$
+						"styler compute blocks (ms/50000 chars)", //$NON-NLS-0$
+						interval * 50000 / charCount,
+						stylerAdapter.getContentType());
+				}
+			}
+			if (this._annotationModel) {
+				var add = [];
+				this._annotationModel.removeAnnotations(mAnnotations.AnnotationType.ANNOTATION_FOLDING);
+				this._computeFolding(this._rootBlock.getBlocks(), this._view.getModel(), add);
+				if (this._detectTasks) {
+					this._annotationModel.removeAnnotations(mAnnotations.AnnotationType.ANNOTATION_TASK);
+					this._computeTasks(this._rootBlock, model, add);
+				}
+				this._replaceAnnotations([], add);
+			}
+			this._view.redrawLines();
+		},
 		destroy: function() {
+			this._stylerAdapter.destroy();
 			if (this._view) {
 				var model = this._view.getModel();
 				if (model.getBaseModel) {

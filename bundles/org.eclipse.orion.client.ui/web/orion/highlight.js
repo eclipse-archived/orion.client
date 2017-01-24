@@ -93,7 +93,8 @@ define(['examples/editor/textStyler', 'orion/editor/textStyler', 'orion/editor/t
 						id: id,
 						contentTypes: serviceRef.getProperty("contentTypes"),
 						patterns: serviceRef.getProperty("patterns"),
-						repository: serviceRef.getProperty("repository")
+						repository: serviceRef.getProperty("repository"),
+						firstLineMatch: serviceRef.getProperty("firstLineMatch")
 					};
 				}
 			}
@@ -103,31 +104,33 @@ define(['examples/editor/textStyler', 'orion/editor/textStyler', 'orion/editor/t
 			}
 		}
 		return Deferred.all(promises, function(error) {return {_error: error};}).then(function(promises) {
-			// Take the last matching provider. Could consider ranking them here.
-			var provider;
-			for (var i = promises.length - 1; i >= 0; i--) {
+			var providers = [];
+			for (var i = 0; i < promises.length; i++) {
 				var promise = promises[i];
 				if (promise && !promise._error && isAllowed(promise)) {
-					provider = promise;
-					break;
+					providers.push(promise);
 				}
 			}
 			var styler;
-			if (provider) {
-				var type = provider.getProperty("type"); //$NON-NLS-0$
+			if (providers.length) {
+				var type = providers[0].getProperty("type"); //$NON-NLS-0$
 				if (type === "highlighter") { //$NON-NLS-0$
 					styler = new AsyncStyler(textView, serviceRegistry, annotationModel);
 					styler.setContentType(contentType);
 				} else if (type === "grammar" || (!NEW && typeof type === "undefined")) { //$NON-NLS-1$ //$NON-NLS-0$
-					var textmateGrammar = provider.getProperty("grammar"); //$NON-NLS-0$
+					var textmateGrammar = providers[0].getProperty("grammar"); //$NON-NLS-0$
 					styler = new mTextMateStyler.TextMateStyler(textView, textmateGrammar, textmateGrammars);
 				} else {
 					if (NEW) {
 						var grammars = [];
-						for(var key in this.orionGrammars) {
+						for (var key in this.orionGrammars) {
 						    grammars.push(this.orionGrammars[key]);
 						}
-						var stylerAdapter = new mTextStyler2.createPatternBasedAdapter(grammars, provider.getProperty("id"), contentType.id);  //$NON-NLS-0$
+						var providerIds = [];
+						providers.forEach(function(current) {
+							providerIds.push(current.getProperty("id")); //$NON-NLS-0$
+						});
+						var stylerAdapter = new mTextStyler2.createPatternBasedAdapter(grammars, providerIds, contentType.id);
 						styler = new mTextStyler2.TextStyler(textView, annotationModel, stylerAdapter);
 					}
 				}
