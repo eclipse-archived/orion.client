@@ -96,6 +96,8 @@ define(['examples/editor/textStyler', 'orion/editor/textStyler', 'orion/editor/t
 						repository: serviceRef.getProperty("repository"),
 						firstLineMatch: serviceRef.getProperty("firstLineMatch")
 					};
+				} else {
+					continue; /* duplicate */
 				}
 			}
 			var promise = getPromise(serviceRef, extension);
