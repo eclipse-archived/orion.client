@@ -7,13 +7,15 @@
 		<link rel="icon" href="/images/shell.png" type="image/png">
 		<title>Shell</title>
 		<link rel="stylesheet" type="text/css" href="ttyPage.css" />
-		<script src="../orion/requireErrorHandler.js"></script>
 		<script src="../requirejs/require.js"></script>
 		<script>
 			/*eslint-env browser, amd*/
 			require(["../orion/require-config.js"], function(config){
-				require(["tty/scripts/ttyPage"], null, errback);
-			}, errback);
+				require(["tty/scripts/ttyPage"], null, config.errback);
+			}, function(err) {
+				alert("Please try refreshing the page.\n\nRequireJS error \'" + err.requireType + 
+						"\'' occurred loading module:\n \'" + err.requireModules + "\'.");
+			});
 		</script>
 	</head>
 	<body id="orion-shellPage" class="orionPage lightPage">

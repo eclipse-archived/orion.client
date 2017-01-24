@@ -7,13 +7,15 @@
 		<link rel="icon" href="../images/edit.png" type="image/png">
 		<title>Compare</title>    
 		<link rel="stylesheet" type="text/css" href="compare.css" />
-		<script src="../orion/requireErrorHandler.js"></script>
 		<script src="../requirejs/require.js"></script>
 		<script>
 			/*eslint-env browser, amd*/
 			require(["../orion/require-config.js"], function(config){
-				require(["compare/compare"], null, errback);
-			}, errback);
+				require(["compare/compare"], null, config.errback);
+			}, function(err) {
+				alert("Please try refreshing the page.\n\nRequireJS error \'" + err.requireType + 
+						"\'' occurred loading module:\n \'" + err.requireModules + "\'.");
+			});
 		</script>
 	</head>
 	<body id="orion-compare" class="orionPage lightPage">

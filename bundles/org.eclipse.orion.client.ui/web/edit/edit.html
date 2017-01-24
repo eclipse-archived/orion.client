@@ -7,16 +7,18 @@
 		<link rel="icon" href="../images/edit.png" type="image/png">
 		<title>Editor</title>
 		<link rel="stylesheet" type="text/css" href="edit.css" />
-		<script src="../orion/requireErrorHandler.js"></script>
 		<script src="../requirejs/require.js"></script>
 		<script>
 			/*eslint-env browser, amd*/
 			require(["../orion/require-config.js"], function(config){
 				function load() {
-					require(["edit/edit"], null, errback);
+					require(["edit/edit"], null, config.errback);
 				}
 				require(["orion/splash"], load, load);
-			}, errback);
+			}, function(err) {
+				alert("Please try refreshing the page.\n\nRequireJS error \'" + err.requireType + 
+						"\'' occurred loading module:\n \'" + err.requireModules + "\'.");
+			});
 		</script>
 	</head>
 
