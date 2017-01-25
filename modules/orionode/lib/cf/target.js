@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016 IBM Corporation and others.
+ * Copyright (c) 2016, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -8,15 +8,17 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-/*eslint-env node */
+/*eslint-env node, es6*/
 var express = require("express");
 var bodyParser = require("body-parser");
 var tasks = require("../tasks");
 var request = require("request");
 var orgs = require("./orgs_spaces");
+var bearerTokenStore;
 var UseraccessToken = {};
 
-module.exports.router = function() {
+module.exports.router = function(options) {
+	bearerTokenStore = require(options.options.configParams["cf.bearer.token.store"] || "./accessTokenStore");
 	
 	module.exports.getAccessToken = getAccessToken;
 	module.exports.parsebody = parsebody;
@@ -82,7 +84,7 @@ function tryLogin(url, Username, Password, userId){
 			request.post(authorizationHeader, function (error, response, body) {
 				var respondJson = parsebody(body);
 				if(!error && response.statusCode === 200){
-					UseraccessToken[userId] = respondJson.access_token;
+					bearerTokenStore.setBearerTokenforUserId && bearerTokenStore.setBearerTokenforUserId(userId, respondJson.access_token);		
 					return fulfill();
 				}
 				return error ? reject({"code": 400, "data":error, "bundleid":"org.eclipse.orion.server.core"}) : 
@@ -133,7 +135,7 @@ function computeTarget(userId, targetRequest){
 	}
 }
 function getAccessToken(userId){
-	return UseraccessToken[userId];
+	return bearerTokenStore.getBearerTokenfromUserId(userId);
 }
 function caughtErrorHandler(task, err){
 	var errorResponse = {
