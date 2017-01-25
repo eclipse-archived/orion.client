@@ -33,7 +33,7 @@
 		return btnDiv;
 	}
 
-	var errback  = function(err) {
+	self.errback = function(err) {
 		var errorPane = createErrorPane();
 		errorPane.appendChild(createElement("h1", "An error occurred loading the page"));
 		errorPane.appendChild(createRefreshButton());

@@ -12,8 +12,8 @@
 		<script>
 			/*eslint-env browser, amd*/
 			require(["../orion/require-config.js"], function(config){
-				require(["tty/scripts/ttyPage"], null, errback);
-			}, errback);
+				require(["tty/scripts/ttyPage"], null, self.errback);
+			}, self.errback);
 		</script>
 	</head>
 	<body id="orion-shellPage" class="orionPage lightPage">

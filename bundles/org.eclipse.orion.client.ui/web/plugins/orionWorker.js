@@ -16,5 +16,5 @@ var pluginProvider = new orion.PluginProvider();
 require(["../orion/require-config.js"], function(config){
 	require(["plugins/orionPlugin"], function(plugin){
 		plugin.connect(pluginProvider);
-	}, errback);
-}, errback);
+	}, self.errback);
+}, self.errback);

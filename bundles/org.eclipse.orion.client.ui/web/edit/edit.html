@@ -13,10 +13,10 @@
 			/*eslint-env browser, amd*/
 			require(["../orion/require-config.js"], function(config){
 				function load() {
-					require(["edit/edit"], null, errback);
+					require(["edit/edit"], null, self.errback);
 				}
 				require(["orion/splash"], load, load);
-			}, errback);
+			}, self.errback);
 		</script>
 	</head>
 

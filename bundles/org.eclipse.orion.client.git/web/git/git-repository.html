@@ -13,11 +13,11 @@
 			/*eslint-env browser, amd*/
 			require(["../orion/require-config.js"], function(config){
 				function load() {
-					require(["git/git-repository"], null, errback);
+					require(["git/git-repository"], null, self.errback);
 				}
 				require.config({config: {"orion/splash": {splashID: "Git"}}});
 				require(["orion/splash"], load, load);
-			}, errback);
+			}, self.errback);
 		</script>
 </head>
 	<body id="orion-repository" class="orionPage lightPage">

@@ -9,8 +9,8 @@
 		/*eslint-env browser, amd*/	
 		require(["../../orion/require-config.js"], function(config){
 			require.config({baseUrl: "../.."});
-			require(["cfui/plugins/cFDeployPlugin"], null, errback);
-		}, errback);
+			require(["cfui/plugins/cFDeployPlugin"], null, self.errback);
+		}, self.errback);
 	</script>
 </head>
 <body>

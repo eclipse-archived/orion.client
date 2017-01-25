@@ -10,8 +10,8 @@
 			require(["../orion/require-config.js"], function(config){
 				require(["plugins/orionPlugin"], function(plugin){
 					plugin.connect();
-				}, errback);
-			}, errback);
+				}, self.errback);
+			}, self.errback);
 		</script>
 </head>
 <body>

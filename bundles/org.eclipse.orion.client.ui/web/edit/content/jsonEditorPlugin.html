@@ -12,8 +12,8 @@
 			/*eslint-env browser, amd*/	
 			require(["../../orion/require-config.js"], function(config){
 				require.config({baseUrl: "../.."});
-				require(["edit/content/jsonEditorPlugin"], null, errback);
-			}, errback);
+				require(["edit/content/jsonEditorPlugin"], null, self.errback);
+			}, self.errback);
 		</script>
     </head>
 	<body>

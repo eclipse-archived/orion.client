@@ -9,8 +9,8 @@
 	<script>
 		require(["../../orion/require-config.js"], function(config){
 			require.config({baseUrl: "../.."});
-			require(["webtools/plugins/webToolsPlugin"], null, errback);
-		}, errback);
+			require(["webtools/plugins/webToolsPlugin"], null, self.errback);
+		}, self.errback);
 	</script>
 </head>
 

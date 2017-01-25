@@ -13,11 +13,11 @@
 			/*eslint-env browser, amd*/
 			require(["../orion/require-config.js"], function(config){
 				function load() {
-					require(["settings/settings"], null, errback);
+					require(["settings/settings"], null, self.errback);
 				}
 				require.config({config: {"orion/splash": {splashID: "Settings"}}});
 				require(["orion/splash"], load, load);
-			}, errback);
+			}, self.errback);
 		</script>
 	</head>
 	

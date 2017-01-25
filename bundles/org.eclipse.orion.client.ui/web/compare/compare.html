@@ -12,8 +12,8 @@
 		<script>
 			/*eslint-env browser, amd*/
 			require(["../orion/require-config.js"], function(config){
-				require(["compare/compare"], null, errback);
-			}, errback);
+				require(["compare/compare"], null, self.errback);
+			}, self.errback);
 		</script>
 	</head>
 	<body id="orion-compare" class="orionPage lightPage">

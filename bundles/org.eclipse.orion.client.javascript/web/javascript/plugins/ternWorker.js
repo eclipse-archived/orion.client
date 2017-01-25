@@ -16,5 +16,5 @@ require(["../../orion/require-config.js"], function(config){
 	require.config({
 		baseUrl: "../../"
 	});
-	require(["javascript/plugins/ternWorkerCore"], null, errback);
-}, errback);
+	require(["javascript/plugins/ternWorkerCore"], null, self.errback);
+}, self.errback);

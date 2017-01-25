@@ -1,6 +1,5 @@
 /*eslint-env browser, amd*/
 /* eslint-disable missing-nls */
-var globalErrback = errback;
 define(function() {
 	require.config({
 		baseUrl: "..",
@@ -15,7 +14,7 @@ define(function() {
 		}
 	});
 	return {
-		errback: globalErrback
+		errback: self.errback
 	};
 });
 
