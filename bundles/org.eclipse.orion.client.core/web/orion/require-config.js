@@ -1,5 +1,6 @@
 /*eslint-env browser, amd*/
 /* eslint-disable missing-nls */
+var globalErrback = errback;
 define(function() {
 	require.config({
 		baseUrl: "..",
@@ -13,17 +14,8 @@ define(function() {
 	        util: 'gcli/util'
 		}
 	});
-	function errback(err) {
-	    if (err.requireType === 'timeout') {
-			try {
-				alert("RequireJS error: Timeout occurred loading module " + err.requireModules + ".\n\nPlease try refreshing the page.");
-			} catch (er) {
-			}
-	    } 
-	    throw err;
-	}
 	return {
-		errback: errback
+		errback: globalErrback
 	};
 });
 

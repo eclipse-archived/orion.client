@@ -6,16 +6,14 @@
 		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 		<title>JSON Editor</title>
 		<link rel="stylesheet" type="text/css" href="jsonEditorPlugin.css" />
+		<script src="../../orion/requireErrorHandler.js"></script>
 		<script src="../../requirejs/require.js"></script>
 		<script>
 			/*eslint-env browser, amd*/	
 			require(["../../orion/require-config.js"], function(config){
 				require.config({baseUrl: "../.."});
-				require(["edit/content/jsonEditorPlugin"], null, config.errback);
-			}, function(err) {
-				alert("Please try refreshing the page.\n\nRequireJS error \'" + err.requireType + 
-						"\'' occurred loading module:\n \'" + err.requireModules + "\'.");
-			});
+				require(["edit/content/jsonEditorPlugin"], null, errback);
+			}, errback);
 		</script>
     </head>
 	<body>
