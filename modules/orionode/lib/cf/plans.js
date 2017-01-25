@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016 IBM Corporation and others.
+ * Copyright (c) 2016, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -16,11 +16,12 @@ var path = require("path");
 var manifests = require("./manifests");
 var api = require("../api"), writeError = api.writeError;
 
-module.exports.router = function() {
+module.exports.router = function(options) {
+	var contextPath = options.options.configParams["orion.context.path"] || "";
 
 	return express.Router()
 	.use(bodyParser.json())
-	.get("/file*", getplans);
+	.get(contextPath + "/file*", getplans);
 	
 function planJson(type, manifest, planner, wizard, required){
 	return {
