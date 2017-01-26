@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2013, 2016 IBM Corporation and others.
+ * Copyright (c) 2013, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License v1.0
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution
@@ -360,9 +360,10 @@ define([
 					_nodeRead(response, moduleName, filePath, fileclient, err, depth, false);
 				});
 		}
-		return fileclient.read(modulePath + "/package.json", false, false, {
-			readIfExists: true
-		}).then(function(json) {
+		if(jsProject.hasNodeModules()) {
+			return fileclient.read(modulePath + "/package.json", false, false, {
+				readIfExists: true
+			}).then(function(json) {
 				if (json) {
 					var val = JSON.parse(json);
 					var mainPath = null;
@@ -392,6 +393,7 @@ define([
 				// if it fails, try to parent folder
 				_nodeRead(response, moduleName, parentFolder, fileclient, err, depth + 1, true);
 			});
+		}
 	}
 	/**
 	 * @since 12.0
