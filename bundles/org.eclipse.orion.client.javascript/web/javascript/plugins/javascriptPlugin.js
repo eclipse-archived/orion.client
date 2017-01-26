@@ -325,8 +325,11 @@ define([
 	 * @since 12.0
 	 */
 	function _nodeRead(response, moduleName, filePath, fileclient, error, depth, subModules) {
+		if(!jsProject.hasNodeModules()) {
+			return _failedRead(response, moduleName, "No node_modules folder in project");
+		}
 		if (depth > 2) {
-			if (TRACE) console.log("Don't read '" + moduleName + "': too deep");
+			if (TRACE) { console.log("Don't read '" + moduleName + "': too deep"); }
 			return _failedRead(response, moduleName, "Too deep");
 		}
 		var index = filePath.lastIndexOf('/', filePath.length - 2);
@@ -335,7 +338,7 @@ define([
 		}
 		var parentFolder = filePath.substr(0, index + 1); // include the trailing / in the folder path
 		if (parentFolder === filePath) {
-			if (TRACE) console.log("Infinite loop reading '" + filePath);
+			if (TRACE) { console.log("Infinite loop reading '" + filePath); }
 			return _failedRead(response, moduleName, "Infinite loop");
 		}
 		var modulePath = parentFolder + "node_modules/" + moduleName;
@@ -360,40 +363,38 @@ define([
 					_nodeRead(response, moduleName, filePath, fileclient, err, depth, false);
 				});
 		}
-		if(jsProject.hasNodeModules()) {
-			return fileclient.read(modulePath + "/package.json", false, false, {
-				readIfExists: true
-			}).then(function(json) {
-				if (json) {
-					var val = JSON.parse(json);
-					var mainPath = null;
-					var main = val.main;
-					if (main) {
-						if (!/(\.js)$/.test(main)) {
-							main += ".js";
-						}
-					} else {
-						main = "index.js";
+		return fileclient.read(modulePath + "/package.json", false, false, {
+			readIfExists: true
+		}).then(function(json) {
+			if (json) {
+				var val = JSON.parse(json);
+				var mainPath = null;
+				var main = val.main;
+				if (main) {
+					if (!/(\.js)$/.test(main)) {
+						main += ".js";
 					}
-					mainPath = modulePath + "/" + main;
-					return fileclient.read(mainPath).then(function(contents) {
-							response.args.contents = contents;
-							response.args.file = mainPath;
-							response.args.path = main;
-							if (TRACE) console.log(mainPath);
-							ternWorker.postMessage(response);
-						},
-						function(err) {
-							_failedRead(response, "node_modules", err);
-						});
+				} else {
+					main = "index.js";
 				}
-				_nodeRead(response, moduleName, parentFolder, fileclient, "No contents", depth + 1, true);
-			},
-			function(err) {
-				// if it fails, try to parent folder
-				_nodeRead(response, moduleName, parentFolder, fileclient, err, depth + 1, true);
-			});
-		}
+				mainPath = modulePath + "/" + main;
+				return fileclient.read(mainPath).then(function(contents) {
+						response.args.contents = contents;
+						response.args.file = mainPath;
+						response.args.path = main;
+						if (TRACE) { console.log(mainPath); }
+						ternWorker.postMessage(response);
+					},
+					function(err) {
+						_failedRead(response, "node_modules", err);
+					});
+			}
+			_nodeRead(response, moduleName, parentFolder, fileclient, "No contents", depth + 1, true);
+		},
+		function(err) {
+			// if it fails, try to parent folder
+			_nodeRead(response, moduleName, parentFolder, fileclient, err, depth + 1, true);
+		});
 	}
 	/**
 	 * @since 12.0
@@ -2324,21 +2325,21 @@ define([
 					dependsOn: "no-implicit-coercion",
 					name: javascriptMessages["no-implicit-coercion-boolean"],
 					type: "boolean", //$NON-NLS-1$
-					defaultValue: true,
+					defaultValue: true
 				},
 				{
 					id: "no-implicit-coercion:number", //$NON-NLS-1$
 					dependsOn: "no-implicit-coercion",
 					name: javascriptMessages["no-implicit-coercion-number"],
 					type: "boolean", //$NON-NLS-1$
-					defaultValue: true,
+					defaultValue: true
 				},
 				{
 					id: "no-implicit-coercion:string", //$NON-NLS-1$
 					dependsOn: "no-implicit-coercion",
 					name: javascriptMessages["no-implicit-coercion-string"],
 					type: "boolean", //$NON-NLS-1$
-					defaultValue: true,
+					defaultValue: true
 				},
 				{
 					id: "no-extend-native", //$NON-NLS-1$

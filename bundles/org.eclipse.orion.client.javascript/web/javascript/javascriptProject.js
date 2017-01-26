@@ -394,13 +394,13 @@ define([
 
 	/**
 	 * @name JavaScriptProject.prototype.hasNodeModules
-	 * @description description
+	 * @description Returns if the current project context has a node_modules folder in it or not
 	 * @function
-	 * @returns returns
+	 * @returns {bool} If the project context has a node_modules folder
 	 * @since 14.0
 	 */
 	JavaScriptProject.prototype.hasNodeModules = function hasNodeModules() {
-		return this._node_modules;
+		return Boolean(this._node_modules);
 	};
 
 	/**
@@ -427,13 +427,14 @@ define([
 				this.projectMeta = project;
 				delete this.ecma;
 				delete this.map[this.TERN_PROJECT];
+				delete this._node_modules;
 				return this.getFile(this.NODE_MODULES).then(function(file) {
-						if(file) {
+						if(file && typeof file.contents === "string") {
 							this._node_modules = true;
 						}
 						_handle.call(this, "onProjectChanged", this, evnt, project.Location);
 					}.bind(this),
-					function(err) {
+					/* @callback */ function(err) {
 						_handle.call(this, "onProjectChanged", this, evnt, project.Location);
 					}.bind(this));
 			}
