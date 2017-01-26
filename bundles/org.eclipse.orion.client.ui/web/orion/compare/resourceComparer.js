@@ -364,7 +364,7 @@ exports.ResourceComparer = (function() {
 					if (metadata) {
 						name = metadata.Name;
 					}
-					mGlobalCommands.setPageTarget({task: messages["compareTreeTitle"], name: name, target: metadata,
+					mGlobalCommands.setPageTarget({task: messages["compareFileTitle"], name: name, target: metadata,
 								serviceRegistry: that._registry, commandService: that._commandService,
 								searchService: that._searchService, fileService: that._fileClient});
 					if (title.charAt(0) === '*') { //$NON-NLS-0$

@@ -43,6 +43,7 @@ define({//Default message bundle
 	'readingFileMetadata': 'Reading file metadata: ${0}...',
 	'comparingFile': 'Comparing: ${0}...',
 	'compareTreeTitle': 'Compare Folders',
+	'compareFileTitle': 'Compare Files',
 	'IgnoreWhitespace': 'Ignore white space',
 	'IgnoreWhitespaceTooltip': 'Ignore white space where applicable',
 	'UseWhitespace': 'Use white space',
