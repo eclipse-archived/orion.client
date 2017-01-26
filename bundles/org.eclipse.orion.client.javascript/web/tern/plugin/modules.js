@@ -57,6 +57,14 @@
         resolved = this.resolvers[i](name, parentFile)
       if (!resolved) resolved = defaultResolver(name, parentFile)
       if (!resolved) return infer.ANull
+      
+      // ORION Check if this file has contents
+      var contents = null;
+      if (typeof resolved === 'object' && typeof resolved.contents === 'string'){
+      	contents = resolved.contents;
+      	resolved = resolved.file;
+      }
+      
       if (typeof resolved != "string") {
         if (!relative) this.nonRelative[name] = true
         return resolved
@@ -66,7 +74,7 @@
       if (known) return known
 
       if (/\.js$|(?:^\/)[^\.]+$/.test(resolved))
-        this.server.addFile(resolved, null, parentFile)
+        this.server.addFile(resolved, contents, parentFile)
       if (!relative) this.nonRelative[name] = resolved
       return this.modules[resolved] = new infer.AVal
     },
