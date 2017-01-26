@@ -469,11 +469,17 @@ define([
 					case 'onCreated': {
 						n = file.result ? file.result.Name : undefined;
 						f = file.result ? file.result.Location : undefined;
+						if(n === this.NODE_MODULES && Boolean(file.result.Directory)) {
+							this._node_modules = true;
+						}
 						break;
 					}
 					case 'onDeleted': {
 						f = file.deleteLocation;
 						n = _shortName(file.deleteLocation);
+						if(f.lastIndexOf(this.NODE_MODULES)+this.NODE_MODULES.length-1 === f.length-2) {
+							delete this._node_modules;
+						}
 						break;
 					}
 					case 'onModified': {
@@ -486,6 +492,12 @@ define([
 						toN = file.result ? file.result.Name : undefined;
 						n = _shortName(file.source);
 						f = file.source;
+						if(f.lastIndexOf(this.NODE_MODULES) + this.NODE_MODULES.length-1 === f.length-2) {
+							delete this._node_modules;
+						}
+						if(file.result && file.result.Name === this.NODE_MODULES && Boolean(file.result.Directory)) {
+							this._node_modules = true;
+						}
 						break;
 					}
 				}
