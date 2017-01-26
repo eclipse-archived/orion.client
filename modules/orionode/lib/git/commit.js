@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012, 2016, 2017 IBM Corporation and others.
+ * Copyright (c) 2012, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -745,8 +745,9 @@ function rebase(req, res, commitToRebase, rebaseOperation) {
 
 }
 
-function merge(req, res, commitToMerge, squash) {
+function merge(req, res, branchToMerge, squash) {
 	var repo, head, commit, oid, paths;
+	var conflicting = false;
 	clone.getRepo(req)
 	.then(function(_repo) {
 		repo = _repo;
@@ -754,44 +755,94 @@ function merge(req, res, commitToMerge, squash) {
 	})
 	.then(function(_head) {
 		head = _head;
-		return repo.getReferenceCommit(commitToMerge);
+		return repo.getReferenceCommit(branchToMerge);
 	})
 	.then(function(_commit) {
 		commit = _commit;
 		if (squash) {
 			throw new Error("Not implemented yet");
 		}
-		return repo.mergeBranches("HEAD", commitToMerge)
+		return repo.mergeBranches("HEAD", branchToMerge)
 		.then(function(_oid) {
 			oid = _oid;
 		})
 		.catch(function(index) {
-			paths = {};
-			index.entries().forEach(function(entry) {
-				if (git.Index.entryIsConflict(entry)) {
-					paths[entry.path] = "";
+			// the merge failed due to conflicts
+			conflicting = true;
+			return git.AnnotatedCommit.lookup(repo, commit.id())
+			.then(function(annotated) {
+				var retCode = git.Merge.merge(repo, annotated, null, null);
+				if (retCode === git.Error.CODE.ECONFLICT) {
+					// checkout failed due to a conflict
+					return getConflictingPaths(repo, head, commit)
+					.then(function(conflictingPaths) {
+						paths = conflictingPaths;
+					});
+				} else if (retCode !== git.Error.CODE.OK) {
+					throw new Error("Internal merge failure (error code " + retCode + ")");
 				}
-			});
-			return git.Checkout.index(repo, index, {
-				checkoutStrategy: git.Checkout.STRATEGY.ALLOW_CONFLICTS,
-				ourLabel: "HEAD",
-				theirLabel: commit.sha()
 			});
 		});
 	})
 	.then(function() {
 		var mergeResult = "MERGED";
-		if (!paths) {
-			if (oid && oid.toString() === head.id().toString()) mergeResult = "ALREADY_UP_TO_DATE";
-			else if (oid && oid.toString() === commit.id().toString()) mergeResult = "FAST_FORWARD";
-		}
+		if (oid && oid.toString() === head.id().toString()) mergeResult = "ALREADY_UP_TO_DATE";
+		else if (oid && oid.toString() === commit.id().toString()) mergeResult = "FAST_FORWARD";
+		else if (conflicting) mergeResult = "CONFLICTING";
 		res.status(200).json({
-			"Result": paths ? "CONFLICTING" : mergeResult,
+			"Result": mergeResult,
 			"FailingPaths": paths
 		});
 	})
 	.catch(function(err) {
 		writeError(400, res, err.message);
+	});
+}
+
+function getConflictingPaths(repo, head, commit) {
+	var tree2;
+	var diffPaths = [];
+	return commit.getTree()
+	.then(function(tree) {
+		tree2 = tree;
+		// get the common ancestor between HEAD and the other branch
+		return Merge.base(repo, head, commit)
+		.then(function(ancestor) {
+			return ancestor.getTree();
+		})
+		.catch(function() {
+			// failed to find common ancestor, use HEAD tree instead
+			return head.getTree();
+		});
+	})
+	.then(function(tree) {
+		// diff the two trees
+		return git.Diff.treeToTree(repo, tree, tree2, null)
+	})
+	.then(function(diff) {
+		return diff.patches();
+	})
+	.then(function(patches) {
+		// get the path of every modified file
+		patches.forEach(function(patch) {
+			diffPaths.push(patch.newFile().path());
+		});
+		return repo.getStatusExt({
+			flags: git.Status.OPT.INCLUDE_UNTRACKED |
+				git.Status.OPT.RECURSE_UNTRACKED_DIRS
+		});
+	})
+	.then(function(statuses) {
+		var paths = {};
+		// check what's in the index and wd
+		statuses.forEach(function(file) {
+			var path = file.path();
+			if (file.statusBit() !== 0 && diffPaths.indexOf(path) !== -1) {
+				// modified file in the index/wd conflicts with the merge
+				paths[path] = "";
+			}
+		});
+		return paths;
 	});
 }
 

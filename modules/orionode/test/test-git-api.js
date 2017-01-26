@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2013 IBM Corporation and others.
+ * Copyright (c) 2013, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -86,6 +86,167 @@ function getGitResponse(res2) {
 		}
 		check(res2);
 	});
+}
+
+function GitClient(name) {
+	this.name = name;
+	this.tasks = [];
+}
+
+GitClient.prototype = {
+	getName: function() {
+		return this.name;
+	},
+
+	start: function(callback) {
+		this.callback = callback;
+		this.tasks.shift().apply();
+	},
+
+	next: function() {
+		if (this.tasks.length !== 0) {
+			this.tasks.shift().apply();
+		} else if (this.callback !== undefined) {
+			this.callback();
+		}
+	},
+
+	init: function(name) {
+		var client = this;
+		this.tasks.push(function() {
+			request()
+			.post(CONTEXT_PATH + "/gitapi/clone/")
+			.send({
+				"Name":  client.getName(),
+				"Location": CONTEXT_PATH + '/workspace',
+				"GitName": "test",
+				"GitMail": "test@test.com"
+			})
+			.expect(201)
+			.end(function(err, res) {
+				assert.ifError(err);
+				assert.equal(res.body.Location, "/gitapi/clone/file/" + client.getName());
+				client.next();
+			});
+		});
+	},
+
+	setFileContents: function(name, contents) {
+		var client = this;
+		this.tasks.push(function() {
+			request()
+			.put(CONTEXT_PATH + "/file/" + client.getName() + "/" + name)
+			.send(contents)
+			.expect(200)
+			.end(function(err, res) {
+				assert.ifError(err);
+				var body = res.body;
+				assert.equal(body.Directory, false);
+				assert.ok(body.ETag, 'has an ETag');
+				assert.equal(body.Location, CONTEXT_PATH + "/file/" + client.getName() + "/" + name);
+				assert.equal(body.Name, name);
+				client.next();
+			});
+		});
+	},
+
+	commit: function() {
+		var client = this;
+		this.tasks.push(function() {
+			request()
+			.post(CONTEXT_PATH + "/gitapi/commit/HEAD/file/" + client.getName())
+			.send({
+				Message: "Test commit!",
+				AuthorName: "test",
+				AuthorEmail: "test@test.com",
+				CommitterName: "test",
+				CommitterEmail: "test@test.com"
+			})
+			.expect(200)
+			.end(function(err, res) {
+				assert.ifError(err);
+				client.next();
+			});
+		});
+	},
+
+	stage: function(name) {
+		var client = this;
+		this.tasks.push(function() {
+			request()
+			.put(CONTEXT_PATH + "/gitapi/index/file/" + client.getName() + "/" + name)
+			.expect(200)
+			.end(function(err, res) {
+				assert.ifError(err);
+				client.next();
+			});
+		});
+	},
+
+	status: function(state) {
+		var client = this;
+		this.tasks.push(function() {
+			request()
+			.get(CONTEXT_PATH + "/gitapi/status/file/" + client.getName())
+			.expect(200)
+			.end(function(err, res) {
+				assert.ifError(err);
+				assert.equal(state, res.body.RepositoryState);
+				client.next();
+			});
+		});
+	},
+
+	createBranch: function(branchName) {
+		var client = this;
+		this.tasks.push(function() {
+			request()
+			.post(CONTEXT_PATH + "/gitapi/branch/file/" + client.getName())
+			.send({
+				Name: branchName
+			})
+			.expect(201)
+			.end(function(err, res) {
+				assert.ifError(err);
+				assert.equal(res.body.CommitLocation, "/gitapi/commit/refs%252Fheads%252F" + branchName + "/file/" + client.getName());
+				assert.equal(res.body.Location, "/gitapi/branch/" + branchName + "/file/" + client.getName());
+				client.next();
+			});
+		});
+	},
+
+	reset: function(type, id) {
+		var client = this;
+		this.tasks.push(function() {
+			request()
+			.post(CONTEXT_PATH + "/gitapi/index/file/" + client.getName())
+			.send({
+				"Reset": type,
+				"Commit": id
+			})
+			.expect(200)
+			.end(function(err, res) {
+				assert.ifError(err);
+				client.next();
+			});
+		});
+	},
+
+	merge: function(branchToMerge, result) {
+		var client = this;
+		this.tasks.push(function() {
+			request()
+			.post(CONTEXT_PATH + "/gitapi/commit/HEAD/file/" + client.getName())
+			.send({
+				Merge: branchToMerge
+			})
+			.expect(200)
+			.end(function(err, res) {
+				assert.ifError(err);
+				client.next();
+			});
+		});
+	}
 }
 
 // Skip tests if nodegit is not installed
@@ -658,6 +819,68 @@ maybeDescribe("git", function() {
 
 		});
 	}); // describe("Use case 3")
+
+	describe("Merge", function() {
+		before(setup);
+
+		describe("Conflicts", function() {
+			it("POST commit will resolve merge in progress", function(finished) {
+				var name = "conflicts.txt";
+
+				var client = new GitClient("merge-conflicts");
+				client.init("merge-conflicts");
+				// init file with content A
+				client.setFileContents(name, "A");
+				// stage and commit
+				client.stage(name);
+				client.commit();
+				client.start(function() {
+					return new Promise(function(resolve) {
+						// get SHA hash of the commit we just created
+						request()
+						.get(CONTEXT_PATH + "/gitapi/commit/master/file/merge-conflicts")
+						.query({ "pageSize": 1 })
+						.expect(202)
+						.end(function(err, res) {
+							assert.ifError(err);
+							getGitResponse(res).then(function(res2) {
+								resolve(res2.JsonData.Children[0].Id);
+							})
+							.catch(function(err) {
+								assert.ifError(err);
+							});
+						});
+					})
+					.then(function(initial) {
+						var client = new GitClient("merge-conflicts");
+						// set file to content B
+						client.setFileContents(name, "B");
+						// stage and commit
+						client.stage(name);
+						client.commit();
+						// create a branch with content B
+						client.createBranch("left");
+						// reset back to original content A
+						client.reset("HARD", initial);
+						// set file to content C
+						client.setFileContents(name, "C");
+						// stage and commit
+						client.stage(name);
+						client.commit();
+						// merge branch with content B
+						client.merge("left");
+						// merge conflict
+						client.status("MERGING");
+						client.start(finished);
+					})
+					.catch(function(err) {
+						assert.ifError(err);
+						finished();
+					});
+				});
+			});
+		}); // describe("Conflicts")
+	}); // describe("Merge")
 
 	describe("config", function() {
 		this.timeout(10000);
