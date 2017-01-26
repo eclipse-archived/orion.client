@@ -440,7 +440,7 @@ define([
 									this._commandRegistry.runCommand("orion.launchConfiguration.checkStatus", launchConfiguration, this, null, null, this._statusLight); //$NON-NLS-0$
 								} else {
 									if(error.Alert && error.Alert === true)
-										this._progressService.setProgressResult(error.Message);
+										this._progressService.setProgressResult(error);
 									this._launchConfigurationDispatcher.dispatchEvent({type: "changeState", newValue: launchConfiguration}); //$NON-NLS-0$
 								}
 							}.bind(this)
@@ -484,7 +484,7 @@ define([
 					
 					if (!_status.error.Retry) {
 						// this is a real error
-						if (_status.error.Message) {
+						if (_status.error.Message && !_status.error.HTML) {
 							longStatusText = _status.error.Message;
 						}
 					}
@@ -576,7 +576,8 @@ define([
 					if (_status.error.Retry) {
 						appInfoText = _status.ShortMessage || messages["appInfoUnknown"]; //$NON-NLS-0$
 					} else {
-						appInfoText = _status.ShortMessage || _status.error.Message || messages["appInfoError"]; //$NON-NLS-0$
+						appInfoText = _status.ShortMessage || _status.error.ShortMessage ||
+							(!_status.error.HTML && _status.error.Message) || messages["appInfoError"]; //$NON-NLS-0$
 					}
 				} else {
 					switch (_status.State) {
