@@ -247,7 +247,7 @@ define("orion/editor/textStyler", ['orion/editor/annotations', 'orion/editor/eve
 				}.bind(this));
 		},
 		destroy: function() {
-			this._styler.getTextModel().removeEventListener("Changed", this._listener); //$NON-NLS-0$
+			this._textModel.removeEventListener("Changed", this._listener); //$NON-NLS-0$
 		},
 		getBlockCommentDelimiters: function(index) {
 			var languageBlock = this._getLanguageBlock(index);
@@ -473,13 +473,13 @@ define("orion/editor/textStyler", ['orion/editor/annotations', 'orion/editor/eve
 		},
 		setStyler: function(styler) {
 			if (this._styler) {
-				this._styler.getTextModel().removeEventListener("Changed", this._listener); //$NON-NLS-0$
+				this._textModel.removeEventListener("Changed", this._listener); //$NON-NLS-0$
 			}
 			this._styler = styler;
 			this._listener = this._onModelChanged.bind(this);
-			var model = this._styler.getTextModel();
-			model.addEventListener("Changed", this._listener); //$NON-NLS-0$
-			this._patternManager.firstLineChanged(model.getLine(0));
+			this._textModel = this._styler.getTextModel();
+			this._textModel.addEventListener("Changed", this._listener); //$NON-NLS-0$
+			this._patternManager.firstLineChanged(this._textModel.getLine(0));
 		},
 		verifyBlock: function(baseModel, text, ancestorBlock, changeCount) {
 			var result = null;
@@ -714,13 +714,12 @@ define("orion/editor/textStyler", ['orion/editor/annotations', 'orion/editor/eve
 			}
 		},
 		_onModelChanged: function(e) {
-			var model = this._styler.getTextModel();
-			var startLine = model.getLineAtOffset(e.start);
+			var startLine = this._textModel.getLineAtOffset(e.start);
 			if (startLine === 0) {
 				/* a change in the first line can change the grammar to be applied throughout */
-				if (this._patternManager.firstLineChanged(model.getLine(0))) {
+				if (this._patternManager.firstLineChanged(this._textModel.getLine(0))) {
 					/* the grammar has changed */
-					this._styler.computeRootBlock(model);
+					this._styler.computeRootBlock(this._textModel);
 				}
 			}
 		},
