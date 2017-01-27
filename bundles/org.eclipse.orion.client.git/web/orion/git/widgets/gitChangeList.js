@@ -926,7 +926,6 @@ define([
 						
 						var textArea = explorer.messageTextArea = document.createElement("textarea"); //$NON-NLS-0$
 						textArea.rows = 4;
-						textArea.type = "textarea"; //$NON-NLS-0$
 						textArea.id = "nameparameterCollector"; //$NON-NLS-0$
 						textArea.placeholder = messages["SmartCommit"];
 						textArea.setAttribute("aria-label", messages["SmartCommitLabel"]);
