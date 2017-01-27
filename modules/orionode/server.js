@@ -94,7 +94,6 @@ function startServer(cb) {
 			}));
 
 			var io = socketio.listen(server, { 'log level': 1 });
-
 			ttyShell.install({ io: io, fileRoot: '/file', workspaceDir: workspaceDir });
 
 			languageServer.install({ io: io, workspaceDir: workspaceDir }); //TODO no good for multiuser
