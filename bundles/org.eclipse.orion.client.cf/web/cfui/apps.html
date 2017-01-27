@@ -7,15 +7,13 @@
     	<title>Cloud Applications</title>
 		<link rel="stylesheet" type="text/css" href="css/apps.css" />
 		<link rel="icon" href="../cfui/images/deploy.png" type="image/png">
+		<script src="../orion/requireErrorHandler.js"></script>
 		<script src="../requirejs/require.js"></script>
 		<script>
 			/*eslint-env browser, amd*/
 			require(["../orion/require-config.js"], function(config){
-				require(["cfui/apps"], null, config.errback);
-			}, function(err) {
-				alert("Please try refreshing the page.\n\nRequireJS error \'" + err.requireType + 
-						"\'' occurred loading module:\n \'" + err.requireModules + "\'.");
-			});
+				require(["cfui/apps"], null, self.errback);
+			}, self.errback);
 		</script>
  	
 </head>

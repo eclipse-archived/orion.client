@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012 IBM Corporation and others.
+ * Copyright (c) 2012, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -22,20 +22,21 @@ module.exports = {};
 module.exports.router = function(options) {
 	var fileRoot = options.fileRoot;
 	if (!fileRoot) { throw new Error('options.root is required'); }
+	var contextPath = options.options.configParams["orion.context.path"] || "";
 
 	return express.Router()
 	.use(bodyParser.json())
-	.get('/clone/file*', getConfig)
-	.get('/:key/clone/file*', getAConfig)
-	.delete('/:key/clone/file*', deleteConfig)
-	.put('/:key/clone/file*', putConfig)
-	.post('/clone/file*', postConfig);
+	.get('/clone'+ contextPath + '/file*', getConfig)
+	.get('/:key/clone'+ contextPath + '/file*', getAConfig)
+	.delete('/:key/clone'+ contextPath + '/file*', deleteConfig)
+	.put('/:key/clone'+ contextPath + '/file*', putConfig)
+	.post('/clone'+ contextPath + '/file*', postConfig);
 
 function configJSON(key, value, fileDir) {
 	return {
 		"Key": key,
-		"CloneLocation": "/gitapi/clone" + fileDir,
-		"Location": "/gitapi/config/" + util.encodeURIComponent(key) + "/clone" + fileDir,
+		"CloneLocation": contextPath + "/gitapi/clone" + fileDir,
+		"Location": contextPath + "/gitapi/config/" + util.encodeURIComponent(key) + "/clone" + fileDir,
 		"Value": Array.isArray(value) ? value : [value]
 	};
 }
@@ -88,8 +89,8 @@ function getConfig(req, res) {
 
 			res.status(200).json({
 				"Children": configs,
-				"CloneLocation": "/gitapi/clone" + fileDir,
-				"Location": "/gitapi/config/clone"+ fileDir,
+				"CloneLocation": contextPath + "/gitapi/clone" + fileDir,
+				"Location": contextPath + "/gitapi/config/clone"+ fileDir,
 				"Type": "Config"
 			});
 

@@ -1,11 +1,11 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2010, 2016 IBM Corporation and others.
- * All rights reserved. This program and the accompanying materials are made 
- * available under the terms of the Eclipse Public License v1.0 
- * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
- * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html). 
- * 
+ * Copyright (c) 2010, 2017 IBM Corporation and others.
+ * All rights reserved. This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License v1.0
+ * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution
+ * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html).
+ *
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 /*eslint-env browser, amd*/
@@ -20,7 +20,7 @@ define([
 			return result ? validator : null;
 		});
 	}
-			
+
 	function clamp(n, min, max) {
 		n = Math.max(n, min);
 		n = Math.min(n, max);
@@ -36,17 +36,17 @@ define([
 	function _fixup(problems, model) {
 		for (var i=0; i < problems.length; i++) {
 			var problem = problems[i];
-			
+
 			problem.description = problem.description || problem.reason;
 			problem.severity = problem.severity || "error"; //$NON-NLS-0$
-			problem.start = typeof problem.start === "number" ? problem.start : problem.character; //$NON-NLS-0$
+			problem.start = typeof problem.start === "number" ? problem.start : problem.character;
 
 			// Range check
-			if (typeof problem.line === "number") {//$NON-NLS-0$
+			if (typeof problem.line === "number") {
 				// start, end are line offsets: 1-based in range [1 .. length+1]
 				var lineLength = model.getLine(problem.line - 1, false).length;
 				problem.start = clamp(problem.start, 1, lineLength);
-				problem.end = typeof problem.end === "number" ? problem.end : -1; //$NON-NLS-0$
+				problem.end = typeof problem.end === "number" ? problem.end : -1;
 				problem.end = clamp(problem.end, problem.start + 1, lineLength + 1);
 
 				// TODO probably need similar workaround for bug 423482 here
@@ -54,7 +54,7 @@ define([
 				// start, end are document offsets (0-based)
 				var charCount = model.getCharCount();
 				problem.start = clamp(problem.start, 0, charCount); // leave room for end
-				problem.end = typeof problem.end === "number" ? problem.end : -1; //$NON-NLS-0$
+				problem.end = typeof problem.end === "number" ? problem.end : -1;
 				problem.end = clamp(problem.end, problem.start, charCount);
 
 				// Workaround: if problem falls on the empty, last line in the buffer, move it to a valid line.
@@ -72,7 +72,7 @@ define([
 			}
 		}
 	}
-	
+
 	/**
 	 * @name orion.SyntaxChecker
 	 * @class Provides access to validation services registered with the service registry.
@@ -82,13 +82,13 @@ define([
 		this.registry = serviceRegistry;
 		this.textModel = model;
 	}
-	
+
 	SyntaxChecker.prototype = /** @lends orion.SyntaxChecker.prototype */ {
 		/**
 		 * @name initialize
 		 * @description Allows providers that implement this function to pre-initisalize their state, etc, before being called later to actually perform validation
 		 * @function
-		 * @public 
+		 * @public
 		 * @param {String} loc The location path to initialize from
 		 * @param {Object} contentType The optional content type
 		 * @since 12.0
@@ -109,7 +109,7 @@ define([
 					validators.forEach(function(validator) {
 						var _v = this.registry.getService(validator);
 						if(_v && typeof _v.initialize === "function") {
-							_v.initialize(loc, contentType);						
+							_v.initialize(loc, contentType);
 						}
 					}.bind(this));
 				}
@@ -117,15 +117,15 @@ define([
 		},
 		/**
 		 * @description Looks up applicable validators, calls them to obtain problems, passes problems to the marker service.
-		 * @function 
-		 * @public 
+		 * @function
+		 * @public
 		 * @param {Object} contentType The content type of the file to check
 		 * @param {String} loc The fully qualified path of the file to check
 		 * @param {String} message The message to display
 		 * @param {String} contents The file contents to check
 		 * @param {Object} editorContext The backing editor content to run with
 		 * @returns {Array.<Object>} The array of problem objects or the empty array
-		 * @see https://wiki.eclipse.org/Orion/Documentation/Developer_Guide/Plugging_into_the_editor#The_Problem_object     
+		 * @see https://wiki.eclipse.org/Orion/Documentation/Developer_Guide/Plugging_into_the_editor#The_Problem_object
 		 */
 		checkSyntax: function checkSyntax(contentType, loc, message, contents, editorContext) {
 			if (!contentType || message) {
@@ -153,7 +153,7 @@ define([
 						}
 						return progress.progress(promise, "Validating " + loc).then(extractProblems);
 					});
-					
+
 					return Deferred.all(problemPromises, function(error) {return {_error: error}; })
 						.then(function(results) {
 							var problems = [];
@@ -189,7 +189,7 @@ define([
 		 * @public
 		 * @param {String} loc The location of the resource
 		 * @param {Object} contentType The content type object
-		 * @returns {Array.<Object>} The array of applicable validators or the empty array
+		 * @returns {Deferred} The deferred to resolve the array of applicable validators
 		 * @since 12.0
 		 */
 		getValidators: function getValidators(loc, contentType) {

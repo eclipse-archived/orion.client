@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2013, 2016 IBM Corporation and others.
+ * Copyright (c) 2013, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License v1.0
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution
@@ -20,7 +20,7 @@ define([
 	var config = {
 		// 0:off, 1:warning, 2:error
 		defaults: Rules.defaults,
-		
+
 		/**
 		 * @description Sets the given rule to the given enabled value
 		 * @function
@@ -46,7 +46,7 @@ define([
 				this.rules[ruleId] = value;
 			}
 		},
-		
+
 		/**
 		 * @description Resets the rules to their default values
 		 * @function
@@ -79,7 +79,7 @@ define([
 	};
 
 	var registry;
-	
+
 	/**
 	 * @description Creates a new ESLintValidator
 	 * @constructor
@@ -95,7 +95,7 @@ define([
 		config.setDefaults();
 		registry = serviceRegistry;
 	}
-	
+
 	/**
 	 * @description Log the given timing in the metrics service
 	 * @param {Number} end The total time to log
@@ -108,8 +108,8 @@ define([
 				metrics.logTiming('language tools', 'validation', end, 'application/javascript'); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			}
 		}
- 	}
-	
+	}
+
 	/**
 	 * @description Converts the configuration rule value to an Orion problem severity string. One of 'warning', 'error'.
 	 * @param {Object} prob The problem object
@@ -129,10 +129,11 @@ define([
 		switch (val) {
 			case 1: return "warning"; //$NON-NLS-0$
 			case 2: return "error"; //$NON-NLS-0$
+			case 3: return "info";
 		}
 		return "error"; //$NON-NLS-0$
 	}
-	
+
 	/**
 	 * @description Computes the problem id to use in the framework from the ESLint problem object
 	 * @param {Object} pb The original ESLint problem
@@ -149,7 +150,7 @@ define([
 	    }
 	    return pb.ruleId;
 	}
-	
+
 	/**
 	 * @description Converts an eslint / esprima problem object to an Orion problem object
 	 * @public
@@ -261,7 +262,7 @@ define([
 			}.bind(this));
 			return deferred;
 		},
-		
+
 		/**
 		 * @description Validates the given AST
 		 * @function
@@ -286,7 +287,7 @@ define([
 			var request = {request: 'lint', args: args}; //$NON-NLS-1$
 			var start = Date.now();
 			this.ternWorker.postMessage(
-				request, 
+				request,
 				/* @callback */
 				function(type, err) {
 					var end = Date.now() - start;
@@ -371,7 +372,7 @@ define([
 				}
 			}
 		},
-		
+
 		/**
 		 * @description Hook for the test suite to enable only the given rule
 		 * @function
@@ -397,11 +398,11 @@ define([
 				}
 			}
 		},
-		
+
 		/**
-		 * All new pref ids MUST be the id of the rule they are for, but to 
+		 * All new pref ids MUST be the id of the rule they are for, but to
 		 * not break existing prefs this object translates the old pref name to its rule name
-		 * @private 
+		 * @private
 		 * @since 8.0
 		 */
 		_legacy: {
@@ -438,7 +439,7 @@ define([
 		    validate_no_redeclare: 'no-redeclare', //$NON-NLS-1$
 		    validate_no_shadow: 'no-shadow' //$NON-NLS-1$
 		}
-		
+
 	});
 	return ESLintValidator;
 });

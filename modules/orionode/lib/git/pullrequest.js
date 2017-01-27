@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012, 2016 IBM Corporation and others.
+ * Copyright (c) 2012, 2016, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -27,10 +27,11 @@ module.exports = {};
 module.exports.router = function(options) {
 	var fileRoot = options.fileRoot;
 	if (!fileRoot) { throw new Error('options.root is required'); }
+	var contextPath = options.options.configParams["orion.context.path"] || "";
 
 	return express.Router()
 	.use(bodyParser.json())
-	.post('/file*', getPullRequest);
+	.post(contextPath + '/file*', getPullRequest);
 	
 function pullRequestJSON(cloneDir,remoteDir,bodyJson) {
 	var children = [];
@@ -87,8 +88,8 @@ function getPullRequest(req, res) {
 	clone.getRepo(req)
 	.then(function(repo) {
 		fileDir = clone.getfileDir(repo,req); 
-		cloneDir = "/gitapi/clone" + fileDir;
-		remoteDir = "/gitapi/remote" + fileDir;
+		cloneDir = contextPath + "/gitapi/clone" + fileDir;
+		remoteDir = contextPath + "/gitapi/remote" + fileDir;
 		return request(userAgentHeader, function (error, response, body) {
 				if (!error && response.statusCode === 200) {
 					bodyJson = JSON.parse(body);

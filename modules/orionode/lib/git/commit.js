@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012, 2016 IBM Corporation and others.
+ * Copyright (c) 2012, 2016, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -30,6 +30,7 @@ module.exports = {};
 module.exports.router = function(options) {
 	var fileRoot = options.fileRoot;
 	if (!fileRoot) { throw new Error('options.root is required'); }
+	var contextPath = options.options.configParams["orion.context.path"] || "";
 
 	module.exports.commitJSON = commitJSON;
 	module.exports.getDiff = getDiff;
@@ -37,9 +38,9 @@ module.exports.router = function(options) {
 
 	return express.Router()
 	.use(bodyParser.json())
-	.get('/:scope/file*', getCommit)
-	.put('/:commit/file*', putCommit)
-	.post('/:commit/file*', postCommit);
+	.get('/:scope'+ contextPath + '/file*', getCommit)
+	.put('/:commit'+ contextPath + '/file*', putCommit)
+	.post('/:commit'+ contextPath + '/file*', postCommit);
 
 function commitJSON(commit, fileDir, diffs, parents) {
 	return {
@@ -49,10 +50,10 @@ function commitJSON(commit, fileDir, diffs, parents) {
 		"Children":[],
 		"CommitterEmail": commit.committer().email(),
 		"CommitterName": commit.committer().name(),
-		"ContentLocation": "/gitapi/commit/" + commit.sha() + fileDir + "?parts=body",
-		"DiffLocation": "/gitapi/diff/" + commit.sha() + fileDir,
-		"Location": "/gitapi/commit/" + commit.sha() + fileDir,
-		"CloneLocation": "/gitapi/clone" + fileDir,
+		"ContentLocation": contextPath + "/gitapi/commit/" + commit.sha() + fileDir + "?parts=body",
+		"DiffLocation": contextPath + "/gitapi/diff/" + commit.sha() + fileDir,
+		"Location": contextPath + "/gitapi/commit/" + commit.sha() + fileDir,
+		"CloneLocation": contextPath + "/gitapi/clone" + fileDir,
 		"Diffs": diffs,
 		"Parents": parents,
 		"Message": commit.message(),
@@ -113,8 +114,8 @@ function getCommitLog(req, res) {
 			"Children": commits,
 			"RepositoryPath": filterPath,
 			"Type": "Commit",
-			"Location":"/gitapi/commit/"+ util.encodeURIComponent(scope) +"/file" + req.params[0],
-			"CloneLocation": "/gitapi/clone" + fileDir
+			"Location":contextPath + "/gitapi/commit/" + util.encodeURIComponent(scope) + contextPath + "/file" + req.params[0],
+			"CloneLocation": contextPath + "/gitapi/clone" + fileDir
 		};
 		if(mergeBase){
 			resp["AheadCount"] = aheadCount;
@@ -419,7 +420,7 @@ function getCommitParents(repo, commit, fileDir) {
 	.then(function(parents) {
 		return parents.map(function(parent) {
 			return {
-				"Location": "/gitapi/commit/" + parent.sha() + fileDir,
+				"Location": contextPath + "/gitapi/commit/" + parent.sha() + fileDir,
 				"Name": parent.sha()
 			};
 		});
@@ -514,7 +515,7 @@ function getDiff(repo, commit, fileDir) {
 			return {
 				"ChangeType": type,
 				"ContentLocation": fileDir + "/" + path1,
-				"DiffLocation": "/gitapi/diff/" + range + fileDir + "/" + path1,
+				"DiffLocation": contextPath + "/gitapi/diff/" + range + fileDir + "/" + path1,
 				"NewPath": newFilePath,
 				"OldPath": oldFilePath,
 				"Type": "Diff"
@@ -526,7 +527,7 @@ function getDiff(repo, commit, fileDir) {
 			"Children": diffs
 		};
 		if (patches.length > 100) {
-			result.NextLocation = "/gitapi/diff/" + range + fileDir + "?pageSize=" + pageSize + "&page=" + (page + 1);
+			result.NextLocation = contextPath + "/gitapi/diff/" + range + fileDir + "?pageSize=" + pageSize + "&page=" + (page + 1);
 		}
 		return result;
 	});
@@ -564,7 +565,8 @@ function getCommitBody(req, res) {
 function identifyNewCommitResource(req, res, newCommit) {
 	var originalUrl = url.parse(req.originalUrl, true);
 	var segments = originalUrl.pathname.split("/");
-	segments[3] = segments[3] + ".." + util.encodeURIComponent(newCommit);
+	var contextPathSegCount = contextPath.split("/").length - 1;
+	segments[3 + contextPathSegCount] = segments[3 + contextPathSegCount] + ".." + util.encodeURIComponent(newCommit);
 	var location = url.format({pathname: segments.join("/"), query: originalUrl.query});
 	res.status(200).json({
 		"Location": location

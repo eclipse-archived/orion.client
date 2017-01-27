@@ -20,11 +20,12 @@ define([
 	function moduleResolve(_name, parentFile) {
 		var resolved = getResolved(_name);
 		if (resolved && resolved.file){
+			if (resolved.contents){
+				return {file: resolved.file, contents: resolved.contents};
+			}
 			return resolved.file;
 		}
 		return null;
-//		var resolved = resolveToFile(name, parentFile)
-//		return resolved && infer.cx().parent.normalizeFilename(resolved)
 	}
 	
 	/**

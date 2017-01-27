@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012 IBM Corporation and others.
+ * Copyright (c) 2012, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -21,13 +21,14 @@ module.exports = {};
 module.exports.router = function(options) {
 	var fileRoot = options.fileRoot;
 	if (!fileRoot) { throw new Error('options.root is required'); }
+	var contextPath = options.options.configParams["orion.context.path"] || "";
 	
 	return express.Router()
 	.use(bodyParser.json())
 	.get('*', getStash)
-	.delete('/file*', deleteStash)
+	.delete(contextPath + '/file*', deleteStash)
 	.delete('/:stashRev*', deleteStash)
-	.put('/file*', putStash)
+	.put(contextPath + '/file*', putStash)
 	.put('/:stashRev*', putStash)
 	.post('*', postStash);
 
@@ -52,8 +53,8 @@ function getStash(req, res) {
 				var diffs = commitAndDiffs[1];
 				var parents = commitAndDiffs[2];
 				var stashCommit = mCommit.commitJSON(commit, fileDir, diffs, parents);
-				stashCommit["ApplyLocation"] = "/gitapi/stash/" + oid + fileDir;
-				stashCommit["DropLocation"] = "/gitapi/stash/" + oid + fileDir;
+				stashCommit["ApplyLocation"] = contextPath + "/gitapi/stash/" + oid + fileDir;
+				stashCommit["DropLocation"] = contextPath + "/gitapi/stash/" + oid + fileDir;
 				stashCommit["Type"] = "StashCommit";
 				return stashCommit;
 			}));
@@ -65,8 +66,8 @@ function getStash(req, res) {
 	.then(function(stashes) {
 		res.status(200).json({
 			"Children" : stashes,
-			"Location" : "/gitapi/stash" + fileDir,
-			"CloneLocation" : "/gitapi/clone" + fileDir,
+			"Location" : contextPath + "/gitapi/stash" + fileDir,
+			"CloneLocation" : contextPath + "/gitapi/clone" + fileDir,
 			"Type" : "StashCommit"
 		});
 	})
