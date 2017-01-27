@@ -80,8 +80,7 @@ define([
 				msg = messages["Getting pull requests..."];
 				if (progress) progress.begin(msg);
 				
-				mGitCommands.getDefaultSshOptions(that.registry, repository).then(function(options){
-						var func = arguments.callee;
+				mGitCommands.getDefaultSshOptions(that.registry, repository).then(function func(options){
 						var deferred = that.progressService.progress(that.gitClient.doPullRequestList(repository.PullRequestLocation, repository.GitUrl,
 								options.gitSshUsername, options.gitSshPassword, options.knownHosts, options.gitPrivateKey,
 								options.gitPassphrase), msg);

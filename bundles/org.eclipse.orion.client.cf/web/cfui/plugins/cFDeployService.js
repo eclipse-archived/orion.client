@@ -62,7 +62,7 @@ define([
 			var projectClient = this.projectClient;
 			var cFService = this.cFService;
 			var fileClient = this.fileClient;
-			return projectClient.getLaunchConfigurationsDir(project).then(function(launchConfDir) {
+			return projectClient.getLaunchConfigurationsDir(project).then(function func(launchConfDir) {
 				if (!launchConfDir) {
 					return null;
 				}
@@ -86,7 +86,6 @@ define([
 					return null;
 
 				} else {
-					var func = arguments.callee.bind(this);
 					return fileClient.fetchChildren(launchConfDir.ChildrenLocation).then(function(children) {
 						launchConfDir.Children = children;
 						return func(launchConfDir);
