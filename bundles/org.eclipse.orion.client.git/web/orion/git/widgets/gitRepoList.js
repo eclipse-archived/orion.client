@@ -13,6 +13,7 @@
 
 define([
 	'i18n!git/nls/gitmessages',
+	'orion/bidiUtils',
 	'orion/commandRegistry',
 	'orion/explorers/explorer',
 	'orion/URITemplate',
@@ -22,7 +23,7 @@ define([
 	'orion/Deferred',
 	'orion/git/gitCommands',
 	'orion/objects'
-], function(messages, mCommandRegistry, mExplorer, URITemplate, i18nUtil, uiUtil, util, Deferred, mGitCommands, objects) {
+], function(messages, bidiUtils, mCommandRegistry, mExplorer, URITemplate, i18nUtil, uiUtil, util, Deferred, mGitCommands, objects) {
 		
 	var repoTemplate = new URITemplate("git/git-repository.html#{,resource,params*}"); //$NON-NLS-0$
 
@@ -430,6 +431,9 @@ define([
 						titleDiv.href = titleLink;
 					}
 					titleDiv.textContent = title || item.Name;
+					if (bidiUtils.isBidiEnabled()) {
+						titleDiv.dir = bidiUtils.getTextDirection(titleDiv.textContent);
+					} 
 					detailsView.appendChild(titleDiv);
 					
 					var descriptionDiv = document.createElement("div"); //$NON-NLS-0$

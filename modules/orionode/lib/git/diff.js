@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012 IBM Corporation and others.
+ * Copyright (c) 2012, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -29,14 +29,15 @@ module.exports = {};
 module.exports.router = function(options) {
 	var fileRoot = options.fileRoot;
 	if (!fileRoot) { throw new Error('options.root is required'); }
+	var contextPath = options.options.configParams["orion.context.path"] || "";
 
 	module.exports.changeType = changeType;
 
 	return express.Router()
 	.use(bodyParser.json())
-	.get('/file*', getDiff)
-	.get('/:scope/file*', getDiff)
-	.post('/:scope/file*', postDiff);
+	.get(contextPath + '/file*', getDiff)
+	.get('/:scope'+ contextPath + '/file*', getDiff)
+	.post('/:scope'+ contextPath + '/file*', postDiff);
 
 function getDiff(req, res) {
 	var query = req.query;
@@ -60,8 +61,8 @@ function getDiff(req, res) {
 			var p = api.toURLPath(path.join(fileDir, filePath));
 			URIs = {
 				"Base": getBaseLocation(scope, p),
-				"CloneLocation": "/gitapi/clone" + fileDir,
-				"Location": "/gitapi/diff/" + util.encodeURIComponent(scope) + fileDir + filePath,
+				"CloneLocation": contextPath + "/gitapi/clone" + fileDir,
+				"Location": contextPath + "/gitapi/diff/" + util.encodeURIComponent(scope) + fileDir + filePath,
 				"New": getNewLocation(scope, p),
 				"Old": getOldLocation(scope, p),
 				"Type": "Diff"
@@ -135,21 +136,21 @@ function changeType(patch) {
 function getOldLocation(scope, path) {
 	if (scope.indexOf("..") !== -1) {
 		var commits = scope.split("..");
-		return "/gitapi/commit/" + util.encodeURIComponent(commits[0]) + path + "?parts=body";
+		return contextPath + "/gitapi/commit/" + util.encodeURIComponent(commits[0]) + path + "?parts=body";
 	} else if (scope === "Cached") {
-		return "/gitapi/commit/HEAD" + path + "?parts=body";
+		return contextPath + "/gitapi/commit/HEAD" + path + "?parts=body";
 	} else if (scope === "Default") {
-		return "/gitapi/index" + path;
+		return contextPath + "/gitapi/index" + path;
 	}
-	return "/gitapi/commit/" + util.encodeURIComponent(scope) + path + "?parts=body";
+	return contextPath + "/gitapi/commit/" + util.encodeURIComponent(scope) + path + "?parts=body";
 }
 
 function getNewLocation(scope, path) {
 	if (scope.indexOf("..") !== -1) {
 		var commits = scope.split("..");
-		return "/gitapi/commit/" + util.encodeURIComponent(commits[1]) + path + "?parts=body";
+		return contextPath + "/gitapi/commit/" + util.encodeURIComponent(commits[1]) + path + "?parts=body";
 	} else if (scope === "Cached") {
-		return "/gitapi/index" + path;
+		return contextPath + "/gitapi/index" + path;
 	}
 	return path;
 }
@@ -158,11 +159,11 @@ function getBaseLocation(scope, path) {
 	if (scope.indexOf("..") !== -1) {
 		var commits = scope.split("..");
 		//TODO find merge base
-		return "/gitapi/commit/" + util.encodeURIComponent(commits[1]) + path + "?parts=body";
+		return contextPath + "/gitapi/commit/" + util.encodeURIComponent(commits[1]) + path + "?parts=body";
 	} else if (scope === "Cached") {
-		return "/gitapi/commit/HEAD" + path + "?parts=body";
+		return contextPath + "/gitapi/commit/HEAD" + path + "?parts=body";
 	}
-	return "/gitapi/index" + path;
+	return contextPath + "/gitapi/index" + path;
 }
 
 function processDiff(diff, filePath, paths, fileDir, includeDiff, includeDiffs, query, scope, diffContents, diffs) {
@@ -189,7 +190,7 @@ function processDiff(diff, filePath, paths, fileDir, includeDiff, includeDiffs, 
 					diffs.Children.push({
 						"ChangeType": type,
 						"ContentLocation": p1,
-						"DiffLocation": "/gitapi/diff/" + util.encodeURIComponent(scope) + p1,
+						"DiffLocation": contextPath + "/gitapi/diff/" + util.encodeURIComponent(scope) + p1,
 						"NewPath": newFilePath,
 						"OldPath": oldFilePath,
 						"Type": "Diff"
@@ -466,7 +467,8 @@ function postDiff(req, res) {
 	var newCommit = req.body.New;
 	var originalUrl = url.parse(req.originalUrl, true);
 	var segments = originalUrl.pathname.split("/");
-	segments[3] = segments[3] + ".." + util.encodeURIComponent(newCommit);
+	var contextPathSegCount = contextPath.split("/").length - 1;
+	segments[3 + contextPathSegCount] = segments[3 + contextPathSegCount] + ".." + util.encodeURIComponent(newCommit);
 	var location = url.format({pathname: segments.join("/"), query: originalUrl.query});
 	res.setHeader('Location', location);
 	res.status(200).json({Location: location});

@@ -7,16 +7,17 @@
 		<link rel="icon" href="../images/initproject.png" type="image/png">
 		<title>Settings</title>
 		<link rel="stylesheet" type="text/css" href="settings.css"/>
+		<script src="../orion/requireErrorHandler.js"></script>
 		<script src="../requirejs/require.js"></script>
 		<script>
 			/*eslint-env browser, amd*/
 			require(["../orion/require-config.js"], function(config){
 				function load() {
-					require(["settings/settings"], null, config.errback);
+					require(["settings/settings"], null, self.errback);
 				}
 				require.config({config: {"orion/splash": {splashID: "Settings"}}});
 				require(["orion/splash"], load, load);
-			});
+			}, self.errback);
 		</script>
 	</head>
 	

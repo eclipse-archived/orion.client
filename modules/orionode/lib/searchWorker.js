@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015, 2016 IBM Corporation and others.
+ * Copyright (c) 2015, 2016, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -128,7 +128,7 @@ try {
 				}
 			}
 
-			this.defaultLocation = "/file/" + workspaceId;
+			this.defaultLocation = contextPath + "/file/" + workspaceId;
 		};
 	}
 
@@ -197,7 +197,7 @@ try {
 	// Note that while this function creates and returns many promises, they fulfill to undefined,
 	// and are used only for flow control.
 	// TODO clean up
-	function searchFile(workspaceDir, dirLocation, filename, searchPattern, filenamePatterns, results, excluded) {
+	function searchFile(contextPath, workspaceDir, dirLocation, filename, searchPattern, filenamePatterns, results, excluded) {
 		if(excluded[filename]) {
 			return;
 		}
@@ -216,7 +216,7 @@ try {
 				return fs.readdirAsync(filePath)
 				.then(function(directoryFiles) {
 					return Promise.map(directoryFiles, function(entry) {
-						return searchFile(workspaceDir, filePath, entry, searchPattern, filenamePatterns, results, excluded);
+						return searchFile(contextPath, workspaceDir, filePath, entry, searchPattern, filenamePatterns, results, excluded);
 					}, { concurrency: SUBDIR_SEARCH_CONCURRENCY });
 				});
 			}
@@ -234,7 +234,7 @@ try {
 					"Directory": stats.isDirectory(),
 					"LastModified": stats.mtime.getTime(),
 					"Length": stats.size,
-					"Location": toURLPath("/file" + filePathFromWorkspace),
+					"Location": toURLPath(contextPath + "/file" + filePathFromWorkspace),
 					"Name": filename,
 					"Path": toURLPath(filePathFromWorkspace.substring(1))
 				});
@@ -281,7 +281,7 @@ try {
 			var results = [];
 
 			return Promise.map(children, function(child) {
-				return searchFile(workspaceDir, searchScope, child, searchPattern, filenamePattern, results, searchOpt.exclude);
+				return searchFile(contextPath, workspaceDir, searchScope, child, searchPattern, filenamePattern, results, searchOpt.exclude);
 			}, { concurrency: SUBDIR_SEARCH_CONCURRENCY })
 			.catch(function(/*err*/) {
 				// Probably an error reading some file or directory -- ignore

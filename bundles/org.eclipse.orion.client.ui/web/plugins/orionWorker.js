@@ -10,10 +10,11 @@
  ******************************************************************************/
 /*globals importScripts orion*/
 /*eslint-env browser, amd*/
-importScripts("../orion/Deferred.js", "../orion/plugin.js", '../requirejs/require.min.js');
+importScripts("../orion/Deferred.js", "../orion/plugin.js", 
+			 '../orion/requireErrorHandler.js', '../requirejs/require.min.js');
 var pluginProvider = new orion.PluginProvider();
 require(["../orion/require-config.js"], function(config){
 	require(["plugins/orionPlugin"], function(plugin){
 		plugin.connect(pluginProvider);
-	}, config.errback);
-});
+	}, self.errback);
+}, self.errback);

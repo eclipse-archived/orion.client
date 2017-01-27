@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012, 2013 IBM Corporation and others.
+ * Copyright (c) 2012, 2013, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -40,6 +40,7 @@ function startServer(cb) {
 	
 	var workspaceArg = args.workspace || args.w;
 	var workspaceConfigParam = configParams.workspace;
+	var contextPath = configParams["orion.context.path"] || "";
 	var workspaceDir;
 	if (workspaceArg) {
 		// -workspace passed in command line is relative to cwd
@@ -87,14 +88,14 @@ function startServer(cb) {
 			}
 			
 			app.use(compression());
-			app.use(orion({
+			app.use(contextPath, function(req,res,next){ req.contextPath = contextPath; next();},orion({
 				workspaceDir: workspaceDir,
 				configParams: configParams,
 				maxAge: dev ? 0 : undefined,
 			}));
 
 			var io = socketio.listen(server, { 'log level': 1 });
-			ttyShell.install({ io: io, fileRoot: '/file', workspaceDir: workspaceDir });
+			ttyShell.install({ io: io, fileRoot: contextPath + '/file', workspaceDir: workspaceDir });
 
 			languageServer.install({ io: io, workspaceDir: workspaceDir }); //TODO no good for multiuser
 

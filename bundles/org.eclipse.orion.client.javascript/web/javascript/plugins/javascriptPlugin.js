@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2013, 2016 IBM Corporation and others.
+ * Copyright (c) 2013, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License v1.0
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution
@@ -325,8 +325,11 @@ define([
 	 * @since 12.0
 	 */
 	function _nodeRead(response, moduleName, filePath, fileclient, error, depth, subModules) {
+		if(!jsProject.hasNodeModules()) {
+			return _failedRead(response, moduleName, "No node_modules folder in project");
+		}
 		if (depth > 2) {
-			if (TRACE) console.log("Don't read '" + moduleName + "': too deep");
+			if (TRACE) { console.log("Don't read '" + moduleName + "': too deep"); }
 			return _failedRead(response, moduleName, "Too deep");
 		}
 		var index = filePath.lastIndexOf('/', filePath.length - 2);
@@ -335,7 +338,7 @@ define([
 		}
 		var parentFolder = filePath.substr(0, index + 1); // include the trailing / in the folder path
 		if (parentFolder === filePath) {
-			if (TRACE) console.log("Infinite loop reading '" + filePath);
+			if (TRACE) { console.log("Infinite loop reading '" + filePath); }
 			return _failedRead(response, moduleName, "Infinite loop");
 		}
 		var modulePath = parentFolder + "node_modules/" + moduleName;
@@ -363,35 +366,35 @@ define([
 		return fileclient.read(modulePath + "/package.json", false, false, {
 			readIfExists: true
 		}).then(function(json) {
-				if (json) {
-					var val = JSON.parse(json);
-					var mainPath = null;
-					var main = val.main;
-					if (main) {
-						if (!/(\.js)$/.test(main)) {
-							main += ".js";
-						}
-					} else {
-						main = "index.js";
+			if (json) {
+				var val = JSON.parse(json);
+				var mainPath = null;
+				var main = val.main;
+				if (main) {
+					if (!/(\.js)$/.test(main)) {
+						main += ".js";
 					}
-					mainPath = modulePath + "/" + main;
-					return fileclient.read(mainPath).then(function(contents) {
-							response.args.contents = contents;
-							response.args.file = mainPath;
-							response.args.path = main;
-							if (TRACE) console.log(mainPath);
-							ternWorker.postMessage(response);
-						},
-						function(err) {
-							_failedRead(response, "node_modules", err);
-						});
+				} else {
+					main = "index.js";
 				}
-				_nodeRead(response, moduleName, parentFolder, fileclient, "No contents", depth + 1, true);
-			},
-			function(err) {
-				// if it fails, try to parent folder
-				_nodeRead(response, moduleName, parentFolder, fileclient, err, depth + 1, true);
-			});
+				mainPath = modulePath + "/" + main;
+				return fileclient.read(mainPath).then(function(contents) {
+						response.args.contents = contents;
+						response.args.file = mainPath;
+						response.args.path = main;
+						if (TRACE) { console.log(mainPath); }
+						ternWorker.postMessage(response);
+					},
+					function(err) {
+						_failedRead(response, "node_modules", err);
+					});
+			}
+			_nodeRead(response, moduleName, parentFolder, fileclient, "No contents", depth + 1, true);
+		},
+		function(err) {
+			// if it fails, try to parent folder
+			_nodeRead(response, moduleName, parentFolder, fileclient, err, depth + 1, true);
+		});
 	}
 	/**
 	 * @since 12.0
@@ -1753,18 +1756,23 @@ define([
 	var ignore = 0,
 		warning = 1,
 		error = 2,
+		info = 3,
 		severities = [
 			{
-				label: javascriptMessages['ignore'],
-				value: ignore
+				label: javascriptMessages['error'],
+				value: error
 			},
 			{
 				label: javascriptMessages['warning'],
 				value: warning
 			},
 			{
-				label: javascriptMessages['error'],
-				value: error
+				label: javascriptMessages['info'],
+				value: info
+			},
+			{
+				label: javascriptMessages['ignore'],
+				value: ignore
 			}];
 
 	var doubleQuote = 'double';
@@ -1821,63 +1829,63 @@ define([
 					id: "no-cond-assign", //$NON-NLS-1$
 					name: javascriptMessages["noCondAssign"],
 					type: "number", //$NON-NLS-1$
-					defaultValue: error,
+					defaultValue: warning,
 					options: severities
 				},
 				{
 					id: "no-constant-condition", //$NON-NLS-1$
 					name: javascriptMessages["noConstantCondition"],
 					type: "number", //$NON-NLS-1$
-					defaultValue: error,
+					defaultValue: warning,
 					options: severities
 				},
 				{
 					id: "no-const-assign", //$NON-NLS-1$
 					name: javascriptMessages["noConstAssign"],
 					type: "number", //$NON-NLS-1$
-					defaultValue: error,
+					defaultValue: warning,
 					options: severities
 				},
 				{
 					id: "no-control-regex", //$NON-NLS-1$
 					name: javascriptMessages["no-control-regex"],
 					type: "number", //$NON-NLS-1$
-					defaultValue: error,
+					defaultValue: warning,
 					options: severities
 				},
 				{
 					id: "no-empty-character-class", //$NON-NLS-1$
 					name: javascriptMessages["no-empty-character-class"],
 					type: "number", //$NON-NLS-1$
-					defaultValue: error,
+					defaultValue: warning,
 					options: severities
 				},
 				{
 					id: "no-obj-calls", //$NON-NLS-1$
 					name: javascriptMessages["no-obj-calls"],
 					type: "number", //$NON-NLS-1$
-					defaultValue: error,
+					defaultValue: warning,
 					options: severities
 				},
 				{
 					id: "no-negated-in-lhs", //$NON-NLS-1$
 					name: javascriptMessages["no-negated-in-lhs"],
 					type: "number", //$NON-NLS-1$
-					defaultValue: error,
+					defaultValue: warning,
 					options: severities
 				},
 				{
 					id: "no-extra-boolean-cast", //$NON-NLS-1$
 					name: javascriptMessages["no-extra-boolean-cast"],
 					type: "number", //$NON-NLS-1$
-					defaultValue: error,
+					defaultValue: warning,
 					options: severities
 				},
 				{
 					id: "no-extra-parens", //$NON-NLS-1$
 					name: javascriptMessages["no-extra-parens"],
 					type: "number", //$NON-NLS-1$
-					defaultValue: warning,
+					defaultValue: info,
 					options: severities
 				},
 				{
@@ -1913,7 +1921,7 @@ define([
 					id: "no-debugger", //$NON-NLS-1$
 					name: javascriptMessages["noDebugger"],
 					type: "number", //$NON-NLS-1$
-					defaultValue: warning,
+					defaultValue: info,
 					options: severities
 				},
 				{
@@ -1934,28 +1942,28 @@ define([
 					id: "no-duplicate-case", //$NON-NLS-1$
 					name: javascriptMessages["no-duplicate-case"],
 					type: "number", //$NON-NLS-1$
-					defaultValue: error,
+					defaultValue: warning,
 					options: severities
 				},
 				{
 					id: "no-dupe-keys", //$NON-NLS-1$
 					name: javascriptMessages["noDupeKeys"],
 					type: "number", //$NON-NLS-1$
-					defaultValue: error,
+					defaultValue: warning,
 					options: severities
 				},
 				{
 					id: "valid-typeof", //$NON-NLS-1$
 					name: javascriptMessages["validTypeof"],
 					type: "number", //$NON-NLS-1$
-					defaultValue: error,
+					defaultValue: warning,
 					options: severities
 				},
 				{
 					id: "no-invalid-regexp", //$NON-NLS-1$
 					name: javascriptMessages["no-invalid-regexp"],
 					type: "number", //$NON-NLS-1$
-					defaultValue: error,
+					defaultValue: warning,
 					options: severities
 				},
 				{
@@ -1969,14 +1977,14 @@ define([
 					id: "no-regex-spaces", //$NON-NLS-1$
 					name: javascriptMessages["noRegexSpaces"],
 					type: "number", //$NON-NLS-1$
-					defaultValue: error,
+					defaultValue: warning,
 					options: severities
 				},
 				{
 					id: "use-isnan", //$NON-NLS-1$
 					name: javascriptMessages["useIsNaN"],
 					type: "number", //$NON-NLS-1$
-					defaultValue: error,
+					defaultValue: warning,
 					options: severities
 				},
 				{
@@ -1990,14 +1998,14 @@ define([
 					id: "no-sparse-arrays", //$NON-NLS-1$
 					name: javascriptMessages["noSparseArrays"],
 					type: "number", //$NON-NLS-1$
-					defaultValue: warning,
+					defaultValue: info,
 					options: severities
 				},
 				{
 					id: "no-fallthrough", //$NON-NLS-1$
 					name: javascriptMessages["noFallthrough"],
 					type: "number", //$NON-NLS-1$
-					defaultValue: error,
+					defaultValue: warning,
 					options: severities
 				},
 				{
@@ -2018,14 +2026,14 @@ define([
 					id: "no-extra-semi", //$NON-NLS-1$
 					name: javascriptMessages["unnecessarySemis"],
 					type: "number", //$NON-NLS-1$
-					defaultValue: warning,
+					defaultValue: info,
 					options: severities
 				},
 				{
 					id: "no-unreachable", //$NON-NLS-1$
 					name: javascriptMessages["noUnreachable"],
 					type: "number", //$NON-NLS-1$
-					defaultValue: error,
+					defaultValue: warning,
 					options: severities
 				},
 				{
@@ -2076,35 +2084,35 @@ define([
 					id: "no-eq-null", //$NON-NLS-1$
 					name: javascriptMessages["no-eq-null"],
 					type: "number", //$NON-NLS-1$
-					defaultValue: error,
+					defaultValue: warning,
 					options: severities
 				},
 				{
 					id: "no-self-assign", //$NON-NLS-1$
 					name: javascriptMessages["no-self-assign"],
 					type: "number", //$NON-NLS-1$
-					defaultValue: error,
+					defaultValue: warning,
 					options: severities
 				},
 				{
 					id: "no-self-compare", //$NON-NLS-1$
 					name: javascriptMessages["no-self-compare"],
 					type: "number", //$NON-NLS-1$
-					defaultValue: error,
+					defaultValue: warning,
 					options: severities
 				},
 				{
 					id: "eqeqeq", //$NON-NLS-1$
 					name: javascriptMessages["noEqeqeq"],
 					type: "number", //$NON-NLS-1$
-					defaultValue: warning,
+					defaultValue: info,
 					options: severities
 				},
 				{
 					id: "no-caller", //$NON-NLS-1$
 					name: javascriptMessages["noCaller"],
 					type: "number", //$NON-NLS-1$
-					defaultValue: error,
+					defaultValue: warning,
 					options: severities
 				},
 				{
@@ -2118,42 +2126,42 @@ define([
 					id: "no-new-array", //$NON-NLS-1$
 					name: javascriptMessages["noNewArray"],
 					type: "number", //$NON-NLS-1$
-					defaultValue: warning,
+					defaultValue: info,
 					options: severities
 				},
 				{
 					id: "no-new-func", //$NON-NLS-1$
 					name: javascriptMessages["noNewFunc"],
 					type: "number", //$NON-NLS-1$
-					defaultValue: warning,
+					defaultValue: info,
 					options: severities
 				},
 				{
 					id: "no-new-object", //$NON-NLS-1$
 					name: javascriptMessages["noNewObject"],
 					type: "number", //$NON-NLS-1$
-					defaultValue: warning,
+					defaultValue: info,
 					options: severities
 				},
 				{
 					id: "no-with", //$NON-NLS-1$
 					name: javascriptMessages["noWith"],
 					type: "number", //$NON-NLS-1$
-					defaultValue: warning,
+					defaultValue: info,
 					options: severities
 				},
 				{
 					id: "no-iterator", //$NON-NLS-1$
 					name: javascriptMessages["noIterator"],
 					type: "number", //$NON-NLS-1$
-					defaultValue: error,
+					defaultValue: warning,
 					options: severities
 				},
 				{
 					id: "no-proto", //$NON-NLS-1$
 					name: javascriptMessages["noProto"],
 					type: "number", //$NON-NLS-1$
-					defaultValue: error,
+					defaultValue: warning,
 					options: severities
 				},
 				{
@@ -2167,27 +2175,27 @@ define([
 					id: "no-new-wrappers", //$NON-NLS-1$
 					name: javascriptMessages["noNewWrappers"],
 					type: "number", //$NON-NLS-1$
-					defaultValue: warning,
+					defaultValue: info,
 					options: severities
 				},
 				{
 					id: "no-undef-init", //$NON-NLS-1$
 					name: javascriptMessages["noUndefInit"],
 					type: "number", //$NON-NLS-1$
-					defaultValue: warning,
+					defaultValue: info,
 					options: severities
 				},
 				{
 					id: "accessor-pairs", //$NON-NLS-1$
 					name: javascriptMessages["accessor-pairs"],
 					type: "number", //$NON-NLS-1$
-					defaultValue: warning,
+					defaultValue: info,
 					options: severities
 				},
 				{
 					id: "no-shadow-global", //$NON-NLS-1$
 					name: javascriptMessages["noShadowGlobals"],
-					defaultValue: warning,
+					defaultValue: info,
 					type: "number", //$NON-NLS-1$
 					options: severities
 				},
@@ -2195,42 +2203,42 @@ define([
 					id: "no-throw-literal", //$NON-NLS-1$
 					name: javascriptMessages["noThrowLiteral"],
 					type: "number", //$NON-NLS-1$
-					defaultValue: warning,
+					defaultValue: info,
 					options: severities
 				},
 				{
 					id: "no-use-before-define", //$NON-NLS-1$
 					name: javascriptMessages["useBeforeDefine"],
 					type: "number", //$NON-NLS-1$
-					defaultValue: warning,
+					defaultValue: info,
 					options: severities
 				},
 				{
 					id: "check-tern-plugin", //$NON-NLS-1$
 					name: javascriptMessages["check-tern-plugin"],
 					type: "number", //$NON-NLS-1$
-					defaultValue: warning,
+					defaultValue: info,
 					options: severities
 				},
 				{
 					id: "radix", //$NON-NLS-1$
 					name: javascriptMessages['radix'],
 					type: 'number', //$NON-NLS-1$
-					defaultValue: warning,
+					defaultValue: info,
 					options: severities
 				},
 				{
 					id: "no-empty-label", //$NON-NLS-1$
 					name: javascriptMessages["no-empty-label"],
 					type: "number", //$NON-NLS-1$
-					defaultValue: error,
+					defaultValue: warning,
 					options: severities
 				},
 				{
 					id: "missing-requirejs", //$NON-NLS-1$
 					name: javascriptMessages["missingRequirejs"],
 					type: "number", //$NON-NLS-1$
-					defaultValue: warning,
+					defaultValue: info,
 					options: severities
 				},
 				{
@@ -2244,56 +2252,56 @@ define([
 					id: "no-undef-expression", //$NON-NLS-1$
 					name: javascriptMessages["undefExpression"],
 					type: "number", //$NON-NLS-1$
-					defaultValue: warning,
+					defaultValue: info,
 					options: severities
 				},
 				{
 					id: "no-undef", //$NON-NLS-1$
 					name: javascriptMessages["undefMember"],
 					type: "number", //$NON-NLS-1$
-					defaultValue: error,
+					defaultValue: warning,
 					options: severities
 				},
 				{
 					id: "unknown-require", //$NON-NLS-1$
 					name: javascriptMessages["unknownRequire"],
 					type: "number", //$NON-NLS-1$
-					defaultValue: warning,
+					defaultValue: info,
 					options: severities
 				},
 				{
 					id: "no-else-return", //$NON-NLS-1$
 					name: javascriptMessages["no-else-return"],
 					type: "number", //$NON-NLS-1$
-					defaultValue: warning,
+					defaultValue: info,
 					options: severities
 				},
 				{
 					id: "no-unused-params", //$NON-NLS-1$
 					name: javascriptMessages["unusedParams"],
 					type: "number", //$NON-NLS-1$
-					defaultValue: warning,
+					defaultValue: info,
 					options: severities
 				},
 				{
 					id: "no-unused-vars", //$NON-NLS-1$
 					name: javascriptMessages["unusedVars"],
 					type: "number", //$NON-NLS-1$
-					defaultValue: warning,
+					defaultValue: info,
 					options: severities
 				},
 				{
 					id: "no-redeclare", //$NON-NLS-1$
 					name: javascriptMessages['varRedecl'],
 					type: 'number', //$NON-NLS-1$
-					defaultValue: warning,
+					defaultValue: info,
 					options: severities
 				},
 				{
 					id: "no-shadow", //$NON-NLS-1$
 					name: javascriptMessages["varShadow"],
 					type: "number", //$NON-NLS-1$
-					defaultValue: warning,
+					defaultValue: info,
 					options: severities
 				},
 				{
@@ -2307,14 +2315,14 @@ define([
 					id: "no-extra-bind", //$NON-NLS-1$
 					name: javascriptMessages["no-extra-bind"],
 					type: "number", //$NON-NLS-1$
-					defaultValue: warning,
+					defaultValue: info,
 					options: severities
 				},
 				{
 					id: "no-implicit-coercion", //$NON-NLS-1$
 					name: javascriptMessages["no-implicit-coercion"],
 					type: "number", //$NON-NLS-1$
-					defaultValue: warning,
+					defaultValue: info,
 					options: severities
 				},
 				{
@@ -2322,27 +2330,27 @@ define([
 					dependsOn: "no-implicit-coercion",
 					name: javascriptMessages["no-implicit-coercion-boolean"],
 					type: "boolean", //$NON-NLS-1$
-					defaultValue: true,
+					defaultValue: true
 				},
 				{
 					id: "no-implicit-coercion:number", //$NON-NLS-1$
 					dependsOn: "no-implicit-coercion",
 					name: javascriptMessages["no-implicit-coercion-number"],
 					type: "boolean", //$NON-NLS-1$
-					defaultValue: true,
+					defaultValue: true
 				},
 				{
 					id: "no-implicit-coercion:string", //$NON-NLS-1$
 					dependsOn: "no-implicit-coercion",
 					name: javascriptMessages["no-implicit-coercion-string"],
 					type: "boolean", //$NON-NLS-1$
-					defaultValue: true,
+					defaultValue: true
 				},
 				{
 					id: "no-extend-native", //$NON-NLS-1$
 					name: javascriptMessages["no-extend-native"],
 					type: "number", //$NON-NLS-1$
-					defaultValue: error,
+					defaultValue: warning,
 					options: severities
 				},
 				{
@@ -2392,7 +2400,7 @@ define([
 					id: "no-param-reassign", //$NON-NLS-1$
 					name: javascriptMessages["no-param-reassign"],
 					type: "number", //$NON-NLS-1$
-					defaultValue: warning,
+					defaultValue: info,
 					options: severities
 				},
 				{
@@ -2406,7 +2414,7 @@ define([
 					id: "no-native-reassign", //$NON-NLS-1$
 					name: javascriptMessages["no-native-reassign"],
 					type: "number", //$NON-NLS-1$
-					defaultValue: error,
+					defaultValue: warning,
 					options: severities
 				},
 				{
@@ -2441,7 +2449,7 @@ define([
 					id: "no-invalid-this", //$NON-NLS-1$
 					name: javascriptMessages["no-invalid-this"],
 					type: "number", //$NON-NLS-1$
-					defaultValue: warning,
+					defaultValue: info,
 					options: severities
 				}, ]
 			},
@@ -2463,14 +2471,14 @@ define([
 					id: "new-parens", //$NON-NLS-1$
 					name: javascriptMessages["newParens"],
 					type: "number", //$NON-NLS-1$
-					defaultValue: error,
+					defaultValue: warning,
 					options: severities
 				},
 				{
 					id: "semi", //$NON-NLS-1$
 					name: javascriptMessages["missingSemi"],
 					type: "number", //$NON-NLS-1$
-					defaultValue: warning,
+					defaultValue: info,
 					options: severities
 				},
 				{
@@ -2513,7 +2521,7 @@ define([
 					id: "no-jslint", //$NON-NLS-1$
 					name: javascriptMessages["unsupportedJSLint"],
 					type: "number", //$NON-NLS-1$
-					defaultValue: warning,
+					defaultValue: info,
 					options: severities
 				},
 				{

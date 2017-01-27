@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2016 IBM Corporation and others.
+ * Copyright (c) 2016, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License v1.0
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution
@@ -14,7 +14,7 @@ define([
 	"orion/Deferred",
 	"js-yaml/js-yaml"
 ], function(Deferred, JsYaml) {
-	
+
 	var eslintHandler = {
 		_update: function _update(project, fileName) {
 			if(fileName === project.ESLINTRC
@@ -61,14 +61,14 @@ define([
 			delete project.map.formatting;
 		}
 	};
-	
+
 	var initialized = false;
-	
+
 	/**
 	 * @description Creates a new JavaScript project
 	 * @constructor
 	 * @public
-	 * @param {ServiceRegistry} serviceRegistry The service registry 
+	 * @param {ServiceRegistry} serviceRegistry The service registry
 	 * @since 12.0
 	 */
 	function JavaScriptProject(serviceRegistry) {
@@ -132,12 +132,12 @@ define([
 	/**
 	 * @description Adds a handler for the given file name to the mapping of handlers
 	 * @function
-	 * @param {Object} functions The object map of functions 
+	 * @param {Object} functions The object map of functions
 	 */
 	JavaScriptProject.prototype.addHandler = function addHandler(functions) {
 		this.handlers.push(functions);
 	};
-	
+
 	/**
 	 * @description Returns the current project path
 	 * @function
@@ -149,7 +149,7 @@ define([
 		}
 		return null;
 	};
-	
+
 	/**
 	 * @description Returns the current ECMA version being used in the project, or the default of 6
 	 * @function
@@ -174,7 +174,7 @@ define([
 			return this.ecma;
 		}.bind(this));
 	};
-	
+
 	/**
 	 * @description Fetch the named child of the current project context
 	 * @function
@@ -197,7 +197,7 @@ define([
 			return null;
 		});
 	};
-	
+
 	JavaScriptProject.prototype.initFrom = function initFrom(path) {
 		if(!initialized) {
 			initialized = true;
@@ -209,10 +209,10 @@ define([
 		}
 		return new Deferred().resolve();
 	};
-	
+
 	/**
 	 * @description Update the contents of the given file name, and optionally create the file if it does not exist.
-	 * NOTE: this function does not check for existig values or duplicate entries, those checks must be done prior to calling 
+	 * NOTE: this function does not check for existig values or duplicate entries, those checks must be done prior to calling
 	 * this function with the JSON values to merge
 	 * @function
 	 * @param {String} childName The short name of the project child to get
@@ -242,11 +242,11 @@ define([
 							return this.getFileClient().write(file.Location, JSON.stringify(values, null, '\t'));
 						}.bind(this));
 					}
-				} 
+				}
 			}.bind(this));
 		}
 	};
-	
+
 	/**
 	 * @description Get the defaults used when creating a new tracked file
 	 * @private
@@ -268,7 +268,7 @@ define([
 				return null;
 		}
 	}
-	
+
 	function _merge(source, dest) {
 		Object.keys(source).forEach(function(key) {
 			if(Array.isArray(dest[key]) && Array.isArray(source[key])) {
@@ -281,7 +281,7 @@ define([
 			}
 		});
 	}
-	
+
 	/**
 	 * @name JavaScriptProject.prototype.getFileClient
 	 * @description Returns the file client to use
@@ -294,7 +294,7 @@ define([
 		}
 		return this.fileClient;
 	};
-	
+
 	/**
 	 * @name JavaScriptProject.prototype.getESlintOptions
 	 * @description Returns project-specific eslint options (if any)
@@ -348,7 +348,7 @@ define([
 			}.bind(this));
 		}.bind(this));
 	};
-	
+
 	/**
 	 * @name JavaScriptProject.prototype.getFormattingOptions
 	 * @description Returns project-specific formatting options (if any)
@@ -391,7 +391,18 @@ define([
 		}
 		return null;
 	}
-	
+
+	/**
+	 * @name JavaScriptProject.prototype.hasNodeModules
+	 * @description Returns if the current project context has a node_modules folder in it or not
+	 * @function
+	 * @returns {bool} If the project context has a node_modules folder
+	 * @since 14.0
+	 */
+	JavaScriptProject.prototype.hasNodeModules = function hasNodeModules() {
+		return Boolean(this._node_modules);
+	};
+
 	/**
 	 * Callback from the orion.edit.model service
 	 * @param {Object} evnt An <tt>orion.edit.model</tt> event.
@@ -416,9 +427,17 @@ define([
 				this.projectMeta = project;
 				delete this.ecma;
 				delete this.map[this.TERN_PROJECT];
-				_handle.call(this, "onProjectChanged", this, evnt, project.Location);
-				return;
-			} 
+				delete this._node_modules;
+				return this.getFile(this.NODE_MODULES).then(function(file) {
+						if(file && typeof file.contents === "string") {
+							this._node_modules = true;
+						}
+						_handle.call(this, "onProjectChanged", this, evnt, project.Location);
+					}.bind(this),
+					/* @callback */ function(err) {
+						_handle.call(this, "onProjectChanged", this, evnt, project.Location);
+					}.bind(this));
+			}
 			_handle.call(this, "onInputChanged", this, evnt, project.Location);
 		} else {
 			delete this.ecma;
@@ -440,7 +459,7 @@ define([
 	/**
 	 * Update the backing map
 	 * @param {Array.<String>} arr The array to walk
-	 * @param {String} state The state, one of: onModified, onDeleted, onCreated 
+	 * @param {String} state The state, one of: onModified, onDeleted, onCreated
 	 */
 	function _updateMap(arr, state) {
 		if(Array.isArray(arr)) {
@@ -450,11 +469,17 @@ define([
 					case 'onCreated': {
 						n = file.result ? file.result.Name : undefined;
 						f = file.result ? file.result.Location : undefined;
+						if(n === this.NODE_MODULES && Boolean(file.result.Directory)) {
+							this._node_modules = true;
+						}
 						break;
 					}
 					case 'onDeleted': {
 						f = file.deleteLocation;
 						n = _shortName(file.deleteLocation);
+						if(f.lastIndexOf(this.NODE_MODULES)+this.NODE_MODULES.length-1 === f.length-2) {
+							delete this._node_modules;
+						}
 						break;
 					}
 					case 'onModified': {
@@ -467,6 +492,12 @@ define([
 						toN = file.result ? file.result.Name : undefined;
 						n = _shortName(file.source);
 						f = file.source;
+						if(f.lastIndexOf(this.NODE_MODULES) + this.NODE_MODULES.length-1 === f.length-2) {
+							delete this._node_modules;
+						}
+						if(file.result && file.result.Name === this.NODE_MODULES && Boolean(file.result.Directory)) {
+							this._node_modules = true;
+						}
 						break;
 					}
 				}
@@ -487,7 +518,7 @@ define([
 		}
 		return fileName;
 	}
-	
+
 	/**
 	 * @description Delegates to a handler for the given handler name (file type), with the given function name
 	 * @param {String} funcName The name of the function to call on the handler iff it exists
@@ -503,6 +534,6 @@ define([
 			});
 		}
 	}
-	
+
 	return JavaScriptProject;
 });

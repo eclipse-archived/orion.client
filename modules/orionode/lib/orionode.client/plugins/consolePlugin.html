@@ -3,14 +3,15 @@
 	<head>
 		<meta charset="UTF-8" />
 		<title>Console Plugin</title>
+		<script src="../../orion/requireErrorHandler.js"></script>
 		<script src="../../requirejs/require.js"></script>
 		<script>
 			/*eslint-env browser, amd*/
 			require(["../orion/require-config.js"], function(config){
 				require(["plugins/consolePlugin"], function(plugin){
 					plugin.connect();
-				}, config.errback);
-			});
+				}, self.errback);
+			}, self.errback);
 		</script>
 	</head>
 	<body>

@@ -416,7 +416,7 @@ define([
 							assertProblems(problems, [
 								{start: 20,
 								 end: 22,
-								 severity: 'warning',
+								 severity: 'info',
 								 description: i18nUtil.formatMessage.call(null, messages['no-use-before-define'], {0: 'xx', nls: 'no-use-before-define'})
 								}
 							]);
@@ -438,12 +438,12 @@ define([
 							assertProblems(problems, [
 								{start: 24,
 								 end: 26,
-								 severity: 'warning',
+								 severity: 'info',
 								 description: i18nUtil.formatMessage.call(null, messages['no-unused-vars-unused'], {0: 'xx', nls: 'no-unused-vars-unused'})
 								},
 								{start: 72,
 								 end: 74,
-								 severity: 'warning',
+								 severity: 'info',
 								 description: i18nUtil.formatMessage.call(null, messages['no-unused-vars-unused'], {0: 'yy', nls: 'no-unused-vars-unused'})
 								}
 							]);
@@ -465,12 +465,12 @@ define([
 							assertProblems(problems, [
 								{start: 54,
 								 end: 56,
-								 severity: 'error',
+								 severity: 'warning',
 								 description: i18nUtil.formatMessage.call(null, messages['no-undef-defined'], {0: 'xx'})
 								},
 								{start: 57,
 								 end: 58,
-								 severity: 'warning',
+								 severity: 'info',
 								 description: i18nUtil.formatMessage.call(null, messages['no-extra-semi'], {})
 								}
 							]);

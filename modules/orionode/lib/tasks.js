@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012, 2016 IBM Corporation and others.
+ * Copyright (c) 2012, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -16,9 +16,11 @@ var crypto = require('crypto');
 var writeError = api.writeError;
 
 var taskList = {};
+var taskContextPath = "/task";
 
 function orionTasksAPI(options) {
 	var root = options.root;
+	taskContextPath = root;
 	if (!root) { throw new Error('options.root path required'); }
 
 	return express.Router()
@@ -28,13 +30,14 @@ function orionTasksAPI(options) {
 		next();
 	})
 	.get('/id/:id', function(req, res/*, next*/) {
-		if (!checkAccess(req)) return writeError(404, res);
+		if (!checkAccess(req.id, req)) return writeError(404, res);
 		var id = req.id;
 		res.json(taskList[id].toJSON(true));
 	})
+	.delete('', deleteAllOperations)
 	.delete('/id/:id', deleteOperation)
 	.get('/temp/:id', function(req, res/*, next*/) {
-		if (!checkAccess(req)) return writeError(404, res);
+		if (!checkAccess(req.id, req)) return writeError(404, res);
 		var id = req.id;
 		res.json(taskList[id].toJSON(false));
 	})
@@ -135,31 +138,52 @@ Task.prototype = {
 		
 		if(this.keep && isWriteLocation){
 			// Do not set location so that tasks is deleted
-			result.Location = "/task/id/" + this.id;
+			result.Location = taskContextPath + "/id/" + this.id;
 		}else if(isWriteLocation){
-			result.Location = "/task/temp/" + this.id;
+			result.Location = taskContextPath + "/temp/" + this.id;
 		}
 		
 		return result;
 	}
 };
 
-function checkAccess(req) {
+function checkAccess(taskId, req) {
 	// check that the task exists and that the user id of the request
 	// matches the user id of the task originator, even if the id is
 	// correct, if the user ids don't match, then we want to disallow
 	// access to the task
-	return taskList[req.id] && taskList[req.id].username === req.user.username;
+	return taskList[taskId] && taskList[taskId].username === req.user.username;
 }
 
 function deleteOperation(req, res/*, next*/){
 	var id = req.id;
-	if (checkAccess(req)) {
+	if (checkAccess(id, req)) {
 		delete taskList[id];
 		res.status(200).json({});
 	} else {
 		writeError(404, res, "Task does not exist: " + id);
 	}
+}
+
+/**
+ * Deletes all completed operations that the user sending the request had created.
+ */
+function deleteAllOperations(req, res) {
+	var locations = [];
+	// iterate all the tasks
+	Object.keys(taskList).forEach(function(id) {
+		if (checkAccess(id, req)) {
+			if (taskList[id].result) {
+				// if the task is finished, delete it
+				delete taskList[id];
+			} else {
+				// otherwise store its location
+				locations.push(taskList[id].toJSON(true).Location);
+			}
+		}
+	});
+	// respond back to the user with the locations of all incomplete tasks
+	res.status(200).json(locations);
 }
 
 module.exports = {

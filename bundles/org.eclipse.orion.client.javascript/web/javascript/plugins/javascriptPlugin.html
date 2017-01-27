@@ -3,6 +3,7 @@
 <head>
 	<meta charset="UTF-8">
 	<title>Orion JavaScript Support</title>
+	<script src="../../orion/requireErrorHandler.js"></script>
 	<script src="../../requirejs/require.js"></script>
 	<script>
 		/*eslint-env browser, amd*/	
@@ -11,8 +12,8 @@
 			require.config({
 				baseUrl: "../../"
 			});
-			require(["javascript/plugins/javascriptPlugin"], null, config.errback);
-		});
+			require(["javascript/plugins/javascriptPlugin"], null, self.errback);
+		}, self.errback);
 	</script>
 </head>
 <body>
