@@ -635,7 +635,7 @@ objects.mixin(EditorSetup.prototype, {
 					if (util.isElectron || !displayRunBar) {
 						lib.node("runBarWrapper").style.display = "none";
 					}
-				});
+				}.bind(this));
 			}
 		}.bind(this));
 	},
