@@ -772,6 +772,9 @@ define("orion/editor/textStyler", ['orion/editor/annotations', 'orion/editor/eve
 		this._unnamedCounter = 0;
 		this._patterns = [];
 		this._firstLineMatches = {};
+		if (!Array.isArray(rootIds)) {
+			rootIds = [rootIds];
+		}
 		this._rootIds = rootIds;
 		grammars.forEach(function(grammar) {
 			this._addRepositoryPatterns(grammar.repository || {}, grammar.id);
