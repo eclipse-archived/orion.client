@@ -211,7 +211,8 @@ define([
         	'mongodb': 'mongodb',
         	'mongo': 'mongodb', //ESlint provides mongo - map it to Tern
         	'mysql': 'mysql', 
-        	'node': 'node', 
+        	'node': 'node',
+        	'commonjs': 'commonjs',
         	'pg': 'postgres', 
         	'redis': 'redis', 
         	'amd': 'requirejs'

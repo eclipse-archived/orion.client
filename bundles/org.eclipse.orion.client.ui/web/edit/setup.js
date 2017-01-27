@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2010, 2013 IBM Corporation and others.
+ * Copyright (c) 2010, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License v1.0
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution
@@ -8,6 +8,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Casey Flynn - Google Inc.
  *******************************************************************************/
 /*eslint-env browser, amd*/
 
@@ -50,13 +51,14 @@ define([
 	'orion/webui/splitter',
 	'orion/webui/tooltip',
 	'orion/bidiUtils',
-	'orion/customGlobalCommands'
+	'orion/customGlobalCommands',
+	'orion/generalPreferences'
 ], function(
 	messages, Sidebar, mInputManager, mCommands, mGlobalCommands,
 	mTextModelFactory, mUndoStack,
 	mFolderView, mEditorView, mPluginEditorView , mMarkdownView, mMarkdownEditor,
 	mCommandRegistry, mContentTypes, mFileClient, mFileCommands, mEditorCommands, mSelection, mStatus, mProgress, mOperationsClient, mOutliner, mDialogs, mExtensionCommands, ProjectCommands, mSearchClient,
-	EventTarget, URITemplate, i18nUtil, PageUtil, util, objects, lib, Deferred, mProjectClient, mSplitter, mTooltip, bidiUtils, mCustomGlobalCommands
+	EventTarget, URITemplate, i18nUtil, PageUtil, util, objects, lib, Deferred, mProjectClient, mSplitter, mTooltip, bidiUtils, mCustomGlobalCommands, mGeneralPrefs
 ) {
 
 var exports = {};
@@ -74,6 +76,8 @@ function MenuBar(options) {
 	this.parentNode = options.parentNode;
 	this.commandRegistry = options.commandRegistry;
 	this.serviceRegistry = options.serviceRegistry;
+	this.preferences = options.preferences;
+	this.generalPreferences = new mGeneralPrefs.GeneralPreferences(this.preferences);
 	this.fileClient = options.fileClient;
 	this.editorCommands = options.editorCommands;
 	this.parentNode = options.parentNode;
@@ -125,21 +129,26 @@ objects.mixin(MenuBar.prototype, {
 		var commandRegistry = this.commandRegistry;
 		var fileClient = this.fileClient;
 		var editorCommands = this.editorCommands;
+		var generalPreferenes = this.generalPreferences;
 		return editorCommands.createCommands().then(function() {
 			editorCommands.registerCommands();
 			editorCommands.registerContextMenuCommands();
-			return mFileCommands.createFileCommands(serviceRegistry, commandRegistry, fileClient).then(function() {
-				return mExtensionCommands.createFileCommands(serviceRegistry, null, "all", true, commandRegistry).then(function() { //$NON-NLS-0$
-					var projectClient = serviceRegistry.getService("orion.project.client"); //$NON-NLS-0$
-					return projectClient.getProjectHandlerTypes().then(function(dependencyTypes){
-						return projectClient.getProjectDeployTypes().then(function(deployTypes){
-							return ProjectCommands.createProjectCommands(serviceRegistry, commandRegistry, fileClient, projectClient, dependencyTypes, deployTypes);
-						}, function(){
-							return ProjectCommands.createProjectCommands(serviceRegistry, commandRegistry, fileClient, projectClient, dependencyTypes);
+			//get the editor prefs.
+			return generalPreferenes.getPrefs().then(function(generalPreferences) {
+				return mFileCommands.createFileCommands(serviceRegistry, commandRegistry, fileClient, generalPreferences).then(function() {
+					return mExtensionCommands.createFileCommands(serviceRegistry, null, "all", true, commandRegistry).then(function() { //$NON-NLS-0$
+						var projectClient = serviceRegistry.getService("orion.project.client"); //$NON-NLS-0$
+						return projectClient.getProjectHandlerTypes().then(function(dependencyTypes){
+							return projectClient.getProjectDeployTypes().then(function(deployTypes){
+								return ProjectCommands.createProjectCommands(serviceRegistry, commandRegistry, fileClient, projectClient, dependencyTypes, deployTypes);
+							}, function(){
+								return ProjectCommands.createProjectCommands(serviceRegistry, commandRegistry, fileClient, projectClient, dependencyTypes);
+							});
 						});
 					});
 				});
 			});
+
 		});
 	},
 	setActiveExplorer: function(explorer) {
@@ -596,7 +605,8 @@ objects.mixin(EditorSetup.prototype, {
 			fileClient: this.fileClient,
 			editorCommands: this.editorCommands,
 			commandRegistry: this.commandRegistry,
-			serviceRegistry: this.serviceRegistry
+			serviceRegistry: this.serviceRegistry,
+			preferences: this.preferences
 		});
 		return menuBar.createCommands();
 	},

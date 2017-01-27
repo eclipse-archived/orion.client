@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2011, 2014 IBM Corporation and others.
+ * Copyright (c) 2011, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -8,6 +8,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Casey Flynn - Google Inc.
  *******************************************************************************/
 /*eslint-env browser, amd*/
 /*global confirm*/
@@ -370,13 +371,16 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/i18n
 	 * @param {orion.commandregistry.CommandRegistry} commandRegistry The command registry to get commands from
 	 * describing model changes that are performed by file commands.
 	 * @param {orion.fileClient.FileClient} fileClient The file system client that the commands should use
+	 * @param {object} prefs GeneralPreferences
 	 * @name orion.fileCommands#createFileCommands
 	 * @function
 	 */
-	fileCommandUtils.createFileCommands = function(serviceRegistry, commandService, fileClient) {
+	fileCommandUtils.createFileCommands = function(serviceRegistry, commandService, fileClient, prefs) {
 		progressService = serviceRegistry.getService("orion.page.progress"); //$NON-NLS-0$
+		
 		var dispatchModelEvent = dispatchModelEventOn.bind(null);
-
+		var generalPrefs = prefs;
+		
 		function contains(arr, item) {
 			return arr.indexOf(item) !== -1;
 		}
@@ -908,6 +912,21 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/i18n
 					errorHandler);	
 			}
 		}		
+
+		function getGeneralPreferenceValue(key, defaultValue) {
+			if (generalPrefs) {
+				return generalPrefs.hasOwnProperty(key) ? generalPrefs[key] : defaultValue;
+			}
+			return defaultValue;
+		}
+
+		var isFileCreationAtRootEnabled = function() {
+			return getGeneralPreferenceValue("enableFileCreationAtRoot", false);
+		}
+
+		var isFolderCreationAtRootEnabled = function() {
+			var createAtRoot = getGeneralPreferenceValue("enableFolderCreationAtRoot", false);
+		}
 		
 		/**
 		 * Creates a new file or folder as a child of the specified parentItem.
@@ -916,9 +935,10 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/i18n
 			var createFunction = function(name) {
 				if (name) {
 					var location = parentItem.Location;
-					if(location === "/workspace/orionode" && util.isElectron && !isDirectory ){
-						// Special case for electron only to create files at workspace level.
-						location = "/file";
+					if (location === "/workspace/orionode") {
+						if ((util.isElectron && !isDirectory ) || isFileCreationAtRootEnabled()){
+							location = "/file";
+						}
 					}
 					var functionName = isDirectory ? "createFolder" : "createFile";
 					var deferred = fileClient[functionName](location, name, {select: true});
@@ -970,7 +990,7 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/i18n
 				createNewArtifact(messages["New File"], item, false);
 			},
 			visibleWhen: function(item) {
-				return checkFolderSelection(item) || util.isElectron;
+				return isFileCreationAtRootEnabled() || checkFolderSelection(item) || util.isElectron;
 			}
 		});
 		commandService.addCommand(newFileCommand);
@@ -985,7 +1005,7 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/i18n
 				createNewArtifact(messages["New Folder"], item, true);
 			},
 			visibleWhen: function(item) {
-				return checkFolderSelection(item) && !mFileUtils.isAtRoot(item.Location);
+				return isFolderCreationAtRootEnabled() || (checkFolderSelection(item) && !mFileUtils.isAtRoot(item.Location));
 			}
 		});
 		commandService.addCommand(newFolderCommand);
@@ -1035,7 +1055,9 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/i18n
 					});
 				} 
 			},
-			visibleWhen: canCreateProject
+			visibleWhen: function(item) {
+				return canCreateProject(item) && !isFolderCreationAtRootEnabled();
+			}
 		});
 		commandService.addCommand(newProjectCommand);
 		
@@ -1060,9 +1082,13 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/i18n
 					errorHandler(messages["NameLocationNotClear"]);
 				}
 			},
-			visibleWhen: canCreateProject
+			visibleWhen: function(item) {
+				var createLinkProjectEnabled = getGeneralPreferenceValue("enableLinkProjectCreation", true);
+				return canCreateProject(item) && createLinkProjectEnabled;
+			}
 		});
 		commandService.addCommand(linkProjectCommand);
+
 		
 		var goUpCommand = new mCommands.Command({
 			name: messages["Go Up"],

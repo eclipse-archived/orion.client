@@ -215,6 +215,20 @@ define([
 		return prob;
 	}
 
+	/**
+	 * @name configureCoreRules
+	 * @description Ensures that core linting rules are not left out because of an eslintrc file being used
+	 * @param {?} cfg The configuration map from the eslintrc file
+	 * @since 14.0
+	 */
+	function configureCoreRules(cfg) {
+		if(cfg && cfg.rules) {
+			cfg.rules["unknown-require"] = config.rules["unknown-require"];
+			cfg.rules["check-tern-plugin"] = config.rules["check-tern-plugin"];
+			cfg.rules["missing-requirejs"] = config.rules["missing-requirejs"];
+		}
+	}
+
 	Objects.mixin(ESLintValidator.prototype, {
 		/**
 		 * @description Callback from SyntaxChecker API to perform any load-time initialization
@@ -252,6 +266,7 @@ define([
 									env[key] = cfg.env[key];
 								});
 							}
+							configureCoreRules(cfg);
 							this._validate(meta, text, env, deferred, cfg);
 						}.bind(this));
 					} else {
