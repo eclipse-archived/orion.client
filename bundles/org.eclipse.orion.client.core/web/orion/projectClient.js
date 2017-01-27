@@ -570,7 +570,7 @@ define([
 	getProjectLaunchConfigurations: function(projectMetadata){
 		var deferred = new Deferred();
 
-		this.getLaunchConfigurationsDir(projectMetadata).then(function(launchConfMeta){
+		this.getLaunchConfigurationsDir(projectMetadata).then(function func(launchConfMeta){
 			if(!launchConfMeta){
 				deferred.resolve([]);
 				return deferred;
@@ -645,10 +645,9 @@ define([
 					deferred.resolve(result);
 				}, deferred.reject);
 			} else {
-				var func = arguments.callee.bind(this);
 				this.fileClient.fetchChildren(launchConfMeta.ChildrenLocation).then(function(children){
 					launchConfMeta.Children = children;
-					func(launchConfMeta);
+					func.bind(this)(launchConfMeta);
 				}.bind(this), deferred.reject);
 			}
 		}.bind(this), deferred.reject);
@@ -723,14 +722,13 @@ define([
 			return deferred;
 		}
 
-		this.getLaunchConfigurationsDir(projectMetadata, true).then(function(_launchConfDir){
+		this.getLaunchConfigurationsDir(projectMetadata, true).then(function func(_launchConfDir){
 			if(_launchConfDir.Children){
 				deferred.resolve(_launchConfDir);
 			} else {
-				var func = arguments.callee.bind(this);
 				this.fileClient.fetchChildren(_launchConfDir.ChildrenLocation).then(function(children){
 					_launchConfDir.Children = children;
-					func(_launchConfDir);
+					func.bind(this)(_launchConfDir);
 				}.bind(this), deferred.reject);
 			}
 		}.bind(this));
