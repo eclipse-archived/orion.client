@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2010, 2014 IBM Corporation and others.
+ * Copyright (c) 2010, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License v1.0
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution
@@ -153,6 +153,11 @@ define("orion/editor/annotations", ['i18n!orion/editor/nls/messages', 'orion/edi
 	 */
 	AnnotationType.ANNOTATION_WARNING = "orion.annotation.warning"; //$NON-NLS-0$
 	/**
+	 * Info annotation type.
+	 * @since 14.0
+	 */
+	AnnotationType.ANNOTATION_INFO = "orion.annotation.info"; //$NON-NLS-0$
+	/**
 	 * Task annotation type.
 	 */
 	AnnotationType.ANNOTATION_TASK = "orion.annotation.task"; //$NON-NLS-0$
@@ -300,6 +305,7 @@ define("orion/editor/annotations", ['i18n!orion/editor/nls/messages', 'orion/edi
 	}
 	registerType(AnnotationType.ANNOTATION_ERROR);
 	registerType(AnnotationType.ANNOTATION_WARNING);
+	registerType(AnnotationType.ANNOTATION_INFO);
 	registerType(AnnotationType.ANNOTATION_TASK);
 	registerType(AnnotationType.ANNOTATION_BREAKPOINT);
 	registerType(AnnotationType.ANNOTATION_BOOKMARK);

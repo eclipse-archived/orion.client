@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2010, 2012 IBM Corporation and others.
+ * Copyright (c) 2010, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -19,6 +19,7 @@ define({//Default message bundle
 	"task": "Task", //$NON-NLS-1$ //$NON-NLS-0$
 	"error": "Error", //$NON-NLS-1$ //$NON-NLS-0$
 	"warning": "Warning", //$NON-NLS-1$ //$NON-NLS-0$
+	"info": "Info", //$NON-NLS-1$ //$NON-NLS-0$
 	"currentSearch": "Current Search", //$NON-NLS-1$ //$NON-NLS-0$
 	"currentLine": "Current Line", //$NON-NLS-1$ //$NON-NLS-0$
 	"matchingBracket": "Matching Bracket", //$NON-NLS-1$ //$NON-NLS-0$

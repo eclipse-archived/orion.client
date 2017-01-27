@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2009, 2015 IBM Corporation and others.
+ * Copyright (c) 2009, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License v1.0
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution
@@ -1001,6 +1001,7 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 						styler.addAnnotationType(AT.ANNOTATION_MATCHING_SEARCH);
 						styler.addAnnotationType(AT.ANNOTATION_ERROR);
 						styler.addAnnotationType(AT.ANNOTATION_WARNING);
+						styler.addAnnotationType(AT.ANNOTATION_INFO);
 						styler.addAnnotationType(AT.ANNOTATION_MATCHING_BRACKET);
 						styler.addAnnotationType(AT.ANNOTATION_CURRENT_BRACKET);
 						styler.addAnnotationType(AT.ANNOTATION_CURRENT_LINE);
@@ -1020,6 +1021,7 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 					ruler.setMultiAnnotationOverlay({html: "<div class='annotationHTML overlay'></div>"}); //$NON-NLS-0$
 					ruler.addAnnotationType(AT.ANNOTATION_ERROR);
 					ruler.addAnnotationType(AT.ANNOTATION_WARNING);
+					ruler.addAnnotationType(AT.ANNOTATION_INFO);
 					ruler.addAnnotationType(AT.ANNOTATION_TASK);
 					ruler.addAnnotationType(AT.ANNOTATION_BOOKMARK);
 					ruler.addAnnotationType(AT.ANNOTATION_DIFF_ADDED);
@@ -1038,6 +1040,7 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 					ruler.addAnnotationType(AT.ANNOTATION_CURRENT_BLAME);
 					ruler.addAnnotationType(AT.ANNOTATION_ERROR);
 					ruler.addAnnotationType(AT.ANNOTATION_WARNING);
+					ruler.addAnnotationType(AT.ANNOTATION_INFO);
 					ruler.addAnnotationType(AT.ANNOTATION_TASK);
 					ruler.addAnnotationType(AT.ANNOTATION_BOOKMARK);
 					ruler.addAnnotationType(AT.ANNOTATION_MATCHING_BRACKET);
@@ -1204,12 +1207,14 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 			this.showAnnotations(problems, [
 				AT.ANNOTATION_ERROR,
 				AT.ANNOTATION_WARNING,
-				AT.ANNOTATION_TASK
+				AT.ANNOTATION_TASK,
+				AT.ANNOTATION_INFO
 			], null, function(annotation) {
 				switch (annotation.severity) {
 					case "error": return AT.ANNOTATION_ERROR; //$NON-NLS-0$
 					case "warning": return AT.ANNOTATION_WARNING; //$NON-NLS-0$
 					case "task": return AT.ANNOTATION_TASK; //$NON-NLS-0$
+					case "info": return AT.ANNOTATION_INFO;
 				}
 				return null;
 			});
