@@ -859,7 +859,7 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 			if (this._textView) { return; }
 
 			// Create textView and install optional features
-			this._textView = this._textViewFactory();
+			this._textView = this._textViewFactory(this);
 			if (this._undoStackFactory) {
 				this._undoStack = this._undoStackFactory.createUndoStack(this);
 				this._textView.setOptions({undoStack: this._undoStack});
@@ -898,7 +898,7 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 				onMouseMove: function(e) {
 					if (!tooltip || that._listener.mouseDown) { return; }
 
-					// Prevent spurious mouse event (e.g. on a scroll)					
+					// Prevent spurious mouse event (e.g. on a scroll)
 					if (e.event.clientX === that._listener.lastMouseX
 						&& e.event.clientY === that._listener.lastMouseY) {
 						return;
