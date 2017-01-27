@@ -431,10 +431,9 @@ define(['require', 'i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 
 			name: messages["connect"],
 			tooltip: messages["fetchContent"],
 			id: "orion.project.dependency.connect", //$NON-NLS-0$
-			callback: function(data) {
+			callback: function func(data) {
 				var item = forceSingleItem(data.items);
 
-				var func = arguments.callee;
 				var params = handleParamsInCommand(func, data, messages["fetchContentOf"] + item.Dependency.Name);
 				if(!params){
 					return;
@@ -493,7 +492,7 @@ define(['require', 'i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 
 			name: messages["checkStatus"],
 			tooltip: messages["checkApplicationStatus"],
 			id: "orion.launchConfiguration.checkStatus", //$NON-NLS-0$
-			callback: function(data) {
+			callback: function func(data) {
 				var item = forceSingleItem(data.items);
 				
 				var errorMessage = i18nUtil.formatMessage(messages["missingCredentials"], item.Type, item.Url); //$NON-NLS-0$
@@ -526,7 +525,6 @@ define(['require', 'i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 
 					return;
 				}
 
-				var func = arguments.callee;
 				var params = handleParamsInCommand(func, data, messages["checkApplicationState"]);
 				if(!params){
 					return;
@@ -602,12 +600,11 @@ define(['require', 'i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 
 				tooltip: start ? messages["startApplication"] : messages["stopApplication"],
 				id: start ? "orion.launchConfiguration.startApp" : "orion.launchConfiguration.stopApp", //$NON-NLS-0$
 				imageClass: start ? "core-sprite-play" : "core-sprite-stop",
-				callback: function(data) {
+				callback: function func(data) {
 					var item = forceSingleItem(data.items);
 
 					data.oldParams = item.Params;
 
-					var func = arguments.callee;
 					var params = handleParamsInCommand(func, data, start? messages["startApplication"] : messages["stopApplication"]);
 					if(!params){
 						return;
@@ -708,14 +705,13 @@ define(['require', 'i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 
 			tooltip: messages["deployThisApplication"], //$NON-NLS-0$
 			id: "orion.launchConfiguration.deploy",
 			imageClass: "core-sprite-deploy",
-			callback: function(data) {
+			callback: function func(data) {
 				var item = forceSingleItem(data.items);
 
 				if(!data.oldParams){
 					data.oldParams = item.Params;
 				}
 
-				var func = arguments.callee;
 				var params = handleParamsInCommand(func, data, i18nUtil.formatMessage(messages["deployItem"], item.Name));
 				if(!params){
 					return;
@@ -771,14 +767,13 @@ define(['require', 'i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 
 			tooltip: messages["editLaunchConfiguration"],
 			id: "orion.launchConfiguration.edit",
 			imageClass: "core-sprite-edit",
-			callback: function(data) {
+			callback: function func(data) {
 				var item = forceSingleItem(data.items);
 
 				if(!data.oldParams){
 					data.oldParams = item.Params;
 				}
 
-				var func = arguments.callee;
 				var params = handleParamsInCommand(func, data, i18nUtil.formatMessage(messages["deployItem"], item.Name));
 				if(!params){
 					return;
@@ -1022,10 +1017,9 @@ define(['require', 'i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 
 					name: handler.addDependencyName,
 					id: "orion.project.adddependency." + type,
 					tooltip: handler.addDependencyTooltip,
-					callback: function(data){
+					callback: function func(data){
 						var item = forceSingleItem(data.items).Project;
 
-						var func = arguments.callee;
 						var params = handleParamsInCommand(func, data, handler.addDependencyTooltip);
 						if(!params){
 							return;
@@ -1107,8 +1101,7 @@ define(['require', 'i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 
 					name: handler.addProjectName,
 					id: "orion.project.createproject." + type,
 					tooltip: handler.addProjectTooltip,
-					callback: function(data){
-						var func = arguments.callee;
+					callback: function func(data){
 						var item = forceSingleItem(data.items);
 
 						var params = handleParamsInCommand(func, data, handler.addProjectTooltip);
@@ -1372,10 +1365,9 @@ define(['require', 'i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 
 					name: deployService.name,
 					tootlip: deployService.tooltip,
 					id: "orion.project.deploy." + deployService.id,
-					callback: function(data){
+					callback: function func(data){
 						var project = data.items;
 
-						var func = arguments.callee;
 						var params = handleParamsInCommand(func, data, deployService.tooltip);
 						if(!params){
 							return;
