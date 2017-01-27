@@ -337,8 +337,7 @@ var exports = {};
 				var item = data.items;
 				commandService.confirm(data.domNode, i18nUtil.formatMessage(messages["RemoveRemoteBranchConfirm"], item.Name), messages.OK, messages.Cancel, false, function(doit) {
 					if (!doit) return;
-					exports.getDefaultSshOptions(serviceRegistry, item).then(function(options){
-						var func = arguments.callee;
+					exports.getDefaultSshOptions(serviceRegistry, item).then(function func(options){
 						var progress = serviceRegistry.getService("orion.page.progress"); //$NON-NLS-0$
 						var gitService = serviceRegistry.getService("orion.git.provider"); //$NON-NLS-0$
 						var progressService = serviceRegistry.getService("orion.page.message"); //$NON-NLS-0$
@@ -434,8 +433,7 @@ var exports = {};
 				var item = data.items;
 				var path = item.Location;
 				var name = item.Name;
-				exports.getDefaultSshOptions(serviceRegistry, item).then(function(options) {
-					var func = arguments.callee;
+				exports.getDefaultSshOptions(serviceRegistry, item).then(function func(options) {
 					var gitService = serviceRegistry.getService("orion.git.provider"); //$NON-NLS-0$
 					var statusService = serviceRegistry.getService("orion.page.message"); //$NON-NLS-0$
 					var progress = serviceRegistry.getService("orion.page.progress"); //$NON-NLS-0$
@@ -1552,8 +1550,7 @@ var exports = {};
 				var cloneFunction = function(gitUrl, path, name) {
 					
 					item.GitUrl = gitUrl;
-					exports.getDefaultSshOptions(serviceRegistry, item).then(function(options) {
-						var func = arguments.callee;
+					exports.getDefaultSshOptions(serviceRegistry, item).then(function func(options) {
 						var gitConfigPreference = new GitConfigPreference(serviceRegistry);
 						
 						serviceRegistry.getService("orion.page.message").setProgressMessage(messages.ProjectSetup); //$NON-NLS-0$
@@ -1630,8 +1627,7 @@ var exports = {};
 			var cloneFunction = function(gitUrl, path, name, cloneSubmodules) {
 				
 				item.GitUrl = gitUrl;
-				exports.getDefaultSshOptions(serviceRegistry, item).then(function(options) {
-					var func = arguments.callee;
+				exports.getDefaultSshOptions(serviceRegistry, item).then(function func(options) {
 					var gitConfigPreference = new GitConfigPreference(serviceRegistry);
 					gitConfigPreference.getConfig().then(function(userInfo){
 						var msg = i18nUtil.formatMessage(messages["AddClone"], gitUrl);
@@ -1692,8 +1688,7 @@ var exports = {};
 				var initRepositoryFunction = function(gitUrl, path, name) {
 					
 					item.GitUrl = gitUrl;
-					exports.getDefaultSshOptions(serviceRegistry, item).then(function(options){
-						var func = arguments.callee;
+					exports.getDefaultSshOptions(serviceRegistry, item).then(function func(options){
 						var gitConfigPreference = new GitConfigPreference(serviceRegistry);
 						gitConfigPreference.getConfig().then(function(userInfo){
 							var deferred = progress.progress(gitService.cloneGitRepository(name, gitUrl, path, explorer.defaultPath, null, null, null, null, null, userInfo), messages["Initializing repository: "] + name); //$NON-NLS-0$
@@ -2596,8 +2591,7 @@ var exports = {};
 			var progress = serviceRegistry.getService("orion.page.progress"); //$NON-NLS-0$
 			var addFunction = function(gitUrl, path, name) {
 				item.GitUrl = gitUrl;
-				exports.getDefaultSshOptions(serviceRegistry, item).then(function(options) {
-					var func = arguments.callee;
+				exports.getDefaultSshOptions(serviceRegistry, item).then(function func(options) {
 					var msg = i18nUtil.formatMessage(messages["AddSubmodule"], name, data.items.Name);
 					var deferred = progress.progress(gitService.addSubmodule(name, data.items.SubmoduleLocation, path, gitUrl, explorer.defaultPath), msg);
 					serviceRegistry.getService("orion.page.message").createProgressMonitor(deferred, //$NON-NLS-0$
