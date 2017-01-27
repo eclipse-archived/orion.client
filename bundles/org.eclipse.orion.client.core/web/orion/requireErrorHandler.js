@@ -38,8 +38,10 @@
 		errorPane.appendChild(createElement("h1", "An error occurred loading the page"));
 		errorPane.appendChild(createRefreshButton());
 		errorPane.appendChild(createElement("h2", "Error: " + err.requireType, 50));
-		errorPane.appendChild(createElement("h2", "Module: " +  err.requireModules));
-
+		
+		if (err.requireModules.length > 0) {
+			errorPane.appendChild(createElement("h2", "Module: " +  err.requireModules[0]));
+		}
 		document.body.innerHTML = "";
 		document.body.appendChild(errorPane);
 	};
