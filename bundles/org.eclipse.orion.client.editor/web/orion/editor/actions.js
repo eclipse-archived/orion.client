@@ -471,7 +471,7 @@ define("orion/editor/actions", [ //$NON-NLS-0$
 			function ignore(annotation, iterationMode) {
 				switch (iterationMode) {
 					case AT.ANNOTATION_ERROR:
-						return annotation.type !== AT.ANNOTATION_ERROR && annotation.type !== AT.ANNOTATION_WARNING;
+						return annotation.type !== AT.ANNOTATION_ERROR && annotation.type !== AT.ANNOTATION_WARNING && annotation.type !== AT.ANNOTATION_INFO;
 					case AT.ANNOTATION_READ_OCCURRENCE:
 						return annotation.type !== AT.ANNOTATION_READ_OCCURRENCE && annotation.type !== AT.ANNOTATION_WRITE_OCCURRENCE;
 					case AT.ANNOTATION_CURRENT_SEARCH:
@@ -491,7 +491,7 @@ define("orion/editor/actions", [ //$NON-NLS-0$
 				var theMode = null;
 				while (curAnnotations.hasNext()) {
 					var annotation = curAnnotations.next();
-					if (annotation.type === AT.ANNOTATION_ERROR || annotation.type === AT.ANNOTATION_WARNING) {
+					if (annotation.type === AT.ANNOTATION_ERROR || annotation.type === AT.ANNOTATION_WARNING || annotation.type === AT.ANNOTATION_INFO) {
 						theMode = AT.ANNOTATION_ERROR;
 						break;
 					} else if (annotation.type === AT.ANNOTATION_READ_OCCURRENCE || annotation.type === AT.ANNOTATION_WRITE_OCCURRENCE) {
