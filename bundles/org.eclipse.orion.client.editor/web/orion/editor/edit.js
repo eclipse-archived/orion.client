@@ -357,14 +357,6 @@ define('orion/editor/edit', [ //$NON-NLS-0$
 		return editor;
 	}
 
-	var editorNS = this.orion ? this.orion.editor : undefined;
-	if (editorNS) {
-		for (var i = 0; i < arguments.length; i++) {
-			merge(editorNS, arguments[i]);	
-		}
-		editorNS.edit = edit;
-	}
-	
 	return edit;
 });
 
