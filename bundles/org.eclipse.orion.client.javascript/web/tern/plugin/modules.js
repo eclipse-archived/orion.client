@@ -68,19 +68,26 @@
       
       if (typeof resolved != "string") {
         if (!relative) this.nonRelative[name] = true
-        resolved.modName = modName; //ORION tag module with original name
         return resolved
       }
 
       var known = this.modules[resolved]
+      // ORION tag module with original name for unknown-require rule, update in case contents changed
+      if (known && contents){
+      	known.modName = modName;
+      }
       if (known) return known
 
       if (/\.js$|(?:^\/)[^\.]+$/.test(resolved))
         this.server.addFile(resolved, contents, parentFile)
       if (!relative) this.nonRelative[name] = resolved
-      //ORION tag the module name
       var val = new infer.AVal;
-      val.modName = modName;
+      
+      // ORION tag module with original name for unknown-require rule
+      if (contents){
+        val.modName = modName;
+  	  }
+
       return this.modules[resolved] = val;
     },
 
