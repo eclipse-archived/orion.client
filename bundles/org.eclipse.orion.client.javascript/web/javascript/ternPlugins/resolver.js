@@ -60,7 +60,7 @@ define([
 	 * @description Resolves the given key (logical name) via the server. This function starts an asynchronous job to resolve the
 	 * script via the scriptResolver in the client
 	 * @param {TernServer} server The server
-	 * @param {String} key The logcial name to resolve
+	 * @param {String} key The logical name to resolve
 	 * @param {String} loc The original file context location (from the AST)
 	 * @since 9.0
 	 */
