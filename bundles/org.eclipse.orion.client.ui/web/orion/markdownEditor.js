@@ -1243,7 +1243,7 @@ define([
 		_atxDetectRegex: /[>\s]*#/g,
 		_blockquoteRemoveMarkersRegex: /^[ \t]*>[ \t]?/gm,
 		_blockquoteStartRegex: /[ \t]*>[ \t]?/g,
-		_fencedCodeBlockRegex: /```/g,
+		_fencedCodeBlockRegex: /`{3,}|~{3,}/g,
 		_elementCounter: 0,
 		_hrRegex: /([ \t]*[-*_]){3,}/g,
 		_htmlNewlineRegex: /\n\s*\S[\s\S]*$/g,
