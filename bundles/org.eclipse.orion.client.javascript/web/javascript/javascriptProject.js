@@ -12,8 +12,9 @@
  /*eslint-env amd, browser*/
 define([
 	"orion/Deferred",
-	"js-yaml/js-yaml"
-], function(Deferred, JsYaml) {
+	"js-yaml/js-yaml",
+	"orion/util"
+], function(Deferred, JsYaml, Util) {
 
 	var eslintHandler = {
 		_update: function _update(project, fileName) {
@@ -410,40 +411,59 @@ define([
 	 */
 	JavaScriptProject.prototype.onInputChanged = function onInputChanged(evnt) {
 		initialized = true;
-		var file = evnt.file,
-			project;
+		var file = evnt.file;
+		resolveProject(file).then(function(project) {
+			if (project) {
+				if(!this.projectMeta || project.Location !== this.projectMeta.Location) {
+					this.projectMeta = project;
+					delete this.ecma;
+					delete this.map[this.TERN_PROJECT];
+					delete this._node_modules;
+					return this.getFile(this.NODE_MODULES).then(function(file) {
+							if(file && typeof file.contents === "string") {
+								this._node_modules = true;
+							}
+							_handle.call(this, "onProjectChanged", this, evnt, project.Location);
+						}.bind(this),
+						/* @callback */ function(err) {
+							_handle.call(this, "onProjectChanged", this, evnt, project.Location);
+						}.bind(this));
+				}
+				_handle.call(this, "onInputChanged", this, evnt, project.Location);
+			} else {
+				delete this.ecma;
+				_handle.call(this, "onProjectChanged", this, evnt, null);
+			}
+		}.bind(this));
+	};
+
+	/**
+	 * @name resolveProject
+	 * @description Tries to find the project context based on where we are in the source tree
+	 * @param {?} file The file object from the resource navigator
+	 * @returns {?} The project context or null
+	 * @since 14.0
+	 */
+	function resolveProject(file) {
+		var project = null,
+			deferred = new Deferred();
 		if(file) {
 			var parents = file.parents ? file.parents : file.Parents;
-			if (Array.isArray(parents)) {
-				if(parents.length > 0) {
-					project = parents[parents.length-1];
-				} else {
-					project = file;
-				}
+			if(!Array.isArray(parents) || parents.length < 1) {
+				project = {Location: "/file/"};
+			} else {
+				project = parents[parents.length-1];
+//				if(Util.isElectron()) {
+//					//TODO call out the server for #getProject
+//				} else {
+//					
+//				}
 			}
+			deferred.resolve(project);
 		}
-		if (project) {
-			if(!this.projectMeta || project.Location !== this.projectMeta.Location) {
-				this.projectMeta = project;
-				delete this.ecma;
-				delete this.map[this.TERN_PROJECT];
-				delete this._node_modules;
-				return this.getFile(this.NODE_MODULES).then(function(file) {
-						if(file && typeof file.contents === "string") {
-							this._node_modules = true;
-						}
-						_handle.call(this, "onProjectChanged", this, evnt, project.Location);
-					}.bind(this),
-					/* @callback */ function(err) {
-						_handle.call(this, "onProjectChanged", this, evnt, project.Location);
-					}.bind(this));
-			}
-			_handle.call(this, "onInputChanged", this, evnt, project.Location);
-		} else {
-			delete this.ecma;
-			_handle.call(this, "onProjectChanged", this, evnt, null);
-		}
-	};
+		return deferred;
+	}
+
 	/**
 	 * Callback from the fileClient event listener
 	 * @param {Object} evnt A file client Changed event.
