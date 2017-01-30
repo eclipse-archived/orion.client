@@ -218,6 +218,19 @@ if (process.versions.electron) {
 				}else if(stats.isDirectory()){
 					configParams.workspace = readyToOpenDir;
 				}
+				allPrefs.user.workspace.currentWorkspace = configParams.workspace;
+				var RECENT_ARRAY_LENGTH = 10;
+				var oldIndex = recentWorkspaces.indexOf(configParams.workspace);
+				if(oldIndex !== -1){
+					allPrefs.user.workspace.recentWorkspaces.splice(oldIndex,1);
+				}
+				if(recentWorkspaces.length < RECENT_ARRAY_LENGTH){
+					allPrefs.user.workspace.recentWorkspaces.unshift(configParams.workspace);
+				}else if(recentWorkspaces.length === RECENT_ARRAY_LENGTH){
+					allPrefs.user.workspace.recentWorkspaces.pop();
+					allPrefs.user.workspace.recentWorkspaces.unshift(configParams.workspace);
+				}
+				prefs.writePrefs(allPrefs);
 			}catch(e){}
 		}
 		if (process.platform === 'darwin') {
