@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2010, 2016 IBM Corporation and others.
+ * Copyright (c) 2010, 2016, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License v1.0
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution
@@ -20,8 +20,9 @@ define([
 	'orion/objects',
 	'orion/PageUtil',
 	'orion/editor/textModelFactory',
-	'orion/metrics'
-], function(messages, mNavigatorRenderer, i18nUtil, Deferred, EventTarget, objects, PageUtil, mTextModelFactory, mMetrics) {
+	'orion/metrics',
+	'orion/explorers/explorer'
+], function(messages, mNavigatorRenderer, i18nUtil, Deferred, EventTarget, objects, PageUtil, mTextModelFactory, mMetrics,mExplorer) {
 
 	function Idle(options){
 		this._document = options.document || document;
@@ -140,6 +141,7 @@ define([
 		this.progressService = options.progressService;
 		this.contentTypeRegistry = options.contentTypeRegistry;
 		this.selection = options.selection;
+		this.reveal = options.reveal;
 		this._input = this._title = "";
 		if (this.fileClient) {
 			this.fileClient.addEventListener("Changed", function(evt) { //$NON-NLS-0$
@@ -539,6 +541,7 @@ define([
 						this.save();
 					} else if (!window.confirm(messages.confirmUnsavedChanges)) {
 						window.location.hash = oldLocation;
+						this.reveal(this.getFileMetadata());
 						return;
 					}
 				}
