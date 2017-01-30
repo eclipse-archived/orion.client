@@ -647,7 +647,7 @@ define([
 			} else {
 				this.fileClient.fetchChildren(launchConfMeta.ChildrenLocation).then(function(children){
 					launchConfMeta.Children = children;
-					func(launchConfMeta);
+					func.bind(this)(launchConfMeta);
 				}.bind(this), deferred.reject);
 			}
 		}.bind(this), deferred.reject);
@@ -728,7 +728,7 @@ define([
 			} else {
 				this.fileClient.fetchChildren(_launchConfDir.ChildrenLocation).then(function(children){
 					_launchConfDir.Children = children;
-					func(_launchConfDir);
+					func.bind(this)(_launchConfDir);
 				}.bind(this), deferred.reject);
 			}
 		}.bind(this));

@@ -431,10 +431,10 @@ define(['require', 'i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 
 			name: messages["connect"],
 			tooltip: messages["fetchContent"],
 			id: "orion.project.dependency.connect", //$NON-NLS-0$
-			callback: function(data) {
+			callback: function func(data) {
 				var item = forceSingleItem(data.items);
 
-				var params = handleParamsInCommand(connectDependencyCommand, data, messages["fetchContentOf"] + item.Dependency.Name);
+				var params = handleParamsInCommand(func, data, messages["fetchContentOf"] + item.Dependency.Name);
 				if(!params){
 					return;
 				}
