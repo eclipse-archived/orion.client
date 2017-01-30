@@ -98,22 +98,24 @@ GitClient.prototype = {
 		return this.name;
 	},
 
-	start: function(callback) {
-		this.callback = callback;
-		this.tasks.shift().apply();
+	start: function() {
+		var client = this;
+		return new Promise(function(resolve) {
+			client.next(resolve);
+		});
 	},
 
-	next: function() {
+	next: function(resolve, value) {
 		if (this.tasks.length !== 0) {
-			this.tasks.shift().apply();
-		} else if (this.callback !== undefined) {
-			this.callback();
+			this.tasks.shift().call(null, resolve);
+		} else {
+			resolve(value);
 		}
 	},
 
 	init: function(name) {
 		var client = this;
-		this.tasks.push(function() {
+		this.tasks.push(function(resolve) {
 			request()
 			.post(CONTEXT_PATH + "/gitapi/clone/")
 			.send({
@@ -126,14 +128,14 @@ GitClient.prototype = {
 			.end(function(err, res) {
 				assert.ifError(err);
 				assert.equal(res.body.Location, "/gitapi/clone/file/" + client.getName());
-				client.next();
+				client.next(resolve, res.body);
 			});
 		});
 	},
 
 	setFileContents: function(name, contents) {
 		var client = this;
-		this.tasks.push(function() {
+		this.tasks.push(function(resolve) {
 			request()
 			.put(CONTEXT_PATH + "/file/" + client.getName() + "/" + name)
 			.send(contents)
@@ -145,14 +147,14 @@ GitClient.prototype = {
 				assert.ok(body.ETag, 'has an ETag');
 				assert.equal(body.Location, CONTEXT_PATH + "/file/" + client.getName() + "/" + name);
 				assert.equal(body.Name, name);
-				client.next();
+				client.next(resolve, res.body);
 			});
 		});
 	},
 
 	commit: function() {
 		var client = this;
-		this.tasks.push(function() {
+		this.tasks.push(function(resolve) {
 			request()
 			.post(CONTEXT_PATH + "/gitapi/commit/HEAD/file/" + client.getName())
 			.send({
@@ -165,41 +167,41 @@ GitClient.prototype = {
 			.expect(200)
 			.end(function(err, res) {
 				assert.ifError(err);
-				client.next();
+				client.next(resolve, res.body);
 			});
 		});
 	},
 
 	stage: function(name) {
 		var client = this;
-		this.tasks.push(function() {
+		this.tasks.push(function(resolve) {
 			request()
 			.put(CONTEXT_PATH + "/gitapi/index/file/" + client.getName() + "/" + name)
 			.expect(200)
 			.end(function(err, res) {
 				assert.ifError(err);
-				client.next();
+				client.next(resolve, res.body);
 			});
 		});
 	},
 
 	status: function(state) {
 		var client = this;
-		this.tasks.push(function() {
+		this.tasks.push(function(resolve) {
 			request()
 			.get(CONTEXT_PATH + "/gitapi/status/file/" + client.getName())
 			.expect(200)
 			.end(function(err, res) {
 				assert.ifError(err);
 				assert.equal(state, res.body.RepositoryState);
-				client.next();
+				client.next(resolve, res.body);
 			});
 		});
 	},
 
 	createBranch: function(branchName) {
 		var client = this;
-		this.tasks.push(function() {
+		this.tasks.push(function(resolve) {
 			request()
 			.post(CONTEXT_PATH + "/gitapi/branch/file/" + client.getName())
 			.send({
@@ -210,14 +212,14 @@ GitClient.prototype = {
 				assert.ifError(err);
 				assert.equal(res.body.CommitLocation, "/gitapi/commit/refs%252Fheads%252F" + branchName + "/file/" + client.getName());
 				assert.equal(res.body.Location, "/gitapi/branch/" + branchName + "/file/" + client.getName());
-				client.next();
+				client.next(resolve, res.body);
 			});
 		});
 	},
 
 	reset: function(type, id) {
 		var client = this;
-		this.tasks.push(function() {
+		this.tasks.push(function(resolve) {
 			request()
 			.post(CONTEXT_PATH + "/gitapi/index/file/" + client.getName())
 			.send({
@@ -227,14 +229,14 @@ GitClient.prototype = {
 			.expect(200)
 			.end(function(err, res) {
 				assert.ifError(err);
-				client.next();
+				client.next(resolve, res.body);
 			});
 		});
 	},
 
 	merge: function(branchToMerge, result) {
 		var client = this;
-		this.tasks.push(function() {
+		this.tasks.push(function(resolve) {
 			request()
 			.post(CONTEXT_PATH + "/gitapi/commit/HEAD/file/" + client.getName())
 			.send({
@@ -243,7 +245,7 @@ GitClient.prototype = {
 			.expect(200)
 			.end(function(err, res) {
 				assert.ifError(err);
-				client.next();
+				client.next(resolve, res.body);
 			});
 		});
 	}
@@ -826,6 +828,7 @@ maybeDescribe("git", function() {
 		describe("Conflicts", function() {
 			it("POST commit will resolve merge in progress", function(finished) {
 				var name = "conflicts.txt";
+				var initial, otherBranch, main;
 
 				var client = new GitClient("merge-conflicts");
 				client.init("merge-conflicts");
@@ -834,49 +837,57 @@ maybeDescribe("git", function() {
 				// stage and commit
 				client.stage(name);
 				client.commit();
-				client.start(function() {
-					return new Promise(function(resolve) {
-						// get SHA hash of the commit we just created
-						request()
-						.get(CONTEXT_PATH + "/gitapi/commit/master/file/merge-conflicts")
-						.query({ "pageSize": 1 })
-						.expect(202)
-						.end(function(err, res) {
-							assert.ifError(err);
-							getGitResponse(res).then(function(res2) {
-								resolve(res2.JsonData.Children[0].Id);
-							})
-							.catch(function(err) {
-								assert.ifError(err);
-							});
-						});
-					})
-					.then(function(initial) {
-						var client = new GitClient("merge-conflicts");
-						// set file to content B
-						client.setFileContents(name, "B");
-						// stage and commit
-						client.stage(name);
-						client.commit();
-						// create a branch with content B
-						client.createBranch("left");
-						// reset back to original content A
-						client.reset("HARD", initial);
-						// set file to content C
-						client.setFileContents(name, "C");
-						// stage and commit
-						client.stage(name);
-						client.commit();
-						// merge branch with content B
-						client.merge("left");
-						// merge conflict
-						client.status("MERGING");
-						client.start(finished);
-					})
-					.catch(function(err) {
-						assert.ifError(err);
-						finished();
-					});
+
+				return client.start().then(function(commit) {
+					initial = commit.Id;
+
+					var client = new GitClient("merge-conflicts");
+					// set file to content B
+					client.setFileContents(name, "B");
+					// stage and commit
+					client.stage(name);
+					client.commit();
+					return client.start();
+				})
+				.then(function(commit) {
+					otherBranch = commit.Id;
+					var client = new GitClient("merge-conflicts");
+					// create a branch with content B
+					client.createBranch("left");
+					// reset back to original content A
+					client.reset("HARD", initial);
+					// set file to content C
+					client.setFileContents(name, "C");
+					// stage and commit
+					client.stage(name);
+					client.commit();
+					return client.start();
+				})
+				.then(function(commit) {
+					main = commit.Id;
+					var client = new GitClient("merge-conflicts");
+					// merge branch with content B
+					client.merge("left");
+					// merge conflict
+					client.status("MERGING");
+					// just stage the file as-is and resolve the conflict
+					client.stage(name);
+					// commit
+					client.commit();
+					return client.start();
+				})
+				.then(function(commit) {
+					assert.equal(main, commit.Parents[0].Name);
+					assert.equal(otherBranch, commit.Parents[1].Name);
+					var client = new GitClient("merge-conflicts");
+					client.status("SAFE");
+					return client.start();
+				})
+				.then(function() {
+					finished();
+				})
+				.catch(function(err) {
+					finished(err);
 				});
 			});
 		}); // describe("Conflicts")

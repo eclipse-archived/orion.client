@@ -848,6 +848,12 @@ function getConflictingPaths(repo, head, commit) {
 
 function createCommit(repo, committerName, committerEmail, authorName, authorEmail, message, amend, insertChangeid){
 	var index, oid, author, committer;
+	var state = repo.state();
+	var mergeRequired = state === git.Repository.STATE.MERGE;
+	if (amend && mergeRequired) {
+		// libgit2's API doesn't allow this
+		throw new Error("Cannot amend a commit to have more merges");
+	}
 	return repo.index()
 	.then(function(indexResult) {
 		index = indexResult;
@@ -884,11 +890,32 @@ function createCommit(repo, committerName, committerEmail, authorName, authorEma
 			}
 			if (amend) {
 				return parent.amend("HEAD",  author, committer, null, message, oid);
+			} else if (mergeRequired) {
+				var promises = [ Promise.resolve(parent) ];
+				// get merge heads
+				return repo.mergeheadForeach(function(oid) {
+					promises.push(repo.getCommit(oid));
+				})
+				.then(function() {
+					// wait for all parents to be resolved
+					return Promise.all(promises);
+				})
+				.then(function(parentCommits) {
+					// create the merge commit on top of the MERGE_HEAD parents
+					return repo.createCommit("HEAD", author, committer, message, oid, parentCommits);
+				});
 			}
 			return repo.createCommit("HEAD", author, committer, message, oid, [parent]);
 		});
 	})
 	.then(function(id) {
+		if (mergeRequired) {
+			// a merge commit was created, cleanup MERGE_* files in .git/
+			var retCode = repo.stateCleanup();
+			if (retCode !== git.Error.CODE.OK) {
+				throw new Error("Internal merge cleanup failed (error code " + retCode + ")");
+			}
+		}
 		return git.Commit.lookup(repo, id);
 	});
 }
@@ -976,7 +1003,7 @@ function postCommit(req, res) {
 	var isInsertChangeId = req.body.ChangeId;	
 
 	var theRepo, thisCommit;
-	var theDiffs = [], theParents;
+	var theDiffs = [];
 	
 	clone.getRepo(req)
 	.then(function(repo) {
@@ -995,14 +1022,11 @@ function postCommit(req, res) {
 		return getCommitParents(theRepo, thisCommit, fileDir);
 	})
 	.then(function(parents){
-		theParents = parents;
+		res.status(200).json(commitJSON(thisCommit, fileDir, theDiffs, parents));
 	})
 	.catch(function(err) {
 		writeError(403, res, err.message);
 	})
-	.done(function() {
-		res.status(200).json(commitJSON(thisCommit, fileDir, theDiffs, theParents));
-	});
 }
 
 function generateChangeId(oid, firstParentId, authorId, committerId, message){
