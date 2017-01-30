@@ -355,7 +355,8 @@ objects.mixin(EditorViewer.prototype, {
 			progressService: this.progressService,
 			statusReporter: this.statusReporter.bind(this),
 			selection: this.selection,
-			contentTypeRegistry: this.contentTypeRegistry
+			contentTypeRegistry: this.contentTypeRegistry,
+			sideBar:this.sideBar
 		});
 		inputManager.addEventListener("InputChanged", function(evt) { //$NON-NLS-0$
 			var metadata = evt.metadata;
@@ -713,6 +714,7 @@ objects.mixin(EditorSetup.prototype, {
 				window.location = this.computeNavigationHref(evt.newValue);
 			}
 		}.bind(this));
+		return sidebar;
 	},
 
 	/**
@@ -794,7 +796,7 @@ objects.mixin(EditorSetup.prototype, {
 		}
 	},
 	
-	createEditorViewer: function(id) {
+	createEditorViewer: function(id, sideBar) {
 		var editorViewer = new EditorViewer({
 			id: id,
 			parent: this.editorDomNode,
@@ -813,7 +815,8 @@ objects.mixin(EditorSetup.prototype, {
 			selection: this.selection,
 			fileClient: this.fileClient,
 			statusService: this.statusService,
-			progressService: this.progressService
+			progressService: this.progressService,
+			sideBar:sideBar
 		});
 		editorViewer.create();
 		return editorViewer;
@@ -1119,9 +1122,9 @@ exports.setUpEditor = function(serviceRegistry, pluginRegistry, preferences, rea
 			sessionStorage.navSelection = JSON.stringify(result.navSelection);
 		}
 		setup.createMenuBar().then(function() {
-			setup.createSideBar();
+			var sideBar = setup.createSideBar();
 			setup.createRunBar().then(function() {
-				setup.editorViewers.push(setup.createEditorViewer());
+				setup.editorViewers.push(setup.createEditorViewer(null, sideBar));
 				setup.setActiveEditorViewer(setup.editorViewers[0]);
 				if (enableSplitEditor) {
 					setup.createSplitMenu();
