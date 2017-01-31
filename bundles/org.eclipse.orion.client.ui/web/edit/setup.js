@@ -862,7 +862,7 @@ objects.mixin(EditorSetup.prototype, {
 		var lastEditedFile = sessionStorage.lastFile;
 		var currentHash = PageUtil.hash();
 		// lastEditedFile exists in session storage and if the project didn't change.
-		if (lastEditedFile && currentHash && lastEditedFile.lastIndexOf(currentHash, 0) === 0 && lastEditedFile !== currentHash) {
+		if (lastEditedFile && lastEditedFile.lastIndexOf(currentHash, 0) === 0 && lastEditedFile !== currentHash) {
 			window.location.hash = currentHash = lastEditedFile;
 		}
 		this.setInput(currentHash);
