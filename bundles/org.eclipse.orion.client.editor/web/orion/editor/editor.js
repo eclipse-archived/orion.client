@@ -180,9 +180,30 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 		 * @param {Boolean} dirty
 		 */
 		setDirty: function(dirty) {
+			this._setSyntaxCheckRequired(dirty);
 			if (this._dirty === dirty) { return; }
 			this._dirty = dirty;
 			this.onDirtyChanged({type: "DirtyChanged"}); //$NON-NLS-0$
+		},
+		/**
+		 * Sets a flag indicating whether the editor contents have been modified since
+		 * the last syntax check (validation) operation.
+		 * 
+		 * @function
+		 * @param required {Boolean} what to set the flag to, true indicates the editor is dirty and needs syntax checking
+		 */
+		_setSyntaxCheckRequired: function _setSyntaxCheckRequired(required){
+			this._syntaxCheckRequired = required;
+		},
+		/**
+		 * Returns the state of the syntax check required flag, indicating whether the editor contents have
+		 * been modified since the last syntax check (validation) operation.
+		 * 
+		 * @function
+		 * @returns returns {Boolean} whether the flag has been set indicating a syntax check (validation) operation is required
+		 */
+		_isSyntaxCheckRequired: function _isSyntaxCheckRequired() {
+			return this._syntaxCheckRequired;
 		},
 		/**
 		 * @private

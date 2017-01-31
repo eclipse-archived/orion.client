@@ -371,7 +371,6 @@ define([
 			var metadata = this.getFileMetadata();
 			if (!metadata) return new Deferred().reject();
 			if (metadata._saving) { return metadata._savingDeferred; }
-			var that = this;
 			metadata._savingDeferred = new Deferred();
 			metadata._saving = true;
 			function done(result) {
@@ -503,6 +502,38 @@ define([
 				}.bind(this));
 			} else {
 				this._idle.setTimeout(timeout);
+			}
+		},
+		/**
+		 * Set the auto syntax check timeout. Recommended this is only set when autosave is turned off
+		 * because save operations will already run the syntax checker.
+		 * 
+		 * @param syntaxChecker {Function} Function that will execute the syntax check
+		 * @param timeout {Number} How long to idle before syntax checking in milliseconds, -1 to disable
+		 */
+		setAutoSyntaxCheck: function(syntaxChecker, timeout) {
+			var time = timeout;
+			if (!syntaxChecker){
+				time = -1;
+			}
+			this._autoSyntaxEnabled = time !== -1;
+			this._autoSyntaxActive = false;
+			if (!this._idle2) {
+				var options = {
+					document: document,
+					timeout: time
+				};
+				this._idle2 = new Idle(options);
+				this._idle2.addEventListener("Idle", function () { //$NON-NLS-0$
+					this._autoSyntaxActive = true;
+					if (this.editor._isSyntaxCheckRequired()){
+						syntaxChecker();
+						this.editor._setSyntaxCheckRequired(false);
+						this._autoSyntaxActive = false;
+					}
+				}.bind(this));
+			} else {
+				this._idle2.setTimeout(time);
 			}
 		},
 		setFormatOnSave: function(enabled) {
