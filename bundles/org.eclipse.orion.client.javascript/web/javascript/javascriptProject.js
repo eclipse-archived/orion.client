@@ -78,6 +78,7 @@ define([
 		this.registry = serviceRegistry;
 		this.fileClient = null;
 		this.handlers = [eslintHandler];
+		this.projectFiles = [this.PACKAGE_JSON, this.TERN_PROJECT, this.ESLINTRC, this.ESLINTRC_JS, this.ESLINTRC_JSON, this.ESLINTRC_YAML, this.ESLINTRC_YML];
 	}
 	/**
 	 * The .tern-project file name
@@ -180,21 +181,26 @@ define([
 	 * @description Fetch the named child of the current project context
 	 * @function
 	 * @param {String} childName The short name of the project child to get
+	 * @param {String} projectPath The optional project path to fetch from
 	 * @returns {Deferred} A deferred that will resolve to the requested child metadata or null
 	 */
-	JavaScriptProject.prototype.getFile = function getFile(childName) {
-		if(!this.projectMeta) {
+	JavaScriptProject.prototype.getFile = function getFile(childName, projectPath) {
+		if(!this.projectMeta && !projectPath) {
 			return new Deferred().resolve(null);
 		}
-		var filePath = this.projectMeta.Location+childName;
+		var _project = this.projectMeta ? this.projectMeta.Location : projectPath;
+		var filePath = _project+childName;
 		if(this.map[filePath]) {
 			return new Deferred().resolve(this.map[filePath]);
 		}
 		return this.getFileClient().read(filePath, false, false, {readIfExists: true}).then(function(child) {
-			this.map[filePath] = {name: filePath, contents: child, project: this.projectMeta.Location};
-			return this.map[filePath];
+			if(child) {
+				this.map[filePath] = {name: filePath, contents: child, project: _project};
+				return this.map[filePath];
+			}
+			return null;
 		}.bind(this),
-		function() {
+		function rejected() {
 			return null;
 		});
 	};
@@ -412,7 +418,7 @@ define([
 	JavaScriptProject.prototype.onInputChanged = function onInputChanged(evnt) {
 		initialized = true;
 		var file = evnt.file;
-		resolveProject(file).then(function(project) {
+		resolveProject.call(this, file).then(function(project) {
 			if (project) {
 				if(!this.projectMeta || project.Location !== this.projectMeta.Location) {
 					this.projectMeta = project;
@@ -445,21 +451,38 @@ define([
 	 * @since 14.0
 	 */
 	function resolveProject(file) {
-		var project = null,
-			deferred = new Deferred();
+		var deferred = new Deferred();
 		if(file) {
+			if(this.projectMeta && file.Location && file.Location.startsWith(this.projectMeta.Location)) {
+				deferred.resolve(this.projectMeta);
+				return;
+			}
 			var parents = file.parents ? file.parents : file.Parents;
 			if(!Array.isArray(parents) || parents.length < 1) {
-				project = {Location: "/file/"};
+				deferred.resolve({Location: "/file/"});
 			} else {
-				project = parents[parents.length-1];
-//				if(Util.isElectron()) {
-//					//TODO call out the server for #getProject
-//				} else {
-//					
-//				}
+				if(Util.isElectron) {
+					//TODO call out the server for #getProject
+					var promises = [],
+						prnt = parents[parents.length-1];
+					this.projectFiles.forEach(function(_f) {
+						promises.push(this.getFile(_f, prnt.Location));
+						promises.push(this.getFile(_f, "/file/"));
+					}.bind(this));
+					promises.reduce(/* @callback */ function(prev, item) {
+						return prev.then(/* @callback */ function(value) {
+							return item.then(function(_file) {
+								if(_file) {
+									deferred.resolve({Location: _file.project});
+									throw new Error("stop");
+								}
+							});
+						});
+					}, new Deferred().resolve());
+				} else {
+					deferred.resolve(parents[parents.length-1]);
+				}
 			}
-			deferred.resolve(project);
 		}
 		return deferred;
 	}
