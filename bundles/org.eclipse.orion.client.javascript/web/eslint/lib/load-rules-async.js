@@ -2235,6 +2235,10 @@ define([
         			if(directive.value.indexOf(_name) < 0) {
 						context.report(node, ProblemMessages['unknown-require-missing-env'], {0: _name, pid: 'unknown-require-missing-env', nls: 'unknown-require-missing-env', data: _name});        				 //$NON-NLS-1$ //$NON-NLS-2$
         			}
+        		} else if(context.env) {
+        			if(!context.env[_name]) {
+						context.report(node, ProblemMessages['unknown-require-missing-env'], {0: _name, pid: 'unknown-require-missing-env', nls: 'unknown-require-missing-env', data: _name}); //$NON-NLS-1$ //$NON-NLS-2$        				
+        			}
         		} else {
         			context.report(node, ProblemMessages['unknown-require-missing-env'], {0: _name, pid: 'unknown-require-missing-env', nls: 'unknown-require-missing-env', data: _name}); //$NON-NLS-1$ //$NON-NLS-2$
         		}
