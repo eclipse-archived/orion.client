@@ -158,6 +158,7 @@ define([
 	 * @returns {Object} Orion Problem object
 	 */
 	function toProblem(e) {
+		var id = getProblemId(e);
 		var start = e.start, end = e.end;
 		var descriptionKey = e.args && e.args.nls ? e.args.nls : e.ruleId;
 		var descriptionArgs = e.args || Object.create(null);
@@ -166,7 +167,7 @@ define([
 			description = i18nUtil.formatMessage.call(null, messages[descriptionKey], descriptionArgs);
 		}
 		var prob = {
-			id: getProblemId(e),
+			id: id,
 			description: description,
 			severity: getSeverity(e)
 		};
@@ -221,12 +222,18 @@ define([
 	 * @param {?} cfg The configuration map from the eslintrc file
 	 * @since 14.0
 	 */
-	function configureCoreRules(cfg) {
+	function configureRules(cfg) {
 		if(cfg && cfg.rules) {
+			Object.keys(cfg.rules).forEach(function(key) {
+				if(!Rules.defaults[key]) {
+					delete cfg.rules[key];
+				}
+			});
 			cfg.rules["unknown-require"] = config.rules["unknown-require"];
 			cfg.rules["check-tern-plugin"] = config.rules["check-tern-plugin"];
 			cfg.rules["missing-requirejs"] = config.rules["missing-requirejs"];
 		}
+		return cfg;
 	}
 
 	Objects.mixin(ESLintValidator.prototype, {
@@ -266,8 +273,7 @@ define([
 									env[key] = cfg.env[key];
 								});
 							}
-							configureCoreRules(cfg);
-							this._validate(meta, text, env, deferred, cfg);
+							this._validate(meta, text, env, deferred, configureRules(cfg));
 						}.bind(this));
 					} else {
 						// need to extract all scripts from the html text
