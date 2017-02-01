@@ -1064,8 +1064,23 @@ html[dir="rtl"] .uploadChooser{ /* ACGC */
 	display: table;
 }
 
-.local > div {
+.local .sectionWrapper {
+	display: none;
+}
+
+.local .sectionTable {
+	border: none;
+	max-height: 400px;
+	overflow-y: auto;
+}
+
+.local .setting-content > div {
 	display: table-row;
+}
+
+.local .setting-header {
+	font-weight: bold;
+	margin: 4px;
 }
 
 .local .setting-label {
@@ -1073,6 +1088,13 @@ html[dir="rtl"] .uploadChooser{ /* ACGC */
 	text-align: right;
 	display: table-cell;
 	vertical-align: middle;
+	min-width: 150px;
+}
+
+.local .setting-link {
+	float: right;
+	margin-right: 4px;
+	margin-top: 4px;
 }
 
 html[dir="rtl"] .local .setting-label { /* ACGC */

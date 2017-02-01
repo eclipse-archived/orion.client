@@ -413,8 +413,7 @@ define("orion/editor/annotations", ['i18n!orion/editor/nls/messages', 'orion/edi
 			var annotation, annotations = [];
 			while (iter.hasNext()) {
 				annotation = iter.next();
-				var priority = this.getAnnotationTypePriority(annotation.type);
-				if (priority === 0) { continue; }
+				if (!this.isAnnotationTypeVisible(annotation.type)) { continue; }
 				annotations.push(annotation);
 			}
 			var self = this;
@@ -433,7 +432,24 @@ define("orion/editor/annotations", ['i18n!orion/editor/nls/messages', 'orion/edi
 		 * @see orion.editor.AnnotationTypeList#removeAnnotationType
 		 */
 		isAnnotationTypeVisible: function(type) {
-			return this.getAnnotationTypePriority(type) !== 0;
+			if (this.getAnnotationTypePriority(type) === 0) return false;
+			return !this._visibleAnnotationTypes || this._visibleAnnotationTypes[type] === undefined || this._visibleAnnotationTypes[type] === true;
+		},
+		/**
+		 * Sets whether annotations of the given annotation type are visble. By default
+		 * all annotations added to the receiver are visible.
+		 * 
+		 * @param {Object} type
+		 * @param {Boolean} visible
+		 * @since 14.0
+		 */
+		setAnnotationTypeVisible: function(type, visible) {
+			if (typeof type === "object") {
+				this._visibleAnnotationTypes = type;
+			} else {
+				if (!this._visibleAnnotationTypes) this._visibleAnnotationTypes = {};
+				this._visibleAnnotationTypes[type] = visible;
+			}
 		},
 		/**
 		 * Removes an annotation type from the receiver.

@@ -14,6 +14,7 @@
 define([
 	'i18n!orion/edit/nls/messages',
 	'orion/editor/editor',
+	'orion/editor/annotations',
 	'orion/editor/eventTarget',
 	'orion/editor/textView',
 	'orion/editor/textModelFactory',
@@ -49,7 +50,7 @@ define([
 	'orion/formatter'	
 ], function(
 	messages,
-	mEditor, mEventTarget, mTextView, mTextModelFactory, mEditorFeatures, mHoverFactory, mContentAssist,
+	mEditor, mAnnotations, mEventTarget, mTextView, mTextModelFactory, mEditorFeatures, mHoverFactory, mContentAssist,
 	mEmacs, mVI, mEditorPreferences, mThemePreferences, mThemeData, EditorSettings,
 	mSearcher, mEditorCommands, mGlobalCommands,
 	mDispatcher, EditorContext, Highlight,
@@ -59,6 +60,7 @@ define([
 ) {
 	var inMemoryFilePattern = memoryFileSysConst.MEMORY_FILE_PATTERN;
 	var Dispatcher = mDispatcher.Dispatcher;
+	var AT = mAnnotations.AnnotationType;
 
 	function parseNumericParams(input, params) {
 		for (var i = 0; i < params.length; i++) {
@@ -238,6 +240,25 @@ define([
 			editor.setFoldingRulerVisible(prefs.foldingRuler);
 			editor.setOverviewRulerVisible(prefs.overviewRuler);
 			editor.setZoomRulerVisible(prefs.zoomRuler);
+			function getTypesVisible(str) {
+				var typesVisible = {};
+				typesVisible[AT.ANNOTATION_CURRENT_SEARCH] = prefs["show" + str + "CurrentSearchAnnotation"];
+				typesVisible[AT.ANNOTATION_MATCHING_SEARCH] = prefs["show" + str + "MatchingSearchAnnotation"];
+				typesVisible[AT.ANNOTATION_READ_OCCURRENCE] = prefs["show" + str + "ReadOccurrenceAnnotation"];
+				typesVisible[AT.ANNOTATION_WRITE_OCCURRENCE] = prefs["show" + str + "WriteOcurrenceAnnotation"];
+				typesVisible[AT.ANNOTATION_ERROR] = prefs["show" + str + "ErrorAnnotation"];
+				typesVisible[AT.ANNOTATION_WARNING] = prefs["show" + str + "WarningAnnotation"];
+				typesVisible[AT.ANNOTATION_INFO] = prefs["show" + str + "InfoAnnotation"];
+				typesVisible[AT.ANNOTATION_TASK] = prefs["show" + str + "TaskAnnotation"];
+				typesVisible[AT.ANNOTATION_BOOKMARK] = prefs["show" + str + "BookmarkAnnotation"];
+				typesVisible[AT.ANNOTATION_MATCHING_BRACKET] = prefs["show" + str + "MatchingBracketAnnotation"];
+				typesVisible[AT.ANNOTATION_CURRENT_BRACKET] = prefs["show" + str + "CurrentBracketAnnotation"];
+				typesVisible[AT.ANNOTATION_CURRENT_LINE] = prefs["show" + str + "CurrentLineAnnotation"];
+				return typesVisible;
+			}
+			editor.setAnnotationTypesVisible(getTypesVisible(""));
+			editor.setOverviewAnnotationTypesVisible(getTypesVisible("Overview"));
+			editor.setTextAnnotationTypesVisible(getTypesVisible("Text"));
 			if (this.renderToolbars) {
 				this.renderToolbars(inputManager.getFileMetadata());
 			}

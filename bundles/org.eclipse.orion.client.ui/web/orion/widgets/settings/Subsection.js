@@ -13,7 +13,9 @@
 /* Shows labeled sections */
 // TODO convert to orion/section
 
-define([], function() {
+define([
+	'orion/webui/littlelib', //$NON-NLS-0$
+], function(lib) {
 
 	/**
 	 * @param options
@@ -29,9 +31,9 @@ define([], function() {
 		var node = document.createElement('section'); //$NON-NLS-0$
 		node.classList.add('setting-row'); //$NON-NLS-0$
 		node.setAttribute('role', 'region'); //$NON-NLS-1$ //$NON-NLS-0$
-		var headerId = 'setting-header-' + sectionName.replace(/\s/g, ''); //$NON-NLS-0$
+		var headerId = this.headerId = 'setting-header-' + sectionName.replace(/\s/g, ''); //$NON-NLS-0$
 		node.setAttribute('aria-labelledby', headerId); //$NON-NLS-0$
-		var titleNode = document.createElement('div'); //$NON-NLS-0$
+		var titleNode = this.titleNode = document.createElement('div'); //$NON-NLS-0$
 		titleNode.classList.add('setting-header'); //$NON-NLS-0$
 		if(options.additionalCssClass) {
 			titleNode.classList.add(options.additionalCssClass); //$NON-NLS-0$
@@ -45,7 +47,37 @@ define([], function() {
 
 		this.node = node;
 		this.subsectionContent = content;
+		
+		this.canHide = options.canHide;
+		if(options.canHide){
+			var that = this;
+			this.titleNode.style.cursor = "pointer"; //$NON-NLS-0$
+			this.titleNode.tabIndex = 0; //$NON-NLS-0$
+			this.titleNode.addEventListener("click", function(evt) { //$NON-NLS-0$
+				that.setHidden(!that.hidden);
+			}, false);
+			this.titleNode.addEventListener("keydown", function(evt) { //$NON-NLS-0$
+				if (evt.target === that.titleNode) {
+					if(evt.keyCode === lib.KEY.ENTER) {
+						that.setHidden(!that.hidden);
+					} else if(evt.keyCode === lib.KEY.ESCAPE) {
+						that.setHidden(true);
+					}
+					evt.stopPropagation();
+				}
+			}, false);
+			this.setHidden("true" === localStorage.getItem(headerId +"/hidden"));
+		}
 	}
+	Subsection.prototype.setHidden = function(hidden){
+		this.hidden = hidden;
+		localStorage.setItem(this.headerId +"/hidden", hidden);
+		if (this.hidden) {
+			this.subsectionContent.style.display = "none";
+		} else {
+			this.subsectionContent.style.display = "";
+		}
+	};
 	Subsection.prototype.show = function(){
 		if( this.parentNode ){
 			this.parentNode.appendChild( this.node );
