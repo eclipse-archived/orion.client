@@ -194,11 +194,8 @@ define([
 			return new Deferred().resolve(this.map[filePath]);
 		}
 		return this.getFileClient().read(filePath, false, false, {readIfExists: true}).then(function(child) {
-			if(child) {
-				this.map[filePath] = {name: filePath, contents: child, project: _project};
-				return this.map[filePath];
-			}
-			return null;
+            this.map[filePath] = {name: filePath, contents: child, project: _project};
+            return this.map[filePath];
 		}.bind(this),
 		function rejected() {
 			return null;
