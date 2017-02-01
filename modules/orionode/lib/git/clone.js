@@ -43,6 +43,7 @@ module.exports.router = function(options) {
 	module.exports.isWorkspace = isWorkspace;
 	module.exports.getSignature = getSignature;
 	module.exports.getCommit = getCommit;
+	module.exports.postClone = postClone;
 
 	return express.Router()
 	.use(bodyParser.json())
