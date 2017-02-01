@@ -400,7 +400,6 @@ define([
 		initialized = true;
 		var file = evnt.file;
 		resolveProject.call(this, file).then(function(project) {
-            this.projectPromise.resolve(project);
 			if (project) {
 				if(!this.projectMeta || project.Location !== this.projectMeta.Location) {
 					this.projectMeta = project;
@@ -412,15 +411,19 @@ define([
 								this._node_modules = true;
 							}
 							_handle.call(this, "onProjectChanged", this, evnt, project.Location);
+							this.projectPromise.resolve(project);
 						}.bind(this),
 						/* @callback */ function(err) {
 							_handle.call(this, "onProjectChanged", this, evnt, project.Location);
+							this.projectPromise.resolve(project);
 						}.bind(this));
 				}
 				_handle.call(this, "onInputChanged", this, evnt, project.Location);
+				this.projectPromise.resolve(project);
 			} else {
 				delete this.ecma;
 				_handle.call(this, "onProjectChanged", this, evnt, null);
+				this.projectPromise.resolve(null);
 			}
 		}.bind(this));
 	};
