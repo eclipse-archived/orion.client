@@ -72,6 +72,13 @@ function startServer(options) {
 		app.use('/xfer', checkAuthenticated, require('./lib/xfer')(options));
 		app.use('/metrics', require('./lib/metrics').router(options));
 		app.use('/version', require('./lib/version').router(options));
+		if(options.configParams["additional.endpoint"]){
+			var additionalEndpoints = require(options.configParams["additional.endpoint"]);
+			additionalEndpoints.forEach(function(additionalEndpoint){
+				additionalEndpoint.checkAuthenticated ? app.use(additionalEndpoint.endpoint,checkAuthenticated,require(additionalEndpoint.modulepath).router(options))
+					: app.use(additionalEndpoint.endpoint,require(additionalEndpoint.modulepath).router(options));
+			});
+		}
 		if (options.configParams.isElectron) app.use('/update', require('./lib/update').router(options));
 
 		// Static files
