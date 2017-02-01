@@ -15,9 +15,9 @@
 
 define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/i18nUtil', 'orion/uiUtils', 'orion/fileUtils', 'orion/commands', 'orion/fileDownloader',
 	'orion/commandRegistry', 'orion/contentTypes', 'orion/compare/compareUtils', 
-	'orion/Deferred', 'orion/webui/dialogs/DirectoryPrompterDialog',
-	'orion/EventTarget', 'orion/form', 'orion/xsrfUtils', 'orion/bidiUtils', 'orion/util'],
-	function(messages, lib, i18nUtil, mUIUtils, mFileUtils, mCommands, mFileDownloader, mCommandRegistry, mContentTypes, mCompareUtils, Deferred, DirPrompter, EventTarget, form, xsrfUtils, bidiUtils, util){
+	'orion/Deferred', 'orion/webui/dialogs/DirectoryPrompterDialog', 'orion/webui/dialogs/SFTPConnectionDialog',
+	'orion/EventTarget', 'orion/form', 'orion/xsrfUtils', 'orion/bidiUtils', 'orion/util', 'orion/collab/shareProjectClient'],
+	function(messages, lib, i18nUtil, mUIUtils, mFileUtils, mCommands, mFileDownloader, mCommandRegistry, mContentTypes, mCompareUtils, Deferred, DirPrompter, SFTPDialog, EventTarget, form, xsrfUtils, bidiUtils, util, shareProjectClient){
 
 	/**
 	 * Utility methods
@@ -1308,7 +1308,54 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/i18n
 					}
 				}
 			});
-		commandService.addCommand(pasteFromBufferCommand);		
+		commandService.addCommand(pasteFromBufferCommand);
+
+		var shareProjectCommand = new mCommands.Command({
+			name: "Share Project",
+			tooltip: "Share project with a friend",
+			description: "Add a user so that they can collaborate with you on the project.",
+			imageClass: "core-sprite-link", //$NON-NLS-0$
+			id: "orion.shareProject", //$NON-NLS-0$
+			parameters: new mCommandRegistry.ParametersDescription([new mCommandRegistry.CommandParameter('username', 'text', "Username:", "Enter username here")]), //$NON-NLS-5$ //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			callback: function(data) {
+				var username = data.parameters.parameterTable.username.value;
+				var project = data.items[0].Name;
+				shareProjectClient.addUser(username, project);
+			},
+			visibleWhen: function(item) {
+				if (Array.isArray(item)) {
+					if (item.length === 1) {
+						return !item[0].Parents || !item[0].Parents.length;
+					}
+				}
+				return false;
+			}
+		});
+		commandService.addCommand(shareProjectCommand);
+
+		var unshareProjectCommand = new mCommands.Command({
+			name: "Unshare Project",
+			tooltip: "Unshare a project",
+			description: "Remove a user from the sharing list of this project.",
+			imageClass: "core-sprite-link", //$NON-NLS-0$
+			id: "orion.unshareProject", //$NON-NLS-0$
+			parameters: new mCommandRegistry.ParametersDescription([new mCommandRegistry.CommandParameter('username', 'text', "Username:", "Enter username here")]), //$NON-NLS-5$ //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			callback: function(data) {
+				var username = data.parameters.parameterTable.username.value;
+				var project = data.items[0].Name;
+				shareProjectClient.removeUser(username, project);
+			},
+			visibleWhen: function(item) {
+				if (Array.isArray(item)) {
+					if (item.length === 1) {
+						return !item[0].Parents || !item[0].Parents.length;
+					}
+				}
+				return false;
+			}
+		});
+		commandService.addCommand(unshareProjectCommand);
+
 		return new Deferred().resolve();
 	};
 		

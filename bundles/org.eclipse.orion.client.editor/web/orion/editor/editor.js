@@ -390,22 +390,6 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 			return this._foldingRulerVisible;
 		},
 		/**
-		 * Creates and add a FoldingAnnotation to the editor.
-		 *
-		 * @param {Number} start The start offset of the annotation in the text model.
-		 * @param {Number} end The end offset of the annotation in the text model.
-		 * @returns {orion.editor.FoldingAnnotation} The FoldingAnnotation added to the editor.
-		 */
-		addFoldingAnnotation: function(start, end) {
-			var annotationModel = this.getAnnotationModel();
-			if(annotationModel) {
-				var foldingAnnotation = new mAnnotations.FoldingAnnotation(start, end, this.getTextView().getModel());
-				annotationModel.addAnnotation(foldingAnnotation);
-				return foldingAnnotation;
-			}
-			return null;
-		},
-		/**
 		 * Returns the line number ruler of the editor.
 		 *
 		 * @returns {orion.editor.LineNumberRuler}

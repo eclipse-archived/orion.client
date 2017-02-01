@@ -233,6 +233,10 @@ define("orion/editor/annotations", ['i18n!orion/editor/nls/messages', 'orion/edi
 	 * Diff Modification annotation type.
 	 */
 	AnnotationType.ANNOTATION_DIFF_MODIFIED = "orion.annotation.diffModified"; //$NON-NLS-0$
+	/**
+	 * Collab Line Change annotation type.
+	 */
+	AnnotationType.ANNOTATION_COLLAB_LINE_CHANGED = "orion.annotation.collabLineChanged"; //$NON-NLS-0$
 
 	/** @private */
 	var annotationTypes = {};
@@ -324,6 +328,7 @@ define("orion/editor/annotations", ['i18n!orion/editor/nls/messages', 'orion/edi
 	registerType(AnnotationType.ANNOTATION_DIFF_ADDED);
 	registerType(AnnotationType.ANNOTATION_DIFF_DELETED);
 	registerType(AnnotationType.ANNOTATION_DIFF_MODIFIED);
+	registerType(AnnotationType.ANNOTATION_COLLAB_LINE_CHANGED, true);
 
 	AnnotationType.registerType(AnnotationType.ANNOTATION_FOLDING, FoldingAnnotation);
 
@@ -565,7 +570,7 @@ define("orion/editor/annotations", ['i18n!orion/editor/nls/messages', 'orion/edi
 		 * returns all annotations in the model.
 		 *
 		 * @param {Number} start the start offset of the range.
-		 * @param {Number} end the end offset of the range.
+		 * @param {Number} end the end offset of the range (including).
 		 * @return {orion.editor.AnnotationIterator} an annotation iterartor.
 		 */
 		getAnnotations: function(start, end) {
@@ -580,10 +585,10 @@ define("orion/editor/annotations", ['i18n!orion/editor/nls/messages', 'orion/edi
 				skip = function() {
 					while (i < annotations.length) {
 						var a =  annotations[i++];
-						if ((start === a.start) || (start > a.start ? start < a.end : a.start < end)) {
+						if ((start === a.start) || (start > a.start ? start <= a.end : a.start <= end)) {
 							return a;
 						}
-						if (a.start >= end) {
+						if (a.start > end) {
 							break;
 						}
 					}

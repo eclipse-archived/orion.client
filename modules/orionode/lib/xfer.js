@@ -38,9 +38,12 @@ module.exports = function(options) {
 		if (err) console.error(err);
 	});
 
-	return express.Router()
+	var router = express.Router()
 	.get('/export*', getXfer)
 	.post('/import*', postImportXfer);
+	router.getXferFrom = getXferFrom;
+	router.postImportXferTo = postImportXferTo;
+	return router;
 	
 	
 function getOptions(req) {
@@ -64,6 +67,10 @@ function reportTransferFailure(res, err) {
 function postImportXfer(req, res) {
 	var filePath = req.params["0"];
 	filePath = fileUtil.safeFilePath(req.user.workspaceDir, filePath);
+	postImportXferTo(req, res, filePath);
+}
+
+function postImportXferTo(req, res, filePath) {
 	var xferOptions = getOptions(req);
 	if (xferOptions.indexOf("sftp") !== -1) {
 		return writeError(500, res, "Not implemented yet.");
@@ -213,9 +220,13 @@ function getXfer(req, res) {
 		return writeError(400, res, "Export is not a zip");
 	}
 	
+	filePath = fileUtil.safeFilePath(req.user.workspaceDir, filePath.replace(/.zip$/, ""));
+	getXferFrom(req, res, filePath);
+}
+
+function getXferFrom(req, res, filePath) {
 	var zip = archiver('zip');
 	zip.pipe(res);
-	filePath = fileUtil.safeFilePath(req.user.workspaceDir, filePath.replace(/.zip$/, ""));
 	write(zip, filePath, filePath)
 	.then(function() {
 		zip.finalize();

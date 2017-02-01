@@ -24,7 +24,8 @@ var express = require('express'),
 	nodemailer = require('nodemailer'),
 	fs = require('fs'),
 	args = require('./args'),
-	generator = require('generate-password');
+	generator = require('generate-password'),
+	jwt = require('jsonwebtoken');
 	
 var CONFIRM_MAIL = "./multitenant/EmailConfirmation.txt",
 	PWD_CONFIRM_RESET_MAIL = "./multitenant/EmailConfirmationPasswordReset.txt",
@@ -496,7 +497,10 @@ module.exports = function(options) {
 		if (!req.user) {
 			return res.status(200).end();
 		}
-		return res.status(200).json(userJSON(req.user));
+		var user = userJSON(req.user)
+		//add the web token with the response
+		user.jwt = jwt.sign({'username': user.UserName}, options.configParams["orion.jwt.secret"]);
+		return res.status(200).json(user);
 	});
 	
 	return app;

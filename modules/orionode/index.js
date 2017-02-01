@@ -11,7 +11,8 @@
 /*eslint-env node */
 var express = require('express'),
 	path = require('path'),
-	fs = require('fs');
+	fs = require('fs'),
+	jwt = require('jsonwebtoken');
 
 var LIBS = path.normalize(path.join(__dirname, 'lib/')),
 	MINIFIED_ORION_CLIENT = "lib/orion.client",
@@ -46,6 +47,37 @@ function startServer(options) {
 			}
 		}
 
+		/**
+		 * This method ensures that the websocket trying to retrieve and save content is authenticated.
+		 * We allow two different authentication methods: JWT for the collab server and user token for users.
+		 */
+		function checkCollabAuthenticated(req, res, next) {
+			if (req.user) {
+				req.user.workspaceDir = options.workspaceDir + (req.user.workspace ? "/" + req.user.workspace : "");
+				next();
+			} else if (req.headers['authorization'] && checkCollabServerToken(req.headers['authorization'])){
+				next();
+			} else {
+				res.writeHead(401, "Not authenticated");
+				res.end();
+			}
+		}
+
+		/**
+		 * Check the JWT token for collab server
+		 */
+		function checkCollabServerToken(authorization) {
+			if (authorization.substr(0, 7) !== "Bearer ") {
+				return false;
+			}
+			try {
+				var decoded = jwt.verify(authorization.substr(7), options.configParams["orion.jwt.secret"]);
+				return true;
+			} catch (ex) {
+				return false;
+			}
+		}
+
 		// API handlers
 		if (options.configParams["orion.single.user"]) {
 			app.use(/* @callback */ function(req, res, next){
@@ -60,7 +92,9 @@ function startServer(options) {
 			});
 		} else {
 			app.use(require(options.configParams["login.module"] || "./lib/user")(options));
+			app.use('/sharedWorkspace', checkCollabAuthenticated, require('./lib/sharedWorkspace')({ root: '/sharedWorkspace/tree/file', fileRoot: '/file', options: options }));
 		}
+		
 		app.use('/site', checkAuthenticated, require('./lib/sites')(options));
 		app.use('/task', checkAuthenticated, require('./lib/tasks').router({ root: contextPath + '/task' }));
 		app.use('/filesearch', checkAuthenticated, require('./lib/search')(options));

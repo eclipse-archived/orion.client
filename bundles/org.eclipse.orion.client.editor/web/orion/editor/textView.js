@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2010, 2016 IBM Corporation and others.
+ * Copyright (c) 2010, 2016, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -743,7 +743,7 @@ define("orion/editor/textView", [  //$NON-NLS-1$
 					end += text.length;
 					style = range.style;
 					if (oldSpan) {
-						oldText = oldSpan.firstChild.data;
+						oldText = oldSpan.firstChild ? oldSpan.firstChild.data : " ";
 						oldStyle = oldSpan.viewStyle;
 						if (oldText === text && compare(style, oldStyle)) {
 							oldEnd += oldText.length;
@@ -757,7 +757,7 @@ define("orion/editor/textView", [  //$NON-NLS-1$
 									if (spanEnd >= changeStart) {
 										spanEnd -= changeCount;
 									}
-									var t = oldSpan.firstChild.data;
+									var t = oldSpan.firstChild ? oldSpan.firstChild.data : " ";
 									var len = t ? t.length : 0;
 									if (oldEnd + len > spanEnd) { break; }
 									oldEnd += len;
@@ -6593,7 +6593,7 @@ define("orion/editor/textView", [  //$NON-NLS-1$
 			} else {
 				if (e.selection.length > 1) this._startUndo();
 			}
-			
+
 			var model = this._model;
 			try {
 				if (e._ignoreDOMSelection) { this._ignoreDOMSelection = true; }
@@ -6611,7 +6611,7 @@ define("orion/editor/textView", [  //$NON-NLS-1$
 				if (e._ignoreDOMSelection) { this._ignoreDOMSelection = false; }
 			}
 			this._setSelection(e.selection, show, true, callback);
-			
+
 			undo = this._compoundChange;
 			if (undo) undo.owner.selection = e.selection;
 			
@@ -6819,6 +6819,11 @@ define("orion/editor/textView", [  //$NON-NLS-1$
 			var viewDiv = this._viewDiv;
 			if (pixelX) { viewDiv.scrollLeft += pixelX; }
 			if (pixelY) { viewDiv.scrollTop += pixelY; }
+		},
+		tryScrollLines: function(deltaLine) {
+			var lineHeight = this.getLineHeight();
+			var deltaY = deltaLine * lineHeight;
+			this._scrollView(0, deltaY);
 		},
 		_setClipboardText: function (text, evt) {
 			if (util.isElectron && !evt) {

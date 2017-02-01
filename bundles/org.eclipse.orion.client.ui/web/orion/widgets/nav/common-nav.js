@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2013, 2016 IBM Corporation and others.
+ * Copyright (c) 2013, 2016, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License v1.0
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution
@@ -377,6 +377,10 @@ define([
 				commandRegistry.registerCommandContribution(viewActionsScope, commandId, 1, "orion.menuBarViewGroup/eclipse.fileCommandExtensions"); //$NON-NLS-0$
 				commandRegistry.registerCommandContribution(contextMenuActionsScope, commandId, 1, "orion.commonNavContextMenuGroup/orion.relatedActions/orion.Extensions"); //$NON-NLS-0$
 			});
+			
+			//Collaboration Mode
+			commandRegistry.registerCommandContribution(contextMenuActionsScope, "orion.shareProject", 1);
+			commandRegistry.registerCommandContribution(contextMenuActionsScope, "orion.unshareProject", 1);
 
 			// Retrieve and register project commands
 			return this.preferences.get("/common-nav").then(function(prefs) { //$NON-NLS-0$
