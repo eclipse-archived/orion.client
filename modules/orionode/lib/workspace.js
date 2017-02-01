@@ -95,7 +95,7 @@ module.exports = function(options) {
 					})
 				};
 				return Promise.all(fileUtil.getDecorators().map(function(decorator){
-					return decorator(workspaceRoot, req, "", workspaceJson);			
+					return decorator(contextPath, workspaceRoot, req, "", workspaceJson);			
 					})
 				);
 			})
