@@ -760,7 +760,7 @@ define("orion/editor/textStyler", ['orion/editor/annotations', 'orion/editor/eve
 		_containsCaptureRegex: /\((?!\?:)/, //$NON-NLS-0$
 		_eolRegex: /$/,
 		_ignoreCaseRegex: /^\(\?i\)\s*/,
-		_linebreakRegex: /(.*)(?:[\r\n]|$)/g,
+		_linebreakRegex: /([\s\S]*?)(?:[\r\n]|$)/g,
 		_CR: "\r", //$NON-NLS-0$
 		_FLAGS: "g", //$NON-NLS-0$
 		_NEWLINE: "\n", //$NON-NLS-0$
