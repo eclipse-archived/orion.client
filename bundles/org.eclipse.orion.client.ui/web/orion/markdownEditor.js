@@ -12,8 +12,9 @@
 /*global URL*/
 define([
 	'orion/i18nUtil',
-	'i18n!orion/nls/messages',
+	'i18n!orion/nls/messages',	
 	'marked/marked',
+	'orion/bidiUtils',
 	'orion/commands',
 	'orion/keyBinding',
 	'orion/editor/annotations',
@@ -28,7 +29,7 @@ define([
 	'orion/webui/splitter',
 	'orion/metrics',
 	'orion/URL-shim'
-], function(i18nUtil, messages, marked, mCommands, mKeyBinding, mAnnotations, mEditor, mTextStyler, mTextUtil, mFileCommands, objects, lib, URITemplate, PageUtil, mSplitter, mMetrics) {
+], function(i18nUtil, messages, marked, bidiUtils, mCommands, mKeyBinding, mAnnotations, mEditor, mTextStyler, mTextUtil, mFileCommands, objects, lib, URITemplate, PageUtil, mSplitter, mMetrics) {
 
 	var uriTemplate = new URITemplate("#{,resource,params*}"); //$NON-NLS-0$
 	var extensionRegex = /\.([0-9a-z]+)(?:[\?#]|$)/i;
@@ -1130,6 +1131,10 @@ define([
 			for (i = e.oldBlocks.length - 1; oldBlocksIndex <= i; i--) {
 				parentElement.removeChild(children[i]);
 			}
+			
+			if (bidiUtils.isBidiEnabled()) {
+				previewDiv.dir = bidiUtils.getTextDirection(previewDiv.textContent);
+			}			
 		},
 		_setElementIdentifier: function(element, id) {
 			var isSelected = element.className.indexOf(this._markdownSelected) !== -1;
@@ -1594,7 +1599,7 @@ define([
 			if (this._model.getCharCount()) {
 				this._stylerAdapter.initialPopulatePreview();
 			}
-
+						
 			var settings = this._editorView.getSettings();
 			this._styler.setWhitespacesVisible(settings.showWhitespaces, true);
 
