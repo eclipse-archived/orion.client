@@ -79,6 +79,7 @@ define([
 		this.fileClient = null;
 		this.handlers = [eslintHandler];
 		this.projectFiles = [this.PACKAGE_JSON, this.TERN_PROJECT, this.ESLINTRC, this.ESLINTRC_JS, this.ESLINTRC_JSON, this.ESLINTRC_YAML, this.ESLINTRC_YML];
+        this.lintFiles = [this.ESLINTRC_JS, this.ESLINTRC_JSON, this.ESLINTRC, this.ESLINTRC_YAML, this.ESLINTRC_YML, this.PACKAGE_JSON];
 	}
 	/**
 	 * The .tern-project file name
@@ -307,50 +308,30 @@ define([
 	 * @see http://eslint.org/docs/user-guide/configuring
 	 */
 	JavaScriptProject.prototype.getESlintOptions = function getESlintOptions() {
+        var deferred = new Deferred();
 		if(this.map.eslint) {
-			return new Deferred().resolve(this.map.eslint);
+			return deferred.resolve(this.map.eslint);
 		}
-		var vals;
-		return this.getFile(this.ESLINTRC_JS).then(function(file) {
-			vals = readAndMap(this.map, file, "eslint");
-			if(vals) {
-				return vals;
-			}
-			return this.getFile(this.ESLINTRC_JSON).then(function(file) {
-				vals = readAndMap(this.map, file, "eslint");
-				if(vals) {
-					return vals;
-				}
-				return this.getFile(this.ESLINTRC).then(function(file) {
-					vals = readAndMap(this.map, file, "eslint");
-					if(vals) {
-						return vals;
-					}
-					return this.getFile(this.ESLINTRC_YAML).then(function(file) {
-						vals = readAndMap(this.map, file, "eslint");
-						if (vals) {
-							return vals;
-						}
-						return this.getFile(this.ESLINTRC_YML).then(function(file) {
-							vals = readAndMap(this.map, file, "eslint");
-							if (vals) {
-								return vals;
-							}
-							return this.getFile(this.PACKAGE_JSON).then(function(file) {
-								if(file && file.contents) {
-									vals = JSON.parse(file.contents);
-									if(vals.eslintConfig !== null && typeof vals.eslintConfig === 'object' && Object.keys(vals.eslintConfig).length > 0) {
-										this.map.eslint = vals.eslintConfig;
-										return this.map.eslint;
-									}
-								}
-								return null;
-							}.bind(this));
-						}.bind(this));
-					}.bind(this));
-				}.bind(this));
-			}.bind(this));
-		}.bind(this));
+        this.projectPromise.then(function() {
+            var p = [];
+            this.lintFiles.forEach(function(_name) {
+                p.push(this.getFile(_name));
+            }.bind(this));
+            p.reduce(function(prev, current, index, array) {
+                return prev.then(function(_file) {
+                    var vals = readAndMap(this.map, _file, "eslint");
+                    if(vals) {
+                        deferred.resolve(vals);
+                        return current.reject("done");
+                    }
+                    if(index === array.length-1) {
+                        deferred.resolve(null);
+                    }
+                    return current;
+                }.bind(this));
+            }.bind(this), new Deferred().resolve());
+        }.bind(this));
+        return deferred;
 	};
 
 	/**
@@ -388,6 +369,9 @@ define([
 					// ignore
 				}
 			}
+            if(vals.eslintConfig && typeof vals.eslintConfig === "object") {
+                vals = vals.eslintConfig;
+            }
 		}
 		if (vals && Object.keys(vals).length > 0) {
 			map[key] = vals;
@@ -416,6 +400,7 @@ define([
 		initialized = true;
 		var file = evnt.file;
 		resolveProject.call(this, file).then(function(project) {
+            this.projectPromise.resolve(project);
 			if (project) {
 				if(!this.projectMeta || project.Location !== this.projectMeta.Location) {
 					this.projectMeta = project;
@@ -449,10 +434,12 @@ define([
 	 */
 	function resolveProject(file) {
 		var deferred = new Deferred();
+        this.projectPromise = new Deferred();
 		if(file) {
-			if(this.projectMeta && file.Location && file.Location.startsWith(this.projectMeta.Location)) {
+            var floc = file.Location ? file.Location : file.location; 
+			if(this.projectMeta && floc && floc.startsWith(this.projectMeta.Location)) {
 				deferred.resolve(this.projectMeta);
-				return;
+				return deferred;
 			}
 			var parents = file.parents ? file.parents : file.Parents;
 			if(!Array.isArray(parents) || parents.length < 1) {
@@ -466,15 +453,18 @@ define([
 						promises.push(this.getFile(_f, prnt.Location));
 						promises.push(this.getFile(_f, "/file/"));
 					}.bind(this));
-					promises.reduce(/* @callback */ function(prev, item) {
-						return prev.then(/* @callback */ function(value) {
-							return item.then(function(_file) {
-								if(_file) {
-									deferred.resolve({Location: _file.project});
-									throw new Error("stop");
-								}
-							});
-						});
+					promises.reduce(function(prev, item, index, array) {
+                        return prev.then(function(_file) {
+                            if(_file && _file.contents) {
+                                deferred.resolve({Location: _file.project});
+                                return item.reject("done");
+                            }
+                            if(index === array.length-1) {
+                                //nothing was found, assume /file/
+                                deferred.resolve({Location: "/file/"});
+                            }
+                            return item;
+                        });
 					}, new Deferred().resolve());
 				} else {
 					deferred.resolve(parents[parents.length-1]);
