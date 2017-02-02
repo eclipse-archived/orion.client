@@ -466,6 +466,28 @@ define([
 		},
 		
 		/**
+		 * @description Find all directive comments with the given name in the given AST
+		 * @function
+		 * @param {Object} ast The AST to search
+		 * @param {String} name The name of the directive to look for. e.g. eslint-env
+		 * @returns {Array} Array of AST comment nodes, possibly empty
+		 * @since 14.0
+		 */
+		findDirectives: function findDirectives(ast, name) {
+			var result = [];
+			if(ast && typeof name !== 'undefined') {
+				var len = ast.comments.length;
+				for(var i = 0; i < len; i++) {
+					var match = /^\s*(eslint-\w+|eslint|globals?)(\s|$)/.exec(ast.comments[i].value);
+					if(match !== null && typeof match !== 'undefined' && match[1] === name) {
+						result.push(ast.comments[i]);
+					}
+				}
+			}
+			return result;
+		},
+		
+		/**
 		 * @description Tries to find the comment for the given node. If more than one is found in the array
 		 * the last entry is considered 'attached' to the node
 		 * @function
