@@ -21,7 +21,7 @@ module.exports = {};
 
 module.exports.router = function(options) {
 	var fileRoot = options.fileRoot;
-	var contextPath = options.options.configParams["orion.context.path"] || "";
+	var contextPath = (options && options.options && options.options.configParams && options.options.configParams["orion.context.path"]) || "";
 	if (!fileRoot) { throw new Error('options.root is required'); }
 
 	return express.Router()

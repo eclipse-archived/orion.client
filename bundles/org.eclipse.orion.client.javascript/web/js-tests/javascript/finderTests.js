@@ -2169,6 +2169,28 @@ define([
 				});
 			});
 			
+			it('Test findDirectives 1', function() {
+			    var r = setup("/*eslint-enable semi,no-undef*/");
+				return r.astManager.getAST(r.editorContext).then(function(ast) {
+					var comments = Finder.findDirectives(ast, 'eslint-enable');
+					assert.equal(comments.length, 1, "Wrong number of directives found.");
+				});
+			});
+			it('Test findDirectives 2', function() {
+			    var r = setup("/* Unrelated comment */\nvar a = 5;\n/*eslint-enable semi,no-undef*/\nfunction foo(){}");
+				return r.astManager.getAST(r.editorContext).then(function(ast) {
+					var comments = Finder.findDirectives(ast, 'eslint-enable');
+					assert.equal(comments.length, 1, "Wrong number of directives found.");
+				});
+			});
+			it('Test findDirectives 3', function() {
+			    var r = setup("/*eslint-enable yoda*/\n/* eslint-disable semi */\n/*Unrelated comment */\nvar a = 5;\n/*eslint-enable semi,no-undef*/\nfunction foo(){}");
+				return r.astManager.getAST(r.editorContext).then(function(ast) {
+					var comments = Finder.findDirectives(ast, 'eslint-enable');
+					assert.equal(comments.length, 2, "Wrong number of directives found.");
+				});
+			});
+			
 			/**
 			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=461446
 			 */

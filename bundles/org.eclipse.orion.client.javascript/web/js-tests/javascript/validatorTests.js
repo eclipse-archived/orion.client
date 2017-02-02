@@ -93,7 +93,7 @@ define([
 			function assertProblems(computed, expected) {
 				try {
 					var problems = computed.problems;
-					assert.equal(problems.length, expected.length, "The wrong number of problems was computed\n " + _problemToString(computed, expected));
+					assert.equal(problems.length, expected.length, "The wrong number of problems was computed\n " + _problemToString(problems, expected));
 					for(var i = 0; i < problems.length; i++) {
 						var pb = problems[i];
 						var expb = expected[i];

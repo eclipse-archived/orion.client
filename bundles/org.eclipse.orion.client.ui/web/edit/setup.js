@@ -355,7 +355,10 @@ objects.mixin(EditorViewer.prototype, {
 			progressService: this.progressService,
 			statusReporter: this.statusReporter.bind(this),
 			selection: this.selection,
-			contentTypeRegistry: this.contentTypeRegistry
+			contentTypeRegistry: this.contentTypeRegistry,
+			reveal: function(model) {
+				this.sidebar.sidebarNavInputManager.reveal(model);
+			}.bind(this)
 		});
 		inputManager.addEventListener("InputChanged", function(evt) { //$NON-NLS-0$
 			var metadata = evt.metadata;
@@ -632,7 +635,7 @@ objects.mixin(EditorSetup.prototype, {
 					if (util.isElectron || !displayRunBar) {
 						lib.node("runBarWrapper").style.display = "none";
 					}
-				});
+				}.bind(this));
 			}
 		}.bind(this));
 	},
@@ -813,7 +816,8 @@ objects.mixin(EditorSetup.prototype, {
 			selection: this.selection,
 			fileClient: this.fileClient,
 			statusService: this.statusService,
-			progressService: this.progressService
+			progressService: this.progressService,
+			sidebar:this.sidebar
 		});
 		editorViewer.create();
 		return editorViewer;
@@ -861,7 +865,6 @@ objects.mixin(EditorSetup.prototype, {
 		if (lastEditedFile && lastEditedFile.lastIndexOf(currentHash, 0) === 0 && lastEditedFile !== currentHash) {
 			window.location.hash = currentHash = lastEditedFile;
 		}
-
 		this.setInput(currentHash);
 		window.addEventListener("hashchange", function() { //$NON-NLS-0$
 			this.setInput(PageUtil.hash());

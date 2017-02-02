@@ -16,8 +16,8 @@ define([
 
 			createElements: function() {
 				this.createSections();
-			},	
-					
+			},
+
 			createSections: function(){
 				/* - desktop selection policy fields ----------------------------------------------------- */
 				this.generalFields = [
@@ -35,12 +35,12 @@ define([
 					id: "fileNavigation", //$NON-NLS-0$
 					title: messages.fileNavigation,
 					content: '<section class="setting-row" role="region" aria-labelledby="fileNavigationTitle" id="setting-row-general">', //$NON-NLS-0$
-				});	
-				
+				});
+
 				var settingsContentElement = document.createElement('div');
 				settingsContentElement.className = 'setting-content'; //$NON-NLS-0$
 				settingsContentElement.style.paddingLeft = "30px";
-				
+
 				lib.node('setting-row-general').appendChild(settingsContentElement); //$NON-NLS-0$
 
 				this.generalFields.forEach(function(child) {
@@ -65,10 +65,10 @@ define([
 				this.preferences.getPrefs().then(function (generalPrefs) {
 					this.generalFields[0].setSelection(generalPrefs.desktopSelectionPolicy);
 					this.generalFields[0].show();
-					
+
 					//filtered resources
 					if(typeof generalPrefs.filteredResources !== 'string') {
-						this.generalFields[1].setValue(".git"); //default
+						this.generalFields[1].setValue(".git, .DS_Store"); //default
 					} else {
 						this.generalFields[1].setValue(generalPrefs.filteredResources);
 					}

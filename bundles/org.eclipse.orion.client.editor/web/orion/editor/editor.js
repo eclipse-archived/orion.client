@@ -16,8 +16,9 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 	'orion/editor/tooltip', //$NON-NLS-0$
 	'orion/editor/annotations', //$NON-NLS-0$
 	'orion/objects', //$NON-NLS-0$
+	'orion/editor/util', //$NON-NLS-1$
 	'orion/util' //$NON-NLS-0$
-], function(messages, mEventTarget, mTooltip, mAnnotations, objects, util) {
+], function(messages, mEventTarget, mTooltip, mAnnotations, objects, textUtil, util) {
 	
 	var AT = mAnnotations.AnnotationType;
 
@@ -180,9 +181,30 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 		 * @param {Boolean} dirty
 		 */
 		setDirty: function(dirty) {
+			this._setSyntaxCheckRequired(dirty);
 			if (this._dirty === dirty) { return; }
 			this._dirty = dirty;
 			this.onDirtyChanged({type: "DirtyChanged"}); //$NON-NLS-0$
+		},
+		/**
+		 * Sets a flag indicating whether the editor contents have been modified since
+		 * the last syntax check (validation) operation.
+		 * 
+		 * @function
+		 * @param required {Boolean} what to set the flag to, true indicates the editor is dirty and needs syntax checking
+		 */
+		_setSyntaxCheckRequired: function _setSyntaxCheckRequired(required){
+			this._syntaxCheckRequired = required;
+		},
+		/**
+		 * Returns the state of the syntax check required flag, indicating whether the editor contents have
+		 * been modified since the last syntax check (validation) operation.
+		 * 
+		 * @function
+		 * @returns returns {Boolean} whether the flag has been set indicating a syntax check (validation) operation is required
+		 */
+		_isSyntaxCheckRequired: function _isSyntaxCheckRequired() {
+			return this._syntaxCheckRequired;
 		},
 		/**
 		 * @private
@@ -589,6 +611,48 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 			} else {
 				textView.removeRuler(this._zoomRuler);
 			}
+		},
+		
+		/**
+		 * Sets which annotations types are shown in the annotation ruler.  Annotations are visible by default.
+		 * 
+		 * @param {Object} types a hash table mapping annotation type to visibility (i.e. AnnotationType.ANNOTATION_INFO -> true).
+		 * @since 14.0
+		 */
+		setAnnotationTypesVisible: function(types) {
+			if (textUtil.compare(this._annotationTypesVisible, types)) return;
+			this._annotationTypesVisible = types;
+			if (!this._annotationRuler || !this._textView || !this._annotationRulerVisible) { return; }
+			this._annotationRuler.setAnnotationTypeVisible(types);
+			this._textView.redrawLines(0, undefined, this._annotationRuler);
+		},
+		
+		/**
+		 * Sets which annotations types are shown in the overview ruler.  Annotations are visible by default.
+		 * 
+		 * @param {Object} types a hash table mapping annotation type to visibility (i.e. AnnotationType.ANNOTATION_INFO -> true).
+		 * @since 14.0
+		 */
+		setOverviewAnnotationTypesVisible: function(types) {
+			if (textUtil.compare(this._overviewAnnotationTypesVisible, types)) return;
+			this._overviewAnnotationTypesVisible = types;
+			if (!this._overviewRuler || !this._textView || !this._overviewRulerVisible) { return; }
+			this._overviewRuler.setAnnotationTypeVisible(types);
+			this._textView.redrawLines(0, undefined, this._overviewRuler);
+		},
+		
+		/**
+		 * Sets which annotations types are shown in the text.  Annotations are visible by default.
+		 * 
+		 * @param {Object} types a hash table mapping annotation type to visibility (i.e. AnnotationType.ANNOTATION_INFO -> true).
+		 * @since 14.0
+		 */
+		setTextAnnotationTypesVisible: function(types) {
+			if (textUtil.compare(this._textAnnotationTypesVisible, types)) return;
+			this._textAnnotationTypesVisible = types;
+			if (!this._annotationStyler || !this._textView) { return; }
+			this._annotationStyler.setAnnotationTypeVisible(types);
+			this._textView.redrawLines(0, undefined);
 		},
 
 		mapOffset: function(offset, _parent) {
@@ -1011,6 +1075,8 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 						styler.addAnnotationType(AT.ANNOTATION_CURRENT_LINKED_GROUP);
 						styler.addAnnotationType(AT.ANNOTATION_LINKED_GROUP);
 						styler.addAnnotationType(HIGHLIGHT_ERROR_ANNOTATION);
+
+						styler.setAnnotationTypeVisible(this._textAnnotationTypesVisible);
 					}
 				}
 
@@ -1027,6 +1093,8 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 					ruler.addAnnotationType(AT.ANNOTATION_DIFF_ADDED);
 					ruler.addAnnotationType(AT.ANNOTATION_DIFF_DELETED);
 					ruler.addAnnotationType(AT.ANNOTATION_DIFF_MODIFIED);
+					
+					ruler.setAnnotationTypeVisible(this._annotationTypesVisible);
 				}
 				this.setAnnotationRulerVisible(this._annotationRulerVisible || this._annotationRulerVisible === undefined, true);
 
@@ -1049,7 +1117,8 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 					ruler.addAnnotationType(AT.ANNOTATION_DIFF_ADDED);
 					ruler.addAnnotationType(AT.ANNOTATION_DIFF_DELETED);
 					ruler.addAnnotationType(AT.ANNOTATION_DIFF_MODIFIED);
-
+					
+					ruler.setAnnotationTypeVisible(this._overviewAnnotationTypesVisible);
 				}
 				this.setOverviewRulerVisible(this._overviewRulerVisible || this._overviewRulerVisible === undefined, true);
 			}

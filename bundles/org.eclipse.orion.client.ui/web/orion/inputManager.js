@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2010, 2016 IBM Corporation and others.
+ * Copyright (c) 2010, 2016, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License v1.0
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution
@@ -140,6 +140,7 @@ define([
 		this.progressService = options.progressService;
 		this.contentTypeRegistry = options.contentTypeRegistry;
 		this.selection = options.selection;
+		this.reveal = options.reveal;
 		this._input = this._title = "";
 		if (this.fileClient) {
 			this.fileClient.addEventListener("Changed", function(evt) { //$NON-NLS-0$
@@ -370,7 +371,6 @@ define([
 			var metadata = this.getFileMetadata();
 			if (!metadata) return new Deferred().reject();
 			if (metadata._saving) { return metadata._savingDeferred; }
-			var that = this;
 			metadata._savingDeferred = new Deferred();
 			metadata._saving = true;
 			function done(result) {
@@ -504,6 +504,38 @@ define([
 				this._idle.setTimeout(timeout);
 			}
 		},
+		/**
+		 * Set the auto syntax check timeout. Recommended this is only set when autosave is turned off
+		 * because save operations will already run the syntax checker.
+		 * 
+		 * @param syntaxChecker {Function} Function that will execute the syntax check
+		 * @param timeout {Number} How long to idle before syntax checking in milliseconds, -1 to disable
+		 */
+		setAutoSyntaxCheck: function(syntaxChecker, timeout) {
+			var time = timeout;
+			if (!syntaxChecker){
+				time = -1;
+			}
+			this._autoSyntaxEnabled = time !== -1;
+			this._autoSyntaxActive = false;
+			if (!this._idle2) {
+				var options = {
+					document: document,
+					timeout: time
+				};
+				this._idle2 = new Idle(options);
+				this._idle2.addEventListener("Idle", function () { //$NON-NLS-0$
+					this._autoSyntaxActive = true;
+					if (this.editor._isSyntaxCheckRequired()){
+						syntaxChecker();
+						this.editor._setSyntaxCheckRequired(false);
+						this._autoSyntaxActive = false;
+					}
+				}.bind(this));
+			} else {
+				this._idle2.setTimeout(time);
+			}
+		},
 		setFormatOnSave: function(enabled) {
 			this._formatOnSaveEnabled = enabled;
 		},
@@ -539,6 +571,7 @@ define([
 						this.save();
 					} else if (!window.confirm(messages.confirmUnsavedChanges)) {
 						window.location.hash = oldLocation;
+						this.reveal(this.getFileMetadata());
 						return;
 					}
 				}

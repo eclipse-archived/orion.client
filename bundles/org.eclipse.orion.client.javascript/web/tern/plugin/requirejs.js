@@ -83,7 +83,8 @@
         deps.push(node.required);
       } else if (node.type == "ArrayExpression") for (var i = 0; i < node.elements.length; ++i) {
         var elt = node.elements[i];
-        if (elt.type == "Literal" && typeof elt.value == "string") {
+        //ORION a sparse array entry will cause this to throw an error
+        if (elt && elt.type == "Literal" && typeof elt.value == "string") {
           elt.required = interf(path.join(base, elt.value), data);
           deps.push(elt.required);
         }

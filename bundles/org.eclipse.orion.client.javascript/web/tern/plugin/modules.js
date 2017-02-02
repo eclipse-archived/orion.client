@@ -43,6 +43,7 @@
     },
 
     resolveModule: function(name, parentFile) {
+      var modName = name; // ORION we need the original name for linting
       var over = this.maybeOverride(name)
       if (over) return over
       var known = this.knownModules[name]
@@ -71,12 +72,23 @@
       }
 
       var known = this.modules[resolved]
+      // ORION tag module with original name for unknown-require rule, update in case contents changed
+      if (known && contents){
+      	known.modName = modName;
+      }
       if (known) return known
 
       if (/\.js$|(?:^\/)[^\.]+$/.test(resolved))
         this.server.addFile(resolved, contents, parentFile)
       if (!relative) this.nonRelative[name] = resolved
-      return this.modules[resolved] = new infer.AVal
+      var val = new infer.AVal;
+      
+      // ORION tag module with original name for unknown-require rule
+      if (contents){
+        val.modName = modName;
+  	  }
+
+      return this.modules[resolved] = val;
     },
 
     findIn: function(array, node, pos) {

@@ -158,6 +158,7 @@ define([
 	 * @returns {Object} Orion Problem object
 	 */
 	function toProblem(e) {
+		var id = getProblemId(e);
 		var start = e.start, end = e.end;
 		var descriptionKey = e.args && e.args.nls ? e.args.nls : e.ruleId;
 		var descriptionArgs = e.args || Object.create(null);
@@ -166,7 +167,7 @@ define([
 			description = i18nUtil.formatMessage.call(null, messages[descriptionKey], descriptionArgs);
 		}
 		var prob = {
-			id: getProblemId(e),
+			id: id,
 			description: description,
 			severity: getSeverity(e)
 		};
@@ -221,12 +222,45 @@ define([
 	 * @param {?} cfg The configuration map from the eslintrc file
 	 * @since 14.0
 	 */
-	function configureCoreRules(cfg) {
+	function configureRules(cfg) {
 		if(cfg && cfg.rules) {
+			Object.keys(cfg.rules).forEach(function(key) {
+				if(!Rules.defaults[key]) {
+					delete cfg.rules[key];
+				}
+			});
 			cfg.rules["unknown-require"] = config.rules["unknown-require"];
 			cfg.rules["check-tern-plugin"] = config.rules["check-tern-plugin"];
 			cfg.rules["missing-requirejs"] = config.rules["missing-requirejs"];
 		}
+		return cfg;
+	}
+
+	/**
+	 * @name prepareConfig
+	 * @description Copies all of the configuration entries from the given configuration object into the one that 
+	 * will be passed to Tern
+	 * @param {?} configuration The existing configuration object or null
+	 * @param {?} env The existing environment map or null
+	 * @returns {?} The configured options map
+	 * @since 14.0
+	 */
+	function prepareConfig(configuration, env) {
+		var c = {rules: config.rules};
+		if(configuration) {
+			Object.keys(configuration).forEach(function(key) {
+				c[key] = configuration[key];
+			});
+		}
+		if(env) {
+			if(!c.env) {
+				c.env = {};
+			}
+			Object.keys(env).forEach(function(key) {
+				c.env[key] = env[key];
+			});
+		}
+		return c;
 	}
 
 	Objects.mixin(ESLintValidator.prototype, {
@@ -266,8 +300,7 @@ define([
 									env[key] = cfg.env[key];
 								});
 							}
-							configureCoreRules(cfg);
-							this._validate(meta, text, env, deferred, cfg);
+							this._validate(meta, text, env, deferred, configureRules(cfg));
 						}.bind(this));
 					} else {
 						// need to extract all scripts from the html text
@@ -290,15 +323,8 @@ define([
 		 */
 		_validate: function(meta, text, env, deferred, configuration) {
 			// When validating snippets in an html file ignore undefined rule because other scripts may add to the window object
-			var rules = config.rules;
-			if (configuration && configuration.rules) {
-				rules = configuration.rules;
-			}
 			var files = [{type: 'full', name: meta.location, text: text}]; //$NON-NLS-1$
-			var args =  {meta: {location: meta.location}, env: env, files: files, rules: rules};
-			if (configuration && configuration.ecmaFeatures) {
-				args.ecmaFeatures = configuration.ecmaFeatures;
-			}
+			var args =  {meta: {location: meta.location}, files: files, config: prepareConfig(configuration, env)};
 			var request = {request: 'lint', args: args}; //$NON-NLS-1$
 			var start = Date.now();
 			this.ternWorker.postMessage(

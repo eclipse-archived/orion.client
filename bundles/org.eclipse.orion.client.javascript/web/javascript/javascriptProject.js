@@ -12,8 +12,9 @@
  /*eslint-env amd, browser*/
 define([
 	"orion/Deferred",
-	"js-yaml/js-yaml"
-], function(Deferred, JsYaml) {
+	"js-yaml/js-yaml",
+	"orion/util"
+], function(Deferred, JsYaml, Util) {
 
 	var eslintHandler = {
 		_update: function _update(project, fileName) {
@@ -77,6 +78,8 @@ define([
 		this.registry = serviceRegistry;
 		this.fileClient = null;
 		this.handlers = [eslintHandler];
+		this.projectFiles = [this.PACKAGE_JSON, this.TERN_PROJECT, this.ESLINTRC, this.ESLINTRC_JS, this.ESLINTRC_JSON, this.ESLINTRC_YAML, this.ESLINTRC_YML];
+        this.lintFiles = [this.ESLINTRC_JS, this.ESLINTRC_JSON, this.ESLINTRC, this.ESLINTRC_YAML, this.ESLINTRC_YML, this.PACKAGE_JSON];
 	}
 	/**
 	 * The .tern-project file name
@@ -179,21 +182,23 @@ define([
 	 * @description Fetch the named child of the current project context
 	 * @function
 	 * @param {String} childName The short name of the project child to get
+	 * @param {String} projectPath The optional project path to fetch from
 	 * @returns {Deferred} A deferred that will resolve to the requested child metadata or null
 	 */
-	JavaScriptProject.prototype.getFile = function getFile(childName) {
-		if(!this.projectMeta) {
+	JavaScriptProject.prototype.getFile = function getFile(childName, projectPath) {
+		if(!this.projectMeta && !projectPath) {
 			return new Deferred().resolve(null);
 		}
-		var filePath = this.projectMeta.Location+childName;
+		var _project = this.projectMeta ? this.projectMeta.Location : projectPath;
+		var filePath = _project+childName;
 		if(this.map[filePath]) {
 			return new Deferred().resolve(this.map[filePath]);
 		}
 		return this.getFileClient().read(filePath, false, false, {readIfExists: true}).then(function(child) {
-			this.map[filePath] = {name: filePath, contents: child, project: this.projectMeta.Location};
-			return this.map[filePath];
+            this.map[filePath] = {name: filePath, contents: child, project: _project};
+            return this.map[filePath];
 		}.bind(this),
-		function() {
+		function rejected() {
 			return null;
 		});
 	};
@@ -303,50 +308,30 @@ define([
 	 * @see http://eslint.org/docs/user-guide/configuring
 	 */
 	JavaScriptProject.prototype.getESlintOptions = function getESlintOptions() {
+        var deferred = new Deferred();
 		if(this.map.eslint) {
-			return new Deferred().resolve(this.map.eslint);
+			return deferred.resolve(this.map.eslint);
 		}
-		var vals;
-		return this.getFile(this.ESLINTRC_JS).then(function(file) {
-			vals = readAndMap(this.map, file, "eslint");
-			if(vals) {
-				return vals;
-			}
-			return this.getFile(this.ESLINTRC_JSON).then(function(file) {
-				vals = readAndMap(this.map, file, "eslint");
-				if(vals) {
-					return vals;
-				}
-				return this.getFile(this.ESLINTRC).then(function(file) {
-					vals = readAndMap(this.map, file, "eslint");
-					if(vals) {
-						return vals;
-					}
-					return this.getFile(this.ESLINTRC_YAML).then(function(file) {
-						vals = readAndMap(this.map, file, "eslint");
-						if (vals) {
-							return vals;
-						}
-						return this.getFile(this.ESLINTRC_YML).then(function(file) {
-							vals = readAndMap(this.map, file, "eslint");
-							if (vals) {
-								return vals;
-							}
-							return this.getFile(this.PACKAGE_JSON).then(function(file) {
-								if(file && file.contents) {
-									vals = JSON.parse(file.contents);
-									if(vals.eslintConfig !== null && typeof vals.eslintConfig === 'object' && Object.keys(vals.eslintConfig).length > 0) {
-										this.map.eslint = vals.eslintConfig;
-										return this.map.eslint;
-									}
-								}
-								return null;
-							}.bind(this));
-						}.bind(this));
-					}.bind(this));
-				}.bind(this));
-			}.bind(this));
-		}.bind(this));
+        this.projectPromise.then(function() {
+            var p = [];
+            this.lintFiles.forEach(function(_name) {
+                p.push(this.getFile(_name));
+            }.bind(this));
+            p.reduce(function(prev, current, index, array) {
+                return prev.then(function(_file) {
+                    var vals = readAndMap(this.map, _file, "eslint");
+                    if(vals) {
+                        deferred.resolve(vals);
+                        return current.reject("done");
+                    }
+                    if(index === array.length-1) {
+                        deferred.resolve(null);
+                    }
+                    return current;
+                }.bind(this));
+            }.bind(this), new Deferred().resolve());
+        }.bind(this));
+        return deferred;
 	};
 
 	/**
@@ -384,6 +369,9 @@ define([
 					// ignore
 				}
 			}
+            if(vals.eslintConfig && typeof vals.eslintConfig === "object") {
+                vals = vals.eslintConfig;
+            }
 		}
 		if (vals && Object.keys(vals).length > 0) {
 			map[key] = vals;
@@ -410,40 +398,85 @@ define([
 	 */
 	JavaScriptProject.prototype.onInputChanged = function onInputChanged(evnt) {
 		initialized = true;
-		var file = evnt.file,
-			project;
+		var file = evnt.file;
+		resolveProject.call(this, file).then(function(project) {
+			if (project) {
+				if(!this.projectMeta || project.Location !== this.projectMeta.Location) {
+					this.projectMeta = project;
+					delete this.ecma;
+					delete this.map[this.TERN_PROJECT];
+					delete this._node_modules;
+					return this.getFile(this.NODE_MODULES).then(function(file) {
+							if(file && typeof file.contents === "string") {
+								this._node_modules = true;
+							}
+							_handle.call(this, "onProjectChanged", this, evnt, project.Location);
+							this.projectPromise.resolve(project);
+						}.bind(this),
+						/* @callback */ function(err) {
+							_handle.call(this, "onProjectChanged", this, evnt, project.Location);
+							this.projectPromise.resolve(project);
+						}.bind(this));
+				}
+				_handle.call(this, "onInputChanged", this, evnt, project.Location);
+				this.projectPromise.resolve(project);
+			} else {
+				delete this.ecma;
+				_handle.call(this, "onProjectChanged", this, evnt, null);
+				this.projectPromise.resolve(null);
+			}
+		}.bind(this));
+	};
+
+	/**
+	 * @name resolveProject
+	 * @description Tries to find the project context based on where we are in the source tree
+	 * @param {?} file The file object from the resource navigator
+	 * @returns {?} The project context or null
+	 * @since 14.0
+	 */
+	function resolveProject(file) {
+		var deferred = new Deferred();
+        this.projectPromise = new Deferred();
 		if(file) {
+            var floc = file.Location ? file.Location : file.location; 
+			if(this.projectMeta && floc && floc.startsWith(this.projectMeta.Location)) {
+				deferred.resolve(this.projectMeta);
+				return deferred;
+			}
 			var parents = file.parents ? file.parents : file.Parents;
-			if (Array.isArray(parents)) {
-				if(parents.length > 0) {
-					project = parents[parents.length-1];
+			if(!Array.isArray(parents) || parents.length < 1) {
+				deferred.resolve({Location: "/file/"});
+			} else {
+				if(Util.isElectron) {
+					//TODO call out the server for #getProject
+					var promises = [],
+						prnt = parents[parents.length-1];
+					this.projectFiles.forEach(function(_f) {
+						promises.push(this.getFile(_f, prnt.Location));
+						promises.push(this.getFile(_f, "/file/"));
+					}.bind(this));
+					promises.reduce(function(prev, item, index, array) {
+                        return prev.then(function(_file) {
+                            if(_file && _file.contents) {
+                                deferred.resolve({Location: _file.project});
+                                return item.reject("done");
+                            }
+                            if(index === array.length-1) {
+                                //nothing was found, assume /file/
+                                deferred.resolve({Location: "/file/"});
+                            }
+                            return item;
+                        });
+					}, new Deferred().resolve());
 				} else {
-					project = file;
+					deferred.resolve(parents[parents.length-1]);
 				}
 			}
 		}
-		if (project) {
-			if(!this.projectMeta || project.Location !== this.projectMeta.Location) {
-				this.projectMeta = project;
-				delete this.ecma;
-				delete this.map[this.TERN_PROJECT];
-				delete this._node_modules;
-				return this.getFile(this.NODE_MODULES).then(function(file) {
-						if(file && typeof file.contents === "string") {
-							this._node_modules = true;
-						}
-						_handle.call(this, "onProjectChanged", this, evnt, project.Location);
-					}.bind(this),
-					/* @callback */ function(err) {
-						_handle.call(this, "onProjectChanged", this, evnt, project.Location);
-					}.bind(this));
-			}
-			_handle.call(this, "onInputChanged", this, evnt, project.Location);
-		} else {
-			delete this.ecma;
-			_handle.call(this, "onProjectChanged", this, evnt, null);
-		}
-	};
+		return deferred;
+	}
+
 	/**
 	 * Callback from the fileClient event listener
 	 * @param {Object} evnt A file client Changed event.

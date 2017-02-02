@@ -41,7 +41,10 @@ function orionTasksAPI(options) {
 		var id = req.id;
 		res.json(taskList[id].toJSON(false));
 	})
-	.delete('/temp/:id', deleteOperation);
+	.delete('/temp/:id', deleteOperation)
+	.get('/count', function(req, res/*, next*/) {
+		res.json({"count": -1}); // TODO
+	});
 }
 
 function Task(res, cancelable, lengthComputable, wait, keep) {

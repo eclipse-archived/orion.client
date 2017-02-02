@@ -85,126 +85,113 @@ define("orion/widgets/settings/EditorSettings", //$NON-NLS-0$
 		}
 		return "";
 	}
+	
+	function BooleanProp() {
+	}
+	BooleanProp.prototype.create = createBooleanProperty;
+	
+	function IntegerProp(min, max) {
+		this.min = min;
+		this.max = max;
+	}
+	IntegerProp.prototype.create = createIntegerProperty;
+	IntegerProp.prototype.validate = validateIntegerProperty;
+	
+	function SelectProp(values) {
+		this.values = values;
+	}
+	SelectProp.prototype.create = createSelectProperty;
 
 	var sections = {
 		editorSettings: {
 			keys: {
-				keyBindings: {
-					values: KEY_MODES,
-					create: createSelectProperty
-				}
+				keyBindings: new SelectProp(KEY_MODES)
 			},
 			fileManagement: {
-				autoSave: {
-					create: createBooleanProperty
-				},
-				autoSaveTimeout: {
-					min: 50,
-					max: 10000,
-					create: createIntegerProperty,
-					validate: validateIntegerProperty
-				},
-				autoLoad: {
-					create: createBooleanProperty
-				},
-				saveDiffs: {
-					create: createBooleanProperty
-				},
-				trimTrailingWhiteSpace: {
-					create: createBooleanProperty
-				},
-				formatOnSave: {
-					create: createBooleanProperty
-				}
+				autoSave: new BooleanProp(),
+				autoSaveTimeout: new IntegerProp(50, 10000),
+				autoLoad: new BooleanProp(),
+				saveDiffs: new BooleanProp(),
+				trimTrailingWhiteSpace: new BooleanProp(),
+				formatOnSave: new BooleanProp()
 			},
 			typing: {
-				autoPairQuotations: {
-					create: createBooleanProperty
-				},
-				autoPairParentheses: {
-					create: createBooleanProperty
-				},
-				autoPairBraces: {
-					create: createBooleanProperty
-				},
-				autoPairSquareBrackets: {
-					create: createBooleanProperty
-				},
-				autoPairAngleBrackets: {
-					create: createBooleanProperty
-				},
-				autoCompleteComments: {
-					create: createBooleanProperty
-				},
-				smartIndentation: {
-					create: createBooleanProperty
-				}
+				autoPairQuotations: new BooleanProp(),
+				autoPairParentheses: new BooleanProp(),
+				autoPairBraces: new BooleanProp(),
+				autoPairSquareBrackets: new BooleanProp(),
+				autoPairAngleBrackets: new BooleanProp(),
+				autoCompleteComments: new BooleanProp(),
+				smartIndentation: new BooleanProp()
 			},
 			tabs: {
-				tabSize: {
-					min: 1,
-					max: 16,
-					create: createIntegerProperty,
-					validate: validateIntegerProperty
-				},
-				expandTab: {
-					create: createBooleanProperty
-				}
+				tabSize: new IntegerProp(1, 16),
+				expandTab: new BooleanProp()
 			},
 			whitespaces: {
-				showWhitespaces: {
-					create: createBooleanProperty
-				}
+				showWhitespaces: new BooleanProp()
 			},
 			wrapping: {
-				wordWrap: {
-					create: createBooleanProperty
-				},
-				showMargin: {
-					create: createBooleanProperty
-				},
-				marginOffset: {
-					min: 10,
-					max: 200,
-					create: createIntegerProperty,
-					validate: validateIntegerProperty
-				}
+				wordWrap: new BooleanProp(),
+				showMargin: new BooleanProp(),
+				marginOffset: new IntegerProp(10, 200)
 			},
 			smoothScrolling: {
-				scrollAnimation: {
-					create: createBooleanProperty
-				},
-				scrollAnimationTimeout: {
-					min: 50,
-					max: 1000,
-					create: createIntegerProperty,
-					validate: validateIntegerProperty
-				}
+				scrollAnimation: new BooleanProp(),
+				scrollAnimationTimeout: new IntegerProp(50, 1000)
 			},
 			rulers: {
-				annotationRuler: {
-					create: createBooleanProperty
-				},
-				lineNumberRuler: {
-					create: createBooleanProperty
-				},
-				foldingRuler: {
-					create: createBooleanProperty
-				},
-				overviewRuler: {
-					create: createBooleanProperty
-				},
-				zoomRuler: {
-					create: createBooleanProperty
-				}
+				annotationRuler: new BooleanProp(),
+				lineNumberRuler: new BooleanProp(),
+				foldingRuler: new BooleanProp(),
+				overviewRuler: new BooleanProp(),
+				zoomRuler: new BooleanProp()
+			},
+			showAnnotations: {
+				showCurrentSearchAnnotation: new BooleanProp(),
+				showMatchingSearchAnnotation: new BooleanProp(),
+				showReadOccurrenceAnnotation: new BooleanProp(),
+				showWriteOcurrenceAnnotation: new BooleanProp(),
+				showErrorAnnotation: new BooleanProp(),
+				showWarningAnnotation: new BooleanProp(),
+				showInfoAnnotation: new BooleanProp(),
+				showTaskAnnotation: new BooleanProp(),
+				showBookmarkAnnotation: new BooleanProp(),
+				showMatchingBracketAnnotation: new BooleanProp(),
+				showCurrentBracketAnnotation: new BooleanProp(),
+				showCurrentLineAnnotation: new BooleanProp()
+			},
+			showOverviewAnnotations: {
+				showOverviewCurrentSearchAnnotation: new BooleanProp(),
+				showOverviewMatchingSearchAnnotation: new BooleanProp(),
+				showOverviewReadOccurrenceAnnotation: new BooleanProp(),
+				showOverviewWriteOcurrenceAnnotation: new BooleanProp(),
+				showOverviewErrorAnnotation: new BooleanProp(),
+				showOverviewWarningAnnotation: new BooleanProp(),
+				showOverviewInfoAnnotation: new BooleanProp(),
+				showOverviewTaskAnnotation: new BooleanProp(),
+				showOverviewBookmarkAnnotation: new BooleanProp(),
+				showOverviewMatchingBracketAnnotation: new BooleanProp(),
+				showOverviewCurrentBracketAnnotation: new BooleanProp(),
+				showOverviewCurrentLineAnnotation: new BooleanProp()
+			},
+			showTextAnnotations: {
+				showTextCurrentSearchAnnotation: new BooleanProp(),
+				showTextMatchingSearchAnnotation: new BooleanProp(),
+				showTextReadOccurrenceAnnotation: new BooleanProp(),
+				showTextWriteOcurrenceAnnotation: new BooleanProp(),
+				showTextErrorAnnotation: new BooleanProp(),
+				showTextWarningAnnotation: new BooleanProp(),
+				showTextInfoAnnotation: new BooleanProp(),
+				showTextTaskAnnotation: new BooleanProp(),
+				showTextBookmarkAnnotation: new BooleanProp(),
+				showTextMatchingBracketAnnotation: new BooleanProp(),
+				showTextCurrentBracketAnnotation: new BooleanProp(),
+				showTextCurrentLineAnnotation: new BooleanProp()
 			},
 			languageTools: {
-				showOccurrences: {
-					create: createBooleanProperty
-				},
-				contentAssistAutoTrigger: {
-					create: createBooleanProperty
-				}
+				showOccurrences: new BooleanProp(),
+				contentAssistAutoTrigger: new BooleanProp()
 			}
 		}
 	};
@@ -236,15 +223,77 @@ define("orion/widgets/settings/EditorSettings", //$NON-NLS-0$
 			var fields = [], subSection, options, set, select;
 			var sectionWidget, subsectionWidget;
 			var themePreferences = this.themePreferences;
-
+			var orionHome = PageLinks.getOrionHome();
+			
 			for (var section in sections) {
 				if (sections.hasOwnProperty(section)) {
-					if (!this.local) {
-						sectionWidget = new mSection.Section(this.sections, {
-							id: section + "Section", //$NON-NLS-1$
-							title: messages[section],
-							slideout: true
-						});
+					sectionWidget = new mSection.Section(this.sections, {
+						id: section + "Section", //$NON-NLS-1$
+						title: messages[section],
+						slideout: true
+					});
+					if (this.local) {
+						var themeStyles = this.oldThemeStyles;
+						if (prefs.fontSizeVisible && (!this.local || prefs.fontSizeLocalVisible)) {
+							var fontSize = themeStyles.style.styles.fontSize;
+							options = [];
+							function fontSizes(unit) {
+								for( var size = 8; size < 19; size++ ){
+									set = {
+										value: size + unit,
+										label: size + unit
+									};
+									if( set.label === fontSize ){
+										set.selected = true;
+									}
+									options.push(set);
+								}
+							}
+							fontSizes("px"); //$NON-NLS-0$
+							fontSizes("pt"); //$NON-NLS-0$
+							select = this.sizeSelect = new SettingsSelect({
+								fieldlabel:messages["Font Size"], //$NON-NLS-0$
+								local: this.local,
+								options:options,
+								postChange: themePreferences.setFontSize.bind(themePreferences)
+							});
+							fields.unshift(select);
+						}
+						if (prefs.themeVisible && (!this.local || prefs.themeLocalVisible)) {
+							var styles = themeStyles.styles;
+							options = [];
+							for( var theme= 0; theme < styles.length; theme++ ){
+								set = {
+									value: styles[theme].name,
+									label: messages[styles[theme].name + "ThemeName"] || styles[theme].name //$NON-NLS-0$
+								};
+								if( styles[theme].name === themeStyles.style.name ){
+									set.selected = true;
+								}
+								options.push(set);
+							}
+							options.push({value: "customize", label: messages['customizeTheme']}); //$NON-NLS-1$
+							select = this.themeSelect = new SettingsSelect({
+								fieldlabel:messages["Editor Theme"],
+								local: this.local,
+								options:options,
+								postChange: function(){
+									if (select.select.value === "customize"){
+										window.open(orionHome + "/settings/settings.html#,category=themeSettings", "_self"); //$NON-NLS-1$ //$NON-NLS-2$
+									} else {
+										var setTheme = themePreferences.setTheme.bind(themePreferences);
+										setTheme(select.select.value);
+									}
+								}
+							});
+							fields.unshift(select);
+						}
+						if (fields.length > 0) {
+							subSection = new Subsection( {canHide: this.local, sectionName:messages["Theme"], parentNode: sectionWidget.getContentElement(), children: fields} );
+							subSection.show();
+							fields = [];
+						}
+					} else {
 						var infoText = document.createElement("div"); //$NON-NLS-0$
 						infoText.classList.add("setting-info"); //$NON-NLS-0$
 						infoText.textContent = messages.editorSettingsInfo;
@@ -273,8 +322,8 @@ define("orion/widgets/settings/EditorSettings", //$NON-NLS-0$
 									fields.push(info.widget = info.create(property, options, prefs, this));
 								}
 							}
-							if (!this.local && fields.length > 0) {
-								subsectionWidget = new Subsection( {sectionName:messages[subsection], parentNode: sectionWidget.getContentElement(), children: fields } );
+							if (/*!this.local &&*/ fields.length > 0) {
+								subsectionWidget = new Subsection( {canHide: this.local, sectionName:messages[subsection], parentNode: sectionWidget.getContentElement(), children: fields } );
 								subsectionWidget.show();
 								fields = [];
 							}
@@ -282,86 +331,15 @@ define("orion/widgets/settings/EditorSettings", //$NON-NLS-0$
 					}
 				}
 			}
-			
+				
 			if (this.local) {
-				var themeStyles = this.oldThemeStyles;
-				var orionHome = PageLinks.getOrionHome();
-				if (prefs.fontSizeVisible && (!this.local || prefs.fontSizeLocalVisible)) {
-					var fontSize = themeStyles.style.styles.fontSize;
-					options = [];
-					function fontSizes(unit) {
-						for( var size = 8; size < 19; size++ ){
-							set = {
-								value: size + unit,
-								label: size + unit
-							};
-							if( set.label === fontSize ){
-								set.selected = true;
-							}
-							options.push(set);
-						}
-					}
-					fontSizes("px"); //$NON-NLS-0$
-					fontSizes("pt"); //$NON-NLS-0$
-					select = this.sizeSelect = new SettingsSelect(
-						{	fieldlabel:messages["Font Size"], //$NON-NLS-0$
-							options:options,
-							postChange: themePreferences.setFontSize.bind(themePreferences)
-						}
-					);
-					fields.unshift(select);
-				}
-				if (prefs.themeVisible && (!this.local || prefs.themeLocalVisible)) {
-					var styles = themeStyles.styles;
-					options = [];
-					for( var theme= 0; theme < styles.length; theme++ ){
-						set = {
-							value: styles[theme].name,
-							label: messages[styles[theme].name + "ThemeName"] || styles[theme].name //$NON-NLS-0$
-						};
-						if( styles[theme].name === themeStyles.style.name ){
-							set.selected = true;
-						}
-						options.push(set);
-					}
-					options.push({value: "customize", label: messages['customizeTheme']}); //$NON-NLS-1$
-					select = this.themeSelect = new SettingsSelect(
-						{	fieldlabel:messages["Editor Theme"],
-							options:options,
-							postChange: function(){
-								if (select.select.value === "customize"){
-									window.open(orionHome + "/settings/settings.html#,category=themeSettings", "_self"); //$NON-NLS-1$ //$NON-NLS-2$
-								} else {
-									var setTheme = themePreferences.setTheme.bind(themePreferences);
-									setTheme(select.select.value);
-								}
-							}
-						}
-					);
-					fields.unshift(select);
-				}
-				if (!this.local && fields.length > 0) {
-					subSection = new Subsection( {sectionName:messages["Editor Theme"], parentNode: this.editorThemeSection.getContentElement(), children: fields} );
-					subSection.show();
-					fields = [];
-				}
-				
-				// Append all the settings content to the menu
-				fields.forEach(function(child) {
-					this.sections.appendChild( child.node );
-					child.show();
-				}.bind(this));
-				
 				// Add link to additional settings
 				var div = document.createElement("div");//$NON-NLS-0$
-				var labelSpan = document.createElement("span"); //$NON-NLS-1$
-				labelSpan.classList.add("setting-label"); //$NON-NLS-1$
-				div.appendChild(labelSpan);
+				div.classList.add('setting-link'); //$NON-NLS-1$
 				var link = document.createElement("a"); //$NON-NLS-0$
 				link.classList.add('dropdownMenuItem'); //$NON-NLS-1$
 				link.href = orionHome + '/settings/settings.html#,category=editorSettings'; //$NON-NLS-1$;
 				link.textContent = messages['moreEditorSettings'];
-				link.style.float = "right"; //$NON-NLS-1$
 				link.addEventListener("keydown", function(e) { //$NON-NLS-0$
 					if (e.keyCode === lib.KEY.ENTER || e.keyCode === lib.KEY.SPACE) {	
 						link.click();

@@ -28,7 +28,7 @@ module.exports = {};
 module.exports.router = function(options) {
 	var fileRoot = options.fileRoot;
 	if (!fileRoot) { throw new Error('options.root is required'); }
-	var contextPath = options.options.configParams["orion.context.path"] || "";
+	var contextPath = (options && options.options && options.options.configParams && options.options.configParams["orion.context.path"]) || "";
 
 	module.exports.getRepo = getRepo;
 	module.exports.getClones = getClones;
@@ -43,6 +43,7 @@ module.exports.router = function(options) {
 	module.exports.isWorkspace = isWorkspace;
 	module.exports.getSignature = getSignature;
 	module.exports.getCommit = getCommit;
+	module.exports.postClone = postClone;
 
 	return express.Router()
 	.use(bodyParser.json())

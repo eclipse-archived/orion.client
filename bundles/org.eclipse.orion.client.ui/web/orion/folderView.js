@@ -294,7 +294,7 @@ define([
 					var res = Object.create(null);
 					if(prefs[1] && typeof prefs[1].filteredResources === 'string') {
 						prefs[1].filteredResources.split(',').forEach(function(item) {
-							res[item] = true;
+							res[item.trim()] = true;
 						});
 					}
 					renderSections.apply(this, [sectionsOrder, sectionNames, res]);

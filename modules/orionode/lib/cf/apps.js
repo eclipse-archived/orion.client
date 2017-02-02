@@ -29,7 +29,7 @@ var crypto = require("crypto");
 var extService = require("./extService");
 
 module.exports.router = function(options) {
-	var contextPath = options.options.configParams["orion.context.path"] || "";
+	var contextPath = (options && options.options && options.options.configParams && options.options.configParams["orion.context.path"]) || "";
 	
 	module.exports._getAppwithAppName = _getAppwithAppName;
 	module.exports.getServiceGuid = getServiceGuid;
