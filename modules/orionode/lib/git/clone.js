@@ -585,7 +585,7 @@ function postClone(req, res) {
 	
 	var task = new tasks.Task(res, false, true, 0, true);
 	
-	git.Clone.clone(cloneUrl, getUniqueFileName(folder, dirName), {
+	return git.Clone.clone(cloneUrl, getUniqueFileName(folder, dirName), {
 		fetchOpts: {
 			callbacks: getRemoteCallbacks(req.body, task)
 		}
