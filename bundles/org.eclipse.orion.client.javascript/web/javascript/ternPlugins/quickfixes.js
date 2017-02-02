@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2016 IBM Corporation and others.
+ * Copyright (c) 2016, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License v1.0
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution
@@ -502,6 +502,9 @@ define([
                 return false;
             }
             var name = annotation.data;
+            if (name && typeof name === 'object'){
+            	name = name.data;
+            }
             if(name !== null && typeof name !== 'undefined') {
                 var comment = null;
                 var start = 0;
@@ -529,6 +532,9 @@ define([
 		 */
         "no-undef-defined-inenv": function(annotation, annotations, file) {
             var name = annotation.data;
+            if (name && typeof name === 'object'){
+            	name = name.data;
+            }
             if(name) {
                 var comment = null;
                 var start = 0;
@@ -589,6 +595,9 @@ define([
          */
         "unknown-require-missing-env": function(annotation, annotations, file) {
 			var name = annotation.data;
+			if (name && typeof name === 'object'){
+            	name = name.data;
+            }
 			if(typeof name === 'string') {
 				var start,
 					comment = Finder.findDirective(file.ast, 'eslint-env'); //$NON-NLS-1$
@@ -623,12 +632,12 @@ define([
 	        		if (!analyzed){
 	        			for (var i = annotations.length - 1; i >= 0; i--) {
 	        				var element = annotations[i];
-	        				var node = Finder.findNode(element.start, file.ast, {parents:true});
-	        				var parent = node.parents.pop();
-	        				if (parent){
-	        					var parentLocation = parent.start.toString() + ":" + parent.end.toString();
-	        					if (analyzeResult[parentLocation] || !(analyzeResult[parentLocation] = 0)){
-	        						analyzeResult[parentLocation] += 1;
+	        				var startNode = Finder.findNode(element.start, file.ast, {parents:true});
+	        				var startParent = startNode.parents.pop();
+	        				if (startParent){
+	        					var startParentLocation = startParent.start.toString() + ":" + startParent.end.toString();
+	        					if (analyzeResult[startParentLocation] || !(analyzeResult[startParentLocation] = 0)){
+	        						analyzeResult[startParentLocation] += 1;
 	        					}
 	        				}
 	        			}
@@ -641,7 +650,7 @@ define([
 	                    var parentLocation = parent.start.toString() + ":" + parent.end.toString();
 	                    var paramindex = -1;
 	                    var greedy = false;
-	                    for(var i = 0; i < parent.params.length; i++) {
+	                    for(i = 0; i < parent.params.length; i++) {
 	                        var p = parent.params[i];
 	                        if(node.range[0] === p.range[0] && node.range[1] === p.range[1]) {
 	                            paramindex = i;
@@ -814,7 +823,7 @@ define([
 	        		if (parents.length === 0) {
 	        			return null;
 	        		}
-	                var decl, idx, change, properties, propertyIndex;
+	                var idx, change, properties, propertyIndex;
 	                switch(node.type) {
 	                	case 'VariableDeclarator' : {
 		                    return getQuickfix(parents.pop(), node, parents);
@@ -1217,18 +1226,6 @@ define([
 				}
 
 				/**
-				 * Checks whether or not a node is a concatenating with an empty string.
-				 * @param {ASTNode} node - A BinaryExpression node to check.
-				 * @returns {boolean} Whether or not the node is a concatenating with an empty string.
-				 */
-				function isConcatWithEmptyString(node) {
-					return node.operator === "+" && (
-						(node.left.type === "Literal" && node.left.value === "") ||
-						(node.right.type === "Literal" && node.right.value === "")
-					);
-				}
-
-				/**
 				 * Gets a node that is the left or right operand of a node, is not the specified literal.
 				 * @param {ASTNode} node - A BinaryExpression node to get.
 				 * @param {any} value - A literal value to check.
@@ -1397,7 +1394,50 @@ define([
 						end: annot.end
 					};
 				});
-			}
+			},
+			/**
+			 * @callback
+			 */
+			"ignore-in-file": function(annotation, annotations, file) {
+	            var id = annotation.data ? annotation.data.ruleId : null;
+	            if(id) {
+	            	var result = [];
+	                var disable = Finder.findDirective(file.ast, 'eslint-disable'); //$NON-NLS-1$
+	                var programStart = getProgramStart(file.ast);
+	                programStart = Math.min(annotation.start, programStart);
+	                // If there is disable directive already there, add the rule to it
+	                if (disable && disable.range[0] <= programStart){
+	                    var start = getDocOffset(file.ast.sourceFile.text, disable.range[0]) + disable.range[0];
+	                    result.push({text: updateDirective(disable.value, 'eslint-disable', id, true), start: start, end: start+disable.value.length}); //$NON-NLS-1$
+	                } else {
+	                	// Otherwise insert at first appropriate insertion point
+	                	var insertion = getDirectiveInsertionPoint(file.ast);
+	                	if (annotation.start < insertion){
+	                		insertion = getCodeStart(file.ast);
+	                	}
+	                	var linestart = getLineStart(file.ast.sourceFile.text, insertion);
+						var indent = computeIndent(file.ast.sourceFile.text, linestart, false);
+						var fix = '/*eslint-disable '+id+' */\n' + indent; //$NON-NLS-1$ //$NON-NLS-2$
+		                result.push({text: fix, start: insertion, end: insertion});
+	                }
+	                // If there is are enable directives, remove the rule from them
+	                var enable = Finder.findDirectives(file.ast, 'eslint-enable'); //$NON-NLS-1$
+	                for (var i = 0; i < enable.length; i++) {
+	                	// TODO We do not handle there being a general eslint-enable statement in the file
+	                	var removal = removeDirective(enable[i].value, id);
+	                	if (removal){
+	                		if (removal.all){
+	                    		result.push({text: '', start: enable[i].range[0], end: enable[i].range[1]});
+	                		} else {
+	                			var enableStart = enable[i].range[0] + getDocOffset(file.ast.sourceFile.text, enable[i].range[0]) + removal.start;
+	                			var enableEnd = enable[i].range[0] + getDocOffset(file.ast.sourceFile.text, enable[i].range[0]) + removal.end;
+	                    		result.push({text: '', start: enableStart, end: enableEnd});
+	                		}
+	                	}
+	                }
+					return result;
+	            }
+            },
 		};
 
 		/**
@@ -1532,9 +1572,9 @@ define([
 
 		/**
 		 * @description Updates the eslint directive
-		 * @param {String}] text The text of the source file
-		 * @param {String} directive The directive text
-		 * @param {String} name The name to add
+		 * @param {String}] text The text of the comment
+		 * @param {String} directive The directive name
+		 * @param {String} name The name to add to the directive
 		 * @param {Boolean} usecommas If we should separate the directive entries with commas or not
 		 * @returns {String} The new directive text
 		 */
@@ -1546,6 +1586,29 @@ define([
 		        return text.trim() + ' '+name;  //$NON-NLS-1$
 	        }
 		    return text.trim() + ' '+name;  //$NON-NLS-1$
+	    }
+	    
+	    /**
+		 * @description Returns the offsets to delete to remove an entry from an eslint directive
+		 * @param {String} text The text of the comment
+		 * @param {String} directive The directive name
+		 * @param {String} name The entry name to remove
+		 * @returns {Object} Object with start and end properties for the offset to remove, will also have all: true if the directive can be removed
+		 */
+		function removeDirective(text, directive, name) {
+			// TODO Have tests for this
+			var offset = text.indexOf(name, directive.length);
+			if (offset >= 0){
+				var end = offset+name.length;
+				if (text[end] === ','){
+					end++;
+				}
+				if (text.slice(0,offset).trim() === "" && text.slice(end).trim() === ""){
+					return {all:true, start: offset, end: end};
+				}
+				return {start: offset, end: end};
+			}
+			return null;
 	    }
 
 		/**
@@ -1697,8 +1760,38 @@ define([
 	                    return n.range[0];
 	                }
 	            }
+	            return n.range[0]; // Start of first node, as script blocks in HTML will have leading whitespace
 		    }
 		    return node.range[0];
+		}
+		
+		/**
+		 * @description Returns the start offset of the first body node
+		 * @param {Object} ast The AST
+		 * @returns {Number} The start offset of first node
+		 */
+		function getProgramStart(ast) {
+		    if(ast.type === 'Program'){
+		    	if (ast.body && ast.body.length > 0) {
+	        		return ast.body[0].start;
+        		}
+        		return ast.end; // Don't use 0 in case this is inside an HTML script block
+            }
+            return 0;
+		}
+		
+		/**
+		 * @description Returns the start offset of the first body node or the first comment, whichever is first.
+		 * @param {Object} ast The AST
+		 * @returns {Number} The start offset of first code content
+		 */
+		function getCodeStart(ast) {
+			var programStart = getProgramStart(ast);
+			var commentStart = programStart;
+			if (ast.comments && ast.comments.length > 0){
+				commentStart = ast.comments[0].range[0];
+			}
+			return Math.min(programStart, commentStart);
 		}
 
 		/**

@@ -716,6 +716,34 @@ define([
 
 	var quickFixComputer = new QuickFixes.JavaScriptQuickfixes(astManager, renameCommand, generateDocCommand, jsProject, ternWorker);
 
+	if (localStorage.ignoreQuickfix){
+		provider.registerServiceProvider("orion.edit.command", //$NON-NLS-1$
+			{
+				/** @callback */
+				execute: function(editorContext, context) {
+					context.annotation.fixid = 'ignore-in-file'; //$NON-NLS-1$
+					return quickFixComputer.execute(editorContext, context);
+				}
+			},
+			{
+				name: javascriptMessages["ignoreInFileFixName"],
+				scopeId: "orion.edit.quickfix", //$NON-NLS-1$
+				id: "ignore.in.file.fix", //$NON-NLS-1$
+				contentType: ['application/javascript', 'text/html'], //$NON-NLS-1$ //$NON-NLS-2$
+				validationProperties: [{
+						source: "annotation:id", //$NON-NLS-1$
+						match: "^(?:.*\\S.*)$" //$NON-NLS-1$
+					},
+					{
+						source: "readonly", //$NON-NLS-1$
+						match: false
+					}
+				]
+			}
+		);
+	}
+
+
 	provider.registerServiceProvider("orion.edit.command", //$NON-NLS-1$
 		quickFixComputer, {
 			name: javascriptMessages["curlyFixName"],
