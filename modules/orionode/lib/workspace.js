@@ -24,7 +24,7 @@ module.exports = function(options) {
 	if (!workspaceRoot) {
 		throw new Error('options.root path required');
 	}
-	var contextPath = options.options.configParams["orion.context.path"] || "";
+	var contextPath = (options && options.options && options.options.configParams && options.options.configParams["orion.context.path"]) || "";
 
 	var workspaceId = 'orionode';
 

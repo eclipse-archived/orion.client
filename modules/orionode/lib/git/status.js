@@ -19,7 +19,7 @@ var bodyParser = require('body-parser');
 function router(options) {
 	var fileRoot = options.fileRoot;
 	if (!fileRoot) { throw new Error('options.root is required'); }
-	var contextPath = options.options.configParams["orion.context.path"] || "";
+	var contextPath = (options && options.options && options.options.configParams && options.options.configParams["orion.context.path"]) || "";
 
 	return express.Router()
 	.use(bodyParser.json())

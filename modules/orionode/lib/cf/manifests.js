@@ -21,7 +21,7 @@ var tasks = require("../tasks");
 var crypto = require('crypto');
 
 module.exports.router = function(options) {
-	var contextPath = options.options.configParams["orion.context.path"] || "";
+	var contextPath = (options && options.options && options.options.configParams && options.options.configParams["orion.context.path"]) || "";
 	module.exports.retrieveManifestFile = retrieveManifestFile;
 	module.exports.retrieveProjectFilePath = retrieveProjectFilePath;
 

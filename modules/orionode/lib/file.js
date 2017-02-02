@@ -25,7 +25,7 @@ function getParam(req, paramName) {
 module.exports = function(options) {
 	var fileRoot = options.root;
 	if (!fileRoot) { throw new Error('options.root is required'); }
-	var contextPath = options.options.configParams["orion.context.path"] || "";
+	var contextPath = (options && options.options && options.options.configParams && options.options.configParams["orion.context.path"]) || "";
 
 	var writeFileMetadata = function() {
 		var args = Array.prototype.slice.call(arguments, 0);

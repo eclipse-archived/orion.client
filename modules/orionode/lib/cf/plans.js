@@ -17,7 +17,7 @@ var manifests = require("./manifests");
 var api = require("../api"), writeError = api.writeError;
 
 module.exports.router = function(options) {
-	var contextPath = options.options.configParams["orion.context.path"] || "";
+	var contextPath = (options && options.options && options.options.configParams && options.options.configParams["orion.context.path"]) || "";
 
 	return express.Router()
 	.use(bodyParser.json())
