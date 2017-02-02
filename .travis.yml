@@ -1,0 +1,36 @@
+branches:
+  only:
+    - master
+
+os:
+  - linux
+
+sudo: false
+
+env:
+  matrix:
+    - export NODE_VERSION="4"
+    - export NODE_VERSION="6.5"
+
+matrix:
+  fast_finish: true
+
+git:
+  depth: 1
+
+addons:
+  apt:
+    sources:
+      - ubuntu-toolchain-r-test
+    packages:
+      - libstdc++-4.9-dev
+
+before_install:
+  - nvm install $NODE_VERSION
+
+install:
+  - cd modules/orionode;
+  - npm install;
+
+script:
+  - npm test;
