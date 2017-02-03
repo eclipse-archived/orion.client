@@ -498,7 +498,11 @@ objects.mixin(EditorViewer.prototype, {
 			}
 			view.editorID = id;
 		}
-		this.setEditor(view ? view.editor : null);
+		var editorSet = false;
+		if(view.editor){
+			editorSet = true;
+			this.setEditor(view.editor);
+		}
 		if (this.currentEditorView !== view || this._recreate) {
 			this._recreate = false;
 			this.commandRegistry.closeParameterCollector();
@@ -512,6 +516,9 @@ objects.mixin(EditorViewer.prototype, {
 			if (this.currentEditorView) {
 				this.currentEditorView.create();
 			}
+		}
+		if(!editorSet){
+			this.setEditor(view ? view.editor : null);
 		}
 		this.pool.lastMetadata = metadata;
 		return this.currentEditorView;
