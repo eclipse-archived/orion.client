@@ -1072,6 +1072,7 @@ html[dir="rtl"] .uploadChooser{ /* ACGC */
 	border: none;
 	max-height: 400px;
 	overflow-y: auto;
+	overflow-x: visible;
 }
 
 .local .setting-content > div {
