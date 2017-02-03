@@ -23,6 +23,13 @@ function handleError(err) {
 }
 
 function startServer(options) {
+	if(options.configParams["additional.modules"]){
+		options.configParams["additional.modules"].split(",").forEach(function(modulePath){
+			require('app-module-path').addPath(modulePath);
+		});
+		require('app-module-path').addPath(__dirname + "/node_modules/");
+		require('app-module-path').addPath(__dirname + "/lib/");
+	}
 	options = options || {};
 	options.configParams = options.configParams || {};
 	options.maxAge = typeof options.maxAge === "number" ? options.maxAge : undefined;
