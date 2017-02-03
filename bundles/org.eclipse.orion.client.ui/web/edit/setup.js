@@ -367,8 +367,7 @@ objects.mixin(EditorViewer.prototype, {
 			} else {
 				delete sessionStorage.lastFile;
 			}
-			var view = this.getEditorView(evt.input, metadata);
-			this.setEditor(view ? view.editor : null);
+			this.setEditorView(evt.input, metadata);
 			evt.editor = this.editor;
 			this.pool.metadata = metadata;
 			var href = window.location.href;
@@ -465,7 +464,7 @@ objects.mixin(EditorViewer.prototype, {
 		return this.currentEditorView;
 	},
 	
-	getEditorView: function (input, metadata) {
+	setEditorView: function (input, metadata) {
 		var view = null;
 		if (metadata && input) {
 			var options = objects.mixin({
@@ -499,6 +498,7 @@ objects.mixin(EditorViewer.prototype, {
 			}
 			view.editorID = id;
 		}
+		this.setEditor(view ? view.editor : null);
 		if (this.currentEditorView !== view || this._recreate) {
 			this._recreate = false;
 			this.commandRegistry.closeParameterCollector();
@@ -525,19 +525,24 @@ objects.mixin(EditorViewer.prototype, {
 		this.editor = newEditor;
 		if (this.editor) {
 			this.editor.addEventListener("DirtyChanged", this.editorDirtyListener = function() { //$NON-NLS-0$
-				mGlobalCommands.setDirtyIndicator(this.editor.isDirty());
-				
-				// Update the viewer's header
-				if (this.curFileNode) {
-					if (!this.dirtyIndicator) {
-						this.dirtyIndicator = document.createElement("span");
-						this.dirtyIndicator.classList.add("editorViewerHeaderDirtyIndicator");
-						this.dirtyIndicator.textContent = "*";
-						this.curFileNode.parentNode.insertBefore(this.dirtyIndicator, this.curFileNode);
-					}
-					this.dirtyIndicator.style.display = this.editor.isDirty() ? "block" : "none";
-				}
+				this.activateContext.editorViewers.forEach(function(editorViewer){
+					editorViewer.updateDirtyIndicator();				
+				});				
 			}.bind(this));
+		}
+	},
+	
+	updateDirtyIndicator: function(){
+		mGlobalCommands.setDirtyIndicator(this.editor.isDirty());
+		// Update the viewer's header
+		if (this.curFileNode) {
+			if (!this.dirtyIndicator) {
+				this.dirtyIndicator = document.createElement("span");
+				this.dirtyIndicator.classList.add("editorViewerHeaderDirtyIndicator");
+				this.dirtyIndicator.textContent = "*";
+				this.curFileNode.parentNode.insertBefore(this.dirtyIndicator, this.curFileNode);
+			}
+			this.dirtyIndicator.style.display = this.editor.isDirty() ? "block" : "none";
 		}
 	},
 	
