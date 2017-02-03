@@ -12,7 +12,7 @@ Thanks for your interest in this project.
 
 4) Inside a console where node.js is installed, do:
   - npm install
-  - start it using:	node --debug server.js -p 8083 –w <workspace_path>
+  - start it using:	node --debug server.js -p 8083 --w <workspace_path>
   This runs the Node.js Orion server on localhost:8083.
 
 5) Open the browser on http://local.orion.org:8083.
