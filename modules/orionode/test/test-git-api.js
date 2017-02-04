@@ -828,6 +828,7 @@ maybeDescribe("git", function() {
 		describe("Conflicts", function() {
 			it("POST commit will resolve merge in progress", function(finished) {
 				var name = "conflicts.txt";
+				var name2 = "unrelated.txt";
 				var initial, otherBranch, main;
 
 				var client = new GitClient("merge-conflicts");
@@ -870,6 +871,10 @@ maybeDescribe("git", function() {
 					client.merge("left");
 					// merge conflict
 					client.status("MERGING");
+					// init unrelated file with content Z
+					client.setFileContents(name2, "Z");
+					// bug 511076, stage unrelated file while conflicted file exists
+					client.stage(name2);
 					// just stage the file as-is and resolve the conflict
 					client.stage(name);
 					// commit
