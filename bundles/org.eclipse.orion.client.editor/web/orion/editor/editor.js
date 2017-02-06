@@ -53,7 +53,6 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 		if (this._model) {
 			this._model.addEventListener("Changed", this._listener.onChanged); //$NON-NLS-0$
 		}
-		this.checkDirty();
 	}
 	BaseEditor.prototype = /** @lends orion.editor.BaseEditor.prototype */ {
 		/**
@@ -927,7 +926,6 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 			if (this._undoStackFactory) {
 				this._undoStack = this._undoStackFactory.createUndoStack(this);
 				this._textView.setOptions({undoStack: this._undoStack});
-				this.checkDirty();
 			}
 			if (this._textDNDFactory) {
 				this._textDND = this._textDNDFactory.createTextDND(this, this._undoStack);
