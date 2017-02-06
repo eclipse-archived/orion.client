@@ -1018,7 +1018,7 @@ define("orion/editor/textStyler", ['orion/editor/annotations', 'orion/editor/eve
 						"editor", //$NON-NLS-0$
 						"styler compute blocks (ms/50000 chars)", //$NON-NLS-0$
 						interval * 50000 / charCount,
-						stylerAdapter.getContentType());
+						this._stylerAdapter.getContentType());
 				}
 			}
 			if (this._annotationModel) {
