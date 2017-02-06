@@ -225,7 +225,7 @@ return function(worker) {
 					result += "{\n\tvalue: \"" + computed.text[i].trim() + "\",\n\tstart: " + computed.selection[i].start + ",\n\tend: " + computed.selection[i].end + "\n}\n";
 				}
 			} else {
-				result += "{\n\tvalue: \"" + computed.value + "\",\n\tstart: " + computed.start + ",\n\tend: " + computed.end + "\n}\n";
+				result += "{\n\tvalue: \"" + computed.value + "\",\n\tstart: " + computed.start + ",\n\tend: " + computed.end + "\n},\n";
 			}
 			result += "\nExpected:\n";			
 			if (Array.isArray(expected)){
@@ -233,7 +233,7 @@ return function(worker) {
 					result += "{\n\tvalue: \"" + expected[i].value.trim() + "\",\n\tstart: " + expected[i].start + ",\n\tend: " + expected[i].end + "\n}\n";
 				}
 			} else {
-				result += "{\n\tvalue: \"" + expected.value + "\",\n\tstart: " + expected.start + ",\n\tend: " + expected.end + "\n}\n";
+				result += "{\n\tvalue: \"" + expected.value + "\",\n\tstart: " + expected.start + ",\n\tend: " + expected.end + "\n},\n";
 			}
 			return result;
 		}
@@ -497,20 +497,60 @@ return function(worker) {
 				callback: done
 			});
 		});
-		it.skip("Ignore in file - enable directive exists 1", function(done) {
+		it("Ignore in file - enable directive exists 1", function(done) {
 			var rule = createTestRule("semi");
 			var expected = [{
-				value: "/*eslint-disable semi */",
+				value: "",
 				start: 0,
-				end: 0
+				end: 22
 			},
 			{
-				value: "eslint-enable yoda, semi",
-				start: 0,
-				end: 0
+				value: "/*eslint-disable semi */",
+				start: 23,
+				end: 23
 			}];
 			return getFixes({
 				buffer: "/*eslint-enable semi*/\nvar a = 1",
+				rule: rule,
+				fixid: "ignore-in-file",
+				expected: expected,
+				callback: done
+			});
+		});
+		it("Ignore in file - enable directive exists 2", function(done) {
+			var rule = createTestRule("semi");
+			var expected = [{
+				value: "",
+				start: 16,
+				end: 21
+			},
+			{
+				value: "/*eslint-disable semi */",
+				start: 28,
+				end: 28
+			}];
+			return getFixes({
+				buffer: "/*eslint-enable semi,yoda*/\nvar a = 1",
+				rule: rule,
+				fixid: "ignore-in-file",
+				expected: expected,
+				callback: done
+			});
+		});
+		it("Ignore in file - enable directive exists 3", function(done) {
+			var rule = createTestRule("semi");
+			var expected = [{
+				value: "",
+				start: 16,
+				end: 21
+			},
+			{
+				value: "/*eslint-disable semi */",
+				start: 29,
+				end: 29
+			}];
+			return getFixes({
+				buffer: "/*eslint-enable semi, yoda*/\nvar a = 1",
 				rule: rule,
 				fixid: "ignore-in-file",
 				expected: expected,
@@ -537,7 +577,7 @@ return function(worker) {
 				callback: done
 			});
 		});
-		it.skip("Ignore in file - enable and disable directive exists 1", function(done) {
+		it("Ignore in file - enable and disable directive exists 1", function(done) {
 			var rule = createTestRule("semi");
 			var expected = [{
 				value: "eslint-disable yoda, semi",
@@ -545,12 +585,52 @@ return function(worker) {
 				end: 21
 			},
 			{
-				value: "eslint-enable yoda, semi",
-				start: 0,
-				end: 0
+				value: "",
+				start: 24,
+				end: 46
 			}];
 			return getFixes({
 				buffer: "/*eslint-disable yoda*/\n/*eslint-enable semi*/\nvar a = 1",
+				rule: rule,
+				fixid: "ignore-in-file",
+				expected: expected,
+				callback: done
+			});
+		});
+		it("Ignore in file - enable and disable directive exists 2", function(done) {
+			var rule = createTestRule("semi");
+			var expected = [{
+				value: "eslint-disable yoda, semi",
+				start: 2,
+				end: 21
+			},
+			{
+				value: "",
+				start: 40,
+				end: 45
+			}];
+			return getFixes({
+				buffer: "/*eslint-disable yoda*/\n/*eslint-enable semi,no-undef*/\nvar a = 1",
+				rule: rule,
+				fixid: "ignore-in-file",
+				expected: expected,
+				callback: done
+			});
+		});
+		it("Ignore in file - enable and disable directive exists 3", function(done) {
+			var rule = createTestRule("semi");
+			var expected = [{
+				value: "eslint-disable yoda, semi",
+				start: 2,
+				end: 21
+			},
+			{
+				value: "",
+				start: 40,
+				end: 45
+			}];
+			return getFixes({
+				buffer: "/*eslint-disable yoda*/\n/*eslint-enable semi, no-undef*/\nvar a = 1",
 				rule: rule,
 				fixid: "ignore-in-file",
 				expected: expected,

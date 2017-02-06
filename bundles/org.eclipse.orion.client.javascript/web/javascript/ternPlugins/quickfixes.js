@@ -1424,7 +1424,7 @@ define([
 	                var enable = Finder.findDirectives(file.ast, 'eslint-enable'); //$NON-NLS-1$
 	                for (var i = 0; i < enable.length; i++) {
 	                	// TODO We do not handle there being a general eslint-enable statement in the file
-	                	var removal = removeDirective(enable[i].value, id);
+	                	var removal = removeDirective(enable[i].value, 'eslint-enable', id);
 	                	if (removal){
 	                		if (removal.all){
 	                    		result.push({text: '', start: enable[i].range[0], end: enable[i].range[1]});
@@ -1435,6 +1435,10 @@ define([
 	                		}
 	                	}
 	                }
+	                // Limitation of the editor, edits must be in order or they will stomp on each other
+	                result = result.sort(function(a, b){
+	                	return a.start - b.start;
+	                });
 					return result;
 	            }
             },
@@ -1596,14 +1600,13 @@ define([
 		 * @returns {Object} Object with start and end properties for the offset to remove, will also have all: true if the directive can be removed
 		 */
 		function removeDirective(text, directive, name) {
-			// TODO Have tests for this
 			var offset = text.indexOf(name, directive.length);
 			if (offset >= 0){
 				var end = offset+name.length;
 				if (text[end] === ','){
 					end++;
 				}
-				if (text.slice(0,offset).trim() === "" && text.slice(end).trim() === ""){
+				if (text.slice(0,offset).trim() === directive && text.slice(end).trim() === ""){
 					return {all:true, start: offset, end: end};
 				}
 				return {start: offset, end: end};
