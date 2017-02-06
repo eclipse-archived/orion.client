@@ -358,6 +358,15 @@ objects.mixin(EditorViewer.prototype, {
 			contentTypeRegistry: this.contentTypeRegistry,
 			reveal: function(model) {
 				this.sidebar.sidebarNavInputManager.reveal(model);
+			}.bind(this),
+			isSameFileInSplitWindow:function(){
+				var isSame = false;
+				if(this.activateContext.editorViewers.length === 1){
+					isSame =  false;
+				}else if(this.activateContext.editorViewers.length === 2){
+					isSame = this.activateContext.editorViewers[0].editor._title === this.activateContext.editorViewers[1].editor._title;
+				}
+				return isSame;
 			}.bind(this)
 		});
 		inputManager.addEventListener("InputChanged", function(evt) { //$NON-NLS-0$
