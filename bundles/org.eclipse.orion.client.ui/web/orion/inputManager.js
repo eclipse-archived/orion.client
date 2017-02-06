@@ -141,6 +141,7 @@ define([
 		this.contentTypeRegistry = options.contentTypeRegistry;
 		this.selection = options.selection;
 		this.reveal = options.reveal;
+		this.confirm = options.confirm;
 		this._input = this._title = "";
 		if (this.fileClient) {
 			this.fileClient.addEventListener("Changed", function(evt) { //$NON-NLS-0$
@@ -562,6 +563,59 @@ define([
 			}
 			var input = PageUtil.matchResourceParameters(loc), oldInput = this._parsedLocation || {};
 			var encodingChanged = oldInput.encoding !== input.encoding;
+			var afterConfirm = function(){
+				var editorChanged = editor && oldInput.editor !== input.editor;
+				this._location = loc;
+				this._parsedLocation = input;
+				this._ignoreInput = true;
+				if(this.selection) {
+					this.selection.setSelections(loc);
+				}
+				this._ignoreInput = false;
+				var evt = {
+					type: "InputChanging", //$NON-NLS-0$
+					input: input
+				};
+				this.dispatchEvent(evt);
+				function saveSession() {
+					if (evt.session) {
+						evt.session.save();
+					}
+				}
+				var fileURI = input.resource;
+				if (evt.metadata) {
+					saveSession();
+					this.reportStatus("");
+					this._input = fileURI;
+					var metadata = evt.metadata;
+					this._setInputContents(input, fileURI, null, metadata);
+					return;
+				}
+				if (fileURI) {
+					if (fileURI === this._input && !encodingChanged) {
+						if (editorChanged) {
+							this.reportStatus("");
+							this._setInputContents(input, fileURI, null, this._fileMetadata, this._isText(this._fileMetadata));
+						} else {
+							if (!this.processParameters(input)) {
+								if (evt.session) {
+									evt.session.apply(true);
+								}
+							}
+						}
+					} else {
+						saveSession();
+						this._input = fileURI;
+						this._readonly = false;
+						this._lastMetadata = this._fileMetadata;
+						this._fileMetadata = null;
+						this.load(input.encoding);
+					}
+				} else {
+					saveSession();
+					this._setNoInput(true);
+				}
+			}.bind(this);
 			if (editor && editor.isDirty()) {
 				var oldLocation = this._location;
 				var oldResource = oldInput.resource;
@@ -569,63 +623,19 @@ define([
 				if (oldResource !== newResource || encodingChanged) {
 					if (this._autoSaveEnabled) {
 						this.save();
-					} else if (!window.confirm(messages.confirmUnsavedChanges)) {
-						window.location.hash = oldLocation;
-						this.reveal(this.getFileMetadata());
-						return;
+						afterConfirm();
+					}else{
+						this.confirm(messages.confirmUnsavedChanges,function(){
+							window.location.hash = oldLocation;
+							this.reveal(this.getFileMetadata());
+							return;
+						}.bind(this),
+						{"Save":this.save.bind(this)},
+						afterConfirm);
 					}
 				}
-			}
-			var editorChanged = editor && oldInput.editor !== input.editor;
-			this._location = loc;
-			this._parsedLocation = input;
-			this._ignoreInput = true;
-			if(this.selection) {
-				this.selection.setSelections(loc);
-			}
-			this._ignoreInput = false;
-			var evt = {
-				type: "InputChanging", //$NON-NLS-0$
-				input: input
-			};
-			this.dispatchEvent(evt);
-			function saveSession() {
-				if (evt.session) {
-					evt.session.save();
-				}
-			}
-			var fileURI = input.resource;
-			if (evt.metadata) {
-				saveSession();
-				this.reportStatus("");
-				this._input = fileURI;
-				var metadata = evt.metadata;
-				this._setInputContents(input, fileURI, null, metadata);
-				return;
-			}
-			if (fileURI) {
-				if (fileURI === this._input && !encodingChanged) {
-					if (editorChanged) {
-						this.reportStatus("");
-						this._setInputContents(input, fileURI, null, this._fileMetadata, this._isText(this._fileMetadata));
-					} else {
-						if (!this.processParameters(input)) {
-							if (evt.session) {
-								evt.session.apply(true);
-							}
-						}
-					}
-				} else {
-					saveSession();
-					this._input = fileURI;
-					this._readonly = false;
-					this._lastMetadata = this._fileMetadata;
-					this._fileMetadata = null;
-					this.load(input.encoding);
-				}
-			} else {
-				saveSession();
-				this._setNoInput(true);
+			}else{
+				afterConfirm();
 			}
 		},
 		setTitle: function(title) {
