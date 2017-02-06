@@ -1427,6 +1427,7 @@ define([
 	                	var removal = removeDirective(enable[i].value, 'eslint-enable', id);
 	                	if (removal){
 	                		if (removal.all){
+	                			// TODO Remove trailing whitespace and newline from the removed comment
 	                    		result.push({text: '', start: enable[i].range[0], end: enable[i].range[1]});
 	                		} else {
 	                			var enableStart = enable[i].range[0] + getDocOffset(file.ast.sourceFile.text, enable[i].range[0]) + removal.start;
