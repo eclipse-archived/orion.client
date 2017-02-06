@@ -412,6 +412,7 @@ define([
 			lib.$("#searchScopeLabel", this._searchWrapper).appendChild(document.createTextNode(messages["Scope"])); //$NON-NLS-1$ //$NON-NLS-0$
 			lib.$("#fileNamePatternsLabel", this._searchWrapper).appendChild(document.createTextNode(messages["File name patterns (comma-separated)"])); //$NON-NLS-1$ //$NON-NLS-0$
 			lib.$("#searchScopeSelectButton", this._searchWrapper).title = messages["Choose a Folder"]; //$NON-NLS-1$ //$NON-NLS-0$
+			lib.$("#advSearchScopeSniffLabel", this._searchWrapper).appendChild(document.createTextNode(messages["Scope Sniff"]));
 		},
 		
 		setSearchScope: function(scope) {
@@ -458,10 +459,23 @@ define([
 			}
 		},
 		
+		isSearchInAllProjects: function(){
+			return localStorage.getItem("/searchScope") === 'true';
+		},
+		
+		setSearchInAllProjectsCheckBox: function(isCheck){
+			this._searchScope.checked = isCheck; //$NON-NLS-0$
+		},
+		
+		readyToSwitchScope: function(resource){
+			this._readyToSwitchResouce = resource;	
+		},
+		
 		_initSearchScope: function() {
 			this._rootURL = this._fileClient.fileServiceRootURL();
 			this._searchLocations = [this._rootURL];
 			
+			this._searchScope = lib.$("#advSearchScopeSniff", this._searchOptWrapperDiv); //$NON-NLS-0$
 			this._searchScopeElementWrapper = lib.$("#searchScopeElementWrapper", this._searchOptWrapperDiv); //$NON-NLS-0$
 			this._searchScopeSelectButton = lib.$("#searchScopeSelectButton", this._searchOptWrapperDiv); //$NON-NLS-0$
 			
@@ -484,6 +498,18 @@ define([
 					searchScopeDialog.show();
 				}.bind(this));
 			}.bind(this));
+			this._searchScope.addEventListener("change", function(event){
+				if(this._searchScope.checked){
+					this.setSearchScope(null);	
+				}else{
+					this.setSearchScope(this._readyToSwitchResouce);				
+				}
+				localStorage.setItem("/searchScope", this._searchScope.checked);
+				while (this._searchScopeElementWrapper.firstChild) {
+				    this._searchScopeElementWrapper.removeChild(this._searchScopeElementWrapper.firstChild);
+				}
+				this._displaySelectedSearchScope();
+			}.bind(this), false);
 		},
 		
 		_replaceBoxIsHidden: function() {

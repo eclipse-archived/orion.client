@@ -415,35 +415,26 @@ define(['orion/objects', 'orion/commands', 'orion/outliner', 'orion/webui/little
 							mainSplitter.splitter.toggleSidePanel();
 						}
 						this._inlineSearchPane.setSearchText(getSearchText());
-						this._inlineSearchPane.setSearchScope(this._lastSearchRoot); //reset search scope
+						var metadata = this.editorInputManager.getFileMetadata();
+						if(metadata) {
+							var resource = recordDefaultSearchResource({items: [metadata]});
+							this._inlineSearchPane.readyToSwitchScope(resource);
+						}
+						var isSearchInAllProjects = this._inlineSearchPane.isSearchInAllProjects();
+						if(isSearchInAllProjects){
+							this._inlineSearchPane.setSearchScope(this._lastSearchRoot); //reset search scope
+						}else{
+							this._inlineSearchPane.setSearchScope(resource);
+						}
+						this._inlineSearchPane.setSearchInAllProjectsCheckBox(isSearchInAllProjects);
 						this._inlineSearchPane.show();
 						this._inlineSearchPane.showSearchOptions();	
 					}
 				}.bind(this)
 			});
 			
-			var quickSearchCommand =  new mCommands.Command({
-				name: messages.searchFilesCommand,
-				tooltip: messages.searchFilesCommand,
-				id: "orion.quickSearch", //$NON-NLS-0$
-				visibleWhen: /** @callback */ function(items, data) {
-					return true;
-				},
-				callback: function(data) {
-					if(this.editorInputManager) {
-						var metadata = this.editorInputManager.getFileMetadata();
-						if(metadata) {
-							var resource = recordDefaultSearchResource({items: [metadata]});
-							var keyword = getSearchText();
-							this.fillSearchPane({keyword: keyword, resource: resource});
-						}
-					}
-				}.bind(this)
-			});
-			
 			this.commandRegistry.addCommand(searchInFolderCommand);
 			this.commandRegistry.addCommand(openSearchCommand);
-			this.commandRegistry.addCommand(quickSearchCommand);
 			
 			this.commandRegistry.registerCommandContribution(this.editScope, "orion.searchInFolder", 99, "orion.menuBarEditGroup/orion.findGroup");  //$NON-NLS-1$ //$NON-NLS-2$
 			this.commandRegistry.registerCommandContribution(this.editScope, "orion.quickSearch", 100, "orion.menuBarEditGroup/orion.findGroup", false, new mKeyBinding.KeyBinding('h', true)); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-3$
