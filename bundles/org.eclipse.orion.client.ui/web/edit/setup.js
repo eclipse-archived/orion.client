@@ -534,16 +534,18 @@ objects.mixin(EditorViewer.prototype, {
 	},
 	
 	updateDirtyIndicator: function(){
-		mGlobalCommands.setDirtyIndicator(this.editor.isDirty());
-		// Update the viewer's header
-		if (this.curFileNode) {
-			if (!this.dirtyIndicator) {
-				this.dirtyIndicator = document.createElement("span");
-				this.dirtyIndicator.classList.add("editorViewerHeaderDirtyIndicator");
-				this.dirtyIndicator.textContent = "*";
-				this.curFileNode.parentNode.insertBefore(this.dirtyIndicator, this.curFileNode);
+		if(this.editor && this.editor.isDirty){	
+			mGlobalCommands.setDirtyIndicator(this.editor.isDirty());
+			// Update the viewer's header
+			if (this.curFileNode) {
+				if (!this.dirtyIndicator) {
+					this.dirtyIndicator = document.createElement("span");
+					this.dirtyIndicator.classList.add("editorViewerHeaderDirtyIndicator");
+					this.dirtyIndicator.textContent = "*";
+					this.curFileNode.parentNode.insertBefore(this.dirtyIndicator, this.curFileNode);
+				}
+				this.dirtyIndicator.style.display = this.editor.isDirty() ? "block" : "none";
 			}
-			this.dirtyIndicator.style.display = this.editor.isDirty() ? "block" : "none";
 		}
 	},
 	
