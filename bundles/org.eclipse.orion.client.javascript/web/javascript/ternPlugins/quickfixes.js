@@ -1435,6 +1435,8 @@ define([
 	                		}
 	                	}
 	                }
+	                // Add a no-op edit to the annotation range so the selection/scroll remains on the annotation
+	                result.push({text: file.ast.sourceFile.text.slice(annotation.start, annotation.end), start: annotation.start, end: annotation.end});
 	                // Limitation of the editor, edits must be in order or they will stomp on each other
 	                result = result.sort(function(a, b){
 	                	return a.start - b.start;
