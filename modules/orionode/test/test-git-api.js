@@ -235,6 +235,27 @@ GitClient.prototype = {
 		});
 	},
 
+	getTag: function(tagName, annotated, commitSHA, commitTimestamp) {
+		var client = this;
+		this.tasks.push(function(resolve) {
+			request()
+			.get(CONTEXT_PATH + "/gitapi/tag/" + tagName + "/file/" + client.getName())
+			.expect(200)
+			.end(function(err, res) {
+				assert.ifError(err);
+				assert.equal(res.body.Name, tagName);
+				assert.equal(res.body.FullName, "refs/tags/" + tagName);
+				assert.equal(res.body.Type, "Tag");
+				assert.equal(res.body.TagType, annotated ? "ANNOTATED" : "LIGHTWEIGHT");
+				assert.equal(res.body.CloneLocation, "/gitapi/clone/file/" + client.getName());
+				assert.equal(res.body.CommitLocation, "/gitapi/commit/" + commitSHA + "/file/" + client.getName());
+				assert.equal(res.body.LocalTimestamp, commitTimestamp);
+				assert.equal(res.body.TreeLocation, "/gitapi/tree/file/" + client.getName() + "/" + tagName);
+				client.next(resolve, res.body);
+			});
+		});
+	},
+
 	listTags: function(commitSHA, tagName, annotated, message) {
 		var client = this;
 		this.tasks.push(function(resolve) {
@@ -966,6 +987,12 @@ maybeDescribe("git", function() {
 					assert.equal(tags[0].CommitLocation, "/gitapi/commit/" + commitSHA + "/file/" + testName);
 					assert.equal(tags[0].LocalTimestamp, commitTimestamp);
 					assert.equal(tags[0].TreeLocation, "/gitapi/tree/file/" + testName + "/" + tagName);
+
+					var client = new GitClient(testName);
+					client.getTag(tagName, false, commitSHA, commitTimestamp);
+					return client.start();
+				})
+				.then(function(tags) {
 					finished();
 				})
 				.catch(function(err) {
@@ -1005,6 +1032,12 @@ maybeDescribe("git", function() {
 					assert.equal(tags[0].CommitLocation, "/gitapi/commit/" + commitSHA + "/file/" + testName);
 					assert.equal(tags[0].LocalTimestamp, commitTimestamp);
 					assert.equal(tags[0].TreeLocation, "/gitapi/tree/file/" + testName + "/" + tagName);
+					
+					var client = new GitClient(testName);
+					client.getTag(tagName, true, commitSHA, commitTimestamp);
+					return client.start();
+				})
+				.then(function(tags) {
 					finished();
 				})
 				.catch(function(err) {

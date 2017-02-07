@@ -57,6 +57,30 @@ function getTagCommit(repo, ref) {
 	});
 }
 
+/**
+ * @param {NodeGit.Repository} repo the Git repository that owns the given referenced
+ * @param {NodeGit.Reference} ref the reference to check whether it's pointing at an annotated tag or not
+ * @return {boolean|String} <tt>true</tt> if the reference points at an annotated tag,
+ * 							<tt>false</tt> if it points at a commit object,
+ * 							a <tt>String</tt> error message if it points at another Git object type
+ */
+function isAnnotated(repo, ref) {
+	// get the object being referenced and check its type
+	return git.Object.lookup(repo, ref.target(), git.Object.TYPE.ANY)
+	.then(function(object) {
+		var type = object.type();
+		if (type === git.Object.TYPE.TAG) {
+			// referenced object is a tag, annotated tag then
+			return true;
+		} else if (type !== git.Object.TYPE.COMMIT) {
+			// otherwise, should be pointing at a commit and not an annotated tag,
+			// but if not, then something is wrong
+			return "Invalid object type found for '" + theRef.name() + "' (" + type + ")";
+		}
+		return false;
+	});
+}
+
 function getTags(req, res) {
 	var tagName = util.decodeURIComponent(req.params.tagName || "");
 	var fileDir;
@@ -78,10 +102,18 @@ function getTags(req, res) {
 		})
 		.then(function(ref) {
 			theRef = ref;
-			return getTagCommit(theRepo, ref);
+			// get the object being referenced and check its type
+			return isAnnotated(theRepo, ref);
 		})
-		.then(function(commit) {
-			res.status(200).json(tagJSON(theRef.name(), theRef.shorthand(), commit.sha(), commit.timeMs(), fileDir));
+		.then(function(annotated) {
+			if (typeof annotated === 'String') {
+				return writeError(400, res, annotated);
+			}
+
+			return getTagCommit(theRepo, theRef)
+			.then(function(commit) {
+				res.status(200).json(tagJSON(theRef.name(), theRef.shorthand(), commit.sha(), commit.timeMs(), fileDir, annotated));
+			});
 		})
 		.catch(function(err) {
 			writeError(404, res, err.message);
@@ -111,18 +143,10 @@ function getTags(req, res) {
 		}))
 		.then(function(referenceList) {
 			async.each(referenceList, function(ref,callback) {
-				// get the object being referenced and check its type
-				git.Object.lookup(theRepo, ref.target(), git.Object.TYPE.ANY)
-				.then(function(object) {
-					var annotated = false;
-					var type = object.type();
-					if (type === git.Object.TYPE.TAG) {
-						// referenced object is a tag, annotated tag then
-						annotated = true;
-					} else if (type !== git.Object.TYPE.COMMIT) {
-						// otherwise, should be pointing at a commit and not an annotated tag,
-						// but if not, then something is wrong
-						return writeError(400, res, "Invalid object type found for '" + ref.name() + "' (" + type + ")");
+				isAnnotated(theRepo, ref)
+				.then(function(annotated) {
+					if (typeof annotated === 'String') {
+						return writeError(400, res, annotated);
 					}
 					getTagCommit(theRepo, ref)
 					.then(function(commit) {
