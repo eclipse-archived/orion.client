@@ -1021,7 +1021,7 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/i18n
 				var targetFolder = getTargetFolder(data.items);
 				var sourceURL = data.parameters && data.parameters.valueFor("url"); //$NON-NLS-0$
 				if (targetFolder && sourceURL) {
-					var importURL = targetFolder.ImportLocation + (targetFolder.ImportLocation.indexOf("?")=== -1 ? "?":"&") + "source="+sourceURL; //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+					var importURL = targetFolder.ImportLocation + (targetFolder.ImportLocation.indexOf("?")=== -1 ? "?":"&") + "source="+encodeURIComponent(sourceURL); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 					var expandZip = data.parameters && data.parameters.valueFor("unzip") && (sourceURL.indexOf(".zip") === sourceURL.length-4); //$NON-NLS-1$ //$NON-NLS-0$
 					var optionHeader = expandZip ? "" : "raw"; //$NON-NLS-1$ //$NON-NLS-0$
 					var deferred = fileClient.remoteImport(importURL, {"OptionHeader":optionHeader}, targetFolder.Location); //$NON-NLS-0$
