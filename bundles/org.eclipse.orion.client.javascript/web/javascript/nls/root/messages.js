@@ -123,7 +123,7 @@ define({
 	'eqeqeqFixName': 'Update operator',
 	'unreachableFixName': 'Remove unreachable code',
 	'sparseArrayFixName': 'Convert to normal array',
-	'semiFixName': 'Add missing \';\' or remove extra \';\'',
+	'semiFixName': 'Add missing semicolon',
 	'unknownRequirePluginFixName': 'Update project settings',
 	'radix': 'Missing radix parameter to parseInt():',
 	'radixFixName': 'Add default radix',
