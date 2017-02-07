@@ -33,7 +33,7 @@ module.exports.router = function(options) {
 	.get('/:tagName*', getTags)
 	.delete('/:tagName*', deleteTag);
 
-function tagJSON(fullName, shortName, sha, timestamp, fileDir) {
+function tagJSON(fullName, shortName, sha, timestamp, fileDir, annotated) {
 	return {
 		"FullName": fullName,
 		"Name": shortName,
@@ -41,7 +41,7 @@ function tagJSON(fullName, shortName, sha, timestamp, fileDir) {
 		"CommitLocation": contextPath + "/gitapi/commit/" + sha + fileDir,
 		"LocalTimeStamp": timestamp,
 		"Location": contextPath + "/gitapi/tag/" + util.encodeURIComponent(shortName) + fileDir,
-		"TagType": "LIGHTWEIGHT",
+		"TagType": annotated ? "ANNOTATED" : "LIGHTWEIGHT",
 		"TreeLocation": contextPath + "/gitapi/tree" + fileDir + "/" + util.encodeURIComponent(shortName),
 		"Type": "Tag"
 	};
@@ -111,15 +111,29 @@ function getTags(req, res) {
 		}))
 		.then(function(referenceList) {
 			async.each(referenceList, function(ref,callback) {
-				getTagCommit(theRepo, ref)
-				.then(function(commit) {
-					tags.push(tagJSON(ref.name(), ref.shorthand(), commit.sha(), commit.timeMs(), fileDir));
-					callback();
-				})
-				.catch(function() {
-					// ignore errors looking up commits
-					tags.push(tagJSON(ref.name(), ref.shorthand(), ref.target().toString(), 0, fileDir));
-					callback();
+				// get the object being referenced and check its type
+				git.Object.lookup(theRepo, ref.target(), git.Object.TYPE.ANY)
+				.then(function(object) {
+					var annotated = false;
+					var type = object.type();
+					if (type === git.Object.TYPE.TAG) {
+						// referenced object is a tag, annotated tag then
+						annotated = true;
+					} else if (type !== git.Object.TYPE.COMMIT) {
+						// otherwise, should be pointing at a commit and not an annotated tag,
+						// but if not, then something is wrong
+						return writeError(400, res, "Invalid object type found for '" + ref.name() + "' (" + type + ")");
+					}
+					getTagCommit(theRepo, ref)
+					.then(function(commit) {
+						tags.push(tagJSON(ref.name(), ref.shorthand(), commit.sha(), commit.timeMs(), fileDir, annotated));
+						callback();
+					})
+					.catch(function() {
+						// ignore errors looking up commits
+						tags.push(tagJSON(ref.name(), ref.shorthand(), ref.target().toString(), 0, fileDir, annotated));
+						callback();
+					});
 				});
 			}, function(err) {
 				if (err) {

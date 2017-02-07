@@ -113,7 +113,7 @@ GitClient.prototype = {
 		}
 	},
 
-	init: function(name) {
+	init: function() {
 		var client = this;
 		this.tasks.push(function(resolve) {
 			request()
@@ -213,6 +213,38 @@ GitClient.prototype = {
 				assert.equal(res.body.CommitLocation, "/gitapi/commit/refs%252Fheads%252F" + branchName + "/file/" + client.getName());
 				assert.equal(res.body.Location, "/gitapi/branch/" + branchName + "/file/" + client.getName());
 				client.next(resolve, res.body);
+			});
+		});
+	},
+
+	createTag: function(commitSHA, tagName, annotated, message) {
+		var client = this;
+		this.tasks.push(function(resolve) {
+			request()
+			.put(CONTEXT_PATH + "/gitapi/commit/" + commitSHA + "/file/" + client.getName())
+			.send({
+				Name: tagName,
+				Annotated: annotated,
+				Message: message
+			})
+			.expect(200)
+			.end(function(err, res) {
+				assert.ifError(err);
+				client.next(resolve, res.body);
+			});
+		});
+	},
+
+	listTags: function(commitSHA, tagName, annotated, message) {
+		var client = this;
+		this.tasks.push(function(resolve) {
+			request()
+			.get(CONTEXT_PATH + "/gitapi/tag/file/" + client.getName())
+			.expect(200)
+			.end(function(err, res) {
+				assert.ifError(err);
+				assert.equal(res.body.Type, "Tag");
+				client.next(resolve, res.body.Children);
 			});
 		});
 	},
@@ -832,7 +864,7 @@ maybeDescribe("git", function() {
 				var initial, otherBranch, main;
 
 				var client = new GitClient("merge-conflicts");
-				client.init("merge-conflicts");
+				client.init();
 				// init file with content A
 				client.setFileContents(name, "A");
 				// stage and commit
@@ -897,6 +929,90 @@ maybeDescribe("git", function() {
 			});
 		}); // describe("Conflicts")
 	}); // describe("Merge")
+
+	describe("Tags", function() {
+		before(setup);
+
+		describe("Create", function() {
+			it("lightweight", function(finished) {
+				var testName = "tag-create-lightweight";
+				var tagName = "tagName";
+				var commitSHA, commitTimestamp;
+
+				var client = new GitClient(testName);
+				client.init();
+				// init file with content A
+				client.setFileContents("tag.txt", "A");
+				// stage and commit
+				client.stage("tag.txt");
+				client.commit();
+
+				return client.start().then(function(commit) {
+					commitSHA = commit.Id;
+					commitTimestamp = commit.LocalTimestamp;
+
+					var client = new GitClient(testName);
+					client.createTag(commit.Id, tagName, false, null);
+					client.listTags();
+					return client.start();
+				})
+				.then(function(tags) {
+					assert.equal(1, tags.length);
+					assert.equal(tags[0].Name, tagName);
+					assert.equal(tags[0].FullName, "refs/tags/" + tagName);
+					assert.equal(tags[0].Type, "Tag");
+					assert.equal(tags[0].TagType, "LIGHTWEIGHT");
+					assert.equal(tags[0].CloneLocation, "/gitapi/clone/file/" + testName);
+					assert.equal(tags[0].CommitLocation, "/gitapi/commit/" + commitSHA + "/file/" + testName);
+					assert.equal(tags[0].LocalTimestamp, commitTimestamp);
+					assert.equal(tags[0].TreeLocation, "/gitapi/tree/file/" + testName + "/" + tagName);
+					finished();
+				})
+				.catch(function(err) {
+					finished(err);
+				});
+			});
+
+			it("annotated", function(finished) {
+				var testName = "tag-create-annotated";
+				var tagName = "tagName";
+				var commitSHA, commitTimestamp;
+
+				var client = new GitClient(testName);
+				client.init();
+				// init file with content A
+				client.setFileContents("tag.txt", "A");
+				// stage and commit
+				client.stage("tag.txt");
+				client.commit();
+
+				return client.start().then(function(commit) {
+					commitSHA = commit.Id;
+					commitTimestamp = commit.LocalTimestamp;
+
+					var client = new GitClient(testName);
+					client.createTag(commit.Id, tagName, true, "tag message");
+					client.listTags();
+					return client.start();
+				})
+				.then(function(tags) {
+					assert.equal(1, tags.length);
+					assert.equal(tags[0].Name, tagName);
+					assert.equal(tags[0].FullName, "refs/tags/" + tagName);
+					assert.equal(tags[0].Type, "Tag");
+					assert.equal(tags[0].TagType, "ANNOTATED");
+					assert.equal(tags[0].CloneLocation, "/gitapi/clone/file/" + testName);
+					assert.equal(tags[0].CommitLocation, "/gitapi/commit/" + commitSHA + "/file/" + testName);
+					assert.equal(tags[0].LocalTimestamp, commitTimestamp);
+					assert.equal(tags[0].TreeLocation, "/gitapi/tree/file/" + testName + "/" + tagName);
+					finished();
+				})
+				.catch(function(err) {
+					finished(err);
+				});
+			});
+		}); // describe("Create")
+	}); // describe("Tags")
 
 	describe("config", function() {
 		this.timeout(10000);
