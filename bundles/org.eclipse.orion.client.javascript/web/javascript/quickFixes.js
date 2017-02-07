@@ -397,9 +397,12 @@ define([
 	        /** @callback fix the check-tern-plugin rule */
 			"check-tern-plugin" : function(editorContext, context, astManager) {
 				return astManager.getAST(editorContext).then(function(ast) {
-					var newPlugin = context.annotation.data;
+					var name = context.annotation.data;
+					if (name && typeof name === 'object'){
+		            	name = name.data;
+		            }
 					var json = {plugins: Object.create(null)};
-					json.plugins[translatePluginName(newPlugin)] = Object.create(null);
+					json.plugins[translatePluginName(name)] = Object.create(null);
 					return this.jsProject.updateFile(this.jsProject.TERN_PROJECT, true, json).then(function(/*file*/) {
 						return editorContext.syntaxCheck(ast.sourceFile.name);
 					});
@@ -408,6 +411,9 @@ define([
 			"check-tern-lib" : function(editorContext, context, astManager) {
 				return astManager.getAST(editorContext).then(function(ast) {
 					var newLib = context.annotation.data;
+					if (newLib && typeof newLib === 'object'){
+		            	newLib = newLib.data;
+		            }
 					var json = {libs: []};
 					json.libs.push(newLib);
 					return this.jsProject.updateFile(this.jsProject.TERN_PROJECT, true, json).then(function(/*file*/) {
@@ -419,14 +425,22 @@ define([
 			"unknown-require-plugin": function(editorContext, context, astManager) {
 				return astManager.getAST(editorContext).then(function(ast) {
 					var json = {plugins: Object.create(null)};
-					var newPlugin = translatePluginName(context.annotation.data);
+					var name = context.annotation.data;
+					if (name && typeof name === 'object'){
+		            	name = name.data;
+		            }
+					var newPlugin = translatePluginName(name);
 					json.plugins[newPlugin] = Object.create(null);
 					if (newPlugin === "commonjs") {
 						// also add "node" see https://bugs.eclipse.org/bugs/show_bug.cgi?id=477377
 						json.plugins["node"] = Object.create(null);
 					}
 					return this.jsProject.updateFile(this.jsProject.TERN_PROJECT, true, json).then(function(/*file*/) {
-						var newDirective = updateDirective(ast, translateDirectiveName(context.annotation.data));
+						var directiveName = context.annotation.data;
+						if (directiveName && typeof directiveName === 'object'){
+			            	directiveName = directiveName.data;
+			            }
+						var newDirective = updateDirective(ast, translateDirectiveName(directiveName));
 						if(newDirective) {
 							return editorContext.setText(newDirective.text, newDirective.start, newDirective.end).then(function() {
 								return editorContext.syntaxCheck(ast.sourceFile.name);
@@ -442,7 +456,7 @@ define([
 					var json = {sourceType: "module", ecmaVersion: 6};
 					return this.jsProject.updateFile(this.jsProject.TERN_PROJECT, true, json).then(function(/*file*/) {
 						return editorContext.syntaxCheck(ast.sourceFile.name);
-					}.bind(this));
+					});
 				}.bind(this));
 			},
 			"no-redeclare": function(editorContext, context, astManager) {

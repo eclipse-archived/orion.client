@@ -203,15 +203,22 @@ define([
 			prob.line = e.lineNumber;
 			prob.start = e.column;
 		} else if (typeof e.line === 'number' && typeof e.column === 'number') {
-			prob.line = e.line;
+			prob.line = e.line
 			prob.start = e.column;
 		} else {
 			prob.start = 0;
 			prob.end = 0;
 		}
+		// Pass along any additional data to the problem annotation (Bug 464538)
 		if (e.args && e.args.data){
-			// Pass along any additional data to the problem annotation (Bug 464538)
-			prob.data = e.args.data;
+			if (typeof e.args.data === 'object'){
+				prob.data = e.args.data;
+				prob.data.ruleId = e.ruleId;
+			} else {
+				prob.data = {data: e.args.data, ruleId: e.ruleId};
+			}
+		} else {
+			prob.data = {ruleId: e.ruleId};
 		}
 		return prob;
 	}
