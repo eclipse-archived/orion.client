@@ -1,5 +1,7 @@
 {
 	"/plugins":{
+		"plugins/consolePlugin.html":true,
+		"collab/plugins/collabPlugin.html":true,
 		"plugins/orionSharedWorker.js": true,
 		"git/plugins/gitPlugin.html":true,
 		"webtools/plugins/webToolsPlugin.html":true,

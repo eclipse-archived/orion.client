@@ -11,7 +11,8 @@
 /*eslint-env node */
 var express = require('express'),
 	path = require('path'),
-	fs = require('fs');
+	fs = require('fs'),
+	jwt = require('jsonwebtoken');
 
 var LIBS = path.normalize(path.join(__dirname, 'lib/')),
 	MINIFIED_ORION_CLIENT = "lib/orion.client",
@@ -66,7 +67,9 @@ function startServer(options) {
 			});
 		} else {
 			app.use(require(options.configParams["login.module"] || "./lib/user")(options));
+			app.use('/sharedWorkspace', require('./lib/sharedWorkspace').router(options, { root: '/sharedWorkspace/tree/file', fileRoot: '/file' }));
 		}
+		
 		app.use('/site', checkAuthenticated, require('./lib/sites')(options));
 		app.use('/task', checkAuthenticated, require('./lib/tasks').router({ taskRoot: contextPath + '/task' }));
 		app.use('/filesearch', checkAuthenticated, require('./lib/search')(options));

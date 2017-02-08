@@ -108,5 +108,7 @@ define({
 	"Orion": "Orion",
 	"OK": "Ok",
 	"Format" : "Format Code",
-	"FormatTooltip":"Format editor contents"
+	"FormatTooltip":"Format editor contents",
+	"Collaborate": "Collaborate",
+	"CollaborateToolTip": "Start a Collaboration session on the current file"
 });
