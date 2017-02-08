@@ -443,8 +443,11 @@ function getCommitRefs(repo, fileDir, commits) {
 					var id,commit;
 					var shortName = ref.replace("refs/tags/", "").replace("refs/remotes/", "").replace("refs/heads/", "");
 					if (ref.indexOf("refs/tags/") === 0) {
+						var annotated = false;
 						return git.Tag.lookup(repo,oid).then(function(tag){
 							id = tag.targetId();
+							// tag lookup succeeded, it's an annotated tag then
+							annotated = true;
 						}).catch(function(){
 							id = oid.toString();
 						})
@@ -452,7 +455,7 @@ function getCommitRefs(repo, fileDir, commits) {
 							commit = map[id];
 							if (commit) {
 								var tags = commit.Tags || (commit.Tags = []);
-								tags.push(mTags.tagJSON(fullName, shortName, id, undefined, fileDir));
+								tags.push(mTags.tagJSON(fullName, shortName, id, undefined, fileDir, annotated));
 							}
 							cb();
 						});
