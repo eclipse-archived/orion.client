@@ -526,11 +526,13 @@ define([
 				};
 				this._idle2 = new Idle(options);
 				this._idle2.addEventListener("Idle", function () { //$NON-NLS-0$
-					this._autoSyntaxActive = true;
-					if (this.editor._isSyntaxCheckRequired()){
-						syntaxChecker();
-						this.editor._setSyntaxCheckRequired(false);
-						this._autoSyntaxActive = false;
+					if (this.editor){
+						this._autoSyntaxActive = true;
+						if (this.editor._isSyntaxCheckRequired()){
+							syntaxChecker();
+							this.editor._setSyntaxCheckRequired(false);
+							this._autoSyntaxActive = false;
+						}
 					}
 				}.bind(this));
 			} else {
