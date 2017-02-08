@@ -1,6 +1,6 @@
 /******************************************************************************* 
  * @license
- * Copyright (c) 2011, 2013 IBM Corporation and others.
+ * Copyright (c) 2011, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -427,7 +427,12 @@ define([
 						that.progressService.progress(that.gitClient.getGitClone(selection.CloneLocation), messages["Getting git repository details"]).then(function(clone){
 							if (selection.Type === "Commit") { //$NON-NLS-0$
 								that.log = selection;
-								that.changes = [selection.Children[0]];
+								if (selection.Children.length === 0) {
+									// no history if untracked file
+									that.changes = [];
+								} else {
+									that.changes = [selection.Children[0]];
+								}
 							} else if (selection.Type === "Branch" || selection.Type === "RemoteTrackingBranch" || selection.Type === "Tag") { //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 								that.reference = selection;
 							}
