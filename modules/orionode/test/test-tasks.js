@@ -27,7 +27,7 @@ var app = express()
 	root: '/taskHelper'
 }))
 .use(CONTEXT_PATH + '/task', tasks.router({
-	root: '/task'
+	taskRoot: CONTEXT_PATH + '/task'
 }));
 
 var request = supertest.bind(null, app);

@@ -358,6 +358,9 @@ objects.mixin(EditorViewer.prototype, {
 			contentTypeRegistry: this.contentTypeRegistry,
 			reveal: function(model) {
 				this.sidebar.sidebarNavInputManager.reveal(model);
+			}.bind(this),
+			isUnsavedWarningNeeed:function(){
+				return this.getOpenEditorCount(this.inputManager.getLocation()) === 1;
 			}.bind(this)
 		});
 		inputManager.addEventListener("InputChanged", function(evt) { //$NON-NLS-0$
@@ -547,6 +550,16 @@ objects.mixin(EditorViewer.prototype, {
 				this.dirtyIndicator.style.display = this.editor.isDirty() ? "block" : "none";
 			}
 		}
+	},
+	
+	getOpenEditorCount: function(fileLocation){
+		var count = 0;
+		this.activateContext.editorViewers.forEach(function(editorViewer){
+			if(fileLocation === editorViewer.inputManager.getLocation()){
+				count++;
+			}
+		});
+		return count;
 	},
 	
 	setInput: function(hash) {

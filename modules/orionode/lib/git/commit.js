@@ -29,18 +29,19 @@ module.exports = {};
 
 module.exports.router = function(options) {
 	var fileRoot = options.fileRoot;
-	if (!fileRoot) { throw new Error('options.root is required'); }
-	var contextPath = (options && options.options && options.options.configParams && options.options.configParams["orion.context.path"]) || "";
-
+	var gitRoot = options.gitRoot;
+	if (!fileRoot) { throw new Error('options.fileRoot is required'); }
+	if (!gitRoot) { throw new Error('options.gitRoot is required'); }
+	
 	module.exports.commitJSON = commitJSON;
 	module.exports.getDiff = getDiff;
 	module.exports.getCommitParents = getCommitParents;
 
 	return express.Router()
 	.use(bodyParser.json())
-	.get('/:scope'+ contextPath + '/file*', getCommit)
-	.put('/:commit'+ contextPath + '/file*', putCommit)
-	.post('/:commit'+ contextPath + '/file*', postCommit);
+	.get('/:scope'+ fileRoot + '*', getCommit)
+	.put('/:commit'+ fileRoot + '*', putCommit)
+	.post('/:commit'+ fileRoot + '*', postCommit);
 
 function commitJSON(commit, fileDir, diffs, parents) {
 	return {
@@ -50,10 +51,10 @@ function commitJSON(commit, fileDir, diffs, parents) {
 		"Children":[],
 		"CommitterEmail": commit.committer().email(),
 		"CommitterName": commit.committer().name(),
-		"ContentLocation": contextPath + "/gitapi/commit/" + commit.sha() + fileDir + "?parts=body",
-		"DiffLocation": contextPath + "/gitapi/diff/" + commit.sha() + fileDir,
-		"Location": contextPath + "/gitapi/commit/" + commit.sha() + fileDir,
-		"CloneLocation": contextPath + "/gitapi/clone" + fileDir,
+		"ContentLocation": gitRoot + "/commit/" + commit.sha() + fileDir + "?parts=body",
+		"DiffLocation": gitRoot + "/diff/" + commit.sha() + fileDir,
+		"Location": gitRoot + "/commit/" + commit.sha() + fileDir,
+		"CloneLocation": gitRoot + "/clone" + fileDir,
 		"Diffs": diffs,
 		"Parents": parents,
 		"Message": commit.message(),
@@ -114,8 +115,8 @@ function getCommitLog(req, res) {
 			"Children": commits,
 			"RepositoryPath": filterPath,
 			"Type": "Commit",
-			"Location":contextPath + "/gitapi/commit/" + util.encodeURIComponent(scope) + contextPath + "/file" + req.params[0],
-			"CloneLocation": contextPath + "/gitapi/clone" + fileDir
+			"Location":gitRoot + "/commit/" + util.encodeURIComponent(scope) + fileRoot + req.params[0],
+			"CloneLocation": gitRoot + "/clone" + fileDir
 		};
 		if(mergeBase){
 			resp["AheadCount"] = aheadCount;
@@ -420,7 +421,7 @@ function getCommitParents(repo, commit, fileDir) {
 	.then(function(parents) {
 		return parents.map(function(parent) {
 			return {
-				"Location": contextPath + "/gitapi/commit/" + parent.sha() + fileDir,
+				"Location": gitRoot + "/commit/" + parent.sha() + fileDir,
 				"Name": parent.sha()
 			};
 		});
@@ -443,8 +444,11 @@ function getCommitRefs(repo, fileDir, commits) {
 					var id,commit;
 					var shortName = ref.replace("refs/tags/", "").replace("refs/remotes/", "").replace("refs/heads/", "");
 					if (ref.indexOf("refs/tags/") === 0) {
+						var annotated = false;
 						return git.Tag.lookup(repo,oid).then(function(tag){
 							id = tag.targetId();
+							// tag lookup succeeded, it's an annotated tag then
+							annotated = true;
 						}).catch(function(){
 							id = oid.toString();
 						})
@@ -452,7 +456,7 @@ function getCommitRefs(repo, fileDir, commits) {
 							commit = map[id];
 							if (commit) {
 								var tags = commit.Tags || (commit.Tags = []);
-								tags.push(mTags.tagJSON(fullName, shortName, id, undefined, fileDir));
+								tags.push(mTags.tagJSON(fullName, shortName, id, undefined, fileDir, annotated));
 							}
 							cb();
 						});
@@ -515,7 +519,7 @@ function getDiff(repo, commit, fileDir) {
 			return {
 				"ChangeType": type,
 				"ContentLocation": fileDir + "/" + path1,
-				"DiffLocation": contextPath + "/gitapi/diff/" + range + fileDir + "/" + path1,
+				"DiffLocation": gitRoot + "/diff/" + range + fileDir + "/" + path1,
 				"NewPath": newFilePath,
 				"OldPath": oldFilePath,
 				"Type": "Diff"
@@ -527,7 +531,7 @@ function getDiff(repo, commit, fileDir) {
 			"Children": diffs
 		};
 		if (patches.length > 100) {
-			result.NextLocation = contextPath + "/gitapi/diff/" + range + fileDir + "?pageSize=" + pageSize + "&page=" + (page + 1);
+			result.NextLocation = gitRoot + "/diff/" + range + fileDir + "?pageSize=" + pageSize + "&page=" + (page + 1);
 		}
 		return result;
 	});
@@ -565,7 +569,7 @@ function getCommitBody(req, res) {
 function identifyNewCommitResource(req, res, newCommit) {
 	var originalUrl = url.parse(req.originalUrl, true);
 	var segments = originalUrl.pathname.split("/");
-	var contextPathSegCount = contextPath.split("/").length - 1;
+	var contextPathSegCount = req.contextPath.split("/").length - 1;
 	segments[3 + contextPathSegCount] = segments[3 + contextPathSegCount] + ".." + util.encodeURIComponent(newCommit);
 	var location = url.format({pathname: segments.join("/"), query: originalUrl.query});
 	res.status(200).json({

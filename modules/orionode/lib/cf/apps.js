@@ -29,7 +29,8 @@ var crypto = require("crypto");
 var extService = require("./extService");
 
 module.exports.router = function(options) {
-	var contextPath = (options && options.options && options.options.configParams && options.options.configParams["orion.context.path"]) || "";
+	var fileRoot = options.fileRoot;
+	if (!fileRoot) { throw new Error('options.fileRoot is required'); }
 	
 	module.exports._getAppwithAppName = _getAppwithAppName;
 	module.exports.getServiceGuid = getServiceGuid;
@@ -140,15 +141,13 @@ function _getAppwithAppName(userId, encodeName, appTarget){
 	});
 }
 function toOrionLocation(req, location){
-	var orionPath = contextPath + "/file";
-	if(location && location.length !== 0 && location.indexOf(orionPath) === 0){
-		return path.join(req.user.workspaceDir, location.substring(orionPath.length)); 
+	if(location && location.length !== 0 && location.indexOf(fileRoot) === 0){
+		return path.join(req.user.workspaceDir, location.substring(fileRoot.length)); 
 	}
 }
 function toAppLocation(req,location){
-	var orionPath = contextPath + "/file";
-	if(location && location.length !== 0 && location.indexOf(orionPath) === 0){
-		var foldername = location.replace(orionPath,"").split("/")[1];
+	if(location && location.length !== 0 && location.indexOf(fileRoot) === 0){
+		var foldername = location.replace(fileRoot,"").split("/")[1];
 		return path.join(req.user.workspaceDir, foldername); 
 	}
 }

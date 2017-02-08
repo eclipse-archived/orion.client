@@ -31,19 +31,21 @@ var app = express()
 	next();
 })
 .use(CONTEXT_PATH + '/task', require('../lib/tasks').router({
-	root: '/task',
+	taskRoot: CONTEXT_PATH + '/task'
 }))
 .use(CONTEXT_PATH + "/workspace*", require('../lib/workspace')({
-	root: '/workspace',
-	fileRoot: '/file',
+	workspaceRoot: CONTEXT_PATH + '/workspace', 
+	fileRoot: CONTEXT_PATH + '/file', 
+	gitRoot: CONTEXT_PATH + '/gitapi'
 }))
 .use(CONTEXT_PATH + "/file*", require('../lib/file')({
-	root: '/file',
-	workspaceRoot: '/workspace',
+	gitRoot: CONTEXT_PATH + '/gitapi', 
+	fileRoot: CONTEXT_PATH + '/file'
 }))
 .use(CONTEXT_PATH + "/gitapi", require('../lib/git')({
-	root: '/gitapi',
-	fileRoot: '/file',
+	gitRoot: CONTEXT_PATH + '/gitapi', 
+	fileRoot: CONTEXT_PATH + '/file', 
+	workspaceRoot: CONTEXT_PATH + '/workspace'
 }));
 
 var request = supertest.bind(null, app);
@@ -113,7 +115,7 @@ GitClient.prototype = {
 		}
 	},
 
-	init: function(name) {
+	init: function() {
 		var client = this;
 		this.tasks.push(function(resolve) {
 			request()
@@ -217,6 +219,58 @@ GitClient.prototype = {
 		});
 	},
 
+	createTag: function(commitSHA, tagName, annotated, message) {
+		var client = this;
+		this.tasks.push(function(resolve) {
+			request()
+			.put(CONTEXT_PATH + "/gitapi/commit/" + commitSHA + "/file/" + client.getName())
+			.send({
+				Name: tagName,
+				Annotated: annotated,
+				Message: message
+			})
+			.expect(200)
+			.end(function(err, res) {
+				assert.ifError(err);
+				client.next(resolve, res.body);
+			});
+		});
+	},
+
+	getTag: function(tagName, annotated, commitSHA) {
+		var client = this;
+		this.tasks.push(function(resolve) {
+			request()
+			.get(CONTEXT_PATH + "/gitapi/tag/" + tagName + "/file/" + client.getName())
+			.expect(200)
+			.end(function(err, res) {
+				assert.ifError(err);
+				assert.equal(res.body.Name, tagName);
+				assert.equal(res.body.FullName, "refs/tags/" + tagName);
+				assert.equal(res.body.Type, "Tag");
+				assert.equal(res.body.TagType, annotated ? "ANNOTATED" : "LIGHTWEIGHT");
+				assert.equal(res.body.CloneLocation, "/gitapi/clone/file/" + client.getName());
+				assert.equal(res.body.CommitLocation, "/gitapi/commit/" + commitSHA + "/file/" + client.getName());
+				assert.equal(res.body.TreeLocation, "/gitapi/tree/file/" + client.getName() + "/" + tagName);
+				client.next(resolve, res.body);
+			});
+		});
+	},
+
+	listTags: function(commitSHA, tagName, annotated, message) {
+		var client = this;
+		this.tasks.push(function(resolve) {
+			request()
+			.get(CONTEXT_PATH + "/gitapi/tag/file/" + client.getName())
+			.expect(200)
+			.end(function(err, res) {
+				assert.ifError(err);
+				assert.equal(res.body.Type, "Tag");
+				client.next(resolve, res.body.Children);
+			});
+		});
+	},
+
 	reset: function(type, id) {
 		var client = this;
 		this.tasks.push(function(resolve) {
@@ -246,6 +300,24 @@ GitClient.prototype = {
 			.end(function(err, res) {
 				assert.ifError(err);
 				client.next(resolve, res.body);
+			});
+		});
+	},
+
+	log: function() {
+		var client = this;
+		this.tasks.push(function(resolve) {
+			request()
+			.get(CONTEXT_PATH + '/gitapi/commit/master/file/' + client.getName())
+			.expect(202)
+			.end(function(err, res) {
+				assert.ifError(err);
+				getGitResponse(res).then(function(res2) {
+					client.next(resolve, res2.JsonData);
+				})
+				.catch(function(err) {
+					assert.ifError(err);
+				});
 			});
 		});
 	}
@@ -832,7 +904,7 @@ maybeDescribe("git", function() {
 				var initial, otherBranch, main;
 
 				var client = new GitClient("merge-conflicts");
-				client.init("merge-conflicts");
+				client.init();
 				// init file with content A
 				client.setFileContents(name, "A");
 				// stage and commit
@@ -897,6 +969,84 @@ maybeDescribe("git", function() {
 			});
 		}); // describe("Conflicts")
 	}); // describe("Merge")
+
+	describe("Tags", function() {
+		before(setup);
+
+		describe("Create", function() {
+
+			/**
+			 * Tests that a tag can be created.
+			 * 
+			 * @param {Function} finished the function to invoke to notify that the test has completed
+			 * @param {String} testName the name of the test to be used for the created Git repository
+			 * @param {boolean} annotated <tt>true</tt> if an annotated tag should be created,
+			 *                            <tt>false</tt> if a lightweight should be created9
+			 */
+			function testCreateTag(finished, testName, annotated) {
+				var tagName = "tagName";
+				var commitSHA;
+
+				var client = new GitClient(testName);
+				client.init();
+				// init file with content A
+				client.setFileContents("tag.txt", "A");
+				// stage and commit
+				client.stage("tag.txt");
+				client.commit();
+
+				return client.start().then(function(commit) {
+					commitSHA = commit.Id;
+
+					var client = new GitClient(testName);
+					// create the tag
+					client.createTag(commit.Id, tagName, annotated, null);
+					// list all tags
+					client.listTags();
+					return client.start();
+				})
+				.then(function(tags) {
+					// only created one tag
+					assert.equal(tags.length, 1);
+					assert.equal(tags[0].Name, tagName);
+					assert.equal(tags[0].FullName, "refs/tags/" + tagName);
+					assert.equal(tags[0].Type, "Tag");
+					assert.equal(tags[0].TagType, annotated ? "ANNOTATED" : "LIGHTWEIGHT");
+					assert.equal(tags[0].CloneLocation, "/gitapi/clone/file/" + testName);
+					assert.equal(tags[0].CommitLocation, "/gitapi/commit/" + commitSHA + "/file/" + testName);
+					assert.equal(tags[0].TreeLocation, "/gitapi/tree/file/" + testName + "/" + tagName);
+
+					var client = new GitClient(testName);
+					// verify that we can retrieve that one tag
+					client.getTag(tagName, annotated, commitSHA);
+					client.log();
+					return client.start();
+				})
+				.then(function(log) {
+					assert.equal(log.Children[0].Tags.length, 1);
+					assert.equal(log.Children[0].Tags[0].Name, tagName);
+					assert.equal(log.Children[0].Tags[0].FullName, "refs/tags/" + tagName);
+					assert.equal(log.Children[0].Tags[0].Type, "Tag");
+					assert.equal(log.Children[0].Tags[0].TagType, annotated ? "ANNOTATED" : "LIGHTWEIGHT");
+					assert.equal(log.Children[0].Tags[0].CloneLocation, "/gitapi/clone/file/" + testName);
+					assert.equal(log.Children[0].Tags[0].CommitLocation, "/gitapi/commit/" + commitSHA + "/file/" + testName);
+					assert.equal(log.Children[0].Tags[0].TreeLocation, "/gitapi/tree/file/" + testName + "/" + tagName);
+					finished();
+				})
+				.catch(function(err) {
+					finished(err);
+				});
+			}
+
+			it("lightweight", function(finished) {
+				testCreateTag(finished, "tag-create-lightweight", false);
+			});
+
+			it("annotated", function(finished) {
+				testCreateTag(finished, "tag-create-annotated", true);
+			});
+		}); // describe("Create")
+	}); // describe("Tags")
 
 	describe("config", function() {
 		this.timeout(10000);

@@ -195,8 +195,12 @@ define([
 	function FileExplorer(options) {
 		EventTarget.attach(this);
 		this.registry = options.serviceRegistry;
-		this.preferences = this.registry.getService('orion.core.preference');
-		this.generalPrefs = new mGeneralPrefs.GeneralPreferences(this.preferences);
+		if(this.registry) {
+			this.preferences = this.registry.getService('orion.core.preference');
+		}
+		if(this.preferences) {
+			this.generalPrefs = new mGeneralPrefs.GeneralPreferences(this.preferences);
+		}
 		this.treeRoot = options.treeRoot;
 		this.selection = options.selection;
 		this.fileClient = options.fileClient;
@@ -257,9 +261,11 @@ define([
 		}
 		
 		// Set general preferences
-		this.generalPrefs.getPrefs().then(function(generalPrefs) {
-			generalPreferences = generalPrefs;
-		});
+		if(this.generalPrefs) {
+			this.generalPrefs.getPrefs().then(function(generalPrefs) {
+				generalPreferences = generalPrefs;
+			});
+		}
 	}
 	
 	var dragStartTarget, dropEffect;

@@ -23,8 +23,9 @@ module.exports = {};
 
 module.exports.router = function(options) {
 	var fileRoot = options.fileRoot;
-	var contextPath = (options && options.options && options.options.configParams && options.options.configParams["orion.context.path"]) || "";
-	if (!fileRoot) { throw new Error('options.root is required'); }
+	var gitRoot = options.gitRoot;
+	if (!fileRoot) { throw new Error('options.fileRoot is required'); }
+	if (!gitRoot) { throw new Error('options.gitRoot is required'); }
 	
 	module.exports.branchJSON = branchJSON;
 	module.exports.getBranchCommit = getBranchCommit;
@@ -32,7 +33,7 @@ module.exports.router = function(options) {
 
 	return express.Router()
 	.use(bodyParser.json())
-	.get(contextPath + '/file*', getBranches)
+	.get(fileRoot + '*', getBranches)
 	.get('/:branchName*', getBranches)
 	.delete('/:branchName*', deleteBranch)
 	.post('*', createBranch);
@@ -43,17 +44,17 @@ module.exports.router = function(options) {
 		var branchURL = util.encodeURIComponent(fullName);
 		var current = !!ref.isHead() || repo.headDetached() && ref.name() === "HEAD";
 		return {
-			"CloneLocation": contextPath + "/gitapi/clone"+ fileDir,
-			"CommitLocation": contextPath + "/gitapi/commit/" + branchURL + fileDir,
+			"CloneLocation": gitRoot + "/clone"+ fileDir,
+			"CommitLocation": gitRoot + "/commit/" + branchURL + fileDir,
 			"Current": current,
 			"Detached": current && !!repo.headDetached(),
-			"DiffLocation": contextPath + "/gitapi/diff/" + util.encodeURIComponent(shortName) + fileDir,
+			"DiffLocation": gitRoot + "/diff/" + util.encodeURIComponent(shortName) + fileDir,
 			"FullName": fullName,
-			"HeadLocation": contextPath + "/gitapi/commit/HEAD" + fileDir,
-			"Location": contextPath + "/gitapi/branch/" + util.encodeURIComponent(shortName) + fileDir,
+			"HeadLocation": gitRoot + "/commit/HEAD" + fileDir,
+			"Location": gitRoot + "/branch/" + util.encodeURIComponent(shortName) + fileDir,
 			"Name": shortName,
 			"RemoteLocation": [],
-			"TreeLocation": contextPath + "/gitapi/tree" + fileDir + "/" + branchURL,
+			"TreeLocation": gitRoot + "/tree" + fileDir + "/" + branchURL,
 			"Type": "Branch"
 		};
 	}

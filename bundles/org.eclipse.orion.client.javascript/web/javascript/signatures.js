@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2013, 2015 IBM Corporation and others.
+ * Copyright (c) 2013, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -14,6 +14,27 @@ define([
 ], function() {
 
 	var Signatures = {
+		/**
+		 * @name FUNCTION_IMAGE
+		 * @description The CSS class name for the function icon
+		 * @type String
+		 * @since 14.0
+		 */
+		FUNCTION_IMAGE: "iconFunction",
+		/**
+		 * @name CLASS_IMAGE
+		 * @description The CSS class name for the class icon
+		 * @type String
+		 * @since 14.0
+		 */
+		CLASS_IMAGE: "iconClass",
+		/**
+		 * @name OBJECT_IMAGE
+		 * @description The CSS class name for the object icon
+		 * @type String
+		 * @since 14.0
+		 */
+		OBJECT_IMAGE: "iconObject",
 	
 		/**
 		 * @name computeSignature

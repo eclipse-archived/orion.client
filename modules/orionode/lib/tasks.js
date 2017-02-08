@@ -15,13 +15,12 @@ var api = require('./api');
 var crypto = require('crypto');
 var writeError = api.writeError;
 
+var taskRoot = "/task";
 var taskList = {};
-var taskContextPath = "/task";
 
 function orionTasksAPI(options) {
-	var root = options.root;
-	taskContextPath = root;
-	if (!root) { throw new Error('options.root path required'); }
+	taskRoot = options.taskRoot;
+	if (!taskRoot) { throw new Error('options.taskRoot is required'); }
 
 	return express.Router()
 	.use(bodyParser.json())
@@ -141,9 +140,9 @@ Task.prototype = {
 		
 		if(this.keep && isWriteLocation){
 			// Do not set location so that tasks is deleted
-			result.Location = taskContextPath + "/id/" + this.id;
+			result.Location = taskRoot + "/id/" + this.id;
 		}else if(isWriteLocation){
-			result.Location = taskContextPath + "/temp/" + this.id;
+			result.Location = taskRoot + "/temp/" + this.id;
 		}
 		
 		return result;

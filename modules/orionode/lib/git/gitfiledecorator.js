@@ -11,16 +11,17 @@
 /*eslint-env node */
 var api = require('../api');
 var clone = require('./clone');
-var util = require('./util');
+var util = require('./util'); 
 
 module.exports = {};
 	
-module.exports.gitFileDecorator = function(contextPath, rootName, req, filepath, originalJson){
+module.exports.gitFileDecorator = function(gitRoot, rootName, req, filepath, originalJson){
 	var result = originalJson;
-	if (!contextPath + "/file" === rootName && !contextPath + "/workspace" ===rootName) {//$NON-NLS-1$ //$NON-NLS-2$
+	var root = getPureRootName(rootName);
+	if (!"file" === root && !"workspace" === root) {//$NON-NLS-1$ //$NON-NLS-2$
 		return; 
 	}
-	var isWorkspace = contextPath + "/workspace"=== rootName;	
+	var isWorkspace = "workspace" === root;	
 	if (isWorkspace && req.method === "GET") {
 		var children = result.Children;
 		return Promise.all(children.map(function(child){
@@ -48,7 +49,11 @@ module.exports.gitFileDecorator = function(contextPath, rootName, req, filepath,
 			return;
 		});
 	}			
-	
+
+function getPureRootName(rootName){
+	var rootSegs = rootName.split("/");
+	return rootSegs[rootSegs.length -1];
+}
 function getBranch(repo){
 	return repo.getCurrentBranch().then(function(reference) {
 		return reference.shorthand();
@@ -90,18 +95,18 @@ function addGitLinks(comingJson,branchname,fileDir){
 	var fileTarget = comingJson.Location.substr(fileDir.length);
 	if(fileTarget === "/") fileTarget = "";
 	comingJson.Git ={
-		"BlameLocation": contextPath + "/gitapi/blame/HEAD" + fileDir + fileTarget,
-		"CloneLocation": contextPath + "/gitapi/clone" + fileDir,
-		"CommitLocation": contextPath + "/gitapi/commit/" + util.encodeURIComponent(branchname) + fileDir + fileTarget,
-		"ConfigLocation": contextPath + "/gitapi/config/clone" + fileDir + fileTarget,
-		"DefaultRemoteBranchLocation": contextPath + "/gitapi/remote/origin/"+ util.encodeURIComponent(branchname) + fileDir,
-		"DiffLocation": contextPath + "/gitapi/diff/Default" + fileDir + fileTarget,
-		"HeadLocation": contextPath + "/gitapi/commit/HEAD" + fileDir + fileTarget,
-		"IndexLocation": contextPath + "/gitapi/index" + fileDir + fileTarget,
-		"RemoteLocation": contextPath + "/gitapi/remote" + fileDir + fileTarget,
-		"StatusLocation": contextPath + "/gitapi/status" + fileDir + fileTarget,
-		"TagLocation": contextPath + "/gitapi/tag" + fileDir + fileTarget,
-		"TreeLocation": contextPath + "/gitapi/tree" + fileDir + "HEAD/" + fileTarget
+		"BlameLocation": gitRoot + "/blame/HEAD" + fileDir + fileTarget,
+		"CloneLocation": gitRoot + "/clone" + fileDir,
+		"CommitLocation": gitRoot + "/commit/" + util.encodeURIComponent(branchname) + fileDir + fileTarget,
+		"ConfigLocation": gitRoot + "/config/clone" + fileDir + fileTarget,
+		"DefaultRemoteBranchLocation": gitRoot + "/remote/origin/"+ util.encodeURIComponent(branchname) + fileDir,
+		"DiffLocation": gitRoot + "/diff/Default" + fileDir + fileTarget,
+		"HeadLocation": gitRoot + "/commit/HEAD" + fileDir + fileTarget,
+		"IndexLocation": gitRoot + "/index" + fileDir + fileTarget,
+		"RemoteLocation": gitRoot + "/remote" + fileDir + fileTarget,
+		"StatusLocation": gitRoot + "/status" + fileDir + fileTarget,
+		"TagLocation": gitRoot + "/tag" + fileDir + fileTarget,
+		"TreeLocation": gitRoot + "/tree" + fileDir + "HEAD/" + fileTarget
 	};
 	if(!branchname){
 		delete comingJson.Git.CommitLocation;

@@ -21,12 +21,13 @@ module.exports = {};
 
 module.exports.router = function(options) {
 	var fileRoot = options.fileRoot;
-	var contextPath = (options && options.options && options.options.configParams && options.options.configParams["orion.context.path"]) || "";
-	if (!fileRoot) { throw new Error('options.root is required'); }
+	var gitRoot = options.gitRoot;
+	if (!fileRoot) { throw new Error('options.fileRoot is required'); }
+	if (!gitRoot) { throw new Error('options.gitRoot is required'); }
 
 	return express.Router()
 	.use(bodyParser.json())
-	.get('/:refName'+ contextPath + '/file/*', getBlame);
+	.get('/:refName'+ fileRoot + "/*", getBlame);
 	
 function getBlame(req, res) {
 	var blamerepo,fileDir, fileRelativePath;
@@ -50,8 +51,8 @@ function getBlame(req, res) {
 			var sendingBlamejason;
 			sendingBlamejason = {
 				"Children" : blamejason,
-				"CloneLocation": contextPath + "/gitapi/clone" + fileDir ,
-				"Location": contextPath + "/gitapi/blame/"+ req.params.refName + fileDir + fileRelativePath,
+				"CloneLocation": gitRoot + "/clone" + fileDir ,
+				"Location": gitRoot + "/blame/"+ req.params.refName + fileDir + fileRelativePath,
 				"Type" : "Blame"
 			};
 			res.status(200).json(sendingBlamejason);

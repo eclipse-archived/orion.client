@@ -25,12 +25,13 @@ app.use(/* @callback */ function(req, res, next) {
 	req.user = { workspaceDir: WORKSPACE };
 	next();
 }).use(PREFIX, require('../lib/workspace')({
-	root: '/workspace',
-	fileRoot: '/file',
+	workspaceRoot: CONTEXT_PATH + '/workspace', 
+	fileRoot: CONTEXT_PATH + '/file', 
+	gitRoot: CONTEXT_PATH + '/gitapi'
 }));
 app.use(PREFIX_FILE, require('../lib/file')({
-	root: '/file',
-	workspaceRoot: '/workspace',
+	gitRoot: CONTEXT_PATH + '/gitapi', 
+	fileRoot: CONTEXT_PATH + '/file'
 }));
 
 var request = supertest.bind(null, app);

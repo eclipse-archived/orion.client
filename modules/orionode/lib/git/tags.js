@@ -22,27 +22,28 @@ module.exports = {};
 
 module.exports.router = function(options) {
 	var fileRoot = options.fileRoot;
-	if (!fileRoot) { throw new Error('options.root is required'); }
-	var contextPath = (options && options.options && options.options.configParams && options.options.configParams["orion.context.path"]) || "";
-	
+	var gitRoot = options.gitRoot;
+	if (!fileRoot) { throw new Error('options.fileRoot is required'); }
+	if (!gitRoot) { throw new Error('options.gitRoot is required'); }
+
 	module.exports.tagJSON = tagJSON;
 
 	return express.Router()
 	.use(bodyParser.json())
-	.get(contextPath + '/file*', getTags)
+	.get(fileRoot + '*', getTags)
 	.get('/:tagName*', getTags)
 	.delete('/:tagName*', deleteTag);
 
-function tagJSON(fullName, shortName, sha, timestamp, fileDir) {
+function tagJSON(fullName, shortName, sha, timestamp, fileDir, annotated) {
 	return {
 		"FullName": fullName,
 		"Name": shortName,
-		"CloneLocation": contextPath + "/gitapi/clone" + fileDir,
-		"CommitLocation": contextPath + "/gitapi/commit/" + sha + fileDir,
+		"CloneLocation": gitRoot + "/clone" + fileDir,
+		"CommitLocation": gitRoot + "/commit/" + sha + fileDir,
 		"LocalTimeStamp": timestamp,
-		"Location": contextPath + "/gitapi/tag/" + util.encodeURIComponent(shortName) + fileDir,
-		"TagType": "LIGHTWEIGHT",
-		"TreeLocation": contextPath + "/gitapi/tree" + fileDir + "/" + util.encodeURIComponent(shortName),
+		"Location": gitRoot + "/tag/" + util.encodeURIComponent(shortName) + fileDir,
+		"TagType": annotated ? "ANNOTATED" : "LIGHTWEIGHT",
+		"TreeLocation": gitRoot + "/tree" + fileDir + "/" + util.encodeURIComponent(shortName),
 		"Type": "Tag"
 	};
 }
@@ -54,6 +55,30 @@ function getTagCommit(repo, ref) {
 		.then(function(tag){
 			return repo.getCommit(tag.targetId());
 		});
+	});
+}
+
+/**
+ * @param {NodeGit.Repository} repo the Git repository that owns the given referenced
+ * @param {NodeGit.Reference} ref the reference to check whether it's pointing at an annotated tag or not
+ * @return {boolean|String} <tt>true</tt> if the reference points at an annotated tag,
+ * 							<tt>false</tt> if it points at a commit object,
+ * 							a <tt>String</tt> error message if it points at another Git object type
+ */
+function isAnnotated(repo, ref) {
+	// get the object being referenced and check its type
+	return git.Object.lookup(repo, ref.target(), git.Object.TYPE.ANY)
+	.then(function(object) {
+		var type = object.type();
+		if (type === git.Object.TYPE.TAG) {
+			// referenced object is a tag, annotated tag then
+			return true;
+		} else if (type !== git.Object.TYPE.COMMIT) {
+			// otherwise, should be pointing at a commit and not an annotated tag,
+			// but if not, then something is wrong
+			return "Invalid object type found for '" + theRef.name() + "' (" + type + ")";
+		}
+		return false;
 	});
 }
 
@@ -78,10 +103,18 @@ function getTags(req, res) {
 		})
 		.then(function(ref) {
 			theRef = ref;
-			return getTagCommit(theRepo, ref);
+			// get the object being referenced and check its type
+			return isAnnotated(theRepo, ref);
 		})
-		.then(function(commit) {
-			res.status(200).json(tagJSON(theRef.name(), theRef.shorthand(), commit.sha(), commit.timeMs(), fileDir));
+		.then(function(annotated) {
+			if (typeof annotated === 'String') {
+				return writeError(400, res, annotated);
+			}
+
+			return getTagCommit(theRepo, theRef)
+			.then(function(commit) {
+				res.status(200).json(tagJSON(theRef.name(), theRef.shorthand(), commit.sha(), commit.timeMs(), fileDir, annotated));
+			});
 		})
 		.catch(function(err) {
 			writeError(404, res, err.message);
@@ -111,15 +144,21 @@ function getTags(req, res) {
 		}))
 		.then(function(referenceList) {
 			async.each(referenceList, function(ref,callback) {
-				getTagCommit(theRepo, ref)
-				.then(function(commit) {
-					tags.push(tagJSON(ref.name(), ref.shorthand(), commit.sha(), commit.timeMs(), fileDir));
-					callback();
-				})
-				.catch(function() {
-					// ignore errors looking up commits
-					tags.push(tagJSON(ref.name(), ref.shorthand(), ref.target().toString(), 0, fileDir));
-					callback();
+				isAnnotated(theRepo, ref)
+				.then(function(annotated) {
+					if (typeof annotated === 'String') {
+						return writeError(400, res, annotated);
+					}
+					getTagCommit(theRepo, ref)
+					.then(function(commit) {
+						tags.push(tagJSON(ref.name(), ref.shorthand(), commit.sha(), commit.timeMs(), fileDir, annotated));
+						callback();
+					})
+					.catch(function() {
+						// ignore errors looking up commits
+						tags.push(tagJSON(ref.name(), ref.shorthand(), ref.target().toString(), 0, fileDir, annotated));
+						callback();
+					});
 				});
 			}, function(err) {
 				if (err) {

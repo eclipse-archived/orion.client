@@ -21,13 +21,14 @@ var tasks = require("../tasks");
 var crypto = require('crypto');
 
 module.exports.router = function(options) {
-	var contextPath = (options && options.options && options.options.configParams && options.options.configParams["orion.context.path"]) || "";
+	var fileRoot = options.fileRoot;
+	if (!fileRoot) { throw new Error('options.fileRoot is required'); }
 	module.exports.retrieveManifestFile = retrieveManifestFile;
 	module.exports.retrieveProjectFilePath = retrieveProjectFilePath;
 
 	return express.Router()
 	.use(bodyParser.json())
-	.get(contextPath + "/file*", getManifests)
+	.get(fileRoot + "*", getManifests)
 	.get("*", getManifests);
 	
 function getManifests(req, res){

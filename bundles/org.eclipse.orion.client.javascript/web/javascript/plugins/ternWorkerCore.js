@@ -786,9 +786,7 @@ function(Tern, defaultOptions, Deferred, Objects, Serialize, Messages, i18nUtil)
 		var deferred = new Deferred();
 		_getFile(loc, /* @callback */ function(err, contents) {
 			if(typeof contents === 'string') {
-				var o = contents.length > 0 ? JSON.parse(contents) : Object.create(null);
-				deferred.resolve(o);
-				deferred.resolve(JSON.parse(contents));
+				deferred.resolve(contents.length > 0 ? JSON.parse(contents) : Object.create(null));
 			} else {
 				deferred.reject();
 			}

@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2015 IBM Corporation and others.
+ * Copyright (c) 2015, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -32,9 +32,10 @@ define([
 				 * @description Appends the given signature object to the running outline
 				 * @function
 				 * @private
-				 * @param {Object} sig The signature object
+				 * @param {?} sig The signature object
+				 * @param {String} classPre The name of the CSS class to tag the item with
 				 */
-				function addElement(sig) {
+				function addElement(sig, classPre) {
 					if(sig) {
 						var item = {
 							label: sig.sig,
@@ -42,6 +43,9 @@ define([
 							start: sig.range[0],
 							end: sig.range[1]
 						};
+						if(classPre) {
+							item.classNamePre = classPre;
+						}
 						if(scope.length < 1) {
 							outline.push(item);
 						}
@@ -72,7 +76,7 @@ define([
 						var item;
 						switch(node.type) {
 							case Estraverse.Syntax.ClassDeclaration : {
-								item = addElement(Signatures.computeSignature(node));
+								item = addElement(Signatures.computeSignature(node), Signatures.CLASS_IMAGE);
 								if(item) {
 									scope.push(item);
 								}
@@ -80,7 +84,7 @@ define([
 								break;
 							}
 							case Estraverse.Syntax.ClassExpression : {
-								item = addElement(Signatures.computeSignature(node));
+								item = addElement(Signatures.computeSignature(node), Signatures.CLASS_IMAGE);
 								if(item) {
 									scope.push(item);
 								}
@@ -88,7 +92,7 @@ define([
 								break;
 							}
 							case Estraverse.Syntax.MethodDefinition: {
-								item = addElement(Signatures.computeSignature(node));
+								item = addElement(Signatures.computeSignature(node), Signatures.FUNCTION_IMAGE);
 								if(item) {
 									scope.push(item);
 								}
@@ -97,7 +101,7 @@ define([
 								break;
 							}
 							case Estraverse.Syntax.FunctionDeclaration: {
-								item = addElement(Signatures.computeSignature(node));
+								item = addElement(Signatures.computeSignature(node), Signatures.FUNCTION_IMAGE);
 								if(item) {
 									scope.push(item);
 								}
@@ -108,7 +112,7 @@ define([
 									delete node.sig;
 									break;
 								}
-								item = addElement(Signatures.computeSignature(node));
+								item = addElement(Signatures.computeSignature(node), Signatures.FUNCTION_IMAGE);
 								if(item) {
 									scope.push(item);
 								}
@@ -116,7 +120,7 @@ define([
 								break;
 							}
 							case Estraverse.Syntax.ArrowFunctionExpression : {
-								item = addElement(Signatures.computeSignature(node));
+								item = addElement(Signatures.computeSignature(node), Signatures.FUNCTION_IMAGE);
 								if (item) {
 									scope.push(item);
 								}
@@ -124,7 +128,7 @@ define([
 								break;
 							}
 							case Estraverse.Syntax.ObjectExpression: {
-								item = addElement(Signatures.computeSignature(node));
+								item = addElement(Signatures.computeSignature(node), Signatures.OBJECT_IMAGE);
 								if(item) {
 									scope.push(item);
 								}

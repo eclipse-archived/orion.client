@@ -19,13 +19,12 @@ var fileUtil = require('./fileUtil');
 var writeError = api.writeError;
 
 module.exports = function(options) {
-	var workspaceRoot = options.root;
 	var fileRoot = options.fileRoot;
-	if (!workspaceRoot) {
-		throw new Error('options.root path required');
-	}
-	var contextPath = (options && options.options && options.options.configParams && options.options.configParams["orion.context.path"]) || "";
-
+	var gitRoot = options.gitRoot;
+	var workspaceRoot = options.workspaceRoot;
+	if (!fileRoot) { throw new Error('options.fileRoot is required'); }
+	if (!gitRoot) { throw new Error('options.gitRoot is required'); }
+	if (!workspaceRoot) { throw new Error('options.workspaceRoot is required'); }
 	var workspaceId = 'orionode';
 
 	/**
@@ -95,7 +94,7 @@ module.exports = function(options) {
 					})
 				};
 				return Promise.all(fileUtil.getDecorators().map(function(decorator){
-					return decorator(contextPath, workspaceRoot, req, "", workspaceJson);			
+					return decorator(gitRoot, workspaceRoot, req, "", workspaceJson);			
 					})
 				);
 			})
@@ -129,7 +128,7 @@ module.exports = function(options) {
 				var filepath = fileUtil.safeFilePath(req.user.workspaceDir, projectName);
 				// Call the File POST helper to handle the filesystem operation. We inject the Project-specific metadata
 				// into the resulting File object.
-				fileUtil.handleFilePOST(contextPath, fileRoot, req, res, filepath, {
+				fileUtil.handleFilePOST(gitRoot, fileRoot, req, res, filepath, {
 					Id: projectName,
 					ContentLocation: makeProjectContentLocation(req, projectName),
 					Location: makeProjectLocation(req, projectName)

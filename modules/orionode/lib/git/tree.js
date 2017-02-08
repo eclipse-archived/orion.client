@@ -21,12 +21,13 @@ module.exports = {};
 
 module.exports.router = function(options) {
 	var fileRoot = options.fileRoot;
-	if (!fileRoot) { throw new Error('options.root is required'); }
-	var contextPath = (options && options.options && options.options.configParams && options.options.configParams["orion.context.path"]) || "";
-
+	var gitRoot = options.gitRoot;
+	if (!fileRoot) { throw new Error('options.fileRoot is required'); }
+	if (!gitRoot) { throw new Error('options.gitRoot is required'); }
+	
 	return express.Router()
-	.get(contextPath + '/', getTree)
-	.get(contextPath + '/file*', getTree);
+	.get('/', getTree)
+	.get(fileRoot + '*', getTree);
 	
 function treeJSON(location, name, timestamp, dir, length) {
 	location = api.toURLPath(location);
@@ -35,8 +36,8 @@ function treeJSON(location, name, timestamp, dir, length) {
 		LocalTimeStamp: timestamp,
 		Directory: dir,
 		Length: length,
-		Location: contextPath + "/gitapi/tree" + location,
-		ChildrenLocation: dir ? contextPath + "/gitapi/tree" + location + "?depth=1": undefined,
+		Location: gitRoot + "/tree" + location,
+		ChildrenLocation: dir ? gitRoot + "/tree" + location + "?depth=1": undefined,
 		Attributes: {
 			ReadOnly: true
 		}
@@ -99,9 +100,9 @@ function getTree(req, res) {
 			var repoRoot =  clone.getfileDirPath(repo,req); 
 			var refLocation = path.join(repoRoot, util.encodeURIComponent(ref));
 			function createParents(data) {
-				var parents = [], temp = data, l, end = contextPath + "/gitapi/tree" + repoRoot;
+				var parents = [], temp = data, l, end = gitRoot + "/tree" + repoRoot;
 				while (temp.Location.length > end.length) {
-					var treePath = contextPath + "/gitapi/tree";
+					var treePath = gitRoot + "/tree";
 					var searchTerm = "^" + treePath.replace(/\//g, "\/");
 					var regex = new RegExp(searchTerm);
 					l = path.dirname(temp.Location).replace(regex, "") + "/";
