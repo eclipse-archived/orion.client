@@ -110,9 +110,6 @@ define({
 		},
 		".editorViewerHeader": {
 			"background": "#F5F7FA !important",
-			"border-bottom-width": "1px",
-			"border-bottom-style": "solid",
-			"border-bottom-color": "#F5F7FA",
 			"color": "#152935 !important"
 		},
 		".filesystemName": {
@@ -436,6 +433,10 @@ define({
 				"background": "#3D72B3",
 				"border-color": "#3D72B3"
 			}
+		},
+		".editorTabCloseButton:hover": {
+		"background-color": "#3D72B3",
+		"color": "#FFFFFF"
 		}
 	}
 });
