@@ -18,10 +18,8 @@ var auth = require('./lib/middleware/auth'),
 	api = require('./lib/api'),
 	compression = require('compression'),
 	path = require('path'),
-	socketio = require('socket.io'),
 	util = require('util'),
 	argslib = require('./lib/args'),
-	ttyShell = require('./lib/tty_shell'),
 	orion = require('./index.js'),
 	prefs = require('./lib/controllers/prefs');
 
@@ -91,9 +89,8 @@ function startServer(cb) {
 				workspaceDir: workspaceDir,
 				configParams: configParams,
 				maxAge: dev ? 0 : undefined,
+				server: server
 			}));
-			var io = socketio.listen(server, { 'log level': 1 });
-			ttyShell.install({ io: io, fileRoot: contextPath + '/file', workspaceDir: workspaceDir });
 
 			server.on('listening', function() {
 				console.log(util.format('Listening on port %d...', port));

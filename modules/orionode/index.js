@@ -11,7 +11,8 @@
 /*eslint-env node */
 var express = require('express'),
 	path = require('path'),
-	fs = require('fs');
+	fs = require('fs'),
+	ttyShell = require('./lib/tty_shell');
 
 var LIBS = path.normalize(path.join(__dirname, 'lib/')),
 	MINIFIED_ORION_CLIENT = "lib/orion.client",
@@ -86,6 +87,9 @@ function startServer(options) {
 			});
 		}
 		if (options.configParams.isElectron) app.use('/update', require('./lib/update').router(options));
+
+		// tty
+		ttyShell.install({ server: options.server, app: app, fileRoot: contextPath + '/file', workspaceDir: options.workspaceDir });
 
 		// Static files
 		app.use(require('term.js').middleware());
