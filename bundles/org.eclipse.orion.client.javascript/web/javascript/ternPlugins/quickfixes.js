@@ -810,6 +810,8 @@ define([
 	                        	}
 	                        }
 	                    }
+	                } else if(declr.type === 'ClassDeclaration') {
+	                	return {text: '', start: declr.range[0], end: declr.range[1]};
 	                }
 	            }
 	        },

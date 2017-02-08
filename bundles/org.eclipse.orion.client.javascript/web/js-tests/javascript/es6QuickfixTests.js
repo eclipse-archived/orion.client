@@ -287,6 +287,23 @@ define([
 					});
 				});
 			});
+			//NO-UNUSED-VARS-UNUSED
+			describe("no-unused-vars-unused", function() {
+				it("Test no-unused-vars-unused ClassDeclaration", function(done) {
+					var rule = createTestRule('no-unused-vars');
+					var expected = {
+						value: "",
+						start: 0,
+						end: 12
+					};
+					return getFixes({buffer: "class Foo {}",
+							rule: rule,
+							expected: expected,
+							callback: done,
+							pid: "no-unused-vars-unused"
+						});
+				});
+			});
 			//NO-UNUSED-VARS-UNREAD
 			describe("no-unused-vars-unread", function() {
 				it("Test no-unused-vars-unread-list-matching-1",function(callback) {
