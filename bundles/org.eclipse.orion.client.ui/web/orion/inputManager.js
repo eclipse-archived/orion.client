@@ -141,6 +141,7 @@ define([
 		this.contentTypeRegistry = options.contentTypeRegistry;
 		this.selection = options.selection;
 		this.reveal = options.reveal;
+		this.isUnsavedWarningNeeed = options.isUnsavedWarningNeeed;
 		this._input = this._title = "";
 		if (this.fileClient) {
 			this.fileClient.addEventListener("Changed", function(evt) { //$NON-NLS-0$
@@ -565,11 +566,12 @@ define([
 			if (editor && editor.isDirty()) {
 				var oldLocation = this._location;
 				var oldResource = oldInput.resource;
-				var newResource = input.resource;
+				var newResource = input.resource;			
 				if (oldResource !== newResource || encodingChanged) {
 					if (this._autoSaveEnabled) {
 						this.save();
-					} else if (!window.confirm(messages.confirmUnsavedChanges)) {
+					} else if(this.isUnsavedWarningNeeed() && !window.confirm(messages.confirmUnsavedChanges)){
+						// Don't show confirm dialog if in the other split window, the same file is opened. 
 						window.location.hash = oldLocation;
 						this.reveal(this.getFileMetadata());
 						return;
