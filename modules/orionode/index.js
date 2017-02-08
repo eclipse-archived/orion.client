@@ -81,8 +81,8 @@ function startServer(options) {
 		if(options.configParams["additional.endpoint"]){
 			var additionalEndpoints = require(options.configParams["additional.endpoint"]);
 			additionalEndpoints.forEach(function(additionalEndpoint){
-				additionalEndpoint.authenticated ? app.use(additionalEndpoint.endpoint, checkAuthenticated, require(additionalEndpoint.module).router(options))
-					: app.use(additionalEndpoint.endpoint, require(additionalEndpoint.module).router(options));
+				additionalEndpoint.authenticated ? app.use(additionalEndpoint.endpoint, checkAuthenticated, require(additionalEndpoint.module).router(options, additionalEndpoint.extraOptions))
+					: app.use(additionalEndpoint.endpoint, require(additionalEndpoint.module).router(options, additionalEndpoint.extraOptions));
 			});
 		}
 		if (options.configParams.isElectron) app.use('/update', require('./lib/update').router(options));
