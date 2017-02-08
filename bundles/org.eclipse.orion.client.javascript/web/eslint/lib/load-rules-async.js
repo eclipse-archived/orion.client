@@ -2269,11 +2269,11 @@ define([
         						if(tern.file.ast && tern.file.ast.environments) {
         							var envs = tern.file.ast.environments;
         							if(envs.node) {
-        								if(!envs.amd && !tern.pluginRunning('node')) { //$NON-NLS-1$
+        								if(!tern.pluginRunning('node') && !tern.pluginRunning('commonjs')) { //$NON-NLS-1$
         									context.report(lib, ProblemMessages['unknown-require-not-running'], {0: 'node', pid: 'unknown-require-not-running', nls: 'unknown-require-not-running', data: 'node'}); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
         									return;
         								}
-        								if(envs.amd && !tern.pluginRunning('commonjs')) { //$NON-NLS-1$
+        								if(!tern.pluginRunning('commonjs')) { //$NON-NLS-1$
         									context.report(lib, ProblemMessages['unknown-require-not-running'], {0: 'commonjs', pid: 'unknown-require-not-running', nls: 'unknown-require-not-running', data: 'commonjs'}); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
         									return;
         								}
