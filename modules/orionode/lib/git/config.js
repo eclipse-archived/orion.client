@@ -21,22 +21,23 @@ module.exports = {};
 
 module.exports.router = function(options) {
 	var fileRoot = options.fileRoot;
-	if (!fileRoot) { throw new Error('options.root is required'); }
-	var contextPath = (options && options.options && options.options.configParams && options.options.configParams["orion.context.path"]) || "";
-
+	var gitRoot = options.gitRoot;
+	if (!fileRoot) { throw new Error('options.fileRoot is required'); }
+	if (!gitRoot) { throw new Error('options.gitRoot is required'); }
+	
 	return express.Router()
 	.use(bodyParser.json())
-	.get('/clone'+ contextPath + '/file*', getConfig)
-	.get('/:key/clone'+ contextPath + '/file*', getAConfig)
-	.delete('/:key/clone'+ contextPath + '/file*', deleteConfig)
-	.put('/:key/clone'+ contextPath + '/file*', putConfig)
-	.post('/clone'+ contextPath + '/file*', postConfig);
+	.get('/clone'+ fileRoot + '*', getConfig)
+	.get('/:key/clone'+ fileRoot + '*', getAConfig)
+	.delete('/:key/clone'+ fileRoot + '*', deleteConfig)
+	.put('/:key/clone'+ fileRoot + '*', putConfig)
+	.post('/clone'+ fileRoot + '*', postConfig);
 
 function configJSON(key, value, fileDir) {
 	return {
 		"Key": key,
-		"CloneLocation": contextPath + "/gitapi/clone" + fileDir,
-		"Location": contextPath + "/gitapi/config/" + util.encodeURIComponent(key) + "/clone" + fileDir,
+		"CloneLocation": gitRoot + "/clone" + fileDir,
+		"Location": gitRoot + "/config/" + util.encodeURIComponent(key) + "/clone" + fileDir,
 		"Value": Array.isArray(value) ? value : [value]
 	};
 }
@@ -89,8 +90,8 @@ function getConfig(req, res) {
 
 			res.status(200).json({
 				"Children": configs,
-				"CloneLocation": contextPath + "/gitapi/clone" + fileDir,
-				"Location": contextPath + "/gitapi/config/clone"+ fileDir,
+				"CloneLocation": gitRoot + "/clone" + fileDir,
+				"Location": gitRoot + "/config/clone"+ fileDir,
 				"Type": "Config"
 			});
 

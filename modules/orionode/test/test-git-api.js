@@ -31,19 +31,21 @@ var app = express()
 	next();
 })
 .use(CONTEXT_PATH + '/task', require('../lib/tasks').router({
-	root: '/task',
+	taskRoot: CONTEXT_PATH + '/task'
 }))
 .use(CONTEXT_PATH + "/workspace*", require('../lib/workspace')({
-	root: '/workspace',
-	fileRoot: '/file',
+	workspaceRoot: CONTEXT_PATH + '/workspace', 
+	fileRoot: CONTEXT_PATH + '/file', 
+	gitRoot: CONTEXT_PATH + '/gitapi'
 }))
 .use(CONTEXT_PATH + "/file*", require('../lib/file')({
-	root: '/file',
-	workspaceRoot: '/workspace',
+	gitRoot: CONTEXT_PATH + '/gitapi', 
+	fileRoot: CONTEXT_PATH + '/file'
 }))
 .use(CONTEXT_PATH + "/gitapi", require('../lib/git')({
-	root: '/gitapi',
-	fileRoot: '/file',
+	gitRoot: CONTEXT_PATH + '/gitapi', 
+	fileRoot: CONTEXT_PATH + '/file', 
+	workspaceRoot: CONTEXT_PATH + '/workspace'
 }));
 
 var request = supertest.bind(null, app);

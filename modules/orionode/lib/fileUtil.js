@@ -223,13 +223,13 @@ exports.addDecorator = function(func) {
  * @param {Boolean} [includeChildren=false]
  * @param {Object} [metadataMixins] Additional metadata to mix in to the response object.
  */
-var writeFileMetadata = exports.writeFileMetadata = function(fileRoot, req, res, contextPath, filepath, stats, etag, depth, metadataMixins) {
+var writeFileMetadata = exports.writeFileMetadata = function(fileRoot, req, res, gitRoot, filepath, stats, etag, depth, metadataMixins) {
 	var result;
 	return fileJSON(fileRoot, req.user.workspaceDir, filepath, stats, depth, metadataMixins)
 	.then(function(originalJson) {
 		result = originalJson;
 		return Promise.map(decorators, function(decorator){
-			return decorator(contextPath, fileRoot, req, filepath, result);			
+			return decorator(gitRoot, fileRoot, req, filepath, result);			
 		});
 	})
 	.then(function(){
@@ -291,7 +291,7 @@ function fileJSON(fileRoot, workspaceDir, filepath, stats, depth, metadataMixins
  * @param {Number} [statusCode] Status code to send on a successful response. By default, `201 Created` is sent if
  * a new resource was created, and and `200 OK` if an existing resource was overwritten.
  */
-exports.handleFilePOST = function(contextPath, fileRoot, req, res, destFilepath, metadataMixins, statusCode) {
+exports.handleFilePOST = function(gitRoot, fileRoot, req, res, destFilepath, metadataMixins, statusCode) {
 	var isDirectory = req.body && getBoolean(req.body, 'Directory');
 	var writeResponse = function(isOverwrite) {
 		// TODO: maybe set ReadOnly and Executable based on fileAtts
@@ -303,7 +303,7 @@ exports.handleFilePOST = function(contextPath, fileRoot, req, res, destFilepath,
 		}
 		return fs.statAsync(destFilepath)
 		.then(function(stats) {
-			return writeFileMetadata(fileRoot, req, res, contextPath, destFilepath, stats, /*etag*/null, /*depth*/0, metadataMixins);
+			return writeFileMetadata(fileRoot, req, res, gitRoot, destFilepath, stats, /*etag*/null, /*depth*/0, metadataMixins);
 		})
 		.catch(function(err) {
 			api.writeError(500, res, err.message);

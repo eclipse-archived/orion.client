@@ -57,10 +57,12 @@ function Nothing() {
 }
 
 function Git(options) {
-	var workspaceRoot = options.root;
 	var fileRoot = options.fileRoot;
-	if (!fileRoot) { throw new Error('options.root path required'); }
-	if (!workspaceRoot) { throw new Error('options.root path required'); }
+	var gitRoot = options.gitRoot;
+	var workspaceRoot = options.workspaceRoot;
+	if (!fileRoot) { throw new Error('options.fileRoot is required'); }
+	if (!gitRoot) { throw new Error('options.gitRoot is required'); }
+	if (!workspaceRoot) { throw new Error('options.workspaceRoot is required'); }
 	
 	var router = express.Router();
 	

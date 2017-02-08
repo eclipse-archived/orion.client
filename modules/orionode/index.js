@@ -68,14 +68,14 @@ function startServer(options) {
 			app.use(require(options.configParams["login.module"] || "./lib/user")(options));
 		}
 		app.use('/site', checkAuthenticated, require('./lib/sites')(options));
-		app.use('/task', checkAuthenticated, require('./lib/tasks').router({ root: contextPath + '/task' }));
+		app.use('/task', checkAuthenticated, require('./lib/tasks').router({ taskRoot: contextPath + '/task' }));
 		app.use('/filesearch', checkAuthenticated, require('./lib/search')(options));
-		app.use('/file*', checkAuthenticated, require('./lib/file')({ root: contextPath + '/file', options: options }));
-		app.use('/workspace*', checkAuthenticated, require('./lib/workspace')({ root: contextPath + '/workspace', fileRoot: contextPath + '/file', options: options }));
-		app.use('/gitapi', checkAuthenticated, require('./lib/git')({ root: contextPath + '/gitapi', fileRoot: contextPath + '/file', options: options}));
-		app.use('/cfapi', checkAuthenticated, require('./lib/cf')({ root: contextPath + '/cfapi',  options: options}));
+		app.use('/file*', checkAuthenticated, require('./lib/file')({ gitRoot: contextPath + '/gitapi', fileRoot: contextPath + '/file', options: options }));
+		app.use('/workspace*', checkAuthenticated, require('./lib/workspace')({ workspaceRoot: contextPath + '/workspace', fileRoot: contextPath + '/file', gitRoot: contextPath + '/gitapi', options: options }));
+		app.use('/gitapi', checkAuthenticated, require('./lib/git')({ gitRoot: contextPath + '/gitapi', fileRoot: contextPath + '/file', workspaceRoot: contextPath + '/workspace', options: options}));
+		app.use('/cfapi', checkAuthenticated, require('./lib/cf')({ fileRoot: contextPath + '/file', options: options}));
 		app.use('/prefs', checkAuthenticated, require('./lib/controllers/prefs').router(options));
-		app.use('/xfer', checkAuthenticated, require('./lib/xfer')(options));
+		app.use('/xfer', checkAuthenticated, require('./lib/xfer')({fileRoot: contextPath + '/file', options:options}));
 		app.use('/metrics', require('./lib/metrics').router(options));
 		app.use('/version', require('./lib/version').router(options));
 		if(options.configParams["additional.endpoint"]){

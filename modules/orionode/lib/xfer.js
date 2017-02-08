@@ -27,12 +27,13 @@ var crypto = require('crypto');
  * @callback
  */
 module.exports = function(options) {
+	var fileRoot = options.fileRoot;
+	if (!fileRoot) { throw new Error('options.fileRoot is required'); }
 	module.exports.write = write;
 	module.exports.getUploadDir = getUploadDir;
-	var contextPath = options.configParams["orion.context.path"] || "";
 	
-	var UPLOADS_FOLDER = path.join(options.configParams['orion.single.user'] ?
-			path.join(os.homedir(), ".orion") : options.workspaceDir, ".uploads");
+	var UPLOADS_FOLDER = path.join(options.options.configParams['orion.single.user'] ?
+			path.join(os.homedir(), ".orion") : options.options.workspaceDir, ".uploads");
 	
 	mkdirp(UPLOADS_FOLDER, function (err) {
 		if (err) console.error(err);
@@ -188,7 +189,7 @@ function completeTransfer(req, res, tempFile, filePath, fileName, xferOptions, s
 			if (failed.length) {
 				return overrideError(failed);
 			}
-			res.setHeader("Location", contextPath + "/file" + filePath.substring(req.user.workspaceDir.length));
+			res.setHeader("Location", fileRoot + filePath.substring(req.user.workspaceDir.length));
 			res.status(201).end();
 		});
 	} else {
@@ -200,7 +201,7 @@ function completeTransfer(req, res, tempFile, filePath, fileName, xferOptions, s
 			if (err) {
 				return writeError(400, res, "Transfer failed");
 			}
-			res.setHeader("Location", contextPath + "/file" + filePath.substring(req.user.workspaceDir.length));
+			res.setHeader("Location", fileRoot + filePath.substring(req.user.workspaceDir.length));
 			res.status(201).end();
 		});
 	}

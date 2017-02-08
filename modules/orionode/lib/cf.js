@@ -23,6 +23,8 @@ var target = require('./cf/target');
 
 module.exports = CF;
 function CF(options) {
+	var fileRoot = options.fileRoot;
+	if (!fileRoot) { throw new Error('options.fileRoot is required'); }
 	var router = express.Router();
 	
 	router.use("/apps", apps.router(options));

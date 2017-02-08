@@ -21,14 +21,13 @@ module.exports = {};
 
 module.exports.router = function(options) {
 	var fileRoot = options.fileRoot;
-	if (!fileRoot) { throw new Error('options.root is required'); }
-	var contextPath = (options && options.options && options.options.configParams && options.options.configParams["orion.context.path"]) || "";
-
+	if (!fileRoot) { throw new Error('options.fileRoot is required'); }
+	
 	return express.Router()
 	.use(bodyParser.json())
-	.put(contextPath + '/file*', putSubmodule)
-	.post(contextPath + '/file*', postSubmodule)
-	.delete(contextPath + '/file*', deleteSubmodule);
+	.put(fileRoot + '*', putSubmodule)
+	.post(fileRoot + '*', postSubmodule)
+	.delete(fileRoot + '*', deleteSubmodule);
 
 function putSubmodule(req, res) {
 	return clone.getRepo(req)

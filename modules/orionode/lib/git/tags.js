@@ -22,14 +22,15 @@ module.exports = {};
 
 module.exports.router = function(options) {
 	var fileRoot = options.fileRoot;
-	if (!fileRoot) { throw new Error('options.root is required'); }
-	var contextPath = (options && options.options && options.options.configParams && options.options.configParams["orion.context.path"]) || "";
-	
+	var gitRoot = options.gitRoot;
+	if (!fileRoot) { throw new Error('options.fileRoot is required'); }
+	if (!gitRoot) { throw new Error('options.gitRoot is required'); }
+
 	module.exports.tagJSON = tagJSON;
 
 	return express.Router()
 	.use(bodyParser.json())
-	.get(contextPath + '/file*', getTags)
+	.get(fileRoot + '*', getTags)
 	.get('/:tagName*', getTags)
 	.delete('/:tagName*', deleteTag);
 
@@ -37,12 +38,12 @@ function tagJSON(fullName, shortName, sha, timestamp, fileDir, annotated) {
 	return {
 		"FullName": fullName,
 		"Name": shortName,
-		"CloneLocation": contextPath + "/gitapi/clone" + fileDir,
-		"CommitLocation": contextPath + "/gitapi/commit/" + sha + fileDir,
+		"CloneLocation": gitRoot + "/clone" + fileDir,
+		"CommitLocation": gitRoot + "/commit/" + sha + fileDir,
 		"LocalTimeStamp": timestamp,
-		"Location": contextPath + "/gitapi/tag/" + util.encodeURIComponent(shortName) + fileDir,
+		"Location": gitRoot + "/tag/" + util.encodeURIComponent(shortName) + fileDir,
 		"TagType": annotated ? "ANNOTATED" : "LIGHTWEIGHT",
-		"TreeLocation": contextPath + "/gitapi/tree" + fileDir + "/" + util.encodeURIComponent(shortName),
+		"TreeLocation": gitRoot + "/tree" + fileDir + "/" + util.encodeURIComponent(shortName),
 		"Type": "Tag"
 	};
 }
