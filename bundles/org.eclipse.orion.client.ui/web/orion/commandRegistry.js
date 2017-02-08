@@ -241,7 +241,7 @@ define([
 		 * will be called with boolean indicating whether the command was confirmed.
 		 */
 		confirm: function(node, message, yesString, noString, modal, onConfirm) {
-			this._popupDialog(true, node, message, yesString, noString, modal, onConfirm);
+			this._popupDialog(modal, "YESNOCONFIRM", node, message, yesString, noString, onConfirm);
 		},
 		
 		/**
@@ -257,18 +257,25 @@ define([
 		 * @param {String} default message in the input box.
 		 * will be called with boolean indicating whether the command was confirmed.
 		 */
-		_popupDialog: function(isConfirm, node, message, yesString, noString, modal, onConfirm, defaultInput) {
-			var result = isConfirm ? false : "";
+		_popupDialog: function(modal, style, node, message, yesString, noString, onConfirm, onCancel, additionalButtonStringCallList, afterBlockCallBack, defaultInput) {
+			var result = style === "YESNOCONFIRM" ? false : "";
 			if (this._parameterCollector && !modal) {
 				var self = this;
-				var okCallback = function() {onConfirm(result);};
-				var closeFunction = function(){self._parameterCollector.close();}
+				var okCallback = function() {if(onConfirm){onConfirm(result);}};
+				var closeFunction = function(){self._parameterCollector.close();
+					if(!result && onCancel){
+						onCancel();
+					}
+					if(result && afterBlockCallBack){
+						afterBlockCallBack();
+					}
+				};
 				var fillFunction = function(parent, buttonParent) {
 					var label = document.createElement("span"); //$NON-NLS-0$
 					label.classList.add("parameterPrompt"); //$NON-NLS-0$
 					label.textContent = message;
 					parent.appendChild(label);
-					if(!isConfirm){
+					if(style === "POPUP"){
 						var input = document.createElement("input");
 						input.setAttribute("value", defaultInput);
 						input.classList.add("parameterInput");
@@ -277,25 +284,40 @@ define([
 					}
 					var yesButton = document.createElement("button"); //$NON-NLS-0$
 					yesButton.addEventListener("click", function(event) { //$NON-NLS-0$
-						result = isConfirm ? true : input.value;
+						result = style === "POPUP" ? input.value : true;
 						okCallback();
 						closeFunction();
 					}, false);
 					buttonParent.appendChild(yesButton);
 					yesButton.appendChild(document.createTextNode(yesString)); //$NON-NLS-0$
 					yesButton.className = "dismissButton"; //$NON-NLS-0$
-					var button = document.createElement("button"); //$NON-NLS-0$
-					button.addEventListener("click", function(event) { //$NON-NLS-0$
-						result = isConfirm ? false : "";
+					var noButton = document.createElement("button"); //$NON-NLS-0$
+					noButton.addEventListener("click", function(event) { //$NON-NLS-0$
+						result = style === "POPUP" ? "" : false;
 						closeFunction();
 					}, false);
-					buttonParent.appendChild(button);
-					button.appendChild(document.createTextNode(noString)); //$NON-NLS-0$
-					button.className = "dismissButton"; //$NON-NLS-0$
+					buttonParent.appendChild(noButton);
+					noButton.appendChild(document.createTextNode(noString)); //$NON-NLS-0$
+					noButton.className = "dismissButton"; //$NON-NLS-0$
+					
+					if(additionalButtonStringCallList){
+						var buttonsStrings = Object.keys(additionalButtonStringCallList);
+						buttonsStrings.forEach(function(keyString){
+							var button = document.createElement("button"); //$NON-NLS-0$
+							button.addEventListener("click", function(event) { //$NON-NLS-0$
+								result = true;
+								additionalButtonStringCallList[keyString]();
+								closeFunction();
+							}, false);
+							buttonParent.appendChild(button);
+							button.appendChild(document.createTextNode(keyString)); //$NON-NLS-0$
+							button.className = "dismissButton";
+						});
+					}
 					return yesButton;
 				};
 				this._parameterCollector.close();
-				if(isConfirm || !isConfirm && !node ){
+				if(!node){
 					// Do this if this is a confirm or if this is a prompt but without node specified.
 					var opened = this._parameterCollector.open(node, fillFunction, function(){});
 				}
@@ -306,7 +328,7 @@ define([
 							this.destroy();
 						},
 						trigger: "click", //$NON-NLS-0$
-						position: isConfirm ? ["below", "right", "above", "left"] : ["right","above", "below", "left"]//$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$
+						position: style !== "POPUP" ? ["below", "right", "above", "left"] : ["right","above", "below", "left"]//$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$
 					});
 					var parameterArea = tooltip.contentContainer();
 					parameterArea.classList.add("parameterPopup"); //$NON-NLS-0$
@@ -316,6 +338,12 @@ define([
 							originalFocusNode.focus();
 						}
 						tooltip.destroy();
+						if(!result && onCancel){
+							onCancel();
+						}
+						if(result && afterBlockCallBack){
+							afterBlockCallBack();
+						}
 					};
 					var messageArea = document.createElement("div"); //$NON-NLS-0$
 					messageArea.classList.add("parameterMessage"); //$NON-NLS-0$
@@ -356,7 +384,11 @@ define([
 		 * will be called with boolean indicating whether the command was confirmed.
 		 */
 		prompt: function(node, message, yesString, noString, defaultInput, modal, onConfirm) {
-			this._popupDialog(false, node, message, yesString, noString, modal, onConfirm ,defaultInput);
+			this._popupDialog(modal, "YESNOCONFIRM", node, message, yesString, noString, onConfirm, null, null, null,defaultInput);
+		},
+		
+		confirmWithAdditionButtons: function(node, message, yesString, noString, onConfirm, onCancel, additionalButtonStringCallList, afterBlockCallBack){
+			this._popupDialog(false, "CUSTOMCONFIRM", node, message, yesString, noString, onConfirm, onCancel, additionalButtonStringCallList, afterBlockCallBack);
 		},
 		
 		/**
