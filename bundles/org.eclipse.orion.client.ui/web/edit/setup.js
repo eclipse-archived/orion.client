@@ -187,14 +187,12 @@ objects.mixin(MenuBar.prototype, {
 function TextModelPool(options) {
 	this.serviceRegistry = options.serviceRegistry;
 	this.all = [];
-	this.contextID = 0;
 }
 TextModelPool.prototype = {};
 objects.mixin(TextModelPool.prototype, {
 	create: function(serviceID) {
 		var model = new mTextModelFactory.TextModelFactory().createTextModel({serviceRegistry: this.serviceRegistry});
 		var undoStack = new mUndoStack.UndoStack(model, 500);
-		serviceID += this.contextID++;
 		var contextImpl = {};
 		[	
 			"getText", //$NON-NLS-0$
@@ -215,104 +213,25 @@ objects.mixin(TextModelPool.prototype, {
 	search: function(resource) {
 		for (var i = 0; i<this.all.length; i++) {
 			var p = this.all[i];
-			if (p.metadata && p.metadata.Location === resource) {
-				return p;
-			}
+			if (p.useCount > 0 && p.metadata && p.metadata.Location === resource) return p;
 		}
 		return null;
 	},
-	release: function(resource) {
+	release: function(p) {
+		p.useCount--;
+		return p;
+	},
+	retain: function(p) {
+		p.useCount++;
+		return p;
+	},
+	get: function() {
 		for (var i = 0; i<this.all.length; i++) {
 			var p = this.all[i];
-			if (p.metadata && p.metadata.Location === resource) {
-				this.serviceRegistry.unregisterService(p.serviceID);
-				this.all.splice(i, 1);
-			}
+			if (p.useCount === 0) return this.retain(p);
 		}
+		return null;
 	}
-});
-
-function TabWidget(options) {
-	objects.mixin(this, options);
-	var tabWidgetDropdownNode = this.tabWidgetDropdownNode = document.createElement("div");
-	tabWidgetDropdownNode.id = "tabWidgetDropdownNode" + this.id;
-	tabWidgetDropdownNode.className = "editorViewerTabDropdown";
-	tabWidgetDropdownNode.style.display = "none";
-
-	this.parent.appendChild(tabWidgetDropdownNode);
-	this.selectedFile = null;
-	this.commandRegistry = options.commandRegistry;
-	// Create dropdown
-	this.createDropdown_();
-}
-
-TabWidget.prototype = {};
-objects.mixin(TabWidget.prototype, {
-	createDropdown_ : function() {
-		var fileList = this.fileList = [];
-		this.widgetClick = function cb() {
-			// TODO(caseyflynn): Update this to set tab focus when implemented.
-			// TODO(caseyflynn): Review behavior of using href vs building a fresh URL
-			window.location = this.href;
-		};
-		var tabCommand = new mCommands.Command({
-			selectionClass: "dropdownSelection",
-			name: messages["AllTabsDropDown"],
-			imageClass: "core-sprite-list",
-			id: "orion.edit.selectEditor",
-			visableWhen: function() {
-				return true;
-			},
-			choiceCallback: function() {
-				return fileList;
-			}
-		});
-		this.commandRegistry.addCommand(tabCommand);
-		this.commandRegistry.registerCommandContribution(this.tabWidgetDropdownNode.id, "orion.edit.selectEditor", 0);
-		this.commandRegistry.renderCommands(this.tabWidgetDropdownNode.id, this.tabWidgetDropdownNode.id, this, this, "button");
-	},
-	addTab: function(metadata, href) {
-		// Remove the item from the file list if it is present.
-		for (var i = this.fileList.length; i--;) {
-			if (this.fileList[i].metadata.Location === metadata.Location) {
-				this.fileList.splice(i, 1);
-			}
-		}
-		// Add item to the file list.
-		this.fileList.unshift({
-			callback: this.widgetClick,
-			checked:true, 
-			href: href,
-			metadata: metadata,
-			name: metadata.Name,
-		});
-
-		// Remove checkmark next to selected file.
-		if (this.selectedFile) {
-			this.selectedFile.checked = false;
-		}
-
-		if (this.fileList.length > 1) {
-			this.tabWidgetDropdownNode.style.display = "flex";
-		}
-
-		this.selectedFile = this.fileList[0];
-	},
-	removeTab: function(metadata) {
-		// If the tab being removed is selected
-		if (this.selectedFile && this.selectedFile.metadata.Location === metadata.Location
-			&& this.selectedFile.length > 1) {
-			this.selectedFile = this.fileList[1];
-		}
-		for (var i = this.fileList.length; i--;) {
-			if (this.fileList[i].metadata.Location === metadata.Location) {
-				this.fileList.splice(i, 1);
-			}
-		}
-		if (this.fileList.length < 2) {
-			this.tabWidgetDropdownNode.style.display = "none";
-		}
-	},
 });
 
 function EditorViewer(options) {
@@ -333,11 +252,60 @@ function EditorViewer(options) {
 
 	this.curFileNode = document.createElement("span"); //$NON-NLS-0$
 	this.curFileNode.className = "editorViewerHeaderTitle"; //$NON-NLS-0$
+//	this.curFileNode.style.left = "25px";
+//	this.curFileNode.style.position = "absolute";
 	headerNode.appendChild(this.curFileNode);
 	this.fileNodeTooltip = new mTooltip.Tooltip({
 		node: this.curFileNode,
+//		text: "Test Tooltip",
 		position: ["below", "above", "right", "left"] //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-4$
 	});
+
+	// Create search and filefields
+//	this.headerSearchButton = document.createElement("button"); //$NON-NLS-0$
+//	this.headerSearchButton.id = "Header Search";
+//	this.headerSearchButton.classList.add("core-sprite-search");
+//	this.headerSearchButton.style.width = "20px";
+//	
+//	this.headerSearchButton.addEventListener("click", function() { //$NON-NLS-0$
+//		this.curFileNode.style.visibility = "hidden";
+//		this.searchField.style.visibility = "visible";
+//		this.searchField.focus();
+//	}.bind(this));
+//	
+//	headerNode.appendChild(this.headerSearchButton);//	this.searchField = document.createElement("input"); //$NON-NLS-0$
+//	this.searchField.id = "fileSearchField";
+//	this.searchField.style.display = "inline-block";
+//	this.searchField.style.position = "absolute";
+//	this.searchField.style.left = "25px";
+//	this.searchField.style.width = "75%";
+//	this.searchField.style.visibility = "hidden";
+//	this.searchField.addEventListener("keyup", function(e) { //$NON-NLS-0$
+//		if(e.defaultPrevented){// If the key event was handled by other listeners and preventDefault was set on(e.g. input completion handled ENTER), we do not handle it here
+//			return;
+//		}
+//		var keyCode= e.charCode || e.keyCode;
+//		if (keyCode === lib.KEY.ENTER) {
+//			this.curFileNode.style.visibility = "visible";
+//			this.searchField.style.visibility = "hidden";
+//		} else if (keyCode === lib.KEY.ESCAPE) {
+//			this.curFileNode.style.visibility = "visible";
+//			this.searchField.style.visibility = "hidden";
+//		} else {
+//			var searchParams = {
+//				keyword: this.searchField.value,
+//				nameSearch: true,
+//				resource: "/file",
+//				rows: 100,
+//				sort: "NameLower asc",
+//				start: 0
+//			};
+//			this.searcher.search(searchParams, null, function() {
+//				var result = arguments;
+//			}.bind(this));
+//		}
+//	}.bind(this));
+//	headerNode.appendChild(this.searchField);
 
 	// Create a breadcrumb
 	this.localBreadcrumbNode = document.createElement("div"); //$NON-NLS-0$
@@ -346,8 +314,6 @@ function EditorViewer(options) {
 	
 	domNode.appendChild(headerNode);
 	
-	this.tabWidget = new TabWidget({parent: headerNode, commandRegistry: this.commandRegistry, openEditor: this.activateContext.openEditor.bind(this.activateContext), id: this.id});
-
 	// Create the editor content area
 	var contentNode = this.contentNode = document.createElement("div"); //$NON-NLS-0$
 	contentNode.className = "editorViewerContent"; //$NON-NLS-0$
@@ -401,7 +367,6 @@ objects.mixin(EditorViewer.prototype, {
 			var metadata = evt.metadata;
 			if (metadata) {
 				sessionStorage.lastFile = PageUtil.hash();
-				this.tabWidget.addTab(metadata, evt.location.href);
 			} else {
 				delete sessionStorage.lastFile;
 			}
@@ -418,7 +383,7 @@ objects.mixin(EditorViewer.prototype, {
 				if (bidiUtils.isBidiEnabled()) {
 					curFileNodeName = bidiUtils.enforceTextDirWithUcc(curFileNodeName);
 				}
-				this.curFileNode.textContent = curFileNodeName;
+				this.curFileNode.textContent = curFileNodeName;				
 			}
 		}.bind(this));
 		inputManager.addEventListener("InputChanging", function(e) { //$NON-NLS-0$
@@ -426,12 +391,14 @@ objects.mixin(EditorViewer.prototype, {
 			var modelPool = this.modelPool;
 			var p = modelPool.search(e.input.resource);
 			if (p) {
-				this.pool = p;
-			} else {
-				p = this.pool = modelPool.create(this.editModelContextServiceID);
+				modelPool.release(this.pool);
+				this.pool = modelPool.retain(p);
+			} else if (this.pool.useCount > 1) {
+				modelPool.release(this.pool);
+				this.pool = modelPool.get();
 			}
-			// If the pool has been initialized, reuse the textModel and undo stack.
-			if (this.pool.metadata) {
+			// If shared, ask input manager to reuse metadata and buffer
+			if (this.pool.useCount > 1) {
 				e.metadata = p.metadata;
 			}
 			if (previousPool !== this.pool) {
@@ -1043,6 +1010,7 @@ objects.mixin(EditorSetup.prototype, {
 			delete params.resource;
 			window.location = uriTemplate.expand({resource: target.Location, params: params});
 			this.lastHash = PageUtil.hash();
+
 			this.editorInputManager.setInputManager(editorViewer.inputManager);
 			this.editorInputManager.dispatchEvent({
 				type: "InputChanged", //$NON-NLS-0$
