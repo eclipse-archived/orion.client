@@ -141,7 +141,6 @@ define({
 	'eslintRuleProposalDescripton': ' - ESLint rule',
 	'eslintEnvProposalDescription': ' - ESLint environment name',
 	'onlineDocumentationProposalEntry': '\n\n[Online documentation](${0})',
-	'keywordProposalDescription': ' - Keyword',
 	'keywordHoverProposal': 'ECMAScript reserved keyword',
 	'reloadPluginCmd': 'Reload',
 	'reloadPluginCmdTooltip'	: 'Reload plug-in',

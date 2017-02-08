@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2015, 2016 IBM Corporation, Inc. and others.
+ * Copyright (c) 2015, 2017 IBM Corporation, Inc. and others.
  * All rights reserved. This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License v1.0
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution
@@ -28,7 +28,7 @@ define([
 	 * @param {javascript.ASTManager} astManager An AST manager to create ASTs with
 	 * @param {TernWorker} ternWorker The worker running Tern
 	 * @param {Function} pluginEnvironments The function to use to query the Tern server for contributed plugins
-	 * @param {Object} cuprovider The CU Provider that caches compilation units
+	 * @param {?} cuprovider The CU Provider that caches compilation units
 	 * @param {JavaScriptProject} jsproject The backing Javascript project
 	 */
 	function TernContentAssist(astManager, ternWorker, pluginEnvironments, cuprovider, jsproject) {
@@ -159,11 +159,11 @@ define([
 			                	// Collapse whitespace around ,
 							    var string = value.replace(/\s*,\s*/g, ",");
 							    string.split(/,+/).forEach(function(_name) {
-							        _name = _name.trim();
-							        if (!_name) {
+							        var _n = _name.trim();
+							        if (!_n) {
 							            return;
 							        }
-							        env[_name] = true;
+							        env[_n] = true;
 							    });
 			                }
 			            }
@@ -262,7 +262,7 @@ define([
         proposal.name = proposal.proposal = completion.name;
         if(typeof completion.type !== 'undefined') {
             if(/^fn/.test(completion.type)) {
-            	//TODO proposal.tags = [{content: 'F', cssClass: 'iconTagPurple'}];
+            	proposal.tags = [{cssClass: 'iconFunction'}];
             	calculateFunctionProposal(completion, args, proposal);
             } else if(completion.type === 'template' || completion.type === 'jsdoc_template') {
             	var prefix = proposal.prefix;
@@ -302,6 +302,7 @@ define([
 		        if(typeof completion.prefix === 'string') {
 		        	_prop.prefix = completion.prefix;
 		        }
+		        _prop.tags = [{cssClass: "iconTemplate"}];
 		        return _prop;
             } else {
             	if(typeof completion.description === 'string') {
@@ -309,13 +310,31 @@ define([
             	} else {
 	    		    proposal.description = convertTypes(' : ' + completion.type); //$NON-NLS-1$
 			    }
+			    switch(completion.type) {
+			    	case "bool": {
+			    		proposal.tags = [{cssClass: "iconBoolean"}];
+			    		break;
+		    		}
+			    	case "string": {
+			    		proposal.tags = [{cssClass: "iconString"}];
+			    		break;
+		    		}
+			    	case "number": {
+			    		proposal.tags = [{cssClass: "iconNumber"}];
+			    		break;
+		    		}
+		    		default: {
+		    			proposal.tags = [{cssClass: "iconObject"}];
+		    		}
+			    }
 		    }
         } else if(completion.isKeyword) {
         	proposal.relevance -= 2; //103
-        	proposal.description = Messages['keywordProposalDescription'];
+        	proposal.description = "";
         	proposal.isKeyword = true;
         	completion.doc = Messages['keywordHoverProposal'];
         	completion.url = getKeywordLink(proposal.name);
+        	proposal.tags = [{cssClass: "iconKeyword"}];
         } else {
         	proposal.description = '';
         }
@@ -325,7 +344,7 @@ define([
         if(!completion.doc) {
             obj.content += proposal.name;
         } else {
-        	var _h = Hover.formatMarkdownHover(completion.doc);
+        	_h = Hover.formatMarkdownHover(completion.doc);
         	if(_h) {
         		obj.content += _h.content;
         	} else {
