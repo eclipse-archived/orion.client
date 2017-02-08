@@ -73,6 +73,13 @@ var exports = {};
 		return  new Deferred().resolve(true);
 	}
 	
+	function removeLastModifiedFile(contentLocation){
+		var lastEditedFile = sessionStorage.lastFile;
+		if (lastEditedFile && lastEditedFile.lastIndexOf("#" + contentLocation, 0) === 0){
+			delete sessionStorage.lastFile
+		}
+	}
+	
 	exports.preStateChanged = function() {
 		return preCallback("selectionChanged");
 	};
@@ -1769,12 +1776,6 @@ var exports = {};
 							displayErrorOnStatus);
 					});
 				}
-				function removeLastModifiedFile(contentLocation){
-					var lastEditedFile = sessionStorage.lastFile;
-					if (lastEditedFile && lastEditedFile.lastIndexOf("#" + contentLocation, 0) === 0){
-						delete sessionStorage.lastFile
-					}
-				}
 			}
 		});
 		commandService.addCommand(deleteCommand);
@@ -2101,6 +2102,7 @@ var exports = {};
 							var paths = [];
 							for (var i = 0; i < items.length; i++) {
 								paths[i] = items[i].name;
+								removeLastModifiedFile(items[i].location);
 							}
 							
 							var deferred = progress.progress(serviceRegistry.getService("orion.git.provider").checkoutPath(data.userData.Clone.Location, paths), messages['Resetting local changes']); //$NON-NLS-0$
