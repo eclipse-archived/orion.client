@@ -26,7 +26,7 @@ var app = express()
 	req.user = { workspaceDir: WORKSPACE };
 	next();
 })
-.use(PREFIX + "*", require('../lib/file')({root: '/file'}));
+.use(PREFIX + "*", require('../lib/file')({gitRoot: CONTEXT_PATH + '/gitapi', fileRoot: CONTEXT_PATH + '/file'}));
 var request = supertest.bind(null, app);
 
 function byName(a, b) {

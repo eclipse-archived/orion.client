@@ -17,11 +17,11 @@ var manifests = require("./manifests");
 var api = require("../api"), writeError = api.writeError;
 
 module.exports.router = function(options) {
-	var contextPath = (options && options.options && options.options.configParams && options.options.configParams["orion.context.path"]) || "";
-
+	var fileRoot = options.fileRoot;
+	if (!fileRoot) { throw new Error('options.fileRoot is required'); }
 	return express.Router()
 	.use(bodyParser.json())
-	.get(contextPath + "/file*", getplans);
+	.get(fileRoot + "*", getplans);
 	
 function planJson(type, manifest, planner, wizard, required){
 	return {

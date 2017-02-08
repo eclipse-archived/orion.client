@@ -18,9 +18,10 @@ var bodyParser = require('body-parser');
 
 function router(options) {
 	var fileRoot = options.fileRoot;
-	if (!fileRoot) { throw new Error('options.root is required'); }
-	var contextPath = (options && options.options && options.options.configParams && options.options.configParams["orion.context.path"]) || "";
-
+	var gitRoot = options.gitRoot;
+	if (!fileRoot) { throw new Error('options.fileRoot is required'); }
+	if (!gitRoot) { throw new Error('options.gitRoot is required'); }
+	
 	return express.Router()
 	.use(bodyParser.json())
 	.get('*', getStatus);
@@ -48,9 +49,9 @@ function router(options) {
 					var orionFilePath = api.join(fileDir, file.path());
 					return {
 						"Git": {
-							"CommitLocation": contextPath + "/gitapi/commit/HEAD" + orionFilePath,
-							"DiffLocation": contextPath + "/gitapi/diff/" + diffType + orionFilePath,
-							"IndexLocation": contextPath + "/gitapi/index" + orionFilePath
+							"CommitLocation": gitRoot + "/commit/HEAD" + orionFilePath,
+							"DiffLocation": gitRoot + "/diff/" + diffType + orionFilePath,
+							"IndexLocation": gitRoot + "/index" + orionFilePath
 						},
 						"Location": orionFilePath,
 						"Name": file.path(),
@@ -109,11 +110,11 @@ function router(options) {
 				res.status(200).json({
 					"Added": added,
 					"Changed": changed,
-					"CloneLocation": contextPath + "/gitapi/clone" + fileDir,
-					"CommitLocation": contextPath + "/gitapi/commit/HEAD" + fileDir,
+					"CloneLocation": gitRoot + "/clone" + fileDir,
+					"CommitLocation": gitRoot + "/commit/HEAD" + fileDir,
 					"Conflicting": conflicting,
-					"IndexLocation": contextPath + "/gitapi/index" + fileDir,
-					"Location": contextPath + "/gitapi/status" + contextPath + "/file" + fileDir,
+					"IndexLocation": gitRoot + "/index" + fileDir,
+					"Location": gitRoot + "/status" + fileRoot + fileDir,
 					"Missing": missing,
 					"Modified": modified,
 					"Removed": removed,
