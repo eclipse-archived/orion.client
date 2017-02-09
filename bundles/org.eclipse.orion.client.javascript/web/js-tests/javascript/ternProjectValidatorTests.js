@@ -156,9 +156,7 @@ define([
 			});
 			it("test loadEagerly - empty", function() {
 				var problems = Validator.validateAST('{"loadEagerly": []}');		
-				assertProblems(problems, [
-					problem(16, 18, "'loadEagerly' should not be empty")
-				]);			
+				assertProblems(problems, []);			
 			});
 			it("test loadEagerly - all string values", function() {
 				var problems = Validator.validateAST('{"loadEagerly": ["one", "two", "three"]}');		
