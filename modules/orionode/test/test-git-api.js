@@ -15,6 +15,7 @@ var express = require('express');
 var path = require('path');
 var supertest = require('supertest');
 var testData = require('./support/test_data');
+var util = require("../lib/git/util");
 var fs = require('fs');
 var git;
 try {
@@ -300,6 +301,27 @@ GitClient.prototype = {
 			.end(function(err, res) {
 				assert.ifError(err);
 				client.next(resolve, res.body);
+			});
+		});
+	},
+
+	compare: function(source, target) {
+		var client = this;
+		this.tasks.push(function(resolve) {
+			source = util.encodeURIComponent(source);
+			target = util.encodeURIComponent(target);
+
+			request()
+			.get(CONTEXT_PATH + "/gitapi/commit/" + source + ".." + target + "/file/" + client.getName())
+			.expect(202)
+			.end(function(err, res) {
+				assert.ifError(err);
+				getGitResponse(res).then(function(res2) {
+					client.next(resolve, res2.JsonData);
+				})
+				.catch(function(err) {
+					assert.ifError(err);
+				});
 			});
 		});
 	},
@@ -969,6 +991,29 @@ maybeDescribe("git", function() {
 			});
 		}); // describe("Conflicts")
 	}); // describe("Merge")
+
+	describe("Log", function() {
+		before(setup);
+
+		describe("Compare", function() {
+			it("libgit2 #4102", function(finished) {
+				var client = new GitClient("compare-no-common-ancestor");
+				// init a new Git repository
+				client.init();
+				// there's a commit already, create a branch here
+				client.createBranch("other");
+				client.commit();
+				// compare master with the created branch
+				client.compare("refs/heads/master", "refs/heads/other");
+				return client.start().then(function() {
+					finished();
+				})
+				.catch(function(err) {
+					finished(err);
+				});
+			});
+		}); // describe("Compare")
+	}); // describe("Log")
 
 	describe("Tags", function() {
 		before(setup);
