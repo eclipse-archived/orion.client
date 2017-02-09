@@ -142,6 +142,7 @@ define([
 		this.selection = options.selection;
 		this.reveal = options.reveal;
 		this.isUnsavedWarningNeeed = options.isUnsavedWarningNeeed;
+		this.confirm = options.confirm;
 		this._input = this._title = "";
 		if (this.fileClient) {
 			this.fileClient.addEventListener("Changed", function(evt) { //$NON-NLS-0$
@@ -565,71 +566,97 @@ define([
 			}
 			var input = PageUtil.matchResourceParameters(loc), oldInput = this._parsedLocation || {};
 			var encodingChanged = oldInput.encoding !== input.encoding;
-			if (editor && editor.isDirty()) {
-				var oldLocation = this._location;
-				var oldResource = oldInput.resource;
-				var newResource = input.resource;			
-				if (oldResource !== newResource || encodingChanged) {
-					if (this._autoSaveEnabled) {
-						this.save();
-					} else if(this.isUnsavedWarningNeeed() && !window.confirm(messages.confirmUnsavedChanges)){
-						// Don't show confirm dialog if in the other split window, the same file is opened. 
-						window.location.hash = oldLocation;
-						this.reveal(this.getFileMetadata());
-						return;
+			var afterConfirm = function(){
+				var editorChanged = editor && oldInput.editor !== input.editor;
+				this._location = loc;
+				this._parsedLocation = input;
+				this._ignoreInput = true;
+				if(this.selection) {
+					this.selection.setSelections(loc);
+				}
+				this._ignoreInput = false;
+				var evt = {
+					type: "InputChanging", //$NON-NLS-0$
+					input: input
+				};
+				this.dispatchEvent(evt);
+				function saveSession() {
+					if (evt.session) {
+						evt.session.save();
 					}
 				}
-			}
-			var editorChanged = editor && oldInput.editor !== input.editor;
-			this._location = loc;
-			this._parsedLocation = input;
-			this._ignoreInput = true;
-			if(this.selection) {
-				this.selection.setSelections(loc);
-			}
-			this._ignoreInput = false;
-			var evt = {
-				type: "InputChanging", //$NON-NLS-0$
-				input: input
-			};
-			this.dispatchEvent(evt);
-			function saveSession() {
-				if (evt.session) {
-					evt.session.save();
+				var fileURI = input.resource;
+				if (evt.metadata) {
+					saveSession();
+					this.reportStatus("");
+					this._input = fileURI;
+					var metadata = evt.metadata;
+					this._setInputContents(input, fileURI, null, metadata);
+					return;
 				}
-			}
-			var fileURI = input.resource;
-			if (evt.metadata) {
-				saveSession();
-				this.reportStatus("");
-				this._input = fileURI;
-				var metadata = evt.metadata;
-				this._setInputContents(input, fileURI, null, metadata);
-				return;
-			}
-			if (fileURI) {
-				if (fileURI === this._input && !encodingChanged) {
-					if (editorChanged) {
-						this.reportStatus("");
-						this._setInputContents(input, fileURI, null, this._fileMetadata, this._isText(this._fileMetadata));
-					} else {
-						if (!this.processParameters(input)) {
-							if (evt.session) {
-								evt.session.apply(true);
+				if (fileURI) {
+					if (fileURI === this._input && !encodingChanged) {
+						if (editorChanged) {
+							this.reportStatus("");
+							this._setInputContents(input, fileURI, null, this._fileMetadata, this._isText(this._fileMetadata));
+						} else {
+							if (!this.processParameters(input)) {
+								if (evt.session) {
+									evt.session.apply(true);
+								}
 							}
 						}
+					} else {
+						saveSession();
+						this._input = fileURI;
+						this._readonly = false;
+						this._lastMetadata = this._fileMetadata;
+						this._fileMetadata = null;
+						this.load(input.encoding);
 					}
 				} else {
 					saveSession();
-					this._input = fileURI;
-					this._readonly = false;
-					this._lastMetadata = this._fileMetadata;
-					this._fileMetadata = null;
-					this.load(input.encoding);
+					this._setNoInput(true);
 				}
-			} else {
-				saveSession();
-				this._setNoInput(true);
+			}.bind(this);
+			if (editor && editor.isDirty()) {
+				var oldLocation = this._location;
+				var oldResource = oldInput.resource;
+				var newResource = input.resource;
+				if (oldResource !== newResource || encodingChanged) {
+					if (this._autoSaveEnabled) {
+						this.save();
+						afterConfirm();
+					}else if(this.isUnsavedWarningNeeed()) {
+						this.confirm(messages.confirmUnsavedChanges,
+							[{
+								label:messages["Do not Save"],
+								callback:function(){
+									afterConfirm();
+								},
+								type:"ok"
+							},{
+								label:messages["Cancel"],
+								callback:function(){
+									window.location.hash = oldLocation;
+									this.reveal(this.getFileMetadata());
+									return;
+								}.bind(this),
+								type:"cancel"
+							},{
+								label:messages["Save"],
+								callback:function(){
+									this.save();
+									afterConfirm();
+								}.bind(this),
+								type:"ok"
+							}]);
+					}else{
+						afterConfirm();
+					}
+				}
+			}else{
+				afterConfirm();
 			}
 		},
 		setTitle: function(title) {

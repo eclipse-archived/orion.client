@@ -356,6 +356,9 @@ objects.mixin(EditorViewer.prototype, {
 			statusReporter: this.statusReporter.bind(this),
 			selection: this.selection,
 			contentTypeRegistry: this.contentTypeRegistry,
+			confirm:function(message,buttonCallbackList){
+				this.commandRegistry.confirmWithButtons(this.curFileNode, message, buttonCallbackList);
+			}.bind(this),
 			reveal: function(model) {
 				this.sidebar.sidebarNavInputManager.reveal(model);
 			}.bind(this),

@@ -241,61 +241,59 @@ define([
 		 * will be called with boolean indicating whether the command was confirmed.
 		 */
 		confirm: function(node, message, yesString, noString, modal, onConfirm) {
-			this._popupDialog(true, node, message, yesString, noString, modal, onConfirm);
+			this._popupDialog(modal,"CONFIRM", node, message, [{label:yesString,callback:onConfirm,type:"ok"},{label:noString,callback:null,type:"cancel"}]);
 		},
 		
 		/**
 		 * Open a parameter collector to confirm a command or collect user input.
 		 *
-		 * @param {Boolean} isConfirm that determinds the popup dialog's type.
+		 * @param {Boolean} modal indicates whether the confirmation prompt should be modal.
+		 * @param {String}  determinds the popup dialog's type, could be "PROMPT" or "CONFIRM"
 		 * @param {DOMElement} node the dom node that is displaying the command
 		 * @param {String} message the message to show when confirming the command
-		 * @param {String} yesString the label to show on a yes/true choice
-		 * @param {String} noString the label to show on a no/false choice
-		 * @param {Boolean} modal indicates whether the confirmation prompt should be modal.
-		 * @param {Function} onConfirm a function that will be called when the user confirms the command.  The function
+		 * @param {Array} an array of button label, callback, type objects; if the type is "yes", either input.value or true will be passed to callback depends on the dialog's type
 		 * @param {String} default message in the input box.
-		 * will be called with boolean indicating whether the command was confirmed.
 		 */
-		_popupDialog: function(isConfirm, node, message, yesString, noString, modal, onConfirm, defaultInput) {
-			var result = isConfirm ? false : "";
+		_popupDialog: function(modal, style, node, message, buttonStringCallList, defaultInput) {
+			var result;
 			if (this._parameterCollector && !modal) {
 				var self = this;
-				var okCallback = function() {onConfirm(result);};
 				var closeFunction = function(){self._parameterCollector.close();}
 				var fillFunction = function(parent, buttonParent) {
 					var label = document.createElement("span"); //$NON-NLS-0$
 					label.classList.add("parameterPrompt"); //$NON-NLS-0$
 					label.textContent = message;
 					parent.appendChild(label);
-					if(!isConfirm){
+					if(style === "PROMPT"){
 						var input = document.createElement("input");
 						input.setAttribute("value", defaultInput);
 						input.classList.add("parameterInput");
 						bidiUtils.initInputField(input);
 						parent.appendChild(input);
 					}
-					var yesButton = document.createElement("button"); //$NON-NLS-0$
-					yesButton.addEventListener("click", function(event) { //$NON-NLS-0$
-						result = isConfirm ? true : input.value;
-						okCallback();
-						closeFunction();
-					}, false);
-					buttonParent.appendChild(yesButton);
-					yesButton.appendChild(document.createTextNode(yesString)); //$NON-NLS-0$
-					yesButton.className = "dismissButton"; //$NON-NLS-0$
-					var button = document.createElement("button"); //$NON-NLS-0$
-					button.addEventListener("click", function(event) { //$NON-NLS-0$
-						result = isConfirm ? false : "";
-						closeFunction();
-					}, false);
-					buttonParent.appendChild(button);
-					button.appendChild(document.createTextNode(noString)); //$NON-NLS-0$
-					button.className = "dismissButton"; //$NON-NLS-0$
-					return yesButton;
+					
+					var buttons = Object.keys(buttonStringCallList).map(function(key){
+						var button = document.createElement("button"); //$NON-NLS-0$
+						button.addEventListener("click", function(event) { //$NON-NLS-0$
+							if(buttonStringCallList[key].type === "ok"){
+								result = style === "PROMPT" ? input.value : true;
+							}else if(buttonStringCallList[key].type === "cancel"){
+								result = style === "PROMPT" ? "" : false;
+							}else{
+								result = true;
+							}
+							buttonStringCallList[key].callback && buttonStringCallList[key].callback(result);
+							closeFunction();
+						}, false);
+						buttonParent.appendChild(button);
+						button.appendChild(document.createTextNode(buttonStringCallList[key]["label"])); //$NON-NLS-0$
+						button.className = "dismissButton";
+						return button;
+					});
+					return buttons[0];
 				};
 				this._parameterCollector.close();
-				if(isConfirm || !isConfirm && !node ){
+				if(!node){
 					// Do this if this is a confirm or if this is a prompt but without node specified.
 					var opened = this._parameterCollector.open(node, fillFunction, function(){});
 				}
@@ -306,7 +304,7 @@ define([
 							this.destroy();
 						},
 						trigger: "click", //$NON-NLS-0$
-						position: isConfirm ? ["below", "right", "above", "left"] : ["right","above", "below", "left"]//$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$
+						position: style !== "PROMPT" ? ["below", "right", "above", "left"] : ["right","above", "below", "left"]//$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$
 					});
 					var parameterArea = tooltip.contentContainer();
 					parameterArea.classList.add("parameterPopup"); //$NON-NLS-0$
@@ -340,7 +338,7 @@ define([
 				return;
 			} 
 			result = window.confirm(message);
-			onConfirm(result);
+			buttonStringCallList[0].callback(result);
 		},
 		
 		/**
@@ -356,7 +354,18 @@ define([
 		 * will be called with boolean indicating whether the command was confirmed.
 		 */
 		prompt: function(node, message, yesString, noString, defaultInput, modal, onConfirm) {
-			this._popupDialog(false, node, message, yesString, noString, modal, onConfirm ,defaultInput);
+			this._popupDialog(modal,"PROMPT", node, message, [{label:yesString,callback:onConfirm,type:"ok"},{label:noString,callback:null,type:"cancel"}], defaultInput);
+		},
+		
+		/**
+		 * Open a dialog with several buttons.
+		 *
+		 * @param {DOMElement} node the dom node that is displaying the command
+		 * @param {String} message the message to show when confirming the command
+		 * @param {Array} an array of button label, callback, type objects;
+		 */
+		confirmWithButtons: function(node, message, buttonsCallbackList){
+			this._popupDialog(false, "CONFIRM", node, message, buttonsCallbackList);
 		},
 		
 		/**
