@@ -488,6 +488,25 @@ define([
 		},
 		
 		/**
+		 * @description Returns the start offset of the first body node or the first comment, whichever is first.
+		 * @param {Object} ast The AST
+		 * @returns {Number} The start offset of program content
+		 */
+		findProgramStart: function findProgramStart(ast) {
+			var programStart = ast.end;
+	    	if (ast.body && ast.body.length > 0) {
+        		programStart = ast.body[0].start;
+    		} else {
+    			programStart = ast.end; // Don't use 0 in case this is inside an HTML script block
+			}
+			var commentStart = programStart;
+			if (ast.comments && ast.comments.length > 0){
+				commentStart = ast.comments[0].range[0];
+			}
+			return Math.min(programStart, commentStart);
+		},
+		
+		/**
 		 * @description Tries to find the comment for the given node. If more than one is found in the array
 		 * the last entry is considered 'attached' to the node
 		 * @function

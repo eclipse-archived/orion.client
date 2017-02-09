@@ -203,7 +203,7 @@ define([
 			prob.line = e.lineNumber;
 			prob.start = e.column;
 		} else if (typeof e.line === 'number' && typeof e.column === 'number') {
-			prob.line = e.line
+			prob.line = e.line;
 			prob.start = e.column;
 		} else {
 			prob.start = 0;

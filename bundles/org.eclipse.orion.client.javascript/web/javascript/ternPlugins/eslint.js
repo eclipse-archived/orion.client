@@ -285,16 +285,23 @@ define([
 							ruleId: element.ruleId,
 							source: element.source
 						};
-						if (element.node && element.node.range) {
-							strippedMessage.node = {
-								range: element.node.range
-							};
-						}
-						if (element.related) {
-							strippedMessage.related = {
-								range: element.related.range
-							};
-						}
+					if (element.node && element.node.range) {
+						strippedMessage.node = {
+							range: element.node.range
+						};
+					}
+					if (element.related) {
+						strippedMessage.related = {
+							range: element.related.range
+						};
+					}
+					// Don't insert annotations at Program node start (0) as we may be in a HTML file script block
+					if (strippedMessage.node && strippedMessage.nodeType === 'Program'){
+						strippedMessage.line = undefined;
+						strippedMessage.column = undefined;
+						var programStart = Finder.findProgramStart(file.ast);
+						strippedMessage.node.range = [programStart, programStart];
+					}
 					strippedMessages.push(strippedMessage);
 				});
 			} catch(e) {
