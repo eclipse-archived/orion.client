@@ -87,8 +87,17 @@ function tryLogin(url, Username, Password, userId){
 					bearerTokenStore.setBearerTokenforUserId && bearerTokenStore.setBearerTokenforUserId(userId, respondJson.access_token);		
 					return fulfill();
 				}
-				return error ? reject({"code": 400, "data":error, "bundleid":"org.eclipse.orion.server.core"}) : 
-				reject({"code":response.statusCode,"data": respondJson,"bundleid":"org.eclipse.orion.server.core"});
+				if(error){
+					error.code = 400;
+					error.data = error;
+					error.bundleid = "org.eclipse.orion.server.core"
+					return reject(error);
+				}
+				var errorStatus = new Error();
+				errorStatus.code = response.statusCode;
+				errorStatus.data = respondJson;
+				errorStatus.bundleid = "org.eclipse.orion.server.core"
+				reject(errorStatus);
 			});
 		});
 	});
@@ -123,15 +132,15 @@ function computeTarget(userId, targetRequest){
 		});
 	}
 	if(!targetRequest){
-		return Promise.reject({
-			"code":500, 
-			"message":"Target not set",
-			"detailMessage":"Target not set",
-			"data":{
-				"description": "Target not set",
-				"error_code": "CF-TargetNotSet"
-			}
-		});
+		var errorStatus = new Error("Target not set");
+		errorStatus.code = 500;
+		errorStatus.data = {
+			"description": "Target not set",
+			"error_code": "CF-TargetNotSet"
+		};
+		errorStatus.detailMessage = "Target not set";
+		errorStatus.bundleid = "org.eclipse.orion.server.core"
+		return Promise.reject(errorStatus);
 	}
 }
 function getAccessToken(userId){
@@ -165,16 +174,13 @@ function cfRequest (method, userId, url, query, body, headers, requestHeader) {
 		if(!requestHeader){
 			var cloudAccessToken = getAccessToken(userId);
 			if (!cloudAccessToken) {
-				return reject(
-					{
-						"code":401,
-						"message":"Not authenticated",
-						"data":{
-							"description": "Not authenticated",
-							"error_code": "CF-NotAuthenticated"
-						}
-					}
-				);
+				var errorStatus = new Error("Not authenticated");
+				errorStatus.code = 401;
+				errorStatus.data = {
+					"description": "Not authenticated",
+					"error_code": "CF-NotAuthenticated"
+				};
+				return reject(errorStatus);
 			}
 			headers = headers || {};
 			headers.Authorization = cloudAccessToken;

@@ -69,7 +69,9 @@ function getapps(req, res){
 }
 function respondAppGetRequest(resp,task){
 	if(!resp){
-		return Promise.reject({"code":404, "message":"Apps can not be found"});
+		var errorStatus = new Error("Apps can not be found");
+		errorStatus.code = "404";
+		return Promise.reject(errorStatus);
 	}
 	task.done({
 		HttpCode: 200,
@@ -231,7 +233,9 @@ function putapps(req, res){
 				waitFor = stopApp(req.user.username,appTarget);
 			}else{
 				if(!appCache.manifest){
-					return Promise.reject({"code":500, "message":"Failed to handle request for "+ path});
+					var errorStatus = new Error("Failed to handle request for "+ req.originalUrl);
+					errorStatus.code = "500";
+					return Promise.reject(errorStatus);
 				}
 			}
 			if(waitFor){
@@ -299,7 +303,11 @@ function respondAppPutRequest(task,status){
 		metadata:appCache.appMetadata	
 	};
 	if (status.error_code) {
-		return Promise.reject({"code":400, "message": status.description,"bundleid":"org.eclipse.orion.server.core","data":status});
+		var errorStatus = new Error(status.description);
+		errorStatus.code = "400";
+		errorStatus.bundleid = "org.eclipse.orion.server.core";
+		errorStatus.data = status;
+		return Promise.reject(errorStatus);
 	}
 	if(status === "RUNNING"){
 		var DEFAULT_TIMEOUT = 60;
@@ -314,8 +322,6 @@ function respondAppPutRequest(task,status){
 		
 	}else if(status === "STOPPED"){
 		resp = appJson;
-	}else{
-		return Promise.reject({"code":400, "message":"Status wrong"});
 	}
 	task.done({
 		HttpCode: 200,
@@ -495,6 +501,11 @@ function bindRoute(req, appTarget){
 					break;
 				}
 			}
+			if(!appCache.appDomain){
+				var errorStatus = new Error("Failed to find domain " + appManifestDomain + " in target available domains, please check the domain property your manifest.yml file.");
+				errorStatus.code = "404";
+				return Promise.reject(errorStatus);
+			}
 		} else {
 			/* client has not requested a specific domain, get the first available */
 			appCache.appDomain = domainArray[0];
@@ -516,7 +527,9 @@ function bindRoute(req, appTarget){
 			/* attach route to application */
 			return waitForRoute.then(function(appRoute){
 				if(appRoute.error_code === "CF-RouteHostTaken"){
-					return Promise.reject({"code":400, "message":appRoute.description});
+					var errorStatus = new Error(appRoute.description);
+					errorStatus.code = "400";
+					return Promise.reject(errorStatus);
 				}
 				appCache.appRoute = appRoute;
 				return target.cfRequest("PUT", req.user.username, appTarget.Url + "/v2/apps/" + appCache.appGuid + "/routes/" + appRoute.metadata.guid);
@@ -532,7 +545,9 @@ function uploadBits(req, appTarget){
 		appCache.appPackageType = path.extname(filePath).substring(1);
 		archiveredFilePath = filePath;
 		if(!archiveredFilePath){
-			return Promise.reject({"code":500, "message":"Failed to read application content"});
+			var errorStatus = new Error("Failed to read application content");
+			errorStatus.code = "500";
+			return Promise.reject(errorStatus);
 		}
 		var uploadFileStream = fs.createReadStream(archiveredFilePath);
 		var uploadBitsHeader = {
@@ -556,7 +571,9 @@ function uploadBits(req, appTarget){
 				}
 			};
 		uploadFileStream.on("error", function(err){
-			return Promise.reject({"code":500, "message":err.message});
+			var errorStatus = new Error(err.message);
+			errorStatus.code = "500";
+			return Promise.reject(errorStatus);
 		});
 		return target.cfRequest(null, null, null ,null, null, null,uploadBitsHeader);
 	}).then(function(requestResult){
@@ -586,10 +603,14 @@ function uploadBits(req, appTarget){
 		function collectCFRespond(collectResult){
 			if(collectResult.status !== "finished" && collectResult.status !== "failure"){
 				if(collectResult.status === "failed"){
-					return Promise.reject({"code":400, "message":"Upload failed"});
+					var errorStatus = new Error("Upload failed");
+					errorStatus.code = "400";
+					return Promise.reject(errorStatus);
 				}
 				if(collectResult.attemptsLeft === 0){
-					return Promise.reject({"code":400, "message":"Upload timeout exceeded"});
+					var errorStatus = new Error("Upload timeout exceeded");
+					errorStatus.code = "400";
+					return Promise.reject(errorStatus);
 				}
 				return new Promise(function(fulfill, reject){
 					setTimeout(function(){
@@ -606,7 +627,9 @@ function uploadBits(req, appTarget){
 					}, 2000);
 				});
 			}else if(collectResult.status === "failure"){
-				return Promise.reject({"code":400, "message":"Failed to upload application bits"});
+				var errorStatus = new Error("Failed to upload application bits");
+				errorStatus.code = "400";
+				return Promise.reject(errorStatus);
 			}else if(collectResult.status === "finished"){
 				return Promise.resolve("finished");
 			}
@@ -753,14 +776,16 @@ function createService(userId, serviceName, servicePlanGuid, appTarget){
 	});
 }
 function normalizeMemoryMeasure(memory){
-	if (memory.toLowerCase().endsWith("m")) //$NON-NLS-1$
-		return Number(memory.substring(0, memory.length - 1));
-	if (memory.toLowerCase().endsWith("mb")) //$NON-NLS-1$
-		return Number(memory.substring(0, memory.length - 2));
-	if (memory.toLowerCase().endsWith("g")) //$NON-NLS-1$
-		return 1024 * memory.substring(0, memory.length - 1);
-	if (memory.toLowerCase().endsWith("gb")) //$NON-NLS-1$
-		return 1024 * memory.substring(0, memory.length - 2);
+	if(memory){	
+		if (memory.toLowerCase().endsWith("m")) //$NON-NLS-1$
+			return Number(memory.substring(0, memory.length - 1));
+		if (memory.toLowerCase().endsWith("mb")) //$NON-NLS-1$
+			return Number(memory.substring(0, memory.length - 2));
+		if (memory.toLowerCase().endsWith("g")) //$NON-NLS-1$
+			return 1024 * memory.substring(0, memory.length - 1);
+		if (memory.toLowerCase().endsWith("gb")) //$NON-NLS-1$
+			return 1024 * memory.substring(0, memory.length - 2);
+	}
 	/* return default memory value, i.e. 1024 MB */
 	return 1024;
 }
@@ -782,7 +807,8 @@ function archiveTarget (filePath){
 			        return fulfill();
 			    });
 			    zip.on("error", function(){
-			        return reject({"message":"Zipping process went wrong"});
+			    	var errorStatus = new Error("Zipping process went wrong");
+					return Promise.reject(errorStatus);
 			    });
 			});
 		});

@@ -8,7 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-/*eslint-env node, express, body-parser*/
+/*eslint-env node, express, body-parser, worker*/
 var express = require("express");
 var bodyParser = require("body-parser");
 var target = require("./target");
@@ -66,7 +66,8 @@ module.exports.router = function() {
 				var boundary = response.headers["content-type"].slice(boundaryIndex+"boundary=".length);
 			}
 			if (!boundary || boundary === "") {
-				Promise.reject("An error occured when performing operation Get App Log. Boundary in response header not found.");
+				var errorStatus = new Error("An error occured when performing operation Get App Log. Boundary in response header not found.");
+				return Promise.reject(errorStatus);
 			}
 
 			var CR = 13;

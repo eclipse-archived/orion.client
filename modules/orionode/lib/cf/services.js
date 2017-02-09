@@ -74,7 +74,7 @@ module.exports.router = function() {
 							}
 						}, function(err) {
 							if (err) {
-								return reject({"message":err.message});
+								return reject(err);
 							}
 							fulfill();
 						});

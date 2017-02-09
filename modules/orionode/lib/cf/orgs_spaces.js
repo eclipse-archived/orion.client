@@ -77,7 +77,7 @@ function getOrgsRequest(userId, targetRequest){
 					});
 				}, function(err) {
 					if(err){
-						return reject({"message":err.message});
+						return reject(err);
 					}			
 					fulfill({"simpleorgsArray":simpleorgsArray,"completeOrgsArray":completeOrgsArray});
 				});
