@@ -997,7 +997,7 @@ maybeDescribe("git", function() {
 
 		describe("Compare", function() {
 			it("libgit2 #4102", function(finished) {
-				var client = new GitClient("compare-no-common-ancestor");
+				var client = new GitClient("libgit2-4102");
 				// init a new Git repository
 				client.init();
 				// there's a commit already, create a branch here
