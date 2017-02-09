@@ -233,8 +233,8 @@ define([
 				}
 				else if (e.keyCode === lib.KEY.ENTER) {
 					if (this._keyCode) {
-						// First see if this is a valid binding...at least one modifier and a keyCode
-						if (this._keyCode && (this._altDown || this._ctrlDown || this._shiftDown || this._commandDown)) {
+						// Ensure there's a keyCode
+						if (this._keyCode) {
 							// remember the override
 							var newBinding = new keyBinding.KeyStroke(this._keyCode, this._ctrlDown, this._shiftDown, this._altDown, this._commandDown);
 							this.commandRegistry.createBindingOverride(row.cmdID, newBinding, row.curBinding);
