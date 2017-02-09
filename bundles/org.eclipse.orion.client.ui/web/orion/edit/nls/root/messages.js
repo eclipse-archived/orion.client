@@ -108,5 +108,7 @@ define({
 	"Orion": "Orion",
 	"OK": "Ok",
 	"Format" : "Format Code",
-	"FormatTooltip":"Format editor contents"
+	"FormatTooltip":"Format editor contents",
+	"Cancel":"Cancel",
+	"Do not Save":"Don't Save"
 });
