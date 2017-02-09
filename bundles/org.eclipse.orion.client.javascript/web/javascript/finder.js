@@ -488,22 +488,21 @@ define([
 		},
 		
 		/**
-		 * @description Returns the start offset of the first body node or the first comment, whichever is first.
-		 * @param {Object} ast The AST
-		 * @returns {Number} The start offset of program content
+		 * @description Returns range of the first non-comment token in the body of the ast.
+		 * @param {AST} ast The AST
+		 * @returns {Array} The range array of first token
 		 */
-		findProgramStart: function findProgramStart(ast) {
-			var programStart = ast.end;
-	    	if (ast.body && ast.body.length > 0) {
-        		programStart = ast.body[0].start;
-    		} else {
-    			programStart = ast.end; // Don't use 0 in case this is inside an HTML script block
+		findProgramStartRange: function findProgramStartNode(ast) {
+			if (ast.tokens && ast.tokens.length > 0){
+				return ast.tokens[0].range;
 			}
-			var commentStart = programStart;
 			if (ast.comments && ast.comments.length > 0){
-				commentStart = ast.comments[0].range[0];
+				return [ast.comments[0].range[0], ast.comments[0].range[0]+1];
 			}
-			return Math.min(programStart, commentStart);
+			if (typeof ast.end === "number"){
+				return [ast.end, ast.end];
+			}
+			return [0, 0];
 		},
 		
 		/**

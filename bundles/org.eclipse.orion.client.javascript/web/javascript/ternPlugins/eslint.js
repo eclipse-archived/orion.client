@@ -299,8 +299,8 @@ define([
 					if (strippedMessage.node && strippedMessage.nodeType === 'Program'){
 						strippedMessage.line = undefined;
 						strippedMessage.column = undefined;
-						var programStart = Finder.findProgramStart(file.ast);
-						strippedMessage.node.range = [programStart, programStart];
+						var programStartRange = Finder.findProgramStartRange(file.ast);
+						strippedMessage.node.range = programStartRange;
 					}
 					strippedMessages.push(strippedMessage);
 				});

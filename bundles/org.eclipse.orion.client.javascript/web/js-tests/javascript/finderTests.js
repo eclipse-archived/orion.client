@@ -2203,145 +2203,156 @@ define([
 			});
 			
 			
-			it('Test findProgramStart No content', function() {
+			it('Test findProgramStartRange No content', function() {
 			    var r = setup("");
 				return r.astManager.getAST(r.editorContext).then(function(ast) {
-					var start = Finder.findProgramStart(ast);
-					assert.equal(start, 0, "Wrong program start found");
+					var start = Finder.findProgramStartRange(ast);
+					assert.deepEqual(start, [0,0], "Wrong program start found");
 				});
 			});
-			it('Test findProgramStart whitespace content', function() {
+			it('Test findProgramStartRange whitespace content', function() {
 			    var r = setup("  \n\n\t\t  ");
 				return r.astManager.getAST(r.editorContext).then(function(ast) {
-					var start = Finder.findProgramStart(ast);
-					assert.equal(start, 8, "Wrong program start found");
+					var start = Finder.findProgramStartRange(ast);
+					assert.deepEqual(start, [8,8], "Wrong program start found");
 				});
 			});
-			it('Test findProgramStart content at 0', function() {
+			it('Test findProgramStartRange content at 0', function() {
 			    var r = setup("var a = 1;");
 				return r.astManager.getAST(r.editorContext).then(function(ast) {
-					var start = Finder.findProgramStart(ast);
-					assert.equal(start, 0, "Wrong program start found");
+					var start = Finder.findProgramStartRange(ast);
+					assert.deepEqual(start, [0,3], "Wrong program start found");
 				});
 			});
-			it('Test findProgramStart function decl at 0', function() {
+			it('Test findProgramStartRange function decl at 0', function() {
 			    var r = setup("function foo(){}");
 				return r.astManager.getAST(r.editorContext).then(function(ast) {
-					var start = Finder.findProgramStart(ast);
-					assert.equal(start, 0, "Wrong program start found");
+					var start = Finder.findProgramStartRange(ast);
+					assert.deepEqual(start, [0,8], "Wrong program start found");
 				});
 			});
-			it('Test findProgramStart call expression at 0', function() {
+			it('Test findProgramStartRange call expression at 0', function() {
 			    var r = setup("define(['a', 'b'], function(a, b){ }");
 				return r.astManager.getAST(r.editorContext).then(function(ast) {
-					var start = Finder.findProgramStart(ast);
-					assert.equal(start, 0, "Wrong program start found");
+					var start = Finder.findProgramStartRange(ast);
+					assert.deepEqual(start, [0,6], "Wrong program start found");
 				});
 			});
-			it('Test findProgramStart block comment at 0', function() {
+			it('Test findProgramStartRange block comment at 0', function() {
 			    var r = setup("/* Copyright today */\nvar a = 2;");
 				return r.astManager.getAST(r.editorContext).then(function(ast) {
-					var start = Finder.findProgramStart(ast);
-					assert.equal(start, 0, "Wrong program start found");
+					var start = Finder.findProgramStartRange(ast);
+					assert.deepEqual(start, [22,25], "Wrong program start found");
 				});
 			});
-			it('Test findProgramStart line comment at 0', function() {
+			it('Test findProgramStartRange line comment at 0', function() {
 			    var r = setup("// Copyright today \nvar a = 2;");
 				return r.astManager.getAST(r.editorContext).then(function(ast) {
-					var start = Finder.findProgramStart(ast);
-					assert.equal(start, 0, "Wrong program start found");
+					var start = Finder.findProgramStartRange(ast);
+					assert.deepEqual(start, [20,23], "Wrong program start found");
 				});
 			});
-			it('Test findProgramStart content not at 0', function() {
+			it('Test findProgramStartRange content not at 0', function() {
 			    var r = setup("\n\n\t\t  var a = 1;");
 				return r.astManager.getAST(r.editorContext).then(function(ast) {
-					var start = Finder.findProgramStart(ast);
-					assert.equal(start, 6, "Wrong program start found");
+					var start = Finder.findProgramStartRange(ast);
+					assert.deepEqual(start, [6,9], "Wrong program start found");
 				});
 			});
-			it('Test findProgramStart function decl not at 0', function() {
+			it('Test findProgramStartRange comment only not at 0', function() {
+			    var r = setup("\n\n\t\t /* Copyright is mine */");
+				return r.astManager.getAST(r.editorContext).then(function(ast) {
+					var start = Finder.findProgramStartRange(ast);
+					assert.deepEqual(start, [5,6], "Wrong program start found");
+				});
+			});
+			it('Test findProgramStartRange bogus ast', function() {
+				var start = Finder.findProgramStartRange({});
+				assert.deepEqual(start, [0,0], "Wrong program start found");
+			});
+			it('Test findProgramStartRange function decl not at 0', function() {
 			    var r = setup("\n\n\t\t  function foo(){}");
 				return r.astManager.getAST(r.editorContext).then(function(ast) {
-					var start = Finder.findProgramStart(ast);
-					assert.equal(start, 6, "Wrong program start found");
+					var start = Finder.findProgramStartRange(ast);
+					assert.deepEqual(start, [6,14], "Wrong program start found");
 				});
 			});
-			it('Test findProgramStart call expression not at 0', function() {
+			it('Test findProgramStartRange call expression not at 0', function() {
 			    var r = setup("\n\n\t\t  define(['a', 'b'], function(a, b){ }");
 				return r.astManager.getAST(r.editorContext).then(function(ast) {
-					var start = Finder.findProgramStart(ast);
-					assert.equal(start, 6, "Wrong program start found");
+					var start = Finder.findProgramStartRange(ast);
+					assert.deepEqual(start, [6,12], "Wrong program start found");
 				});
 			});
-			it('Test findProgramStart block comment not at 0', function() {
+			it('Test findProgramStartRange block comment not at 0', function() {
 			    var r = setup("\n\n\t\t  /* Copyright today */\n\n\n\t\t  var a = 2;");
 				return r.astManager.getAST(r.editorContext).then(function(ast) {
-					var start = Finder.findProgramStart(ast);
-					assert.equal(start, 6, "Wrong program start found");
+					var start = Finder.findProgramStartRange(ast);
+					assert.deepEqual(start, [34,37], "Wrong program start found");
 				});
 			});
-			it('Test findProgramStart line comment not at 0', function() {
+			it('Test findProgramStartRange line comment not at 0', function() {
 			    var r = setup("\n\n\t\t  // Copyright today\n\n\n\t\t  var a = 2;");
 				return r.astManager.getAST(r.editorContext).then(function(ast) {
-					var start = Finder.findProgramStart(ast);
-					assert.equal(start, 6, "Wrong program start found");
+					var start = Finder.findProgramStartRange(ast);
+					assert.deepEqual(start, [31,34], "Wrong program start found");
 				});
 			});
 			
-			it('Test findProgramStart No content in HTML', function() {
+			it('Test findProgramStartRange No content in HTML', function() {
 			    var r= setup("<html>\n<script></script>\n</html>", "text/html");
 				return r.astManager.getAST(r.editorContext).then(function(ast) {
-					var start = Finder.findProgramStart(ast);
-					assert.equal(start, 15, "Wrong program start found");
+					var start = Finder.findProgramStartRange(ast);
+					assert.deepEqual(start, [15,15], "Wrong program start found");
 				});
 			});
-			it('Test findProgramStart whitespace content in HTML', function() {
+			it('Test findProgramStartRange whitespace content in HTML', function() {
 			    var r = setup("<html>\n<script>\n  \n\n\t\t  \n</script>\n</html>", "text/html");
 				return r.astManager.getAST(r.editorContext).then(function(ast) {
-					var start = Finder.findProgramStart(ast);
-					assert.equal(start, 25, "Wrong program start found");
+					var start = Finder.findProgramStartRange(ast);
+					assert.deepEqual(start, [25,25], "Wrong program start found");
 				});
 			});
-			it('Test findProgramStart content at 0 in HTML', function() {
+			it('Test findProgramStartRange content at 0 in HTML', function() {
 			    var r = setup("<html>\n<script>\nvar a = 1;\n</script>\n</html>", "text/html");
 				return r.astManager.getAST(r.editorContext).then(function(ast) {
-					var start = Finder.findProgramStart(ast);
-					assert.equal(start, 16, "Wrong program start found");
+					var start = Finder.findProgramStartRange(ast);
+					assert.deepEqual(start, [16,19], "Wrong program start found");
 				});
 			});
-			it('Test findProgramStart block comment at 0 in HTML', function() {
+			it('Test findProgramStartRange block comment at 0 in HTML', function() {
 			    var r = setup("<html>\n<script>\n/* Copyright today */\nvar a = 2;\n</script>\n</html>", "text/html");
 				return r.astManager.getAST(r.editorContext).then(function(ast) {
-					var start = Finder.findProgramStart(ast);
-					assert.equal(start, 16, "Wrong program start found");
+					var start = Finder.findProgramStartRange(ast);
+					assert.deepEqual(start, [38,41], "Wrong program start found");
 				});
 			});
-			it('Test findProgramStart line comment at 0 in HTML', function() {
+			it('Test findProgramStartRange line comment at 0 in HTML', function() {
 			    var r = setup("<html>\n<script>\n// Copyright today \nvar a = 2;\n</script>\n</html>", "text/html");
 				return r.astManager.getAST(r.editorContext).then(function(ast) {
-					var start = Finder.findProgramStart(ast);
-					assert.equal(start, 16, "Wrong program start found");
+					var start = Finder.findProgramStartRange(ast);
+					assert.deepEqual(start, [36,39], "Wrong program start found");
 				});
 			});
-			it('Test findProgramStart content not at 0 in HTML', function() {
+			it('Test findProgramStartRange content not at 0 in HTML', function() {
 			    var r = setup("<html>\n<script>\n\n\n\t\t  var a = 1;\n</script>\n</html>", "text/html");
 				return r.astManager.getAST(r.editorContext).then(function(ast) {
-					var start = Finder.findProgramStart(ast);
-					assert.equal(start, 22, "Wrong program start found");
+					var start = Finder.findProgramStartRange(ast);
+					assert.deepEqual(start, [22,25], "Wrong program start found");
 				});
 			});
-			it('Test findProgramStart block comment not at 0 in HTML', function() {
+			it('Test findProgramStartRange block comment not at 0 in HTML', function() {
 			    var r = setup("<html>\n<script>\n\n\n\t\t  /* Copyright today */\n\n\n\t\t  var a = 2;\n</script>\n</html>", "text/html");
 				return r.astManager.getAST(r.editorContext).then(function(ast) {
-					var start = Finder.findProgramStart(ast);
-					assert.equal(start, 22, "Wrong program start found");
+					var start = Finder.findProgramStartRange(ast);
+					assert.deepEqual(start, [50,53], "Wrong program start found");
 				});
 			});
-			it('Test findProgramStart line comment not at 0 in HTML', function() {
+			it('Test findProgramStartRange line comment not at 0 in HTML', function() {
 			    var r = setup("<html>\n<script>\n\n\n\t\t  // Copyright today\n\n\n\t\t  var a = 2;\n</script>\n</html>", "text/html");
 				return r.astManager.getAST(r.editorContext).then(function(ast) {
-					var start = Finder.findProgramStart(ast);
-					assert.equal(start, 22, "Wrong program start found");
+					var start = Finder.findProgramStartRange(ast);
+					assert.deepEqual(start, [47,50], "Wrong program start found");
 				});
 			});
 			
