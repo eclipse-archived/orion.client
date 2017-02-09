@@ -229,16 +229,25 @@ define([
 	 * @param {?} cfg The configuration map from the eslintrc file
 	 * @since 14.0
 	 */
-	function configureRules(cfg) {
+	function configureRules(cfg, confg) {
 		if(cfg && cfg.rules) {
 			Object.keys(cfg.rules).forEach(function(key) {
 				if(!Rules.defaults[key]) {
 					delete cfg.rules[key];
 				}
 			});
-			cfg.rules["unknown-require"] = config.rules["unknown-require"];
-			cfg.rules["check-tern-plugin"] = config.rules["check-tern-plugin"];
-			cfg.rules["missing-requirejs"] = config.rules["missing-requirejs"];
+			if(confg && !confg.skip) { //test hook to disable these rules unless explicitly added
+				cfg.rules["unknown-require"] = config.rules["unknown-require"];
+				cfg.rules["check-tern-plugin"] = config.rules["check-tern-plugin"];
+				cfg.rules["missing-requirejs"] = config.rules["missing-requirejs"];
+			}
+		}
+		//test hooks
+		if(confg) {
+			if(!cfg) {
+				return confg;
+			}
+			cfg.rules = confg.rules;
 		}
 		return cfg;
 	}
@@ -300,14 +309,21 @@ define([
 						env.browser = true;
 					}
 					if(this.project) {
-						this.project.getESlintOptions().then(function(cfg) {
-							if(cfg && cfg.env) {
-								env = !env ? Object.create(null) : env;
-								Object.keys(cfg.env).forEach(function(key) {
-									env[key] = cfg.env[key];
+						this.project.getComputedEnvironment(false).then(function(cenv) {
+							env = !env ? Object.create(null) : env;
+							if(cenv) {
+								Object.keys(cenv).forEach(function(key) {
+									env[key] = cenv[key];
 								});
 							}
-							this._validate(meta, text, env, deferred, configureRules(cfg));
+							this.project.getESlintOptions().then(function(cfg) {
+								if(cfg && cfg.env) {
+									Object.keys(cfg.env).forEach(function(key) {
+										env[key] = cfg.env[key];
+									});
+								}
+								this._validate(meta, text, env, deferred, configureRules(cfg, config));
+							}.bind(this));
 						}.bind(this));
 					} else {
 						// need to extract all scripts from the html text

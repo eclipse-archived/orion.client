@@ -32,6 +32,9 @@ define([
 			getEcmaLevel: function getEcmaLevel() {},
 			getESlintOptions: function getESlintOptions() {
 				return new Deferred().resolve(null);
+			},
+			getComputedEnvironment: function getComputedEnvironment() {
+				return new Deferred().resolve({});
 			}
 		};
 		

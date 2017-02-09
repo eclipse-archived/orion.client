@@ -48,10 +48,11 @@
 				'js-tests/javascript/ternProjectFileTests',
 				'js-tests/javascript/ternProjectManagerTests',
 				'js-tests/javascript/ternProjectValidatorTests',
+				'js-tests/javascript/computedEnvTests'
 				], function(worker, crossFileTests, ternAssistIndexTests, ternAssistModuleTests, ternAssistTests, ternCommandTests, dependencyTests, finderTests, 
 							occurrencesTests, es6OccurrencesTests, es7OccurrencesTests, es7AssistTests, astOutlinerTests, outlinerTests, es6OutlinerTests, nodeValidatorTests, 
 							validatorTests, lruTests, quickfixTests, quickfixGlobalTests, es6QuickfixTests, eslintCoreTests, scriptResolverTests, sigparserTests, es6ValidatorTests, 
-							ternProjectTests, ternProjectValidatorTests) {
+							ternProjectTests, ternProjectValidatorTests, computedEnvTests) {
 					var testworker;
 					before("reset timeout", function(done) {
 						this.timeout(30000);
@@ -90,6 +91,7 @@
 					es6ValidatorTests(testworker);
 					ternProjectTests(testworker);
 					ternProjectValidatorTests(testworker);
+					computedEnvTests(testworker);
 					testSuite.run();
 		});
 	});
