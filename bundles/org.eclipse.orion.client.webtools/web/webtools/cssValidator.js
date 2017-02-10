@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2014, 2016 IBM Corporation and others.
+ * Copyright (c) 2014, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License v1.0
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution
@@ -21,42 +21,42 @@ define("webtools/cssValidator", [
 	// TODO How to keep this list up to date with rules definitions, settings options and content assist
 	var config = {
 		// Define the default values for the rules
-		// 0:off, 1:warning, 2:error
+		// 0:off, 1:warning, 2:error 3:info
 		rules: {
-			"adjoining-classes" : 1, //$NON-NLS-0$
-			"box-model" : 1, //$NON-NLS-0$
-			"box-sizing" : 1, //$NON-NLS-0$
-			"bulletproof-font-face" : 1, //$NON-NLS-0$
-			"compatible-vendor-prefixes" : 1, //$NON-NLS-0$
-			"display-property-grouping" : 1, //$NON-NLS-0$
-			"duplicate-background-images" : 1, //$NON-NLS-0$
-			"duplicate-properties" : 1, //$NON-NLS-0$
-			"empty-rules" : 1, //$NON-NLS-0$
-			"fallback-colors" : 1, //$NON-NLS-0$
-			"floats" : 1, //$NON-NLS-0$
-			"font-faces" : 1, //$NON-NLS-0$
-			"font-sizes" : 1, //$NON-NLS-0$
-			"gradients" : 1, //$NON-NLS-0$
-			"ids" : 1, //$NON-NLS-0$
-			"import" : 1, //$NON-NLS-0$
-			"important" : 1, //$NON-NLS-0$
-			"known-properties" : 1, //$NON-NLS-0$
-			"outline-none" : 1, //$NON-NLS-0$
-			"overqualified-elements" : 1, //$NON-NLS-0$
-			"qualified-headings" : 1, //$NON-NLS-0$
-			"regex-selectors" : 1, //$NON-NLS-0$
-			"rules-count" : 1, //$NON-NLS-0$
-			"selector-max-approaching" : 1, //$NON-NLS-0$
-			"selector-max" : 1, //$NON-NLS-0$
-			"shorthand" : 1, //$NON-NLS-0$
-			"star-property-hack" : 1, //$NON-NLS-0$
-			"text-indent" : 1, //$NON-NLS-0$
-			"underscore-property-hack" : 1, //$NON-NLS-0$
-			"unique-headings" : 1, //$NON-NLS-0$
-			"universal-selector" : 1, //$NON-NLS-0$
-			"unqualified-attributes" : 1, //$NON-NLS-0$
-			"vendor-prefix" : 1, //$NON-NLS-0$
-			"zero-units" : 1 //$NON-NLS-0$
+			"adjoining-classes" : 3, //$NON-NLS-0$
+			"box-model" : 3, //$NON-NLS-0$
+			"box-sizing" : 3, //$NON-NLS-0$
+			"bulletproof-font-face" : 3, //$NON-NLS-0$
+			"compatible-vendor-prefixes" : 3, //$NON-NLS-0$
+			"display-property-grouping" : 3, //$NON-NLS-0$
+			"duplicate-background-images" : 3, //$NON-NLS-0$
+			"duplicate-properties" : 3, //$NON-NLS-0$
+			"empty-rules" : 3, //$NON-NLS-0$
+			"fallback-colors" : 3, //$NON-NLS-0$
+			"floats" : 3, //$NON-NLS-0$
+			"font-faces" : 3, //$NON-NLS-0$
+			"font-sizes" : 3, //$NON-NLS-0$
+			"gradients" : 3, //$NON-NLS-0$
+			"ids" : 3, //$NON-NLS-0$
+			"import" : 3, //$NON-NLS-0$
+			"important" : 3, //$NON-NLS-0$
+			"known-properties" : 3, //$NON-NLS-0$
+			"outline-none" : 3, //$NON-NLS-0$
+			"overqualified-elements" : 3, //$NON-NLS-0$
+			"qualified-headings" : 3, //$NON-NLS-0$
+			"regex-selectors" : 3, //$NON-NLS-0$
+			"rules-count" : 3, //$NON-NLS-0$
+			"selector-max-approaching" : 3, //$NON-NLS-0$
+			"selector-max" : 3, //$NON-NLS-0$
+			"shorthand" : 3, //$NON-NLS-0$
+			"star-property-hack" : 3, //$NON-NLS-0$
+			"text-indent" : 3, //$NON-NLS-0$
+			"underscore-property-hack" : 3, //$NON-NLS-0$
+			"unique-headings" : 3, //$NON-NLS-0$
+			"universal-selector" : 3, //$NON-NLS-0$
+			"unqualified-attributes" : 3, //$NON-NLS-0$
+			"vendor-prefix" : 3, //$NON-NLS-0$
+			"zero-units" : 3 //$NON-NLS-0$
 		},
 		
 		/**

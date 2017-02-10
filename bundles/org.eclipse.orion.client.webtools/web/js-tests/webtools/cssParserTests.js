@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2015 IBM Corporation and others.
+ * Copyright (c) 2015, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License v1.0
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution
@@ -97,7 +97,7 @@ define([
 			var results = CSSLint.verify("@import 'foo.css';", rules);
 		    assertResults(results, {
 		         tokens: [{"type":"IMPORT_SYM","range":[0,7],"value":"@import"},{"type":"STRING","range":[8,17],"value":"'foo.css'"},{"type":"SEMICOLON","range":[17,18],"value":";"},{"type":"EOF","range":[18,18],"value":null}],
-                 messages: [{"message":"@import prevents parallel downloads, use <link> instead.","line":1,"col":1,"type":"warning"}]
+                 messages: [{"message":"@import prevents parallel downloads, use <link> instead.","line":1,"col":1,"type":"info"}]
 		    });
 		});
 		
@@ -113,7 +113,7 @@ define([
 			var results = CSSLint.verify("@import 'a.css';\n@import 'b.css';", rules);
 		    assertResults(results, {
 		        tokens: [{"type":"IMPORT_SYM","range":[0,7],"value":"@import"},{"type":"STRING","range":[8,15],"value":"'a.css'"},{"type":"SEMICOLON","range":[15,16],"value":";"},{"type":"IMPORT_SYM","range":[17,24],"value":"@import"},{"type":"STRING","range":[25,32],"value":"'b.css'"},{"type":"SEMICOLON","range":[32,33],"value":";"},{"type":"EOF","range":[33,33],"value":null}],
-				messages: [{"message":"@import prevents parallel downloads, use <link> instead.","line":1,"col":1,"type":"warning"},{"message":"@import prevents parallel downloads, use <link> instead.","line":2,"col":1,"type":"warning"}]
+				messages: [{"message":"@import prevents parallel downloads, use <link> instead.","line":1,"col":1,"type":"info"},{"message":"@import prevents parallel downloads, use <link> instead.","line":2,"col":1,"type":"info"}]
 		    });
 		});
 		
@@ -121,7 +121,7 @@ define([
 			var results = CSSLint.verify("@import 'a.css';\r\n@import 'b.css';", rules);
 		    assertResults(results, {
 		        tokens: [{"type":"IMPORT_SYM","range":[0,7],"value":"@import"},{"type":"STRING","range":[8,15],"value":"'a.css'"},{"type":"SEMICOLON","range":[15,16],"value":";"},{"type":"IMPORT_SYM","range":[18,25],"value":"@import"},{"type":"STRING","range":[26,33],"value":"'b.css'"},{"type":"SEMICOLON","range":[33,34],"value":";"},{"type":"EOF","range":[34,34],"value":null}],
-				messages: [{"message":"@import prevents parallel downloads, use <link> instead.","line":1,"col":1,"type":"warning"},{"message":"@import prevents parallel downloads, use <link> instead.","line":2,"col":1,"type":"warning"}]
+				messages: [{"message":"@import prevents parallel downloads, use <link> instead.","line":1,"col":1,"type":"info"},{"message":"@import prevents parallel downloads, use <link> instead.","line":2,"col":1,"type":"info"}]
 		    });
 		});
 		
@@ -129,7 +129,7 @@ define([
 			var results = CSSLint.verify("@import 'a.css';\n\n@import 'b.css';", rules);
 		    assertResults(results, {
 		         tokens: [{"type":"IMPORT_SYM","range":[0,7],"value":"@import"},{"type":"STRING","range":[8,15],"value":"'a.css'"},{"type":"SEMICOLON","range":[15,16],"value":";"},{"type":"IMPORT_SYM","range":[18,25],"value":"@import"},{"type":"STRING","range":[26,33],"value":"'b.css'"},{"type":"SEMICOLON","range":[33,34],"value":";"},{"type":"EOF","range":[34,34],"value":null}],
-				messages: [{"message":"@import prevents parallel downloads, use <link> instead.","line":1,"col":1,"type":"warning"},{"message":"@import prevents parallel downloads, use <link> instead.","line":3,"col":1,"type":"warning"}]
+				messages: [{"message":"@import prevents parallel downloads, use <link> instead.","line":1,"col":1,"type":"info"},{"message":"@import prevents parallel downloads, use <link> instead.","line":3,"col":1,"type":"info"}]
 		    });
 		});
 		
@@ -137,7 +137,7 @@ define([
 			var results = CSSLint.verify("@import 'a.css';\r\n\n@import 'b.css';", rules);
 		    assertResults(results, {
 		         tokens: [{"type":"IMPORT_SYM","range":[0,7],"value":"@import"},{"type":"STRING","range":[8,15],"value":"'a.css'"},{"type":"SEMICOLON","range":[15,16],"value":";"},{"type":"IMPORT_SYM","range":[19,26],"value":"@import"},{"type":"STRING","range":[27,34],"value":"'b.css'"},{"type":"SEMICOLON","range":[34,35],"value":";"},{"type":"EOF","range":[35,35],"value":null}],
-				messages: [{"message":"@import prevents parallel downloads, use <link> instead.","line":1,"col":1,"type":"warning"},{"message":"@import prevents parallel downloads, use <link> instead.","line":3,"col":1,"type":"warning"}]
+				messages: [{"message":"@import prevents parallel downloads, use <link> instead.","line":1,"col":1,"type":"info"},{"message":"@import prevents parallel downloads, use <link> instead.","line":3,"col":1,"type":"info"}]
 		    });
 		});
 	});
