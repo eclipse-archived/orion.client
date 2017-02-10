@@ -42,10 +42,10 @@ define("webtools/htmlValidator", [
 			'style', //$NON-NLS-1$
 			'width' //$NON-NLS-1$
 		],
-		'attr-no-dup': 1,
-		'fig-req-figcaption': 1,
-		'img-req-alt': 1,
-		'tag-close': 1
+		'attr-no-dup': 3,
+		'fig-req-figcaption': 3,
+		'img-req-alt': 3,
+		'tag-close': 3
 	};
 
 	Objects.mixin(HtmlValidator.prototype, /** @lends webtools.CssValidator.prototype*/ {
@@ -153,7 +153,7 @@ define("webtools/htmlValidator", [
 			}
 
 			function setOption(rule, value) {
-				if (typeof value === 'number' && value >= 0 && value < 3) {
+				if (typeof value === 'number' && value >= 0 && value < 4) {
 					options[rule] = value;
 				}
 			}

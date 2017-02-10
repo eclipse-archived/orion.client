@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2014, 2016 IBM Corporation and others.
+ * Copyright (c) 2014, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License v1.0
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution
@@ -469,8 +469,13 @@ define(['orion/plugin',
     	/**
     	 * HTML validation settings
     	 */
-    	var ignore = 0, warning = 1, error = 2, severities = [
+    	var ignore = 0, 
+    		warning = 1, 
+    		error = 2, 
+    		info = 3,
+    		severities = [
     		{label: messages.ignore,  value: ignore},
+    		{label: messages.info,   value: info},
     		{label: messages.warning, value: warning},
     		{label: messages.error,   value: error}
     	];
@@ -494,28 +499,28 @@ define(['orion/plugin',
     							id: "validate_attr_no_dup", //$NON-NLS-1$
     							name: messages["attr_no_dup"],
     							type: "number", //$NON-NLS-1$
-    							defaultValue: warning,
+    							defaultValue: info,
     							options: severities
     						},
     						{
     							id: "validate_fig_req_figcaption", //$NON-NLS-1$
     							name: messages["fig_req_figcaption"],
     							type: "number", //$NON-NLS-1$
-    							defaultValue: warning,
+    							defaultValue: info,
     							options: severities
     						},
     						{
     							id: "validate_img_req_alt", //$NON-NLS-1$
     							name: messages["img_req_alt"],
     							type: "number", //$NON-NLS-1$
-    							defaultValue: warning,
+    							defaultValue: info,
     							options: severities
     						},
     						{
     							id: "validate_tag_close", //$NON-NLS-1$
     							name: messages["tag_close"],
     							type: "number", //$NON-NLS-1$
-    							defaultValue: warning,
+    							defaultValue: info,
     							options: severities
     						}]
     				}]
