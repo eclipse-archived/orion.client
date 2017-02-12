@@ -166,7 +166,6 @@ define([
     	 * @since 10.0
     	 */
     	renderGroupElement: function renderGroupElement(item, spanHolder) {
-    		console.log("renderGroupElement");
 			var nameSpan = document.createElement("span"); //$NON-NLS-0$
 			nameSpan.appendChild(document.createTextNode(item.name)); //$NON-NLS-0$
 			nameSpan.classList.add("groupNameSpan"); //$NON-NLS-0$
