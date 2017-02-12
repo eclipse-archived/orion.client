@@ -1,5 +1,5 @@
 /*******************************************************************************
- * @license Copyright (c) 2014 IBM Corporation and others. All rights
+ * @license Copyright (c) 2014, 2017 IBM Corporation and others. All rights
  *          reserved. This program and the accompanying materials are made
  *          available under the terms of the Eclipse Public License v1.0
  *          (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse
@@ -140,7 +140,9 @@ define([
 	    },
 	    _getFileRenderName: function(item) {
 	    	var renderName;
-	    	if (item.totalMatches) {
+	    	if (item.totalMatches === 1) {
+	    		renderName = this.explorer.model.getFileName(item) + " " + messages["singleMatch"]; //$NON-NLS-0$
+    		} else if (item.totalMatches > 1) {
 	    		renderName = this.explorer.model.getFileName(item) + " (" + i18nUtil.formatMessage(messages["${0} matches"], item.totalMatches) + ")"; //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 	    	} else if(item.type === 'file') {
 	    		renderName = this.explorer.model.getFileName(item);
@@ -164,6 +166,7 @@ define([
     	 * @since 10.0
     	 */
     	renderGroupElement: function renderGroupElement(item, spanHolder) {
+    		console.log("renderGroupElement");
 			var nameSpan = document.createElement("span"); //$NON-NLS-0$
 			nameSpan.appendChild(document.createTextNode(item.name)); //$NON-NLS-0$
 			nameSpan.classList.add("groupNameSpan"); //$NON-NLS-0$
