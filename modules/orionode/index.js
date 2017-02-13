@@ -88,7 +88,7 @@ function startServer(options) {
 		if (options.configParams.isElectron) app.use('/update', require('./lib/update').router(options));
 
 		// Static files
-		app.use(require('term.js').middleware());
+		app.use('/xterm', express.static(path.join(__dirname, 'node_modules', 'xterm', 'dist')));
 		var prependStaticAssets = options.configParams["prepend.static.assets"] && options.configParams["prepend.static.assets"].split(",") || [];
 		var appendStaticAssets = options.configParams["append.static.assets"] && options.configParams["append.static.assets"].split(",") || [];
 		var orionode_static = path.normalize(path.join(LIBS, 'orionode.client/'));
