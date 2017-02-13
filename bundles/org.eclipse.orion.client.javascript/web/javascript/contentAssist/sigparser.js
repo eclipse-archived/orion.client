@@ -136,14 +136,16 @@ define([
 					pos += 2;
 					return '->'; //$NON-NLS-1$
 				}
+				v += c;
+				pos++;
+				c = sig.charAt(pos);
 			} else if(c === '(') {
 				if(v === 'fn') {
 					v += c;
 					pos++;
 					return v; //start of a function, return it
-				} else {
-					return c;
 				}
+				return c;
 			} else if(c === '|') {
 				return v;
 			} else if(c === '') {
