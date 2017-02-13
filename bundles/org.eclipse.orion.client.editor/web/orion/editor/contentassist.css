@@ -36,12 +36,6 @@
 	border-bottom: 1px solid rgba(255, 255, 255, 0.3);
 }
 
-.contentassist .proposal-noemphasis-keyword {
-	background-color: aliceblue;
-	color: #c04600;
-	font-weight: bold;
-}
-
 .contentassist .proposal-noemphasis {
 	background-color: aliceblue;
 	font-weight: lighter;
