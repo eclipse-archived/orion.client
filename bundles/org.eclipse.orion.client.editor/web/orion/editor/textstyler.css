@@ -1,5 +1,5 @@
 .comment {
-	color: #3C802C;
+	color: #357d21;
 }
 
 .constant {
@@ -25,7 +25,7 @@
 }
 
 .string {
-	color: #446fbd;
+	color: #314dce;
 }
 
 .support {
@@ -62,7 +62,7 @@
 
 .entity-name-function, .entity-name-type {
 	font-weight: bold;
-	color: #67BBB8;
+	color: #007b78;
 }
 
 .entity-name-tag {
@@ -70,7 +70,7 @@
 }
 
 .entity-other-attribute-name {
-	color: #3C802C;
+	color: #357d21;
 }
 
 .invalid-illegal {
@@ -83,7 +83,7 @@
 }
 
 .keyword-operator {
-	color: #CC4C07;
+	color: #c04600;
 	font-weight: bold;
 }
 
@@ -104,7 +104,7 @@
 }
 
 .variable-parameter {
-	color: #D1416F;
+	color: #CD2B65;
 }
 
 .variable-language {

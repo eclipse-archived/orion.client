@@ -74,7 +74,7 @@ define([
 					"backgroundColor": "#ffffff",
 					"color": "#151515",
 					"comment": {
-						"color": "#3C802C"
+						"color": "#357d21"
 					},
 					"constant": {
 						"color": "#9932CC",
@@ -89,7 +89,7 @@ define([
 						"name": {
 							"color": "#98937B",
 							"function": {
-								"color": "#67BBB8",
+								"color": "#007b78",
 								"fontWeight": "bold"
 							}
 						},
@@ -103,7 +103,7 @@ define([
 					"fontSize": defaultFontSize,
 					"keyword": {
 						"control": {
-							"color": "#CC4C07",
+							"color": "#c04600",
 							"fontWeight": "bold"
 						},
 						"operator": {
@@ -112,9 +112,9 @@ define([
 						},
 						"other": {
 							"documentation": {
-								"color": "#7F9FBF",
+								"color": "#37739f",
 								"task": {
-									"color": "#5595ff"
+									"color": "#006DD4"
 								}
 							}
 						}
@@ -130,7 +130,7 @@ define([
 							"fontStyle": "italic"
 						},
 						"list": {
-							"color": "#CC4C07"
+							"color": "#c04600"
 						},
 						"other": {
 							"separator": {
@@ -140,11 +140,11 @@ define([
 								"textDecoration": "line-through"
 							},
 							"table": {
-								"color": "#3C802C"
+								"color": "#357d21"
 							}
 						},
 						"quote": {
-							"color": "#446FBD"
+							"color": "#314dce"
 						},
 						"raw": {
 							"fontFamily": "monospace",
@@ -161,7 +161,7 @@ define([
 					"meta": {
 						"documentation": {
 							"annotation": {
-								"color": "#7F9FBF"
+								"color": "#37739f"
 							},
 							"tag": {
 								"color": "#7F7F9F"
@@ -171,15 +171,15 @@ define([
 							"color": "#A4A4A4"
 						},
 						"tag": {
-							"color": "#CC4C07",
+							"color": "#c04600",
 							"attribute": {
-								"color": "#93a2aa"
+								"color": "#58727e"
 							}
 						}
 					},
 					"punctuation": {
 						"operator": {
-							"color":"#D1416F"
+							"color":"#CD2B65"
 						}
 					},
 					"ruler": {
@@ -195,7 +195,7 @@ define([
 						"color": "#767676"
 					},
 					"string": {
-						"color": "#446FBD",
+						"color": "#314dce",
 						"interpolated": {
 							"color": "#151515"
 						}
@@ -234,7 +234,7 @@ define([
 							"color": "#E038AD"
 						},
 						"parameter": {
-							"color": "#D1416F"
+							"color": "#CD2B65"
 						}
 					}
 				}

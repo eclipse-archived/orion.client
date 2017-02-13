@@ -1,7 +1,7 @@
 /*Editor syntax highlighting themes*/
 /*Refer to https://manual.macromates.com/en/language_grammars at section 12.4 for the theme hierarchy*/
 .editorTheme .comment {
-	color: #3C802C;
+	color: #357d21;
 }
 .editorTheme .constant.numeric.hex {
 	color: #9932CC;
@@ -13,7 +13,7 @@
 	color: #9932CC;
 }
 .editorTheme .entity.name.function {
-	color: #67BBB8;
+	color: #007b78;
 	font-weight: bold;
 }
 .editorTheme .entity.name {
@@ -23,7 +23,7 @@
 	color: #5F9EA0;
 }
 .editorTheme .keyword.control {
-	color: #CC4C07;
+	color: #c04600;
 	font-weight: bold;
 }
 .editorTheme .keyword.operator {
@@ -31,13 +31,13 @@
 	font-weight: bold;
 }
 .editorTheme .keyword.other.documentation.task {
-	color: #5595ff;
+	color: #006DD4;
 }
 .editorTheme .keyword.other.documentation {
-	color: #7F9FBF;
+	color: #37739f;
 }
 .editorTheme .meta.documentation.annotation {
-	color: #7F9FBF;
+	color: #37739f;
 }
 .editorTheme .meta.documentation.tag {
 	color: #7F7F9F;
@@ -46,19 +46,19 @@
 	color: #A4A4A4;
 }
 .editorTheme .meta.tag.attribute {
-	color: #93a2aa;
+	color: #58727e;
 }
 .editorTheme .meta.tag {
-	color: #CC4C07;
+	color: #c04600;
 }
 .editorTheme .punctuation.operator {
-	color: #D1416F;
+	color: #CD2B65;
 }
 .editorTheme .string.interpolated {
 	color: #151515;
 }
 .editorTheme .string {
-	color: #446FBD;
+	color: #314dce;
 }
 .editorTheme .support.type.propertyName {
 	color: #9F4177;
@@ -71,7 +71,7 @@
 	color: #E038AD;
 }
 .editorTheme .variable.parameter {
-	color: #D1416F;
+	color: #D13F6E;
 }
 /*Editor core themes*/
 .editorTheme .annotationLine.currentLine {

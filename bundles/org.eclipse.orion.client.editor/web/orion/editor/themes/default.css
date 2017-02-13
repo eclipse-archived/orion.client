@@ -10,7 +10,7 @@
 
 .entity.name.function, .entity.name.type {
 	font-weight: bold;
-	color: #67BBB8;
+	color: #007b78;
 }
 
 .entity.name {
@@ -18,7 +18,7 @@
 }
 
 .entity.other.attribute.name {
-	color: #3C802C;
+	color: #357d21;
 }
 
 .meta.documentation.tag {
@@ -26,7 +26,7 @@
 }
 
 .meta.documentation.annotation {
-	color: #7F9FBF;
+	color: #37739f;
 }
 
 .meta.preprocessor {
@@ -46,7 +46,7 @@
 }
 
 .markup.list {
-	color: #CC4C07;
+	color: #c04600;
 }
 
 .markup.other.separator {
@@ -58,11 +58,11 @@
 }
 
 .markup.other.table {
-	color: #3C802C;
+	color: #357d21;
 }
 
 .markup.quote, .markup-quote {
-	color: #446fbd;
+	color: #314dce;
 }
 
 .markup.raw {
@@ -86,7 +86,7 @@ markup.raw.html.markdown {
 }
 
 .variable.parameter {
-	color: #D1416F;
+	color: #CD2B65;
 }
 
 .variable.language {
