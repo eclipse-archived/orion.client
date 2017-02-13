@@ -11,14 +11,14 @@
 /*eslint-env browser, amd*/
 /*global Terminal*/
 define([
-	"/socket.io/socket.io.js",
-	"/requirejs/domReady.js",
+	"socket.io/socket.io",
+	"requirejs/domReady",
 	'orion/widgets/input/DropDownMenu',
 	'orion/widgets/input/SettingsSelect',
 	'orion/commands',
 	"orion/PageUtil",
-	"/term.js"
-], function(io, onReady, DropDownMenu, SettingsSelect, mCommands, PageUtil/*, Terminal*/) {
+	"xterm/xterm"
+], function(io, onReady, DropDownMenu, SettingsSelect, mCommands, PageUtil, Terminal) {
 
 	var term, serviceRegistry;
 	var colorScheme = "Dark";
