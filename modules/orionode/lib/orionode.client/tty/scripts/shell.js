@@ -11,14 +11,14 @@
 /*eslint-env browser, amd*/
 /*global Terminal*/
 define([
-	"/socket.io/socket.io.js",
-	"/requirejs/domReady.js",
+	"socket.io/socket.io",
+	"requirejs/domReady",
 	'orion/widgets/input/DropDownMenu',
 	'orion/widgets/input/SettingsSelect',
 	'orion/commands',
 	"orion/PageUtil",
-	"/term.js"
-], function(io, onReady, DropDownMenu, SettingsSelect, mCommands, PageUtil/*, Terminal*/) {
+	"xterm/xterm"
+], function(io, onReady, DropDownMenu, SettingsSelect, mCommands, PageUtil, Terminal) {
 
 	var term, serviceRegistry;
 	var colorScheme = "Dark";
@@ -48,7 +48,8 @@ define([
 			socket.emit('resize', Math.floor(newCols), Math.floor(newRows));
 		};
 
-		socket = io.connect('/tty');
+		var socketioPath = location.pathname.substr(0, location.pathname.indexOf('tty')) + 'socket.io/';
+		socket = io.connect('/tty', { path: socketioPath });
 		socket.on('connect', function() {
 			socket.emit('start', getCWD());
 		});
