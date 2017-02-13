@@ -835,7 +835,7 @@ define("orion/editor/textView", [  //$NON-NLS-1$
 						range = {text: text.substring(start, tabIndex), style: style};
 						range = bidiUtils.enforceTextDir(range);
 						data.ranges.push(range);
-						if (bidiUtils.isBidiEnabled()) {
+						if (bidiUtils.isBidiEnabled() && !this.view._isMarkdown) {
 							data.ranges.push(bidiRange);
 						}
 						data.tabOffset += range.text.length;
@@ -849,7 +849,7 @@ define("orion/editor/textView", [  //$NON-NLS-1$
 						}
 						range = {text: spaces, style: style, ignoreChars: spacesCount - 1};
 						data.ranges.push(range);
-						if (bidiUtils.isBidiEnabled()) {
+						if (bidiUtils.isBidiEnabled()  && !this.view._isMarkdown) {
 							data.ranges.push(bidiRange);
 						}
 						data.tabOffset += range.text.length;
@@ -865,7 +865,7 @@ define("orion/editor/textView", [  //$NON-NLS-1$
 				range = {text: text.substring(start, end), style: style};
 				range = bidiUtils.enforceTextDir(range);
 				data.ranges.push(range);
-				if (bidiUtils.isBidiEnabled()) {
+				if (bidiUtils.isBidiEnabled() && !this.view._isMarkdown) {
 					data.ranges.push(bidiRange);
 				}
 				data.tabOffset += range.text.length;
@@ -5338,6 +5338,33 @@ define("orion/editor/textView", [  //$NON-NLS-1$
 			this.setOptions({wrapMode: !this.getOptions("wrapMode")}); //$NON-NLS-1$
 			return true;
 		},
+		_doSetDirection: function (args) {
+			if (!this._isMarkdown) { return; }
+			var LRE = "\u202A";	//$NON-NLS-0$			
+			var RLE = "\u202B"; //$NON-NLS-0$
+			var charToAdd = ( args.type === "ltr" ? LRE : RLE );			
+			var model = this._model;			
+			var selections = this._getSelections();
+			if (selections.length > 1) {
+				this._setSelection(selections[0], true);
+			}						
+							
+			var lineIndex = model.getLineAtOffset(selections[0].start);										
+			var startLine = model.getLineStart(lineIndex);
+			var endLine = model.getLineEnd(lineIndex);
+			var text = model.getText(startLine, endLine);
+			var oldIndex = Math.max(text.indexOf(LRE), text.indexOf(RLE));
+			var newIndex = selections[0].start - startLine;
+			if (oldIndex != -1 && oldIndex < newIndex) {
+				newIndex--;
+			}
+			text = text.replace(LRE, "").replace(RLE, "");
+			text = text.substring(0,newIndex) + charToAdd + text.substring(newIndex);
+			selections[0].start = startLine;
+			selections[0].end = endLine;
+			
+			return this._modifyContent({text: text, selection: selections, _ignoreDOMSelection: true}, true);
+		},
 		
 		/************************************ Internals ******************************************/
 		_autoScroll: function () {
@@ -5661,7 +5688,9 @@ define("orion/editor/textView", [  //$NON-NLS-1$
 				
 				"toggleOverwriteMode": {defaultHandler: function(data) {return that._doOverwriteMode(merge(data,{}));}, actionDescription: {name: messages.toggleOverwriteMode}}, //$NON-NLS-1$
 				"toggleTabMode": {defaultHandler: function(data) {return that._doTabMode(merge(data,{}));}, actionDescription: {name: messages.toggleTabMode}}, //$NON-NLS-1$
-				"toggleWrapMode": {defaultHandler: function(data) {return that._doWrapMode(merge(data,{}));}, actionDescription: {name: messages.toggleWrapMode}} //$NON-NLS-1$
+				"toggleWrapMode": {defaultHandler: function(data) {return that._doWrapMode(merge(data,{}));}, actionDescription: {name: messages.toggleWrapMode}}, //$NON-NLS-1$
+				"dirLTR": {defaultHandler: function(data) {return that._doSetDirection(merge(data,{type: "ltr"}));}, actionDescription: {name: messages.dirLTR}}, //$NON-NLS-1$
+				"dirRTL": {defaultHandler: function(data) {return that._doSetDirection(merge(data,{type: "rtl"}));}, actionDescription: {name: messages.dirRTL}}, //$NON-NLS-1$
 			};
 		},
 		_createRulerParent: function(doc, className) {
@@ -6496,6 +6525,7 @@ define("orion/editor/textView", [  //$NON-NLS-1$
 			this._dragOffset = -1;
 			this._isRangeRects = (!util.isIE || util.isIE >= 9) && typeof _parent.ownerDocument.createRange().getBoundingClientRect === "function"; //$NON-NLS-1$
 			this._isW3CEvents = _parent.addEventListener;
+			this._isMarkdown = (_parent.baseURI.indexOf("editor=orion.editor.markdown") != -1);
 
 			/* Auto scroll */
 			this._autoScrollX = null;
