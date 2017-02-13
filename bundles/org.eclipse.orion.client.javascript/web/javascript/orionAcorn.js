@@ -190,7 +190,12 @@ define([
 			if(_a.type === "ArrayExpression") {
 				envs.amd = true;
 				addArrayDeps(_a.elements, deps, "amd"); //$NON-NLS-1$
-			} else if(_a.type === "FunctionExpression" || _a.type === 'ObjectExpression') {
+			} else if(_a.type === "FunctionExpression"){
+				envs.amd = true;
+				if (_a.params && _a.params.length > 0 && _a.params[0].name === 'require'){
+					envs.simplifiedCommonJS = true;
+				}
+			} else if (_a.type === 'ObjectExpression') {
 				envs.amd = true;
 			}
 		}
