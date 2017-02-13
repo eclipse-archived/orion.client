@@ -17,8 +17,8 @@ define([
 	'orion/widgets/input/SettingsSelect',
 	'orion/commands',
 	"orion/PageUtil",
-	"/term.js"
-], function(io, onReady, DropDownMenu, SettingsSelect, mCommands, PageUtil/*, Terminal*/) {
+	"/xterm/xterm.js"
+], function(io, onReady, DropDownMenu, SettingsSelect, mCommands, PageUtil, Terminal) {
 
 	var term, serviceRegistry;
 	var colorScheme = "Dark";
@@ -40,8 +40,9 @@ define([
 				termContainer.removeChild(span);
 			}
 			var newRows = (newHeight - 10) / (charHeight || 12);
-			var newCols = Math.max(80, (newWidth - 10) / (charWidth || 12));
-			if (newRows === rows && newCols !== cols) return;
+			//var newCols = Math.max(80, (newWidth - 10) / (charWidth || 12));
+			var newCols = (newWidth - 10) / (charWidth || 12);
+			if (newRows === rows && newCols === cols) return;
 			rows = newRows;
 			cols = newCols;
 			term.resize(Math.floor(newCols), Math.floor(newRows));

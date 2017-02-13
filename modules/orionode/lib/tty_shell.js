@@ -14,10 +14,10 @@ var api = require('./api'),
 		fileUtil = require('./fileUtil');
 var pty;
 try {
-	pty = require("pty.js");
+	pty = require("node-pty");
 } catch (e) {
 	console.error(e.message);
-	console.error("pty.js is not installed. Some features will be unavailable.");
+	console.error("node-pty is not installed. Some features will be unavailable.");
 }
 
 exports.install = function(options) {
