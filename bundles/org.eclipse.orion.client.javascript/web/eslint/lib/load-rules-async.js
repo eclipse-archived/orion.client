@@ -1286,6 +1286,11 @@ define([
                 function checkShadow(node) {
                     var env = context.env ? context.env : {};
                     env.builtin = true;
+                    var tern = context.getTern();
+                    var isSimplifiedCommonJS = false;
+                    if (tern.file.ast && tern.file.ast.environments && tern.file.ast.environments.simplifiedCommonJS){
+                    	isSimplifiedCommonJS = true;
+                	}
                     switch(node.type) {
                         case 'VariableDeclarator': {
                         	checkIdentifier(node.id, function(node) {
@@ -1300,6 +1305,9 @@ define([
                         case 'FunctionDeclaration':
                         case 'ArrowFunctionExpression': {
                             node.params.forEach(function(param) {
+                            	if (isSimplifiedCommonJS && (param.name === 'require' || param.name === 'exports' || param.name === 'module')){
+                            		return;
+                            	}
                                 if(param.type === 'Identifier' && env[Finder.findESLintEnvForMember(param.name)]) {
                                     context.report(param, ProblemMessages['no-shadow-global-param'], {0: param.name, nls:'no-shadow-global-param'}); //$NON-NLS-1$
                                 }
@@ -2303,23 +2311,33 @@ define([
 										return;
 									}
 								}
+								//check if known module path
 								if(tern.libKnown(lib.value)) {
-									checkDirective(lib);
+									// module names need to be specified in eslint-env unless they are RequireJS relative paths used in simplified CommonJS
+									if (!envs.simplifiedCommonJS){
+										checkDirective(lib);
+									}
 									return;
 								}
 								//TODO check for the module having been loaded via the graph
 								if(tern.optionalPlugins[lib.value]) {
 									//we known about it
 									context.report(lib, ProblemMessages['unknown-require-plugin'], {pid: 'unknown-require-plugin', nls: 'unknown-require-plugin', data: lib.value}); //$NON-NLS-2$ //$NON-NLS-1$
-								} else if(nodeModules[lib.value]) {
+									return;
+								}
+								if(nodeModules[lib.value]) {
 									context.report(lib, ProblemMessages['unknown-require-plugin'], {pid: 'unknown-require-plugin', nls: 'unknown-require-plugin', data: 'node'}); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+									return;
+								}
+								var env = tern.getEnvFromDep(lib.value);
+								if (env === 'commonjs' && envs.simplifiedCommonJS){
+									context.report(lib, ProblemMessages['unknown-require'], {data: lib.value});
+									return;
+								}
+								if(!tern.pluginRunning(env)) {
+									context.report(lib, ProblemMessages['unknown-require-not-running'], {0: env, pid: 'unknown-require-not-running', nls: 'unknown-require-not-running', data: env}); //$NON-NLS-1$ //$NON-NLS-2$
 								} else {
-									var env = tern.getEnvFromDep(lib.value);
-									if(!tern.pluginRunning(env)) {
-										context.report(lib, ProblemMessages['unknown-require-not-running'], {0: env, pid: 'unknown-require-not-running', nls: 'unknown-require-not-running', data: env}); //$NON-NLS-1$ //$NON-NLS-2$
-									} else {
-										context.report(lib, ProblemMessages['unknown-require'], {data: lib.value});
-									}
+									context.report(lib, ProblemMessages['unknown-require'], {data: lib.value});
 								}
         					}
         				}

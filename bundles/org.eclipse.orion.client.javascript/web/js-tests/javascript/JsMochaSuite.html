@@ -35,6 +35,7 @@
 				'js-tests/javascript/astOutlinerTests',
 				'js-tests/javascript/outlinerTests',
 				'js-tests/javascript/es6OutlinerTests',
+				'js-tests/javascript/commonJsValidatorTests',
 				'js-tests/javascript/nodeValidatorTests',
 				'js-tests/javascript/validatorTests',
 				'js-tests/javascript/lruTests',
@@ -50,7 +51,7 @@
 				'js-tests/javascript/ternProjectValidatorTests',
 				'js-tests/javascript/computedEnvTests'
 				], function(worker, crossFileTests, ternAssistIndexTests, ternAssistModuleTests, ternAssistTests, ternCommandTests, dependencyTests, finderTests, 
-							occurrencesTests, es6OccurrencesTests, es7OccurrencesTests, es7AssistTests, astOutlinerTests, outlinerTests, es6OutlinerTests, nodeValidatorTests, 
+							occurrencesTests, es6OccurrencesTests, es7OccurrencesTests, es7AssistTests, astOutlinerTests, outlinerTests, es6OutlinerTests, commonJsValidatorTests, nodeValidatorTests, 
 							validatorTests, lruTests, quickfixTests, quickfixGlobalTests, es6QuickfixTests, eslintCoreTests, scriptResolverTests, sigparserTests, es6ValidatorTests, 
 							ternProjectTests, ternProjectValidatorTests, computedEnvTests) {
 					var testworker;
@@ -86,6 +87,7 @@
 					ternAssistModuleTests(testworker);
 					ternAssistTests(testworker);
 					ternCommandTests(testworker);
+					commonJsValidatorTests(testworker);
 					nodeValidatorTests(testworker);
 					validatorTests(testworker);
 					es6ValidatorTests(testworker);
