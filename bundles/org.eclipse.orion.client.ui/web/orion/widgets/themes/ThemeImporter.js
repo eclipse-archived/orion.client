@@ -754,7 +754,7 @@ define([
             }
 
             // Ask the user to name the theme since css files contain no theme name information
-            var themeName = prompt(messages["nameImportedTheme"], messages["defaultImportedThemeName"]);
+            var themeName = prompt && prompt(messages["nameImportedTheme"], messages["defaultImportedThemeName"]) || messages["defaultImportedThemeName"];
             newStyle.name = themeName;
             newStyle.className = themeName;
 
