@@ -65,7 +65,7 @@ function startServer(options) {
 				return res.status(200).json({UserName: req.user.username});
 			});
 		} else {
-			app.use(require(options.configParams["login.module"] || "./lib/user")(options));
+			app.use(require(options.configParams["login.module"] || "./lib/user").router(options));
 		}
 		app.use('/site', checkAuthenticated, require('./lib/sites')(options));
 		app.use('/task', checkAuthenticated, require('./lib/tasks').router({ taskRoot: contextPath + '/task' }));

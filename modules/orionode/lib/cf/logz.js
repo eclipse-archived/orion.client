@@ -26,11 +26,10 @@ module.exports.router = function() {
 		var task = new tasks.Task(res, false, false, 0, false);
 		var appName = req._parsedUrl.pathname.slice(1);
 		var targetRequest = req.query.Target ? JSON.parse(req.query.Target) : null;
-		var cloudAccessToken = target.getAccessToken(req.user.username);
 		var timestamp = req.query.Timestamp && req.query.Timestamp !== "-1" ? req.query.Timestamp : -1;
 		var appGuid, loggingEndpoint;
 
-		target.computeTarget(req.user.username, targetRequest)
+		target.computeTarget(req.user.username, target.fullTarget(req, targetRequest))
 		.then(function(appTarget){
 			return apps._getAppwithAppName(req.user.username, appName, appTarget);
 		}).then(function(appResult){
@@ -40,24 +39,27 @@ module.exports.router = function() {
 				"Accept": "application/json",
 				"Content-Type": "application/json"
 			};
-			return target.cfRequest(null, req.user.username, infoURL, null, null, infoHeader, null);
+			return target.cfRequest(null, req.user.username, infoURL, null, null, infoHeader, null, targetRequest);
 		}).then(function(infoData) {
-			loggingEndpoint = infoData.logging_endpoint;
+			return target.getAccessToken(req.user.username)
+			.then(function(cloudAccessToken){
+				loggingEndpoint = infoData.logging_endpoint;
 
-			if (loggingEndpoint.startsWith("wss://"))
-				loggingEndpoint = loggingEndpoint.replace("wss://", "https://");
-			else if (loggingEndpoint.startsWith("ws://"))
-				loggingEndpoint = loggingEndpoint.replace("ws://", "http://");
-			
-			var logzHeader = {
-				url: loggingEndpoint + "/recent?app=" + appGuid,
-				headers: {
-					"Content-Type": "mutlipart/form-data",
-					"Authorization": cloudAccessToken
-				},
-				encoding: null
-			};
-			return target.cfRequest(null, null, null, null, null, null, logzHeader);
+				if (loggingEndpoint.startsWith("wss://"))
+					loggingEndpoint = loggingEndpoint.replace("wss://", "https://");
+				else if (loggingEndpoint.startsWith("ws://"))
+					loggingEndpoint = loggingEndpoint.replace("ws://", "http://");
+				
+				var logzHeader = {
+					url: loggingEndpoint + "/recent?app=" + appGuid,
+					headers: {
+						"Content-Type": "mutlipart/form-data",
+						"Authorization": cloudAccessToken
+					},
+					encoding: null
+				};
+				return target.cfRequest(null, null, null, null, null, null, logzHeader);
+			});
 		}).then(function(response) {
 			var body = response.body;
 			var boundaryIndex = response.headers["content-type"].indexOf("boundary=");

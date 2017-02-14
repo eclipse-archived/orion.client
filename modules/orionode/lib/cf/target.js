@@ -14,17 +14,19 @@ var bodyParser = require("body-parser");
 var tasks = require("../tasks");
 var request = require("request");
 var orgs = require("./orgs_spaces");
-var bearerTokenStore;
-var UseraccessToken = {};
+var bearerTokenStore = require("./accessTokenStore");
 
 module.exports.router = function(options) {
-	bearerTokenStore = require(options.options.configParams["cf.bearer.token.store"] || "./accessTokenStore");
+	if(options.options.configParams["cf.bearer.token.store"]){
+		var getBearerToken = require(options.options.configParams["cf.bearer.token.store"]).getBearerTokenfromUserId;
+	}
 	
 	module.exports.getAccessToken = getAccessToken;
 	module.exports.parsebody = parsebody;
 	module.exports.computeTarget = computeTarget;
 	module.exports.cfRequest = cfRequest;
 	module.exports.caughtErrorHandler = caughtErrorHandler;
+	module.exports.fullTarget = fullTarget;
 
 	return express.Router()
 	.use(bodyParser.json())
@@ -84,7 +86,7 @@ function tryLogin(url, Username, Password, userId){
 			request.post(authorizationHeader, function (error, response, body) {
 				var respondJson = parsebody(body);
 				if(!error && response.statusCode === 200){
-					bearerTokenStore.setBearerTokenforUserId && bearerTokenStore.setBearerTokenforUserId(userId, respondJson.access_token);		
+					bearerTokenStore.setBearerToken && bearerTokenStore.setBearerToken(userId, respondJson.access_token);		
 					return fulfill();
 				}
 				if(error){
@@ -143,8 +145,8 @@ function computeTarget(userId, targetRequest){
 		return Promise.reject(errorStatus);
 	}
 }
-function getAccessToken(userId){
-	return bearerTokenStore.getBearerTokenfromUserId(userId);
+function getAccessToken(userId, target){
+	return bearerTokenStore.getBearerToken(userId, target, getBearerToken);
 }
 function caughtErrorHandler(task, err){
 	var errorResponse = {
@@ -169,10 +171,13 @@ function parsebody(body){
 	}
 	return result;
 }
-function cfRequest (method, userId, url, query, body, headers, requestHeader) {
-	return new Promise(function(fulfill, reject) {
+function cfRequest (method, userId, url, query, body, headers, requestHeader, target) {
+	var waitFor;
+	if(!requestHeader){
+		waitFor = getAccessToken(userId, target);
+	}
+	return Promise.resolve(waitFor).then(function(cloudAccessToken){
 		if(!requestHeader){
-			var cloudAccessToken = getAccessToken(userId);
 			if (!cloudAccessToken) {
 				var errorStatus = new Error("Not authenticated");
 				errorStatus.code = 401;
@@ -180,7 +185,7 @@ function cfRequest (method, userId, url, query, body, headers, requestHeader) {
 					"description": "Not authenticated",
 					"error_code": "CF-NotAuthenticated"
 				};
-				return reject(errorStatus);
+				return Promise.reject(errorStatus);
 			}
 			headers = headers || {};
 			headers.Authorization = cloudAccessToken;
@@ -194,20 +199,28 @@ function cfRequest (method, userId, url, query, body, headers, requestHeader) {
 		if (requestHeader.headers.Authorization) {
 			requestHeader.headers.Authorization = "bearer " + requestHeader.headers.Authorization;
 		}
-		request(requestHeader, /* @callback */ function (error, response, body) {
-			if (error) {
-				return reject(error);
-			}
-//			if (response.status) {
-//				return reject();
-//			}
-			if (body instanceof Uint8Array) {
-				fulfill(response);
-			}
-			else {
-            	fulfill(parsebody(body));
-			}
-		});
+		return new Promise(function(fullfill,reject){
+			request(requestHeader, /* @callback */ function (error, response, body) {
+				if (error) {
+					return reject(error);
+				}
+	//			if (response.status) {
+	//				return reject();
+	//			}
+				if (body instanceof Uint8Array) {
+					fullfill(response);
+				}
+				else {
+					fullfill(parsebody(body));
+				}
+			});
+		})
 	});
+}
+function fullTarget(req,target){
+	if(req.headers['accept-language']){	
+		target['accept-language'] = req.headers['accept-language'];
+	}
+	return target;
 }
 };

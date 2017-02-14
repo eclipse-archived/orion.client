@@ -9,11 +9,18 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 /*eslint-env node */
-var ACCESS_TOKEN = {};
+var userBearerTokens = {};
 
-exports.getBearerTokenfromUserId = function(userId){
-	return ACCESS_TOKEN[userId];
+exports.getBearerToken = function(userId, target, getBearerToken){
+	if(getBearerToken){
+		 return getBearerToken(userId, target)
+		 .then(function(bearerToken){
+			return bearerToken;
+		 });
+	}else if(userBearerTokens[userId]){
+		return Promise.resolve(userBearerTokens[userId]);
+	}
 };
-exports.setBearerTokenforUserId = function(userID, accessToken){
-	ACCESS_TOKEN[userID] = accessToken;
+exports.setBearerToken = function(userId, bearerToken){
+	userBearerTokens[userId] = bearerToken;
 };
