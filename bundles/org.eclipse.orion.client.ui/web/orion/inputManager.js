@@ -630,7 +630,14 @@ define([
 					}else if(this.isUnsavedWarningNeeed()) {
 						this.confirm(messages.confirmUnsavedChanges,
 							[{
-								label:messages["Do not Save"],
+								label:messages["Yes"],
+								callback:function(){
+									this.save();
+									afterConfirm();
+								}.bind(this),
+								type:"ok"
+							},{
+								label:messages["No"],
 								callback:function(){
 									afterConfirm();
 								},
@@ -643,13 +650,6 @@ define([
 									return;
 								}.bind(this),
 								type:"cancel"
-							},{
-								label:messages["Save"],
-								callback:function(){
-									this.save();
-									afterConfirm();
-								}.bind(this),
-								type:"ok"
 							}]);
 					}else{
 						afterConfirm();

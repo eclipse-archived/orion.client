@@ -12,7 +12,7 @@ define({
 	"Editor": "Editor",
 	"switchEditor": "Switch Editor",
 	"Fetching": "Fetching: ${0}",
-	"confirmUnsavedChanges": "There are unsaved changes in the current file.  If you navigate to a different file, you will lose your changes.  \n\nDo you want to navigate away?",
+	"confirmUnsavedChanges": "This file contains unsaved changes.  If you navigate away, will lose them.  \n\nDo you want to save your changes?",
 	"searchFilesCommand": "Quick Search...",
 	"searchFiles": "Quick Search in ${0}",
 	"searchTerm": "Enter search term:",
@@ -110,5 +110,6 @@ define({
 	"Format" : "Format Code",
 	"FormatTooltip":"Format editor contents",
 	"Cancel":"Cancel",
-	"Do not Save":"Don't Save"
+	"Yes":"Yes",
+	"No":"No"
 });
