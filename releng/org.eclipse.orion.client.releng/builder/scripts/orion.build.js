@@ -68,6 +68,7 @@
             { name: "cfui/plugins/wizards/generic/genericDeploymentWizard" },
             { name: "compare/compare" },
             { name: "edit/content/imageViewerPlugin" },
+            { name: "plugins/languages/json/jsonPlugin" },
             { name: "edit/content/jsonEditorPlugin" },
             { name: "edit/edit" },
             { name: "git/git-repository" },

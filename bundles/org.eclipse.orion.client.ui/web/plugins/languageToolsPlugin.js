@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2015 IBM Corporation and others.
+ * Copyright (c) 2015, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -25,7 +25,6 @@ define([
 	'plugins/languages/haml/hamlPlugin',
 	'plugins/languages/jade/jadePlugin',
 	'plugins/languages/java/javaPlugin',
-	'plugins/languages/json/jsonPlugin',
 	'plugins/languages/jsx/jsxPlugin',
 	'plugins/languages/launch/launchPlugin',
 	'plugins/languages/less/lessPlugin',
