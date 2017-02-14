@@ -16,7 +16,7 @@ For full instructions, see the [Getting Started guide](https://wiki.eclipse.org/
 * To install the built server run `npm install orion`.
 * Alternatively, you can install from source by checking out the repo from [GitHub](https://github.com/eclipse/orion.client) or [Eclipse.org](http://git.eclipse.org/c/orion/org.eclipse.orion.client.git/)
 and then running `cd modules/orionode && npm install`.
-* Orion has an optional dependency on the pty.js package, which is not installed by default.  If you're on a non-Windows platform you can install this package with `npm install pty.js`.  If this package is not installed then an error message will be displayed when the server is run, but will still run fine.
+* Orion has an optional dependency on the node-pty package, which is not installed by default. You can install this package with `npm install node-pty`.  If this package is not installed then an error message will be displayed when the server is run, but will still run fine.
 
 ### Running the server
 1. Browse to the directory where you installed Orion, usually `node_modules/orion/`.
