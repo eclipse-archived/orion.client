@@ -27,7 +27,7 @@ function getOrgs(req, res){
 	var task = new tasks.Task(res,false,false,0,false);
 	var resp = {};
 	var targetRequest = JSON.parse(req.query.Target);
-	getOrgsRequest(req.user.username, targetRequest)
+	getOrgsRequest(req.user.username, target.fullTarget(req,targetRequest))
 	.then(function(orgsArray){
 		resp = {
 			"Orgs" : orgsArray.simpleorgsArray
@@ -48,14 +48,14 @@ function getOrgs(req, res){
 function getOrgsRequest(userId, targetRequest){
 	var completeOrgsArray = [];
 	var simpleorgsArray = [];
-	return target.cfRequest("GET", userId, targetRequest.Url + "/v2/organizations", {"inline-relations-depth":"1"})
+	return target.cfRequest("GET", userId, targetRequest.Url + "/v2/organizations", {"inline-relations-depth":"1"}, null, null, null, targetRequest)
 	// TODO In Java code, there is a case that Region is needed, but that value was always assigned as null.
 	.then(function(result){
 		completeOrgsArray = result.resources;
 		return new Promise(function(fulfill,reject){
 			if(completeOrgsArray){
 				async.each(completeOrgsArray, function(resource, cb) {
-					return target.cfRequest("GET", userId, targetRequest.Url + resource.entity.spaces_url, {"inline-relations-depth":"1"})
+					return target.cfRequest("GET", userId, targetRequest.Url + resource.entity.spaces_url, {"inline-relations-depth":"1"}, null, null, null, targetRequest)
 					.then(function(spaceJson){	
 						var spaces = [];
 						var spaceResources = spaceJson && spaceJson.resources || [];
