@@ -92,7 +92,7 @@ define({
 	"Dependency": "Dependency",
 	"UnnamedCommand": "Unnamed",
 	"searchInFolder": "Folder Search...",
-	"Global Search": "Global Search...",
+	"Global Search": "Search...",
 	"ClickEditLabel": "Click to edit",
 	"ProjectInfo": "Project Information",
 	"Name": "Name",
