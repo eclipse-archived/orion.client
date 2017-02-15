@@ -57,7 +57,9 @@ function retrieveManifestFile(req, manifestAbsoluteLocation){
 		}
 		fs.readFile(filePath, "utf8", function(err, fileContent){
 			if(err && err.code !== "ENOENT") {
-				return reject({"code": 404, "message": err.message});
+				var errorStatus = new Error(err.message);
+				errorStatus.code = "404";
+				return reject(errorStatus);
 			}
 			fulfill(fileContent);
 		});
@@ -310,7 +312,10 @@ function analyzeManifest(manifest, manifestAST, fileContent){
 		if(lineNumber !== -1){
 			resultJson.Line = lineNumber;
 		}
-		return {"code":400, "message":message,"data":resultJson};
+		var errorStatus = new Error(message);
+		errorStatus.code = "400";
+		errorStatus.data = resultJson;
+		return errorStatus;
 	}
 }
 function retrieveProjectFilePath(req){
@@ -318,7 +323,7 @@ function retrieveProjectFilePath(req){
 	return path.join(req.user.workspaceDir, projectPath);
 }
 function slugify(inputString){
-	return inputString.toString().toLowerCase()
+	return inputString.toLowerCase()
 	.replace(/\s+/g, "-")		// Replace spaces with -
 	.replace(/[^\w\-]+/g, "")	// Remove all non-word chars
 	.replace(/\-\-+/g, "-")		// Replace multiple - with single -

@@ -464,12 +464,22 @@ function(messages, i18nUtil, mCommands, mCommandRegistry, lib, mTooltip, colors,
 		if (theme && theme.styles) {
 			currentTheme = theme;
 		}
-
 		if (protectedThemes.indexOf(currentTheme.name) !== -1) {
-			var newName = prompt(i18nUtil.formatMessage(messages["cannotModifyMsg"], currentTheme.name), messages["defaultImportedThemeName"]);
-			if (newName && newName.length > 0 && protectedThemes.indexOf(newName) === -1) {
-				currentTheme.name = newName;
-				this.addTheme(currentTheme);
+			if(util.isElectron){
+				var node = document.getElementById("editorThemeName");
+				this.commandService.prompt(node, i18nUtil.formatMessage(messages["cannotModifyMsg"], currentTheme.name), messages['Ok'], messages['Cancel'], 
+					messages["defaultImportedThemeName"], false, function(newName) {
+						if (newName && newName.length > 0 && protectedThemes.indexOf(newName) === -1) {
+							currentTheme.name = newName;
+							this.addTheme(currentTheme);
+						}
+					}.bind(this));
+			}else{
+				var newName = prompt(i18nUtil.formatMessage(messages["cannotModifyMsg"], currentTheme.name), messages["defaultImportedThemeName"]);
+				if (newName && newName.length > 0 && protectedThemes.indexOf(newName) === -1) {
+					currentTheme.name = newName;
+					this.addTheme(currentTheme);
+				}
 			}
 		}
 		else {

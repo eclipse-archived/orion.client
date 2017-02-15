@@ -119,5 +119,6 @@ define({
 	"showPossibleMatch": "Show possible matches",
 	"perfectMatch": "Perfect match",
 	"notAMatch": "Not a match",
-	"couldBeMatch": "Could be a match"
+	"couldBeMatch": "Could be a match",
+	"Scope Sniff":"Search In All Projects"
 });

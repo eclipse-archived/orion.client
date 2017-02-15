@@ -50,7 +50,7 @@ function userJSON(user) {
 
 mongoose.Promise = Promise;
 
-module.exports = function(options) {
+module.exports.router = function(options) {
 	var app = express.Router();
 	
 	var orionAccountSchema = new mongoose.Schema({

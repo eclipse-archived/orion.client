@@ -29,13 +29,13 @@
 	background-color: #EAF2FE;
 }
 .prospecto .entity-name-tag {
-	color: #CC4C07;
+	color: #c04600;
 }
 .prospecto .entity-other-attribute-name {
 	color: cadetBlue;
 }
 .prospecto .string-quoted {
-	color: #446FBD;
+	color: #314dce;
 }
 .prospecto .meta.annotation.currentLine {
 	background-color: #EAF2FE;
@@ -44,14 +44,14 @@
 	color: blue;
 }
 .prospecto .string {
-	color: #446FBD;
+	color: #314dce;
 }
 .prospecto .comment {
-	color: #3C802C;
+	color: #357d21;
 }
 .prospecto .comment.block.documentation {
-	color: #3C802C;
+	color: #357d21;
 }
 .prospecto .keyword.other.documentation.markup {
-	color: #3C802C;
+	color: #357d21;
 }

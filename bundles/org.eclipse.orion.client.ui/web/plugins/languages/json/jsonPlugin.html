@@ -2,24 +2,18 @@
 <html>
 <head>
 	<meta charset="UTF-8">
-    <meta name="copyright" content="Copyright (c) IBM Corporation and others 2013.">
+    <meta name="copyright" content="Copyright (c) IBM Corporation and others 2013, 2017.">
     <title>Orion JSON Support</title>
+	<script src="../../../orion/requireErrorHandler.js"></script>
 	<script src="../../../requirejs/require.js"></script>
 	<script type="text/javascript">
 		/*eslint-env browser, amd*/
-		require({
-			baseUrl: '../../../',
-			paths: {
-				text: 'requirejs/text',
-				i18n: 'requirejs/i18n',
-				domReady: 'requirejs/domReady'
-			},
-			packages: [
-			]
-		});
-		require(["plugins/languages/json/jsonPlugin"], function(jsonPlugin) {
-			jsonPlugin.connect();
-		});
+		require(["../../../orion/require-config.js"], function(config){
+			require.config({
+				baseUrl: "../../../"
+			});
+			require(["plugins/languages/json/jsonPlugin"], null, self.errback);
+		}, self.errback);
 	</script>
 </head>
 
@@ -30,6 +24,7 @@
 	</p>
 	<ul>
 		<li><em>Editing</em> - an editor with syntax highlighting</li>
+		<li><em>AST creation</em> - creates shared JSON abstract syntax trees for other tools, like JavaScript</li>
 	</ul>
 	<p>June 29, 2016</p>	
 	

@@ -234,6 +234,33 @@ define([
 					assert.equal(params[1].type.start, 21, 'The param type has the wrong start');
 					assert.equal(params[1].type.end, 23, 'The param type has the wrong end');
 				});
+				/*
+				 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=512136
+				 * @since 14.0
+				 */
+				it("simple param contains dash or underscores", function() {
+					var value = sigparser.parse('fn(one-with-dash: number, two_with_underscore: {})');
+					assert(value, 'parsing did not complete');
+					assert.equal(value.start, 0, 'The signature start was not correct');
+					assert.equal(value.end, 50, 'The signature end was not correct');
+					var ret = value.ret;
+					assert.equal(ret, null, 'The return value was not parsed');
+					var params = value.params;
+					assert(Array.isArray(params), 'Should be a params array');
+					assert.equal(params.length, 2, 'There should be two params');
+					assert.equal(params[0].value, 'one-with-dash', 'The param has the wrong name');
+					assert.equal(params[0].start, 3, 'The param has the wrong start');
+					assert.equal(params[0].end, 24, 'The param has the wrong end');
+					assert.equal(params[0].type.value, 'number', 'The param has the wrong type');
+					assert.equal(params[0].type.start, 18, 'The param type has the wrong start');
+					assert.equal(params[0].type.end, 24, 'The param type has the wrong end');
+					assert.equal(params[1].value, 'two_with_underscore', 'The param has the wrong name');
+					assert.equal(params[1].start, 26, 'The param has the wrong start');
+					assert.equal(params[1].end, 49, 'The param has the wrong end');
+					assert.equal(params[1].type.value, '{}', 'The param has the wrong type');
+					assert.equal(params[1].type.start, 47, 'The param type has the wrong start');
+					assert.equal(params[1].type.end, 49, 'The param type has the wrong end');
+				});
 			});
 			describe("Array Parameter and Return Type Tests", function() {
 				it("complex array return union type 1", function() {

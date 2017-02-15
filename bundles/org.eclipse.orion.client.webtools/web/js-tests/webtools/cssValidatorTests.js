@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2014, 2015 IBM Corporation and others.
+ * Copyright (c) 2014, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License v1.0
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution
@@ -81,13 +81,13 @@ define([
 		 * Test common csslint problems. Tests a bad property decl
 		 */
 		it("Test common csslint problems: unknown property", function(/*done*/) {
-		    var val = setup({buffer: "h1:{f: 22px}", rule: {id:null, severity:1}});
+		    var val = setup({buffer: "h1:{f: 22px}", rule: {id:null, severity:3}});
 			return validator.computeProblems(val.editorContext).then(function(result) {
 				assertProblems(result, [
 				    {start: 5,
 				     end: 6,
 				     line: 1,
-				     severity: 'warning',
+				     severity: 'info',
 				     description: 'Unknown property \'f\'.'
 				    }
 				]);
@@ -98,13 +98,13 @@ define([
 		 * Test common csslint problems. Tests a duplicate property
 		 */
 		it("Test common csslint problems: duplicate property", function(/*done*/) {
-			var val = setup({buffer: "h2:{border: 0; border: 0;}", rule: {id:null, severity:1}});
+			var val = setup({buffer: "h2:{border: 0; border: 0;}", rule: {id:null, severity:3}});
 			return validator.computeProblems(val.editorContext).then(function(result) {
 				assertProblems(result, [
 				    {start: 16,
 				     end: 22,
 				     line: 1,
-				     severity: 'warning',
+				     severity: 'info',
 				     description: 'Duplicate property \'border\' found.'
 				    }
 				]);
@@ -115,13 +115,13 @@ define([
 		 * Test common csslint problems. Tests an empty rule
 		 */
 		it("Test common csslint problems: empty rule", function(/*done*/) {
-			var val = setup({buffer: "h3:{}", rule: {id:null, severity:1}});
+			var val = setup({buffer: "h3:{}", rule: {id:null, severity:3}});
 			return validator.computeProblems(val.editorContext).then(function(result) {
 				assertProblems(result, [
 				    {start: 1,
 				     end: 3,
 				     line: 1,
-				     severity: 'warning',
+				     severity: 'info',
 				     description: 'Rule is empty.'
 				    }
 				]);
@@ -132,7 +132,7 @@ define([
 		 * Test csslint parsing errors. Missing end of rule brace
 		 */
 		it("Test csslint parsing errors: Missing end of rule brace", function(/*done*/) {
-			var val = setup({buffer: "h3:{", rule: {id:null, severity:1}});
+			var val = setup({buffer: "h3:{", rule: {id:null, severity:3}});
 			return validator.computeProblems(val.editorContext).then(function(result) {
 				assertProblems(result, [
 				    {start: 1,
@@ -199,7 +199,7 @@ define([
 		 * Test embedded rulset. True to error
 		 */
 		it("Test embedded ruleset: True to error", function(/*done*/) {
-			var val = setup({buffer: "/*csslint empty-rules:true*/\nh3:{}", rule: {id:null, severity:1}});
+			var val = setup({buffer: "/*csslint empty-rules:true*/\nh3:{}", rule: {id:null, severity:2}});
 			return validator.computeProblems(val.editorContext).then(function(result) {
 				assertProblems(result, [
 				    {start: 1,
@@ -226,7 +226,7 @@ define([
 		 * Test embedded rulset. 1 to warn
 		 */
 		it("Test embedded ruleset: 1 to warn", function(/*done*/) {
-			var val = setup({buffer: "/*csslint empty-rules:1*/\nh3:{}", rule: {id:null, severity:0}});
+			var val = setup({buffer: "/*csslint empty-rules:1*/\nh3:{}", rule: {id:null, severity:1}});
 			return validator.computeProblems(val.editorContext).then(function(result) {
 				assertProblems(result, [
 				    {start: 1,
@@ -300,7 +300,7 @@ define([
 		 * Test embedded rulset. Ignore multiple embedded rulesets
 		 */
 		it("Test embedded ruleset: Ignore multiple embedded rulesets", function(/*done*/) {
-			var val = setup({buffer: "/*csslint empty-rules:2*/\n/*duplicate-properties:true*/\nh1:{}\nh2:{border: 0; border: 0}", rule: {id:null, severity:1}});
+			var val = setup({buffer: "/*csslint empty-rules:2*/\n/*duplicate-properties:true*/\nh1:{}\nh2:{border: 0; border: 0}", rule: {id:null, severity:3}});
 			return validator.computeProblems(val.editorContext).then(function(result) {
 				assertProblems(result, [
 				    {start: 1,
@@ -312,7 +312,7 @@ define([
 				    {start: 16,
 				     end: 22,
 				     line: 4,
-				     severity: 'warning',
+				     severity: 'info',
 				     description: 'Duplicate property \'border\' found.'
 				    }
 				]);

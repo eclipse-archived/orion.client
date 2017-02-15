@@ -12,8 +12,7 @@ define({
 	"Editor": "Editor",
 	"switchEditor": "Switch Editor",
 	"Fetching": "Fetching: ${0}",
-	"confirmUnsavedChanges": "There are unsaved changes in the current file.  If you navigate to a different file, you will lose your changes.  \n\nDo you want to navigate away?",
-	"searchFilesCommand": "Quick Search...",
+	"confirmUnsavedChanges": "This file contains unsaved changes.  If you navigate away, will lose them.  \n\nDo you want to save your changes?",
 	"searchFiles": "Quick Search in ${0}",
 	"searchTerm": "Enter search term:",
 	"unsavedChanges": "There are unsaved changes in current file, you can't navigate away without saving it.",
@@ -92,7 +91,7 @@ define({
 	"Dependency": "Dependency",
 	"UnnamedCommand": "Unnamed",
 	"searchInFolder": "Folder Search...",
-	"Global Search": "Global Search...",
+	"Global Search": "Search...",
 	"ClickEditLabel": "Click to edit",
 	"ProjectInfo": "Project Information",
 	"Name": "Name",
@@ -108,5 +107,8 @@ define({
 	"Orion": "Orion",
 	"OK": "Ok",
 	"Format" : "Format Code",
-	"FormatTooltip":"Format editor contents"
+	"FormatTooltip":"Format editor contents",
+	"Cancel":"Cancel",
+	"Yes":"Yes",
+	"No":"No"
 });

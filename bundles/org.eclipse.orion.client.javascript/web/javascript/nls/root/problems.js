@@ -100,7 +100,7 @@ define({
 	'unknown-require': 'This library could not be found, type information for it will be incomplete.',
 	'unknown-require-plugin': 'This library is available in a Tern plugin that is not currently loaded.',
 	'unknown-require-not-running': 'Type information for this library might be available, but requires the \'${0}\' plug-in to be running.',
-	'unknown-require-missing-env': 'The \'${0}\' entry is missing from the eslint-env directive',
+	'unknown-require-missing-env': 'The \'${0}\' entry is missing from the eslint-env directive.',
 	'missing-requirejs': 'To use AMD, the \'requirejs\' plug-in needs to be running.',
 	'radix-description': 'Warn when parseInt() is called without the \'radix\' parameter.',
 	'semi-missing': 'Missing semicolon.',

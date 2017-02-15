@@ -488,6 +488,24 @@ define([
 		},
 		
 		/**
+		 * @description Returns range of the first non-comment token in the body of the ast.
+		 * @param {AST} ast The AST
+		 * @returns {Array} The range array of first token
+		 */
+		findProgramStartRange: function findProgramStartNode(ast) {
+			if (ast.tokens && ast.tokens.length > 0){
+				return ast.tokens[0].range;
+			}
+			if (ast.comments && ast.comments.length > 0){
+				return [ast.comments[0].range[0], ast.comments[0].range[0]+1];
+			}
+			if (typeof ast.end === "number"){
+				return [ast.end, ast.end];
+			}
+			return [0, 0];
+		},
+		
+		/**
 		 * @description Tries to find the comment for the given node. If more than one is found in the array
 		 * the last entry is considered 'attached' to the node
 		 * @function

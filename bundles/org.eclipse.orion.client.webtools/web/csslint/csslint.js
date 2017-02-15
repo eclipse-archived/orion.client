@@ -1378,8 +1378,15 @@ Parser.prototype = function(){
             // Grammar
             //-----------------------------------------------------------------
 
-            _stylesheet: function(){
+            _stylesheet: function(input){
 				ast = Object.create(null);
+				//ORION if no source, don't fail on an error
+				if(!input) {
+					this.ast = this.startNode('StyleSheet', 0); //ORION 8.0
+					this.endNode(this.ast, 0); //ORION 8.0
+                	this.fire("endstylesheet");
+                	return;
+				}
             	_aststack = [];
                 /*
                  * stylesheet
@@ -3516,7 +3523,7 @@ Parser.prototype = function(){
 
             parse: function(input){
                 this._tokenStream = new TokenStream(input, Tokens);
-                this._stylesheet();
+                this._stylesheet(input);
             },
 
             parseStyleSheet: function(input){
@@ -6633,7 +6640,8 @@ var CSSLint = (function(){
                 "true": 2,  // true is error
                 "": 1,      // blank is warning
                 "false": 0, // false is ignore
-
+                "info": 3,  // ORION info
+				"3": 3,     // ORION explicit info
                 "2": 2,     // explicit error
                 "1": 1,     // explicit warning
                 "0": 0      // explicit ignore
@@ -6888,8 +6896,14 @@ Reporter.prototype = {
      * ORION 13.0
      */
     report: function(message, line, col, rule, data) {
+    	var t = "info";
+    	if(this.ruleset[rule.id] === 2) {
+    		t = "error";
+    	} else if(this.ruleset[rule.id] === 1) {
+    		t = "warning";
+    	}
     	var err = {
-            type    : this.ruleset[rule.id] == 2 ? "error" : "warning",
+            type    : t,
             line    : line,
             col     : col,
             message : message,

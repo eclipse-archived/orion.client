@@ -157,7 +157,7 @@ define([
 							{
 								id: "unknown-require",
 								severity: 'warning',
-								description: 'This library could not be found, type information for it will be incomplete.',
+								description: 'The \'foo\' entry is missing from the eslint-env directive.',
 								start: 28,
 								end: 33
 							}]);
@@ -189,7 +189,7 @@ define([
 							assertProblems(problems, [{
 								id: "unknown-require",
 								severity: 'warning',
-								description: 'This library could not be found, type information for it will be incomplete.',
+								description: 'The \'foo/bar\' entry is missing from the eslint-env directive.',
 								start: 28,
 								end: 37
 							}]);

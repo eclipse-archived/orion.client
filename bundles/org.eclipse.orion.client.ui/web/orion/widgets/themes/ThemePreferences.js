@@ -121,7 +121,7 @@ define([], function() {
 							color: "#98937B", //$NON-NLS-0$
 							"function": { //$NON-NLS-0$
 								fontWeight: "bold", //$NON-NLS-0$
-								color: "#67BBB8" //$NON-NLS-0$
+								color: "#007b78" //$NON-NLS-0$
 							}
 						},
 						other: {
@@ -141,7 +141,7 @@ define([], function() {
 						},
 						other: {
 							documentation: {
-								color: "#7F9FBF" //$NON-NLS-0$
+								color: "#37739f" //$NON-NLS-0$
 							}
 						}
 					},
@@ -156,7 +156,7 @@ define([], function() {
 							fontStyle: "italic" //$NON-NLS-0$
 						},
 						list: {
-							color: "#CC4C07" //$NON-NLS-0$
+							color: "#c04600" //$NON-NLS-0$
 						},
 						other: {
 							separator: {
@@ -166,11 +166,11 @@ define([], function() {
 								textDecoration: "line-through" //$NON-NLS-0$
 							},
 							table: {
-								color: "#3C802C" //$NON-NLS-0$
+								color: "#357d21" //$NON-NLS-0$
 							}
 						},
 						quote: {
-							color: "#446FBD" //$NON-NLS-0$
+							color: "#314dce" //$NON-NLS-0$
 						},
 						raw: {
 							fontFamily: "monospace" //$NON-NLS-0$
@@ -184,7 +184,7 @@ define([], function() {
 					meta: {
 						documentation: {
 							annotation: {
-								color: "#7F9FBF" //$NON-NLS-0$
+								color: "#37739f" //$NON-NLS-0$
 							},
 							tag: {
 								color: "#7F7F9F" //$NON-NLS-0$
@@ -213,7 +213,7 @@ define([], function() {
 							color: "#E038AD" //$NON-NLS-0$
 						},
 						parameter: {
-							color: "#D1416F" //$NON-NLS-0$
+							color: "#CD2B65" //$NON-NLS-0$
 						}
 					}
 				}

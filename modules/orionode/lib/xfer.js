@@ -23,6 +23,14 @@ var fs = Promise.promisifyAll(require('fs'));
 var fileUtil = require('./fileUtil');
 var crypto = require('crypto');
 
+function getUploadsFolder(options) {
+	if (options.options) {
+		return path.join(options.options.configParams['orion.single.user'] ? 
+			path.join(os.homedir(), ".orion") : options.options.workspaceDir, ".uploads");
+	}
+	return path.join(os.homedir(), ".orion");
+}
+
 /**
  * @callback
  */
@@ -32,8 +40,7 @@ module.exports = function(options) {
 	module.exports.write = write;
 	module.exports.getUploadDir = getUploadDir;
 	
-	var UPLOADS_FOLDER = path.join(options.options.configParams['orion.single.user'] ?
-			path.join(os.homedir(), ".orion") : options.options.workspaceDir, ".uploads");
+	var UPLOADS_FOLDER = getUploadsFolder(options);
 	
 	mkdirp(UPLOADS_FOLDER, function (err) {
 		if (err) console.error(err);
@@ -216,13 +223,19 @@ function getXfer(req, res) {
 	
 	var zip = archiver('zip');
 	zip.pipe(res);
-	filePath = fileUtil.safeFilePath(req.user.workspaceDir, filePath.replace(/.zip$/, ""));
+	var folderName = filePath.replace(/.zip$/, "");
+	filePath = fileUtil.safeFilePath(req.user.workspaceDir, folderName);
 	write(zip, filePath, filePath)
 	.then(function() {
 		zip.finalize();
 	})
 	.catch(function(err) {
-		writeError(500, res, err.message);
+		if (err.code === "ENOENT") {
+			// bug 511513, use a custom message so that the server's workspace path isn't leaked
+			writeError(404, res, "Folder '" + folderName + "' does not exist");
+		} else {
+			writeError(500, res, err.message);
+		}
 	});
 }
 

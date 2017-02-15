@@ -20,7 +20,7 @@ define({
 	'emptyFileTemplateDoc': 'Create new default contents for the .tern-project file',
 	'prefCodeStyle':'Code Style',
 	'prefBestPractices':'Best Practices',
-	'prefPotentialProblems':'Potential Programming Problems',
+	'prefPotentialProblems':'Possible Errors',
 	'sourceOutline' : 'Source Outline',
 	'sourceOutlineTitle': 'JavaScript source outline',
 	'astOutline' : 'AST Outline',

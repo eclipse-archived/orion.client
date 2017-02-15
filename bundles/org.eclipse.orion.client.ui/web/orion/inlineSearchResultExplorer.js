@@ -1233,6 +1233,12 @@ function(messages, Deferred, lib, mContentTypes, i18nUtil, mExplorer, mCommands,
         		currentModel = this.getNavHandler().currentModel();
         	}
         }
+        
+        // makes sure that the behaviour is consistent with actually clicking it
+        var rowLinks = this.getRow(this.getNavHandler().currentModel()).getElementsByTagName("a");
+        for (var i = 0; i < rowLinks.length; i++){
+        	rowLinks[i].click();
+        }
     };
     
     InlineSearchResultExplorer.prototype.switchFullPath = function() {

@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2016 IBM Corporation and others.
+ * Copyright (c) 2016, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License v1.0
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution
@@ -98,7 +98,7 @@ define([
 					assertProblems(result, [
 					    {start: 12,
 					     end: 25,
-					     severity: 'warning',
+					     severity: 'info',
 					     description: "The 'bgcolor' attribute is banned."
 					    }
 					]);
@@ -110,7 +110,7 @@ define([
 					assertProblems(result, [
 					    {start: 12,
 					     end: 19,
-					     severity: 'warning',
+					     severity: 'info',
 					     description: "The 'bgcolor' attribute is banned."
 					    }
 					]);
@@ -131,7 +131,7 @@ define([
 					assertProblems(result, [
 					    {start: 15,
 					     end: 27,
-					     severity: 'warning',
+					     severity: 'info',
 					     description: "The 'align' attribute is duplicated."
 					    }
 					]);
@@ -141,8 +141,8 @@ define([
 			    var val = setup({buffer: '<html lang="en" lang=\'fr\' lang=jp></html>', rule: {id:null, severity:1}});
 				return validator.computeProblems(val.editorContext).then(function(result) {
 					assertProblems(result, [
-					    {start: 6, end: 15, severity: "warning", description: "The 'lang' attribute is duplicated."},
-						{start: 16, end: 25, severity: "warning", description: "The 'lang' attribute is duplicated."}		
+					    {start: 6, end: 15, severity: "info", description: "The 'lang' attribute is duplicated."},
+						{start: 16, end: 25, severity: "info", description: "The 'lang' attribute is duplicated."}		
 					]);
 				});
 			});
@@ -150,8 +150,8 @@ define([
 			    var val = setup({buffer: '<html><body><p align="left" align="right" align="center"></p></body></html>', rule: {id:null, severity:1}});
 				return validator.computeProblems(val.editorContext).then(function(result) {
 					assertProblems(result, [
-						{start: 15, end: 27, severity: "warning", description: "The 'align' attribute is duplicated."},
-						{start: 28, end: 41, severity: "warning", description: "The 'align' attribute is duplicated."}
+						{start: 15, end: 27, severity: "info", description: "The 'align' attribute is duplicated."},
+						{start: 28, end: 41, severity: "info", description: "The 'align' attribute is duplicated."}
 					]);
 				});
 			});
@@ -177,7 +177,7 @@ define([
 					assertProblems(result, [
 					    {start: 6,
 					     end: 11,
-					     severity: 'warning',
+					     severity: 'info',
 					     description: "The 'alt' property must be set for image tags (for accessibility)."
 					    }
 					]);
@@ -189,7 +189,7 @@ define([
 					assertProblems(result, [
 					    {start: 6,
 					     end: 25,
-					     severity: 'warning',
+					     severity: 'info',
 					     description: "The 'alt' property must be set for image tags (for accessibility)."
 					    }
 					]);
@@ -201,7 +201,7 @@ define([
 					assertProblems(result, [
 					    {start: 6,
 					     end: 11,
-					     severity: 'warning',
+					     severity: 'info',
 					     description: "The 'alt' property must be set for image tags (for accessibility)."
 					    }
 					]);
@@ -213,7 +213,7 @@ define([
 					assertProblems(result, [
 					    {start: 6,
 					     end: 11,
-					     severity: 'warning',
+					     severity: 'info',
 					     description: "The 'alt' property must be set for image tags (for accessibility)."
 					    }
 					]);
@@ -248,7 +248,7 @@ define([
 					assertProblems(result, [
 					    {start: 6,
 					     end: 9,
-					     severity: 'warning',
+					     severity: 'info',
 					     description: "No matching closing tag for 'a'."
 					    }
 					]);
@@ -274,7 +274,7 @@ define([
 					assertProblems(result, [
 					    {start: 6,
 					     end: 9,
-					     severity: 'warning',
+					     severity: 'info',
 					     description: "No matching closing tag for 'a'."
 					    }
 					]);
@@ -293,12 +293,12 @@ define([
 					assertProblems(result, [
 					    {start: 6,
 					     end: 9,
-					     severity: 'warning',
+					     severity: 'info',
 					     description: "No matching closing tag for 'a'."
 					    },
 					    {start: 9,
 					     end: 12,
-					     severity: 'warning',
+					     severity: 'info',
 					     description: "No matching closing tag for 'b'."
 					    }
 					]);
@@ -310,7 +310,7 @@ define([
 					assertProblems(result, [
 					    {start: 13,
 					     end: 16,
-					     severity: 'warning',
+					     severity: 'info',
 					     description: "No matching closing tag for 'b'."
 					    }
 					]);
@@ -322,7 +322,7 @@ define([
 					assertProblems(result, [
 					    {start: 6,
 					     end: 9,
-					     severity: 'warning',
+					     severity: 'info',
 					     description: "No matching closing tag for 'a'."
 					    }
 					]);
@@ -341,7 +341,7 @@ define([
 					assertProblems(result, [
 					    {start: 12,
 					     end: 15,
-					     severity: 'warning',
+					     severity: 'info',
 					     description: "No matching closing tag for 'a'."
 					    }
 					]);
@@ -360,7 +360,7 @@ define([
 					assertProblems(result, [
 					    {start: 13,
 					     end: 16,
-					     severity: 'warning',
+					     severity: 'info',
 					     description: "No matching closing tag for 'a'."
 					    }
 					]);
@@ -372,7 +372,7 @@ define([
 					assertProblems(result, [
 					    {start: 6,
 					     end: 9,
-					     severity: 'warning',
+					     severity: 'info',
 					     description: "No matching closing tag for 'a'."
 					    }
 					]);
@@ -384,7 +384,7 @@ define([
 					assertProblems(result, [
 					    {start: 13,
 					     end: 16,
-					     severity: 'warning',
+					     severity: 'info',
 					     description: "No matching closing tag for 'b'."
 					    }
 					]);
@@ -396,12 +396,12 @@ define([
 					assertProblems(result, [
 					    {start: 6,
 					     end: 9,
-					     severity: 'warning',
+					     severity: 'info',
 					     description: "No matching closing tag for 'a'."
 					    },
 					     {start: 13,
 					     end: 16,
-					     severity: 'warning',
+					     severity: 'info',
 					     description: "No matching closing tag for 'b'."
 					    }
 					]);
@@ -422,7 +422,7 @@ define([
 							assertProblems(result, [
 								{start: 0,
 							     end: 6,
-							     severity: 'warning',
+							     severity: 'info',
 							     description: "No matching closing tag for 'html'."
 						    	}
 							]);
@@ -441,7 +441,7 @@ define([
 							assertProblems(result, [
 								{start: 6,
 							     end: 12,
-							     severity: 'warning',
+							     severity: 'info',
 							     description: "No matching closing tag for 'body'."
 						    	}
 							]);
@@ -460,7 +460,7 @@ define([
 							assertProblems(result, [
 								{start: 6,
 							     end: 12,
-							     severity: 'warning',
+							     severity: 'info',
 							     description: "No matching closing tag for 'head'."
 						    	}
 							]);
@@ -473,7 +473,7 @@ define([
 							assertProblems(result, [
 								{start: 6,
 							     end: 12,
-							     severity: 'warning',
+							     severity: 'info',
 							     description: "No matching closing tag for 'head'."
 						    	}
 							]);
@@ -492,7 +492,7 @@ define([
 							assertProblems(result, [
 								{start: 6,
 							     end: 16,
-							     severity: 'warning',
+							     severity: 'info',
 							     description: "No matching closing tag for 'colgroup'."
 						    	}
 							]);
@@ -505,7 +505,7 @@ define([
 							assertProblems(result, [
 								{start: 6,
 							     end: 12,
-							     severity: 'warning',
+							     severity: 'info',
 							     description: "No matching closing tag for 'colgroup'."
 						    	}
 							]);
@@ -517,7 +517,7 @@ define([
 							assertProblems(result, [
 								{start: 6,
 								end: 10,
-								severity: "warning",
+								severity: "info",
 								description: "No matching closing tag for 'li'."},
 							]);
 						});
@@ -542,7 +542,7 @@ define([
 							assertProblems(result, [
 								{start: 6,
 								end: 9,
-								severity: "warning",
+								severity: "info",
 								description: "No matching closing tag for 'p'."},
 							]);
 						});
@@ -553,7 +553,7 @@ define([
 							assertProblems(result, [
 								{start: 9,
 								end: 12,
-								severity: "warning",
+								severity: "info",
 								description: "No matching closing tag for 'p'."},
 							]);
 						});
@@ -564,7 +564,7 @@ define([
 							assertProblems(result, [
 								{start: 9,
 								end: 12,
-								severity: "warning",
+								severity: "info",
 								description: "No matching closing tag for 'p'."},
 							]);
 						});
@@ -586,7 +586,7 @@ define([
 							assertProblems(result, [
 								{start: 10,
 							     end: 14,
-							     severity: 'warning',
+							     severity: 'info',
 							     description: "No matching closing tag for 'li'."
 						    	}
 							]);

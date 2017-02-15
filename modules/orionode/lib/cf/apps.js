@@ -46,7 +46,7 @@ function getapps(req, res){
 	var encodeName =  req.query.Name;
 	var encodedContentLocation =  req.query.ContentLocation;
 	var targetRequest = req.query.Target ? JSON.parse(req.query.Target) : null;
-	target.computeTarget(req.user.username, targetRequest)
+	target.computeTarget(req.user.username, target.fullTarget(req,targetRequest))
 	 .then(function(appTarget){
 		if(encodeName){
 			return getAppwithAppName(req.user.username, task,encodeName,appTarget);
@@ -69,7 +69,9 @@ function getapps(req, res){
 }
 function respondAppGetRequest(resp,task){
 	if(!resp){
-		return Promise.reject({"code":404, "message":"Apps can not be found"});
+		var errorStatus = new Error("Apps can not be found");
+		errorStatus.code = "404";
+		return Promise.reject(errorStatus);
 	}
 	task.done({
 		HttpCode: 200,
@@ -82,7 +84,7 @@ function respondAppGetRequest(resp,task){
 }
 function getAppwithoutName(req, task, appTarget){
 	var appsArray = [];
-	target.cfRequest("GET", req.user.username, appTarget.Url + appTarget.Space.entity.apps_url, {"inline-relations-depth":"2"})
+	target.cfRequest("GET", req.user.username, appTarget.Url + appTarget.Space.entity.apps_url, {"inline-relations-depth":"2"}, null, null, null, appTarget)
 	.then(function(result){
 		var appResources = result.resources;
 		for(var k = 0; k < appResources.length; k++){
@@ -120,17 +122,17 @@ function getAppwithAppName(userId, task,encodeName, appTarget){
 }
 function _getAppwithAppName(userId, encodeName, appTarget){
 	var app = {};
-	return target.cfRequest("GET", userId, appTarget.Url + appTarget.Space.entity.apps_url, {"q": "name:"+util.encodeURIComponent(encodeName),"inline-relations-depth":"1"})
+	return target.cfRequest("GET", userId, appTarget.Url + appTarget.Space.entity.apps_url, {"q": "name:"+util.encodeURIComponent(encodeName),"inline-relations-depth":"1"}, null, null, null, appTarget)
 	.then(function(result){
 		if(!result.resources || result.resources && result.resources.length === 0){
 			return null;
 		}
 		app.appUrl = result.resources[0].metadata.url;
 		app.appMetadata = result.resources[0].metadata;
-		return target.cfRequest("GET", userId, appTarget.Url + app.appUrl +"/summary")
+		return target.cfRequest("GET", userId, appTarget.Url + app.appUrl +"/summary", null, null, null, null, appTarget)
 		.then(function(result){
 			app.summaryJson = result;
-			return target.cfRequest("GET", userId, appTarget.Url + app.appUrl +"/instances");
+			return target.cfRequest("GET", userId, appTarget.Url + app.appUrl +"/instances", null, null, null, null, appTarget);
 		}).then(function(result){
 			app.instanceJson = result;
 			var appJson;
@@ -191,7 +193,7 @@ function putapps(req, res){
 	var manifestAppName = null;
 	var restart;
 	var appTarget;
-	return target.computeTarget(req.user.username, targetRequest)
+	return target.computeTarget(req.user.username, target.fullTarget(req,targetRequest))
 	 .then(function(resultTarget){
 	 	appTarget = resultTarget;
 		if(contentLocation && !state){
@@ -231,7 +233,9 @@ function putapps(req, res){
 				waitFor = stopApp(req.user.username,appTarget);
 			}else{
 				if(!appCache.manifest){
-					return Promise.reject({"code":500, "message":"Failed to handle request for "+ path});
+					var errorStatus = new Error("Failed to handle request for "+ req.originalUrl);
+					errorStatus.code = "500";
+					return Promise.reject(errorStatus);
 				}
 			}
 			if(waitFor){
@@ -299,7 +303,11 @@ function respondAppPutRequest(task,status){
 		metadata:appCache.appMetadata	
 	};
 	if (status.error_code) {
-		return Promise.reject({"code":400, "message": status.description,"bundleid":"org.eclipse.orion.server.core","data":status});
+		var errorStatus = new Error(status.description);
+		errorStatus.code = "400";
+		errorStatus.bundleid = "org.eclipse.orion.server.core";
+		errorStatus.data = status;
+		return Promise.reject(errorStatus);
 	}
 	if(status === "RUNNING"){
 		var DEFAULT_TIMEOUT = 60;
@@ -314,8 +322,6 @@ function respondAppPutRequest(task,status){
 		
 	}else if(status === "STOPPED"){
 		resp = appJson;
-	}else{
-		return Promise.reject({"code":400, "message":"Status wrong"});
 	}
 	task.done({
 		HttpCode: 200,
@@ -332,7 +338,7 @@ function startApp(userId, userTimeout ,appTarget){
 	var DEFAULT_TIMEOUT = 60;
 	var MAX_TIMEOUT = 180;
 	var body = {"console":true, "state":"STARTED"};
-	return target.cfRequest("PUT", userId, appTarget.Url + appCache.appUrl, {"inline-relations-depth":"1"}, JSON.stringify(body))
+	return target.cfRequest("PUT", userId, appTarget.Url + appCache.appUrl, {"inline-relations-depth":"1"}, JSON.stringify(body), null, null, appTarget)
 	.then(function(parsedBody) {
 		if (parsedBody.error_code) {
 			return parsedBody;
@@ -377,7 +383,7 @@ function startApp(userId, userTimeout ,appTarget){
 		function collectCFRespond(){
 			return new Promise(function(fulfill, reject){
 				setTimeout(function(){
-					return target.cfRequest("GET", userId, appTarget.Url + appCache.appUrl + "/instances")
+					return target.cfRequest("GET", userId, appTarget.Url + appCache.appUrl + "/instances", null, null, null, null, appTarget)
 					.then(function(result){
 						fulfill({"data": result,"attemptsLeft": --attemptsLeft});
 					})
@@ -393,7 +399,7 @@ function startApp(userId, userTimeout ,appTarget){
 
 function stopApp(userId, appTarget){
 	var body = {"console":true,"state":"STOPPED"};
-	return target.cfRequest("PUT", userId, appTarget.Url + appCache.appUrl, {"inline-relations-depth":"1"}, JSON.stringify(body))
+	return target.cfRequest("PUT", userId, appTarget.Url + appCache.appUrl, {"inline-relations-depth":"1"}, JSON.stringify(body), null, null, appTarget)
 	.then(function(){
 		return "STOPPED";
 	});
@@ -445,7 +451,7 @@ function createApp(req, appTarget){
 			"stack_guid":stackGuid,
 			"environment_json":appCache.manifest.applications[0].env || {}
 		};
-		return target.cfRequest("POST", req.user.username, appTarget.Url + "/v2/apps", null, JSON.stringify(body))
+		return target.cfRequest("POST", req.user.username, appTarget.Url + "/v2/apps", null, JSON.stringify(body), null, null, appTarget)
 		.then(function(result){
 			appCache.appGuid = result.metadata.guid;
 			return result;
@@ -469,7 +475,7 @@ function updateApp(req, appTarget){
 			"stack_guid":stackGuid,
 			"environment_json":appCache.manifest.applications[0].env || {}
 			};
-		return target.cfRequest("PUT", req.user.username, appTarget.Url + appCache.appUrl, {"async":"true","inline-relations-depth":"1"}, JSON.stringify(body))	
+		return target.cfRequest("PUT", req.user.username, appTarget.Url + appCache.appUrl, {"async":"true","inline-relations-depth":"1"}, JSON.stringify(body), null, null, appTarget)	
 		.then(function(result){
 			return result;
 		});
@@ -495,6 +501,11 @@ function bindRoute(req, appTarget){
 					break;
 				}
 			}
+			if(!appCache.appDomain){
+				var errorStatus = new Error("Failed to find domain " + appManifestDomain + " in target available domains, please check the domain property your manifest.yml file.");
+				errorStatus.code = "404";
+				return Promise.reject(errorStatus);
+			}
 		} else {
 			/* client has not requested a specific domain, get the first available */
 			appCache.appDomain = domainArray[0];
@@ -503,7 +514,7 @@ function bindRoute(req, appTarget){
 	/* find out whether the declared host can be reused */
 	.then(function(){
 		return target.cfRequest("GET", req.user.username, appTarget.Url + "/v2/routes", 
-		{"inline-relations-depth":"1", "q":"host:"+appCache.manifest.applications[0].host + ";domain_guid:" + appCache.appDomain.Guid})
+		{"inline-relations-depth":"1", "q":"host:"+appCache.manifest.applications[0].host + ";domain_guid:" + appCache.appDomain.Guid}, null, null, null, appTarget)
 		.then(function(result){
 			var resource = result.resources[0];
 			var waitForRoute;
@@ -516,106 +527,122 @@ function bindRoute(req, appTarget){
 			/* attach route to application */
 			return waitForRoute.then(function(appRoute){
 				if(appRoute.error_code === "CF-RouteHostTaken"){
-					return Promise.reject({"code":400, "message":appRoute.description});
+					var errorStatus = new Error(appRoute.description);
+					errorStatus.code = "400";
+					return Promise.reject(errorStatus);
 				}
 				appCache.appRoute = appRoute;
-				return target.cfRequest("PUT", req.user.username, appTarget.Url + "/v2/apps/" + appCache.appGuid + "/routes/" + appRoute.metadata.guid);
+				return target.cfRequest("PUT", req.user.username, appTarget.Url + "/v2/apps/" + appCache.appGuid + "/routes/" + appRoute.metadata.guid, null, null, null, null, appTarget);
 			});
 		});
 	});
 }
 function uploadBits(req, appTarget){
-	var cloudAccessToken = target.getAccessToken(req.user.username);
+	var cloudAccessToken;
 	var archiveredFilePath;
-	return archiveTarget(appCache.appStore)
-	.then(function(filePath){
-		appCache.appPackageType = path.extname(filePath).substring(1);
-		archiveredFilePath = filePath;
-		if(!archiveredFilePath){
-			return Promise.reject({"code":500, "message":"Failed to read application content"});
-		}
-		var uploadFileStream = fs.createReadStream(archiveredFilePath);
-		var uploadBitsHeader = {
-				method: "PUT",
-				url: appTarget.Url + "/v2/apps/" + appCache.appGuid + "/bits?async=true",
-				headers: {"Authorization": cloudAccessToken,"Content-Type":"multipart/form-data"},
-				formData:{
-					"resources":{
-						value:  "[]",
-						options: {
-							contentType: "text/plain"
-						}
-					},
-					"application":{
-						value: uploadFileStream,
-						options: {
-							filename: "application.zip",
-							contentType: "application/zip"
-						}
-					}
-				}
-			};
-		uploadFileStream.on("error", function(err){
-			return Promise.reject({"code":500, "message":err.message});
-		});
-		return target.cfRequest(null, null, null ,null, null, null,uploadBitsHeader);
-	}).then(function(requestResult){
-		var ATTEMPTACCOUNT = 150;
-		var initialValue = {
-			"attemptsLeft":ATTEMPTACCOUNT,
-			"status":requestResult.entity.status
-			};
-		return promiseWhile(initialValue)
-		.then(function(){
-			// TODO in java code this file was deleted in 'failure' case, not necessarily here.
-			fs.unlinkSync(archiveredFilePath);
-		});
-		
-		function promiseWhile(value) {
-			return Promise.resolve(value).then(function(collectResult) {
-				return collectCFRespond(collectResult)
-				.then(function(result){
-					if(result.status === "finished"){
-						// When it's 'finished', return from the whole recursive promise chain.
-						return;
-					}
-					return promiseWhile(result);
-				});
-			});
-		}
-		function collectCFRespond(collectResult){
-			if(collectResult.status !== "finished" && collectResult.status !== "failure"){
-				if(collectResult.status === "failed"){
-					return Promise.reject({"code":400, "message":"Upload failed"});
-				}
-				if(collectResult.attemptsLeft === 0){
-					return Promise.reject({"code":400, "message":"Upload timeout exceeded"});
-				}
-				return new Promise(function(fulfill, reject){
-					setTimeout(function(){
-						return target.cfRequest("GET", req.user.username, appTarget.Url + requestResult.metadata.url)
-						.then(function(result){
-							fulfill({
-							"attemptsLeft":--initialValue.attemptsLeft,
-							"status":result.entity.status
-							});			
-						})
-						.catch(function(err){
-							return reject(err);
-						});
-					}, 2000);
-				});
-			}else if(collectResult.status === "failure"){
-				return Promise.reject({"code":400, "message":"Failed to upload application bits"});
-			}else if(collectResult.status === "finished"){
-				return Promise.resolve("finished");
+	return target.getAccessToken(req.user.username)
+	.then(function(token){
+		cloudAccessToken = token;
+		return archiveTarget(appCache.appStore)
+		.then(function(filePath){
+			appCache.appPackageType = path.extname(filePath).substring(1);
+			archiveredFilePath = filePath;
+			if(!archiveredFilePath){
+				var errorStatus = new Error("Failed to read application content");
+				errorStatus.code = "500";
+				return Promise.reject(errorStatus);
 			}
-		}
-	});
+			var uploadFileStream = fs.createReadStream(archiveredFilePath);
+			var uploadBitsHeader = {
+					method: "PUT",
+					url: appTarget.Url + "/v2/apps/" + appCache.appGuid + "/bits?async=true",
+					headers: {"Authorization": cloudAccessToken,"Content-Type":"multipart/form-data"},
+					formData:{
+						"resources":{
+							value:  "[]",
+							options: {
+								contentType: "text/plain"
+							}
+						},
+						"application":{
+							value: uploadFileStream,
+							options: {
+								filename: "application.zip",
+								contentType: "application/zip"
+							}
+						}
+					}
+				};
+			uploadFileStream.on("error", function(err){
+				var errorStatus = new Error(err.message);
+				errorStatus.code = "500";
+				return Promise.reject(errorStatus);
+			});
+			return target.cfRequest(null, null, null ,null, null, null,uploadBitsHeader);
+		}).then(function(requestResult){
+			var ATTEMPTACCOUNT = 150;
+			var initialValue = {
+				"attemptsLeft":ATTEMPTACCOUNT,
+				"status":requestResult.entity.status
+				};
+			return promiseWhile(initialValue)
+			.then(function(){
+				// TODO in java code this file was deleted in 'failure' case, not necessarily here.
+				fs.unlinkSync(archiveredFilePath);
+			});
+			
+			function promiseWhile(value) {
+				return Promise.resolve(value).then(function(collectResult) {
+					return collectCFRespond(collectResult)
+					.then(function(result){
+						if(result.status === "finished"){
+							// When it's 'finished', return from the whole recursive promise chain.
+							return;
+						}
+						return promiseWhile(result);
+					});
+				});
+			}
+			function collectCFRespond(collectResult){
+				if(collectResult.status !== "finished" && collectResult.status !== "failure"){
+					if(collectResult.status === "failed"){
+						var errorStatus = new Error("Upload failed");
+						errorStatus.code = "400";
+						return Promise.reject(errorStatus);
+					}
+					if(collectResult.attemptsLeft === 0){
+						var errorStatus = new Error("Upload timeout exceeded");
+						errorStatus.code = "400";
+						return Promise.reject(errorStatus);
+					}
+					return new Promise(function(fulfill, reject){
+						setTimeout(function(){
+							return target.cfRequest("GET", req.user.username, appTarget.Url + requestResult.metadata.url, null, null, null, null, appTarget)
+							.then(function(result){
+								fulfill({
+								"attemptsLeft":--initialValue.attemptsLeft,
+								"status":result.entity.status
+								});			
+							})
+							.catch(function(err){
+								return reject(err);
+							});
+						}, 2000);
+					});
+				}else if(collectResult.status === "failure"){
+					var errorStatus = new Error("Failed to upload application bits");
+					errorStatus.code = "400";
+					return Promise.reject(errorStatus);
+				}else if(collectResult.status === "finished"){
+					return Promise.resolve("finished");
+				}
+			}
+		});
+	})
 }
 function bindServices(req, appTarget){
 	if(appCache.manifest.applications[0].services){
-		return target.cfRequest("GET", req.user.username, appTarget.Url + "/v2/services", {"inline-relations-depth":"1"})
+		return target.cfRequest("GET", req.user.username, appTarget.Url + "/v2/services", {"inline-relations-depth":"1"}, null, null, null, appTarget)
 		.then(function(result){
 			var manifestService = appCache.manifest.applications[0].services;
 			var respondServiceJson = result.resources;
@@ -696,7 +723,7 @@ function bindService(userId, serviceGuid, appTarget){
 		"app_guid": appCache.appGuid,
 		"service_instance_guid": serviceGuid
 	};
-	return target.cfRequest("POST", userId, appTarget.Url + "/v2/service_bindings", null, JSON.stringify(body));
+	return target.cfRequest("POST", userId, appTarget.Url + "/v2/service_bindings", null, JSON.stringify(body), null, null, appTarget);
 }
 function createRoute(req, appTarget){
 	var body = {
@@ -704,12 +731,12 @@ function createRoute(req, appTarget){
 		"host":appCache.manifest.applications[0].host,
 		"domain_guid":appCache.appDomain.Guid
 	};
-	return target.cfRequest("POST", req.user.username, appTarget.Url + "/v2/routes", {"inline-relations-depth":"1"}, JSON.stringify(body));
+	return target.cfRequest("POST", req.user.username, appTarget.Url + "/v2/routes", {"inline-relations-depth":"1"}, JSON.stringify(body), null, null, appTarget);
 }
 function getAppbyGuid(userId, appGuid ,appTarget){
-	return target.cfRequest("GET", userId, appTarget.Url + "/v2/apps/" + appGuid)
+	return target.cfRequest("GET", userId, appTarget.Url + "/v2/apps/" + appGuid, null, null, null, null, appTarget)
 	.then(function(appJSON){
-		return target.cfRequest("GET", userId, appCache.appTarget.Url + appJSON.metadata.url + "/summary")
+		return target.cfRequest("GET", userId, appCache.appTarget.Url + appJSON.metadata.url + "/summary", null, null, null, null, appTarget)
 		.then(function(result){
 			appCache.summaryJson = result;
 			appCache.appGuid = appJSON.metadata.guid;
@@ -718,18 +745,18 @@ function getAppbyGuid(userId, appGuid ,appTarget){
 	});
 }
 function getRouteGuidbyGuid(userId, routeGuid, appTarget){
-	return target.cfRequest("GET", userId,appTarget.Url + "/v2/routes/" + routeGuid)
+	return target.cfRequest("GET", userId,appTarget.Url + "/v2/routes/" + routeGuid, null, null, null, null, appTarget)
 	.then(function(result){
 		return result.metadata.guid; // TODO this need to test
 	});
 }
 function mapRoute(userId, routeGuid, appTarget){
-	return target.cfRequest("PUT", userId, appTarget.Url + "/v2/apps/" + appCache.appGuid + "/routes/" + routeGuid);
+	return target.cfRequest("PUT", userId, appTarget.Url + "/v2/apps/" + appCache.appGuid + "/routes/" + routeGuid, null, null, null, null, appTarget);
 }
 } // End of putApp()
 function getServiceGuid(userId, service, appTarget){
 	return target.cfRequest("GET", userId, appTarget.Url + "/v2/spaces/" + appTarget.Space.metadata.guid + "/service_instances"
-	, {"inline-relations-depth":"1","return_user_provided_service_instances":"true","q":"name:"+service})
+	, {"inline-relations-depth":"1","return_user_provided_service_instances":"true","q":"name:"+service}, null, null, null, appTarget)
 	.then(function(serviceJson){	
 		var serviceResources = serviceJson.resources;
 		var serviceInstanceGUID;
@@ -747,20 +774,22 @@ function createService(userId, serviceName, servicePlanGuid, appTarget){
 		"name": serviceName,
 		"service_plan_guid": servicePlanGuid
 	};
-	return target.cfRequest("POST", userId, appTarget.Url + "/v2/service_instances", null, JSON.stringify(body))
+	return target.cfRequest("POST", userId, appTarget.Url + "/v2/service_instances", null, JSON.stringify(body), null, null, appTarget)
 	.then(function(result){
 		return result.metadata.guid;
 	});
 }
 function normalizeMemoryMeasure(memory){
-	if (memory.toLowerCase().endsWith("m")) //$NON-NLS-1$
-		return Number(memory.substring(0, memory.length - 1));
-	if (memory.toLowerCase().endsWith("mb")) //$NON-NLS-1$
-		return Number(memory.substring(0, memory.length - 2));
-	if (memory.toLowerCase().endsWith("g")) //$NON-NLS-1$
-		return 1024 * memory.substring(0, memory.length - 1);
-	if (memory.toLowerCase().endsWith("gb")) //$NON-NLS-1$
-		return 1024 * memory.substring(0, memory.length - 2);
+	if(memory){	
+		if (memory.toLowerCase().endsWith("m")) //$NON-NLS-1$
+			return Number(memory.substring(0, memory.length - 1));
+		if (memory.toLowerCase().endsWith("mb")) //$NON-NLS-1$
+			return Number(memory.substring(0, memory.length - 2));
+		if (memory.toLowerCase().endsWith("g")) //$NON-NLS-1$
+			return 1024 * memory.substring(0, memory.length - 1);
+		if (memory.toLowerCase().endsWith("gb")) //$NON-NLS-1$
+			return 1024 * memory.substring(0, memory.length - 2);
+	}
 	/* return default memory value, i.e. 1024 MB */
 	return 1024;
 }
@@ -782,7 +811,8 @@ function archiveTarget (filePath){
 			        return fulfill();
 			    });
 			    zip.on("error", function(){
-			        return reject({"message":"Zipping process went wrong"});
+			    	var errorStatus = new Error("Zipping process went wrong");
+					return Promise.reject(errorStatus);
 			    });
 			});
 		});

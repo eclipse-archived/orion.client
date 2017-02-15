@@ -350,6 +350,96 @@ define([
 		}.bind(this));
 	};
 
+	/**
+	 * @name JavaScriptProject.prototype.getComputedEnvironment
+	 * @description Computes the environment that has been computed based on what config files are in the project
+	 * @function
+	 * @param {Boolean} includeEslint If we should also lookup the ESLint options
+	 * @returns {Deferred} A deferred that will resolve to an object listing the computed environments to use in the tools
+	 * @since 14.0
+	 */
+	JavaScriptProject.prototype.getComputedEnvironment = function getComputedEnvironment(includeEslint) {
+		if(this.map.env) {
+			return new Deferred().resolve(this.map.env);
+		}
+		this.map.env = {browser: true, node: true}; //always start assuming browser
+		//start with eslint options - they can carry env objects
+		if(includeEslint) {
+			return this.getESlintOptions().then(function(options) {
+				if(options && options.env) {
+					Object.keys(options.env).forEach(function(key) {
+						this.map.env[key] = options.env[key];
+					}.bind(this));
+				}
+				return guessEnvForProject(this);
+			}.bind(this));
+		} 
+		return guessEnvForProject(this);
+	};
+
+	/**
+	 * @name guessEnvForProject
+	 * @description Looking at what files are available and whats in them, guess at the current project environment
+	 * @param {JavaScriptProject} project The project object
+	 * @returns {Deferred} a deferred to resolve the environment
+	 * @since 14.0
+	 */
+	function guessEnvForProject(project) {
+		return project.getFile(project.PACKAGE_JSON).then(function(file) {
+			if(file && typeof file.contents === "string") {
+				project.map.env.node = true;
+			}
+			return project.getFile(project.TERN_PROJECT).then(function(file) {
+				if(file && typeof file.contents === "string") {
+					try {
+						var vals = JSON.parse(file.contents);
+					} catch (e) {
+						// ignore
+					}
+					if(vals) {
+						if(Array.isArray(vals.libs)) {
+							if(vals.libs.indexOf("browser") > -1) {
+								project.map.env.browser = true;
+							} else if(vals.libs.indexOf("ecma6") > -1) {
+								project.map.env.es6 = true;
+							} 
+						}  
+						if(Array.isArray(vals.defs)) {
+							if(vals.defs.indexOf("browser") > -1) {
+								project.map.env.browser = true;
+							} else if(vals.defs.indexOf("ecma6") > -1) {
+								project.map.env.es6 = true;
+							} 
+						}
+						if(vals.plugins && typeof vals.plugins === 'object') {
+							if(vals.plugins.node) {
+								project.map.env.node = true;
+							} else if(vals.plugins.requirejs || vals.plugins.commonjs) {
+								project.map.env.amd = true;
+								project.map.env.browser = true;
+							} else if(vals.plugins.es6_modules) {
+								project.map.env.es6 = true;
+								project.map.env.browser = true;
+								project.map.env.node = true;
+							}
+						} 
+						if(typeof vals.ecmaVersion === 'number') {
+							if(vals.ecmaVersion >= 6) {
+								project.map.env.es6 = true;
+							}
+						} 
+						if(vals.sourceType === 'modules') {
+							project.map.env.es6 = true;
+							project.map.env.browser = true;
+							project.map.env.node = true;
+						}
+					}
+				}
+				return project.map.env;
+			});
+		});
+	}
+
 	function readAndMap(map, file, key) {
 		if (file && file.contents) {
 			var vals = null;

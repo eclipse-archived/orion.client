@@ -2821,7 +2821,7 @@ define([
 	/**
 	 * Register syntax styling for js, json and json schema content
 	 */
-	var newGrammars = {};
+	var newGrammars = Object.create(null);
 	mJS.grammars.forEach(function(current) {
 		newGrammars[current.id] = current;
 	});
@@ -2834,11 +2834,9 @@ define([
 	mEJS.grammars.forEach(function(current) {
 		newGrammars[current.id] = current;
 	});
-	for (var current in newGrammars) {
-		if (newGrammars.hasOwnProperty(current)) {
-			provider.registerService("orion.edit.highlighter", {}, newGrammars[current]); //$NON-NLS-1$
-		}
-	}
+	Object.keys(newGrammars).forEach(function(key) {
+		provider.registerService("orion.edit.highlighter", {}, newGrammars[key]); //$NON-NLS-1$
+	});
 	provider.connect(function() {
 		var fc = serviceRegistry.getService("orion.core.file.client"); //$NON-NLS-1$
 		fc.addEventListener("Changed", jsProject.onFileChanged.bind(jsProject));

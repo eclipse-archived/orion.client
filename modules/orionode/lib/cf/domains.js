@@ -65,7 +65,7 @@ function getCFdomains(appTarget, UserId, targetUrl, domainName, defaultDomainMod
 	var waitFor;
 	if (!defaultDomainMode){
 		waitFor = target.cfRequest("GET", UserId, targetUrl + appTarget.Org.entity.private_domains_url, 
-				domainName ? {"q": "name:" + util.encodeURIComponent(domainName)}: null);
+				domainName ? {"q": "name:" + util.encodeURIComponent(domainName)}: null, null, null, null, appTarget);
 	}else{
 		waitFor = Promise.resolve();
 	}
@@ -78,7 +78,7 @@ function getCFdomains(appTarget, UserId, targetUrl, domainName, defaultDomainMod
 				"page": "1",
 				"results-per-page": "1"
 			};
-			return target.cfRequest("GET", UserId, targetUrl + "/v2/shared_domains", qs)
+			return target.cfRequest("GET", UserId, targetUrl + "/v2/shared_domains", qs, null, null, null, appTarget)
 			.then(function(result){
 				return result;
 			});

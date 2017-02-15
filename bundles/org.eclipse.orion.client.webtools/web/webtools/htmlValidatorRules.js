@@ -170,14 +170,20 @@ define([
 		}
 		var stringSeverity = severity;
 		if (typeof severity === 'number') {
-			stringSeverity = severity === 2 ? "error" : "warning"; //$NON-NLS-1$ //$NON-NLS-2$
+			if(severity === 1) {
+				stringSeverity = "error";
+			} else if(severity === 2) {
+				stringSeverity = "warning";
+			} else {
+				stringSeverity = "info";
+			}
 		}
 		return {
 			id: id,
 			description: message,
 			start: start,
 			end: end,
-			severity: stringSeverity ? stringSeverity : 'warning' //$NON-NLS-1$
+			severity: stringSeverity ? stringSeverity : 'info' //$NON-NLS-1$
 		};
 	}
 

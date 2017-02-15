@@ -783,7 +783,7 @@ define([
 					var model = editor.getModel();
 					if (data.parameters && data.parameters.valueFor('line')) { //$NON-NLS-0$
 						line = data.parameters.valueFor('line'); //$NON-NLS-0$
-					} else {
+					} else if(!util.isElectron){
 						line = model.getLineAtOffset(editor.getCaretOffset());
 						line = prompt(messages.gotoLinePrompt, line + 1);
 						if (line) {

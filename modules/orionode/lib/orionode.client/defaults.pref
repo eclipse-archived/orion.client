@@ -1,6 +1,7 @@
 {
 	"/plugins":{
 		"plugins/orionSharedWorker.js": true,
+		"plugins/languages/json/jsonPlugin.html": true,
 		"git/plugins/gitPlugin.html":true,
 		"webtools/plugins/webToolsPlugin.html":true,
 		"javascript/plugins/javascriptPlugin.html":true,

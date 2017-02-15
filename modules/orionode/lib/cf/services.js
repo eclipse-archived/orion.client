@@ -45,7 +45,7 @@ module.exports.router = function() {
 				return target.cfRequest("GET", req.user.username, targetURL + serviceUrl, {
 					"inline-relations-depth": "1",
 					"return_user_provided_service_instances": "true"
-				});
+				}, null, null, null, targetRequest);
 			}
 			function collectServiceInfo(result) {
 				var serviceResources = result && result.resources;
@@ -74,7 +74,7 @@ module.exports.router = function() {
 							}
 						}, function(err) {
 							if (err) {
-								return reject({"message":err.message});
+								return reject(err);
 							}
 							fulfill();
 						});
@@ -117,6 +117,6 @@ module.exports.router = function() {
 	}
 
 	function getCFService(userId, targetURL, serviceGuid) {
-		return target.cfRequest("GET", userId, targetURL + "/v2/services/" + serviceGuid);
+		return target.cfRequest("GET", userId, targetURL + "/v2/services/" + serviceGuid, null, null, null, null, {Url:targetURL});
 	}
 };
