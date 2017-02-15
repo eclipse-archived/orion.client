@@ -5,9 +5,12 @@ function die () {
     exit 1
 }
 
-DOWNLOADS=/home/data/httpd/download.eclipse.org
+if [ -z "$DOWNLOADS" ]; then
+	DOWNLOADS=/home/data/httpd/download.eclipse.org
+fi
 
 NODEGIT_VERSION=v0.16.0
+rm -rf ../node_modules
 (npm install --no-optional) || die "Failed to install dependencies, consult the npm log to find out why."
 cp ${DOWNLOADS}/orion/orionode/nodegit/${NODEGIT_VERSION}/linux/nodegit.node ../node_modules/nodegit/build/Release
 (../node_modules/.bin/grunt ${GRUNT_TASK}) || die "Failed to minify client code."
