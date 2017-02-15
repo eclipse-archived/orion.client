@@ -110,5 +110,7 @@ define({
 	"FormatTooltip":"Format editor contents",
 	"Cancel":"Cancel",
 	"Yes":"Yes",
-	"No":"No"
+	"No":"No",
+	"Collaborate": "Collaborate",
+	"CollaborateToolTip": "Start a Collaboration session on the current file"
 });
