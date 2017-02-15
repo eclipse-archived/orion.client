@@ -14,10 +14,10 @@ var api = require('./api'),
 		fileUtil = require('./fileUtil');
 var pty;
 try {
-	pty = require("pty.js");
+	pty = require("node-pty");
 } catch (e) {
 	console.error(e.message);
-	console.error("pty.js is not installed. Some features will be unavailable.");
+	console.error("node-pty is not installed. Some features will be unavailable.");
 }
 
 exports.install = function(options) {
@@ -43,9 +43,9 @@ exports.install = function(options) {
 
 	io.of('/tty').on('connection', function(sock) {
 		sock.on('start', function(cwd) {
-			// Handle missing pty.js
+			// Handle missing node-pty
 			if (!pty) {
-				var error = new Error('pty.js is not installed on this server. Terminal cannot be used.');
+				var error = new Error('node-pty is not installed on this server. Terminal cannot be used.');
 				console.error(error);
 				sock.emit('fail', error.message);
 				return;
@@ -54,7 +54,8 @@ exports.install = function(options) {
 			var realCWD = resolvePath(cwd);
 			var buff = [];
 			// Open Terminal Connection
-			var terminal = pty.fork(process.env.SHELL || 'sh', [], {
+			var shell = process.platform === 'win32' ? 'powershell.exe' : (process.env.SHELL || 'sh');
+			var terminal = pty.fork(shell, [], {
 				name: require('fs').existsSync('/usr/share/terminfo/x/xterm-256color')
 				? 'xterm-256color'
 				: 'xterm',
