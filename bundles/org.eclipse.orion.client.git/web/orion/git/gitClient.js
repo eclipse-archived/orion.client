@@ -1203,6 +1203,13 @@ eclipse.GitService = (function() {
 			return clientDeferred;
 		},
 		
+		showPatch: function(url){
+			xhr("GET", url)
+			.then(function(result){
+				window.__showPatch(result.responseText);
+			});
+		},
+		
 		deleteSubmodule : function(submoduleLocation, parents){
 			var service = this;
 			var clientDeferred = new Deferred();

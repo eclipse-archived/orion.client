@@ -33,11 +33,12 @@ define([
 	'orion/git/logic/gitCommit',
 	'orion/objects',
 	'orion/bidiUtils',
-	'orion/URL-shim'
+	'orion/URL-shim',
+	'orion/util'
 ], function(
 	messages, require, EventTarget, Deferred, i18nUtil, lib, mCommands, mCommandRegistry, mGitUtil, GitPreferenceStorage,
 	GitConfigPreference, mCloneGitRepository, mApplyPatch, URITemplate, mGitCommonLogic, mGitPushLogic, 
-	mGitStashLogic, mGitCommitLogic, objects, bidiUtils) {
+	mGitStashLogic, mGitCommitLogic, objects, bidiUtils, url_shim, util) {
 
 /**
  * @namespace The global container for eclipse APIs.
@@ -2225,7 +2226,11 @@ var exports = {};
 					url += data.items.Diffs.Children[i].NewPath;
 				}
 			}
-			window.open(url);
+			if(util.isElectron){
+				this.gitClient.showPatch(url);
+			}else{
+				window.open(url);
+			}
 		};
 			
 		var showStagedPatchCommand = new mCommands.Command({

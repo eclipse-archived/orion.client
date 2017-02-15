@@ -10,6 +10,9 @@
  *******************************************************************************/
 /*eslint-env browser, node*/
 var electron = require('electron');
+var fs = require('fs');
+var os = require('os');
+var path = require('path');
 var dragSrcEl = null;
 var contextSrcEl = null;
 
@@ -304,6 +307,12 @@ function createTab(url) {
 		iframe.contentWindow.confirm = window.confirm;
 		iframe.contentWindow.alert = window.alert;
 		iframe.contentWindow.__electron = electron;
+		iframe.contentWindow.__showPatch = function(content){
+			var defaultPath = path.join(os.homedir(),"/Downloads","changes.patch") 
+			electron.remote.dialog.showSaveDialog({defaultPath:defaultPath},function(fileName){
+				fs.writeFile(fileName, content);			
+			});
+		};
 
 		var target = iframe.contentDocument.querySelector('head > title');
 		if (target) {
