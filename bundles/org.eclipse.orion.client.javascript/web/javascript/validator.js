@@ -236,7 +236,7 @@ define([
 					delete cfg.rules[key];
 				}
 			});
-			if(confg && !confg.skip) { //test hook to disable these rules unless explicitly added
+			if(!confg || (confg && !confg.skip)) { //test hook to disable these rules unless explicitly added
 				cfg.rules["unknown-require"] = config.rules["unknown-require"];
 				cfg.rules["check-tern-plugin"] = config.rules["check-tern-plugin"];
 				cfg.rules["missing-requirejs"] = config.rules["missing-requirejs"];
