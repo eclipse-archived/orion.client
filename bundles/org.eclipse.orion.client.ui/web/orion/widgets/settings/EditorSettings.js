@@ -140,6 +140,10 @@ define("orion/widgets/settings/EditorSettings", //$NON-NLS-0$
 				scrollAnimation: new BooleanProp(),
 				scrollAnimationTimeout: new IntegerProp(50, 1000)
 			},
+			languageTools: {
+				showOccurrences: new BooleanProp(),
+				contentAssistAutoTrigger: new BooleanProp()
+			},
 			rulers: {
 				annotationRuler: new BooleanProp(),
 				lineNumberRuler: new BooleanProp(),
@@ -188,10 +192,6 @@ define("orion/widgets/settings/EditorSettings", //$NON-NLS-0$
 				showTextMatchingBracketAnnotation: new BooleanProp(),
 				showTextCurrentBracketAnnotation: new BooleanProp(),
 				showTextCurrentLineAnnotation: new BooleanProp()
-			},
-			languageTools: {
-				showOccurrences: new BooleanProp(),
-				contentAssistAutoTrigger: new BooleanProp()
 			}
 		}
 	};
