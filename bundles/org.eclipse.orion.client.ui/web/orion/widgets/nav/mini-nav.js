@@ -113,6 +113,7 @@ define([
 						res[item.trim()] = true;
 					});
 				}
+				var excludeHiddenFiles = Boolean(prefs.excludeHiddenFiles);
 				this.explorer = new MiniNavExplorer({
 					preferences: this.preferences,
 					commandRegistry: this.commandRegistry,
@@ -131,7 +132,8 @@ define([
 					serviceRegistry: this.serviceRegistry,
 					toolbarNode: this.toolbarNode,
 					progressService: this.progressService,
-					filteredResources: res
+					filteredResources: res,
+					excludeHiddenFiles: excludeHiddenFiles
 				});
 				// Create switcher here
 				this.fsSwitcher = new mFilesystemSwitcher.FilesystemSwitcher({

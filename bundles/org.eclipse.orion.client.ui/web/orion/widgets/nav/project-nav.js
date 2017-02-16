@@ -30,11 +30,12 @@ define([
 	var FileModel = mExplorer.FileModel;
 	var uriTemplate = new URITemplate("#{,resource,params*}"); //$NON-NLS-0$
 
-	function ProjectNavModel(serviceRegistry, root, fileClient, idPrefix, excludeFiles, excludeFolders, projectClient, fileMetadata, filteredResources) {
+	function ProjectNavModel(serviceRegistry, root, fileClient, idPrefix, excludeFiles, excludeFolders, projectClient, fileMetadata, filteredResources, excludeHiddenFiles) {
 		this.projectClient = projectClient;
 		this.project = root;
 		this.fileMetadata = fileMetadata;
 		this.filteredResources = filteredResources;
+		this.excludeHiddenFiles = excludeHiddenFiles;
 		FileModel.apply(this, arguments);
 	}
 
@@ -179,7 +180,7 @@ define([
 			}
 		},
 		createModel: function() {
-			return new ProjectNavModel(this.registry, this.treeRoot, this.fileClient, this.parentId, this.excludeFiles, this.excludeFolders, this.projectClient, this.fileMetadata, this.filteredResources);
+			return new ProjectNavModel(this.registry, this.treeRoot, this.fileClient, this.parentId, this.excludeFiles, this.excludeFolders, this.projectClient, this.fileMetadata, this.filteredResources, this.excludeHiddenFiles);
 		},
 		reroot: function(item) {
 			var defer = new Deferred();
@@ -320,6 +321,7 @@ define([
 						res[item.trim()] = true;
 					});
 				}
+				var excludeHiddenFiles = prefs.excludeHiddenFiles || false;
 				this.explorer = new ProjectNavExplorer({
 					preferences: this.preferences,
 					commandRegistry: this.commandRegistry,
@@ -339,7 +341,8 @@ define([
 					serviceRegistry: this.serviceRegistry,
 					toolbarNode: this.toolbarNode,
 					progressService: this.progressService,
-					filteredResources: res
+					filteredResources: res,
+					excludeHiddenFiles: excludeHiddenFiles
 				});
 				this.explorer.workspaceMetadata = this.workspaceMetadata;
 				this.explorer.display(this.editorInputManager.getFileMetadata());

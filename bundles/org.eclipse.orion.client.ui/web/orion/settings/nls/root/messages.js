@@ -39,6 +39,8 @@ define({//Default message bundle
 	"desktopSelectionPolicyTooltip": "The policy applies to the cases when a file or folder link is clicked while Ctrl, Shift or Cmd keys are pressed. The file or folder will be selected if this policy is checked. Otherwise the file or folder link will be opened in a new tab or window as the normal web behavior.",
 	"filteredResources": "Filtered Resources (comma-separated list):",
 	"filteredResourcesTooltip": "The comma-separated list of resources to be filtered from view and searching.",
+	"excludeHiddenFiles": "Exclude hidden files:",
+	"excludeHiddenFilesTooltip": "Do not display files prefixed with a \".\"",
 	"Navigation": "Navigation",
 	"Font": "Font",
 	"Family": "Family",
