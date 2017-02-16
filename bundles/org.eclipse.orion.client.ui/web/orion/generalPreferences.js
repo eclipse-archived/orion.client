@@ -24,6 +24,7 @@ define([
 	var defaults = {
 		desktopSelectionPolicy: true,
 		filteredResources: '.git, .DS_Store',
+		excludeHiddenFiles: false,
 		enableFileCreationAtRoot: false,
 		enableFolderCreationAtRoot: false,
 		enableProjectCreation: true,

@@ -241,7 +241,7 @@ define([
 			}
 			this._parent.appendChild(this._node);
 
-			function renderSections(sectionsOrder, sectionNames, filteredResources) {
+			function renderSections(sectionsOrder, sectionNames, filteredResources, excludeHiddenFiles) {
 				sectionsOrder.forEach(function(sectionName) {
 					if (sectionName === "project") {
 						if (projectJson && this.showProjectView) {
@@ -269,7 +269,8 @@ define([
 								editorInputManager: this.editorInputManager,
 								commandRegistry: this.commandRegistry,
 								contentTypeRegistry: this.contentTypeRegistry,
-								filteredResources: filteredResources
+								filteredResources: filteredResources,
+								excludeHiddenFiles: excludeHiddenFiles
 							});
 							foldersSection.embedExplorer(this.folderNavExplorer);
 							this.folderNavExplorer.setCommandsVisible(this._isCommandsVisible());
@@ -297,7 +298,11 @@ define([
 							res[item.trim()] = true;
 						});
 					}
-					renderSections.apply(this, [sectionsOrder, sectionNames, res]);
+					var excludeHiddenFiles = false;
+					if (prefs[1] && prefs[1].excludeHiddenFiles) {
+						excludeHiddenFiles = true;
+					}
+					renderSections.apply(this, [sectionsOrder, sectionNames, res, excludeHiddenFiles]);
 				}.bind(this),
 				function(error) {
 					renderSections.apply(this, [sectionsOrder, sectionNames]);

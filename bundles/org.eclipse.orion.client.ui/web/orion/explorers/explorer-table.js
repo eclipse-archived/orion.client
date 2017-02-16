@@ -36,8 +36,9 @@ define([
 	 * @param {boolean} excludeFiles The optional flag for if files should be left out of the model
 	 * @param {boolean} excludeFolders The optional flag for if folders should be left out of the model
 	 * @param {?} filteredResources The optional map of names to be left out of the model (filtered)
+	 * @param {boolean} excludeHiddenFiles The optional flag for if hidden files should be left out of the model
 	 */
-	function FileModel(serviceRegistry, root, fileClient, idPrefix, excludeFiles, excludeFolders, filteredResources) {
+	function FileModel(serviceRegistry, root, fileClient, idPrefix, excludeFiles, excludeFolders, filteredResources, excludeHiddenFiles) {
 		this.registry = serviceRegistry;
 		this.root = root;
 		this.fileClient = fileClient;
@@ -51,6 +52,7 @@ define([
 			//is set from project nav not via arguments
 			this.filteredResources = filteredResources;
 		}
+		this.excludeHiddenFiles = Boolean(excludeHiddenFiles);
 	}
 	FileModel.prototype = new mExplorer.ExplorerModel();
 	objects.mixin(FileModel.prototype, /** @lends orion.explorer.FileModel.prototype */ {
@@ -64,12 +66,15 @@ define([
 		processParent: function(parentItem, children) {
 			// Note that the Parents property is not available for metadatas retrieved with fetchChildren().
 			var parents = parentItem.Projects ? [] : [parentItem].concat(parentItem.Parents || []);
-			if (this.excludeFiles || this.excludeFolders || this.filteredResources) {
+			if (this.excludeFiles || this.excludeFolders || this.filteredResources || this.excludeHiddenFiles) {
 				var filtered = [];
 				children.forEach(function(child) {
 					var exclude = child.Directory ? this.excludeFolders : this.excludeFiles;
 					if(this.filteredResources) {
 						exclude = exclude || this.filteredResources[child.Name];
+					}
+					if (this.excludeHiddenFiles) {
+						exclude = exclude || child.Name && child.Name.charAt(0) === '.';
 					}
 					if (!exclude) {
 						filtered.push(child);
@@ -216,6 +221,7 @@ define([
 		this.checkbox = false;
 		this._hookedDrag = false;
 		this.filteredResources = options.filteredResources;
+		this.excludeHiddenFiles = options.excludeHiddenFiles;
 		var modelEventDispatcher = options.modelEventDispatcher ? options.modelEventDispatcher : new EventTarget();
 		this.modelEventDispatcher = modelEventDispatcher;
 		//Listen to all resource changed events
@@ -1061,7 +1067,7 @@ define([
 		 * @returns {orion.explorer.FileModel}
 		 */
 		createModel: function() {
-			return new FileModel(this.registry, this.treeRoot, this.fileClient, this.parentId, this.excludeFiles, this.excludeFolders, this.filteredResources);
+			return new FileModel(this.registry, this.treeRoot, this.fileClient, this.parentId, this.excludeFiles, this.excludeFolders, this.filteredResources, this.excludeHiddenFiles);
 		},
 
 		/**

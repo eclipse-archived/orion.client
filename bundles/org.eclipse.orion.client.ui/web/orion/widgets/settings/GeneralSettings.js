@@ -29,6 +29,11 @@ define([
 						fieldlabel: messages["filteredResources"],
 						fieldTitle: messages["filteredResourcesTooltip"],
 						postChange: this.setPreferences.bind(this)
+				    }),
+				    new SettingsCheckbox({
+						fieldlabel: messages["excludeHiddenFiles"],
+						fieldTitle: messages["excludeHiddenFilesTooltip"],
+						postChange: this.setPreferences.bind(this)
 				    })
 				];
 				new mSection.Section(this.node, {
@@ -53,6 +58,7 @@ define([
 				return this.preferences.getPrefs().then(function (generalPrefs) {
 					generalPrefs.desktopSelectionPolicy = this.generalFields[0].isChecked();
 					generalPrefs.filteredResources = this.generalFields[1].getValue();
+					generalPrefs.excludeHiddenFiles = this.generalFields[2].isChecked();
 					this.preferences.setPrefs(generalPrefs);
 				}.bind(this));
 			},
@@ -73,6 +79,9 @@ define([
 						this.generalFields[1].setValue(generalPrefs.filteredResources);
 					}
 					this.generalFields[1].show();
+
+					this.generalFields[2].setSelection(generalPrefs.excludeHiddenFiles);
+					this.generalFields[2].show();
 
 					if (callback) {
 						callback();
