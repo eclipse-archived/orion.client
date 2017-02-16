@@ -323,7 +323,6 @@ define([
 		    var val = setup({buffer: "h1:{stop-color: red}", rule: {id:null, severity:3}});
 			return validator.computeProblems(val.editorContext).then(function(result) {
 				assertProblems(result, [
-				    {}
 				]);
 			});
 		});
@@ -331,7 +330,6 @@ define([
 		    var val = setup({buffer: "h1:{stroke: red}", rule: {id:null, severity:3}});
 			return validator.computeProblems(val.editorContext).then(function(result) {
 				assertProblems(result, [
-				    {}
 				]);
 			});
 		});
@@ -339,7 +337,6 @@ define([
 		    var val = setup({buffer: "h1:{fill: red}", rule: {id:null, severity:3}});
 			return validator.computeProblems(val.editorContext).then(function(result) {
 				assertProblems(result, [
-				    {}
 				]);
 			});
 		});
