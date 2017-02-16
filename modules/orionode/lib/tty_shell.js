@@ -120,7 +120,7 @@ exports.install = function(options) {
 				});
 
 				console.log('Created new %s (fd: %d, pid: %d)',
-					process.env.SHELL || 'sh',
+					shell,
 					terminal.fd, 
 					terminal.pid);
 
