@@ -12,6 +12,7 @@
  
 define([
 	'i18n!orion/nls/messages',
+	'orion/i18nUtil',
 	'orion/webui/littlelib',
 	'orion/commandsProxy',
 	'orion/webui/dropdown',
@@ -20,7 +21,7 @@ define([
 	'text!orion/webui/checkedmenuitem.html',
 	'orion/webui/tooltip',
 	'orion/metrics'
-], function(messages, lib, mCommandsProxy, Dropdown, DropdownButtonFragment, DropdownButtonWithArrowFragment, CheckedMenuItemFragment, Tooltip, mMetrics) {
+], function(messages, i18nUtil, lib, mCommandsProxy, Dropdown, DropdownButtonFragment, DropdownButtonWithArrowFragment, CheckedMenuItemFragment, Tooltip, mMetrics) {
 		/**
 		 * @name orion.commands.NO_IMAGE
 		 * @description Image data for 16x16 transparent png.
@@ -243,7 +244,12 @@ define([
 			button.classList.add(command.extraClass);
 		}
 		button.classList.add("commandButton"); //$NON-NLS-1$
-		var text = document.createTextNode(command.name);
+		
+		var buttonText = command.name;
+		if (commandInvocation.userData.annotation.data && commandInvocation.userData.annotation.data.ruleId){
+			buttonText = i18nUtil.formatMessage(command.name, commandInvocation.userData.annotation.data.ruleId);
+		}
+		var text = document.createTextNode(buttonText);
 		button.appendChild(text);
 		
 		var onClick = callback || command.callback;
