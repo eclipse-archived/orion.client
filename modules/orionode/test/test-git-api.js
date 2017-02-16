@@ -136,6 +136,32 @@ GitClient.prototype = {
 		});
 	},
 
+	postFile: function(parentFolder, name, isDirectory) {
+		var client = this;
+		this.tasks.push(function(resolve) {
+			var encodedName = encodeURIComponent(name);
+			request()
+			.post(CONTEXT_PATH + '/file/' + client.getName() + parentFolder)
+			.send({ Name: name, Directory: isDirectory })
+			.expect(201)
+			.end(function(err, res) {
+				var body = res.body
+				assert.ifError(err);
+				assert.equal(body.Name, name);
+				assert.equal(body.Directory, isDirectory);
+				client.next(resolve, body);
+			});
+		});
+	},
+
+	createFile: function(parentFolder, name) {
+		this.postFile(parentFolder, name, false);
+	},
+
+	createFolder: function(parentFolder, name) {
+		this.postFile(parentFolder, name, true);
+	},
+
 	setFileContents: function(name, contents) {
 		var client = this;
 		this.tasks.push(function(resolve) {
@@ -150,6 +176,25 @@ GitClient.prototype = {
 				assert.ok(body.ETag, 'has an ETag');
 				assert.equal(body.Location, CONTEXT_PATH + "/file/" + client.getName() + "/" + name);
 				assert.equal(body.Name, name);
+				client.next(resolve, res.body);
+			});
+		});
+	},
+
+	/**
+	 * Deletes the file or folder at the given path relative to the Orion workspace.
+	 * This path must not be URL encoded.
+	 * 
+	 * @param {String} path the file or folder to delete from the server
+	 */
+	delete: function(path) {
+		var client = this;
+		this.tasks.push(function(resolve) {
+			request()
+			.delete(CONTEXT_PATH + "/file/" + client.getName() + "/" + encodeURIComponent(path))
+			.expect(204)
+			.end(function(err, res) {
+				assert.ifError(err);
 				client.next(resolve, res.body);
 			});
 		});
@@ -1092,6 +1137,78 @@ maybeDescribe("git", function() {
 			});
 		}); // describe("Create")
 	}); // describe("Tags")
+
+	describe("Status", function() {
+		before(setup);
+
+		describe("DiffLocation", function() {
+
+			/**
+			 * Tests that the DiffLocation property of the returned JSON from
+			 * the status API is correctly URL encoded.
+			 * 
+			 * /a%b.txt						-> /a%2525b.txt
+			 * /a b/test.txt				-> /a%2520b/test.txt
+			 * /modules/orionode/hello.js	-> /modules/orionode/hello.js
+			 */
+			it("bug 512061", function(finished) {
+				var client = new GitClient("bug512061");
+				// init a new Git repository
+				client.init();
+				// create a few folders
+				client.createFolder("/", "a b");
+				client.createFolder("/", "modules");
+				client.createFolder("/modules/", "orionode");
+
+				// tests > /a%b.txt
+				client.createFile("/", "a%b.txt");
+				client.status("SAFE");
+				return client.start().then(function(status) {
+					var git = status.Untracked[0].Git;
+					assert.equal(git.CommitLocation,
+						"/gitapi/commit/HEAD/file/bug512061/" + util.encodeURIComponent("a%b.txt"));
+					assert.equal(git.DiffLocation,
+						"/gitapi/diff/Default/file/bug512061/" + util.encodeURIComponent("a%b.txt"));
+					assert.equal(git.IndexLocation,
+						"/gitapi/index/file/bug512061/" + util.encodeURIComponent("a%b.txt"));
+
+					client.delete("/a%b.txt");
+					// tests > /a b/test.txt
+					client.createFile("/a b/", "test.txt");
+					client.status("SAFE");
+					return client.start();
+				})
+				.then(function(status) {
+					var git = status.Untracked[0].Git;
+					assert.equal(git.CommitLocation,
+						"/gitapi/commit/HEAD/file/bug512061/" + util.encodeURIComponent("a b") + "/test.txt");
+					assert.equal(git.DiffLocation,
+						"/gitapi/diff/Default/file/bug512061/" + util.encodeURIComponent("a b") + "/test.txt");
+					assert.equal(git.IndexLocation,
+						"/gitapi/index/file/bug512061/" + util.encodeURIComponent("a b") + "/test.txt");
+
+					client.delete("/a b/test.txt");
+					// tests > /modules/orionode/hello.js
+					client.createFile("/modules/orionode/", "hello.js");
+					client.status("SAFE");
+					return client.start();
+				})
+				.then(function(status) {
+					var git = status.Untracked[0].Git;
+					assert.equal(git.CommitLocation,
+						"/gitapi/commit/HEAD/file/bug512061/modules/orionode/hello.js");
+					assert.equal(git.DiffLocation,
+						"/gitapi/diff/Default/file/bug512061/modules/orionode/hello.js");
+					assert.equal(git.IndexLocation,
+						"/gitapi/index/file/bug512061/modules/orionode/hello.js");
+					finished();
+				})
+				.catch(function(err) {
+					finished(err);
+				});
+			}); // it("bug 512061")"
+		}); // describe("DiffLocation")
+	}); // describe("Status")
 
 	describe("config", function() {
 		this.timeout(10000);
