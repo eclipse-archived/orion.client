@@ -14,7 +14,6 @@ define([
 	'orion/commands',
 	'orion/keyBinding',
 	'orion/explorers/navigationUtils',
-	'orion/i18nUtil',
 	'orion/bidiUtils',
 	'orion/PageUtil',
 	'orion/uiUtils',
@@ -25,7 +24,7 @@ define([
 	'orion/metrics',
 	'orion/Deferred',
 	'orion/EventTarget'
-], function(Commands, mKeyBinding, mNavUtils, i18nUtil, bidiUtils, PageUtil, UIUtil, lib, mDropdown, mTooltip, SubMenuButtonFragment, mMetrics, mDeferred, mEventTarget) {
+], function(Commands, mKeyBinding, mNavUtils, bidiUtils, PageUtil, UIUtil, lib, mDropdown, mTooltip, SubMenuButtonFragment, mMetrics, mDeferred, mEventTarget) {
 
 	/**
 	 * Constructs a new command registry with the given options.
@@ -1265,7 +1264,10 @@ define([
 							invocation.handler = invocation.handler || this;
 							invocation.domParent = parent;
 							var element;
-							var onClick = function(event) {
+							/**
+							 * @callback
+							 */
+							var onClick = function(e) {
 								self._invoke(invocation);
 							};
 							if (renderType === "menu") {
