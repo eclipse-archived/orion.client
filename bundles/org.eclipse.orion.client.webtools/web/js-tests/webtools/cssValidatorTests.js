@@ -318,5 +318,30 @@ define([
 				]);
 			});
 		});
+		
+		it("Test SVG CSS properties: stop-color", function(/*done*/) {
+		    var val = setup({buffer: "h1:{stop-color: red}", rule: {id:null, severity:3}});
+			return validator.computeProblems(val.editorContext).then(function(result) {
+				assertProblems(result, [
+				    {}
+				]);
+			});
+		});
+		it("Test SVG CSS properties: stroke", function(/*done*/) {
+		    var val = setup({buffer: "h1:{stroke: red}", rule: {id:null, severity:3}});
+			return validator.computeProblems(val.editorContext).then(function(result) {
+				assertProblems(result, [
+				    {}
+				]);
+			});
+		});
+		it("Test SVG CSS properties: fill", function(/*done*/) {
+		    var val = setup({buffer: "h1:{fill: red}", rule: {id:null, severity:3}});
+			return validator.computeProblems(val.editorContext).then(function(result) {
+				assertProblems(result, [
+				    {}
+				]);
+			});
+		});
 	});
 });

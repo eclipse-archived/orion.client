@@ -17,7 +17,7 @@ define([
 	var cssProperties = Object.create(null);
 	cssProperties = [
 		/*
-		 * The following data was scraped from http://www.w3schools.com/cssref/nt
+		 * The following data was scraped from http://www.w3schools.com/cssref/
 		 */
 		{
 			name: "@font-face",
