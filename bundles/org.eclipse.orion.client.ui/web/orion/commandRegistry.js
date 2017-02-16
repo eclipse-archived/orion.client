@@ -1280,14 +1280,29 @@ define([
 								self._registerRenderedCommand(command.id, scopeId, invocation);
 							} else if (renderType === "quickfix") {
 								id = renderType + command.id + index; // using the index ensures unique ids within the DOM when a command repeats for each item
-								var commandDiv = document.createElement("div"); //$NON-NLS-0$
-								parent.appendChild(commandDiv);
-								parent.classList.add('quickFixList');
-								element = Commands.createQuickfixItem(commandDiv, command, invocation, onClick, self._prefService);
+								parent.classList.add('quickFixList'); //$NON-NLS-1$
+								var QUICKFIX_ID = 'quickfixDetails'; //$NON-NLS-1$
+								var quickfixDetails = parent.childNodes.item(QUICKFIX_ID);
+								if (command.id === 'ignore.in.file.fix'){
+									if (!quickfixDetails){
+										quickfixDetails = document.createElement("div");
+										quickfixDetails.id = QUICKFIX_ID;
+										parent.appendChild(quickfixDetails);
+									}
+									element = Commands.createQuickfixItem(quickfixDetails, command, invocation, onClick, self._prefService);
+								} else {
+									var commandDiv = document.createElement("div");
+									if (quickfixDetails){
+										parent.insertBefore(commandDiv, quickfixDetails);
+									} else {
+										parent.appendChild(commandDiv);
+									}
+									element = Commands.createQuickfixItem(commandDiv, command, invocation, onClick, self._prefService);
+								}
 							} else {
 								id = renderType + command.id + index;  // // using the index ensures unique ids within the DOM when a command repeats for each item
 								element = Commands.createCommandItem(parent, command, invocation, id, null, renderType === "tool", onClick);
-							} 
+							}
 							mNavUtils.generateNavGrid(domNodeWrapperList, element);
 							invocation.domNode = element;
 							index++;
