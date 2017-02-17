@@ -224,7 +224,7 @@ GitClient.prototype = {
 		var client = this;
 		this.tasks.push(function(resolve) {
 			request()
-			.put(CONTEXT_PATH + "/gitapi/index/file/" + client.getName() + "/" + name)
+			.put(CONTEXT_PATH + "/gitapi/index/file/" + client.getName() + "/" + util.encodeURIComponent(name))
 			.expect(200)
 			.end(function(err, res) {
 				assert.ifError(err);
@@ -1137,6 +1137,36 @@ maybeDescribe("git", function() {
 			});
 		}); // describe("Create")
 	}); // describe("Tags")
+
+	describe("Index", function() {
+		before(setup);
+
+		describe("Stage", function() {
+
+			/**
+			 * Stage a file with a name that needs to be URL encoded.
+			 */
+			it("bug 512285", function(finished) {
+				var client = new GitClient("bug512285");
+				// init a new Git repository
+				client.init();
+				client.createFile("/", "a%b.txt");
+				client.stage("a%b.txt");
+				client.status("SAFE");
+				return client.start().then(function(index) {
+					assert.equal(index.Added.length, 1);
+					assert.equal(index.Added[0].Name, "a%b.txt");
+					assert.equal(index.Added[0].Path, "a%b.txt");
+					assert.equal(index.Added[0].Location, "/file/bug512285/" + util.encodeURIComponent("a%b.txt"));
+					assert.equal(index.Untracked.length, 0);
+					finished();
+				})
+				.catch(function(err) {
+					finished(err);
+				});
+			}); // it("bug 512285")"
+		}); // describe("Stage")
+	}); // describe("Index")
 
 	describe("Status", function() {
 		before(setup);

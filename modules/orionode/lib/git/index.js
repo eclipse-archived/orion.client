@@ -81,6 +81,7 @@ function putIndex(req, res) {
 	.then(function(_repo) {
 		repo = _repo;
 		filePath = clone.getfileRelativePath(repo,req);
+		filePath = decodeURIComponent(filePath);
 		return repo.refreshIndex();
 	})
 	.then(function(indexResult) {
