@@ -10,8 +10,10 @@
  *******************************************************************************/
 /*eslint-env browser, node*/
 var electron = require('electron');
+var nodeUrl = require('url');
 var dragSrcEl = null;
 var contextSrcEl = null;
+var needToCleanFrames = [];
 
 function redrawButtons() {
 	var bar = document.querySelector("#bar");
@@ -223,6 +225,12 @@ function update() {
 			tab.style.flexBasis = "0";
 		});
 	}
+	if(needToCleanFrames.length > 0){
+		needToCleanFrames.forEach(function(iframe){
+			iframe.parentNode.removeChild(iframe);
+		});
+		needToCleanFrames = [];
+	}
 }
 
 function getActiveTab() {
@@ -328,7 +336,12 @@ function createTab(url) {
 		});
 	});
 	document.body.appendChild(iframe);
-	addNewTab(id, iframe);
+	var srcUrl = nodeUrl.parse(url);
+	if(srcUrl.pathname === "/" || srcUrl.pathname.endsWith(".html")){
+		addNewTab(id, iframe);	
+	}else{
+		needToCleanFrames.push(iframe);
+	}
 }
 
 function registerContextMenu() {
