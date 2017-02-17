@@ -52,13 +52,6 @@ function startServer(options) {
 			}
 		}
 
-		// Static files
-		app.use('/xterm', express.static(path.join(__dirname, 'node_modules', 'xterm', 'dist')));
-		var prependStaticAssets = options.configParams["prepend.static.assets"] && options.configParams["prepend.static.assets"].split(",") || [];
-		var appendStaticAssets = options.configParams["append.static.assets"] && options.configParams["append.static.assets"].split(",") || [];
-		var orionode_static = path.normalize(path.join(LIBS, 'orionode.client/'));
-		app.use(require('./lib/orion_static')({ orionClientRoot: ORION_CLIENT, maxAge: options.maxAge, orionode_static: orionode_static, prependStaticAssets: prependStaticAssets, appendStaticAssets: appendStaticAssets}));
-		
 		// API handlers
 		if (options.configParams["orion.single.user"]) {
 			app.use(/* @callback */ function(req, res, next){
@@ -93,6 +86,13 @@ function startServer(options) {
 			});
 		}
 		if (options.configParams.isElectron) app.use('/update', require('./lib/update').router(options));
+
+		// Static files
+		app.use('/xterm', express.static(path.join(__dirname, 'node_modules', 'xterm', 'dist')));
+		var prependStaticAssets = options.configParams["prepend.static.assets"] && options.configParams["prepend.static.assets"].split(",") || [];
+		var appendStaticAssets = options.configParams["append.static.assets"] && options.configParams["append.static.assets"].split(",") || [];
+		var orionode_static = path.normalize(path.join(LIBS, 'orionode.client/'));
+		app.use(require('./lib/orion_static')({ orionClientRoot: ORION_CLIENT, maxAge: options.maxAge, orionode_static: orionode_static, prependStaticAssets: prependStaticAssets, appendStaticAssets: appendStaticAssets}));
 
 		//error handling
 		app.use(function(req, res){
