@@ -791,6 +791,25 @@ define([
 				this._computeAnnotations(annotationModel, baseModel, current, start, end, _add);
 			}.bind(this));
 		},
+		_enforceTextDir: function(block, tokens) {
+			var lineIndex = this.model.getLineAtOffset(block.start);
+			var LRE = "\u202A";	//$NON-NLS-0$			
+			var RLE = "\u202B"; //$NON-NLS-0$
+			var textDir = this.model.getLineTextDir(lineIndex);
+			var charToAdd = "";		
+			if (textDir === "ltr") {
+				charToAdd = LRE;
+			} else if (textDir === "rtl") {
+				charToAdd = RLE;
+			}
+			if (charToAdd.length > 0) {
+				tokens.forEach(function(current) {
+					if (current.text) {
+						current.text = charToAdd + current.text;
+					}
+				});
+			}
+		},
 		_generateHTML: function(rootElement, block) {
 			if (!block.startToken && !block.tokens) {
 				return;	 /* likely a block with only tokens for its parent */
@@ -806,6 +825,7 @@ define([
 				 * removes each token from the array as it is processed
 				 */
 				var parseTokens = block.tokens.slice();
+				this._enforceTextDir(block, parseTokens);
 				parseTokens.links = this._linkDefs;
 				rootElement.innerHTML = marked.Parser.parse(parseTokens, markedOptions);
 				return;

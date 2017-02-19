@@ -146,7 +146,16 @@ function(util) { /* BDL */
 		}
 	}
 	
-	function enforceTextDir(range) {
+	function createNewStyle ( oldStyle, textDir ) {
+		var newStyle = oldStyle;
+		if (typeof newStyle.attributes === "undefined") {
+			newStyle.attributes = {};
+		}
+		newStyle.attributes.dir = textDir;
+		return newStyle;
+	}
+	
+	function enforceTextDir( range, textDir ) {
 		var comments = [{name:"comment block"}, 
 		                {name:"comment line double-slash"},
 		                {name:"comment block documentation"},
@@ -163,13 +172,17 @@ function(util) { /* BDL */
 					var newStyle = style;
 					if (typeof newStyle.attributes === "undefined") {
 						newStyle.attributes = {};
-					}
-					newStyle.attributes.dir = getTextDirection(text);
-					range.style = newStyle;		
+					}							
+					range.style = createNewStyle( style, getTextDirection(text) );
 					return range;
 				}
 			}
 		}
+		else if (style && textDir && textDir.length > 0) {
+			range.style = createNewStyle( style, textDir );
+			return range;
+		}
+		
 		return range;
 	}
 

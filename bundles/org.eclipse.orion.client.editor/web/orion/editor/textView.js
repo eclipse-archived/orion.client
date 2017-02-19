@@ -241,7 +241,7 @@ define("orion/editor/textView", [  //$NON-NLS-1$
 	 * @class A Selection represents a range of selected text in the view.
 	 * @name orion.editor.Selection
 	 */
-	function Selection (start, end, caret) {
+	function Selection(start, end, caret) {
 		/**
 		 * The selection start offset.
 		 *
@@ -662,6 +662,7 @@ define("orion/editor/textView", [  //$NON-NLS-1$
 			var model = view._model;
 			var lineText = model.getLine(lineIndex);
 			var lineStart = model.getLineStart(lineIndex);
+			var textDir = model.getLineTextDir(lineIndex);
 			var e = {type:"LineStyle", textView: view, lineIndex: lineIndex, lineText: lineText, lineStart: lineStart}; //$NON-NLS-1$
 			view.onLineStyle(e);
 			var doc = _parent.ownerDocument;
@@ -681,7 +682,7 @@ define("orion/editor/textView", [  //$NON-NLS-1$
 			
 			var ranges = [];
 			var data = {tabOffset: 0, ranges: ranges};
-			this._createRanges(e.ranges, lineText, 0, lineText.length, lineStart, data);
+			this._createRanges(e.ranges, lineText, 0, lineText.length, lineStart, textDir, data);
 			
 			/*
 			* A trailing span with a whitespace is added for three different reasons:
@@ -792,7 +793,7 @@ define("orion/editor/textView", [  //$NON-NLS-1$
 			}
 			return lineDiv;
 		},
-		_createRanges: function(ranges, text, start, end, lineStart, data) {
+		_createRanges: function(ranges, text, start, end, lineStart, textDir, data) {
 			if (start > end) { return; }
 			if (ranges) {
 				for (var i = 0; i < ranges.length; i++) {
@@ -805,7 +806,7 @@ define("orion/editor/textView", [  //$NON-NLS-1$
 						styleStart = Math.max(start, styleStart);
 						styleEnd = Math.min(end, styleEnd);
 						if (start < styleStart) {
-							this._createRange(text, start, styleStart, null, data);
+							this._createRange(text, start, styleStart, null, textDir, data);
 						}
 						if (!range.style || !range.style.unmergeable) {
 							while (i + 1 < ranges.length && ranges[i + 1].start - lineStart === styleEnd && compare(range.style, ranges[i + 1].style)) {
@@ -814,16 +815,16 @@ define("orion/editor/textView", [  //$NON-NLS-1$
 								i++;
 							}
 						}
-						this._createRange(text, styleStart, styleEnd, range.style, data);
+						this._createRange(text, styleStart, styleEnd, range.style, textDir, data);
 						start = styleEnd;
 					}
 				}
 			}
 			if (start < end) {
-				this._createRange(text, start, end, null, data);
+				this._createRange(text, start, end, null, textDir, data);
 			}
 		},
-		_createRange: function(text, start, end, style, data) {
+		_createRange: function(text, start, end, style, textDir, data) {
 			if (start > end) { return; }
 			var tabSize = this.view._customTabSize, range;
 			var bidiStyle = {tagName:"span", bidi:true, style:{unicodeBidi:"embed", direction:"ltr"}};
@@ -833,9 +834,9 @@ define("orion/editor/textView", [  //$NON-NLS-1$
 				while (tabIndex !== -1 && tabIndex < end) {
 					if (start < tabIndex) {
 						range = {text: text.substring(start, tabIndex), style: style};
-						range = bidiUtils.enforceTextDir(range);
+						range = bidiUtils.enforceTextDir(range, textDir);
 						data.ranges.push(range);
-						if (bidiUtils.isBidiEnabled()) {
+						if (bidiUtils.isBidiEnabled() && !this.view._isMarkdown) {
 							data.ranges.push(bidiRange);
 						}
 						data.tabOffset += range.text.length;
@@ -849,7 +850,7 @@ define("orion/editor/textView", [  //$NON-NLS-1$
 						}
 						range = {text: spaces, style: style, ignoreChars: spacesCount - 1};
 						data.ranges.push(range);
-						if (bidiUtils.isBidiEnabled()) {
+						if (bidiUtils.isBidiEnabled()  && !this.view._isMarkdown) {
 							data.ranges.push(bidiRange);
 						}
 						data.tabOffset += range.text.length;
@@ -863,9 +864,9 @@ define("orion/editor/textView", [  //$NON-NLS-1$
 			}
 			if (start <= end) {
 				range = {text: text.substring(start, end), style: style};
-				range = bidiUtils.enforceTextDir(range);
+				range = bidiUtils.enforceTextDir(range, textDir);
 				data.ranges.push(range);
-				if (bidiUtils.isBidiEnabled()) {
+				if (bidiUtils.isBidiEnabled() && !this.view._isMarkdown) {
 					data.ranges.push(bidiRange);
 				}
 				data.tabOffset += range.text.length;
@@ -5338,6 +5339,27 @@ define("orion/editor/textView", [  //$NON-NLS-1$
 			this.setOptions({wrapMode: !this.getOptions("wrapMode")}); //$NON-NLS-1$
 			return true;
 		},
+		_doSetDirection: function (args) {
+			if (!this._isMarkdown) { return; }			
+			var model = this._model;	
+			var selections = this._getSelections();			
+			var marker = ( args.type === "ltr" ? util.LtrMarker : util.RtlMarker );
+			var that = this;
+			selections.forEach(function(current) {
+				var startLineIndex = model.getLineAtOffset(current.start);
+				var endLineIndex = model.getLineAtOffset(current.end);
+				for (var i = startLineIndex; i<=endLineIndex; i++) {
+					var startLine = model.getLineStart(i);
+					var selection = [current];
+					selection[0].start = selection[0].end = startLine;
+					that._modifyContent({text: marker, selection: selection, _ignoreDOMSelection: true}, true);
+					selection[0].start = startLine;
+					selection[0].end = startLine + marker.length;
+					that._modifyContent({text: "", selection: selection, _ignoreDOMSelection: true}, true); //$NON-NLS-1$
+				}				
+			});
+			return true;											
+		},
 		
 		/************************************ Internals ******************************************/
 		_autoScroll: function () {
@@ -5661,7 +5683,9 @@ define("orion/editor/textView", [  //$NON-NLS-1$
 				
 				"toggleOverwriteMode": {defaultHandler: function(data) {return that._doOverwriteMode(merge(data,{}));}, actionDescription: {name: messages.toggleOverwriteMode}}, //$NON-NLS-1$
 				"toggleTabMode": {defaultHandler: function(data) {return that._doTabMode(merge(data,{}));}, actionDescription: {name: messages.toggleTabMode}}, //$NON-NLS-1$
-				"toggleWrapMode": {defaultHandler: function(data) {return that._doWrapMode(merge(data,{}));}, actionDescription: {name: messages.toggleWrapMode}} //$NON-NLS-1$
+				"toggleWrapMode": {defaultHandler: function(data) {return that._doWrapMode(merge(data,{}));}, actionDescription: {name: messages.toggleWrapMode}}, //$NON-NLS-1$
+				"dirLTR": {defaultHandler: function(data) {return that._doSetDirection(merge(data,{type: "ltr"}));}, actionDescription: {name: messages.dirLTR}}, //$NON-NLS-1$
+				"dirRTL": {defaultHandler: function(data) {return that._doSetDirection(merge(data,{type: "rtl"}));}, actionDescription: {name: messages.dirRTL}}, //$NON-NLS-1$
 			};
 		},
 		_createRulerParent: function(doc, className) {
@@ -6496,6 +6520,7 @@ define("orion/editor/textView", [  //$NON-NLS-1$
 			this._dragOffset = -1;
 			this._isRangeRects = (!util.isIE || util.isIE >= 9) && typeof _parent.ownerDocument.createRange().getBoundingClientRect === "function"; //$NON-NLS-1$
 			this._isW3CEvents = _parent.addEventListener;
+			this._isMarkdown = (_parent.baseURI.indexOf("editor=orion.editor.markdown") != -1);
 
 			/* Auto scroll */
 			this._autoScrollX = null;

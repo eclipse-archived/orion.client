@@ -20,8 +20,9 @@ define([
 	'orion/objects',
 	'orion/PageUtil',
 	'orion/editor/textModelFactory',
-	'orion/metrics'
-], function(messages, mNavigatorRenderer, i18nUtil, Deferred, EventTarget, objects, PageUtil, mTextModelFactory, mMetrics) {
+	'orion/metrics',
+	'orion/util'
+], function(messages, mNavigatorRenderer, i18nUtil, Deferred, EventTarget, objects, PageUtil, mTextModelFactory, mMetrics, util) {
 
 	function Idle(options){
 		this._document = options.document || document;
@@ -400,8 +401,9 @@ define([
 
 			function _save(that) {
 				editor.markClean();
-				var contents = editor.getText();
+				var contents = editor.getModel().getTextForSave();
 				var data = contents;
+				var hasTextDir = (data.indexOf(util.LtrMarker) != -1 || data.indexOf(util.RtlMarker) != -1);
 				if (that._getSaveDiffsEnabled() && !that._errorSaving) {
 					var changes = that._getUnsavedChanges();
 					if (changes) {
@@ -409,7 +411,7 @@ define([
 						for (var i = 0; i < changes.length; i++) {
 							len += changes[i].text.length;
 						}
-						if (contents.length > len) {
+						if (contents.length > len && !hasTextDir) {
 							data = {
 								diff: changes
 							};
