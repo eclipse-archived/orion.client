@@ -231,6 +231,8 @@ define("orion/editor/keyModes", [ //$NON-NLS-0$
 		bindings.push({actionID: "escape",			keyBinding: new KeyBinding(27), predefined: true}); //$NON-NLS-0$
 		bindings.push({actionID: "selectAll",		keyBinding: new KeyBinding('a', true), predefined: true}); //$NON-NLS-1$ //$NON-NLS-0$
 		bindings.push({actionID: "toggleTabMode",	keyBinding: new KeyBinding('m', true), predefined: true}); //$NON-NLS-1$ //$NON-NLS-0$
+		bindings.push({actionID: "dirLTR",	keyBinding: new KeyBinding(36, null, true, true), predefined: true}); //$NON-NLS-0$
+		bindings.push({actionID: "dirRTL",	keyBinding: new KeyBinding(35, null, true, true), predefined: true}); //$NON-NLS-0$
 		if (util.isMac) {
 			bindings.push({actionID: "deleteNext",		keyBinding: new KeyBinding(46, null, true), predefined: true}); //$NON-NLS-0$
 			bindings.push({actionID: "deleteWordPrevious",	keyBinding: new KeyBinding(8, null, null, true), predefined: true}); //$NON-NLS-0$

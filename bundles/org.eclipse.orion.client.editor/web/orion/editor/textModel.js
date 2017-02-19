@@ -38,8 +38,9 @@ define("orion/editor/textModel", ['orion/editor/eventTarget', 'orion/regex', 'or
 		this._lastLineIndex = -1;
 		this._text = [""];
 		this._lineOffsets = [0];
+		this._textDirs = [""];
 		this.setText(text);
-		this.setLineDelimiter(lineDelimiter);
+		this.setLineDelimiter(lineDelimiter);		
 	}
 
 	TextModel.prototype = /** @lends orion.editor.TextModel.prototype */ {
@@ -371,6 +372,23 @@ define("orion/editor/textModel", ['orion/editor/eventTarget', 'orion/regex', 'or
 			return this._lineOffsets[lineIndex];
 		},
 		/**
+		 * Returns the text direction of the given line.
+		 * <p>
+		 * The valid indices are 0 to line count exclusive.  Returns <code>""</code> 
+		 * if the index is out of range. 
+		 * </p>
+		 *
+		 * @param {Number} lineIndex the zero based index of the line.
+		 * @return {String} the text direction of the line<code>""</code> if out of range.
+		 *		 
+		 */
+		getLineTextDir: function(lineIndex) {
+			if (!(0 <= lineIndex && lineIndex < this.getLineCount())) {
+				return ""; 
+			}
+			return this._textDirs[lineIndex];
+		},
+		/**
 		 * Returns the text for the given range.
 		 * <p>
 		 * The end offset is not inclusive. This means that character at the end offset
@@ -415,6 +433,23 @@ define("orion/editor/textModel", ['orion/editor/eventTarget', 'orion/regex', 'or
 			var beforeText = this._text[firstChunk].substring(start - firstOffset);
 			var afterText = this._text[lastChunk].substring(0, end - lastOffset);
 			return beforeText + this._text.slice(firstChunk+1, lastChunk).join("") + afterText; 
+		},
+		/**
+		 *  Returns the whole text for save. We keep the text direction of each line by adding the ltr/rtl marker.
+		 *
+		 */
+		getTextForSave: function() {
+			var text = "";
+			for (var i = 0; i<this.getLineCount(); i++) {
+				if (this._textDirs[i] === "ltr") {
+					text += util.LtrMarker + this.getLine(i, true);
+				} else if (this._textDirs[i] === "rtl") {
+					text += util.RtlMarker + this.getLine(i, true);
+				} else {
+					text += this.getLine(i, true);
+				}
+			}
+			return text;
 		},
 		/**
 		 * Notifies all listeners that the text is about to change.
@@ -508,6 +543,8 @@ define("orion/editor/textModel", ['orion/editor/eventTarget', 'orion/regex', 'or
 			if (start === undefined) { start = 0; }
 			if (end === undefined) { end = this.getCharCount(); }
 			if (start === end && text === "") { return; }
+			var ltrMarker = util.LtrMarker;
+			var rtlMarker = util.RtlMarker;
 			var startLine = this.getLineAtOffset(start);
 			var endLine = this.getLineAtOffset(end);
 			var eventStart = start;
@@ -517,12 +554,21 @@ define("orion/editor/textModel", ['orion/editor/eventTarget', 'orion/regex', 'or
 			var addedLineCount = 0;
 			var lineCount = this.getLineCount();
 			
-			var cr = 0, lf = 0, index = 0;
+			var cr = 0, lf = 0, index = 0, shift = 0;
 			var newLineOffsets = [];
-			while (true) {
+			var newTextDirs = [];
+			var origText = text;
+			
+									
+			while (true) {				
 				if (cr !== -1 && cr <= index) { cr = text.indexOf("\r", index); } //$NON-NLS-0$
 				if (lf !== -1 && lf <= index) { lf = text.indexOf("\n", index); } //$NON-NLS-0$
 				if (lf === -1 && cr === -1) { break; }
+				if (text.substr(index, ltrMarker.length) == ltrMarker) {
+					shift += ltrMarker.length;
+				} else if (text.substr(index, rtlMarker.length) == rtlMarker) {
+					shift += rtlMarker.length;
+				}
 				if (cr !== -1 && lf !== -1) {
 					if (cr + 1 === lf) {
 						index = lf + 1;
@@ -534,8 +580,20 @@ define("orion/editor/textModel", ['orion/editor/eventTarget', 'orion/regex', 'or
 				} else {
 					index = lf + 1;
 				}
-				newLineOffsets.push(start + index);
+				newLineOffsets.push(start + index - shift);
 				addedLineCount++;
+				if (text.substr(index, ltrMarker.length) == ltrMarker) {
+					newTextDirs.push("ltr"); //$NON-NLS-0$
+				} else if (text.substr(index, rtlMarker.length) == rtlMarker) {
+					newTextDirs.push("rtl"); //$NON-NLS-0$
+				} else {
+					newTextDirs.push(""); //$NON-NLS-0$
+				}
+			}
+			if (text !== ltrMarker && text !== rtlMarker) {
+				var re1 = new RegExp(ltrMarker, "g"), re2 = new RegExp(rtlMarker, "g");
+				text = text.replace(re1, "").replace(re2, "");
+				addedCharCount = text.length;
 			}
 		
 			var modelChangingEvent = {
@@ -582,14 +640,24 @@ define("orion/editor/textModel", ['orion/editor/eventTarget', 'orion/regex', 'or
 			if (newLineOffsets.length < limit) {
 				args = [startLine + 1, removedLineCount].concat(newLineOffsets);
 				Array.prototype.splice.apply(this._lineOffsets, args);
+				args = [startLine + 1, removedLineCount].concat(newTextDirs);
+				Array.prototype.splice.apply(this._textDirs, args);
 			} else {
 				index = startLine + 1;
 				this._lineOffsets.splice(index, removedLineCount);
 				for (var k = 0; k < newLineOffsets.length; k += limit) {
 					args = [index, 0].concat(newLineOffsets.slice(k, Math.min(newLineOffsets.length, k + limit)));
 					Array.prototype.splice.apply(this._lineOffsets, args);
+					args = [index, 0].concat(newTextDirs.slice(k, Math.min(newTextDirs.length, k + limit)));
+					Array.prototype.splice.apply(this._textDirs, args);
 					index += limit;
 				}
+			}
+			
+			if (origText.indexOf(ltrMarker) == 0) {
+				this._textDirs[startLine] = "ltr"; //$NON-NLS-0$				
+			} else if (origText.indexOf(rtlMarker) == 0) {
+				this._textDirs[startLine] = "rtl"; //$NON-NLS-0$				
 			}
 			
 			var offset = 0, chunk = 0, length;
@@ -628,7 +696,7 @@ define("orion/editor/textModel", ['orion/editor/eventTarget', 'orion/regex', 'or
 				removedLineCount: removedLineCount,
 				addedLineCount: addedLineCount
 			};
-			this.onChanged(modelChangedEvent);
+			this.onChanged(modelChangedEvent);						
 		}
 	};
 	mEventTarget.EventTarget.addMixin(TextModel.prototype);

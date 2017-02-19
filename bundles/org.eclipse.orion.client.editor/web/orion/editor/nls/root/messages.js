@@ -86,6 +86,8 @@ define({//Default message bundle
 	"toggleWrapMode": "Toggle Wrap Mode", //$NON-NLS-1$ //$NON-NLS-0$
 	"toggleTabMode": "Toggle Tab Mode", //$NON-NLS-1$ //$NON-NLS-0$
 	"toggleOverwriteMode": "Toggle Overwrite Mode", //$NON-NLS-1$ //$NON-NLS-0$
+	"dirLTR": "Set Left to Right Text Direction", //$NON-NLS-1$ //$NON-NLS-0$
+	"dirRTL": "Set Right to Left Text Direction", //$NON-NLS-1$ //$NON-NLS-0$
 	
 	"committerOnTime": "${0} on ${1}", //$NON-NLS-1$ //$NON-NLS-0$
 	

@@ -30,6 +30,8 @@ define(function() {
 	var isTouch = typeof document !== "undefined" && "ontouchstart" in document.createElement("input"); //$NON-NLS-1$ //$NON-NLS-0$
 	
 	var platformDelimiter = isWindows ? "\r\n" : "\n"; //$NON-NLS-1$ //$NON-NLS-0$
+	var LtrMarker = "\u202A\u202A\u202A\u202A\u202A"; //$NON-NLS-0$
+	var RtlMarker = "\u202B\u202B\u202B\u202B\u202B"; //$NON-NLS-0$
 
 	function formatMessage(msg) {
 		var args = arguments;
@@ -85,6 +87,9 @@ define(function() {
 		/** Capabilities */
 		isTouch: isTouch,
 
-		platformDelimiter: platformDelimiter
+		platformDelimiter: platformDelimiter,
+		LtrMarker: LtrMarker,
+		RtlMarker: RtlMarker
+		
 	};
 });
