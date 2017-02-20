@@ -240,7 +240,7 @@ define([
 					});
 					it("should retain information before the color value", function() {
 						var target, value, expected, actual;
-						target = "0 1px 2px 0 rgba(61, 114, 179, 0.25)";
+						target = "0 1px 2px 0 rgba(60, 113, 179, 0.25)";
 						value = "#000000";
 						expected = "0 1px 2px 0 rgba(0, 0, 0, 0.25)";
 						actual = themeBuilder.updateValue(target, value);
@@ -293,8 +293,8 @@ define([
 					});
 					it("should retrieve value when string contains other information before value", function() {
 						var value, expected, actual;
-						value = "0 1px 2px 0 rgb(61, 114, 179)";
-						expected = "#3D72B3";
+						value = "0 1px 2px 0 rgb(60, 113, 179)";
+						expected = "#3C71B3";
 						actual = themeBuilder.getValue(value);
 						assert.equal(expected, actual);
 					});

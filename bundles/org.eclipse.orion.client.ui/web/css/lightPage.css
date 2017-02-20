@@ -80,7 +80,7 @@
 .lightPage .gitCommitMessageSection,
 .lightPage .treeIterationCursorRow_Dotted,
 .lightPage .treeIterationCursorRow {
-	background-color: rgba(61, 114, 179, 0.25);
+	background-color: rgba(60, 113, 179, 0.25);
 }
 
 .lightPage label.parameterInput,
@@ -99,12 +99,12 @@
 .lightPage .gitStatusTitle,
 .lightPage .gitStatusIcon,
 .lightPage .sideMenuItem > .submenu-trigger:hover {
-	color: rgb(61, 114, 179) !important;
+	color: rgb(60, 113, 179) !important;
 }
 
 .lightPage .sideMenuItemActive:hover {
 	color: white;
-	background: rgba(61, 114, 179, 0.25) !important;
+	background: rgba(60, 113, 179, 0.25) !important;
 }
 
 .lightPage .splashDetailedMessage,
@@ -124,12 +124,12 @@
 }
 
 .lightPage .gitCommitMessage .gitCommitMessageTopRow {
-	border: 1px solid rgb(61, 114, 179);
+	border: 1px solid rgb(60, 113, 179);
 }
 
 .lightPage .tooltip {
-	background-color: rgb(61, 114, 179);
-	border: 1px solid rgb(61, 114, 170);
+	background-color: rgb(60, 113, 179);
+	border: 1px solid rgb(60, 113, 179);
  	color: white;
 }
 
@@ -139,28 +139,28 @@
 
 .lightPage .tooltipTailFromright:before,
 .lightPage .tooltipTailFromright:after {
-	border-right-color: rgb(61, 114, 179);
+	border-right-color: rgb(60, 113, 179);
 }
 
 .lightPage .tooltipTailFromleft:before,
 .lightPage .tooltipTailFromleft:after {
-	border-left-color: rgb(61, 114, 179);
+	border-left-color: rgb(60, 113, 179);
 }
 
 .lightPage .tooltipTailFrombelow:before,
 .lightPage .tooltipTailFrombelow:after {
-	border-bottom-color: rgb(61, 114, 179);
+	border-bottom-color: rgb(60, 113, 179);
 }
 
 .lightPage .tooltipTailFromabove:before,
 .lightPage .tooltipTailFromabove:after {
-	border-top-color: rgb(61, 114, 179);
+	border-top-color: rgb(60, 113, 179);
 }
 
 .lightPage .searchResultsWrapperDiv .selectableNavRow:hover,
 .lightPage .dropdownMenu .dropdownMenuItemSelected {
-	border-left-color: rgb(61, 114, 179);
-	background: rgba(61, 114, 179, 0.25);
+	border-left-color: rgb(60, 113, 179);
+	background: rgba(60, 113, 179, 0.25);
 }
 
 .lightPage .dialogTitle,
@@ -177,20 +177,20 @@
 .lightPage .sideMenuItemActive,
 .lightPage .tooltip,
 .lightPage .checkedRow {
-	background-color: rgb(61, 114, 179) !important;
+	background-color: rgb(60, 113, 179) !important;
  	color: white !important;
 }
 
 .lightPage .primaryButton {  /* from git.css */
-	background-color: rgb(61, 114, 179) !important;
+	background-color: rgb(60, 113, 179) !important;
 	color: white !important;
-	border: 1px solid rgb(61, 114, 179) !important;
+	border: 1px solid rgb(60, 113, 179) !important;
 	border-radius: 0 !important;
 }
 
 .lightPage .primaryButton:hover, .primaryButton:focus {
-	background: rgb(61, 114, 179);
-	border-color: rgb(61, 114, 179);
+	background: rgb(60, 113, 179);
+	border-color: rgb(60, 113, 179);
 }
 
 .lightPage .checkedRow .commandButton {
@@ -203,8 +203,8 @@
 }
 
 .lightPage .commandButton {
-	color: rgb(61, 114, 179);
-	border: 1px solid rgb(61, 114, 179);
+	color: rgb(60, 113, 179);
+	border: 1px solid rgb(60, 113, 179);
 	background-color: rgba(0, 0, 0, 0);
 }
 
@@ -213,7 +213,7 @@
 }
 
 .lightPage .textviewTooltip {
-	background-color: rgb(61, 114, 179);
+	background-color: rgb(60, 113, 179);
 }
 
 .lightPage .textviewTooltip .commandButton { /* Styling quickfixes */
@@ -227,15 +227,15 @@
 .lightPage .commandButton:not(.primaryButton):hover,
 .lightPage .commandButton:not(.primaryButton):focus {
 	color: black;
-	background-color: rgba(61, 114, 179, 0.25);
-	box-shadow: 0 1px 2px 0 rgb(61, 114, 179);
+	background-color: rgba(60, 113, 179, 0.25);
+	box-shadow: 0 1px 2px 0 rgb(60, 113, 179);
 }
 
 .lightPage .checkedRow .commandButton:not(.primaryButton):hover,
 .lightPage .checkedRow .commandButton:not(.primaryButton):focus {
 	color: black;
 	background: rgba(255, 255, 255, 0.50);
-	box-shadow: 0 1px 2px 0 rgb(61, 114, 179);
+	box-shadow: 0 1px 2px 0 rgb(60, 113, 179);
 }
 
 .lightPage .launchConfigurationsButton .commandButton.orionButton.dropdownTrigger {
