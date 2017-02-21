@@ -18,15 +18,9 @@ define([
 
 	var eslintHandler = {
 		_update: function _update(project, fileName) {
-			if(fileName === project.ESLINTRC
-				|| fileName === project.ESLINTRC_JS
-				|| fileName === project.ESLINTRC_JSON
-				|| fileName === project.PACKAGE_JSON
-				|| fileName === project.ESLINTRC_YAML
-				|| fileName === project.ESLINTRC_YML) {
+			if(project.lintFiles.indexOf(fileName) > -1) {
 				delete project.map.eslint;
-			}
-			if (fileName === project.JSBEAUTIFYRC) {
+			} else if (fileName === project.JSBEAUTIFYRC) {
 				delete project.map.formatting;
 			}
 		},
@@ -63,6 +57,59 @@ define([
 		}
 	};
 
+	/**
+	 * @description This handler updates the 'env' map.
+	 * @type {?}
+	 * @since 14.0
+	 */
+	var envHandler = {
+		/**
+		 * @callback
+		 */
+		onCreated: function onCreated(project, qualifiedName, fileName) {
+			//We can read the new files and update here, but that could take longer than 
+			//would be ready for the next getComputedEnvironment call - just wipe the cache
+			//and recompute when asked for
+			this._wipeCache(project, fileName);
+		},
+		/**
+		 * @callback
+		 */
+		onDeleted: function onDeleted(project, qualifiedName, fileName) {
+			//We don't have access to the deleted contents - wipe the cache and recompute when asked for
+			this._wipeCache(project, fileName);
+		},
+		/**
+		 * @callback
+		 */
+		onModified: function onModified(project, qualifiedName, fileName) {
+			//same problem with onCreated - we could compute the delta, but that could take longer 
+			//and not be complete by the next onComputedEnvironment call, which would cause sync issues
+			//just wipe the cache
+			this._wipeCache(project, fileName);
+		},
+		/**
+		 * @callback
+		 */
+		onProjectChanged: function onProjectChanged(project, evnt, projectName) {
+			delete project.map.env;
+		},
+		/**
+		 * @name _wipeCache
+		 * @description Clears the 'env' cache if the file name is a project configuration-like file
+		 * @function
+		 * @private
+		 * @param {JavaScriptProject} project The backing project
+		 * @param {String} fileName The short name of the file, i.e. 'package.json'
+		 */
+		_wipeCache: function _wipeCache(project, fileName) {
+			if(fileName === project.PACKAGE_JSON || fileName === project.NODE_MODULES || 
+				project.lintFiles.indexOf(fileName) > -1 || fileName === project.TERN_PROJECT) {
+					delete project.map.env;
+			}
+		} 
+	};
+
 	var initialized = false;
 
 	/**
@@ -77,9 +124,9 @@ define([
 		this.map = Object.create(null);
 		this.registry = serviceRegistry;
 		this.fileClient = null;
-		this.handlers = [eslintHandler];
-		this.projectFiles = [this.PACKAGE_JSON, this.TERN_PROJECT, this.ESLINTRC, this.ESLINTRC_JS, this.ESLINTRC_JSON, this.ESLINTRC_YAML, this.ESLINTRC_YML];
+		this.handlers = [eslintHandler, envHandler];
         this.lintFiles = [this.ESLINTRC_JS, this.ESLINTRC_JSON, this.ESLINTRC, this.ESLINTRC_YAML, this.ESLINTRC_YML, this.PACKAGE_JSON];
+		this.projectFiles = [this.PACKAGE_JSON, this.TERN_PROJECT].concat(this.lintFiles);
 	}
 	/**
 	 * The .tern-project file name
@@ -354,27 +401,25 @@ define([
 	 * @name JavaScriptProject.prototype.getComputedEnvironment
 	 * @description Computes the environment that has been computed based on what config files are in the project
 	 * @function
-	 * @param {Boolean} includeEslint If we should also lookup the ESLint options
 	 * @returns {Deferred} A deferred that will resolve to an object listing the computed environments to use in the tools
 	 * @since 14.0
 	 */
-	JavaScriptProject.prototype.getComputedEnvironment = function getComputedEnvironment(includeEslint) {
+	JavaScriptProject.prototype.getComputedEnvironment = function getComputedEnvironment() {
 		if(this.map.env) {
 			return new Deferred().resolve(this.map.env);
 		}
-		this.map.env = {browser: true, node: true}; //always start assuming browser
+		this.map.env = {};
+		this.map.env.envs = {browser: true, node: true}; //always start assuming browser
 		//start with eslint options - they can carry env objects
-		if(includeEslint) {
-			return this.getESlintOptions().then(function(options) {
-				if(options && options.env) {
-					Object.keys(options.env).forEach(function(key) {
-						this.map.env[key] = options.env[key];
-					}.bind(this));
-				}
-				return guessEnvForProject(this);
-			}.bind(this));
-		} 
-		return guessEnvForProject(this);
+		return this.getESlintOptions().then(function(options) {
+			this.map.env.eslint = options;
+			if(options && options.vals && options.vals.env) {
+				Object.keys(options.vals.env).forEach(function(key) {
+					this.map.env.envs[key] = options.vals.env[key];
+				}.bind(this));
+			}
+			return guessEnvForProject(this);
+		}.bind(this));
 	};
 
 	/**
@@ -386,10 +431,32 @@ define([
 	 */
 	function guessEnvForProject(project) {
 		return project.getFile(project.PACKAGE_JSON).then(function(file) {
+			project.map.env.packagejson = {file: file};
 			if(file && typeof file.contents === "string") {
-				project.map.env.node = true;
+				try {
+					var vals = project.map.env.packagejson.vals = JSON.parse(file.contents);
+					if(vals) {
+						if(vals.dependencies) {
+							Object.keys(vals.dependencies).forEach(function(key) {
+								project.map.env.envs[key] = true;
+							});
+						} else if(vals.devDependencies) {
+							Object.keys(vals.dependencies).forEach(function(key) {
+								project.map.env.envs[key] = true;
+							});
+						} else if(vals.optionalDependencies) {
+							Object.keys(vals.dependencies).forEach(function(key) {
+								project.map.env.envs[key] = true;
+							});
+						}
+					}
+				} catch(e) {
+					//ignore
+				}
+				project.map.env.envs.node = true;
 			}
 			return project.getFile(project.TERN_PROJECT).then(function(file) {
+				project.map.env.ternproject = {file: file, vals: null};
 				if(file && typeof file.contents === "string") {
 					try {
 						var vals = JSON.parse(file.contents);
@@ -397,41 +464,42 @@ define([
 						// ignore
 					}
 					if(vals) {
+						project.map.env.ternproject.vals = vals;
 						if(Array.isArray(vals.libs)) {
 							if(vals.libs.indexOf("browser") > -1) {
-								project.map.env.browser = true;
+								project.map.env.envs.browser = true;
 							} else if(vals.libs.indexOf("ecma6") > -1) {
-								project.map.env.es6 = true;
+								project.map.env.envs.es6 = true;
 							} 
 						}  
 						if(Array.isArray(vals.defs)) {
 							if(vals.defs.indexOf("browser") > -1) {
-								project.map.env.browser = true;
+								project.map.env.envs.browser = true;
 							} else if(vals.defs.indexOf("ecma6") > -1) {
-								project.map.env.es6 = true;
+								project.map.env.envs.es6 = true;
 							} 
 						}
 						if(vals.plugins && typeof vals.plugins === 'object') {
 							if(vals.plugins.node) {
-								project.map.env.node = true;
+								project.map.env.envs.node = true;
 							} else if(vals.plugins.requirejs || vals.plugins.commonjs) {
-								project.map.env.amd = true;
-								project.map.env.browser = true;
+								project.map.env.envs.amd = true;
+								project.map.env.envs.browser = true;
 							} else if(vals.plugins.es6_modules) {
-								project.map.env.es6 = true;
-								project.map.env.browser = true;
-								project.map.env.node = true;
+								project.map.env.envs.es6 = true;
+								project.map.env.envs.browser = true;
+								project.map.env.envs.node = true;
 							}
 						} 
 						if(typeof vals.ecmaVersion === 'number') {
 							if(vals.ecmaVersion >= 6) {
-								project.map.env.es6 = true;
+								project.map.env.envs.es6 = true;
 							}
 						} 
 						if(vals.sourceType === 'modules') {
-							project.map.env.es6 = true;
-							project.map.env.browser = true;
-							project.map.env.node = true;
+							project.map.env.envs.es6 = true;
+							project.map.env.envs.browser = true;
+							project.map.env.envs.node = true;
 						}
 					}
 				}
@@ -441,6 +509,7 @@ define([
 	}
 
 	function readAndMap(map, file, key) {
+		map[key] = {file: file, vals: null};
 		if (file && file.contents) {
 			var vals = null;
 			try {
@@ -464,7 +533,7 @@ define([
             }
 		}
 		if (vals && Object.keys(vals).length > 0) {
-			map[key] = vals;
+			map[key].vals = vals;
 			return map[key];
 		}
 		return null;

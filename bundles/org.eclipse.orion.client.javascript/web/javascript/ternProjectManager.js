@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2015, 2016 IBM Corporation and others.
+ * Copyright (c) 2015, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License v1.0
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution
@@ -11,13 +11,14 @@
  *******************************************************************************/
  /*eslint-env amd, browser*/
 define([
-'orion/objects',
-'orion/Deferred',
-'orion/URITemplate',
-'orion/i18nUtil',
-'javascript/ternProjectValidator',
-'i18n!javascript/nls/problems'
-], function(Objects, Deferred, URITemplate, i18nUtil, Validator, Messages) {
+	'orion/objects',
+	'orion/Deferred',
+	'orion/URITemplate',
+	'orion/i18nUtil',
+	'javascript/ternProjectValidator',
+	'i18n!javascript/nls/problems',
+	'javascript/plugins/ternDefaults'
+], function(Objects, Deferred, URITemplate, i18nUtil, Validator, Messages, TernDefaults) {
 
 	/**
 	 * @description Creates a new open declaration command
@@ -75,7 +76,7 @@ define([
 		 * @function
 		 * @param {String} file The fully qualified name of the file
 		 */
-		refresh : function(file, contents) {
+		refresh : function(file, contents, env) {
 			this.currentFile = file;
 			try {
 				this.json = contents ? JSON.parse(contents) : Object.create(null);
@@ -84,7 +85,7 @@ define([
 				this._report(Messages['errorParsing'], err);
 				this.json = Object.create(null);
 			}
-			return this.loadTernProjectOptions(this.json);
+			return this.loadTernProjectOptions(this.json, env);
 		},
 		
 		/**
@@ -117,10 +118,11 @@ define([
 		 * Loads the given jsonOptions into Tern, either by restarting the Tern server with new initialization options
 		 * or by adding additional type information to the running Tern server.  The messages sent to Tern are processed
 		 * asynchronously and will not be complete when this function returns.
-		 * @param {Object} jsonOptions options to load into Tern
+		 * @param {?} jsonOptions options to load into Tern
+		 * @param {?} env the optional computed environment
 		 */
-		loadTernProjectOptions: function(jsonOptions) {
-			var opts = jsonOptions || Object.create(null);
+		loadTernProjectOptions: function(jsonOptions, env) {
+			var opts = prepareOptions(jsonOptions || Object.create(null), env);
 			opts.projectLoc = this.projectLocation;
 			if (Array.isArray(opts.loadEagerly) && opts.loadEagerly.length > 0) {
 				var fileLoadPromises = [];
@@ -177,28 +179,33 @@ define([
 			}
 		},
 		/**
-		 * @callback 
+		 * @callback
 		 */
 		onDeleted: function onDeleted(jsProject, qualifiedName, fileName) {
-			if(fileName === jsProject.TERN_PROJECT && qualifiedName.indexOf(jsProject.getProjectPath()) === 0) {
-				this.loadTernProjectOptions();
+			if(jsProject.projectFiles.indexOf(fileName) > -1 && qualifiedName.indexOf(jsProject.getProjectPath()) === 0) {
+				jsProject.getComputedEnvironment().then(function(env) {
+					this.loadTernProjectOptions(null, env);	
+				});
 			}
 		},
 		/**
 		 * @callback
 		 */
 		onMoved: function onMoved(jsProject, qualifiedName, fileName, toQualified, toName) {
-			if(fileName === jsProject.TERN_PROJECT && qualifiedName.indexOf(jsProject.getProjectPath()) === 0) {
+			if(jsProject.projectFiles.indexOf(fileName) > -1 && qualifiedName.indexOf(jsProject.getProjectPath()) === 0) {
 				//same as a delete
-				this.loadTernProjectOptions();
+				return jsProject.getComputedEnvironment().then(function(env) {
+					this.loadTernProjectOptions(null, env);	
+				});
 			}
-			if(toName === jsProject.TERN_PROJECT && toQualified.indexOf(jsProject.getProjectPath()) === 0) {
+			if(jsProject.projectFiles.indexOf(toName) > -1 && toQualified.indexOf(jsProject.getProjectPath()) === 0) {
 				//same as adding
-				return jsProject.getFile(jsProject.TERN_PROJECT).then(function(file) {
+				return jsProject.getComputedEnvironment().then(function(env) {
+					var file = env.ternproject ? env.ternproject.file : null;
 					if(file && file.contents) {
-						this.refresh(file.name, file.contents);
+						this.refresh(file.name, file.contents, env);
 					} else {
-						this.loadTernProjectOptions();
+						this.loadTernProjectOptions(null, env);
 					}
 				}.bind(this));
 			}
@@ -207,16 +214,17 @@ define([
 		 * @callback 
 		 */
 		onModified: function onModified(jsProject, fullPath, shortName) {
-			this.modified = shortName === jsProject.TERN_PROJECT;
+			this.modified = jsProject.projectFiles.indexOf(shortName) > -1;
 			if(this.modified && !this.ineditor) {
 				this.modified = false;
 				this.starting();
 				//contents changed while not editing, restart
-				return jsProject.getFile(jsProject.TERN_PROJECT).then(function(file) {
+				return jsProject.getComputedEnvironment().then(function(env) {
+					var file = env.ternproject ? env.ternproject.file : null;
 					if(file && file.contents) {
-						this.refresh(file.name, file.contents);
+						this.refresh(file.name, file.contents, env);
 					} else {
-						this.loadTernProjectOptions();
+						this.loadTernProjectOptions(null, env);
 					}
 				}.bind(this));
 			}
@@ -225,15 +233,16 @@ define([
 		 * @callback 
 		 */
 		onInputChanged: function onInputChanged(jsProject, evnt, projectName) {
-			this.ineditor = evnt.file.name === jsProject.TERN_PROJECT;
+			this.ineditor = jsProject.projectFiles.indexOf(evnt.file.name) > -1;
 			if(this.modified && !this.ineditor) {
 				this.modified = false;
 				this.starting();
-				return jsProject.getFile(jsProject.TERN_PROJECT).then(function(file) {
+				return jsProject.getComputedEnvironment().then(function(env) {
+					var file = env.ternproject ? env.ternproject.file : null;
 					if(file && file.contents) {
-						this.refresh(file.name, file.contents);
+						this.refresh(file.name, file.contents, env);
 					} else {
-						this.loadTernProjectOptions();
+						this.loadTernProjectOptions(null, env);
 					}
 				}.bind(this));
 			}
@@ -243,23 +252,56 @@ define([
 		 */
 		onProjectChanged: function onProjectChanged(jsProject, evnt, projectName) {
 			this.projectLocation = projectName;
-			this.ineditor = this.modified = evnt.file.name === jsProject.TERN_PROJECT;
+			this.ineditor = this.modified = jsProject.projectFiles.indexOf(evnt.file.name) > -1;
 			this.scriptResolver.setSearchLocation(projectName);
 			if(!this.ineditor) {
 				this.starting();
-				if(!projectName) {
-					return this.loadTernProjectOptions(); // code editor sends out bogus events for files that have no projects
-				}
-				return jsProject.getFile(jsProject.TERN_PROJECT).then(function(file) {
+				return jsProject.getComputedEnvironment().then(function(env) {
+					if(!projectName) {
+						return this.loadTernProjectOptions(); // code editor sends out bogus events for files that have no projects
+					}
+					var file = env.ternproject ? env.ternproject.file : null;
 					if(file && file.contents) {
-						this.refresh(file.name, file.contents);
+						this.refresh(file.name, file.contents, env);
 					} else {
-						this.loadTernProjectOptions();
+						this.loadTernProjectOptions(null, env);
 					}
 				}.bind(this));
 			}
 		}
 	});
+
+	/**
+	 * @description merges the configurations from the actual .tern-project file and the computed project setup
+	 * @param {?} json The JSON from the actual .tern-project file
+	 * @param {?} env The computed environment
+	 * @since 14.0
+	 */
+	function prepareOptions(json, env) {
+		if(env && env.envs) {
+			//TODO make this more dynamic once we have the ability to install definition files and plugins
+			TernDefaults.defNames.forEach(function(def) {
+				if(env.envs[def]) {
+					if(!Array.isArray(json.libs)) {
+						json.libs = [def];	
+					} else if(json.libs.indexOf(def) < 0) {
+						json.libs.push(def);
+					}
+				}
+			});
+			Object.keys(TernDefaults.plugins.optional).forEach(function(key) {
+				if(env.envs[key]) {
+					if(!json.plugins) {
+						json.plugins = {};
+					}
+					if(!json.plugins[key]) {
+						json.plugins[key] = {};
+					}
+				}				
+			});
+		}
+		return json;
+	}
 
 	return {
 		TernProjectManager : TernProjectManager

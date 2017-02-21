@@ -103,46 +103,41 @@ define([
 
 		doAssist: function(ast, params, meta, envs, htmlsource) {
 			return this.jsProject.getEcmaLevel().then(function(ecma) {
-				return this.jsProject.getComputedEnvironment(false).then(function(cenv) {
-					Objects.mixin(envs, cenv);
-					return this.jsProject.getESlintOptions().then(function(eslint) {
-					    var files = [
-					    	{type:'full', name: meta.location, text: htmlsource ? htmlsource : ast.sourceFile.text} //$NON-NLS-1$
-					    ];
-					    if(typeof params.keywords === 'undefined') {
-					    	params.keywords = true;
-					    }
-					    params.ecma = ecma;
-					    if(eslint && eslint.env) {
-					    	Objects.mixin(envs, eslint.env);
-					    }
-					    var env = this.getActiveEnvironments(ast, envs);
-					    var args = {params: params, meta: meta, envs: env, files: files};
-						var deferred = new Deferred();
-						var that = this;
-						this.ternworker.postMessage({request: 'completions', args: args}, //$NON-NLS-1$
-							/* @callback */ function(response, err) {
-								clearTimeout(that.timeout);
-								var p = [];
-								if(Array.isArray(response.proposals)) {
-									p = response.proposals;
-								}
-					        	deferred.resolve(sortProposals(p, args));
+				return this.jsProject.getComputedEnvironment().then(function(cenv) {
+					Objects.mixin(envs, cenv && cenv.envs ? cenv.envs : {});
+				    var files = [
+				    	{type:'full', name: meta.location, text: htmlsource ? htmlsource : ast.sourceFile.text} //$NON-NLS-1$
+				    ];
+				    if(typeof params.keywords === 'undefined') {
+				    	params.keywords = true;
+				    }
+				    params.ecma = ecma;
+				    var env = this.getActiveEnvironments(ast, envs);
+				    var args = {params: params, meta: meta, envs: env, files: files};
+					var deferred = new Deferred();
+					var that = this;
+					this.ternworker.postMessage({request: 'completions', args: args}, //$NON-NLS-1$
+						/* @callback */ function(response, err) {
+							clearTimeout(that.timeout);
+							var p = [];
+							if(Array.isArray(response.proposals)) {
+								p = response.proposals;
 							}
-			        	);
-						
-						if(this.timeout) {
-							clearTimeout(this.timeout);
+				        	deferred.resolve(sortProposals(p, args));
 						}
-						this.timeout = setTimeout(function() {
-							if(deferred) {
-								// In the editor we can't return an error message here or it will be treated as a proposal and inserted into text
-								deferred.resolve(params.timeoutReturn ? params.timeoutReturn : []);
-							}
-							that.timeout = null;
-						}, params.timeout ? params.timeout : 5000);
-						return deferred;
-					}.bind(this));
+		        	);
+					
+					if(this.timeout) {
+						clearTimeout(this.timeout);
+					}
+					this.timeout = setTimeout(function() {
+						if(deferred) {
+							// In the editor we can't return an error message here or it will be treated as a proposal and inserted into text
+							deferred.resolve(params.timeoutReturn ? params.timeoutReturn : []);
+						}
+						that.timeout = null;
+					}, params.timeout ? params.timeout : 5000);
+					return deferred;
 				}.bind(this));
 			}.bind(this));
 
