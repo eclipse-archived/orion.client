@@ -32,7 +32,8 @@ var app = express()
 	next();
 })
 .use(CONTEXT_PATH + '/task', require('../lib/tasks').router({
-	taskRoot: CONTEXT_PATH + '/task'
+	taskRoot: CONTEXT_PATH + '/task',
+	singleUser: true
 }))
 .use(CONTEXT_PATH + "/workspace*", require('../lib/workspace')({
 	workspaceRoot: CONTEXT_PATH + '/workspace', 

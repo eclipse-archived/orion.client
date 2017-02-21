@@ -141,10 +141,12 @@ function orionTasksAPI(options) {
 	taskRoot = options.taskRoot;
 	if (!taskRoot) { throw new Error('options.taskRoot is required'); }
 
-	if (options.options.configParams["orion.single.user"]) {
-		taskStore = new TaskStoreInMemory();
-	} else {
-		taskStore = new TaskStoreMongoDB();
+	if (!taskStore) {
+		if (options.singleUser) {
+			taskStore = new TaskStoreInMemory();
+		} else {
+			taskStore = new TaskStoreMongoDB();
+		}
 	}
 
 	return express.Router()
@@ -284,7 +286,7 @@ Task.prototype = {
 	},
 };
 
-function deleteOperation(req, res/*, next*/){
+function deleteOperation(req, res/*, next*/) {
 	taskStore.getTask(req.id, function(err, task) {
 		if (err) {
 			return writeError(500, res, err.toString());
@@ -312,10 +314,14 @@ function deleteAllOperations(req, res) {
 		var locations = [];
 		var doneCount = 0;
 		var done = function() {
-			if (++doneCount === tasks.length) {
+			if (!tasks.length || ++doneCount === tasks.length) {
 				res.status(200).json(locations);
 			}
 		};
+		if (!tasks.length) {
+			done();
+			return;
+		}
 		tasks.forEach(function(task) {
 			if (task.result) {
 				taskStore.deleteTask(task.id, done); /* task is completed */

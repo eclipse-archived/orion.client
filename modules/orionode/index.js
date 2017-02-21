@@ -68,7 +68,7 @@ function startServer(options) {
 			app.use(require(options.configParams["login.module"] || "./lib/user").router(options));
 		}
 		app.use('/site', checkAuthenticated, require('./lib/sites')(options));
-		app.use('/task', checkAuthenticated, require('./lib/tasks').router({ taskRoot: contextPath + '/task', options: options}));
+		app.use('/task', checkAuthenticated, require('./lib/tasks').router({ taskRoot: contextPath + '/task', singleUser: options.configParams["orion.single.user"]}));
 		app.use('/filesearch', checkAuthenticated, require('./lib/search')(options));
 		app.use('/file*', checkAuthenticated, require('./lib/file')({ gitRoot: contextPath + '/gitapi', fileRoot: contextPath + '/file', options: options }));
 		app.use('/workspace*', checkAuthenticated, require('./lib/workspace')({ workspaceRoot: contextPath + '/workspace', fileRoot: contextPath + '/file', gitRoot: contextPath + '/gitapi', options: options }));

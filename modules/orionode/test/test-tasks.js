@@ -24,10 +24,12 @@ var app = express()
 	next();
 })
 .use(CONTEXT_PATH + '/taskHelper', require('./support/task_helper').router({
-	root: '/taskHelper'
+	root: '/taskHelper',
+	singleUser: true
 }))
 .use(CONTEXT_PATH + '/task', tasks.router({
-	taskRoot: CONTEXT_PATH + '/task'
+	taskRoot: CONTEXT_PATH + '/task',
+	singleUser: true
 }));
 
 var request = supertest.bind(null, app);
