@@ -333,6 +333,7 @@ if (process.versions.electron) {
 			windowOptions.title = "Orion";
 			windowOptions.icon = "icon/256x256/orion.png";
 			var nextWindow = new electron.BrowserWindow(windowOptions);
+			var ipcMain  = electron.ipcMain;
 			nextWindow.setMenuBarVisibility(false);	// This line only work for Window and Linux
 			if (windowOptions.maximized) {
 				nextWindow.maximize();
@@ -356,16 +357,24 @@ if (process.versions.electron) {
 					allPrefs.windowBounds = nextWindow.getBounds();
 					allPrefs.windowBounds.maximized = nextWindow.isMaximized();
 					prefs.writePrefs(allPrefs);
-					nextWindow.destroy();
+					if (updateDownloaded) {
+						nextWindow.webContents.session.clearCache(function() {
+							nextWindow.destroy();
+						});
+					}else{
+						nextWindow.destroy();
+					}
 				}
 				event.preventDefault();
-				if (updateDownloaded) {
-					nextWindow.webContents.session.clearCache(function() {
-						exit();
-					});
-				} else {
+				nextWindow.webContents.send('toCollectTabsUrl');	
+				ipcMain.on("collectTabsUrl", function(event, args){
+					var allPrefs = prefs.readPrefs();
+					var lastOpenedTabUrls = {};
+					lastOpenedTabUrls[allPrefs.user.workspace.currentWorkspace] = args;
+					allPrefs.user.workspace.lastOpenedTabUrls = lastOpenedTabUrls;
+					prefs.writePrefs(allPrefs);
 					exit();
-				}
+				});
 			});
 			nextWindow.webContents.once("did-frame-finish-load", function () {
 				if (feedURL) {
@@ -373,14 +382,60 @@ if (process.versions.electron) {
 					scheduleUpdateChecks();
 				}
 			});
+			api.getOrionEE().on("electron_workspace_changed",function(newWorkspace){
+				console.log("server.js knows: ", newWorkspace);
+				nextWindow.webContents.send('toCollectTabsUrl');
+				ipcMain.on("collectTabsUrl", function(event, args){
+					var allPrefs = prefs.readPrefs();
+					var toSaveUrls = {};
+					var lastWorkspace = allPrefs.user.workspace.recentWorkspaces[1];
+					toSaveUrls[lastWorkspace] = args;
+					allPrefs.user.workspace.lastOpenedTabUrls = toSaveUrls;
+					prefs.writePrefs(allPrefs);
+					var _lastOpenedTabUrls = allPrefs.user && allPrefs.user.workspace && allPrefs.user.workspace.lastOpenedTabUrls || allPrefs.user.workspace.lastOpenedTabUrls || {};
+					var lastOpenedTabUrls = _lastOpenedTabUrls[newWorkspace] || [];
+					nextWindow.webContents.executeJavaScript('closeAllTabs();');
+					var hostUrl = "http://localhost:" + port;
+					if(lastOpenedTabUrls.length > 0 && lastOpenedTabUrls[0] !== 'about:blank'){
+						nextWindow.webContents.executeJavaScript('createTab("' + hostUrl + "/" + lastOpenedTabUrls[0] + '");');
+						for(var i = 1; i < lastOpenedTabUrls.length; i++ ){
+							if(lastOpenedTabUrls[i] !== 'about:blank'){
+								
+								nextWindow.webContents.executeJavaScript('window.open("' + hostUrl + "/" + lastOpenedTabUrls[i] + '");');
+							}
+						}
+					}else{ // if user open that workspace for the first time
+						nextWindow.webContents.executeJavaScript('createTab("' + hostUrl + '");');
+					}
+				});
+
+			});	
 			return nextWindow;
 		}
 		startServer(function() {
-			var initialUrl = "http://localhost:" + port;
-			if(relativeFileUrl){ // Works in Mac Open Command Only
-				initialUrl = initialUrl + "/edit/edit.html#/file" + relativeFileUrl;
+			var mainWindow,
+			 	hostUrl = "http://localhost:" + port,
+			 	_lastOpenedTabUrls = allPrefs.user && allPrefs.user.workspace && allPrefs.user.workspace.lastOpenedTabUrls || allPrefs.user.workspace.lastOpenedTabUrls || {},
+				lastOpenedTabUrls = _lastOpenedTabUrls[prefsWorkspace] || [];
+
+			if(relativeFileUrl){
+				var fileUrl = hostUrl + "/edit/edit.html#/file" + relativeFileUrl;
+				lastOpenedTabUrls.unshift("edit/edit.html#/file" + relativeFileUrl);
 			}
-			var mainWindow = createWindow(initialUrl);
+			if(readyToOpenDir && prefsWorkspace !== configParams.workspace){
+				mainWindow = createWindow(fileUrl ? fileUrl : hostUrl);
+			}else{
+				if(lastOpenedTabUrls.length > 0 && lastOpenedTabUrls[0] !== 'about:blank'){
+					mainWindow = createWindow(hostUrl + "/" + lastOpenedTabUrls[0]); 
+					for(var i = 1; i < lastOpenedTabUrls.length; i++ ){
+						if(lastOpenedTabUrls[i] !== 'about:blank'){
+							mainWindow.webContents.executeJavaScript('window.open("' + hostUrl + "/" + lastOpenedTabUrls[i] + '");');
+						}
+					}
+				}else{ // if user open Orion for the first time
+					mainWindow = createWindow(hostUrl);
+				}
+			}
 			mainWindow.on('closed', function() {
 				mainWindow = null;
 			});

@@ -70,6 +70,13 @@ function redrawButtons() {
 	};
 }
 
+function closeAllTabs(){
+	var tabbuttons = document.querySelectorAll(".tabItem");
+	for (var j = 0; j < tabbuttons.length; j++) {
+		tabbuttons[j].lastChild.click();
+	}
+}
+
 function addNewTab(id, iframe) {
 	var bar = document.querySelector("#bar");
 	var tabParent = bar.querySelector("ul");
@@ -249,6 +256,7 @@ function load() {
 		}, 50);
 	});
 	registerContextMenu();
+	collectTabsUrl();
 }
 
 function registerElectronMenu(pageControlCallbacks, newTabCallback){
@@ -440,4 +448,14 @@ function getPosition(e) {
 		x: posx,
 		y: posy
 	};
+}
+function collectTabsUrl(){
+	var ipcRenderer = electron.ipcRenderer;
+	ipcRenderer.on('toCollectTabsUrl',function(){
+		var iframes = document.querySelectorAll(".tabContent");
+		var tabUrls = Array.prototype.map.call(iframes,function(iframe){
+			return iframe.contentWindow.location.href.replace(/http:\/\/localhost:\w+\//, "");
+		});
+		ipcRenderer.send("collectTabsUrl",tabUrls);
+	});
 }
