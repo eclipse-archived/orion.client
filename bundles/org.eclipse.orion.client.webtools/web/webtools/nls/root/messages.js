@@ -122,9 +122,9 @@ define({//Default message bundle
 	"zero-units": "Disallow units for 0 values:",   
 	
 	// CSS Quick Fixes
-	"quickfix-empty-rules": "Remove the rule.",   
-	"quickfix-important": "Remove '!important' annotation.",   
-	"quickfix-zero-units": "Remove 'px' qualifier.",   
+	"quickfix-empty-rules": "Remove the rule",
+	"quickfix-important": "Remove '!important' annotation",
+	"quickfix-zero-units": "Remove 'px' qualifier",
 	
 	//HTML content assist
 	"simpleDocDescription": "Simple HTML document",
