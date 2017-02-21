@@ -242,6 +242,9 @@ define([
 			var _d = evnt.data;
 			if (_d.__isError) {
 				Logger.log(_d.message);
+				if(_d.stack) {
+					Logger.log(_d.stack);
+				}
 			} else if (typeof _d === 'object') {
 				var id = _d.messageID;
 				var f = this.callbacks[id];
