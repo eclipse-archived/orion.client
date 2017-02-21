@@ -212,15 +212,16 @@ Task.prototype = {
 		if (!this.isRunning()) return;
 		taskCount++;
 		this.started = true;
+		var res = this.res;
 		taskStore.createTask(this, function(err) {
 			if (err) {
-				return writeError(500, this.res, err.toString());
+				return writeError(500, res, err.toString());
 			}
 			var resp = JSON.stringify(toJSON(this, true));
-			this.res.statusCode = 202;
-			this.res.setHeader('Content-Type', 'application/json');
-			this.res.setHeader('Content-Length', resp.length);
-			this.res.end(resp);
+			res.statusCode = 202;
+			res.setHeader('Content-Type', 'application/json');
+			res.setHeader('Content-Length', resp.length);
+			res.end(resp);
 		}.bind(this));
 	},
 	done: function(result) {
@@ -240,6 +241,7 @@ Task.prototype = {
 			default:
 				this.type = "abort";
 		}
+		var res = this.res;
 		if (!this.started) {
 			if (this.timeout) {
 				clearTimeout(this.timeout);
@@ -247,26 +249,26 @@ Task.prototype = {
 			}
 			taskStore.updateTask(this, function(err) {
 				if (err) {
-					return writeError(500, this.res, err.toString());
+					return writeError(500, res, err.toString());
 				}
 				if (this.result.JsonData) {
-					this.res.statusCode = this.result.HttpCode;
+					res.statusCode = this.result.HttpCode;
 					var resp = JSON.stringify(this.result.JsonData);
-					this.res.setHeader('Content-Type', 'application/json');
-					this.res.setHeader('Content-Length', resp.length);
-					this.res.end(resp);
+					res.setHeader('Content-Type', 'application/json');
+					res.setHeader('Content-Length', resp.length);
+					res.end(resp);
 				} else if (this.type === "error") {
-					this.res.writeHead(this.result.HttpCode, this.result.Message || "");
-					this.res.end();
+					res.writeHead(this.result.HttpCode, this.result.Message || "");
+					res.end();
 				}
 			}.bind(this));
 		} else {
 			delete this.res;
 			taskStore.updateTask(this, function(err) {
 				if (err) {
-					return writeError(500, this.res, err.toString());
+					return writeError(500, res, err.toString());
 				}
-			}.bind(this));
+			});
 		}
 	},
 	isRunning: function() {
@@ -278,11 +280,12 @@ Task.prototype = {
 		if (typeof message === "string") this.message = message;
 		if (typeof loaded === "number") this.loaded = loaded;
 		if (typeof total === "number") this.total = total;
+		var res = this.res;
 		taskStore.updateTask(this, function(err) {
 			if (err) {
-				return writeError(500, this.res, err.toString());
+				return writeError(500, res, err.toString());
 			}
-		}.bind(this));
+		});
 	},
 };
 
