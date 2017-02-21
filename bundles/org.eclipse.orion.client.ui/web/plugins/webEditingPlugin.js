@@ -55,7 +55,7 @@ define([
 				{	id: "application/x-sh",
 					"extends": "text/plain",
 					name: "sh",
-					extension: ["sh"]
+					extension: ["sh", "bash"]
 				},
 				{	id: "application/pdf",
 					"extends": "application/browser-renderable",
