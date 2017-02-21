@@ -15,7 +15,7 @@ var supertest = require('supertest');
 var tasks = require('../lib/tasks');
 
 var CONTEXT_PATH = '';
-var username = "testUser";
+var username = "testUser" + Date.now();
 var taskIds = [];
 
 var app = express()

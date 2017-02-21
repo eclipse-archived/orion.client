@@ -81,8 +81,8 @@ var TaskStoreMongoDB = function() {
 		// uriUnqualStrategy: String // TODO needed?
 	});
 	
-	/* depends on the user module to establish the db connection */
 	this._orionTask = this._mongoose.model("orionTask", taskSchema);
+	this._mongoose.connect('mongodb://localhost/orion_tasks');
 };
 
 TaskStoreMongoDB.prototype = {
@@ -214,7 +214,7 @@ Task.prototype = {
 		this.started = true;
 		taskStore.createTask(this, function(err) {
 			if (err) {
-				return writeError(500, res, err.toString());
+				return writeError(500, this.res, err.toString());
 			}
 			var resp = JSON.stringify(toJSON(this, true));
 			this.res.statusCode = 202;
@@ -250,7 +250,7 @@ Task.prototype = {
 					return writeError(500, this.res, err.toString());
 				}
 				if (this.result.JsonData) {
-					res.statusCode = this.result.HttpCode;
+					this.res.statusCode = this.result.HttpCode;
 					var resp = JSON.stringify(this.result.JsonData);
 					this.res.setHeader('Content-Type', 'application/json');
 					this.res.setHeader('Content-Length', resp.length);
