@@ -2276,70 +2276,78 @@ define([
         				var args = node.arguments;
         				if(args.length === 1) {
         					var lib = args[0];
-        					if(lib.type === "Literal" && lib.value.charAt(0) !== '.') { //we don't check relative libs
-        						var tern = context.getTern();
-        						if(tern.file.ast && tern.file.ast.environments) {
-        							var envs = tern.file.ast.environments;
-        							if(envs.node && !envs.simplifiedCommonJS) {
-        								if(!tern.pluginRunning('node') && !tern.pluginRunning('commonjs')) { //$NON-NLS-1$ //$NON-NLS-2$
-        									context.report(lib, ProblemMessages['unknown-require-not-running'], {0: 'node', pid: 'unknown-require-not-running', nls: 'unknown-require-not-running', data: 'node'}); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
-        									return;
-        								}
-        								if(!tern.pluginRunning('commonjs')) { //$NON-NLS-1$
-        									context.report(lib, ProblemMessages['unknown-require-not-running'], {0: 'commonjs', pid: 'unknown-require-not-running', nls: 'unknown-require-not-running', data: 'commonjs'}); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
-        									return;
-        								}
-        							}
-        						}
-        						if(tern.plugins[lib.value]) { //it has a named plugin
-        							checkDirective(lib);
-        							return;
-        						}
-        						//check the defs
-    							if(tern.getDef(lib.value)) {
-    								checkDirective(lib);
-    								return;
-    							}
-								//it might be a node built-in, this also confirms its in the running node def
-								var nodejs = tern.getDef('node'); //$NON-NLS-1$
-								if(nodejs) {
-									if(nodejs[lib.value]) {
-										checkDirective(lib);
-										return;
-									} else if(nodejs['!define'] && nodejs['!define'][lib.value]) {
-										checkDirective(lib);
+        					if(lib.type === "Literal") { //we don't check relative libs
+        						if(lib.value.charAt(0) !== '.') {
+	        						var tern = context.getTern();
+	        						if(tern.file.ast && tern.file.ast.environments) {
+	        							var envs = tern.file.ast.environments;
+	        							if(envs.node && !envs.simplifiedCommonJS) {
+	        								if(!tern.pluginRunning('node') && !tern.pluginRunning('commonjs')) { //$NON-NLS-1$ //$NON-NLS-2$
+	        									context.report(lib, ProblemMessages['unknown-require-not-running'], {0: 'node', pid: 'unknown-require-not-running', nls: 'unknown-require-not-running', data: 'node'}); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+	        									return;
+	        								}
+	        								if(!tern.pluginRunning('commonjs')) { //$NON-NLS-1$
+	        									context.report(lib, ProblemMessages['unknown-require-not-running'], {0: 'commonjs', pid: 'unknown-require-not-running', nls: 'unknown-require-not-running', data: 'commonjs'}); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+	        									return;
+	        								}
+	        							}
+	        						}
+	        						if(tern.plugins[lib.value]) { //it has a named plugin
+	        							checkDirective(lib);
+	        							return;
+	        						}
+	        						//check the defs
+	    							if(tern.getDef(lib.value)) {
+	    								checkDirective(lib);
+	    								return;
+	    							}
+									//it might be a node built-in, this also confirms its in the running node def
+									var nodejs = tern.getDef('node'); //$NON-NLS-1$
+									if(nodejs) {
+										if(nodejs[lib.value]) {
+											checkDirective(lib);
+											return;
+										} else if(nodejs['!define'] && nodejs['!define'][lib.value]) {
+											checkDirective(lib);
+											return;
+										}
+									}
+									//check if known module path
+									if(tern.libKnown(lib.value)) {
+										// module names need to be specified in eslint-env unless they are RequireJS relative paths used in simplified CommonJS
+										if (!envs.simplifiedCommonJS){
+											checkDirective(lib);
+										}
 										return;
 									}
-								}
-								//check if known module path
-								if(tern.libKnown(lib.value)) {
-									// module names need to be specified in eslint-env unless they are RequireJS relative paths used in simplified CommonJS
-									if (!envs.simplifiedCommonJS){
-										checkDirective(lib);
+									//TODO check for the module having been loaded via the graph
+									if(tern.optionalPlugins[lib.value]) {
+										//we known about it
+										context.report(lib, ProblemMessages['unknown-require-plugin'], {pid: 'unknown-require-plugin', nls: 'unknown-require-plugin', data: lib.value}); //$NON-NLS-2$ //$NON-NLS-1$
+										return;
 									}
-									return;
-								}
-								//TODO check for the module having been loaded via the graph
-								if(tern.optionalPlugins[lib.value]) {
-									//we known about it
-									context.report(lib, ProblemMessages['unknown-require-plugin'], {pid: 'unknown-require-plugin', nls: 'unknown-require-plugin', data: lib.value}); //$NON-NLS-2$ //$NON-NLS-1$
-									return;
-								}
-								if(nodeModules[lib.value]) {
-									context.report(lib, ProblemMessages['unknown-require-plugin'], {pid: 'unknown-require-plugin', nls: 'unknown-require-plugin', data: 'node'}); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-									return;
-								}
-								var env = tern.getEnvFromDep(lib.value);
-								if (env === 'commonjs' && envs.simplifiedCommonJS){
-									context.report(lib, ProblemMessages['unknown-require'], {data: lib.value});
-									return;
-								}
-								if(!tern.pluginRunning(env)) {
-									context.report(lib, ProblemMessages['unknown-require-not-running'], {0: env, pid: 'unknown-require-not-running', nls: 'unknown-require-not-running', data: env}); //$NON-NLS-1$ //$NON-NLS-2$
-								} else {
-									context.report(lib, ProblemMessages['unknown-require'], {data: lib.value});
-								}
-        					}
+									if(nodeModules[lib.value]) {
+										context.report(lib, ProblemMessages['unknown-require-plugin'], {pid: 'unknown-require-plugin', nls: 'unknown-require-plugin', data: 'node'}); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+										return;
+									}
+									var env = tern.getEnvFromDep(lib.value);
+									if (env === 'commonjs' && envs.simplifiedCommonJS){
+										context.report(lib, ProblemMessages['unknown-require'], {data: lib.value});
+										return;
+									}
+									if(!tern.pluginRunning(env)) {
+										context.report(lib, ProblemMessages['unknown-require-not-running'], {0: env, pid: 'unknown-require-not-running', nls: 'unknown-require-not-running', data: env}); //$NON-NLS-1$ //$NON-NLS-2$
+									} else {
+										context.report(lib, ProblemMessages['unknown-require'], {data: lib.value});
+									}
+	        					} else {
+	        						//relative path, if Tern has it in the fileMap its known, otherwise mark it
+	        						tern = context.getTern();
+	        						if(!tern.hasFile(lib.value, tern.file)) {
+	        							context.report(lib, ProblemMessages['unknown-require'], {data: lib.value});
+	        						}
+	        					}
+	    					}
         				}
         			}
         		}
