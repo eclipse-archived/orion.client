@@ -10,6 +10,8 @@
  *******************************************************************************/
 /*eslint-env node*/
 var url = require('url');
+var events = require('events');
+var orionEE;
 
 /*
  * Sadly, the Orion client code expects http://orionserver/file and http://orionserver/file/ 
@@ -141,6 +143,16 @@ function matchHost(req, aUrl) {
 	return aUrl;
 }
 
+var OrionEventEmitter = function(){};
+OrionEventEmitter.prototype = new events.EventEmitter;
+
+function getOrionEE(){
+	if(!orionEE){
+		orionEE = new OrionEventEmitter();
+	}
+	return orionEE;
+}
+
 exports.toURLPath = toURLPath;
 exports.pathMatch = pathMatch;
 exports.matchHost = matchHost;
@@ -148,3 +160,4 @@ exports.rest = rest;
 exports.join = join;
 exports.writeError = writeError;
 exports.write = write;
+exports.getOrionEE = getOrionEE;
