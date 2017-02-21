@@ -157,6 +157,7 @@ module.exports = function(options) {
 	router.put('*', function(req, res) {
 		if (req.body.Location && options.options.configParams["orion.single.user"]) {
 			options.options.workspaceDir = req.body.Location;
+			api.getOrionEE().emit("workspace-changed",req.body.Location);
 			return res.status(200).end();
 		}
 		writeError(403, res);
