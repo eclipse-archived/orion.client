@@ -11,7 +11,6 @@
 /*eslint-env node */
 /*eslint no-console:1*/
 var api = require('../api'), writeError = api.writeError;
-var git = require('nodegit');
 var url = require("url");
 var path = require("path");
 var fs = require('fs');
@@ -22,6 +21,7 @@ var tasks = require('../tasks');
 var express = require('express');
 var bodyParser = require('body-parser');
 var rmdir = require('rimraf');
+var git = require('./nodegitWrapper');
 
 module.exports = {};
 
