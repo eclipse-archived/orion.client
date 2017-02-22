@@ -182,7 +182,7 @@ define([
 		 * @callback
 		 */
 		onDeleted: function onDeleted(jsProject, qualifiedName, fileName) {
-			if(jsProject.projectFiles.indexOf(fileName) > -1 && qualifiedName.indexOf(jsProject.getProjectPath()) === 0) {
+			if(jsProject.importantChange(qualifiedName, fileName) && qualifiedName.indexOf(jsProject.getProjectPath()) === 0) {
 				jsProject.getComputedEnvironment().then(function(env) {
 					this.loadTernProjectOptions(null, env);	
 				});
@@ -192,13 +192,13 @@ define([
 		 * @callback
 		 */
 		onMoved: function onMoved(jsProject, qualifiedName, fileName, toQualified, toName) {
-			if(jsProject.projectFiles.indexOf(fileName) > -1 && qualifiedName.indexOf(jsProject.getProjectPath()) === 0) {
+			if(jsProject.importantChange(qualifiedName, fileName) && qualifiedName.indexOf(jsProject.getProjectPath()) === 0) {
 				//same as a delete
 				return jsProject.getComputedEnvironment().then(function(env) {
 					this.loadTernProjectOptions(null, env);	
 				});
 			}
-			if(jsProject.projectFiles.indexOf(toName) > -1 && toQualified.indexOf(jsProject.getProjectPath()) === 0) {
+			if(jsProject.importantChange(toQualified, toName) && toQualified.indexOf(jsProject.getProjectPath()) === 0) {
 				//same as adding
 				return jsProject.getComputedEnvironment().then(function(env) {
 					var file = env.ternproject ? env.ternproject.file : null;
@@ -214,7 +214,7 @@ define([
 		 * @callback 
 		 */
 		onModified: function onModified(jsProject, fullPath, shortName) {
-			this.modified = jsProject.projectFiles.indexOf(shortName) > -1;
+			this.modified = jsProject.importantChange(fullPath, shortName);
 			if(this.modified && !this.ineditor) {
 				this.modified = false;
 				this.starting();
@@ -233,7 +233,7 @@ define([
 		 * @callback 
 		 */
 		onInputChanged: function onInputChanged(jsProject, evnt, projectName) {
-			this.ineditor = jsProject.projectFiles.indexOf(evnt.file.name) > -1;
+			this.ineditor = jsProject.importantChange(evnt.file.location, evnt.file.name);
 			if(this.modified && !this.ineditor) {
 				this.modified = false;
 				this.starting();
@@ -252,7 +252,7 @@ define([
 		 */
 		onProjectChanged: function onProjectChanged(jsProject, evnt, projectName) {
 			this.projectLocation = projectName;
-			this.ineditor = this.modified = jsProject.projectFiles.indexOf(evnt.file.name) > -1;
+			this.ineditor = this.modified = jsProject.importantChange(evnt.file.location, evnt.file.name);
 			this.scriptResolver.setSearchLocation(projectName);
 			if(!this.ineditor) {
 				this.starting();
@@ -289,6 +289,16 @@ define([
 					}
 				}
 			});
+			if(Array.isArray(env.defs)) {
+				if(!Array.isArray(json.libs)) {
+					json.libs = [];
+				}
+				env.defs.forEach(function(def) {
+					if(json.libs.indexOf(def) < 0) {
+						json.libs.push(def);
+					}
+				});
+			}
 			Object.keys(TernDefaults.plugins.optional).forEach(function(key) {
 				if(env.envs[key]) {
 					if(!json.plugins) {

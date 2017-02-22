@@ -70,14 +70,14 @@ define([
 			//We can read the new files and update here, but that could take longer than 
 			//would be ready for the next getComputedEnvironment call - just wipe the cache
 			//and recompute when asked for
-			this._wipeCache(project, fileName);
+			this._wipeCache(project, qualifiedName, fileName);
 		},
 		/**
 		 * @callback
 		 */
 		onDeleted: function onDeleted(project, qualifiedName, fileName) {
 			//We don't have access to the deleted contents - wipe the cache and recompute when asked for
-			this._wipeCache(project, fileName);
+			this._wipeCache(project, qualifiedName, fileName);
 		},
 		/**
 		 * @callback
@@ -86,7 +86,7 @@ define([
 			//same problem with onCreated - we could compute the delta, but that could take longer 
 			//and not be complete by the next onComputedEnvironment call, which would cause sync issues
 			//just wipe the cache
-			this._wipeCache(project, fileName);
+			this._wipeCache(project, qualifiedName, fileName);
 		},
 		/**
 		 * @callback
@@ -100,16 +100,21 @@ define([
 		 * @function
 		 * @private
 		 * @param {JavaScriptProject} project The backing project
+		 * @param {String} qualifileName The fully qualified name of the file
 		 * @param {String} fileName The short name of the file, i.e. 'package.json'
 		 */
-		_wipeCache: function _wipeCache(project, fileName) {
+		_wipeCache: function _wipeCache(project, qualifileName, fileName) {
 			if(fileName === project.PACKAGE_JSON || fileName === project.NODE_MODULES || 
 				project.lintFiles.indexOf(fileName) > -1 || fileName === project.TERN_PROJECT) {
 					delete project.map.env;
 			}
+			var folderPath = project.getProjectPath()+project.DEFINITIONS;
+			if(qualifileName === folderPath || qualifileName.indexOf(folderPath) === 0) {
+				delete project.map.env;
+			}
 		} 
 	};
-
+	
 	var initialized = false;
 
 	/**
@@ -178,7 +183,11 @@ define([
 	 * @see https://github.com/beautify-web/js-beautify/blob/master/README.md
 	 */
 	JavaScriptProject.prototype.JSBEAUTIFYRC = '.jsbeautifyrc';
-
+	/**
+	 * The .definitions folder name
+	 * @since 14.0
+	 */
+	JavaScriptProject.prototype.DEFINITIONS = '.definitions';
 	/**
 	 * @description Adds a handler for the given file name to the mapping of handlers
 	 * @function
@@ -247,6 +256,28 @@ define([
 		}.bind(this),
 		function rejected() {
 			return null;
+		});
+	};
+	
+	/**
+	 * @description Fetch the children of the named child folder of the current project context
+	 * @function
+	 * @param {String} childName The short name of the project child to get
+	 * @param {String} projectPath The optional project path to fetch from
+	 * @returns {Deferred} A deferred that will resolve to the requested child metadata or null
+	 * @since 14.0
+	 */
+	JavaScriptProject.prototype.getFolder = function getFolder(childName, projectPath) {
+		if(!this.projectMeta && !projectPath) {
+			return new Deferred().resolve(null);
+		}
+		var _project = this.projectMeta ? this.projectMeta.Location : projectPath;
+		var folderPath = _project+childName;
+		return this.getFileClient().fetchChildren(folderPath).then(function(children) {
+            return children;
+		},
+		function rejected() {
+			return [];
 		});
 	};
 
@@ -396,6 +427,23 @@ define([
 			return readAndMap(this.map, file, "formatting");
 		}.bind(this));
 	};
+	
+	/**
+	 * @name JavaScriptProject.prototype.importantChange
+	 * @description Returns if the file changed was an important change requiring a Tern restart
+	 * @function
+	 * @param {String} qualifiedName The fully qualified name of the changed file
+	 * @param {String} filename The name of the changed file
+	 * @returns {Boolean} True if an important project configuration file has changed
+	 * @since 14.0
+	 */
+	JavaScriptProject.prototype.importantChange = function importantChange(qualifiedName, filename) {
+		if(this.projectFiles.indexOf(filename) > -1) {
+			return true;
+		}
+		var folderPath = this.getProjectPath()+this.DEFINITIONS;
+		return qualifiedName === folderPath || qualifiedName.indexOf(folderPath) === 0;
+	};
 
 	/**
 	 * @name JavaScriptProject.prototype.getComputedEnvironment
@@ -503,7 +551,15 @@ define([
 						}
 					}
 				}
-				return project.map.env;
+				return project.getFolder(project.DEFINITIONS).then(function(children) {
+					if(children.length > 0) {
+						project.map.env.defs = [];
+						children.forEach(function(def) {
+							project.map.env.defs.push(project.DEFINITIONS+'/'+def.Name);
+						});
+					}
+					return project.map.env;
+				});
 			});
 		});
 	}
