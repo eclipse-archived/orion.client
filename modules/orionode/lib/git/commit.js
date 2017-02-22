@@ -14,7 +14,6 @@ var path = require('path');
 var diff = require("./diff");
 var mTags = require("./tags");
 var clone = require("./clone");
-var git = require('nodegit');
 var url = require('url');
 var crypto = require('crypto');
 var async = require('async');
@@ -24,6 +23,15 @@ var util = require('./util');
 var remotes = require('./remotes');
 var branches = require('./branches');
 var tasks = require('../tasks');
+var globalmodules = require('global-modules');
+var os = require("os");
+try {
+	var git = require('nodegit');
+} catch (e) {
+	if (e.code === "MODULE_NOT_FOUND" && e.message.indexOf("nodegit") >= 0 && os.type() === "Windows_NT") {
+		git = require(globalmodules + '/nodegit');
+	}
+}
 
 module.exports = {};
 

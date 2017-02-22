@@ -10,12 +10,20 @@
  *******************************************************************************/
 /*eslint-env node */
 var api = require('../api'), writeError = api.writeError;
-var git = require('nodegit');
 var clone = require('./clone');
 var path = require('path');
 var express = require('express');
 var util = require('./util');
 var mime = require('mime');
+var globalmodules = require('global-modules');
+var os = require("os");
+try {
+	var git = require('nodegit');
+} catch (e) {
+	if (e.code === "MODULE_NOT_FOUND" && e.message.indexOf("nodegit") >= 0 && os.type() === "Windows_NT") {
+		git = require(globalmodules + '/nodegit');
+	}
+}
 
 module.exports = {};
 

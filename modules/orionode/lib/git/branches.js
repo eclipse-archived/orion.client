@@ -10,7 +10,6 @@
  *******************************************************************************/
 /*eslint-env node */
 var api = require('../api'), writeError = api.writeError;
-var git = require('nodegit');
 var async = require('async');
 var mRemotes = require('./remotes');
 var clone = require('./clone');
@@ -18,6 +17,15 @@ var express = require('express');
 var bodyParser = require('body-parser');
 var util = require('./util');
 var args = require('../args');
+var globalmodules = require('global-modules');
+var os = require("os");
+try {
+	var git = require('nodegit');
+} catch (e) {
+	if (e.code === "MODULE_NOT_FOUND" && e.message.indexOf("nodegit") >= 0 && os.type() === "Windows_NT") {
+		git = require(globalmodules + '/nodegit');
+	}
+}
 
 module.exports = {};
 
