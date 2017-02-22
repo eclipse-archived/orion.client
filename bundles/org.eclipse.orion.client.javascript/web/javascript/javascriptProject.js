@@ -559,6 +559,8 @@ define([
 						});
 					}
 					return project.map.env;
+				}, function rejected() {
+					return project.map.env;
 				});
 			});
 		});
@@ -584,7 +586,7 @@ define([
 					// ignore
 				}
 			}
-            if(vals.eslintConfig && typeof vals.eslintConfig === "object") {
+            if(vals && vals.eslintConfig && typeof vals.eslintConfig === "object") {
                 vals = vals.eslintConfig;
             }
 		}
