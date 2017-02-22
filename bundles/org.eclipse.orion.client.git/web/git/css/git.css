@@ -559,10 +559,6 @@ _:-moz-tree-row(hover), .gitChangeListCheck { /* Firefox  HACK */
 	opacity: 1;
 }
 
-.gitCommitMore:focus {
-	opacity: 1;
-}
-
 .gitListMore {
 	text-align: center;
 	font-size: 10pt;

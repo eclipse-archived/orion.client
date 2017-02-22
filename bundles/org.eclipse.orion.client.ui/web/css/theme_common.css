@@ -355,11 +355,6 @@ a.breadcrumb.currentLocation {
 	font-size: 7pt;
 }
 
-.searchbox:focus{
-	color: white;
-	outline: none;
-}
-
 /* Orion button provides standard padding, margin, alignment for any button, regardless of whether it is a command or not.  Using
    this helps non-gray buttons remain uniform looking with respect to size. */
    
@@ -411,7 +406,7 @@ a.breadcrumb.currentLocation {
 	/* text-transform: uppercase; */
 }
 
-.commandButton:not(.primaryButton):hover, .commandButton:not(.primaryButton):focus {
+.commandButton:not(.primaryButton):hover {
 	color: white;
 	background-color: #a5b5bc;
 	box-shadow: 0 1px 2px 0 rgba(0,0,0,0.2);
@@ -427,7 +422,7 @@ a.breadcrumb.currentLocation {
 	color: white;
 }
 
-.primaryButton:hover, .primaryButton:focus {
+.primaryButton:hover {
 	background: #01CDB0;
 	border-color: #01CDB0;
 }
@@ -450,7 +445,7 @@ a.breadcrumb.currentLocation {
 	user-select: none;
 }
 
-.commandImage:hover, .commandImage:focus {
+.commandImage:hover {
 	background-color: #a5b5bc;
 	border: 1px solid #ccc;
 }
@@ -719,10 +714,6 @@ a.breadcrumb.currentLocation {
 .dropdownMenu > li > a, .dropdownMenu > li > span {
 	width: calc( 100% - 9px );
 	margin: 0;
-}
-
-.dropdownMenu > li > *:focus {
-	outline: none;
 }
 
 

@@ -127,10 +127,6 @@ img {
     border-color: red;
 }
 
-.form-elements-container.has-error input:focus {
-    outline-color: transparent;
-}
-
 .has-error,
 .status.has-error {
     color: red;

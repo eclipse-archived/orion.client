@@ -1,3 +1,17 @@
+/* Stanard focus handling */
+:-moz-focusring {
+   outline: none;
+   box-shadow: 0 0 4px #5b9dd9;
+}
+
+.textviewContent:focus, .sidebar:focus {
+	outline: none;
+	-webkit-box-shadow: none;
+	-moz-box-shadow: none;
+	box-shadow: none;
+}
+
+/* Light Theme Spec */
 
 .lightPage .dropdownTrigger:not(.dropdownDefaultButton),
 .lightPage .mainToolbar .commandImage.dropdownTrigger,

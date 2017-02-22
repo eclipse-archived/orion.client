@@ -60,10 +60,6 @@
 	padding-left:0 !important;
 }
 
-.navbar:focus {
-	outline: none
-}
-
 .navbar-item {
 	border-bottom: 1px solid #eee;
 	color: #707070;

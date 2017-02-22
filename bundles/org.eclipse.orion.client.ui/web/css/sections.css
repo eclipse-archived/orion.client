@@ -94,9 +94,6 @@ sectionAnchor {
 	color: #707070;
 	overflow: hidden;
 }
-.sectionWrapper:focus{
-	outline:none;
-}
 
 .sectionWrapperAux {
     /* background-color: #fafafa;
