@@ -764,6 +764,8 @@ define([
 			if (!isDir) {
 				if (!noSetInput) {
 					editor.setInput(title, null, contents);
+					// Verify the file has not changed..
+					this.load();
 				}
 				if (editor && editor.getTextView && editor.getTextView()) {
 					var textView = editor.getTextView();
