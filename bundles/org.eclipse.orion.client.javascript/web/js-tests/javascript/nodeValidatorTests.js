@@ -15,9 +15,8 @@ define([
 	'javascript/validator',
 	'chai/chai',
 	'orion/Deferred',
-	"javascript/ruleData",
 	'mocha/mocha', //must stay at the end, not a module
-], function(Validator, chai, Deferred, Rules) {
+], function(Validator, chai, Deferred) {
 	var assert = chai.assert;
 	return function(worker) {
 		describe('Node Validator Tests', function() {
@@ -146,26 +145,6 @@ define([
 			// unknown-require
 			describe('unknown-require', function() {
 				var RULE_ID = "unknown-require";
-				it("Simple name with no file", function(callback) {
-					var topic = "/*eslint-env node*/ require('foo');";
-					var config = { rules: {} };
-					var createFiles = [{name: 'foo', text: ''}];
-					config.rules[RULE_ID] = 1;
-					validate({buffer: topic, callback: callback, config: config, createFiles: createFiles}).then(
-						function (problems) {
-							assertProblems(problems, [
-							{
-								id: "unknown-require",
-								severity: 'warning',
-								description: 'The \'foo\' entry is missing from the eslint-env directive.',
-								start: 28,
-								end: 33
-							}]);
-						},
-						function (error) {
-							worker.getTestState().callback(error);
-						});
-				});
 				it("Simple name but file exists", function(callback) {
 					var topic = "/*eslint-env node, foo2*/ require('foo2');";
 					var config = { rules: {} };
@@ -174,25 +153,6 @@ define([
 					validate({buffer: topic, callback: callback, config: config, createFiles: createFiles}).then(
 						function (problems) {
 							assertProblems(problems, []);
-						},
-						function (error) {
-							worker.getTestState().callback(error);
-						});
-				});
-				it("Multiple segment name with no file", function(callback) {
-					var topic = "/*eslint-env node*/ require('foo/bar');";
-					var config = { rules: {} };
-					var createFiles = [{name: 'foo/bar', text: ''}];
-					config.rules[RULE_ID] = 1;
-					validate({buffer: topic, callback: callback, config: config, createFiles: createFiles}).then(
-						function (problems) {
-							assertProblems(problems, [{
-								id: "unknown-require",
-								severity: 'warning',
-								description: 'The \'foo/bar\' entry is missing from the eslint-env directive.',
-								start: 28,
-								end: 37
-							}]);
 						},
 						function (error) {
 							worker.getTestState().callback(error);
