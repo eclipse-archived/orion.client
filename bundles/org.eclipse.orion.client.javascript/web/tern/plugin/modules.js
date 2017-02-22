@@ -347,6 +347,7 @@
         if (typeof rec == "string") return string
         rec.displayName = name
         rec.name = string
+        rec.type = "string"; //ORION tag the completion with the correct type
         return rec
       })
     }
