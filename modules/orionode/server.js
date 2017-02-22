@@ -32,6 +32,7 @@ var PORT_LOW = 8082;
 var PORT_HIGH = 10082;
 var port = args.port || args.p || process.env.PORT || 8081;
 var configFile = args.config || args.c || path.join(__dirname, 'orion.conf');
+var initialWorkspace;
 
 var configParams = argslib.readConfigFileSync(configFile) || {};
 
@@ -52,6 +53,7 @@ function startServer(cb) {
 	} else {
 		workspaceDir = path.join(__dirname, '.workspace');
 	}
+	initialWorkspace = workspaceDir;
 	argslib.createDirs([workspaceDir], function() {
 	var passwordFile = args.password || args.pwd;
 	argslib.readPasswordFile(passwordFile, function(password) {
@@ -189,7 +191,10 @@ if (process.versions.electron) {
 	function updateWorkspacePrefs(workspace, _allPrefs){
 		var allPrefs = _allPrefs ? _allPrefs : prefs.readPrefs();
 		allPrefs.user.workspace.currentWorkspace = workspace;
-		var recentWorkspaces = allPrefs.user && allPrefs.user.workspace && allPrefs.user.workspace.recentWorkspaces
+		if(!allPrefs.user.workspace.recentWorkspaces){
+			allPrefs.user.workspace.recentWorkspaces = [];
+		}
+		var recentWorkspaces = allPrefs.user && allPrefs.user.workspace && allPrefs.user.workspace.recentWorkspaces;
 		var RECENT_ARRAY_LENGTH = 10;
 		var oldIndex = recentWorkspaces.indexOf(workspace);
 		if(oldIndex !== -1){
@@ -206,10 +211,12 @@ if (process.versions.electron) {
 	
 	function updateLastOpendTabsPrefs(tabs){
 		var allPrefs = prefs.readPrefs();
-		if(!allPrefs.user.workspace.lastOpenedTabUrls){
-			allPrefs.user.workspace.lastOpenedTabUrls = {};
+		var lastOpenedTabUrls = allPrefs.user && allPrefs.user.workspace && allPrefs.user.workspace.lastOpenedTabUrls;
+		if(!lastOpenedTabUrls){
+			(allPrefs.user || (allPrefs.user = {})).workspace || (allPrefs.user.workspace = {}).lastOpenedTabUrls || (allPrefs.user.workspace.lastOpenedTabUrls={});
 		}
-		allPrefs.user.workspace.lastOpenedTabUrls[allPrefs.user.workspace.currentWorkspace] = tabs;
+		var currentWorkspace = allPrefs.user && allPrefs.user.workspace && allPrefs.user.workspace.currentWorkspace || initialWorkspace;
+		allPrefs.user.workspace.lastOpenedTabUrls[currentWorkspace] = tabs;
 		prefs.writePrefs(allPrefs);
 	}
 
