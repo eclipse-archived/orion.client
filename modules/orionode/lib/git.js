@@ -9,52 +9,40 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 /*eslint-env node*/
-var fileUtil = require('./fileUtil');
 var express = require('express');
+var git = require('./git/nodegitWrapper');
 
-// Handle optional nodegit dependency
-var hasNodegit = true;
-try {
-	var index = require('./git/index');
-	var clone = require('./git/clone');
-	var remotes = require('./git/remotes');
-	var branches = require('./git/branches');
-	var status = require('./git/status');
-	var config = require('./git/config');
-	var commit = require('./git/commit');
-	var tags = require('./git/tags');
-	var stash = require('./git/stash');
-	var blame = require('./git/blame');
-	var diff = require('./git/diff');
-	var submodule = require('./git/submodule');
-	var tree = require('./git/tree');
-	var pullrequest = require('./git/pullrequest');
-	var gitFileDecorator = require('./git/gitfiledecorator').gitFileDecorator;
-} catch (e) {
-	hasNodegit = false;
-	if (e.code === "MODULE_NOT_FOUND" && e.message.indexOf("nodegit") >= 0) {
-		console.error("nodegit is not installed. Some features will be unavailable.");
-	} else {
-		console.error("nodegit failed to load. " + e.message);
-	}
-}
-
-if (hasNodegit) {
-	module.exports = Git;
-} else {
-	module.exports = Nothing;
-}
-
-function Nothing() {
-	var router = express.Router();
-	router.use(/* @callback */ function(req, res) {
-		res.status(404).json({
-			Severity: "Error",
-			Message: "Nodegit not installed."
+if (!git) {
+	function Nothing() {
+		var router = express.Router();
+		router.use(/* @callback */ function(req, res) {
+			res.status(404).json({
+				Severity: "Warning",
+				Message: "Git source control functions is not available, to enable the functionality please run 'npm install nodegit -g', and restart Orion."
+			});
 		});
-	});
-	return router;
+		return router;
+	}
+	module.exports = Nothing;
+	return;
 }
+
+var fileUtil = require('./fileUtil');
+var index = require('./git/index');
+var clone = require('./git/clone');
+var remotes = require('./git/remotes');
+var branches = require('./git/branches');
+var status = require('./git/status');
+var config = require('./git/config');
+var commit = require('./git/commit');
+var tags = require('./git/tags');
+var stash = require('./git/stash');
+var blame = require('./git/blame');
+var diff = require('./git/diff');
+var submodule = require('./git/submodule');
+var tree = require('./git/tree');
+var pullrequest = require('./git/pullrequest');
+var gitFileDecorator = require('./git/gitfiledecorator').gitFileDecorator;
 
 function Git(options) {
 	var fileRoot = options.fileRoot;
@@ -83,3 +71,4 @@ function Git(options) {
 	fileUtil.addDecorator(gitFileDecorator);
 	return router;
 }
+module.exports = Git;

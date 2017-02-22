@@ -12,7 +12,6 @@
 var api = require('../api'), writeError = api.writeError;
 var args = require('../args');
 var async = require('async');
-var git = require('nodegit');
 var url = require('url');
 var tasks = require('../tasks');
 var clone = require('./clone');
@@ -20,6 +19,7 @@ var mConfig = require('./config');
 var express = require('express');
 var bodyParser = require('body-parser');
 var util = require('./util');
+var git = require('./nodegitWrapper');
 
 module.exports = {};
 

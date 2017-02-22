@@ -156,8 +156,8 @@ tar -xzf ../orionode_${BUILD}.tar.gz
 cleanup_nodemodules
 update_config_files
 
-# copy over nodegit binary to workaround in memory ssh limitation
-cp ~/downloads/orion/orionode/nodegit/v${nodegit_version}/electron/v${electron_version}/windows/nodegit.node orionode/node_modules/nodegit/build/Release
+# remove nodegit module for Windows electron build
+rm -rf orionode/node_modules/nodegit
 
 pushd orionode
 update_remote_releases
