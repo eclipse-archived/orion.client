@@ -211,12 +211,12 @@ if (process.versions.electron) {
 	
 	function updateLastOpendTabsPrefs(tabs){
 		var allPrefs = prefs.readPrefs();
-		var lastOpenedTabUrls = allPrefs.user && allPrefs.user.workspace && allPrefs.user.workspace.lastOpenedTabUrls;
-		if(!lastOpenedTabUrls){
-			(allPrefs.user || (allPrefs.user = {})).workspace || (allPrefs.user.workspace = {}).lastOpenedTabUrls || (allPrefs.user.workspace.lastOpenedTabUrls={});
+		var openedTabs = allPrefs.user && allPrefs.user.workspace && allPrefs.user.workspace.openedTabs;
+		if(!openedTabs){
+			((allPrefs.user || (allPrefs.user = {})).workspace || (allPrefs.user.workspace = {})).openedTabs || (allPrefs.user.workspace.openedTabs={});
 		}
 		var currentWorkspace = allPrefs.user && allPrefs.user.workspace && allPrefs.user.workspace.currentWorkspace || initialWorkspace;
-		allPrefs.user.workspace.lastOpenedTabUrls[currentWorkspace] = tabs;
+		allPrefs.user.workspace.openedTabs[currentWorkspace] = tabs;
 		prefs.writePrefs(allPrefs);
 	}
 
@@ -410,14 +410,14 @@ if (process.versions.electron) {
 				var allPrefs = prefs.readPrefs();
 				// step3: update new pref's currentworkspace and recentworkspaces with newTargetWorkspace
 				updateWorkspacePrefs(newTargetWorkspace, allPrefs);
-				var lastOpenedTabUrls = allPrefs.user && allPrefs.user.workspace && allPrefs.user.workspace.lastOpenedTabUrls && allPrefs.user.workspace.lastOpenedTabUrls[newTargetWorkspace] || [];
+				var openedTabs = allPrefs.user && allPrefs.user.workspace && allPrefs.user.workspace.openedTabs && allPrefs.user.workspace.openedTabs[newTargetWorkspace] || [];
 				var hostUrl = "http://localhost:" + port;
 				// step4: open tabs of new current workspace if any saved before
-				if(lastOpenedTabUrls.length > 0 && lastOpenedTabUrls[0] !== 'about:blank'){
-					nextWindow.webContents.executeJavaScript('createTab("' + hostUrl + "/" + lastOpenedTabUrls[0] + '");');
-					for(var i = 1; i < lastOpenedTabUrls.length; i++ ){
-						if(lastOpenedTabUrls[i] !== 'about:blank'){
-							nextWindow.webContents.executeJavaScript('window.open("' + hostUrl + "/" + lastOpenedTabUrls[i] + '");');
+				if(openedTabs.length > 0 && openedTabs[0] !== 'about:blank'){
+					nextWindow.webContents.executeJavaScript('createTab("' + hostUrl + "/" + openedTabs[0] + '");');
+					for(var i = 1; i < openedTabs.length; i++ ){
+						if(openedTabs[i] !== 'about:blank'){
+							nextWindow.webContents.executeJavaScript('window.open("' + hostUrl + "/" + openedTabs[i] + '");');
 						}
 					}
 				}else{ // if user open that workspace for the first time
@@ -435,20 +435,20 @@ if (process.versions.electron) {
 		startServer(function() {
 			var mainWindow,
 			 	hostUrl = "http://localhost:" + port,
-			 	lastOpenedTabUrls = allPrefs.user && allPrefs.user.workspace && allPrefs.user.workspace.lastOpenedTabUrls && allPrefs.user.workspace.lastOpenedTabUrls[prefsWorkspace] || [];
+			 	openedTabs = allPrefs.user && allPrefs.user.workspace && allPrefs.user.workspace.openedTabs && allPrefs.user.workspace.openedTabs[prefsWorkspace] || [];
 
 			if(relativeFileUrl){
 				var fileUrl = hostUrl + "/edit/edit.html#/file" + relativeFileUrl;
-				lastOpenedTabUrls.unshift("edit/edit.html#/file" + relativeFileUrl);
+				openedTabs.unshift("edit/edit.html#/file" + relativeFileUrl);
 			}
 			if(readyToOpenDir && prefsWorkspace !== configParams.workspace){
 				mainWindow = createWindow(fileUrl ? fileUrl : hostUrl);
 			}else{
-				if(lastOpenedTabUrls.length > 0 && lastOpenedTabUrls[0] !== 'about:blank'){
-					mainWindow = createWindow(hostUrl + "/" + lastOpenedTabUrls[0]); 
-					for(var i = 1; i < lastOpenedTabUrls.length; i++ ){
-						if(lastOpenedTabUrls[i] !== 'about:blank'){
-							mainWindow.webContents.executeJavaScript('window.open("' + hostUrl + "/" + lastOpenedTabUrls[i] + '");');
+				if(openedTabs.length > 0 && openedTabs[0] !== 'about:blank'){
+					mainWindow = createWindow(hostUrl + "/" + openedTabs[0]); 
+					for(var i = 1; i < openedTabs.length; i++ ){
+						if(openedTabs[i] !== 'about:blank'){
+							mainWindow.webContents.executeJavaScript('window.open("' + hostUrl + "/" + openedTabs[i] + '");');
 						}
 					}
 				}else{ // if user open Orion for the first time
