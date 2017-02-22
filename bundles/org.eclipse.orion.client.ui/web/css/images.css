@@ -88,7 +88,7 @@
 .core-sprite-applicationnotdeployed {
 	border-radius: 50%;
 	background-color: white;
-	border: 1px solid grey;
+	border: 1px solid #707070;
 	width: 12px;
 	height: 12px; 
 }

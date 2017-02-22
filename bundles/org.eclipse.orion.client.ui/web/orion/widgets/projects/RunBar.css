@@ -146,7 +146,7 @@
 	-webkit-flex-shrink: 0;		/* Safari */
 	flex-shrink: 0;
 	
-	background: gray;
+	background: #707070;
 	border: 2px solid transparent;
 	border-radius: 100%;
 	display: inline-block;
@@ -171,7 +171,7 @@
 
 .statusLight.statusLightProgress {
 	background: none;
-	border-color: gray;
+	border-color: #707070;
 	border-top-color: transparent;
 	
 	-webkit-animation: rotate 1s infinite linear;

@@ -554,13 +554,13 @@ a.breadcrumb.currentLocation {
 	padding-left: 3px;
 	padding-right: 2px;
 	background-color: #FFF;
-	color: #808080;
+	color: #707070;
 }
 
 .orionSwitchInner:after {
 	padding-right: 3px;
 	background-color: #eee;
-	color: #808080;
+	color: #707070;
 	text-align: right;
 }
 
@@ -611,7 +611,7 @@ a.breadcrumb.currentLocation {
 
 .commandActive {
 	background-color: #e6e6e6 !important;
-	border: 1px solid #808080 !important;
+	border: 1px solid #707070 !important;
     border-radius: 2px !important;
 }
 
@@ -766,7 +766,7 @@ a.breadcrumb.currentLocation {
 }
 
 .dropdownMenuItem .dropdownKeyBinding {
-	color: grey !important; /* !important to override .dropdownMenuItem */
+	color: #707070 !important; /* !important to override .dropdownMenuItem */
 	flex-grow: 0;
 	-webkit-flex-grow: 0;		/* Safari */
 	font-size: 11px;
@@ -1176,7 +1176,7 @@ a.breadcrumb.currentLocation {
 
 .orionSwitchInner.sprite-switch-check-x:after{
 	color: white;
-	background-color: gray;
+	background-color: #707070;
 	content: '\e02a'; /* X icon */
 	font-family: 'Orion Icon Font';
 	margin-top: -3px;

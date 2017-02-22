@@ -66,7 +66,7 @@
 
 .navbar-item {
 	border-bottom: 1px solid #eee;
-	color: gray;
+	color: #707070;
 	display: block;
 	font-size: 8pt;
 	font-weight: bold;
@@ -493,12 +493,12 @@ html[dir="rtl"] .serviceContainer { /* ACGC */
 	border-radius: 4px;
 	background: white;
 	float: left;
-	color: #AAA;
+	color: #707070;
 	text-align: center;
 	font-size: 9px;
 	font-weight: normal;
 	margin-left: 5px;
-	border: 1px solid #CCC;
+	border: 1px solid #707070;
 }
 
 html[dir="rtl"] .serviceCount { /* ACGC */
@@ -760,7 +760,7 @@ _:-moz-tree-row(hover), .colorpicker-input { /* Firefox  HACK */
 .scopeList li{
     padding:10px 15px;
     border-bottom: 1px dotted #EFEFEF;
-    color: gray;
+    color: #707070;
 }
 
 .scopeList li select{
@@ -841,7 +841,7 @@ html[dir="rtl"] #editorThemeDelete, #editorThemeRevert, #editorThemeSave { /* AC
 }
 
 .editorThemeButton {
-    color: gray;  
+    color: #707070;  
     padding: 0;  
     font-size: 14px;
 }

@@ -30,7 +30,7 @@ define([
 			if (!divParent) {
 				divParent = document.createElement("div");
 				divParent.id = "divParent";
-				divParent.style.border = "1px solid gray;";
+				divParent.style.border = "1px solid #707070;";
 				divParent.style.backgroundColor = 'magenta';
 				divParent.style.width = "500px";
 				divParent.style.height = "300px";

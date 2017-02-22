@@ -27,7 +27,7 @@
 .sectionTable td {
 	border-bottom: 1px solid #dadada;
 	vertical-align: middle;
-	color: gray;
+	color: #707070;
 }
 
 .sectionTable tr:last-child td{

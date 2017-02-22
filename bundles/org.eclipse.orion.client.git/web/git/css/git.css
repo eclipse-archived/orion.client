@@ -301,7 +301,7 @@ html[dir="rtl"] .mainToolbar .gitFilterBox input { /* ACGC */
 	left: 5px;
 	cursor: pointer;
 	outline: none;
-	color: gray;
+	color: #707070;
 	padding: 0 2px 2px;
     border: 1px solid transparent;
 }

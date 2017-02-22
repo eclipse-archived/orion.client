@@ -76,7 +76,7 @@ define(['examples/editor/demoSetup', 'orion/Deferred', 'orion/util'], function(m
 			if (!document.getElementById("divParent")) {
 				var divParent = document.createElement("div");
 				divParent.id = "divParent";
-				divParent.style.border = "1px solid gray;";
+				divParent.style.border = "1px solid #707070;";
 				divParent.style.width = "1000px";
 				divParent.style.height = "800px";
 				body.appendChild(divParent);

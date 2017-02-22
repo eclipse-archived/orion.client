@@ -113,7 +113,7 @@ html[dir="rtl"] .logo { /* ACGC */
 }
 
 .pageNav {
-	color: #808080;
+	color: #707070;
 	font-size: 8pt;
 }
 
@@ -336,7 +336,7 @@ textarea.parameterInput {
 }
 
 .disabledNavRow > .navColumn > .mainNavColumn > * {
-	color: gray;
+	color: #707070;
 	cursor: default;
 }
 
@@ -597,7 +597,7 @@ html[dir="rtl"] .bannerMenuSearchOptions { /* ACGC */
 
 .bannerButton:hover {
 	background-color: #e6e6e6;
-	border: 1px solid #808080;
+	border: 1px solid #707070;
 }
 
 .toolbarButton {
@@ -1304,7 +1304,7 @@ html[dir="rtl"] .sectionWrapper, html[dir="rtl"] .sectionTable{ /* ACGC */
 	vertical-align: middle;
 	font-weight: bold;
 	padding: 6px;
-	color: gray;
+	color: #707070;
 	margin-bottom: 0;
 	border-color: #e3e7ea;
 	transition: all 0.1s ease;
@@ -1325,7 +1325,7 @@ html[dir="rtl"] .sectionWrapper, html[dir="rtl"] .sectionTable{ /* ACGC */
 .sectionTable td {
 	border-bottom: 1px solid #f1f3f4;
 	vertical-align: middle;
-	color: gray;
+	color: #707070;
 }
 
 .sectionTable tr:last-child td{
@@ -1415,7 +1415,7 @@ html[dir="rtl"] .sectionWrapper, html[dir="rtl"] .sectionTable{ /* ACGC */
 
 .orionProject .discreetInput {
 	border: 1px solid transparent; /* prevent movement on hover */
-	color: gray;
+	color: #707070;
 	font: 8pt Lucida Sans Unicode,Lucida Grande,Verdana,Arial,Helvetica,Myriad,Tahoma,clean,sans-serif;
 	width: 90%;
 	margin-left: 0;
