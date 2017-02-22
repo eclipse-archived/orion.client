@@ -82,7 +82,9 @@ var TaskStoreMongoDB = function() {
 	});
 	
 	this._orionTask = this._mongoose.model("orionTask", taskSchema);
-//	this._mongoose.connect('mongodb://localhost/orion_tasks');
+	if (!this._mongoose.connection.readyState) {
+		this._mongoose.connect('mongodb://localhost/orion_multitenant');
+	}
 };
 
 TaskStoreMongoDB.prototype = {
