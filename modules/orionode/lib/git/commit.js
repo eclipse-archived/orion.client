@@ -14,7 +14,6 @@ var path = require('path');
 var diff = require("./diff");
 var mTags = require("./tags");
 var clone = require("./clone");
-var git = require('nodegit');
 var url = require('url');
 var crypto = require('crypto');
 var async = require('async');
@@ -24,6 +23,7 @@ var util = require('./util');
 var remotes = require('./remotes');
 var branches = require('./branches');
 var tasks = require('../tasks');
+var git = require('./nodegitHandler').git;
 
 module.exports = {};
 

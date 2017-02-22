@@ -11,11 +11,11 @@
 /*eslint-env node */
 var api = require('../api'), writeError = api.writeError;
 var path = require('path');
-var git = require('nodegit');
 var express = require('express');
 var bodyParser = require('body-parser');
 var clone = require('./clone');
 var commitm = require('./commit');
+var git = require('./nodegitHandler').git;
 
 module.exports = {};
 

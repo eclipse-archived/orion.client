@@ -9,13 +9,13 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 /*eslint-env node */
-var git = require('nodegit');
 var api = require('../api'), writeError = api.writeError;
 var args = require('../args');
 var express = require('express');
 var bodyParser = require('body-parser');
 var clone = require('./clone');
 var fileUtil = require('../fileUtil');
+var git = require('./nodegitHandler').git;
 
 module.exports = {};
 
