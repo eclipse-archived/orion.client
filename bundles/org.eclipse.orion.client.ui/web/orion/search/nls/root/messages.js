@@ -120,5 +120,5 @@ define({
 	"perfectMatch": "Perfect match",
 	"notAMatch": "Not a match",
 	"couldBeMatch": "Could be a match",
-	"Scope Sniff":"Search In All Projects"
+	"Scope All":"Search In All Directories"
 });
