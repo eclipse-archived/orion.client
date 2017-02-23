@@ -96,10 +96,6 @@ define([
 		},
 		
 		hide: function() {
-			if(this._defaultSearchResource){
-  				this.setSearchScope(this._defaultSearchResource);//reset search scope when the InlineSearchPane is hide
-			}
-
 			if(window.document.title === this.newDocumentTitle){
 				window.document.title = this.previousDocumentTitle;
 			}
@@ -412,7 +408,8 @@ define([
 			lib.$("#searchScopeLabel", this._searchWrapper).appendChild(document.createTextNode(messages["Scope"])); //$NON-NLS-1$ //$NON-NLS-0$
 			lib.$("#fileNamePatternsLabel", this._searchWrapper).appendChild(document.createTextNode(messages["File name patterns (comma-separated)"])); //$NON-NLS-1$ //$NON-NLS-0$
 			lib.$("#searchScopeSelectButton", this._searchWrapper).title = messages["Choose a Folder"]; //$NON-NLS-1$ //$NON-NLS-0$
-			lib.$("#advSearchScopeSniffLabel", this._searchWrapper).appendChild(document.createTextNode(messages["Scope Sniff"]));
+			lib.$("#advSearchScopeAllProjectLabel", this._searchWrapper).appendChild(document.createTextNode(messages["Scope All"]));
+			lib.$("#advSearchScopeProjectLabel", this._searchWrapper).appendChild(document.createTextNode(messages["Scope Project"]));
 		},
 		
 		setSearchScope: function(scope) {
@@ -460,22 +457,42 @@ define([
 		},
 		
 		isSearchInAllProjects: function(){
-			return localStorage.getItem("/searchScope") === 'true';
+			return localStorage.getItem("/inlineSearchAllProject") === 'true';
 		},
 		
-		setSearchInAllProjectsCheckBox: function(isCheck){
-			this._searchScope.checked = isCheck; //$NON-NLS-0$
+		isSearchInCurrentProject: function(){
+			return localStorage.getItem("/inlineSearchProject") === 'true';
 		},
 		
-		readyToSwitchScope: function(resource){
-			this._readyToSwitchResouce = resource;	
+		uncheckSearchInAllProjects: function(){
+			this._searchScopeAllProject.checked = false;
+			localStorage.setItem("/inlineSearchAllProject", false);
+		},
+		
+		uncheckSearchInProject: function(){
+			this._searchScopeProject.checked = false;
+			localStorage.setItem("/inlineSearchProject", false);
+		},
+		
+		updateScopeOptions: function(searchInAllProject, searchProject){
+			this._searchScopeAllProject.checked = searchInAllProject; //$NON-NLS-0$
+			this._searchScopeProject.checked = searchProject; //$NON-NLS-0$
+		},
+		
+		setProjectScope: function(resource){
+			this._projectScope = resource;	
+		},
+		
+		setFolderScope: function(resource){
+			this._folderScope = resource;
 		},
 		
 		_initSearchScope: function() {
 			this._rootURL = this._fileClient.fileServiceRootURL();
 			this._searchLocations = [this._rootURL];
 			
-			this._searchScope = lib.$("#advSearchScopeSniff", this._searchOptWrapperDiv); //$NON-NLS-0$
+			this._searchScopeAllProject = lib.$("#advSearchScopeAllProject", this._searchOptWrapperDiv); //$NON-NLS-0$
+			this._searchScopeProject = lib.$("#advSearchScopeProject", this._searchOptWrapperDiv); //$NON-NLS-0$
 			this._searchScopeElementWrapper = lib.$("#searchScopeElementWrapper", this._searchOptWrapperDiv); //$NON-NLS-0$
 			this._searchScopeSelectButton = lib.$("#searchScopeSelectButton", this._searchOptWrapperDiv); //$NON-NLS-0$
 			
@@ -498,13 +515,27 @@ define([
 					searchScopeDialog.show();
 				}.bind(this));
 			}.bind(this));
-			this._searchScope.addEventListener("change", function(event){
-				if(this._searchScope.checked){
-					this.setSearchScope(null);	
+			this._searchScopeAllProject.addEventListener("change", function(event){
+				if(this._searchScopeAllProject.checked){
+					this.setSearchScope(null);
+					this.uncheckSearchInProject();
 				}else{
-					this.setSearchScope(this._readyToSwitchResouce);				
+					this.setSearchScope(this._folderScope);				
 				}
-				localStorage.setItem("/searchScope", this._searchScope.checked);
+				localStorage.setItem("/inlineSearchAllProject", this._searchScopeAllProject.checked);
+				while (this._searchScopeElementWrapper.firstChild) {
+				    this._searchScopeElementWrapper.removeChild(this._searchScopeElementWrapper.firstChild);
+				}
+				this._displaySelectedSearchScope();
+			}.bind(this), false);
+			this._searchScopeProject.addEventListener("change", function(event){
+				if(this._searchScopeProject.checked){
+					this.setSearchScope(this._projectScope);
+					this.uncheckSearchInAllProjects();
+				}else{
+					this.setSearchScope(this._folderScope);				
+				}
+				localStorage.setItem("/inlineSearchProject", this._searchScopeProject.checked);
 				while (this._searchScopeElementWrapper.firstChild) {
 				    this._searchScopeElementWrapper.removeChild(this._searchScopeElementWrapper.firstChild);
 				}
