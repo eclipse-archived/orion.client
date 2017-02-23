@@ -21,7 +21,7 @@ define([
 	'orion/bidiUtils'
 ], function(require, messages, URITemplate, i18nUtil, util, objects, bidiUtils) {
 	
-	var commitTemplate = new URITemplate("git/git-repository.html#{,resource,params*}?page=1"); //$NON-NLS-0$	
+	var commitTemplate = new URITemplate("#{,resource,params*}?page=1"); //$NON-NLS-0$	
 	
 	/**
 	 * @class orion.git.GitCommitInfo
@@ -110,7 +110,7 @@ define([
 				if (this.commitLink) {
 					link = document.createElement("a"); //$NON-NLS-0$
 					link.className = "navlinkonpage"; //$NON-NLS-0$
-					link.href = require.toUrl(commitTemplate.expand({resource: commit.Location}));
+					link.href = commitTemplate.expand({resource: commit.Location});
 				} else {
 					link = document.createElement("div"); //$NON-NLS-0$
 					link.className = "gitCommitTitle"; //$NON-NLS-0$

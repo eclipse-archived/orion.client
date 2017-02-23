@@ -31,7 +31,7 @@ define([
 	'orion/metrics'
 ], function(require, messages, mGitChangeList, mGitCommitList, mGitBranchList, mGitConfigList, mGitRepoList, mSection, mSelection, lib, URITemplate, PageUtil, util, mFileUtils, i18nUtil, mGlobalCommands, mGitCommands, Deferred, mMetrics) {
 	
-	var repoTemplate = new URITemplate("git/git-repository.html#{,resource,params*}"); //$NON-NLS-0$
+	var repoTemplate = new URITemplate("#{,resource,params*}"); //$NON-NLS-0$
 	
 	function compare(s1, s2, props) {
 		if (s1 === s2) { return true; }
@@ -111,7 +111,7 @@ define([
 				break;
 			case "checkout": //$NON-NLS-0$
 				if (that.repository) {
-					window.location.href = require.toUrl(repoTemplate.expand({resource: that.lastResource = that.repository.Location}));
+					window.location.href = repoTemplate.expand({resource: that.lastResource = that.repository.Location});
 				}
 				that.changedItem();
 				break;
@@ -141,7 +141,7 @@ define([
 				}
 				
 				if (that.repository) {
-					window.location.href = require.toUrl(repoTemplate.expand({resource: that.lastResource = that.repository.Location}));
+					window.location.href = repoTemplate.expand({resource: that.lastResource = that.repository.Location});
 				}
 				that.changedItem();
 
@@ -161,7 +161,7 @@ define([
 					return parentSelected || childSelected;
 				}
 				if (that.repository && event.items.some(submoduleSelected)) {
-					window.location.href = require.toUrl(repoTemplate.expand({resource: that.lastResource = ""}));
+					window.location.href = repoTemplate.expand({resource: that.lastResource = ""});
 					that.changedItem();
 				}
 				break;
@@ -177,7 +177,7 @@ define([
 			case "dropStash": //$NON-NLS-0$
 				var ref = event.branch || event.tag || event.remote || event.stash;
 				if (that.reference && ref && ref.Location === that.reference.Location) {
-					window.location.href = require.toUrl(repoTemplate.expand({resource: that.lastResource = that.repository.Location}));
+					window.location.href = repoTemplate.expand({resource: that.lastResource = that.repository.Location});
 					that.changedItem();
 				}
 				break;
@@ -466,7 +466,7 @@ define([
 			target: repository,
 			breadcrumbTarget: item,
 			makeBreadcrumbLink: function(seg, location) {
-				seg.href = require.toUrl(repoTemplate.expand({resource: location || ""}));
+				seg.href = repoTemplate.expand({resource: location || ""});
 			},
 			serviceRegistry: this.registry,
 			commandService: this.commandService
@@ -518,7 +518,7 @@ define([
 					this.changes = this.reference = this.log = null;
 					section.setHidden(true);
 					this.setSelectedRepository(selected);
-					window.location.href = require.toUrl(repoTemplate.expand({resource: this.lastResource = selected.Location}));
+					window.location.href = repoTemplate.expand({resource: this.lastResource = selected.Location});
 				} else {
 					return;
 				}
@@ -603,7 +603,7 @@ define([
 					section.setHidden(true);
 					this.setSelectedReference(selected);
 					if (!util.isNewBranch(selected)) {
-						window.location.href = require.toUrl(repoTemplate.expand({resource: this.lastResource = selected.Location}));
+						window.location.href = repoTemplate.expand({resource: this.lastResource = selected.Location});
 					}
 				} else {
 					return;
@@ -712,7 +712,7 @@ define([
 			mGitCommands.preStateChanged().then(function(doIt) {
 				if(doIt) {
 					this.setSelectedChanges(selected);
-//					window.location.href = require.toUrl(repoTemplate.expand({resource: this.lastResource = selected.Location}));
+//					window.location.href = repoTemplate.expand({resource: this.lastResource = selected.Location});
 				} else {
 					return;
 				}

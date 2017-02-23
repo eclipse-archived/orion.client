@@ -20,7 +20,7 @@ define([
 	
 	var ID_COUNT = 0;
 	
-	var editTemplate = new URITemplate("../edit/edit.html#{,resource,params*}"); //$NON-NLS-0$
+	var editTemplate = new URITemplate("#{,resource,params*}"); //$NON-NLS-0$
 			
 	function ProjectsRenderer(options){
 		this._init(options);
