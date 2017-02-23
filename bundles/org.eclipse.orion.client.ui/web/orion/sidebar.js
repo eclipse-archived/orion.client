@@ -375,33 +375,11 @@ define(['orion/objects', 'orion/commands', 'orion/outliner', 'orion/webui/little
 			  } else {
 			  	searchLoc = data.items;
 			  }
-			  this._inlineSearchPane._defaultSearchResource = searchLoc;
 			  return searchLoc;
-			}.bind(this);
-			
-			var searchInFolderCommand = new mCommands.Command({
-				name: messages["searchInFolder"], //$NON-NLS-0$
-				id: "orion.searchInFolder", //$NON-NLS-0$
-				visibleWhen: function(item) {
-					if (Array.isArray(item)) {
-						if(item.length === 1 && item[0].Directory){
-							return true;
-						}
-					}
-					return false;
-				},
-				callback: function (data) {
-					var item = data.items[0];
-					recordDefaultSearchResource(data);
-					this._inlineSearchPane.setSearchText(getSearchText());
-					this._inlineSearchPane.setSearchScope(item);
-					this._inlineSearchPane.show();
-					this._inlineSearchPane.showSearchOptions();	
-				}.bind(this)
-			});
+			};
 			
 			var openSearchCommand = new mCommands.Command({
-				name: messages["Global Search"], //$NON-NLS-0$
+				name: messages["Search"], //$NON-NLS-0$
 				id: "orion.openSearch", //$NON-NLS-0$
 				visibleWhen: function() {
 					return true;
@@ -417,29 +395,20 @@ define(['orion/objects', 'orion/commands', 'orion/outliner', 'orion/webui/little
 						this._inlineSearchPane.setSearchText(getSearchText());
 						var metadata = this.editorInputManager.getFileMetadata();
 						if(metadata) {
-							var resource = recordDefaultSearchResource({items: [metadata]});
-							this._inlineSearchPane.readyToSwitchScope(resource);
+							var projectScope = recordDefaultSearchResource({items: [metadata]});
+							this._inlineSearchPane.setProjectScope(projectScope);
 						}
-						var isSearchInAllProjects = this._inlineSearchPane.isSearchInAllProjects();
-						if(isSearchInAllProjects){
-							this._inlineSearchPane.setSearchScope(this._lastSearchRoot); //reset search scope
-						}else{
-							this._inlineSearchPane.setSearchScope(resource);
-						}
-						this._inlineSearchPane.setSearchInAllProjectsCheckBox(isSearchInAllProjects);
+						var folderScope = data.items[0].Directory ? data.items[0] : data.items[0].parent;
+						this._inlineSearchPane.setFolderScope(folderScope);
+						var seachScopeOption = this._inlineSearchPane.getSearchScopeOption();
+						this._inlineSearchPane.updateScopeOptions(seachScopeOption);
 						this._inlineSearchPane.show();
 						this._inlineSearchPane.showSearchOptions();	
 					}
 				}.bind(this)
 			});
-			
-			this.commandRegistry.addCommand(searchInFolderCommand);
 			this.commandRegistry.addCommand(openSearchCommand);
-			
-			this.commandRegistry.registerCommandContribution(this.editScope, "orion.searchInFolder", 99, "orion.menuBarEditGroup/orion.findGroup");  //$NON-NLS-1$ //$NON-NLS-2$
-			this.commandRegistry.registerCommandContribution(this.editScope, "orion.quickSearch", 100, "orion.menuBarEditGroup/orion.findGroup", false, new mKeyBinding.KeyBinding('h', true)); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-3$
 			this.commandRegistry.registerCommandContribution(this.editScope, "orion.openSearch", 101, "orion.menuBarEditGroup/orion.findGroup", false, new mKeyBinding.KeyBinding('h', true, true)); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-3$
-			
  		}
 	});
 
