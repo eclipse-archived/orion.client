@@ -397,10 +397,12 @@ define([
             }.bind(this));
             p.reduce(function(prev, current, index, array) {
                 return prev.then(function(_file) {
-                    var vals = readAndMap(this.map, _file, "eslint");
-                    if(vals) {
-                        deferred.resolve(vals);
-                        return current.reject("done");
+                	if(_file && _file.contents) {
+	                    var vals = readAndMap(this.map, _file, "eslint", this);
+	                    if(vals) {
+	                        deferred.resolve(vals);
+	                        return current.reject("done");
+	                    }
                     }
                     if(index === array.length-1) {
                         deferred.resolve(null);
@@ -424,7 +426,10 @@ define([
 			return new Deferred().resolve(this.map.formatting);
 		}
 		return this.getFile(this.JSBEAUTIFYRC).then(function(file) {
-			return readAndMap(this.map, file, "formatting");
+			if(file && file.contents) {
+				return readAndMap(this.map, file, "formatting", this);
+			}
+			return null;
 		}.bind(this));
 	};
 	
@@ -566,32 +571,53 @@ define([
 		});
 	}
 
-	function readAndMap(map, file, key) {
+	/**
+	 * @description Attempts to read the given file contents, parse it based on its type and cache it using the given key
+	 * @param {?} map The project cache
+	 * @param {?} file The file object from the file client
+	 * @param {String} key The key to map to
+	 * @param {JavaScriptProject} project The project context
+	 * @returns {?} The parsed cache value
+	 */
+	function readAndMap(map, file, key, project) {
 		map[key] = {file: file, vals: null};
-		if (file && file.contents) {
-			var vals = null;
-			try {
-				vals = JSON.parse(file.contents);
-			} catch (e) {
-				// ignore
-			}
-			if (vals === null) {
-				// try yml and yaml parsing
+		switch(file.name.slice(file.name.lastIndexOf('/')+1)) {
+			case project.ESLINTRC:
+			case project.ESLINTRC_JSON: {
 				try {
-					// YML and YAML files
-					vals = JsYaml.safeLoad(
-						file.contents,
-						{json: true});
-				} catch (e) {
-					// ignore
+					map[key].vals = JSON.parse(file.contents);
+				} catch(err) {
+					//ignore, bad JSON
 				}
+				break;
 			}
-            if(vals && vals.eslintConfig && typeof vals.eslintConfig === "object") {
-                vals = vals.eslintConfig;
-            }
+			case project.PACKAGE_JSON: {
+				try {
+					var v = JSON.parse(file.contents);
+					if(v && v.eslintConfig && typeof v.eslintConfig === "object") {
+						map[key].vals = v.eslintConfig;
+					}
+				} catch(err) {
+					//ignore, bad JSON
+				}
+				break;
+			}
+			case project.ESLINTRC_YAML:
+			case project.ESLINTRC_YML: {
+				try {
+					map[key].vals = JsYaml.safeLoad(file.contents);
+				} catch (e) {
+					// ignore, bad YAML/YML
+				}
+				break;
+			}
+			case project.ESLINTRC_JS: {
+				//TODO how should we load JS from an arbitrary file?
+				//we can't eval them and we can't require them
+				break;
+			}
 		}
-		if (vals && Object.keys(vals).length > 0) {
-			map[key].vals = vals;
+		if (map[key].vals) {
 			return map[key];
 		}
 		return null;
