@@ -273,7 +273,7 @@ define([
 		}
 		var _project = this.projectMeta ? this.projectMeta.Location : projectPath;
 		var folderPath = _project+childName;
-		return this.getFileClient().fetchChildren(folderPath).then(function(children) {
+		return this.getFileClient().fetchChildren(folderPath, {readIfExists: true}).then(function(children) {
             return children;
 		},
 		function rejected() {
@@ -512,11 +512,7 @@ define([
 				project.map.env.ternproject = {file: file, vals: null};
 				if(file && typeof file.contents === "string") {
 					try {
-						var vals = JSON.parse(file.contents);
-					} catch (e) {
-						// ignore
-					}
-					if(vals) {
+						vals = JSON.parse(file.contents);
 						project.map.env.ternproject.vals = vals;
 						if(Array.isArray(vals.libs)) {
 							if(vals.libs.indexOf("browser") > -1) {
@@ -554,6 +550,8 @@ define([
 							project.map.env.envs.browser = true;
 							project.map.env.envs.node = true;
 						}
+					} catch (e) {
+						// ignore, bad JSON
 					}
 				}
 				return project.getFolder(project.DEFINITIONS).then(function(children) {

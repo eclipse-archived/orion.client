@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2010, 2016 IBM Corporation and others.
+ * Copyright (c) 2010, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License v1.0
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution
@@ -191,9 +191,10 @@ define(["orion/Deferred", "orion/xhr", "orion/URL-shim", "orion/operation", "ori
 		/**
 		 * Obtains the children of a remote resource
 		 * @param {String} loc The location of the item to obtain children for
+		 * @param {?} options The optional collection of options to pass into the request
 		 * @return A deferred that will provide the array of child objects when complete
 		 */
-		fetchChildren: function(loc) {
+		fetchChildren: function(loc, options) {
 			var fetchLocation = loc;
 			if (fetchLocation === this.fileBase) {
 				return this.loadWorkspace(fetchLocation).then(function(jsondata) {
@@ -204,14 +205,18 @@ define(["orion/Deferred", "orion/xhr", "orion/URL-shim", "orion/operation", "ori
 			if (fetchLocation.indexOf("?depth=") === -1) { //$NON-NLS-0$
 				fetchLocation += "?depth=1"; //$NON-NLS-0$
 			}
-			// console.log("get children");
-			return _xhr("GET", fetchLocation, {
+			var opts = {
 				headers: {
 					"Orion-Version": "1",
 					"Content-Type": "charset=UTF-8"
 				},
 				timeout: 15000
-			}).then(function(result) {
+			};
+			if (options && typeof options.readIfExists === 'boolean') {
+				opts.headers["read-if-exists"] = Boolean(options.readIfExists).toString();
+			}
+			// console.log("get children");
+			return _xhr("GET", fetchLocation, opts).then(function(result) {
 				var jsonData = result.response ? JSON.parse(result.response) : {};
 				return jsonData.Children || [];
 			}).then(function(result) {
