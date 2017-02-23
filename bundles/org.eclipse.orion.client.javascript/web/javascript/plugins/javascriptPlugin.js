@@ -1613,7 +1613,7 @@ define([
 
 	provider.registerServiceProvider("orion.edit.command", //$NON-NLS-1$
 		quickFixComputer, {
-			name: javascriptMessages["checkTernPluginFixName"],
+			name: javascriptMessages["unknownRequirePluginFixName"],
 			fixAllEnabled: false,
 			scopeId: "orion.edit.quickfix", //$NON-NLS-1$
 			id: "check.tern.plugin.fix", //$NON-NLS-1$
@@ -1632,7 +1632,7 @@ define([
 
 	provider.registerServiceProvider("orion.edit.command", //$NON-NLS-1$
 		quickFixComputer, {
-			name: javascriptMessages["checkTernLibFixName"],
+			name: javascriptMessages["unknownRequirePluginFixName"],
 			fixAllEnabled: false,
 			scopeId: "orion.edit.quickfix", //$NON-NLS-1$
 			id: "check.tern.lib.fix", //$NON-NLS-1$
