@@ -139,6 +139,10 @@ exports.install = function(options) {
 					// termsocket = null;
 				});
 
+				terminal.on('exit', function() {
+					sock.disconnect();
+				});
+
 				while (buff.length) {
 					sock.emit('data', buff.shift());
 				}
