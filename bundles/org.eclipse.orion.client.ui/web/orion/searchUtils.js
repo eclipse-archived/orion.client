@@ -59,7 +59,7 @@ searchUtils.getSearchParams = function(searcher, searchStr, advOptions){
 			commitSearch = advOptions && advOptions.type !== searchUtils.ALL_FILE_TYPE;
 		}
 		if (commitSearch) {
-			var searchParams = searcher.createSearchParams(newSearchStr, false, false, advOptions);
+			var searchParams = searcher.createInlineSearchParams(newSearchStr, advOptions);
 			return searchParams;
 		}
 	} else {

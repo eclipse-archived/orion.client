@@ -284,6 +284,22 @@ define([
 				keyword: keyword,
 				replace: advancedOptions ? advancedOptions.replace : undefined
 			};
+		},
+		
+		createInlineSearchParams: function(keyword, advancedOptions){
+			return {
+				resource: advancedOptions.resource,
+				sort: advancedOptions && advancedOptions.sort ? advancedOptions.sort : "Path asc", //$NON-NLS-0$
+				rows: advancedOptions && advancedOptions.rows ? advancedOptions.rows : 40,
+				start: 0,
+				caseSensitive: advancedOptions ? advancedOptions.caseSensitive : undefined,
+				wholeWord: advancedOptions ? advancedOptions.wholeWord : undefined,
+				regEx: advancedOptions ? advancedOptions.regEx : undefined,
+				fileType: advancedOptions ? advancedOptions.fileType : undefined,
+				fileNamePatterns: (advancedOptions && advancedOptions.fileNamePatterns) ? advancedOptions.fileNamePatterns : undefined,
+				keyword: keyword,
+				replace: advancedOptions ? advancedOptions.replace : undefined
+			};
 		}
 	};
 
