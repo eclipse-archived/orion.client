@@ -15,8 +15,7 @@ var express = require('express'),
 
 var LIBS = path.normalize(path.join(__dirname, 'lib/')),
 	MINIFIED_ORION_CLIENT = "lib/orion.client",
-	ORION_CLIENT = path.normalize(path.join(__dirname,
-		fs.existsSync(path.join(__dirname, MINIFIED_ORION_CLIENT)) ? MINIFIED_ORION_CLIENT : '../../'));
+	ORION_CLIENT = path.normalize(path.join(__dirname, '../../'));
 
 function handleError(err) {
 	throw err;
@@ -89,10 +88,14 @@ function startServer(options) {
 
 		// Static files
 		app.use('/xterm', express.static(path.join(__dirname, 'node_modules', 'xterm', 'dist')));
-		var prependStaticAssets = options.configParams["prepend.static.assets"] && options.configParams["prepend.static.assets"].split(",") || [];
-		var appendStaticAssets = options.configParams["append.static.assets"] && options.configParams["append.static.assets"].split(",") || [];
-		var orionode_static = path.normalize(path.join(LIBS, 'orionode.client/'));
-		app.use(require('./lib/orion_static')({ orionClientRoot: ORION_CLIENT, maxAge: options.maxAge, orionode_static: orionode_static, prependStaticAssets: prependStaticAssets, appendStaticAssets: appendStaticAssets}));
+		if (fs.existsSync(path.join(__dirname, MINIFIED_ORION_CLIENT))) {
+			app.use(express.static(MINIFIED_ORION_CLIENT, {maxAge: options.maxAge, dotfiles: 'allow'}));
+		} else {
+			var prependStaticAssets = options.configParams["prepend.static.assets"] && options.configParams["prepend.static.assets"].split(",") || [];
+			var appendStaticAssets = options.configParams["append.static.assets"] && options.configParams["append.static.assets"].split(",") || [];
+			var orionode_static = path.normalize(path.join(LIBS, 'orionode.client/'));
+			app.use(require('./lib/orion_static')({ orionClientRoot: ORION_CLIENT, maxAge: options.maxAge, orionode_static: orionode_static, prependStaticAssets: prependStaticAssets, appendStaticAssets: appendStaticAssets}));
+		}
 
 		//error handling
 		app.use(function(req, res){

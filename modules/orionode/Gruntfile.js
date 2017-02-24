@@ -52,17 +52,6 @@ module.exports = function(grunt) {
 			}
 		},
 		copy: {
-			// Copy each client {bundle} to lib/orion.client/bundles/{bundle}
-			orionclient: {
-				files: bundles.map(function(bundle) {
-					return {
-						expand: true,
-						cwd: bundle.path,
-						src: SOURCE_GLOB,
-						dest: "lib/orion.client/bundles/" + bundle.name + "/"
-					};
-				})
-			},
 			orionserver: {
 				files: extraModules.map(function(modulePath) {
 					return {
@@ -97,38 +86,8 @@ module.exports = function(grunt) {
 				files: [{
 					expand: true,
 					cwd: optimized,
-					dest: "lib/",
-					src: ["**/*.js", "**/*.css", "**/*.html", "**/*.map"], // includes .src.js
-					rename: function(dest, src) {
-						// Determine the actual destination. This is either a bundle in lib/orion.client/bundles/
-						// or the Orionode client code lib/orionode.client/.
-						var bundlefile, match;
-						if ((match = /(.*)(\.src\.js|\.map)$/.exec(src)) != null) {
-							// Source map file; use the associated .js file to decide where we go
-							bundlefile = match[1];
-						} else {
-							bundlefile = src;
-						}
-						var newDest;
-						// Reverse order here so later bundle in list wins over earlier one, if both contain a bundlefile
-						grunt.verbose.write("Finding origin bundle for " + src + "... ");
-						bundles.slice().reverse().some(function(bundle) {
-							if (grunt.file.exists(_path.join(bundle.web, bundlefile))) {
-								// This file originated from bundle
-								newDest = _path.join(dest, "orion.client/bundles/", bundle.name, "web/", src);
-								return true;
-							}
-						});
-						// Check orionode.client last, since it overrides orion.client bundles
-						if (grunt.file.exists(_path.join("lib/orionode.client/", bundlefile)))
-							newDest = _path.join(dest, "orionode.client/", src);
-
-						if (newDest)
-							grunt.verbose.ok();
-						else
-							grunt.fail.warn("Could not determine origin bundle for " + src + ".");
-						return newDest;
-					}
+					src: SOURCE_GLOB,
+					dest: "lib/orion.client",
 				}]
 			}
 		},
@@ -191,7 +150,7 @@ module.exports = function(grunt) {
 
 	grunt.registerTask("test", ["simplemocha"]);
 	grunt.registerTask("optimize", ["printBuild", "copy:stage", "requirejs", "string-replace", "copy:unstage"]);
-	grunt.registerTask("default", ["checkDirs", "clean", "copy:orionserver", "copy:orionclient", "optimize", "test"]);
-	grunt.registerTask("notest", ["checkDirs", "clean", "copy:orionserver", "copy:orionclient", "optimize"]);
-	grunt.registerTask("nomin",   ["checkDirs", "clean", "copy:orionserver", "copy:orionclient", "string-replace:orionclient", "test"]);
+	grunt.registerTask("default", ["checkDirs", "clean", "copy:orionserver", "optimize", "test"]);
+	grunt.registerTask("notest", ["checkDirs", "clean", "copy:orionserver", "optimize"]);
+	grunt.registerTask("nomin",   ["checkDirs", "clean", "copy:orionserver", "string-replace:orionclient", "test"]);
 };
