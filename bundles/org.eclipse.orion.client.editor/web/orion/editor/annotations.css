@@ -38,6 +38,10 @@
 	background-repeat: repeat-y;
 	color: #CCCCCC;
 }
+.annotation.collabLineChanged {
+	background-repeat: repeat-y;
+	color: #FFFFFF;
+}
 .annotation.diffDeleted {
 	background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAMAAAADCAIAAADZSiLoAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAVSURBVBhXY3growJBDP9hAMb6/x8ADgMVdmD2Og4AAAAASUVORK5CYII=);
 	background-repeat: repeat-x;
@@ -49,6 +53,11 @@
 	color: #555555;
 }
 .lines .annotation.diffModified {
+	background-image: none;
+	background-color: rgba(85, 181, 219, 0.67);
+	color: #555555;
+}
+.lines .annotation.collabLineChanged {
 	background-image: none;
 	background-color: rgba(85, 181, 219, 0.67);
 	color: #555555;
@@ -168,6 +177,14 @@
 	background-repeat: repeat-y;
 	background-position: left top;
 }
+.annotationHTML.collabLineChanged {
+	text-align: center;
+	border-radius: 50%;
+	line-height: 16px;
+	font-size: 11px;
+	font-family: monospace;
+	font-weight: bold;
+}
 
 /* Styles for the overview ruler  */
 .annotationOverview {
@@ -241,6 +258,10 @@
 .annotationOverview.diffModified {
 	background-color: rgba(85, 181, 219, 0.61);
 	border: 1px solid black;
+}
+.annotationOverview.collabLineChanged {
+	background-color: #84b3cf;
+	border: 1px solid #9cc2d8;
 }
 
 /* Styles for text range */
