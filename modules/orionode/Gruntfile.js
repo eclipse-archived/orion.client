@@ -12,7 +12,7 @@ module.exports = function(grunt) {
 	    staging = "target/staging/",
 	    optimized = "target/optimized/";
 	    
-	var socketioPath =  grunt.file.exists('../../node_modules/socket.io/node_modules/socket.io-client/socket.io') ?
+	var socketioPath =  grunt.file.exists('./node_modules/socket.io/node_modules/socket.io-client') ?
 			'../../node_modules/socket.io/node_modules/socket.io-client/socket.io' :
 			'../../node_modules/socket.io-client/socket.io';
 	    
