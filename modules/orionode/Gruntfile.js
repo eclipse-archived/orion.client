@@ -12,6 +12,10 @@ module.exports = function(grunt) {
 	    staging = "target/staging/",
 	    optimized = "target/optimized/";
 	    
+	var socketioPath =  grunt.file.exists('../../node_modules/socket.io/node_modules/socket.io-client/socket.io') ?
+			'../../node_modules/socket.io/node_modules/socket.io-client/socket.io' :
+			'../../node_modules/socket.io-client/socket.io';
+	    
 	var orionBuildConfig = util.loadBuildConfig(configPath),
 	    bundles = util.parseBundles(orionBuildConfig, {
 			buildDirectory: staging,
@@ -33,7 +37,7 @@ module.exports = function(grunt) {
 				name: "tty/ttyShell"
 			},
 		], {
-			"socket.io/socket.io": '../../node_modules/socket.io/node_modules/socket.io-client/socket.io',
+			"socket.io/socket.io": socketioPath,
         	"xterm/xterm": '../../node_modules/xterm/dist/xterm',
 		}),
 		checkDirs: {
