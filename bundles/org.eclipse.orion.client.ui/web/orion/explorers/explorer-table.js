@@ -1034,7 +1034,15 @@ define([
 					var promise = this.dragAndDrop(targetItem, file, this, unzip, false, true);
 					var done = function() {
 						destroy();
-						this.changedItem(targetItem, true);
+						this.fileClient.dispatchEvent({
+							type: "Changed",
+							created: [{
+								parent: targetItem.Location,
+								eventData: {
+									select: false
+								}
+							}]
+						});
 					}.bind(this);
 					promise.then(
 						done,

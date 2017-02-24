@@ -68,9 +68,8 @@ function startServer(options) {
 			var additionalEndpoints = require(options.configParams["additional.endpoint"]);
 			additionalEndpoints.forEach(function(additionalEndpoint){
 				if(additionalEndpoint.endpoint){
-					additionalEndpoint.authenticated ?
-						app.use(additionalEndpoint.endpoint, checkAuthenticated, require(additionalEndpoint.module).router(options)) :
-						app.use(additionalEndpoint.endpoint, require(additionalEndpoint.module).router(options));
+					additionalEndpoint.authenticated ? app.use(additionalEndpoint.endpoint, checkAuthenticated, require(additionalEndpoint.module).router(options))
+						: app.use(additionalEndpoint.endpoint, require(additionalEndpoint.module).router(options, additionalEndpoint.extraOptions));
 				}else{
 					var extraModule = require(additionalEndpoint.module);
 					var middleware = extraModule.router ? extraModule.router(options) : extraModule(options);
@@ -88,7 +87,7 @@ function startServer(options) {
 		app.use('/gitapi', checkAuthenticated, require('./lib/git')({ gitRoot: contextPath + '/gitapi', fileRoot: /*contextPath + */'/file', workspaceRoot: /*contextPath + */'/workspace', options: options}));
 		app.use('/cfapi', checkAuthenticated, require('./lib/cf')({ fileRoot: contextPath + '/file', options: options}));
 		app.use('/prefs', checkAuthenticated, require('./lib/controllers/prefs').router(options));
-		app.use('/xfer', checkAuthenticated, require('./lib/xfer')({fileRoot: contextPath + '/file', options:options}));
+		app.use('/xfer', checkAuthenticated, require('./lib/xfer').router({fileRoot: contextPath + '/file', options:options}));
 		app.use('/metrics', require('./lib/metrics').router(options));
 		app.use('/version', require('./lib/version').router(options));
 		if (options.configParams.isElectron) app.use('/update', require('./lib/update').router(options));
