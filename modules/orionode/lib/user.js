@@ -27,7 +27,8 @@ var express = require('express'),
 	api = require('./api'),
 	generator = require('generate-password'),
 	log4js = require('log4js'),
-	logger = log4js.getLogger("user");
+	logger = log4js.getLogger("user"),
+	jwt = require('jsonwebtoken');
 	
 var CONFIRM_MAIL = "./multitenant/EmailConfirmation.txt",
 	PWD_CONFIRM_RESET_MAIL = "./multitenant/EmailConfirmationPasswordReset.txt",
@@ -47,7 +48,8 @@ function userJSON(user) {
 		OAuth: user.oauth || undefined,
 		LastLoginTimestamp: user.login_timestamp ? user.login_timestamp.getTime() : 0,
 		DiskUsageTimestamp: user.disk_usage_timestamp ? user.disk_usage_timestamp.getTime() : 0,
-		DiskUsage: user.disk_usage || 0 
+		DiskUsage: user.disk_usage || 0 ,
+		jwt: user.jwt
 	};
 }
 
@@ -534,7 +536,12 @@ module.exports.router = function(options) {
 		if (!req.user) {
 			return res.status(200).end();
 		}
-		return res.status(200).json(userJSON(req.user));
+		//add the web token with the response
+		if (options.configParams["orion.jwt.secret"]) {
+			req.user.jwt = jwt.sign({'username': req.user.username}, options.configParams["orion.jwt.secret"]);
+		}
+		var user = userJSON(req.user)
+		return res.status(200).json(user);
 	});
 	
 	return app;

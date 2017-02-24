@@ -32,16 +32,19 @@ function getUploadsFolder(options) {
 	return path.join(os.homedir(), ".orion");
 }
 
+var UPLOADS_FOLDER;
+var fileRoot;
+
 /**
  * @callback
  */
-module.exports = function(options) {
-	var fileRoot = options.fileRoot;
+module.exports.router = function(options) {
+	fileRoot = options.fileRoot;
 	if (!fileRoot) { throw new Error('options.fileRoot is required'); }
 	module.exports.write = write;
 	module.exports.getUploadDir = getUploadDir;
 	
-	var UPLOADS_FOLDER = getUploadsFolder(options);
+	UPLOADS_FOLDER = getUploadsFolder(options);
 	
 	mkdirp(UPLOADS_FOLDER, function (err) {
 		if (err) logger.error(err);
@@ -50,8 +53,11 @@ module.exports = function(options) {
 	return express.Router()
 	.get('/export*', getXfer)
 	.post('/import*', postImportXfer);
-	
-	
+}
+
+module.exports.getXferFrom = getXferFrom;
+module.exports.postImportXferTo = postImportXferTo;
+
 function getOptions(req) {
 	return req.get("X-Xfer-Options").split(",");
 }
@@ -73,6 +79,10 @@ function reportTransferFailure(res, err) {
 function postImportXfer(req, res) {
 	var filePath = req.params["0"];
 	filePath = fileUtil.safeFilePath(req.user.workspaceDir, filePath);
+	postImportXferTo(req, res, filePath);
+}
+
+function postImportXferTo(req, res, filePath) {
 	var xferOptions = getOptions(req);
 	if (xferOptions.indexOf("sftp") !== -1) {
 		return writeError(500, res, "Not implemented yet.");
@@ -239,6 +249,11 @@ function getXfer(req, res) {
 		return writeError(400, res, "Export is not a zip");
 	}
 	
+	filePath = fileUtil.safeFilePath(req.user.workspaceDir, filePath.replace(/.zip$/, ""));
+	getXferFrom(req, res, filePath);
+}
+
+function getXferFrom(req, res, filePath) {
 	var zip = archiver('zip');
 	zip.pipe(res);
 	var folderName = filePath.replace(/.zip$/, "");
@@ -277,4 +292,3 @@ function write (zip, base, filePath) {
 function getUploadDir(){
 	return UPLOADS_FOLDER;
 }
-};
