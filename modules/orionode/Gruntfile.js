@@ -33,7 +33,7 @@ module.exports = function(grunt) {
 				name: "tty/ttyShell"
 			},
 		], {
-			"socket.io/socket.io": '../../node_modules/socket.io-client/socket.io',
+			"socket.io/socket.io": '../../node_modules/socket.io/node_modules/socket.io-client/socket.io',
         	"xterm/xterm": '../../node_modules/xterm/dist/xterm',
 		}),
 		checkDirs: {
