@@ -18,7 +18,7 @@ define([
 	"orion/searchClient",
 	"orion/globalCommands",
 	'orion/webui/littlelib',
-	"tty/scripts/shell"
+	"tty/shell"
 ], function(messages, mBootstrap, mCommandRegistry, mFileClient, mSearchClient, mGlobalCommands, lib, shell) {
 
 	mBootstrap.startup().then(function(core) {

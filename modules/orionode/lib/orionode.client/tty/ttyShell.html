@@ -7,13 +7,13 @@
 		<link rel="icon" href="/images/shell.png" type="image/png">
 		<title>Shell</title>
 		<link rel="stylesheet" type="text/css" href="../xterm/xterm.css" />
-		<link rel="stylesheet" type="text/css" href="ttyPage.css" />
+		<link rel="stylesheet" type="text/css" href="ttyShell.css" />
 		<script src="../orion/requireErrorHandler.js"></script>
 		<script src="../requirejs/require.js"></script>
 		<script>
 			/*eslint-env browser, amd*/
 			require(["../orion/require-config.js"], function(config){
-				require(["tty/scripts/ttyPage"], null, self.errback);
+				require(["tty/ttyShell"], null, self.errback);
 			}, self.errback);
 		</script>
 	</head>

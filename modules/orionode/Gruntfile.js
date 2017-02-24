@@ -25,7 +25,17 @@ module.exports = function(grunt) {
 		configPath: configPath,
 		staging: staging,
 		optimized: optimized,
-		nodeBuildConfig: util.filterBuildConfig(orionBuildConfig, "<% requirejsExcludeModules %>"),
+		nodeBuildConfig: util.filterBuildConfig(orionBuildConfig, "<% requirejsExcludeModules %>", [
+			{
+				name: "plugins/consolePlugin"
+			},
+			{
+				name: "tty/ttyShell"
+			},
+		], {
+			"socket.io/socket.io": '../../node_modules/socket.io-client/socket.io',
+        	"xterm/xterm": '../../node_modules/xterm/dist/xterm',
+		}),
 		checkDirs: {
 			orion: {
 				src: ["<%= clientPath %>/bundles", "<%= configPath %>"],
@@ -76,7 +86,7 @@ module.exports = function(grunt) {
 					// Copy orionode.client last since it must overwrite some files
 					{
 						expand: true,
-						cwd: "lib/orionode.client/**",
+						cwd: "lib/orionode.client",
 						src: SOURCE_GLOB,
 						dest: staging
 					}
