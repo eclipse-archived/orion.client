@@ -96,10 +96,6 @@ define([
 		},
 		
 		hide: function() {
-			if(this._defaultSearchResource){
-  				this.setSearchScope(this._defaultSearchResource);//reset search scope when the InlineSearchPane is hide
-			}
-
 			if(window.document.title === this.newDocumentTitle){
 				window.document.title = this.previousDocumentTitle;
 			}
@@ -190,7 +186,7 @@ define([
 			if(options.keyword){
 				this._searchBox.addTextInputValueToRecentEntries();
 				this._fileNamePatternsBox.addTextInputValueToRecentEntries();
-				var searchParams = mSearchUtils.getSearchParams(this._searcher, options.keyword, options);
+				var searchParams = mSearchUtils.getSearchParams(this._searcher, options.keyword, options, this.getSearchScopeOption());
 				this._searchResultExplorer.runSearch(searchParams, this._searchResultsWrapperDiv).then(function() {
 					this._initAnnotations();
 				}.bind(this));
@@ -412,33 +408,24 @@ define([
 			lib.$("#searchScopeLabel", this._searchWrapper).appendChild(document.createTextNode(messages["Scope"])); //$NON-NLS-1$ //$NON-NLS-0$
 			lib.$("#fileNamePatternsLabel", this._searchWrapper).appendChild(document.createTextNode(messages["File name patterns (comma-separated)"])); //$NON-NLS-1$ //$NON-NLS-0$
 			lib.$("#searchScopeSelectButton", this._searchWrapper).title = messages["Choose a Folder"]; //$NON-NLS-1$ //$NON-NLS-0$
-			lib.$("#advSearchScopeSniffLabel", this._searchWrapper).appendChild(document.createTextNode(messages["Scope Sniff"]));
+			lib.$("#advSearchScopeAllProjectLabel", this._searchWrapper).appendChild(document.createTextNode(messages["Scope All"]));
+			lib.$("#advSearchScopeProjectLabel", this._searchWrapper).appendChild(document.createTextNode(messages["Scope Project"]));
+			lib.$("#advSearchScopeSelectedLabel", this._searchWrapper).appendChild(document.createTextNode(messages["Scope Selected"]));
+			lib.$("#advSearchScopeOtherLabel", this._searchWrapper).appendChild(document.createTextNode(messages["Scope Other"]));
 		},
 		
-		setSearchScope: function(scope) {
-			this._targetFolder = scope;
-			var targetFolder = scope;
-			if(typeof scope === "string") {
-				targetFolder = {Location: scope};
-			}
-			if (targetFolder && targetFolder.fileMetadata) {
-				targetFolder = targetFolder.fileMetadata;
-			}
-			
-			if (targetFolder && (targetFolder.Path || targetFolder.Location)) {
-				var location = targetFolder.Path || targetFolder.Location;
-				this._searchLocations = [location];
-			} else {
-				this._searchLocations = [this._rootURL];
-			}
-			
-			if (targetFolder && targetFolder.Location) {
-				this._searcher.setLocationByMetaData(targetFolder);
-			} else {
-				this._searcher.setLocationbyURL(this._searchLocations[0]);
-			}
-			
-			this._displaySelectedSearchScope();
+		setOtherSearchScope: function(scope){
+			var otherLocationString = typeof scope === "string" ? scope : scope.Location;
+			this._searcher.setLocationOther(otherLocationString);
+			localStorage.setItem("/inlineSearchOtherScope", otherLocationString);
+			this._displaySelectedSearchScope([otherLocationString]);
+			this._searcher.addDisplaycallback(this._displaySelectedSearchScope.bind(this),"other");
+		},
+		
+		setSearchScope: function(searchScopeOption) {	
+			var searchLocation = this._searcher.getSearchLocation(searchScopeOption);
+			this._displaySelectedSearchScope([searchLocation]);
+			this._searcher.addDisplaycallback(this._displaySelectedSearchScope.bind(this),searchScopeOption);
 		},
 		
 		setSearchText: function(str) {
@@ -459,27 +446,49 @@ define([
 			}
 		},
 		
-		isSearchInAllProjects: function(){
-			return localStorage.getItem("/searchScope") === 'true';
+		getSearchScopeOption: function(){
+			return localStorage.getItem("/inlineSearchScopeOption") || "selected";
 		},
 		
-		setSearchInAllProjectsCheckBox: function(isCheck){
-			this._searchScope.checked = isCheck; //$NON-NLS-0$
+		updateScopeOptions: function(scopeOption){
+			switch(scopeOption){
+				case "selected":
+					this._searchScopeSelected.checked = true;
+					this.setSearchScope("selected" );
+					break;
+				case "project":
+					this._searchScopeProject.checked = true;
+					this.setSearchScope("project");
+					break;
+				case "all_project":
+					this._searchScopeAllProject.checked = true;
+					this.setSearchScope("all_project");
+					break;
+				case "other":
+					this._searchScopeOther.checked = true;
+					this.setOtherSearchScope(this._getOtherScope());
+					break;
+			}
 		},
 		
-		readyToSwitchScope: function(resource){
-			this._readyToSwitchResouce = resource;	
+		_getOtherScope: function(){
+			return localStorage.getItem("/inlineSearchOtherScope") || "/file";
 		},
 		
 		_initSearchScope: function() {
 			this._rootURL = this._fileClient.fileServiceRootURL();
 			this._searchLocations = [this._rootURL];
 			
-			this._searchScope = lib.$("#advSearchScopeSniff", this._searchOptWrapperDiv); //$NON-NLS-0$
+			this._searchScopeSelected = lib.$("#advSearchScopeSelected", this._searchOptWrapperDiv); //$NON-NLS-0$
+			this._searchScopeProject = lib.$("#advSearchScopeProject", this._searchOptWrapperDiv); //$NON-NLS-0$
+			this._searchScopeAllProject = lib.$("#advSearchScopeAllProject", this._searchOptWrapperDiv); //$NON-NLS-0$
+			this._searchScopeOther = lib.$("#advSearchScopeOther", this._searchOptWrapperDiv); //$NON-NLS-0$
 			this._searchScopeElementWrapper = lib.$("#searchScopeElementWrapper", this._searchOptWrapperDiv); //$NON-NLS-0$
 			this._searchScopeSelectButton = lib.$("#searchScopeSelectButton", this._searchOptWrapperDiv); //$NON-NLS-0$
 			
 			this._searchScopeSelectButton.addEventListener("click", function(){ //$NON-NLS-0$
+				this._searchScopeOther.checked = true;
+				localStorage.setItem("/inlineSearchScopeOption", "other");
 				var deferred;
 				if(typeof this._targetFolder === "string") {
 					deferred = this._fileClient.read(this._targetFolder, true);
@@ -493,23 +502,42 @@ define([
 						serviceRegistry: this._serviceRegistry,
 						fileClient: this._fileClient,
 						targetFolder: scopeMetadata,
-						func: this.setSearchScope.bind(this)
+						func: this.setOtherSearchScope.bind(this)
 					});
 					searchScopeDialog.show();
 				}.bind(this));
 			}.bind(this));
-			this._searchScope.addEventListener("change", function(event){
-				if(this._searchScope.checked){
-					this.setSearchScope(null);	
-				}else{
-					this.setSearchScope(this._readyToSwitchResouce);				
+			this._searchScopeSelected.addEventListener("change", function(){
+				if(this._searchScopeSelected.checked){
+					this._saveAndUpdateDisplayedScope("selected");
+					this.setSearchScope("selected");
 				}
-				localStorage.setItem("/searchScope", this._searchScope.checked);
-				while (this._searchScopeElementWrapper.firstChild) {
-				    this._searchScopeElementWrapper.removeChild(this._searchScopeElementWrapper.firstChild);
-				}
-				this._displaySelectedSearchScope();
 			}.bind(this), false);
+			this._searchScopeAllProject.addEventListener("change", function(){
+				if(this._searchScopeAllProject.checked){
+					this._saveAndUpdateDisplayedScope("all_project");
+					this.setSearchScope("all_project");
+				}
+			}.bind(this), false);
+			this._searchScopeProject.addEventListener("change", function(){
+				if(this._searchScopeProject.checked){
+					this._saveAndUpdateDisplayedScope("project");
+					this.setSearchScope("project");
+				}
+			}.bind(this), false);
+			this._searchScopeOther.addEventListener("change", function(){
+				if(this._searchScopeOther.checked){
+					this._saveAndUpdateDisplayedScope("other");
+					this.setOtherSearchScope(this._getOtherScope());
+				}
+			}.bind(this), false);
+		},
+		
+		_saveAndUpdateDisplayedScope: function(scope){
+			localStorage.setItem("/inlineSearchScopeOption", scope);
+			while (this._searchScopeElementWrapper.firstChild) {
+			    this._searchScopeElementWrapper.removeChild(this._searchScopeElementWrapper.firstChild);
+			}
 		},
 		
 		_replaceBoxIsHidden: function() {
@@ -575,11 +603,11 @@ define([
 			this._replaceCompareDiv.classList.remove("replaceCompareDivVisible"); //$NON-NLS-0$
 		},
 		
-		_displaySelectedSearchScope: function() {
+		_displaySelectedSearchScope: function(searchLocations) {
 			var scopeElementWrapper = this._searchScopeElementWrapper;
 			lib.empty(scopeElementWrapper);
 			
-			this._searchLocations.forEach(function(searchLocation){
+			searchLocations.forEach(function(searchLocation){
 				var decodedLocation = decodeURI(searchLocation);
 				var scopeString = decodedLocation;
 				var rootName = this._fileClient.fileServiceRootURL(scopeString);

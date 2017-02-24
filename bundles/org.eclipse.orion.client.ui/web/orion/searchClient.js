@@ -52,7 +52,7 @@ define([
 		setLocationByMetaData: function(meta, useParentLocation){
 			var locationName = "";
 			var noneRootMeta = null;
-			this._searchRootLocation = this._fileClient.fileServiceRootURL(meta.Location);
+			this.setLocationbyURL(meta);
 			if(useParentLocation && meta && meta.Parents && meta.Parents.length > 0){
 				if(useParentLocation.index === "last"){
 					noneRootMeta = meta.Parents[meta.Parents.length-1];
@@ -63,11 +63,9 @@ define([
 				noneRootMeta = this._getNoneRootMeta(meta);
 			} 
 			if(noneRootMeta){
-				this.setLocationbyURL(noneRootMeta.Location);
 				locationName = noneRootMeta.Name;
 				this._childrenLocation = noneRootMeta.ChildrenLocation;
 			} else if(meta){
-				this.setLocationbyURL(this._searchRootLocation);
 				locationName = this._fileClient.fileServiceName(meta.Location);
 				this._childrenLocation = meta.ChildrenLocation;
 			}
@@ -90,8 +88,32 @@ define([
 				searchInputDom.title = messages["TypeKeyOrWildCard"] + locationName;
 			}
 		},
-		setLocationbyURL: function(locationURL){
-			this._searchLocation = locationURL;
+		_calculateProjectScope : function (data) {
+		  //Similar mechanism to the setLocationByMetaData method in searchClient.js with meta = data.items[0]
+		  //and useParentLocation = {index: "last"} to retrieve project scope info.
+		  var searchLoc = null;
+		  if(data.items[0] && data.items[0].Parents && data.items[0].Parents.length){
+		    searchLoc = data.items[0].Parents[data.items[0].Parents.length - 1];
+		  } else if(data.items[0]) {
+		    searchLoc = data.items[0];
+		  } else {
+		  	searchLoc = data.items;
+		  }
+		  return searchLoc;
+		},
+		
+		setLocationOther: function(otherLocation){
+			this._searchLocation_other = otherLocation;
+		},
+			
+		setLocationbyURL: function(meta){
+			this._searchLocation_selected = meta.Directory ? meta : meta.Parents[0];
+			this._searchLocation_project = this._calculateProjectScope({items: [meta]});
+			if(this._searchScopeOption === "selected"){
+				this._displaycallBack([this._searchLocation_selected.Location]);
+			}else if(this._searchScopeOption === "project"){
+				this._displaycallBack([this._searchLocation_project.Location]);
+			}
 		},
 		setRootLocationbyURL: function(locationURL){
 			this._searchRootLocation = locationURL;
@@ -99,9 +121,25 @@ define([
 		setChildrenLocationbyURL: function(locationURL){
 			this._childrenLocation = locationURL;
 		},
-		getSearchLocation: function(){
-			if(this._searchLocation){
-				return this._searchLocation;
+		getSearchLocation: function(searchScope){
+			switch(searchScope){
+				case "selected":
+					if(this._searchLocation_selected){
+						return this._searchLocation_selected.Location;
+					}
+					break;
+				case "project":
+					if(this._searchLocation_project){
+						return this._searchLocation_project.Location;
+					}
+					break;
+				case "all_project":
+					return "/file";
+				case "other":
+					if(this._searchLocation_other){
+						return this._searchLocation_other;
+					}
+					break;
 			}
 			return this._fileClient.fileServiceRootURL();
 		},
@@ -119,6 +157,10 @@ define([
 				return this._childrenLocation;
 			}
 			return this._fileClient.fileServiceRootURL();
+		},
+		addDisplaycallback: function(displayCallback, searchScopeOption){
+			this._displaycallBack = displayCallback;
+			this._searchScopeOption = searchScopeOption;
 		},
 		
 		/**
@@ -257,8 +299,8 @@ define([
 		 * @param {Boolean} [nameSearch] The name of a file to search for
 		 * @param {Boolean} [useRoot] If true, do not use the location property of the searcher. Use the root url of the file system instead.
 		 */
-		createSearchParams: function(keyword, nameSearch, useRoot, advancedOptions)  {
-			var searchOn = useRoot ? this.getSearchRootLocation(): this.getSearchLocation();
+		createSearchParams: function(keyword, nameSearch, useRoot, advancedOptions, searchScope)  {
+			var searchOn = useRoot ? this.getSearchRootLocation(): this.getSearchLocation(searchScope);
 			if (nameSearch) {
 				//assume implicit trailing wildcard if there isn't one already
 				//var wildcard= (/\*$/.test(keyword) ? "" : "*"); //$NON-NLS-0$
@@ -282,7 +324,8 @@ define([
 				fileType: advancedOptions ? advancedOptions.fileType : undefined,
 				fileNamePatterns: (advancedOptions && advancedOptions.fileNamePatterns) ? advancedOptions.fileNamePatterns : undefined,
 				keyword: keyword,
-				replace: advancedOptions ? advancedOptions.replace : undefined
+				replace: advancedOptions ? advancedOptions.replace : undefined,
+				searchScope: searchScope
 			};
 		}
 	};
