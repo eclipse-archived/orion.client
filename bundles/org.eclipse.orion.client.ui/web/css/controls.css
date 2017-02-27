@@ -1308,13 +1308,10 @@ html[dir="rtl"] .sectionWrapper, html[dir="rtl"] .sectionTable{ /* ACGC */
 
 .sectionWrapper.sectionClosed {
 	box-shadow: none;
-	opacity: 0.9;
-	background: none;
 }
 
 .sectionWrapper.sectionClosed:hover {
-	box-shadow: 0 1px 2px 0 rgba(0,0,0,0.2);
-	opacity: 1;
+	box-shadow: 0 1px 2px 0 rgb(60, 113, 179);
 	transition: all 0.1s;
 }
 
