@@ -40,17 +40,15 @@ exports.createDirs = function(dirs, callback) {
 };
 
 /**
- * @param {Function} callback Invoked as function(password), the password is null if the file couldn't be read.
+ * Reads the password in the given password file
  */
-exports.readPasswordFile = function(passwordFile, callback) {
+exports.readPasswordFile = function(passwordFile) {
 	if (passwordFile) {
-		fs.readFile(passwordFile, function(err, data) {
-			if (err) { throw err; }
-			callback(String.prototype.trim.call(data));
-		});
-	} else {
-		callback(null);
+		try {
+			return fs.readFileSync(passwordFile,'utf8');
+		} catch (e) {}
 	}
+	return null;
 };
 
 function parseConfig(err, content) {
