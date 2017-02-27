@@ -107,13 +107,13 @@ module.exports.start = function(startServer, configParams) {
 		prefs.writePrefs(allPrefs);
 	}
 	
-	function updateLastOpendTabsPrefs(tabs){
+	function updateLastOpendTabsPrefs(tabs, originalWorkspace){
 		var allPrefs = prefs.readPrefs();
 		var openedTabs = allPrefs.user && allPrefs.user.workspace && allPrefs.user.workspace.openedTabs;
 		if(!openedTabs){
 			((allPrefs.user || (allPrefs.user = {})).workspace || (allPrefs.user.workspace = {})).openedTabs || (allPrefs.user.workspace.openedTabs={});
 		}
-		var currentWorkspace = allPrefs.user && allPrefs.user.workspace && allPrefs.user.workspace.currentWorkspace || configParams.workspace;
+		var currentWorkspace = (originalWorkspace ? originalWorkspace : allPrefs.user.workspace.currentWorkspace) || configParams.workspace;
 		allPrefs.user.workspace.openedTabs[currentWorkspace] = tabs;
 		prefs.writePrefs(allPrefs);
 	}
@@ -299,8 +299,10 @@ module.exports.start = function(startServer, configParams) {
 				}
 			});
 			var newTargetWorkspace;
-			api.getOrionEE().on("workspace-changed",function(newWorkspace){
-				newTargetWorkspace = newWorkspace;
+			var originalWorkspace;
+			api.getOrionEE().on("workspace-changed",function(workspaces){
+				newTargetWorkspace = workspaces[0];
+				originalWorkspace = workspaces[1];
 				// step1: collect tabs info
 				nextWindow.webContents.send('collect-tabs-info','changeworkspace');
 			});
@@ -323,7 +325,7 @@ module.exports.start = function(startServer, configParams) {
 				}
 			});
 			ipcMain.on("collected-tabs-info-changeworkspace", function(event, args){
-				updateLastOpendTabsPrefs(args);
+				updateLastOpendTabsPrefs(args, originalWorkspace);
 				// step2: close all tabs of last workspace
 				nextWindow.webContents.executeJavaScript('closeAllTabs();');
 				api.getOrionEE().emit("open-tabs");
