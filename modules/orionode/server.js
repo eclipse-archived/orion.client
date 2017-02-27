@@ -41,6 +41,7 @@ function startServer(cb) {
 	var workspaceArg = args.workspace || args.w;
 	var workspaceConfigParam = configParams.workspace;
 	var contextPath = configParams["orion.context.path"] || "";
+	var listenContextPath = configParams["orion.context.listenPath"] || false;
 	var workspaceDir;
 	if (workspaceArg) {
 		// -workspace passed in command line is relative to cwd
@@ -89,7 +90,7 @@ function startServer(cb) {
 			}
 			
 			app.use(compression());
-			app.use(contextPath, function(req,res,next){ req.contextPath = contextPath; next();},orion({
+			app.use(listenContextPath ? contextPath : "/", function(req,res,next){ req.contextPath = contextPath; next();},orion({
 				workspaceDir: workspaceDir,
 				configParams: configParams,
 				maxAge: dev ? 0 : undefined,
