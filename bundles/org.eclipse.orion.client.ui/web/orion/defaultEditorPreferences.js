@@ -88,7 +88,7 @@ define([
 		showErrorAnnotation: true,
 		showWarningAnnotation: false,
 		showInfoAnnotation: false,
-		showTaskAnnotation: false,
+		showTaskAnnotation: true,
 		showBookmarkAnnotation: true,
 		showMatchingBracketAnnotation: true,
 		showCurrentBracketAnnotation: true,
