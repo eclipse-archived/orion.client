@@ -483,76 +483,82 @@ define([
 	 * @since 14.0
 	 */
 	function guessEnvForProject(project) {
-		return project.getFile(project.PACKAGE_JSON).then(function(file) {
-			project.map.env.packagejson = {file: file};
+		return project.getFile(project.TERN_PROJECT).then(function(file) {
+			project.map.env.ternproject = {file: file, vals: null};
 			if(file && typeof file.contents === "string") {
 				try {
-					var vals = project.map.env.packagejson.vals = JSON.parse(file.contents);
-					if(vals) {
-						if(vals.dependencies) {
-							Object.keys(vals.dependencies).forEach(function(key) {
-								project.map.env.envs[key] = true;
-							});
-						} else if(vals.devDependencies) {
-							Object.keys(vals.dependencies).forEach(function(key) {
-								project.map.env.envs[key] = true;
-							});
-						} else if(vals.optionalDependencies) {
-							Object.keys(vals.dependencies).forEach(function(key) {
-								project.map.env.envs[key] = true;
-							});
-						}
+					var vals = JSON.parse(file.contents);
+					project.map.env.ternproject.vals = vals;
+					if(Array.isArray(vals.libs)) {
+						if(vals.libs.indexOf("browser") > -1) {
+							project.map.env.envs.browser = true;
+						} else if(vals.libs.indexOf("ecma6") > -1) {
+							project.map.env.envs.es6 = true;
+						} 
 					}
-				} catch(e) {
-					//ignore
-				}
-				project.map.env.envs.node = true;
-			}
-			return project.getFile(project.TERN_PROJECT).then(function(file) {
-				project.map.env.ternproject = {file: file, vals: null};
-				if(file && typeof file.contents === "string") {
-					try {
-						vals = JSON.parse(file.contents);
-						project.map.env.ternproject.vals = vals;
-						if(Array.isArray(vals.libs)) {
-							if(vals.libs.indexOf("browser") > -1) {
-								project.map.env.envs.browser = true;
-							} else if(vals.libs.indexOf("ecma6") > -1) {
-								project.map.env.envs.es6 = true;
-							} 
-						}  
-						if(Array.isArray(vals.defs)) {
-							if(vals.defs.indexOf("browser") > -1) {
-								project.map.env.envs.browser = true;
-							} else if(vals.defs.indexOf("ecma6") > -1) {
-								project.map.env.envs.es6 = true;
-							} 
+					if(Array.isArray(vals.defs)) {
+						if(vals.defs.indexOf("browser") > -1) {
+							project.map.env.envs.browser = true;
+						} else if(vals.defs.indexOf("ecma6") > -1) {
+							project.map.env.envs.es6 = true;
+						} 
+					}
+					if(vals.plugins && typeof vals.plugins === 'object') {
+						if(vals.plugins.node) {
+							project.map.env.envs.node = true;
+						} else if(Object.keys(vals.plugins).length > 0) {
+							//remove node as a default if there are other plugins specified
+							//We will re-add it later when we look for other cues, like package.json
+							delete project.map.env.envs.node;
 						}
-						if(vals.plugins && typeof vals.plugins === 'object') {
-							if(vals.plugins.node) {
-								project.map.env.envs.node = true;
-							} else if(vals.plugins.requirejs || vals.plugins.commonjs) {
-								project.map.env.envs.amd = true;
-								project.map.env.envs.browser = true;
-							} else if(vals.plugins.es6_modules) {
-								project.map.env.envs.es6 = true;
-								project.map.env.envs.browser = true;
-								project.map.env.envs.node = true;
-							}
-						} 
-						if(typeof vals.ecmaVersion === 'number') {
-							if(vals.ecmaVersion >= 6) {
-								project.map.env.envs.es6 = true;
-							}
-						} 
-						if(vals.sourceType === 'modules') {
+						if(vals.plugins.requirejs || vals.plugins.commonjs) {
+							project.map.env.envs.amd = true;
+							project.map.env.envs.browser = true;
+						}
+						if(vals.plugins.es6_modules) {
 							project.map.env.envs.es6 = true;
 							project.map.env.envs.browser = true;
 							project.map.env.envs.node = true;
 						}
-					} catch (e) {
-						// ignore, bad JSON
+					} 
+					if(typeof vals.ecmaVersion === 'number') {
+						if(vals.ecmaVersion >= 6) {
+							project.map.env.envs.es6 = true;
+						}
+					} 
+					if(vals.sourceType === 'modules') {
+						project.map.env.envs.es6 = true;
+						project.map.env.envs.browser = true;
+						project.map.env.envs.node = true;
 					}
+				} catch (e) {
+					// ignore, bad JSON
+				}
+			}
+			return project.getFile(project.PACKAGE_JSON).then(function(file) {
+				project.map.env.packagejson = {file: file};
+				if(file && typeof file.contents === "string") {
+					try {
+						vals = project.map.env.packagejson.vals = JSON.parse(file.contents);
+						if(vals) {
+							if(vals.dependencies) {
+								Object.keys(vals.dependencies).forEach(function(key) {
+									project.map.env.envs[key] = true;
+								});
+							} else if(vals.devDependencies) {
+								Object.keys(vals.dependencies).forEach(function(key) {
+									project.map.env.envs[key] = true;
+								});
+							} else if(vals.optionalDependencies) {
+								Object.keys(vals.dependencies).forEach(function(key) {
+									project.map.env.envs[key] = true;
+								});
+							}
+						}
+					} catch(e) {
+						//ignore
+					}
+					project.map.env.envs.node = true;
 				}
 				return project.getFolder(project.DEFINITIONS).then(function(children) {
 					if(children.length > 0) {
