@@ -92,7 +92,7 @@ function startServer(cb) {
 				configParams: configParams,
 				maxAge: dev ? 0 : undefined,
 			}));
-			var io = socketio.listen(server, { 'log level': 1, path: contextPath + '/socket.io' });
+			var io = socketio.listen(server, { 'log level': 1, path: (listenContextPath ? contextPath : '' ) + '/socket.io' });
 			ttyShell.install({ io: io, app: app, fileRoot: contextPath + '/file', workspaceDir: workspaceDir });
 
 			server.on('listening', function() {
