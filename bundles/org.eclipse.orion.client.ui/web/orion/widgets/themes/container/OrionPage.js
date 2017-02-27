@@ -11,7 +11,7 @@
  /*eslint-env browser,amd*/
 define({
 	"className": "orionPage",
-	"name": "orionPage",
+	"name": "Dark",
 	"styles": {
 		"#configSection": {
 			"background-color": "#26343F !important",

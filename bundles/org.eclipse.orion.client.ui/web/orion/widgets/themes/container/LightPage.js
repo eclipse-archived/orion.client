@@ -11,7 +11,7 @@
  /*eslint-env browser,amd*/
 define({
 	"className": "lightPage",
-	"name": "lightPage",
+	"name": "Light",
 	"styles": {
 		"#configSection": {
 			"background-color": "#FFFFFF !important",
