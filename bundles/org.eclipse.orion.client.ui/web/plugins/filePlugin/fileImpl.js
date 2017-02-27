@@ -365,7 +365,37 @@ define(["orion/Deferred", "orion/xhr", "orion/URL-shim", "orion/operation", "ori
 				return result;
 			}.bind(this));
 		},
-
+		/**
+		 * @description Computes the project context from the given location
+		 * @param {String} resourceLocation The resource context to find the project for
+		 * @param {?} options The options map
+		 * @since 14.0
+		 */
+		getProject: function getProject(resourceLocation, options) {
+			var url = new URL(resourceLocation, self.location);
+			url.query.set("project", "true");
+			if(options && Array.isArray(options.names)) {
+				var names = '';
+				options.names.forEach(function(item, index) {
+					names += encodeURIComponent(item);
+					if (index < options.names.length - 1) {
+						names += ",";
+					}
+				});
+				url.query.set("names", names);
+			}
+			return _xhr("GET", url.href, {
+				headers: {
+					"Orion-Version": "1"
+				},
+				timeout: 15000,
+				log: false
+			}).then(function(result) {
+				return result.response ? JSON.parse(result.response) : null;
+			},/* @callback */ function reject(err) {
+				return null;
+			});
+		},
 		/**
 		 * Creates a folder.
 		 * @param {String} parentLocation The location of the parent folder

@@ -159,7 +159,28 @@ module.exports = function(options) {
 		var rest = req.params["0"].substring(1),
 			readIfExists = req.headers ? Boolean(req.headers['read-if-exists']).valueOf() : false,
 			filepath = getSafeFilePath(req, rest);
-		fileUtil.withStatsAndETag(filepath, function(error, stats, etag) {
+		if(filepath && req.query && req.query.project === "true") {
+			var n = req.query.names ? req.query.names.split(',') : [],
+				names = {};
+			n.forEach(function(item) {
+				names[decodeURIComponent(item)] = Object.create(null);
+			});
+			return fileUtil.getProject(req.user.workspaceDir, fileRoot, filepath, names).then(function(project) {
+				return fileUtil.withStatsAndETag(project, function(error, stats, etag) {
+					if (error && error.code === 'ENOENT') {
+						res.sendStatus(204);
+					} else if(error) {
+						writeError(500, res, error);
+					} else {
+						writeFileMetadata(req, res, gitRoot, project, stats, etag, 0);
+					}
+				});
+			}, function reject(err) {
+				//don't send back 404, this API asks a question, it does not ask to actually get a resource
+				res.sendStatus(204);
+			});
+		}
+		return fileUtil.withStatsAndETag(filepath, function(error, stats, etag) {
 			if (error && error.code === 'ENOENT') {
 				if(typeof readIfExists === 'boolean' && readIfExists) {
 					res.sendStatus(204);
