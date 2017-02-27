@@ -453,6 +453,9 @@ function createApp(req, appTarget){
 		};
 		return target.cfRequest("POST", req.user.username, appTarget.Url + "/v2/apps", null, JSON.stringify(body), null, null, appTarget)
 		.then(function(result){
+			if(result.error_code){
+				return handleSimpleErrorStatus(result, "404");
+			}
 			appCache.appGuid = result.metadata.guid;
 			return result;
 		});
@@ -527,9 +530,7 @@ function bindRoute(req, appTarget){
 			/* attach route to application */
 			return waitForRoute.then(function(appRoute){
 				if(appRoute.error_code === "CF-RouteHostTaken"){
-					var errorStatus = new Error(appRoute.description);
-					errorStatus.code = "400";
-					return Promise.reject(errorStatus);
+					return handleSimpleErrorStatus(appRoute, "400");
 				}
 				appCache.appRoute = appRoute;
 				return target.cfRequest("PUT", req.user.username, appTarget.Url + "/v2/apps/" + appCache.appGuid + "/routes/" + appRoute.metadata.guid, null, null, null, null, appTarget);
@@ -738,6 +739,9 @@ function getAppbyGuid(userId, appGuid ,appTarget){
 	.then(function(appJSON){
 		return target.cfRequest("GET", userId, appCache.appTarget.Url + appJSON.metadata.url + "/summary", null, null, null, null, appTarget)
 		.then(function(result){
+			if(result.error_code){
+				return handleSimpleErrorStatus(result, "404");
+			}
 			appCache.summaryJson = result;
 			appCache.appGuid = appJSON.metadata.guid;
 			appCache.appName = result.name;			
@@ -747,6 +751,9 @@ function getAppbyGuid(userId, appGuid ,appTarget){
 function getRouteGuidbyGuid(userId, routeGuid, appTarget){
 	return target.cfRequest("GET", userId,appTarget.Url + "/v2/routes/" + routeGuid, null, null, null, null, appTarget)
 	.then(function(result){
+		if(result.error_code){
+			return handleSimpleErrorStatus(result, "404");
+		}
 		return result.metadata.guid; // TODO this need to test
 	});
 }
@@ -757,7 +764,10 @@ function mapRoute(userId, routeGuid, appTarget){
 function getServiceGuid(userId, service, appTarget){
 	return target.cfRequest("GET", userId, appTarget.Url + "/v2/spaces/" + appTarget.Space.metadata.guid + "/service_instances"
 	, {"inline-relations-depth":"1","return_user_provided_service_instances":"true","q":"name:"+service}, null, null, null, appTarget)
-	.then(function(serviceJson){	
+	.then(function(serviceJson){
+		if(serviceJson.error_code){
+			return handleSimpleErrorStatus(serviceJson, "404");
+		}
 		var serviceResources = serviceJson.resources;
 		var serviceInstanceGUID;
 		// Find service Guid from the response of getting service request.
@@ -776,6 +786,9 @@ function createService(userId, serviceName, servicePlanGuid, appTarget){
 	};
 	return target.cfRequest("POST", userId, appTarget.Url + "/v2/service_instances", null, JSON.stringify(body), null, null, appTarget)
 	.then(function(result){
+		if(result.error_code){
+			return handleSimpleErrorStatus(result, "404");
+		}
 		return result.metadata.guid;
 	});
 }
@@ -856,5 +869,10 @@ function archiveTarget (filePath){
 		return false; // false means no '.war' has been find
 		});
 	}
+}
+function handleSimpleErrorStatus(cfRequestResult, code){
+	var errorStatus = new Error(cfRequestResult.description);
+	errorStatus.code = code;
+	return Promise.reject(errorStatus);
 }
 };
