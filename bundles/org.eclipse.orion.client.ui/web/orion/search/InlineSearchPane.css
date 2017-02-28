@@ -211,11 +211,13 @@
 
 .fileNamePatternsInput {
 	margin: 0;
+	min-width:270px;
 }
 
 .toggleDisplayLink {
 	display: block;
 	margin: 0;
+	white-space: nowrap;
 }
 
 .toggleDisplayLink.linkHidden {
@@ -229,6 +231,9 @@
 
 .searchMainOptionBlock {
 	margin: 5px 10px 0 10px;
+	display: flex;
+	flex-direction: column;
+	flex-wrap: nowrap;
 }
 
 .searchMainOptionBlock input[type="text"]:disabled {
@@ -236,9 +241,23 @@
 }
 
 .searchOptionBlock {
-	margin: 15px 10px;
+	margin: 0 10px 10px 10px;
 	min-width: 254px;
 	width: calc(100% - 20px);
+}
+.searchGeneralOptionBlock{
+	margin-top: 0;
+	flex-shrink: 0;
+	
+}
+.searchGeneralOptionBlock ul{
+	list-style: none;
+	margin: 0;
+	padding: 0;
+}
+.searchGeneralOptionBlock li{
+	border: 1px solid;
+	display: inline;
 }
 
 .searchOption {
@@ -259,9 +278,19 @@
 .searchLabel {
 	margin: 1px 0;
 }
-
+.scopeLabel{
+	padding-right: 3px;
+    padding-top: 8px;
+ 	flex-shrink: 0;
+}
 .searchCheckboxLabel {
 	vertical-align: middle;
+	background-color: rgba(0, 0, 0, 0);
+    border-width: 1px;
+    border-style: solid;
+    border-color: #3C71B3;
+    color: #3C71B3;
+    padding: 3px;
 }
 
 .searchCheckbox {
@@ -273,13 +302,16 @@
 	background-color: whitesmoke;
 	border: 1px solid lightgray;
 	border-radius: 3px;
-	display: inline-block;
+	display: flex;
 	white-space: nowrap;
+	flex-grow: 1;
+	min-width:272px;
 }
 
 .searchScopeElementWrapper {
 	display: inline-block;
-	width: 224px;
+	min-width: 245px;
+	flex-grow:1;
 }
 
 .searchScopeElement {
@@ -294,6 +326,7 @@
 	text-overflow: ellipsis;
 	vertical-align: bottom;
 	white-space: nowrap;
+	margin-top: 8px;
 }
 
 .commandButton.searchScopeSelectButton {
@@ -457,6 +490,16 @@
 	background: #cedce7;
 }
 
+.searchWrapper .comboTextInputWrapper{
+	display: flex;
+    flex-direction: row;
+    min-width: 272px;
+}
+
+.searchWrapper .comboTextInputWrapper input{
+	flex-grow: 1;	
+}
+
 .searchWrapper:not(.searchWrapperActive) > .comboTextInputWrapper > .comboTextInputButton {
 	background-color: white;
 	border-color: white;
@@ -603,4 +646,33 @@
 	color: #d8ab27;
 	font-size: 14px;
 	padding: 3px 0 0 17px;	
+}
+.hiddenCheckbox{
+	display: none;
+}
+.searchCheckbox.advSearchCaseSensitive:checked + label{
+	background-color:#3C71B3;
+	color:rgb(255, 255, 255);
+}
+.searchCheckbox.advSearchWholeWord:checked + label{
+	background-color:#3C71B3;
+	color:rgb(255, 255, 255);
+}
+.searchCheckbox.advSearchRegEx:checked + label{
+	background-color:#3C71B3;
+	color:rgb(255, 255, 255);
+}
+.searchTitleBar{
+	display: flex;
+    justify-content: space-between;
+    width: calc(100% - 30px);
+}
+.searchCheckboxLabel.advSearchCaseSensitiveLabel:after{
+	content:"Aa"
+}
+.searchCheckboxLabel.advSearchWholeWordLabel:after{
+	content:"\\b"
+}
+.searchCheckboxLabel.advSearchRegExLabel:after{
+	content:"*"
 }
