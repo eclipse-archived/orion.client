@@ -25,6 +25,7 @@ module.exports.router = function(options) {
 	if (!fileRoot) { throw new Error('options.fileRoot is required'); }
 	module.exports.retrieveManifestFile = retrieveManifestFile;
 	module.exports.retrieveProjectFilePath = retrieveProjectFilePath;
+	module.exports.slugify = slugify;
 
 	return express.Router()
 	.use(bodyParser.json())

@@ -510,6 +510,8 @@ function bindRoute(req, appTarget){
 			/* client has not requested a specific domain, get the first available */
 			appCache.appDomain = domainArray[0];
 		}
+		// validate host
+		appCache.manifest.applications[0].host || (appCache.manifest.applications[0].host = manifests.slugify(appCache.manifest.applications[0].name));
 	})
 	/* find out whether the declared host can be reused */
 	.then(function(){
@@ -526,7 +528,7 @@ function bindRoute(req, appTarget){
 			}
 			/* attach route to application */
 			return waitForRoute.then(function(appRoute){
-				if(appRoute.error_code === "CF-RouteHostTaken"){
+				if(appRoute.error_code){
 					return handleSimpleErrorStatus(appRoute, "400");
 				}
 				appCache.appRoute = appRoute;
