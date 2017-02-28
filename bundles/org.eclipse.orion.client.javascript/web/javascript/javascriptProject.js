@@ -391,27 +391,26 @@ define([
 		if(this.map.eslint) {
 			return deferred.resolve(this.map.eslint);
 		}
-        this.projectPromise.then(function() {
-            var p = [];
-            this.lintFiles.forEach(function(_name) {
-                p.push(this.getFile(_name));
-            }.bind(this));
-            p.reduce(function(prev, current, index, array) {
-                return prev.then(function(_file) {
-                	if(_file && _file.contents) {
-	                    var vals = readAndMap(this.map, _file, "eslint", this);
-	                    if(vals) {
-	                        deferred.resolve(vals);
-	                        return current.reject("done");
-	                    }
-                    }
-                    if(index === array.length-1) {
-                        deferred.resolve(null);
-                    }
-                    return current;
-                }.bind(this));
-            }.bind(this), new Deferred().resolve());
+        
+        var p = [];
+        this.lintFiles.forEach(function(_name) {
+            p.push(this.getFile(_name));
         }.bind(this));
+        p.reduce(function(prev, current, index, array) {
+            return prev.then(function(_file) {
+            	if(_file && _file.contents) {
+                    var vals = readAndMap(this.map, _file, "eslint", this);
+                    if(vals) {
+                        deferred.resolve(vals);
+                        return current.reject("done");
+                    }
+                }
+                if(index === array.length-1) {
+                    deferred.resolve(null);
+                }
+                return current;
+            }.bind(this));
+        }.bind(this), new Deferred().resolve());
         return deferred;
 	};
 
@@ -462,17 +461,19 @@ define([
 		if(this.map.env) {
 			return new Deferred().resolve(this.map.env);
 		}
-		this.map.env = {};
-		this.map.env.envs = {browser: true, node: true}; //always start assuming browser
-		//start with eslint options - they can carry env objects
-		return this.getESlintOptions().then(function(options) {
-			this.map.env.eslint = options;
-			if(options && options.vals && options.vals.env) {
-				Object.keys(options.vals.env).forEach(function(key) {
-					this.map.env.envs[key] = options.vals.env[key];
-				}.bind(this));
-			}
-			return guessEnvForProject(this);
+		return this.projectPromise.then(function() {
+			this.map.env = {};
+			this.map.env.envs = {browser: true, node: true}; //always start assuming browser
+			//start with eslint options - they can carry env objects
+			return this.getESlintOptions().then(function(options) {
+				this.map.env.eslint = options;
+				if(options && options.vals && options.vals.env) {
+					Object.keys(options.vals.env).forEach(function(key) {
+						this.map.env.envs[key] = options.vals.env[key];
+					}.bind(this));
+				}
+				return guessEnvForProject(this);
+			}.bind(this));
 		}.bind(this));
 	};
 
