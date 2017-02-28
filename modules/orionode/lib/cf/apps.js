@@ -302,13 +302,6 @@ function respondAppPutRequest(task,status){
 		entity:appCache.summaryJson,
 		metadata:appCache.appMetadata	
 	};
-	if (status.error_code) {
-		var errorStatus = new Error(status.description);
-		errorStatus.code = "400";
-		errorStatus.bundleid = "org.eclipse.orion.server.core";
-		errorStatus.data = status;
-		return Promise.reject(errorStatus);
-	}
 	if(status === "RUNNING"){
 		var DEFAULT_TIMEOUT = 60;
 		resp = {
@@ -346,7 +339,7 @@ function startApp(userId, userTimeout ,appTarget){
 		if(userTimeout < 0 ){
 			userTimeout = appCache.manifest.applications[0].timeout ? appCache.manifest.applications[0].timeout : DEFAULT_TIMEOUT;
 		}
-		var attemptsLeft = Math.min(userTimeout, MAX_TIMEOUT) / 2;
+		var attemptsLeft = Math.min(userTimeout, MAX_TIMEOUT);
 		
 		function promiseWhile(value) {
 			return Promise.resolve(value).then(function() {
@@ -371,11 +364,15 @@ function startApp(userId, userTimeout ,appTarget){
 						return "RUNNING";
 					}
 					if (flappingInstanceNo > 0 ) {
-						return "FLAPPING";
+						var errorStatus = new Error("An error occurred during application startup, please refresh page.");
+						errorStatus.code = "400";
+						return Promise.reject(errorStatus);
 					}
 					return promiseWhile(result.attemptsLeft);
 				}else if(result.attemptsLeft === 0 ){
-					return "TIMEOUT";
+					var errorStatus = new Error("Application startup process timeout, please refresh page.");
+					errorStatus.code = "400";
+					return Promise.reject(errorStatus);
 				}
 				});
 			});

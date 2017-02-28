@@ -16,17 +16,17 @@ var target = require("./target");
 var createExtServices = exports.createExtServices = function(req, appTarget, appCache) {
     var serviceDeclaration = appCache.manifest['declared-services'];
     if(serviceDeclaration){
-        var keys = Object.keys(serviceDeclaration);
+        var serviceNames = Object.keys(serviceDeclaration);
         return new Promise(function(fulfill,reject){
-            async.each(keys, function(key, cb) {
-                return apps.getServiceGuid(req.user.username, serviceDeclaration[key], appTarget)
+            async.each(serviceNames, function(serviceName, cb) {
+                return apps.getServiceGuid(req.user.username, serviceName, appTarget)
                     .then(function(serviceInstanceGUID){
                         if(!serviceInstanceGUID){
                         /* no service instance bound to the application, create one if possible */
                         /* support both 'type' and 'label' fields as service type */
-                        var serviceType = serviceDeclaration[key].type || serviceDeclaration[key].label;
-                        var serviceProvider = serviceDeclaration[key].provider || null;
-                        var servicePlan = serviceDeclaration[key].plan;
+                        var serviceType = serviceDeclaration[serviceName].type || serviceDeclaration[serviceName].label;
+                        var serviceProvider = serviceDeclaration[serviceName].provider || null;
+                        var servicePlan = serviceDeclaration[serviceName].plan;
                         
                         return getServicebyName(req.user.username, serviceType, appTarget)
                         .then(function(respondServiceJson){
@@ -49,8 +49,8 @@ var createExtServices = exports.createExtServices = function(req, appTarget, app
                                     }
                                 }
                             }
-                            if(!servicePlanGuid) cb({"message":"Could not find service instance " + key +" nor service "+ serviceType+" with plan "+ servicePlan + " in target."});
-                            return apps.createService(req.user.username, serviceType, servicePlanGuid, appTarget)
+                            if(!servicePlanGuid) cb({"message":"Could not find service instance " + serviceName +" nor service "+ serviceType+" with plan "+ servicePlan + " in target."});
+                            return apps.createService(req.user.username, serviceName, servicePlanGuid, appTarget)
                             .then(function(serviceGuid){
                                 return serviceInstanceGUID = serviceGuid;
                             });
