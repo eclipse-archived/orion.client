@@ -251,8 +251,11 @@ define([
 			return new Deferred().resolve(this.map[filePath]);
 		}
 		return this.getFileClient().read(filePath, false, false, {readIfExists: true}).then(function(child) {
-            this.map[filePath] = {name: filePath, contents: child, project: _project};
-            return this.map[filePath];
+			if(child !== null) {
+	            this.map[filePath] = {name: filePath, contents: child, project: _project};
+	            return this.map[filePath];
+	        }
+			return null;
 		}.bind(this),
 		function rejected() {
 			return null;
@@ -305,26 +308,24 @@ define([
 	JavaScriptProject.prototype.updateFile = function updateFile(childName, create, values) {
 		if(this.projectMeta) {
 			return this.getFile(childName).then(function(child) {
-				if(child) {
-					var contents = child.contents;
-					if(typeof contents === 'string') {
-						var json;
-						if (contents.length) {
-							json = JSON.parse(contents);
-							_merge(values, json);
-						} else {
-							json = values;
-						}
-						return this.getFileClient().write(this.projectMeta.Location+childName, JSON.stringify(json, null, '\t'));
-					} else if(create) {
-						return this.getFileClient().createFile(this.projectMeta.Location, childName).then(function(file) {
-							json = _defaultsFor(childName);
-							if(json) {
-								_merge(json, values);
-							}
-							return this.getFileClient().write(file.Location, JSON.stringify(values, null, '\t'));
-						}.bind(this));
+				var contents = child ? child.contents : null;
+				if(typeof contents === 'string') {
+					var json;
+					if (contents.length) {
+						json = JSON.parse(contents);
+						_merge(values, json);
+					} else {
+						json = values;
 					}
+					return this.getFileClient().write(this.projectMeta.Location+childName, JSON.stringify(json, null, '\t'));
+				} else if(create) {
+					return this.getFileClient().createFile(this.projectMeta.Location, childName).then(function(file) {
+						json = _defaultsFor(childName);
+						if(json) {
+							_merge(json, values);
+						}
+						return this.getFileClient().write(file.Location, JSON.stringify(values, null, '\t'));
+					}.bind(this));
 				}
 			}.bind(this));
 		}
@@ -695,33 +696,50 @@ define([
 			if(!Array.isArray(parents) || parents.length < 1) {
 				deferred.resolve({Location: "/file/"});
 			} else {
-				if(Util.isElectron) {
-					//TODO call out the server for #getProject
-					var promises = [],
-						prnt = parents[parents.length-1];
-					this.projectFiles.forEach(function(_f) {
-						promises.push(this.getFile(_f, prnt.Location));
-						promises.push(this.getFile(_f, "/file/"));
-					}.bind(this));
-					promises.reduce(function(prev, item, index, array) {
-                        return prev.then(function(_file) {
-                            if(_file && _file.contents) {
-                                deferred.resolve({Location: _file.project});
-                                return item.reject("done");
-                            }
-                            if(index === array.length-1) {
-                                //nothing was found, assume /file/
-                                deferred.resolve({Location: "/file/"});
-                            }
-                            return item;
-                        });
-					}, new Deferred().resolve());
-				} else {
-					deferred.resolve(parents[parents.length-1]);
-				}
+				this.getFileClient().getProject(floc, {names: [this.PACKAGE_JSON, this.TERN_PROJECT]}).then(function(project) {
+					if(project) {
+						return deferred.resolve({Location: project.Location});
+					}
+					fallbackProjectResolve.call(this, deferred, parents);
+				}.bind(this), /* @callback */ function reject(err) {
+					fallbackProjectResolve.call(this, deferred, parents);
+				}.bind(this));
 			}
 		}
 		return deferred;
+	}
+	
+	/**
+	 * @description Fallabck function to try and find the project context if the file client call fails
+	 * @param {Deferred} deferred The deferred to resolve
+	 * @param {Array.<?>} parents The array of parents to look in  
+	 * @since 14.0
+	 */
+	function fallbackProjectResolve(deferred, parents) {
+		if(Util.isElectron) {
+			//TODO call out the server for #getProject
+			var promises = [],
+				prnt = parents[parents.length-1];
+			this.projectFiles.forEach(function(_f) {
+				promises.push(this.getFile(_f, prnt.Location));
+				promises.push(this.getFile(_f, "/file/"));
+			}.bind(this));
+			promises.reduce(function(prev, item, index, array) {
+                return prev.then(function(_file) {
+                    if(_file && _file.contents) {
+                        deferred.resolve({Location: _file.project});
+                        return item.reject("done");
+                    }
+                    if(index === array.length-1) {
+                        //nothing was found, assume /file/
+                        deferred.resolve({Location: "/file/"});
+                    }
+                    return item;
+                });
+			}, new Deferred().resolve());
+		} else {
+			deferred.resolve(parents[parents.length-1]);
+		}
 	}
 
 	/**
