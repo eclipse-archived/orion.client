@@ -354,14 +354,58 @@ hard-coded numbers elsewhere.
 	height: 100%;
 }
 
-.editorViewerHeader {
-	display:flex;
-	background: #3B4B54;
+ .editorViewerHeader {
+	align-items: center;
+ 	background: #3B4B54;
 	color: white;
-	flex-direction:row;
-	align-items:center;
-	line-height:26px;
-	border-bottom: 1px solid #263238;
+	display: flex;
+	flex-direction: row;
+	height: 26px;
+}
+
+.editorTabContainerOuter {
+	height: 100%;
+	line-height: 26px;
+	width: 100%;
+	overflow: hidden;
+}
+
+.editorTabContainer {
+	align-items: flex-start;
+	display: flex;
+	flex: 1;
+	flex-direction: row;
+	list-style: none;
+	margin: 0;
+	outline: none;
+	overflow-x: hidden;
+	padding: 0;
+	position: relative;
+	white-space: nowrap;
+	z-index: 3;
+}
+
+.editorTab {
+	border-top: 1px solid black;
+	border-right: 1px solid black;
+	display: flex;
+	flex: 0 0 auto;
+}
+
+.editorTabCloseButton {
+	border-radius: 50%;
+	margin: auto 5px auto 5px;
+	font-size: 12px;
+	height: 10px;
+	line-height: 10px;
+	padding: 1px;
+	text-align: center;
+	width: 10px;
+}
+
+.editorTabCloseButton:hover {
+	background-color: rgb(61, 114, 179);
+	color: #FFFFFF;
 }
 
 .editorViewerHeaderDirtyIndicator {
@@ -370,6 +414,13 @@ hard-coded numbers elsewhere.
 
 .editorViewerHeaderTitle {
 	padding-left: 5px;
+	margin-left: 5px;
+	margin-right: 5px;
+}
+
+.editorViewerTabDropdown {
+	justify-content: flex-end;
+	margin-right: 12px;
 }
 
 .editorViewerContent {
@@ -390,6 +441,18 @@ hard-coded numbers elsewhere.
 	width: 40%;
 	height: 40%;
 }
+
+.focusedEditorTab {
+	min-width: 12px !important;
+	min-height: 12px !important;
+	font-family: "HelveticaNeue", "Helvetica Neue", "HelveticaNeueRoman", "HelveticaNeue-Roman", "Helvetica Neue Roman", 
+		'TeXGyreHerosRegular', "Helvetica", "Tahoma", "Geneva", "Arial", sans-serif !important;
+}
+
+.hideOnDrag {
+  transform: translateX(-9999px);
+}
+
 
 /* 
  * NOTE: Please don't apply margin values to the splitter as the splitter.js
