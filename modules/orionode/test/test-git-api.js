@@ -284,6 +284,19 @@ GitClient.prototype = {
 		});
 	},
 
+	deleteTag: function(tagName) {
+		var client = this;
+		this.tasks.push(function(resolve) {
+			request()
+			.delete(CONTEXT_PATH + "/gitapi/tag/" + util.encodeURIComponent(tagName) + "/file/" + client.getName())
+			.expect(200)
+			.end(function(err, res) {
+				assert.ifError(err);
+				client.next(resolve, res.body);
+			});
+		});
+	},
+
 	getTag: function(tagName, annotated, commitSHA) {
 		var client = this;
 		this.tasks.push(function(resolve) {
@@ -1064,6 +1077,16 @@ maybeDescribe("git", function() {
 	describe("Tags", function() {
 		before(setup);
 
+		function assertTag(tag, tagName, annotated, testName, commitSHA) {
+			assert.equal(tag.Name, tagName);
+			assert.equal(tag.FullName, "refs/tags/" + tagName);
+			assert.equal(tag.Type, "Tag");
+			assert.equal(tag.TagType, annotated ? "ANNOTATED" : "LIGHTWEIGHT");
+			assert.equal(tag.CloneLocation, "/gitapi/clone/file/" + testName);
+			assert.equal(tag.CommitLocation, "/gitapi/commit/" + commitSHA + "/file/" + testName);
+			assert.equal(tag.TreeLocation, "/gitapi/tree/file/" + testName + "/" + util.encodeURIComponent(tagName));
+		}
+
 		describe("Create", function() {
 
 			/**
@@ -1099,13 +1122,7 @@ maybeDescribe("git", function() {
 				.then(function(tags) {
 					// only created one tag
 					assert.equal(tags.length, 1);
-					assert.equal(tags[0].Name, tagName);
-					assert.equal(tags[0].FullName, "refs/tags/" + tagName);
-					assert.equal(tags[0].Type, "Tag");
-					assert.equal(tags[0].TagType, annotated ? "ANNOTATED" : "LIGHTWEIGHT");
-					assert.equal(tags[0].CloneLocation, "/gitapi/clone/file/" + testName);
-					assert.equal(tags[0].CommitLocation, "/gitapi/commit/" + commitSHA + "/file/" + testName);
-					assert.equal(tags[0].TreeLocation, "/gitapi/tree/file/" + testName + "/" + tagName);
+					assertTag(tags[0], tagName, annotated, testName, commitSHA);
 
 					var client = new GitClient(testName);
 					// verify that we can retrieve that one tag
@@ -1115,13 +1132,7 @@ maybeDescribe("git", function() {
 				})
 				.then(function(log) {
 					assert.equal(log.Children[0].Tags.length, 1);
-					assert.equal(log.Children[0].Tags[0].Name, tagName);
-					assert.equal(log.Children[0].Tags[0].FullName, "refs/tags/" + tagName);
-					assert.equal(log.Children[0].Tags[0].Type, "Tag");
-					assert.equal(log.Children[0].Tags[0].TagType, annotated ? "ANNOTATED" : "LIGHTWEIGHT");
-					assert.equal(log.Children[0].Tags[0].CloneLocation, "/gitapi/clone/file/" + testName);
-					assert.equal(log.Children[0].Tags[0].CommitLocation, "/gitapi/commit/" + commitSHA + "/file/" + testName);
-					assert.equal(log.Children[0].Tags[0].TreeLocation, "/gitapi/tree/file/" + testName + "/" + tagName);
+					assertTag(log.Children[0].Tags[0], tagName, annotated, testName, commitSHA);
 					finished();
 				})
 				.catch(function(err) {
@@ -1137,6 +1148,63 @@ maybeDescribe("git", function() {
 				testCreateTag(finished, "tag-create-annotated", true);
 			});
 		}); // describe("Create")
+
+		describe("Delete", function() {
+
+			/**
+			 * Tests that a tag can be created and deleted.
+			 * 
+			 * @param {Function} finished the function to invoke to notify that the test has completed
+			 * @param {String} testName the name of the test to be used for the created Git repository
+			 * @param {String} tagName the name of the tag to create and delete
+			 * @param {boolean} annotated <tt>true</tt> if an annotated tag should be created,
+			 *                            <tt>false</tt> if a lightweight should be created
+			 */
+			function testDeleteTag(finished, testName, tagName, annotated) {
+				var commitSHA;
+				var client = new GitClient(testName);
+				client.init();
+				// init file with content A
+				client.setFileContents("tag.txt", "A");
+				// stage and commit
+				client.stage("tag.txt");
+				client.commit();
+				return client.start().then(function(commit) {
+					commitSHA = commit.Id;
+					// create the tag
+					client.createTag(commitSHA, tagName, annotated);
+					// list all tags
+					client.listTags();
+					return client.start();
+				})
+				.then(function(tags) {
+					// only created one tag
+					assert.equal(tags.length, 1);
+					assertTag(tags[0], tagName, annotated, testName, commitSHA);
+					// delete the tag
+					client.deleteTag(tagName);
+					// list all tags
+					client.listTags();
+					return client.start();
+				})
+				.then(function(tags) {
+					// deleted the tag so there should be no tags
+					assert.equal(tags.length, 0);
+					finished();
+				})
+				.catch(function(err) {
+					finished(err);
+				});
+			}
+
+			it("lightweight", function(finished) {
+				testDeleteTag(finished, "tag-delete-lightweight", "a%b", false);
+			});
+
+			it("annotated", function(finished) {
+				testDeleteTag(finished, "tag-delete-annotated", "a%b", true);
+			});
+		}); // describe("Delete")
 	}); // describe("Tags")
 
 	describe("Index", function() {
