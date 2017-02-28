@@ -185,7 +185,7 @@ define([
 			if(jsProject.importantChange(qualifiedName, fileName) && qualifiedName.indexOf(jsProject.getProjectPath()) === 0) {
 				jsProject.getComputedEnvironment().then(function(env) {
 					this.loadTernProjectOptions(null, env);	
-				});
+				}.bind(this));
 			}
 		},
 		/**
@@ -196,7 +196,7 @@ define([
 				//same as a delete
 				return jsProject.getComputedEnvironment().then(function(env) {
 					this.loadTernProjectOptions(null, env);	
-				});
+				}.bind(this));
 			}
 			if(jsProject.importantChange(toQualified, toName) && toQualified.indexOf(jsProject.getProjectPath()) === 0) {
 				//same as adding
