@@ -113,6 +113,7 @@ define(['orion/git/util','orion/i18nUtil','orion/git/gitPreferenceStorage','orio
 		
 		switch (jsonData.HttpCode) {
 			case 401:
+			case 403:
 				
 				/* authentication error, clear remaining credentials */
 				var gitPreferenceStorage = new GitPreferenceStorage(serviceRegistry);
