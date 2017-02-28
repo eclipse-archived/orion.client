@@ -17,7 +17,9 @@ define({
 	"Wrap search": "Wrap search",
 	"Incremental search": "Incremental search",
 	"Whole Word": "Whole Word",
+	"Whole Word Tooltip": "Whole Word",
 	"Regular expression": "Regular expression",
+	"Regular expression Tooltip": "Regular Expression",
 	"Find after replace": "Find after replace",
 	"Options": "Options",
 	"Find next match": "Find next match",
@@ -80,6 +82,7 @@ define({
 	"Type a search term": "Type a search term",
 	"Type a replace term": "Type a replace term",
 	"Case sensitive": "Case sensitive",
+	"Case sensitive Tooltip": "Case sensitive",
 	"File name": "File name",
 	"Path name": "Path name",
 	"Save": "Save",
@@ -91,7 +94,7 @@ define({
 	"${0} matches": "${0} matches",
 	"regexOptionOff" : "Regular expressions are off. Click here or use the options to turn them on for replacement",
 	"regexOptionOn" : "Regular expressions are on. Click here or use the options to turn them off",
-	"Scope": "Scope",
+	"Scope": "Find in:",
 	"Show previous search terms": "Show previous search terms",
 	"Show previous replace terms": "Show previous replace terms",
 	"Show replacement preview": "Show replacement preview",
@@ -120,5 +123,10 @@ define({
 	"perfectMatch": "Perfect match",
 	"notAMatch": "Not a match",
 	"couldBeMatch": "Could be a match",
-	"Scope Sniff":"Search In All Projects"
+	"Scope All":"All Folders",
+	"Scope Project":"Root Folder",
+	"Scope Selected":"Current Folder",
+	"Scope Other":"Other",
+	"Search Label":"Search:",
+	"Exclude Files":"Files to exclude (comma-separated)"
 });
