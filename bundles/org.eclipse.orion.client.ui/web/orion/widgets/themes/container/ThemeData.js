@@ -22,8 +22,8 @@ define([
 
 	// *******************************************************************************
 	//
-	// If wish to make changes to LightPage, or OrionPage, you must increment the 
-	// version number in ThemeVersion.js.
+	// If you change any styles in this file, you must increment the version number
+	// in ThemeVersion.js.
 	//
 	// *******************************************************************************
 
@@ -51,7 +51,7 @@ define([
 				storage: '/themes',
 				styleset: 'containerStyles',
 				defaultTheme: 'lightPage',
-				selectedKey: 'containerTheme',
+				selectedKey: 'containerSelected',
 				version: THEMES_VERSION
 			};
 		}
@@ -62,7 +62,7 @@ define([
 			var sheetMaker = new ThemeSheetWriter.ThemeSheetWriter();
 			var themeClass = "orionPage";
 			var theme = new mTextTheme.TextTheme.getTheme(themeClass);
-			theme.setThemeClass(themeClass, sheetMaker.getSheet(themeClass, settings ));
+			theme.setThemeClass(themeClass, sheetMaker.getSheet(themeClass, settings));
 		}
 		
 		ThemeData.prototype.processSettings = processSettings;
@@ -72,4 +72,4 @@ define([
 			getStyles:getStyles
 		};
 	}
-);
+);

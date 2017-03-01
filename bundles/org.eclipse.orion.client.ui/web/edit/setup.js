@@ -242,6 +242,8 @@ function EditorViewer(options) {
 	this.editContextServiceID = "orion.edit.context" + this.id; //$NON-NLS-0$
 	this.editModelContextServiceID = "orion.edit.model.context" + this.id; //$NON-NLS-0$
 	
+	this.shown = true;
+
 	var domNode = this.domNode = document.createElement("div"); //$NON-NLS-0$
 	domNode.className = "editorViewerFrame"; //$NON-NLS-0$
 	this.parent.appendChild(domNode);
@@ -378,9 +380,11 @@ objects.mixin(EditorViewer.prototype, {
 			this.updateDirtyIndicator();
 			evt.editor = this.editor;
 			this.pool.metadata = metadata;
-			var href = window.location.href;
-			this.activateContext.setActiveEditorViewer(this);
-			this.commandRegistry.processURL(href);
+			if (this.shown) {
+				var href = window.location.href;
+				this.activateContext.setActiveEditorViewer(this);
+				this.commandRegistry.processURL(href);
+			}
 			if (this.curFileNode) {
 				var curFileNodeName = evt.name || "";
 				if (bidiUtils.isBidiEnabled()) {
@@ -1112,11 +1116,17 @@ objects.mixin(EditorSetup.prototype, {
 		
 		if (oldSplitterMode === MODE_SINGLE && mode !== MODE_SINGLE) {
 			this.lastTarget = null;
+			this.editorViewers[1].shown = true;
 			if (href) {
 				this.editorViewers[1].inputManager.setInput(href);
 			} else {
 				this.editorViewers[1].inputManager.setInput(PageUtil.hash());
 			}
+		} else if (oldSplitterMode !== undefined && oldSplitterMode !== MODE_SINGLE && mode === MODE_SINGLE) {
+			var currentLocation = this.editorViewers[1].inputManager.getFileMetadata().Location;
+			var rootLocation = this.fileClient.fileServiceRootURL(currentLocation);
+			this.editorViewers[1].shown = false;
+			this.editorViewers[1].inputManager.setInput(rootLocation);
 		}
 	},
 	createSplitMenu: function() {

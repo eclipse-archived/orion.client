@@ -241,6 +241,230 @@ define([
 			};
 			this.styles.push(prospecto);
 
+			darker = {
+				"className": "darker",
+				"name": "Darker",
+				"styles": {
+					"annotationLine": {
+						"currentLine": {
+							"backgroundColor": "#171c20"
+						}
+					},
+					"annotationRange": {
+						"currentBracket": {
+							"backgroundColor": "#006E00"
+						},
+						"currentSearch": {
+							"backgroundColor": "#5d5d5d"
+						},
+						"matchingBracket": {
+							"backgroundColor": "#006E00"
+						},
+						"matchingSearch": {
+							"backgroundColor": "#363636",
+							"currentSearch": {
+								"backgroundColor": "#465e47"
+							}
+						},
+						"writeOccurrence": {
+							"backgroundColor": "#093f59"
+						},
+						"selectedLinkedGroup": {
+							"backgroundColor": "rgb(49,115,112)"
+						},
+						"currentLinkedGroup": {
+							"backgroundColor": "rgba(49,115,112,0.8)"
+						}
+					},
+					"backgroundColor": "#1a1d1e",
+					"color": "#dadada",
+					"comment": {
+						"block": {
+							"color": "#5e7175"
+						},
+						"color": "#5e7175",
+						"line": {
+							"color": "#5e7175"
+						}
+					},
+					"constant": {
+						"color": "#c8333a",
+						"numeric": {
+							"color": "#c8333a",
+							"hex": {
+								"color": "#cd3f45"
+							}
+						}
+					},
+					"entity": {
+						"name": {
+							"color": "#30a7d3",
+							"function": {
+								"color": "#30a7d3",
+								"fontWeight": "normal"
+							}
+						},
+						"other": {
+							"attribute-name": {
+								"color":"#5F9EA0"
+							}
+						}
+					},
+					"fontFamily": defaultFont,
+					"fontSize": defaultFontSize,
+					"keyword": {
+						"control": {
+							"color": "#e8d075",
+							"fontWeight":"normal"
+						},
+						"operator": {
+							"color": "#91c23d",
+							"fontWeight": "normal"
+						},
+						"other": {
+							"documentation": {
+								"color": "#7F9FBF",
+								"task": {
+									"color": "#8db6f1"
+								}
+							}
+						}
+					},
+					"markup": {
+						"bold": {
+							"fontWeight": "bold"
+						},
+						"heading": {
+							"color": "#91c23d"
+						},
+						"italic": {
+							"fontStyle": "italic"
+						},
+						"list": {
+							"color": "#CC4C07"
+						},
+						"other": {
+							"separator": {
+								"color":"#e8d075"
+							},
+							"strikethrough": {
+								"textDecoration": "line-through"
+							},
+							"table": {
+								"color": "#3C802C"
+							}
+						},
+						"quote": {
+							"color": "#55b5db"
+						},
+						"raw": {
+							"fontFamily": "monospace",
+							"html": {
+								"backgroundColor": "#3B4B53"
+							}
+						},
+						"underline": {
+							"link": {
+								"textDecoration": "underline"
+							}
+						}
+					},
+					"meta": {
+						"documentation": {
+							"annotation": {
+								"color": "#7F9FBF"
+							},
+							"tag": {
+								"color": "#7F7F9F"
+							}
+						},
+						"preprocessor": {
+							"color": "#A4A4A4"
+						},
+						"tag": {
+							"color": "#999999",
+							"attribute": {
+								"color": "#07e2d9"
+							}
+						}
+					},
+					"punctuation": {
+						"operator": {
+							"color":"#FF8C00"
+						}
+					},
+					"ruler": {
+						"annotations": {
+							"backgroundColor": "#0f1113"
+						},
+						"backgroundColor":"#0f1113",
+						"overview": {
+							"backgroundColor": "#0f1113"
+						}
+					},
+					"rulerLines": {
+						"color":"#3d4750",
+						"even": {
+							"color":"#3d4750"
+						},
+						"odd": {
+							"color":"#3d4750"
+						}
+					},
+					"string": {
+						"color": "#55b5db",
+						"interpolated": {
+							"color":"#dadada"
+						},
+						"quoted": {
+							"double": {
+								"color": "#55b5db"
+							},
+							"single": {
+								"color": "#55b5db"
+							}
+						}
+					},
+					"support": {
+						"type": {
+							"propertyName": {
+								"color": "#9fca56"
+							}
+						}
+					},
+					"textviewContent ::-moz-selection": {
+						"backgroundColor":"rgba(49,115,112,0.99)"
+					},
+					"textviewContent ::selection": {
+						"backgroundColor":"rgba(49,115,112,0.99)"
+					},
+					"textviewLeftRuler": {
+						"borderColor":"#0e1112"
+					},
+					"textviewRightRuler": {
+						"borderColor":"#0e1112"
+					},
+					"textviewSelection": {
+						"backgroundColor": "rgba(49,115,112,0.99)"
+					},
+					"textviewSelectionUnfocused": {
+						"backgroundColor": "rgba(49,115,112,0.99)"
+					},
+					"variable": {
+						"language": {
+							"color": "#9fca56",
+							"fontWeight":"normal"
+						},
+						"other": {
+							"color":"#E038AD"
+						},
+						"parameter": {
+							"color":"#FF8C00"
+						}
+					}
+				}
+			};
+			this.styles.push(darker);
 
 			ceol = {
 				"className": "ceol",
@@ -443,225 +667,6 @@ define([
 				}
 			};
 			this.styles.push(ceol);
-
-			darker = {
-				"className": "darker",
-				"name": "Darker",
-				"styles": {
-					"annotationLine": {
-						"currentLine": {
-							"backgroundColor": "#171c20"
-						}
-					},
-					"annotationRange": {
-						"currentBracket": {
-							"backgroundColor": "#006E00"
-						},
-						"currentSearch": {
-							"backgroundColor": "#5d5d5d"
-						},
-						"matchingBracket": {
-							"backgroundColor": "#006E00"
-						},
-						"matchingSearch": {
-							"backgroundColor": "#363636",
-							"currentSearch": {
-								"backgroundColor": "#465e47"
-							}
-						},
-						"writeOccurrence": {
-							"backgroundColor": "#093f59"
-						}
-					},
-					"backgroundColor": "#1a1d1e",
-					"color": "#dadada",
-					"comment": {
-						"block": {
-							"color": "#5e7175"
-						},
-						"color": "#5e7175",
-						"line": {
-							"color": "#5e7175"
-						}
-					},
-					"constant": {
-						"color": "#c8333a",
-						"numeric": {
-							"color": "#c8333a",
-							"hex": {
-								"color": "#cd3f45"
-							}
-						}
-					},
-					"entity": {
-						"name": {
-							"color": "#30a7d3",
-							"function": {
-								"color": "#30a7d3",
-								"fontWeight": "normal"
-							}
-						},
-						"other": {
-							"attribute-name": {
-								"color":"#5F9EA0"
-							}
-						}
-					},
-					"fontFamily": defaultFont,
-					"fontSize": defaultFontSize,
-					"keyword": {
-						"control": {
-							"color": "#e8d075",
-							"fontWeight":"normal"
-						},
-						"operator": {
-							"color": "#91c23d",
-							"fontWeight": "normal"
-						},
-						"other": {
-							"documentation": {
-								"color": "#7F9FBF",
-								"task": {
-									"color": "#8db6f1"
-								}
-							}
-						}
-					},
-					"markup": {
-						"bold": {
-							"fontWeight": "bold"
-						},
-						"heading": {
-							"color": "#91c23d"
-						},
-						"italic": {
-							"fontStyle": "italic"
-						},
-						"list": {
-							"color": "#CC4C07"
-						},
-						"other": {
-							"separator": {
-								"color":"#e8d075"
-							},
-							"strikethrough": {
-								"textDecoration": "line-through"
-							},
-							"table": {
-								"color": "#3C802C"
-							}
-						},
-						"quote": {
-							"color": "#55b5db"
-						},
-						"raw": {
-							"fontFamily": "monospace",
-							"html": {
-								"backgroundColor": "#3B4B53"
-							}
-						},
-						"underline": {
-							"link": {
-								"textDecoration": "underline"
-							}
-						}
-					},
-					"meta": {
-						"documentation": {
-							"annotation": {
-								"color": "#7F9FBF"
-							},
-							"tag": {
-								"color": "#7F7F9F"
-							}
-						},
-						"preprocessor": {
-							"color": "#A4A4A4"
-						},
-						"tag": {
-							"color": "#999999",
-							"attribute": {
-								"color": "#07e2d9"
-							}
-						}
-					},
-					"punctuation": {
-						"operator": {
-							"color":"#FF8C00"
-						}
-					},
-					"ruler": {
-						"annotations": {
-							"backgroundColor": "#0f1113"
-						},
-						"backgroundColor":"#0f1113",
-						"overview": {
-							"backgroundColor": "#0f1113"
-						}
-					},
-					"rulerLines": {
-						"color":"#3d4750",
-						"even": {
-							"color":"#3d4750"
-						},
-						"odd": {
-							"color":"#3d4750"
-						}
-					},
-					"string": {
-						"color": "#55b5db",
-						"interpolated": {
-							"color":"#dadada"
-						},
-						"quoted": {
-							"double": {
-								"color": "#55b5db"
-							},
-							"single": {
-								"color": "#55b5db"
-							}
-						}
-					},
-					"support": {
-						"type": {
-							"propertyName": {
-								"color": "#9fca56"
-							}
-						}
-					},
-					"textviewContent ::-moz-selection": {
-						"backgroundColor":"rgba(49,115,112,0.99)"
-					},
-					"textviewContent ::selection": {
-						"backgroundColor":"rgba(49,115,112,0.99)"
-					},
-					"textviewLeftRuler": {
-						"borderColor":"#0e1112"
-					},
-					"textviewRightRuler": {
-						"borderColor":"#0e1112"
-					},
-					"textviewSelection": {
-						"backgroundColor": "rgba(49,115,112,0.99)"
-					},
-					"textviewSelectionUnfocused": {
-						"backgroundColor": "rgba(49,115,112,0.99)"
-					},
-					"variable": {
-						"language": {
-							"color": "#9fca56",
-							"fontWeight":"normal"
-						},
-						"other": {
-							"color":"#DB0FA6"
-						},
-						"parameter": {
-							"color":"#FF8C00"
-						}
-					}
-				}
-			};
-			this.styles.push(darker);
 		}
 		
 		function getStyles(){
@@ -687,12 +692,13 @@ define([
 		
 		ThemeData.prototype.fontSettable = fontSettable;
 		
-		function getThemeStorageInfo(){
+		function getThemeStorageInfo(){	
+			var useLightTheme = document.body.classList.contains("lightPage");
 			return {
-				storage:'/themes',
-				styleset:'editorstyles',
-				defaultTheme:'Prospecto',
-				selectedKey: 'editorSelected',
+				storage: '/themes', //$NON-NLS-0$
+				styleset: 'editorStyles', //$NON-NLS-0$
+				defaultTheme: useLightTheme ? 'Prospecto' : 'Darker', //$NON-NLS-1$  //$NON-NLS-0$
+				selectedKey: 'editorSelected', //$NON-NLS-0$
 				version: THEMES_VERSION
 			}; 
 		}
