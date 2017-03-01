@@ -195,6 +195,10 @@ function(messages, Deferred, lib, mContentTypes, i18nUtil, mExplorer, mCommands,
 			if (openWithCommand && typeof openWithCommand.hrefCallback === 'function') {
 				href = openWithCommand.hrefCallback({items: item});
 			}
+			var navHandler = this.explorer.getNavHandler();
+			if(navHandler) {
+				navHandler.setSelection(modelItem);
+			}
 			if(this._ctrlKeyOn(evt)){
 				window.open(href);
 			} else {
