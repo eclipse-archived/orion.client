@@ -12,6 +12,7 @@
 var api = require('../api');
 var clone = require('./clone');
 var util = require('./util'); 
+var fs = require('fs');
 
 module.exports = {};
 	
@@ -75,19 +76,23 @@ function calcGitLinks(fileChildren,branchname,fileDir){
 	
 function addWorkSpaceGitLinks(workspacechild,req, name){
 	var fullpath = api.join(req.user.workspaceDir,name);
-	return clone.getRepoByPath(fullpath, req.user.workspaceDir)
-	.then(
-		function(repo) {
-			if(repo){
-				return Promise.resolve(getBranch(repo))
-					.then(function(branchname){
-						var workDir = api.join(clone.getfileDir(repo,req) , "/");
-						addGitLinks(workspacechild,branchname,workDir);
-					});
-			}
+	fs.stat(fullpath, function(err, stats) {
+		if (!err && stats.isDirectory()) {	
+			return clone.getRepoByPath(fullpath, req.user.workspaceDir)
+			.then(
+				function(repo) {
+					if(repo){
+						return Promise.resolve(getBranch(repo))
+							.then(function(branchname){
+								var workDir = api.join(clone.getfileDir(repo,req) , "/");
+								addGitLinks(workspacechild,branchname,workDir);
+							});
+					}
+				}
+			).catch(function(){
+					return;
+			});
 		}
-	).catch(function(){
-			return;
 	});
 }
 	
