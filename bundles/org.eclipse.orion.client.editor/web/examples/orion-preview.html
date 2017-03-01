@@ -1,8 +1,8 @@
 <div class="editorSection">
-	<div class="editorSectionHeader"><span>Theme Preview</span></div>
-	<div id="containerPreview" style="position: absolute; margin: 10px; height: 90%; width: 90%; border: 1px dotted #EFEFEF">
+	<div class="editorSectionHeader" style="padding-top: 12px; padding-bottom: 11.5px;"><span>Theme Preview</span></div>
+	<div id="containerPreview" style="position: absolute; margin: 4px; height: 90%; width: 90%;">
 		<div id="orion-editor" spellcheck="false" class="orionPage lightPage">
-			<header id="banner" role="banner" class="headerLayout">
+			<header id="banner" role="banner" class="headerLayout" style="height: 0;">
 				<nav id="navbar"></nav>
 				<div id="notificationArea" class="notificationHide">
 					<div class="notifications" id="notifications" aria-live="assertive" aria-atomic="true"></div>
@@ -10,7 +10,7 @@
 				</div>
 			</header>
 			<input id="fileSelectorInput" type="file" multiple="" style="position:fixed; top: -100px; visibility: hidden;" tabindex="-1" aria-hidden="true">
-			<nav id="sideMenu" class="sideMenu" aria-label="Sidebar">
+			<nav id="sideMenu" class="sideMenu" aria-label="Sidebar" style="top: 0;">
 				<div class="sideMenuHome"></div>
 				<button class="sideMenuScrollButton sideMenuTopScrollButton core-sprite-openarrow"></button>
 				<ul class="sideMenuList">
@@ -22,7 +22,7 @@
 				</ul>
 				<button class="sideMenuScrollButton sideMenuBottomScrollButton core-sprite-openarrow"></button>
 			</nav>
-			<div id="pageContent" class="content-fixedHeight">
+			<div id="pageContent" class="content-fixedHeight" style="top: 0;">
 				<div id="sideMenuToggle" class="sideMenuToggle"></div>
 				<div id="pageToolbar" class="mainToolbar toolComposite toolbarLayout">
 					<ul id="fileActions" class="commandList layoutLeft pageActions">

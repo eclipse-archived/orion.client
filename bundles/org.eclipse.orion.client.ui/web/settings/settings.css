@@ -775,17 +775,20 @@ html[dir="rtl"] .scopeList li select{ /* ACGC */
 .scopeListHeader, .editorSectionHeader {
     padding: 10px 15px;  
     border-bottom: 1px solid #dadada;  
-    border-right: 1px solid #dadada;
     font-weight: bold;
 }
 
 html[dir="rtl"] .scopeListHeader, .editorSectionHeader { /* ACGC */
     border-left: 1px solid #dadada;
-    border-right: 0px;
+    border-right: 0;
+}
+
+.scopeListHeader {
+    border-right: 1px solid #dadada;
 }
 
 .editorSectionHeader{
-	border-right:none;
+	border-left: 0;
 }
 
 .editorSection {
