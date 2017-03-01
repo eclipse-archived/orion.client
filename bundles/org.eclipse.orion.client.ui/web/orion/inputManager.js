@@ -143,6 +143,9 @@ define([
 		this.reveal = options.reveal;
 		this.isUnsavedWarningNeeed = options.isUnsavedWarningNeeed;
 		this.confirm = options.confirm;
+		this.generalPreferences = options.generalPreferences || {};
+		var generalPrefs = this.generalPreferences || {};
+		this.isEditorTabsEnabled = generalPrefs.hasOwnProperty("enableEditorTabs") ? generalPrefs.enableEditorTabs : true;
 		this._input = this._title = "";
 		if (this.fileClient) {
 			this.fileClient.addEventListener("Changed", function(evt) { //$NON-NLS-0$
@@ -591,7 +594,7 @@ define([
 					this.reportStatus("");
 					this._input = fileURI;
 					var metadata = evt.metadata;
-					this._setInputContents(input, fileURI, null, metadata);
+					this._setInputContents(input, fileURI, null, metadata, false, true);
 					return;
 				}
 				if (fileURI) {
@@ -619,7 +622,7 @@ define([
 					this._setNoInput(true);
 				}
 			}.bind(this);
-			if (editor && editor.isDirty()) {
+			if (editor && editor.isDirty() && !this.isEditorTabsEnabled) {
 				var oldLocation = this._location;
 				var oldResource = oldInput.resource;
 				var newResource = input.resource;
@@ -627,30 +630,13 @@ define([
 					if (this._autoSaveEnabled) {
 						this.save();
 						afterConfirm();
-					}else if(this.isUnsavedWarningNeeed()) {
-						this.confirm(messages.confirmUnsavedChanges,
-							[{
-								label:messages["Yes"],
-								callback:function(){
-									this.save();
-									afterConfirm();
-								}.bind(this),
-								type:"ok"
-							},{
-								label:messages["No"],
-								callback:function(){
-									afterConfirm();
-								},
-								type:"ok"
-							},{
-								label:messages["Cancel"],
-								callback:function(){
-									window.location.hash = oldLocation;
-									this.reveal(this.getFileMetadata());
-									return;
-								}.bind(this),
-								type:"cancel"
-							}]);
+					} else if(this.isUnsavedWarningNeeed()) {
+						var cancelCallback = function() {
+							window.location.hash = oldLocation;
+							this.reveal(this.getFileMetadata());
+							return;
+						}.bind(this);
+						this.confirmUnsavedChanges(afterConfirm, cancelCallback);
 					}else{
 						afterConfirm();
 					}
@@ -658,6 +644,28 @@ define([
 			}else{
 				afterConfirm();
 			}
+		},
+		confirmUnsavedChanges: function(afterConfirm, cancelCallback, targetNode) {
+			this.confirm(messages.confirmUnsavedChanges,
+				[{
+					label:messages["Yes"],
+					callback:function(){
+						this.save();
+						afterConfirm();
+					}.bind(this),
+					type:"ok"
+				},{
+					label:messages["No"],
+					callback:function(){
+						afterConfirm();
+					},
+					type:"ok"
+				},{
+					label:messages["Cancel"],
+					callback: cancelCallback,
+					type:"cancel"
+				}],
+				targetNode);
 		},
 		setTitle: function(title) {
 			var indexOfSlash = title.lastIndexOf("/"); //$NON-NLS-0$
@@ -726,7 +734,7 @@ define([
 			this.setContentType(null);
 			this.dispatchEvent({ type: "InputChanged", input: null }); //$NON-NLS-0$
 		},
-		_setInputContents: function(input, title, contents, metadata, noSetInput) {
+		_setInputContents: function(input, title, contents, metadata, noSetInput, isCachedContent) {
 			var _name, isDir = false;
 			if (metadata) {
 				this._fileMetadata = metadata;
@@ -764,6 +772,11 @@ define([
 			if (!isDir) {
 				if (!noSetInput) {
 					editor.setInput(title, null, contents);
+					if (isCachedContent) {
+						// Check server for updated content.
+						this.load();
+					}
+
 				}
 				if (editor && editor.getTextView && editor.getTextView()) {
 					var textView = editor.getTextView();
@@ -772,7 +785,9 @@ define([
 						editor.getModel().setModelData({	 metadata: metadata});
 					}
 				}
-				this._clearUnsavedChanges();
+				if (!this.isEditorTabsEnabled) {
+					this._clearUnsavedChanges();
+				}
 				if (!this.processParameters(input)) {
 					if (evt.session) {
 						evt.session.apply();
