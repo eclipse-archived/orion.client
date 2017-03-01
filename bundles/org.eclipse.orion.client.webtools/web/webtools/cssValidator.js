@@ -23,40 +23,40 @@ define("webtools/cssValidator", [
 		// Define the default values for the rules
 		// 0:off, 1:warning, 2:error 3:info
 		rules: {
-			"adjoining-classes" : 3, //$NON-NLS-0$
-			"box-model" : 3, //$NON-NLS-0$
-			"box-sizing" : 3, //$NON-NLS-0$
-			"bulletproof-font-face" : 3, //$NON-NLS-0$
-			"compatible-vendor-prefixes" : 3, //$NON-NLS-0$
-			"display-property-grouping" : 3, //$NON-NLS-0$
-			"duplicate-background-images" : 3, //$NON-NLS-0$
-			"duplicate-properties" : 3, //$NON-NLS-0$
-			"empty-rules" : 3, //$NON-NLS-0$
-			"fallback-colors" : 3, //$NON-NLS-0$
-			"floats" : 3, //$NON-NLS-0$
-			"font-faces" : 3, //$NON-NLS-0$
-			"font-sizes" : 3, //$NON-NLS-0$
-			"gradients" : 3, //$NON-NLS-0$
-			"ids" : 3, //$NON-NLS-0$
-			"import" : 3, //$NON-NLS-0$
-			"important" : 3, //$NON-NLS-0$
-			"known-properties" : 3, //$NON-NLS-0$
-			"outline-none" : 3, //$NON-NLS-0$
-			"overqualified-elements" : 3, //$NON-NLS-0$
-			"qualified-headings" : 3, //$NON-NLS-0$
-			"regex-selectors" : 3, //$NON-NLS-0$
-			"rules-count" : 3, //$NON-NLS-0$
-			"selector-max-approaching" : 3, //$NON-NLS-0$
-			"selector-max" : 3, //$NON-NLS-0$
-			"shorthand" : 3, //$NON-NLS-0$
-			"star-property-hack" : 3, //$NON-NLS-0$
-			"text-indent" : 3, //$NON-NLS-0$
-			"underscore-property-hack" : 3, //$NON-NLS-0$
-			"unique-headings" : 3, //$NON-NLS-0$
-			"universal-selector" : 3, //$NON-NLS-0$
-			"unqualified-attributes" : 3, //$NON-NLS-0$
-			"vendor-prefix" : 3, //$NON-NLS-0$
-			"zero-units" : 3 //$NON-NLS-0$
+			"adjoining-classes" : 3,
+			"box-model" : 3,
+			"box-sizing" : 3,
+			"bulletproof-font-face" : 3,
+			"compatible-vendor-prefixes" : 3,
+			"display-property-grouping" : 3,
+			"duplicate-background-images" : 3,
+			"duplicate-properties" : 3,
+			"empty-rules" : 3,
+			"fallback-colors" : 3,
+			"floats" : 3,
+			"font-faces" : 3,
+			"font-sizes" : 3,
+			"gradients" : 3,
+			"ids" : 3,
+			"import" : 3,
+			"important" : 3,
+			"known-properties" : 3,
+			"outline-none" : 3,
+			"overqualified-elements" : 3,
+			"qualified-headings" : 3,
+			"regex-selectors" : 3,
+			"rules-count" : 3,
+			"selector-max-approaching" : 3,
+			"selector-max" : 3,
+			"shorthand" : 3,
+			"star-property-hack" : 3,
+			"text-indent" : 3,
+			"underscore-property-hack" : 3,
+			"unique-headings" : 3,
+			"universal-selector" : 3,
+			"unqualified-attributes" : 3,
+			"vendor-prefix" : 3,
+			"zero-units" : 3
 		},
 		
 		/**
@@ -79,7 +79,7 @@ define("webtools/cssValidator", [
 		 * @param {Object} [key] Optional key to use for complex rule configuration.
 		 */
 		setOption: function(ruleId, value, key) {
-			if (typeof value === "number") { //$NON-NLS-0$
+			if (typeof value === "number") {
 				if(Array.isArray(this.rules[ruleId])) {
 					var ruleConfig = this.rules[ruleId];
 					if (key) {
@@ -231,7 +231,7 @@ define("webtools/cssValidator", [
 		 * @since 8.0
 		 */
 		_getProblemRange: function(message) {
-			if (!message.rule || !message.rule.id || message.rule.id === "errors"){ //$NON-NLS-0$
+			if (!message.rule || !message.rule.id || message.rule.id === "errors"){
 				// Parsing errors often don't have a token to select, so instead select the line
 				return [1, message.evidence.length + 1];
 			}
@@ -273,9 +273,7 @@ define("webtools/cssValidator", [
 				else if(s === offset) {
 					return contents.substring(s, pos);
 				}
-				else {
-					return contents.substring(s+1, pos);
-				}
+				return contents.substring(s+1, pos);
 			}
 			return null;
 		},
