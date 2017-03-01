@@ -416,6 +416,36 @@ objects.mixin(EditorViewer.prototype, {
 				}
 			}
 		}.bind(this));
+		var fileClient = this.fileClient;
+		this.fileClient.addEventListener("Changed", function(evnt) {
+			var metadata = inputManager.getFileMetadata();
+			if (!metadata) return;
+			if (evnt.deleted) {
+				evnt.deleted.some(function(item) {
+					if (metadata.Location.indexOf(item.deleteLocation) === 0) {
+						var newLocation;
+						if (metadata.Parents) {
+							metadata.Parents.some(function(p) {
+								if (p.Location.indexOf(item.deleteLocation) !== 0) {
+									newLocation = p.Location;
+									return true;
+								}
+							});
+						}
+						inputManager.setInput(newLocation || fileClient.fileServiceRootURL(metadata.Location));
+						return true;
+					}
+				});
+			}
+			if (evnt.moved) {
+				evnt.moved.some(function(item) {
+					if (metadata.Location.indexOf(item.source) === 0) {
+						inputManager.setInput(item.result && item.result.Location || fileClient.fileServiceRootURL(metadata.Location));
+						return true;
+					}
+				});
+			}
+		});
 		this.selection.addEventListener("selectionChanged", function(evt) { //$NON-NLS-0$
 			inputManager.setInput(evt.selection);
 		});
@@ -734,7 +764,6 @@ objects.mixin(EditorSetup.prototype, {
 			window.location = uriTemplate.expand({resource: newInput.resource || newInput, params: newInput.params || []});
 		};
 		this.sidebarNavInputManager.addEventListener("filesystemChanged", gotoInput); //$NON-NLS-0$
-		this.sidebarNavInputManager.addEventListener("editorInputMoved", gotoInput); //$NON-NLS-0$
 		this.sidebarNavInputManager.addEventListener("create", function(evt) { //$NON-NLS-0$
 			if (evt.newValue && !evt.ignoreRedirect) {
 				window.location = this.computeNavigationHref(evt.newValue);

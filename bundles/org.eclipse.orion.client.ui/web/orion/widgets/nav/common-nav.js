@@ -122,57 +122,6 @@ define([
 				}
 			}.bind(this));
 		},
-		// Override the same API from the super class to dispatch "editorInputMoved" event
-		handleResourceChange: function(evt) {
-			return FileExplorer.prototype.handleResourceChange.call(this, evt).then(function(newEvt) {
-				if ((evt.deleted || evt.moved) && newEvt) {
-					this.onFileModelChange(newEvt);
-				}
-			}.bind(this));
-		},
-		onFileModelChange: function(evnt) {
-			var oldValue = evnt.oldValue,
-				newValue = evnt.newValue;
-			// Detect if we moved/renamed/deleted the current file being edited, or an ancestor thereof.
-			var editorFile = this.editorInputManager.getFileMetadata();
-			if (!editorFile) {
-				return;
-			}
-			var affectedAncestor;
-			[editorFile].concat(editorFile.Parents || []).some(function(ancestor) {
-				if (oldValue.Location === ancestor.Location) {
-					affectedAncestor = oldValue;
-					return true;
-				}
-				return false;
-			});
-			if (affectedAncestor) {
-				var newInput;
-				if (affectedAncestor.Location === editorFile.Location) {
-					// Current file was the target, see if we know its new name
-					newInput = (newValue && newValue.ChildrenLocation) || (newValue && newValue.ContentLocation) || (newValue && newValue.Location) || null;
-					if (newInput) {
-						newInput = {
-							resource: newInput
-						};
-						if (newInput.resource === newValue.Location) {
-							var url = this.editorInputManager.selection.getSelection();
-							var match = /^[^,]+,(.*)$/.exec(url);
-							if (match) {
-								newInput.params = match[1].split(",");
-							}
-						}
-					}
-				} else {
-					newInput = null;
-				}
-				this.sidebarNavInputManager.dispatchEvent({
-					type: "editorInputMoved", //$NON-NLS-0$
-					parent: oldValue.parent.Location,
-					newInput: newInput
-				});
-			}
-		},
 		createActionSections: function() {
 			var _self = this;
 			// Create some elements that we can hang actions on. Ideally we'd have just 1, but the
