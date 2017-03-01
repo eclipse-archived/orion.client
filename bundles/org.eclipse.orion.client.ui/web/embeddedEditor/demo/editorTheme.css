@@ -17,7 +17,7 @@
 	font-weight: bold;
 }
 .editorTheme .entity.name {
-	color: #98937B;
+	color: #7D7755;
 }
 .editorTheme .entity.other.attribute-name {
 	color: #5F9EA0;
@@ -68,7 +68,7 @@
 	font-weight: bold;
 }
 .editorTheme .variable.other {
-	color: #E038AD;
+	color: #DB0FA6;
 }
 .editorTheme .variable.parameter {
 	color: #D13F6E;

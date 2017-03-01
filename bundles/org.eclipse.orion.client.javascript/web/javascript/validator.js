@@ -309,21 +309,20 @@ define([
 						env.browser = true;
 					}
 					if(this.project) {
-						this.project.getComputedEnvironment(false).then(function(cenv) {
+						this.project.getComputedEnvironment().then(function(cenv) {
 							env = !env ? Object.create(null) : env;
-							if(cenv) {
-								Object.keys(cenv).forEach(function(key) {
-									env[key] = cenv[key];
+							if(cenv && cenv.envs) {
+								Object.keys(cenv.envs).forEach(function(key) {
+									env[key] = cenv.envs[key];
 								});
 							}
-							this.project.getESlintOptions().then(function(cfg) {
-								if(cfg && cfg.env) {
-									Object.keys(cfg.env).forEach(function(key) {
-										env[key] = cfg.env[key];
-									});
-								}
-								this._validate(meta, text, env, deferred, configureRules(cfg, config));
-							}.bind(this));
+							var eslint = cenv.eslint ? cenv.eslint.vals : null;
+							if(eslint && eslint.env) {
+								Object.keys(eslint.env).forEach(function(key) {
+									env[key] = eslint.env[key];
+								});
+							}
+							this._validate(meta, text, env, deferred, configureRules(eslint, config));
 						}.bind(this));
 					} else {
 						// need to extract all scripts from the html text

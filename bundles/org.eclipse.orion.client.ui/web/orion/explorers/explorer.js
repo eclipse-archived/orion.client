@@ -17,8 +17,9 @@ define([
 	'orion/explorers/explorerNavHandler',
 	'orion/Deferred',
 	'orion/uiUtils',
-	'orion/commands'
-], function(messages, lib, mTreeTable, mNavHandler, Deferred, UiUtils, mCommands){
+	'orion/commands',
+	'orion/util'
+], function(messages, lib, mTreeTable, mNavHandler, Deferred, UiUtils, mCommands, util){
 
 var exports = {};
 
@@ -73,10 +74,13 @@ exports.Explorer = (function() {
             	if(desktopMode) {
             		doubleClickEvt.preventDefault();
 					var evt = document.createEvent("MouseEvents");
-				    evt.initMouseEvent("click", true, true, window,
-				        3, 0, 0, 0, 0,
-				        true, false, evt.shiftKey, true,
-				        0, null);
+					if(util.isMac){
+						evt.initMouseEvent("click", true, true, window,
+				        0, 0, 0, 0, 0, false, false, evt.shiftKey, true, 0, null);
+					}else{
+					    evt.initMouseEvent("click", true, true, window,
+					        0, 0, 0, 0, 0, true, false, evt.shiftKey, false, 0, null);
+					}
 				    linkNode.dispatchEvent(evt); 
             	}
             });

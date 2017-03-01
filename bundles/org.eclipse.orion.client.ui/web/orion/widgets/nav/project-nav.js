@@ -119,22 +119,6 @@ define([
 	}
 	ProjectNavExplorer.prototype = Object.create(CommonNavExplorer.prototype);
 	objects.mixin(ProjectNavExplorer.prototype, /** @lends orion.sidebar.ProjectNavExplorer.prototype */ {
-		onFileModelChange: function(evnt) {
-			var oldValue = evnt.oldValue,
-				newValue = evnt.newValue;
-			// Detect if we moved/renamed/deleted the current file being edited, or an ancestor thereof.
-			if (oldValue.ChildrenLocation === this.treeRoot.ContentLocation) {
-				this.sidebarNavInputManager.dispatchEvent({
-					type: "editorInputMoved", //$NON-NLS-0$
-					parent: newValue ? (newValue.ChildrenLocation || newValue.ContentLocation) : null,
-					newInput: newValue ? {
-						resource: newValue.ChildrenLocation || newValue.ContentLocation
-					} : null
-				});
-				return;
-			}
-			CommonNavExplorer.prototype.onFileModelChange.call(this, evnt);
-		},
 		display: function(fileMetadata, redisplay) {
 			if (!fileMetadata) {
 				return new Deferred().reject();

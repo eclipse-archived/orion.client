@@ -18,15 +18,9 @@ define([
 
 	var eslintHandler = {
 		_update: function _update(project, fileName) {
-			if(fileName === project.ESLINTRC
-				|| fileName === project.ESLINTRC_JS
-				|| fileName === project.ESLINTRC_JSON
-				|| fileName === project.PACKAGE_JSON
-				|| fileName === project.ESLINTRC_YAML
-				|| fileName === project.ESLINTRC_YML) {
+			if(project.lintFiles.indexOf(fileName) > -1) {
 				delete project.map.eslint;
-			}
-			if (fileName === project.JSBEAUTIFYRC) {
+			} else if (fileName === project.JSBEAUTIFYRC) {
 				delete project.map.formatting;
 			}
 		},
@@ -63,6 +57,64 @@ define([
 		}
 	};
 
+	/**
+	 * @description This handler updates the 'env' map.
+	 * @type {?}
+	 * @since 14.0
+	 */
+	var envHandler = {
+		/**
+		 * @callback
+		 */
+		onCreated: function onCreated(project, qualifiedName, fileName) {
+			//We can read the new files and update here, but that could take longer than 
+			//would be ready for the next getComputedEnvironment call - just wipe the cache
+			//and recompute when asked for
+			this._wipeCache(project, qualifiedName, fileName);
+		},
+		/**
+		 * @callback
+		 */
+		onDeleted: function onDeleted(project, qualifiedName, fileName) {
+			//We don't have access to the deleted contents - wipe the cache and recompute when asked for
+			this._wipeCache(project, qualifiedName, fileName);
+		},
+		/**
+		 * @callback
+		 */
+		onModified: function onModified(project, qualifiedName, fileName) {
+			//same problem with onCreated - we could compute the delta, but that could take longer 
+			//and not be complete by the next onComputedEnvironment call, which would cause sync issues
+			//just wipe the cache
+			this._wipeCache(project, qualifiedName, fileName);
+		},
+		/**
+		 * @callback
+		 */
+		onProjectChanged: function onProjectChanged(project, evnt, projectName) {
+			delete project.map.env;
+		},
+		/**
+		 * @name _wipeCache
+		 * @description Clears the 'env' cache if the file name is a project configuration-like file
+		 * @function
+		 * @private
+		 * @param {JavaScriptProject} project The backing project
+		 * @param {String} qualifileName The fully qualified name of the file
+		 * @param {String} fileName The short name of the file, i.e. 'package.json'
+		 */
+		_wipeCache: function _wipeCache(project, qualifileName, fileName) {
+			if(fileName === project.PACKAGE_JSON || fileName === project.NODE_MODULES || 
+				project.lintFiles.indexOf(fileName) > -1 || fileName === project.TERN_PROJECT) {
+					delete project.map.env;
+			}
+			var folderPath = project.getProjectPath()+project.DEFINITIONS;
+			if(qualifileName === folderPath || qualifileName.indexOf(folderPath) === 0) {
+				delete project.map.env;
+			}
+		} 
+	};
+	
 	var initialized = false;
 
 	/**
@@ -77,9 +129,9 @@ define([
 		this.map = Object.create(null);
 		this.registry = serviceRegistry;
 		this.fileClient = null;
-		this.handlers = [eslintHandler];
-		this.projectFiles = [this.PACKAGE_JSON, this.TERN_PROJECT, this.ESLINTRC, this.ESLINTRC_JS, this.ESLINTRC_JSON, this.ESLINTRC_YAML, this.ESLINTRC_YML];
+		this.handlers = [eslintHandler, envHandler];
         this.lintFiles = [this.ESLINTRC_JS, this.ESLINTRC_JSON, this.ESLINTRC, this.ESLINTRC_YAML, this.ESLINTRC_YML, this.PACKAGE_JSON];
+		this.projectFiles = [this.PACKAGE_JSON, this.TERN_PROJECT].concat(this.lintFiles);
 	}
 	/**
 	 * The .tern-project file name
@@ -131,7 +183,11 @@ define([
 	 * @see https://github.com/beautify-web/js-beautify/blob/master/README.md
 	 */
 	JavaScriptProject.prototype.JSBEAUTIFYRC = '.jsbeautifyrc';
-
+	/**
+	 * The .definitions folder name
+	 * @since 14.0
+	 */
+	JavaScriptProject.prototype.DEFINITIONS = '.definitions';
 	/**
 	 * @description Adds a handler for the given file name to the mapping of handlers
 	 * @function
@@ -195,11 +251,36 @@ define([
 			return new Deferred().resolve(this.map[filePath]);
 		}
 		return this.getFileClient().read(filePath, false, false, {readIfExists: true}).then(function(child) {
-            this.map[filePath] = {name: filePath, contents: child, project: _project};
-            return this.map[filePath];
+			if(child !== null) {
+	            this.map[filePath] = {name: filePath, contents: child, project: _project};
+	            return this.map[filePath];
+	        }
+			return null;
 		}.bind(this),
 		function rejected() {
 			return null;
+		});
+	};
+	
+	/**
+	 * @description Fetch the children of the named child folder of the current project context
+	 * @function
+	 * @param {String} childName The short name of the project child to get
+	 * @param {String} projectPath The optional project path to fetch from
+	 * @returns {Deferred} A deferred that will resolve to the requested child metadata or null
+	 * @since 14.0
+	 */
+	JavaScriptProject.prototype.getFolder = function getFolder(childName, projectPath) {
+		if(!this.projectMeta && !projectPath) {
+			return new Deferred().resolve(null);
+		}
+		var _project = this.projectMeta ? this.projectMeta.Location : projectPath;
+		var folderPath = _project+childName;
+		return this.getFileClient().fetchChildren(folderPath, {readIfExists: true}).then(function(children) {
+            return children;
+		},
+		function rejected() {
+			return [];
 		});
 	};
 
@@ -227,26 +308,24 @@ define([
 	JavaScriptProject.prototype.updateFile = function updateFile(childName, create, values) {
 		if(this.projectMeta) {
 			return this.getFile(childName).then(function(child) {
-				if(child) {
-					var contents = child.contents;
-					if(typeof contents === 'string') {
-						var json;
-						if (contents.length) {
-							json = JSON.parse(contents);
-							_merge(values, json);
-						} else {
-							json = values;
-						}
-						return this.getFileClient().write(this.projectMeta.Location+childName, JSON.stringify(json, null, '\t'));
-					} else if(create) {
-						return this.getFileClient().createFile(this.projectMeta.Location, childName).then(function(file) {
-							json = _defaultsFor(childName);
-							if(json) {
-								_merge(json, values);
-							}
-							return this.getFileClient().write(file.Location, JSON.stringify(values, null, '\t'));
-						}.bind(this));
+				var contents = child ? child.contents : null;
+				if(typeof contents === 'string') {
+					var json;
+					if (contents.length) {
+						json = JSON.parse(contents);
+						_merge(values, json);
+					} else {
+						json = values;
 					}
+					return this.getFileClient().write(this.projectMeta.Location+childName, JSON.stringify(json, null, '\t'));
+				} else if(create) {
+					return this.getFileClient().createFile(this.projectMeta.Location, childName).then(function(file) {
+						json = _defaultsFor(childName);
+						if(json) {
+							_merge(json, values);
+						}
+						return this.getFileClient().write(file.Location, JSON.stringify(values, null, '\t'));
+					}.bind(this));
 				}
 			}.bind(this));
 		}
@@ -312,25 +391,26 @@ define([
 		if(this.map.eslint) {
 			return deferred.resolve(this.map.eslint);
 		}
-        this.projectPromise.then(function() {
-            var p = [];
-            this.lintFiles.forEach(function(_name) {
-                p.push(this.getFile(_name));
-            }.bind(this));
-            p.reduce(function(prev, current, index, array) {
-                return prev.then(function(_file) {
-                    var vals = readAndMap(this.map, _file, "eslint");
+        
+        var p = [];
+        this.lintFiles.forEach(function(_name) {
+            p.push(this.getFile(_name));
+        }.bind(this));
+        p.reduce(function(prev, current, index, array) {
+            return prev.then(function(_file) {
+            	if(_file && _file.contents) {
+                    var vals = readAndMap(this.map, _file, "eslint", this);
                     if(vals) {
                         deferred.resolve(vals);
                         return current.reject("done");
                     }
-                    if(index === array.length-1) {
-                        deferred.resolve(null);
-                    }
-                    return current;
-                }.bind(this));
-            }.bind(this), new Deferred().resolve());
-        }.bind(this));
+                }
+                if(index === array.length-1) {
+                    deferred.resolve(null);
+                }
+                return current;
+            }.bind(this));
+        }.bind(this), new Deferred().resolve());
         return deferred;
 	};
 
@@ -346,35 +426,55 @@ define([
 			return new Deferred().resolve(this.map.formatting);
 		}
 		return this.getFile(this.JSBEAUTIFYRC).then(function(file) {
-			return readAndMap(this.map, file, "formatting");
+			if(file && file.contents) {
+				return readAndMap(this.map, file, "formatting", this);
+			}
+			return null;
 		}.bind(this));
+	};
+	
+	/**
+	 * @name JavaScriptProject.prototype.importantChange
+	 * @description Returns if the file changed was an important change requiring a Tern restart
+	 * @function
+	 * @param {String} qualifiedName The fully qualified name of the changed file
+	 * @param {String} filename The name of the changed file
+	 * @returns {Boolean} True if an important project configuration file has changed
+	 * @since 14.0
+	 */
+	JavaScriptProject.prototype.importantChange = function importantChange(qualifiedName, filename) {
+		if(this.projectFiles.indexOf(filename) > -1) {
+			return true;
+		}
+		var folderPath = this.getProjectPath()+this.DEFINITIONS;
+		return qualifiedName === folderPath || qualifiedName.indexOf(folderPath) === 0;
 	};
 
 	/**
 	 * @name JavaScriptProject.prototype.getComputedEnvironment
 	 * @description Computes the environment that has been computed based on what config files are in the project
 	 * @function
-	 * @param {Boolean} includeEslint If we should also lookup the ESLint options
 	 * @returns {Deferred} A deferred that will resolve to an object listing the computed environments to use in the tools
 	 * @since 14.0
 	 */
-	JavaScriptProject.prototype.getComputedEnvironment = function getComputedEnvironment(includeEslint) {
+	JavaScriptProject.prototype.getComputedEnvironment = function getComputedEnvironment() {
 		if(this.map.env) {
 			return new Deferred().resolve(this.map.env);
 		}
-		this.map.env = {browser: true, node: true}; //always start assuming browser
-		//start with eslint options - they can carry env objects
-		if(includeEslint) {
+		return this.projectPromise.then(function() {
+			this.map.env = {};
+			this.map.env.envs = {browser: true, node: true}; //always start assuming browser
+			//start with eslint options - they can carry env objects
 			return this.getESlintOptions().then(function(options) {
-				if(options && options.env) {
-					Object.keys(options.env).forEach(function(key) {
-						this.map.env[key] = options.env[key];
+				this.map.env.eslint = options;
+				if(options && options.vals && options.vals.env) {
+					Object.keys(options.vals.env).forEach(function(key) {
+						this.map.env.envs[key] = options.vals.env[key];
 					}.bind(this));
 				}
 				return guessEnvForProject(this);
 			}.bind(this));
-		} 
-		return guessEnvForProject(this);
+		}.bind(this));
 	};
 
 	/**
@@ -385,86 +485,145 @@ define([
 	 * @since 14.0
 	 */
 	function guessEnvForProject(project) {
-		return project.getFile(project.PACKAGE_JSON).then(function(file) {
+		return project.getFile(project.TERN_PROJECT).then(function(file) {
+			project.map.env.ternproject = {file: file, vals: null};
 			if(file && typeof file.contents === "string") {
-				project.map.env.node = true;
+				try {
+					var vals = JSON.parse(file.contents);
+					project.map.env.ternproject.vals = vals;
+					if(Array.isArray(vals.libs)) {
+						if(vals.libs.indexOf("browser") > -1) {
+							project.map.env.envs.browser = true;
+						} else if(vals.libs.indexOf("ecma6") > -1) {
+							project.map.env.envs.es6 = true;
+						} 
+					}
+					if(Array.isArray(vals.defs)) {
+						if(vals.defs.indexOf("browser") > -1) {
+							project.map.env.envs.browser = true;
+						} else if(vals.defs.indexOf("ecma6") > -1) {
+							project.map.env.envs.es6 = true;
+						} 
+					}
+					if(vals.plugins && typeof vals.plugins === 'object') {
+						if(vals.plugins.node) {
+							project.map.env.envs.node = true;
+						} else if(Object.keys(vals.plugins).length > 0) {
+							//remove node as a default if there are other plugins specified
+							//We will re-add it later when we look for other cues, like package.json
+							delete project.map.env.envs.node;
+						}
+						if(vals.plugins.requirejs || vals.plugins.commonjs) {
+							project.map.env.envs.amd = true;
+							project.map.env.envs.browser = true;
+						}
+						if(vals.plugins.es6_modules) {
+							project.map.env.envs.es6 = true;
+							project.map.env.envs.browser = true;
+							project.map.env.envs.node = true;
+						}
+					} 
+					if(typeof vals.ecmaVersion === 'number') {
+						if(vals.ecmaVersion >= 6) {
+							project.map.env.envs.es6 = true;
+						}
+					} 
+					if(vals.sourceType === 'modules') {
+						project.map.env.envs.es6 = true;
+						project.map.env.envs.browser = true;
+						project.map.env.envs.node = true;
+					}
+				} catch (e) {
+					// ignore, bad JSON
+				}
 			}
-			return project.getFile(project.TERN_PROJECT).then(function(file) {
+			return project.getFile(project.PACKAGE_JSON).then(function(file) {
+				project.map.env.packagejson = {file: file};
 				if(file && typeof file.contents === "string") {
 					try {
-						var vals = JSON.parse(file.contents);
-					} catch (e) {
-						// ignore
-					}
-					if(vals) {
-						if(Array.isArray(vals.libs)) {
-							if(vals.libs.indexOf("browser") > -1) {
-								project.map.env.browser = true;
-							} else if(vals.libs.indexOf("ecma6") > -1) {
-								project.map.env.es6 = true;
-							} 
-						}  
-						if(Array.isArray(vals.defs)) {
-							if(vals.defs.indexOf("browser") > -1) {
-								project.map.env.browser = true;
-							} else if(vals.defs.indexOf("ecma6") > -1) {
-								project.map.env.es6 = true;
-							} 
-						}
-						if(vals.plugins && typeof vals.plugins === 'object') {
-							if(vals.plugins.node) {
-								project.map.env.node = true;
-							} else if(vals.plugins.requirejs || vals.plugins.commonjs) {
-								project.map.env.amd = true;
-								project.map.env.browser = true;
-							} else if(vals.plugins.es6_modules) {
-								project.map.env.es6 = true;
-								project.map.env.browser = true;
-								project.map.env.node = true;
+						vals = project.map.env.packagejson.vals = JSON.parse(file.contents);
+						if(vals) {
+							if(vals.dependencies) {
+								Object.keys(vals.dependencies).forEach(function(key) {
+									project.map.env.envs[key] = true;
+								});
+							} else if(vals.devDependencies) {
+								Object.keys(vals.dependencies).forEach(function(key) {
+									project.map.env.envs[key] = true;
+								});
+							} else if(vals.optionalDependencies) {
+								Object.keys(vals.dependencies).forEach(function(key) {
+									project.map.env.envs[key] = true;
+								});
 							}
-						} 
-						if(typeof vals.ecmaVersion === 'number') {
-							if(vals.ecmaVersion >= 6) {
-								project.map.env.es6 = true;
-							}
-						} 
-						if(vals.sourceType === 'modules') {
-							project.map.env.es6 = true;
-							project.map.env.browser = true;
-							project.map.env.node = true;
 						}
+					} catch(e) {
+						//ignore
 					}
+					project.map.env.envs.node = true;
 				}
-				return project.map.env;
+				return project.getFolder(project.DEFINITIONS).then(function(children) {
+					if(children.length > 0) {
+						project.map.env.defs = [];
+						children.forEach(function(def) {
+							project.map.env.defs.push(project.DEFINITIONS+'/'+def.Name);
+						});
+					}
+					return project.map.env;
+				}, function rejected() {
+					return project.map.env;
+				});
 			});
 		});
 	}
 
-	function readAndMap(map, file, key) {
-		if (file && file.contents) {
-			var vals = null;
-			try {
-				vals = JSON.parse(file.contents);
-			} catch (e) {
-				// ignore
-			}
-			if (vals === null) {
-				// try yml and yaml parsing
+	/**
+	 * @description Attempts to read the given file contents, parse it based on its type and cache it using the given key
+	 * @param {?} map The project cache
+	 * @param {?} file The file object from the file client
+	 * @param {String} key The key to map to
+	 * @param {JavaScriptProject} project The project context
+	 * @returns {?} The parsed cache value
+	 */
+	function readAndMap(map, file, key, project) {
+		map[key] = {file: file, vals: null};
+		switch(file.name.slice(file.name.lastIndexOf('/')+1)) {
+			case project.ESLINTRC:
+			case project.ESLINTRC_JSON: {
 				try {
-					// YML and YAML files
-					vals = JsYaml.safeLoad(
-						file.contents,
-						{json: true});
-				} catch (e) {
-					// ignore
+					map[key].vals = JSON.parse(file.contents);
+				} catch(err) {
+					//ignore, bad JSON
 				}
+				break;
 			}
-            if(vals.eslintConfig && typeof vals.eslintConfig === "object") {
-                vals = vals.eslintConfig;
-            }
+			case project.PACKAGE_JSON: {
+				try {
+					var v = JSON.parse(file.contents);
+					if(v && v.eslintConfig && typeof v.eslintConfig === "object") {
+						map[key].vals = v.eslintConfig;
+					}
+				} catch(err) {
+					//ignore, bad JSON
+				}
+				break;
+			}
+			case project.ESLINTRC_YAML:
+			case project.ESLINTRC_YML: {
+				try {
+					map[key].vals = JsYaml.safeLoad(file.contents);
+				} catch (e) {
+					// ignore, bad YAML/YML
+				}
+				break;
+			}
+			case project.ESLINTRC_JS: {
+				//TODO how should we load JS from an arbitrary file?
+				//we can't eval them and we can't require them
+				break;
+			}
 		}
-		if (vals && Object.keys(vals).length > 0) {
-			map[key] = vals;
+		if (map[key].vals) {
 			return map[key];
 		}
 		return null;
@@ -538,33 +697,50 @@ define([
 			if(!Array.isArray(parents) || parents.length < 1) {
 				deferred.resolve({Location: "/file/"});
 			} else {
-				if(Util.isElectron) {
-					//TODO call out the server for #getProject
-					var promises = [],
-						prnt = parents[parents.length-1];
-					this.projectFiles.forEach(function(_f) {
-						promises.push(this.getFile(_f, prnt.Location));
-						promises.push(this.getFile(_f, "/file/"));
-					}.bind(this));
-					promises.reduce(function(prev, item, index, array) {
-                        return prev.then(function(_file) {
-                            if(_file && _file.contents) {
-                                deferred.resolve({Location: _file.project});
-                                return item.reject("done");
-                            }
-                            if(index === array.length-1) {
-                                //nothing was found, assume /file/
-                                deferred.resolve({Location: "/file/"});
-                            }
-                            return item;
-                        });
-					}, new Deferred().resolve());
-				} else {
-					deferred.resolve(parents[parents.length-1]);
-				}
+				this.getFileClient().getProject(floc, {names: [this.PACKAGE_JSON, this.TERN_PROJECT]}).then(function(project) {
+					if(project) {
+						return deferred.resolve({Location: project.Location});
+					}
+					fallbackProjectResolve.call(this, deferred, parents);
+				}.bind(this), /* @callback */ function reject(err) {
+					fallbackProjectResolve.call(this, deferred, parents);
+				}.bind(this));
 			}
 		}
 		return deferred;
+	}
+	
+	/**
+	 * @description Fallabck function to try and find the project context if the file client call fails
+	 * @param {Deferred} deferred The deferred to resolve
+	 * @param {Array.<?>} parents The array of parents to look in  
+	 * @since 14.0
+	 */
+	function fallbackProjectResolve(deferred, parents) {
+		if(Util.isElectron) {
+			//TODO call out the server for #getProject
+			var promises = [],
+				prnt = parents[parents.length-1];
+			this.projectFiles.forEach(function(_f) {
+				promises.push(this.getFile(_f, prnt.Location));
+				promises.push(this.getFile(_f, "/file/"));
+			}.bind(this));
+			promises.reduce(function(prev, item, index, array) {
+                return prev.then(function(_file) {
+                    if(_file && _file.contents) {
+                        deferred.resolve({Location: _file.project});
+                        return item.reject("done");
+                    }
+                    if(index === array.length-1) {
+                        //nothing was found, assume /file/
+                        deferred.resolve({Location: "/file/"});
+                    }
+                    return item;
+                });
+			}, new Deferred().resolve());
+		} else {
+			deferred.resolve(parents[parents.length-1]);
+		}
 	}
 
 	/**

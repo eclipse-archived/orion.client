@@ -10,8 +10,10 @@
  *******************************************************************************/
 /*eslint-env browser, node*/
 var electron = require('electron');
+var nodeUrl = require('url');
 var dragSrcEl = null;
 var contextSrcEl = null;
+var needToCleanFrames = [];
 
 function redrawButtons() {
 	var bar = document.querySelector("#bar");
@@ -66,6 +68,13 @@ function redrawButtons() {
 		historyForward:historyForward,
 		historyBack:historyBack
 	};
+}
+
+function closeAllTabs(){
+	var tabbuttons = document.querySelectorAll(".tabItem");
+	for (var j = 0; j < tabbuttons.length; j++) {
+		tabbuttons[j].lastChild.click();
+	}
 }
 
 function addNewTab(id, iframe) {
@@ -218,10 +227,18 @@ function update() {
 	Array.prototype.forEach.call(items, function(tab) {
 		tab.style.flexBasis = "";
 	});
-	if (bar.getBoundingClientRect().right < ul.lastChild.getBoundingClientRect().right) {
-		Array.prototype.forEach.call(items, function(tab) {
-			tab.style.flexBasis = "0";
+	if(ul.lastChild){
+		if (bar.getBoundingClientRect().right < ul.lastChild.getBoundingClientRect().right) {
+			Array.prototype.forEach.call(items, function(tab) {
+				tab.style.flexBasis = "0";
+			});
+		}
+	}
+	if(needToCleanFrames.length > 0){
+		needToCleanFrames.forEach(function(iframe){
+			iframe.parentNode.removeChild(iframe);
 		});
+		needToCleanFrames = [];
 	}
 }
 
@@ -241,6 +258,7 @@ function load() {
 		}, 50);
 	});
 	registerContextMenu();
+	collectTabsUrl();
 }
 
 function registerElectronMenu(pageControlCallbacks, newTabCallback){
@@ -328,7 +346,12 @@ function createTab(url) {
 		});
 	});
 	document.body.appendChild(iframe);
-	addNewTab(id, iframe);
+	var srcUrl = nodeUrl.parse(url);
+	if(srcUrl.pathname === "/" || srcUrl.pathname.endsWith(".html")){
+		addNewTab(id, iframe);	
+	}else{
+		needToCleanFrames.push(iframe);
+	}
 }
 
 function registerContextMenu() {
@@ -427,4 +450,14 @@ function getPosition(e) {
 		x: posx,
 		y: posy
 	};
+}
+function collectTabsUrl(){
+	var ipcRenderer = electron.ipcRenderer;
+	ipcRenderer.on('collect-tabs-info',function(event, arg){
+		var iframes = document.querySelectorAll(".tabContent");
+		var tabUrls = Array.prototype.map.call(iframes,function(iframe){
+			return iframe.contentWindow.location.href.replace(/http:\/\/localhost:\w+\//, "");
+		});
+		ipcRenderer.send("collected-tabs-info-" + arg, tabUrls);
+	});
 }

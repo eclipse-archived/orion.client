@@ -142,6 +142,12 @@ define([
 				}, 100);
 				return d;
 			},
+			/**
+			 * @description Computes the project context from the given location
+			 * @param {String} context The resource context to find the project for
+			 * @since 14.0
+			 */
+			getProject: _noMatch,
 			search: _noMatch,
 			createProject: _noMatch,
 			createFolder: _noMatch,
@@ -361,7 +367,14 @@ define([
 		changeWorkspace: function(workspaceLocation) {
 			return _doServiceCall(this._getService(), "changeWorkspace", arguments); //$NON-NLS-1$
 		},
-
+		/**
+		 * @description Computes the project context from the given location
+		 * @param {String} context The resource context to find the project for
+		 * @since 14.0
+		 */
+		getProject: function getProject(resource) {
+			return _doServiceCall(this._getService(resource), "getProject", arguments);	
+		},
 		_createArtifact: function(parentLocation, funcName, eventData, funcArgs) {
 			return _doServiceCall(this._getService(parentLocation), funcName, funcArgs).then(function(result){
 				if(this.isEventFrozen()) {

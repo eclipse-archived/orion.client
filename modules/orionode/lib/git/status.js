@@ -13,6 +13,7 @@ var api = require('../api'),
 	writeError = api.writeError;
 var git = require('nodegit');
 var clone = require('./clone');
+var util = require('./util');
 var express = require('express');
 var bodyParser = require('body-parser');
 
@@ -46,7 +47,7 @@ function router(options) {
 		
 				function returnContent(file, diffType) {
 					diffType = diffType || "Default";
-					var orionFilePath = api.join(fileDir, file.path());
+					var orionFilePath = encodePath(api.join(fileDir, file.path()));
 					return {
 						"Git": {
 							"CommitLocation": gitRoot + "/commit/HEAD" + orionFilePath,
@@ -128,6 +129,26 @@ function router(options) {
 			writeError(400, res, err);
 		});
 	}
+}
+
+/**
+ * Encodes a path with URL encoding while ignoring path separators ("/").
+ * 
+ * /a%b.txt						-> /a%2525b.txt
+ * /a b/test.txt				-> /a%2520b/test.txt
+ * /modules/orionode/hello.js	-> /modules/orionode/hello.js
+ * 
+ * @param {String} path the path to encode, delimited by a
+ *                      forward slash ("/") path separator
+ */
+function encodePath(path) {
+	var split = path.split("/");
+	path = "";
+	// start at 1 because the split[0] === ""
+	for (var i = 1; i < split.length; i++) {
+		path = path + "/" + util.encodeURIComponent(split[i]);
+	}
+	return path;
 }
 
 module.exports = {

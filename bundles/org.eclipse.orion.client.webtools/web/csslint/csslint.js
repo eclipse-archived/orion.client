@@ -1,4 +1,4 @@
-/* eslint-disable  */
+/* eslint-disable */
 /* eslint-env amd */
 define([
 ], function() {
@@ -3650,7 +3650,7 @@ nth
 
 /*global Validation, ValidationTypes, ValidationError*/
 var Properties = {
-
+		
     //A
     "alignment-adjust"              : "auto | baseline | before-edge | text-before-edge | middle | central | after-edge | text-after-edge | ideographic | alphabetic | hanging | mathematical | <percentage> | <length>",
     "alignment-baseline"            : "baseline | use-script | before-edge | text-before-edge | after-edge | text-after-edge | central | middle | ideographic | alphabetic | hanging | mathematical",
@@ -4127,7 +4127,43 @@ var Properties = {
     
     //Z
     "z-index"                       : "<integer> | auto | inherit",
-    "zoom"                          : "<number> | <percentage> | normal"
+    "zoom"                          : "<number> | <percentage> | normal",
+    
+    // ORION 14.0 Add all SVG properties, temp fix for Bug 512286 until we update CSSLint
+	"clip-path": 1,
+	"clip-rule": 1,
+	"color-interpolation": 1,
+	"color-interpolation-filters": 1,
+	"color-rendering": 1,
+	"enable-background": 1,
+	"fill": 1,
+	"fill-opacity": 1,
+	"fill-rule": 1,
+	"flood-color": 1,
+	"flood-opacity": 1,
+	"glyph-orientation-horizontal": 1,
+	"glyph-orientation-vertical": 1,
+	"kerning": 1,
+	"lighting-color": 1,
+	"marker": 1,
+	"marker-end": 1,
+	"marker-mid": 1,
+	"marker-start": 1,
+	"mask": 1,
+	"shape-rendering": 1,
+	"stop-color": 1,
+	"stop-opacity": 1,
+	"stroke": 1,
+	"stroke-dasharray": 1,
+	"stroke-dashoffset": 1,
+	"stroke-linecap": 1,
+	"stroke-linejoin": 1,
+	"stroke-miterlimit": 1,
+	"stroke-opacity": 1,
+	"stroke-width": 1,
+	"text-anchor": 1,
+	"writing-mode": 1,
+    
 };
 
 /*global SyntaxUnit, Parser*/

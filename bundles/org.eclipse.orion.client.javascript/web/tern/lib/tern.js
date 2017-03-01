@@ -126,11 +126,21 @@
     this.mod = {}
 
     this.defs = options.defs.slice(0)
-    this.plugins = Object.create(null)
-    for (var plugin in options.plugins) if (options.plugins.hasOwnProperty(plugin))
-      this.loadPlugin(plugin, options.plugins[plugin])
+    this.plugins = Object.create(null);
+    //ORION forward exceptions loading plugins
+    try {
+	    for (var plugin in options.plugins) if (options.plugins.hasOwnProperty(plugin))
+	      this.loadPlugin(plugin, options.plugins[plugin])
+	} catch(err) {
+		throw ternError("Plugin failed to load: "+err.message);
+	}
+	//ORION forward exceptions during restart
+	try {
+	    this.reset();
+	} catch(err) {
+		throw ternError("Tern failed to reset: "+err.message);
+	}
 
-    this.reset();
   };
   Server.prototype = signal.mixin({
     addFile: function(name, /*optional*/ text, parent) {

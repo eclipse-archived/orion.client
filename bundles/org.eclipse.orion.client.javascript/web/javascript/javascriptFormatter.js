@@ -1,6 +1,6 @@
  /*******************************************************************************
  * @license
- * Copyright (c) 2016 IBM Corporation and others.
+ * Copyright (c) 2016, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -96,7 +96,7 @@ define([
 				//TODO make sure we can get the options as set in the formatting preference page Right now only the indent character is customizable
 				// We should expose all existing options - see defaults above
 				this.project.getFormattingOptions().then(function(cfg) {
-					this._format(editorContext, deferred, cfg ? cfg : config.rules);
+					this._format(editorContext, deferred, cfg && cfg.formatting && cfg.formatting.vals ? cfg : config.rules);
 				}.bind(this));
 			} else {
 				this._format(editorContext, deferred, config.rules);

@@ -1,0 +1,491 @@
+@import "../css/layout.css";
+@import "../css/ide.css";
+@import "../css/images.css";
+@import "../css/theme.css";
+
+.pageLayoutTarget {
+	padding: 0;
+	background: transparent;
+	box-shadow: none;
+}
+
+.terminal {
+	font-size: 14px;
+	font-family: "DejaVu Sans Mono", "Liberation Mono", monospace;
+	height: 100%;
+}
+
+@keyframes xterm-cursor-blink {
+    0% {
+    }
+    50% {
+        background-color: transparent;
+        color: inherit;
+    }
+}
+
+.terminal[scheme="Dark"] {
+	color: #ffffff;
+	background-color: #000000;
+	border-color: #000000;
+}
+
+.terminal[scheme="Dark"] .xterm-viewport {
+	background-color: #000000;
+}
+
+.terminal:not(.xterm-cursor-style-underline):not(.xterm-cursor-style-bar)[scheme="Dark"] .terminal-cursor {
+    background-color: #ffffff;
+    color: #000000;
+}
+
+.terminal:not(.focus)[scheme="Dark"] .terminal-cursor {
+    outline: 1px solid #ffffff;
+    outline-offset: -1px;
+    background-color: transparent;
+}
+
+.terminal[scheme="Dark"] .xterm-color-0 {
+	color: #000000;
+}
+.terminal[scheme="Dark"] .xterm-bg-color-0 {
+	background-color: #000000;
+}
+
+.terminal[scheme="Dark"] .xterm-color-1 {
+	color: #dc322f;
+}
+.terminal[scheme="Dark"] .xterm-bg-color-1 {
+	background-color: #dc322f;
+}
+
+.terminal[scheme="Dark"] .xterm-color-2 {
+	color: #859900;
+}
+.terminal[scheme="Dark"] .xterm-bg-color-2 {
+	background-color: #859900;
+}
+
+.terminal[scheme="Dark"] .xterm-color-3 {
+	color: #b58900;
+}
+.terminal[scheme="Dark"] .xterm-bg-color-3 {
+	background-color: #b58900;
+}
+
+.terminal[scheme="Dark"] .xterm-color-4 {
+	color: #268bd2;
+}
+.terminal[scheme="Dark"] .xterm-bg-color-4 {
+	background-color: #268bd2;
+}
+
+.terminal[scheme="Dark"] .xterm-color-5 {
+	color: #d33682;
+}
+.terminal[scheme="Dark"] .xterm-bg-color-5 {
+	background-color: #d33682;
+}
+
+.terminal[scheme="Dark"] .xterm-color-6 {
+	color: #2aa198;
+}
+.terminal[scheme="Dark"] .xterm-bg-color-6 {
+	background-color: #2aa198;
+}
+
+.terminal[scheme="Dark"] .xterm-color-7 {
+	color: #eee8d5;
+}
+.terminal[scheme="Dark"] .xterm-bg-color-7 {
+	background-color: #eee8d5;
+}
+
+.terminal[scheme="Dark"] .xterm-color-8 {
+	color: #002b36;
+}
+.terminal[scheme="Dark"] .xterm-bg-color-8 {
+	background-color: #002b36;
+}
+
+.terminal[scheme="Dark"] .xterm-color-9 {
+	color: #cb4b16;
+}
+.terminal[scheme="Dark"] .xterm-bg-color-9 {
+	background-color: #cb4b16;
+}
+
+/* Linux Tango - user@machine, shell scripts */
+.terminal[scheme="Dark"] .xterm-color-10 {
+	color: #8AE234;
+}
+.terminal[scheme="Dark"] .xterm-bg-color-10 {
+	background-color: #8AE234;
+}
+
+/* Linux Tango - ~/location/ */
+.terminal[scheme="Dark"] .xterm-color-11 {
+	color: #FCE94F;
+}
+.terminal[scheme="Dark"] .xterm-bg-color-11 {
+	background-color: #FCE94F;
+}
+
+/* Linux Tango - (git-branch) */
+.terminal[scheme="Dark"] .xterm-color-12 {
+	color: #729FCF;
+}
+.terminal[scheme="Dark"] .xterm-bg-color-12 {
+	background-color: #729FCF;
+}
+
+/* Linux Tango - images */
+.terminal[scheme="Dark"] .xterm-color-13 {
+	color: #AD7FA8;
+}
+.terminal[scheme="Dark"] .xterm-bg-color-13 {
+	background-color: #AD7FA8;
+}
+
+/* Linux Tango - javascript comments */
+.terminal[scheme="Dark"] .xterm-color-14 {
+	color: #3465A4;
+}
+.terminal[scheme="Dark"] .xterm-bg-color-14 {
+	background-color: #3465A4;
+}
+
+.terminal[scheme="Dark"] .xterm-color-15 {
+	color: #fdf6e3;
+}
+.terminal[scheme="Dark"] .xterm-bg-color-15 {
+	background-color: #fdf6e3;
+}
+
+.terminal[scheme="Dark"] .xterm-color-256 {
+	color: #000000;
+}
+.terminal[scheme="Dark"] .xterm-bg-color-256 {
+	background-color: #000000;
+}
+
+.terminal[scheme="Dark"] .xterm-color-257 {
+	color: #fdf6e3;
+}
+.terminal[scheme="Dark"] .xterm-bg-color-257 {
+	background-color: #fdf6e3;
+}
+
+.terminal[scheme="Light"] {
+	color: #000000;
+	background-color: #ffffff;
+	border-color: #ffffff;
+}
+
+.terminal[scheme="Light"] .xterm-viewport {
+	background-color: #ffffff;
+}
+
+.terminal:not(.xterm-cursor-style-underline):not(.xterm-cursor-style-bar)[scheme="Light"] .terminal-cursor {
+    background-color: #000000;
+    color: #ffffff;
+}
+
+.terminal:not(.focus)[scheme="Light"] .terminal-cursor {
+    outline: 1px solid #000000;
+    outline-offset: -1px;
+    background-color: transparent;
+}
+
+.terminal[scheme="Light"] .xterm-color-0 {
+	color: #ffffff;
+}
+.terminal[scheme="Light"] .xterm-bg-color-0 {
+	background-color: #ffffff;
+}
+
+.terminal[scheme="Light"] .xterm-color-1 {
+	color: #dc322f;
+}
+.terminal[scheme="Light"] .xterm-bg-color-1 {
+	background-color: #dc322f;
+}
+
+.terminal[scheme="Light"] .xterm-color-2 {
+	color: #859900;
+}
+.terminal[scheme="Light"] .xterm-bg-color-2 {
+	background-color: #859900;
+}
+
+.terminal[scheme="Light"] .xterm-color-3 {
+	color: #b58900;
+}
+.terminal[scheme="Light"] .xterm-bg-color-3 {
+	background-color: #b58900;
+}
+
+.terminal[scheme="Light"] .xterm-color-4 {
+	color: #268bd2;
+}
+.terminal[scheme="Light"] .xterm-bg-color-4 {
+	background-color: #268bd2;
+}
+
+.terminal[scheme="Light"] .xterm-color-5 {
+	color: #d33682;
+}
+.terminal[scheme="Light"] .xterm-bg-color-5 {
+	background-color: #d33682;
+}
+
+.terminal[scheme="Light"] .xterm-color-6 {
+	color: #2aa198;
+}
+.terminal[scheme="Light"] .xterm-bg-color-6 {
+	background-color: #2aa198;
+}
+
+.terminal[scheme="Light"] .xterm-color-7 {
+	color: #000000;
+}
+.terminal[scheme="Light"] .xterm-bg-color-7 {
+	background-color: #000000;
+}
+
+.terminal[scheme="Light"] .xterm-color-8 {
+	color: #002b36;
+}
+.terminal[scheme="Light"] .xterm-bg-color-8 {
+	background-color: #002b36;
+}
+
+.terminal[scheme="Light"] .xterm-color-9 {
+	color: #cb4b16;
+}
+.terminal[scheme="Light"] .xterm-bg-color-9 {
+	background-color: #cb4b16;
+}
+
+/* Linux Tango - user@machine, shell scripts */
+.terminal[scheme="Light"] .xterm-color-10 {
+	color: #8AE234;
+}
+.terminal[scheme="Light"] .xterm-bg-color-10 {
+	background-color: #8AE234;
+}
+
+/* Linux Tango - ~/location/ */
+.terminal[scheme="Light"] .xterm-color-11 {
+	color: #FCE94F;
+}
+.terminal[scheme="Light"] .xterm-bg-color-11 {
+	background-color: #FCE94F;
+}
+
+/* Linux Tango - (git-branch) */
+.terminal[scheme="Light"] .xterm-color-12 {
+	color: #729FCF;
+}
+.terminal[scheme="Light"] .xterm-bg-color-12 {
+	background-color: #729FCF;
+}
+
+/* Linux Tango - images */
+.terminal[scheme="Light"] .xterm-color-13 {
+	color: #AD7FA8;
+}
+.terminal[scheme="Light"] .xterm-bg-color-13 {
+	background-color: #AD7FA8;
+}
+
+/* Linux Tango - javascript comments */
+.terminal[scheme="Light"] .xterm-color-14 {
+	color: #3465A4;
+}
+.terminal[scheme="Light"] .xterm-bg-color-14 {
+	background-color: #3465A4;
+}
+
+.terminal[scheme="Light"] .xterm-color-15 {
+	color: #000000;
+}
+.terminal[scheme="Light"] .xterm-bg-color-15 {
+	background-color: #000000;
+}
+
+.terminal[scheme="Light"] .xterm-color-256 {
+	color: #ffffff;
+}
+.terminal[scheme="Light"] .xterm-bg-color-256 {
+	background-color: #ffffff;
+}
+
+.terminal[scheme="Light"] .xterm-color-257 {
+	color: #000000;
+}
+.terminal[scheme="Light"] .xterm-bg-color-257 {
+	background-color: #000000;
+}
+
+.terminal[scheme="Solarized"] {
+	color: #839496;
+	background-color: #002b36;
+	border-color: #002b36;
+}
+
+.terminal[scheme="Solarized"] .xterm-viewport {
+	background-color: #002b36;
+}
+
+.terminal:not(.xterm-cursor-style-underline):not(.xterm-cursor-style-bar)[scheme="Solarized"] .terminal-cursor {
+    background-color: #839496;
+    color: #002b36;
+}
+
+.terminal:not(.focus)[scheme="Solarized"] .terminal-cursor {
+    outline: 1px solid #839496;
+    outline-offset: -1px;
+    background-color: transparent;
+}
+
+.terminal[scheme="Solarized"] .xterm-color-0 {
+	color: #073642;
+}
+.terminal[scheme="Solarized"] .xterm-bg-color-0 {
+	background-color: #073642;
+}
+
+/* git - changes not staged for commit */
+.terminal[scheme="Solarized"] .xterm-color-1 {
+	color: #dc322f;
+}
+.terminal[scheme="Solarized"] .xterm-bg-color-1 {
+	background-color: #dc322f;
+}
+
+/* git - changes staged for commit */
+.terminal[scheme="Solarized"] .xterm-color-2 {
+	color: #268bd2;
+}
+.terminal[scheme="Solarized"] .xterm-bg-color-2 {
+	background-color: #268bd2;
+}
+
+.terminal[scheme="Solarized"] .xterm-color-3 {
+	color: #b58900;
+}
+.terminal[scheme="Solarized"] .xterm-bg-color-3 {
+	background-color: #b58900;
+}
+
+.terminal[scheme="Solarized"] .xterm-color-4 {
+	color: #268bd2;
+}
+.terminal[scheme="Solarized"] .xterm-bg-color-4 {
+	background-color: #268bd2;
+}
+
+.terminal[scheme="Solarized"] .xterm-color-5 {
+	color: #d33682;
+}
+.terminal[scheme="Solarized"] .xterm-bg-color-5 {
+	background-color: #d33682;
+}
+
+.terminal[scheme="Solarized"] .xterm-color-6 {
+	color: #2aa198;
+}
+.terminal[scheme="Solarized"] .xterm-bg-color-6 {
+	background-color: #2aa198;
+}
+
+.terminal[scheme="Solarized"] .xterm-color-7 {
+	color: #eee8d5;
+}
+.terminal[scheme="Solarized"] .xterm-bg-color-7 {
+	background-color: #eee8d5;
+}
+
+.terminal[scheme="Solarized"] .xterm-color-8 {
+	color: #002b36;
+}
+.terminal[scheme="Solarized"] .xterm-bg-color-8 {
+	background-color: #002b36;
+}
+
+.terminal[scheme="Solarized"] .xterm-color-9 {
+	color: #cb4b16;
+}
+.terminal[scheme="Solarized"] .xterm-bg-color-9 {
+	background-color: #cb4b16;
+}
+
+/* magenta user@machine */
+.terminal[scheme="Solarized"] .xterm-color-10 {
+	color: #d33682;
+}
+.terminal[scheme="Solarized"] .xterm-bg-color-10 {
+	background-color: #d33682;
+}
+
+.terminal[scheme="Solarized"] .xterm-color-11 {
+	color: #268bd2;
+}
+.terminal[scheme="Solarized"] .xterm-bg-color-11 {
+	background-color: #268bd2;
+}
+
+/* green location */
+.terminal[scheme="Solarized"] .xterm-color-12 {
+	color: #859900;
+}
+.terminal[scheme="Solarized"] .xterm-bg-color-12 {
+	background-color: #859900;
+}
+
+.terminal[scheme="Solarized"] .xterm-color-13 {
+	color: #6c71c4;
+}
+.terminal[scheme="Solarized"] .xterm-bg-color-13 {
+	background-color: #6c71c4;
+}
+
+.terminal[scheme="Solarized"] .xterm-color-14 {
+	color: #2aa198;
+}
+.terminal[scheme="Solarized"] .xterm-bg-color-14 {
+	background-color: #2aa198;
+}
+
+.terminal[scheme="Solarized"] .xterm-color-15 {
+	color: #fdf6e3;
+}
+.terminal[scheme="Solarized"] .xterm-bg-color-15 {
+	background-color: #fdf6e3;
+}
+
+.clearfix:before,
+.clearfix:after {
+	content: " ";
+	display: table;
+}
+.clearfix:after {
+	clear: both;
+}
+/* For IE 6/7 only */
+.clearfix {
+	*zoom: 1;
+}
+
+.terminalContainer {
+	overflow-y: scroll;
+}
+
+#terminalBox {
+	height: 100%;
+}
+
+#terminalControl {
+	display: inline-block;
+}

@@ -14,9 +14,8 @@ var express = require('express'),
 	fs = require('fs');
 
 var LIBS = path.normalize(path.join(__dirname, 'lib/')),
-	MINIFIED_ORION_CLIENT = "lib/orion.client",
-	ORION_CLIENT = path.normalize(path.join(__dirname,
-		fs.existsSync(path.join(__dirname, MINIFIED_ORION_CLIENT)) ? MINIFIED_ORION_CLIENT : '../../'));
+	MINIFIED_ORION_CLIENT = path.normalize(path.join(__dirname, "lib/orion.client")),
+	ORION_CLIENT = path.normalize(path.join(__dirname, '../../'));
 
 function handleError(err) {
 	throw err;
@@ -68,7 +67,7 @@ function startServer(options) {
 			app.use(require(options.configParams["login.module"] || "./lib/user").router(options));
 		}
 		app.use('/site', checkAuthenticated, require('./lib/sites')(options));
-		app.use('/task', checkAuthenticated, require('./lib/tasks').router({ taskRoot: contextPath + '/task' }));
+		app.use('/task', checkAuthenticated, require('./lib/tasks').router({ taskRoot: contextPath + '/task', singleUser: options.configParams["orion.single.user"]}));
 		app.use('/filesearch', checkAuthenticated, require('./lib/search')(options));
 		app.use('/file*', checkAuthenticated, require('./lib/file')({ gitRoot: contextPath + '/gitapi', fileRoot: contextPath + '/file', options: options }));
 		app.use('/workspace*', checkAuthenticated, require('./lib/workspace')({ workspaceRoot: contextPath + '/workspace', fileRoot: contextPath + '/file', gitRoot: contextPath + '/gitapi', options: options }));
@@ -88,11 +87,15 @@ function startServer(options) {
 		if (options.configParams.isElectron) app.use('/update', require('./lib/update').router(options));
 
 		// Static files
-		app.use(require('term.js').middleware());
-		var prependStaticAssets = options.configParams["prepend.static.assets"] && options.configParams["prepend.static.assets"].split(",") || [];
-		var appendStaticAssets = options.configParams["append.static.assets"] && options.configParams["append.static.assets"].split(",") || [];
-		var orionode_static = path.normalize(path.join(LIBS, 'orionode.client/'));
-		app.use(require('./lib/orion_static')({ orionClientRoot: ORION_CLIENT, maxAge: options.maxAge, orionode_static: orionode_static, prependStaticAssets: prependStaticAssets, appendStaticAssets: appendStaticAssets}));
+		app.use('/xterm', express.static(path.join(__dirname, 'node_modules', 'xterm', 'dist')));
+		if (fs.existsSync(MINIFIED_ORION_CLIENT)) {
+			app.use(express.static(MINIFIED_ORION_CLIENT, {maxAge: options.maxAge, dotfiles: 'allow'}));
+		} else {
+			var prependStaticAssets = options.configParams["prepend.static.assets"] && options.configParams["prepend.static.assets"].split(",") || [];
+			var appendStaticAssets = options.configParams["append.static.assets"] && options.configParams["append.static.assets"].split(",") || [];
+			var orionode_static = path.normalize(path.join(LIBS, 'orionode.client/'));
+			app.use(require('./lib/orion_static')({ orionClientRoot: ORION_CLIENT, maxAge: options.maxAge, orionode_static: orionode_static, prependStaticAssets: prependStaticAssets, appendStaticAssets: appendStaticAssets}));
+		}
 
 		//error handling
 		app.use(function(req, res){

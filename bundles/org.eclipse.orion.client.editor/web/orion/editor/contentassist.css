@@ -20,11 +20,6 @@
 	resize: both;
 }
 
-.contentassist:focus {
-	outline: none;
-}
-
-
 .contentassist .proposal-emphasis {
 	font-weight: normal;
 }

@@ -48,13 +48,17 @@ module.exports = function(grunt) {
 	/**
 	 * @returns {Object} A copy of `config` with the `excludeModules` removed from its `modules` section.
 	 */
-	self.filterBuildConfig = function(config, excludeModules) {
+	self.filterBuildConfig = function(config, excludeModules, extraModules, extraPaths) {
 		excludeModules = excludeModules || [];
 		var clone = JSON.parse(JSON.stringify(config));
 		clone.modules = clone.modules && clone.modules.filter(function(module) {
 			var baseName = module.name.split("/").pop();
 			return excludeModules.indexOf(baseName) === -1;
 		});
+		clone.modules = clone.modules.concat(extraModules || []);
+		for (var p in extraPaths || {}) {
+			clone.paths[p] = extraPaths[p];
+		}
 		return clone;
 	};
 

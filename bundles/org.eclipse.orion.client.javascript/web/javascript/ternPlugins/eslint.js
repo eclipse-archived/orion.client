@@ -118,6 +118,61 @@ define([
 	}
 
 	/**
+	 * @name appendPath
+	 * @description Appends the given paths together, ensuring no extra slashes appear in the paths
+	 * @param {String} path The path
+	 * @param {String} addition The addition to the path
+	 * @returns {String} The combined path
+	 * @since 14.0
+	 */
+	function appendPath(path, addition) {
+		if (typeof path === 'string' && typeof addition === 'string') {
+			var newpath = path;
+			if (newpath.charAt(newpath.length - 1) !== '/') {
+				newpath += '/';
+			}
+			if (addition.charAt(0) === '/') {
+				newpath += addition.slice(1);
+			} else {
+				newpath += addition;
+			}
+			return newpath;
+		}
+		return null;
+	}
+
+	/**
+	 * @name resolvePath
+	 * @description Resolves the 
+	 * @param {String} path The path to resolve, assumed to be relative
+	 * @param {File} file The Tern file object to resolve against
+	 * @returns {Boolean} The resolved path or null
+	 * @since 14.0
+	 */
+	function resolvePath(path, file) {
+		var _p = path,
+			filepath = file.name.slice(0, file.name.lastIndexOf('/'));
+		var rel = /^\.\.\//.exec(_p);
+		if (rel) {
+			while (rel !== null) {
+				filepath = filepath.slice(0, filepath.lastIndexOf('/'));
+				_p = _p.slice(3);
+				rel = /^\.\.\//.exec(_p);
+			}
+			return appendPath(filepath, _p);
+		} 
+		rel = /^\.\//.test(_p);
+		if(rel) {
+			while (rel) {
+				_p = _p.slice(2);
+				rel = /^\.\//.test(_p);
+			}
+			return appendPath(filepath, _p);
+		}
+		return null;
+	}
+
+	/**
 	 * The Tern delegate
 	 * @since 13.0
 	 */
@@ -128,6 +183,32 @@ define([
 			this.optionalPlugins = server.options.optionalPlugins;
 			this.optionalDefs = server.options.optionalDefs;
 			this.file = file;
+		},
+		/**
+		 * @name hasFile
+		 * @description Returns if Tern knows about the file 
+		 * @function
+		 * @param {String} path The full or relative path to the file
+		 * @param {File} file the original file we are trying to find the relative path to
+		 * @returns {Boolean} True if Tern knows about the file, false otherwise
+		 * @since 14.0
+		 */
+		hasFile: function hasFile(path, file) {
+			if(path && this.server && this.server.fileMap) {
+				if(this.server.fileMap[path]) {
+					return true;
+				}
+				if(path.indexOf('.') === 0 && file) {
+					var p = resolvePath(path, file);
+					if(p) {
+						if(p.lastIndexOf('.js') < 0) {
+							p += ".js";
+						}
+						return this.server.fileMap[p];
+					}
+				}
+			}
+			return false;
 		},
 		findRefs: function findRefs(query, file) {
 			try {

@@ -51,7 +51,37 @@ Clone `org.eclipse.orion.client` and `org.eclipse.orion.server` under the same l
 % ./orion
 ```
 
-Now point your browser at http://localhost:8080 to start the Orion client
+Now point your browser at `http://localhost:8080` to start the Orion client.
+
+How to build Orion using npm
+------------------------------
+
+###Install Node.js:
+
+Install the latest Node.js v6 LTS from http://nodejs.org/
+
+###Clone Git repositories:
+
+Clone `org.eclipse.orion.client`.
+
+```
+% cd /my/git/repos
+% git clone http://git.eclipse.org/gitroot/orion/org.eclipse.orion.client.git
+```
+
+###Run npm install:
+```
+% cd org.eclipse.orion.client
+% cd modules/orionode
+% npm install
+```
+
+###Run the Orion server
+```
+% node server.js
+```
+
+Now point your browser at `http://localhost:8081` to start the Orion client.
 
 License
 -------

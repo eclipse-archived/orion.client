@@ -598,7 +598,8 @@ function postClone(req, res) {
 		return configRepo(repo, req.body.GitName, req.body.GitMail);
 	})
 	.then(function() {
-		if (req.body.cloneSubmodules) {
+		// default to true if parameter not set
+		if (req.body.cloneSubmodules === undefined || req.body.cloneSubmodules === null || req.body.cloneSubmodules) {
 			return foreachSubmodule(repo, "update", true);
 		}
 	})

@@ -242,6 +242,9 @@ define([
 			var _d = evnt.data;
 			if (_d.__isError) {
 				Logger.log(_d.message);
+				if(_d.stack) {
+					Logger.log(_d.stack);
+				}
 			} else if (typeof _d === 'object') {
 				var id = _d.messageID;
 				var f = this.callbacks[id];
@@ -716,33 +719,34 @@ define([
 
 	var quickFixComputer = new QuickFixes.JavaScriptQuickfixes(astManager, renameCommand, generateDocCommand, jsProject, ternWorker);
 
-	if (localStorage.ignoreQuickfix){
-		provider.registerServiceProvider("orion.edit.command", //$NON-NLS-1$
-			{
-				/** @callback */
-				execute: function(editorContext, context) {
-					context.annotation.fixid = 'ignore-in-file'; //$NON-NLS-1$
-					return quickFixComputer.execute(editorContext, context);
-				}
-			},
-			{
-				name: javascriptMessages["ignoreInFileFixName"],
-				scopeId: "orion.edit.quickfix", //$NON-NLS-1$
-				id: "ignore.in.file.fix", //$NON-NLS-1$
-				contentType: ['application/javascript', 'text/html'], //$NON-NLS-1$ //$NON-NLS-2$
-				validationProperties: [{
-						source: "annotation:id", //$NON-NLS-1$
-						match: "^(?:.*\\S.*)$" //$NON-NLS-1$
-					},
-					{
-						source: "readonly", //$NON-NLS-1$
-						match: false
-					}
-				]
+	provider.registerServiceProvider("orion.edit.command", //$NON-NLS-1$
+		{
+			/** @callback */
+			execute: function(editorContext, context) {
+				context.annotation.fixid = 'ignore-in-file'; //$NON-NLS-1$
+				return quickFixComputer.execute(editorContext, context);
 			}
-		);
-	}
-
+		},
+		{
+			name: javascriptMessages["ignoreInFileFixName"],
+			scopeId: "orion.edit.quickfix", //$NON-NLS-1$
+			id: "ignore.in.file.fix", //$NON-NLS-1$
+			contentType: ['application/javascript', 'text/html'], //$NON-NLS-1$ //$NON-NLS-2$
+			validationProperties: [{
+					source: "annotation:id", //$NON-NLS-1$
+					match: "^(?:.*\\S.*)$" //$NON-NLS-1$
+				},
+				{
+					source: "annotation:data:ruleId", //$NON-NLS-1$
+					match: "^(?:.*\\S.*)$" //$NON-NLS-1$
+				},
+				{
+					source: "readonly", //$NON-NLS-1$
+					match: false
+				}
+			]
+		}
+	);
 
 	provider.registerServiceProvider("orion.edit.command", //$NON-NLS-1$
 		quickFixComputer, {
@@ -1609,7 +1613,7 @@ define([
 
 	provider.registerServiceProvider("orion.edit.command", //$NON-NLS-1$
 		quickFixComputer, {
-			name: javascriptMessages["checkTernPluginFixName"],
+			name: javascriptMessages["unknownRequirePluginFixName"],
 			fixAllEnabled: false,
 			scopeId: "orion.edit.quickfix", //$NON-NLS-1$
 			id: "check.tern.plugin.fix", //$NON-NLS-1$
@@ -1628,7 +1632,7 @@ define([
 
 	provider.registerServiceProvider("orion.edit.command", //$NON-NLS-1$
 		quickFixComputer, {
-			name: javascriptMessages["checkTernLibFixName"],
+			name: javascriptMessages["unknownRequirePluginFixName"],
 			fixAllEnabled: false,
 			scopeId: "orion.edit.quickfix", //$NON-NLS-1$
 			id: "check.tern.lib.fix", //$NON-NLS-1$

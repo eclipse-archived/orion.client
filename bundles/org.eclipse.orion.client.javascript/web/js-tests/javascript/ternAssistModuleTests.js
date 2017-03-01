@@ -214,35 +214,35 @@ define([
 					};
 					testProposals(options, [
 						['', 'node'],
-						['assert(value, message?)', 'assert(value, message?)'],
-						['stream()', 'stream()'],
-						['buffer', 'buffer : buffer'],
-						['child_process', 'child_process : child_process'],
-						['cluster', 'cluster : cluster'],
-						['crypto', 'crypto : crypto'],
-						['dgram', 'dgram : dgram'],
-						['dns', 'dns : dns'],
-						['domain', 'domain : domain'],
-						['events', 'events : events'],
-						['fs', 'fs : fs'],
-						['http', 'http : http'],
-						['https', 'https : https'],
-						['module', 'module : module'],
-						['net', 'net : net'],
-						['os', 'os : os'],
-						['path', 'path : path'],
-						['punycode', 'punycode : punycode'],
-						['querystring', 'querystring : querystring'],
-						['readline', 'readline : readline'],
-						['repl', 'repl : repl'],
-						['string_decoder', 'string_decoder : string_decoder'],
-						['timers', 'timers : timers'],
-						['tls', 'tls : tls'],
-						['tty', 'tty : tty'],
-						['url', 'url : url'],
-						['util', 'util : util'],
-						['vm', 'vm : vm'],
-						['zlib', 'zlib : zlib']
+						['assert', 'assert : string'],
+						['buffer', 'buffer : string'],
+						['child_process', 'child_process : string'],
+						['cluster', 'cluster : string'],
+						['crypto', 'crypto : string'],
+						['dgram', 'dgram : string'],
+						['dns', 'dns : string'],
+						['domain', 'domain : string'],
+						['events', 'events : string'],
+						['fs', 'fs : string'],
+						['http', 'http : string'],
+						['https', 'https : string'],
+						['module', 'module : string'],
+						['net', 'net : string'],
+						['os', 'os : string'],
+						['path', 'path : string'],
+						['punycode', 'punycode : string'],
+						['querystring', 'querystring : string'],
+						['readline', 'readline : string'],
+						['repl', 'repl : string'],
+						['stream', 'stream : string'],
+						['string_decoder', 'string_decoder : string'],
+						['timers', 'timers : string'],
+						['tls', 'tls : string'],
+						['tty', 'tty : string'],
+						['url', 'url : string'],
+						['util', 'util : string'],
+						['vm', 'vm : string'],
+						['zlib', 'zlib : string']
 					]);
 				});
 				it('Default node modules', function(done) {
@@ -254,35 +254,35 @@ define([
 					};
 					testProposals(options, [
 						['', 'node'],
-						['assert(value, message?)', 'assert(value, message?)'],
-						['stream()', 'stream()'],
-						['buffer', 'buffer : buffer'],
-						['child_process', 'child_process : child_process'],
-						['cluster', 'cluster : cluster'],
-						['crypto', 'crypto : crypto'],
-						['dgram', 'dgram : dgram'],
-						['dns', 'dns : dns'],
-						['domain', 'domain : domain'],
-						['events', 'events : events'],
-						['fs', 'fs : fs'],
-						['http', 'http : http'],
-						['https', 'https : https'],
-						['module', 'module : module'],
-						['net', 'net : net'],
-						['os', 'os : os'],
-						['path', 'path : path'],
-						['punycode', 'punycode : punycode'],
-						['querystring', 'querystring : querystring'],
-						['readline', 'readline : readline'],
-						['repl', 'repl : repl'],
-						['string_decoder', 'string_decoder : string_decoder'],
-						['timers', 'timers : timers'],
-						['tls', 'tls : tls'],
-						['tty', 'tty : tty'],
-						['url', 'url : url'],
-						['util', 'util : util'],
-						['vm', 'vm : vm'],
-						['zlib', 'zlib : zlib']
+						['assert', 'assert : string'],
+						['buffer', 'buffer : string'],
+						['child_process', 'child_process : string'],
+						['cluster', 'cluster : string'],
+						['crypto', 'crypto : string'],
+						['dgram', 'dgram : string'],
+						['dns', 'dns : string'],
+						['domain', 'domain : string'],
+						['events', 'events : string'],
+						['fs', 'fs : string'],
+						['http', 'http : string'],
+						['https', 'https : string'],
+						['module', 'module : string'],
+						['net', 'net : string'],
+						['os', 'os : string'],
+						['path', 'path : string'],
+						['punycode', 'punycode : string'],
+						['querystring', 'querystring : string'],
+						['readline', 'readline : string'],
+						['repl', 'repl : string'],
+						['stream', 'stream : string'],
+						['string_decoder', 'string_decoder : string'],
+						['timers', 'timers : string'],
+						['tls', 'tls : string'],
+						['tty', 'tty : string'],
+						['url', 'url : string'],
+						['util', 'util : string'],
+						['vm', 'vm : string'],
+						['zlib', 'zlib : string']
 					]);
 				});
 				it('Default node modules - c prefix', function(done) {
@@ -295,11 +295,11 @@ define([
 					};
 					testProposals(options, [
 						// TODO Temp workaround for Bug 508687
-						['c', 'c'],
+						['c', 'c : string'],
 						['', 'node'],
-						['child_process', 'child_process : child_process'],
-						['cluster', 'cluster : cluster'],
-						['crypto', 'crypto : crypto']
+						['child_process', 'child_process : string'],
+						['cluster', 'cluster : string'],
+						['crypto', 'crypto : string']
 					]);
 				});
 				it('Indexed lib node modules - e prefix', function(done) {
@@ -313,11 +313,11 @@ define([
 						};
 						testProposals(options, [
 							// TODO Temp workaround for Bug 508687
-							['e', 'e'],
+							['e', 'e : string'],
 							['', 'express'],
-							['express()', 'express() : app'],
+							['express', 'express : string'],
 							['', 'node'],
-							['events', 'events : events']
+							['events', 'events : string']
 						]);
 					});
 				});
@@ -331,45 +331,45 @@ define([
 						};
 						testProposals(options, [
 							['', 'amqp'],
-							['amqp', 'amqp : !known_modules.amqp'],
+							['amqp', 'amqp : string'],
 							['', 'express'],
-							['express()', 'express() : app'],
+							['express', 'express : string'],
 							['', 'mongodb'],
-							['mongodb', 'mongodb : !known_modules.mongodb'],
+							['mongodb', 'mongodb : string'],
 							['', 'mysql'],
-							['mysql', 'mysql : !known_modules.mysql'],
+							['mysql', 'mysql : string'],
 							['', 'redis'],
-							['redis', 'redis : !known_modules.redis'],
+							['redis', 'redis : string'],
 							['', 'node'],
-							['assert(value, message?)', 'assert(value, message?)'],
-							['stream()', 'stream()'],
-							['buffer', 'buffer : buffer'],
-							['child_process', 'child_process : child_process'],
-							['cluster', 'cluster : cluster'],
-							['crypto', 'crypto : crypto'],
-							['dgram', 'dgram : dgram'],
-							['dns', 'dns : dns'],
-							['domain', 'domain : domain'],
-							['events', 'events : events'],
-							['fs', 'fs : fs'],
-							['http', 'http : http'],
-							['https', 'https : https'],
-							['module', 'module : module'],
-							['net', 'net : net'],
-							['os', 'os : os'],
-							['path', 'path : path'],
-							['punycode', 'punycode : punycode'],
-							['querystring', 'querystring : querystring'],
-							['readline', 'readline : readline'],
-							['repl', 'repl : repl'],
-							['string_decoder', 'string_decoder : string_decoder'],
-							['timers', 'timers : timers'],
-							['tls', 'tls : tls'],
-							['tty', 'tty : tty'],
-							['url', 'url : url'],
-							['util', 'util : util'],
-							['vm', 'vm : vm'],
-							['zlib', 'zlib : zlib'],
+							['assert', 'assert : string'],
+							['buffer', 'buffer : string'],
+							['child_process', 'child_process : string'],
+							['cluster', 'cluster : string'],
+							['crypto', 'crypto : string'],
+							['dgram', 'dgram : string'],
+							['dns', 'dns : string'],
+							['domain', 'domain : string'],
+							['events', 'events : string'],
+							['fs', 'fs : string'],
+							['http', 'http : string'],
+							['https', 'https : string'],
+							['module', 'module : string'],
+							['net', 'net : string'],
+							['os', 'os : string'],
+							['path', 'path : string'],
+							['punycode', 'punycode : string'],
+							['querystring', 'querystring : string'],
+							['readline', 'readline : string'],
+							['repl', 'repl : string'],
+							['stream', 'stream : string'],
+							['string_decoder', 'string_decoder : string'],
+							['timers', 'timers : string'],
+							['tls', 'tls : string'],
+							['tty', 'tty : string'],
+							['url', 'url : string'],
+							['util', 'util : string'],
+							['vm', 'vm : string'],
+							['zlib', 'zlib : string']
 						]);
 					});
 				});
@@ -409,8 +409,8 @@ define([
 						createFiles: [{name: "a/existingDep", text: "function foo(){}"},{name: "a/existingDep2", text: "function foo2(){}"}]
 					};
 					testProposals(options, [
-						['a/existingDep', 'a/existingDep'],
-						['a/existingDep2', 'a/existingDep2'],
+						['a/existingDep', 'a/existingDep : string'],
+						['a/existingDep2', 'a/existingDep2 : string'],
 					]);
 				});
 				it('Existing deps - Prefix Ex', function(done) {
@@ -422,7 +422,7 @@ define([
 						createFiles: [{name: "b/prefixExisting", text: "function foo(){}"},{name: "b/notPrefixExisting", text: "function foo(){}"},{name: "b/pref", text: ""}]
 					};
 					testProposals(options, [
-						['b/prefixExisting', 'b/prefixExisting'],
+						['b/prefixExisting', 'b/prefixExisting : string'],
 					]);
 				});
 				it('Existing deps with module name', function(done) {
@@ -434,8 +434,8 @@ define([
 						createFiles: [{name: "a/existingDep", text: "function foo(){}"},{name: "a/existingDep2", text: "function foo2(){}"}]
 					};
 					testProposals(options, [
-						['a/existingDep', 'a/existingDep'],
-						['a/existingDep2', 'a/existingDep2'],
+						['a/existingDep', 'a/existingDep : string'],
+						['a/existingDep2', 'a/existingDep2 : string'],
 					]);
 				});
 				it('Existing deps with module name - Prefix Ex', function(done) {
@@ -447,7 +447,7 @@ define([
 						createFiles: [{name: "b/prefixExisting", text: "function foo(){}"},{name: "b/notPrefixExisting", text: "function foo(){}"},{name: "b/pref", text: ""}]
 					};
 					testProposals(options, [
-						['b/prefixExisting', 'b/prefixExisting'],
+						['b/prefixExisting', 'b/prefixExisting : string'],
 					]);
 				});
 				it('Existing deps with module name - module name completions', function(done) {
@@ -459,8 +459,8 @@ define([
 						createFiles: [{name: "a/existingDep", text: "function foo(){}"},{name: "a/existingDep2", text: "function foo2(){}"}]
 					};
 					testProposals(options, [
-						['a/existingDep', 'a/existingDep'],
-						['a/existingDep2', 'a/existingDep2'],
+						['a/existingDep', 'a/existingDep : string'],
+						['a/existingDep2', 'a/existingDep2 : string'],
 					]);
 				});
 			});

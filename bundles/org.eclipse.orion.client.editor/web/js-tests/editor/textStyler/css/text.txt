@@ -451,7 +451,7 @@ a.breadcrumb.currentLocation {
 }
 
 .dropdownMenuItem .dropdownKeyBinding {
-	color: grey !important; /* !important to override .dropdownMenuItem */
+	color: #707070 !important; /* !important to override .dropdownMenuItem */
 	flex-grow: 0;
 	-webkit-flex-grow: 0;		/* Safari */
 	font-size: 11px;

@@ -25,7 +25,7 @@ define([
 	'orion/objects'
 ], function(messages, bidiUtils, mCommandRegistry, mExplorer, URITemplate, i18nUtil, uiUtil, util, Deferred, mGitCommands, objects) {
 		
-	var repoTemplate = new URITemplate("git/git-repository.html#{,resource,params*}"); //$NON-NLS-0$
+	var repoTemplate = new URITemplate("#{,resource,params*}"); //$NON-NLS-0$
 
 	function GitRepoListModel(options) {
 		this.root = options.root;
@@ -358,7 +358,7 @@ define([
 						title = messages[item.Type];
 					} else if ((item.Type === "Clone" && !item.parent) || item.parent.Type === "RepoRoot") { //$NON-NLS-0$
 						if (explorer.showLinks) {
-							titleLink = require.toUrl(repoTemplate.expand({resource: repo.Location}));
+							titleLink = repoTemplate.expand({resource: repo.Location});
 						} else {
 							titleClass = "gitRepoTitle"; //$NON-NLS-0$
 						}

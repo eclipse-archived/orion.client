@@ -185,7 +185,7 @@ define({//Default message bundle
 	"showErrorAnnotation": "Error",
 	"showWarningAnnotation": "Warning",
 	"showInfoAnnotation": "Info",
-	"showTaskAnnotation": "Annotations",
+	"showTaskAnnotation": "Task",
 	"showBookmarkAnnotation": "Bookmark",
 	"showMatchingBracketAnnotation": "Matching Bracket",
 	"showCurrentBracketAnnotation": "Current Bracket",

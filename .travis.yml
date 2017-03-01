@@ -27,10 +27,12 @@ addons:
 
 before_install:
   - nvm install $NODE_VERSION
+  - npm install -g grunt-cli
 
 install:
   - cd modules/orionode;
   - npm install;
+  - grunt;
 
 script:
-  - npm test;
+  - npm pack;

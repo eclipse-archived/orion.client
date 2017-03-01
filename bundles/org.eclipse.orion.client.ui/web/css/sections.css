@@ -19,13 +19,14 @@ html[dir="rtl"] .sectionIcon { /* ACGC */
 }
 
 .sectionItemCount {
-	padding: 2px;
+	padding: 3px;
 	border-radius: 4px;
-	border: 1px solid #CCC;
+	border: 1px solid #707070;
 	float: left;
-	color: #AAA;
+	color: #707070;
+	background: white;
 	margin-top: 4px;
-	font-size: 8px;
+	font-size: 9px;
 	font-weight: normal;
 	margin-left: 5px;
 }
@@ -78,7 +79,7 @@ html[dir="rtl"] .sectionExplorerActions { /* ACGC */
 /*TODO: this is wrong
 sectionAnchor {
 	line-height: 30px,
-	color: #808080,
+	color: #707070,
 	font-weight: normal !important;
 	margin-top: 0 !important;
 }
@@ -90,11 +91,8 @@ sectionAnchor {
 
 .sectionWrapper {
 	vertical-align: middle;
-	color: gray;
+	color: #707070;
 	overflow: hidden;
-}
-.sectionWrapper:focus{
-	outline:none;
 }
 
 .sectionWrapperAux {

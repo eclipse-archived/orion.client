@@ -91,10 +91,6 @@ select {
 	outline: -webkit-focus-ring-color auto 5px;
 }
 
-.comboTextInputWrapperFocussed input:focus{
-	outline:none !important;
-}
-
 .comboTextInputField {
 	width: 260px !important;
 	height: 24px;

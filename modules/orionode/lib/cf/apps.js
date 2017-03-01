@@ -302,13 +302,6 @@ function respondAppPutRequest(task,status){
 		entity:appCache.summaryJson,
 		metadata:appCache.appMetadata	
 	};
-	if (status.error_code) {
-		var errorStatus = new Error(status.description);
-		errorStatus.code = "400";
-		errorStatus.bundleid = "org.eclipse.orion.server.core";
-		errorStatus.data = status;
-		return Promise.reject(errorStatus);
-	}
 	if(status === "RUNNING"){
 		var DEFAULT_TIMEOUT = 60;
 		resp = {
@@ -346,7 +339,7 @@ function startApp(userId, userTimeout ,appTarget){
 		if(userTimeout < 0 ){
 			userTimeout = appCache.manifest.applications[0].timeout ? appCache.manifest.applications[0].timeout : DEFAULT_TIMEOUT;
 		}
-		var attemptsLeft = Math.min(userTimeout, MAX_TIMEOUT) / 2;
+		var attemptsLeft = Math.min(userTimeout, MAX_TIMEOUT);
 		
 		function promiseWhile(value) {
 			return Promise.resolve(value).then(function() {
@@ -371,11 +364,15 @@ function startApp(userId, userTimeout ,appTarget){
 						return "RUNNING";
 					}
 					if (flappingInstanceNo > 0 ) {
-						return "FLAPPING";
+						var errorStatus = new Error("An error occurred during application startup, please refresh page.");
+						errorStatus.code = "400";
+						return Promise.reject(errorStatus);
 					}
 					return promiseWhile(result.attemptsLeft);
 				}else if(result.attemptsLeft === 0 ){
-					return "TIMEOUT";
+					var errorStatus = new Error("Application startup process timeout, please refresh page.");
+					errorStatus.code = "400";
+					return Promise.reject(errorStatus);
 				}
 				});
 			});
@@ -453,6 +450,9 @@ function createApp(req, appTarget){
 		};
 		return target.cfRequest("POST", req.user.username, appTarget.Url + "/v2/apps", null, JSON.stringify(body), null, null, appTarget)
 		.then(function(result){
+			if(result.error_code){
+				return handleSimpleErrorStatus(result, "404");
+			}
 			appCache.appGuid = result.metadata.guid;
 			return result;
 		});
@@ -510,6 +510,8 @@ function bindRoute(req, appTarget){
 			/* client has not requested a specific domain, get the first available */
 			appCache.appDomain = domainArray[0];
 		}
+		// validate host
+		appCache.manifest.applications[0].host || (appCache.manifest.applications[0].host = manifests.slugify(appCache.manifest.applications[0].name));
 	})
 	/* find out whether the declared host can be reused */
 	.then(function(){
@@ -526,10 +528,8 @@ function bindRoute(req, appTarget){
 			}
 			/* attach route to application */
 			return waitForRoute.then(function(appRoute){
-				if(appRoute.error_code === "CF-RouteHostTaken"){
-					var errorStatus = new Error(appRoute.description);
-					errorStatus.code = "400";
-					return Promise.reject(errorStatus);
+				if(appRoute.error_code){
+					return handleSimpleErrorStatus(appRoute, "400");
 				}
 				appCache.appRoute = appRoute;
 				return target.cfRequest("PUT", req.user.username, appTarget.Url + "/v2/apps/" + appCache.appGuid + "/routes/" + appRoute.metadata.guid, null, null, null, null, appTarget);
@@ -738,6 +738,9 @@ function getAppbyGuid(userId, appGuid ,appTarget){
 	.then(function(appJSON){
 		return target.cfRequest("GET", userId, appCache.appTarget.Url + appJSON.metadata.url + "/summary", null, null, null, null, appTarget)
 		.then(function(result){
+			if(result.error_code){
+				return handleSimpleErrorStatus(result, "404");
+			}
 			appCache.summaryJson = result;
 			appCache.appGuid = appJSON.metadata.guid;
 			appCache.appName = result.name;			
@@ -747,6 +750,9 @@ function getAppbyGuid(userId, appGuid ,appTarget){
 function getRouteGuidbyGuid(userId, routeGuid, appTarget){
 	return target.cfRequest("GET", userId,appTarget.Url + "/v2/routes/" + routeGuid, null, null, null, null, appTarget)
 	.then(function(result){
+		if(result.error_code){
+			return handleSimpleErrorStatus(result, "404");
+		}
 		return result.metadata.guid; // TODO this need to test
 	});
 }
@@ -757,7 +763,10 @@ function mapRoute(userId, routeGuid, appTarget){
 function getServiceGuid(userId, service, appTarget){
 	return target.cfRequest("GET", userId, appTarget.Url + "/v2/spaces/" + appTarget.Space.metadata.guid + "/service_instances"
 	, {"inline-relations-depth":"1","return_user_provided_service_instances":"true","q":"name:"+service}, null, null, null, appTarget)
-	.then(function(serviceJson){	
+	.then(function(serviceJson){
+		if(serviceJson.error_code){
+			return handleSimpleErrorStatus(serviceJson, "404");
+		}
 		var serviceResources = serviceJson.resources;
 		var serviceInstanceGUID;
 		// Find service Guid from the response of getting service request.
@@ -776,6 +785,9 @@ function createService(userId, serviceName, servicePlanGuid, appTarget){
 	};
 	return target.cfRequest("POST", userId, appTarget.Url + "/v2/service_instances", null, JSON.stringify(body), null, null, appTarget)
 	.then(function(result){
+		if(result.error_code){
+			return handleSimpleErrorStatus(result, "404");
+		}
 		return result.metadata.guid;
 	});
 }
@@ -856,5 +868,10 @@ function archiveTarget (filePath){
 		return false; // false means no '.war' has been find
 		});
 	}
+}
+function handleSimpleErrorStatus(cfRequestResult, code){
+	var errorStatus = new Error(cfRequestResult.description);
+	errorStatus.code = code;
+	return Promise.reject(errorStatus);
 }
 };

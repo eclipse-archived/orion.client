@@ -26,7 +26,7 @@ define([
 
 	var ID_COUNT = 0;
 
-	var editTemplate = new URITemplate("./edit.html#{,resource,params*}");
+	var editTemplate = new URITemplate("#{,resource,params*}");
 
 	function ProjectInfoModel(project){
 		this.root = project;

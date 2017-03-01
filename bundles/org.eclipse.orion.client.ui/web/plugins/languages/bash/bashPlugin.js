@@ -29,7 +29,7 @@ define(['orion/plugin', 'orion/editor/stylers/application_x-sh/syntax'], functio
 				{	id: "application/x-sh",
 					"extends": "text/plain",
 					name: "Bash",
-					extension: ["sh"]
+					extension: ["sh", "bash"]
 				}
 			] 
 		});

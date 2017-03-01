@@ -11,7 +11,7 @@
  /*eslint-env browser,amd*/
 define({
 	"className": "orionPage",
-	"name": "orionPage",
+	"name": "Dark",
 	"styles": {
 		"#configSection": {
 			"background-color": "#26343F !important",
@@ -126,7 +126,7 @@ define({
 			"gitCommitMessageTopRow": {
 				"border-width": "1px",
 				"border-style": "solid",
-				"border-color": "rgb(61, 114, 179)"
+				"border-color": "rgb(60, 113, 179)"
 			},
 			".gitCommitMessageTopRow": {
 				"border-color": "#1BB199"
@@ -238,8 +238,8 @@ define({
 		},
 		".primaryButton:hover,": {
 			".primaryButton:focus": {
-				"background": "rgb(61, 114, 179)",
-				"border-color": "rgb(61, 114, 179)"
+				"background": "rgb(60, 113, 179)",
+				"border-color": "rgb(60, 113, 179)"
 			}
 		},
 		".projectNavColumn": {

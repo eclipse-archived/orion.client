@@ -87,7 +87,7 @@ define([
 					},
 					"entity": {
 						"name": {
-							"color": "#98937B",
+							"color": "#7D7755",
 							"function": {
 								"color": "#007b78",
 								"fontWeight": "bold"
@@ -231,7 +231,7 @@ define([
 							"fontWeight": "bold"
 						},
 						"other": {
-							"color": "#E038AD"
+							"color": "#DB0FA6"
 						},
 						"parameter": {
 							"color": "#CD2B65"
@@ -284,7 +284,7 @@ define([
 					},
 					"entity": {
 						"name": {
-							"color": "#98937B",
+							"color": "#7D7755",
 							"function": {
 								"color": "#67BBB8",
 								"fontWeight": "bold"
@@ -434,7 +434,7 @@ define([
 							"fontWeight": "bold"
 						},
 						"other": {
-							"color": "#E038AD"
+							"color": "#DB0FA6"
 						},
 						"parameter": {
 							"color": "#a2f9e7"
@@ -653,7 +653,7 @@ define([
 							"fontWeight":"normal"
 						},
 						"other": {
-							"color":"#E038AD"
+							"color":"#DB0FA6"
 						},
 						"parameter": {
 							"color":"#FF8C00"

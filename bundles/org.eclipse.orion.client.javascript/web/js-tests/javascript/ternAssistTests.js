@@ -3534,7 +3534,7 @@ define([
 							['', 'ecma5'],
 							['Function(body)', 'Function(body) : fn()'],
 							["", "Templates"],
-							["/**\n * @name name\n * @param parameter\n */\nfunction name (parameter) {\n\t\n}", "function declaration"],
+							["/**\n * @param parameter\n */\nfunction name (parameter) {\n\t\n}", "function declaration"],
 							['', 'Keywords'],
 							["function", "function"]
 							]);
@@ -3557,7 +3557,7 @@ define([
 							['', 'ecma5'],
 							['Function(body)', 'Function(body) : fn()'],
 							["", "Templates"],
-							["/**\n * @name name\n * @param parameter\n */\nfunction name (parameter) {\n\t\n}", "function declaration"],
+							["/**\n * @param parameter\n */\nfunction name (parameter) {\n\t\n}", "function declaration"],
 							['', 'Keywords'],
 							["function", "function"]
 							]);
@@ -3626,7 +3626,7 @@ define([
 							['', 'ecma5'],
 							['Function(body)', 'Function(body) : fn()'],
 							["", "Templates"],
-							["/**\n * @name name\n * @param parameter\n */\nfunction name (parameter) {\n\t\n}", "function declaration"],
+							["/**\n * @param parameter\n */\nfunction name (parameter) {\n\t\n}", "function declaration"],
 							['', 'Keywords'],
 							["function", "function"]
 							]);

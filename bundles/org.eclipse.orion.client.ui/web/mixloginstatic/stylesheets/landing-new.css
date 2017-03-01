@@ -79,9 +79,7 @@ button,
   transition: all 320ms ease-out;
 }
 button:hover,
-.button:hover,
-button:focus,
-.button:focus {
+.button:hover {
   background-color: #c88c35;
   color: white;
   transition: all 320ms ease-in;

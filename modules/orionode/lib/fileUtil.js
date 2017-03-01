@@ -47,9 +47,13 @@ var getChildren = exports.getChildren = function(fileRoot, workspaceDir, directo
 				return null; // suppress rejection
 			});
 		});
+	}, function reject(err) {
+		return [];
 	})
 	.then(function(results) {
 		return results.filter(function(r) { return r; });
+	}, function reject(err) {
+		return [];
 	});
 };
 
@@ -77,12 +81,14 @@ var safeFilePath = exports.safeFilePath = function(workspaceDir, filepath) {
 	return safePath(workspaceDir, path.join(workspaceDir, filepath));
 };
 
-var getParents = exports.getParents = function(fileRoot, relativePath) {
+var getParents = exports.getParents = function(fileRoot, relativePath, includeFolder) {
 	var segs = relativePath.split('/');
 	if(segs && segs.length > 0 && segs[segs.length-1] === ""){// pop the last segment if it is empty. In this case wwwpath ends with "/".
 		segs.pop();
 	}
-	segs.pop();//The last segment now is the directory itself. We do not need it in the parents array.
+	if(!includeFolder) {
+		segs.pop();//The last segment now is the directory itself. We do not need it in the parents array.
+	}
 	var loc = fileRoot;
 	var parents = [];
 	for (var i=0; i < segs.length; i++) {
@@ -98,6 +104,59 @@ var getParents = exports.getParents = function(fileRoot, relativePath) {
 	return parents.reverse();
 };
 
+/**
+ * @description Tries to compute the project path for the given file path
+ * @param {string} workspaceDir The root workspace directory
+ * @param {string} fileRoot The root file path of the server
+ * @param {string} relativePath The path we want the project for
+ * @param {?} options The optional map of options to use while looking for a project
+ * @returns {Promise} A promise to resolve the project
+ * @since 14.0
+ */
+var getProject = exports.getProject = function getProject(workspaceDir, fileRoot, relativePath, options) {
+	var parents = getParents(fileRoot, relativePath, true),
+		names = options && typeof options.names === "object" ? options.names : {};
+	names['.git'] = {isDirectory: true};
+	names['project.json'] = Object.create(null);
+	if(Array.isArray(parents) && parents.length > 0) {
+		var promises = [];
+		for(var i = 0, len = parents.length; i < len; i++) {
+			var parentFile = parents[i],
+				filepath = parentFile.Location.slice(fileRoot.length);
+			if(filepath.indexOf(workspaceDir) !== 0) {
+				break;
+			}
+			promises.push(findProject(fileRoot, workspaceDir, filepath, names));
+		}
+		return Promise.any(promises);
+	}
+	return Promise.resolve(null);
+};
+/**
+ * @description Finds the project from the given file context
+ * @param {string} fileRoot The root file context
+ * @param {string} workspaceDir The root workspace location
+ * @param {string} filepath The absolute path to the file context we are starting from
+ * @param {?} names The map of names to check against to determine project-ness
+ * @since 14.0
+ * @returns {Promise} Returns a promise to try and resolve the project from the context
+ */
+function findProject(fileRoot, workspaceDir, filepath, names) {
+	return new Promise(function(resolve, reject) {
+		return getChildren(fileRoot, workspaceDir, filepath, 1).then(function(children) {
+			if(Array.isArray(children) && children.length > 0) {
+				for(var i = 0, len = children.length; i < len; i++) {
+					var c = children[i],
+						n = names[c.Name];
+					if(n && (c.Directory && n.isDirectory)) {
+						return resolve(filepath);
+					}
+				}
+			}
+			return reject(new Error('not a project'));
+		});
+	});
+}
 /**
  * Performs the equivalent of rm -rf on a directory.
  * @param {Function} callback Invoked as callback(error)
@@ -182,7 +241,11 @@ exports.withETag = function(filepath, callback) {
  * @returns {String} The Location of for a file resource.
  */
 function getFileLocation(fileRoot, wwwpath, isDir) {
-	return api.join(fileRoot, wwwpath) + (isDir ? '/' : '');
+	var filepath = api.join(fileRoot, wwwpath);
+	if(isDir && filepath.lastIndexOf('/') !== filepath.length-1) {
+		filepath += '/';
+	}
+	return filepath;
 }
 
 /**

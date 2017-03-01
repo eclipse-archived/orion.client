@@ -118,7 +118,7 @@ define([], function() {
 					},
 					entity: {
 						name: {
-							color: "#98937B", //$NON-NLS-0$
+							color: "#7D7755", //$NON-NLS-0$
 							"function": { //$NON-NLS-0$
 								fontWeight: "bold", //$NON-NLS-0$
 								color: "#007b78" //$NON-NLS-0$
@@ -210,7 +210,7 @@ define([], function() {
 							fontWeight: "bold" //$NON-NLS-0$
 						},
 						other: {
-							color: "#E038AD" //$NON-NLS-0$
+							color: "#DB0FA6" //$NON-NLS-0$
 						},
 						parameter: {
 							color: "#CD2B65" //$NON-NLS-0$

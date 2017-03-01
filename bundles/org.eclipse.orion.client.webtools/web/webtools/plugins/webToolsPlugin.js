@@ -213,6 +213,7 @@ define(['orion/plugin',
 	    		id : "quickfix-important",  //$NON-NLS-1$
 	    		contentType: ['text/css','text/html'],  //$NON-NLS-1$ //$NON-NLS-2$
 	    		validationProperties: [
+	    			{source: "annotation:end", match: "!0"}, //$NON-NLS-1$ //$NON-NLS-2$
     		    	{source: "annotation:id", match: "important"}, //$NON-NLS-1$ //$NON-NLS-2$
     				{source: "readonly", match: false} //$NON-NLS-1$
     		    ]

@@ -316,6 +316,10 @@ define([
 					that.environments.es_modules = true;
 				} else if (type === 'ExportNamedDeclaration' || type === 'ExportDefaultDeclaration' || type === 'ExportAllDeclaration'){
 					that.environments.es_modules = true;
+				} else if(type === "MemberExpression") {
+					if(node.property.name === "exports" && node.object.name === "module") {
+						that.environments.node = true;
+					}
 				}
 				var result = nextMethod.call(this, node, type);
 				// attach trailing comments

@@ -32,7 +32,8 @@ var app = express()
 	next();
 })
 .use(CONTEXT_PATH + '/task', require('../lib/tasks').router({
-	taskRoot: CONTEXT_PATH + '/task'
+	taskRoot: CONTEXT_PATH + '/task',
+	singleUser: true
 }))
 .use(CONTEXT_PATH + "/workspace*", require('../lib/workspace')({
 	workspaceRoot: CONTEXT_PATH + '/workspace', 
@@ -136,6 +137,32 @@ GitClient.prototype = {
 		});
 	},
 
+	postFile: function(parentFolder, name, isDirectory) {
+		var client = this;
+		this.tasks.push(function(resolve) {
+			var encodedName = encodeURIComponent(name);
+			request()
+			.post(CONTEXT_PATH + '/file/' + client.getName() + parentFolder)
+			.send({ Name: name, Directory: isDirectory })
+			.expect(201)
+			.end(function(err, res) {
+				var body = res.body
+				assert.ifError(err);
+				assert.equal(body.Name, name);
+				assert.equal(body.Directory, isDirectory);
+				client.next(resolve, body);
+			});
+		});
+	},
+
+	createFile: function(parentFolder, name) {
+		this.postFile(parentFolder, name, false);
+	},
+
+	createFolder: function(parentFolder, name) {
+		this.postFile(parentFolder, name, true);
+	},
+
 	setFileContents: function(name, contents) {
 		var client = this;
 		this.tasks.push(function(resolve) {
@@ -150,6 +177,25 @@ GitClient.prototype = {
 				assert.ok(body.ETag, 'has an ETag');
 				assert.equal(body.Location, CONTEXT_PATH + "/file/" + client.getName() + "/" + name);
 				assert.equal(body.Name, name);
+				client.next(resolve, res.body);
+			});
+		});
+	},
+
+	/**
+	 * Deletes the file or folder at the given path relative to the Orion workspace.
+	 * This path must not be URL encoded.
+	 * 
+	 * @param {String} path the file or folder to delete from the server
+	 */
+	delete: function(path) {
+		var client = this;
+		this.tasks.push(function(resolve) {
+			request()
+			.delete(CONTEXT_PATH + "/file/" + client.getName() + "/" + encodeURIComponent(path))
+			.expect(204)
+			.end(function(err, res) {
+				assert.ifError(err);
 				client.next(resolve, res.body);
 			});
 		});
@@ -179,7 +225,7 @@ GitClient.prototype = {
 		var client = this;
 		this.tasks.push(function(resolve) {
 			request()
-			.put(CONTEXT_PATH + "/gitapi/index/file/" + client.getName() + "/" + name)
+			.put(CONTEXT_PATH + "/gitapi/index/file/" + client.getName() + "/" + util.encodeURIComponent(name))
 			.expect(200)
 			.end(function(err, res) {
 				assert.ifError(err);
@@ -230,6 +276,19 @@ GitClient.prototype = {
 				Annotated: annotated,
 				Message: message
 			})
+			.expect(200)
+			.end(function(err, res) {
+				assert.ifError(err);
+				client.next(resolve, res.body);
+			});
+		});
+	},
+
+	deleteTag: function(tagName) {
+		var client = this;
+		this.tasks.push(function(resolve) {
+			request()
+			.delete(CONTEXT_PATH + "/gitapi/tag/" + util.encodeURIComponent(tagName) + "/file/" + client.getName())
 			.expect(200)
 			.end(function(err, res) {
 				assert.ifError(err);
@@ -1018,6 +1077,16 @@ maybeDescribe("git", function() {
 	describe("Tags", function() {
 		before(setup);
 
+		function assertTag(tag, tagName, annotated, testName, commitSHA) {
+			assert.equal(tag.Name, tagName);
+			assert.equal(tag.FullName, "refs/tags/" + tagName);
+			assert.equal(tag.Type, "Tag");
+			assert.equal(tag.TagType, annotated ? "ANNOTATED" : "LIGHTWEIGHT");
+			assert.equal(tag.CloneLocation, "/gitapi/clone/file/" + testName);
+			assert.equal(tag.CommitLocation, "/gitapi/commit/" + commitSHA + "/file/" + testName);
+			assert.equal(tag.TreeLocation, "/gitapi/tree/file/" + testName + "/" + util.encodeURIComponent(tagName));
+		}
+
 		describe("Create", function() {
 
 			/**
@@ -1053,13 +1122,7 @@ maybeDescribe("git", function() {
 				.then(function(tags) {
 					// only created one tag
 					assert.equal(tags.length, 1);
-					assert.equal(tags[0].Name, tagName);
-					assert.equal(tags[0].FullName, "refs/tags/" + tagName);
-					assert.equal(tags[0].Type, "Tag");
-					assert.equal(tags[0].TagType, annotated ? "ANNOTATED" : "LIGHTWEIGHT");
-					assert.equal(tags[0].CloneLocation, "/gitapi/clone/file/" + testName);
-					assert.equal(tags[0].CommitLocation, "/gitapi/commit/" + commitSHA + "/file/" + testName);
-					assert.equal(tags[0].TreeLocation, "/gitapi/tree/file/" + testName + "/" + tagName);
+					assertTag(tags[0], tagName, annotated, testName, commitSHA);
 
 					var client = new GitClient(testName);
 					// verify that we can retrieve that one tag
@@ -1069,13 +1132,7 @@ maybeDescribe("git", function() {
 				})
 				.then(function(log) {
 					assert.equal(log.Children[0].Tags.length, 1);
-					assert.equal(log.Children[0].Tags[0].Name, tagName);
-					assert.equal(log.Children[0].Tags[0].FullName, "refs/tags/" + tagName);
-					assert.equal(log.Children[0].Tags[0].Type, "Tag");
-					assert.equal(log.Children[0].Tags[0].TagType, annotated ? "ANNOTATED" : "LIGHTWEIGHT");
-					assert.equal(log.Children[0].Tags[0].CloneLocation, "/gitapi/clone/file/" + testName);
-					assert.equal(log.Children[0].Tags[0].CommitLocation, "/gitapi/commit/" + commitSHA + "/file/" + testName);
-					assert.equal(log.Children[0].Tags[0].TreeLocation, "/gitapi/tree/file/" + testName + "/" + tagName);
+					assertTag(log.Children[0].Tags[0], tagName, annotated, testName, commitSHA);
 					finished();
 				})
 				.catch(function(err) {
@@ -1091,7 +1148,166 @@ maybeDescribe("git", function() {
 				testCreateTag(finished, "tag-create-annotated", true);
 			});
 		}); // describe("Create")
+
+		describe("Delete", function() {
+
+			/**
+			 * Tests that a tag can be created and deleted.
+			 * 
+			 * @param {Function} finished the function to invoke to notify that the test has completed
+			 * @param {String} testName the name of the test to be used for the created Git repository
+			 * @param {String} tagName the name of the tag to create and delete
+			 * @param {boolean} annotated <tt>true</tt> if an annotated tag should be created,
+			 *                            <tt>false</tt> if a lightweight should be created
+			 */
+			function testDeleteTag(finished, testName, tagName, annotated) {
+				var commitSHA;
+				var client = new GitClient(testName);
+				client.init();
+				// init file with content A
+				client.setFileContents("tag.txt", "A");
+				// stage and commit
+				client.stage("tag.txt");
+				client.commit();
+				return client.start().then(function(commit) {
+					commitSHA = commit.Id;
+					// create the tag
+					client.createTag(commitSHA, tagName, annotated);
+					// list all tags
+					client.listTags();
+					return client.start();
+				})
+				.then(function(tags) {
+					// only created one tag
+					assert.equal(tags.length, 1);
+					assertTag(tags[0], tagName, annotated, testName, commitSHA);
+					// delete the tag
+					client.deleteTag(tagName);
+					// list all tags
+					client.listTags();
+					return client.start();
+				})
+				.then(function(tags) {
+					// deleted the tag so there should be no tags
+					assert.equal(tags.length, 0);
+					finished();
+				})
+				.catch(function(err) {
+					finished(err);
+				});
+			}
+
+			it("lightweight", function(finished) {
+				testDeleteTag(finished, "tag-delete-lightweight", "a%b", false);
+			});
+
+			it("annotated", function(finished) {
+				testDeleteTag(finished, "tag-delete-annotated", "a%b", true);
+			});
+		}); // describe("Delete")
 	}); // describe("Tags")
+
+	describe("Index", function() {
+		before(setup);
+
+		describe("Stage", function() {
+
+			/**
+			 * Stage a file with a name that needs to be URL encoded.
+			 */
+			it("bug 512285", function(finished) {
+				var client = new GitClient("bug512285");
+				// init a new Git repository
+				client.init();
+				client.createFile("/", "a%b.txt");
+				client.stage("a%b.txt");
+				client.status("SAFE");
+				return client.start().then(function(index) {
+					assert.equal(index.Added.length, 1);
+					assert.equal(index.Added[0].Name, "a%b.txt");
+					assert.equal(index.Added[0].Path, "a%b.txt");
+					assert.equal(index.Added[0].Location, "/file/bug512285/" + util.encodeURIComponent("a%b.txt"));
+					assert.equal(index.Untracked.length, 0);
+					finished();
+				})
+				.catch(function(err) {
+					finished(err);
+				});
+			}); // it("bug 512285")"
+		}); // describe("Stage")
+	}); // describe("Index")
+
+	describe("Status", function() {
+		before(setup);
+
+		describe("DiffLocation", function() {
+
+			/**
+			 * Tests that the DiffLocation property of the returned JSON from
+			 * the status API is correctly URL encoded.
+			 * 
+			 * /a%b.txt						-> /a%2525b.txt
+			 * /a b/test.txt				-> /a%2520b/test.txt
+			 * /modules/orionode/hello.js	-> /modules/orionode/hello.js
+			 */
+			it("bug 512061", function(finished) {
+				var client = new GitClient("bug512061");
+				// init a new Git repository
+				client.init();
+				// create a few folders
+				client.createFolder("/", "a b");
+				client.createFolder("/", "modules");
+				client.createFolder("/modules/", "orionode");
+
+				// tests > /a%b.txt
+				client.createFile("/", "a%b.txt");
+				client.status("SAFE");
+				return client.start().then(function(status) {
+					var git = status.Untracked[0].Git;
+					assert.equal(git.CommitLocation,
+						"/gitapi/commit/HEAD/file/bug512061/" + util.encodeURIComponent("a%b.txt"));
+					assert.equal(git.DiffLocation,
+						"/gitapi/diff/Default/file/bug512061/" + util.encodeURIComponent("a%b.txt"));
+					assert.equal(git.IndexLocation,
+						"/gitapi/index/file/bug512061/" + util.encodeURIComponent("a%b.txt"));
+
+					client.delete("/a%b.txt");
+					// tests > /a b/test.txt
+					client.createFile("/a b/", "test.txt");
+					client.status("SAFE");
+					return client.start();
+				})
+				.then(function(status) {
+					var git = status.Untracked[0].Git;
+					assert.equal(git.CommitLocation,
+						"/gitapi/commit/HEAD/file/bug512061/" + util.encodeURIComponent("a b") + "/test.txt");
+					assert.equal(git.DiffLocation,
+						"/gitapi/diff/Default/file/bug512061/" + util.encodeURIComponent("a b") + "/test.txt");
+					assert.equal(git.IndexLocation,
+						"/gitapi/index/file/bug512061/" + util.encodeURIComponent("a b") + "/test.txt");
+
+					client.delete("/a b/test.txt");
+					// tests > /modules/orionode/hello.js
+					client.createFile("/modules/orionode/", "hello.js");
+					client.status("SAFE");
+					return client.start();
+				})
+				.then(function(status) {
+					var git = status.Untracked[0].Git;
+					assert.equal(git.CommitLocation,
+						"/gitapi/commit/HEAD/file/bug512061/modules/orionode/hello.js");
+					assert.equal(git.DiffLocation,
+						"/gitapi/diff/Default/file/bug512061/modules/orionode/hello.js");
+					assert.equal(git.IndexLocation,
+						"/gitapi/index/file/bug512061/modules/orionode/hello.js");
+					finished();
+				})
+				.catch(function(err) {
+					finished(err);
+				});
+			}); // it("bug 512061")"
+		}); // describe("DiffLocation")
+	}); // describe("Status")
 
 	describe("config", function() {
 		this.timeout(10000);
