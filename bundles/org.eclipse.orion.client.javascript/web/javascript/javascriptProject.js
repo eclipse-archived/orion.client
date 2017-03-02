@@ -92,7 +92,7 @@ define([
 		 * @callback
 		 */
 		onProjectChanged: function onProjectChanged(project, evnt, projectName) {
-			delete project.map.env;
+			//delete project.map.env;
 		},
 		/**
 		 * @name _wipeCache
@@ -104,13 +104,18 @@ define([
 		 * @param {String} fileName The short name of the file, i.e. 'package.json'
 		 */
 		_wipeCache: function _wipeCache(project, qualifileName, fileName) {
+			var folderPath = project.getProjectPath()+project.DEFINITIONS;
 			if(fileName === project.PACKAGE_JSON || fileName === project.NODE_MODULES || 
 				project.lintFiles.indexOf(fileName) > -1 || fileName === project.TERN_PROJECT) {
-					delete project.map.env;
-			}
-			var folderPath = project.getProjectPath()+project.DEFINITIONS;
-			if(qualifileName === folderPath || qualifileName.indexOf(folderPath) === 0) {
-				delete project.map.env;
+					project.projectPromise = new Deferred();
+					return computeEnvironment(project).then(/* @callback */ function(env) {
+						project.projectPromise.resolve();
+					});
+			} else if(qualifileName === folderPath || qualifileName.indexOf(folderPath) === 0) {
+				project.projectPromise = new Deferred();
+					return computeEnvironment(project).then(/* @callback */ function(env) {
+						project.projectPromise.resolve();
+					});
 			}
 		} 
 	};
@@ -458,123 +463,170 @@ define([
 	 * @since 14.0
 	 */
 	JavaScriptProject.prototype.getComputedEnvironment = function getComputedEnvironment() {
-		if(this.map.env) {
-			return new Deferred().resolve(this.map.env);
-		}
 		return this.projectPromise.then(function() {
-			this.map.env = {};
-			this.map.env.envs = {browser: true, node: true}; //always start assuming browser
-			//start with eslint options - they can carry env objects
-			return this.getESlintOptions().then(function(options) {
-				this.map.env.eslint = options;
-				if(options && options.vals && options.vals.env) {
-					Object.keys(options.vals.env).forEach(function(key) {
-						this.map.env.envs[key] = options.vals.env[key];
-					}.bind(this));
-				}
-				return guessEnvForProject(this);
-			}.bind(this));
+			if(this.map.env) {
+				return new Deferred().resolve(this.map.env);
+			}
 		}.bind(this));
 	};
-
+	
 	/**
-	 * @name guessEnvForProject
-	 * @description Looking at what files are available and whats in them, guess at the current project environment
-	 * @param {JavaScriptProject} project The project object
-	 * @returns {Deferred} a deferred to resolve the environment
+	 * @description Computes the environment for a given project context
+	 * @param {JavaScriptProject} project The project to compute the environment for
 	 * @since 14.0
 	 */
-	function guessEnvForProject(project) {
+	function computeEnvironment(project) {
+		project.map.env = {};
+		project.map.env.envs = {browser: true, node: true}; //always start assuming browser
 		return project.getFile(project.TERN_PROJECT).then(function(file) {
+			processTernProject(project, file);
+			return project.getESlintOptions().then(function(options) {
+				processEslintOptions(project, options);
+				return project.getFile(project.NODE_MODULES).then(function(file) {
+					if(file && typeof file.contents === "string") {
+						project.map.env._node_modules = true;
+					}
+					return project.getFile(project.PACKAGE_JSON).then(function(file) {
+						processPackageJson(project, file);
+						return project.getFolder(project.DEFINITIONS).then(function(children) {
+							if(children.length > 0) {
+								project.map.env.defs = [];
+								children.forEach(function(def) {
+									project.map.env.defs.push(project.DEFINITIONS+'/'+def.Name);
+								});
+							}
+							return project.map.env;
+						}, function rejected() {
+							return project.map.env;
+						});
+					});
+				});
+			});
+		});
+	}
+	
+	/**
+	 * @description Examine the .tern-project file to configure the tools
+	 * @param {JavaScriptProject} project The backing project to configure
+	 * @param {?} file The .tern-project file contents
+	 * @since 14.0
+	 */
+	function processTernProject(project, file) {
+		if(file && typeof file.contents === "string") {
 			project.map.env.ternproject = {file: file, vals: null};
-			if(file && typeof file.contents === "string") {
-				try {
-					var vals = JSON.parse(file.contents);
-					project.map.env.ternproject.vals = vals;
-					if(Array.isArray(vals.libs)) {
-						if(vals.libs.indexOf("browser") > -1) {
-							project.map.env.envs.browser = true;
-						} else if(vals.libs.indexOf("ecma6") > -1) {
-							project.map.env.envs.es6 = true;
-						} 
-					}
-					if(Array.isArray(vals.defs)) {
-						if(vals.defs.indexOf("browser") > -1) {
-							project.map.env.envs.browser = true;
-						} else if(vals.defs.indexOf("ecma6") > -1) {
-							project.map.env.envs.es6 = true;
-						} 
-					}
-					if(vals.plugins && typeof vals.plugins === 'object') {
-						if(vals.plugins.node) {
-							project.map.env.envs.node = true;
-						} else if(Object.keys(vals.plugins).length > 0) {
-							//remove node as a default if there are other plugins specified
-							//We will re-add it later when we look for other cues, like package.json
-							delete project.map.env.envs.node;
-						}
-						if(vals.plugins.requirejs || vals.plugins.commonjs) {
-							project.map.env.envs.amd = true;
-							project.map.env.envs.browser = true;
-						}
-						if(vals.plugins.es6_modules) {
-							project.map.env.envs.es6 = true;
-							project.map.env.envs.browser = true;
-							project.map.env.envs.node = true;
-						}
+			//wipe the defaults, since we found content.
+			//see https://bugs.eclipse.org/bugs/show_bug.cgi?id=512964
+			delete project.map.env.envs.node;
+			delete project.map.env.envs.browser;
+			try {
+				var vals = JSON.parse(file.contents);
+				project.map.env.ternproject.vals = vals;
+				if(Array.isArray(vals.libs)) {
+					if(vals.libs.indexOf("browser") > -1) {
+						project.map.env.envs.browser = true;
+					} else if(vals.libs.indexOf("ecma6") > -1) {
+						project.map.env.envs.es6 = true;
 					} 
-					if(typeof vals.ecmaVersion === 'number') {
-						if(vals.ecmaVersion >= 6) {
-							project.map.env.envs.es6 = true;
-						}
+				}
+				if(Array.isArray(vals.defs)) {
+					if(vals.defs.indexOf("browser") > -1) {
+						project.map.env.envs.browser = true;
+					} else if(vals.defs.indexOf("ecma6") > -1) {
+						project.map.env.envs.es6 = true;
 					} 
-					if(vals.sourceType === 'modules') {
+				}
+				if(vals.plugins && typeof vals.plugins === 'object') {
+					if(vals.plugins.node) {
+						project.map.env.envs.node = true;
+					} else if(Object.keys(vals.plugins).length > 0) {
+						//remove node as a default if there are other plugins specified
+						//We will re-add it later when we look for other cues, like package.json
+						delete project.map.env.envs.node;
+					}
+					if(vals.plugins.requirejs || vals.plugins.commonjs) {
+						project.map.env.envs.amd = true;
+						project.map.env.envs.browser = true;
+					}
+					if(vals.plugins.es6_modules) {
 						project.map.env.envs.es6 = true;
 						project.map.env.envs.browser = true;
 						project.map.env.envs.node = true;
 					}
-				} catch (e) {
-					// ignore, bad JSON
-				}
-			}
-			return project.getFile(project.PACKAGE_JSON).then(function(file) {
-				project.map.env.packagejson = {file: file};
-				if(file && typeof file.contents === "string") {
-					try {
-						vals = project.map.env.packagejson.vals = JSON.parse(file.contents);
-						if(vals) {
-							if(vals.dependencies) {
-								Object.keys(vals.dependencies).forEach(function(key) {
-									project.map.env.envs[key] = true;
-								});
-							} else if(vals.devDependencies) {
-								Object.keys(vals.dependencies).forEach(function(key) {
-									project.map.env.envs[key] = true;
-								});
-							} else if(vals.optionalDependencies) {
-								Object.keys(vals.dependencies).forEach(function(key) {
-									project.map.env.envs[key] = true;
-								});
-							}
-						}
-					} catch(e) {
-						//ignore
+				} 
+				if(typeof vals.ecmaVersion === 'number') {
+					if(vals.ecmaVersion >= 6) {
+						project.map.env.envs.es6 = true;
 					}
+				} 
+				if(vals.sourceType === 'modules') {
+					project.map.env.envs.es6 = true;
+					project.map.env.envs.browser = true;
 					project.map.env.envs.node = true;
 				}
-				return project.getFolder(project.DEFINITIONS).then(function(children) {
-					if(children.length > 0) {
-						project.map.env.defs = [];
-						children.forEach(function(def) {
-							project.map.env.defs.push(project.DEFINITIONS+'/'+def.Name);
+			} catch (e) {
+				// ignore, bad JSON
+			}
+		}
+	}
+	
+	/**
+	 * @description Look into the found ESLint options to pre-configure the language tools
+	 * @param {JavaScriptProject} project The back project to configure
+	 * @param {?} options The computed ESLint option map
+	 * @since 14.0
+	 */
+	function processEslintOptions(project, options) {
+		project.map.env.eslint = options;
+		if(options && options.vals) {
+			if(options.vals.env) {
+				Object.keys(options.vals.env).forEach(function(key) {
+					project.map.env.envs[key] = options.vals.env[key];
+				});
+			}
+			if(options.vals.ecmaVersion) {
+				project.map.env.ecmaVersion = options.vals.ecmaVersion;
+			}
+		}
+	}
+	
+	/**
+	 * @description Look into the package.json contents to pre-configure the tools
+	 * @param {JavaScriptProject} project The backing project to configure
+	 * @param {?} file The package.json file
+	 * @since 14.0
+	 */
+	function processPackageJson(project, file) {
+		if(file && typeof file.contents === "string") {
+			project.map.env.packagejson = {file: file};
+			try {
+				var vals = project.map.env.packagejson.vals = JSON.parse(file.contents);
+				if(vals) {
+					if(vals.dependencies) {
+						Object.keys(vals.dependencies).forEach(function(key) {
+							project.map.env.envs[key] = true;
 						});
 					}
-					return project.map.env;
-				}, function rejected() {
-					return project.map.env;
-				});
-			});
-		});
+					if(vals.devDependencies) {
+						Object.keys(vals.devDependencies).forEach(function(key) {
+							project.map.env.envs[key] = true;
+						});
+					}
+					if(vals.optionalDependencies) {
+						Object.keys(vals.optionalDependencies).forEach(function(key) {
+							project.map.env.envs[key] = true;
+						});
+					}
+					if(vals.engines) {
+						Object.keys(vals.engines).forEach(function(key) {
+							project.map.env.envs[key] = true;
+						});
+					}
+				}
+			} catch(e) {
+				//ignore
+			}
+			project.map.env.envs.node = true;
+		}
 	}
 
 	/**
@@ -637,7 +689,10 @@ define([
 	 * @since 14.0
 	 */
 	JavaScriptProject.prototype.hasNodeModules = function hasNodeModules() {
-		return Boolean(this._node_modules);
+		if(this.map.env) {
+			return Boolean(this.map.env._node_modules);
+		}
+		return false;
 	};
 
 	/**
@@ -655,10 +710,7 @@ define([
 					delete this.ecma;
 					delete this.map[this.TERN_PROJECT];
 					delete this._node_modules;
-					return this.getFile(this.NODE_MODULES).then(function(file) {
-							if(file && typeof file.contents === "string") {
-								this._node_modules = true;
-							}
+					return computeEnvironment(this).then(/* @callback */ function(env) {
 							_handle.call(this, "onProjectChanged", this, evnt, project.Location);
 							this.projectPromise.resolve(project);
 						}.bind(this),

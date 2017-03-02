@@ -13,6 +13,7 @@
 define([
 	"orion/plugin", 
 	"plugins/languageToolsPlugin",
+	//"plugins/languages/json/jsonPlugin",
 	"plugins/webEditingPlugin"
 ], function(PluginProvider) {
 	
@@ -33,7 +34,9 @@ define([
 
 	function registerServiceProviders(provider) {
 		plugins.forEach(function(plugin) {
-			plugin.registerServiceProviders(provider);
+			if(plugin) {
+				plugin.registerServiceProviders(provider);
+			}
 		});
 	}
 	connect();

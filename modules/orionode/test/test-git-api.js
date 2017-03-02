@@ -259,9 +259,38 @@ GitClient.prototype = {
 			.expect(201)
 			.end(function(err, res) {
 				assert.ifError(err);
-				assert.equal(res.body.CommitLocation, "/gitapi/commit/refs%252Fheads%252F" + branchName + "/file/" + client.getName());
-				assert.equal(res.body.Location, "/gitapi/branch/" + branchName + "/file/" + client.getName());
+				assert.equal(res.body.CommitLocation,
+					"/gitapi/commit/refs%252Fheads%252F" + util.encodeURIComponent(branchName) + "/file/" + client.getName());
+				assert.equal(res.body.Location,
+					"/gitapi/branch/" + util.encodeURIComponent(branchName) + "/file/" + client.getName());
 				client.next(resolve, res.body);
+			});
+		});
+	},
+
+	deleteBranch: function(branchName) {
+		var client = this;
+		this.tasks.push(function(resolve) {
+			request()
+			.delete(CONTEXT_PATH + "/gitapi/branch/" + util.encodeURIComponent(branchName) + "/file/" + client.getName())
+			.expect(200)
+			.end(function(err, res) {
+				assert.ifError(err);
+				client.next(resolve, res.body);
+			});
+		});
+	},
+
+	listBranches: function() {
+		var client = this;
+		this.tasks.push(function(resolve) {
+			request()
+			.get(CONTEXT_PATH + "/gitapi/branch/file/" + client.getName())
+			.expect(200)
+			.end(function(err, res) {
+				assert.ifError(err);
+				assert.equal(res.body.Type, "Branch");
+				client.next(resolve, res.body.Children);
 			});
 		});
 	},
@@ -1074,8 +1103,35 @@ maybeDescribe("git", function() {
 		}); // describe("Compare")
 	}); // describe("Log")
 
-	describe("Tags", function() {
+	describe("Branches", function() {
 		before(setup);
+
+		describe("Delete", function() {
+
+			it("bug 512877", function(finished) {
+				var client = new GitClient("bug512877");
+				client.init();
+				// create a branch with a name that needs to be encoded
+				client.createBranch("a%b");
+				// delete the branch
+				client.deleteBranch("a%b");
+				// list branches to verify deletion
+				client.listBranches();
+				return client.start().then(function(children) {
+					// only one branch, the master branch
+					assert.equal(children.length, 1);
+					assert.equal(children[0].FullName, "refs/heads/master");
+					finished();
+				})
+				.catch(function(err) {
+					finished(err);
+				});
+			});
+		}); // describe("Delete")
+	}); // describe("Branches")
+
+	 describe("Tags", function() {
+	 	before(setup);
 
 		function assertTag(tag, tagName, annotated, testName, commitSHA) {
 			assert.equal(tag.Name, tagName);

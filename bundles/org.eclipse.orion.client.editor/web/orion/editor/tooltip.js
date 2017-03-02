@@ -402,7 +402,7 @@ function Tooltip (view, editor) {
 			if (!this._outerArea){
 				this._outerArea = this._computeOuterArea(this._anchorArea, this._tooltipArea);
 			}
-
+			
 			this._tooltipDiv.style.visibility = "visible"; //$NON-NLS-0$
 			this._tipShowing = true;
 			
@@ -512,7 +512,21 @@ function Tooltip (view, editor) {
 			
 			// Now that we have our width recalculate the desired height...
 			tooltipDiv.style.width = (tipRect.width - padding) + "px"; //$NON-NLS-1$
-			tipRect.height = Math.min(tooltipDiv.getBoundingClientRect().height, defHeight);
+			tipRect.height = Math.min(tooltipDiv.clientHeight, defHeight);
+			
+			// If there will be Y overflow, increase width to fit the scrollbar
+			if (tooltipDiv.clientHeight > defHeight){
+				var contentWidth = this._tooltipContents.offsetWidth;
+				tooltipDiv.style.overflowY = "scroll";
+				var scrollWidth = contentWidth - this._tooltipContents.offsetWidth;
+				if (scrollWidth > 0){
+					tipRect.width += scrollWidth;
+					if (tipRect.width > viewportWidth){
+						tipRect.width = viewportWidth;
+					}
+				}
+				tooltipDiv.style.overflowY = null;
+			}
 			
 			// Hack for single line tooltips that wrap, set a minimum height to make them show 2 lines without scrolling
 			// The largest line height was MacOS Chrome with 20px+padding.  So 25 is the minimum height we are sure we are one two lines

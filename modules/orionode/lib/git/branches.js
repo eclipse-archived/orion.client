@@ -244,7 +244,7 @@ module.exports.router = function(options) {
 	}
 	
 	function deleteBranch(req, res) {
-		var branchName = util.decodeURIComponent(req.params.branchName);
+		var branchName = decodeURIComponent(req.params.branchName);
 		clone.getRepo(req)
 		.then(function(repo) {
 			return git.Branch.lookup(repo, branchName, git.Branch.BRANCH.LOCAL);

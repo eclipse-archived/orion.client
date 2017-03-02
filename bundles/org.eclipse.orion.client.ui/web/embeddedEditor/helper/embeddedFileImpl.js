@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2014 IBM Corporation and others.
+ * Copyright (c) 2014, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -11,7 +11,12 @@
 
 /*eslint-env browser, amd*/
 /*global URL*/
-define(["orion/Deferred", 'embeddedEditor/helper/memoryFileSysConst', "orion/encoding-shim", "orion/URL-shim"], function(Deferred, memoryFileSysConst) {
+define([
+	"orion/Deferred", 
+	"embeddedEditor/helper/memoryFileSysConst", 
+	"orion/encoding-shim", 
+	"orion/URL-shim"
+], function(Deferred, memoryFileSysConst) {
 	function EmbeddedFileImpl(fileBase) {
 		this.fileBase = fileBase;
 		this.fileRoot = {};
@@ -57,6 +62,17 @@ define(["orion/Deferred", 'embeddedEditor/helper/memoryFileSysConst', "orion/enc
 		writeBlob: function(/*fLocation, contents, args*/) {
 			throw new Error("Not supported"); //$NON-NLS-0$ 
 		},
+		/**
+		 * @name getProject
+		 * @description Returns the project context for the given resource
+		 * @function
+		 * @returns {?} The project context
+		 * @callback
+		 * @since 14.0
+		 */
+		getProject: function getProject(resourceLocation) {
+			return this.fileRoot[memoryFileSysConst.MEMORY_FILE_PROJECT_PATTERN];		
+		},
 		_getFile: function(fLocation, create) {
 			var locationURL = new URL(fLocation);
 			var filePath = locationURL.pathname;
@@ -76,18 +92,26 @@ define(["orion/Deferred", 'embeddedEditor/helper/memoryFileSysConst', "orion/enc
 		 * @param {String} location The location of the file to get contents for
 		 * @param {Boolean} [isMetadata] If defined and true, returns the file metadata, 
 		 *   otherwise file contents are returned
-		 * @return A deferred that will be provided with the contents or metadata when available
+		 * @param {Boolean} acceptPatch
+		 * @param {?} options The set of options for the read, or undefined
+		 * @return {Deferred} A deferred that will be provided with the contents or metadata when available
+		 * @callback
 		 */
-		read: function(fLocation, isMetadata) {
-			var file = this._getFile(fLocation);
+		read: function(fLocation, isMetadata, acceptPatch, options) {
+			var file = this._getFile(fLocation),
+				opts = options ? options : Object.create(null);
 			if (file === undefined) {
+				if(opts.readIfExists) {
+					//read-if-exists is spec'd to return null
+					return new Deferred().resolve(null);
+				}
 				return new Deferred().resolve(isMetadata ? {} : "");
 			} 
 			if(isMetadata){
 				var parents = fLocation === memoryFileSysConst.MEMORY_FILE_PROJECT_PATTERN ? [] : [this.fileRoot[memoryFileSysConst.MEMORY_FILE_PROJECT_PATTERN]];
 				var meta = {
 					Length: file.length,
-					Directory: !!file.Directory,
+					Directory: Boolean(file.Directory),
 					LocalTimeStamp: file.LocalTimeStamp,
 					ETag: file.ETag,
 					Location: file.Location,
@@ -105,6 +129,7 @@ define(["orion/Deferred", 'embeddedEditor/helper/memoryFileSysConst', "orion/enc
 		 * @param {String|Object} contents The content string, object describing the location of content, or a metadata object to write
 		 * @param {String|Object} args Additional arguments used during write operation (i.e. ETag) 
 		 * @return A deferred for chaining events after the write completes with new metadata object
+		 * @callback
 		 */		
 		write: function(fLocation, contents, args) {
 			var file = this._getFile(fLocation, true);
