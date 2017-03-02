@@ -92,18 +92,26 @@ define([
 		 * @param {String} location The location of the file to get contents for
 		 * @param {Boolean} [isMetadata] If defined and true, returns the file metadata, 
 		 *   otherwise file contents are returned
-		 * @return A deferred that will be provided with the contents or metadata when available
+		 * @param {Boolean} acceptPatch
+		 * @param {?} options The set of options for the read, or undefined
+		 * @return {Deferred} A deferred that will be provided with the contents or metadata when available
+		 * @callback
 		 */
-		read: function(fLocation, isMetadata) {
-			var file = this._getFile(fLocation);
+		read: function(fLocation, isMetadata, acceptPatch, options) {
+			var file = this._getFile(fLocation),
+				opts = options ? options : Object.create(null);
 			if (file === undefined) {
+				if(opts.readIfExists) {
+					//read-if-exists is spec'd to return null
+					return new Deferred().resolve(null);
+				}
 				return new Deferred().resolve(isMetadata ? {} : "");
 			} 
 			if(isMetadata){
 				var parents = fLocation === memoryFileSysConst.MEMORY_FILE_PROJECT_PATTERN ? [] : [this.fileRoot[memoryFileSysConst.MEMORY_FILE_PROJECT_PATTERN]];
 				var meta = {
 					Length: file.length,
-					Directory: !!file.Directory,
+					Directory: Boolean(file.Directory),
 					LocalTimeStamp: file.LocalTimeStamp,
 					ETag: file.ETag,
 					Location: file.Location,
@@ -121,6 +129,7 @@ define([
 		 * @param {String|Object} contents The content string, object describing the location of content, or a metadata object to write
 		 * @param {String|Object} args Additional arguments used during write operation (i.e. ETag) 
 		 * @return A deferred for chaining events after the write completes with new metadata object
+		 * @callback
 		 */		
 		write: function(fLocation, contents, args) {
 			var file = this._getFile(fLocation, true);
