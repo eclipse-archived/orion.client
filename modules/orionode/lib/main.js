@@ -36,7 +36,7 @@ function redrawButtons() {
 		active.contentWindow.location.reload();
 	}
 	var back = document.createElement("button"),
-		backTitle = process.platform === "darwin"? "Back (⌘+Left)" :"Back (Alt+Left)";
+		backTitle = process.platform === "darwin"? "Back (Cmd+Left)" :"Back (Alt+Left)";
 	back.title = backTitle;
 	back.setAttribute("aria-label", backTitle);
 	back.textContent = "<";
@@ -45,7 +45,7 @@ function redrawButtons() {
 	buttons.appendChild(back);
 	
 	var forward = document.createElement("button"),
-		forwardTitle = process.platform === "darwin"? "Forward (⌘+Right)" :"Forward (Alt+Right)";
+		forwardTitle = process.platform === "darwin"? "Forward (Cmd+Right)" :"Forward (Alt+Right)";
 	forward.title = forwardTitle;
 	forward.setAttribute("aria-label", forwardTitle);
 	forward.textContent = ">";
@@ -54,7 +54,7 @@ function redrawButtons() {
 	buttons.appendChild(forward);
 	
 	var refresh = document.createElement("button"),
-		refreshTitle = process.platform === "darwin"? "Refresh (⌘+R)" :"Refresh (Ctrl+R)";
+		refreshTitle = process.platform === "darwin"? "Refresh (Cmd+R)" :"Refresh (Ctrl+R)";
 	refresh.title = refreshTitle;
 	refresh.setAttribute("aria-label", refreshTitle);
 	refresh.textContent = "\u27F2";
