@@ -426,7 +426,7 @@ hard-coded numbers elsewhere.
 .editorViewerContent {
 	position: absolute;
 	width: 100%;
-	top: 27px;
+	top: 26px;
 	bottom: 0;
 	overflow: auto
 }
