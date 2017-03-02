@@ -170,8 +170,11 @@ module.exports.start = function(startServer, configParams) {
 						{ label: "Cut", accelerator: "CmdOrCtrl+X", selector: "cut:" },
 						{ label: "Copy", accelerator: "CmdOrCtrl+C", selector: "copy:" },
 						{ label: "Paste", accelerator: "CmdOrCtrl+V", selector: "paste:" },
-						{ label: "Select All", accelerator: "CmdOrCtrl+A", selector: "selectAll:" },
-						{ label: "openDevTool", accelerator: "Cmd+Option+I",visible:false, click: function (item, focusedWindow) {
+						{ label: "Select All", accelerator: "CmdOrCtrl+A", selector: "selectAll:" }
+					]},
+					{label: "Debug",
+					submenu: [
+						{ label: "Toggle Developer Tools", accelerator: "Cmd+Option+I", click: function (item, focusedWindow) {
 							//if windows, add F12 to also open dev tools - depending on electron / windows versions this might not be allowed to be rebound
 							if (focusedWindow) focusedWindow.webContents.toggleDevTools();
 						}}
