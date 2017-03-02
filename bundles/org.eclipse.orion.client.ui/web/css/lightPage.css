@@ -147,10 +147,6 @@
  	color: white;
 }
 
-.lightPage .editorViewerHeader {
-	border-bottom: 1px solid #f5f7fa;	
-}
-
 .lightPage .tooltipTailFromright:before,
 .lightPage .tooltipTailFromright:after {
 	border-right-color: rgb(60, 113, 179);
