@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2014 IBM Corporation and others.
+ * Copyright (c) 2014, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -11,7 +11,12 @@
 
 /*eslint-env browser, amd*/
 /*global URL*/
-define(["orion/Deferred", 'embeddedEditor/helper/memoryFileSysConst', "orion/encoding-shim", "orion/URL-shim"], function(Deferred, memoryFileSysConst) {
+define([
+	"orion/Deferred", 
+	"embeddedEditor/helper/memoryFileSysConst", 
+	"orion/encoding-shim", 
+	"orion/URL-shim"
+], function(Deferred, memoryFileSysConst) {
 	function EmbeddedFileImpl(fileBase) {
 		this.fileBase = fileBase;
 		this.fileRoot = {};
@@ -56,6 +61,17 @@ define(["orion/Deferred", 'embeddedEditor/helper/memoryFileSysConst', "orion/enc
 		},
 		writeBlob: function(/*fLocation, contents, args*/) {
 			throw new Error("Not supported"); //$NON-NLS-0$ 
+		},
+		/**
+		 * @name getProject
+		 * @description Returns the project context for the given resource
+		 * @function
+		 * @returns {?} The project context
+		 * @callback
+		 * @since 14.0
+		 */
+		getProject: function getProject(resourceLocation) {
+			return this.fileRoot[memoryFileSysConst.MEMORY_FILE_PROJECT_PATTERN];		
 		},
 		_getFile: function(fLocation, create) {
 			var locationURL = new URL(fLocation);
