@@ -478,121 +478,155 @@ define([
 	function computeEnvironment(project) {
 		project.map.env = {};
 		project.map.env.envs = {browser: true, node: true}; //always start assuming browser
-		//start with eslint options - they can carry env objects
-		return project.getESlintOptions().then(function(options) {
-			project.map.env.eslint = options;
-			if(options && options.vals && options.vals.env) {
-				Object.keys(options.vals.env).forEach(function(key) {
-					project.map.env.envs[key] = options.vals.env[key];
+		return project.getFile(project.TERN_PROJECT).then(function(file) {
+			processTernProject(project, file);
+			return project.getESlintOptions().then(function(options) {
+				processEslintOptions(project, options);
+				return project.getFile(project.NODE_MODULES).then(function(file) {
+					if(file && typeof file.contents === "string") {
+						project.map.env._node_modules = true;
+					}
+					return project.getFile(project.PACKAGE_JSON).then(function(file) {
+						processPackageJson(project, file);
+						return project.getFolder(project.DEFINITIONS).then(function(children) {
+							if(children.length > 0) {
+								project.map.env.defs = [];
+								children.forEach(function(def) {
+									project.map.env.defs.push(project.DEFINITIONS+'/'+def.Name);
+								});
+							}
+							return project.map.env;
+						}, function rejected() {
+							return project.map.env;
+						});
+					});
 				});
-			}
-			return project.getFile(this.NODE_MODULES).then(function(file) {
-				if(file && typeof file.contents === "string") {
-					project.map.env._node_modules = true;
-				}
-				return guessEnvForProject(project);
 			});
 		});
 	}
 	
 	/**
-	 * @name guessEnvForProject
-	 * @description Looking at what files are available and whats in them, guess at the current project environment
-	 * @param {JavaScriptProject} project The project object
-	 * @returns {Deferred} a deferred to resolve the environment
+	 * @description Examine the .tern-project file to configure the tools
+	 * @param {JavaScriptProject} project The backing project to configure
+	 * @param {?} file The .tern-project file contents
 	 * @since 14.0
 	 */
-	function guessEnvForProject(project) {
-		return project.getFile(project.TERN_PROJECT).then(function(file) {
-			if(file && typeof file.contents === "string") {
-				project.map.env.ternproject = {file: file, vals: null};
-				try {
-					var vals = JSON.parse(file.contents);
-					project.map.env.ternproject.vals = vals;
-					if(Array.isArray(vals.libs)) {
-						if(vals.libs.indexOf("browser") > -1) {
-							project.map.env.envs.browser = true;
-						} else if(vals.libs.indexOf("ecma6") > -1) {
-							project.map.env.envs.es6 = true;
-						} 
-					}
-					if(Array.isArray(vals.defs)) {
-						if(vals.defs.indexOf("browser") > -1) {
-							project.map.env.envs.browser = true;
-						} else if(vals.defs.indexOf("ecma6") > -1) {
-							project.map.env.envs.es6 = true;
-						} 
-					}
-					if(vals.plugins && typeof vals.plugins === 'object') {
-						if(vals.plugins.node) {
-							project.map.env.envs.node = true;
-						} else if(Object.keys(vals.plugins).length > 0) {
-							//remove node as a default if there are other plugins specified
-							//We will re-add it later when we look for other cues, like package.json
-							delete project.map.env.envs.node;
-						}
-						if(vals.plugins.requirejs || vals.plugins.commonjs) {
-							project.map.env.envs.amd = true;
-							project.map.env.envs.browser = true;
-						}
-						if(vals.plugins.es6_modules) {
-							project.map.env.envs.es6 = true;
-							project.map.env.envs.browser = true;
-							project.map.env.envs.node = true;
-						}
+	function processTernProject(project, file) {
+		if(file && typeof file.contents === "string") {
+			project.map.env.ternproject = {file: file, vals: null};
+			//wipe the defaults, since we found content.
+			//see https://bugs.eclipse.org/bugs/show_bug.cgi?id=512964
+			delete project.map.env.envs.node;
+			delete project.map.env.envs.browser;
+			try {
+				var vals = JSON.parse(file.contents);
+				project.map.env.ternproject.vals = vals;
+				if(Array.isArray(vals.libs)) {
+					if(vals.libs.indexOf("browser") > -1) {
+						project.map.env.envs.browser = true;
+					} else if(vals.libs.indexOf("ecma6") > -1) {
+						project.map.env.envs.es6 = true;
 					} 
-					if(typeof vals.ecmaVersion === 'number') {
-						if(vals.ecmaVersion >= 6) {
-							project.map.env.envs.es6 = true;
-						}
+				}
+				if(Array.isArray(vals.defs)) {
+					if(vals.defs.indexOf("browser") > -1) {
+						project.map.env.envs.browser = true;
+					} else if(vals.defs.indexOf("ecma6") > -1) {
+						project.map.env.envs.es6 = true;
 					} 
-					if(vals.sourceType === 'modules') {
+				}
+				if(vals.plugins && typeof vals.plugins === 'object') {
+					if(vals.plugins.node) {
+						project.map.env.envs.node = true;
+					} else if(Object.keys(vals.plugins).length > 0) {
+						//remove node as a default if there are other plugins specified
+						//We will re-add it later when we look for other cues, like package.json
+						delete project.map.env.envs.node;
+					}
+					if(vals.plugins.requirejs || vals.plugins.commonjs) {
+						project.map.env.envs.amd = true;
+						project.map.env.envs.browser = true;
+					}
+					if(vals.plugins.es6_modules) {
 						project.map.env.envs.es6 = true;
 						project.map.env.envs.browser = true;
 						project.map.env.envs.node = true;
 					}
-				} catch (e) {
-					// ignore, bad JSON
-				}
-			}
-			return project.getFile(project.PACKAGE_JSON).then(function(file) {
-				if(file && typeof file.contents === "string") {
-					project.map.env.packagejson = {file: file};
-					try {
-						vals = project.map.env.packagejson.vals = JSON.parse(file.contents);
-						if(vals) {
-							if(vals.dependencies) {
-								Object.keys(vals.dependencies).forEach(function(key) {
-									project.map.env.envs[key] = true;
-								});
-							} else if(vals.devDependencies) {
-								Object.keys(vals.dependencies).forEach(function(key) {
-									project.map.env.envs[key] = true;
-								});
-							} else if(vals.optionalDependencies) {
-								Object.keys(vals.dependencies).forEach(function(key) {
-									project.map.env.envs[key] = true;
-								});
-							}
-						}
-					} catch(e) {
-						//ignore
+				} 
+				if(typeof vals.ecmaVersion === 'number') {
+					if(vals.ecmaVersion >= 6) {
+						project.map.env.envs.es6 = true;
 					}
+				} 
+				if(vals.sourceType === 'modules') {
+					project.map.env.envs.es6 = true;
+					project.map.env.envs.browser = true;
 					project.map.env.envs.node = true;
 				}
-				return project.getFolder(project.DEFINITIONS).then(function(children) {
-					if(children.length > 0) {
-						project.map.env.defs = [];
-						children.forEach(function(def) {
-							project.map.env.defs.push(project.DEFINITIONS+'/'+def.Name);
+			} catch (e) {
+				// ignore, bad JSON
+			}
+		}
+	}
+	
+	/**
+	 * @description Look into the found ESLint options to pre-configure the language tools
+	 * @param {JavaScriptProject} project The back project to configure
+	 * @param {?} options The computed ESLint option map
+	 * @since 14.0
+	 */
+	function processEslintOptions(project, options) {
+		project.map.env.eslint = options;
+		if(options && options.vals) {
+			if(options.vals.env) {
+				Object.keys(options.vals.env).forEach(function(key) {
+					project.map.env.envs[key] = options.vals.env[key];
+				});
+			}
+			if(options.vals.ecmaVersion) {
+				project.map.env.ecmaVersion = options.vals.ecmaVersion;
+			}
+		}
+	}
+	
+	/**
+	 * @description Look into the package.json contents to pre-configure the tools
+	 * @param {JavaScriptProject} project The backing project to configure
+	 * @param {?} file The package.json file
+	 * @since 14.0
+	 */
+	function processPackageJson(project, file) {
+		if(file && typeof file.contents === "string") {
+			project.map.env.packagejson = {file: file};
+			try {
+				var vals = project.map.env.packagejson.vals = JSON.parse(file.contents);
+				if(vals) {
+					if(vals.dependencies) {
+						Object.keys(vals.dependencies).forEach(function(key) {
+							project.map.env.envs[key] = true;
 						});
 					}
-					return project.map.env;
-				}, function rejected() {
-					return project.map.env;
-				});
-			});
-		});
+					if(vals.devDependencies) {
+						Object.keys(vals.devDependencies).forEach(function(key) {
+							project.map.env.envs[key] = true;
+						});
+					}
+					if(vals.optionalDependencies) {
+						Object.keys(vals.optionalDependencies).forEach(function(key) {
+							project.map.env.envs[key] = true;
+						});
+					}
+					if(vals.engines) {
+						Object.keys(vals.engines).forEach(function(key) {
+							project.map.env.envs[key] = true;
+						});
+					}
+				}
+			} catch(e) {
+				//ignore
+			}
+			project.map.env.envs.node = true;
+		}
 	}
 
 	/**
