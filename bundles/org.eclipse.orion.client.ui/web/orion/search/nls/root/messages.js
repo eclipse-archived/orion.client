@@ -27,8 +27,8 @@ define({
 	"Replace": "Replace",
 	"Replace...": "Preview",
 	"Replace All": "Replace All",
-	"Show Replace": "Switch to Replace Mode",
-	"Hide Replace": "Switch to Search Mode",
+	"Show Replace": "Replace Mode",
+	"Hide Replace": "Search Mode",
 	"Search ${0}": "Search ${0}",
 	"TypeKeyOrWildCard": "Type a keyword or wild card to search in ",
 	"Search failed.": "Search failed.",
@@ -91,7 +91,7 @@ define({
 	"${0} matches": "${0} matches",
 	"regexOptionOff" : "Regular expressions are off. Click here or use the options to turn them on for replacement",
 	"regexOptionOn" : "Regular expressions are on. Click here or use the options to turn them off",
-	"Scope": "Scope",
+	"Scope": "Find in:",
 	"Show previous search terms": "Show previous search terms",
 	"Show previous replace terms": "Show previous replace terms",
 	"Show replacement preview": "Show replacement preview",
@@ -120,5 +120,11 @@ define({
 	"perfectMatch": "Perfect match",
 	"notAMatch": "Not a match",
 	"couldBeMatch": "Could be a match",
-	"Scope Sniff":"Search In All Projects"
+	"Scope All":"All Folders",
+	"Scope Project":"Root Folder",
+	"Scope Selected":"Current Folder",
+	"Scope Other":"Other",
+	"Search Label":"Search:",
+	"Exclude Files":"Files to exclude (comma-separated)",
+	"The following files are excluded from general setting":"The following files are excluded from general setting:"
 });
