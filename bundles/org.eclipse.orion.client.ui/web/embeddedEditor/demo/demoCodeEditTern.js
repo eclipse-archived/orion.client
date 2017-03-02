@@ -109,7 +109,7 @@ Deferred) {
 	var files2import = [
 		{
 			name: ".tern-project",
-			contents:''//{"sourceType": "module","ecmaVersion": 6}'
+			contents:'//{"sourceType": "module","ecmaVersion": 6}'
 		},
 		{
 			name: ".eslintrc",

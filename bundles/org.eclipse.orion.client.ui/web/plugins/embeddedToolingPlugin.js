@@ -13,6 +13,7 @@
 define([
 	"orion/plugin", 
 	"plugins/languageToolsPlugin",
+	"plugins/languages/json/jsonPlugin",
 	"plugins/webEditingPlugin"
 ], function(PluginProvider) {
 	
