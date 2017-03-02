@@ -110,8 +110,8 @@ define([
 			"default": true, 
 			name: messages["Orion Editor"],
 			nls: "orion/nls/messages",
-			uriTemplate: "#{,Location,params*}",
-			orionTemplate: "#{,Location,params*}",
+			uriTemplate: "../edit/edit.html#{,Location,params*}",
+			orionTemplate: "../edit/edit.html#{,Location,params*}",
 			validationProperties: [{
 				source: "!Projects" // Filter out workspace;
 			}]});
@@ -129,7 +129,7 @@ define([
 			id: MARKDOWN_VIEWER_ID,
 			name: messages["Orion Markdown Viewer"],
 			nls: "orion/nls/messages",
-			uriTemplate: "#{,Location,params*},editor=" + MARKDOWN_VIEWER_ID});
+			uriTemplate: "../edit/edit.html#{,Location,params*},editor=" + MARKDOWN_VIEWER_ID});
 	
 		provider.registerService("orion.navigate.openWith", {}, {
 				editor: MARKDOWN_VIEWER_ID,
@@ -141,7 +141,7 @@ define([
 			name: messages["Orion Markdown Editor"],
 			nls: "orion/nls/messages",
 			"default": true,
-			uriTemplate: "#{,Location,params*},editor=" + MARKDOWN_EDITOR_ID});
+			uriTemplate: "../edit/edit.html#{,Location,params*},editor=" + MARKDOWN_EDITOR_ID});
 	
 		provider.registerService("orion.navigate.openWith", {}, {
 				editor: MARKDOWN_EDITOR_ID,

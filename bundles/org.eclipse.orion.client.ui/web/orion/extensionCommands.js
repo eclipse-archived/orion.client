@@ -437,6 +437,12 @@ define(["orion/Deferred", "orion/commands", 	'orion/PageUtil', "orion/contentTyp
 					commandOptions.hrefCallback = function(data){
 						var item = Array.isArray(data.items) ? data.items[0] : data.items;
 						var href = validator.getURI.bind(validator)(item);
+						// Preserve the query params of the current location to keep context
+						var url = new URL(href);
+						if (!url.search) {
+							url.search = window.location.search;
+						}
+						href = url.href;
 						if (data.command && data.command.isEditor) {
 							data.domNode.addEventListener("click", function(evt) {
 								if(item.Location) {
