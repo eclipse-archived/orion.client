@@ -18,6 +18,7 @@ Deferred) {
 	var defaultPluginURLs = [
 		"../../javascript/plugins/javascriptPlugin_embed_dev.html",
 		"../../webtools/plugins/webToolsPlugin_embed_dev.html",
+		"../../plugins/languages/json/jsonPlugin.html",
 		"../../plugins/embeddedToolingPlugin.html"
 	];
 		var contents = 'import "somelib";//Hover on the error marker on "import" and click on the quick fix. The .tern-project file will be updated with new contents.\n' +
@@ -152,6 +153,7 @@ Deferred) {
 	codeEdit.startup().then(function() {
 		document.getElementById("progressMessageDiv").textContent = "Plugins loaded!";
 		files2import[1].contents = JSON.stringify(ruleData, undefined, 4);
+		files2import = [];
 		codeEdit.importFiles(files2import).then(function(/*results*/) {
 			startup();
 			codeEdit.exportFiles(files2export).then(function(exportResults) {
