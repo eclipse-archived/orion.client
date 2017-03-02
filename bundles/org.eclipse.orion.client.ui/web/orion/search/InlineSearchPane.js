@@ -20,10 +20,11 @@ define([
 	'orion/webui/dialogs/DirectoryPrompterDialog',
 	'orion/widgets/input/ComboTextInput',
 	'i18n!orion/search/nls/messages',
+	'orion/generalPreferences',
 	'orion/webui/Slideout'
 ], function(
 	objects, lib, bidiUtils, InlineSearchPaneTemplate, InlineSearchResultExplorer, 
-	mSearchUtils, Deferred, DirectoryPrompterDialog, ComboTextInput, messages, mSlideout
+	mSearchUtils, Deferred, DirectoryPrompterDialog, ComboTextInput, messages, mGeneralPreferences, mSlideout
 ) {
 	var SearchAnnoTypes = {};
 	SearchAnnoTypes.ANNO_SEARCH_HIT = "orion.annotation.search.hit"; //$NON-NLS-0$
@@ -40,6 +41,7 @@ define([
 		this._searcher = options.searcher;
 		this._preferences = options.preferences;
 		this._inputManager = options.inputManager;
+		this._generalPreferrence = new mGeneralPreferences.GeneralPreferences(this._preferences);
 		this._initialize();
 	}
 	InlineSearchPane.prototype = Object.create(SlideoutViewMode.prototype);
@@ -96,10 +98,6 @@ define([
 		},
 		
 		hide: function() {
-			if(this._defaultSearchResource){
-  				this.setSearchScope(this._defaultSearchResource);//reset search scope when the InlineSearchPane is hide
-			}
-
 			if(window.document.title === this.newDocumentTitle){
 				window.document.title = this.previousDocumentTitle;
 			}
@@ -132,10 +130,16 @@ define([
 			}, this);
 			
 			this._correctFileNamePatternsInputValue();
+			this._correctExcludeFilesInputValue();
 			var fileNamePatternsArray = mSearchUtils.getFileNamePatternsArray(this._fileNamePatternsBox.getTextInputValue());
+			var excludeFilesArray = mSearchUtils.getFileNamePatternsArray(this._excludeFilesBox.getTextInputValue()) || [];
 			var replaceValue = this._replaceBox.getTextInputValue() || undefined;
-			
-			return {keyword: this._searchBox.getTextInputValue(),
+			return this._generalPreferrence.getPrefs().then(function(prefs) {
+				if(typeof prefs.filteredResources === 'string') {
+					var excludeFilesFromSetting = prefs.filteredResources.split(',');
+					excludeFilesArray = excludeFilesArray.concat(excludeFilesFromSetting);
+				}
+				return {keyword: this._searchBox.getTextInputValue(),
 					rows: 10000,
 					start: 0,
 					replace: replaceValue,
@@ -143,8 +147,10 @@ define([
 					wholeWord: this._wholeWordCB.checked,
 			        regEx: this._regExCB.checked,
 					fileNamePatterns: fileNamePatternsArray,
+					exclude:excludeFilesArray,
 			        resource: resource
-			};
+				};
+			}.bind(this));
 		},
 		
 		search: function(){
@@ -185,38 +191,44 @@ define([
 		},
 				
 		_submitSearch: function(){
-			var options = this.getOptions();
-			options.replace = null;
-			if(options.keyword){
-				this._searchBox.addTextInputValueToRecentEntries();
-				this._fileNamePatternsBox.addTextInputValueToRecentEntries();
-				var searchParams = mSearchUtils.getSearchParams(this._searcher, options.keyword, options);
-				this._searchResultExplorer.runSearch(searchParams, this._searchResultsWrapperDiv).then(function() {
-					this._initAnnotations();
-				}.bind(this));
-				this._hideSearchOptions();
-			}
+			var deferredOptions = this.getOptions();
+			deferredOptions.then(function(options){
+				options.replace = null;
+				if(options.keyword){
+					this._searchBox.addTextInputValueToRecentEntries();
+					this._fileNamePatternsBox.addTextInputValueToRecentEntries();
+					this._excludeFilesBox.addTextInputValueToRecentEntries();
+					var searchParams = mSearchUtils.getSearchParams(this._searcher, options.keyword, options, this.getSearchScopeOption());
+					this._searchResultExplorer.runSearch(searchParams, this._searchResultsWrapperDiv).then(function() {
+						this._initAnnotations();
+					}.bind(this));
+					this._hideSearchOptions();
+				}
+			}.bind(this));
 		},
 		
 		_replacePreview: function(){
-			var options = this.getOptions();
-			if(!options.replace){
-				options.replace = "";
-			}
-			if(options.keyword){
-				this._searchBox.addTextInputValueToRecentEntries();
-				this._replaceBox.addTextInputValueToRecentEntries();
-				this._fileNamePatternsBox.addTextInputValueToRecentEntries();
-       			var searchParams;
-				if(this._filledResult) {
-       				searchParams = mSearchUtils.copySearchParams(this._filledResult.searchParams);
-       				searchParams.replace = options.replace;
-				} else {
-					searchParams = mSearchUtils.getSearchParams(this._searcher, options.keyword, options);
-					this._hideSearchOptions();
+			var deferredOptions = this.getOptions();
+			deferredOptions.then(function(options){
+				if(!options.replace){
+					options.replace = "";
 				}
-				this._searchResultExplorer.runSearch(searchParams, this._searchResultsWrapperDiv, this._filledResult);
-			}
+				if(options.keyword){
+					this._searchBox.addTextInputValueToRecentEntries();
+					this._replaceBox.addTextInputValueToRecentEntries();
+					this._fileNamePatternsBox.addTextInputValueToRecentEntries();
+					this._excludeFilesBox.addTextInputValueToRecentEntries();
+	       			var searchParams;
+					if(this._filledResult) {
+	       				searchParams = mSearchUtils.copySearchParams(this._filledResult.searchParams);
+	       				searchParams.replace = options.replace;
+					} else {
+						searchParams = mSearchUtils.getSearchParams(this._searcher, options.keyword, options);
+						this._hideSearchOptions();
+					}
+					this._searchResultExplorer.runSearch(searchParams, this._searchResultsWrapperDiv, this._filledResult);
+				}
+			}.bind(this));
 		},
 	    
 	    _initSearchBox: function(){
@@ -382,10 +394,40 @@ define([
 			}.bind(this));
 	    },
 	    
+	    _initExcludeFilesBox: function(){
+	    	this._excludeFilesHint = lib.$("#excludeFilesHint", this._searchWrapper); //$NON-NLS-0$
+	    	this._excludeFilesBox = new ComboTextInput({
+				id: "excludeFilesInput", //$NON-NLS-0$
+				insertBeforeNode: this._excludeFilesHint,
+				parentNode: this._excludeFilesHint.parentNode,
+				hasButton: false,
+				hasInputCompletion: true,
+				serviceRegistry: this._serviceRegistry
+			});
+			this._excludeFilesBox.getDomNode().classList.add("fileNamePatternsInput"); //$NON-NLS-0$
+			this._excludeFilesTextInput = this._excludeFilesBox.getTextInputNode();
+			this._excludeFilesTextInput.classList.add("fileNamePatternsTextInput");
+			
+			lib.empty(this._excludeFilesHint);
+			this._excludeFilesTextInput.addEventListener("focus", function(){ //$NON-NLS-0$
+				this._generalPreferrence.getPrefs().then(function(prefs) {
+					if(typeof prefs.filteredResources === 'string') {
+						var excludeFilesFromSetting = prefs.filteredResources || "";
+					}
+					this._excludeFilesHint.textContent = messages["The following files are excluded from general setting"] + excludeFilesFromSetting; //$NON-NLS-0$
+				}.bind(this));
+				this._excludeFilesHint.classList.add("fileNamePatternsHintVisible"); //$NON-NLS-0$
+			}.bind(this));
+			this._excludeFilesTextInput.addEventListener("blur", function(){ //$NON-NLS-0$
+				this._excludeFilesHint.classList.remove("fileNamePatternsHintVisible"); //$NON-NLS-0$
+			}.bind(this));
+	    },
+	    
 		_initControls: function(){
 			this._initSearchBox();
 			this._initReplaceBox();
 			this._initFileNamePatternsBox();
+			this._initExcludeFilesBox();
 			
 			this._caseSensitiveCB = lib.$("#advSearchCaseSensitive", this._searchWrapper); //$NON-NLS-0$
 			this._wholeWordCB = lib.$("#advSearchWholeWord", this._searchWrapper); //$NON-NLS-0$
@@ -406,39 +448,35 @@ define([
 		
 		_initHTMLLabels: function(){
 			this._replaceCompareTitleDiv.textContent = messages["Preview: "]; //$NON-NLS-0$
-			lib.$("#advSearchCaseSensitiveLabel", this._searchWrapper).appendChild(document.createTextNode(messages["Case sensitive"])); //$NON-NLS-1$ //$NON-NLS-0$
-			lib.$("#advSearchWholeWordLabel", this._searchWrapper).appendChild(document.createTextNode(messages["Whole Word"])); //$NON-NLS-1$ //$NON-NLS-0$
-			lib.$("#advSearchRegExLabel", this._searchWrapper).appendChild(document.createTextNode(messages["Regular expression"])); //$NON-NLS-1$ //$NON-NLS-0$
+			lib.$("#searchLabel", this._searchWrapper).appendChild(document.createTextNode(messages["Search Label"])); //$NON-NLS-1$ //$NON-NLS-0$
+			lib.$("#advSearchCaseSensitiveLabel", this._searchWrapper).title = messages["Case sensitive"]; //$NON-NLS-1$ //$NON-NLS-0$
+			lib.$("#advSearchWholeWordLabel", this._searchWrapper).title = messages["Whole Word"]; //$NON-NLS-1$ //$NON-NLS-0$
+			lib.$("#advSearchRegExLabel", this._searchWrapper).title = messages["Regular expression"]; //$NON-NLS-1$ //$NON-NLS-0$
+			lib.$("#advSearchRegExLabel", this._searchWrapper).appendChild(document.createTextNode("."));
 			lib.$("#searchScopeLabel", this._searchWrapper).appendChild(document.createTextNode(messages["Scope"])); //$NON-NLS-1$ //$NON-NLS-0$
 			lib.$("#fileNamePatternsLabel", this._searchWrapper).appendChild(document.createTextNode(messages["File name patterns (comma-separated)"])); //$NON-NLS-1$ //$NON-NLS-0$
 			lib.$("#searchScopeSelectButton", this._searchWrapper).title = messages["Choose a Folder"]; //$NON-NLS-1$ //$NON-NLS-0$
-			lib.$("#advSearchScopeSniffLabel", this._searchWrapper).appendChild(document.createTextNode(messages["Scope Sniff"]));
+			lib.$("#advSearchScopeAllProjectLabel", this._searchWrapper).appendChild(document.createTextNode(messages["Scope All"]));
+			lib.$("#advSearchScopeProjectLabel", this._searchWrapper).appendChild(document.createTextNode(messages["Scope Project"]));
+			lib.$("#advSearchScopeSelectedLabel", this._searchWrapper).appendChild(document.createTextNode(messages["Scope Selected"]));
+			lib.$("#advSearchScopeOtherLabel", this._searchWrapper).appendChild(document.createTextNode(messages["Scope Other"]));
+			lib.$("#excludeFilesLabel", this._searchWrapper).appendChild(document.createTextNode(messages["Exclude Files"]));
 		},
 		
-		setSearchScope: function(scope) {
-			this._targetFolder = scope;
-			var targetFolder = scope;
-			if(typeof scope === "string") {
-				targetFolder = {Location: scope};
-			}
-			if (targetFolder && targetFolder.fileMetadata) {
-				targetFolder = targetFolder.fileMetadata;
-			}
-			
-			if (targetFolder && (targetFolder.Path || targetFolder.Location)) {
-				var location = targetFolder.Path || targetFolder.Location;
-				this._searchLocations = [location];
-			} else {
-				this._searchLocations = [this._rootURL];
-			}
-			
-			if (targetFolder && targetFolder.Location) {
-				this._searcher.setLocationByMetaData(targetFolder);
-			} else {
-				this._searcher.setLocationbyURL(this._searchLocations[0]);
-			}
-			
-			this._displaySelectedSearchScope();
+		setOtherSearchScope: function(scope){
+			var otherLocationString = typeof scope === "string" ? scope : scope.Location;
+			this._searcher.setLocationOther(otherLocationString);
+			localStorage.setItem("/inlineSearchOtherScope", otherLocationString);
+			this._targetFolder = otherLocationString;
+			this._displaySelectedSearchScope([otherLocationString]);
+			this._searcher.addDisplaycallback(this._displaySelectedSearchScope.bind(this),"other");
+		},
+		
+		setSearchScope: function(searchScopeOption) {	
+			var searchLocation = this._searcher.getSearchLocation(searchScopeOption);
+			this._targetFolder = searchLocation;
+			this._displaySelectedSearchScope([searchLocation]);
+			this._searcher.addDisplaycallback(this._displaySelectedSearchScope.bind(this),searchScopeOption);
 		},
 		
 		setSearchText: function(str) {
@@ -459,27 +497,49 @@ define([
 			}
 		},
 		
-		isSearchInAllProjects: function(){
-			return localStorage.getItem("/searchScope") === 'true';
+		getSearchScopeOption: function(){
+			return localStorage.getItem("/inlineSearchScopeOption") || "selected";
 		},
 		
-		setSearchInAllProjectsCheckBox: function(isCheck){
-			this._searchScope.checked = isCheck; //$NON-NLS-0$
+		updateScopeOptions: function(scopeOption){
+			switch(scopeOption){
+				case "selected":
+					this._searchScopeSelected.checked = true;
+					this.setSearchScope("selected" );
+					break;
+				case "project":
+					this._searchScopeProject.checked = true;
+					this.setSearchScope("project");
+					break;
+				case "all_project":
+					this._searchScopeAllProject.checked = true;
+					this.setSearchScope("all_project");
+					break;
+				case "other":
+					this._searchScopeOther.checked = true;
+					this.setOtherSearchScope(this._getOtherScope());
+					break;
+			}
 		},
 		
-		readyToSwitchScope: function(resource){
-			this._readyToSwitchResouce = resource;	
+		_getOtherScope: function(){
+			return localStorage.getItem("/inlineSearchOtherScope") || "/file";
 		},
 		
 		_initSearchScope: function() {
 			this._rootURL = this._fileClient.fileServiceRootURL();
 			this._searchLocations = [this._rootURL];
 			
-			this._searchScope = lib.$("#advSearchScopeSniff", this._searchOptWrapperDiv); //$NON-NLS-0$
+			this._searchScopeSelected = lib.$("#advSearchScopeSelected", this._searchOptWrapperDiv); //$NON-NLS-0$
+			this._searchScopeProject = lib.$("#advSearchScopeProject", this._searchOptWrapperDiv); //$NON-NLS-0$
+			this._searchScopeAllProject = lib.$("#advSearchScopeAllProject", this._searchOptWrapperDiv); //$NON-NLS-0$
+			this._searchScopeOther = lib.$("#advSearchScopeOther", this._searchOptWrapperDiv); //$NON-NLS-0$
 			this._searchScopeElementWrapper = lib.$("#searchScopeElementWrapper", this._searchOptWrapperDiv); //$NON-NLS-0$
 			this._searchScopeSelectButton = lib.$("#searchScopeSelectButton", this._searchOptWrapperDiv); //$NON-NLS-0$
 			
 			this._searchScopeSelectButton.addEventListener("click", function(){ //$NON-NLS-0$
+				this._searchScopeOther.checked = true;
+				localStorage.setItem("/inlineSearchScopeOption", "other");
 				var deferred;
 				if(typeof this._targetFolder === "string") {
 					deferred = this._fileClient.read(this._targetFolder, true);
@@ -493,23 +553,42 @@ define([
 						serviceRegistry: this._serviceRegistry,
 						fileClient: this._fileClient,
 						targetFolder: scopeMetadata,
-						func: this.setSearchScope.bind(this)
+						func: this.setOtherSearchScope.bind(this)
 					});
 					searchScopeDialog.show();
 				}.bind(this));
 			}.bind(this));
-			this._searchScope.addEventListener("change", function(event){
-				if(this._searchScope.checked){
-					this.setSearchScope(null);	
-				}else{
-					this.setSearchScope(this._readyToSwitchResouce);				
+			this._searchScopeSelected.addEventListener("change", function(){
+				if(this._searchScopeSelected.checked){
+					this._saveAndUpdateDisplayedScope("selected");
+					this.setSearchScope("selected");
 				}
-				localStorage.setItem("/searchScope", this._searchScope.checked);
-				while (this._searchScopeElementWrapper.firstChild) {
-				    this._searchScopeElementWrapper.removeChild(this._searchScopeElementWrapper.firstChild);
-				}
-				this._displaySelectedSearchScope();
 			}.bind(this), false);
+			this._searchScopeAllProject.addEventListener("change", function(){
+				if(this._searchScopeAllProject.checked){
+					this._saveAndUpdateDisplayedScope("all_project");
+					this.setSearchScope("all_project");
+				}
+			}.bind(this), false);
+			this._searchScopeProject.addEventListener("change", function(){
+				if(this._searchScopeProject.checked){
+					this._saveAndUpdateDisplayedScope("project");
+					this.setSearchScope("project");
+				}
+			}.bind(this), false);
+			this._searchScopeOther.addEventListener("change", function(){
+				if(this._searchScopeOther.checked){
+					this._saveAndUpdateDisplayedScope("other");
+					this.setOtherSearchScope(this._getOtherScope());
+				}
+			}.bind(this), false);
+		},
+		
+		_saveAndUpdateDisplayedScope: function(scope){
+			localStorage.setItem("/inlineSearchScopeOption", scope);
+			while (this._searchScopeElementWrapper.firstChild) {
+			    this._searchScopeElementWrapper.removeChild(this._searchScopeElementWrapper.firstChild);
+			}
 		},
 		
 		_replaceBoxIsHidden: function() {
@@ -575,11 +654,11 @@ define([
 			this._replaceCompareDiv.classList.remove("replaceCompareDivVisible"); //$NON-NLS-0$
 		},
 		
-		_displaySelectedSearchScope: function() {
+		_displaySelectedSearchScope: function(searchLocations) {
 			var scopeElementWrapper = this._searchScopeElementWrapper;
 			lib.empty(scopeElementWrapper);
 			
-			this._searchLocations.forEach(function(searchLocation){
+			searchLocations.forEach(function(searchLocation){
 				var decodedLocation = decodeURI(searchLocation);
 				var scopeString = decodedLocation;
 				var rootName = this._fileClient.fileServiceRootURL(scopeString);
@@ -587,29 +666,22 @@ define([
 					//replace location string with file system name
 					scopeString = this._fileClient.fileServiceName(scopeString);
 				} else {
-					//set scopeString to resource name
-					var segments = scopeString.split("/");
-					if (segments) {
-						scopeString = segments.pop();
-						if (!scopeString) {
-							// scopeString ended with '/', last element in array returned by 
-							// split() was empty, pop again to get the name
-							scopeString = segments.pop();
-						}
-					}
+					scopeString = scopeString.replace(rootName, "");
 				}
-												
+				var locationElementWrapper = document.createElement("div");
+				locationElementWrapper.classList.add("locationElementWrapper");
+				
 				var locationElement = document.createElement("span"); //$NON-NLS-0$
-				locationElement.classList.add("searchScopeElement"); //$NON-NLS-0$
 				
 				locationElement.title = decodedLocation;
 				scopeElementWrapper.title = decodedLocation;
 				
-				locationElement.appendChild(document.createTextNode(scopeString));
+				locationElement.textContent = scopeString;
 				if (bidiUtils.isBidiEnabled()) {
 					locationElement.dir = bidiUtils.getTextDirection(scopeString);
 				}
-				scopeElementWrapper.appendChild(locationElement);	
+				locationElementWrapper.appendChild(locationElement);	
+				scopeElementWrapper.appendChild(locationElementWrapper);	
 			}, this);
 		},
 		
@@ -618,6 +690,14 @@ define([
 			if (inputValue) {
 				var correctedPatternArray = mSearchUtils.getFileNamePatternsArray(inputValue);
 				this._fileNamePatternsBox.setTextInputValue(correctedPatternArray.join(", ")); //$NON-NLS-0$
+			}
+		},
+		
+		_correctExcludeFilesInputValue: function() {
+			var inputValue = this._excludeFilesBox.getTextInputValue();
+			if (inputValue) {
+				var correctedExcludeFilesArray = mSearchUtils.getFileNamePatternsArray(inputValue);
+				this._excludeFilesBox.setTextInputValue(correctedExcludeFilesArray.join(", ")); //$NON-NLS-0$
 			}
 		},
 		
