@@ -92,7 +92,7 @@ define([
 		 * @callback
 		 */
 		onProjectChanged: function onProjectChanged(project, evnt, projectName) {
-			delete project.map.env;
+			//delete project.map.env;
 		},
 		/**
 		 * @name _wipeCache
@@ -104,13 +104,18 @@ define([
 		 * @param {String} fileName The short name of the file, i.e. 'package.json'
 		 */
 		_wipeCache: function _wipeCache(project, qualifileName, fileName) {
+			var folderPath = project.getProjectPath()+project.DEFINITIONS;
 			if(fileName === project.PACKAGE_JSON || fileName === project.NODE_MODULES || 
 				project.lintFiles.indexOf(fileName) > -1 || fileName === project.TERN_PROJECT) {
-					delete project.map.env;
-			}
-			var folderPath = project.getProjectPath()+project.DEFINITIONS;
-			if(qualifileName === folderPath || qualifileName.indexOf(folderPath) === 0) {
-				delete project.map.env;
+					project.projectPromise = new Deferred();
+					return computeEnvironment(project).then(/* @callback */ function(env) {
+						project.projectPromise.resolve();
+					});
+			} else if(qualifileName === folderPath || qualifileName.indexOf(folderPath) === 0) {
+				project.projectPromise = new Deferred();
+					return computeEnvironment(project).then(/* @callback */ function(env) {
+						project.projectPromise.resolve();
+					});
 			}
 		} 
 	};
@@ -458,25 +463,38 @@ define([
 	 * @since 14.0
 	 */
 	JavaScriptProject.prototype.getComputedEnvironment = function getComputedEnvironment() {
-		if(this.map.env) {
-			return new Deferred().resolve(this.map.env);
-		}
 		return this.projectPromise.then(function() {
-			this.map.env = {};
-			this.map.env.envs = {browser: true, node: true}; //always start assuming browser
-			//start with eslint options - they can carry env objects
-			return this.getESlintOptions().then(function(options) {
-				this.map.env.eslint = options;
-				if(options && options.vals && options.vals.env) {
-					Object.keys(options.vals.env).forEach(function(key) {
-						this.map.env.envs[key] = options.vals.env[key];
-					}.bind(this));
-				}
-				return guessEnvForProject(this);
-			}.bind(this));
+			if(this.map.env) {
+				return new Deferred().resolve(this.map.env);
+			}
 		}.bind(this));
 	};
-
+	
+	/**
+	 * @description Computes the environment for a given project context
+	 * @param {JavaScriptProject} project The project to compute the environment for
+	 * @since 14.0
+	 */
+	function computeEnvironment(project) {
+		project.map.env = {};
+		project.map.env.envs = {browser: true, node: true}; //always start assuming browser
+		//start with eslint options - they can carry env objects
+		return project.getESlintOptions().then(function(options) {
+			project.map.env.eslint = options;
+			if(options && options.vals && options.vals.env) {
+				Object.keys(options.vals.env).forEach(function(key) {
+					project.map.env.envs[key] = options.vals.env[key];
+				});
+			}
+			return project.getFile(this.NODE_MODULES).then(function(file) {
+				if(file && typeof file.contents === "string") {
+					project.map.env._node_modules = true;
+				}
+				return guessEnvForProject(project);
+			});
+		});
+	}
+	
 	/**
 	 * @name guessEnvForProject
 	 * @description Looking at what files are available and whats in them, guess at the current project environment
@@ -486,8 +504,8 @@ define([
 	 */
 	function guessEnvForProject(project) {
 		return project.getFile(project.TERN_PROJECT).then(function(file) {
-			project.map.env.ternproject = {file: file, vals: null};
 			if(file && typeof file.contents === "string") {
+				project.map.env.ternproject = {file: file, vals: null};
 				try {
 					var vals = JSON.parse(file.contents);
 					project.map.env.ternproject.vals = vals;
@@ -538,8 +556,8 @@ define([
 				}
 			}
 			return project.getFile(project.PACKAGE_JSON).then(function(file) {
-				project.map.env.packagejson = {file: file};
 				if(file && typeof file.contents === "string") {
+					project.map.env.packagejson = {file: file};
 					try {
 						vals = project.map.env.packagejson.vals = JSON.parse(file.contents);
 						if(vals) {
@@ -637,7 +655,10 @@ define([
 	 * @since 14.0
 	 */
 	JavaScriptProject.prototype.hasNodeModules = function hasNodeModules() {
-		return Boolean(this._node_modules);
+		if(this.map.env) {
+			return Boolean(this.map.env._node_modules);
+		}
+		return false;
 	};
 
 	/**
@@ -655,10 +676,7 @@ define([
 					delete this.ecma;
 					delete this.map[this.TERN_PROJECT];
 					delete this._node_modules;
-					return this.getFile(this.NODE_MODULES).then(function(file) {
-							if(file && typeof file.contents === "string") {
-								this._node_modules = true;
-							}
+					return computeEnvironment(this).then(/* @callback */ function(env) {
 							_handle.call(this, "onProjectChanged", this, evnt, project.Location);
 							this.projectPromise.resolve(project);
 						}.bind(this),
