@@ -102,7 +102,7 @@ define(['i18n!orion/nls/messages', 'orion/webui/littlelib', 'orion/PageUtil', 'o
 					if (links.some(function(link) {
 						var linkURL = new URL(link.href);
 						link.hash = "";
-						return pageURL.href === linkURL.href;
+						return pageURL.pathname === linkURL.pathname;
 					})) {
 						this._currentCategory = category;
 						return true;
