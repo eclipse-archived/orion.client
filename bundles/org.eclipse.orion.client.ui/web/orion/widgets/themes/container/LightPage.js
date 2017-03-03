@@ -110,9 +110,6 @@ define({
 		},
 		".editorViewerHeader": {
 			"background": "#F5F7FA !important",
-			"border-bottom-width": "1px",
-			"border-bottom-style": "solid",
-			"border-bottom-color": "#F5F7FA",
 			"color": "#152935 !important"
 		},
 		".filesystemName": {
@@ -436,6 +433,14 @@ define({
 				"background": "#3C71B3",
 				"border-color": "#3C71B3"
 			}
+		},
+		".editorTabCloseButton:hover": {
+			"background-color": "#3D72B3",
+			"color": "#FFFFFF"
+		},
+		".editorTab": {
+			"border-top": "1px solid #C4C5C8",
+			"border-right": "1px solid #C4C5C8"
 		}
 	}
 });
