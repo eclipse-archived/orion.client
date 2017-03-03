@@ -79,9 +79,9 @@ function runJavaServer(javaHome) {
 				params.push('-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=1044');
 			}
 			params.push("-Dlog.level=ALL");
-			params.push('-Declipse.application=org.jboss.tools.vscode.java.id1');
+			params.push('-Declipse.application=org.eclipse.jdt.ls.core.id1');
 			params.push('-Dosgi.bundles.defaultStartLevel=4');
-			params.push('-Declipse.product=org.jboss.tools.vscode.java.product');
+			params.push('-Declipse.product=org.eclipse.jdt.ls.core.product');
 			if (DEBUG) {
 				params.push('-Dlog.protocol=true');
 			}

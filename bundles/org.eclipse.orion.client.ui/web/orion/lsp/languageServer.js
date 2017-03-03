@@ -96,7 +96,7 @@ define([
 		},
 
 		start: function() {
-			if (this.started) return;
+			if (this.started) return new Deferred(this.capabilities);
 			this.started = true;
 			return this.lspService.start().then(function(capabilities) {
 				return this.capabilities = capabilities;
