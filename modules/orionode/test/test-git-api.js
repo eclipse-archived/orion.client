@@ -360,6 +360,29 @@ GitClient.prototype = {
 		});
 	},
 
+	/**
+	 * Pops the first entry in the stash and applies it on top of the current working tree state.
+	 * 
+	 * @param {number} [statusCode] an optional HTTP status code that will be returned by the request,
+	 *                              if not set, a 200 OK will be expected
+	 */
+	stashPop: function(statusCode) {
+		if (typeof statusCode !== 'number') {
+			statusCode = 200;
+		}
+
+		var client = this;
+		this.tasks.push(function(resolve) {
+			request()
+			.put(CONTEXT_PATH + "/gitapi/stash/file" + client.getName())
+			.expect(statusCode)
+			.end(function(err, res) {
+				assert.ifError(err);
+				client.next(resolve, res.body);
+			});
+		});
+	},
+
 	reset: function(type, id) {
 		var client = this;
 		this.tasks.push(function(resolve) {
@@ -1364,6 +1387,28 @@ maybeDescribe("git", function() {
 			}); // it("bug 512061")"
 		}); // describe("DiffLocation")
 	}); // describe("Status")
+
+	describe("Stash", function() {
+		describe("Pop", function() {
+
+			/**
+			 * Pop the stash while it is empty.
+			 */
+			it("empty stash", function(finished) {
+				var client = new GitClient("stash-pop-empty");
+				// init a new Git repository
+				client.init();
+				client.stashPop(400);
+				return client.start().then(function(body) {
+					assert.equal('Failed to apply stashed changes due to an empty stash.', body.Message);
+					finished();
+				})
+				.catch(function(err) {
+					finished(err);
+				});
+			}); // it("empty stash")"
+		}); // describe("Pop")
+	}); // describe("Stash")
 
 	describe("config", function() {
 		this.timeout(10000);
