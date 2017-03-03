@@ -52,15 +52,13 @@ define([
 	'orion/webui/tooltip',
 	'orion/bidiUtils',
 	'orion/customGlobalCommands',
-	'orion/generalPreferences',
-	'orion/breadcrumbs',
-	'orion/keyBinding'
+	'orion/generalPreferences'
 ], function(
 	messages, Sidebar, mInputManager, mCommands, mGlobalCommands,
 	mTextModelFactory, mUndoStack,
 	mFolderView, mEditorView, mPluginEditorView , mMarkdownView, mMarkdownEditor,
 	mCommandRegistry, mContentTypes, mFileClient, mFileCommands, mEditorCommands, mSelection, mStatus, mProgress, mOperationsClient, mOutliner, mDialogs, mExtensionCommands, ProjectCommands, mSearchClient,
-	EventTarget, URITemplate, i18nUtil, PageUtil, util, objects, lib, Deferred, mProjectClient, mSplitter, mTooltip, bidiUtils, mCustomGlobalCommands, mGeneralPrefs, mBreadcrumbs, mKeyBinding
+	EventTarget, URITemplate, i18nUtil, PageUtil, util, objects, lib, Deferred, mProjectClient, mSplitter, mTooltip, bidiUtils, mCustomGlobalCommands, mGeneralPrefs
 ) {
 
 var exports = {};
@@ -78,7 +76,8 @@ function MenuBar(options) {
 	this.parentNode = options.parentNode;
 	this.commandRegistry = options.commandRegistry;
 	this.serviceRegistry = options.serviceRegistry;
-	this.generalPreferences = options.generalPreferences;
+	this.preferences = options.preferences;
+	this.generalPreferences = new mGeneralPrefs.GeneralPreferences(this.preferences);
 	this.fileClient = options.fileClient;
 	this.editorCommands = options.editorCommands;
 	this.parentNode = options.parentNode;
@@ -118,7 +117,7 @@ objects.mixin(MenuBar.prototype, {
 		
 		commandRegistry.addCommandGroup(fileActionsScope, "orion.menuBarFileGroup", 1000, messages["File"], null, messages["noActions"], null, null, "dropdownSelection"); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		commandRegistry.addCommandGroup(editActionsScope, "orion.menuBarEditGroup", 100, messages["Edit"], null, messages["noActions"], null, null, "dropdownSelection"); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-		commandRegistry.addCommandGroup(viewActionsScope, "orion.menuBarViewGroup", 100, messages["View"], null, messages["noActions"], null, null, "dropdownSelection"); //$NON-NLS-1$ //$NON-NLS-2$
+		commandRegistry.addCommandGroup(viewActionsScope, "orion.menuBarViewGroup", 100, messages["View"], null, messages["noActions"], null, null, "dropdownSelection"); //$NON-NLS-1$ //$NON-NLS-2$	
 		commandRegistry.addCommandGroup(toolsActionsScope, "orion.menuBarToolsGroup", 100, messages["Tools"], null, null, null, null, "dropdownSelection"); //$NON-NLS-1$ //$NON-NLS-2$
 		
 		commandRegistry.addCommandGroup(fileActionsScope, "orion.newContentGroup", 0, messages["New"], "orion.menuBarFileGroup", null, null, null, "dropdownSelection"); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
@@ -130,22 +129,26 @@ objects.mixin(MenuBar.prototype, {
 		var commandRegistry = this.commandRegistry;
 		var fileClient = this.fileClient;
 		var editorCommands = this.editorCommands;
-		var generalPreferences = this.generalPreferences;
+		var generalPreferenes = this.generalPreferences;
 		return editorCommands.createCommands().then(function() {
 			editorCommands.registerCommands();
 			editorCommands.registerContextMenuCommands();
-			return mFileCommands.createFileCommands(serviceRegistry, commandRegistry, fileClient, generalPreferences).then(function() {
-				return mExtensionCommands.createFileCommands(serviceRegistry, null, "all", true, commandRegistry).then(function() { //$NON-NLS-0$
-					var projectClient = serviceRegistry.getService("orion.project.client"); //$NON-NLS-0$
-					return projectClient.getProjectHandlerTypes().then(function(dependencyTypes){
-						return projectClient.getProjectDeployTypes().then(function(deployTypes){
-							return ProjectCommands.createProjectCommands(serviceRegistry, commandRegistry, fileClient, projectClient, dependencyTypes, deployTypes);
-						}, function(){
-							return ProjectCommands.createProjectCommands(serviceRegistry, commandRegistry, fileClient, projectClient, dependencyTypes);
+			//get the editor prefs.
+			return generalPreferenes.getPrefs().then(function(generalPreferences) {
+				return mFileCommands.createFileCommands(serviceRegistry, commandRegistry, fileClient, generalPreferences).then(function() {
+					return mExtensionCommands.createFileCommands(serviceRegistry, null, "all", true, commandRegistry).then(function() { //$NON-NLS-0$
+						var projectClient = serviceRegistry.getService("orion.project.client"); //$NON-NLS-0$
+						return projectClient.getProjectHandlerTypes().then(function(dependencyTypes){
+							return projectClient.getProjectDeployTypes().then(function(deployTypes){
+								return ProjectCommands.createProjectCommands(serviceRegistry, commandRegistry, fileClient, projectClient, dependencyTypes, deployTypes);
+							}, function(){
+								return ProjectCommands.createProjectCommands(serviceRegistry, commandRegistry, fileClient, projectClient, dependencyTypes);
+							});
 						});
 					});
 				});
 			});
+
 		});
 	},
 	setActiveExplorer: function(explorer) {
@@ -184,16 +187,14 @@ objects.mixin(MenuBar.prototype, {
 function TextModelPool(options) {
 	this.serviceRegistry = options.serviceRegistry;
 	this.all = [];
-	this.contextID = 0;
 }
 TextModelPool.prototype = {};
 objects.mixin(TextModelPool.prototype, {
 	create: function(serviceID) {
 		var model = new mTextModelFactory.TextModelFactory().createTextModel({serviceRegistry: this.serviceRegistry});
 		var undoStack = new mUndoStack.UndoStack(model, 500);
-		serviceID += this.contextID++;
 		var contextImpl = {};
-		[
+		[	
 			"getText", //$NON-NLS-0$
 			"setText" //$NON-NLS-0$
 		].forEach(function(method) {
@@ -201,10 +202,10 @@ objects.mixin(TextModelPool.prototype, {
 		});
 		this.serviceRegistry.registerService(serviceID, contextImpl, null);
 		var result = {
+			useCount: 1,
 			model: model,
 			undoStack: undoStack,
-			serviceID: serviceID,
-			registeredViewers: {}
+			serviceID: serviceID
 		};
 		this.all.push(result);
 		return result;
@@ -212,531 +213,24 @@ objects.mixin(TextModelPool.prototype, {
 	search: function(resource) {
 		for (var i = 0; i<this.all.length; i++) {
 			var p = this.all[i];
-			if (p.metadata && p.metadata.Location === resource) {
-				return p;
-			}
+			if (p.useCount > 0 && p.metadata && p.metadata.Location === resource) return p;
 		}
 		return null;
 	},
-	registerViewer: function(pool, viewerId) {
-		if (!pool.registeredViewers.hasOwnProperty(viewerId)) {
-			pool.registeredViewers[viewerId] = true;
-		}
+	release: function(p) {
+		p.useCount--;
+		return p;
 	},
-	release: function(resource, viewerId) {
+	retain: function(p) {
+		p.useCount++;
+		return p;
+	},
+	get: function() {
 		for (var i = 0; i<this.all.length; i++) {
 			var p = this.all[i];
-			if (p.metadata && p.metadata.Location === resource) {
-				if (p.registeredViewers.hasOwnProperty(viewerId)) {
-					delete p.registeredViewers[viewerId];
-				}
-				if (Object.keys(p.registeredViewers).length === 0) {
-					p.model.destroy();
-					p.undoStack.destroy();
-					this.all.splice(i, 1);
-				}
-			}
-		}
-	}
-});
-
-function TabWidget(options) {
-	EventTarget.attach(this);
-	objects.mixin(this, options);
-	this.selectedFile = null;
-	this.commandRegistry = options.commandRegistry;
-	
-	this.fileList = [];
-	this.editorTabs = {};
-	this.breadcrumbUniquifier = "_editor_" + this.id;
-	var generalPrefs = this.generalPreferences || {};
-	this.enableEditorTabs = generalPrefs.hasOwnProperty("enableEditorTabs") ? generalPrefs.enableEditorTabs : false;
-	this.maximumEditorTabs = generalPrefs.hasOwnProperty("maximumEditorTabs") ? generalPrefs.maximumEditorTabs : 0;
-	this.beingDragged = null;
-	
-	if (!this.enableEditorTabs) {
-		this.maximumEditorTabs = 1;
-	}
-
-	// Used to hide horizontal scroll bar.
-	var editorTabScrollHider = document.createElement("div");
-	editorTabScrollHider.className = "editorTabContainerOuter";
-	editorTabScrollHider.setAttribute("role", "tablist");
-	this.parent.appendChild(editorTabScrollHider);
-	
-	var editorTabContainer = this.editorTabContainer = document.createElement("div");
-	editorTabContainer.className = "editorTabContainer";
-	editorTabContainer.id = "editorTabContainer" + this.id;
-	editorTabScrollHider.appendChild(editorTabContainer);
-
-	editorTabContainer.addEventListener("dragenter", this.dragenterListener_.bind(this));
-
-	var tabWidgetDropdownNode = this.tabWidgetDropdownNode = document.createElement("div");
-	tabWidgetDropdownNode.id = "tabWidgetDropdownNode" + this.id;
-	tabWidgetDropdownNode.className = "editorViewerTabDropdown";
-	tabWidgetDropdownNode.style.display = "none";
-	tabWidgetDropdownNode.setAttribute("aria-haspopup", "true");
-
-	this.parent.appendChild(tabWidgetDropdownNode);
-
-	if (this.enableEditorTabs) {
-		this.createDropdown_();
-		this.restoreTabsFromStorage();
-	}
-}
-
-TabWidget.prototype = {};
-objects.mixin(TabWidget.prototype, {
-	createDropdown_ : function() {
-		var fileList = this.fileList;
-		var that = this;
-		this.widgetClick = function cb() {
-			that.setWindowLocation(this.href);
-		};
-
-		var tabCommand = new mCommands.Command({
-			selectionClass: "dropdownSelection",
-			name: messages["AllTabsDropDown"],
-			imageClass: "core-sprite-list",
-			id: "orion.edit.selectEditor",
-			visableWhen: function() {
-				return true;
-			},
-			choiceCallback: function() {
-				return fileList;
-			}
-		});
-		this.commandRegistry.addCommand(tabCommand);
-		this.commandRegistry.registerCommandContribution(this.tabWidgetDropdownNode.id, "orion.edit.selectEditor", 0);
-		this.commandRegistry.renderCommands(this.tabWidgetDropdownNode.id, this.tabWidgetDropdownNode.id, this, this, "button");
-		this.registerAdditionalCommands();
-	},
-	setWindowLocation: function(href) {
-		window.location = href;
-	},
-	dragenterListener_: function(e) {
-		e.preventDefault();
-		var target = e.target;
-		var draggedNode = this.beingDragged ? this.beingDragged.node : null;
-		var insertBeforeNode = target.nextSibling;
-
-		// Drag event from outside of this widget to the tab container.
-		if (target.classList.contains("editorTabContainer") && draggedNode === null) {
-			target = target.lastChild;
-			insertBeforeNode = null;
-		}
-		var targetContainer = target.parentNode;
-		if (target.classList.contains("editorTab")) {
-			// Support for dragging between editors.
-			if (!target.parentNode.contains(draggedNode)) {
-				var evt = {type: "EditorTabTransfer", target: target, raisingId: this.id};
-				this.dispatchEvent(evt);
-
-				// Not a tab being dragged. Do nothing.
-				if (!evt.beingDragged) {
-					return;
-				}
-
-				var newTab = this.addTab(evt.beingDragged.metadata, evt.beingDragged.href);
-				evt.beingDragged.parent.removeTab(evt.beingDragged.metadata);
-
-				// add the hidden property to the newly created node.
-				draggedNode = newTab.editorTabNode;
-				draggedNode.classList.add('hideOnDrag');
-
-				targetContainer = draggedNode.parentNode;
-
-				// Update the being dragged in this class.
-				this.beingDragged = {node: draggedNode, metadata: evt.beingDragged.metadata, href: evt.beingDragged.href, parent: this};
-
-				// cleanup method after drag and drop.
-				var afterDragActions =  {
-					dragCleanup: function() {
-						draggedNode.classList.remove('hideOnDrag');
-						this.activateEditorViewer();
-						draggedNode.click();
-						this.beingDragged = null;
-					}.bind(this)
-				};
-
-				this.afterDragActions = afterDragActions;
-				evt.beingDragged.parent.afterDragActions = afterDragActions;
-
-				// Clear the dragged object from the other tabWidget
-				evt.beingDragged.parent.beingDragged = null;
-
-				// If this is the only tab, do not remove it, and do not hide it.
-				if (this.fileList.length > 1) {
-					draggedNode.parentNode.removeChild(draggedNode);
-				} else {
-					draggedNode.classList.remove('hideOnDrag');
-				}
-			} else {
-				if (target.nextSibling === draggedNode) {
-					insertBeforeNode = target;
-				}
-				target.parentNode.removeChild(draggedNode);
-			}
-
-			if (insertBeforeNode) {
-				targetContainer.insertBefore(draggedNode, insertBeforeNode);
-			} else {
-				targetContainer.appendChild(draggedNode);
-			}
-		}
-	},
-	setTabStorage: function() {
-		var mappedFiles = this.fileList.map(function(f) {
-			if (!f.metadata.Directory) {
-				return {metadata: f.metadata, href: f.href};
-			}
-		});
-		localStorage["editorTabs_" + this.id] = JSON.stringify(mappedFiles);
-	},
-	restoreTabsFromStorage: function() {
-		if (localStorage.hasOwnProperty("editorTabs_" + this.id)) {
-			try {
-				var cachedTabs = JSON.parse(localStorage["editorTabs_" + this.id]);
-				cachedTabs.forEach(function(cachedTab) {
-					if (cachedTab) {
-						this.addTab(cachedTab.metadata, cachedTab.href);
-					}
-				}.bind(this));
-			} catch (e) {
-				delete localStorage["editorTabs_" + this.id];
-			}
-		}
-	},
-	registerAdditionalCommands: function() {
-		var nextTab = new mCommands.Command({
-			name: "selectNextTab",
-			id: "orion.edit.selectNextTab",
-			visibleWhen: function() {
-				return true;
-			},
-			callback: this.selectNextTab.bind(this)
-		});
-		this.commandRegistry.addCommand(nextTab);
-
-		var previousTab = new mCommands.Command({
-			name: "selectPreviousTab",
-			id: "orion.edit.selectPreviousTab",
-			visibleWhen: function() {
-				return true;
-			},
-			callback: this.selectPreviousTab.bind(this)
-		});
-		this.commandRegistry.addCommand(previousTab);
-
-		var showTabDropdown = new mCommands.Command({
-			name: "showTabDropdown",
-			id: "orion.edit.showTabDropdown",
-			visibleWhen: function() {
-				return true;
-			},
-			callback: function() {
-				this.tabWidgetDropdownNode.firstChild.click();
-			}.bind(this)
-		});
-		this.commandRegistry.addCommand(showTabDropdown);
-
-		this.commandRegistry.registerCommandContribution(this.editorTabContainer.id , "orion.edit.selectNextTab", 0, null, true, new mKeyBinding.KeyBinding(117, true), null, this);
-		this.commandRegistry.registerCommandContribution(this.editorTabContainer.id , "orion.edit.selectPreviousTab", 0, null, true, new mKeyBinding.KeyBinding(117, true, true), null, this);
-		this.commandRegistry.registerCommandContribution(this.editorTabContainer.id , "orion.edit.showTabDropdown", 0, null, true, new mKeyBinding.KeyBinding('e', true, true), null, this);
-
-		this.commandRegistry.renderCommands(this.editorTabContainer.id, this.editorTabContainer.id, this, this, "button");
-	},
-	selectPreviousTab: function() {
-		var selectedTab = this.getCurrentEditorTabNode();
-		if (selectedTab.previousSibling !== null) {
-			selectedTab.previousSibling.click();
-		} else {
-			selectedTab.parentNode.lastChild.click();
-		}
-	},
-	selectNextTab: function() {
-		var selectedTab = this.getCurrentEditorTabNode();
-		if (selectedTab.nextSibling !== null) {
-			selectedTab.nextSibling.click();
-		} else {
-			selectedTab.parentNode.firstChild.click();
-		}
-	},
-	createTab_ : function(metadata, href) {
-		var editorTab = document.createElement("div");
-		editorTab.className = "editorTab";
-		editorTab.setAttribute("draggable", true);
-		editorTab.setAttribute("role", "tab");
-		editorTab.setAttribute("aria-controls", "editorViewerContent_Panel" + this.id);
-
-		
-		this.editorTabContainer.appendChild(editorTab);
-		
-		var dirtyIndicator = document.createElement("span");
-		dirtyIndicator.classList.add("editorViewerHeaderDirtyIndicator");
-		dirtyIndicator.textContent = "*";
-		dirtyIndicator.style.display = "none";
-		editorTab.appendChild(dirtyIndicator);
-		
-		var curFileNode = document.createElement("span");
-		curFileNode.className = "editorViewerHeaderTitle";
-		editorTab.appendChild(curFileNode);
-		var curFileNodeName = metadata.Name || "";
-		if (bidiUtils.isBidiEnabled()) {
-			curFileNodeName = bidiUtils.enforceTextDirWithUcc(curFileNodeName);
-		}
-		curFileNode.textContent = curFileNodeName;
-
-		var closeButton = document.createElement("div");
-		closeButton.className = "editorTabCloseButton";
-		// Unicode multiplication sign
-		closeButton.textContent = "\u2715";
-		closeButton.addEventListener("click", function(e) {
-			e.stopPropagation();
-
-			var tabClose = function() {
-				this.removeTab(metadata);
-				var evt = {
-					type: "TabClosed",
-					resource: metadata.Location
-				};
-				this.dispatchEvent(evt);
-			}.bind(this);
-
-			var isDirty = dirtyIndicator.style.display !== "none";
-
-			if (isDirty) {
-				if (this.selectedFile.href !== href) {
-					this.setWindowLocation(href);
-				}
-			}
-			var closingEvent = {
-				type: "TabClosing",
-				isDirty: isDirty,
-				editorTab: editorTab,
-				callback: tabClose
-			};
-
-			this.dispatchEvent(closingEvent);
-		}.bind(this));
-		editorTab.appendChild(closeButton);
-		
-		var fileNodeTooltip = new mTooltip.Tooltip({
-			node: curFileNode,
-			position: ["below", "above", "right", "left"]
-		});
-	
-		// Create breadcrumb for tooltip.
-		var localBreadcrumbNode = document.createElement("div");
-		var tipContainer = fileNodeTooltip.contentContainer();
-		tipContainer.appendChild(localBreadcrumbNode);
-		
-		var makeHref = function(segment, folderLocation, folder) {
-			var resource = folder ? folder.Location : this.fileClient.fileServiceRootURL(folderLocation);
-			segment.href = uriTemplate.expand({resource: resource});
-			if (folder) {
-				if (metadata && metadata.Location === folder.Location) {
-					segment.addEventListener("click", function() { //$NON-NLS-0$
-						if (this.sidebarNavInputManager){
-							this.sidebarNavInputManager.reveal(folder);
-						}
-					}.bind(this));
-				}
-			}
-		}.bind(this);
-		
-		var breadcrumbOptions = {
-			container: localBreadcrumbNode,
-			resource: metadata,
-			workspaceRootSegmentName: this.fileClient.fileServiceName(metadata.Location),
-			workspaceRootURL: this.fileClient.fileServiceRootURL(metadata.Location),
-			makeFinalHref: true,
-			makeHref: makeHref,
-			// This id should be unique regardless of editor views open.
-			id: "breadcrumb" + metadata.Location + this.breadcrumbUniquifier
-		};
-		
-		var breadcrumb = new mBreadcrumbs.BreadCrumbs(breadcrumbOptions);
-		
-		editorTab.addEventListener("click", function() {
-			this.setWindowLocation(href);
-		}.bind(this));
-
-		editorTab.addEventListener("dragstart", function(e) {
-			if (this.fileList.length === 1) {
-				e.preventDefault();
-				return false;
-			}
-			this.beingDragged = {node: e.target, metadata: metadata, href: href, parent: this};
-			setTimeout(function() {
-				tipContainer.parentNode.classList.add('hideOnDrag');
-				e.target.classList.add('hideOnDrag');
-			});
-		}.bind(this));
-		
-		editorTab.addEventListener("dragend", function(e) {
-			if (this.afterDragActions) {
-				setTimeout(function() {
-					this.afterDragActions.dragCleanup();
-					this.afterDragActions = null;
-				}.bind(this));
-			}
-			this.beingDragged = null;
-			tipContainer.parentNode.classList.remove('hideOnDrag');
-			e.target.classList.remove('hideOnDrag');
-		}.bind(this));
-
-		return {
-			editorTabNode: editorTab,
-			dirtyIndicatorNode: dirtyIndicator,
-			fileNameNode: curFileNode,
-			breadcrumb: breadcrumb,
-			closeButtonNode: closeButton,
-			fileNodeToolTip: fileNodeTooltip
-		};
-	},
-	getDraggedNode: function() {
-		return this.beingDragged;
-	},
-	addTab: function(metadata, href) {
-		var fileList = this.fileList;
-		var fileToAdd = null;
-		var curEditorTabNode = null;
-		var editorTab;
-		var lastCloseButton = this.getCurrentEditorCloseButtonNode();
-		
-		// Remove checkmark next to selected file, remove selected tab style.
-		if (this.selectedFile) {
-			this.selectedFile.checked = false;
-			curEditorTabNode = this.getCurrentEditorTabNode();
-			curEditorTabNode.classList.remove("focusedEditorTab");
-			curEditorTabNode.classList.remove("editorTheme");
-			curEditorTabNode.classList.remove("textview");
-			curEditorTabNode.setAttribute("aria-selected", "false");
-		}
-
-		// If the editor tab exists, reuse it.
-		if (this.editorTabs.hasOwnProperty(metadata.Location)) {
-			// Remove the item from the file list if it is present.
-			for (var i = this.fileList.length; i--;) {
-				if (this.fileList[i].metadata.Location === metadata.Location) {
-					fileToAdd = this.fileList.splice(i, 1)[0];
-					fileToAdd.checked = true;
-					editorTab = this.editorTabs[metadata.Location];
-					break;
-				}
-			}
-		} else {
-			// Store file information
-			fileToAdd = {
-				callback: this.widgetClick,
-				checked:true, 
-				href: href,
-				metadata: metadata,
-				name: metadata.Name,
-			};
-			// Create and store a new editorTab
-			editorTab = this.editorTabs[metadata.Location] = this.createTab_(metadata, href);
-		}
-
-		// Add the file to our dropdown menu
-		this.fileList.unshift(fileToAdd);
-		
-		// Style the editor tab
-		editorTab.editorTabNode.classList.add("focusedEditorTab");
-		editorTab.editorTabNode.classList.add("editorTheme");
-		editorTab.editorTabNode.classList.add("textview");
-		editorTab.editorTabNode.setAttribute("aria-selected", "true");
-
-		// Update the selected file
-		this.selectedFile = this.fileList[0];
-
-		// Enforce maximum editor tabs
-		if (this.maximumEditorTabs > 0 && fileList.length > this.maximumEditorTabs) {
-			this.removeTab(fileList[fileList.length-1].metadata);
-			this.dispatchEvent({type: "TabClosed", resource: metadata.Location});
-		}
-		
-		// Ensure it is visible
-		this.scrollToTab(editorTab.editorTabNode);
-		
-		// If we have more than one open file, display the dropdown and close button on tabs
-		if (this.fileList.length > 1) {
-			lastCloseButton.style.display = "block";
-			this.tabWidgetDropdownNode.style.display = "block";
-		} else {
-			editorTab.closeButtonNode.style.display = "none";
-		}
-		this.setTabStorage();
-		return editorTab;
-	},
-	removeTab: function(metadata) {
-		// Currently there is no support for an editor to be opened that does not have
-		// an associated file.
-		if (this.fileList.length === 1) {
-			return;
-		}
-
-		var lastHref = this.selectedFile ? this.selectedFile.href : null;
-		
-		// If the tab being removed is selected, select the next file in the list
-		if (this.selectedFile && this.selectedFile.metadata.Location === metadata.Location
-			&& this.fileList.length > 1) {
-			this.selectedFile = this.fileList[1];
-		}
-		for (var i = this.fileList.length; i--;) {
-			if (this.fileList[i].metadata.Location === metadata.Location) {
-				this.fileList.splice(i, 1);
-			}
-		}
-		
-		var tab = this.editorTabs[metadata.Location];
-		if (tab) {
-			tab.breadcrumb.destroy();
-			tab.fileNodeToolTip.destroy();
-		}
-		
-		this.editorTabContainer.removeChild(tab.editorTabNode);
-		delete this.editorTabs[metadata.Location];
-		
-		if (this.fileList.length < 2) {
-			this.tabWidgetDropdownNode.style.display = "none";
-			var closeButton = this.getCurrentEditorCloseButtonNode();
-			closeButton.style.display = "none";
-		}
-
-		if (lastHref !== this.selectedFile.href) {
-			this.activateEditorViewer();
-			this.setWindowLocation(this.selectedFile.href)
-		}
-		this.setTabStorage();
-	},
-	scrollToTab: function(tab) {
-		var sib = tab.previousSibling;
-		var offset = 30;
-		if (sib) {
-			offset = Math.floor(sib.offsetWidth / 2);
-		}
-		
-		this.editorTabContainer.scrollLeft = tab.offsetLeft - offset;
-	},
-	getCurrentTabProperty: function(propertyName) {
-		var fileMetadata = this.selectedFile && this.selectedFile.metadata ? this.selectedFile.metadata.Location : null;
-		if (this.editorTabs.hasOwnProperty(fileMetadata)) {
-			if (this.editorTabs[fileMetadata].hasOwnProperty(propertyName)) {
-				return this.editorTabs[fileMetadata][propertyName];
-			}
+			if (p.useCount === 0) return this.retain(p);
 		}
 		return null;
-	},
-	getCurrentTabDirtyIndicator: function() {
-		return this.getCurrentTabProperty("dirtyIndicatorNode");
-	},
-	getCurrentEditorTabNode: function() {
-		return this.getCurrentTabProperty("editorTabNode");
-	},
-	getCurrentEditorCloseButtonNode: function() {
-		return this.getCurrentTabProperty("closeButtonNode");
 	}
 });
 
@@ -747,7 +241,7 @@ function EditorViewer(options) {
 	this.problemsServiceID = "orion.core.marker" + this.id; //$NON-NLS-0$
 	this.editContextServiceID = "orion.edit.context" + this.id; //$NON-NLS-0$
 	this.editModelContextServiceID = "orion.edit.model.context" + this.id; //$NON-NLS-0$
-
+	
 	this.shown = true;
 
 	var domNode = this.domNode = document.createElement("div"); //$NON-NLS-0$
@@ -757,12 +251,74 @@ function EditorViewer(options) {
 	// Create the header 
 	var headerNode = this.headerNode = document.createElement("div"); //$NON-NLS-0$
 	headerNode.className = "editorViewerHeader"; //$NON-NLS-0$
-	domNode.appendChild(headerNode);
 
+	this.curFileNode = document.createElement("span"); //$NON-NLS-0$
+	this.curFileNode.className = "editorViewerHeaderTitle"; //$NON-NLS-0$
+//	this.curFileNode.style.left = "25px";
+//	this.curFileNode.style.position = "absolute";
+	headerNode.appendChild(this.curFileNode);
+	this.fileNodeTooltip = new mTooltip.Tooltip({
+		node: this.curFileNode,
+//		text: "Test Tooltip",
+		position: ["below", "above", "right", "left"] //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-4$
+	});
+
+	// Create search and filefields
+//	this.headerSearchButton = document.createElement("button"); //$NON-NLS-0$
+//	this.headerSearchButton.id = "Header Search";
+//	this.headerSearchButton.classList.add("core-sprite-search");
+//	this.headerSearchButton.style.width = "20px";
+//	
+//	this.headerSearchButton.addEventListener("click", function() { //$NON-NLS-0$
+//		this.curFileNode.style.visibility = "hidden";
+//		this.searchField.style.visibility = "visible";
+//		this.searchField.focus();
+//	}.bind(this));
+//	
+//	headerNode.appendChild(this.headerSearchButton);//	this.searchField = document.createElement("input"); //$NON-NLS-0$
+//	this.searchField.id = "fileSearchField";
+//	this.searchField.style.display = "inline-block";
+//	this.searchField.style.position = "absolute";
+//	this.searchField.style.left = "25px";
+//	this.searchField.style.width = "75%";
+//	this.searchField.style.visibility = "hidden";
+//	this.searchField.addEventListener("keyup", function(e) { //$NON-NLS-0$
+//		if(e.defaultPrevented){// If the key event was handled by other listeners and preventDefault was set on(e.g. input completion handled ENTER), we do not handle it here
+//			return;
+//		}
+//		var keyCode= e.charCode || e.keyCode;
+//		if (keyCode === lib.KEY.ENTER) {
+//			this.curFileNode.style.visibility = "visible";
+//			this.searchField.style.visibility = "hidden";
+//		} else if (keyCode === lib.KEY.ESCAPE) {
+//			this.curFileNode.style.visibility = "visible";
+//			this.searchField.style.visibility = "hidden";
+//		} else {
+//			var searchParams = {
+//				keyword: this.searchField.value,
+//				nameSearch: true,
+//				resource: "/file",
+//				rows: 100,
+//				sort: "NameLower asc",
+//				start: 0
+//			};
+//			this.searcher.search(searchParams, null, function() {
+//				var result = arguments;
+//			}.bind(this));
+//		}
+//	}.bind(this));
+//	headerNode.appendChild(this.searchField);
+
+	// Create a breadcrumb
+	this.localBreadcrumbNode = document.createElement("div"); //$NON-NLS-0$
+	var tipContainer = this.fileNodeTooltip.contentContainer();
+	tipContainer.appendChild(this.localBreadcrumbNode);
+	
+	domNode.appendChild(headerNode);
+	
 	// Create the editor content area
 	var contentNode = this.contentNode = document.createElement("div"); //$NON-NLS-0$
 	contentNode.className = "editorViewerContent"; //$NON-NLS-0$
-	contentNode.id = "editorViewerContent_Panel" + this.id;
 	domNode.appendChild(contentNode);
 	
 	if (!enableSplitEditor) {
@@ -783,7 +339,6 @@ objects.mixin(EditorViewer.prototype, {
 	create: function() {
 		this.createTextModel();
 		this.createInputManager();
-		this.createTabWidget();
 		this.createEditorView();
 	},
 	
@@ -795,49 +350,6 @@ objects.mixin(EditorViewer.prototype, {
 		this.editorView = new mEditorView.EditorView(this.defaultOptions());
 	},
 	
-	createTabWidget: function() {
-		this.tabWidget = new TabWidget({
-			parent: this.headerNode,
-			commandRegistry: this.commandRegistry,
-			id: this.id,
-			fileClient: this.fileClient,
-			generalPreferences: this.generalPreferences,
-			inputManager: this.inputManager,
-			activateEditorViewer: function() {
-				this.activateContext.setActiveEditorViewer(this);
-			}.bind(this)
-		});
-
-		this.tabWidget.addEventListener("TabClosing", function(evt) {
-			var isDirty = evt.isDirty;
-			if (isDirty) {
-				if (this.inputManager._autoSaveEnabled) {
-					this.inputManager.save();
-					evt.callback();
-				} else if (this.getOpenEditorCount(this.inputManager.getFileMetadata()) === 1) {
-					var cancelCallback = function() { return; };
-					this.inputManager.confirmUnsavedChanges(evt.callback, cancelCallback, evt.editorTab);
-				} else {
-					evt.callback();
-				}
-			} else {
-				evt.callback();
-			}
-		}.bind(this));
-
-		this.tabWidget.addEventListener("TabClosed", function(evt) {
-			this.modelPool.release(evt.resource, this.id);
-		}.bind(this));
-
-		this.tabWidget.addEventListener("EditorTabTransfer", function(evt) {
-			this.activateContext.editorViewers.forEach(function(viewer) {
-				if (viewer.tabWidget.getDraggedNode() !== null) {
-					evt.beingDragged = viewer.tabWidget.getDraggedNode();
-				}
-			});
-		}.bind(this));
-	},
-
 	createInputManager: function() {
 		var inputManager = this.inputManager = new mInputManager.InputManager({
 			serviceRegistry: this.serviceRegistry,
@@ -846,27 +358,20 @@ objects.mixin(EditorViewer.prototype, {
 			statusReporter: this.statusReporter.bind(this),
 			selection: this.selection,
 			contentTypeRegistry: this.contentTypeRegistry,
-			generalPreferences: this.generalPreferences,
-			confirm: function(message, buttonCallbackList, targetNode){
-				targetNode = targetNode || this.tabWidget.getCurrentEditorTabNode();
-				this.commandRegistry.confirmWithButtons(targetNode, message, buttonCallbackList);
+			confirm:function(message,buttonCallbackList){
+				this.commandRegistry.confirmWithButtons(this.curFileNode, message, buttonCallbackList);
 			}.bind(this),
 			reveal: function(model) {
 				this.sidebar.sidebarNavInputManager.reveal(model);
 			}.bind(this),
 			isUnsavedWarningNeeed:function(){
-				return this.getOpenEditorCount(this.inputManager.getFileMetadata()) === 1;
+				return this.getOpenEditorCount(this.inputManager.getLocation()) === 1;
 			}.bind(this)
 		});
 		inputManager.addEventListener("InputChanged", function(evt) { //$NON-NLS-0$
 			var metadata = evt.metadata;
 			if (metadata) {
 				sessionStorage.lastFile = PageUtil.hash();
-				var tabHref = evt.location.href;
-				if (!sessionStorage.lastFile) {
-					tabHref = uriTemplate.expand({resource: metadata.Location});
-				}
-				this.tabWidget.addTab(metadata, tabHref);
 			} else {
 				delete sessionStorage.lastFile;
 			}
@@ -880,21 +385,27 @@ objects.mixin(EditorViewer.prototype, {
 				this.activateContext.setActiveEditorViewer(this);
 				this.commandRegistry.processURL(href);
 			}
+			if (this.curFileNode) {
+				var curFileNodeName = evt.name || "";
+				if (bidiUtils.isBidiEnabled()) {
+					curFileNodeName = bidiUtils.enforceTextDirWithUcc(curFileNodeName);
+				}
+				this.curFileNode.textContent = curFileNodeName;				
+			}
 		}.bind(this));
 		inputManager.addEventListener("InputChanging", function(e) { //$NON-NLS-0$
 			var previousPool = this.pool;
 			var modelPool = this.modelPool;
 			var p = modelPool.search(e.input.resource);
 			if (p) {
-				this.pool = p;
-			} else {
-				p = this.pool = modelPool.create(this.editModelContextServiceID);
+				modelPool.release(this.pool);
+				this.pool = modelPool.retain(p);
+			} else if (this.pool.useCount > 1) {
+				modelPool.release(this.pool);
+				this.pool = modelPool.get();
 			}
-
-			modelPool.registerViewer(this.pool, this.id);
-
-			// If the pool has been initialized, reuse the textModel and undo stack.
-			if (this.pool.metadata) {
+			// If shared, ask input manager to reuse metadata and buffer
+			if (this.pool.useCount > 1) {
 				e.metadata = p.metadata;
 			}
 			if (previousPool !== this.pool) {
@@ -1063,24 +574,27 @@ objects.mixin(EditorViewer.prototype, {
 	},
 	
 	updateDirtyIndicator: function(){
-		if (this.editor && this.editor.isDirty) {
+		if(this.editor && this.editor.isDirty){	
 			mGlobalCommands.setDirtyIndicator(this.editor.isDirty());
 			// Update the viewer's header
-			var dirtyIndicator = this.tabWidget.getCurrentTabDirtyIndicator();
-			if (dirtyIndicator) {
-				dirtyIndicator.style.display = this.editor.isDirty() ? "block" : "none";
+			if (this.curFileNode) {
+				if (!this.dirtyIndicator) {
+					this.dirtyIndicator = document.createElement("span");
+					this.dirtyIndicator.classList.add("editorViewerHeaderDirtyIndicator");
+					this.dirtyIndicator.textContent = "*";
+					this.curFileNode.parentNode.insertBefore(this.dirtyIndicator, this.curFileNode);
+				}
+				this.dirtyIndicator.style.display = this.editor.isDirty() ? "block" : "none";
 			}
 		}
 	},
 	
-	getOpenEditorCount: function(fileMetadata){
+	getOpenEditorCount: function(fileLocation){
 		var count = 0;
 		this.activateContext.editorViewers.forEach(function(editorViewer){
-			editorViewer.tabWidget.fileList.forEach(function(file) {
-				if (file.metadata.Location === fileMetadata.Location) {
-					count++;
-				}
-			});
+			if(fileLocation === editorViewer.inputManager.getLocation()){
+				count++;
+			}
 		});
 		return count;
 	},
@@ -1140,12 +654,6 @@ objects.mixin(EditorSetup.prototype, {
 		});
 	},
 	
-	getGeneralPreferences: function() {
-		return new mGeneralPrefs.GeneralPreferences(this.preferences).getPrefs().then(function(prefs) {
-			this.generalPreferences = prefs;
-		}.bind(this));
-	},
-	
 	createBanner: function() {
 			// Do not collapse sidebar, https://bugs.eclipse.org/bugs/show_bug.cgi?id=418558
 		var collapseSidebar = false; //PageUtil.hash() !== ""
@@ -1159,7 +667,7 @@ objects.mixin(EditorSetup.prototype, {
 			editorCommands: this.editorCommands,
 			commandRegistry: this.commandRegistry,
 			serviceRegistry: this.serviceRegistry,
-			generalPreferences: this.generalPreferences
+			preferences: this.preferences
 		});
 		return menuBar.createCommands();
 	},
@@ -1341,7 +849,7 @@ objects.mixin(EditorSetup.prototype, {
 						this.setSplitterMode(MODE_PIP, locWithParams);
 				} else {
 					this.editorViewers[1].inputManager.setInput(locWithParams);
-				}
+				}				
 				break;
 		}
 	},
@@ -1361,7 +869,6 @@ objects.mixin(EditorSetup.prototype, {
 			renderToolbars: this.renderToolbars.bind(this),
 			readonly: this.readonly,
 			preferences: this.preferences,
-			generalPreferences: this.generalPreferences,
 			searcher: this.searcher,
 			selection: this.selection,
 			fileClient: this.fileClient,
@@ -1539,6 +1046,7 @@ objects.mixin(EditorSetup.prototype, {
 			delete params.resource;
 			window.location = uriTemplate.expand({resource: target.Location, params: params});
 			this.lastHash = PageUtil.hash();
+
 			this.editorInputManager.setInputManager(editorViewer.inputManager);
 			this.editorInputManager.dispatchEvent({
 				type: "InputChanged", //$NON-NLS-0$
@@ -1676,18 +1184,16 @@ exports.setUpEditor = function(serviceRegistry, pluginRegistry, preferences, rea
 			//TODO find a better way to give the selection to the navigator
 			sessionStorage.navSelection = JSON.stringify(result.navSelection);
 		}
-		setup.getGeneralPreferences().then(function() {
-			setup.createMenuBar().then(function() {
-				setup.createSideBar();
-				setup.createRunBar().then(function() {
-					setup.editorViewers.push(setup.createEditorViewer());
-					setup.setActiveEditorViewer(setup.editorViewers[0]);
-					if (enableSplitEditor) {
-						setup.createSplitMenu();
-						setup.setSplitterMode(MODE_SINGLE);
-					}
-					setup.load();
-				});
+		setup.createMenuBar().then(function() {
+			setup.createSideBar();
+			setup.createRunBar().then(function() {
+				setup.editorViewers.push(setup.createEditorViewer());
+				setup.setActiveEditorViewer(setup.editorViewers[0]);
+				if (enableSplitEditor) {
+					setup.createSplitMenu();
+					setup.setSplitterMode(MODE_SINGLE);
+				}
+				setup.load();
 			});
 		});
 	});

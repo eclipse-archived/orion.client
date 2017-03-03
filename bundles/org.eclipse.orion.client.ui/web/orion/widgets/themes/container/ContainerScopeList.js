@@ -47,6 +47,7 @@ define(['i18n!orion/settings/nls/messages'
 			display: messages["containerTheme secondary background"],
 			objPath: [
 				"styles .editorViewerHeader background",
+				"styles .editorViewerHeader border-bottom-color",
 				"styles .launchConfigurationMenuItem.dropdownMenuItemActive background",
 				"styles .sectionTable .preview_td border-bottom",
 				"styles .sidebarWrapper background",
@@ -87,8 +88,7 @@ define(['i18n!orion/settings/nls/messages'
 				"styles .tooltip color",
 				"styles .tooltip h2 color",
 				"styles .tooltip .navlinkonpage color",
-				"styles .tooltip .operationError color",
-				"styles .editorTabCloseButton:hover color"
+				"styles .tooltip .operationError color"
 			], 
 			id: "secondaryTextColor",
 			value: defaultColor
@@ -101,9 +101,6 @@ define(['i18n!orion/settings/nls/messages'
 				"styles .split background",
 				"styles .splitThumb background",
 				"styles .pageToolbar .dropdownTrigger:not(.dropdownDefaultButton) color",
-				"styles .editorTabCloseButton:hover background-color",
-				"styles .editorTab border-top",
-				"styles .editorTab border-right",
 			],
 			id: "tertiaryBackgroundColor",
 			value: defaultColor

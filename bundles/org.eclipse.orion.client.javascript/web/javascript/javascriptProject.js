@@ -70,29 +70,24 @@ define([
 			//We can read the new files and update here, but that could take longer than 
 			//would be ready for the next getComputedEnvironment call - just wipe the cache
 			//and recompute when asked for
-			this._wipeCache(project, qualifiedName, fileName);
+			if(project.importantChange(qualifiedName, fileName)) {
+				this._update(project, qualifiedName, fileName);
+			}
 		},
 		/**
 		 * @callback
 		 */
 		onDeleted: function onDeleted(project, qualifiedName, fileName) {
 			//We don't have access to the deleted contents - wipe the cache and recompute when asked for
-			this._wipeCache(project, qualifiedName, fileName);
+			if(project.importantChange(qualifiedName, fileName)) {
+				this._update(project, qualifiedName, fileName);
+			}
 		},
 		/**
 		 * @callback
 		 */
 		onModified: function onModified(project, qualifiedName, fileName) {
-			//same problem with onCreated - we could compute the delta, but that could take longer 
-			//and not be complete by the next onComputedEnvironment call, which would cause sync issues
-			//just wipe the cache
-			this._wipeCache(project, qualifiedName, fileName);
-		},
-		/**
-		 * @callback
-		 */
-		onProjectChanged: function onProjectChanged(project, evnt, projectName) {
-			//delete project.map.env;
+			project.updateNeeded = project.importantChange(qualifiedName, fileName);
 		},
 		/**
 		 * @name _wipeCache
@@ -100,23 +95,15 @@ define([
 		 * @function
 		 * @private
 		 * @param {JavaScriptProject} project The backing project
-		 * @param {String} qualifileName The fully qualified name of the file
+		 * @param {String} qualifiedName The fully qualified name of the file
 		 * @param {String} fileName The short name of the file, i.e. 'package.json'
+		 * @callback
 		 */
-		_wipeCache: function _wipeCache(project, qualifileName, fileName) {
-			var folderPath = project.getProjectPath()+project.DEFINITIONS;
-			if(fileName === project.PACKAGE_JSON || fileName === project.NODE_MODULES || 
-				project.lintFiles.indexOf(fileName) > -1 || fileName === project.TERN_PROJECT) {
-					project.projectPromise = new Deferred();
-					return computeEnvironment(project).then(/* @callback */ function(env) {
-						project.projectPromise.resolve();
-					});
-			} else if(qualifileName === folderPath || qualifileName.indexOf(folderPath) === 0) {
-				project.projectPromise = new Deferred();
-					return computeEnvironment(project).then(/* @callback */ function(env) {
-						project.projectPromise.resolve();
-					});
-			}
+		_update: function _update(project, qualifiedName, fileName) {
+			project.projectPromise = new Deferred();
+			return computeEnvironment(project).then(/* @callback */ function(env) {
+				project.projectPromise.resolve();
+			});
 		} 
 	};
 	
@@ -212,31 +199,6 @@ define([
 			return this.projectMeta.Location;
 		}
 		return null;
-	};
-
-	/**
-	 * @description Returns the current ECMA version being used in the project, or the default of 6
-	 * @function
-	 * @returns {Number} The project ECMA level or the default of 6
-	 */
-	JavaScriptProject.prototype.getEcmaLevel = function getEcmaLevel() {
-		if(this.ecma > 4 && this.ecma < 8) {
-			return new Deferred().resolve(this.ecma);
-		}
-		return this.getFile(this.TERN_PROJECT).then(function(file) {
-			this.ecma = 6;
-			if(file) {
-				try {
-					var v = JSON.parse(file.contents);
-					if(v.ecmaVersion > 4 && v.ecmaVersion < 8) {
-						this.ecma = v.ecmaVersion;
-					}
-				} catch(err) {
-					this.ecma = 6;
-				}
-			}
-			return this.ecma;
-		}.bind(this));
 	};
 
 	/**
@@ -392,31 +354,35 @@ define([
 	 * @see http://eslint.org/docs/user-guide/configuring
 	 */
 	JavaScriptProject.prototype.getESlintOptions = function getESlintOptions() {
-        var deferred = new Deferred();
 		if(this.map.eslint) {
-			return deferred.resolve(this.map.eslint);
+			return new Deferred().resolve(this.map.eslint);
 		}
-        
-        var p = [];
-        this.lintFiles.forEach(function(_name) {
-            p.push(this.getFile(_name));
+        return this.getFile(this.ESLINTRC_JS).then(function(file) {
+        	if(file && file.contents) {
+        		return readAndMap(this.map, file, "eslint", this);
+        	}
+        	return this.getFile(this.ESLINTRC_JSON).then(function(file) {
+        		if(file && file.contents) {
+	        		return readAndMap(this.map, file, "eslint", this);
+	        	}
+	        	return this.getFile(this.ESLINTRC).then(function(file) {
+	        		if(file && file.contents) {
+		        		return readAndMap(this.map, file, "eslint", this);
+		        	}
+		        	return this.getFile(this.ESLINTRC_YAML).then(function(file) {
+		        		if(file && file.contents) {
+			        		return readAndMap(this.map, file, "eslint", this);
+			        	}
+			        	return this.getFile(this.ESLINTRC_YML).then(function(file) {
+			        		if(file && file.contents) {
+				        		return readAndMap(this.map, file, "eslint", this);
+				        	}
+				        	return null;
+			        	}.bind(this));
+		        	}.bind(this)); 
+	        	}.bind(this));
+	    	}.bind(this));
         }.bind(this));
-        p.reduce(function(prev, current, index, array) {
-            return prev.then(function(_file) {
-            	if(_file && _file.contents) {
-                    var vals = readAndMap(this.map, _file, "eslint", this);
-                    if(vals) {
-                        deferred.resolve(vals);
-                        return current.reject("done");
-                    }
-                }
-                if(index === array.length-1) {
-                    deferred.resolve(null);
-                }
-                return current;
-            }.bind(this));
-        }.bind(this), new Deferred().resolve());
-        return deferred;
 	};
 
 	/**
@@ -480,8 +446,14 @@ define([
 		project.map.env.envs = {browser: true, node: true}; //always start assuming browser
 		return project.getFile(project.TERN_PROJECT).then(function(file) {
 			processTernProject(project, file);
+			if(typeof project.map.env.sourceType !== 'string'){
+				project.map.env.sourceType = 'script';
+			}
 			return project.getESlintOptions().then(function(options) {
 				processEslintOptions(project, options);
+				if(typeof project.map.env.ecma !== 'number') {
+					project.map.env.ecmaVersion = 6;
+				}
 				return project.getFile(project.NODE_MODULES).then(function(file) {
 					if(file && typeof file.contents === "string") {
 						project.map.env._node_modules = true;
@@ -554,7 +526,11 @@ define([
 					}
 				} 
 				if(typeof vals.ecmaVersion === 'number') {
-					if(vals.ecmaVersion >= 6) {
+					if(vals.ecmaVersion > 4 && vals.ecmaVersion < 8) {
+						project.map.env.envs.es6 = vals.ecmaVersion >= 6;
+						project.map.env.ecmaVersion = vals.ecmaVersion;
+					} else {
+						project.map.env.ecmaVersion = 6;
 						project.map.env.envs.es6 = true;
 					}
 				} 
@@ -576,8 +552,8 @@ define([
 	 * @since 14.0
 	 */
 	function processEslintOptions(project, options) {
-		project.map.env.eslint = options;
 		if(options && options.vals) {
+			project.map.env.eslint = options;
 			if(options.vals.env) {
 				Object.keys(options.vals.env).forEach(function(key) {
 					project.map.env.envs[key] = options.vals.env[key];
@@ -620,6 +596,11 @@ define([
 						Object.keys(vals.engines).forEach(function(key) {
 							project.map.env.envs[key] = true;
 						});
+					}
+					if(vals.eslintConfig) {
+						if(!project.map.env.eslint) {
+							project.map.env.eslint = {file: file, vals: vals.eslintConfig};
+						}
 					}
 				}
 			} catch(e) {
@@ -719,6 +700,17 @@ define([
 							this.projectPromise.resolve(project);
 						}.bind(this));
 				}
+				if(project.updateNeeded) {
+					project.updateNeeded = false;
+					return computeEnvironment(this).then(/* @callback */ function(env) {
+							_handle.call(this, "onInputChanged", this, evnt, project.Location);
+							this.projectPromise.resolve(project);
+						}.bind(this),
+						/* @callback */ function(err) {
+							_handle.call(this, "onInputChanged", this, evnt, project.Location);
+							this.projectPromise.resolve(project);
+						}.bind(this));
+				} 
 				_handle.call(this, "onInputChanged", this, evnt, project.Location);
 				this.projectPromise.resolve(project);
 			} else {

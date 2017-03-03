@@ -1059,7 +1059,7 @@ define([
 			contentType: ['application/javascript', 'text/html'], //$NON-NLS-1$ //$NON-NLS-2$
 			validationProperties: [{
 					source: "annotation:id", //$NON-NLS-1$
-					match: "^(?:unknown-require-plugin|unknown-require-not-running|missing-requirejs)$" //$NON-NLS-1$
+					match: "^(?:unknown-require-not-running|missing-requirejs)$" //$NON-NLS-1$
 				},
 				{
 					source: "readonly", //$NON-NLS-1$
@@ -1640,6 +1640,33 @@ define([
 			validationProperties: [{
 					source: "annotation:id", //$NON-NLS-1$
 					match: "^(?:check-tern-lib)$" //$NON-NLS-1$
+				},
+				{
+					source: "readonly", //$NON-NLS-1$
+					match: false
+				}
+			]
+		}
+	);
+	
+	provider.registerServiceProvider("orion.edit.command", //$NON-NLS-1$
+		{
+			/** @callback */
+			execute: function(editorContext, context) {
+				if (context.annotation.id === 'unknown-require-plugin') {
+					context.annotation.fixid = 'unknown-require-packagejson'; //$NON-NLS-1$
+				}
+				return quickFixComputer.execute(editorContext, context);
+			}
+		}, {
+			name: javascriptMessages.unknownRequirePackagejsonFixName,
+			fixAllEnabled: false,
+			scopeId: "orion.edit.quickfix", //$NON-NLS-1$
+			id: "check.tern.lib.fix.packagejson", //$NON-NLS-1$
+			contentType: ['application/javascript', 'text/html'], //$NON-NLS-1$ //$NON-NLS-2$
+			validationProperties: [{
+					source: "annotation:id", //$NON-NLS-1$
+					match: "^(?:unknown-require-plugin)$" //$NON-NLS-1$
 				},
 				{
 					source: "readonly", //$NON-NLS-1$

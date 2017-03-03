@@ -34,7 +34,7 @@ define([
 				return new Deferred().resolve(null);
 			},
 			getComputedEnvironment: function getComputedEnvironment() {
-				return new Deferred().resolve({});
+				return new Deferred().resolve({ecmaVersion: 5});
 			}
 		};
 		
