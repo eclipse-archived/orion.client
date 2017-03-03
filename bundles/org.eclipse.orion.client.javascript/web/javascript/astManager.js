@@ -63,16 +63,9 @@ define([
 				return editorContext.getText().then(function(text) {
 					var options = Object.create(null);
 					if(this.jsProject) {
-						return this.jsProject.getFile(this.jsProject.TERN_PROJECT).then(function(file) {
-							if(file && file.contents) {
-								var json = JSON.parse(file.contents);
-								if (json) {
-									options.ecmaVersion = json.ecmaVersion;
-									if (json.sourceType) {
-										options.sourceType = json.sourceType;
-									}
-								}
-							}
+						return this.jsProject.getComputedEnvironment().then(function(env) {
+							options.ecmaVersion = typeof env.ecmaVersion === 'number' ? env.ecmaVersion : 6;
+							options.sourceType = typeof env.sourceType === 'string' ? env.sourceType : "script";
 							ast = this.parse(text, metadata ? metadata.location : 'unknown', options); //$NON-NLS-1$
 							this.cache.put(loc, ast);
 							return ast;
