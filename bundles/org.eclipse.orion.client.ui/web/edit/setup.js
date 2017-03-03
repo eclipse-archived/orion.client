@@ -1618,7 +1618,10 @@ objects.mixin(EditorSetup.prototype, {
 			var currentLocation = this.editorViewers[1].inputManager.getFileMetadata().Location;
 			var rootLocation = this.fileClient.fileServiceRootURL(currentLocation);
 			this.editorViewers[1].shown = false;
-			this.editorViewers[1].inputManager.setInput(rootLocation);
+			var editorTabsEnabled = this.generalPreferences && this.generalPreferences.enableEditorTabs;
+			if (!editorTabsEnabled) {
+				this.editorViewers[1].inputManager.setInput(rootLocation);
+			}
 		}
 	},
 	createSplitMenu: function() {
