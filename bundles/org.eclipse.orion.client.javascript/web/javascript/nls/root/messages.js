@@ -125,6 +125,7 @@ define({
 	'sparseArrayFixName': 'Convert to normal array',
 	'semiFixName': 'Add missing semicolon',
 	'unknownRequirePluginFixName': 'Update project settings',
+	'unknownRequirePackagejsonFixName': 'Update package.json',
 	'radix': 'Missing radix parameter to parseInt():',
 	'radixFixName': 'Add default radix',
 	'unusedVarsUnusedFixName': 'Remove unused variable',

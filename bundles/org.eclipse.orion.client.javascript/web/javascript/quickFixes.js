@@ -450,8 +450,22 @@ define([
 					});
 				}.bind(this));
 			},
+			"unknown-require-packagejson": function(editorContext, context, astManager) {
+				return astManager.getAST(editorContext).then(function(ast) {
+					var json = {dependencies: Object.create(null)};
+					var dataName = context.annotation.data;
+					if (dataName && typeof dataName === 'object') {
+		            	dataName = dataName.data;
+		            }
+					var newPlugin = translatePluginName(dataName);
+					json.dependencies[newPlugin] = "latest";
+					return this.jsProject.updateFile(this.jsProject.PACKAGE_JSON, true, json).then(function(/*file*/) {
+						return editorContext.syntaxCheck(ast.sourceFile.name);
+					});
+				}.bind(this));
+			},
 			/** @callback fix the forbiddenExportImport rule */
-			"forbiddenExportImport" :function(editorContext, context, astManager) {
+			"forbiddenExportImport": function(editorContext, context, astManager) {
 				return astManager.getAST(editorContext).then(function(ast) {
 					var json = {sourceType: "module", ecmaVersion: 6};
 					return this.jsProject.updateFile(this.jsProject.TERN_PROJECT, true, json).then(function(/*file*/) {
