@@ -333,6 +333,19 @@ module.exports.start = function(startServer, configParams) {
 				nextWindow.webContents.executeJavaScript('closeAllTabs();');
 				api.getOrionEE().emit("open-tabs");
 			});
+			ipcMain.on("stop-search",function(event, items){
+				nextWindow.webContents.stopFindInPage('clearSelection');
+			});
+			ipcMain.on("perform-search",function(event, string){
+				nextWindow.webContents.findInPage(string);
+			});
+			nextWindow.webContents.on('found-in-page', function (event,result) {
+		        if (!result) {
+		          nextWindow.webContents.send('update', 0);
+		          return;
+		        }
+		        nextWindow.webContents.send('update', result.matches);
+		    });
 			return nextWindow;
 		}
 		startServer(function() {

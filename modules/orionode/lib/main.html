@@ -246,20 +246,35 @@ body {
 	background:rgb(60, 113, 179);
 	color:white;
 }
+.electron_search{
+	position: absolute;
+	width: 200px;
+	height: 15px;
+	top: 0;
+	right: 10px;
+	background-color: #FFFFFF !important;
+	padding: 0px;
+	z-index: 500 !important;
+}
 
 </style>
 <script type="text/javascript" src="main.js"></script>
 </head>
 <body onload="load()" class="lightPage">
+	<div id="browserSearch" class="electron_search" style="display:none">
+		<input id="search" type="text" placeholder="Search..." autofocus>
+		<span id="label"></span>
+		<a id="action">Search</a>
+	</div>	
 	<nav class="tabs" id="bar"></nav>
 	<nav>
-	  <ul id='context-menu' class="context-menu-items">
-	    <li>
-	      <span class="context-menu-item">
-	        Close Others
-	      </span>
-	    </li>
-	  </ul>
+		<ul id='context-menu' class="context-menu-items">
+		<li>
+			<span class="context-menu-item">
+			Close Others
+			</span>
+		</li>
+		</ul>
 	</nav>
 </body>
 </html>

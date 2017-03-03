@@ -19,6 +19,7 @@ function redrawButtons() {
 	var bar = document.querySelector("#bar");
 	var buttons = document.createElement("span");
 	buttons.classList.add("tabButtons");
+
 	function historyBack() {
 		var active = getActiveTab();
 		if (!active) return;
@@ -30,47 +31,48 @@ function redrawButtons() {
 		if (!active) return;
 		active.contentWindow.history.forward();
 	}
+
 	function refreshPage() {
 		var active = getActiveTab();
 		if (!active) return;
 		active.contentWindow.location.reload();
 	}
 	var back = document.createElement("button"),
-		backTitle = process.platform === "darwin"? "Back (Cmd+Left)" :"Back (Alt+Left)";
+		backTitle = process.platform === "darwin" ? "Back (Cmd+Left)" : "Back (Alt+Left)";
 	back.title = backTitle;
 	back.setAttribute("aria-label", backTitle);
 	back.textContent = "<";
 	back.classList.add("tabButton");
 	back.addEventListener("click", historyBack);
 	buttons.appendChild(back);
-	
+
 	var forward = document.createElement("button"),
-		forwardTitle = process.platform === "darwin"? "Forward (Cmd+Right)" :"Forward (Alt+Right)";
+		forwardTitle = process.platform === "darwin" ? "Forward (Cmd+Right)" : "Forward (Alt+Right)";
 	forward.title = forwardTitle;
 	forward.setAttribute("aria-label", forwardTitle);
 	forward.textContent = ">";
 	forward.classList.add("tabButton");
 	forward.addEventListener("click", historyForward);
 	buttons.appendChild(forward);
-	
+
 	var refresh = document.createElement("button"),
-		refreshTitle = process.platform === "darwin"? "Refresh (Cmd+R)" :"Refresh (Ctrl+R)";
+		refreshTitle = process.platform === "darwin" ? "Refresh (Cmd+R)" : "Refresh (Ctrl+R)";
 	refresh.title = refreshTitle;
 	refresh.setAttribute("aria-label", refreshTitle);
 	refresh.textContent = "\u27F2";
 	refresh.classList.add("tabButton");
 	refresh.addEventListener("click", refreshPage);
 	buttons.appendChild(refresh);
-	
+
 	bar.appendChild(buttons);
 	return {
-		refreshPage:refreshPage,
-		historyForward:historyForward,
-		historyBack:historyBack
+		refreshPage: refreshPage,
+		historyForward: historyForward,
+		historyBack: historyBack
 	};
 }
 
-function closeAllTabs(){
+function closeAllTabs() {
 	var tabbuttons = document.querySelectorAll(".tabItem");
 	for (var j = 0; j < tabbuttons.length; j++) {
 		tabbuttons[j].lastChild.click();
@@ -182,7 +184,7 @@ function addNewTab(id, iframe) {
 		contextSrcEl = tab;
 		evt.preventDefault();
 		menu.classList.remove(activeClassName); // Close old one 
-		positionMenu(evt);	// calculate new pisition
+		positionMenu(evt); // calculate new pisition
 		menu.classList.add(activeClassName); // Open new One
 	});
 	tabParent.appendChild(tab);
@@ -194,11 +196,12 @@ function setTabLabel(id, str) {
 	var text = tab.querySelector(".tabLabel");
 	tab.title = text.textContent = str;
 }
-function setTabIcon(id,head) {
-	var linkIconElement = Array.prototype.find.call(head.childNodes, function(node){
+
+function setTabIcon(id, head) {
+	var linkIconElement = Array.prototype.find.call(head.childNodes, function(node) {
 		return node.nodeName === 'LINK' && node.rel === 'icon';
 	});
-	if(linkIconElement && linkIconElement.href){
+	if (linkIconElement && linkIconElement.href) {
 		var tab = document.getElementById("tab" + id);
 		var icon = tab.querySelector(".tabIcon");
 		icon.src = linkIconElement.href;
@@ -227,15 +230,15 @@ function update() {
 	Array.prototype.forEach.call(items, function(tab) {
 		tab.style.flexBasis = "";
 	});
-	if(ul.lastChild){
+	if (ul.lastChild) {
 		if (bar.getBoundingClientRect().right < ul.lastChild.getBoundingClientRect().right) {
 			Array.prototype.forEach.call(items, function(tab) {
 				tab.style.flexBasis = "0";
 			});
 		}
 	}
-	if(needToCleanFrames.length > 0){
-		needToCleanFrames.forEach(function(iframe){
+	if (needToCleanFrames.length > 0) {
+		needToCleanFrames.forEach(function(iframe) {
 			iframe.parentNode.removeChild(iframe);
 		});
 		needToCleanFrames = [];
@@ -259,15 +262,64 @@ function load() {
 	});
 	registerContextMenu();
 	collectTabsUrl();
+	initiateInbrowserSearchWedget();
 }
 
-function registerElectronMenu(pageControlCallbacks, newTabCallback){
-	function switchForwardTabs(){
+function createSearchWidget() {
+	var searchWidget = document.getElementById('browserSearch');
+	if (searchWidget.style.display === "none") {
+		var inputEl = document.getElementById('search');
+		searchWidget.style.display = "";
+		inputEl.focus();
+		if (inputEl.select) {
+			inputEl.select();
+		}
+	} else {
+		searchWidget.style.display = "none";
+	}
+}
+
+function initiateInbrowserSearchWedget() {
+	var ipc = electron.ipcRenderer;
+	var inputEl = document.getElementById('search');
+	var labelEl = document.getElementById('label');
+	var highLight = document.getElementById('action');
+	var inputValue;
+	inputEl.addEventListener("keyup", function(event) {
+		event.preventDefault();
+		if (event.keyCode === 13) {
+			ipc.send('perform-search', inputValue);
+		}
+	}, false);
+	inputEl.addEventListener('input', function(event) {
+		if (!inputEl.value.length) {
+			ipc.send('stop-search');
+			labelEl.innerText = '';
+			return;
+		}
+		inputValue = inputEl.value;
+	});
+	highLight.addEventListener("click", function() {
+		ipc.send('perform-search', inputValue);
+	}, false);
+	ipc.on('update', function(event, count) {
+		if (!inputEl.value.length) return;
+		labelEl.innerText = count.toString() + ' matches';
+		inputEl.focus();
+		if (inputEl.select) {
+			inputEl.select();
+		}
+	});
+}
+
+function registerElectronMenu(pageControlCallbacks, newTabCallback) {
+	function switchForwardTabs() {
 		var activeTab = document.querySelector(".tabItem.active");
 		var nextTabButton = activeTab.nextSibling;
 		nextTabButton ? nextTabButton.click() : activeTab.parentNode.firstChild.click();
 	}
-	function switchBackwardTabs(){
+
+	function switchBackwardTabs() {
 		var activeTab = document.querySelector(".tabItem.active");
 		var previousTabButton = activeTab.previousSibling;
 		previousTabButton ? previousTabButton.click() : activeTab.parentNode.lastChild.click();
@@ -276,38 +328,64 @@ function registerElectronMenu(pageControlCallbacks, newTabCallback){
 	var menu = Menu.getApplicationMenu();
 	menu.append(new electron.remote.MenuItem( // The main purpose of creating menu if for key binding
 		{
-			label: "Navigation",  
-			submenu: [
-				{label: "Back", accelerator:process.platform === "darwin"? "CmdOrCtrl+Left" :"Alt+Left", click: pageControlCallbacks.historyBack},
-				{label: "Forward", accelerator:process.platform === "darwin"? "CmdOrCtrl+Right" :"Alt+Right", click: pageControlCallbacks.historyForward},
-				{label: "Refresh", accelerator:process.platform === "darwin"? "CmdOrCtrl+R" :"Ctrl+R", click: pageControlCallbacks.refreshPage},
-				{label: "RefreshOnF5", accelerator:process.platform === "darwin"? "" :"F5", visible:false, click: pageControlCallbacks.refreshPage},
-				{label: "New Tab", accelerator:process.platform === "darwin"? "CmdOrCtrl+T" :"Ctrl+T", click: newTabCallback.newTab},
-				{label: "Move to Next Tab", accelerator:process.platform === "darwin"? "Ctrl+Tab" :"Ctrl+Tab", click: switchForwardTabs},
-				{label: "Move to Previous Tab", accelerator:process.platform === "darwin"? "Ctrl+Shift+Tab" :"Ctrl+Shift+Tab", click: switchBackwardTabs}
-			]
+			label: "Navigation",
+			submenu: [{
+				label: "Back",
+				accelerator: process.platform === "darwin" ? "CmdOrCtrl+Left" : "Alt+Left",
+				click: pageControlCallbacks.historyBack
+			}, {
+				label: "Forward",
+				accelerator: process.platform === "darwin" ? "CmdOrCtrl+Right" : "Alt+Right",
+				click: pageControlCallbacks.historyForward
+			}, {
+				label: "Refresh",
+				accelerator: process.platform === "darwin" ? "CmdOrCtrl+R" : "Ctrl+R",
+				click: pageControlCallbacks.refreshPage
+			}, {
+				label: "RefreshOnF5",
+				accelerator: process.platform === "darwin" ? "" : "F5",
+				visible: false,
+				click: pageControlCallbacks.refreshPage
+			}, {
+				label: "New Tab",
+				accelerator: process.platform === "darwin" ? "CmdOrCtrl+T" : "Ctrl+T",
+				click: newTabCallback.newTab
+			}, {
+				label: "Move to Next Tab",
+				accelerator: process.platform === "darwin" ? "Ctrl+Tab" : "Ctrl+Tab",
+				click: switchForwardTabs
+			}, {
+				label: "Move to Previous Tab",
+				accelerator: process.platform === "darwin" ? "Ctrl+Shift+Tab" : "Ctrl+Shift+Tab",
+				click: switchBackwardTabs
+			}, {
+				label: "Search",
+				accelerator: process.platform === "darwin" ? "Ctrl+F" : "Ctrl+F",
+				click: createSearchWidget
+			}]
 		}
 	));
 	Menu.setApplicationMenu(menu);
 }
 
-function createNewTabButton(url){
+function createNewTabButton(url) {
 	var bar = document.querySelector("#bar");
 	var newTabButton = document.createElement("a"),
-		newTabButtonTitle = process.platform === "darwin"? "New Tab (⌘+T)" :"New Tab (Ctrl+T)",
+		newTabButtonTitle = process.platform === "darwin" ? "New Tab (⌘+T)" : "New Tab (Ctrl+T)",
 		newTabButtonText = "+";
-	
+
 	newTabButton.title = newTabButtonTitle;
 	newTabButton.setAttribute("aria-label", newTabButtonTitle);
 	newTabButton.innerHTML = newTabButtonText;
 	newTabButton.classList.add("openNewTab");
+
 	function newTab() {
 		createTab(url);
 	}
 	newTabButton.addEventListener("click", newTab);
 	bar.appendChild(newTabButton);
 	return {
-		newTab:newTab
+		newTab: newTab
 	};
 }
 
@@ -328,7 +406,7 @@ function createTab(url) {
 			var observer = new window.WebKitMutationObserver(function(mutations) {
 				if (mutations) {
 					setTabLabel(id, iframe.contentDocument.title);
-					setTabIcon(id,iframe.contentDocument.head);
+					setTabIcon(id, iframe.contentDocument.head);
 				}
 			});
 			observer.observe(target, {
@@ -347,9 +425,9 @@ function createTab(url) {
 	});
 	document.body.appendChild(iframe);
 	var srcUrl = nodeUrl.parse(url);
-	if(srcUrl.pathname === "/" || srcUrl.pathname.endsWith(".html")){
-		addNewTab(id, iframe);	
-	}else{
+	if (srcUrl.pathname === "/" || srcUrl.pathname.endsWith(".html")) {
+		addNewTab(id, iframe);
+	} else {
 		needToCleanFrames.push(iframe);
 	}
 }
@@ -357,29 +435,29 @@ function createTab(url) {
 function registerContextMenu() {
 	var menu = document.querySelector("#context-menu");
 	var menuitem = document.querySelector(".context-menu-item");
-	menuitem.addEventListener("mouseover", function(){
+	menuitem.addEventListener("mouseover", function() {
 		menuitem.classList.add('context-menu-item-selected');
 	});
-	menuitem.addEventListener("mouseleave", function(){
+	menuitem.addEventListener("mouseleave", function() {
 		menuitem.classList.remove('context-menu-item-selected');
 	});
 	// Register on document to make sure click on empty spaces after the tab buttons can close the context menu as well.
-	document.addEventListener("click", function(evt) { 
+	document.addEventListener("click", function(evt) {
 		if (clickInsideElement(evt, 'context-menu-item')) {
 			var correspondingiframeId = 'iframe' + contextSrcEl.id.substr(3);
-			var corrspondingiframe = document.querySelector('#'+correspondingiframeId);
+			var corrspondingiframe = document.querySelector('#' + correspondingiframeId);
 			// Remove all the other tab buttons first
 			var allTabButtons = document.querySelectorAll('.tabs > ul > li');
 			var alliframes = document.querySelectorAll('.tabContent');
-			if(allTabButtons.length > 1){
+			if (allTabButtons.length > 1) {
 				Array.prototype.forEach.call(allTabButtons, function(eachOne) {
-					if(eachOne.id !== contextSrcEl.id){
+					if (eachOne.id !== contextSrcEl.id) {
 						contextSrcEl.parentNode.removeChild(eachOne);
 					}
 				});
 				Array.prototype.forEach.call(alliframes, function(eachOne) {
-					if(eachOne.nodeName === 'IFRAME' && eachOne.id !== correspondingiframeId){
-						 corrspondingiframe.parentNode.removeChild(eachOne);
+					if (eachOne.nodeName === 'IFRAME' && eachOne.id !== correspondingiframeId) {
+						corrspondingiframe.parentNode.removeChild(eachOne);
 					}
 				});
 				update();
@@ -390,6 +468,7 @@ function registerContextMenu() {
 		menu.classList.remove('context-menu-items-open');
 	});
 }
+
 function clickInsideElement(e, className) {
 	var el = e.srcElement || e.target;
 	if (el.classList.contains(className)) {
@@ -433,6 +512,7 @@ function positionMenu(e) {
 		menu.style.top = clickCoordsY + "px";
 	}
 }
+
 function getPosition(e) {
 	var posx = 0;
 	var posy = 0;
@@ -451,11 +531,12 @@ function getPosition(e) {
 		y: posy
 	};
 }
-function collectTabsUrl(){
+
+function collectTabsUrl() {
 	var ipcRenderer = electron.ipcRenderer;
-	ipcRenderer.on('collect-tabs-info',function(event, arg){
+	ipcRenderer.on('collect-tabs-info', function(event, arg) {
 		var iframes = document.querySelectorAll(".tabContent");
-		var tabUrls = Array.prototype.map.call(iframes,function(iframe){
+		var tabUrls = Array.prototype.map.call(iframes, function(iframe) {
 			return iframe.contentWindow.location.href.replace(/http:\/\/localhost:\w+\//, "");
 		});
 		ipcRenderer.send("collected-tabs-info-" + arg, tabUrls);
