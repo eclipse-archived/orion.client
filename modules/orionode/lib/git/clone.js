@@ -94,6 +94,12 @@ function getRepoByPath(filePath,workspaceDir) {
 		if (filePath.length <= workspaceDir) return Promise.reject(new Error("Forbidden"));
 	}
  	var ceiling = path.dirname(workspaceDir);
+ 	if (!fs.statSync(filePath).isDirectory()) {
+		var index = filePath.lastIndexOf('/');
+		if (index !== -1) {
+			filePath = filePath.substring(0, index);
+		}
+	}
 	return git.Repository.discover(filePath, 0, ceiling).then(function(buf) {
 		return git.Repository.open(buf.toString());
 	});
