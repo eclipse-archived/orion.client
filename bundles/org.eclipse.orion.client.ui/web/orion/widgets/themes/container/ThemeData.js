@@ -41,7 +41,7 @@ define([
 		ThemeData.prototype.getStyles = getStyles;
 		
 		function getProtectedThemes() {
-			return ["lightPage", "orionPage"];
+			return ["Light", "Dark"];
 		}
 
 		ThemeData.prototype.getProtectedThemes = getProtectedThemes;
