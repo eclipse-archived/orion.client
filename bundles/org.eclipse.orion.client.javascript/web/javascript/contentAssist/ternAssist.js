@@ -260,7 +260,7 @@ define([
         proposal.name = proposal.proposal = completion.name;
         if(typeof completion.type !== 'undefined') {
             if(/^fn/.test(completion.type)) {
-            	proposal.tags = [{cssClass: 'iconFunction'}];
+            	proposal.tags = [{cssClass: /^[A-Z]/.test(proposal.name) ? 'iconClass' : 'iconFunction'}];
             	calculateFunctionProposal(completion, args, proposal);
             } else if(completion.type === 'template' || completion.type === 'jsdoc_template') {
             	var prefix = proposal.prefix;
