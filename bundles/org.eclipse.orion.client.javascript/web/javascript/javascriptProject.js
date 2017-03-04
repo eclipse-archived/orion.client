@@ -700,8 +700,8 @@ define([
 							this.projectPromise.resolve(project);
 						}.bind(this));
 				}
-				if(project.updateNeeded) {
-					project.updateNeeded = false;
+				if(this.updateNeeded) {
+					delete this.updateNeeded;
 					return computeEnvironment(this).then(/* @callback */ function(env) {
 							_handle.call(this, "onInputChanged", this, evnt, project.Location);
 							this.projectPromise.resolve(project);
