@@ -37,7 +37,7 @@ define([
 			cornFlowerblue  String      String      String
 			----------------------------------------------- */
 		
-		var defaultFont = '"Source Code Pro", "Consolas", "Monaco", "Vera Mono", monospace'; //$NON-NLS-0$
+		var defaultFont = '"Consolas", "Monaco", "Vera Mono", monospace'; //$NON-NLS-0$
 		var defaultFontSize = '12px'; //$NON-NLS-0$
 		var prospecto, darker, ceol;
 
@@ -486,8 +486,8 @@ define([
 							}
 						}
 					},
-					"fontFamily": "\"Source Code Pro\", \"Consolas\", \"Monaco\", \"Vera Mono\", monospace",
-					"fontSize": "12px",
+					"fontFamily": defaultFont,
+					"fontSize": defaultFontSize,
 					"keyword": {
 						"control": {
 							"color": "#a7fae6",
