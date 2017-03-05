@@ -53,7 +53,7 @@ define([
 		remoteImport: function(/*targetLocation, options*/) {
 			throw new Error("Not supported"); //$NON-NLS-0$ 
 		},
-		remoteExport: function(/*sourceLocation, options) {
+		remoteExport: function(/*sourceLocation, options*/) {
 			throw new Error("Not supported"); //$NON-NLS-0$ 
 		},
 		readBlob: function(/*fLocation*/) {
