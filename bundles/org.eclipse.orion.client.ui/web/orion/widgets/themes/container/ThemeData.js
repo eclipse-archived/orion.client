@@ -47,10 +47,11 @@ define([
 		ThemeData.prototype.getProtectedThemes = getProtectedThemes;
 		
 		function getThemeStorageInfo(){
+			var useLightTheme = document.body.classList.contains("lightPage"); //$NON-NLS-0$
 			return {
 				storage: '/themes',
 				styleset: 'containerStyles',
-				defaultTheme: 'lightPage',
+				defaultTheme: useLightTheme ? 'Light' : 'Dark', //$NON-NLS-1$  //$NON-NLS-0$
 				selectedKey: 'containerSelected',
 				version: THEMES_VERSION
 			};
