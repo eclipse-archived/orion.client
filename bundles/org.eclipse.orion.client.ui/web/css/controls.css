@@ -289,6 +289,16 @@ textarea.parameterInput {
 	width: 50em;
 }
 
+div.parameterInput[contenteditable="true"] {
+	width: 30em;
+	display: inline-block;
+	background-color: white;	
+}
+
+div.parameterInput[contenteditable="true"]:before {
+    content: "\feff ";
+}
+
 .parameterPopup {
 	min-width: 15em;
 	max-width: 100em;
