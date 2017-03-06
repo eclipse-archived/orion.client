@@ -206,8 +206,8 @@ try {
 		.then(function(stats) {
 			/*eslint consistent-return:0*/
 			if (stats.isDirectory()) {
-				if (filename[0] === ".") {
-					// do not search hidden dirs like .git
+				if (filename === ".git") {
+					// do not search .git no matter what
 					return;
 				}
 				if (filePath.substring(filePath.length-1) !== path.sep) {
