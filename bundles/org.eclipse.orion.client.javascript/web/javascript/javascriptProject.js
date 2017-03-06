@@ -87,19 +87,7 @@ define([
 		 * @callback
 		 */
 		onModified: function onModified(project, qualifiedName, fileName) {
-			this.updateNeeded = project.importantChange(qualifiedName, fileName);
-			if(this.updateNeeded && !this.inEditor) {
-				this._update(project);
-			}
-		},
-		/**
-		 * @callback
-		 */
-		onInputChange: function onInputChanged(project, evnt, projectName) {
-			this.inEditor = project.importantChange(evnt.file.location, evnt.file.name);
-			if(this.updateNeeded && !this.inEditor) {
-				this._update(project);
-			}
+			project.updateNeeded = project.importantChange(qualifiedName, fileName);
 		},
 		/**
 		 * @name _wipeCache
@@ -269,7 +257,11 @@ define([
 	 * @returns {Deferred} A deferred to resolve once loading has completed
 	 */
 	JavaScriptProject.prototype.initFrom = function initFrom(path) {
-		if(!initialized) {
+		var refresh = false;
+		if(this.projectMeta && path.indexOf(this.projectMeta.Location) < 0) {
+			refresh = true;
+		}
+		if(!initialized || refresh) {
 			initialized = true;
 			return this.getFileClient().read(path, true, false, {readIfExists: true}).then(function(child) {
 				if(child) {
@@ -456,10 +448,19 @@ define([
 	 * @since 14.0
 	 */
 	JavaScriptProject.prototype.getComputedEnvironment = function getComputedEnvironment() {
+		if(!this.projectPromise) {
+			return new Deferred().reject("The project has not been initialized");
+		}
 		return this.projectPromise.then(function() {
-			if(this.map.env) {
-				return new Deferred().resolve(this.map.env);
+			if(this.updateNeeded) {
+				this.projectPromise = new Deferred();
+				this.updateNeeded = false;
+				return computeEnvironment(this, true).then(function() {
+					this.projectPromise.resolve();
+					return this.map.env;
+				}.bind(this));
 			}
+			return this.map.env;
 		}.bind(this));
 	};
 	
@@ -728,12 +729,9 @@ define([
 							this.projectPromise.resolve(project);
 						}.bind(this));
 				}
-				return this.projectPromise.then(/* @callback */ function() {
-						_handle.call(this, "onInputChanged", this, evnt, project.Location);
-					}.bind(this),
-					/* @callback */ function(err) {
-						_handle.call(this, "onInputChanged", this, evnt, project.Location);
-					}.bind(this));
+				return this.projectPromise.then(function() {
+					_handle.call(this, "onInputChanged", this, evnt, project.Location);
+				}.bind(this)); 
 			}
 			_handle.call(this, "onProjectChanged", this, evnt, null);
 			this.projectPromise.resolve(null);
@@ -749,26 +747,23 @@ define([
 	 */
 	function resolveProject(file) {
 		var deferred = new Deferred();
-        this.projectPromise = new Deferred();
 		if(file) {
             var floc = file.Location ? file.Location : file.location; 
 			if(this.projectMeta && floc && floc.startsWith(this.projectMeta.Location)) {
-				deferred.resolve(this.projectMeta);
-				return deferred;
+				return deferred.resolve(this.projectMeta);
 			}
+			this.projectPromise = new Deferred();
 			var parents = file.parents ? file.parents : file.Parents;
-			if(!Array.isArray(parents) || parents.length < 1) {
-				deferred.resolve({Location: "/file/"});
-			} else {
-				this.getFileClient().getProject(floc, {names: [this.PACKAGE_JSON, this.TERN_PROJECT]}).then(function(project) {
-					if(project) {
-						return deferred.resolve({Location: project.Location});
-					}
-					fallbackProjectResolve.call(this, deferred, parents);
-				}.bind(this), /* @callback */ function reject(err) {
-					fallbackProjectResolve.call(this, deferred, parents);
-				}.bind(this));
-			}
+			this.getFileClient().getProject(floc, {names: [this.PACKAGE_JSON, this.TERN_PROJECT]}).then(function(project) {
+				if(project) {
+					return deferred.resolve({Location: project.Location});
+				}
+				fallbackProjectResolve.call(this, deferred, parents);
+			}.bind(this), /* @callback */ function reject(err) {
+				fallbackProjectResolve.call(this, deferred, parents);
+			}.bind(this));
+		} else {
+			return deferred.resolve(null);
 		}
 		return deferred;
 	}
