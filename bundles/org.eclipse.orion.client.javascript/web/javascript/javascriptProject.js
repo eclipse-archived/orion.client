@@ -71,16 +71,16 @@ define([
 			//would be ready for the next getComputedEnvironment call - just wipe the cache
 			//and recompute when asked for
 			if(project.importantChange(qualifiedName, fileName)) {
-				this._update(project, qualifiedName, fileName);
+				this._update(project);
 			}
 		},
 		/**
 		 * @callback
 		 */
 		onDeleted: function onDeleted(project, qualifiedName, fileName) {
-			//We don't have access to the deleted contents - wipe the cache and recompute when asked for
+			//We don't have access to the deleted contents - wipe the cache and recompute
 			if(project.importantChange(qualifiedName, fileName)) {
-				this._update(project, qualifiedName, fileName);
+				this._update(project);
 			}
 		},
 		/**
@@ -95,13 +95,10 @@ define([
 		 * @function
 		 * @private
 		 * @param {JavaScriptProject} project The backing project
-		 * @param {String} qualifiedName The fully qualified name of the file
-		 * @param {String} fileName The short name of the file, i.e. 'package.json'
-		 * @callback
 		 */
-		_update: function _update(project, qualifiedName, fileName) {
+		_update: function _update(project) {
 			project.projectPromise = new Deferred();
-			return computeEnvironment(project).then(/* @callback */ function(env) {
+			return computeEnvironment(project, true).then(/* @callback */ function(env) {
 				project.projectPromise.resolve();
 			});
 		} 
@@ -251,8 +248,20 @@ define([
 		});
 	};
 
+	/**
+	 * @name JavaScriptProject.prototype.initFrom
+	 * @description Callback used to start the tooling from a non-plugin context - for example running the 'Show Problems'
+	 * command on a folder prior to opening a JS file
+	 * @function
+	 * @param {String} path The file path that the tooling started from
+	 * @returns {Deferred} A deferred to resolve once loading has completed
+	 */
 	JavaScriptProject.prototype.initFrom = function initFrom(path) {
-		if(!initialized) {
+		var refresh = false;
+		if(this.projectMeta && path.indexOf(this.projectMeta.Location) < 0) {
+			refresh = true;
+		}
+		if(!initialized || refresh) {
 			initialized = true;
 			return this.getFileClient().read(path, true, false, {readIfExists: true}).then(function(child) {
 				if(child) {
@@ -320,6 +329,13 @@ define([
 		}
 	}
 
+	/**
+	 * @name _merge
+	 * @description Merges the source and the destination
+	 * @private
+	 * @param {Array.<?>} source The source array
+	 * @param {Array.<?>} dest The destination to merge to
+	 */
 	function _merge(source, dest) {
 		Object.keys(source).forEach(function(key) {
 			if(Array.isArray(dest[key]) && Array.isArray(source[key])) {
@@ -417,6 +433,9 @@ define([
 		if(this.projectFiles.indexOf(filename) > -1) {
 			return true;
 		}
+		if(this.NODE_MODULES === filename) {
+			return true;
+		}
 		var folderPath = this.getProjectPath()+this.DEFINITIONS;
 		return qualifiedName === folderPath || qualifiedName.indexOf(folderPath) === 0;
 	};
@@ -429,10 +448,19 @@ define([
 	 * @since 14.0
 	 */
 	JavaScriptProject.prototype.getComputedEnvironment = function getComputedEnvironment() {
+		if(!this.projectPromise) {
+			return new Deferred().reject("The project has not been initialized");
+		}
 		return this.projectPromise.then(function() {
-			if(this.map.env) {
-				return new Deferred().resolve(this.map.env);
+			if(this.updateNeeded) {
+				this.projectPromise = new Deferred();
+				this.updateNeeded = false;
+				return computeEnvironment(this, true).then(function() {
+					this.projectPromise.resolve();
+					return this.map.env;
+				}.bind(this));
 			}
+			return this.map.env;
 		}.bind(this));
 	};
 	
@@ -441,7 +469,10 @@ define([
 	 * @param {JavaScriptProject} project The project to compute the environment for
 	 * @since 14.0
 	 */
-	function computeEnvironment(project) {
+	function computeEnvironment(project, update) {
+		if(!update) {
+			return new Deferred().resolve(project.map.env);
+		}
 		project.map.env = {};
 		project.map.env.envs = {browser: true, node: true}; //always start assuming browser
 		return project.getFile(project.TERN_PROJECT).then(function(file) {
@@ -451,7 +482,7 @@ define([
 			}
 			return project.getESlintOptions().then(function(options) {
 				processEslintOptions(project, options);
-				if(typeof project.map.env.ecma !== 'number') {
+				if(typeof project.map.env.ecmaVersion !== 'number') {
 					project.map.env.ecmaVersion = 6;
 				}
 				return project.getFile(project.NODE_MODULES).then(function(file) {
@@ -684,14 +715,12 @@ define([
 	JavaScriptProject.prototype.onInputChanged = function onInputChanged(evnt) {
 		initialized = true;
 		var file = evnt.file;
-		resolveProject.call(this, file).then(function(project) {
+		return resolveProject.call(this, file).then(function(project) {
 			if (project) {
 				if(!this.projectMeta || project.Location !== this.projectMeta.Location) {
 					this.projectMeta = project;
-					delete this.ecma;
 					delete this.map[this.TERN_PROJECT];
-					delete this._node_modules;
-					return computeEnvironment(this).then(/* @callback */ function(env) {
+					return computeEnvironment(this, true).then(/* @callback */ function(env) {
 							_handle.call(this, "onProjectChanged", this, evnt, project.Location);
 							this.projectPromise.resolve(project);
 						}.bind(this),
@@ -700,24 +729,12 @@ define([
 							this.projectPromise.resolve(project);
 						}.bind(this));
 				}
-				if(project.updateNeeded) {
-					project.updateNeeded = false;
-					return computeEnvironment(this).then(/* @callback */ function(env) {
-							_handle.call(this, "onInputChanged", this, evnt, project.Location);
-							this.projectPromise.resolve(project);
-						}.bind(this),
-						/* @callback */ function(err) {
-							_handle.call(this, "onInputChanged", this, evnt, project.Location);
-							this.projectPromise.resolve(project);
-						}.bind(this));
-				} 
-				_handle.call(this, "onInputChanged", this, evnt, project.Location);
-				this.projectPromise.resolve(project);
-			} else {
-				delete this.ecma;
-				_handle.call(this, "onProjectChanged", this, evnt, null);
-				this.projectPromise.resolve(null);
+				return this.projectPromise.then(function() {
+					_handle.call(this, "onInputChanged", this, evnt, project.Location);
+				}.bind(this)); 
 			}
+			_handle.call(this, "onProjectChanged", this, evnt, null);
+			this.projectPromise.resolve(null);
 		}.bind(this));
 	};
 
@@ -730,26 +747,23 @@ define([
 	 */
 	function resolveProject(file) {
 		var deferred = new Deferred();
-        this.projectPromise = new Deferred();
 		if(file) {
             var floc = file.Location ? file.Location : file.location; 
 			if(this.projectMeta && floc && floc.startsWith(this.projectMeta.Location)) {
-				deferred.resolve(this.projectMeta);
-				return deferred;
+				return deferred.resolve(this.projectMeta);
 			}
+			this.projectPromise = new Deferred();
 			var parents = file.parents ? file.parents : file.Parents;
-			if(!Array.isArray(parents) || parents.length < 1) {
-				deferred.resolve({Location: "/file/"});
-			} else {
-				this.getFileClient().getProject(floc, {names: [this.PACKAGE_JSON, this.TERN_PROJECT]}).then(function(project) {
-					if(project) {
-						return deferred.resolve({Location: project.Location});
-					}
-					fallbackProjectResolve.call(this, deferred, parents);
-				}.bind(this), /* @callback */ function reject(err) {
-					fallbackProjectResolve.call(this, deferred, parents);
-				}.bind(this));
-			}
+			this.getFileClient().getProject(floc, {names: [this.PACKAGE_JSON, this.TERN_PROJECT]}).then(function(project) {
+				if(project) {
+					return deferred.resolve({Location: project.Location});
+				}
+				fallbackProjectResolve.call(this, deferred, parents);
+			}.bind(this), /* @callback */ function reject(err) {
+				fallbackProjectResolve.call(this, deferred, parents);
+			}.bind(this));
+		} else {
+			return deferred.resolve(null);
 		}
 		return deferred;
 	}
@@ -812,17 +826,11 @@ define([
 					case 'onCreated': {
 						n = file.result ? file.result.Name : undefined;
 						f = file.result ? file.result.Location : undefined;
-						if(n === this.NODE_MODULES && Boolean(file.result.Directory)) {
-							this._node_modules = true;
-						}
 						break;
 					}
 					case 'onDeleted': {
 						f = file.deleteLocation;
 						n = _shortName(file.deleteLocation);
-						if(f.lastIndexOf(this.NODE_MODULES)+this.NODE_MODULES.length-1 === f.length-2) {
-							delete this._node_modules;
-						}
 						break;
 					}
 					case 'onModified': {
@@ -835,12 +843,6 @@ define([
 						toN = file.result ? file.result.Name : undefined;
 						n = _shortName(file.source);
 						f = file.source;
-						if(f.lastIndexOf(this.NODE_MODULES) + this.NODE_MODULES.length-1 === f.length-2) {
-							delete this._node_modules;
-						}
-						if(file.result && file.result.Name === this.NODE_MODULES && Boolean(file.result.Directory)) {
-							this._node_modules = true;
-						}
 						break;
 					}
 				}

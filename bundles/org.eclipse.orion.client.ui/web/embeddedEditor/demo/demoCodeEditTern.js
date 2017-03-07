@@ -110,7 +110,7 @@ Deferred) {
 	var files2import = [
 		{
 			name: ".tern-project",
-			contents:'//{"sourceType": "module","ecmaVersion": 6}'
+			contents:'{"sourceType": "module","ecmaVersion": 6}'
 		},
 		{
 			name: ".eslintrc",
@@ -153,7 +153,7 @@ Deferred) {
 	codeEdit.startup().then(function() {
 		document.getElementById("progressMessageDiv").textContent = "Plugins loaded!";
 		files2import[1].contents = JSON.stringify(ruleData, undefined, 4);
-		files2import = [];
+		//files2import = [];
 		codeEdit.importFiles(files2import).then(function(/*results*/) {
 			startup();
 			codeEdit.exportFiles(files2export).then(function(exportResults) {

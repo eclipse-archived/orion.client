@@ -55,6 +55,7 @@ define([
 	var defaultPluginURLs = [
 		"../javascript/plugins/javascriptPlugin.html",
 		"../webtools/plugins/webToolsPlugin.html",
+		"../others/plugins/languages/json/jsonPlugin.html",
 		"../plugins/embeddedToolingPlugin.html"
 	];
 

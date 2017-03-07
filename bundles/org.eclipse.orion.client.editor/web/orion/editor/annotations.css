@@ -221,11 +221,11 @@
 	border: 1px solid #42a7cc;
 }
 .annotationOverview.readOccurrence {
-	background-color: lightgray;
+	background-color: #CACACA;
 	border: 1px solid black;
 }
 .annotationOverview.writeOccurrence {
-	background-color: Gold;
+	background-color: #ECD099;
 	border: 1px solid darkred;
 }
 .annotationOverview.currentBlame {
@@ -266,7 +266,7 @@
 }
 .annotationRange.warning {
 	/* images/squiggly_warning.png */
-	background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAQAAAADCAYAAAC09K7GAAAAAXNSR0IArs4c6QAAAAZiS0dEAP8A/wD/oL2nkwAAAAlwSFlzAAALEwAACxMBAJqcGAAAAAd0SU1FB9sJFhQXEbhTg7YAAAAZdEVYdENvbW1lbnQAQ3JlYXRlZCB3aXRoIEdJTVBXgQ4XAAAAMklEQVQI12NkgIIvJ3QXMjAwdDN+OaEbysDA4MPAwNDNwMCwiOHLCd1zX07o6kBVGQEAKBANtobskNMAAAAASUVORK5CYII=");
+	background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAQAAAADCAYAAAC09K7GAAAAHklEQVQYV2NkgIJN9Yr//RrvMzKC+DAOiGaEcWAqAWNbDlVEJTbrAAAAAElFTkSuQmCC");
 }
 .annotationRange.info {
 	/* images/squiggly_breakpoint.png */
@@ -279,10 +279,10 @@
 	background-color: #00FE00;
 }
 .annotationRange.readOccurrence {
-	background-color: lightgray;
+	background-color: #CACACA;
 }
 .annotationRange.writeOccurrence {
-	background-color: yellow;
+	background-color: #ECD099;
 }
 .annotationRange.matchingSearch {
 	background-color: #C3E1FF;

@@ -360,6 +360,29 @@ GitClient.prototype = {
 		});
 	},
 
+	/**
+	 * Pops the first entry in the stash and applies it on top of the current working tree state.
+	 * 
+	 * @param {number} [statusCode] an optional HTTP status code that will be returned by the request,
+	 *                              if not set, a 200 OK will be expected
+	 */
+	stashPop: function(statusCode) {
+		if (typeof statusCode !== 'number') {
+			statusCode = 200;
+		}
+
+		var client = this;
+		this.tasks.push(function(resolve) {
+			request()
+			.put(CONTEXT_PATH + "/gitapi/stash/file" + client.getName())
+			.expect(statusCode)
+			.end(function(err, res) {
+				assert.ifError(err);
+				client.next(resolve, res.body);
+			});
+		});
+	},
+
 	reset: function(type, id) {
 		var client = this;
 		this.tasks.push(function(resolve) {
@@ -384,6 +407,22 @@ GitClient.prototype = {
 			.post(CONTEXT_PATH + "/gitapi/commit/HEAD/file/" + client.getName())
 			.send({
 				Merge: branchToMerge
+			})
+			.expect(200)
+			.end(function(err, res) {
+				assert.ifError(err);
+				client.next(resolve, res.body);
+			});
+		});
+	},
+
+	cherryPick: function(commitSHA) {
+		var client = this;
+		this.tasks.push(function(resolve) {
+			request()
+			.post(CONTEXT_PATH + "/gitapi/commit/HEAD/file/" + client.getName())
+			.send({
+				"Cherry-Pick": commitSHA
 			})
 			.expect(200)
 			.end(function(err, res) {
@@ -1080,6 +1119,59 @@ maybeDescribe("git", function() {
 		}); // describe("Conflicts")
 	}); // describe("Merge")
 
+	describe("Cherry-Pick", function() {
+		before(setup);
+
+		describe("Conflicts", function() {
+			it("CONFLICTING result returned", function(finished) {
+				var name = "conflicts.txt";
+				var initial;
+
+				var client = new GitClient("cherry-pick-conflicts");
+				client.init();
+				// init file with content A
+				client.setFileContents(name, "A");
+				// stage and commit
+				client.stage(name);
+				client.commit();
+
+				return client.start().then(function(commit) {
+					initial = commit.Id;
+					// set file to content B
+					client.setFileContents(name, "B");
+					// stage and commit
+					client.stage(name);
+					client.commit();
+					return client.start();
+				})
+				.then(function(commit) {
+					// reset back to original content A
+					client.reset("HARD", initial);
+					// set file to content C
+					client.setFileContents(name, "C");
+					// stage and commit
+					client.stage(name);
+					client.commit();
+					client.cherryPick(commit.Id);
+					return client.start();
+				})
+				.then(function(body) {
+					assert.equal(body.HeadUpdated, true);
+					assert.equal(body.Result, "CONFLICTING");
+
+					client.status("CHERRY_PICKING");
+					return client.start();
+				})
+				.then(function() {
+					finished();
+				})
+				.catch(function(err) {
+					finished(err);
+				});
+			});
+		}); // describe("Conflicts")
+	}); // describe("Cherry-Pick")
+
 	describe("Log", function() {
 		before(setup);
 
@@ -1364,6 +1456,28 @@ maybeDescribe("git", function() {
 			}); // it("bug 512061")"
 		}); // describe("DiffLocation")
 	}); // describe("Status")
+
+	describe("Stash", function() {
+		describe("Pop", function() {
+
+			/**
+			 * Pop the stash while it is empty.
+			 */
+			it("empty stash", function(finished) {
+				var client = new GitClient("stash-pop-empty");
+				// init a new Git repository
+				client.init();
+				client.stashPop(400);
+				return client.start().then(function(body) {
+					assert.equal('Failed to apply stashed changes due to an empty stash.', body.Message);
+					finished();
+				})
+				.catch(function(err) {
+					finished(err);
+				});
+			}); // it("empty stash")"
+		}); // describe("Pop")
+	}); // describe("Stash")
 
 	describe("config", function() {
 		this.timeout(10000);

@@ -277,17 +277,7 @@ button.dismissButton.parameterInput {
 
 /* Adjust default sizes and layout for certain types */
 input.parameterInput[type=url] {
-	width: 30em;	
-}
-
-div.parameterInput[contenteditable="true"] {
 	width: 30em;
-	display: inline-block;
-	background-color: white;	
-}
-
-div.parameterInput[contenteditable="true"]:before {
-    content: "\feff ";
 }
 
 input.parameterInput[type=checkbox] {

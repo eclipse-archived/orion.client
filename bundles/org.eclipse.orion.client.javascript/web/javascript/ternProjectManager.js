@@ -233,7 +233,9 @@ define([
 		 * @callback 
 		 */
 		onInputChanged: function onInputChanged(jsProject, evnt, projectName) {
-			this.ineditor = jsProject.importantChange(evnt.file.location, evnt.file.name);
+			var loc = evnt.file.location ? evnt.file.location : evnt.file.Location,
+				_name = evnt.file.name ? evnt.file.name : evnt.file.Name;
+			this.ineditor = jsProject.importantChange(loc, _name);
 			if(this.modified && !this.ineditor) {
 				this.modified = false;
 				this.starting();
@@ -252,7 +254,9 @@ define([
 		 */
 		onProjectChanged: function onProjectChanged(jsProject, evnt, projectName) {
 			this.projectLocation = projectName;
-			this.ineditor = this.modified = jsProject.importantChange(evnt.file.location, evnt.file.name);
+			var loc = evnt.file.location ? evnt.file.location : evnt.file.Location,
+				_name = evnt.file.name ? evnt.file.name : evnt.file.Name;
+			this.ineditor = this.modified = jsProject.importantChange(loc, _name);
 			this.scriptResolver.setSearchLocation(projectName);
 			if(!this.ineditor) {
 				this.starting();

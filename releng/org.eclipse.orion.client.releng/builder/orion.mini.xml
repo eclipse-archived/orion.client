@@ -300,6 +300,7 @@
 			<copy file="${orionClient}/bundles/org.eclipse.orion.client.ui/web/embeddedEditor/plugins/jslintPlugin.html" tofile="${out}/codeEdit/others/plugins/jslintPlugin.html" />
 			<copy file="${orionClient}/bundles/org.eclipse.orion.client.javascript/web/javascript/plugins/ternWorker.js" tofile="${out}/codeEdit/javascript/plugins/ternWorker.js" />
 			<copy file="${orionClient}/bundles/org.eclipse.orion.client.core/web/orion/require-config.js" tofile="${out}/codeEdit/orion/require-config.js" />
+			<copy file="${orionClient}/bundles/org.eclipse.orion.client.core/web/orion/requireErrorHandler.js" tofile="${out}/codeEdit/orion/requireErrorHandler.js" />
 			<copy file="${orionClient}/bundles/org.eclipse.orion.client.core/web/requirejs/require.min.js" tofile="${out}/codeEdit/requirejs/require.min.js" />
 			<copy file="${orionClient}/bundles/org.eclipse.orion.client.ui/web/embeddedEditor/plugins/javascriptPlugin.html" tofile="${out}/codeEdit/javascript/plugins/javascriptPlugin.html" />
 			<copy file="${orionClient}/bundles/org.eclipse.orion.client.ui/web/embeddedEditor/plugins/webToolsPlugin.html" tofile="${out}/codeEdit/webtools/plugins/webToolsPlugin.html" />

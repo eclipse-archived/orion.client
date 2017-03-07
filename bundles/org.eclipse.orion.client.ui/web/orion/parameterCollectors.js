@@ -11,8 +11,8 @@
  *******************************************************************************/
 /*eslint-env browser, amd*/
 
-define(['i18n!orion/nls/messages', 'orion/webui/littlelib', 'orion/bidiUtils', 'orion/bidiFormat'], 
-        function(messages, lib, bidiUtils, bidiFormat) {
+define(['i18n!orion/nls/messages', 'orion/webui/littlelib', 'orion/bidiUtils'], 
+        function(messages, lib, bidiUtils) {
 
 	
 	/**
@@ -135,10 +135,6 @@ define(['i18n!orion/nls/messages', 'orion/webui/littlelib', 'orion/bidiUtils', '
 					if (!validate(field.parameterName, field.checked, field)) {
 						return true;
 					}
-				} else if (field.type === "url" && field.nodeName === "DIV") { //$NON-NLS-0$
-					if (!validate(field.parameterName, field.textContent.trim(), field)) {
-						return true;
-					}
 				} else if (field.type !== "button") { //$NON-NLS-0$
 					if (!validate(field.parameterName, field.value.trim(), field)) {
 						return true;
@@ -156,10 +152,6 @@ define(['i18n!orion/nls/messages', 'orion/webui/littlelib', 'orion/bidiUtils', '
 			}
 			
 			if (lib.$$array("textArea", parent).some(isValid)) {  //$NON-NLS-0$
-				return false;
-			}
-			
-			if (lib.$$array("div", parent).some(isValid)) {  //$NON-NLS-0$
 				return false;
 			}
 			
@@ -277,24 +269,16 @@ define(['i18n!orion/nls/messages', 'orion/webui/littlelib', 'orion/bidiUtils', '
 							}
 						}
 					} else {
-						var isSTT = (bidiUtils.isBidiEnabled() && parm.type === "url"); //$NON-NLS-0$
 						if (!field) {
-							field = (!isSTT ? document.createElement("input") : document.createElement("div")); //$NON-NLS-0$
+							field = document.createElement("input"); //$NON-NLS-0$
 							field.type = parm.type;
-							field.id = id;
-							if (isSTT) {
-								field.contentEditable = true;							
-							}
+							field.id = id;							
 							parent.appendChild(field);
 						}
 						if (parm.value) {
-							if (!isSTT) {
-								field.value = parm.value;
-							} else {
-								field.innerHTML = bidiFormat.getHtml(parm.value, "url", {}, false, "en");								
-							}
-						}					
-						(!isSTT ? bidiUtils.initInputField(field) : bidiFormat.attach(field, "url", {}, false, "en"));
+							field.value = parm.value;
+						}
+						bidiUtils.initInputField(field);
 					}
 					field.classList.add("parameterInput"); //$NON-NLS-0$
 					// for fun
