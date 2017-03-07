@@ -47,7 +47,7 @@ TaskStoreInMemory.prototype = {
 	}
 };
 
-var TaskStoreMongoDB = function() {
+var TaskStoreMongoDB = function(callback) {
 	this._mongoose = require("mongoose");
 	var taskSchema = new this._mongoose.Schema({
 		id: {
@@ -82,7 +82,17 @@ var TaskStoreMongoDB = function() {
 	});
 	
 	this._orionTask = this._mongoose.model("orionTask", taskSchema);
-	if (!this._mongoose.connection.readyState) {
+	if (this._mongoose.connection.readyState) {
+		/* connection already successfully established */
+		callback(null, this);
+	} else {
+		/* connect to mongo */
+		var db = this._mongoose.connection;
+		db.once('error', callback);
+		db.once('open', function() {
+			db.removeListener('error', callback);
+			callback(null, this);
+		}.bind(this));
 		this._mongoose.connect('mongodb://localhost/orion_multitenant');
 	}
 };
@@ -147,7 +157,14 @@ function orionTasksAPI(options) {
 		if (options.singleUser) {
 			taskStore = new TaskStoreInMemory();
 		} else {
-			taskStore = new TaskStoreMongoDB();
+			new TaskStoreMongoDB(function(error, result) {
+				if (error) {
+					/* fall back to in-memory task store */
+					taskStore = new TaskStoreInMemory();
+				} else {
+					taskStore = result;
+				}
+			});
 		}
 	}
 
