@@ -68,7 +68,7 @@ define([
 							}
 						},
 						"writeOccurrence": {
-							"backgroundColor": "#ffff00"
+							"backgroundColor": "#ECD099"
 						}
 					},
 					"backgroundColor": "#ffffff",
