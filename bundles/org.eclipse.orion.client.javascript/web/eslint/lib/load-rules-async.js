@@ -2256,6 +2256,10 @@ define([
         				if(args.length === 1) {
         					var lib = args[0];
         					if(lib.type === "Literal") { //we don't check relative libs
+        						if(typeof lib.value !== 'string' || (typeof lib.value == 'string' && !lib.value.trim())) {
+        							//don't mark empty strings or non-strings
+        							return;
+        						}
         						if(lib.value.charAt(0) !== '.') {
 	        						var tern = context.getTern();
 	        						if(tern.file.ast && tern.file.ast.environments) {
