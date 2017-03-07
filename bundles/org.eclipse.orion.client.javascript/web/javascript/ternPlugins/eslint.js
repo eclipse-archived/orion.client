@@ -177,12 +177,13 @@ define([
 	 * @since 13.0
 	 */
 	var _tern = {
-		init: function init(server, file) {
+		init: function init(server, file, config) {
 			this.server = server;
 			this.plugins = server.options.plugins;
 			this.optionalPlugins = server.options.optionalPlugins;
 			this.optionalDefs = server.options.optionalDefs;
 			this.file = file;
+			this.config = config;
 		},
 		/**
 		 * @name hasFile
@@ -266,15 +267,22 @@ define([
 				}
 			}
 		},
-		libKnown: function libKnown(name) {
+		/**
+		 * @name libKnown
+		 * @description Checks if the library with the given name is known to Tern or the computed environment
+		 * @function
+		 * @param {string} libName The name of the library
+		 * @returns {bool} True if the library name if known, false otherwise
+		 */
+		libKnown: function libKnown(libName) {
 			if(this.server.mod && this.server.mod.modules) {
-				if(this.server.mod.modules.knownModules && this.server.mod.modules.knownModules[name]) {
+				if(this.server.mod.modules.knownModules && this.server.mod.modules.knownModules[libName]) {
 					return true;
 				}
 				var keys = Object.keys(this.server.mod.modules.modules);
 				for(var i = 0, len = keys.length; i < len; i++) {
 					var mod = this.server.mod.modules.modules[keys[i]];
-					if(mod && mod.modName === name) {
+					if(mod && mod.modName === libName) {
 						return true;
 					}
 				}
@@ -283,9 +291,16 @@ define([
 				keys = Object.keys(this.server.mod.requireJS.interfaces);
 				for(i = 0, len = keys.length; i < len; i++) {
 					mod = this.server.mod.requireJS.interfaces[keys[i]];
-					if(mod && mod.reqName === name) {
+					if(mod && mod.reqName === libName) {
 						return true;
 					}
+				}
+			}
+			//@see https://bugs.eclipse.org/bugs/show_bug.cgi?id=512833
+			//if the computed environment includes the lib, don't nag about it
+			if(this.config && this.config.env) {
+				if(this.config.env[libName]) {
+					return true;
 				}
 			}
 			return false;
@@ -317,7 +332,7 @@ define([
 		run: function(server, query, file) {
 			var config = query.config;
 			config.tern = _tern;
-			_tern.init(server, file);
+			_tern.init(server, file, config);
 			if (!config.parserOptions) {
 				var parserOptions = Object.create(null);
 				parserOptions.ecmaVersion = server.options.ecmaVersion;

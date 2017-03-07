@@ -1653,7 +1653,7 @@ define([
 		{
 			/** @callback */
 			execute: function(editorContext, context) {
-				if (context.annotation.id === 'unknown-require-plugin') {
+				if (context.annotation.id === 'unknown-require-plugin' || context.annotation.id === 'unknown-require') {
 					context.annotation.fixid = 'unknown-require-packagejson'; //$NON-NLS-1$
 				}
 				return quickFixComputer.execute(editorContext, context);
@@ -1666,7 +1666,7 @@ define([
 			contentType: ['application/javascript', 'text/html'], //$NON-NLS-1$ //$NON-NLS-2$
 			validationProperties: [{
 					source: "annotation:id", //$NON-NLS-1$
-					match: "^(?:unknown-require-plugin)$" //$NON-NLS-1$
+					match: "^(?:unknown-require-plugin|unknown-require)$" //$NON-NLS-1$
 				},
 				{
 					source: "readonly", //$NON-NLS-1$
