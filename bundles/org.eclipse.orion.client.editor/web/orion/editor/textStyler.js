@@ -1068,25 +1068,27 @@ define("orion/editor/textStyler", ['orion/editor/annotations', 'orion/editor/eve
 		},
 		getStyles: function(offset) {
 			var result = [];
-			var model = this._view.getModel();
-			if (model.getBaseModel) {
-				model = model.getBaseModel();
-			}
-			var block = this._findBlock(this._rootBlock, offset);
-			var lineIndex = model.getLineAtOffset(offset);
-			var lineText = model.getLine(lineIndex);
-			var styles = [];
-			this._stylerAdapter.parse(lineText, model.getLineStart(lineIndex), 0, block, styles);
-			var style = styles[binarySearch(styles, offset, true)];
-			if (style && style.start <= offset && offset < style.end) {
-				result.push(style);
-			}
-			while (block) {
-				style = this._stylerAdapter.computeStyle(block, model, offset);
-				if (style) {
-					result.splice(0, 0, style);
+			if (this._view) {
+				var model = this._view.getModel();
+				if (model.getBaseModel) {
+					model = model.getBaseModel();
 				}
-				block = block.parent;
+				var block = this._findBlock(this._rootBlock, offset);
+				var lineIndex = model.getLineAtOffset(offset);
+				var lineText = model.getLine(lineIndex);
+				var styles = [];
+				this._stylerAdapter.parse(lineText, model.getLineStart(lineIndex), 0, block, styles);
+				var style = styles[binarySearch(styles, offset, true)];
+				if (style && style.start <= offset && offset < style.end) {
+					result.push(style);
+				}
+				while (block) {
+					style = this._stylerAdapter.computeStyle(block, model, offset);
+					if (style) {
+						result.splice(0, 0, style);
+					}
+					block = block.parent;
+				}
 			}
 			return result;
 		},
