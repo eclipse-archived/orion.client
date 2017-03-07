@@ -51,6 +51,7 @@ define([
 			//is set from project nav not via arguments
 			this.filteredResources = filteredResources;
 		}
+		this.filter = new FileFilter(this.filteredResources);
 	}
 	FileModel.prototype = new mExplorer.ExplorerModel();
 	objects.mixin(FileModel.prototype, /** @lends orion.explorer.FileModel.prototype */ {
@@ -68,8 +69,8 @@ define([
 				var filtered = [];
 				children.forEach(function(child) {
 					var exclude = child.Directory ? this.excludeFolders : this.excludeFiles;
-					if(this.filteredResources) {
-						exclude = exclude || this.filteredResources[child.Name];
+					if(this.filteredResources && this.filter) {
+						exclude = exclude || this.filter.isFiltered(child.Name);
 					}
 					if (!exclude) {
 						filtered.push(child);
@@ -154,6 +155,62 @@ define([
 	});
 
 	FileModel.prototype.constructor = FileModel;
+
+	/**
+	 * String matcher used by FileModel
+	 * @param {string[]} filteredResources - file names or patterns to filter, where a pattern may contain:
+	 * 										 	* to match one or more characters in a path segment
+	 * 											? to match on one character in a path segment
+	 */
+	function FileFilter(filteredResources) {
+		this.fileRegex_ = [];
+		this.fileLookup_ = {};
+		this.create_(filteredResources);
+	}
+	
+	objects.mixin(FileFilter.prototype, /** @lends orion.explorer.FileFilter.prototype */ {
+		create_: function(filteredResources) {
+			if (filteredResources) {
+				Object.keys(filteredResources).forEach(function(resourceName) {
+					if (this.isExpression_(resourceName)) {
+						this.fileRegex_.push(this.buildExpression_(resourceName));
+					} else {
+						this.fileLookup_[resourceName] = true;
+					}
+				}.bind(this));
+			}
+		},
+		isExpression_: function(fileFilter) {
+			if (fileFilter) {
+				return fileFilter.includes("*") || fileFilter.includes("?");
+			}
+			return false;
+		},
+		buildExpression_: function(fileFilter) {
+			// Escape all regular expression characters except for * and .
+			var escaped = fileFilter.replace(/[\-\[\]\/\{\}\(\)\+\.\\\^\$\|\,\#]/g, "\\$&");
+			// Replace * with .*
+			escaped = escaped.replace(/\*/g, ".+");
+			// Replace ? with .
+			escaped = escaped.replace(/\?/g, ".");
+			// Add ^ and $ to the string
+			return new RegExp("^" + escaped + "$");
+		},
+		isFilteredByRegex_: function(fileName) {
+			for (var i=0; i<this.fileRegex_.length; i++) {
+				if (this.fileRegex_[i].test(fileName)) {
+					return true;
+				}
+			}
+			return false;
+		},
+		isFiltered: function(fileName) {
+			if (this.fileLookup_.hasOwnProperty(fileName)) {
+				return true;
+			}
+			return this.isFilteredByRegex_(fileName);
+		}
+	});
 
 
 	/**
@@ -1390,6 +1447,7 @@ define([
 	//return module exports
 	return {
 		FileExplorer: FileExplorer,
-		FileModel: FileModel
+		FileModel: FileModel,
+		FileFilter: FileFilter,
 	};
 });
