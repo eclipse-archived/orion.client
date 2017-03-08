@@ -31,6 +31,12 @@ define([
 ], function(messages, sharedMessages, Deferred, mExplorer, lib, mSearchCrawler, extensionCommands, mCommands, navigatorRenderer, objects, mSyntaxchecker, 
 			mTextModel, mFileDetailRenderer, mUiUtils, i18nUtil) {
     
+	var cate2sevMap = {
+		"category_errors_id": "error",
+		"category_info_id": "info",
+		"category_warnings_id": "warning"
+	};
+
     /**
      * @description Adds the given node to the parent at the given position
      * @private
@@ -54,15 +60,17 @@ define([
 	 * @param {Boolean} isError If the icon should be the error icon
 	 * @param {String} additionalCss The class name of any additional CSS to use
 	 */
-	function getDetailDecoratorIcon(holderDiv, isError, additionalCss){
+	function getDetailDecoratorIcon(holderDiv, severity, additionalCss){
 		var icon = document.createElement("div");
 		
 		icon.classList.add("problemsDecorator"); //$NON-NLS-1$
 		if(additionalCss) {
 			icon.classList.add(additionalCss);
 		}
-		if(isError) {
+		if(severity === "error") {
 			icon.classList.add("problemsError"); //$NON-NLS-1$
+		} else if(severity === "info") {
+			icon.classList.add("problemsInfo"); //$NON-NLS-1$
 		} else {
 			icon.classList.add("problemsWarning"); //$NON-NLS-1$
 		}
@@ -112,17 +120,21 @@ define([
 	 */
 	function processProblemsByType(totalProblems) {
 		var errorsParent = {children: [], type: "category", location: "category_errors_id", name: messages["Errors"]},  //$NON-NLS-1$ //$NON-NLS-2$
+		infoParent = {children: [], type: "category", location: "category_info_id", name: messages["Info"]},  //$NON-NLS-1$ //$NON-NLS-2$
 		warningsParent = {children: [], type: "category", location: "category_warnings_id", name: messages["Warnings"]}; //$NON-NLS-1$ //$NON-NLS-2$
 		totalProblems.forEach(function(child) {
 			if(child.severity === "warning") {
 				child.parent = warningsParent;
 				warningsParent.children.push(child);
+			} else if(child.severity === "info"){
+				child.parent = infoParent;
+				infoParent.children.push(child);
 			} else {
 				child.parent = errorsParent;
 				errorsParent.children.push(child);
 			}
 		});
-		return [errorsParent, warningsParent];
+		return [errorsParent, warningsParent, infoParent];
 	}
 	/**
 	 * @description Set the file to problem relationships for the given problems and files
@@ -714,10 +726,10 @@ define([
 					if (item.type === "category") {
 						td.classList.add("problemsDecoratorTDTitle"); //$NON-NLS-1$
 						this.getExpandImage(tableRow, div);
-						getDetailDecoratorIcon(div, item.location === "category_errors_id");
+						getDetailDecoratorIcon(div, cate2sevMap[item.location]);
 					} else if (item.type === "problem") {
  						td.classList.add("problemsDecoratorTD"); //$NON-NLS-1$
-						getDetailDecoratorIcon(div, item.severity === "error");
+						getDetailDecoratorIcon(div, item.severity);
  					}
 					return td;
 				case 1:
@@ -805,7 +817,7 @@ define([
     	 * @param {Element} spanHolder The span to decorate
     	 */
     	generateDetailDecorator: function(item, spanHolder) {
-			getDetailDecoratorIcon(spanHolder, item.severity === "error", "problemsDecoratorLessMargin"); //$NON-NLS-1$
+			getDetailDecoratorIcon(spanHolder, item.severity, "problemsDecoratorLessMargin"); //$NON-NLS-1$
 	    }
 	});
 	
