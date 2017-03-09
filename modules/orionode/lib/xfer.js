@@ -179,7 +179,10 @@ function completeTransfer(req, res, tempFile, filePath, fileName, xferOptions, s
 					}
 					var writeStream = fs.createWriteStream(outputName);
 					writeStream.on('error', function(err) {
-						reportTransferFailure(res, err);
+						if (res) {
+							reportTransferFailure(res, err);
+							res = null;
+						}
 					});
 					entry.pipe(writeStream);
 				} else if (type === "Directory") {
@@ -191,13 +194,27 @@ function completeTransfer(req, res, tempFile, filePath, fileName, xferOptions, s
 				entry.autodrain();
 			}
 		})
+		.on('error', function(error) {
+			if (res) {
+				res.status(400).json({
+					Severity: "Error",
+					HttpCode:400,
+					Code: 0,
+					Message: "Failed during file unzip: " + error.message
+				}).end();
+				res = null;
+			}
+		})
 		.on('close', function() {
 			fs.unlink(tempFile);
-			if (failed.length) {
-				return overrideError(failed);
+			if (res) {
+				if (failed.length) {
+					return overrideError(failed);
+				}
+				res.setHeader("Location", fileRoot + filePath.substring(req.user.workspaceDir.length));
+				res.status(201).end();
+				res = null;
 			}
-			res.setHeader("Location", fileRoot + filePath.substring(req.user.workspaceDir.length));
-			res.status(201).end();
 		});
 	} else {
 		var file = path.join(filePath, fileName);

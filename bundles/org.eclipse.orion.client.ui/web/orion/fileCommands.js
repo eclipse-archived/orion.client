@@ -136,7 +136,7 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/i18n
 					}
 					if (result.Severity === "Error") {
 						if (handlers && handlers.error) {
-							handlers.error();
+							handlers.error(result);
 							return;
 						}
 						errorHandler(result);

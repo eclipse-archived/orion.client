@@ -351,19 +351,16 @@ define([
 			if (!/(\.js)$/.test(modulePath)) {
 				fileToLoad += ".js";
 			}
-			if (!/(\.js)$/.test(modulePath)) {
-				fileToLoad += ".js";
-			}
-			return fileclient.read(filePath).then(function(contents) {
+			return fileclient.read(fileToLoad, false, false, {readIfExists: true}).then(function(contents) {
 					if (contents) {
 						response.args.contents = contents;
-						ternWorker.postMessage(response);
-					} else {
-						_nodeRead(response, moduleName, filePath, fileclient, "No contents", depth, false);
+						response.args.file = fileToLoad;
+						return ternWorker.postMessage(response);
 					}
+					_failedRead(response, moduleName, 'Could not read module: ' + moduleName);
 				},
 				function(err) {
-					_nodeRead(response, moduleName, filePath, fileclient, err, depth, false);
+					_failedRead(response, moduleName, err);
 				});
 		}
 		return fileclient.read(modulePath + "/package.json", false, false, {

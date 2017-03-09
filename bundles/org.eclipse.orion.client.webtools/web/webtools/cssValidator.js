@@ -23,9 +23,9 @@ define("webtools/cssValidator", [
 		// Define the default values for the rules
 		// 0:off, 1:warning, 2:error 3:info
 		rules: {
-			"adjoining-classes" : 3,
+			"adjoining-classes" : 0,
 			"box-model" : 3,
-			"box-sizing" : 3,
+			"box-sizing" : 0,
 			"bulletproof-font-face" : 3,
 			"compatible-vendor-prefixes" : 3,
 			"display-property-grouping" : 3,
@@ -40,13 +40,13 @@ define("webtools/cssValidator", [
 			"ids" : 3,
 			"import" : 3,
 			"important" : 3,
-			"known-properties" : 3,
+			"known-properties" : 1,
 			"outline-none" : 3,
 			"overqualified-elements" : 3,
 			"qualified-headings" : 3,
 			"regex-selectors" : 3,
 			"rules-count" : 3,
-			"selector-max-approaching" : 3,
+			"selector-max-approaching" : 0,
 			"selector-max" : 3,
 			"shorthand" : 3,
 			"star-property-hack" : 3,
