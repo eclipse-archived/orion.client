@@ -142,7 +142,7 @@
 }
 
 .searchResultsWrapperDiv {
-	height: calc(100% - 220px - 46px); /* subtract height of search options*/
+	height: calc(100% - 220px - 97px); /* subtract height of search options*/
 	transition: height 0.2s ease; /* avoid extra scroll bar while switching between search and replace modes */
 	width: 100%;
 	overflow: auto;
@@ -185,8 +185,7 @@
 }
 
 .replaceWrapperHidden {
-	max-height: 0; /* for transition */
-	overflow: hidden;
+	display: none;
 }
 
 .fileNamePatternsTextInput {
@@ -202,7 +201,8 @@
 	opacity: 0;
 	text-align: center;
 	transition: opacity 0.1s ease;
-	width: 252px;
+	min-width: 252px;
+	text-align: left;
 }
 
 .fileNamePatternsHintVisible {
@@ -211,11 +211,13 @@
 
 .fileNamePatternsInput {
 	margin: 0;
+	min-width:270px;
 }
 
 .toggleDisplayLink {
 	display: block;
 	margin: 0;
+	white-space: nowrap;
 }
 
 .toggleDisplayLink.linkHidden {
@@ -229,6 +231,9 @@
 
 .searchMainOptionBlock {
 	margin: 5px 10px 0 10px;
+	display: flex;
+	flex-direction: column;
+	flex-wrap: nowrap;
 }
 
 .searchMainOptionBlock input[type="text"]:disabled {
@@ -236,9 +241,13 @@
 }
 
 .searchOptionBlock {
-	margin: 15px 10px;
+	margin: 0 10px 10px 10px;
 	min-width: 254px;
 	width: calc(100% - 20px);
+}
+.searchGeneralOptionBlock{
+	margin-left: 4px;
+	flex-shrink: 0;
 }
 
 .searchOption {
@@ -259,41 +268,35 @@
 .searchLabel {
 	margin: 1px 0;
 }
-
-.searchCheckboxLabel {
-	vertical-align: middle;
+.scopeLabel{
+	padding-right: 3px;
+    padding-top: 8px;
+ 	flex-shrink: 0;
 }
-
-.searchCheckbox {
-	margin: 4px 0 0 5px;
+.searchOptionControlButton {
 	vertical-align: middle;
+	background-color: rgba(0, 0, 0, 0);
+    border-width: 1px;
+    border-style: solid;
+    border-color: #3C71B3;
+    color: #3C71B3;
+    padding: 3px;
 }
 
 .searchScopeInputWrapper {
 	background-color: whitesmoke;
 	border: 1px solid lightgray;
 	border-radius: 3px;
-	display: inline-block;
+	display: flex;
 	white-space: nowrap;
+	flex-grow: 1;
+	min-width:272px;
 }
 
 .searchScopeElementWrapper {
 	display: inline-block;
-	width: 224px;
-}
-
-.searchScopeElement {
-	color: #222;
-	cursor: initial;
-	display: inline-block;
-	font-weight: normal;
-	margin: 0 5px;
-	overflow: hidden;
-	padding: 0;
-	max-width: 100%; /* prevents span from overflowing parent */
-	text-overflow: ellipsis;
-	vertical-align: bottom;
-	white-space: nowrap;
+	min-width: 245px;
+	flex-grow:1;
 }
 
 .commandButton.searchScopeSelectButton {
@@ -305,8 +308,11 @@
 	font-size: 12px;
 	margin: 0;
 	padding: 6px;
-	text-transform: none;
-	vertical-align: baseline;
+}
+
+.commandButton.core-sprite-outline.searchScopeSelectButton{
+	color: white;
+    background-color: #7fa4c0;
 }
 
 .searchButton > span {
@@ -317,16 +323,15 @@
 .commandButton.comboTextInputButton.searchButton {
 	background-color: #7fa4c0;
 	padding: 3px 5px 5px 5px;
+	z-index: 1;
+}
+
+.commandButton.comboTextInputButton.searchButton:hover span{
+	color: black;
 }
 
 .commandButton.comboTextInputButton.searchButton.isHidden {
 	padding: 3px 0 5px 0;
-}
-
-.replaceWrapper > .comboTextInputWrapper > .comboTextInputButton {
-	background-color: #7fa4c0;
-	color: white;
-	padding: 7px 10px;
 }
 
 .projectNavSidebarWrapper > .searchWrapperActive {
@@ -455,6 +460,17 @@
 .navlink.searchDetailLink > span > b {
 	color: black;
 	background: #cedce7;
+}
+
+.searchWrapper .comboTextInputWrapper{
+	display: flex;
+    flex-direction: row;
+    min-width: 272px;
+    margin-top: 0;
+}
+
+.searchWrapper .comboTextInputWrapper input{
+	flex-grow: 1;	
 }
 
 .searchWrapper:not(.searchWrapperActive) > .comboTextInputWrapper > .comboTextInputButton {
@@ -603,4 +619,87 @@
 	color: #d8ab27;
 	font-size: 14px;
 	padding: 3px 0 0 17px;	
+}
+.hiddenCheckbox{
+	display: none;
+}
+.searchOptionControlBar{
+	display: flex;
+    justify-content: flex-start;
+    width: calc(100% - 30px);
+}
+.searchOptionControlButton.advSearchCaseSensitive:after{
+	content:"Aa";
+	font-size: 12px;
+    line-height: 3px;
+    position: relative;
+}
+.searchOptionControlButton.advSearchWholeWord:after{
+	content:"\\b";
+	font-size: 12px;
+    line-height: 3px;
+    position: relative;
+}
+.searchOptionControlButton.advSearchRegEx:after{
+	content: "*";
+    font-size: 17px;
+    line-height: 2px;
+    position: relative;
+    top: 2px;
+}
+
+.locationElementWrapper {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: clip;
+    position: relative;
+    background-color: inherit;
+    margin-top: 8px;
+    margin-right: 8px;
+}
+
+.locationElementWrapper:before {
+    content: '\02026';
+    position: absolute;
+    z-index: 1;
+    background-color: #F5F7FA;
+    color: #222;
+    cursor: initial;
+    font-weight: normal;
+    vertical-align: bottom;
+    white-space: nowrap;
+    padding-left: 3px;
+}
+
+.locationElementWrapper span {
+    min-width: calc(100% - 9px);
+    position: relative;
+    display: inline-block;
+    float: right;
+    overflow: visible;
+    background-color: inherit;
+    text-indent: 0.5em;
+    color: #222;
+    cursor: initial;
+    font-weight: normal;
+    vertical-align: bottom;
+    white-space: nowrap;
+}
+.locationElementWrapper span:before {
+    content: '';
+    z-index: 200;
+    display: inline-block;
+    background-color: #F5F7FA;
+    vertical-align: bottom;
+    width: 13px;
+    height: 10px;
+    margin-top: 2px;
+    white-space: nowrap;
+    position: absolute;
+    overflow: visible;
+    left: -7px;
+}
+.checkedSearchOptionButton{
+	background-color:#3C71B3;
+	color:rgb(255, 255, 255);
 }
