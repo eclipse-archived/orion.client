@@ -1,47 +1,61 @@
 <div class="searchOptWrapperDiv">
 	<div class="searchMainOptionBlock">
+		<span id="searchLabel" class="searchLabel"></span>
 		<!-- search box gets inserted here -->
 		<div id="replaceWrapper" class="replaceWrapper replaceWrapperHidden">
 		<!-- replace box gets inserted here -->
 		</div>
-		<a id="toggleReplaceLink" class="toggleDisplayLink"></a>
+		<div class="searchOptionControlBar">
+			<button id="toggleReplaceLink" class="searchOptionControlButton toggleDisplayLink"></button>
+			<div class="searchGeneralOptionBlock">
+				<span class="searchOption">
+					<button id="advSearchCaseSensitive" class="searchOptionControlButton advSearchCaseSensitive"></button>
+				</span>
+				<span class="searchOption">
+					<button id="advSearchWholeWord" class="searchOptionControlButton advSearchWholeWord"></button>
+				</span>
+				<span class="searchOption">
+					<button id="advSearchRegEx" class="searchOptionControlButton advSearchRegEx"></button>
+				</span>
+			</div>
+		</div>
 	</div>
 	<div class="searchParamBlockDiv">
-		<div class="searchOptionBlock">
-			<span class="searchOption">
-				<input type="checkbox" id="advSearchCaseSensitive" class="searchCheckbox">
-				<label id="advSearchCaseSensitiveLabel" class="searchCheckboxLabel" for="advSearchCaseSensitive"></label>
-			</span>
-			<span class="searchOption">
-				<input type="checkbox" id="advSearchWholeWord" class="searchCheckbox">
-				<label id="advSearchWholeWordLabel" class="searchCheckboxLabel" for="advSearchWholeWord"></label>
-			</span>
-			<span class="searchOption">
-				<input type="checkbox" id="advSearchRegEx" class="searchCheckbox">
-				<label id="advSearchRegExLabel" class="searchCheckboxLabel" for="advSearchRegEx"></label>
-			</span>
-		</div>
-		<div class="searchOptionBlock">
-			<div class="searchOption">
+				<div class="searchOptionBlock">
+					<div id="searchScopeLabel" class="searchLabel scopeLabel"></div>
+					<div id="searchScopeInputWrapper" class="searchScopeInputWrapper">
+						<span id="searchScopeElementWrapper" class="searchScopeElementWrapper"></span>
+						<button id="searchScopeSelectButton" class="commandButton core-sprite-outline searchScopeSelectButton"></button>
+					</div>
+					<div>
+						<span class="searchOption">
+							<input type="radio" id="advSearchScopeSelected" name="advSearchScope" value="selected" class="searchRadiobox">
+							<label id="advSearchScopeSelectedLabel" class="searchRadioboxLabel" for="advSearchScopeSelected"></label>
+						</span>
+						<span class="searchOption">
+							<input type="radio" id="advSearchScopeProject" name="advSearchScope" value="project" class="searchRadiobox">
+							<label id="advSearchScopeProjectLabel" class="searchRadioboxLabel" for="advSearchScopeProject"></label>
+						</span>
+						<span class="searchOption">
+							<input type="radio" id="advSearchScopeAllProject" name="advSearchScope" value="allProject" class="searchRadiobox">
+							<label id="advSearchScopeAllProjectLabel" class="searchRadioboxLabel" for="advSearchScopeAllProject"></label>
+						</span>
+						<span class="searchOption">
+							<input type="radio" id="advSearchScopeOther" name="advSearchScope" value="other" class="searchRadiobox">
+							<label id="advSearchScopeOtherLabel" class="searchRadioboxLabel" for="advSearchScopeOther"></label>
+						</span>
+					</div>
+				</div>
+			<div class="searchOptionBlock">
 				<div id="fileNamePatternsLabel" class="searchLabel"></div>
 				<!-- file name patterns box gets inserted here -->
 				<span id="fileNamePatternsHint" class="fileNamePatternsHint"></span>
 			</div>
-	
-			<div class="searchOption">
-				<div id="searchScope" class="searchScope">
-					<div id="searchScopeLabel" class="searchLabel"></div>
-					<span id="searchScopeInputWrapper" class="searchScopeInputWrapper">
-						<span id="searchScopeElementWrapper" class="searchScopeElementWrapper"></span>
-						<button id="searchScopeSelectButton" class="commandButton core-sprite-outline searchScopeSelectButton"></button>
-					</span>
-				</div>
-				<span class="searchOption">
-					<input type="checkbox" id="advSearchScopeSniff" class="searchCheckbox">
-					<label id="advSearchScopeSniffLabel" class="searchCheckboxLabel" for="advSearchScopeSniff"></label>
-				</span>
+			<div class="searchOptionBlock">
+				<div id="excludeFilesLabel" class="searchLabel"></div>
+				<!-- exclude file names box gets inserted here -->
+				<span id="excludeFilesHint" class="fileNamePatternsHint"></span>
 			</div>
-		</div>
 	</div>
 </div>
 <a id="toggleSearchOptionsLink" class="toggleDisplayLink toggleSearchOptionsLink linkHidden"></a>
