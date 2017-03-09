@@ -1,4 +1,8 @@
-@import "../edit.css";
+@import "../../../css/layout.css";
+@import "./../../css/pages.css";
+@import "./../../css/controls.css";
+@import "./../../css/lightPage.css";
+@import "./../../css/theme.css";
 .typeimage {
 	padding-top: 2px;
 	padding-bottom: 2px;
@@ -42,4 +46,32 @@ body {
 td {
 	padding-top: 2px;
 	padding-bottom: 2px;
+}
+.jsonEditor-sprite-openarrow:before{
+    content:'\25BC';
+}
+.jsonEditor-sprite-closedarrow:before{
+    content:'\25B6';
+}
+.jsonEditor-sprite-progress:before{
+	content:'...';
+}
+.jsonEditor-sprite-openarrow,
+.jsonEditor-sprite-closedarrow,
+.jsonEditor-sprite-progress
+{
+	color: inherit;
+    font-size: 9px;
+    line-height: normal;
+    vertical-align: middle;
+    padding: 0;
+    background: none;
+    border: none;
+    -webkit-font-smoothing: antialiased;
+}
+.jsonEditor-sprite-openarrow
+{
+	margin: 0;
+    font-size: 11px;
+    padding-right: 1px;
 }
