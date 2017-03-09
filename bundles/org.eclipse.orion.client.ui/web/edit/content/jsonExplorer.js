@@ -58,6 +58,9 @@ define([
 	}
 	JSONRenderer.prototype = new mExplorer.SelectionRenderer();
 	objects.mixin(JSONRenderer.prototype, {
+		_expandImageClass : "jsonEditor-sprite-openarrow", //$NON-NLS-0$
+		_collapseImageClass : "jsonEditor-sprite-closedarrow", //$NON-NLS-0$
+		_progressImageClass : "jsonEditor-sprite-progress", //$NON-NLS-0$,
 		labelColumnIndex: 0,
 		emptyCallback: function(bodyElement) {
 			var msg = this.explorer.emptyMessage;
