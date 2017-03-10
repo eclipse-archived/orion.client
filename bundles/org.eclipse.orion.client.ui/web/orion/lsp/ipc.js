@@ -694,9 +694,7 @@ define([], function() {
 	 * @returns {Deferred} The deferred to return the results of the request
 	 */
 	IPC.prototype.completionItemResolve = function completionItemResolve(completionItem) {
-		this.sendMessage(this.id++, this.MESSAGE_TYPES.completionItemResolve, {
-			completionItem: completionItem
-		});
+		return this.sendMessage(this.id++, this.MESSAGE_TYPES.completionItemResolve, completionItem);
 	};
 	return IPC;
 });

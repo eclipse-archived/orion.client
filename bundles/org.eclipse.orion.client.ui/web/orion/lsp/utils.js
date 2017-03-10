@@ -237,7 +237,7 @@ define([
 				return provider.completion(meta.location, position).then(function(results) {
 						var items  = results.items;
 						if (Array.isArray(items) && items.length > 0) {
-							return Deferred.all(convertToCompletionProposals(editorContext, items)).then(function(proposals) {
+							return Deferred.all(resolveCompletionItems(provider, editorContext, items)).then(function(proposals) {
 								return new Deferred().resolve(proposals);
 							});
 						}
@@ -278,47 +278,46 @@ define([
 		}
 	}
 
-	function convertToCompletionProposals(editorContext, items) {
-		var tempArray = items.map(function(item) {
-			var temp = {
-				name: item.label,
-				description: ' (' + resolveCompletionKind(item.kind) + ')',
-				relevance: 100,
-				style: 'emphasis', //$NON-NLS-1$
-				overwrite: true,
-				kind: 'java' //$NON-NLS-1$
-			};
-			if (item.textEdit) {
-				temp.proposal = item.textEdit.newText;
-			} else if (item.insertText) {
-				temp.proposal = item.insertText;
-			} else {
-				temp.proposal = item.label;
-			}
-			if (temp.proposal) {
-				// remove {{ and }} around parameter's names
-				temp.proposal = temp.proposal.replace(/{{/gi, "").replace(/}}/gi, "");
-			}
-			if (item.documentation) {
-				temp.hover = {
-					content: item.documentation,
-					type: 'markdown'
+	function resolveCompletionItems(provider, editorContext, items) {
+		return items.map(function(completionItem) {
+			return provider.completionItemResolve(completionItem).then(function(item) {
+				var temp = {
+					name: item.label,
+					description: ' (' + resolveCompletionKind(item.kind) + ')',
+					relevance: 100,
+					style: 'emphasis', //$NON-NLS-1$
+					overwrite: true,
+					kind: 'java' //$NON-NLS-1$
 				};
-			}
-			if (Array.isArray(item.additionalTextEdits) && item.additionalTextEdits.length !== 0) {
-				var tempEdits = [];
-				item.additionalTextEdits.forEach(function(additionalEdit) {
-					var newEdit = Object.create(null);
-					newEdit.text = additionalEdit.newText;
-					newEdit.range = additionalEdit.range;
-					tempEdits.push(newEdit);
-				});
-				temp.additionalEdits = tempEdits;
-			}
-			return temp;
-		});
-		return tempArray.map(function(proposal) {
-			return convertEachProposal(editorContext, proposal);
+				if (item.textEdit) {
+					temp.proposal = item.textEdit.newText;
+				} else if (item.insertText) {
+					temp.proposal = item.insertText;
+				} else {
+					temp.proposal = item.label;
+				}
+				if (temp.proposal) {
+					// remove {{ and }} around parameter's names
+					temp.proposal = temp.proposal.replace(/{{/gi, "").replace(/}}/gi, "");
+				}
+				if (item.documentation) {
+					temp.hover = {
+						content: item.documentation,
+						type: 'markdown'
+					};
+				}
+				if (Array.isArray(item.additionalTextEdits) && item.additionalTextEdits.length !== 0) {
+					var tempEdits = [];
+					item.additionalTextEdits.forEach(function(additionalEdit) {
+						var newEdit = Object.create(null);
+						newEdit.text = additionalEdit.newText;
+						newEdit.range = additionalEdit.range;
+						tempEdits.push(newEdit);
+					});
+					temp.additionalEdits = tempEdits;
+				}
+				return convertEachProposal(editorContext, temp);
+			});
 		});
 	}
 
@@ -354,7 +353,6 @@ define([
 		}
 		return deferred;
 	}
-
 
 	return {
 		getPosition: getPosition,
