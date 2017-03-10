@@ -22,7 +22,7 @@
 }
 
 .stretch {
-	white-space:normal;
+	white-space:nowrap;
 	flex: 1 1 auto;
 	-ms-flex: 1 1 auto;
 	-webkit-flex: 1 1 auto;
