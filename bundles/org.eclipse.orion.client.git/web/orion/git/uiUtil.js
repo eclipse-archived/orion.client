@@ -63,28 +63,21 @@ define([
 			doFilter();
 		};
 		button.addEventListener("click", clickFilter); //$NON-NLS-0$
+		filter.addEventListener ("search", clickFilter, false);
 		
 		var sectionContent = section.getContentElement();
 		sectionContent.insertBefore(filterDiv, sectionContent.firstChild);
-		
-		var keyDownFilter  = function(e) {
-			if (e.keyCode === 13) {
-				doFilter();
-			}
-		};
-		filter.addEventListener("keydown", keyDownFilter); //$NON-NLS-0$	
 		
 		return {
 			filter: filter,
 			button: button,
 			commandTooltip: commandTooltip,
 			clickFilter: clickFilter,
-			keyDownFilter: keyDownFilter,
 			
 			destroy: function() {
 				this.commandTooltip.destroy();
 				this.button.removeEventListener("click", this.clickFilter);
-				this.filter.removeEventListener("keydown", this.keyDownFilter);
+				this.filter.removeEventListener("search", this.clickFilter);
 			}
 		};
 	}
