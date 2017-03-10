@@ -25,9 +25,10 @@ define([
 	'orion/webui/littlelib', 
 	'orion/util', 
 	'orion/webui/dialog', 
-	'orion/metrics', 
+	'orion/metrics',
+	'orion/generalPreferences',
 	'orion/Deferred'
-], function(messages, searchMSG, extensionCommands, i18nUtil, bidiUtils, mSearchUtils, navigatorRenderer, mContentTypes, require, lib, util, dialog, mMetrics, Deferred) {
+], function(messages, searchMSG, extensionCommands, i18nUtil, bidiUtils, mSearchUtils, navigatorRenderer, mContentTypes, require, lib, util, dialog, mMetrics, mGeneralPreferences, Deferred) {
 	//default search renderer until we factor this out completely
 	function DefaultSearchRenderer(serviceRegistry, commandRegistry) {
 		this.serviceRegistry = serviceRegistry;
@@ -202,7 +203,7 @@ define([
 		'<div role="search">' + //$NON-NLS-0$
 			'<div><label id="fileNameMessage" for="fileName">${Type the name of a file to open (? = any character, * = any string):}</label></div>' + //$NON-NLS-0$
 			'<div><input id="fileName" type="text" class="openResourceDialogInput" style="min-width: 25em; width:90%;"/></div>' + //$NON-NLS-0$
-			'<div><label for="searchScope"><input id="searchScope" type="checkbox" style="width: auto" class="openResourceDialogInput"/>${Search all Projects}</label></input></div>' + //$NON-NLS-0$
+			'<div><label for="searchScope"><input id="searchScope" type="checkbox" style="width: auto" class="openResourceDialogInput"/>${Search In All Folders}</label></input></div>' + //$NON-NLS-0$
 			'<div id="progress" style="padding: 2px 0 0; width: 100%;"><img src="'+ require.toUrl("../../../images/progress_running.gif") + '" class="progressPane_running_dialog" id="crawlingProgress"></img></div>' +  //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			'<div id="results" style="max-height:250px; height:auto; overflow-y:auto;" aria-live="off"></div>' + //$NON-NLS-0$
 			'<div id="statusbar"></div>' + //$NON-NLS-0$
@@ -216,6 +217,7 @@ define([
 		this.commandRegistry = options.commandRegistry;
 		this._searcher = options.searcher;
 		this._progress = options.progress;
+		this._prefService = options.prefService;
 		this._onHide = options.onHide;
 		this._contentTypeService = new mContentTypes.ContentTypeRegistry(this.serviceRegistry);
 		if (!this._searcher) {
@@ -443,34 +445,38 @@ define([
 			
 			// Capture the checkbox state
 			this._searchOnRoot = this.$searchScope.checked;
-			
-			var searchParams = this._searcher.createSearchParams(keyword.keyword, this._nameSearch, this._searchOnRoot);
-			var renderFunction = this._searchRenderer.makeRenderFunction(this._contentTypeService, this.$results, false, this.decorateResult.bind(this));
-			this.currentSearch = renderFunction;
-			var div = document.createElement("div"); //$NON-NLS-0$
-			div.appendChild(document.createTextNode(this._nameSearch ? messages['Searching...'] : util.formatMessage(messages["SearchOccurences"], text)));
-			lib.empty(this.$results);
-			this.$results.appendChild(div);
-			var deferredSearch;
-			if(this._searchPending) {
-				deferredSearch = this._searcher.cancel();
-				this.cancelled = true;
-			} else {
-				deferredSearch = new Deferred().resolve();
-			}
-			deferredSearch.then(function(/*result*/) {
-				this._searchPending = true;
-				this._searcher.search(searchParams).then(function(searchResult) {
-					this._searchPending = false;
-					if (renderFunction === this.currentSearch || this.cancelled) {
-						this.cancelled = false;
-						var filteredResult = searchResult.filter(function(item) {
-							return (keyword.folderKeyword ? (item.path.indexOf(keyword.folderKeyword) >= 0) : true);
-						});
-						renderFunction(filteredResult, searchParams.keyword, null, searchParams);
-					}
-				}.bind(this), function(error) {
-					renderFunction(null, null, error, null);
+			return new mGeneralPreferences.GeneralPreferences(this._prefService).getPrefs().then(function(prefs) {
+				if(typeof prefs.filteredResources === 'string') {
+					var excludeFilesFromSetting = prefs.filteredResources.split(',');
+				}
+				var searchParams = this._searcher.createSearchParams(keyword.keyword, this._nameSearch, this._searchOnRoot,{exclude:excludeFilesFromSetting});
+				var renderFunction = this._searchRenderer.makeRenderFunction(this._contentTypeService, this.$results, false, this.decorateResult.bind(this));
+				this.currentSearch = renderFunction;
+				var div = document.createElement("div"); //$NON-NLS-0$
+				div.appendChild(document.createTextNode(this._nameSearch ? messages['Searching...'] : util.formatMessage(messages["SearchOccurences"], text)));
+				lib.empty(this.$results);
+				this.$results.appendChild(div);
+				var deferredSearch;
+				if(this._searchPending) {
+					deferredSearch = this._searcher.cancel();
+					this.cancelled = true;
+				} else {
+					deferredSearch = new Deferred().resolve();
+				}
+				deferredSearch.then(function(/*result*/) {
+					this._searchPending = true;
+					this._searcher.search(searchParams).then(function(searchResult) {
+						this._searchPending = false;
+						if (renderFunction === this.currentSearch || this.cancelled) {
+							this.cancelled = false;
+							var filteredResult = searchResult.filter(function(item) {
+								return (keyword.folderKeyword ? (item.path.indexOf(keyword.folderKeyword) >= 0) : true);
+							});
+							renderFunction(filteredResult, searchParams.keyword, null, searchParams);
+						}
+					}.bind(this), function(error) {
+						renderFunction(null, null, error, null);
+					}.bind(this));
 				}.bind(this));
 			}.bind(this));
 		}else{
