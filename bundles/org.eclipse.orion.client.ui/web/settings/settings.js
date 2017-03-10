@@ -72,7 +72,7 @@ define(['i18n!orion/settings/nls/messages', 'orion/bootstrap', 'orion/status', '
 									};
 									
 		lib.node("categoriesTitle").textContent = messages["Categories"]; //$NON-NLS-1$ //$NON-NLS-0$
-		var settingsContainer = new SettingsContainer( containerParameters, lib.node("categoriesContainer"), lib.node("settings")); //$NON-NLS-0$
+		var settingsContainer = new SettingsContainer( containerParameters, lib.node("categoriesContainer"), lib.$("#settings", lib.node("pageContent"))); //$NON-NLS-0$
 		settingsContainer.show();
 
 		preferencesStatusService.setMessage("");
