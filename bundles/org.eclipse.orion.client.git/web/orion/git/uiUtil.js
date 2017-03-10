@@ -63,6 +63,7 @@ define([
 			doFilter();
 		};
 		button.addEventListener("click", clickFilter); //$NON-NLS-0$
+		filter.addEventListener ("search", clickFilter, false);
 		
 		var sectionContent = section.getContentElement();
 		sectionContent.insertBefore(filterDiv, sectionContent.firstChild);
