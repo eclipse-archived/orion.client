@@ -184,6 +184,8 @@ html[dir="rtl"] .mainToolbar .sectionWrapper { /* ACGC */
 
 .sidebar .sectionWrapper.sectionOpened {
 	background-color: white;
+	min-width: 140px;
+	display: flex;
 }
 
 .sidebar > .sectionTable {
@@ -576,6 +578,7 @@ _:-moz-tree-row(hover), .gitChangeListCheck { /* Firefox  HACK */
 	font-size: 12px;
 	font-weight: normal !important;
 	padding-bottom: 3px;
+	white-space: nowrap;
 }
 
 .gitCommitListLoaded {
@@ -604,8 +607,8 @@ _:-moz-tree-row(hover), .gitChangeListCheck { /* Firefox  HACK */
 .gitCommitListSectionTitle {
 	font-size: 8.5pt;
 	/* text-transform: uppercase; */
-	margin-top: 4px;
 	color: #3B4B54;
+	white-space: nowrap;
 }
 
 .checkedRow .gitCommitListSectionTitle {
@@ -884,6 +887,24 @@ _:-moz-tree-row(hover), .gitChangeListCheck { /* Firefox  HACK */
 
 .checkedRow .commitActions {
 	display: block;
+}
+.commandList.sectionActions {
+	display: inline-flex;
+	margin-top: 0;
+}
+
+.gitListCell .commandList.layoutRight{
+	display: inline-flex;
+}
+.dropdownTrigger.commandButton{
+	white-space: nowrap;
+}
+.toolbarTarget .sectionAnchor.sectionTitle.layoutLeft{
+	min-width: 90px;
+    flex: 1 1 auto;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
 }
 
 .git-sprite-notsure{ background-position: 0 -216px; width: 16px; height: 16px; } 
