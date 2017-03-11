@@ -431,7 +431,7 @@ function putClone(req, res) {
 				});
 			});
 		}
-		return theRepo.checkoutBranch(branch, checkOptions);
+		return theRepo.checkoutBranch("refs/heads/" + branch, checkOptions);
 	})
 	.then(function(){
 		res.status(200).end();

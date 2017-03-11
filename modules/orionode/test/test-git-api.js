@@ -268,6 +268,22 @@ GitClient.prototype = {
 		});
 	},
 
+	checkoutBranch: function(branchName) {
+		var client = this;
+		this.tasks.push(function(resolve) {
+			request()
+			.put(CONTEXT_PATH + "/gitapi/clone/file/" + client.getName())
+			.send({
+				Branch: branchName
+			})
+			.expect(200)
+			.end(function(err, res) {
+				assert.ifError(err);
+				client.next(resolve, res.body);
+			});
+		});
+	},
+
 	deleteBranch: function(branchName) {
 		var client = this;
 		this.tasks.push(function(resolve) {
@@ -470,7 +486,20 @@ GitClient.prototype = {
 		});
 	},
 
-	log: function(branch) {
+	/**
+	 * Requests a log of the given branch from the server.
+	 * 
+	 * @param branch the name of the interested branch
+	 * @param toRef the name of the resolved reference, this should only be
+	 *              different if <tt>branch</tt> is <tt>HEAD</tt>, in which
+	 *              case <tt>toRef</tt> should be the name of the branch that
+	 *              <tt>HEAD</tt> is pointing to
+	 */
+	log: function(branch, toRef) {
+		if (toRef === undefined) {
+			toRef = branch;
+		}
+
 		var client = this;
 		this.tasks.push(function(resolve) {
 			request()
@@ -483,13 +512,13 @@ GitClient.prototype = {
 					assert.equal(res2.JsonData.Location, "/gitapi/commit/" + util.encodeURIComponent(branch) + "/file/" + client.getName());
 					assert.equal(res2.JsonData.CloneLocation, "/gitapi/clone/file/" + client.getName());
 
-					assert.equal(res2.JsonData.toRef.Name, branch);
-					assert.equal(res2.JsonData.toRef.FullName, "refs/heads/" + branch);
+					assert.equal(res2.JsonData.toRef.Name, toRef);
+					assert.equal(res2.JsonData.toRef.FullName, "refs/heads/" + toRef);
 					assert.equal(res2.JsonData.toRef.CloneLocation, "/gitapi/clone/file/" + client.getName());
-					assert.equal(res2.JsonData.toRef.CommitLocation, "/gitapi/commit/" + util.encodeURIComponent("refs/heads/" + branch) + "/file/" + client.getName());
-					assert.equal(res2.JsonData.toRef.DiffLocation, "/gitapi/diff/" + util.encodeURIComponent(branch) + "/file/" + client.getName());
-					assert.equal(res2.JsonData.toRef.Location, "/gitapi/branch/" + util.encodeURIComponent(branch) + "/file/" + client.getName());
-					assert.equal(res2.JsonData.toRef.TreeLocation, "/gitapi/tree/file/" + client.getName() + "/" + util.encodeURIComponent("refs/heads/" + branch));
+					assert.equal(res2.JsonData.toRef.CommitLocation, "/gitapi/commit/" + util.encodeURIComponent("refs/heads/" + toRef) + "/file/" + client.getName());
+					assert.equal(res2.JsonData.toRef.DiffLocation, "/gitapi/diff/" + util.encodeURIComponent(toRef) + "/file/" + client.getName());
+					assert.equal(res2.JsonData.toRef.Location, "/gitapi/branch/" + util.encodeURIComponent(toRef) + "/file/" + client.getName());
+					assert.equal(res2.JsonData.toRef.TreeLocation, "/gitapi/tree/file/" + client.getName() + "/" + util.encodeURIComponent("refs/heads/" + toRef));
 					assert.equal(res2.JsonData.toRef.Type, "Branch");
 					
 					client.next(resolve, res2.JsonData);
@@ -1275,6 +1304,78 @@ maybeDescribe("git", function() {
 			});
 		}); // describe("Skip")
 	}); // describe("Rebase")
+
+	describe("Branch", function() {
+		before(setup);
+
+		describe("Checkout", function() {
+
+			/**
+			 * Ensures that the user can checkout a branch.
+			 * 
+			 * @param finished the callback for notifying the test harness that the test has completed
+			 * @param testName the name of this test
+			 * @param branchName the name of the branch to create and subsequently checkout
+			 * @param createConflictingTag <tt>true</tt> if a tag with the same name should be created,
+			 *                             <tt>false</tt> otherwise
+			 */
+			function testBug513503(finished, testName, branchName, createConflictingTag) {
+				var tagCommit;
+
+				var client = new GitClient("bug513503-" + testName);
+				client.init();
+				client.commit();
+				client.start().then(function(commit) {
+					tagCommit = commit.Id;
+
+					// create the branch
+					client.createBranch(branchName);
+					if (createConflictingTag) {
+						// create a tag with the same name
+						client.createTag(tagCommit, branchName);
+					}
+					client.commit();
+					return client.start();
+				})
+				.then(function(commit) {
+					client.checkoutBranch(branchName);
+					client.log("HEAD", branchName);
+					return client.start();
+				})
+				.then(function(body) {
+					assert.equal(body.toRef.HeadSHA, tagCommit);
+					finished();
+				})
+				.catch(function(err) {
+					finished(err);
+				});
+			};
+
+			it("bug 513503 no conflicting tag (tag)", function(finished) {
+				testBug513503(finished, "safe-tag", "tag", false);
+			});
+
+			it("bug 513503 no conflicting tag (refs/heads/tag)", function(finished) {
+				testBug513503(finished, "safe-refs-heads-tag", "refs/heads/tag", false);
+			});
+
+			it("bug 513503 no conflicting tag (refs/tags/tag)", function(finished) {
+				testBug513503(finished, "safe-refs-tags-tag", "refs/tags/tag", false);
+			});
+
+			it("bug 513503 conflicting tag (tag)", function(finished) {
+				testBug513503(finished, "conflict-tag", "tag", true);
+			});
+
+			it("bug 513503 conflicting tag (refs/heads/tag)", function(finished) {
+				testBug513503(finished, "conflict-refs-heads-tag", "refs/heads/tag", true);
+			});
+
+			it("bug 513503 conflicting tag (refs/tags/tag)", function(finished) {
+				testBug513503(finished, "conflict-refs-tags-tag", "refs/tags/tag", true);
+			});
+		}); // describe("Checkout")
+	}); // describe("Branch")
 
 	describe("Merge", function() {
 		before(setup);
