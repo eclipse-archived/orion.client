@@ -298,7 +298,7 @@ define([
 			// Special case in electron, or when create file at root enabled.
 			// Need to find the workspace element to create file at workspace level.
 			if (loc === "/file") {
-				if (util.isElection || this._isFileCreationAtRootEnabled()) {
+				if (util.isElectron || this._isFileCreationAtRootEnabled()) {
 					elementNode = this.model.root;
 				}
 			} else {
