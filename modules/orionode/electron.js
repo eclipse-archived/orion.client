@@ -295,6 +295,9 @@ module.exports.start = function(startServer, configParams) {
 					exit();
 				});
 			});
+			nextWindow.on("focus", function(event) {
+				nextWindow.webContents.executeJavaScript('bindfocus();');
+			});
 			nextWindow.webContents.once("did-frame-finish-load", function () {
 				if (feedURL) {
 					autoUpdater.resolveNewVersion(false);
