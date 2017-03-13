@@ -67,7 +67,7 @@ define([
 			var data = evt.data;
 			var markerService = serviceRegistry.getService(markerServiceID);
 			if (markerService) {
-				markerService._setProblems(Utils.toProblems(data.params.diagnostics));
+				markerService._setProblems(Utils.toProblems(data.params.diagnostics), data.params.uri);
 			}
 			console.log(JSON.stringify(data));
 		});

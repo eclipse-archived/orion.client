@@ -7,7 +7,7 @@ ARG LSP_ORION_VERSION
 # install java lsp server based on the latest build
 RUN mkdir -p /home/java-language-server
 WORKDIR /home/java-language-server
-RUN curl -L https://dl.bintray.com/gorkem/java-language-server/java-server-1.0.0-$JAVA_LANGUAGE_SERVER.tar.gz -o /home/java-language-server/java-server.tar.gz \
+RUN curl -L http://download.eclipse.org/jdtls/snapshots/$JAVA_LANGUAGE_SERVER -o /home/java-language-server/java-server.tar.gz \
   && tar -xzvf /home/java-language-server/java-server.tar.gz \
   && rm /home/java-language-server/java-server.tar.gz
 

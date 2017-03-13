@@ -568,7 +568,7 @@ define([
 				if (lspLanguageServer) {
 					lspLanguageServer.didSave(evnt.inputManager.getLocation());
 				}
-			}.bind(this));
+			});
 
 			this.blamer = new mBlamer.Blamer(serviceRegistry, inputManager, editor);
 			this.differ = new mDiffer.Differ(serviceRegistry, inputManager, editor);
@@ -580,7 +580,16 @@ define([
 			var markerService = serviceRegistry.getService(this.problemsServiceID);
 			if(markerService) {
 				markerService.addEventListener("problemsChanged", function(evt) {
-					editor.showProblems(evt.problems);
+					if (evt.uri) {
+						var metaData = inputManager.getFileMetadata();
+						if (metaData && metaData.Location === evt.uri) {
+							if (Array.isArray(evt.problems) && evt.problems.length !== 0) {
+								editor.showProblems(evt.problems);
+							}
+						}
+					} else if (Array.isArray(evt.problems) && evt.problems.length !== 0) {
+						editor.showProblems(evt.problems);
+					}
 				});
 			}
 
