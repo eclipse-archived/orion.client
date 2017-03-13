@@ -294,7 +294,7 @@ function registerElectronMenu(pageControlCallbacks, newTabCallback){
 function createNewTabButton(url){
 	var bar = document.querySelector("#bar");
 	var newTabButton = document.createElement("a"),
-		newTabButtonTitle = process.platform === "darwin"? "New Tab (⌘+T)" :"New Tab (Ctrl+T)",
+		newTabButtonTitle = process.platform === "darwin"? "New Tab (Cmd+T)" :"New Tab (Ctrl+T)",
 		newTabButtonText = "+";
 	
 	newTabButton.title = newTabButtonTitle;
@@ -309,6 +309,10 @@ function createNewTabButton(url){
 	return {
 		newTab:newTab
 	};
+}
+
+function bindfocus(){
+	getActiveTab().focus();
 }
 
 function createTab(url) {
