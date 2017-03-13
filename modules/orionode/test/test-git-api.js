@@ -453,15 +453,28 @@ GitClient.prototype = {
 		});
 	},
 
-	log: function() {
+	log: function(branch) {
 		var client = this;
 		this.tasks.push(function(resolve) {
 			request()
-			.get(CONTEXT_PATH + '/gitapi/commit/master/file/' + client.getName())
+			.get(CONTEXT_PATH + '/gitapi/commit/' + util.encodeURIComponent(branch) + '/file/' + client.getName())
 			.expect(202)
 			.end(function(err, res) {
 				assert.ifError(err);
 				getGitResponse(res).then(function(res2) {
+					assert.equal(res2.JsonData.Type, "Commit");
+					assert.equal(res2.JsonData.Location, "/gitapi/commit/" + util.encodeURIComponent(branch) + "/file/" + client.getName());
+					assert.equal(res2.JsonData.CloneLocation, "/gitapi/clone/file/" + client.getName());
+
+					assert.equal(res2.JsonData.toRef.Name, branch);
+					assert.equal(res2.JsonData.toRef.FullName, "refs/heads/" + branch);
+					assert.equal(res2.JsonData.toRef.CloneLocation, "/gitapi/clone/file/" + client.getName());
+					assert.equal(res2.JsonData.toRef.CommitLocation, "/gitapi/commit/" + util.encodeURIComponent("refs/heads/" + branch) + "/file/" + client.getName());
+					assert.equal(res2.JsonData.toRef.DiffLocation, "/gitapi/diff/" + util.encodeURIComponent(branch) + "/file/" + client.getName());
+					assert.equal(res2.JsonData.toRef.Location, "/gitapi/branch/" + util.encodeURIComponent(branch) + "/file/" + client.getName());
+					assert.equal(res2.JsonData.toRef.TreeLocation, "/gitapi/tree/file/" + client.getName() + "/" + util.encodeURIComponent("refs/heads/" + branch));
+					assert.equal(res2.JsonData.toRef.Type, "Branch");
+					
 					client.next(resolve, res2.JsonData);
 				})
 				.catch(function(err) {
@@ -1193,6 +1206,28 @@ maybeDescribe("git", function() {
 				});
 			});
 		}); // describe("Compare")
+
+		describe("Branch", function() {
+
+			/**
+			 * Check that requesting for the log of a branch with a
+			 * name that needs to be URL encoded succeeds.
+			 */
+			it("bug 513537", function(finished) {
+				var client = new GitClient("bug513537");
+				// init a new Git repository
+				client.init();
+				// there's a commit already, create a branch here
+				client.createBranch("a%b");
+				client.log("a%b");
+				return client.start().then(function() {
+					finished();
+				})
+				.catch(function(err) {
+					finished(err);
+				});
+			});
+		})
 	}); // describe("Log")
 
 	describe("Branches", function() {
@@ -1275,7 +1310,7 @@ maybeDescribe("git", function() {
 					var client = new GitClient(testName);
 					// verify that we can retrieve that one tag
 					client.getTag(tagName, annotated, commitSHA);
-					client.log();
+					client.log("master");
 					return client.start();
 				})
 				.then(function(log) {
