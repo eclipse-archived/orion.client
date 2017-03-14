@@ -11,6 +11,7 @@
 /*eslint-env node*/
 'use strict'
 var api = require('../api'),
+ 	writeResponse = api.writeResponse,
     bodyParser = require('body-parser'),
     express = require('express'),
     Debug = require('debug'),
@@ -206,9 +207,9 @@ function handleGet(req, res) { //eslint-disable-line consistent-return
 	if (typeof key !== 'string') {
 		// No key param - a whole node was requested
 		if (node === NOT_EXIST) {
-			return res.json({});
+			return writeResponse(200, res, null, {});
 		}
-		return res.json(node);
+		return writeResponse(200, res, null, node);
 	}
 	// Sending a single property
 	var value = node[key];
@@ -217,7 +218,7 @@ function handleGet(req, res) { //eslint-disable-line consistent-return
 	}
 	var result = {};
 	result[key] = value;
-	res.json(result);
+	writeResponse(200, res, null, result);
 }
 
 function handlePut(req, res) {

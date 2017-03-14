@@ -24,6 +24,7 @@ var express = require('express'),
 	nodemailer = require('nodemailer'),
 	fs = require('fs'),
 	args = require('./args'),
+	api = require('./api'),
 	generator = require('generate-password');
 	
 var CONFIRM_MAIL = "./multitenant/EmailConfirmation.txt",
@@ -270,7 +271,7 @@ module.exports.router = function(options) {
 				return next(err);  
 			}
 			if (!user) {
-				return res.status(401).json({error: info.message});
+				return api.writeResponse(401, res, null, {error: info.message});
 			}
 			req.logIn(user, function(err) {
 				if (err) { return next(err); }
@@ -303,7 +304,7 @@ module.exports.router = function(options) {
 			for (var i=start; i<end; i++) {
 				result.push(userJSON(users[i]));
 			}
-			return res.status(200).json({
+			return api.writeResponse(200, res, null,{
 				Users: result,
 				UsersStart: start,
 				UsersRows: rows,
@@ -319,7 +320,7 @@ module.exports.router = function(options) {
 				res.writeHead(400, "User not fount: " + req.params.id);
 				return res.end();
 			}
-			return res.status(200).json(userJSON(user));
+			return api.writeResponse(200, res, null, userJSON(user));
 		});
 	});
 
@@ -400,7 +401,7 @@ module.exports.router = function(options) {
 		}
 		orionAccount.register(new orionAccount({username: req.body.UserName, email: req.body.Email, fullname: req.body.FullName, oauth: req.body.identifier}), req.body.Password ,function(err, user){
 			if (err) {
-				return res.status(404).json({Message: err.message});
+				return api.writeResponse(404, res, null, {Message: err.message});
 			}
 			if (options.configParams["orion.auth.user.creation.force.email"]) {
 				sendMail({user: user, options: options, template: CONFIRM_MAIL, auth: CONFIRM_MAIL_AUTH, req: req});
@@ -412,7 +413,7 @@ module.exports.router = function(options) {
 					}
 				});
 			}
-			return res.status(201).json({error: "Created"});
+			return api.writeResponse(201, res, null, {error: "Created"});
 		});
 	});
 

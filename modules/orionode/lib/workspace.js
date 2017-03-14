@@ -57,7 +57,7 @@ module.exports = function(options) {
 					api.writeError(500, res, "Could not open the workspace directory");
 					return;
 				}
-				api.write(null, res, null, {
+				api.writeResponse(null, res, null, {
 					Id: 'anonymous',
 					Name: 'anonymous',
 					UserName: 'anonymous',
@@ -67,7 +67,7 @@ module.exports = function(options) {
 						Location: api.join(workspaceRootUrl, workspaceId),
 						Name: workspaceName
 					}]
-				});
+				}, true);
 			});
 		} else if (rest === workspaceId) {
 			var parentFileLocation = originalFileRoot(req);
@@ -99,7 +99,7 @@ module.exports = function(options) {
 				);
 			})
 			.then(function(){
-				api.write(null, res, null, workspaceJson);
+				api.writeResponse(null, res, null, workspaceJson, true);
 			})
 			.catch(api.writeError.bind(null, 500, res));
 		} else {
@@ -114,12 +114,12 @@ module.exports = function(options) {
 		if (rest === '') {
 			// Create workspace. unsupported
 			err = {Message: 'Unsupported operation: create workspace'};
-			res.status(403).json(err);
+			api.writeResponse(403, res, null, err);
 		} else if (rest === workspaceId) {
 			var projectName = fileUtil.decodeSlug(req.headers.slug) || req.body && req.body.Name;
 			if (!projectName) {
 				err = {Message: 'Missing "Slug" header or "Name" parameter'};
-				res.status(400).json(err);
+				api.writeResponse(400, res, null, err);
 				return;
 			}
 			// Move/Rename a project
@@ -144,11 +144,11 @@ module.exports = function(options) {
 						api.writeError(400, res, error);
 					}
 				} else {
-					api.write(201, res, null, {
+					api.writeResponse(201, res, null, {
 						Id: projectName,
 						ContentLocation: makeProjectContentLocation(req, projectName), // Important
 						Location: makeProjectLocation(req, projectName) // not important
-					});
+					}, true);
 				}
 			});
 		}

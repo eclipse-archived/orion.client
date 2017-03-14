@@ -9,7 +9,7 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 /*eslint-env node */
-var api = require('../api'), writeError = api.writeError;
+var api = require('../api'), writeError = api.writeError, writeResponse = api.writeResponse;
 var git = require('nodegit');
 var async = require('async');
 var mRemotes = require('./remotes');
@@ -146,7 +146,7 @@ module.exports.router = function(options) {
 					return getBranchRemotes(theRepo, [branch], fileDir);
 				})
 				.then(function(){
-					res.status(200).json(branch);
+					writeResponse(200, res, null, branch);
 				});
 			})
 			.catch(function(err) {
@@ -193,7 +193,7 @@ module.exports.router = function(options) {
 					return getBranchRemotes(theRepo, branches, fileDir);
 				})
 				.then(function(){
-					res.status(200).json({
+					writeResponse(200, res, null, {
 							"Children": branches,
 							"Type": "Branch"
 					});
@@ -235,7 +235,7 @@ module.exports.router = function(options) {
 			var branch = branchJSON(theRepo, ref, fileDir);
 			return getBranchRemotes(theRepo, [branch], fileDir)
 			.then(function(){
-				res.status(201).json(branch);
+				writeResponse(201, res, null, branch);
 			});
 		})
 		.catch(function(err) {

@@ -11,7 +11,7 @@
 /*eslint-env node */
 var git = require('nodegit');
 var url = require('url');
-var api = require('../api'), writeError = api.writeError;
+var api = require('../api'), writeError = api.writeError, writeResponse = api.writeResponse;
 var clone = require('./clone');
 var fs = require('fs');
 var path = require('path');
@@ -424,7 +424,7 @@ function applyPatch(req, res) {
 							}.bind(this))
 						};
 						if (failed.length) {
-							return res.status(400).json({
+							return writeResponse(400, res, null, {
 								Message: "Some files did not apply: " + failed.map(function(index) {
 									return this.getUnprefixFile(index.oldFileName);
 								}.bind(this)).join(","),
@@ -433,7 +433,7 @@ function applyPatch(req, res) {
 								JsonData: jsonData
 							});
 						}
-						res.status(200).json({
+						writeResponse(200, res, null, {
 							Message: "Ok",
 							HttpCode: 200,
 							JsonData: jsonData
@@ -471,7 +471,6 @@ function postDiff(req, res) {
 	var contextPathSegCount = req.contextPath.split("/").length - 1;
 	segments[3 + contextPathSegCount] = segments[3 + contextPathSegCount] + ".." + util.encodeURIComponent(newCommit);
 	var location = url.format({pathname: segments.join("/"), query: originalUrl.query});
-	res.setHeader('Location', location);
-	res.status(200).json({Location: location});
+	writeResponse(200, res, {'Location':location}, {Location: location});
 }
 };

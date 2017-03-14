@@ -62,8 +62,9 @@ function toURLPath(p) {
  * @param {HttpResponse} res
  * @param {Object} [headers]
  * @param {Object|String} [body] If Object, response will be JSON. If string, response will be text/plain.
+ * @param {Boolean} needEncodeLocation
  */
-function write(code, res, headers, body) {
+function writeResponse(code, res, headers, body, needEncodeLocation) {
 	if (typeof code === 'number') {
 		res.status(code);
 	}
@@ -74,7 +75,10 @@ function write(code, res, headers, body) {
 	}
 	if (typeof body !== 'undefined') {
 		if (typeof body === 'object') {
-			encodeLocation(body);
+			needEncodeLocation && encodeLocation(body);
+			res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate"); // HTTP 1.1.
+			res.setHeader("Pragma", "no-cache"); // HTTP 1.1.
+			res.setHeader("Expires", "0"); // HTTP 1.1.			
 			return res.json(body);
 		}
 		res.send(body);
@@ -89,7 +93,9 @@ function encodeLocation(obj) {
 	for (var p in obj) {
 		if (p.match(LocationRegex)) {
 			if (typeof obj[p] === "object") {
-				obj[p].pathname = obj[p].pathname.replace(PercentReplaceRegex, "%25");
+				if(obj[p].pathname){
+					obj[p].pathname = obj[p].pathname.replace(PercentReplaceRegex, "%25");
+				}
 				obj[p] = url.format(obj[p]);
 			} else {
 				obj[p] = url.format({pathname: obj[p].replace(PercentReplaceRegex, "%25")});
@@ -159,5 +165,5 @@ exports.matchHost = matchHost;
 exports.rest = rest;
 exports.join = join;
 exports.writeError = writeError;
-exports.write = write;
+exports.writeResponse = writeResponse;
 exports.getOrionEE = getOrionEE;
