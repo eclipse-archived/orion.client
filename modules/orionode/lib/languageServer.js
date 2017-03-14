@@ -139,15 +139,15 @@ var ready = false;
 
 function parseMessage(data, workspaceUrl, sock) {
 	try {
-		var dataContents = data.toString('utf-8');
+		var dataContents = data;
 		if (remainingData) {
-			dataContents = remainingData + dataContents;
+			dataContents = Buffer.concat([remainingData, dataContents]);
 		}
-		var offset = -1;
+		var offset = 0;
 		var headerIndex = -1;
-		loop: while ((headerIndex = dataContents.indexOf(CONTENT_LENGTH, offset)) !== -1) {
+		loop: while ((headerIndex = dataContents.indexOf(CONTENT_LENGTH, offset, 'ascii')) !== -1) {
 			// this is an known header
-			var headerSizeIndex = dataContents.indexOf('\r\n\r\n', headerIndex + CONTENT_LENGTH_SIZE, 'utf-8');
+			var headerSizeIndex = dataContents.indexOf('\r\n\r\n', headerIndex + CONTENT_LENGTH_SIZE, 'ascii');
 			if (headerSizeIndex !== -1) {
 				var messageSize = Number(dataContents.slice(headerIndex + CONTENT_LENGTH_SIZE, headerSizeIndex));
 				if (messageSize + headerSizeIndex >= dataContents.length) {
@@ -156,19 +156,23 @@ function parseMessage(data, workspaceUrl, sock) {
 					break loop;
 				}
 				offset = headerSizeIndex + 4 + messageSize;
-				var message = Object.create(null);
-				message.headers = {
-					'Content-Length': messageSize
-				};
 				// enough data to get the message contents
 				var contents = dataContents.slice(headerSizeIndex + 4, headerSizeIndex + 4 + messageSize);
 				var json = null;
 				try {
-					json = JSON.parse(contents);
+					json = JSON.parse(contents.toString('utf8'));
 				} catch(e) {
 					console.log(e);
+					console.log("==================== START CURRENT DATA =============================\n");
+					console.log("contents = " + contents);
+					console.log("messageSize = " + messageSize);
+					console.log("full data contents = " + dataContents);
+					console.log("headerSizeIndex = " + headerSizeIndex);
+					console.log("raw data = " + data);
+					console.log("raw data slice= " + data.slice(headerSizeIndex + 4, headerSizeIndex + 4 + messageSize));
+					console.log("remaining data = " + remainingData);
+					console.log("==================== END CURRENT DATA =============================\n");
 				}
-				message.content = json;
 				if (json) {
 					if (json.params) {
 						fixURI(json.params, workspaceUrl);
@@ -177,7 +181,7 @@ function parseMessage(data, workspaceUrl, sock) {
 						fixURI(json.result, workspaceUrl);
 					}
 				}
-				if (sock) {
+				if (json !== null && sock) {
 					// detect that the server is ready
 //					{"method":"language/status","params":{"type":"Started","message":"Ready"},"jsonrpc":"2.0"}
 					if (!ready
@@ -187,7 +191,7 @@ function parseMessage(data, workspaceUrl, sock) {
 							&& json.params.message === "Ready") {
 						ready = true;
 					}
-					console.log(contents);
+					console.log(JSON.stringify(json));
 					sock.emit('data', json);
 				}
 			} else {
@@ -195,14 +199,13 @@ function parseMessage(data, workspaceUrl, sock) {
 				break loop;
 			}
 		}
-		if (offset === -1) {
+		if (offset === 0) {
 			remainingData = dataContents;
 		} else if (offset < dataContents.length) {
 			remainingData = dataContents.slice(offset, dataContents.length);
 		} else {
 			remainingData = null;
 		}
-		//console.log('remaining data: >>>' + remainingData + '<<<');
 	} catch (err) {
 		console.log(err);
 	}
