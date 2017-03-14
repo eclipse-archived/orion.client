@@ -43,7 +43,8 @@
         '${orionClient}/bundles/org.eclipse.orion.client.help',
         '${orionClient}/bundles/org.eclipse.orion.client.javascript',
         '${orionClient}/bundles/org.eclipse.orion.client.webtools',
-        '${orionClient}/bundles/org.eclipse.orion.client.users'
+        '${orionClient}/bundles/org.eclipse.orion.client.users',
+        '${orionClient}/bundles/org.eclipse.orion.client.debug'
     ],
     // Folders that should be searched for JSDoc
     jsdocs: [
