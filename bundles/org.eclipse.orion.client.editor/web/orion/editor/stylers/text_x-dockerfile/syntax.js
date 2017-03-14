@@ -12,20 +12,20 @@
 /*eslint-env browser, amd*/
 define("orion/editor/stylers/text_x-dockerfile/syntax", ["orion/editor/stylers/lib/syntax"], function(mLib) {
 	var keywords = [
-		"add", "arg",
-		"cmd", "copy",
-		"entrypoint", "env", "expose",
-		"from",
-		"healthcheck",
-		"label",
-		"maintainer",
-		"onbuild",
-		"run",
-		"shell",
-		"stopsignal",
-		"user",
-		"volume",
-		"workdir"
+		"ADD", "ARG",
+		"CMD", "COPY",
+		"ENTRYPOINT", "ENV", "EXPOSE",
+		"FROM",
+		"HEALTHCHECK",
+		"LABEL",
+		"MAINTAINER",
+		"ONBUILD",
+		"RUN",
+		"SHELL",
+		"STOPSIGNAL",
+		"USER",
+		"VOLUME",
+		"WORKDIR"
 	];
 
 	var id = "orion.dockerfile";
