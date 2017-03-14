@@ -749,6 +749,9 @@ define([
 		var deferred = new Deferred();
 		if(file) {
             var floc = file.Location ? file.Location : file.location; 
+			if(this.projectMeta && floc && floc.startsWith(this.projectMeta.Location)) {
+				return deferred.resolve(this.projectMeta);
+			}
 			this.projectPromise = new Deferred();
 			var parents = file.parents ? file.parents : file.Parents;
 			this.getFileClient().getProject(floc, {names: [this.PACKAGE_JSON, this.TERN_PROJECT]}).then(function(project) {
