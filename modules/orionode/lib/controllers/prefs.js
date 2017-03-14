@@ -47,8 +47,6 @@ var PREF_FILENAME = PrefsController.PREF_FILENAME = 'prefs.json';
 // https://wiki.eclipse.org/Orion/Server_API/Preference_API
 function PrefsController(options) {
 	options.configParams = options.configParams || {};
-	var ttl = options.ttl || 5000; // default is 5 seconds
-	var useCache = options.configParams['orion.single.user'];
 
 	var router = express.Router()
 	.use(bodyParser.json())
@@ -87,12 +85,7 @@ function PrefsController(options) {
 			.then(acquirePrefs.bind(null, req, res))
 			.then(handler.bind(null, req, res))
 			.then(function() { //eslint-disable-line consistent-return
-				if (!useCache) {
-					return savePrefs(req.prefs, req.prefFile);
-				}
-				if(options.configParams.isElectron){
-					return savePrefs(req.prefs, req.prefFile);
-				}
+				return savePrefs(req.prefs, req.prefFile);
 			})
 			.catch(next); // next(err)
 		};
@@ -100,63 +93,23 @@ function PrefsController(options) {
 
 	// Promised middleware that acquires prefs (either from memory or disk) and stores in `req`.
 	function acquirePrefs(req) {
-		var app = req.app, prefs = app.locals.prefs;
-		var getPrefs;
 		var prefFile = req.prefFile = getPrefsFileName(req);
-		if (prefs) {
-			debug('Using prefs from memory');
-			scheduleFlush(app, prefFile);
-			getPrefs = Promise.resolve(prefs);
-		} else {
-			getPrefs = fs.readFileAsync(prefFile, 'utf8')
-			.catchReturn({ code: 'ENOENT' }, null) // New prefs file: suppress error
-			.then(function(contents) {
-				if (contents) {
-					debug('Read pref file %s from disk (len: %d)', prefFile, contents.length);
-				} else {
-					debug('No pref file %s exists, creating new', prefFile);
-				}
-				prefs = new Preference(contents || null);
-				if (useCache) {
-					app.locals.prefs = prefs;
-					scheduleFlush(app, prefFile);
-				}
-				return prefs;
-			});
-		}
-		return getPrefs
+		return fs.readFileAsync(prefFile, 'utf8')
+		.catchReturn({ code: 'ENOENT' }, null) // New prefs file: suppress error
+		.then(function(contents) {
+			if (contents) {
+				debug('Read pref file %s from disk (len: %d)', prefFile, contents.length);
+			} else {
+				debug('No pref file %s exists, creating new', prefFile);
+			}
+			return new Preference(contents || null);
+		})
 		.then(function(prefs) {
 			var urlObj = req._parsedUrl || nodeUrl.parse(req.url);
 			req.prefs = prefs;
 			req.prefPath = urlObj.pathname;
 			req.prefNode = req.prefs.get(req.prefPath);
 		});
-	}
-
-	function scheduleFlush(app, prefFile) {
-		var prefs = app.locals.prefs;
-		if (!prefs) {
-			debug('scheduleFlush(): WARNING, no prefs to flush'); // should never hpapen
-			return;
-		}
-		// Reset the clock
-		clearTimeout(prefs.timerId);
-		prefs.timerId = setTimeout(flushJob.bind(null, app, prefFile), ttl);
-	}
-
-	// Deletes the cache and writes prefs back to disk if they were changed.
-	function flushJob(app, prefFile) {
-		var prefs = app.locals.prefs;
-		if (!prefs) {
-			debug('flushJob(): WARNING: no pref data to write'); // should never happen
-			return;
-		}
-
-		app.locals.prefs = null;
-		savePrefs(prefs, prefFile)
-		.catch(function() {
-			// Suppress 'unhandled rejection' errors
-		})
 	}
 
 	// Writes prefs to disk
@@ -194,8 +147,8 @@ function PrefsController(options) {
 			.catch(function(error) {
 				// Rejecting here will crash the process; just warn
 				debug("Error unlocking pref file:", error);
-			})
-		})
+			});
+		});
 	}
 
 } // PrefsController
