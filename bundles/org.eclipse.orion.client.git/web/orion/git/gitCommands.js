@@ -2097,7 +2097,9 @@ var exports = {};
 							var paths = [];
 							for (var i = 0; i < items.length; i++) {
 								paths[i] = items[i].name;
-								removeLastModifiedFile(items[i].location);
+								if(items[i].type === "Added"){
+									removeLastModifiedFile(items[i].location);
+								}
 							}
 							
 							var deferred = progress.progress(serviceRegistry.getService("orion.git.provider").checkoutPath(data.userData.Clone.Location, paths), messages['Resetting local changes']); //$NON-NLS-0$
