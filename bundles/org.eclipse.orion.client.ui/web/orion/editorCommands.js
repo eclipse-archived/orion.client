@@ -184,25 +184,6 @@ define([
 			this._createOpenRecentCommand();
 			return this._createEditCommands();
 		},
-		updateWorkspacePrefs:function(workspaceAddress){
-			var that = this;
-			return this.preferences.get("/workspace").then(function(prefs) {
-				return prefs.recentWorkspaces ? prefs.recentWorkspaces : [];
-			}).then(function(recentworkspaces){
-				var RECENT_ARRAY_LENGTH = 10;
-				var oldIndex = recentworkspaces.indexOf(workspaceAddress);
-				if(oldIndex !== -1){
-					recentworkspaces.splice(oldIndex,1);
-				}
-				if(recentworkspaces.length < RECENT_ARRAY_LENGTH){
-					recentworkspaces.unshift(workspaceAddress);
-				}else if(recentworkspaces.length === RECENT_ARRAY_LENGTH){
-					recentworkspaces.pop();
-					recentworkspaces.unshift(workspaceAddress);
-				}
-				return that.preferences.put("/workspace",{recentWorkspaces: recentworkspaces, currentWorkspace: workspaceAddress});
-			})
-		},
 		//TODO: We need a better way invoke side bar action 
 		setSideBar: function(sideBar) {
 			this.sideBar = sideBar;

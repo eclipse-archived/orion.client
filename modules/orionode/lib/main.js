@@ -13,6 +13,7 @@ var electron = require('electron');
 var nodeUrl = require('url');
 var dragSrcEl = null;
 var contextSrcEl = null;
+var activeIndex = 0;
 var needToCleanFrames = [];
 
 function redrawButtons() {
@@ -348,6 +349,8 @@ function createTab(url) {
 			var activeClassName = "context-menu-items-open";
 			menu.classList.remove(activeClassName);
 		});
+		var tabbuttons = document.querySelectorAll(".tabItem");
+		tabbuttons[activeIndex] && tabbuttons[activeIndex].click();
 	});
 	document.body.appendChild(iframe);
 	var srcUrl = nodeUrl.parse(url);
@@ -356,6 +359,10 @@ function createTab(url) {
 	}else{
 		needToCleanFrames.push(iframe);
 	}
+}
+
+function setActiveIndex(index){
+	activeIndex = index;
 }
 
 function registerContextMenu() {
@@ -459,9 +466,13 @@ function collectTabsUrl(){
 	var ipcRenderer = electron.ipcRenderer;
 	ipcRenderer.on('collect-tabs-info',function(event, arg){
 		var iframes = document.querySelectorAll(".tabContent");
-		var tabUrls = Array.prototype.map.call(iframes,function(iframe){
+		var activeTabIndex = 0;
+		var tabUrls = Array.prototype.map.call(iframes,function(iframe,index){
+			if(iframe.classList.contains("active")){
+				activeTabIndex = index;
+			}
 			return iframe.contentWindow.location.href.replace(/http:\/\/localhost:\w+\//, "");
 		});
-		ipcRenderer.send("collected-tabs-info-" + arg, tabUrls);
+		ipcRenderer.send("collected-tabs-info-" + arg, tabUrls, activeTabIndex);
 	});
 }
