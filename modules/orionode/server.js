@@ -21,6 +21,7 @@ var auth = require('./lib/middleware/auth'),
 	util = require('util'),
 	argslib = require('./lib/args'),
 	ttyShell = require('./lib/tty_shell'),
+	api = require('./lib/api'),
 	orion = require('./index.js');
 
 // Get the arguments, the workspace directory, and the password file (if configured), then launch the server
@@ -109,6 +110,27 @@ function startServer(cb) {
 				}
 			});
 			server.listen(port);
+			
+			// this function is called when you want the server to die gracefully
+			// i.e. wait for existing connections
+			var gracefulShutdown = function() {
+				console.log("Received kill signal, shutting down gracefully.");
+				api.getOrionEE().emit("close-server");
+				// Close Mongo
+				// Close Search Workers
+				server.close(function() {
+					console.log("Closed out remaining connections.");
+					process.exit();
+				});
+				setTimeout(function() {
+					console.error("Could not close connections in time, forcefully shutting down");
+					process.exit();
+				}, 10 * 1000);
+			};
+			// listen for TERM signal .e.g. kill 
+			process.on('SIGTERM', gracefulShutdown);
+			// listen for INT signal e.g. Ctrl-C
+			process.on('SIGINT', gracefulShutdown);
 		} catch (e) {
 			console.error(e && e.stack);
 		}
