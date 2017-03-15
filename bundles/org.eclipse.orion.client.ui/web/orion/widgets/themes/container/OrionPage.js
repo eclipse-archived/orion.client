@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2015 IBM Corporation and others.
+ * Copyright (c) 2015-2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -111,9 +111,6 @@ define({
 		},
 		".editorViewerHeader": {
 			"background": "#3B4B54 !important",
-			"border-bottom-width": "1px",
-			"border-bottom-style": "solid",
-			"border-bottom-color": "#3B4B54",
 			"color": "#FFFFFF !important"
 		},
 		".filesystemName": {
@@ -440,6 +437,18 @@ define({
 				"background": "#1BB199",
 				"border-color": "#1BB199"
 			}
+		},
+		".editorTabCloseButton:hover": {
+			"background-color": "#1BB199",
+			"color": "#FFFFFF"
+		},
+		".editorTab": {
+			"border-top": "1px solid #26343F",
+			"border-right": "1px solid #26343F"
+		},
+		".focusedEditorTab": {
+			"background-color": "#26343F",
+			"color": "#FFFFFF"
 		}
 	}
 });
