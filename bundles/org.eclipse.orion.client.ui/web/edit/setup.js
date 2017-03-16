@@ -54,16 +54,25 @@ define([
 	'orion/customGlobalCommands',
 	'orion/generalPreferences',
 	'orion/breadcrumbs',
-	'orion/keyBinding'
+	'orion/keyBinding',
+	'orion/debug/breakpoint',
+	'orion/editor/annotations',
+	'orion/debug/debugService',
+	'orion/debug/nativeDeployService',
+	'i18n!orion/debug/nls/messages',
+	'orion/debug/debugFileImpl',
 ], function(
 	messages, Sidebar, mInputManager, mCommands, mGlobalCommands,
 	mTextModelFactory, mUndoStack,
 	mFolderView, mEditorView, mPluginEditorView , mMarkdownView, mMarkdownEditor,
 	mCommandRegistry, mContentTypes, mFileClient, mFileCommands, mEditorCommands, mSelection, mStatus, mProgress, mOperationsClient, mOutliner, mDialogs, mExtensionCommands, ProjectCommands, mSearchClient,
-	EventTarget, URITemplate, i18nUtil, PageUtil, util, objects, lib, Deferred, mProjectClient, mSplitter, mTooltip, bidiUtils, mCustomGlobalCommands, mGeneralPrefs, mBreadcrumbs, mKeyBinding
+	EventTarget, URITemplate, i18nUtil, PageUtil, util, objects, lib, Deferred, mProjectClient, mSplitter, mTooltip, bidiUtils, mCustomGlobalCommands, mGeneralPrefs, mBreadcrumbs, mKeyBinding,
+	mBreakpoint, mAnnotations, mDebugService, mNativeDeployService, debugMessages, DebugFileImpl
 ) {
 
 var exports = {};
+
+var AT = mAnnotations.AnnotationType;
 
 var enableSplitEditor = true;
 
@@ -786,6 +795,8 @@ function EditorViewer(options) {
 	this.editModelContextServiceID = "orion.edit.model.context" + this.id; //$NON-NLS-0$
 	this.shown = true;
 
+	this.debugService = this.serviceRegistry.getService("orion.debug.service");
+	
 	var domNode = this.domNode = document.createElement("div"); //$NON-NLS-0$
 	domNode.className = "editorViewerFrame"; //$NON-NLS-0$
 	this.parent.appendChild(domNode);
@@ -821,6 +832,7 @@ objects.mixin(EditorViewer.prototype, {
 		this.createInputManager();
 		this.createTabWidget();
 		this.createEditorView();
+		this.hookDebugService();
 	},
 	
 	createTextModel: function() {
@@ -910,6 +922,7 @@ objects.mixin(EditorViewer.prototype, {
 			}
 			var view = this.getEditorView(evt.input, metadata);
 			this.setEditor(view ? view.editor : null);
+			this.addAnnotationsFromDebugService();
 			this.updateDirtyIndicator();
 			evt.editor = this.editor;
 			this.pool.metadata = metadata;
@@ -998,6 +1011,54 @@ objects.mixin(EditorViewer.prototype, {
 		this.selection.addEventListener("selectionChanged", function(evt) { //$NON-NLS-0$
 			inputManager.setInput(evt.selection);
 		});
+	},
+
+	hookDebugService: function() {
+		// Handle breakpoint event and add annotation
+		this.debugService.addEventListener("BreakpointAdded", function(e) {
+			if (!this.editor) {
+				return;
+			}
+			if (e.breakpoint.location === this.inputManager.getInput()) {
+				var annotation = this.breakpointToAnnotation(e.breakpoint);
+				var annotationModel = this.editor.getAnnotationModel();
+				annotationModel.addAnnotation(annotation);
+			}
+		}.bind(this));
+		this.debugService.addEventListener("BreakpointRemoved", function(e) {
+			if (!this.editor) {
+				return;
+			}
+			if (e.breakpoint.location === this.inputManager.getInput()) {
+				var annotation = this.breakpointToAnnotation(e.breakpoint);
+				var type = annotation.type;
+				var annotationModel = this.editor.getAnnotationModel();
+				var annotations = annotationModel.getAnnotations(annotation.start, annotation.end);
+				while (annotations.hasNext()) {
+					var annotation = annotations.next();
+					if (annotation.type === type) {
+						annotationModel.removeAnnotation(annotation);
+					}
+				}
+			}
+		}.bind(this));
+
+		// Handle line focused event
+		this.debugService.addEventListener("LineFocused", function(e) {
+			if (!this.editor) {
+				return;
+			}
+			if (e.location !== this.inputManager.getInput()) {
+				return;
+			}
+			this.editor.highlightLine(e.line);
+		}.bind(this));
+		this.debugService.addEventListener("LineUnfocused", function(e) {
+			if (!this.editor) {
+				return;
+			}
+			this.editor.unhighlightLine();
+		}.bind(this));
 	},
 
 	defaultOptions: function() {
@@ -1107,6 +1168,7 @@ objects.mixin(EditorViewer.prototype, {
 		if (this.editor === newEditor) { return; }
 		if (this.editor) {
 			this.editor.removeEventListener("DirtyChanged", this.editorDirtyListener); //$NON-NLS-0$
+			this.editor.removeEventListener("AnnotationModified", this.editorAnnotationModifiedListener);
 		}
 		this.editor = newEditor;
 		if (this.editor) {
@@ -1115,9 +1177,115 @@ objects.mixin(EditorViewer.prototype, {
 					editorViewer.updateDirtyIndicator();
 				});
 			}.bind(this));
+			this.editor.addEventListener("AnnotationModified", this.editorAnnotationModifiedListener = function(e) {
+				// this.activateContext.editorViewers.forEach(function(editorViewer){
+				// 	var annotationModel = editorViewer.editor.getAnnotationModel();
+				// 	e.removed.forEach(function(annotation) {
+				// 		annotationModel.removeAnnotation(annotation);
+				// 	});
+				// 	e.added.forEach(function(annotation) {
+				// 		annotationModel.addAnnotation(annotation);
+				// 	});
+				// });
+				// Also update debug service
+				e.removed.forEach(function(annotation) {
+					var breakpoint = this.annotationToBreakpoint(annotation);
+					if (breakpoint) {
+						this.debugService.removeBreakpoint(breakpoint);
+					}
+				}.bind(this));
+				e.added.forEach(function(annotation) {
+					var breakpoint = this.annotationToBreakpoint(annotation);
+					if (breakpoint instanceof mBreakpoint.LineConditionalBreakpoint) {
+						this.commandRegistry.prompt(this.domNode, messages["EnterCondition"], messages["OK"], messages["Cancel"], "true", false, function(condition) {
+							if (condition) {
+								breakpoint.condition = breakpoint.description = condition;
+								this.debugService.addBreakpoint(breakpoint);
+							}
+						}.bind(this));
+					} else {
+						if (breakpoint) {
+							this.debugService.addBreakpoint(breakpoint);
+						}
+					}
+				}.bind(this));
+			}.bind(this));
 		}
 	},
+
+	addAnnotationsFromDebugService: function() {
+		// Add local breakpoints to this editor
+		this.debugService.getBreakpointsByLocation(this.inputManager.getInput()).then(function(breakpoints) {
+			if (!this.editor) {
+				return;
+			}
+			var annotationModel = this.editor.getAnnotationModel();
+			annotationModel.removeAnnotations(AT.ANNOTATION_BOOKMARK);
+			annotationModel.removeAnnotations(AT.ANNOTATION_BREAKPOINT);
+			annotationModel.removeAnnotations(AT.ANNOTATION_CONDITIONAL_BREAKPOINT);
+			breakpoints.forEach(function(breakpoint) {
+				var annotation = this.breakpointToAnnotation(breakpoint);
+				if (annotation) {
+					annotationModel.addAnnotation(annotation);
+				}
+			}.bind(this));
+		}.bind(this));
+
+		// Add current focused line
+		this.debugService.getFocusedLine().then(function(lineWithLocation) {
+			if (!this.editor) {
+				return;
+			}
+			if (!lineWithLocation) {
+				return;
+			}
+			var line = lineWithLocation.line;
+			var location = lineWithLocation.location;
+			if (location !== this.inputManager.getInput()) {
+				return;
+			}
+			this.editor.highlightLine(line);
+		}.bind(this));
+	},
 	
+	annotationToBreakpoint: function(annotation) {
+		var location = this.inputManager.getInput();
+		var textModel = this.editor.getModel();
+		if (textModel.getBaseModel) {
+			textModel = textModel.getBaseModel();
+		}
+		var line = textModel.getLineAtOffset(annotation.start);
+		if (annotation.type === AT.ANNOTATION_BOOKMARK) {
+			return new mBreakpoint.LineBookmark(location, line, annotation.title);
+		} else if (annotation.type === AT.ANNOTATION_BREAKPOINT) {
+			return new mBreakpoint.LineBreakpoint(location, line, annotation.title, true);
+		} else if (annotation.type === AT.ANNOTATION_CONDITIONAL_BREAKPOINT) {
+			return new mBreakpoint.LineConditionalBreakpoint(location, line, annotation.title, annotation.title, true);
+		}
+		return null;
+	},
+
+	breakpointToAnnotation: function(breakpoint) {
+		var annotationType = undefined;
+		if (breakpoint instanceof mBreakpoint.LineBookmark) {
+			annotationType = AT.ANNOTATION_BOOKMARK;
+		} else if (breakpoint instanceof mBreakpoint.LineBreakpoint) {
+			annotationType = AT.ANNOTATION_BREAKPOINT;
+		} else if (breakpoint instanceof mBreakpoint.LineConditionalBreakpoint) {
+			annotationType = AT.ANNOTATION_CONDITIONAL_BREAKPOINT;
+		}
+		if (annotationType) {
+			var textModel = this.editor.getModel();
+			if (textModel.getBaseModel) {
+				textModel = textModel.getBaseModel();
+			}
+			var lineStart = textModel.getLineStart(breakpoint.line);
+			var lineEnd = textModel.getLineEnd(breakpoint.line);
+			return AT.createAnnotation(annotationType, lineStart, lineEnd, breakpoint.description);
+		}
+		return null;
+	},
+
 	updateDirtyIndicator: function(){
 		if (this.editor && this.editor.isDirty) {
 			var loc = this.inputManager.getFileMetadata().Location;
@@ -1174,6 +1342,17 @@ objects.mixin(EditorSetup.prototype, {
 		this.dialogService = new mDialogs.DialogService(serviceRegistry);
 		this.commandRegistry = new mCommandRegistry.CommandRegistry({selection: this.selection});
 		this.progressService = new mProgress.ProgressService(serviceRegistry, this.operationsClient, this.commandRegistry);
+		this.getGeneralPreferences().then(function() {
+			if (this.generalPreferences.enableDebugger) {
+				this.nativeDeployService = new mNativeDeployService.NativeDeployService(serviceRegistry, this.commandRegistry);
+				var debugFileService = new DebugFileImpl();
+				serviceRegistry.registerService("orion.core.file", debugFileService, {
+					Name: debugMessages["DebugWorkspace"],
+					top: "/debug",
+					pattern: "/debug"
+				});
+			}
+		}.bind(this));
 		
 		// Editor needs additional services
 		this.outlineService = new mOutliner.OutlineService({serviceRegistry: serviceRegistry, preferences: this.preferences});
@@ -1195,6 +1374,7 @@ objects.mixin(EditorSetup.prototype, {
 			navToolbarId: "pageNavigationActions", //$NON-NLS-0$
 			editorContextMenuId: "editorContextMenuActions", //$NON-NLS-0$
 		});
+		this.debugService = new mDebugService.PreferenceDebugService(serviceRegistry, this.preferences);
 	},
 	
 	getGeneralPreferences: function() {
@@ -1233,15 +1413,16 @@ objects.mixin(EditorSetup.prototype, {
 			projectClient: this.serviceRegistry.getService("orion.project.client"),
 			progressService: this.progressService,
 			preferences: this.preferences,
-			editorInputManager: this.editorInputManager
+			editorInputManager: this.editorInputManager,
+			generalPreferences: this.generalPreferences
 		}).then(function(runBar){
 			if (runBar) {
 				this.preferences.get('/runBar').then(function(prefs){ //$NON-NLS-1$
 					this.runBar = runBar;
 					var displayRunBar = prefs.display === undefined  || prefs.display;
-					if (util.isElectron || !displayRunBar) {
-						lib.node("runBarWrapper").style.display = "none";
-					}
+					// if (util.isElectron || !displayRunBar) {
+					// 	lib.node("runBarWrapper").style.display = "none";
+					// }
 				}.bind(this));
 			}
 		}.bind(this));
@@ -1287,6 +1468,7 @@ objects.mixin(EditorSetup.prototype, {
 			contentTypeRegistry: this.contentTypeRegistry,
 			editorInputManager: this.editorInputManager,
 			preferences: this.preferences,
+			generalPreferences: this.generalPreferences,
 			fileClient: this.fileClient,
 			outlineService: this.outlineService,
 			parent: this.sidebarDomNode,

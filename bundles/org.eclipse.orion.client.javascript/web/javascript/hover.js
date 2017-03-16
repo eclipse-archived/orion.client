@@ -436,8 +436,99 @@ Objects.mixin(JavaScriptHover.prototype, /** @lends javascript.JavaScriptHover.p
     }
 });
 
+/**
+ * @name javascript.JavaScriptDebugHoverEvaluationProvider
+ * @constructor
+ * @public
+ * @param {javascript.ASTManager} astManager
+ * @param {javascript.ScriptResolver} resolver
+ * @param {javascript.TernWorkerCore} ternWorker
+ * @param {javascript.CUProvider} cuProvider
+ */
+function JavaScriptDebugHoverEvaluationProvider(astManager, resolver, ternWorker, cuProvider) {
+    this.astManager = astManager;
+    this.resolver = resolver;
+    this.ternworker = ternWorker;
+    this.cuprovider = cuProvider;
+}
+
+/**
+ * Get the plain text of a node.
+ * @param {Node} node
+ * @return {string}
+ */
+function _getNodeText(node) {
+    return node.sourceFile.text.substr(node.start, node.end - node.start);
+}
+
+Objects.mixin(JavaScriptDebugHoverEvaluationProvider.prototype, /** @lends javascript.JavaScriptDebugHoverEvaluationProvider.prototype*/ {
+
+    /**
+     * @description Get hover text
+     * @function
+     * @public
+     * @param {?} editorContext The current editor context
+     * @param {?} ctxt The current selection context
+     */
+    findHoverText: function findHoverText(editorContext, ctxt) {
+        if (ctxt.proposal && ctxt.proposal.kind === 'js') {
+            return ctxt.proposal.hover;
+        }
+        var that = this;
+        return editorContext.getFileMetadata().then(function(meta) {
+            if (!meta) {
+                return null;
+            }
+            if (Array.isArray(meta.parents) && meta.parents.length > 0) {
+                that.resolver.setSearchLocation(meta.parents[meta.parents.length - 1].Location);
+            } else {
+                that.resolver.setSearchLocation(null);
+            }
+            if (meta && meta.contentType.id === 'application/javascript') {
+                return that.astManager.getAST(editorContext).then(function(ast) {
+                    return that._doHover(ast, ctxt, meta);
+                });
+            }
+            return editorContext.getText().then(function(text) {
+                var cu = that.cuprovider.getCompilationUnit(function() {
+                    return Finder.findScriptBlocks(text);
+                }, meta);
+                if (cu.validOffset(ctxt.offset)) {
+                    return that.astManager.getAST(cu.getEditorContext()).then(function(ast) {
+                        return that._doHover(ast, ctxt, meta, text);
+                    });
+                }
+                return null;
+            });
+        });
+
+    },
+
+    _doHover: function _doHover(ast, ctxt, meta, htmlsource) {
+        var node = Finder.findNode(ctxt.offset, ast, {
+            parents: true
+        });
+        if (!node) {
+            return null;
+        } else if (node.type === 'Literal') {
+            return _getNodeText(node);
+        } else if (node.type === 'Identifier') {
+            if (node.parents[node.parents.length - 1].type === 'MemberExpression' &&
+                node.parents[node.parents.length - 1].property.range[0] <= ctxt.offset) {
+                return _getNodeText(node.parents[node.parents.length - 1]);
+            } else {
+                return _getNodeText(node);
+            }
+        } else {
+            return null
+        }
+    }
+
+});
+
 return {
     JavaScriptHover: JavaScriptHover,
+    JavaScriptDebugHoverEvaluationProvider: JavaScriptDebugHoverEvaluationProvider,
     formatMarkdownHover: formatMarkdownHover
 };
 });
