@@ -1,0 +1,57 @@
+{
+    "node-debug": {
+        "repository": "https://github.com/Microsoft/vscode-node-debug.git",
+        "ignore": "extensionHost",
+        "templates": [
+            {
+                "name": "Default",
+                "program": "${workspaceRoot}/server.js",
+                "cwd": "${workspaceRoot}"
+            }
+        ]
+    },
+    "python": {
+        "repository": "https://github.com/DonJayamanne/pythonVSCode.git",
+        "build": "./node_modules/.bin/tsc --target ES5",
+        "templates": [
+            {
+                "name": "Default",
+                "program": "${workspaceRoot}/main.py",
+                "pythonPath": "python",
+                "cwd": "${workspaceRoot}",
+                "debugOptions": [
+                    "WaitOnAbnormalExit",
+                    "WaitOnNormalExit",
+                    "RedirectOutput"
+                ]
+            }
+        ]
+    },
+    "vscode-lldb": {
+        "repository": "https://github.com/vadimcn/vscode-lldb.git",
+        "build": "./node_modules/.bin/tsc --target ES5 --lib DOM,ES5,ScriptHost,ES2015.Promise,ES2015.Collection,ES2015.Core",
+        "templates": [
+            {
+                "name": "Default",
+                "program": "${workspaceRoot}/<your program>",
+                "args": [],
+                "cwd": "${workspaceRoot}"
+            }
+        ]
+    },
+    "java": {
+        "repository": "https://github.com/DonJayamanne/javaVSCode.git",
+        "build": "./node_modules/.bin/tsc --target ES5 --lib DOM,ES5,ScriptHost,ES2015.Promise,ES2015.Collection,ES2015.Core",
+        "templates": [
+            {
+                "name": "Default",
+                "startupClass": "${workspaceRoot}/Program.java",
+                "cwd": "${workspaceRoot}",
+                "options": [
+                    "-classpath",
+                    "${workspaceRoot}"
+                ]
+            }
+        ]
+    }
+}
