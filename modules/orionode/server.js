@@ -22,6 +22,7 @@ var auth = require('./lib/middleware/auth'),
 	argslib = require('./lib/args'),
 	ttyShell = require('./lib/tty_shell'),
 	orion = require('./index.js');
+	debugServer = require('../orionode.debug.server');
 
 // Get the arguments, the workspace directory, and the password file (if configured), then launch the server
 var args = argslib.parseArgs(process.argv);
@@ -94,6 +95,27 @@ function startServer(cb) {
 			}));
 			var io = socketio.listen(server, { 'log level': 1, path: (listenContextPath ? contextPath : '' ) + '/socket.io' });
 			ttyShell.install({ io: io, app: app, fileRoot: contextPath + '/file', workspaceDir: workspaceDir });
+			debugServer.install({ io: io, app: app, fileRoot: contextPath + '/file', workspaceDir: workspaceDir, listenPath: (listenContextPath ? contextPath : '') });
+
+			//error handling
+			app.use(function(req, res){
+				res.status(404);
+
+				// respond with html page
+				//if (req.accepts('html')) {
+				//	res.render('404', { url: req.url });
+				//	return;
+				//}
+
+				// respond with json
+				if (req.accepts('json')) {
+					res.send({ error: 'Not found' });
+					return;
+				}
+
+				// default to plain-text. send()
+				res.type('txt').send('Not found');
+			});
 
 			server.on('listening', function() {
 				configParams.port = port;
