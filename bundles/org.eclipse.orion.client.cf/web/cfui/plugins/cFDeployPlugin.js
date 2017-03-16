@@ -36,7 +36,7 @@ require([
 			id: "org.eclipse.orion.client.cf.deploy",
 			deployTypes: ["Cloud Foundry"],
 			name: messages["createNew"],
-			tooltip: messages["deploy.cf.tooltip"],
+			tooltip: messages["createNewTooltip"],
 			validationProperties: [{source: "NoShow" }],
 			logLocationTemplate: "{+OrionHome}/cfui/logs.html#{Name,Target*}",
 			priorityForDefault: 9
