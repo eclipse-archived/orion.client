@@ -1,0 +1,29 @@
+<table class="formTable">
+	<tr>
+		<td class="label">Configuration Name:</td>
+		<td class="selectCell"><input id="config-name-input" type="text"></td>
+	</tr>
+	<tr>
+		<td class="label">Remote Debug:</td>
+		<td class="selectCell"><input id="remote-debug-checkbox" type="checkbox"></td>
+	</tr>
+	<tr>
+		<td class="label">Debug Server:</td>
+		<td class="selectCell"><input id="debug-server-input" type="text"></td>
+	</tr>
+	<tr>
+		<td class="label">Remote Root Path:</td>
+		<td class="selectCell"><input id="remote-root-input" type="text"></td>
+	</tr>
+	<tr>
+		<td class="label">Debug Adapter Type:</td>
+		<td class="selectCell"><select id="debug-adapter-type-select"></select></td>
+	</tr>
+</table>
+<div id="editorWrapper">
+	<div id="editor"></div>
+	<div id="configTemplate">
+		<button class="orionButton commandButton" id="template-button">Select a Template</button>
+		<select id="template-dropdown" class="collapsed"></select>
+	</div>
+</div>
