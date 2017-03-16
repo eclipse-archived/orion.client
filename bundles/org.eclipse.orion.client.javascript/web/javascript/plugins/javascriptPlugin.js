@@ -568,6 +568,11 @@ define([
 			name: javascriptMessages['jsHover'],
 			contentType: ["application/javascript", "text/html"] //$NON-NLS-1$ //$NON-NLS-2$
 		});
+	provider.registerService("orion.debug.hoverEvaluationProvider", new Hover.JavaScriptDebugHoverEvaluationProvider(astManager, scriptresolver, ternWorker, CUProvider), //$NON-NLS-1$
+		{
+			name: javascriptMessages['jsHoverEvaluationProvider'],
+			contentType: ["application/javascript", "text/html"] //$NON-NLS-1$ //$NON-NLS-2$
+		});
 
 	provider.registerService("orion.edit.validator", //$NON-NLS-1$
 		{
