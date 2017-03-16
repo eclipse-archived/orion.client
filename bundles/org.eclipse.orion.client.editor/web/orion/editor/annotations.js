@@ -166,6 +166,10 @@ define("orion/editor/annotations", ['i18n!orion/editor/nls/messages', 'orion/edi
 	 */
 	AnnotationType.ANNOTATION_BREAKPOINT = "orion.annotation.breakpoint"; //$NON-NLS-0$
 	/**
+	 * Breakpoint annotation type.
+	 */
+	AnnotationType.ANNOTATION_CONDITIONAL_BREAKPOINT = "orion.annotation.conditionalBreakpoint"; //$NON-NLS-0$
+	/**
 	 * Bookmark annotation type.
 	 */
 	AnnotationType.ANNOTATION_BOOKMARK = "orion.annotation.bookmark"; //$NON-NLS-0$
@@ -185,6 +189,10 @@ define("orion/editor/annotations", ['i18n!orion/editor/nls/messages', 'orion/edi
 	 * Current line annotation type.
 	 */
 	AnnotationType.ANNOTATION_CURRENT_LINE = "orion.annotation.currentLine"; //$NON-NLS-0$
+	/**
+	 * Current search annotation type.
+	 */
+	AnnotationType.ANNOTATION_HIGHLIGHTED_LINE = "orion.annotation.highlightedLine"; //$NON-NLS-0$
 	/**
 	 * Current search annotation type.
 	 */
@@ -308,6 +316,7 @@ define("orion/editor/annotations", ['i18n!orion/editor/nls/messages', 'orion/edi
 	registerType(AnnotationType.ANNOTATION_INFO);
 	registerType(AnnotationType.ANNOTATION_TASK);
 	registerType(AnnotationType.ANNOTATION_BREAKPOINT);
+	registerType(AnnotationType.ANNOTATION_CONDITIONAL_BREAKPOINT);
 	registerType(AnnotationType.ANNOTATION_BOOKMARK);
 	registerType(AnnotationType.ANNOTATION_CURRENT_BRACKET);
 	registerType(AnnotationType.ANNOTATION_MATCHING_BRACKET);
@@ -319,6 +328,7 @@ define("orion/editor/annotations", ['i18n!orion/editor/nls/messages', 'orion/edi
 	registerType(AnnotationType.ANNOTATION_CURRENT_LINKED_GROUP);
 	registerType(AnnotationType.ANNOTATION_LINKED_GROUP);
 	registerType(AnnotationType.ANNOTATION_CURRENT_LINE, true);
+	registerType(AnnotationType.ANNOTATION_HIGHLIGHTED_LINE, true);
 	registerType(AnnotationType.ANNOTATION_BLAME, true);
 	registerType(AnnotationType.ANNOTATION_CURRENT_BLAME, true);
 	registerType(AnnotationType.ANNOTATION_DIFF_ADDED);
