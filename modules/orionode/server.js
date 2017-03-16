@@ -21,6 +21,7 @@ var auth = require('./lib/middleware/auth'),
 	util = require('util'),
 	argslib = require('./lib/args'),
 	ttyShell = require('./lib/tty_shell'),
+	api = require('./lib/api'),
 	orion = require('./index.js');
 
 // Get the arguments, the workspace directory, and the password file (if configured), then launch the server
@@ -92,6 +93,8 @@ function startServer(cb) {
 				configParams: configParams,
 				maxAge: dev ? 0 : undefined,
 			}));
+			
+			server = require('http-shutdown')(server);
 			var io = socketio.listen(server, { 'log level': 1, path: (listenContextPath ? contextPath : '' ) + '/socket.io' });
 			ttyShell.install({ io: io, app: app, fileRoot: contextPath + '/file', workspaceDir: workspaceDir });
 
@@ -109,6 +112,31 @@ function startServer(cb) {
 				}
 			});
 			server.listen(port);
+			
+			// this function is called when you want the server to die gracefully
+			// i.e. wait for existing connections
+			var gracefulShutdown = function() {
+				console.log("Received kill signal, shutting down gracefully.");
+				api.getOrionEE().emit("close-socket");
+				server.shutdown(function() {
+					api.getOrionEE().emit("close-server");// Disconnect Mongoose // Close Search Workers
+					console.log("Closed out remaining connections.");
+					process.exit();
+				});
+				setTimeout(function() {
+					api.getOrionEE().emit("close-server");
+					console.error("Could not close connections in time, forcefully shutting down");
+					process.exit();
+				}, configParams["shutdown.timeout"]);
+			};
+			// listen for TERM signal .e.g. kill 
+			process.on('SIGTERM', gracefulShutdown);
+			var stdin = process.openStdin();
+			stdin.addListener("data", function(d) {
+				if(d.toString().trim() === "shutdown"){
+					gracefulShutdown();
+				}
+			});
 		} catch (e) {
 			console.error(e && e.stack);
 		}

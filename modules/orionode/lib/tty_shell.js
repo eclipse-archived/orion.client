@@ -81,6 +81,11 @@ exports.install = function(options) {
 				onStart(passedCwd);
 			}
 		});
+		
+		api.getOrionEE().on("close-socket", function(){
+			console.log("Closing Socket.IO.");
+			sock.disconnect();
+		});
 
 		function onStart(cwd) {
 			// Handle missing node-pty
@@ -104,7 +109,7 @@ exports.install = function(options) {
 				var buff = [];
 				// Open Terminal Connection
 				var shell = process.platform === 'win32' ? 'powershell.exe' : (process.env.SHELL || 'sh');
-				var terminal = pty.fork(shell, [], {
+				var terminal = pty.spawn(shell, [], {
 					name: require('fs').existsSync('/usr/share/terminfo/x/xterm-256color')
 					? 'xterm-256color'
 					: 'xterm',
@@ -135,7 +140,7 @@ exports.install = function(options) {
 				});
 
 				sock.on('disconnect', function() {
-					terminal.destroy()
+					terminal.destroy();
 					// termsocket = null;
 				});
 
