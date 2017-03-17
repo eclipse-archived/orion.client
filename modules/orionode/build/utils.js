@@ -55,6 +55,9 @@ module.exports = function(grunt) {
 			var baseName = module.name.split("/").pop();
 			return excludeModules.indexOf(baseName) === -1;
 		});
+		extraModules.forEach(function(m) {
+			m.excludeShallow = clone.modules[0].excludeShallow;
+		});
 		clone.modules = clone.modules.concat(extraModules || []);
 		for (var p in extraPaths || {}) {
 			clone.paths[p] = extraPaths[p];

@@ -148,7 +148,7 @@ function findProject(fileRoot, workspaceDir, filepath, names) {
 				for(var i = 0, len = children.length; i < len; i++) {
 					var c = children[i],
 						n = names[c.Name];
-					if(n && (c.Directory && n.isDirectory)) {
+					if(n && (c.Directory && n.isDirectory || !c.Directory && !n.isDirectory)) {
 						return resolve(filepath);
 					}
 				}

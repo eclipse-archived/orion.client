@@ -165,7 +165,7 @@ module.exports = function(options) {
 			n.forEach(function(item) {
 				names[decodeURIComponent(item)] = Object.create(null);
 			});
-			return fileUtil.getProject(req.user.workspaceDir, fileRoot, filepath, names).then(function(project) {
+			return fileUtil.getProject(req.user.workspaceDir, fileRoot, filepath, {names: names}).then(function(project) {
 				return fileUtil.withStatsAndETag(project, function(error, stats, etag) {
 					if (error && error.code === 'ENOENT') {
 						res.sendStatus(204);

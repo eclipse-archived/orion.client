@@ -233,7 +233,7 @@ Task.prototype = {
 		this.started = true;
 		taskStore.createTask(this, function(err) {
 			var res = this.res;
-			if (!res) {
+			if (res.finished) {
 				return;
 			}
 			if (err) {
@@ -245,7 +245,6 @@ Task.prototype = {
 				res.setHeader('Content-Length', resp.length);
 				res.end(resp);
 			}
-			this.res = null;
 		}.bind(this));
 	},
 	done: function(result) {
@@ -272,7 +271,7 @@ Task.prototype = {
 			}
 			taskStore.updateTask(this, function(err) {
 				var res = this.res;
-				if (!res) {
+				if (res.finished) {
 					return;
 				}
 				if (err) {
@@ -289,7 +288,6 @@ Task.prototype = {
 						res.end();
 					}
 				}
-				this.res = null;
 			}.bind(this));
 		} else {
 			taskStore.updateTask(this, function(err) {
