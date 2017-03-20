@@ -10,18 +10,19 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 /*eslint-env browser, amd*/
-define("orion/editor/contentAssist", [ //$NON-NLS-0$
-	'i18n!orion/editor/nls/messages', //$NON-NLS-0$
-	'orion/keyBinding', //$NON-NLS-0$
-	'orion/editor/keyModes', //$NON-NLS-0$
-	'orion/editor/eventTarget', //$NON-NLS-0$
-	'orion/Deferred', //$NON-NLS-0$
-	'orion/objects', //$NON-NLS-0$
-	'orion/editor/tooltip', //$NON-NLS-0$
-	'orion/editor/util', //$NON-NLS-0$
-	'orion/util', //$NON-NLS-0$
-	'orion/webui/littlelib', //$NON-NLS-0$
-	'orion/metrics' //$NON-NLS-0$
+/*eslint-disable no-else-return, no-extra-parens*/
+define("orion/editor/contentAssist", [
+	'i18n!orion/editor/nls/messages',
+	'orion/keyBinding',
+	'orion/editor/keyModes',
+	'orion/editor/eventTarget',
+	'orion/Deferred',
+	'orion/objects',
+	'orion/editor/tooltip',
+	'orion/editor/util',
+	'orion/util',
+	'orion/webui/littlelib',
+	'orion/metrics'
 ], function(messages, mKeyBinding, mKeyModes, mEventTarget, Deferred, objects, mTooltip, textUtil, util, lib, mMetrics) {
 	/**
 	 * @name orion.editor.ContentAssistProvider
@@ -189,7 +190,7 @@ define("orion/editor/contentAssist", [ //$NON-NLS-0$
 				end: mapEnd
 			};
 			this.setState(State.INACTIVE);
-			var proposalText = typeof proposal === "string" ? proposal : proposal.proposal; //$NON-NLS-0$
+			var proposalText = typeof proposal === "string" ? proposal : proposal.proposal;
 			view.setText(proposalText, start, end);
 			if (proposal.additionalEdits) {
 				var edit;
@@ -306,7 +307,7 @@ define("orion/editor/contentAssist", [ //$NON-NLS-0$
 			return index;
 		},
 		handleError: function(error) {
-			if (typeof console !== "undefined") { //$NON-NLS-0$
+			if (typeof console !== "undefined") {
 				console.log("Error retrieving content assist proposals"); //$NON-NLS-0$
 				console.log(error && error.stack);
 			}
@@ -318,7 +319,7 @@ define("orion/editor/contentAssist", [ //$NON-NLS-0$
 		initialize: function() {
 			this._providers.forEach(function(info) {
 				var provider = info.provider;
-				if (typeof provider.initialize === "function") {//$NON-NLS-0$
+				if (typeof provider.initialize === "function") {
 					provider.initialize();
 				}
 			});
@@ -505,7 +506,7 @@ define("orion/editor/contentAssist", [ //$NON-NLS-0$
 								}
 								
 								return activated;
-							} else if (typeof proposal === "string") { //$NON-NLS-0$
+							} else if (typeof proposal === "string") {
 								pattern = getRegexp("", this._filterText);
 								return pattern.test(proposal);
 							}
@@ -768,21 +769,21 @@ define("orion/editor/contentAssist", [ //$NON-NLS-0$
 			if (this._triggerListenerInstalled) {
 				// uninstall the listener if necessary
 				if (!this._autoTriggerEnabled || !this._charTriggersInstalled) {
-					this.textView.removeEventListener("Modify", this._boundTriggerListener); //$NON-NLS-0$
+					this.textView.removeEventListener("Modify", this._boundTriggerListener);
 					this._triggerListenerInstalled = false;
 				}
 			} else if (this._autoTriggerEnabled && this._charTriggersInstalled){
 				// install the listener if necessary
-				this.textView.addEventListener("Modify", this._boundTriggerListener); //$NON-NLS-0$
+				this.textView.addEventListener("Modify", this._boundTriggerListener);
 				this._triggerListenerInstalled = true;
 			}
 		},
 		
 		_addTextViewListeners: function() {
 			if (!this._textViewListenersAdded) {
-				this.textView.addEventListener("ModelChanging", this._textViewListeners.onModelChanging); //$NON-NLS-0$
-				this.textView.addEventListener("Scroll", this._textViewListeners.onScroll); //$NON-NLS-0$
-				this.textView.addEventListener("Selection", this._textViewListeners.onSelection); //$NON-NLS-0$
+				this.textView.addEventListener("ModelChanging", this._textViewListeners.onModelChanging);
+				this.textView.addEventListener("Scroll", this._textViewListeners.onScroll);
+				this.textView.addEventListener("Selection", this._textViewListeners.onSelection);
 				this._textViewListenersAdded = true;
 			}
 		},
@@ -790,9 +791,9 @@ define("orion/editor/contentAssist", [ //$NON-NLS-0$
 		_removeTextViewListeners: function() {
 			if (this._textViewListenersAdded) {
 				this._latestModelChangingEvent = null;
-				this.textView.removeEventListener("ModelChanging", this._textViewListeners.onModelChanging); //$NON-NLS-0$
-				this.textView.removeEventListener("Scroll", this._textViewListeners.onScroll); //$NON-NLS-0$
-				this.textView.removeEventListener("Selection", this._textViewListeners.onSelection); //$NON-NLS-0$
+				this.textView.removeEventListener("ModelChanging", this._textViewListeners.onModelChanging);
+				this.textView.removeEventListener("Scroll", this._textViewListeners.onScroll);
+				this.textView.removeEventListener("Selection", this._textViewListeners.onSelection);
 				this._textViewListenersAdded = false;
 			}
 		},
@@ -830,7 +831,7 @@ define("orion/editor/contentAssist", [ //$NON-NLS-0$
 		this.widget = ContentAssistWidget;
 		this.proposals = [];
 		var self = this;
-		this.contentAssist.addEventListener("ProposalsComputed", function(event) { //$NON-NLS-0$
+		this.contentAssist.addEventListener("ProposalsComputed", function(event) {
 			self.proposals = event.data.proposals;
 			if (self.proposals.length === 0) {
 				self.selectedIndex = -1;
@@ -1126,7 +1127,7 @@ define("orion/editor/contentAssist", [ //$NON-NLS-0$
 		this.isShowing = false;
 		this._useResizeTimer = false;
 		var document = this.textView.getOptions("parent").ownerDocument; //$NON-NLS-0$
-		this.parentNode = typeof parentNode === "string" ? document.getElementById(parentNode) : parentNode; //$NON-NLS-0$
+		this.parentNode = typeof parentNode === "string" ? document.getElementById(parentNode) : parentNode;
 		if (!this.parentNode) {
 			this.parentNode = util.createElement(document, "div"); //$NON-NLS-0$
 			this.parentNode.className = "contentassist"; //$NON-NLS-0$
@@ -1146,7 +1147,7 @@ define("orion/editor/contentAssist", [ //$NON-NLS-0$
 			this._useResizeTimer = true;
 		}
 		
-		textUtil.addEventListener(this.parentNode, "scroll", this.onScroll.bind(this)); //$NON-NLS-0$
+		textUtil.addEventListener(this.parentNode, "scroll", this.onScroll.bind(this));
 		
 		var self = this;
 		this.textViewListener = {
@@ -1159,7 +1160,7 @@ define("orion/editor/contentAssist", [ //$NON-NLS-0$
 				// the click is handled by the onClick() function
 			}
 		};
-		this.contentAssist.addEventListener("Deactivating", function(event) { //$NON-NLS-0$
+		this.contentAssist.addEventListener("Deactivating", function(event) {
 			self.hide();
 		});
 		this.scrollListener = function(e) {
@@ -1169,7 +1170,7 @@ define("orion/editor/contentAssist", [ //$NON-NLS-0$
 			}
 		};
 		//TODO: code edit widget : clean up the code to remove the listener here
-		textUtil.addEventListener(document, "scroll", this.scrollListener); //$NON-NLS-0$
+		textUtil.addEventListener(document, "scroll", this.scrollListener);
 	}
 	ContentAssistWidget.prototype = /** @lends orion.editor.ContentAssistWidget.prototype */ {
 		/** @private */
@@ -1194,7 +1195,7 @@ define("orion/editor/contentAssist", [ //$NON-NLS-0$
 			div.setAttribute("role", "option"); //$NON-NLS-1$ //$NON-NLS-2$
 			div.className = STYLES[proposal.style] ? STYLES[proposal.style] : STYLES.dfault;
 			var node;
-			if (proposal.style === "hr") { //$NON-NLS-0$
+			if (proposal.style === "hr") {
 				node = util.createElement(document, "hr"); //$NON-NLS-0$
 			} else {
 				node = this._createDisplayNode(proposal, itemIndex);
@@ -1207,7 +1208,7 @@ define("orion/editor/contentAssist", [ //$NON-NLS-0$
 		createAccessible: function() {
 			var mode = this._contentAssistMode;
 			var self = this;
-			textUtil.addEventListener(this.parentNode, "keydown", function(evt) { //$NON-NLS-0$
+			textUtil.addEventListener(this.parentNode, "keydown", function(evt) {
 				if (!evt) { evt = window.event; }
 				if (evt.preventDefault) {
 					evt.preventDefault();
@@ -1235,7 +1236,7 @@ define("orion/editor/contentAssist", [ //$NON-NLS-0$
 		},
 		/** @private */
 		_createDisplayNode: function(proposal, index) {
-			var node = document.createElement("span"); //$NON-NLS-0$
+			var node = document.createElement("span");
 			
 			if (!proposal){
 				return node;
@@ -1303,7 +1304,7 @@ define("orion/editor/contentAssist", [ //$NON-NLS-0$
 		},
 		/** @private */
 		_createNameNode: function(name) {
-			var node = document.createElement("span"); //$NON-NLS-0$
+			var node = document.createElement("span");
 			node.classList.add("proposal-name"); //$NON-NLS-0$
 			node.appendChild(document.createTextNode(name));
 			return node;
@@ -1316,11 +1317,11 @@ define("orion/editor/contentAssist", [ //$NON-NLS-0$
 		_createTagsNode: function(tags) {
 			var tagsNode = null;
 			if (tags && tags.constructor === Array && tags.length > 0){
-				tagsNode = document.createElement("span");	 //$NON-NLS-1$
+				tagsNode = document.createElement("span");
 				for (var i=0; i<tags.length; i++) {
 					var tag = tags[i];
 					if (tag.content || tag.cssClass){
-						var tagNode = document.createElement("span"); //$NON-NLS-1$
+						var tagNode = document.createElement("span");
 						if (tag.cssClass){
 							tagNode.classList.add(tag.cssClass);
 						} else {
@@ -1517,7 +1518,7 @@ define("orion/editor/contentAssist", [ //$NON-NLS-0$
 					this._mutationObserver.observe(this.parentNode, {attributes: true});
 				}
 				if (!this.textViewListenerAdded) {
-					this.textView.addEventListener("MouseDown", this.textViewListener.onMouseDown); //$NON-NLS-0$
+					this.textView.addEventListener("MouseDown", this.textViewListener.onMouseDown);
 					this.textViewListenerAdded = true;
 				}
 			}
@@ -1539,7 +1540,7 @@ define("orion/editor/contentAssist", [ //$NON-NLS-0$
 			this._contentAssistMode._hideTooltip();
 			
 			if (this.textViewListenerAdded) {
-				this.textView.removeEventListener("MouseDown", this.textViewListener.onMouseDown); //$NON-NLS-0$
+				this.textView.removeEventListener("MouseDown", this.textViewListener.onMouseDown);
 				this.textViewListenerAdded = false;
 			}
 			
