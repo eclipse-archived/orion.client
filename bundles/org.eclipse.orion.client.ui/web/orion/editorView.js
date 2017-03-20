@@ -47,7 +47,7 @@ define([
 	'orion/commonPreferences',
 	'embeddedEditor/helper/memoryFileSysConst',
 	'orion/objects',
-	'orion/formatter'	
+	'orion/formatter'
 ], function(
 	messages,
 	mEditor, mAnnotations, mEventTarget, mTextView, mTextModelFactory, mEditorFeatures, mHoverFactory, mContentAssist,
@@ -266,7 +266,6 @@ define([
 			if (editor.getContentAssist()) {
 				editor.getContentAssist().setAutoTriggerEnabled(prefs.contentAssistAutoTrigger);
 			}
-
 			this.dispatchEvent({
 				type: "Settings", //$NON-NLS-0$
 				newSettings: this.settings
@@ -379,7 +378,7 @@ define([
 					return true;
 				});
 
-				textView.setKeyBinding(new mKeyBinding.KeyStroke('z', true, false, true), "toggleZoomRuler"); //$NON-NLS-1$ //$NON-NLS-2$
+				textView.setKeyBinding(new mKeyBinding.KeyStroke("z", true, false, true), "toggleZoomRuler"); //$NON-NLS-1$ //$NON-NLS-2$
 				textView.setAction("toggleZoomRuler", function() { //$NON-NLS-0$
 					if (!that.settings.zoomRulerVisible) return false;
 					that.settings.zoomRuler = !that.settings.zoomRuler;
@@ -488,7 +487,6 @@ define([
 			editor.getEditorContext = function() {
 				return EditorContext.getEditorContext(serviceRegistry, that.editContextServiceID);
 			};
-
 			this.dispatcher = new Dispatcher(this.serviceRegistry, this.contentTypeRegistry, editor, inputManager);
 			if(this.themePreferences && this.editorPreferences){
 				this.localSettings = EditorSettings ? new EditorSettings({local: true, editor: editor, themePreferences: this.themePreferences, preferences: this.editorPreferences}) : null;
