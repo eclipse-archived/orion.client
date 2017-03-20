@@ -815,6 +815,7 @@ Parser.prototype = function(){
               if(node.type !== 'StyleSheet') {
                 this.setNodeStart(this.ast, start);
               }
+              node.parent = this._aststack[this._aststack.length-1];
               this._aststack.push(node);
               return node;
             },
@@ -1967,8 +1968,7 @@ Parser.prototype = function(){
                     tt,
                     selectors;
 
-                var node = this.startNode('Rule', tokenStream.curr().range[1]); //ORION AST generation
-                node.declarations = [];
+                var node = this.startNode('Rule', tokenStream.curr().range[1], 'body'); //ORION AST generation
                 /*
                  * Error Recovery: If even a single selector fails to parse,
                  * then the entire ruleset should be thrown away.
@@ -2016,6 +2016,7 @@ Parser.prototype = function(){
                     });
 
                     this._readDeclarations(true);
+                    this.endNode(node, tokenStream.curr().range[1]); // ORION AST Generation
 
                     this.fire({
                         type:       "endrule",
@@ -2023,7 +2024,6 @@ Parser.prototype = function(){
                         line:       selectors[0].line,
                         col:        selectors[0].col
                     });
-                    this.addToParent(this.endNode(node, tokenStream.curr().range[1]), 'body');
                 }
 
                 return selectors;
@@ -2041,10 +2041,14 @@ Parser.prototype = function(){
                 var tokenStream = this._tokenStream,
                     selectors   = [],
                     selector;
+                    
+                var node = this.startNode('SelectorBody', tokenStream.curr().range[1], 'selectorBody'); // ORION AST generation
+                node.selectors= []; //ORION AST generation
 
                 selector = this._selector();
                 if (selector !== null){
-
+					var selectorNode = this.startNode('Selector', tokenStream.curr().range[1], 'selectors'); // ORION AST generation
+					
                     selectors.push(selector);
                     while(tokenStream.match(Tokens.COMMA)){
                         this._readWhitespace();
@@ -2055,8 +2059,11 @@ Parser.prototype = function(){
                             this._unexpectedToken(tokenStream.LT(1));
                         }
                     }
+                    
+                    this.endNode(selectorNode, tokenStream.curr().range[1]); // ORION AST Generation
                 }
-
+				
+				this.endNode(node, tokenStream.curr().range[1]); // ORION AST Generation
                 return selectors.length ? selectors : null;
             },
 
@@ -2593,10 +2600,9 @@ Parser.prototype = function(){
                     prio        = null,
                     invalid     = null,
                     propertyName= "";
-				var node = this.startNode('Declaration', this._tokenStream.curr().range[0], 'declarations'); //ORION
+				var node = this.startNode('Declaration', this._tokenStream.curr().range[0], 'declarations'); //ORION AST Generation
                 property = this._property();
                 if (property !== null){
-					node.value = property; //ORION
                     tokenStream.mustMatch(Tokens.COLON);
                     this._readWhitespace();
 
@@ -2636,10 +2642,14 @@ Parser.prototype = function(){
                         col:        property.col,
                         invalid:    invalid
                     });
-					this.endNode(node, this._tokenStream.curr().range[1]);
+                    
+                    // TODO ORION Property and Value should be AST nodes with ranges
+                    node.property = property; //ORION AST Generation
+                    node.value = expr; //ORION AST Generation
+					this.endNode(node, this._tokenStream.curr().range[1]); //ORION AST Generation
                     return true;
                 } else {
-                	this.endNode(node, this._tokenStream.curr().range[1]);
+                	this.endNode(node, this._tokenStream.curr().range[1]); //ORION AST Generation
                     return false;
                 }
             },
@@ -3155,8 +3165,8 @@ Parser.prototype = function(){
 
 
                 this._readWhitespace();
-				var node = this.startNode('Declarations', this._tokenStream.curr().range[0], 'declarations');
-				node.declarations = [];
+				var node = this.startNode('DeclarationBody', this._tokenStream.curr().range[0], 'declarationBody'); // ORION AST Generation
+				node.declarations = []; // ORION AST Generation
                 if (checkStart){
                     tokenStream.mustMatch(Tokens.LBRACE);
                 }
@@ -6525,6 +6535,7 @@ module.exports = {
     Colors            : require("./Colors"),
     Combinator        : require("./Combinator"),
     Parser            : require("./Parser"),
+    Properties        : require("./Properties"), // ORION Export properties list for content assist
     PropertyName      : require("./PropertyName"),
     PropertyValue     : require("./PropertyValue"),
     PropertyValuePart : require("./PropertyValuePart"),
@@ -6540,7 +6551,9 @@ module.exports = {
     ValidationError   : require("./ValidationError")
 };
 
-},{"./Colors":1,"./Combinator":2,"./Matcher":3,"./MediaFeature":4,"./MediaQuery":5,"./Parser":6,"./PropertyName":8,"./PropertyValue":9,"./PropertyValuePart":11,"./Selector":13,"./SelectorPart":14,"./SelectorSubPart":15,"./Specificity":16,"./TokenStream":17,"./Tokens":18,"./ValidationError":20}],23:[function(require,module,exports){
+},{"./Colors":1,"./Combinator":2,"./Matcher":3,"./MediaFeature":4,"./MediaQuery":5,"./Parser":6,"./PropertyName":8,"./PropertyValue":9,"./PropertyValuePart":11,"./Selector":13,"./SelectorPart":14,"./SelectorSubPart":15,"./Specificity":16,"./TokenStream":17,"./Tokens":18,"./ValidationError":20
+,"./Properties":7 // ORION Export properties list for content assist
+}],23:[function(require,module,exports){
 "use strict";
 
 module.exports = EventTarget;
@@ -8253,6 +8266,8 @@ CSSLint._Reporter = Reporter;
 
 // ORION expose colors for content assist
 CSSLint.Colors = parserlib.css.Colors;
+// ORION expose properties for content assist
+CSSLint.Properties = parserlib.css.Properties;
 
 /*
  * Utility functions that make life easier.
