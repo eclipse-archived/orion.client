@@ -170,6 +170,17 @@ define("webtools/cssValidator", [
 					range = this._getProblemRange(message);
 				} else {
 					range = [0,0];
+					// Try to select the first rule identifier as 0,0 ranges are hard to see
+					if (results.tokens){
+						for (var j = 0; j < results.tokens.length; j++) {
+							var token = results.tokens[j];
+							if (token.type === 'IDENT'){
+								message.line = undefined; // Tokens use offset range, not line+range
+								range = token.range;
+								break;
+							}
+						}
+					}
 				}
 				if(range) {
     				problems.push({

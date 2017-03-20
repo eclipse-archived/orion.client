@@ -127,6 +127,176 @@ define([
 				]);
 			});
 		});
+		
+		it("Test common csslint problems: !important", function(/*done*/) {
+			var val = setup({buffer: "abc{\ncolor: blue !important;}", rule: {id:null, severity:3}});
+			return validator.computeProblems(val.editorContext).then(function(result) {
+				assertProblems(result, [
+				    {start: 1,
+				     end: 6,
+				     line: 2,
+				     severity: 'info',
+				     description: 'Use of !important.'
+				    }
+				]);
+			});
+		});
+		it("Test common csslint problems: Too many !important", function(/*done*/) {
+			var val = setup({buffer: "abc{\ncolor: blue !important;\ncolor: blue !important;\ncolor: blue !important;\ncolor: blue !important;\ncolor: blue !important;\ncolor: blue !important;\ncolor: blue !important;\ncolor: blue !important;\ncolor: blue !important;\ncolor: blue !important;\ncolor: blue !important;\n}", rule: {id:'important', severity:2}});
+			return validator.computeProblems(val.editorContext).then(function(result) {
+				assertProblems(result, [
+				    {start: 1,
+				     end: 6,
+				     line: 2,
+				     severity: 'error',
+				     description: 'Use of !important.'
+				    },
+				    {start: 1,
+				     end: 6,
+				     line: 3,
+				     severity: 'error',
+				     description: 'Use of !important.'
+				    },
+				    {start: 1,
+				     end: 6,
+				     line: 4,
+				     severity: 'error',
+				     description: 'Use of !important.'
+				    },
+				    {start: 1,
+				     end: 6,
+				     line: 5,
+				     severity: 'error',
+				     description: 'Use of !important.'
+				    },
+				    {start: 1,
+				     end: 6,
+				     line: 6,
+				     severity: 'error',
+				     description: 'Use of !important.'
+				    },
+				    {start: 1,
+				     end: 6,
+				     line: 7,
+				     severity: 'error',
+				     description: 'Use of !important.'
+				    },
+				    {start: 1,
+				     end: 6,
+				     line: 8,
+				     severity: 'error',
+				     description: 'Use of !important.'
+				    },
+				    {start: 1,
+				     end: 6,
+				     line: 9,
+				     severity: 'error',
+				     description: 'Use of !important.'
+				    },
+				    {start: 1,
+				     end: 6,
+				     line: 10,
+				     severity: 'error',
+				     description: 'Use of !important.'
+				    },
+				    {start: 1,
+				     end: 6,
+				     line: 11,
+				     severity: 'error',
+				     description: 'Use of !important.'
+				    },
+				    {start: 1,
+				     end: 6,
+				     line: 12,
+				     severity: 'error',
+				     description: 'Use of !important.'
+				    },
+				    {start: 0,
+				     end: 3,
+				     severity: 'warning',
+				     description: 'Too many !important declarations (11), try to use less than 10 to avoid specificity issues.'
+				    }
+				]);
+			});
+		});
+		it("Test common csslint problems: Too many !important with leading comment", function(/*done*/) {
+			var val = setup({buffer: "/* Comment */\n.abc.g{\ncolor: blue !important;\ncolor: blue !important;\ncolor: blue !important;\ncolor: blue !important;\ncolor: blue !important;\ncolor: blue !important;\ncolor: blue !important;\ncolor: blue !important;\ncolor: blue !important;\ncolor: blue !important;\ncolor: blue !important;\n}", rule: {id:'important', severity:2}});
+			return validator.computeProblems(val.editorContext).then(function(result) {
+				assertProblems(result, [
+				    {start: 1,
+				     end: 6,
+				     line: 3,
+				     severity: 'error',
+				     description: 'Use of !important.'
+				    },
+				    {start: 1,
+				     end: 6,
+				     line: 4,
+				     severity: 'error',
+				     description: 'Use of !important.'
+				    },
+				    {start: 1,
+				     end: 6,
+				     line: 5,
+				     severity: 'error',
+				     description: 'Use of !important.'
+				    },
+				    {start: 1,
+				     end: 6,
+				     line: 6,
+				     severity: 'error',
+				     description: 'Use of !important.'
+				    },
+				    {start: 1,
+				     end: 6,
+				     line: 7,
+				     severity: 'error',
+				     description: 'Use of !important.'
+				    },
+				    {start: 1,
+				     end: 6,
+				     line: 8,
+				     severity: 'error',
+				     description: 'Use of !important.'
+				    },
+				    {start: 1,
+				     end: 6,
+				     line: 9,
+				     severity: 'error',
+				     description: 'Use of !important.'
+				    },
+				    {start: 1,
+				     end: 6,
+				     line: 10,
+				     severity: 'error',
+				     description: 'Use of !important.'
+				    },
+				    {start: 1,
+				     end: 6,
+				     line: 11,
+				     severity: 'error',
+				     description: 'Use of !important.'
+				    },
+				    {start: 1,
+				     end: 6,
+				     line: 12,
+				     severity: 'error',
+				     description: 'Use of !important.'
+				    },
+				    {start: 1,
+				     end: 6,
+				     line: 13,
+				     severity: 'error',
+				     description: 'Use of !important.'
+				    },
+				    {start: 15,
+				     end: 18,
+				     severity: 'warning',
+				     description: 'Too many !important declarations (11), try to use less than 10 to avoid specificity issues.'
+				    }
+				]);
+			});
+		});
 
 		/**
 		 * Test csslint parsing errors. Missing end of rule brace

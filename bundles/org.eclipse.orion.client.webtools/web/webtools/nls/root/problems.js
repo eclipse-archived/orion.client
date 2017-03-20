@@ -28,7 +28,7 @@ define({
 	"ids" : "Don't use IDs in selectors.",
 	"ids-really" : "${0} IDs in the selector, really?",
 	"import" : "@import prevents parallel downloads, use <link> instead.",
-	"important" : "Use of !important",
+	"important" : "Use of !important.",
 	"important-count": "Too many !important declarations (${0}), try to use less than 10 to avoid specificity issues.",
 	"order-alphabetical": "Rule doesn't have all its properties in alphabetical order.",
 	//"known-properties" : this value is parser generated and not NLS-able
