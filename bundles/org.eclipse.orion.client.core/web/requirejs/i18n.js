@@ -143,6 +143,20 @@
                         addIfExists(req, current, toLoad, prefix, suffix);
                     }
 
+                    if(config.locales) {
+                    	var j, k; 
+                    	for (j = 0; j < config.locales.length; j++) {
+                    		locale = config.locales[j];
+                    		parts = locale.split("-");
+                    		current = "";
+	                    	for (k = 0; k < parts.length; k++) {
+		                        part = parts[k];
+		                        current += (current ? "-" : "") + part;
+		                        addIfExists(req, current, toLoad, prefix, suffix);
+	                    	}
+                    	}
+                    }
+
                     req(toLoad, function () {
                         onLoad();
                     });
