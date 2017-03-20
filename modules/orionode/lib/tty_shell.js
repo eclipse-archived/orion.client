@@ -81,6 +81,12 @@ exports.install = function(options) {
 				onStart(passedCwd);
 			}
 		});
+		
+		var disconnectSocket = function(){
+			sock.disconnect();
+			api.getOrionEE().removeListener("close-socket", disconnectSocket);
+		};
+		api.getOrionEE().on("close-socket", disconnectSocket);
 
 		function onStart(cwd) {
 			// Handle missing node-pty
@@ -104,7 +110,7 @@ exports.install = function(options) {
 				var buff = [];
 				// Open Terminal Connection
 				var shell = process.platform === 'win32' ? 'powershell.exe' : (process.env.SHELL || 'sh');
-				var terminal = pty.fork(shell, [], {
+				var terminal = pty.spawn(shell, [], {
 					name: require('fs').existsSync('/usr/share/terminfo/x/xterm-256color')
 					? 'xterm-256color'
 					: 'xterm',
@@ -135,13 +141,11 @@ exports.install = function(options) {
 				});
 
 				sock.on('disconnect', function() {
-					terminal.destroy()
+					terminal.destroy();
 					// termsocket = null;
 				});
 
-				terminal.on('exit', function() {
-					sock.disconnect();
-				});
+				terminal.on('exit', disconnectSocket);
 
 				while (buff.length) {
 					sock.emit('data', buff.shift());
@@ -149,7 +153,7 @@ exports.install = function(options) {
 
 				sock.emit('ready');
 			});
-		};
+		}
 	});
 };
 

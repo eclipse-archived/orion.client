@@ -24,6 +24,7 @@ var express = require('express'),
 	nodemailer = require('nodemailer'),
 	fs = require('fs'),
 	args = require('./args'),
+	api = require('./api'),
 	generator = require('generate-password');
 	
 var CONFIRM_MAIL = "./multitenant/EmailConfirmation.txt",
@@ -158,6 +159,11 @@ module.exports.router = function(options) {
 	passport.use(orionAccount.createStrategy());
 	passport.serializeUser(orionAccount.serializeUser());
 	passport.deserializeUser(orionAccount.deserializeUser());
+	
+	api.getOrionEE().on("close-server", function(){
+		console.log("Closing User MongoDB");
+		mongoose && mongoose.disconnect();
+	});
 	
 	function canAddUsers() {
 		return !options.configParams["orion.auth.user.creation"];
