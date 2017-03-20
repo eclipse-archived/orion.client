@@ -123,7 +123,7 @@
     "ide"
   ],
   "author": "Orion contributors <orionnode@gmail.com>",
-  "license": "Eclipse Public License + Eclipse Distribution License",
+  "license": "EPL-1.0",
   "requirejsExcludeModules": [
     "GerritFilePlugin",
     "GitHubFilePlugin",
