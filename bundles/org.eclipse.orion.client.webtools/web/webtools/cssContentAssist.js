@@ -13,13 +13,12 @@
 define([
 	'orion/editor/templates',
 	'orion/objects',
-	'orion/i18nUtil',
 	'csslint/csslint',
 	'webtools/util',
 	'javascript/util',
 	'webtools/compilationUnit',
 	'i18n!webtools/nls/messages'
-], function(mTemplates, Objects, i18nUtil, CSSLint, Util, jsUtil, CU, Messages) {
+], function(mTemplates, Objects, CSSLint, Util, jsUtil, CU, Messages) {
 
 	function CssContentAssistProvider(cssResultManager) {
 		this.cssResultManager = cssResultManager;
@@ -137,10 +136,8 @@ define([
 					return this.getPropertyValueProposals(params, node);
 				} else if (this.inProperty(node)){
 					return this.getPropertyProposals(params);
-				} else {
-					return this.getRootProposals(params);
-					// TODO Templates for rules, imports, links, etc.
-				}	
+				}
+				return this.getRootProposals(params);
 			}
 			return [];			
 		},
@@ -170,28 +167,83 @@ define([
 		},
 		
 		getPropertyValueProposals: function getPropertyValueProposals(params, node) {
-			// TODO We can get the Validator to figure out potential values
 			var proposals = [];
-			var parent = node.parent;
-			if (parent && parent.property){
-				var property = parent.property.text;
+			var nodeParent = node.parent;
+			if (nodeParent && nodeParent.property){
+				var property = nodeParent.property.text;
 				if (typeof property === 'string'){
-					var namePrefix = params.prefix ? params.prefix : "";
 					var valString = CSSLint.Properties[property];
-					var vals = valString.split(/\s*\|\s*/);
-					for(var j = 0; j < vals.length; j++) {
-						var val = vals[j];
-						// TODO Support complex values like <color>{1,4}
-						if (val.length > 0 && val.indexOf('<') === -1){
-							if(jsUtil.looselyMatches(namePrefix, val)) {
-								var proposal = this.makeComputedProposal(val, val, null, null, params.prefix);
-								proposals.push(proposal);
+					this._getComplexValueProposals(params, proposals, valString);
+				}
+			}
+			return proposals;
+		},
+		
+		_getComplexValueProposals: function _getComplexValueProposals(params, proposals, value){
+			if (!value || typeof value !== 'string' || value.length === 0){
+				return;
+			}
+			var namePrefix = params.prefix ? params.prefix : "";
+			
+			// Check for # or {1,4} postfix
+			var test = /^(.*)(?:\#|\{.*\})$/.exec(value);
+			if (test){
+				this._getComplexValueProposals(params, proposals, test[1]);
+			} else {
+				// Check for [ a | b ] style values
+				test = /^\[(.*)\]$/.exec(value);
+				if (test) {
+					this._getComplexValueProposals(params, proposals, test[1]);
+				} else {
+					// Check for OR'd values a | b
+					var vals = value.split(/\s*\|\s*/);
+					var val;
+					if (vals.length === 1){
+						val = vals[0].trim();
+						if (value.match(/^\<.*\>$/)){
+							// Typed value, lookup details
+							if (value === '<background-image>' || value === '<color>' || value === '<image>'){
+								// List all colors
+								var colors = Object.keys(CSSLint.Colors);
+								for (var i = 0; i < colors.length; i++) {
+									if(jsUtil.looselyMatches(namePrefix, colors[i])) {
+										// TODO Use value for documentation in hover
+										var proposal = this.makeComputedProposal(colors[i], colors[i], null, null, params.prefix);
+										proposals.push(proposal);
+									}
+								}
+							} else {
+								// Lookup in value type table
+								var type = CSSLint.ValidationTypes.simple[value];
+								if (!type){
+									type = CSSLint.ValidationTypes.complex[value];
+								}
+								if (type && typeof type === 'string'){
+									this._getComplexValueProposals(params, proposals, type);
+								} else if (proposals.length === 0){
+									// Provide default inherit and initial proposals if we have nothing else
+									if(jsUtil.looselyMatches(namePrefix, 'inherit')) { //$NON-NLS-1$
+										proposals.push(this.makeComputedProposal('inherit', 'inherit', null, null, params.prefix)); //$NON-NLS-1$ //$NON-NLS-2$
+									}
+									if(jsUtil.looselyMatches(namePrefix, 'initial')) { //$NON-NLS-1$
+										proposals.push(this.makeComputedProposal('initial', 'initial', null, null, params.prefix)); //$NON-NLS-1$ //$NON-NLS-2$
+									}
+								}
 							}
+						} else if (jsUtil.looselyMatches(namePrefix, val)) {
+							// Actual string value, offer a proposal
+							proposal = this.makeComputedProposal(val, val, null, null, params.prefix);
+							proposals.push(proposal);
+						}
+					} else {
+						// Multiple OR values, recurse over each
+						for (i = 0; i < vals.length; i++) {
+							val = vals[i].trim();
+							this._getComplexValueProposals(params, proposals, val);
 						}
 					}
 				}
 			}
-			return proposals;
 		},
 		
 		getPropertyProposals: function getPropertyProposals(params) {
@@ -204,7 +256,8 @@ define([
 				if(jsUtil.looselyMatches(namePrefix, prop)) {
 					// TODO Use templates to make drop down of potential values
 					// TODO Add doc link to MDN
-					var proposal = this.makeComputedProposal(prop + ': ;', prop, null, null, params.prefix);
+					// TODO Look ahead for an existing semicolon
+					var proposal = this.makeComputedProposal(prop + ': ;', prop, null, null, params.prefix); //$NON-NLS-1$
 					proposal.escapePosition = params.offset - namePrefix.length + prop.length + 2;
 					proposals.push(proposal);
 					
@@ -276,10 +329,13 @@ define([
 			for(var j = 0; j < sheetTemplates.length; j++) {
 				var template = sheetTemplates[j];
 				if(jsUtil.looselyMatches(namePrefix, template.prefix)) {
-					var template = new mTemplates.Template(template.prefix, template.description, template.template);
-					proposals.push(template.getProposal(params.prefix, params.offset, params));
+					var t = new mTemplates.Template(template.prefix, template.description, template.template);
+					var prop = t.getProposal(params.prefix, params.offset, params);
 					// TODO Fix insertion to remove prefix
-					// TODO Fix look to match other proposals
+//					prop.prefix = params.prefix;
+					prop.style = 'emphasis'; //$NON-NLS-1$
+					prop.kind = 'css'; //$NON-NLS-1$
+					proposals.push(prop);
 				}
 			}
 			return proposals;	
@@ -293,11 +349,11 @@ define([
 		 * @param {Object} hover The markdown hover object for the proposal
 		 * @param {String} prefix The prefix for the proposal
 		 */
-		makeComputedProposal: function(proposal, name, description, hover, prefix) {
+		makeComputedProposal: function(proposal, propName, description, hover, prefix) {
 			return {
 				proposal: proposal,
 				relevance: 100,
-				name: name,
+				name: propName,
 				description: description,
 				hover: hover,
 				prefix: prefix,

@@ -6578,7 +6578,6 @@ module.exports = {
     Colors            : require("./Colors"),
     Combinator        : require("./Combinator"),
     Parser            : require("./Parser"),
-    Properties        : require("./Properties"), // ORION Export properties list for content assist
     PropertyName      : require("./PropertyName"),
     PropertyValue     : require("./PropertyValue"),
     PropertyValuePart : require("./PropertyValuePart"),
@@ -6591,11 +6590,13 @@ module.exports = {
     Specificity       : require("./Specificity"),
     TokenStream       : require("./TokenStream"),
     Tokens            : require("./Tokens"),
-    ValidationError   : require("./ValidationError")
+    ValidationError   : require("./ValidationError"),
+    Properties        : require("./Properties"), // ORION Export properties list for content assist
+    ValidationTypes   : require("./ValidationTypes") // ORION Export validation types (simple/complex) for content assist
 };
 
 },{"./Colors":1,"./Combinator":2,"./Matcher":3,"./MediaFeature":4,"./MediaQuery":5,"./Parser":6,"./PropertyName":8,"./PropertyValue":9,"./PropertyValuePart":11,"./Selector":13,"./SelectorPart":14,"./SelectorSubPart":15,"./Specificity":16,"./TokenStream":17,"./Tokens":18,"./ValidationError":20
-,"./Properties":7 // ORION Export properties list for content assist
+,"./Properties":7, "./ValidationTypes":21 // ORION Export properties list for content assist
 }],23:[function(require,module,exports){
 "use strict";
 
@@ -8311,6 +8312,8 @@ CSSLint._Reporter = Reporter;
 CSSLint.Colors = parserlib.css.Colors;
 // ORION expose properties for content assist
 CSSLint.Properties = parserlib.css.Properties;
+// ORION export ValidationTypes (simple/complex) for content assist
+CSSLint.ValidationTypes = parserlib.css.ValidationTypes;
 
 /*
  * Utility functions that make life easier.

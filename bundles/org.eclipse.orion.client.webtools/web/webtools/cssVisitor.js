@@ -24,7 +24,7 @@ define([
          * @param {Function} callback The visitor callback 
          */
         visit: function visit(ast, callback) {
-            if(Array.isArray(ast.body) && callback && typeof(callback.visitNode) === 'function') {
+            if(callback && typeof callback.visitNode === 'function') {
             	var ret = visitNode(callback, ast);
                 endVisitNode(callback, ast);
                 if(ret === this.BREAK) {

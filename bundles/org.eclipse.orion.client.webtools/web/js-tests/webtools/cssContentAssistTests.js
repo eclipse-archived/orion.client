@@ -24,6 +24,20 @@ define([
 	var cssResultMgr = new cssResultManager(serviceRegistry);
 	var assist = new CssContentAssist.CssContentAssistProvider(cssResultMgr);
 
+	function runTest(options, prefix, offset, expected){
+		var config = setup(options);
+		var contxt =  {
+			delimiter: '\n',
+			indentation: '',
+			tab: '	',
+			offset: offset,
+			prefix: prefix
+		};
+		return assist.computeContentAssist(config.editorContext, contxt).then(function(proposals){
+			assertProposals(proposals, expected);
+		});
+	}
+	
 	/**
 	 * Set up the test and return an object for the test context
 	 * @param {Object} options The map of options
@@ -95,79 +109,103 @@ define([
 		return result;
 	}
 	
-	function getPrefix(assist, editorContext, context) {
-		return assist.computePrefix(editorContext, context.offset);
-	}
-
-	describe.skip('CSS Content Assist Tests', function() {
-		it('Completion of padding', function() {
-			var config = setup({
-				buffer:
-					'#identity {\n' + 
-					'padding\n' +
-					'}'
-			});
-			var contxt =  {
-				delimiter: '\n',
-				indentation: '',
-				offset: 19,
-				tab: '	'
-			};
-			return getPrefix(assist, config.editorContext, contxt).then(function(prefix) {
-				contxt.prefix = prefix;
-				return assist.computeContentAssist(config.editorContext, contxt).then(function(proposals) {
-					var expected = [
-					{ description: 'Templates', },
-					{ description: 'padding - padding pixel style', proposal: ': valuepx;'},
-					{ description: 'padding - padding top right bottom left style', proposal: ': toppx leftpx bottompx rightpx;'},
-					{ description: 'padding - padding top right,left bottom style', proposal: ': toppx right_leftpx bottompx;'},
-					{ description: 'padding - padding top,bottom right,left style', proposal: ': top_bottompx right_leftpx'},
-					{ description: 'padding-bottom - padding-bottom pixel style', proposal: '-bottom: valuepx;'},
-					{ description: 'padding-left - padding-left pixel style', proposal: '-left: valuepx;'},
-					{ description: 'padding-right - padding-right pixel style', proposal: '-right: valuepx;'},
-					{ description: 'padding-top - padding-top pixel style', proposal: '-top: valuepx;'},
-					{ description: 'Keywords', },
-					{ description: 'padding', },
-					{ description: 'padding-bottom', proposal: '-bottom'},
-					{ description: 'padding-left', proposal: '-left'},
-					{ description: 'padding-right', proposal: '-right'},
-					{ description: 'padding-top', proposal: '-top'},
-					];
-					assertProposals(proposals, expected);
-				});
-			})
+	describe('CSS Content Assist Tests', function() {
+		it('General - empty file', function() {
+			var expected = [
+				{ description: 'rule - class selector rule', proposal: '.class {\n\t\n}'},
+				{ description: 'rule - id selector rule', proposal: '#id {\n\t\n}'},
+				{ description: 'import - import style sheet', proposal: '@import "uri";'},
+			];
+			return runTest({buffer: ""}, '', 0, expected);
 		});
-		it('Completion of padding-', function() {
-			var config = setup({
-				buffer:
-					'#identity {\n' + 
-					'padding-\n' +
-					'}'
-			});
-			var contxt =  {
-				delimiter: '\n',
-				indentation: '',
-				offset: 20,
-				tab: '	'
-			};
-			return getPrefix(assist, config.editorContext, contxt).then(function(prefix) {
-				contxt.prefix = prefix;
-				return assist.computeContentAssist(config.editorContext, contxt).then(function(proposals) {
-					var expected = [
-						{ description: 'Templates', },
-						{ description: 'padding-bottom - padding-bottom pixel style', proposal: 'bottom: valuepx;'},
-						{ description: 'padding-left - padding-left pixel style', proposal: 'left: valuepx;'},
-						{ description: 'padding-right - padding-right pixel style', proposal: 'right: valuepx;'},
-						{ description: 'padding-top - padding-top pixel style', proposal: 'top: valuepx;'},
-						{ description: 'Keywords', },
-						{ description: 'padding-bottom', proposal: 'bottom'},
-						{ description: 'padding-left', proposal: 'left'},
-						{ description: 'padding-right', proposal: 'right'},
-						{ description: 'padding-top', proposal: 'top'},
-					];
-					assertProposals(proposals, expected);
-				});
-			})
+		it('General - after rule close', function() {
+			var expected = [
+				{ description: 'rule - class selector rule', proposal: '.class {\n\t\n}'},
+				{ description: 'rule - id selector rule', proposal: '#id {\n\t\n}'},
+				{ description: 'import - import style sheet', proposal: '@import "uri";'},
+			];
+			return runTest({buffer: "abc { a: 1; } "}, '', 14, expected);
+		});
+		it('General - ru prefix', function() {
+			var expected = [
+				{ description: 'rule - class selector rule', proposal: '.class {\n\t\n}'},
+				{ description: 'rule - id selector rule', proposal: '#id {\n\t\n}'},
+			];
+			return runTest({buffer: "abc { a: 1; } ru "}, 'ru', 16, expected);
+		});
+		
+		it('Property - cue', function() {
+			var expected = [
+				{ name: 'cue', proposal: 'cue: ;'},
+				{ name: 'cue-after', proposal: 'cue-after: ;'},
+				{ name: 'cue-before', proposal: 'cue-before: ;'},
+			];
+			return runTest({buffer: "abc{ cue"}, 'cue', 8, expected);
+		});
+		it('Property - border', function() {
+			var expected = [
+				{ name: 'border', proposal: 'border: ;'},
+				{ name: 'border-bottom', proposal: 'border-bottom: ;'},
+				{ name: 'border-bottom-color', proposal: 'border-bottom-color: ;'},
+				{ name: 'border-bottom-left-radius', proposal: 'border-bottom-left-radius: ;'},
+				{ name: 'border-bottom-right-radius', proposal: 'border-bottom-right-radius: ;'},
+				{ name: 'border-bottom-style', proposal: 'border-bottom-style: ;'},
+				{ name: 'border-bottom-width', proposal: 'border-bottom-width: ;'},
+				{ name: 'border-collapse', proposal: 'border-collapse: ;'},
+				{ name: 'border-color', proposal: 'border-color: ;'},
+				{ name: 'border-image', proposal: 'border-image: ;'},
+				{ name: 'border-image-outset', proposal: 'border-image-outset: ;'},
+				{ name: 'border-image-repeat', proposal: 'border-image-repeat: ;'},
+				{ name: 'border-image-slice', proposal: 'border-image-slice: ;'},
+				{ name: 'border-image-source', proposal: 'border-image-source: ;'},
+				{ name: 'border-image-width', proposal: 'border-image-width: ;'},
+				{ name: 'border-left', proposal: 'border-left: ;'},
+				{ name: 'border-left-color', proposal: 'border-left-color: ;'},
+				{ name: 'border-left-style', proposal: 'border-left-style: ;'},
+				{ name: 'border-left-width', proposal: 'border-left-width: ;'},
+				{ name: 'border-radius', proposal: 'border-radius: ;'},
+				{ name: 'border-right', proposal: 'border-right: ;'},
+				{ name: 'border-right-color', proposal: 'border-right-color: ;'},
+				{ name: 'border-right-style', proposal: 'border-right-style: ;'},
+				{ name: 'border-right-width', proposal: 'border-right-width: ;'},
+				{ name: 'border-spacing', proposal: 'border-spacing: ;'},
+				{ name: 'border-style', proposal: 'border-style: ;'},
+				{ name: 'border-top', proposal: 'border-top: ;'},
+				{ name: 'border-top-color', proposal: 'border-top-color: ;'},
+				{ name: 'border-top-left-radius', proposal: 'border-top-left-radius: ;'},
+				{ name: 'border-top-right-radius', proposal: 'border-top-right-radius: ;'},
+				{ name: 'border-top-style', proposal: 'border-top-style: ;'},
+				{ name: 'border-top-width', proposal: 'border-top-width: ;'},
+				{ name: 'border-width', proposal: 'border-width: ;'},
+			];
+			return runTest({buffer: "abc{ border"}, 'border', 11, expected);
+		});
+		
+		it('Property value - cue 1 (csslint prop = <cue-before> | <cue-after>', function() {
+			var expected = [
+				{ name: 'cue-after', proposal: 'cue-after'},
+				{ name: 'cue-before', proposal: 'cue-before'},
+			];
+			return runTest({buffer: "abc{ cue: "}, '', 9, expected);
+		});
+		it('Property value - cue 2', function() {
+			var expected = [
+				{ name: 'cue-after', proposal: 'cue-after'},
+				{ name: 'cue-before', proposal: 'cue-before'},
+			];
+			return runTest({buffer: "abc{ cue: "}, '', 10, expected);
+		});
+		it('Property value - cue 3', function() {
+			var expected = [
+				{ name: 'cue-after', proposal: 'cue-after'},
+				{ name: 'cue-before', proposal: 'cue-before'},
+			];
+			return runTest({buffer: "abc{ cue: ;}"}, '', 10, expected);
+		});
+		it('Property value - cue-before (csslint prop = 1)', function() {
+			var expected = [
+			];
+			return runTest({buffer: "abc{ cue-before: "}, '', 16, expected);
 		});
 	});
 });
