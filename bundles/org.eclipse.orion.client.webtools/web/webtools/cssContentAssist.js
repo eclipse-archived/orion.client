@@ -13,12 +13,13 @@
 define([
 	'orion/editor/templates',
 	'orion/objects',
+	'orion/i18nUtil',
 	'csslint/csslint',
 	'webtools/util',
 	'javascript/util',
 	'webtools/compilationUnit',
 	'i18n!webtools/nls/messages'
-], function(mTemplates, Objects, CSSLint, Util, jsUtil, CU, Messages) {
+], function(mTemplates, Objects, i18nUtil, CSSLint, Util, jsUtil, CU, Messages) {
 
 	function CssContentAssistProvider(cssResultManager) {
 		this.cssResultManager = cssResultManager;
@@ -28,48 +29,107 @@ define([
 	
 	
 	// TODO Support additional templates
-	var sheetTemplates = [
+	var ruleTemplates = [
 		{
-			prefix: "rule", //$NON-NLS-1$
-			description: Messages['ruleTemplateDescription'],
-			template: ".${class} {\n\t${cursor}\n}" //$NON-NLS-1$
+			prefix: "Rule", //$NON-NLS-1$
+			description: Messages['elementRuleDescription'],
+			template: "${element} {\n\t${cursor}\n}", //$NON-NLS-1$
+			doc: Messages['elementRuleDoc'],
+			url: "https://developer.mozilla.org/en-US/docs/Web/CSS/Syntax#CSS_rulesets" //$NON-NLS-1$
 		},
 		{
-			prefix: "rule", //$NON-NLS-1$
-			description: Messages['idSelectorTemplateDescription'],
-			template: "#${id} {\n\t${cursor}\n}" //$NON-NLS-1$
+			prefix: "Rule", //$NON-NLS-1$
+			description: Messages['idRuleDescription'],
+			template: "#${id} {\n\t${cursor}\n}", //$NON-NLS-1$
+			doc: Messages['idRuleDoc'],
+			url: "https://developer.mozilla.org/en-US/docs/Web/CSS/Syntax#CSS_rulesets" //$NON-NLS-1$
 		},
-//		{
-//			prefix: "outline", //$NON-NLS-1$
-//			description: Messages['outlineStyleTemplateDescription'],
-//			template: "outline: ${color:" + fromJSON(colorValues) + "} ${style:" + fromJSON(borderStyles) + "} ${width:" + fromJSON(widths) + "};" //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
-//		},
-//		{
-//			prefix: "background-image", //$NON-NLS-1$
-//			description: Messages['backgroundImageTemplateDescription'],
-//			template: "background-image: url(\"${uri}\");" //$NON-NLS-1$
-//		},
-//		{
-//			prefix: "url", //$NON-NLS-1$
-//			description: Messages['urlImageTemplateDescription'],
-//			template: "url(\"${uri}\");" //$NON-NLS-1$
-//		},
+		{
+			prefix: "Rule", //$NON-NLS-1$
+			description: Messages['classRuleDescription'],
+			template: "#${id} {\n\t${cursor}\n}", //$NON-NLS-1$
+			doc: Messages['classRuleDoc'],
+			url: "https://developer.mozilla.org/en-US/docs/Web/CSS/Syntax#CSS_rulesets" //$NON-NLS-1$
+		},
+	];
+	//https://developer.mozilla.org/en-US/docs/Web/CSS/At-rule
+	var rootAtRuleTemplates = [
+		{
+			prefix: "@charset", //$NON-NLS-1$
+			description: '@charset', //$NON-NLS-1$
+			template: "@charset \"${charset}\";", //$NON-NLS-1$
+			doc: Messages['charsetTemplateDoc'],
+			url: "https://developer.mozilla.org/en-US/docs/Web/CSS/@charset" //$NON-NLS-1$
+		},
+		{
+			prefix: "@import", //$NON-NLS-1$
+			description: '@import', //$NON-NLS-1$
+			template: "@import \"${url}\";", //$NON-NLS-1$
+			doc: Messages['importTemplateDoc'],
+			url: "https://developer.mozilla.org/en-US/docs/Web/CSS/@import" //$NON-NLS-1$
+		},
+		{
+			prefix: "@namespace", //$NON-NLS-1$
+			description: '@namespace', //$NON-NLS-1$
+			template: "@namespace \"${url}\";", //$NON-NLS-1$
+			doc: Messages['namespaceTemplateDoc'],
+			url: "https://developer.mozilla.org/en-US/docs/Web/CSS/@namespace" //$NON-NLS-1$ //$NON-NLS-1$
+		}
+	];
+	//https://developer.mozilla.org/en-US/docs/Web/CSS/At-rule
+	var nestedAtRuleTemplates = [
+		{
+			prefix: "@media", //$NON-NLS-1$
+			description: '@media', //$NON-NLS-1$
+			template: "@media ${<media-query-list>} {\n\t${cursor}\n}", //$NON-NLS-1$
+			doc: Messages['mediaTemplateDoc'],
+			url: "https://developer.mozilla.org/en-US/docs/Web/CSS/@media" //$NON-NLS-1$ //$NON-NLS-1$
+		},
+		{
+			prefix: "@supports", //$NON-NLS-1$
+			description: '@supports', //$NON-NLS-1$
+			template: "@supports (${condition}) {\n\t${cursor}\n}", //$NON-NLS-1$
+			doc: Messages['supportsTemplateDoc'],
+			url: "https://developer.mozilla.org/en-US/docs/Web/CSS/@supports" //$NON-NLS-1$ //$NON-NLS-1$
+		},
+		{
+			prefix: "@page", //$NON-NLS-1$
+			description: '@page', //$NON-NLS-1$
+			template: "@page ${<page-selector-list>}) {\n\t${cursor}\n}", //$NON-NLS-1$
+			doc: Messages['pageTemplateDoc'],
+			url: "https://developer.mozilla.org/en-US/docs/Web/CSS/@page" //$NON-NLS-1$ //$NON-NLS-1$
+		},
+		{
+			prefix: "@font-face", //$NON-NLS-1$
+			description: '@font-face', //$NON-NLS-1$
+			template: "@font-face {\n\tfont-family: \"${<family-name>}\";\n\tsrc: \"${url}\";\n}", //$NON-NLS-1$
+			doc: Messages['font-faceTemplateDoc'],
+			url: "https://developer.mozilla.org/en-US/docs/Web/CSS/@font-face" //$NON-NLS-1$ //$NON-NLS-1$
+		},
+		{
+			prefix: "@keyframes", //$NON-NLS-1$
+			description: '@keyframes', //$NON-NLS-1$
+			template: "@keyframes ${name} {\n\t${cursor}\n}", //$NON-NLS-1$
+			doc: Messages['keyframesTemplateDoc'],
+			url: "https://developer.mozilla.org/en-US/docs/Web/CSS/@keyframes" //$NON-NLS-1$ //$NON-NLS-1$
+		},
 //		{
 //			prefix: "rgb", //$NON-NLS-1$
 //			description: Messages['rgbColourTemplateDescription'],
 //			template: "rgb(${red},${green},${blue});" //$NON-NLS-1$
 //		},
-		{
-			prefix: "@import", //$NON-NLS-1$
-			description: Messages['importTemplateDescription'],
-			template: "@import \"${uri}\";" //$NON-NLS-1$
-		},
 //		{
 //			prefix: "csslint", //$NON-NLS-1$
 //			description: Messages['csslintTemplateDescription'],
 //			template: "\/*csslint ${:" + fromJSON(csslintRules) + "}: ${a:" + fromJSON(severityValues) + "} *\/" //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 //		}
 	];
+	
+	// TODO Selector templates
+//		"elementSelector": "element",
+//	"idSelector": "#id",
+//	"classSelector": ".class",
+//	"attributeSelector": "[attribute]",
 	
 	Objects.mixin(CssContentAssistProvider.prototype, {
 
@@ -261,63 +321,6 @@ define([
 					proposal.escapePosition = params.offset - namePrefix.length + prop.length + 2;
 					proposals.push(proposal);
 					
-					
-//					var hover = Object.create(null);
-//					hover.type = 'markdown'; //$NON-NLS-1$
-//					hover.content = "";
-//					if (prop.doc){
-//						hover.content += tag.doc;
-//					}
-//					if(prop.url) {
-//						hover.content += i18nUtil.formatMessage(Messages['onlineDocumentation'], tag.url);
-//					}
-					
-//					var proposalText = "";
-//					var desc = "";
-//					switch (tag.type) {
-//						case 'single':
-//							proposalText = "<" + tag.name + "></" + tag.name + ">"; //$NON-NLS-1$
-////							desc = " - " + proposalText;
-//							if (leadingBracket){
-//								proposalText = proposalText.substring(1);
-//							}
-//							break;
-//						case 'multi':
-//							proposalText = "<" + tag.name + ">\n\n</" + tag.name + ">"; //$NON-NLS-1$
-////							desc = " - " + proposalText;
-//							if (leadingBracket){
-//								proposalText = proposalText.substring(1);
-//							}
-//							break;
-//						case 'empty':
-//							proposalText = "<" + tag.name + "/>"; //$NON-NLS-1$
-////							desc = " - " + proposalText;
-//							if (leadingBracket){
-//								proposalText = proposalText.substring(1);
-//							}
-//							break;
-//						default:
-//							proposalText = "<" + tag.name + ">";
-////							desc = " - " + proposalText;
-//							if (leadingBracket){
-//								proposalText = proposalText.substring(1);
-//							}
-//							break;
-//					}
-//					if (tag.category === "Obsolete and deprecated elements"){
-//						desc += Messages['obsoleteTagDesc'];
-//					}
-//					var proposal = this.makeComputedProposal(proposalText, tag.name, desc, hover, params.prefix);
-//					// The prefix not being includes prevents content assist staying open while typing
-////					if (source.charAt(params.offset - prefix.length - 1) === '<'){
-////						prefix = '<' + prefix;
-////						proposal.prefix = prefix;
-////					}
-//					proposal.escapePosition = params.offset - namePrefix.length + tag.name.length + 2;
-//					if(leadingBracket){
-//						proposal.escapePosition--;
-//					}
-//					proposals.push(proposal);
 				}
 			}
 			return proposals;	
@@ -325,20 +328,51 @@ define([
 		
 		getRootProposals: function getRootProposals(params) {
 			var proposals = [];
-			var namePrefix = params.prefix ? params.prefix : "";
-			for(var j = 0; j < sheetTemplates.length; j++) {
-				var template = sheetTemplates[j];
-				if(jsUtil.looselyMatches(namePrefix, template.prefix)) {
-					var t = new mTemplates.Template(template.prefix, template.description, template.template);
-					var prop = t.getProposal(params.prefix, params.offset, params);
-					// TODO Fix insertion to remove prefix
-//					prop.prefix = params.prefix;
-					prop.style = 'emphasis'; //$NON-NLS-1$
-					prop.kind = 'css'; //$NON-NLS-1$
+			for(var i = 0; i < ruleTemplates.length; i++) {
+				var prop = this._makeTemplateProposal(params, ruleTemplates[i]);
+				if (prop){
+					proposals.push(prop);
+				}
+			}
+			for(var j = 0; j < rootAtRuleTemplates.length; j++) {
+				prop = this._makeTemplateProposal(params, rootAtRuleTemplates[j]);
+				if (prop){
+					proposals.push(prop);
+				}
+			}
+			for(var j = 0; j < nestedAtRuleTemplates.length; j++) {
+				prop = this._makeTemplateProposal(params, nestedAtRuleTemplates[j]);
+				if (prop){
 					proposals.push(prop);
 				}
 			}
 			return proposals;	
+		},
+		
+		_makeTemplateProposal: function _makeTemplateProposal(params, template){
+			var namePrefix = params.prefix ? params.prefix : "";
+			if(jsUtil.looselyMatches(namePrefix, template.prefix)) {
+				var t = new mTemplates.Template(template.prefix, template.description, template.template);
+				var prop = t.getProposal(params.prefix, params.offset, params);
+				prop.prefix = params.prefix;
+				prop.overwrite = true;
+				prop.style = 'emphasis'; //$NON-NLS-1$
+				prop.kind = 'css'; //$NON-NLS-1$
+				
+				if (template.doc || template.url){
+					var hover = Object.create(null);
+					hover.type = 'markdown'; //$NON-NLS-1$
+					hover.content = "";
+					if (template.doc){
+						hover.content += template.doc;
+					}
+					if(template.url) {
+						hover.content += i18nUtil.formatMessage(Messages['onlineDocumentation'], template.url);
+					}
+					prop.hover = hover;
+				}
+				return prop;
+			}
 		},
 		
 		/**

@@ -102,7 +102,9 @@ define([
 				result += "description: '" + proposals[i].description + "', ";
 			}
 			if (proposals[i].proposal){
-				result += "proposal: '" + proposals[i].proposal + "'";
+				var propText = proposals[i].proposal.replace(/(?:\r\n|\r|\n)/g, '\\n');
+				propText = propText.replace(/\t/g, '\\t');
+				result += "proposal: '" + propText + "'";
 			}
 			result += "},\n";
 		}
@@ -112,24 +114,41 @@ define([
 	describe('CSS Content Assist Tests', function() {
 		it('General - empty file', function() {
 			var expected = [
-				{ description: 'rule - class selector rule', proposal: '.class {\n\t\n}'},
-				{ description: 'rule - id selector rule', proposal: '#id {\n\t\n}'},
-				{ description: 'import - import style sheet', proposal: '@import "uri";'},
+				{ description: 'Rule : element { }', proposal: 'element {\n\t\n}'},
+				{ description: 'Rule : #id { }', proposal: '#id {\n\t\n}'},
+				{ description: 'Rule : .class { }', proposal: '#id {\n\t\n}'},
+				{ description: '@charset', proposal: '@charset "charset";'},
+				{ description: '@import', proposal: '@import "url";'},
+				{ description: '@namespace', proposal: '@namespace "url";'},
+				{ description: '@media', proposal: '@media <media-query-list> {\n\t\n}'},
+				{ description: '@supports', proposal: '@supports (condition) {\n\t\n}'},
+				{ description: '@page', proposal: '@page <page-selector-list>) {\n\t\n}'},
+				{ description: '@font-face', proposal: '@font-face {\n\tfont-family: "<family-name>";\n\tsrc: "url";\n}'},
+				{ description: '@keyframes', proposal: '@keyframes name {\n\t\n}'},
 			];
 			return runTest({buffer: ""}, '', 0, expected);
 		});
 		it('General - after rule close', function() {
 			var expected = [
-				{ description: 'rule - class selector rule', proposal: '.class {\n\t\n}'},
-				{ description: 'rule - id selector rule', proposal: '#id {\n\t\n}'},
-				{ description: 'import - import style sheet', proposal: '@import "uri";'},
+				{ description: 'Rule : element { }', proposal: 'element {\n\t\n}'},
+				{ description: 'Rule : #id { }', proposal: '#id {\n\t\n}'},
+				{ description: 'Rule : .class { }', proposal: '#id {\n\t\n}'},
+				{ description: '@charset', proposal: '@charset "charset";'},
+				{ description: '@import', proposal: '@import "url";'},
+				{ description: '@namespace', proposal: '@namespace "url";'},
+				{ description: '@media', proposal: '@media <media-query-list> {\n\t\n}'},
+				{ description: '@supports', proposal: '@supports (condition) {\n\t\n}'},
+				{ description: '@page', proposal: '@page <page-selector-list>) {\n\t\n}'},
+				{ description: '@font-face', proposal: '@font-face {\n\tfont-family: "<family-name>";\n\tsrc: "url";\n}'},
+				{ description: '@keyframes', proposal: '@keyframes name {\n\t\n}'},
 			];
 			return runTest({buffer: "abc { a: 1; } "}, '', 14, expected);
 		});
 		it('General - ru prefix', function() {
 			var expected = [
-				{ description: 'rule - class selector rule', proposal: '.class {\n\t\n}'},
-				{ description: 'rule - id selector rule', proposal: '#id {\n\t\n}'},
+				{ description: 'Rule : element { }', proposal: 'element {\n\t\n}'},
+				{ description: 'Rule : #id { }', proposal: '#id {\n\t\n}'},
+				{ description: 'Rule : .class { }', proposal: '#id {\n\t\n}'},
 			];
 			return runTest({buffer: "abc { a: 1; } ru "}, 'ru', 16, expected);
 		});
