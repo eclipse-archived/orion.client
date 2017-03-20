@@ -1,3 +1,4 @@
+/*eslint-disable missing-nls, unknown-require, no-else-return, no-shadow-global, no-extra-parens, no-implicit-coercion, no-unused-params*/
 define([], function() {
 
 /*!
@@ -24,7 +25,6 @@ THE SOFTWARE.
 
 */
 
-/*eslint-disable */
 var CSSLint = (function(){
   var module = module || {},
       exports = exports || {};
@@ -7677,7 +7677,8 @@ var CSSLint = (function() {
                 "true": 2,  // true is error
                 "": 1,      // blank is warning
                 "false": 0, // false is ignore
-
+                "info": 3,  // ORION allow info severity
+                "3": 3,     // ORION allow info severity
                 "2": 2,     // explicit error
                 "1": 1,     // explicit warning
                 "0": 0      // explicit ignore
@@ -7847,7 +7848,7 @@ var CSSLint = (function() {
         try {
             parser.parse(text);
         } catch (ex) {
-            reporter.error("Fatal error, cannot continue: " + ex.message, ex.line, ex.col, {});
+            reporter.error("Fatal error, cannot continue: " + ex.message, ex.line, ex.col, {}, {nls: "fatal-error", 0: ex.message}); // ORION NLS Messages
         }
 
         report = {
@@ -7956,18 +7957,24 @@ Reporter.prototype = {
      * @param {int} line The line number.
      * @param {int} col The column number.
      * @param {Object} rule The rule this message relates to.
+     * @param {Object} data An optional object to pass message data through
      * @method error
+     * ORION Include NLS data in message
      */
-    error: function(message, line, col, rule) {
+    error: function(message, line, col, rule, data) {
         "use strict";
-        this.messages.push({
+        var err = {
             type    : "error",
             line    : line,
             col     : col,
             message : message,
             evidence: this.lines[line-1],
             rule    : rule || {}
-        });
+        };
+        if (data) {
+        	err.data = data;
+        }
+        this.messages.push(err);
     },
 
     /**
@@ -7990,9 +7997,11 @@ Reporter.prototype = {
      * @param {int} line The line number.
      * @param {int} col The column number.
      * @param {Object} rule The rule this message relates to.
+     * @param {Object} data An optional object to pass message data through
      * @method report
+     * ORION Include NLS data in message, allow info severity
      */
-    report: function(message, line, col, rule) {
+    report: function(message, line, col, rule, data) {
         "use strict";
 
         // Check if rule violation should be allowed
@@ -8009,15 +8018,25 @@ Reporter.prototype = {
         if (ignore) {
             return;
         }
-
-        this.messages.push({
-            type    : this.ruleset[rule.id] === 2 ? "error" : "warning",
+        
+        var t = "info";
+    	if(this.ruleset[rule.id] === 2) {
+    		t = "error";
+    	} else if(this.ruleset[rule.id] === 1) {
+    		t = "warning";
+    	}
+        var err = {
+            type    : t,
             line    : line,
             col     : col,
             message : message,
             evidence: this.lines[line-1],
             rule    : rule
-        });
+        };
+        if(data) {
+        	err.data = data;
+        }
+        this.messages.push(err);
     },
 
     /**
@@ -8060,16 +8079,22 @@ Reporter.prototype = {
      * Report some rollup warning information.
      * @param {String} message The message to store.
      * @param {Object} rule The rule this message relates to.
+     * @param {Object} data An optional object to pass message data through
      * @method rollupWarn
+     * ORION Include NLS data in message
      */
-    rollupWarn: function(message, rule) {
+    rollupWarn: function(message, rule, data) {
         "use strict";
-        this.messages.push({
+        var err = {
             type    : "warning",
             rollup  : true,
             message : message,
             rule    : rule
-        });
+        };
+        if(data) {
+        	err.data = data;
+        }
+        this.messages.push(err);
     },
 
     /**
@@ -8086,6 +8111,9 @@ Reporter.prototype = {
 
 // expose for testing purposes
 CSSLint._Reporter = Reporter;
+
+// ORION expose colors for content assist
+CSSLint.Colors = parserlib.css.Colors;
 
 /*
  * Utility functions that make life easier.
@@ -8187,7 +8215,7 @@ CSSLint.addRule({
                                 classCount++;
                             }
                             if (classCount > 1){
-                                reporter.report("Adjoining classes: "+selectors[i].text, part.line, part.col, rule);
+                                reporter.report("Adjoining classes: "+selectors[i].text, part.line, part.col, rule, {0: selectors[i].text, nls: "adjoining-classes"}); // ORION NLS message
                             }
                         }
                     }
@@ -8248,7 +8276,7 @@ CSSLint.addRule({
                             value = properties[prop].value;
                             // special case for padding
                             if (!(prop === "padding" && value.parts.length === 2 && value.parts[0].value === 0)) {
-                                reporter.report("Using height with " + prop + " can sometimes make elements larger than you expect.", properties[prop].line, properties[prop].col, rule);
+                                reporter.report("Using height with " + prop + " can sometimes make elements larger than you expect.", properties[prop].line, properties[prop].col, rule, {0: prop, nls: "box-model-height"}); // ORION NLS message
                             }
                         }
                     }
@@ -8260,7 +8288,7 @@ CSSLint.addRule({
                             value = properties[prop].value;
 
                             if (!(prop === "padding" && value.parts.length === 2 && value.parts[1].value === 0)) {
-                                reporter.report("Using width with " + prop + " can sometimes make elements larger than you expect.", properties[prop].line, properties[prop].col, rule);
+                                reporter.report("Using width with " + prop + " can sometimes make elements larger than you expect.", properties[prop].line, properties[prop].col, rule, {0: prop, nls: "box-model-width"}); // ORION NLS message
                             }
                         }
                     }
@@ -8582,7 +8610,7 @@ CSSLint.addRule({
                             item = full[i];
                             if (CSSLint.Util.indexOf(actual, item) === -1) {
                                 propertiesSpecified = (actual.length === 1) ? actual[0] : (actual.length === 2) ? actual.join(" and ") : actual.join(", ");
-                                reporter.report("The property " + item + " is compatible with " + propertiesSpecified + " and should be included as well.", value.actualNodes[0].line, value.actualNodes[0].col, rule);
+                                reporter.report("The property " + item + " is compatible with " + propertiesSpecified + " and should be included as well.", value.actualNodes[0].line, value.actualNodes[0].col, rule, {0: item, 1: propertiesSpecified}); // ORION NLS message
                             }
                         }
 
@@ -8637,7 +8665,7 @@ CSSLint.addRule({
         function reportProperty(name, display, msg) {
             if (properties[name]) {
                 if (typeof propertiesToCheck[name] !== "string" || properties[name].value.toLowerCase() !== propertiesToCheck[name]) {
-                    reporter.report(msg || name + " can't be used with display: " + display + ".", properties[name].line, properties[name].col, rule);
+                    reporter.report(msg || name + " can't be used with display: " + display + ".", properties[name].line, properties[name].col, rule, {0: msg || name, 1: display}); // ORION NLS message
                 }
             }
         }
@@ -8749,7 +8777,8 @@ CSSLint.addRule({
                         if (typeof stack[value.parts[i].uri] === "undefined") {
                             stack[value.parts[i].uri] = event;
                         } else {
-                            reporter.report("Background image '" + value.parts[i].uri + "' was used multiple times, first declared at line " + stack[value.parts[i].uri].line + ", col " + stack[value.parts[i].uri].col + ".", event.line, event.col, rule);
+                            reporter.report("Background image '" + value.parts[i].uri + "' was used multiple times, first declared at line " + stack[value.parts[i].uri].line + ", col " + stack[value.parts[i].uri].col + ".", event.line, event.col,
+                                rule, {0: value.parts[i].url, 1: stack[value.parts[i].uri].line, 2: stack[value.parts[i].uri].col}); // ORION NLS message
                         }
                     }
                 }
@@ -8795,7 +8824,7 @@ CSSLint.addRule({
                 name = property.text.toLowerCase();
 
             if (properties[name] && (lastProperty !== name || properties[name] === event.value.text)) {
-                reporter.report("Duplicate property '" + event.property + "' found.", event.line, event.col, rule);
+                reporter.report("Duplicate property '" + event.property + "' found.", event.line, event.col, rule, {0: event.property}); // ORION NLS message
             }
 
             properties[name] = event.value.text;
@@ -8929,7 +8958,8 @@ CSSLint.addRule({
                             }
 
                             if (!lastProperty || (lastProperty.property.text.toLowerCase() !== name || lastProperty.colorType !== "compat")) {
-                                reporter.report("Fallback " + name + " (hex or RGB) should precede " + colorType + " " + name + ".", event.line, event.col, rule);
+                                reporter.report("Fallback " + name + " (hex or RGB) should precede " + colorType + " " + name + ".",
+                                    event.line, event.col, rule, {0: name, 1: colorType, 2: name}); // ORION NLS message
                             }
                         } else {
                             event.colorType = "compat";
@@ -9114,7 +9144,8 @@ CSSLint.addRule({
             }
 
             if (missing.length && missing.length < 4) {
-                reporter.report("Missing vendor-prefixed CSS gradients for " + missing.join(", ") + ".", event.selectors[0].line, event.selectors[0].col, rule);
+            	var grads = missing.join(", ");
+                reporter.report("Missing vendor-prefixed CSS gradients for " + grads + ".", event.selectors[0].line, event.selectors[0].col, rule, {0:grads}); //ORION NLS message
             }
 
         });
@@ -9167,7 +9198,7 @@ CSSLint.addRule({
                 if (idCount === 1) {
                     reporter.report("Don't use IDs in selectors.", selector.line, selector.col, rule);
                 } else if (idCount > 1) {
-                    reporter.report(idCount + " IDs in the selector, really?", selector.line, selector.col, rule);
+                    reporter.report(idCount + " IDs in the selector, really?", selector.line, selector.col, rule,  {nls: "ids-really", 0: idCount}); //ORION NLS message
                 }
             }
 
@@ -9410,7 +9441,7 @@ CSSLint.addRule({
             if (lastRule) {
                 if (lastRule.outline) {
                     if (lastRule.selectors.toString().toLowerCase().indexOf(":focus") === -1) {
-                        reporter.report("Outlines should only be modified using :focus.", lastRule.line, lastRule.col, rule);
+                        reporter.report("Outlines should only be modified using :focus.", lastRule.line, lastRule.col, {nls: "outline-none-focus"}); // ORION NLS message
                     } else if (lastRule.propCount === 1) {
                         reporter.report("Outlines shouldn't be hidden unless other visual changes are made.", lastRule.line, lastRule.col, rule);
                     }
@@ -9484,7 +9515,8 @@ CSSLint.addRule({
                         for (k=0; k < part.modifiers.length; k++) {
                             modifier = part.modifiers[k];
                             if (part.elementName && modifier.type === "id") {
-                                reporter.report("Element (" + part + ") is overqualified, just use " + modifier + " without element name.", part.line, part.col, rule);
+                                reporter.report("Element (" + part + ") is overqualified, just use " + modifier + " without element name.",
+                                    part.line, part.col, rule, {0: part, 1: modifier}); //ORION NLS message
                             } else if (modifier.type === "class") {
 
                                 if (!classes[modifier]) {
@@ -9509,7 +9541,8 @@ CSSLint.addRule({
 
                     // one use means that this is overqualified
                     if (classes[prop].length === 1 && classes[prop][0].part.elementName) {
-                        reporter.report("Element (" + classes[prop][0].part + ") is overqualified, just use " + classes[prop][0].modifier + " without element name.", classes[prop][0].part.line, classes[prop][0].part.col, rule);
+                        reporter.report("Element (" + classes[prop][0].part + ") is overqualified, just use " + classes[prop][0].modifier + " without element name.",
+                            classes[prop][0].part.line, classes[prop][0].part.col, rule, {0: classes[prop][0].part, 1: classes[prop][0].modifier}); // ORION NLS message
                     }
                 }
             }
@@ -9549,7 +9582,7 @@ CSSLint.addRule({
                     part = selector.parts[j];
                     if (part.type === parser.SELECTOR_PART_TYPE) {
                         if (part.elementName && /h[1-6]/.test(part.elementName.toString()) && j > 0) {
-                            reporter.report("Heading (" + part.elementName + ") should not be qualified.", part.line, part.col, rule);
+                            reporter.report("Heading (" + part.elementName + ") should not be qualified.", part.line, part.col, rule, {0: part.elementName}); //ORION NLS message
                         }
                     }
                 }
@@ -9593,7 +9626,8 @@ CSSLint.addRule({
                             modifier = part.modifiers[k];
                             if (modifier.type === "attribute") {
                                 if (/([~\|\^\$\*]=)/.test(modifier)) {
-                                    reporter.report("Attribute selectors with " + RegExp.$1 + " are slow!", modifier.line, modifier.col, rule);
+                                    reporter.report("Attribute selectors with " + RegExp.$1 + " are slow!",
+                                        modifier.line, modifier.col, rule, {0:RegExp.$1}); //ORION NLS message
                                 }
                             }
 
@@ -9658,7 +9692,8 @@ CSSLint.addRule({
 
         parser.addListener("endstylesheet", function() {
             if (count >= 3800) {
-                reporter.report("You have " + count + " selectors. Internet Explorer supports a maximum of 4095 selectors per stylesheet. Consider refactoring.", 0, 0, rule);
+                reporter.report("You have " + count + " selectors. Internet Explorer supports a maximum of 4095 selectors per stylesheet. Consider refactoring.",
+                0, 0,rule, {0: count}); // ORION NLS message
             }
         });
     }
@@ -9688,7 +9723,8 @@ CSSLint.addRule({
 
         parser.addListener("endstylesheet", function() {
             if (count > 4095) {
-                reporter.report("You have " + count + " selectors. Internet Explorer supports a maximum of 4095 selectors per stylesheet. Consider refactoring.", 0, 0, rule);
+                reporter.report("You have " + count + " selectors. Internet Explorer supports a maximum of 4095 selectors per stylesheet. Consider refactoring.",
+                    0, 0, rule, {0: count}); //ORION NLS message
             }
         });
     }
@@ -9804,7 +9840,9 @@ CSSLint.addRule({
                     }
 
                     if (total === mapping[prop].length) {
-                        reporter.report("The properties " + mapping[prop].join(", ") + " can be replaced by " + prop + ".", event.line, event.col, rule);
+                    	var d = mapping[prop].join(", ");
+                        reporter.report("The properties " + d + " can be replaced by " + prop + ".",
+                            event.line, event.col, rule, {0: d, 1: prop}); //ORION NLS message
                     }
                 }
             }
@@ -9995,7 +10033,8 @@ CSSLint.addRule({
                     if (!pseudo) {
                         headings[RegExp.$1]++;
                         if (headings[RegExp.$1] > 1) {
-                            reporter.report("Heading (" + part.elementName + ") has already been defined.", part.line, part.col, rule);
+                            reporter.report("Heading (" + part.elementName + ") has already been defined.",
+                                part.line, part.col, rule, {0:part.elementName}); // ORION NLS message
                         }
                     }
                 }
@@ -10226,11 +10265,13 @@ CSSLint.addRule({
                 actual = needsStandard[i].actual;
 
                 if (!properties[needed]) {
-                    reporter.report("Missing standard property '" + needed + "' to go along with '" + actual + "'.", properties[actual][0].name.line, properties[actual][0].name.col, rule);
+                    reporter.report("Missing standard property '" + needed + "' to go along with '" + actual + "'.",
+                        properties[actual][0].name.line, properties[actual][0].name.col, rule, {0: needed, 1: actual, nls: "vendor-prefix-standard"}); //ORION NLS message
                 } else {
                     // make sure standard property is last
                     if (properties[needed][0].pos < properties[actual][0].pos) {
-                        reporter.report("Standard property '" + needed + "' should come after vendor-prefixed property '" + actual + "'.", properties[actual][0].name.line, properties[actual][0].name.col, rule);
+                        reporter.report("Standard property '" + needed + "' should come after vendor-prefixed property '" + actual + "'.",
+                            properties[actual][0].name.line, properties[actual][0].name.col, rule, {0: needed, 1: actual}); //ORION NLS message
                     }
                 }
             }

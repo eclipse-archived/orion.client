@@ -10,7 +10,7 @@
 /* eslint-env amd */
 define({
 	//CSS lint messages
-	"adjoining-classes" : "Don't use adjoining classes.",
+	"adjoining-classes" : "Adjoining classes: ${0}.",
 	"box-model-height" : "Using height with ${0} can sometimes make elements larger than you expect.",
 	"box-model-width" : "Using width with ${0} can sometimes make elements larger than you expect.",
 	"box-sizing" : "The box-sizing property isn't supported in IE6 and IE7.",
@@ -30,6 +30,7 @@ define({
 	"import" : "@import prevents parallel downloads, use <link> instead.",
 	"important" : "Use of !important",
 	"important-count": "Too many !important declarations (${0}), try to use less than 10 to avoid specificity issues.",
+	"order-alphabetical": "Rule doesn't have all its properties in alphabetical order.",
 	//"known-properties" : this value is parser generated and not NLS-able
 	"outline-none" : "Outlines shouldn't be hidden unless other visual changes are made.",
 	"outline-none-focus" : "Outlines should only be modified using :focus.",
@@ -39,6 +40,7 @@ define({
 	//"rules-count": this rule only counts rules and does not display a message to the end user
 	"selector-max-approaching" : "You have ${0} selectors. Internet Explorer supports a maximum of 4095 selectors per stylesheet. Consider refactoring.",
 	"selector-max" : "You have ${0} selectors. Internet Explorer supports a maximum of 4095 selectors per stylesheet. Consider refactoring.",
+	"selector-newline": "Newline character found in selector (forgot a comma?).",
 	"shorthand" : "The properties ${0} can be replaced by ${1}.",
 	"star-property-hack" : "Property with star prefix found.",
 	"text-indent" : "Negative text-indent doesn't work well with RTL. If you use text-indent for image replacement explicitly set direction for that item to ltr.",
