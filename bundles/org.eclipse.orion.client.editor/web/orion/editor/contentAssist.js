@@ -1320,10 +1320,13 @@ define("orion/editor/contentAssist", [
 				tagsNode = document.createElement("span");
 				for (var i=0; i<tags.length; i++) {
 					var tag = tags[i];
-					if (tag.content || tag.cssClass){
+					if (tag.content || tag.cssClass || tag.color){
 						var tagNode = document.createElement("span");
 						if (tag.cssClass){
 							tagNode.classList.add(tag.cssClass);
+						} else if (typeof tag.color === 'string' && tag.color.match(/^[\w-]*$/)){
+							tagNode.classList.add('colorTag'); //$NON-NLS-1$
+							tagNode.style.backgroundColor = tag.color;
 						} else {
 							tagNode.classList.add('proposalTag'); //$NON-NLS-1$
 						}

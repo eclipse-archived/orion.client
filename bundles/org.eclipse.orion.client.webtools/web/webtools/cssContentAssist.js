@@ -297,6 +297,7 @@ define([
 									if(jsUtil.looselyMatches(namePrefix, colors[i])) {
 										// TODO Use value for documentation in hover
 										var proposal = this._makeComputedProposal(colors[i], colors[i], null, null, params.prefix);
+										proposal.tags = [{color: colors[i]}];
 										proposals.push(proposal);
 									}
 								}

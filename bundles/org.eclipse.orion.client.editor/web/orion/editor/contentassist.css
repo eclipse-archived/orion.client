@@ -82,6 +82,15 @@
   	color: white;
 }
 
+.contentassist .colorTag {
+	width: 16px;
+	height: 10px;
+	border-radius: 2px;
+	vertical-align: middle;
+	margin-right: 5px;
+	display: inline-block;
+}
+
 /* TODO This class should be moved to a language specific location */
 .contentassist .iconTemplate {
 	width: 16px;
