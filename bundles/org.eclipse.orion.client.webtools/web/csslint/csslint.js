@@ -1023,7 +1023,7 @@ Parser.prototype = function(){
                 if (tt !== Tokens.EOF){
                     this._unexpectedToken(tokenStream.token());
                 }
-                this.endNode(this.ast, tokenStream.curr().range[1]); //ORION AST generation
+                this.endNode(this.ast, tokenStream.curr().range[0]); //ORION AST generation
                 this.fire("endstylesheet");
             },
 
@@ -1925,7 +1925,6 @@ Parser.prototype = function(){
                     token,
                     line,
                     col;
-                var node = this.startNode('Property', tokenStream.curr().range[0]); //ORION AST generation
                 //check for star hack - throws error if not allowed
                 if (tokenStream.peek() === Tokens.STAR && this.options.starHack){
                     tokenStream.get();
@@ -1933,25 +1932,20 @@ Parser.prototype = function(){
                     hack = token.value;
                     line = token.startLine;
                     col = token.startCol;
-                    this.setNodeStart(node, tokenStream.curr().range[0]); //ORION AST generation
                 }
 
                 if(tokenStream.match(Tokens.IDENT)){
                     token = tokenStream.token();
                     tokenValue = token.value;
                     
-                    this.setNodeStart(node, tokenStream.curr().range[0]); //ORION AST generation
                     //check for underscore hack - no error if not allowed because it's valid CSS syntax
                     if (tokenValue.charAt(0) === "_" && this.options.underscoreHack){
                         hack = "_";
                         tokenValue = tokenValue.substring(1);
                     }
-                    node.hack = hack;
-                    node.value = tokenValue;
                     value = new PropertyName(tokenValue, hack, (line||token.startLine), (col||token.startCol));
                     this._readWhitespace();
                 }
-				this.addToParent(this.endNode(node, tokenStream.curr().range[1]), 'properties'); //ORION AST generation
                 return value;
             },
 
@@ -1968,7 +1962,7 @@ Parser.prototype = function(){
                     tt,
                     selectors;
 
-                var node = this.startNode('Rule', tokenStream.curr().range[1], 'body'); //ORION AST generation
+                var node = this.startNode('Rule', tokenStream.curr().range[0], 'body'); //ORION AST generation
                 /*
                  * Error Recovery: If even a single selector fails to parse,
                  * then the entire ruleset should be thrown away.
@@ -2016,7 +2010,18 @@ Parser.prototype = function(){
                     });
 
                     this._readDeclarations(true);
-                    this.endNode(node, tokenStream.curr().range[1]); // ORION AST Generation
+                    
+                    // ORION AST Generation select the RBRACE token
+                    var currIndex = this._tokenStream.tokens.length-1;
+                    var currToken = this._tokenStream.tokens[currIndex];
+                    while (currToken.range[0] > node.range[0]){
+                    	if (currToken.type === 'RBRACE'){
+                    		break;
+                    	}
+                    	currIndex--;
+                    	currToken = this._tokenStream.tokens[currIndex];
+                    }
+                	this.endNode(node, currToken.range[1]); //ORION AST Generation
 
                     this.fire({
                         type:       "endrule",
@@ -2042,28 +2047,33 @@ Parser.prototype = function(){
                     selectors   = [],
                     selector;
                     
-                var node = this.startNode('SelectorBody', tokenStream.curr().range[1], 'selectorBody'); // ORION AST generation
+                var node = this.startNode('SelectorBody', tokenStream.curr().range[0], 'selectorBody'); // ORION AST generation
                 node.selectors= []; //ORION AST generation
 
                 selector = this._selector();
                 if (selector !== null){
-					var selectorNode = this.startNode('Selector', tokenStream.curr().range[1], 'selectors'); // ORION AST generation
-					
+                	var identToken = tokenStream.tokens[tokenStream.tokens.length-2]; // ORION AST generation
+					var selectorNode = this.startNode('Selector', identToken.range[1]-selector.text.length, 'selectors'); // ORION AST generation
+					selectorNode.text = selector.text;
                     selectors.push(selector);
+                    this.endNode(selectorNode, identToken.range[1]); // ORION AST Generation
+                    
                     while(tokenStream.match(Tokens.COMMA)){
                         this._readWhitespace();
                         selector = this._selector();
                         if (selector !== null){
-                            selectors.push(selector);
+		                	identToken = tokenStream.tokens[tokenStream.tokens.length-2]; // ORION AST generation
+							selectorNode = this.startNode('Selector', identToken.range[1]-selector.text.length, 'selectors'); // ORION AST generation
+							selectorNode.text = selector.text;
+		                    selectors.push(selector);
+		                    this.endNode(selectorNode, identToken.range[1]); // ORION AST Generation
                         } else {
                             this._unexpectedToken(tokenStream.LT(1));
                         }
                     }
-                    
-                    this.endNode(selectorNode, tokenStream.curr().range[1]); // ORION AST Generation
                 }
 				
-				this.endNode(node, tokenStream.curr().range[1]); // ORION AST Generation
+				this.endNode(node, tokenStream.curr().range[0]); // ORION AST Generation - Use start range as token is now a LBRACE
                 return selectors.length ? selectors : null;
             },
 
@@ -2600,10 +2610,18 @@ Parser.prototype = function(){
                     prio        = null,
                     invalid     = null,
                     propertyName= "";
-				var node = this.startNode('Declaration', this._tokenStream.curr().range[0], 'declarations'); //ORION AST Generation
                 property = this._property();
                 if (property !== null){
+                	var identToken = tokenStream.tokens[tokenStream.tokens.length-2]; // ORION AST generation
+					var node = this.startNode('Declaration', identToken.range[1]-property.text.length, 'declarations'); // ORION AST generation
+                	var propertyNode = this.startNode('Property', node.range[0], 'property');  //ORION AST Generation
+                	propertyNode.text = property.text;  //ORION AST Generation
+                	this.endNode(propertyNode, this._tokenStream.curr().range[0]); //ORION AST Generation
+                	
                     tokenStream.mustMatch(Tokens.COLON);
+                    
+                    var propValNode = this.startNode('PropertyValue', this._tokenStream.curr().range[1], 'propertyValue'); //ORION AST Generation
+                    
                     this._readWhitespace();
 
                     expr = this._expr();
@@ -2643,13 +2661,26 @@ Parser.prototype = function(){
                         invalid:    invalid
                     });
                     
-                    // TODO ORION Property and Value should be AST nodes with ranges
-                    node.property = property; //ORION AST Generation
-                    node.value = expr; //ORION AST Generation
-					this.endNode(node, this._tokenStream.curr().range[1]); //ORION AST Generation
+                    // ORION AST Generation, walk backwards to find declaration end semi
+                    var currIndex = this._tokenStream.tokens.length-1;
+                    var currToken = this._tokenStream.tokens[currIndex];
+                    while (currToken.range[0] > propertyNode.range[1]){
+                    	if (currToken.type === 'SEMICOLON'){
+                    		break;
+                    	}
+                    	currIndex--;
+                    	currToken = this._tokenStream.tokens[currIndex];
+                    }
+                    // TODO Val text currently ignores whitespace and !IMPORTANT declarations
+                    propValNode.text = expr.text;  //ORION AST Generation
+                    if (prio){
+                    	propValNode.important = true;
+                    }
+                	this.endNode(propValNode, currToken.range[0]); //ORION AST Generation
+					this.endNode(node, currToken.range[1]); //ORION AST Generation
+					
                     return true;
                 } else {
-                	this.endNode(node, this._tokenStream.curr().range[1]); //ORION AST Generation
                     return false;
                 }
             },
@@ -2663,7 +2694,7 @@ Parser.prototype = function(){
 
                 var tokenStream = this._tokenStream,
                     result      = tokenStream.match(Tokens.IMPORTANT_SYM);
-
+                
                 this._readWhitespace();
                 return result;
             },
@@ -2680,7 +2711,7 @@ Parser.prototype = function(){
 					//valueParts	= [],
                     value       = null,
                     operator    = null;
-
+                    
                 value = this._term(inFunction);
                 if (value !== null){
 
@@ -2706,6 +2737,7 @@ Parser.prototype = function(){
                             values.push(value);
                         }
                     } while(true);
+                    
                 }
 
 				//cleanup
@@ -3224,7 +3256,18 @@ Parser.prototype = function(){
                         throw ex;
                     }
                 }
-				this.addToParent(node, this.endNode(node, this._tokenStream.curr().range[1]));
+                
+                // ORION AST Generation select the RBRACE token
+                var currIndex = this._tokenStream.tokens.length-1;
+                var currToken = this._tokenStream.tokens[currIndex];
+                while (currToken.range[0] > node.range[0]){
+                	if (currToken.type === 'RBRACE'){
+                		break;
+                	}
+                	currIndex--;
+                	currToken = this._tokenStream.tokens[currIndex];
+                }
+            	this.endNode(node, currToken.range[1]); //ORION AST Generation
             },
 
             /**

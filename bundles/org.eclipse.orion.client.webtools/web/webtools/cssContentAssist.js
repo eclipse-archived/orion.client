@@ -27,6 +27,51 @@ define([
 	
 	CssContentAssistProvider.prototype = new mTemplates.TemplateContentAssist([], []);
 	
+	
+	// TODO Support additional templates
+	var sheetTemplates = [
+		{
+			prefix: "rule", //$NON-NLS-1$
+			description: Messages['ruleTemplateDescription'],
+			template: ".${class} {\n\t${cursor}\n}" //$NON-NLS-1$
+		},
+		{
+			prefix: "rule", //$NON-NLS-1$
+			description: Messages['idSelectorTemplateDescription'],
+			template: "#${id} {\n\t${cursor}\n}" //$NON-NLS-1$
+		},
+//		{
+//			prefix: "outline", //$NON-NLS-1$
+//			description: Messages['outlineStyleTemplateDescription'],
+//			template: "outline: ${color:" + fromJSON(colorValues) + "} ${style:" + fromJSON(borderStyles) + "} ${width:" + fromJSON(widths) + "};" //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+//		},
+//		{
+//			prefix: "background-image", //$NON-NLS-1$
+//			description: Messages['backgroundImageTemplateDescription'],
+//			template: "background-image: url(\"${uri}\");" //$NON-NLS-1$
+//		},
+//		{
+//			prefix: "url", //$NON-NLS-1$
+//			description: Messages['urlImageTemplateDescription'],
+//			template: "url(\"${uri}\");" //$NON-NLS-1$
+//		},
+//		{
+//			prefix: "rgb", //$NON-NLS-1$
+//			description: Messages['rgbColourTemplateDescription'],
+//			template: "rgb(${red},${green},${blue});" //$NON-NLS-1$
+//		},
+		{
+			prefix: "@import", //$NON-NLS-1$
+			description: Messages['importTemplateDescription'],
+			template: "@import \"${uri}\";" //$NON-NLS-1$
+		},
+//		{
+//			prefix: "csslint", //$NON-NLS-1$
+//			description: Messages['csslintTemplateDescription'],
+//			template: "\/*csslint ${:" + fromJSON(csslintRules) + "}: ${a:" + fromJSON(severityValues) + "} *\/" //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+//		}
+	];
+	
 	Objects.mixin(CssContentAssistProvider.prototype, {
 
         computeContentAssist: function computeContentAssist(editorContext, params) {
@@ -57,7 +102,7 @@ define([
 		/**
 		 * @callback 
 		 */
-		computePrefix: function(editorContext, offset) {
+		computePrefix: function computePrefix(editorContext, offset) {
 			return editorContext.getText().then(function (text) {
 				return text.substring(this._getPrefixStart(text, offset), offset);
 			}.bind(this));
@@ -66,7 +111,7 @@ define([
 		/**
 		 * @private
 		 */
-		_getPrefixStart: function(text, offset) {
+		_getPrefixStart: function _getPrefixStart(text, offset) {
 			var index = offset;
 			while (index > 0) {
 				var char = text.substring(index - 1, index);
@@ -85,35 +130,71 @@ define([
 		 * @param {Object} params The paramter context
 		 * @returns {Array.<Object>} The array of proposal objects or an empty array, never null
 		 */
-		_computeProposalsFromAst: function(ast, params) {
+		_computeProposalsFromAst: function _computeProposalsFromAst(ast, params) {
 			var node = Util.findCssNodeAtOffset(ast, params.offset);
 			if(node) {
-				
-				// De
-				
-				/*if (this.inDeclarationValue(node)){
-					return this.getDeclarationValue(node);
-				} else*/ if (this.inPropertyDeclaration(node)){
-					return this.getProperties(node, params);
-//				} else if (this.inBody(node)){
-					// templates?
-				}
-				
-				// TODO We can get the Validator as well to figure out potential values
+				if (this.inPropertyValue(node)){
+					return this.getPropertyValueProposals(params, node);
+				} else if (this.inProperty(node)){
+					return this.getPropertyProposals(params);
+				} else {
+					return this.getRootProposals(params);
+					// TODO Templates for rules, imports, links, etc.
+				}	
 			}
 			return [];			
 		},
 		
-		inPropertyDeclaration: function(node) {
+		inPropertyValue: function inPropertyValue(node) {
 			if (node){
-				if (node.type === 'Declarations'){
+				if (node.type === 'PropertyValue'){
 					return true;
 				}
 			}
 			return false;
-		},  
+		}, 
 		
-		getProperties: function(node, params) {
+		inProperty: function inProperty(node) {
+			if (node){
+				if (node.type === 'Property'){
+					return true;
+				}
+				if (node.type === 'Declaration'){
+					return true;
+				}
+				if (node.type === 'DeclarationBody'){
+					return true;
+				}
+			}
+			return false;
+		},
+		
+		getPropertyValueProposals: function getPropertyValueProposals(params, node) {
+			// TODO We can get the Validator to figure out potential values
+			var proposals = [];
+			var parent = node.parent;
+			if (parent && parent.property){
+				var property = parent.property.text;
+				if (typeof property === 'string'){
+					var namePrefix = params.prefix ? params.prefix : "";
+					var valString = CSSLint.Properties[property];
+					var vals = valString.split(/\s*\|\s*/);
+					for(var j = 0; j < vals.length; j++) {
+						var val = vals[j];
+						// TODO Support complex values like <color>{1,4}
+						if (val.length > 0 && val.indexOf('<') === -1){
+							if(jsUtil.looselyMatches(namePrefix, val)) {
+								var proposal = this.makeComputedProposal(val, val, null, null, params.prefix);
+								proposals.push(proposal);
+							}
+						}
+					}
+				}
+			}
+			return proposals;
+		},
+		
+		getPropertyProposals: function getPropertyProposals(params) {
 			var props = CSSLint.Properties;
 			var propKeys = Object.keys(props);
 			var proposals = [];
@@ -121,6 +202,8 @@ define([
 			for(var j = 0; j < propKeys.length; j++) {
 				var prop = propKeys[j];
 				if(jsUtil.looselyMatches(namePrefix, prop)) {
+					// TODO Use templates to make drop down of potential values
+					// TODO Add doc link to MDN
 					var proposal = this.makeComputedProposal(prop + ': ;', prop, null, null, params.prefix);
 					proposal.escapePosition = params.offset - namePrefix.length + prop.length + 2;
 					proposals.push(proposal);
@@ -182,6 +265,21 @@ define([
 //						proposal.escapePosition--;
 //					}
 //					proposals.push(proposal);
+				}
+			}
+			return proposals;	
+		},
+		
+		getRootProposals: function getRootProposals(params) {
+			var proposals = [];
+			var namePrefix = params.prefix ? params.prefix : "";
+			for(var j = 0; j < sheetTemplates.length; j++) {
+				var template = sheetTemplates[j];
+				if(jsUtil.looselyMatches(namePrefix, template.prefix)) {
+					var template = new mTemplates.Template(template.prefix, template.description, template.template);
+					proposals.push(template.getProposal(params.prefix, params.offset, params));
+					// TODO Fix insertion to remove prefix
+					// TODO Fix look to match other proposals
 				}
 			}
 			return proposals;	

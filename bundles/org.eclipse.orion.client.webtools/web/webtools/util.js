@@ -67,15 +67,16 @@ define([
 			 CssVisitor.visit(ast, {
 	            visitNode: function(node) {
 					if(node.range[0] <= offset) {
-						found = node;
+						if (node.range[1] === -1 || node.range[1] >= offset) {
+							found = node;
+						} else {
+							return Visitor.SKIP;
+						}
 					} else {
 					    return Visitor.BREAK;
 					}      
 	            },
 	            endVisitNode: function(node) {
-	            	if(found && offset > found.range[1] && offset > node.range[0]) {
-	            		found = node;
-	            	}
 	            }
 	        });
 	        return found;

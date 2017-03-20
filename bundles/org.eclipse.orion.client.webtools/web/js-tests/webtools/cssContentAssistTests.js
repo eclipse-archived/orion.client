@@ -99,7 +99,7 @@ define([
 		return assist.computePrefix(editorContext, context.offset);
 	}
 
-	describe('CSS Content Assist Tests', function() {
+	describe.skip('CSS Content Assist Tests', function() {
 		it('Completion of padding', function() {
 			var config = setup({
 				buffer:

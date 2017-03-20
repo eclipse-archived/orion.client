@@ -25,13 +25,11 @@ define([
          */
         visit: function visit(ast, callback) {
             if(Array.isArray(ast.body) && callback && typeof(callback.visitNode) === 'function') {
-                for(var i = 0; i < ast.body.length; i++) {
-                    var ret = visitNode(callback, ast.body[i], null);
-                    endVisitNode(callback, ast.body[i]);
-                    if(ret === this.BREAK) {
-                        return;
-                    }
-                }    
+            	var ret = visitNode(callback, ast);
+                endVisitNode(callback, ast);
+                if(ret === this.BREAK) {
+                    return;
+                }
             }
         }
     };
@@ -43,45 +41,60 @@ define([
 	 * @param {Object} last the last node that was visited
 	 * @returns {Number} Returns #Break or #SKIP or nothing   
 	 */
-    function visitNode(callback, node, last) {
-    	if(typeof(callback.visitNode) === 'function') {
-	        node.parent = last;
+    function visitNode(callback, node) {
+    	if(typeof callback.visitNode === 'function') {
 	        var ret = callback.visitNode(node);
 	        if(ret === Visitor.BREAK || ret === Visitor.SKIP) {
 	            return ret;
-	        } 
+	        }
 	        if(Array.isArray(node.body)) {
-	            ret = visitNodes(node, node.body, callback);
+	            ret = visitNodes(callback, node.body);
 	            if(ret === Visitor.BREAK) {
 		            return ret;
 		        }
+	        }
+	        if (node.selectorBody){
+	        	visitNode(callback, node.selectorBody);
+	        }
+	        if (node.declarationBody){
+	        	visitNode(callback, node.declarationBody);
+	        }
+	        
+	        if(Array.isArray(node.selectors)) {
+				ret = visitNodes(callback, node.selectors);
+	            if(ret === Visitor.BREAK) {
+		            return ret;
+		        }	        	
 	        } else if(Array.isArray(node.declarations)) {
-				ret = visitNodes(node, node.declarations, callback);
+				ret = visitNodes(callback, node.declarations);
 	            if(ret === Visitor.BREAK) {
 		            return ret;
 		        }	        	
-	        } else if(Array.isArray(node.properties)) {
-				ret = visitNodes(node, node.properties, callback);
-	            if(ret === Visitor.BREAK) {
-		            return ret;
-		        }	        	
+	        }
+	        
+	        if (node.selector){
+	        	visitNode(callback, node.selector);
+	        }
+	        if (node.declaration){
+	        	visitNode(callback, node.declaration);
+	        }
+	        if (node.property){
+	        	visitNode(callback, node.property);
+	        }
+	        if (node.propertyValue){
+	        	visitNode(callback, node.propertyValue);
 	        }
         }
     }
     
-    function visitNodes(node, arr, callback) {
-    	for(var i = 0; i < arr.length; i++) {
-	        var _n = arr[i];
-	        var ret = callback.visitNode(_n, node);
-	        if(typeof(callback.endVisitNode) === 'function') {
-	    		callback.endVisitNode(_n);
-	    	}
-	        if(ret === Visitor.SKIP) {
-	        	continue;
-	        } else if(ret === Visitor.BREAK) {
-	            return ret;
-	        }
-	    }
+    function visitNodes(callback, children) {
+    	for(var i = 0; i < children.length; i++) {
+    		var node = children[i];
+    		var ret = visitNode(callback, node);
+    		if (ret === Visitor.BREAK){
+    			return ret;
+    		}
+		}
     }
     
     /**
@@ -91,7 +104,7 @@ define([
      * @param {Object} node The node we are ending the visit for
      */
     function endVisitNode(callback, node) {
-    	if(typeof(callback.endVisitNode) === 'function') {
+    	if(typeof callback.endVisitNode === 'function') {
     		callback.endVisitNode(node);
     	}
     }
