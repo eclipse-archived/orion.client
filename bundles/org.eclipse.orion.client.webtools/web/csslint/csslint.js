@@ -6653,7 +6653,7 @@ function StringReader(text) {
      * @type String
      * @private
      */
-    this._input = text.replace(/(\r\n?|\n)/g, "\n");
+    this._input = text; //.replace(/(\r\n?|\n)/g, "\n"); ORION Newlines should be left alone for offsets
 
 
     /**
@@ -7986,11 +7986,14 @@ var CSSLint = (function() {
         } catch (ex) {
             reporter.error("Fatal error, cannot continue: " + ex.message, ex.line, ex.col, {}, {nls: "fatal-error", 0: ex.message}); // ORION NLS Messages
         }
-
+		//ORION AST Generation, include tokens in report
+        var tokens = (parser._tokenStream && parser._tokenStream.tokens) ? parser._tokenStream.tokens : [];
         report = {
             messages    : reporter.messages,
             stats       : reporter.stats,
             ruleset     : reporter.ruleset,
+            tokens      : tokens, // ORION AST Generation
+            ast         : parser.ast, // ORION AST Generation
             allow       : reporter.allow,
             ignore      : reporter.ignore
         };
@@ -9445,7 +9448,8 @@ CSSLint.addRule({
         parser.addListener("endstylesheet", function() {
             reporter.stat("important", count);
             if (count >= 10) {
-                reporter.rollupWarn("Too many !important declarations (" + count + "), try to use less than 10 to avoid specificity issues.", rule);
+                reporter.rollupWarn("Too many !important declarations (" + count + "), try to use less than 10 to avoid specificity issues.",
+                    rule, {0:count, nls: "important-count"}); //ORION NLS message
             }
         });
     }
