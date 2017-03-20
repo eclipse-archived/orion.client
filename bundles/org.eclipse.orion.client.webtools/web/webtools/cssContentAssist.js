@@ -81,7 +81,7 @@ define([
 		{
 			prefix: "@media", //$NON-NLS-1$
 			description: '@media', //$NON-NLS-1$
-			template: "@media ${<media-query-list>} {\n\t${cursor}\n}", //$NON-NLS-1$
+			template: "@media ${media-query-list} {\n\t${cursor}\n}", //$NON-NLS-1$
 			doc: Messages['mediaTemplateDoc'],
 			url: "https://developer.mozilla.org/en-US/docs/Web/CSS/@media" //$NON-NLS-1$ //$NON-NLS-1$
 		},
@@ -95,14 +95,14 @@ define([
 		{
 			prefix: "@page", //$NON-NLS-1$
 			description: '@page', //$NON-NLS-1$
-			template: "@page ${<page-selector-list>}) {\n\t${cursor}\n}", //$NON-NLS-1$
+			template: "@page ${page-selector-list} {\n\t${cursor}\n}", //$NON-NLS-1$
 			doc: Messages['pageTemplateDoc'],
 			url: "https://developer.mozilla.org/en-US/docs/Web/CSS/@page" //$NON-NLS-1$ //$NON-NLS-1$
 		},
 		{
 			prefix: "@font-face", //$NON-NLS-1$
 			description: '@font-face', //$NON-NLS-1$
-			template: "@font-face {\n\tfont-family: \"${<family-name>}\";\n\tsrc: \"${url}\";\n}", //$NON-NLS-1$
+			template: "@font-face {\n\tfont-family: \"${family-name}\";\n\tsrc: \"${url}\";\n}", //$NON-NLS-1$
 			doc: Messages['font-faceTemplateDoc'],
 			url: "https://developer.mozilla.org/en-US/docs/Web/CSS/@font-face" //$NON-NLS-1$ //$NON-NLS-1$
 		},
@@ -196,8 +196,12 @@ define([
 					return this.getPropertyValueProposals(params, node);
 				} else if (this.inProperty(node)){
 					return this.getPropertyProposals(params);
+				} else if (this.inConditionalAtRule(node)){
+					return this.getConditionalAtRuleProposals(params);
+				} else if (this.inRoot(node)){
+					return this.getRootProposals(params);
 				}
-				return this.getRootProposals(params);
+				// TODO This allows property completions inside of @page and other at-rules
 			}
 			return [];			
 		},
@@ -220,6 +224,30 @@ define([
 					return true;
 				}
 				if (node.type === 'DeclarationBody'){
+					return true;
+				}
+			}
+			return false;
+		},
+		
+		inConditionalAtRule: function inConditionalAtRule(node) {
+			if (node){
+				if (node.type === 'MediaBody'){
+					return true;
+				}
+				if (node.type === 'SupportsBody'){
+					return true;
+				}
+			}
+			return false;
+		},
+		
+		inRoot: function inRoot(node) {
+			if (node){
+				if (node.type === 'StyleSheet'){
+					return true;
+				}
+				if (node.type === 'Selector'){
 					return true;
 				}
 			}
@@ -268,7 +296,7 @@ define([
 								for (var i = 0; i < colors.length; i++) {
 									if(jsUtil.looselyMatches(namePrefix, colors[i])) {
 										// TODO Use value for documentation in hover
-										var proposal = this.makeComputedProposal(colors[i], colors[i], null, null, params.prefix);
+										var proposal = this._makeComputedProposal(colors[i], colors[i], null, null, params.prefix);
 										proposals.push(proposal);
 									}
 								}
@@ -283,16 +311,16 @@ define([
 								} else if (proposals.length === 0){
 									// Provide default inherit and initial proposals if we have nothing else
 									if(jsUtil.looselyMatches(namePrefix, 'inherit')) { //$NON-NLS-1$
-										proposals.push(this.makeComputedProposal('inherit', 'inherit', null, null, params.prefix)); //$NON-NLS-1$ //$NON-NLS-2$
+										proposals.push(this._makeComputedProposal('inherit', 'inherit', null, null, params.prefix)); //$NON-NLS-1$ //$NON-NLS-2$
 									}
 									if(jsUtil.looselyMatches(namePrefix, 'initial')) { //$NON-NLS-1$
-										proposals.push(this.makeComputedProposal('initial', 'initial', null, null, params.prefix)); //$NON-NLS-1$ //$NON-NLS-2$
+										proposals.push(this._makeComputedProposal('initial', 'initial', null, null, params.prefix)); //$NON-NLS-1$ //$NON-NLS-2$
 									}
 								}
 							}
 						} else if (jsUtil.looselyMatches(namePrefix, val)) {
 							// Actual string value, offer a proposal
-							proposal = this.makeComputedProposal(val, val, null, null, params.prefix);
+							proposal = this._makeComputedProposal(val, val, null, null, params.prefix);
 							proposals.push(proposal);
 						}
 					} else {
@@ -314,10 +342,9 @@ define([
 			for(var j = 0; j < propKeys.length; j++) {
 				var prop = propKeys[j];
 				if(jsUtil.looselyMatches(namePrefix, prop)) {
-					// TODO Use templates to make drop down of potential values
 					// TODO Add doc link to MDN
 					// TODO Look ahead for an existing semicolon
-					var proposal = this.makeComputedProposal(prop + ': ;', prop, null, null, params.prefix); //$NON-NLS-1$
+					var proposal = this._makeComputedProposal(prop + ': ;', prop, null, null, params.prefix); //$NON-NLS-1$
 					proposal.escapePosition = params.offset - namePrefix.length + prop.length + 2;
 					proposals.push(proposal);
 					
@@ -336,6 +363,23 @@ define([
 			}
 			for(var j = 0; j < rootAtRuleTemplates.length; j++) {
 				prop = this._makeTemplateProposal(params, rootAtRuleTemplates[j]);
+				if (prop){
+					proposals.push(prop);
+				}
+			}
+			for(var j = 0; j < nestedAtRuleTemplates.length; j++) {
+				prop = this._makeTemplateProposal(params, nestedAtRuleTemplates[j]);
+				if (prop){
+					proposals.push(prop);
+				}
+			}
+			return proposals;	
+		},
+		
+		getConditionalAtRuleProposals: function getConditionalAtRuleProposals(params) {
+			var proposals = [];
+			for(var i = 0; i < ruleTemplates.length; i++) {
+				var prop = this._makeTemplateProposal(params, ruleTemplates[i]);
 				if (prop){
 					proposals.push(prop);
 				}
@@ -383,7 +427,7 @@ define([
 		 * @param {Object} hover The markdown hover object for the proposal
 		 * @param {String} prefix The prefix for the proposal
 		 */
-		makeComputedProposal: function(proposal, propName, description, hover, prefix) {
+		_makeComputedProposal: function _makeComputedProposal(proposal, propName, description, hover, prefix) {
 			return {
 				proposal: proposal,
 				relevance: 100,

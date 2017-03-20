@@ -120,10 +120,10 @@ define([
 				{ description: '@charset', proposal: '@charset "charset";'},
 				{ description: '@import', proposal: '@import "url";'},
 				{ description: '@namespace', proposal: '@namespace "url";'},
-				{ description: '@media', proposal: '@media <media-query-list> {\n\t\n}'},
+				{ description: '@media', proposal: '@media media-query-list {\n\t\n}'},
 				{ description: '@supports', proposal: '@supports (condition) {\n\t\n}'},
-				{ description: '@page', proposal: '@page <page-selector-list>) {\n\t\n}'},
-				{ description: '@font-face', proposal: '@font-face {\n\tfont-family: "<family-name>";\n\tsrc: "url";\n}'},
+				{ description: '@page', proposal: '@page page-selector-list {\n\t\n}'},
+				{ description: '@font-face', proposal: '@font-face {\n\tfont-family: "family-name";\n\tsrc: "url";\n}'},
 				{ description: '@keyframes', proposal: '@keyframes name {\n\t\n}'},
 			];
 			return runTest({buffer: ""}, '', 0, expected);
@@ -136,10 +136,10 @@ define([
 				{ description: '@charset', proposal: '@charset "charset";'},
 				{ description: '@import', proposal: '@import "url";'},
 				{ description: '@namespace', proposal: '@namespace "url";'},
-				{ description: '@media', proposal: '@media <media-query-list> {\n\t\n}'},
+				{ description: '@media', proposal: '@media media-query-list {\n\t\n}'},
 				{ description: '@supports', proposal: '@supports (condition) {\n\t\n}'},
-				{ description: '@page', proposal: '@page <page-selector-list>) {\n\t\n}'},
-				{ description: '@font-face', proposal: '@font-face {\n\tfont-family: "<family-name>";\n\tsrc: "url";\n}'},
+				{ description: '@page', proposal: '@page page-selector-list {\n\t\n}'},
+				{ description: '@font-face', proposal: '@font-face {\n\tfont-family: "family-name";\n\tsrc: "url";\n}'},
 				{ description: '@keyframes', proposal: '@keyframes name {\n\t\n}'},
 			];
 			return runTest({buffer: "abc { a: 1; } "}, '', 14, expected);
@@ -225,6 +225,79 @@ define([
 			var expected = [
 			];
 			return runTest({buffer: "abc{ cue-before: "}, '', 16, expected);
+		});
+		
+		it('Conditional at rules media 1', function() {
+			var expected = [
+			];
+			return runTest({buffer: "abc{ a:1; } @media  some and ( width:5px) {  abc { cue:2; } } "}, '@me', 15, expected);
+		});
+		it('Conditional at rules media 2', function() {
+			var expected = [
+			];
+			return runTest({buffer: "abc{ a:1; } @media  some and ( width:5px) {  abc { cue:2; } } "}, '', 19, expected);
+		});
+		it('Conditional at rules media 3', function() {
+			var expected = [
+			];
+			return runTest({buffer: "abc{ a:1; } @media  some and ( width:5px) {  abc { cue:2; } } "}, '', 30, expected);
+		});
+		it('Conditional at rules media 4', function() {
+			var expected = [
+				{ description: 'Rule : element { }', proposal: 'element {\n\t\n}'},
+				{ description: 'Rule : #id { }', proposal: '#id {\n\t\n}'},
+				{ description: 'Rule : .class { }', proposal: '#id {\n\t\n}'},
+				{ description: '@media', proposal: '@media media-query-list {\n\t\n}'},
+				{ description: '@supports', proposal: '@supports (condition) {\n\t\n}'},
+				{ description: '@page', proposal: '@page page-selector-list {\n\t\n}'},
+				{ description: '@font-face', proposal: '@font-face {\n\tfont-family: "family-name";\n\tsrc: "url";\n}'},
+				{ description: '@keyframes', proposal: '@keyframes name {\n\t\n}'},
+			];
+			return runTest({buffer: "abc{ a:1; } @media  some and ( width:5px) {  abc { cue:2; } } "}, '', 44, expected);
+		});
+		it('Conditional at rules media 5', function() {
+			var expected = [
+				{ name: 'cue', proposal: 'cue: ;'},
+				{ name: 'cue-after', proposal: 'cue-after: ;'},
+				{ name: 'cue-before', proposal: 'cue-before: ;'},
+			];
+			return runTest({buffer: "abc{ a:1; } @media  some and ( width:5px) {  abc { cue:2; } } "}, 'cue', 54, expected);
+		});
+		it('Conditional at rules supports 1', function() {
+			var expected = [
+			];
+			return runTest({buffer: "abc{ a:1; }\n@supports  ( animation-name: test) {  abc { cue:2; } } "}, '@su', 15, expected);
+		});
+		it('Conditional at rules supports 2', function() {
+			var expected = [
+			];
+			return runTest({buffer: "abc{ a:1; }\n@supports  ( animation-name: test) {  abc { cue:2; } } "}, '', 22, expected);
+		});
+		it('Conditional at rules supports 3', function() {
+			var expected = [
+			];
+			return runTest({buffer: "abc{ a:1; }\n@supports  ( animation-name: test) {  abc { cue:2; } } "}, '', 24, expected);
+		});
+		it('Conditional at rules supports 4', function() {
+			var expected = [
+				{ description: 'Rule : element { }', proposal: 'element {\n\t\n}'},
+				{ description: 'Rule : #id { }', proposal: '#id {\n\t\n}'},
+				{ description: 'Rule : .class { }', proposal: '#id {\n\t\n}'},
+				{ description: '@media', proposal: '@media media-query-list {\n\t\n}'},
+				{ description: '@supports', proposal: '@supports (condition) {\n\t\n}'},
+				{ description: '@page', proposal: '@page page-selector-list {\n\t\n}'},
+				{ description: '@font-face', proposal: '@font-face {\n\tfont-family: "family-name";\n\tsrc: "url";\n}'},
+				{ description: '@keyframes', proposal: '@keyframes name {\n\t\n}'},
+			];
+			return runTest({buffer: "abc{ a:1; }\n@supports  ( animation-name: test) {  abc { cue:2; } } "}, '', 49, expected);
+		});
+		it('Conditional at rules supports 5', function() {
+			var expected = [
+				{ name: 'cue', proposal: 'cue: ;'},
+				{ name: 'cue-after', proposal: 'cue-after: ;'},
+				{ name: 'cue-before', proposal: 'cue-before: ;'},
+			];
+			return runTest({buffer: "abc{ a:1; }\n@supports  ( animation-name: test) {  abc { cue:2; } } "}, 'cue', 59, expected);
 		});
 	});
 });

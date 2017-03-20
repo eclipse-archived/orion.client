@@ -59,6 +59,15 @@ define([
 	        if (node.declarationBody){
 	        	visitNode(callback, node.declarationBody);
 	        }
+	        if (node.mediaList){
+	        	visitNode(callback, node.mediaList);
+	        }
+	        if (node.mediaBody){
+	        	visitNode(callback, node.mediaBody);
+	        }
+	        if (node.supportsBody){
+	        	visitNode(callback, node.supportsBody);
+	        }
 	        
 	        if(Array.isArray(node.selectors)) {
 				ret = visitNodes(callback, node.selectors);

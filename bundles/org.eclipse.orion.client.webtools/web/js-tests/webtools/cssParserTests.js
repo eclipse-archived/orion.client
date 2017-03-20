@@ -162,7 +162,7 @@ define([
 	        assertAstResults(results, ast);
 	    });
 	    it("Multiple rule - one prop with whitespace", function() {
-	        var ast = '{"type":"StyleSheet","range":[0,18],"body":[{"type":"Rule","range":[0,9],"selectorBody":{"type":"SelectorBody","range":[0,3],"selectors":[{"type":"Selector","range":[0,3],"text":"abc"}]},"declarationBody":{"type":"DeclarationBody","range":[3,9],"declarations":[{"type":"Declaration","range":[4,8],"property":{"type":"Property","range":[4,5],"text":"a"},"propertyValue":{"type":"PropertyValue","range":[6,7],"text":"1"}}]}},{"type":"Rule","range":[10,18],"selectorBody":{"type":"SelectorBody","range":[10,13],"selectors":[{"type":"Selector","range":[10,13],"text":"def"}]},"declarationBody":{"type":"DeclarationBody","range":[13,18],"declarations":[{"type":"Declaration","range":[14,16],"property":{"type":"Property","range":[14,15],"text":"a"},"propertyValue":{"type":"PropertyValue","range":[16,15],"text":"1"}}]}}]}';
+	        var ast = '{"type":"StyleSheet","range":[0,18],"body":[{"type":"Rule","range":[0,9],"selectorBody":{"type":"SelectorBody","range":[0,3],"selectors":[{"type":"Selector","range":[0,3],"text":"abc"}]},"declarationBody":{"type":"DeclarationBody","range":[3,9],"declarations":[{"type":"Declaration","range":[4,8],"property":{"type":"Property","range":[4,5],"text":"a"},"propertyValue":{"type":"PropertyValue","range":[6,7],"text":"1"}}]}},{"type":"Rule","range":[10,18],"selectorBody":{"type":"SelectorBody","range":[10,13],"selectors":[{"type":"Selector","range":[10,13],"text":"def"}]},"declarationBody":{"type":"DeclarationBody","range":[13,18],"declarations":[{"type":"Declaration","range":[14,17],"property":{"type":"Property","range":[14,15],"text":"a"},"propertyValue":{"type":"PropertyValue","range":[16,17],"text":"1"}}]}}]}';
 	        var results = CSSLint.verify("abc{a:1;}\ndef{a:1}");
 	        assertAstResults(results, ast);
 	    });
@@ -173,8 +173,8 @@ define([
 	        assertAstResults(results, ast);
 	    });
 	    it("Selector test 2 - id", function() {
-	        var ast = '{"type":"StyleSheet","range":[0,8],"body":[{"type":"Rule","range":[0,8],"selectorBody":{"type":"SelectorBody","range":[0,6],"selectors":[{"type":"Selector","range":[0,6],"text":"#class"}]},"declarationBody":{"type":"DeclarationBody","range":[6,8],"declarations":[]}}]}';
-	        var results = CSSLint.verify("#class{}");
+	        var ast = '{"type":"StyleSheet","range":[0,5],"body":[{"type":"Rule","range":[0,5],"selectorBody":{"type":"SelectorBody","range":[0,3],"selectors":[{"type":"Selector","range":[0,3],"text":"#id"}]},"declarationBody":{"type":"DeclarationBody","range":[3,5],"declarations":[]}}]}';
+	        var results = CSSLint.verify("#id{}");
 	        assertAstResults(results, ast);
 	    });
 	    it("Selector test 3 - *", function() {
@@ -193,12 +193,12 @@ define([
 	        assertAstResults(results, ast);
 	    });
 	    it("Selector test 6 - nested elements", function() {
-	        var ast = '{"type":"StyleSheet","range":[0,5],"body":[{"type":"Rule","range":[0,5],"selectorBody":{"type":"SelectorBody","range":[0,3],"selectors":[{"type":"Selector","range":[-1,3],"text":"a   b"}]},"declarationBody":{"type":"DeclarationBody","range":[3,5],"declarations":[]}}]}';
+	        var ast = '{"type":"StyleSheet","range":[0,5],"body":[{"type":"Rule","range":[0,5],"selectorBody":{"type":"SelectorBody","range":[0,3],"selectors":[{"type":"Selector","range":[0,3],"text":"a   b"}]},"declarationBody":{"type":"DeclarationBody","range":[3,5],"declarations":[]}}]}';
 	        var results = CSSLint.verify("a b{}");
 	        assertAstResults(results, ast);
 	    });
 	    it("Selector test 7 - parent elements", function() {
-	        var ast = '{"type":"StyleSheet","range":[0,7],"body":[{"type":"Rule","range":[0,7],"selectorBody":{"type":"SelectorBody","range":[0,5],"selectors":[{"type":"Selector","range":[0,5],"text":"a > b"}],"selector":{"type":"Combinator","range":[4,4],"value":{"col":3,"line":1,"text":">","type":"child"}}},"declarationBody":{"type":"DeclarationBody","range":[5,7],"declarations":[]}}]}';
+	        var ast = '{"type":"StyleSheet","range":[0,7],"body":[{"type":"Rule","range":[0,7],"selectorBody":{"type":"SelectorBody","range":[0,5],"selectors":[{"type":"Selector","range":[0,5],"text":"a > b"}]},"declarationBody":{"type":"DeclarationBody","range":[5,7],"declarations":[]}}]}';
 	        var results = CSSLint.verify("a > b{}");
 	        assertAstResults(results, ast);
 	    });
@@ -218,8 +218,8 @@ define([
 	        assertAstResults(results, ast);
 	    });
 	    it("Selector test 11 - nth type", function() {
-	        var ast = '{"type":"StyleSheet","range":[0,18],"body":[{"type":"Rule","range":[0,18],"selectorBody":{"type":"SelectorBody","range":[0,16],"selectors":[{"type":"Selector","range":[0,16],"text":"p:nth-of-type(2)"}],"expression":{"type":"Expression","range":[14,16],"value":"2"}},"declarationBody":{"type":"DeclarationBody","range":[16,18],"declarations":[]}}]}';
-	        var results = CSSLint.verify("p:nth-of-type(2){}");
+	        var ast = '{"type":"StyleSheet","range":[0,23],"body":[{"type":"Rule","range":[0,23],"selectorBody":{"type":"SelectorBody","range":[0,21],"selectors":[{"type":"Selector","range":[0,21],"text":"p:nth-of-type( 2n+1 )"}]},"declarationBody":{"type":"DeclarationBody","range":[21,23],"declarations":[]}}]}';
+	        var results = CSSLint.verify("p:nth-of-type( 2n+1 ){}");
 	        assertAstResults(results, ast);
 	    });
 	    
@@ -230,7 +230,7 @@ define([
 	    });
 	    it("Declaration test 2 - 2 props", function() {
 	        var ast = '{"type":"StyleSheet","range":[0,13],"body":[{"type":"Rule","range":[0,13],"selectorBody":{"type":"SelectorBody","range":[0,3],"selectors":[{"type":"Selector","range":[0,3],"text":"abc"}]},"declarationBody":{"type":"DeclarationBody","range":[3,13],"declarations":[{"type":"Declaration","range":[4,8],"property":{"type":"Property","range":[4,5],"text":"a"},"propertyValue":{"type":"PropertyValue","range":[6,7],"text":"1"}},{"type":"Declaration","range":[8,12],"property":{"type":"Property","range":[8,9],"text":"b"},"propertyValue":{"type":"PropertyValue","range":[10,11],"text":"2"}}]}}]}';
-	        var results = CSSLint.verify("abc{a:1;b:2;}");
+			var results = CSSLint.verify("abc{a:1;b:2;}");
 	        assertAstResults(results, ast);
 	    });
 	    it("Declaration test 3 - 2 props with whitespace", function() {
@@ -251,56 +251,92 @@ define([
 	    
 	    // TODO Comments?
 	    
-	    it("@import url string 1", function() {
+	    it("@charset 1", function() {
+	        var ast = '{"type":"StyleSheet","range":[0,17],"body":[{"type":"Charset","range":[0,17]}]}';
+	        var results = CSSLint.verify("@charset \"UTF-8\";");
+	        assertAstResults(results, ast);
+	    });
+	    it("@import 1 url string 1", function() {
 	        var ast = '{"type":"StyleSheet","range":[0,18],"body":[{"type":"Import","range":[0,18],"uri":{"type":"Uri","range":[8,17]}}]}';
 	        var results = CSSLint.verify("@import 'foo.css';");
 	        assertAstResults(results, ast);
 	    });
-	    
-	    it("@import url string 2- media query", function() {
-	        var ast = '{"type":"StyleSheet","range":[0,24],"body":[{"type":"Import","range":[0,24],"uri":{"type":"Uri","range":[8,17]},"mediaqueries":{"type":"MediaQueryList","range":[18,24],"queries":[{"type":"MediaQuery","range":[18,24],"expressions":[],"mediafeature":{"type":"MediaFeature","range":[18,23],"value":"print"}}]}}]}';
-	        var results = CSSLint.verify("@import 'foo.css' print;");
-	        assertAstResults(results, ast);
-	    });
-	    
-	    it("@import url string 3 - media query expression", function() {
-	        var ast = '{"type":"StyleSheet","range":[0,42],"body":[{"type":"Import","range":[0,42],"uri":{"type":"Uri","range":[8,17]},"mediaqueries":{"type":"MediaQueryList","range":[18,42],"queries":[{"type":"MediaQuery","range":[18,42],"expressions":[{"type":"MediaExpression","range":[28,42],"mediafeature":{"type":"MediaFeature","range":[29,33],"value":"font"},"feature":{"type":"MediaFeature","range":[29,33]},"expression":{"type":"Expression","range":[35,41],"value":"Ariel"}}],"mediafeature":{"type":"MediaFeature","range":[18,23],"value":"print"}}]}}]}';
-	        var results = CSSLint.verify("@import 'foo.css' print and (font: Ariel);");
-	        assertAstResults(results, ast);
-	    });
-	    
-	    it("@import url string 4 - chained media queries", function() {
-	        var ast = '{"type":"StyleSheet","range":[0,51],"body":[{"type":"Import","range":[0,51],"uri":{"type":"Uri","range":[8,17]},"mediaqueries":{"type":"MediaQueryList","range":[18,51],"queries":[{"type":"MediaQuery","range":[18,42],"expressions":[{"type":"MediaExpression","range":[28,42],"mediafeature":{"type":"MediaFeature","range":[29,33],"value":"font"},"feature":{"type":"MediaFeature","range":[29,33]},"expression":{"type":"Expression","range":[35,41],"value":"Ariel"}}],"mediafeature":{"type":"MediaFeature","range":[18,23],"value":"print"}},{"type":"MediaQuery","range":[43,51],"expressions":[],"mediafeature":{"type":"MediaFeature","range":[43,50],"value":"display"}}]}}]}';
-	        var results = CSSLint.verify("@import 'foo.css' print and (font: Ariel), display;");
-	       assertAstResults(results, ast);
-	    });
-	    
-	    it("@import url function", function() {
+	    it("@import 2 url function", function() {
 	        var ast = '{"type":"StyleSheet","range":[0,23],"body":[{"type":"Import","range":[0,23],"uri":{"type":"Uri","range":[8,22]}}]}';
 	        var results = CSSLint.verify("@import url('foo.css');");
 	        assertAstResults(results, ast);
 	    });
-	    
-	    it("@import url func 2- media query", function() {
-	        var ast = '{"type":"StyleSheet","range":[0,29],"body":[{"type":"Import","range":[0,29],"uri":{"type":"Uri","range":[8,22]},"mediaqueries":{"type":"MediaQueryList","range":[23,29],"queries":[{"type":"MediaQuery","range":[23,29],"expressions":[],"mediafeature":{"type":"MediaFeature","range":[23,28],"value":"print"}}]}}]}';
-	        var results = CSSLint.verify("@import url('foo.css') print;");
+	    it("@namespace 1", function() {
+	        var ast = '{"type":"StyleSheet","range":[0,22],"body":[{"type":"Namespace","range":[0,22],"uri":{"type":"Uri","range":[11,21]}}]}';
+	        var results = CSSLint.verify("@namespace url(myURL);");
+	        assertAstResults(results, ast);
+	    });
+	    it("@namespace 2", function() {
+	        var ast = '{"type":"StyleSheet","range":[0,26],"body":[{"type":"Namespace","range":[0,26],"prefix":"prefix","uri":{"type":"Uri","range":[18,25]}}]}';
+	        var results = CSSLint.verify("@namespace prefix \"myURL\";");
+	        assertAstResults(results, ast);
+	    });
+	    it("@media 1 - complex", function() {
+	        var ast = '{"type":"StyleSheet","range":[0,58],"body":[{"type":"Media","range":[0,58],"mediaList":{"type":"MediaList","range":[0,42]},"mediaBody":{"type":"MediaBody","range":[42,58],"body":[{"type":"Rule","range":[44,58],"selectorBody":{"type":"SelectorBody","range":[44,48],"selectors":[{"type":"Selector","range":[44,47],"text":"abc"}]},"declarationBody":{"type":"DeclarationBody","range":[48,58],"declarations":[{"type":"Declaration","range":[50,54],"property":{"type":"Property","range":[50,51],"text":"a"},"propertyValue":{"type":"PropertyValue","range":[52,53],"text":"1"}}]}}]}}]}';
+	        var results = CSSLint.verify("@media only screen and (max-width: 500px) {\nabc {\na:1;\n}\n}");
+	        assertAstResults(results, ast);
+	    });
+	    it("@supports 1", function() {
+	        var ast = '{"type":"StyleSheet","range":[0,62],"body":[{"type":"Rule","range":[0,11],"selectorBody":{"type":"SelectorBody","range":[0,3],"selectors":[{"type":"Selector","range":[0,3],"text":"abc"}]},"declarationBody":{"type":"DeclarationBody","range":[3,11],"declarations":[{"type":"Declaration","range":[5,9],"property":{"type":"Property","range":[5,6],"text":"a"},"propertyValue":{"type":"PropertyValue","range":[7,8],"text":"1"}}]}},{"type":"Supports","range":[12,62],"supportsCondition":{"type":"SupportsCondition","range":[12,47],"declarations":{"type":"Declaration","range":[24,45],"property":{"type":"Property","range":[24,38],"text":"animation-name"},"propertyValue":{"type":"PropertyValue","range":[39,44],"text":"test"}}},"supportsBody":{"type":"SupportsBody","range":[46,62],"body":[{"type":"Rule","range":[48,62],"selectorBody":{"type":"SelectorBody","range":[48,52],"selectors":[{"type":"Selector","range":[48,51],"text":"abc"}]},"declarationBody":{"type":"DeclarationBody","range":[52,62],"declarations":[{"type":"Declaration","range":[54,60],"property":{"type":"Property","range":[54,57],"text":"cue"},"propertyValue":{"type":"PropertyValue","range":[58,59],"text":"2"}}]}}]}}]}';
+	        var results = CSSLint.verify("abc{ a:1; }\n@supports ( animation-name: test) { abc { cue:2; }");
+	        assertAstResults(results, ast);
+	    });
+	    it("@document 1", function() {
+	        var ast = '{"type":"StyleSheet","range":[0,76],"body":[{"type":"Document","range":[0,76],"body":[{"type":"Rule","range":[46,76],"selectorBody":{"type":"SelectorBody","range":[46,51],"selectors":[{"type":"Selector","range":[46,50],"text":"body"}]},"declarationBody":{"type":"DeclarationBody","range":[51,76],"declarations":[{"type":"Declaration","range":[57,70],"property":{"type":"Property","range":[57,62],"text":"color"},"propertyValue":{"type":"PropertyValue","range":[63,69],"text":"green"}}]}}]}]}';
+	        var results = CSSLint.verify("@document url(myURL), domain(mozilla.org) {\n  body {\n    color: green;\n  }\n}");
+	        assertAstResults(results, ast);
+	    });
+	    it("@page 1 - simple", function() {
+	        var ast = '{"type":"StyleSheet","range":[0,8],"body":[{"type":"Page","range":[0,8],"declarationBody":{"type":"DeclarationBody","range":[6,8],"declarations":[]}}]}';
+	        var results = CSSLint.verify("@page {}");
+	        assertAstResults(results, ast);
+	    });
+	    it("@page 2 - declaration", function() {
+	        var ast = '{"type":"StyleSheet","range":[0,23],"body":[{"type":"Page","range":[0,23],"declarationBody":{"type":"DeclarationBody","range":[6,23],"declarations":[{"type":"Declaration","range":[9,21],"property":{"type":"Property","range":[9,15],"text":"margin"},"propertyValue":{"type":"PropertyValue","range":[16,20],"text":"1in"}}]}}]}';
+	        var results = CSSLint.verify("@page {\n\tmargin: 1in;\n}");
+	        assertAstResults(results, ast);
+	    });
+	    it("@page 3 - identifier", function() {
+	        var ast = '{"type":"StyleSheet","range":[0,11],"body":[{"type":"Page","range":[0,11],"declarationBody":{"type":"DeclarationBody","range":[9,11],"declarations":[]},"id":"h1"}]}';
+	        var results = CSSLint.verify("@page h1 {}");
+	        assertAstResults(results, ast);
+	    });
+	    it("@page 4 - declarations and identifier", function() {
+	        var ast = '{"type":"StyleSheet","range":[0,44],"body":[{"type":"Page","range":[0,44],"declarationBody":{"type":"DeclarationBody","range":[9,44],"declarations":[{"type":"Declaration","range":[12,24],"property":{"type":"Property","range":[12,18],"text":"margin"},"propertyValue":{"type":"PropertyValue","range":[19,23],"text":"1in"}},{"type":"Declaration","range":[26,42],"property":{"type":"Property","range":[26,35],"text":"font-size"},"propertyValue":{"type":"PropertyValue","range":[36,41],"text":"20pt"}}]},"id":"h1"}]}';
+	        var results = CSSLint.verify("@page h1 {\n\tmargin: 1in;\n\tfont-size: 20pt;\n}");
+	        assertAstResults(results, ast);
+	    });
+	    it("@page 5 - rule and simple", function() {
+	        var ast = '{"type":"StyleSheet","range":[0,18],"body":[{"type":"Rule","range":[0,6],"selectorBody":{"type":"SelectorBody","range":[0,4],"selectors":[{"type":"Selector","range":[0,3],"text":"abc"}]},"declarationBody":{"type":"DeclarationBody","range":[5,6],"declarations":[]}},{"type":"Page","range":[8,16],"declarationBody":{"type":"DeclarationBody","range":[14,16],"declarations":[]}}]}';
+	        var results = CSSLint.verify("abc {}\n @page {}\n ");
+	        assertAstResults(results, ast);
+	    });
+	    it("@font-face 1", function() {
+	        var ast = '{"type":"StyleSheet","range":[0,79],"body":[{"type":"FontFace","range":[0,79],"declarations":[],"declarationBody":{"type":"DeclarationBody","range":[11,79],"declarations":[{"type":"Declaration","range":[15,40],"property":{"type":"Property","range":[15,26],"text":"font-family"},"propertyValue":{"type":"PropertyValue","range":[27,39],"text":"MyHelvetica"}},{"type":"Declaration","range":[43,77],"property":{"type":"Property","range":[43,46],"text":"src"},"propertyValue":{"type":"PropertyValue","range":[47,76],"text":"local(\\"Helvetica Neue Bold\\")"}}]}}]}';
+	        var results = CSSLint.verify('@font-face {\n  font-family: MyHelvetica;\n  src: local("Helvetica Neue Bold");\n}');
+	        assertAstResults(results, ast);
+	    });
+	    it("@keyframes 1 - simple", function() {
+	        var ast = '{"type":"StyleSheet","range":[0,52],"body":[{"type":"Keyframes","range":[0,52],"declarations":[],"declarationBody":{"type":"DeclarationBody","range":[36,52],"declarations":[{"type":"Declaration","range":[38,48],"property":{"type":"Property","range":[38,41],"text":"top"},"propertyValue":{"type":"PropertyValue","range":[42,47],"text":"30px"}}]}}]}';
+	        var results = CSSLint.verify("@keyframes abc { 0% { top: 0; } 50% { top: 30px; } }");
+	        assertAstResults(results, ast);
+	    });
+	    it("@viewport 1 - simple", function() {
+	        var ast = '{"type":"StyleSheet","range":[0,37],"body":[{"type":"Viewport","range":[0,37],"declarations":[],"declarationBody":{"type":"DeclarationBody","range":[10,37],"declarations":[{"type":"Declaration","range":[12,35],"property":{"type":"Property","range":[12,23],"text":"orientation"},"propertyValue":{"type":"PropertyValue","range":[24,34],"text":"landscape"}}]}}]}';
+	        var results = CSSLint.verify("@viewport { orientation: landscape; }");
 	        assertAstResults(results, ast);
 	    });
 	    
-	    it("@import url func 3 - media query expression", function() {
-	        var ast = '{"type":"StyleSheet","range":[0,47],"body":[{"type":"Import","range":[0,47],"uri":{"type":"Uri","range":[8,22]},"mediaqueries":{"type":"MediaQueryList","range":[23,47],"queries":[{"type":"MediaQuery","range":[23,47],"expressions":[{"type":"MediaExpression","range":[33,47],"mediafeature":{"type":"MediaFeature","range":[34,38],"value":"font"},"feature":{"type":"MediaFeature","range":[34,38]},"expression":{"type":"Expression","range":[40,46],"value":"Ariel"}}],"mediafeature":{"type":"MediaFeature","range":[23,28],"value":"print"}}]}}]}';
-	        var results = CSSLint.verify("@import url('foo.css') print and (font: Ariel);");
-	        assertAstResults(results, ast);
-	    });
 	    
-	    it("@import url func 4 - chained media queries", function() {
-	        var ast = '{"type":"StyleSheet","range":[0,56],"body":[{"type":"Import","range":[0,56],"uri":{"type":"Uri","range":[8,22]},"mediaqueries":{"type":"MediaQueryList","range":[23,56],"queries":[{"type":"MediaQuery","range":[23,47],"expressions":[{"type":"MediaExpression","range":[33,47],"mediafeature":{"type":"MediaFeature","range":[34,38],"value":"font"},"feature":{"type":"MediaFeature","range":[34,38]},"expression":{"type":"Expression","range":[40,46],"value":"Ariel"}}],"mediafeature":{"type":"MediaFeature","range":[23,28],"value":"print"}},{"type":"MediaQuery","range":[48,56],"expressions":[],"mediafeature":{"type":"MediaFeature","range":[48,55],"value":"display"}}]}}]}';
-	        var results = CSSLint.verify("@import url('foo.css') print and (font: Ariel), display;");
-	        assertAstResults(results, ast);
-	    });
 	    
 	});
 	
+	// TODO Make the AST parser more recoverable
 	describe.skip("CSS Recoverable AST Tests", function() {
 		
 		// TODO Uncompleted value 'background: ;' results in node not being closed.
