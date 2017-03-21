@@ -49,9 +49,13 @@ define([
 			}
 			return null;
 		},
+		/**
+		 * Used to update "selectd" and "project" search scope based on the file or folder selected.
+		 */
 		setLocationByMetaData: function(meta, useParentLocation){
 			var locationName = "";
 			var noneRootMeta = null;
+			this._setLocationbyURL(meta);
 			this._searchRootLocation = this._fileClient.fileServiceRootURL(meta.Location);
 			if(useParentLocation && meta && meta.Parents && meta.Parents.length > 0){
 				if(useParentLocation.index === "last"){
@@ -91,15 +95,62 @@ define([
 			}
 		},
 		setLocationbyURL: function(locationURL){
-			this._searchLocation = locationURL;
+			this._searchLocation = locationURL;			
 		},
-		setRootLocationbyURL: function(locationURL){
-			this._searchRootLocation = locationURL;
+		_calculateProjectScope : function (data) {
+		  //Similar mechanism to the setLocationByMetaData method in searchClient.js with meta = data.items[0]
+		  //and useParentLocation = {index: "last"} to retrieve project scope info.
+		  var searchLoc = null;
+		  if(data.items[0] && data.items[0].Parents && data.items[0].Parents.length){
+		    searchLoc = data.items[0].Parents[data.items[0].Parents.length - 1];
+		  } else if(data.items[0]) {
+		    searchLoc = data.items[0];
+		  } else {
+		  	searchLoc = data.items;
+		  }
+		  return searchLoc;
 		},
-		setChildrenLocationbyURL: function(locationURL){
-			this._childrenLocation = locationURL;
+		/**
+		 * Used to update "other" search scope, this location info comes directly from InlineSearchPane.js
+		 */
+		setLocationOther: function(otherLocation){
+			this._searchLocation_other = otherLocation;
 		},
-		getSearchLocation: function(){
+		_handleSearchscopeLocation: function(searchTarget){
+			// If the search target's Location is /workspace/orionode, change it to fileSearviceRootUrl(), which in most cases will give you /file
+			return searchTarget.Location !== "/workspace/orionode" ? searchTarget.Location : this._fileClient.fileServiceRootURL();
+		},
+		_setLocationbyURL: function(meta){
+			this._searchLocation_selected = typeof meta ==="string" ? meta : meta.Directory ? meta : meta.Parents[0];
+			this._searchLocation_project = this._calculateProjectScope({items: [meta]});
+			if(this._displaycallBack){
+				if(this._searchScopeOption === "selected"){
+					this._displaycallBack([this._handleSearchscopeLocation(this._searchLocation_selected)]);
+				}else if(this._searchScopeOption === "project"){
+					this._displaycallBack([this._handleSearchscopeLocation(this._searchLocation_project)]);
+				}
+			}
+		},
+		getSearchLocation: function(searchScope){
+			switch(searchScope){
+				case "selected":
+					if(this._searchLocation_selected){
+						return this._handleSearchscopeLocation(this._searchLocation_selected);
+					}
+					break;
+				case "project":
+					if(this._searchLocation_project){
+						return this._handleSearchscopeLocation(this._searchLocation_project);
+					}
+					break;
+				case "workspace":
+					return this._fileClient.fileServiceRootURL();
+				case "other":
+					if(this._searchLocation_other){
+						return this._searchLocation_other;
+					}
+					break;
+			}
 			if(this._searchLocation){
 				return this._searchLocation;
 			}
@@ -119,6 +170,10 @@ define([
 				return this._childrenLocation;
 			}
 			return this._fileClient.fileServiceRootURL();
+		},
+		addDisplaycallback: function(displayCallback, searchScopeOption){
+			this._displaycallBack = displayCallback;
+			this._searchScopeOption = searchScopeOption;
 		},
 		
 		/**
@@ -257,8 +312,8 @@ define([
 		 * @param {Boolean} [nameSearch] The name of a file to search for
 		 * @param {Boolean} [useRoot] If true, do not use the location property of the searcher. Use the root url of the file system instead.
 		 */
-		createSearchParams: function(keyword, nameSearch, useRoot, advancedOptions)  {
-			var searchOn = useRoot ? this.getSearchRootLocation(): this.getSearchLocation();
+		createSearchParams: function(keyword, nameSearch, useRoot, advancedOptions, searchScope)  {
+			var searchOn = useRoot ? this.getSearchRootLocation(): this.getSearchLocation(searchScope);
 			if (nameSearch) {
 				//assume implicit trailing wildcard if there isn't one already
 				//var wildcard= (/\*$/.test(keyword) ? "" : "*"); //$NON-NLS-0$
@@ -268,7 +323,8 @@ define([
 					rows: 100,
 					start: 0,
 					nameSearch: true,
-					keyword: keyword
+					keyword: keyword,
+					exclude: (advancedOptions && advancedOptions.exclude) ? advancedOptions.exclude : undefined,
 				};
 			}
 			return {
@@ -281,8 +337,10 @@ define([
 				regEx: advancedOptions ? advancedOptions.regEx : undefined,
 				fileType: advancedOptions ? advancedOptions.fileType : undefined,
 				fileNamePatterns: (advancedOptions && advancedOptions.fileNamePatterns) ? advancedOptions.fileNamePatterns : undefined,
+				exclude: (advancedOptions && advancedOptions.exclude) ? advancedOptions.exclude : undefined,
 				keyword: keyword,
-				replace: advancedOptions ? advancedOptions.replace : undefined
+				replace: advancedOptions ? advancedOptions.replace : undefined,
+				searchScope: searchScope
 			};
 		}
 	};

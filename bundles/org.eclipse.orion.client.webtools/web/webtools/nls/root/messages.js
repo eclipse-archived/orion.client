@@ -145,15 +145,26 @@ define({//Default message bundle
 	"addQuotesToAttributes": " - Add quotes to the current attribute",
 	
 	//CSS content assist
-	"ruleTemplateDescription": "rule - class selector rule",
-	"idSelectorTemplateDescription": "rule - id selector rule",
-	"outlineStyleTemplateDescription": "outline - outline style",
-	"backgroundImageTemplateDescription": "background-image - image style",
-	"urlImageTemplateDescription": "url - url image",
-	"rgbColourTemplateDescription": "rgb - rgb color",
-	"importTemplateDescription": "import - import style sheet",
-	"csslintTemplateDescription": "csslint - add embedded rule severity",
-	"keywordsAssistTitle": "Keywords",
-	"templateAssistHeader": "Templates",
-	"templateHoverHeader": "Template source code:\n\n"
+	// 'element' 'id' 'class' and 'attribute' can be replaced with translated text, but they are describing specific CSS structures
+	// See https://www.w3schools.com/cssref/css_selectors.asp
+	"elementRuleDescription": "Rule : element { }",
+	"idRuleDescription": "Rule : #id { }",
+	"classRuleDescription": "Rule : .class { }",
+	"elementSelector": "element",
+	"idSelector": "#id",
+	"classSelector": ".class",
+	"attributeSelector": "[attribute]",
+	"elementRuleDoc": "A rule (ruleset) that applies to all elements that match the given name.",
+	"classRuleDoc": "A rule (ruleset) that applies to elements based on the value of their class attribute.",
+	"idRuleDoc": "A rule (ruleset) that applies to elements based on the value of its id attribute.",
+
+	// See https://developer.mozilla.org/en-US/docs/Web/CSS/At-rule
+	'charsetTemplateDoc': 'Defines the character set used by the style sheet.',
+	'importTemplateDoc': 'Tells the CSS engine to include an external style sheet.',
+	'namespaceTemplateDoc': 'Tells the CSS engine that all its content must be considered prefixed with an XML namespace.',
+	'mediaTemplateDoc': 'A conditional group rule which will apply its content if the device meets the criteria of the condition defined using a media query.',
+	'supportsTemplateDoc': 'A conditional group rule which will apply its content if the device meets the criteria of the condition defined using a media query.',
+	'pageTemplateDoc': 'Describes the aspect of layout changes which will be applied when printing the document.',
+	'font-faceTemplateDoc': 'Describes the aspect of an external font to be downloaded.',
+	'keyframesTemplateDoc': 'Describes the aspect of intermediate steps in a CSS animation sequence.',
 });

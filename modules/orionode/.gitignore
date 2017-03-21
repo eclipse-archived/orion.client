@@ -13,6 +13,9 @@ target/
 # Ignore inlined orion client code copied by Grunt build
 lib/orion.client/
 
+# ignore electron artifacts
+dist/
+
 # Ignore per-user Orionode data
 .workspace*/
 test/.test_workspace/

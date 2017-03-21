@@ -63,6 +63,7 @@ define([
 			doFilter();
 		};
 		button.addEventListener("click", clickFilter); //$NON-NLS-0$
+		filter.addEventListener ("search", clickFilter, false);
 		
 		var sectionContent = section.getContentElement();
 		sectionContent.insertBefore(filterDiv, sectionContent.firstChild);
@@ -72,7 +73,7 @@ define([
 				doFilter();
 			}
 		};
-		filter.addEventListener("keydown", keyDownFilter); //$NON-NLS-0$	
+		filter.addEventListener("keydown", keyDownFilter); //$NON-NLS-0$
 		
 		return {
 			filter: filter,
@@ -84,6 +85,7 @@ define([
 			destroy: function() {
 				this.commandTooltip.destroy();
 				this.button.removeEventListener("click", this.clickFilter);
+				this.filter.removeEventListener("search", this.clickFilter);
 				this.filter.removeEventListener("keydown", this.keyDownFilter);
 			}
 		};

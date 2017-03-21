@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2011, 2015 IBM Corporation and others.
+ * Copyright (c) 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -9,387 +9,168 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-/*eslint-env browser, amd*/
-define("webtools/cssContentAssist", [
-	'orion/Deferred',
+/*eslint-env amd */
+define([
 	'orion/editor/templates',
-	'orion/editor/stylers/text_css/syntax',
 	'orion/objects',
-	'webtools/util',
-	'javascript/compilationUnit',
+	'orion/i18nUtil',
 	'csslint/csslint',
-	'webtools/cssVisitor',
+	'webtools/util',
+	'javascript/util',
+	'webtools/compilationUnit',
 	'i18n!webtools/nls/messages'
-], function(Deferred, mTemplates, mCSS, Objects, Util, CU, CSSLint, Visitor, Messages) {
+], function(mTemplates, Objects, i18nUtil, CSSLint, Util, jsUtil, CU, Messages) {
 
-/* eslint-disable missing-nls */
-	var overflowValues = {
-		type: "link",
-		values: ["visible", "hidden", "scroll", "auto", "no-display", "no-content"]
-	};
-	var fontStyleValues = {
-		type: "link",
-		values: ["italic", "normal", "oblique", "inherit"]
-	};
-	var fontWeightValues = {
-		type: "link",
-		values: [
-			"bold", "normal", "bolder", "lighter",
-			"100", "200", "300", "400", "500", "600",
-			"700", "800", "900", "inherit"
-		]
-	};
-	var displayValues = {
-		type: "link",
-		values: [
-			"none", "block", "box", "flex", "inline", "inline-block", "inline-flex", "inline-table",
-			"list-item", "table", "table-caption", "table-cell", "table-column", "table-column-group",
-			"table-footer-group", "table-header-group", "table-row", "table-row-group", "inherit"
-		]
-	};
-	var visibilityValues = {
-		type: "link",
-		values: ["hidden", "visible", "collapse", "inherit"]
-	};
-	var positionValues = {
-		type: "link",
-		values: ["absolute", "fixed", "relative", "static", "inherit"]
-	};
-	var whitespaceValues = {
-		type: "link",
-		values: ["pre", "pre-line", "pre-wrap", "nowrap", "normal", "inherit"]
-	};
-	var wordwrapValues = {
-		type: "link",
-		values: ["normal", "break-word"] 
-	};
-	var floatValues = {
-		type: "link",
-		values: ["left", "right", "none", "inherit"] 
-	};
-	var borderStyles = {
-		type: "link",
-		values: ["solid", "dashed", "dotted", "double", "groove", "ridge", "inset", "outset"]
-	};
-	var widths = {
-		type: "link",
-		values: []
-	};
-	widths.values.push('0');
-	for (var i=1; i<10; i++) {
-		widths.values.push(i.toString() + 'px');
-	}
-	var colorValues = {
-		type: "link",
-		values: Object.keys(CSSLint.Colors)
-	};
-	var cursorValues = {
-		type: "link",
-		values: [
-			"auto",
-			"crosshair",
-			"default",
-			"e-resize",
-			"help",
-			"move",
-			"n-resize",
-			"ne-resize",
-			"nw-resize",
-			"pointer",
-			"progress",
-			"s-resize",
-			"se-resize",
-			"sw-resize",
-			"text",
-			"w-resize",
-			"wait",
-			"inherit"
-		]
-	};
-	var csslintRules = {
-		type: "link",
-		values: [
-			"adjoining-classes",
-			"box-model",
-			"box-sizing",
-			"bulletproof-font-face",
-			"compatible-vendor-prefixes",
-			"display-property-grouping",
-			"duplicate-background-images",
-			"duplicate-properties",
-			"empty-rules",
-			"fallback-colors",
-			"floats",
-			"font-faces",
-			"font-sizes",
-			"gradients",
-			"ids",
-			"import",
-			"important",
-			"known-properties",
-			"outline-none",
-			"overqualified-elements",
-			"qualified-headings",
-			"regex-selectors",
-			"rules-count",
-			"selector-max-approaching",
-			"selector-max",
-			"shorthand",
-			"star-property-hack",
-			"text-indent",
-			"underscore-property-hack",
-			"unique-headings",
-			"universal-selector",
-			"unqualified-attributes",
-			"vendor-prefix",
-			"zero-units"
-		]
-	};
-	var severityValues = {
-		type: "link",
-		values: [
-			"false",
-			"true",
-			"0",
-			"1",
-			"2"
-		]
-	};
-	
-	var valuesProperties = [
-		{prop: "display", values: displayValues},
-		{prop: "overflow", values: overflowValues},
-		{prop: "overflow-x", values: overflowValues},
-		{prop: "overflow-y", values: overflowValues},
-		{prop: "float", values: floatValues},
-		{prop: "position", values: positionValues},
-		{prop: "cursor", values: cursorValues},
-		{prop: "color", values: colorValues},
-		{prop: "border-top-color", values: colorValues},
-		{prop: "border-bottom-color", values: colorValues},
-		{prop: "border-right-color", values: colorValues},
-		{prop: "border-left-color", values: colorValues},
-		{prop: "background-color", values: colorValues},
-		{prop: "font-style", values: fontStyleValues},
-		{prop: "font-weight", values: fontWeightValues},
-		{prop: "white-space", values: whitespaceValues},
-		{prop: "word-wrap", values: wordwrapValues},
-		{prop: "visibility", values: visibilityValues}
-	];
-	
-	var pixelProperties = [
-		"width", "height", "top", "bottom", "left", "right",
-		"min-width", "min-height", "max-width", "max-height",
-		"margin", "padding", "padding-left", "padding-right",
-		"padding-top", "padding-bottom", "margin-left", "margin-top",
-		"margin-bottom", "margin-right"
-	];
-	
-	var borderProperties = ["border", "border-top", "border-bottom", "border-left", "border-right"];
-/* eslint-enable missing-nls */
-
-	function fromJSON(o) {
-		return JSON.stringify(o).replace("}", "\\}");  //$NON-NLS-1$
+	function CssContentAssistProvider(cssResultManager) {
+		this.cssResultManager = cssResultManager;
 	}
 	
-	var templates = [
+	CssContentAssistProvider.prototype = new mTemplates.TemplateContentAssist([], []);
+	
+	
+	// TODO Support additional templates
+	var ruleTemplates = [
 		{
-			prefix: "rule", //$NON-NLS-1$
-			description: Messages['ruleTemplateDescription'],
-			template: ".${class} {\n\t${cursor}\n}" //$NON-NLS-1$
+			prefix: "Rule", //$NON-NLS-1$
+			description: Messages['elementRuleDescription'],
+			template: "${element} {\n\t${cursor}\n}", //$NON-NLS-1$
+			doc: Messages['elementRuleDoc'],
+			url: "https://developer.mozilla.org/en-US/docs/Web/CSS/Syntax#CSS_rulesets" //$NON-NLS-1$
 		},
 		{
-			prefix: "rule", //$NON-NLS-1$
-			description: Messages['idSelectorTemplateDescription'],
-			template: "#${id} {\n\t${cursor}\n}" //$NON-NLS-1$
+			prefix: "Rule", //$NON-NLS-1$
+			description: Messages['idRuleDescription'],
+			template: "#${id} {\n\t${cursor}\n}", //$NON-NLS-1$
+			doc: Messages['idRuleDoc'],
+			url: "https://developer.mozilla.org/en-US/docs/Web/CSS/Syntax#CSS_rulesets" //$NON-NLS-1$
 		},
 		{
-			prefix: "outline", //$NON-NLS-1$
-			description: Messages['outlineStyleTemplateDescription'],
-			template: "outline: ${color:" + fromJSON(colorValues) + "} ${style:" + fromJSON(borderStyles) + "} ${width:" + fromJSON(widths) + "};" //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+			prefix: "Rule", //$NON-NLS-1$
+			description: Messages['classRuleDescription'],
+			template: "#${id} {\n\t${cursor}\n}", //$NON-NLS-1$
+			doc: Messages['classRuleDoc'],
+			url: "https://developer.mozilla.org/en-US/docs/Web/CSS/Syntax#CSS_rulesets" //$NON-NLS-1$
 		},
+	];
+	//https://developer.mozilla.org/en-US/docs/Web/CSS/At-rule
+	var rootAtRuleTemplates = [
 		{
-			prefix: "background-image", //$NON-NLS-1$
-			description: Messages['backgroundImageTemplateDescription'],
-			template: "background-image: url(\"${uri}\");" //$NON-NLS-1$
-		},
-		{
-			prefix: "url", //$NON-NLS-1$
-			description: Messages['urlImageTemplateDescription'],
-			template: "url(\"${uri}\");" //$NON-NLS-1$
-		},
-		{
-			prefix: "rgb", //$NON-NLS-1$
-			description: Messages['rgbColourTemplateDescription'],
-			template: "rgb(${red},${green},${blue});" //$NON-NLS-1$
+			prefix: "@charset", //$NON-NLS-1$
+			description: '@charset', //$NON-NLS-1$
+			template: "@charset \"${charset}\";", //$NON-NLS-1$
+			doc: Messages['charsetTemplateDoc'],
+			url: "https://developer.mozilla.org/en-US/docs/Web/CSS/@charset" //$NON-NLS-1$
 		},
 		{
 			prefix: "@import", //$NON-NLS-1$
-			description: Messages['importTemplateDescription'],
-			template: "@import \"${uri}\";" //$NON-NLS-1$
+			description: '@import', //$NON-NLS-1$
+			template: "@import \"${url}\";", //$NON-NLS-1$
+			doc: Messages['importTemplateDoc'],
+			url: "https://developer.mozilla.org/en-US/docs/Web/CSS/@import" //$NON-NLS-1$
 		},
 		{
-			prefix: "csslint", //$NON-NLS-1$
-			description: Messages['csslintTemplateDescription'],
-			template: "\/*csslint ${:" + fromJSON(csslintRules) + "}: ${a:" + fromJSON(severityValues) + "} *\/" //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			prefix: "@namespace", //$NON-NLS-1$
+			description: '@namespace', //$NON-NLS-1$
+			template: "@namespace \"${url}\";", //$NON-NLS-1$
+			doc: Messages['namespaceTemplateDoc'],
+			url: "https://developer.mozilla.org/en-US/docs/Web/CSS/@namespace" //$NON-NLS-1$ //$NON-NLS-1$
 		}
 	];
-	
-	var prop;
-	for (i=0; i<valuesProperties.length; i++) {
-		prop = valuesProperties[i];
-		templates.push({
-			prefix: prop.prop,
-			description: prop.prop + " - " + prop.prop + " style", //$NON-NLS-1$ //$NON-NLS-2$
-			template: prop.prop + ": ${value:" + fromJSON(prop.values) + "};" //$NON-NLS-1$ //$NON-NLS-2$
-		});
-	}	
-	
-	for (i=0; i<pixelProperties.length; i++) {
-		prop = pixelProperties[i];
-		templates.push({
-			prefix: prop,
-			description: prop + " - " + prop + " pixel style", //$NON-NLS-1$ //$NON-NLS-2$
-			template: prop  + ": ${value}px;" //$NON-NLS-1$
-		});
-	}
-	var fourWidthsProperties = ["padding", "margin"]; //$NON-NLS-1$ //$NON-NLS-2$
-	for (i=0; i<fourWidthsProperties.length; i++) {
-		prop = fourWidthsProperties[i];
-		templates.push({
-			prefix: prop,
-			description: prop + " - " + prop + " top right bottom left style", //$NON-NLS-1$ //$NON-NLS-2$
-			template: prop  + ": ${top}px ${left}px ${bottom}px ${right}px;" //$NON-NLS-1$
-		});
-		templates.push({
-			prefix: prop,
-			description: prop + " - " + prop + " top right,left bottom style", //$NON-NLS-1$ //$NON-NLS-2$
-			template: prop  + ": ${top}px ${right_left}px ${bottom}px;" //$NON-NLS-1$
-		});
-		templates.push({
-			prefix: prop,
-			description: prop + " - " + prop + " top,bottom right,left style", //$NON-NLS-1$ //$NON-NLS-2$
-			template: prop  + ": ${top_bottom}px ${right_left}px" //$NON-NLS-1$
-		});
-	}
-	
-	for (i=0; i<borderProperties.length; i++) {
-		prop = borderProperties[i];
-		templates.push({
-			prefix: prop,
-			description: prop + " - " + prop + " style", //$NON-NLS-1$ //$NON-NLS-2$
-			template: prop + ": ${width:" + fromJSON(widths) + "} ${style:" + fromJSON(borderStyles) + "} ${color:" + fromJSON(colorValues) + "};" //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
-		});
-	}
-	
-	/**
-	 * @description Create a proxy template provider
-	 * @returns {TemplateProvider} A new TemplateProvider
-	 * @since 10.0
-	 */
-	function TemplateProvider() {
-	}
-	
-	TemplateProvider.prototype = new mTemplates.TemplateContentAssist(mCSS.keywords, templates);
-	
-	Objects.mixin(TemplateProvider.prototype, {
-		/**
-         * @callback 
-         */
-        getKeywordProposals: function(prefix) {
-			var proposals = [];
-			var keywords = this.getKeywords();
-			if (keywords) {
-				for (i = 0; i < keywords.length; i++) {
-					if (keywords[i].indexOf(prefix) === 0) {
-						var _p = keywords[i].substring(prefix.length);
-						proposals.push({
-							proposal: _p, 
-							description: keywords[i], 
-							style: 'emphasis', //$NON-NLS-1$
-							kind: 'css' //$NON-NLS-1$
-						});
-					}
-				}
-				
-				if (0 < proposals.length) {
-					proposals.sort(function(p1, p2) {
-						if (p1.name < p2.name) return -1;
-						if (p1.name > p2.name) return 1;
-						if (p1.description < p2.description) return -1;
-						if (p1.description > p2.description) return 1;
-						return 0;
-					});
-					proposals.splice(0, 0,{
-						proposal: '',
-						description: Messages['keywordsAssistTitle'],
-						style: 'noemphasis_title_keywords', //$NON-NLS-1$
-						unselectable: true,
-						kind: 'css' //$NON-NLS-1$
-					});	
-				}
-			}
-			return proposals;
+	//https://developer.mozilla.org/en-US/docs/Web/CSS/At-rule
+	var nestedAtRuleTemplates = [
+		{
+			prefix: "@media", //$NON-NLS-1$
+			description: '@media', //$NON-NLS-1$
+			template: "@media ${media-query-list} {\n\t${cursor}\n}", //$NON-NLS-1$
+			doc: Messages['mediaTemplateDoc'],
+			url: "https://developer.mozilla.org/en-US/docs/Web/CSS/@media" //$NON-NLS-1$ //$NON-NLS-1$
 		},
+		{
+			prefix: "@supports", //$NON-NLS-1$
+			description: '@supports', //$NON-NLS-1$
+			template: "@supports (${condition}) {\n\t${cursor}\n}", //$NON-NLS-1$
+			doc: Messages['supportsTemplateDoc'],
+			url: "https://developer.mozilla.org/en-US/docs/Web/CSS/@supports" //$NON-NLS-1$ //$NON-NLS-1$
+		},
+		{
+			prefix: "@page", //$NON-NLS-1$
+			description: '@page', //$NON-NLS-1$
+			template: "@page ${page-selector-list} {\n\t${cursor}\n}", //$NON-NLS-1$
+			doc: Messages['pageTemplateDoc'],
+			url: "https://developer.mozilla.org/en-US/docs/Web/CSS/@page" //$NON-NLS-1$ //$NON-NLS-1$
+		},
+		{
+			prefix: "@font-face", //$NON-NLS-1$
+			description: '@font-face', //$NON-NLS-1$
+			template: "@font-face {\n\tfont-family: \"${family-name}\";\n\tsrc: \"${url}\";\n}", //$NON-NLS-1$
+			doc: Messages['font-faceTemplateDoc'],
+			url: "https://developer.mozilla.org/en-US/docs/Web/CSS/@font-face" //$NON-NLS-1$ //$NON-NLS-1$
+		},
+		{
+			prefix: "@keyframes", //$NON-NLS-1$
+			description: '@keyframes', //$NON-NLS-1$
+			template: "@keyframes ${name} {\n\t${cursor}\n}", //$NON-NLS-1$
+			doc: Messages['keyframesTemplateDoc'],
+			url: "https://developer.mozilla.org/en-US/docs/Web/CSS/@keyframes" //$NON-NLS-1$ //$NON-NLS-1$
+		},
+//		{
+//			prefix: "rgb", //$NON-NLS-1$
+//			description: Messages['rgbColourTemplateDescription'],
+//			template: "rgb(${red},${green},${blue});" //$NON-NLS-1$
+//		},
+//		{
+//			prefix: "csslint", //$NON-NLS-1$
+//			description: Messages['csslintTemplateDescription'],
+//			template: "\/*csslint ${:" + fromJSON(csslintRules) + "}: ${a:" + fromJSON(severityValues) + "} *\/" //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+//		}
+	];
+	
+	// TODO Selector templates
+//		"elementSelector": "element",
+//	"idSelector": "#id",
+//	"classSelector": ".class",
+//	"attributeSelector": "[attribute]",
+	
+	Objects.mixin(CssContentAssistProvider.prototype, {
+
+        computeContentAssist: function computeContentAssist(editorContext, params) {
+        	return editorContext.getFileMetadata().then(function(meta) {
+        		if(meta && meta.contentType.id === "text/html") {
+			        return editorContext.getText().then(function(text) {
+    			         var blocks = Util.findStyleBlocks(text, params.offset);
+    			         if(blocks && blocks.length > 0) {
+    			             var cu = new CU(blocks, meta, editorContext);
+    			             return this.cssResultManager.getResult(cu.getEditorContext()).then(function(results) {
+                			    if(results) {
+                			         return this._computeProposalsFromAst(results.ast, params);
+                			    }
+                			    return null;
+        			         }.bind(this));
+    			         }
+			         }.bind(this));
+			    }
+			    return this.cssResultManager.getResult(editorContext).then(function(results) {
+    			    if(results) {
+    			         return this._computeProposalsFromAst(results.ast, params);
+    			    }
+    			    return null;
+    			}.bind(this));
+			}.bind(this));
+		},
+		
 		/**
 		 * @callback 
 		 */
-		getTemplateProposals: function(prefix, offset, context) {
-			var proposals = [];
-			var _tmplates = this.getTemplates();
-			for (var t = 0; t < _tmplates.length; t++) {
-				var template = _tmplates[t];
-				if (template.match(prefix)) {
-					var proposal = template.getProposal(prefix, offset, context);
-					proposal.style = 'emphasis'; //$NON-NLS-1$
-					var obj = Object.create(null);
-			        obj.type = 'markdown'; //$NON-NLS-1$
-			        obj.content = Messages['templateHoverHeader'];
-			        obj.content += proposal.proposal;
-			        proposal.hover = obj;
-			        proposal.kind = 'css'; //$NON-NLS-1$
-			        this.removePrefix(prefix, proposal);
-					proposals.push(proposal);
-				}
-			}
-			
-			if (0 < proposals.length) {
-				proposals.sort(function(p1, p2) {
-					if (p1.name < p2.name) return -1;
-					if (p1.name > p2.name) return 1;
-					if (p1.description < p2.description) return -1;
-					if (p1.description > p2.description) return 1;
-					return 0;
-				});
-				// if any templates were added to the list of 
-				// proposals, add a title as the first element
-				proposals.splice(0, 0, {
-					proposal: '',
-					description: Messages['templateAssistHeader'],
-					style: 'noemphasis_title', //$NON-NLS-0$
-					unselectable: true
-				});
-			}
-			
-			return proposals;
-		}
-	});
-	
-	/**
-	 * @name orion.editor.CssContentAssistProvider
-	 * @class Provides content assist for CSS keywords.
-	 * @param {CssResultManager} resultManager The backing result manager
-	 */
-	function CssContentAssistProvider(resultManager) {
-	    this._resultManager = resultManager;
-	}
-	var templateAssist = new TemplateProvider();
-	
-	Objects.mixin(CssContentAssistProvider.prototype, {
+		computePrefix: function computePrefix(editorContext, offset) {
+			return editorContext.getText().then(function (text) {
+				return text.substring(this._getPrefixStart(text, offset), offset);
+			}.bind(this));
+		},
+		
 		/**
 		 * @private
 		 */
-		_getPrefixStart: function(text, offset) {
+		_getPrefixStart: function _getPrefixStart(text, offset) {
 			var index = offset;
 			while (index > 0) {
 				var char = text.substring(index - 1, index);
@@ -401,98 +182,265 @@ define("webtools/cssContentAssist", [
 			}
 			return index;
 		},
+		
 		/**
-		 * @callback 
-		 */
-		computePrefix: function(editorContext, offset) {
-			return editorContext.getText().then(function (text) {
-				return text.substring(this._getPrefixStart(text, offset), offset);
-			}.bind(this));
-		},
-        /**
-         * @callback
-         * @since 8.0
-         */
-        computeContentAssist: function computeContentAssist(editorContext, params) {
-            var that = this;
-            return Deferred.when(editorContext.getFileMetadata(), function(meta) {
-               if(meta.contentType.id === 'text/html') {
-                  return editorContext.getText().then(function(text) {
-                     var blocks = Util.findStyleBlocks(text, params.offset);
-                     if(blocks && blocks.length > 0) {
-                         var cu = new CU(blocks, meta);
-                         return that._computeProposals(cu.getEditorContext(), text, params);
-                     }
-                  });
-               }
-               return editorContext.getText().then(function(text) {
-                  return that._computeProposals(editorContext, text, params);
-               });
-            });
-        },
-        
-        /**
-         * @description Computes the proposals from the given offset, also returns all keyword and template proposals
-         * @since 8.0
-         * @callback
-         */
-        _computeProposals: function _computeProposals(editorContext, buffer, context) {
-            var _ctxt = this._getCompletionContext(editorContext, context);
-            if(_ctxt) {
-            	context.kind = _ctxt.value;
-            }
-            return [].concat(templateAssist.computeProposals(buffer, context.offset, context));
-        },
-        
-        /**
-         * @description Computes the kind of completion we are attempting. For example 'color: <assist>' would return 'color'
-         * @function
-         * @private
-         * @param {Object} context The completion contest from #computeProposals
-         * @returns {String} The completion context or <code>null</code>
-         * @since 8.0
-         */
-        _getCompletionContext: function _getCompletionContext(editorContext, context) {
-            if(this._resultManager) {
-            	var that = this;
-                return this._resultManager.getResult(editorContext).then(function(results) {
-                   if(results && results.ast) {
-                       var node = that.findNodeAtOffset(results.ast, context.offset);
-                       if(node && node.type === 'Rule') {
-                       		return 'rule'; //$NON-NLS-1$
-                       }
-                   }
-                   return null;
-                });
-            }
-            return null;
-        },
-        
-        /**
-		 * Returns the ast node at the given offset or the parent node enclosing it
+		 * Computes the completions from the given AST and parameter context
 		 * @param {Object} ast The AST to inspect
-		 * @param {Number} offset The offset into the source 
-		 * @returns {Object} The AST node at the given offset or null 
-		 * @since 10.0
+		 * @param {Object} params The paramter context
+		 * @returns {Array.<Object>} The array of proposal objects or an empty array, never null
 		 */
-		findNodeAtOffset: function(ast, offset) {
-			var found = null;
-			 Visitor.visit(ast, {
-	            visitNode: function(node) {
-					if(node.range[0] <= offset) {
-						found = node;
+		_computeProposalsFromAst: function _computeProposalsFromAst(ast, params) {
+			var node = Util.findCssNodeAtOffset(ast, params.offset);
+			if(node) {
+				if (this.inPropertyValue(node)){
+					return this.getPropertyValueProposals(params, node);
+				} else if (this.inProperty(node)){
+					return this.getPropertyProposals(params);
+				} else if (this.inConditionalAtRule(node)){
+					return this.getConditionalAtRuleProposals(params);
+				} else if (this.inRoot(node)){
+					return this.getRootProposals(params);
+				}
+				// TODO This allows property completions inside of @page and other at-rules
+			}
+			return [];			
+		},
+		
+		inPropertyValue: function inPropertyValue(node) {
+			if (node){
+				if (node.type === 'PropertyValue'){
+					return true;
+				}
+			}
+			return false;
+		}, 
+		
+		inProperty: function inProperty(node) {
+			if (node){
+				if (node.type === 'Property'){
+					return true;
+				}
+				if (node.type === 'Declaration'){
+					return true;
+				}
+				if (node.type === 'DeclarationBody'){
+					return true;
+				}
+			}
+			return false;
+		},
+		
+		inConditionalAtRule: function inConditionalAtRule(node) {
+			if (node){
+				if (node.type === 'MediaBody'){
+					return true;
+				}
+				if (node.type === 'SupportsBody'){
+					return true;
+				}
+			}
+			return false;
+		},
+		
+		inRoot: function inRoot(node) {
+			if (node){
+				if (node.type === 'StyleSheet'){
+					return true;
+				}
+				if (node.type === 'Selector'){
+					return true;
+				}
+			}
+			return false;
+		},
+		
+		getPropertyValueProposals: function getPropertyValueProposals(params, node) {
+			var proposals = [];
+			var nodeParent = node.parent;
+			if (nodeParent && nodeParent.property){
+				var property = nodeParent.property.text;
+				if (typeof property === 'string'){
+					var valString = CSSLint.Properties[property];
+					this._getComplexValueProposals(params, proposals, valString);
+				}
+			}
+			return proposals;
+		},
+		
+		_getComplexValueProposals: function _getComplexValueProposals(params, proposals, value){
+			if (!value || typeof value !== 'string' || value.length === 0){
+				return;
+			}
+			var namePrefix = params.prefix ? params.prefix : "";
+			
+			// Check for # or {1,4} postfix
+			var test = /^(.*)(?:\#|\{.*\})$/.exec(value);
+			if (test){
+				this._getComplexValueProposals(params, proposals, test[1]);
+			} else {
+				// Check for [ a | b ] style values
+				test = /^\[(.*)\]$/.exec(value);
+				if (test) {
+					this._getComplexValueProposals(params, proposals, test[1]);
+				} else {
+					// Check for OR'd values a | b
+					var vals = value.split(/\s*\|\s*/);
+					var val;
+					if (vals.length === 1){
+						val = vals[0].trim();
+						if (value.match(/^\<.*\>$/)){
+							// Typed value, lookup details
+							if (value === '<background-image>' || value === '<color>' || value === '<image>'){
+								// List all colors
+								var colors = Object.keys(CSSLint.Colors);
+								for (var i = 0; i < colors.length; i++) {
+									if(jsUtil.looselyMatches(namePrefix, colors[i])) {
+										// TODO Use value for documentation in hover
+										var proposal = this._makeComputedProposal(colors[i], colors[i], null, null, params.prefix);
+										proposal.tags = [{color: colors[i]}];
+										proposals.push(proposal);
+									}
+								}
+							} else {
+								// Lookup in value type table
+								var type = CSSLint.ValidationTypes.simple[value];
+								if (!type){
+									type = CSSLint.ValidationTypes.complex[value];
+								}
+								if (type && typeof type === 'string'){
+									this._getComplexValueProposals(params, proposals, type);
+								} else if (proposals.length === 0){
+									// Provide default inherit and initial proposals if we have nothing else
+									if(jsUtil.looselyMatches(namePrefix, 'inherit')) { //$NON-NLS-1$
+										proposals.push(this._makeComputedProposal('inherit', 'inherit', null, null, params.prefix)); //$NON-NLS-1$ //$NON-NLS-2$
+									}
+									if(jsUtil.looselyMatches(namePrefix, 'initial')) { //$NON-NLS-1$
+										proposals.push(this._makeComputedProposal('initial', 'initial', null, null, params.prefix)); //$NON-NLS-1$ //$NON-NLS-2$
+									}
+								}
+							}
+						} else if (jsUtil.looselyMatches(namePrefix, val)) {
+							// Actual string value, offer a proposal
+							proposal = this._makeComputedProposal(val, val, null, null, params.prefix);
+							proposals.push(proposal);
+						}
 					} else {
-					    return Visitor.BREAK;
-					}      
-	            },
-	            endVisitNode: function(node) {
-	            	if(found && offset > found.range[1] && offset > node.range[0]) {
-	            		found = node;
-	            	}
-	            }
-	        });
-	        return found;
-		}
+						// Multiple OR values, recurse over each
+						for (i = 0; i < vals.length; i++) {
+							val = vals[i].trim();
+							this._getComplexValueProposals(params, proposals, val);
+						}
+					}
+				}
+			}
+		},
+		
+		getPropertyProposals: function getPropertyProposals(params) {
+			var props = CSSLint.Properties;
+			var propKeys = Object.keys(props);
+			var proposals = [];
+			var namePrefix = params.prefix ? params.prefix : "";
+			for(var j = 0; j < propKeys.length; j++) {
+				var prop = propKeys[j];
+				if(jsUtil.looselyMatches(namePrefix, prop)) {
+					// TODO Add doc link to MDN
+					// TODO Look ahead for an existing semicolon
+					var proposal = this._makeComputedProposal(prop + ': ;', prop, null, null, params.prefix); //$NON-NLS-1$
+					proposal.escapePosition = params.offset - namePrefix.length + prop.length + 2;
+					proposals.push(proposal);
+					
+				}
+			}
+			return proposals;	
+		},
+		
+		getRootProposals: function getRootProposals(params) {
+			var proposals = [];
+			for(var i = 0; i < ruleTemplates.length; i++) {
+				var prop = this._makeTemplateProposal(params, ruleTemplates[i]);
+				if (prop){
+					proposals.push(prop);
+				}
+			}
+			for(var j = 0; j < rootAtRuleTemplates.length; j++) {
+				prop = this._makeTemplateProposal(params, rootAtRuleTemplates[j]);
+				if (prop){
+					proposals.push(prop);
+				}
+			}
+			for(var j = 0; j < nestedAtRuleTemplates.length; j++) {
+				prop = this._makeTemplateProposal(params, nestedAtRuleTemplates[j]);
+				if (prop){
+					proposals.push(prop);
+				}
+			}
+			return proposals;	
+		},
+		
+		getConditionalAtRuleProposals: function getConditionalAtRuleProposals(params) {
+			var proposals = [];
+			for(var i = 0; i < ruleTemplates.length; i++) {
+				var prop = this._makeTemplateProposal(params, ruleTemplates[i]);
+				if (prop){
+					proposals.push(prop);
+				}
+			}
+			for(var j = 0; j < nestedAtRuleTemplates.length; j++) {
+				prop = this._makeTemplateProposal(params, nestedAtRuleTemplates[j]);
+				if (prop){
+					proposals.push(prop);
+				}
+			}
+			return proposals;	
+		},
+		
+		_makeTemplateProposal: function _makeTemplateProposal(params, template){
+			var namePrefix = params.prefix ? params.prefix : "";
+			if(jsUtil.looselyMatches(namePrefix, template.prefix)) {
+				var t = new mTemplates.Template(template.prefix, template.description, template.template);
+				var prop = t.getProposal(params.prefix, params.offset, params);
+				prop.prefix = params.prefix;
+				prop.overwrite = true;
+				prop.style = 'emphasis'; //$NON-NLS-1$
+				prop.kind = 'css'; //$NON-NLS-1$
+				
+				if (template.doc || template.url){
+					var hover = Object.create(null);
+					hover.type = 'markdown'; //$NON-NLS-1$
+					hover.content = "";
+					if (template.doc){
+						hover.content += template.doc;
+					}
+					if(template.url) {
+						hover.content += i18nUtil.formatMessage(Messages['onlineDocumentation'], template.url);
+					}
+					prop.hover = hover;
+				}
+				return prop;
+			}
+		},
+		
+		/**
+		 * Factory-like function to create proposal objects
+		 * @param {String} proposal The proposal text
+		 * @param {String} name The name for the proposal
+		 * @param {String} description The description for the proposal
+		 * @param {Object} hover The markdown hover object for the proposal
+		 * @param {String} prefix The prefix for the proposal
+		 */
+		_makeComputedProposal: function _makeComputedProposal(proposal, propName, description, hover, prefix) {
+			return {
+				proposal: proposal,
+				relevance: 100,
+				name: propName,
+				description: description,
+				hover: hover,
+				prefix: prefix,
+				style: 'emphasis', //$NON-NLS-1$
+				overwrite: true,
+				kind: 'css' //$NON-NLS-1$
+		    };
+		},
 	});
 
 	return {

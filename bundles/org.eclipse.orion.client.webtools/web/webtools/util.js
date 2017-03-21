@@ -12,8 +12,9 @@
  *******************************************************************************/
 /*eslint-env amd*/
 define([
+'webtools/cssVisitor',
 'htmlparser2/visitor'
-], function(Visitor) {
+], function(CssVisitor, Visitor) {
 
 	var Util = {
 		
@@ -49,6 +50,33 @@ define([
 	            			missingTagClose = true;
 	            		}
 	            	}
+	            }
+	        });
+	        return found;
+		},
+		
+		/**
+		 * Returns the ast node at the given offset or the parent node enclosing it for a CSS ast
+		 * @param {Object} ast The AST to inspect
+		 * @param {Number} offset The offset into the source 
+		 * @returns {Object} The AST node at the given offset or null 
+		 * @since 10.0
+		 */
+		findCssNodeAtOffset: function(ast, offset) {
+			var found = null;
+			 CssVisitor.visit(ast, {
+	            visitNode: function(node) {
+					if(node.range[0] <= offset) {
+						if (node.range[1] === -1 || node.range[1] >= offset) {
+							found = node;
+						} else {
+							return Visitor.SKIP;
+						}
+					} else {
+					    return Visitor.BREAK;
+					}      
+	            },
+	            endVisitNode: function(node) {
 	            }
 	        });
 	        return found;

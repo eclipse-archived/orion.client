@@ -51,6 +51,7 @@ define([
 			//is set from project nav not via arguments
 			this.filteredResources = filteredResources;
 		}
+		this.filter = new FileFilter(this.filteredResources);
 	}
 	FileModel.prototype = new mExplorer.ExplorerModel();
 	objects.mixin(FileModel.prototype, /** @lends orion.explorer.FileModel.prototype */ {
@@ -68,8 +69,8 @@ define([
 				var filtered = [];
 				children.forEach(function(child) {
 					var exclude = child.Directory ? this.excludeFolders : this.excludeFiles;
-					if(this.filteredResources) {
-						exclude = exclude || this.filteredResources[child.Name];
+					if(this.filteredResources && this.filter) {
+						exclude = exclude || this.filter.isFiltered(child.Name);
 					}
 					if (!exclude) {
 						filtered.push(child);
@@ -154,6 +155,62 @@ define([
 	});
 
 	FileModel.prototype.constructor = FileModel;
+
+	/**
+	 * String matcher used by FileModel
+	 * @param {string[]} filteredResources - file names or patterns to filter, where a pattern may contain:
+	 * 										 	* to match one or more characters in a path segment
+	 * 											? to match on one character in a path segment
+	 */
+	function FileFilter(filteredResources) {
+		this._fileRegex = [];
+		this._fileLookup = {};
+		this._create(filteredResources);
+	}
+	
+	objects.mixin(FileFilter.prototype, /** @lends orion.explorer.FileFilter.prototype */ {
+		_create: function(filteredResources) {
+			if (filteredResources) {
+				Object.keys(filteredResources).forEach(function(resourceName) {
+					if (this._isExpression(resourceName)) {
+						this._fileRegex.push(this._buildExpression(resourceName));
+					} else {
+						this._fileLookup[resourceName] = true;
+					}
+				}.bind(this));
+			}
+		},
+		_isExpression: function(fileFilter) {
+			if (fileFilter) {
+				return fileFilter.includes("*") || fileFilter.includes("?");
+			}
+			return false;
+		},
+		_buildExpression: function(fileFilter) {
+			// Escape all regular expression characters except for * and .
+			var escaped = fileFilter.replace(/[\-\[\]\/\{\}\(\)\+\.\\\^\$\|\,\#]/g, "\\$&");
+			// Replace * with .*
+			escaped = escaped.replace(/\*/g, ".+");
+			// Replace ? with .
+			escaped = escaped.replace(/\?/g, ".");
+			// Add ^ and $ to the string
+			return new RegExp("^" + escaped + "$");
+		},
+		_isFilteredByRegex: function(fileName) {
+			for (var i=0; i<this._fileRegex.length; i++) {
+				if (this._fileRegex[i].test(fileName)) {
+					return true;
+				}
+			}
+			return false;
+		},
+		isFiltered: function(fileName) {
+			if (this._fileLookup.hasOwnProperty(fileName)) {
+				return true;
+			}
+			return this._isFilteredByRegex(fileName);
+		}
+	});
 
 
 	/**
@@ -298,7 +355,7 @@ define([
 			// Special case in electron, or when create file at root enabled.
 			// Need to find the workspace element to create file at workspace level.
 			if (loc === "/file") {
-				if (util.isElection || this._isFileCreationAtRootEnabled()) {
+				if (util.isElectron || this._isFileCreationAtRootEnabled()) {
 					elementNode = this.model.root;
 				}
 			} else {
@@ -1396,6 +1453,7 @@ define([
 	//return module exports
 	return {
 		FileExplorer: FileExplorer,
-		FileModel: FileModel
+		FileModel: FileModel,
+		FileFilter: FileFilter,
 	};
 });
