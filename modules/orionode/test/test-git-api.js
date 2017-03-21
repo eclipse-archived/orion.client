@@ -1073,7 +1073,7 @@ maybeDescribe("git", function() {
 				client.stage(name);
 				client.commit();
 
-				return client.start().then(function(commit) {
+				client.start().then(function(commit) {
 					initial = commit.Id;
 
 					var client = new GitClient("merge-conflicts");
@@ -1148,7 +1148,7 @@ maybeDescribe("git", function() {
 				client.stage(name);
 				client.commit();
 
-				return client.start().then(function(commit) {
+				client.start().then(function(commit) {
 					initial = commit.Id;
 					// set file to content B
 					client.setFileContents(name, "B");
@@ -1198,7 +1198,7 @@ maybeDescribe("git", function() {
 				client.commit();
 				// compare master with the created branch
 				client.compare("refs/heads/master", "refs/heads/other");
-				return client.start().then(function() {
+				client.start().then(function() {
 					finished();
 				})
 				.catch(function(err) {
@@ -1220,7 +1220,7 @@ maybeDescribe("git", function() {
 				// there's a commit already, create a branch here
 				client.createBranch("a%b");
 				client.log("a%b");
-				return client.start().then(function() {
+				client.start().then(function() {
 					finished();
 				})
 				.catch(function(err) {
@@ -1244,7 +1244,7 @@ maybeDescribe("git", function() {
 				client.deleteBranch("a%b");
 				// list branches to verify deletion
 				client.listBranches();
-				return client.start().then(function(children) {
+				client.start().then(function(children) {
 					// only one branch, the master branch
 					assert.equal(children.length, 1);
 					assert.equal(children[0].FullName, "refs/heads/master");
@@ -1405,7 +1405,7 @@ maybeDescribe("git", function() {
 				client.createFile("/", "a%b.txt");
 				client.stage("a%b.txt");
 				client.status("SAFE");
-				return client.start().then(function(index) {
+				client.start().then(function(index) {
 					assert.equal(index.Added.length, 1);
 					assert.equal(index.Added[0].Name, "a%b.txt");
 					assert.equal(index.Added[0].Path, "a%b.txt");
@@ -1445,7 +1445,7 @@ maybeDescribe("git", function() {
 				// tests > /a%b.txt
 				client.createFile("/", "a%b.txt");
 				client.status("SAFE");
-				return client.start().then(function(status) {
+				client.start().then(function(status) {
 					var git = status.Untracked[0].Git;
 					assert.equal(git.CommitLocation,
 						"/gitapi/commit/HEAD/file/bug512061/" + util.encodeURIComponent("a%b.txt"));
@@ -1503,7 +1503,7 @@ maybeDescribe("git", function() {
 				// init a new Git repository
 				client.init();
 				client.stashPop(400);
-				return client.start().then(function(body) {
+				client.start().then(function(body) {
 					assert.equal('Failed to apply stashed changes due to an empty stash.', body.Message);
 					finished();
 				})
@@ -1538,7 +1538,7 @@ maybeDescribe("git", function() {
 		before(setupRepo);
 
 		it("gets repo config", function(done) {
-			return repoConfig()
+			repoConfig()
 			.expect(200)
 			.expect(function(res) {
 				assert.equal(res.body.Type, "Config", "Is a config");
@@ -1547,7 +1547,7 @@ maybeDescribe("git", function() {
 			.end(done);
 		});
 		it("gets key", function(done) {
-			return repoConfig()
+			repoConfig()
 			.end(function(err, res) {
 				assert.ifError(err);
 				// Ensure we can GET a child's Location to retrieve it individually
@@ -1563,7 +1563,7 @@ maybeDescribe("git", function() {
 			});
 		});
 		it("updates key", function(done) {
-			return repoConfig()
+			repoConfig()
 			.end(function(err, res) {
 				assert.ifError(err);
 				// Find the core.filemode config and toggle it

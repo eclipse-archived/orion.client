@@ -14,7 +14,7 @@ var chai = require('chai'),
     nodePath = require('path'),
     PrefsController = require('../lib/controllers/prefs').router,
     Promise = require('bluebird'),
-    supertestAsPromised = require('supertest-as-promised'),
+    supertest = require('supertest'),
     testData = require('./support/test_data');
 
 var expect = chai.expect,
@@ -48,16 +48,16 @@ app.use(/* @callback */ function(req, res, next) {
 	ttl: 50, // flush after 50 ms
 }));
 
-var request = supertestAsPromised.bind(null, app);
+var request = supertest.bind(null, app);
 
 function setupWorkspace(done) {
-	return Promise.fromCallback(testData.setUp.bind(null, WORKSPACE_DIR))
+	Promise.fromCallback(testData.setUp.bind(null, WORKSPACE_DIR))
 	.asCallback(done);
 }
 
 function setupPrefs(done) {
 	var path = nodePath.join(WORKSPACE_DIR, '.orion', PrefsController.PREF_FILENAME);
-	return mkdirpAsync(nodePath.dirname(path))
+	mkdirpAsync(nodePath.dirname(path))
 	.then(() => fs.writeFileAsync(path, JSON.stringify(samplePrefData)))
 	.asCallback(done);
 }
