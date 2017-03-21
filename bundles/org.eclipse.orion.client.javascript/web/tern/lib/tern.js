@@ -802,7 +802,7 @@
       if (objType) infer.forAllPropertiesOf(objType, gather);
 
       if (!completions.length && query.guess !== false && objType && objType.guessProperties)
-        objType.guessProperties(function(p, o, d) {if (p != prop && p != "✖") gather(p, o, d);});
+        objType.guessProperties(function(p, o, d) {if (p != prop && p != "✖" && p != "<i>") gather(p, o, d);});
       if (!completions.length && word.length >= 2 && query.guess !== false) {
       	Object.keys(srv.cx.props).forEach(function(prop) {
       		srv.cx.props[prop].forEach(function(type) {
