@@ -385,7 +385,7 @@ define([
 			var themeSettingsNode = document.createElement('div');
 			this.table.appendChild(themeSettingsNode);
 			
-			var containerTheme = new containerThemeData.ThemeData();
+			var containerTheme = new containerThemeData.ThemeData(this.registry);
 			var themePreferences = new mThemePreferences.ThemePreferences(this.preferences, containerTheme);
 			var previewWidget = new ContainerWidget();
 			var scopeList = ContainerScopeList;

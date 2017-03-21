@@ -264,7 +264,7 @@ define([
 
             var bgColor = getBackgroundColor(dictKey, dictString);
             var useDarkBase = calculateLuminance(bgColor) < luminanceDarkLimit;
-            var newStyle = themeData.getDefaultTheme({dark: useDarkBase});
+            var newStyle = themeData.getBaseTheme({dark: useDarkBase});
 
             //finds the general attributes
             for (var i = 0; i < dictKey.length; i++) {
@@ -603,7 +603,7 @@ define([
             var bgColor = getBackgroundColor(rules);
             /* use a dark base theme if luminance is low (the theme being imported is dark) */
             var useDarkBase = calculateLuminance(bgColor) < luminanceDarkLimit;
-            var newStyle = themeData.getDefaultTheme({dark: useDarkBase});
+            var newStyle = themeData.getBaseTheme({dark: useDarkBase});
 
             var activelineBgString = "-activeline-background",
                 atomString = "-atom",
@@ -765,7 +765,7 @@ define([
         function importEclipseTheme(xml) {
             /* use a dark base theme if luminance is low (the theme being imported is dark) */
             var useDarkBase = calculateLuminance(getValuesFromXML(xml, "background")) < luminanceDarkLimit;
-            var newStyle = themeData.getDefaultTheme({dark: useDarkBase});
+            var newStyle = themeData.getBaseTheme({dark: useDarkBase});
 
             var styles = newStyle.styles;
 
@@ -939,4 +939,4 @@ define([
             ThemeImporter:ThemeImporter
         };
     }
-);
+);
