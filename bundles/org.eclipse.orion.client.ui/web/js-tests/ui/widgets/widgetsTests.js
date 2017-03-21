@@ -80,16 +80,18 @@ define([
 				it("Should return 2 default style strings", function() {
 					var expected, actual;
 					expected = 2;
-					actual = themeData.getStyles();
-					assert.isArray(actual);
-					assert.equal(actual.length, expected);
+					themeData.getStyles().then(function(actual) {
+						assert.isArray(actual);
+						assert.equal(actual.length, expected);						
+					});
 				});
 				it("Should return protected themes", function() {
 					var expected, actual;
 					expected = 2;
-					actual = themeData.getProtectedThemes();
-					assert.isArray(actual);
-					assert.equal(actual.length, expected);
+					themeData.getProtectedThemes().then(function(actual) {
+						assert.isArray(actual);
+						assert.equal(actual.length, expected);
+					});
 				});
 			}),
 			describe("Theme Sheet Writer Tests", function() {
