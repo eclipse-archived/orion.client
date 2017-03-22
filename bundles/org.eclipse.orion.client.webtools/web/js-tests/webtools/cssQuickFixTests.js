@@ -191,6 +191,26 @@ define([
 		                      rule: rule,
 		                      expected: expected});
 		});
+		
+		it("Test empty-rules - multiple selectors", function() {
+		    var rule = createTestRule('empty-rules');
+		    var expected = {value: "",
+		                    start: 0,
+		                    end: 25};
+		    return getFixes({buffer: '\truleA, \truleB, \truleC {}\n',
+		                      rule: rule,
+		                      expected: expected});
+		});
+		
+		it("Test empty-rules - multiple selectors multiple lines", function() {
+		    var rule = createTestRule('empty-rules');
+		    var expected = {value: "",
+		                    start: 0,
+		                    end: 25};
+		    return getFixes({buffer: '\truleA,\n\truleB,\n\truleC {}\n',
+		                      rule: rule,
+		                      expected: expected});
+		});
 
 		it("Test important - single line", function() {
 		    var rule = createTestRule('important');

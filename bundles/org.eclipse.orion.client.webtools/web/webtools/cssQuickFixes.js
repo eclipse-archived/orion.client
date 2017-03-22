@@ -43,11 +43,11 @@ define([
 			return editorContext.getText().then(function(text) {
 				// Remove leading space
 				var start = annotation.start;
-				while (start >= 0 && (text[start-1] === ' ' || text[start-1] === '\t')){ //$NON-NLS-0$ //$NON-NLS-1$
+				while (start >= 0 && /\s/.test(text[start-1])){
 					start--;
 				}
 				var contents = text.substring(annotation.start);
-				contents = contents.match(/.*{\s*}\s*/,''); //$NON-NLS-0$
+				contents = contents.match(/^[^{]*{\s*}\s*/,''); //$NON-NLS-0$
 				if (contents){
 					return editorContext.setText("", start, start+contents[0].length);
 				}
