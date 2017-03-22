@@ -29,8 +29,8 @@ new_release() {
 	github-release release --user "${GITHUB_USER}" --repo "${GITHUB_REPO}" --tag v"${pkg_version}${RELEASE_CHANNEL}" --name v"${pkg_version}${RELEASE_CHANNEL}" --description "${RELEASE_DESCRIPTION}"
 }
 
-nofile(str) {
-	echo "File "
+nofile() {
+	echo "File not found: "$1
 	exit 1
 }
 
