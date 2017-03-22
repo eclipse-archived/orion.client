@@ -13,7 +13,7 @@ if [ -z "$RELEASE_CHANNEL" ]; then
 	RELEASE_CHANNEL="-alpha"
 fi
 
-name=$(jsawk -i package.json 'return this.version')
+name=$(jsawk -i package.json 'return this.name')
 pkg_version=$(jsawk -i package.json 'return this.version')
 
 # upload a file under the specified github release
@@ -30,7 +30,7 @@ new_release() {
 }
 
 nofile() {
-	echo "File not found: "$1
+	echo "File not found"
 	exit 1
 }
 
