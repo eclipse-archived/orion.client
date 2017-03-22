@@ -9,7 +9,7 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 /*eslint-env node */
-var api = require('../api'), writeError = api.writeError;
+var api = require('../api'), writeError = api.writeError, writeResponse = api.writeResponse;
 var git = require('nodegit');
 var mCommit = require('./commit');
 var clone = require('./clone');
@@ -65,7 +65,7 @@ function getStash(req, res) {
 		return Promise.all(stashesPromises);
 	})
 	.then(function(stashes) {
-		res.status(200).json({
+		writeResponse(200, res, null, {
 			"Children" : stashes,
 			"Location" : gitRoot + "/stash" + fileDir,
 			"CloneLocation" : gitRoot + "/clone" + fileDir,

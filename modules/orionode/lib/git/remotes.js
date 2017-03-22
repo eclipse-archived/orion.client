@@ -9,7 +9,7 @@
  *	 IBM Corporation - initial API and implementation
  *******************************************************************************/
 /*eslint-env node */
-var api = require('../api'), writeError = api.writeError;
+var api = require('../api'), writeError = api.writeError, writeResponse = api.writeResponse;
 var args = require('../args');
 var async = require('async');
 var git = require('nodegit');
@@ -107,7 +107,7 @@ function getRemotes(req, res) {
 					cb();
 				});
 			}, function() {
-				res.status(200).json({
+				writeResponse(200, res, null, {
 					"Children": r,
 					"Type": "Remote"
 				});
@@ -152,7 +152,7 @@ function getRemotes(req, res) {
 					if (err) {
 						return writeError(403, res);
 					}
-					res.status(200).json(remoteJSON(theRemote, fileDir, branches));
+					writeResponse(200, res, null, remoteJSON(theRemote, fileDir, branches));
 				});
 			});
 		});
@@ -175,7 +175,7 @@ function getRemotes(req, res) {
 			return theRepo.getBranchCommit(branch);
 		})
 		.then(function(commit) {
-			res.status(200).json(remoteBranchJSON(theBranch, commit, theRemote, fileDir));
+			writeResponse(200, res, null, remoteBranchJSON(theBranch, commit, theRemote, fileDir));
 		})
 		.catch(function() {
 			return writeError(403, res);
@@ -201,7 +201,7 @@ function addRemote(req, res) {
 		var remoteName = remote ? remote.name() : req.body.Remote;
 		var configFile = api.join(repo.path(), "config");
 		function done () {
-			res.status(201).json({
+			writeResponse(201, res, null, {
 				"Location": gitRoot + "/remote/" + util.encodeURIComponent(remoteName) + fileDir
 			});
 		}

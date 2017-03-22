@@ -11,9 +11,8 @@
 /*eslint-env node*/
 var express = require('express');
 var bodyParser = require('body-parser');
-var api = require('./api');
+var api = require('./api'), writeError = api.writeError, writeResponse = api.writeResponse;
 var crypto = require('crypto');
-var writeError = api.writeError;
 
 var MS_EXPIRATION = 86400 * 1000 * 7; /* 7 days */  // TODO should be settable per task by client
 
@@ -182,7 +181,7 @@ function orionTasksAPI(options) {
 			if (!task || task.username !== req.user.username) {
 				return writeError(404, res);
 			}
-			res.json(toJSON(task, true));
+			writeResponse(200, res, null, toJSON(task, true));
 		});
 	})
 	.delete('', deleteAllOperations)
@@ -195,12 +194,12 @@ function orionTasksAPI(options) {
 			if (!task || task.username !== req.user.username) {
 				return writeError(404, res);
 			}
-			res.json(toJSON(task, false));
+			writeResponse(200, res, null, toJSON(task, false));
 		});
 	})
 	.delete('/temp/:id', deleteOperation)
 	.get('/count', function(req, res/*, next*/) {
-		res.json({"count": taskCount});
+		writeResponse(200, res, null, {"count": taskCount});
 	});
 }
 
@@ -326,7 +325,7 @@ function deleteOperation(req, res/*, next*/) {
 			if (err) {
 				return writeError(500, res, err.toString());
 			}
-			res.status(200).json({});
+			writeResponse(200, res, null, {});
 		});
 	});
 }
@@ -343,7 +342,7 @@ function deleteAllOperations(req, res) {
 		var doneCount = 0;
 		var done = function() {
 			if (!tasks.length || ++doneCount === tasks.length) {
-				res.status(200).json(locations);
+				writeResponse(200, res, null, locations);
 			}
 		};
 		if (!tasks.length) {

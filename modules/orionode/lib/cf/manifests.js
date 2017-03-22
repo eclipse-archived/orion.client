@@ -11,7 +11,7 @@
 /*eslint-env node, express, body-parser*/
 var express = require("express");
 var bodyParser = require("body-parser");
-var api = require("../api"), writeError = api.writeError;
+var api = require("../api"), writeError = api.writeError, writeResponse = api.writeResponse;
 var fs = require("fs");
 var path = require("path");
 var yaml = require("js-yaml");
@@ -39,7 +39,7 @@ function getManifests(req, res){
 			"Contents": manifest,
 			"Type": "Manifest"
 		};
-		res.status(200).json(respond);			
+		writeResponse(200, res, null, respond);			
 	}).catch(function(err){
 		var task = new tasks.Task(res, false, false, 0, false);
 		target.caughtErrorHandler(task, err);

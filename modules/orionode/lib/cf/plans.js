@@ -14,7 +14,7 @@ var bodyParser = require("body-parser");
 var fs = require("fs");
 var path = require("path");
 var manifests = require("./manifests");
-var api = require("../api"), writeError = api.writeError;
+var api = require("../api"), writeError = api.writeError, writeResponse = api.writeResponse;
 
 module.exports.router = function(options) {
 	var fileRoot = options.fileRoot;
@@ -86,7 +86,7 @@ function getplans(req, res){
 		}
 		generatePlansforManifest();
 		var result =  {"Children": children};
-		res.status(200).json(result);
+		writeResponse(200, res, null, result);
 	}).catch(function(err){
 		writeError(404, res, err.message);
 	});
