@@ -2,7 +2,7 @@
 #
 #  Env vars:
 #
-#   BUILD_ID - the build id
+#   BUILD_ID - the build id (optional)
 #   BUILD_NUMBER - the micro version number to update package.json (optional)
 #   UPDATE_SERVER - site running the nuts update server (optional)
 #   NODEGIT_DIR - directory with nodegit binaries. Used when building all platforms in one machine. (optional)
@@ -39,8 +39,10 @@ update_config_files() {
 	sed -i.bak -E '/(passport*|mongoose|mongodb|nodemailer|connect-mongo)/d' package.json
 	
 	# update build id
-	sed -i.bak "s/orion\.buildId\=/orion\.buildId\=electron ${BUILD_ID}/" orion.conf
-	sed -i.bak "s/var BUILD_ID \= \"unknown\"\;/var BUILD_ID \= \"electron ${BUILD_ID}\"\;/" lib/version.js
+	if [ ! -z "$BUILD_ID" ]; then
+		sed -i.bak "s/orion\.buildId\=/orion\.buildId\=${BUILD_ID}/" orion.conf
+		sed -i.bak "s/var BUILD_ID \= \"unknown\"\;/var BUILD_ID \= \"${BUILD_ID}\"\;/" lib/version.js
+	fi
 	
 	# update build version
 	if [ ! -z "$BUILD_NUMBER" ]; then

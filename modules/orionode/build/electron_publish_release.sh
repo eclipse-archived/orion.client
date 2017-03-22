@@ -21,12 +21,13 @@ pkg_version=$(jsawk -i package.json 'return this.version')
 # upload a file under the specified github release
 # $1: file name/path
 upload () {
-	echo $1
+	echo Uploading $1
 	github-release upload --user "${GITHUB_USER}" --repo "${GITHUB_REPO}" --tag v"${pkg_version}${RELEASE_CHANNEL}" --name $1 --file $1
 }
 
 # create a new release
 new_release() {
+	echo Creating release v"${pkg_version}${RELEASE_CHANNEL}"
 	github-release release --user "${GITHUB_USER}" --repo "${GITHUB_REPO}" --tag v"${pkg_version}${RELEASE_CHANNEL}" --name v"${pkg_version}${RELEASE_CHANNEL}" --description "${RELEASE_DESCRIPTION}"
 }
 
@@ -35,6 +36,14 @@ checkfile() {
 		echo "File not found: "$1
 		exit 1
 	fi
+}
+
+pushd () {
+    command pushd "$@" > /dev/null
+}
+
+popd () {
+    command popd "$@" > /dev/null
 }
 
 checkfile "dist/linux/${name}-${pkg_version}.deb"
