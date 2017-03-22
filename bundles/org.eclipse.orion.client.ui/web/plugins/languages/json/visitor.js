@@ -24,14 +24,12 @@ define([
          * @param {?} callback The visitor callback 
          */
         visit: function visit(ast, callback) {
-            if(Array.isArray(ast) && callback && typeof callback.visitNode === 'function') {
-                for(var i = 0; i < ast.length; i++) {
-                    var ret = visitNode(callback, ast[i], null);
-                    endVisitNode(callback, ast[i]);
-                    if(ret === this.BREAK) {
-                        return;
-                    }
-                }    
+            if(ast && callback && typeof callback.visitNode === 'function') {
+                var ret = visitNode(callback, ast, null);
+                endVisitNode(callback, ast);
+                if(ret === this.BREAK) {
+                    return;
+                }
             }
         },
         
@@ -44,6 +42,9 @@ define([
          * @returns {?|null} Returns the node at the given location or null if there is no node at the given offset
          */
         findNodeAtOffset: function findNodeAtOffset(ast, offset) {
+        	if(!ast) {
+        		return null;
+        	}
 			var _n;
 			this.visit(ast, {
 				visitNode: function(node) {
