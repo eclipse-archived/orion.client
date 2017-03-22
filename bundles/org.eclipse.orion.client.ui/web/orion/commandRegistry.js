@@ -289,7 +289,7 @@ define([
 						button.className = "dismissButton";
 						return button;
 					});
-					return buttons[0];
+					return input ? input : buttons[0];
 				};
 				this._parameterCollector.close();
 				if(!node){

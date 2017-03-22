@@ -95,6 +95,7 @@ define({
 	"Dependency": "Dependency",
 	"UnnamedCommand": "Unnamed",
 	"Search": "Search...",
+	"Bookmark Search": "Bookmarks",
 	"ClickEditLabel": "Click to edit",
 	"ProjectInfo": "Project Information",
 	"Name": "Name",
@@ -116,5 +117,6 @@ define({
 	"No":"No",
 	"selectNextTab": "Select Next Editor Tab",
 	"selectPreviousTab": "Select Previous Editor Tab",
-	"showTabDropdown": "Display Open Editor Tabs"	
+	"showTabDropdown": "Display Open Editor Tabs",
+	"Enterbookmarks":"Enter the bookmark"
 });

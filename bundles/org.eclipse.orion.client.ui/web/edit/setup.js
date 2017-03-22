@@ -36,6 +36,7 @@ define([
 	'orion/operationsClient',
 	'orion/outliner',
 	'orion/dialogs',
+	'orion/bookmarkManager',
 	'orion/extensionCommands',
 	'orion/projectCommands',
 	'orion/searchClient',
@@ -59,7 +60,7 @@ define([
 	messages, Sidebar, mInputManager, mCommands, mGlobalCommands,
 	mTextModelFactory, mUndoStack,
 	mFolderView, mEditorView, mPluginEditorView , mMarkdownView, mMarkdownEditor,
-	mCommandRegistry, mContentTypes, mFileClient, mFileCommands, mEditorCommands, mSelection, mStatus, mProgress, mOperationsClient, mOutliner, mDialogs, mExtensionCommands, ProjectCommands, mSearchClient,
+	mCommandRegistry, mContentTypes, mFileClient, mFileCommands, mEditorCommands, mSelection, mStatus, mProgress, mOperationsClient, mOutliner, mDialogs, mBookmarkManager, mExtensionCommands, ProjectCommands, mSearchClient,
 	EventTarget, URITemplate, i18nUtil, PageUtil, util, objects, lib, Deferred, mProjectClient, mSplitter, mTooltip, bidiUtils, mCustomGlobalCommands, mGeneralPrefs, mBreadcrumbs, mKeyBinding
 ) {
 
@@ -1088,6 +1089,18 @@ objects.mixin(EditorViewer.prototype, {
 			this.currentEditorView = view;
 			if (this.currentEditorView) {
 				this.currentEditorView.create();
+			}
+		}
+		if(this.currentEditorView.editor){
+			if(this.currentEditorView.editor.id === "orion.editor.markdown" || !this.editorBookmarkManagerCreated){
+				new mBookmarkManager.BookmarkManager({
+					inputManager : this.inputManager,
+					commandRegistry:  this.commandRegistry,
+					editor: this.currentEditorView.editor
+				});
+				if(this.currentEditorView.editor.id === "orion.editor"){
+					this.editorBookmarkManagerCreated = true;
+				}
 			}
 		}
 		this.pool.lastMetadata = metadata;

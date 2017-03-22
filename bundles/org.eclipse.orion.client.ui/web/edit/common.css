@@ -14,6 +14,8 @@
 
 @import "../orion/problems/problemsView.css";
 
+@import "../orion/bookmarkSearch/BookmarkSearchPane.css";
+
 @import "../css/theme.css";
 
 .outlinerWrapper {
