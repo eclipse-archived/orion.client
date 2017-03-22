@@ -665,8 +665,8 @@
                     }
                 }
             },
-            onError: function (error) {
-                errors.push({ error: error });
+            onError: function (error, offset, lngth) {
+                errors.push({ error: error, offset: offset, length: lngth });
             }
         };
         visit(text, visitor, options);
