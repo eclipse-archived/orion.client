@@ -30,6 +30,7 @@ fi
 # update orion.conf and package.json
 update_config_files() {
 	# determine build versions
+	name=$(jsawk -i package.json 'return this.name')
 	electron_version=$(jsawk -i package.json 'return this.build.electronVersion')
 	nodegit_version=$(jsawk -i package.json 'return this.dependencies.nodegit')
 	pkg_version=$(jsawk -i package.json 'return this.version')
@@ -99,7 +100,7 @@ if [ -f "$nodegit_lib" ]; then
 	cp $nodegit_lib ./node_modules/nodegit/build/Release
 fi
 npm run dist:win
-mv dist/win/"${name} Setup ${pkg_version}.exe" dist/win/"${name}-${pkg_version}-setup.exe"
+mv "dist/win/${name} Setup ${pkg_version}.exe" "dist/win/${name}-${pkg_version}-setup.exe"
 
 # Build linux packages, etc
 nodegit_lib=${NODEGIT_DIR}/v${nodegit_version}/electron/v${electron_version}/linux/nodegit.node
@@ -107,4 +108,4 @@ if [ -f "$nodegit_lib" ]; then
 	cp $nodegit_lib ./node_modules/nodegit/build/Release
 fi
 npm run dist:linux
-mv "dist/Orion-${pkg_version}.deb" "dist/Orion-${pkg_version}.rpm" "dist/Orion-${pkg_version}.tar.gz" dist/linux/
+mv "dist/${name}-${pkg_version}.deb" "dist/${name}-${pkg_version}.rpm" "dist/${name}-${pkg_version}.tar.gz" dist/linux/
