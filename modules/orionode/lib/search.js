@@ -50,7 +50,7 @@ module.exports = function(options) {
 	.get('*', function(req, res) {
 		search(req.originalUrl, req.user.workspaceDir, req.contextPath)
 		.then(function(result) {
-			res.json(result);
+			api.writeResponse(200, res, null, result);
 		})
 		.catch (function(err) {
 			api.writeError(400, res, err);

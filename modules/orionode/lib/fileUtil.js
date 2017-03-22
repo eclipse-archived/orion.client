@@ -300,8 +300,7 @@ var writeFileMetadata = exports.writeFileMetadata = function(fileRoot, req, res,
 			result.ETag = etag;
 			res.setHeader('ETag', etag);
 		}
-		res.setHeader("Cache-Control", "no-cache");
-		api.write(null, res, null, result);
+		api.writeResponse(null, res, null, result, true, true);
 	})
 	.catch(api.writeError.bind(null, 500, res));
 };
@@ -381,7 +380,7 @@ exports.handleFilePOST = function(gitRoot, fileRoot, req, res, destFilepath, met
 		var xCreateOptions = (req.headers['x-create-options'] || "").split(",");
 		var isCopy = xCreateOptions.indexOf('copy') !== -1, isMove = xCreateOptions.indexOf('move') !== -1;
 		if (isCopy && isMove) {
-			return api.write(400, res, null, 'Illegal combination of X-Create-Options.');
+			return api.writeResponse(400, res, null, 'Illegal combination of X-Create-Options.', true);
 		}
 		if (xCreateOptions.indexOf('no-overwrite') !== -1 && destExists) {
 			return api.writeError(412, res, new Error('A file or folder with the same name already exists at this location.'));

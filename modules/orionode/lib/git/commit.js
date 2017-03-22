@@ -9,7 +9,7 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 /*eslint-env node */
-var api = require('../api'), writeError = api.writeError;
+var api = require('../api'), writeError = api.writeError, writeResponse = api.writeResponse;
 var path = require('path');
 var diff = require("./diff");
 var mTags = require("./tags");
@@ -101,7 +101,7 @@ function getCommitLog(req, res) {
 		return false;
 	}
 	var commits = []	, repo;
-	function writeResponse(over) {
+	function sendResponse(over) {
 		var refs = scope.split("..");
 		var toRef, fromRef; 
 		if(refs.length === 1){
@@ -246,7 +246,7 @@ function getCommitLog(req, res) {
 			return revWalk.next()
 			.then(function(oid) {
 				if (!oid) {
-					writeResponse(true);
+					sendResponse(true);
 					return;
 				}
 				return repo.getCommit(oid)
@@ -259,7 +259,7 @@ function getCommitLog(req, res) {
 						.then(function(stuff) {
 							commits.push(commitJSON(commit, fileDir, stuff[0], stuff[1]));
 							if (pageSize && commits.length === pageSize) {//page done
-								writeResponse();
+								sendResponse();
 								return;
 							}
 							walk();
@@ -270,7 +270,7 @@ function getCommitLog(req, res) {
 			})
 			.catch(function(error) {
 				if (error.errno === git.Error.CODE.ITEROVER) {
-					writeResponse(true);
+					sendResponse(true);
 				} else {
 					task.done({
 						HttpCode: 404,
@@ -296,7 +296,7 @@ function getCommitLog(req, res) {
 						// client trying to skip more commits than that which affects the specified file,
 						// respond that we're done and there is nothing left
 						if (skipCount >= fileCommits.length) {
-							writeResponse(true);
+							sendResponse(true);
 							return;
 						}
 
@@ -337,7 +337,7 @@ function getCommitLog(req, res) {
 								if (idx === fullCommits.length - 1) {
 									// we're at the end, stop iterating
 									// and write the response
-									writeResponse(done);
+									sendResponse(done);
 									return;
 								}
 								processCommits(fullCommits, idx + 1);
@@ -390,7 +390,7 @@ function getCommitLog(req, res) {
 				if(mergeBaseCommitOid){
 					log(repo, mergeBaseCommitOid.tostrS());
 				} else {
-					writeResponse(true);
+					sendResponse(true);
 				}
 			});
 		} else {
@@ -558,9 +558,7 @@ function getCommitBody(req, res) {
 	})
 	.then(function(blob) {
 		var resp = blob.toString();
-		res.setHeader('Content-Type', 'application/octect-stream');
-		res.setHeader('Content-Length', resp.length);
-		res.status(200).end(resp);
+		writeResponse(200, res, {'Content-Type':'application/octect-stream','Content-Length': resp.length}, resp, null, true);
 	}).catch(function(err) {
 		writeError(404, res, err.message);
 	});
@@ -572,7 +570,7 @@ function identifyNewCommitResource(req, res, newCommit) {
 	var contextPathSegCount = req.contextPath.split("/").length - 1;
 	segments[3 + contextPathSegCount] = segments[3 + contextPathSegCount] + ".." + util.encodeURIComponent(newCommit);
 	var location = url.format({pathname: segments.join("/"), query: originalUrl.query});
-	res.status(200).json({
+	writeResponse(200, res, null, {
 		"Location": location
 	});
 }
@@ -598,7 +596,7 @@ function revert(req, res, commitToRevert) {
 		return theRepo.stateCleanup();
 	})
 	.then(function() {
-		res.status(200).json({
+		writeResponse(200, res, null, {
 			"Result": theRC ? "FAILURE" : "OK"
 		});
 	})
@@ -639,7 +637,7 @@ function cherryPick(req, res, commitToCherrypick) {
 		return git.Reference.nameToId(theRepo, "HEAD");
 	})
 	.then(function(newHead) {
-		res.status(200).json({
+		writeResponse(200, res, null, {
 			"Result": theRC ? "FAILED" : "OK",
 			"HeadUpdated": !theRC && theHead !== newHead
 		});
@@ -651,7 +649,7 @@ function cherryPick(req, res, commitToCherrypick) {
 	})
 	.catch(function(err) {
 		if(err.message.indexOf("Cannot create a tree") !== -1){
-			res.status(200).json({
+			writeResponse(200, res, null, {
 				"HeadUpdated": true,
 				"Result": "CONFLICTING"
 			});
@@ -739,7 +737,7 @@ function rebase(req, res, commitToRebase, rebaseOperation) {
 		} else if (rebaseOperation === "ABORT") {
 			rebaseResult = "ABORTED";
 		}
-		res.status(200).json({
+		writeResponse(200, res, null, {
 			"Result": rebaseResult
 		});
 	})
@@ -793,7 +791,7 @@ function merge(req, res, branchToMerge, squash) {
 		if (oid && oid.toString() === head.id().toString()) mergeResult = "ALREADY_UP_TO_DATE";
 		else if (oid && oid.toString() === commit.id().toString()) mergeResult = "FAST_FORWARD";
 		else if (conflicting) mergeResult = "CONFLICTING";
-		res.status(200).json({
+		writeResponse(200, res, null, {
 			"Result": mergeResult,
 			"FailingPaths": paths
 		});
@@ -955,7 +953,7 @@ function tag(req, res, commitId, name, isAnnotated, message) {
 		writeError(403, res, err.message);
 	})
 	.done(function() {
-		res.status(200).json(commitJSON(thisCommit, fileDir, theDiffs, theParents));
+		writeResponse(200, res, null, commitJSON(thisCommit, fileDir, theDiffs, theParents));
 	});
 }
 
@@ -1026,11 +1024,11 @@ function postCommit(req, res) {
 		return getCommitParents(theRepo, thisCommit, fileDir);
 	})
 	.then(function(parents){
-		res.status(200).json(commitJSON(thisCommit, fileDir, theDiffs, parents));
+		writeResponse(200, res, null, commitJSON(thisCommit, fileDir, theDiffs, parents));
 	})
 	.catch(function(err) {
 		writeError(403, res, err.message);
-	})
+	});
 }
 
 function generateChangeId(oid, firstParentId, authorId, committerId, message){

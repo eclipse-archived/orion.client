@@ -9,7 +9,7 @@
  * IBM Corporation - initial API and implementation
  *******************************************************************************/
 /*eslint-env node */
-var api = require('./api'), writeError = api.writeError;
+var api = require('./api'), writeError = api.writeError, writeResponse = api.writeResponse;
 var archiver = require('archiver');
 var unzip = require('unzip2');
 var request = require('request');
@@ -60,7 +60,7 @@ function reportTransferFailure(res, err) {
 	if (err.message) {
 		message += ": " + err.message;
 	}
-	return res.status(400).json({
+	return writeResponse(400, res, null, {
 				Severity: "Error",
 				HttpCode: 400,
 				Code: 0,
@@ -142,7 +142,7 @@ function excluded(excludes, rootName, outputName) {
 function completeTransfer(req, res, tempFile, filePath, fileName, xferOptions, shouldUnzip) {
 	var overwrite = xferOptions.indexOf("overwrite-older") !== -1;
 	function overrideError(files) {
-		res.status(400).json({
+		writeResponse(400, res, null, {
 			Severity: "Error",
 			HttpCode:400,
 			Code: 0,
@@ -196,12 +196,12 @@ function completeTransfer(req, res, tempFile, filePath, fileName, xferOptions, s
 		})
 		.on('error', function(error) {
 			if (res) {
-				res.status(400).json({
+				writeResponse(200, res, null, {
 					Severity: "Error",
 					HttpCode:400,
 					Code: 0,
 					Message: "Failed during file unzip: " + error.message
-				}).end();
+				});
 				res = null;
 			}
 		})

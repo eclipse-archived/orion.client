@@ -9,7 +9,7 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 /*eslint-env node */
-var api = require('../api'), writeError = api.writeError;
+var api = require('../api'), writeError = api.writeError, writeResponse = api.writeResponse;
 var path = require('path');
 var git = require('nodegit');
 var express = require('express');
@@ -55,7 +55,7 @@ function getBlame(req, res) {
 				"Location": gitRoot + "/blame/"+ req.params.refName + fileDir + fileRelativePath,
 				"Type" : "Blame"
 			};
-			res.status(200).json(sendingBlamejason);
+			writeResponse(200, res, null, sendingBlamejason);
 		});
 	}).catch(function(err){
 		writeError(403, res, err);

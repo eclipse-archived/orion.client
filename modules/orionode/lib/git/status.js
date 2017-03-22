@@ -9,8 +9,7 @@
  *	 IBM Corporation - initial API and implementation
  *******************************************************************************/
 /*eslint-env node */
-var api = require('../api'),
-	writeError = api.writeError;
+var api = require('../api'), writeError = api.writeError, writeResponse = api.writeResponse;
 var git = require('nodegit');
 var clone = require('./clone');
 var util = require('./util');
@@ -108,7 +107,7 @@ function router(options) {
 					repoState = "CHERRY_PICKING";
 				}
 				
-				res.status(200).json({
+				writeResponse(200, res, null, {
 					"Added": added,
 					"Changed": changed,
 					"CloneLocation": gitRoot + "/clone" + fileDir,

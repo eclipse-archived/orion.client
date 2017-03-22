@@ -10,7 +10,7 @@
  *******************************************************************************/
 /*eslint-env node */
 /*eslint no-console:1*/
-var api = require('../api'), writeError = api.writeError;
+var api = require('../api'), writeError = api.writeError, writeResponse = api.writeResponse;
 var git = require('nodegit');
 var url = require("url");
 var path = require("path");
@@ -164,7 +164,7 @@ function getCommit(repo, refOrCommit) {
 
 function getClone(req, res) {
 	getClones(req, res, function(repos) {
-		res.status(200).json({
+		writeResponse(200, res, null, {
 			"Children": repos,
 			"Type": "Clone"
 		});
@@ -343,12 +343,11 @@ function postInit(req, res) {
 				return theRepo.createCommit("HEAD", author, committer, "Initial commit", oid, []);
 			})
 			.then(function() {
-				res.status(201).json({
+				writeResponse(201, res, null, {
 					"Location": gitRoot + "/clone"+  fileRoot + "/" + req.body.Name
 				});
 			})
 			.catch(function(err){
-				console.log(err);
 				writeError(403, res);
 			});
 

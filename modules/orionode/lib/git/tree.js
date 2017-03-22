@@ -9,7 +9,7 @@
  *		 IBM Corporation - initial API and implementation
  *******************************************************************************/
 /*eslint-env node */
-var api = require('../api'), writeError = api.writeError;
+var api = require('../api'), writeError = api.writeError, writeResponse = api.writeResponse;
 var git = require('nodegit');
 var clone = require('./clone');
 var path = require('path');
@@ -59,7 +59,7 @@ function getTree(req, res) {
 					});
 				}
 				add(repos, tree);
-				res.status(200).json(tree);
+				writeResponse(200, res, null, tree);
 			});
 		}
 	}
@@ -87,7 +87,7 @@ function getTree(req, res) {
 			.then(function(children) {
 				var tree = treeJSON(location, path.basename(req.params["0"] || ""), 0, true, 0);
 				tree.Children = children;
-				res.status(200).json(tree);
+				writeResponse(200, res, null, tree);
 			});
 		}
 		var segments = filePath.split("/");
@@ -119,7 +119,7 @@ function getTree(req, res) {
 					return treeJSON(path.join(refLocation, entry.path()), entry.name(), 0, entry.isDirectory(), 0);
 				});
 				createParents(result);
-				return res.status(200).json(result);
+				return writeResponse(200, res, null, result);
 			}
 			if (p) {
 				return tree.getEntry(p)
@@ -129,7 +129,7 @@ function getTree(req, res) {
 							var result = treeJSON(path.join(refLocation, entry.path()), entry.name(), 0, entry.isDirectory(), 0);
 							result.ETag = entry.sha();
 							createParents(result);
-							return res.status(200).json(result);
+							return writeResponse(200, res, null, result);
 						}
 						return entry.getBlob()
 						.then(function(blob) {
@@ -141,10 +141,10 @@ function getTree(req, res) {
                 				res.status(200).end(buffer, 'binary');
 							}else{
 								var resp = blob.toString();
-								res.setHeader('Content-Type', 'application/octect-stream');
-								res.setHeader('Content-Length', resp.length);
-								res.setHeader("ETag", "\"" + entry.sha() + "\"");
-								res.status(200).end(resp);
+								writeResponse(200, res, {
+									'Content-Type':'application/octect-stream',
+									'Content-Length': resp.length,
+									'ETag': '\"' + entry.sha() + '\"'}, resp, null, true);
 							}
 						});
 					}

@@ -9,7 +9,7 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 /*eslint-env node */
-var api = require('./api'), writeError = api.writeError;
+var api = require('./api'), writeError = api.writeError, writeResponse = api.writeResponse;
 var express = require('express');
 var bodyParser = require('body-parser');
 var fs = require('fs');
@@ -170,7 +170,7 @@ function getSite(req, res) {
 		}
 		var site = sites[req.params.site];
 		if (site) {
-			res.status(200).json(siteJSON(site, req));
+			writeResponse(200, res, null, siteJSON(site, req));
 		} else {
 			res.writeHead(400, "Site not found:" + req.params.id);
 			res.end();
@@ -186,7 +186,7 @@ function getSites(req, res) {
 		var result = Object.keys(sites).map(function(id) {
 			return siteJSON(sites[id], req);
 		});
-		res.status(200).json({SiteConfigurations: result});
+		writeResponse(200, res, null, {SiteConfigurations: result});
 	});
 }
 
@@ -206,8 +206,7 @@ function updateSite(req, res, callback, okStatus) {
 			}
 			saveSites(req, sites, function() {
 				if (err) res.writeHead(400, "Failed to update site:" + req.params.id);
-				res.status(okStatus || 200);
-				site ? res.json(siteJSON(site, req)) : res.end();
+				site ? writeResponse(okStatus || 200, res, null, siteJSON(site, req)) : writeResponse(okStatus || 200, res, null);
 			});
 		} else {
 			res.writeHead(400, "Site not found:" + req.params.id);

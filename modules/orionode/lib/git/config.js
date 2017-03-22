@@ -10,7 +10,7 @@
  *******************************************************************************/
 /*eslint-env node */
 /*globals configs:true val:true*/
-var api = require('../api'), writeError = api.writeError;
+var api = require('../api'), writeError = api.writeError, writeResponse = api.writeResponse;
 var args = require('../args');
 var clone = require('./clone');
 var express = require('express');
@@ -63,7 +63,7 @@ function getAConfig(req, res) {
 				value = config[section] && config[section][name];
 			}
 			if (value !== undefined) {
-				res.status(200).json(configJSON(key, value, fileDir));
+				writeResponse(200, res, null, configJSON(key, value, fileDir));
 			} else {
 				writeError(404, res, "There is no config entry with key provided");
 			}
@@ -88,7 +88,7 @@ function getConfig(req, res) {
 
 			getFullPath(config, "");
 
-			res.status(200).json({
+			writeResponse(200, res, null, {
 				"Children": configs,
 				"CloneLocation": gitRoot + "/clone" + fileDir,
 				"Location": gitRoot + "/config/clone"+ fileDir,
@@ -140,8 +140,7 @@ function updateConfig(req, res, key, value, callback) {
 					}
 					if (result.value) {
 						var resp = configJSON(key, result.value, fileDir);
-						res.setHeader("Location", resp.Location);
-						res.status(result.status).json(resp);
+						writeResponse(result.status, res, {"Location":resp.Location}, resp);
 					} else {
 						res.status(result.status).end();
 					}
