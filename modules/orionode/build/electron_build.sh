@@ -9,6 +9,8 @@
 #   CSC_LINK - used to sign the app bundle (optional)
 #   CSC_KEY_PASSWORD - used to sign the app bundle (optional)
 #
+#  For multi platform build: https://github.com/electron-userland/electron-builder/wiki/Multi-Platform-Build
+#
 
 # Need node 4.4.1
 if [ "v4.4.1" != `node --version` ]; then
