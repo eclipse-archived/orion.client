@@ -206,8 +206,8 @@ define([
 		    var rule = createTestRule('empty-rules');
 		    var expected = {value: "",
 		                    start: 0,
-		                    end: 25};
-		    return getFixes({buffer: '\truleA,\n\truleB,\n\truleC {}\n',
+		                    end: 24};
+		    return getFixes({buffer: '\truleA,\n\truleB,\n\truleC {}',
 		                      rule: rule,
 		                      expected: expected});
 		});

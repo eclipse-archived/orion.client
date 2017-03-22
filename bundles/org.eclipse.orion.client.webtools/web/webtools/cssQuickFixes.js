@@ -32,14 +32,14 @@ define([
 		 */
 		execute: function(editorContext, context) {
 			var id = context.annotation.id;
-			Metrics.logEvent('language tools', 'quickfix', id, 'text/css');
+			Metrics.logEvent('language tools', 'quickfix', id, 'text/css'); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		    var fixes = this[id];
 	        if(fixes) {
 	            return fixes(editorContext, context.annotation);
 	        }
 		    return null;
 		},
-		"empty-rules": function(editorContext, annotation) { //$NON-NLS-0$
+		"empty-rules": function(editorContext, annotation) {
 			return editorContext.getText().then(function(text) {
 				// Remove leading space
 				var start = annotation.start;
@@ -47,14 +47,14 @@ define([
 					start--;
 				}
 				var contents = text.substring(annotation.start);
-				contents = contents.match(/^[^{]*{\s*}\s*/,''); //$NON-NLS-0$
+				contents = contents.match(/^[^{]*{\s*}\s*/,'');
 				if (contents){
 					return editorContext.setText("", start, start+contents[0].length);
 				}
 				return null;
             });
 		},
-		"important": function(editorContext, annotation){ //$NON-NLS-0$
+		"important": function(editorContext, annotation){
 			return editorContext.getText().then(function(text) {
 				// The annotation will select the property name. Get the complete property.
 				var contents = text.substring(annotation.start);
@@ -68,7 +68,7 @@ define([
 				return null;
             });
 		},
-		"zero-units": function(editorContext, annotation) { //$NON-NLS-0$
+		"zero-units": function(editorContext, annotation) {
 			return editorContext.getText().then(function(text) {
 				var contents = text.substring(annotation.start, annotation.end);
 				contents = contents.replace(/0px/gi,'0'); //$NON-NLS-0$
