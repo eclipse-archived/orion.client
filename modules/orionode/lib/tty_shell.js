@@ -19,8 +19,7 @@ var pty;
 try {
 	pty = require("node-pty");
 } catch (e) {
-	console.error(e.message);
-	console.error("node-pty is not installed. Some features will be unavailable.");
+	console.log("WARNING: node-pty is not installed. Some features will be unavailable. Reason: " + e.message);
 }
 
 exports.install = function(options) {
