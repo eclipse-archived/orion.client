@@ -32,8 +32,8 @@ define([
 
 		afterEach(function(){
 			// Reset the rule severities to defaults
-			if (validator){
-				validator._restoreRules();
+			if (resultMgr){
+				resultMgr._restoreRules();
 			}
 		});
 
@@ -49,7 +49,7 @@ define([
 		    resultMgr = new ResultMgr();
 			validator = new CssValidator(resultMgr);
 			var rule = options.rule;
-			validator._enableOnly(rule.id, rule.severity);
+			resultMgr._enableOnly(rule.id, rule.severity);
 			var fixComputer = new CssQuickFixes.CssQuickFixes();
 			var editorContext = {
 				/*override*/

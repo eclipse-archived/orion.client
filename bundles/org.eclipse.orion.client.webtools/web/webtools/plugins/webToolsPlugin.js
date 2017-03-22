@@ -79,6 +79,16 @@ define(['orion/plugin',
     	});
     	
     	/**
+    	 * Register result manager as pref manager
+    	 */
+    	provider.registerService("orion.cm.managedservice", cssResultMgr, //$NON-NLS-1$
+    		{
+    			contentType: ["text/css", "text/html"], //$NON-NLS-1$ //$NON-NLS-2$
+    			pid: 'csslint.config'  //$NON-NLS-1$
+    		}
+    	);
+    	
+    	/**
     	 * Register AST manager as Model Change listener
     	 */
     	provider.registerService("orion.edit.model", {  //$NON-NLS-1$
@@ -102,7 +112,6 @@ define(['orion/plugin',
     	provider.registerService(["orion.edit.validator", "orion.cm.managedservice"], new mCssValidator(cssResultMgr), //$NON-NLS-1$ //$NON-NLS-2$
     		{
     			contentType: ["text/css", "text/html"], //$NON-NLS-1$ //$NON-NLS-2$
-    			pid: 'csslint.config'  //$NON-NLS-1$
     		}
     	);
 

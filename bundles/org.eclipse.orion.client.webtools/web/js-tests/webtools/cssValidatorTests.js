@@ -29,9 +29,9 @@ define([
 		    var contentType = options.contentType ? options.contentType : 'text/css';
 		    resultMgr = new ResultMgr();
 		    validator = new CssValidator(resultMgr);
-		    validator._restoreRules();
+		    resultMgr._restoreRules();
 			var rule = options.rule;
-			validator._enableOnly(rule.id, rule.severity);
+			resultMgr._enableOnly(rule.id, rule.severity);
 			var editorContext = {
 				/*override*/
 				getText: function() {
