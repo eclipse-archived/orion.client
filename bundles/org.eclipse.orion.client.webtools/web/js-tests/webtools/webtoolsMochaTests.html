@@ -17,11 +17,12 @@
 	require(["mocha/sauce"], function(mocha) {
 		mocha.setup("bdd");
 		require([
+			"js-tests/webtools/cssContentAssistTests",
+			"js-tests/webtools/cssHoverTests",
 			"js-tests/webtools/cssOutlinerTests",
 			"js-tests/webtools/cssQuickFixTests",
 			"js-tests/webtools/cssValidatorTests",
 			"js-tests/webtools/cssParserTests",
-			"js-tests/webtools/cssContentAssistTests",
 			"js-tests/webtools/utilTests",
 			"js-tests/webtools/htmlHoverTests",
 			"js-tests/webtools/htmlOccurrencesTests",
