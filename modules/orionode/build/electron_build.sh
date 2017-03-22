@@ -99,6 +99,7 @@ if [ -f "$nodegit_lib" ]; then
 	cp $nodegit_lib ./node_modules/nodegit/build/Release
 fi
 npm run dist:win
+mv dist/win/"${name} Setup ${pkg_version}.exe" dist/win/"${name}-${pkg_version}-setup.exe"
 
 # Build linux packages, etc
 nodegit_lib=${NODEGIT_DIR}/v${nodegit_version}/electron/v${electron_version}/linux/nodegit.node
@@ -106,3 +107,4 @@ if [ -f "$nodegit_lib" ]; then
 	cp $nodegit_lib ./node_modules/nodegit/build/Release
 fi
 npm run dist:linux
+mv "dist/Orion-${pkg_version}.deb" "dist/Orion-${pkg_version}.rpm" "dist/Orion-${pkg_version}.tar.gz" dist/linux/
