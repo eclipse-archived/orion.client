@@ -922,8 +922,9 @@ objects.mixin(EditorViewer.prototype, {
 
 			modelPool.registerViewer(this.pool, this.id);
 
-			// If the pool has been initialized, reuse the textModel and undo stack.
-			if (this.pool.metadata) {
+			// If the pool has been initialized and the input has changed
+			// set the event metadata so InputManager will update.
+			if (this.pool.metadata && previousPool !== this.pool) {
 				e.metadata = p.metadata;
 			}
 			if (previousPool !== this.pool) {
