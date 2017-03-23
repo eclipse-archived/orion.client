@@ -82,7 +82,7 @@ rm -rf node_modules
 npm install --production
 rm -rf node_modules/node-pty
 rm -rf node_modules/nodegit/vendor
-rm -rf node_modules/nodegit/build/Release/obj.target
+rm -rf node_modules/nodegit/build/Release/*
 rm -rf target
 
 # Install electron builder
