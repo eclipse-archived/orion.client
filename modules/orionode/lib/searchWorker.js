@@ -249,6 +249,9 @@ try {
 				}
 				add();
 			});
+		}).catch(function(err) {
+			// Probably an error reading some file or directory -- ignore
+			return;
 		});
 	}
 	
@@ -283,9 +286,6 @@ try {
 			return Promise.map(children, function(child) {
 				return searchFile(contextPath, workspaceDir, searchScope, child, searchPattern, filenamePattern, results, searchOpt.exclude);
 			}, { concurrency: SUBDIR_SEARCH_CONCURRENCY })
-			.catch(function(/*err*/) {
-				// Probably an error reading some file or directory -- ignore
-			})
 			.then(function() {
 				return {
 					"response": {
