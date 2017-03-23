@@ -226,6 +226,24 @@ define([
 			];
 			return runTest({buffer: "abc{ cue-before: "}, '', 16, expected);
 		});
+		it('Property value - complex type with Matcher object, text-decoration-line', function() {
+			var expected = [
+				{ name: 'none', proposal: 'none'},
+				{ name: 'underline', proposal: 'underline'},
+				{ name: 'overline', proposal: 'overline'},
+				{ name: 'line-through', proposal: 'line-through'},
+				{ name: 'blink', proposal: 'blink'},
+			];
+			return runTest({buffer: "abc{ text-decoration-line: "}, '', 27, expected);
+		});
+		it('Property value - complex type with Matcher object, text-decoration, do prefix', function() {
+			var expected = [
+				{ name: 'double', proposal: 'double'},
+				{ name: 'dotted', proposal: 'dotted'},
+				{ name: 'dodgerblue', proposal: 'dodgerblue'},
+			];
+			return runTest({buffer: "abc{ text-decoration: do"}, 'do', 24, expected);
+		});
 		
 		it('Conditional at rules media 1', function() {
 			var expected = [
