@@ -67,14 +67,18 @@ update_config_files() {
 
 update_config_files
 
-# create .npmrc to target electron runtime
-if [ ! -f ".npmrc" ]; then
-cat <<EOF >> .npmrc
-runtime = electron
-target = $electron_version
-target_arch = x64
-disturl = https://atom.io/download/atom-shell
-EOF
+if [ -z "$NODEGIT_DIR" ]; then
+	NODEGIT_DIR=~/downloads/orion/orionode/nodegit
+fi
+
+# target electron runtime when nodegit pre-compiled binary is not available. assume only nodegit has native code
+if [ ! -d "$NODEGIT_DIR" ]; then
+	# Electron's version.
+	export npm_config_target=$electron_version
+	export npm_config_arch=x64
+	export npm_config_target_arch=x64
+	export npm_config_disturl=https://atom.io/download/electron
+	export npm_config_runtime=electron
 fi
 
 # Install production modules and clean up some unecessary files to reduce size
@@ -82,16 +86,13 @@ rm -rf node_modules
 npm install --production
 rm -rf node_modules/node-pty
 rm -rf node_modules/nodegit/vendor
-rm -rf node_modules/nodegit/build/Release/*
+find node_modules/nodegit/build/Release/ -mindepth 1 ! -name '*.node' -exec rm -rf {} \;
 rm -rf target
 
 # Install electron builder
 npm install -g electron-builder@5.5.0
 
 # Build mac dmg, etc
-if [ -z "$NODEGIT_DIR" ]; then
-	NODEGIT_DIR=~/downloads/orion/orionode/nodegit
-fi
 nodegit_lib=${NODEGIT_DIR}/v${nodegit_version}/electron/v${electron_version}/mac/nodegit.node
 if [ -f "$nodegit_lib" ]; then
 	cp $nodegit_lib ./node_modules/nodegit/build/Release
