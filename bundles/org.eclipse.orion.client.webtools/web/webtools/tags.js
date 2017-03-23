@@ -41,6 +41,7 @@ define([
 		{
 			name: "acronym",
 			category: Messages.obsoleteTagCategory,
+			obsolete: true,
 			doc: Messages.acronymTagDoc,
 			url: "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/acronym"
 		},
@@ -53,6 +54,7 @@ define([
 		{
 			name: "applet",
 			category: Messages.obsoleteTagCategory,
+			obsolete: true,
 			doc: Messages.appletTagDoc,
 			url: "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/applet"
 		},
@@ -96,6 +98,7 @@ define([
 		{
 			name: "basefont",
 			category: Messages.obsoleteTagCategory,
+			obsolete: true,
 			doc: Messages.basefontTagDoc,
 			url: "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/basefont"
 		},
@@ -114,12 +117,14 @@ define([
 		{
 			name: "big",
 			category: Messages.obsoleteTagCategory,
+			obsolete: true,
 			doc: Messages.bigTagDoc,
 			url: "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/big"
 		},
 		{
 			name: "blink",
 			category: Messages.obsoleteTagCategory,
+			obsolete: true,
 			doc: Messages.blinkTagDoc,
 			url: "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/blink"
 		},
@@ -162,6 +167,7 @@ define([
 		{
 			name: "center",
 			category: Messages.obsoleteTagCategory,
+			obsolete: true,
 			doc: Messages.centerTagDoc,
 			url: "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/center"
 		},
@@ -240,6 +246,7 @@ define([
 		{
 			name: "dir",
 			category: Messages.obsoleteTagCategory,
+			obsolete: true,
 			doc: Messages.dirTagDoc,
 			url: "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/dir"
 		},
@@ -300,6 +307,7 @@ define([
 		{
 			name: "font",
 			category: Messages.obsoleteTagCategory,
+			obsolete: true,
 			doc: Messages.fontTagDoc,
 			url: "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/font"
 		},
@@ -318,12 +326,14 @@ define([
 		{
 			name: "frame",
 			category: Messages.obsoleteTagCategory,
+			obsolete: true,
 			doc: Messages.frameTagDoc,
 			url: "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/frame"
 		},
 		{
 			name: "frameset",
 			category: Messages.obsoleteTagCategory,
+			obsolete: true,
 			doc: Messages.framesetTagDoc,
 			url: "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/frameset"
 		},
@@ -426,6 +436,7 @@ define([
 		{
 			name: "isindex",
 			category: Messages.obsoleteTagCategory,
+			obsolete: true,
 			doc: Messages.isindexTagDoc,
 			url: "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/isindex"
 		},
@@ -468,6 +479,7 @@ define([
 		{
 			name: "listing",
 			category: Messages.obsoleteTagCategory,
+			obsolete: true,
 			doc: Messages.listingTagDoc,
 			url: "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/listing"
 		},
@@ -492,6 +504,7 @@ define([
 		{
 			name: "marquee",
 			category: Messages.obsoleteTagCategory,
+			obsolete: true,
 			doc: Messages.marqueeTagDoc,
 			url: "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/marquee"
 		},
@@ -528,6 +541,7 @@ define([
 		{
 			name: "noembed",
 			category: Messages.obsoleteTagCategory,
+			obsolete: true,
 			doc: Messages.noembedTagDoc,
 			url: "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/noembed"
 		},
@@ -588,6 +602,7 @@ define([
 		{
 			name: "plaintext",
 			category: Messages.obsoleteTagCategory,
+			obsolete: true,
 			doc: Messages.plaintextTagDoc,
 			url: "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/plaintext"
 		},
@@ -684,6 +699,7 @@ define([
 		{
 			name: "spacer",
 			category: Messages.obsoleteTagCategory,
+			obsolete: true,
 			doc: Messages.spacerTagDoc,
 			url: "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/spacer"
 		},
@@ -696,6 +712,7 @@ define([
 		{
 			name: "strike",
 			category: Messages.obsoleteTagCategory,
+			obsolete: true,
 			doc: Messages.strikeTagDoc,
 			url: "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/strike"
 		},
@@ -804,6 +821,7 @@ define([
 		{
 			name: "tt",
 			category: Messages.obsoleteTagCategory,
+			obsolete: true,
 			doc: Messages.ttTagDoc,
 			url: "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/tt"
 		},
@@ -840,6 +858,7 @@ define([
 		{
 			name: "xmp",
 			category: Messages.obsoleteTagCategory,
+			obsolete: true,
 			doc: Messages.xmpTagDoc,
 			url: "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/xmp"
 		}
