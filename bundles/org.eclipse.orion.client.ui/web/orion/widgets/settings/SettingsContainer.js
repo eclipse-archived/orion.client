@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2012, 2015 IBM Corporation and others.
+ * Copyright (c) 2012, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -385,7 +385,7 @@ define([
 			var themeSettingsNode = document.createElement('div');
 			this.table.appendChild(themeSettingsNode);
 			
-			var containerTheme = new containerThemeData.ThemeData();
+			var containerTheme = new containerThemeData.ThemeData(this.registry);
 			var themePreferences = new mThemePreferences.ThemePreferences(this.preferences, containerTheme);
 			var previewWidget = new ContainerWidget();
 			var scopeList = ContainerScopeList;
