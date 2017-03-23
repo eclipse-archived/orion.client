@@ -195,7 +195,7 @@ function getTags(req, res) {
 }
 
 function deleteTag(req, res) {
-	var tagName = decodeURIComponent(req.params.tagName);
+	var tagName = util.decodeURIComponent(req.params.tagName);
 	return clone.getRepo(req)
 	.then(function(repo) {
 		return git.Tag.delete(repo, tagName);

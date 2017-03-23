@@ -17,5 +17,10 @@ module.exports.encodeURIComponent = function(path) {
 };
 
 module.exports.decodeURIComponent = function(path) {
-	return decodeURIComponent(decodeURIComponent(path));
+	var result = path;
+	try {
+		result = decodeURIComponent(result);
+		result = decodeURIComponent(result);
+	} catch (e) {}
+	return result;
 };
