@@ -584,6 +584,15 @@ objects.mixin(TabWidget.prototype, {
 			this.setWindowLocation(href);
 		}.bind(this));
 
+		editorTab.addEventListener("mouseup", function(e) {
+			var button = e.which;
+			if (button === 2) {
+				e.preventDefault();
+				var isDirty = dirtyIndicator.style.display !== "none";
+				this.closeTab(metadata, isDirty);
+			}
+		}.bind(this));
+
 		editorTab.addEventListener("dragstart", function(e) {
 			if (this.fileList.length === 1) {
 				e.preventDefault();
