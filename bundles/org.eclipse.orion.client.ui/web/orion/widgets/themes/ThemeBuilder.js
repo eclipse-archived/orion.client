@@ -1,11 +1,12 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2012 IBM Corporation and others.
+ * Copyright (c) 2016 - 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License v1.0
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution
  * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html).
  * Contributors: Anton McConville - IBM Corporation - initial API and implementation
+ *               Casey Flynn - Google Inc.
  ******************************************************************************/
 /*eslint-env browser, amd*/
 
@@ -20,7 +21,6 @@ define(['i18n!orion/settings/nls/messages',
 ],
 function(messages, i18nUtil, mCommands, mCommandRegistry, lib, mTooltip, colors, util) {
 	var editorTheme, originalTheme, currentTheme, revertBtn, deleteBtn, saveBtn, themeNameInput, setup;
-	var protectedThemes = [];
 	var defaultColor = "#ff80c0";
 	var scopeList;
 	
@@ -281,7 +281,6 @@ function(messages, i18nUtil, mCommands, mCommandRegistry, lib, mTooltip, colors,
 		this.themeData = args.themeData;
 		this.toolbarId = args.toolbarId;
 		this.serviceRegistry = args.serviceRegistry;
-		protectedThemes = this.themeData ? (this.themeData.getProtectedThemes ? this.themeData.getProtectedThemes() : []) : [];
 		this.messageService = this.serviceRegistry.getService("orion.page.message"); //$NON-NLS-0$
 		this.previewWidget = args.previewWidget;
 		setup = args.setup;
@@ -438,25 +437,28 @@ function(messages, i18nUtil, mCommands, mCommandRegistry, lib, mTooltip, colors,
 	};
 	
 	function deleteTheme(){
-		//if default theme
-		if (protectedThemes.indexOf(currentTheme.name) !== -1){
-			window.alert(currentTheme.name + messages["cannotDeleteMsg"]);
-		}
-		else if (confirm(messages["confirmDeleteMsg"]) === true){
-			this.preferences.getTheme(function(themeStyles) {
-				var themeName = currentTheme.name;
-				
-				for (var i = 0; i < themeStyles.styles.length; i++) {
-					if (themeStyles.styles[i].name === themeName) {
-						themeStyles.styles.splice(i, 1);
+		this.preferences.getProtectedThemes(function(protectedThemes) {
+			//if default theme
+			if (protectedThemes.indexOf(currentTheme.name) !== -1){
+				window.alert(currentTheme.name + messages["cannotDeleteMsg"]);
+			}
+			else if (confirm(messages["confirmDeleteMsg"]) === true){
+				this.preferences.getTheme(function(themeStyles) {
+					var themeName = currentTheme.name;
+
+					for (var i = 0; i < themeStyles.styles.length; i++) {
+						if (themeStyles.styles[i].name === themeName) {
+							themeStyles.styles.splice(i, 1);
+							break;
+						}
 					}
-				}
-				// show the first theme
-				this.preferences.setTheme(themeStyles.styles[0].name, themeStyles.styles).then(function() {
-					this.populateThemes();
+					// show the first theme
+					this.preferences.setTheme(themeStyles.styles[0].name, themeStyles.styles).then(function() {
+						this.populateThemes();
+					}.bind(this));
 				}.bind(this));
-			}.bind(this));
-		}
+			}
+		}.bind(this));
 	}
 	ThemeBuilder.prototype.deleteTheme = deleteTheme;
 	
@@ -464,27 +466,28 @@ function(messages, i18nUtil, mCommands, mCommandRegistry, lib, mTooltip, colors,
 		if (theme && theme.styles) {
 			currentTheme = theme;
 		}
-		if (protectedThemes.indexOf(currentTheme.name) !== -1) {
-			if(util.isElectron){
-				var node = document.getElementById("editorThemeName");
-				this.commandService.prompt(node, i18nUtil.formatMessage(messages["cannotModifyMsg"], currentTheme.name), messages['Ok'], messages['Cancel'], 
-					messages["defaultImportedThemeName"], false, function(newName) {
-						if (newName && newName.length > 0 && protectedThemes.indexOf(newName) === -1) {
-							currentTheme.name = newName;
-							this.addTheme(currentTheme);
-						}
-					}.bind(this));
-			}else{
-				var newName = prompt(i18nUtil.formatMessage(messages["cannotModifyMsg"], currentTheme.name), messages["defaultImportedThemeName"]);
-				if (newName && newName.length > 0 && protectedThemes.indexOf(newName) === -1) {
-					currentTheme.name = newName;
-					this.addTheme(currentTheme);
+		this.preferences.getProtectedThemes(function(protectedThemes) {
+			if (protectedThemes.indexOf(currentTheme.name) !== -1) {
+				if(util.isElectron){
+					var node = document.getElementById("editorThemeName");
+					this.commandService.prompt(node, i18nUtil.formatMessage(messages["cannotModifyMsg"], currentTheme.name), messages['Ok'], messages['Cancel'], 
+						messages["defaultImportedThemeName"], false, function(newName) {
+							if (newName && newName.length > 0 && protectedThemes.indexOf(newName) === -1) {
+								currentTheme.name = newName;
+								this.addTheme(currentTheme);
+							}
+						}.bind(this));
+				} else {
+					var newName = prompt(i18nUtil.formatMessage(messages["cannotModifyMsg"], currentTheme.name), messages["defaultImportedThemeName"]);
+					if (newName && newName.length > 0 && protectedThemes.indexOf(newName) === -1) {
+						currentTheme.name = newName;
+						this.addTheme(currentTheme);
+					}
 				}
+			} else {
+				this.addTheme(currentTheme);
 			}
-		}
-		else {
-			this.addTheme(currentTheme);
-		}
+		}.bind(this));
 	}
 	ThemeBuilder.prototype.saveTheme = saveTheme;
 	

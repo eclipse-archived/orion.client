@@ -13,9 +13,10 @@
 define([
 		'orion/editor/textTheme',
 		'orion/widgets/themes/ThemeVersion',
+		'orion/Deferred',
 		'orion/objects',
 
-], function(mTextTheme, THEMES_VERSION, objects) {
+], function(mTextTheme, THEMES_VERSION, Deferred, objects) {
 
 	// *******************************************************************************
 	//
@@ -636,20 +637,33 @@ define([
 		}
 		
 		function getStyles(){
-			return this.styles;
+			var d = new Deferred();
+			d.resolve(this.styles);
+			return d;
 		}
 		
 		ThemeData.prototype.styles = [];
 		ThemeData.prototype.getStyles = getStyles;
 
-		function getDefaultTheme(options) {
+		function getBaseTheme(options) {
 			/* return a copy of the appropriate theme definition */
 			return JSON.parse(JSON.stringify((options || {}).dark ? darker : prospecto));
+		}
+		ThemeData.prototype.getBaseTheme = getBaseTheme;
+		
+		function getDefaultTheme() {
+			var d = new Deferred();
+			var useLightTheme = document.body.classList.contains("lightPage");
+			var defaultTheme = useLightTheme ? 'Prospecto' : 'Dark';
+			d.resolve(defaultTheme);
+			return d;
 		}
 		ThemeData.prototype.getDefaultTheme = getDefaultTheme;
 		
 		function getProtectedThemes() {
-			return ["Prospecto", "Dark"]; //$NON-NLS-1$ //$NON-NLS-0$
+			var d = new Deferred();
+			d.resolve(["Prospecto", "Dark"]);
+			return d;
 		}
 
 		ThemeData.prototype.getProtectedThemes = getProtectedThemes;
@@ -658,14 +672,20 @@ define([
 		
 		ThemeData.prototype.fontSettable = fontSettable;
 		
+		function getThemeVersion() {
+			var d = new Deferred();
+			d.resolve(THEMES_VERSION);
+			return d;
+		}
+		
+		ThemeData.prototype.getThemeVersion = getThemeVersion;
+		
 		function getThemeStorageInfo(){	
 			var useLightTheme = document.body.classList.contains("lightPage");
 			return {
 				storage: '/themes', //$NON-NLS-0$
 				styleset: 'editorstyles', //$NON-NLS-0$
-				defaultTheme: useLightTheme ? 'Prospecto' : 'Dark', //$NON-NLS-1$  //$NON-NLS-0$
 				selectedKey: 'editorSelected', //$NON-NLS-0$
-				version: THEMES_VERSION
 			}; 
 		}
 		ThemeData.prototype.getThemeStorageInfo = getThemeStorageInfo;
@@ -680,7 +700,7 @@ define([
 		return {
 			ThemeData: ThemeData,
 			getStyles: getStyles,
-			getDefaultTheme: getDefaultTheme
+			getBaseTheme: getBaseTheme
 		};
 	}
-);
+);
