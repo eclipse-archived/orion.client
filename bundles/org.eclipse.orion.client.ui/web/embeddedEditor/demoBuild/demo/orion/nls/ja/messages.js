@@ -31,7 +31,7 @@ define({//Default message bundle
 	"Orion JSON Editor": "JSON Editor",
 	"View on Site": "View on Site",
 	"View this file or folder on a web site hosted by Orion": "View this file or folder on a web site hosted by Orion.",
-	"ShowAllKeyBindings": "Show a list of all the keybindings on this page",
+	"ShowAllKeyBindings": "Show a list of all the keyboard shortcuts on this page",
 	"Show Keys": "Show Keys",
 	"HideShowBannerFooter": "Hide or show the page banner",
 	"Toggle Banner and Footer": "Toggle Banner",
