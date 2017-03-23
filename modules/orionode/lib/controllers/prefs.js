@@ -142,6 +142,7 @@ function PrefsController(options) {
 		return lockFile.lockAsync(getLockfileName(prefFile), {
 			retries: 3,
 			retryWait: 25,
+			stale: 5000
 		})
 		.disposer(function() {
 			return lockFile.unlockAsync(getLockfileName(prefFile))
