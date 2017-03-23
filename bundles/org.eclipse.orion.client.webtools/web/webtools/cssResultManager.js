@@ -24,40 +24,41 @@ define([
 		// Define the default values for the rules
 		// 0:off, 1:warning, 2:error 3:info
 		rules: {
-			"adjoining-classes" : 0,
-			"box-model" : 3,
-			"box-sizing" : 0,
-			"bulletproof-font-face" : 3,
-			"compatible-vendor-prefixes" : 3,
-			"display-property-grouping" : 3,
-			"duplicate-background-images" : 3,
-			"duplicate-properties" : 3,
-			"empty-rules" : 3,
-			"fallback-colors" : 3,
-			"floats" : 3,
-			"font-faces" : 3,
-			"font-sizes" : 3,
-			"gradients" : 3,
-			"ids" : 3,
-			"import" : 3,
-			"important" : 3,
-			"known-properties" : 1,
-			"outline-none" : 3,
-			"overqualified-elements" : 3,
-			"qualified-headings" : 3,
-			"regex-selectors" : 3,
-			"rules-count" : 3,
-			"selector-max-approaching" : 0,
-			"selector-max" : 3,
-			"shorthand" : 3,
-			"star-property-hack" : 3,
-			"text-indent" : 3,
-			"underscore-property-hack" : 3,
-			"unique-headings" : 3,
-			"universal-selector" : 3,
-			"unqualified-attributes" : 3,
-			"vendor-prefix" : 3,
-			"zero-units" : 3
+			"adjoining-classes" : 0, // Compat
+			"box-model" : 3, // Style
+			"box-sizing" : 0, // Compat
+			"bulletproof-font-face" : 0, // Compat
+			"compatible-vendor-prefixes" : 3, // Compat vendor
+			"display-property-grouping" : 3, // Potential problem
+			"duplicate-background-images" : 0, // Performance
+			"duplicate-properties" : 3, // Potential problem
+			"empty-rules" : 3, // Potential problem
+			"fallback-colors" : 0, // Compat
+			"floats" : 0, // Maintainability
+			"font-faces" : 0, // Performance
+			"font-sizes" : 0, // Maintainability
+			"gradients" : 3, // Compat vendor
+			"ids" : 0, // Maintainability
+			"import" : 0, // Performance
+			"important" : 0, // Maintainability
+			"known-properties" : 1, // Potential problem
+			"order-alphabetical" : 0, // Maintainability
+			"outline-none" : 3, // Style accessibility
+			"overqualified-elements" : 0, // Performance
+			"qualified-headings" : 0, // OOCSS
+			"regex-selectors" : 0, // Performance
+			"rules-count" : 0, // Performance
+			"selector-max-approaching" : 0, // Compat vendor
+			"selector-max" : 3, // Compat vendor
+			"shorthand" : 0, // Performance
+			"star-property-hack" : 0, // Compat
+			"text-indent" : 3, // Style
+			"underscore-property-hack" : 0, // Compat
+			"unique-headings" : 0, // OOCSS
+			"universal-selector" : 0, // Performance
+			"unqualified-attributes" : 0, // Performance
+			"vendor-prefix" : 3, // Compat vendor
+			"zero-units" : 0 // Performance
 		},
 		
 		/**
@@ -215,6 +216,7 @@ define([
 			config.setOption("import", properties.validate_imports); //$NON-NLS-0$ // import is restricted key word
 			config.setOption("important", properties.validate_important); //$NON-NLS-0$
 			config.setOption("known-properties", properties.validate_known_properties); //$NON-NLS-0$
+			config.setOption("order-alphabetical", properties.validate_order_alphabetical); //$NON-NLS-0$
 			config.setOption("outline-none", properties.validate_outline_none); //$NON-NLS-0$
 			config.setOption("overqualified-elements", properties.validate_overqualified_elements); //$NON-NLS-0$
 			config.setOption("qualified-headings", properties.validate_qualified_headings); //$NON-NLS-0$
