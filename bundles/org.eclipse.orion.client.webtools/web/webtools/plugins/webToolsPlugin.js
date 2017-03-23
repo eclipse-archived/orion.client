@@ -556,7 +556,7 @@ define(['orion/plugin',
     							id: "validate_box_model", //$NON-NLS-1$
     							name: messages["box-model"],
     							type: "number", //$NON-NLS-1$
-    							defaultValue: info,
+    							defaultValue: ignore,
     							options: severities
     						},
     						{

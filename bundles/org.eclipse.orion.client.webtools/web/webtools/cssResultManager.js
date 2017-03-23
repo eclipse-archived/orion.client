@@ -25,7 +25,7 @@ define([
 		// 0:off, 1:warning, 2:error 3:info
 		rules: {
 			"adjoining-classes" : 0, // Compat
-			"box-model" : 3, // Style
+			"box-model" : 0, // Style
 			"box-sizing" : 0, // Compat
 			"bulletproof-font-face" : 0, // Compat
 			"compatible-vendor-prefixes" : 3, // Compat vendor
@@ -52,7 +52,7 @@ define([
 			"selector-max" : 3, // Compat vendor
 			"shorthand" : 0, // Performance
 			"star-property-hack" : 0, // Compat
-			"text-indent" : 3, // Style
+			"text-indent" : 3, // Style accessibility
 			"underscore-property-hack" : 0, // Compat
 			"unique-headings" : 0, // OOCSS
 			"universal-selector" : 0, // Performance
