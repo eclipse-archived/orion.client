@@ -136,7 +136,7 @@ define([
 				     end: 6,
 				     line: 2,
 				     severity: 'info',
-				     description: 'Use of !important.'
+				     description: 'Using !important leads to specificity issues.'
 				    }
 				]);
 			});
@@ -149,67 +149,67 @@ define([
 				     end: 6,
 				     line: 2,
 				     severity: 'error',
-				     description: 'Use of !important.'
+				     description: 'Using !important leads to specificity issues.'
 				    },
 				    {start: 1,
 				     end: 6,
 				     line: 3,
 				     severity: 'error',
-				     description: 'Use of !important.'
+				     description: 'Using !important leads to specificity issues.'
 				    },
 				    {start: 1,
 				     end: 6,
 				     line: 4,
 				     severity: 'error',
-				     description: 'Use of !important.'
+				     description: 'Using !important leads to specificity issues.'
 				    },
 				    {start: 1,
 				     end: 6,
 				     line: 5,
 				     severity: 'error',
-				     description: 'Use of !important.'
+				     description: 'Using !important leads to specificity issues.'
 				    },
 				    {start: 1,
 				     end: 6,
 				     line: 6,
 				     severity: 'error',
-				     description: 'Use of !important.'
+				     description: 'Using !important leads to specificity issues.'
 				    },
 				    {start: 1,
 				     end: 6,
 				     line: 7,
 				     severity: 'error',
-				     description: 'Use of !important.'
+				     description: 'Using !important leads to specificity issues.'
 				    },
 				    {start: 1,
 				     end: 6,
 				     line: 8,
 				     severity: 'error',
-				     description: 'Use of !important.'
+				     description: 'Using !important leads to specificity issues.'
 				    },
 				    {start: 1,
 				     end: 6,
 				     line: 9,
 				     severity: 'error',
-				     description: 'Use of !important.'
+				     description: 'Using !important leads to specificity issues.'
 				    },
 				    {start: 1,
 				     end: 6,
 				     line: 10,
 				     severity: 'error',
-				     description: 'Use of !important.'
+				     description: 'Using !important leads to specificity issues.'
 				    },
 				    {start: 1,
 				     end: 6,
 				     line: 11,
 				     severity: 'error',
-				     description: 'Use of !important.'
+				     description: 'Using !important leads to specificity issues.'
 				    },
 				    {start: 1,
 				     end: 6,
 				     line: 12,
 				     severity: 'error',
-				     description: 'Use of !important.'
+				     description: 'Using !important leads to specificity issues.'
 				    },
 				    {start: 0,
 				     end: 3,
@@ -227,67 +227,67 @@ define([
 				     end: 6,
 				     line: 3,
 				     severity: 'error',
-				     description: 'Use of !important.'
+				     description: 'Using !important leads to specificity issues.'
 				    },
 				    {start: 1,
 				     end: 6,
 				     line: 4,
 				     severity: 'error',
-				     description: 'Use of !important.'
+				     description: 'Using !important leads to specificity issues.'
 				    },
 				    {start: 1,
 				     end: 6,
 				     line: 5,
 				     severity: 'error',
-				     description: 'Use of !important.'
+				     description: 'Using !important leads to specificity issues.'
 				    },
 				    {start: 1,
 				     end: 6,
 				     line: 6,
 				     severity: 'error',
-				     description: 'Use of !important.'
+				     description: 'Using !important leads to specificity issues.'
 				    },
 				    {start: 1,
 				     end: 6,
 				     line: 7,
 				     severity: 'error',
-				     description: 'Use of !important.'
+				     description: 'Using !important leads to specificity issues.'
 				    },
 				    {start: 1,
 				     end: 6,
 				     line: 8,
 				     severity: 'error',
-				     description: 'Use of !important.'
+				     description: 'Using !important leads to specificity issues.'
 				    },
 				    {start: 1,
 				     end: 6,
 				     line: 9,
 				     severity: 'error',
-				     description: 'Use of !important.'
+				     description: 'Using !important leads to specificity issues.'
 				    },
 				    {start: 1,
 				     end: 6,
 				     line: 10,
 				     severity: 'error',
-				     description: 'Use of !important.'
+				     description: 'Using !important leads to specificity issues.'
 				    },
 				    {start: 1,
 				     end: 6,
 				     line: 11,
 				     severity: 'error',
-				     description: 'Use of !important.'
+				     description: 'Using !important leads to specificity issues.'
 				    },
 				    {start: 1,
 				     end: 6,
 				     line: 12,
 				     severity: 'error',
-				     description: 'Use of !important.'
+				     description: 'Using !important leads to specificity issues.'
 				    },
 				    {start: 1,
 				     end: 6,
 				     line: 13,
 				     severity: 'error',
-				     description: 'Use of !important.'
+				     description: 'Using !important leads to specificity issues.'
 				    },
 				    {start: 15,
 				     end: 18,
