@@ -441,7 +441,6 @@ define([
 				}
 				var searchParams = this._searcher.createSearchParams(keyword.keyword, this._nameSearch, this._searchOnRoot,{exclude:excludeFilesFromSetting});
 				var renderFunction = this._searchRenderer.makeRenderFunction(this._contentTypeService, this.$results, false, this.decorateResult.bind(this));
-				this.currentSearch = renderFunction;
 				var div = document.createElement("div"); //$NON-NLS-0$
 				div.appendChild(document.createTextNode(this._nameSearch ? messages['Searching...'] : util.formatMessage(messages["SearchOccurences"], text)));
 				lib.empty(this.$results);
@@ -451,13 +450,10 @@ define([
 				}
 				var currentSearch = this._searchPending = this._searcher.search(searchParams).then(function(searchResult) {
 					this._searchPending =  null;
-					if (renderFunction === this.currentSearch || this.cancelled) {
-						this.cancelled = false;
-						var filteredResult = searchResult.filter(function(item) {
-							return (keyword.folderKeyword ? (item.path.indexOf(keyword.folderKeyword) >= 0) : true);
-						});
-						renderFunction(filteredResult, searchParams.keyword, null, searchParams);
-					}
+					var filteredResult = searchResult.filter(function(item) {
+						return keyword.folderKeyword ? item.path.indexOf(keyword.folderKeyword) >= 0 : true;
+					});
+					renderFunction(filteredResult, searchParams.keyword, null, searchParams);
 				}.bind(this), function(error) {
 					if (currentSearch === this._searchPending) {
 						this._searchPending = null;
