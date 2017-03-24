@@ -94,6 +94,12 @@ var TaskStoreMongoDB = function(callback) {
 		}.bind(this));
 		this._mongoose.connect('mongodb://localhost/orion_multitenant');
 	}
+	api.getOrionEE().on("close-server", function(){
+		console.log("Closing Task MongoDB");
+		if(this._mongoose && (this._mongoose.connection.readyState === 1 || this._mongoose.connection.readyState === 2)){
+			this._mongoose.disconnect();
+		}
+	});
 };
 
 TaskStoreMongoDB.prototype = {

@@ -21,6 +21,7 @@
     "fs-extra": "^0.26.7",
     "generate-password": "^1.1.1",
     "google-protobuf": "^3.0.0-alpha.6.2",
+    "http-shutdown": "^1.2.0",
     "https": "^1.0.0",
     "js-yaml": "^3.6.1",
     "lockfile": "^1.0.1",

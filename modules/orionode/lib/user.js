@@ -160,6 +160,13 @@ module.exports.router = function(options) {
 	passport.serializeUser(orionAccount.serializeUser());
 	passport.deserializeUser(orionAccount.deserializeUser());
 	
+	api.getOrionEE().on("close-server", function(){
+		console.log("Closing User MongoDB");
+		if(mongoose && (mongoose.connection.readyState === 1 || mongoose.connection.readyState === 2)){
+			mongoose.disconnect();
+		}
+	});
+	
 	function canAddUsers() {
 		return !options.configParams["orion.auth.user.creation"];
 	}

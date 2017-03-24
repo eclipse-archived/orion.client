@@ -42,6 +42,12 @@ module.exports = function(options) {
 				worker.postMessage({id: id, originalUrl: originalUrl, workspaceDir: workspaceDir, contextPath: contextPath});
 			});
 		};
+		api.getOrionEE().on("close-server", function(){
+			console.log("Closing Search Workers")
+			searchWorkers.forEach(function(worker){
+				worker.terminate();
+			});
+		});
 	} else {
 		search = require('./searchWorker');
 	}
