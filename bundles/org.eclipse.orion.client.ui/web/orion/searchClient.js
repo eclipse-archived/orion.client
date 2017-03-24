@@ -192,20 +192,14 @@ define([
 		 * @param {Function(JSONObject)} Callback function that receives the results of the query.
 		 */
 		search: function(searchParams, generateMatches, generateMeta) {
-			var result = new Deferred();
 			try {
-				this._searchDeferred = this.getFileClient().search(searchParams);
-				this._searchDeferred.then(function(jsonData) {
-					this._searchDeferred = null;
+				return this.getFileClient().search(searchParams).then(function(jsonData) {
 					var searchResult = this.convert(jsonData, searchParams);
-					this._generateMatches(searchParams, searchResult, generateMatches).then(function() {
-						this._generateMeta(searchResult, generateMeta).then(function() {
-							result.resolve(searchResult);
+					return this._generateMatches(searchParams, searchResult, generateMatches).then(function() {
+						return this._generateMeta(searchResult, generateMeta).then(function() {
+							return searchResult;
 						});
 					}.bind(this));
-				}.bind(this), function(error) {
-					this._searchDeferred = null;
-					result.reject(error);
 				}.bind(this));
 			}
 			catch(err){
@@ -215,23 +209,19 @@ define([
 						this._crawler = this._createCrawler(searchParams);
 					}
 					if(searchParams.nameSearch) {
-						this._crawler.searchName(searchParams).then(function(jsonData) {
-							this._searchDeferred = null;
-							result.resolve(this.convert(jsonData, searchParams));
-						}.bind(this));
-					} else {
-						this._crawler.search(function() {
-							result.progress(arguments[0], arguments[1]);
-						}).then(function(jsonData) {
-							this._searchDeferred = null;
-							result.resolve(this.convert(jsonData, searchParams));
+						return this._crawler.searchName(searchParams).then(function(jsonData) {
+							return this.convert(jsonData, searchParams);
 						}.bind(this));
 					}
-				} else {
-					throw error;
+					var result;
+					return result = this._crawler.search(function() {
+						result.progress(arguments[0], arguments[1]);
+					}).then(function(jsonData) {
+						return this.convert(jsonData, searchParams);
+					}.bind(this));
 				}
+				throw error;
 			}
-			return result;
 		},
 		_generateSingle: function(sResult, searchHelper) {
 			return this.getFileClient().read(sResult.location).then(function(jsonData) {
@@ -294,12 +284,6 @@ define([
 				}
 			}
 			return converted;
-		},
-		cancel: function() {
-			if(this._searchDeferred) {
-				return this._searchDeferred.cancel();
-			}
-			return new Deferred().resolve();
 		},
 		_createCrawler: function(searchParams, options) {
 			this._crawler = new mSearchCrawler.SearchCrawler(this._registry, this.getFileClient(), searchParams, options);

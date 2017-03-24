@@ -263,11 +263,7 @@ define([
 		}
 		bidiUtils.initInputField(this.$fileName);
 		this.$fileName.addEventListener("input", function(evt) { //$NON-NLS-0$
-			self._time = + new Date();
-			if (self._timeoutId) {
-				clearTimeout(self._timeoutId);
-			}
-			self._timeoutId = setTimeout(self.checkSearch.bind(self), 0);
+			self.checkSearch();
 		}, false);
 		this.$fileName.addEventListener("keydown",function(evt) { //$NON-NLS-0$
 			if (evt.keyCode === lib.KEY.ENTER) {
@@ -388,14 +384,8 @@ define([
 
 	/** @private */
 	OpenResourceDialog.prototype.checkSearch = function() {
-		clearTimeout(this._timeoutId);
-		var now = Date.now();
-		if ((now - this._time) > this._searchDelay) {
-			this._time = now;
-			this.doSearch();
-		} else {
-			this._timeoutId = setTimeout(this.checkSearch.bind(this), 50); //$NON-NLS-0$
-		}
+		if (this._timeoutId) clearTimeout(this._timeoutId);
+		this._timeoutId = setTimeout(this.doSearch.bind(this), this._searchDelay); //$NON-NLS-0$
 	};
 
 	/** @private */
@@ -456,32 +446,27 @@ define([
 				div.appendChild(document.createTextNode(this._nameSearch ? messages['Searching...'] : util.formatMessage(messages["SearchOccurences"], text)));
 				lib.empty(this.$results);
 				this.$results.appendChild(div);
-				var deferredSearch;
-				if(this._searchPending) {
-					deferredSearch = this._searcher.cancel();
-					this.cancelled = true;
-				} else {
-					deferredSearch = new Deferred().resolve();
+				if (this._searchPending) {
+					this._searchPending.cancel();
 				}
-				deferredSearch.then(function(/*result*/) {
-					this._searchPending = true;
-					this._searcher.search(searchParams).then(function(searchResult) {
-						this._searchPending = false;
-						if (renderFunction === this.currentSearch || this.cancelled) {
-							this.cancelled = false;
-							var filteredResult = searchResult.filter(function(item) {
-								return (keyword.folderKeyword ? (item.path.indexOf(keyword.folderKeyword) >= 0) : true);
-							});
-							renderFunction(filteredResult, searchParams.keyword, null, searchParams);
-						}
-					}.bind(this), function(error) {
+				var currentSearch = this._searchPending = this._searcher.search(searchParams).then(function(searchResult) {
+					this._searchPending =  null;
+					if (renderFunction === this.currentSearch || this.cancelled) {
+						this.cancelled = false;
+						var filteredResult = searchResult.filter(function(item) {
+							return (keyword.folderKeyword ? (item.path.indexOf(keyword.folderKeyword) >= 0) : true);
+						});
+						renderFunction(filteredResult, searchParams.keyword, null, searchParams);
+					}
+				}.bind(this), function(error) {
+					if (currentSearch === this._searchPending) {
+						this._searchPending = null;
 						renderFunction(null, null, error, null);
-					}.bind(this));
+					}
 				}.bind(this));
 			}.bind(this));
-		}else{
-			this._showRecentSearchedOpenedFiles();
 		}
+		this._showRecentSearchedOpenedFiles();
 	};
 	
 	/** @private */
@@ -539,6 +524,7 @@ define([
 	/** @private */
 	OpenResourceDialog.prototype._beforeHiding = function() {
 		clearTimeout(this._timeoutId);
+		this._timeoutId = 0;
 	};
 	
 	OpenResourceDialog.prototype._afterHiding = function() {
