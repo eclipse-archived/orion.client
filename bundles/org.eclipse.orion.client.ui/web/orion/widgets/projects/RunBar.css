@@ -31,7 +31,6 @@
 	margin: 0 8px 0 0;
 	min-width: 270px;
 	transition: opacity 0.3s ease;
-	z-index: 60;
 }
 
 .launchConfigurationsWrapper > .launchConfigurationsButton.dropdownTrigger {
