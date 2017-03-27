@@ -14,6 +14,7 @@ var nodeUrl = require('url');
 var dragSrcEl = null;
 var contextSrcEl = null;
 var activeIndex = 0;
+var isInitiatingWorkspace = false;
 var needToCleanFrames = [];
 
 function redrawButtons() {
@@ -349,8 +350,11 @@ function createTab(url) {
 			var activeClassName = "context-menu-items-open";
 			menu.classList.remove(activeClassName);
 		});
-		var tabbuttons = document.querySelectorAll(".tabItem");
-		tabbuttons[activeIndex] && tabbuttons[activeIndex].click();
+		if(isInitiatingWorkspace){
+			var tabbuttons = document.querySelectorAll(".tabItem");
+			tabbuttons[activeIndex] && tabbuttons[activeIndex].click();
+			isInitiatingWorkspace = false;
+		}
 	});
 	document.body.appendChild(iframe);
 	var srcUrl = nodeUrl.parse(url);
@@ -362,6 +366,7 @@ function createTab(url) {
 }
 
 function setActiveIndex(index){
+	isInitiatingWorkspace = true;
 	activeIndex = index;
 }
 
