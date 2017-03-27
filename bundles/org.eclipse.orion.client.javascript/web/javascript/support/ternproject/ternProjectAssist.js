@@ -22,7 +22,7 @@ define([
 
 	var templates = [{
 		prefix: "",
-		name: "New file", //$NON-NLS-0$
+		name: Messages.newTernProjectFile, //$NON-NLS-0$
 		description: "",
 		template: '{\n' + //$NON-NLS-1$
 			'\t"plugins": {},\n' + //$NON-NLS-1$
@@ -170,7 +170,6 @@ define([
 		 * @param {EditorContext} editorContext The editor context
 		 * @param {?} params The parameters from the Orion API callback
 		 * @returns {Array.<Object>} returns
-		 * @since 11.0
 		 */
 		computeContentAssist: function computeContentAssist(editorContext, params) {
 			return astManager.getAST(editorContext, ".tern-project").then(function(ast) {
