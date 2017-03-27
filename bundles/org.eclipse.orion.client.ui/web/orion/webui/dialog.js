@@ -296,6 +296,7 @@ define(['orion/webui/littlelib', 'orion/uiUtils'],
 			this.$lastFocusedElement = this.$originalFocus = document.activeElement;
 			this.$frame.style.top = top + "px"; //$NON-NLS-0$
 			this.$frame.style.left = left + "px"; //$NON-NLS-0$ 
+			this.$frame.style["max-width"] = "calc(100% - " + left + "px";
 			this.$frame.classList.add("dialogShowing"); //$NON-NLS-0$
 			if (typeof this._afterShowing === "function") { //$NON-NLS-0$
 				this._afterShowing();
