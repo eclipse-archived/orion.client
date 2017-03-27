@@ -128,7 +128,6 @@ html[dir="rtl"] .logo { /* ACGC */
 	flex: 0 0 auto;
 	-ms-flex: 0 0 auto;
 	-webkit-flex: 0 0 auto;
-	z-index: 150;
 }
 
 /* 4px margin used by toolbar, plus 4px of border/padding */
