@@ -149,7 +149,7 @@ define([
 							Parser.visit(text, {
 								onObjectBegin: function(offset) {
 									var p = stack[stack.length - 1];
-									var n = {type: 'ObjectExpression', properties: [], range: [offset, -1]};
+									var n = {type: 'ObjectExpression', properties: [], range: [offset, -1], parent: p};
 									if (p.type === "Program") {
 										p.body = n;
 									} else if (p.type === "Property") {
@@ -164,8 +164,8 @@ define([
 								},
 								onObjectProperty: function(propertyName, offset, lngth) {
 									var p = stack[stack.length - 1];
-									var n = {type: "Property", range: [offset, -1], key: null, value: null};
-									n.key = {type: 'Literal', value: propertyName, range: [offset, offset + lngth]};
+									var n = {type: "Property", range: [offset, -1], key: null, value: null, parent: p};
+									n.key = {type: 'Literal', value: propertyName, range: [offset, offset + lngth], parent: n};
 									p.properties.push(n);
 									stack.push(n);
 								},
@@ -174,7 +174,7 @@ define([
 								 */
 								onArrayBegin: function(offset, lngth) {
 									var p = stack[stack.length - 1];
-									var n = {type: "ArrayExpression", elements: [], range: [offset, -1]};
+									var n = {type: "ArrayExpression", elements: [], range: [offset, -1], parent: p};
 									p.value = n;
 									stack.push(n);
 								},
@@ -185,7 +185,7 @@ define([
 								},
 								onLiteralValue: function(value, offset, lngth) {
 									var p = stack[stack.length - 1];
-									var n = {type: "Literal", value: value, range: [offset, offset + lngth]};
+									var n = {type: "Literal", value: value, range: [offset, offset + lngth], parent: p};
 									if (p.type === "Property") {
 										p.value = n;
 									} else if (p.type === "ArrayExpression") {
