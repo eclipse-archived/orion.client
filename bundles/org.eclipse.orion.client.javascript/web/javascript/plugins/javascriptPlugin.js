@@ -24,15 +24,14 @@ define([
 	'javascript/javascriptFormatter',
 	'javascript/javascriptProject',
 	'javascript/contentAssist/ternAssist',
-	'javascript/contentAssist/ternProjectAssist',
+	'javascript/jsonAstManager',
+	'javascript/support/ternproject/ternProjectSupport',
 	'javascript/validator',
-	'javascript/ternProjectValidator',
 	'javascript/occurrences',
 	'javascript/hover',
 	'javascript/outliner',
 	'javascript/astOutliner',
 	'javascript/cuProvider',
-	'javascript/ternProjectManager',
 	'orion/util',
 	'javascript/logger',
 	'javascript/commands/generateDocCommand',
@@ -47,8 +46,8 @@ define([
 	'i18n!javascript/nls/messages',
 	'orion/i18nUtil',
 	'orion/URL-shim'
-], function(PluginProvider, mServiceRegistry, Deferred, ScriptResolver, ASTManager, QuickFixes, JavaScriptFormatter, JavaScriptProject, TernAssist, TernProjectAssist,
-	EslintValidator, TernProjectValidator, Occurrences, Hover, Outliner, AstOutliner, CUProvider, TernProjectManager, Util, Logger, GenerateDocCommand, OpenDeclCommand, OpenImplCommand,
+], function(PluginProvider, mServiceRegistry, Deferred, ScriptResolver, ASTManager, QuickFixes, JavaScriptFormatter, JavaScriptProject, TernAssist,
+	JsonAstManager, TernProjectSupport, EslintValidator, Occurrences, Hover, Outliner, AstOutliner, CUProvider, Util, Logger, GenerateDocCommand, OpenDeclCommand, OpenImplCommand,
 	RenameCommand, RefsCommand, mJS, mJSON, mJSONSchema, mEJS, javascriptMessages, i18nUtil) {
 
 	var serviceRegistry = new mServiceRegistry.ServiceRegistry();
@@ -262,13 +261,29 @@ define([
 			Logger.log(err);
 		});
 
-	var ternProjectManager = new TernProjectManager.TernProjectManager(ternWorker, scriptresolver, serviceRegistry, setStarting);
-
 	/**
 	 * Create a new JavaScript project context
 	 * @since 12.0
 	 */
 	var jsProject = new JavaScriptProject(serviceRegistry);
+	var jsonAstManager = new JsonAstManager.JsonAstManager(serviceRegistry, jsProject);
+	/**
+	 * Register JSON AST manager as Model Change listener
+	 */
+	provider.registerService("orion.edit.model", //$NON-NLS-1$
+		{
+			onModelChanging: jsonAstManager.onModelChanging.bind(jsonAstManager),
+			onInputChanged: jsonAstManager.onInputChanged.bind(jsonAstManager)
+		},
+		{
+			contentType: ["application/json", "javascript/config"] //$NON-NLS-1$ //$NON-NLS-2$
+		});
+		
+// Register .tern-project support
+	
+	var ternProjectSupport = new TernProjectSupport(serviceRegistry, jsProject, jsonAstManager, ternWorker, scriptresolver, setStarting);
+	ternProjectSupport.registerExtensions(provider);
+	
 	provider.registerService("orion.edit.model", //$NON-NLS-1$
 		{
 			onInputChanged: jsProject.onInputChanged.bind(jsProject)
@@ -276,8 +291,6 @@ define([
 		{
 			contentType: ["application/javascript", "text/html", "application/json"] //$NON-NLS-1$ //$NON-NLS-2$//$NON-NLS-3$
 		});
-
-	jsProject.addHandler(ternProjectManager);
 
 	/**
 	 * Create the AST manager
@@ -514,26 +527,6 @@ define([
 			autoApply: false
 		});
 
-	provider.registerService("orion.edit.contentassist", //$NON-NLS-1$
-		{
-			/** @callback */
-			computeContentAssist: function(editorContext, params) {
-				return editorContext.getFileMetadata().then(function(meta) {
-					if (meta.name === ".tern-project") {
-						return editorContext.getText().then(function(text) {
-							return TernProjectAssist.getProposals(text, params);
-						});
-					}
-				});
-			}
-		},
-		{
-			contentType: ["application/json"], //$NON-NLS-1$
-			nls: 'javascript/nls/messages', //$NON-NLS-1$
-			name: 'ternProjectAssist', //$NON-NLS-1$
-			id: "orion.edit.contentassist.javascript.tern.project" //$NON-NLS-1$
-		});
-
 	/**
 	 * Register the jsdoc-based outline
 	 */
@@ -568,27 +561,8 @@ define([
 			name: javascriptMessages['jsHover'],
 			contentType: ["application/javascript", "text/html"] //$NON-NLS-1$ //$NON-NLS-2$
 		});
-
-	provider.registerService("orion.edit.validator", //$NON-NLS-1$
-		{
-			/**
-			 * @callback
-			 */
-			computeProblems: function(editorContext, context, config) {
-				return editorContext.getFileMetadata().then(function(meta) {
-					if (meta.name === '.tern-project') {
-						return editorContext.getText().then(function(text) {
-							return TernProjectValidator.validateAST(text);
-						});
-					}
-					return null;
-				});
-			}
-		},
-		{
-			contentType: ["application/json"] //$NON-NLS-1$
-		});
-
+		
+	
 	/**
 	 * Register AST manager as Model Change listener
 	 */

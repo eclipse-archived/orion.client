@@ -753,14 +753,13 @@ define([
 				return deferred.resolve(this.projectMeta);
 			}
 			this.projectPromise = new Deferred();
-			var parents = file.parents ? file.parents : file.Parents;
 			this.getFileClient().getProject(floc, {names: [this.PACKAGE_JSON, this.TERN_PROJECT]}).then(function(project) {
 				if(project) {
 					return deferred.resolve({Location: project.Location});
 				}
-				fallbackProjectResolve.call(this, deferred, parents);
+				fallbackProjectResolve.call(this, deferred, file);
 			}.bind(this), /* @callback */ function reject(err) {
-				fallbackProjectResolve.call(this, deferred, parents);
+				fallbackProjectResolve.call(this, deferred, file);
 			}.bind(this));
 		} else {
 			return deferred.resolve(null);
@@ -774,7 +773,8 @@ define([
 	 * @param {Array.<?>} parents The array of parents to look in  
 	 * @since 14.0
 	 */
-	function fallbackProjectResolve(deferred, parents) {
+	function fallbackProjectResolve(deferred, file) {
+		var parents = file.parents ? file.parents : file.Parents;
 		if(Util.isElectron) {
 			//TODO call out the server for #getProject
 			var promises = [],
@@ -796,8 +796,14 @@ define([
                     return item;
                 });
 			}, new Deferred().resolve());
-		} else {
+		} else if(parents && parents.length > 0) {
 			deferred.resolve(parents[parents.length-1]);
+		} else {
+			if(file.Directory) {
+				deferred.resolve({Location: file.Location ? file.Location : file.location});
+			} else {
+				deferred.resolve({Location: "/file/"});
+			}
 		}
 	}
 
