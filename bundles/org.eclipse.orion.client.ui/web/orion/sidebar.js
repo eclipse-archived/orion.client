@@ -374,6 +374,7 @@ define(['orion/objects', 'orion/commands', 'orion/outliner', 'orion/webui/little
 					if (this._inlineSearchPane.isVisible()) {
 						this._inlineSearchPane.hide();
 					} else {
+						this._inlineSearchPane.updateSearchScopeFromSelection(data.items.length > 0 ? data.items[0] : data.items);
 						var mainSplitter = mGlobalCommands.getMainSplitter();
 						if (mainSplitter.splitter.isClosed()) {
 							mainSplitter.splitter.toggleSidePanel();

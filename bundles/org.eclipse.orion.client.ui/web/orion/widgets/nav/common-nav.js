@@ -311,7 +311,7 @@ define([
 			}
 
 			// Context Menu search action
-			commandRegistry.registerCommandContribution(contextMenuActionsScope, "orion.searchInFolder", 1, "orion.commonNavContextMenuGroup"); //$NON-NLS-0$
+			commandRegistry.registerCommandContribution(contextMenuActionsScope, "orion.openSearch", 1, "orion.commonNavContextMenuGroup"); //$NON-NLS-0$
 			commandRegistry.registerCommandContribution(contextMenuActionsScope, "orion.problemsInFolder", 2, "orion.commonNavContextMenuGroup"); //$NON-NLS-0$
 
 

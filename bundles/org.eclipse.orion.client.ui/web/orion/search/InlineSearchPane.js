@@ -161,6 +161,12 @@ define([
 			this._submitSearch();
 		},
 		
+		updateSearchScopeFromSelection(meta){
+			if(meta){
+				this._searcher._setLocationbyURL(meta);
+			}
+		},
+		
 		_generateAnnotations: function(fileLocation, editor) {
 			this._searchResultExplorer.findFileNode(fileLocation).then(function(fileNode) {
 				if(fileNode && fileNode.children && editor) {
