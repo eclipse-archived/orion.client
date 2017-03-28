@@ -154,6 +154,8 @@ define([
 										p.body = n;
 									} else if (p.type === "Property") {
 										p.value = n;
+									} else if(p.type === "ArrayExpression") {
+										p.elements.push(n);
 									}
 									stack.push(n);
 								},
