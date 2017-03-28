@@ -555,7 +555,7 @@ define("orion/editor/linkedMode", [
 					if (position.escape) { continue; }
 					var type = mAnnotations.AnnotationType.ANNOTATION_LINKED_GROUP;
 					if (position.group === model.selectedGroupIndex) {
-						if (position.index === 0) {
+						if (position.index === 0 && position.count > 1) {
 							type = mAnnotations.AnnotationType.ANNOTATION_SELECTED_LINKED_GROUP;
 						} else {
 							type = mAnnotations.AnnotationType.ANNOTATION_CURRENT_LINKED_GROUP;
