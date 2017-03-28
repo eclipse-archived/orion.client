@@ -1680,6 +1680,7 @@ objects.mixin(EditorSetup.prototype, {
 				this.editorViewers[1].inputManager.setInput(rootLocation);
 			}
 		}
+		sessionStorage.splitterSelection = mode;
 	},
 	createSplitMenu: function() {
 		var that = this;
@@ -1696,7 +1697,7 @@ objects.mixin(EditorSetup.prototype, {
 			that.commandRegistry.destroy(toolbar);
 			that.commandRegistry.renderCommands(toolbar, toolbar, that, that, "button"); //$NON-NLS-0$
 		}
-		var choices = [
+		var choices = this.splitMenuChoices = [
 			{name: messages["SplitSinglePage"], mode: MODE_SINGLE, imageClass: "core-sprite-page", checked: true, callback: callback}, //$NON-NLS-0$
 			{name: messages["SplitVertical"], mode: MODE_VERTICAL, imageClass: "core-sprite-vertical", callback: callback}, //$NON-NLS-0$
 			{name: messages["SplitHorizontal"], mode: MODE_HORIZONTAL, imageClass: "core-sprite-horizontal", callback: callback}, //$NON-NLS-0$
@@ -1743,8 +1744,10 @@ exports.setUpEditor = function(serviceRegistry, pluginRegistry, preferences, rea
 					setup.editorViewers.push(setup.createEditorViewer());
 					setup.setActiveEditorViewer(setup.editorViewers[0]);
 					if (enableSplitEditor) {
+						var mode = Number(sessionStorage.splitterSelection) || MODE_SINGLE;
 						setup.createSplitMenu();
-						setup.setSplitterMode(MODE_SINGLE);
+						setup.splitterMode = MODE_SINGLE;
+						setup.splitMenuChoices[mode].callback();
 					}
 					setup.load();
 				});
