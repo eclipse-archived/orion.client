@@ -108,7 +108,7 @@ define([
 			});
 			if (!fromOnly) {
 				// if we only have empty lines and comments, only suggest FROM
-				return [ createFROM(context.prefix, offset) ];
+				return [ createFROM(context.prefix, offset, this.markdowns["FROM"]) ];
 			}
 			
 			if (context.prefix === "") {
