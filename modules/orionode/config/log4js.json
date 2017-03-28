@@ -1,0 +1,16 @@
+{
+    "levels": {
+        "server": "INFO",
+        "audit-logs": "INFO"
+    },
+    "appenders": [
+        {
+            "type": "console",
+            "layout": {
+                "type": "pattern",
+                "pattern": "[%d] [%p] [%c] %m",
+                "tokens": {}
+            }
+        }
+    ]
+}

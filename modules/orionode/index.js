@@ -22,13 +22,13 @@ function handleError(err) {
 }
 
 function startServer(options) {
+	options = options || {};
 	if(options.configParams["additional.modules.path"]){
 		var addModulePath = require('app-module-path');
 		options.configParams["additional.modules.path"].split(",").forEach(function(modulePath){
 			addModulePath.addPath(path.join(__dirname, modulePath));
 		});
 	}
-	options = options || {};
 	options.configParams = options.configParams || {};
 	options.maxAge = typeof options.maxAge === "number" ? options.maxAge : undefined;
 	var contextPath = options && options.configParams["orion.context.path"] || "";
@@ -66,6 +66,19 @@ function startServer(options) {
 		} else {
 			app.use(require(options.configParams["login.module"] || "./lib/user").router(options));
 		}
+		app.use('/version', require('./lib/version').router(options));
+		if(options.configParams["additional.endpoint"]){
+			var additionalEndpoints = require(options.configParams["additional.endpoint"]);
+			additionalEndpoints.forEach(function(additionalEndpoint){
+				if(additionalEndpoint.endpoint){
+					additionalEndpoint.authenticated ? app.use(additionalEndpoint.endpoint, checkAuthenticated, require(additionalEndpoint.module).router(options))
+						: app.use(additionalEndpoint.endpoint, require(additionalEndpoint.module).router(options));
+				}else{
+					var middleware = require(additionalEndpoint.module)(options);
+					if (middleware)	app.use(middleware); // use this module as a middleware 
+				}
+			});
+		}
 		app.use('/site', checkAuthenticated, require('./lib/sites')(options));
 		app.use('/task', checkAuthenticated, require('./lib/tasks').router({ taskRoot: contextPath + '/task', singleUser: options.configParams["orion.single.user"]}));
 		app.use('/filesearch', checkAuthenticated, require('./lib/search')(options));
@@ -76,14 +89,6 @@ function startServer(options) {
 		app.use('/prefs', checkAuthenticated, require('./lib/controllers/prefs').router(options));
 		app.use('/xfer', checkAuthenticated, require('./lib/xfer')({fileRoot: contextPath + '/file', options:options}));
 		app.use('/metrics', require('./lib/metrics').router(options));
-		app.use('/version', require('./lib/version').router(options));
-		if(options.configParams["additional.endpoint"]){
-			var additionalEndpoints = require(options.configParams["additional.endpoint"]);
-			additionalEndpoints.forEach(function(additionalEndpoint){
-				additionalEndpoint.authenticated ? app.use(additionalEndpoint.endpoint, checkAuthenticated, require(additionalEndpoint.module).router(options))
-					: app.use(additionalEndpoint.endpoint, require(additionalEndpoint.module).router(options));
-			});
-		}
 		if (options.configParams.isElectron) app.use('/update', require('./lib/update').router(options));
 
 		// Static files

@@ -58,13 +58,17 @@ function startServer(cb) {
 		var password = argslib.readPasswordFile(passwordFile);
 		var dev = Object.prototype.hasOwnProperty.call(args, 'dev');
 		var log = Object.prototype.hasOwnProperty.call(args, 'log');
+		// init logging
+		var log4js = require('log4js');
+		log4js.configure(path.join(__dirname, 'config/log4js.json'));
+		var logger = log4js.getLogger('server');
 		if (dev) {
-			console.log('Development mode: client code will not be cached.');
+			logger.info('Development mode: client code will not be cached.');
 		}
 		if (passwordFile) {
-			console.log(util.format('Using password from file: %s', passwordFile));
+			logger.info(util.format('Using password from file: %s', passwordFile));
 		}
-		console.log(util.format('Using workspace: %s', workspaceDir));
+		logger.info(util.format('Using workspace: %s', workspaceDir));
 		
 		var server;
 		try {
@@ -100,7 +104,7 @@ function startServer(cb) {
 
 			server.on('listening', function() {
 				configParams.port = port;
-				console.log(util.format('Listening on port %d...', port));
+				logger.info(util.format('Listening on port %d...', port));
 				if (cb) {
 					cb();
 				}
@@ -116,16 +120,16 @@ function startServer(cb) {
 			// this function is called when you want the server to die gracefully
 			// i.e. wait for existing connections
 			var gracefulShutdown = function() {
-				console.log("Received kill signal, shutting down gracefully.");
+				logger.info("Received kill signal, shutting down gracefully.");
 				api.getOrionEE().emit("close-socket");
 				server.shutdown(function() {
 					api.getOrionEE().emit("close-server");// Disconnect Mongoose // Close Search Workers
-					console.log("Closed out remaining connections.");
+					logger.info("Closed out remaining connections.");
 					process.exit();
 				});
 				setTimeout(function() {
 					api.getOrionEE().emit("close-server");
-					console.error("Could not close connections in time, forcefully shutting down");
+					logger.error("Could not close connections in time, forcefully shutting down");
 					process.exit();
 				}, configParams["shutdown.timeout"]);
 			};
@@ -138,7 +142,7 @@ function startServer(cb) {
 				}
 			});
 		} catch (e) {
-			console.error(e && e.stack);
+			logger.error(e && e.stack);
 		}
 	});
 }
