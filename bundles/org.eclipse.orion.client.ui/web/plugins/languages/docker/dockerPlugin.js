@@ -225,12 +225,12 @@ define([
 								if (content.charAt(j) === ' ' || content.charAt(j)  === '\t'
 										|| content.charAt(j) === '\r' || content.charAt(j)  === '\n') {
 									if (i <= context.offset && context.offset <= j) {
-										return markdowns[content.substring(i, j)];
+										return markdowns[content.substring(i, j).toUpperCase()];
 									}
 									return null;
 								}
 							}
-							return markdowns[content.substring(i, j)];
+							return markdowns[content.substring(i, j).toUpperCase()];
 						}
 					}
 					return null;
