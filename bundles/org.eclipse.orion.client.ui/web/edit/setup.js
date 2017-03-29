@@ -278,10 +278,10 @@ function TabWidget(options) {
 	tabWidgetDropdownNode.setAttribute("aria-haspopup", "true");
 
 	this.parent.appendChild(tabWidgetDropdownNode);
+	this.restoreTabsFromStorage();
 
 	if (this.enableEditorTabs) {
 		this.createDropdown_();
-		this.restoreTabsFromStorage();
 	}
 }
 
@@ -438,7 +438,7 @@ objects.mixin(TabWidget.prototype, {
 		if (sessionStorage.hasOwnProperty("editorTabs_" + this.id)) {
 			try {
 				var cachedTabs = JSON.parse(sessionStorage["editorTabs_" + this.id]);
-				cachedTabs.forEach(function(cachedTab) {
+				cachedTabs.reverse().forEach(function(cachedTab) {
 					if (cachedTab) {
 						this.addTab(cachedTab.metadata, cachedTab.href);
 					}
@@ -1468,8 +1468,19 @@ objects.mixin(EditorSetup.prototype, {
 	load: function() {
 		var lastEditedFile = sessionStorage.lastFile;
 		var currentHash = PageUtil.hash();
-		// lastEditedFile exists in session storage and if the project didn't change.
+
+		// If loading split panes, check to see if the second pane is loading window hash
+		// and set input accordingly.
+		if (this.editorViewers.length > 1) {
+			var openFile = this.editorViewers[1].tabWidget.selectedFile.metadata.Location;
+			if (openFile && currentHash === "" || currentHash.lastIndexOf(openFile, 1 ) === 1) {
+				var editorHref = this.editorViewers[0].tabWidget.selectedFile.href;
+				currentHash = "#" + editorHref.split("#")[1];
+				lastEditedFile = null;
+			}
+		}
 		if (lastEditedFile && lastEditedFile.lastIndexOf(currentHash, 0) === 0 && lastEditedFile !== currentHash) {
+			// If the project didn't change, preserve resource parameters
 			window.location.hash = currentHash = lastEditedFile;
 		}
 		this.setInput(currentHash);
@@ -1652,6 +1663,14 @@ objects.mixin(EditorSetup.prototype, {
 		if (oldSplitterMode === MODE_SINGLE && mode !== MODE_SINGLE) {
 			this.lastTarget = null;
 			this.editorViewers[1].shown = true;
+			if (this.editorViewers[1].tabWidget.fileList.length > 0) {
+				var selectedFile = this.editorViewers[1].tabWidget.selectedFile;
+				if (selectedFile) {
+					var params = PageUtil.matchResourceParameters(selectedFile.href);
+					delete params.resource;
+					href = uriTemplate.expand({resource: selectedFile.metadata.Location, params: params});
+				}
+			}
 			if (href) {
 				this.editorViewers[1].inputManager.setInput(href);
 			} else {
@@ -1666,6 +1685,7 @@ objects.mixin(EditorSetup.prototype, {
 				this.editorViewers[1].inputManager.setInput(rootLocation);
 			}
 		}
+		sessionStorage.splitterSelection = mode;
 	},
 	createSplitMenu: function() {
 		var that = this;
@@ -1682,7 +1702,7 @@ objects.mixin(EditorSetup.prototype, {
 			that.commandRegistry.destroy(toolbar);
 			that.commandRegistry.renderCommands(toolbar, toolbar, that, that, "button"); //$NON-NLS-0$
 		}
-		var choices = [
+		var choices = this.splitMenuChoices = [
 			{name: messages["SplitSinglePage"], mode: MODE_SINGLE, imageClass: "core-sprite-page", checked: true, callback: callback}, //$NON-NLS-0$
 			{name: messages["SplitVertical"], mode: MODE_VERTICAL, imageClass: "core-sprite-vertical", callback: callback}, //$NON-NLS-0$
 			{name: messages["SplitHorizontal"], mode: MODE_HORIZONTAL, imageClass: "core-sprite-horizontal", callback: callback}, //$NON-NLS-0$
@@ -1729,8 +1749,10 @@ exports.setUpEditor = function(serviceRegistry, pluginRegistry, preferences, rea
 					setup.editorViewers.push(setup.createEditorViewer());
 					setup.setActiveEditorViewer(setup.editorViewers[0]);
 					if (enableSplitEditor) {
+						var mode = Number(sessionStorage.splitterSelection) || MODE_SINGLE;
 						setup.createSplitMenu();
-						setup.setSplitterMode(MODE_SINGLE);
+						setup.splitterMode = MODE_SINGLE;
+						setup.splitMenuChoices[mode].callback();
 					}
 					setup.load();
 				});
