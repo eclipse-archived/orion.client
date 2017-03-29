@@ -211,11 +211,12 @@ define([
 				     severity: 'error',
 				     description: 'Using !important leads to specificity issues.'
 				    },
-				    {start: 0,
-				     end: 3,
-				     severity: 'warning',
-				     description: 'Too many !important declarations (11), try to use less than 10 to avoid specificity issues.'
-				    }
+				    // We disable the 'too many' warning as it is unhelpful and doesn't work with ignore quickfixes
+//				    {start: 0,
+//				     end: 3,
+//				     severity: 'warning',
+//				     description: 'Too many !important declarations (11), try to use less than 10 to avoid specificity issues.'
+//				    }
 				]);
 			});
 		});
@@ -289,11 +290,12 @@ define([
 				     severity: 'error',
 				     description: 'Using !important leads to specificity issues.'
 				    },
-				    {start: 15,
-				     end: 18,
-				     severity: 'warning',
-				     description: 'Too many !important declarations (11), try to use less than 10 to avoid specificity issues.'
-				    }
+				    // We disable the 'too many' warning as it is unhelpful and doesn't work with ignore quickfixes
+//				    {start: 15,
+//				     end: 18,
+//				     severity: 'warning',
+//				     description: 'Too many !important declarations (11), try to use less than 10 to avoid specificity issues.'
+//				    }
 				]);
 			});
 		});

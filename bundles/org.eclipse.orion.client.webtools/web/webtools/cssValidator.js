@@ -78,7 +78,8 @@ define("webtools/cssValidator", [
 		 */
 		_computeProblems: function(results) {
 			    var messages = results.messages,
-			    problems = [];
+			    problems = [],
+			    cssRuleId;
 			for (var i=0; i < messages.length; i++) {
 				var message = messages[i],
 					range = null,
@@ -104,8 +105,10 @@ define("webtools/cssValidator", [
 						}
 					}
 				}
-				var cssRuleId = undefined;
-				if (id !== 'errors'){
+				// We don't want the ignore quickfix to show up for certain problems (Bug 514433)
+				cssRuleId = undefined;
+				var noIgnoreQuickfix = ['errors', 'import-ie-limit', 'floats', 'font-faces', 'font-sizes', 'selector-max-approaching', 'selector-max']; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$ //$NON-NLS-7$
+				if (noIgnoreQuickfix.indexOf(id) === -1){
 					cssRuleId = id;
 				}
 				if(range) {

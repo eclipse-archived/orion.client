@@ -9446,7 +9446,8 @@ CSSLint.addRule({
                 if (idCount === 1) {
                     reporter.report("Don't use IDs in selectors.", selector.line, selector.col, rule);
                 } else if (idCount > 1) {
-                    reporter.report(idCount + " IDs in the selector, really?", selector.line, selector.col, rule,  {nls: "ids-really", 0: idCount}); //ORION NLS message
+                	// ORION Disable rules that give warnings and warn about the count (Bug 514433)
+//                    reporter.report(idCount + " IDs in the selector, really?", selector.line, selector.col, rule,  {nls: "ids-really", 0: idCount}); //ORION NLS message
                 }
             }
 
@@ -9557,8 +9558,9 @@ CSSLint.addRule({
         parser.addListener("endstylesheet", function() {
             reporter.stat("important", count);
             if (count >= 10) {
-                reporter.rollupWarn("Too many !important declarations (" + count + "), try to use less than 10 to avoid specificity issues.",
-                    rule, {0:count, nls: "important-count"}); //ORION NLS message
+            	// ORION Disable rules that give warnings and warn about the count (Bug 514433)
+//                reporter.rollupWarn("Too many !important declarations (" + count + "), try to use less than 10 to avoid specificity issues.",
+//                    rule, {0:count, nls: "important-count"}); //ORION NLS message
             }
         });
     }
