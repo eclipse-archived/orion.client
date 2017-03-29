@@ -57,10 +57,10 @@ define([
 					},
 					"annotationRange": {
 						"currentBracket": {
-							"backgroundColor": "#00FE00"
+							"backgroundColor": "#ADFFAD"
 						},
 						"matchingBracket": {
-							"backgroundColor": "#00FE00"
+							"backgroundColor": "#ADFFAD"
 						},
 						"matchingSearch": {
 							"backgroundColor": "#c3e1ff",
@@ -444,7 +444,7 @@ define([
 					},
 					"annotationRange": {
 						"currentBracket": {
-							"backgroundColor": "#00FE00"
+							"backgroundColor": "#4178be"
 						},
 						"matchingBracket": {
 							"backgroundColor": "#4178be"
