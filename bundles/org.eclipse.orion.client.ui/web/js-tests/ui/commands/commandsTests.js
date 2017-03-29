@@ -564,7 +564,7 @@ define(['chai/chai', 'orion/serviceregistry', 'orion/commandRegistry', 'orion/co
 				init("testRenderAtomicButtons");
 				commandRegistry.registerCommandContribution("orion.edit.quickfix", "test.quickfix", 1);
 				try {
-					commandRegistry.renderCommands("orion.edit.quickfix", parentDiv, null, null, 'quickfix', {_annotationModel: {}}, null); //$NON-NLS-1$ //$NON-NLS-2$
+					commandRegistry.renderCommands("orion.edit.quickfix", parentDiv, null, null, 'quickfix', {annotation: {_annotationModel: {}}}, null); //$NON-NLS-1$ //$NON-NLS-2$
 					assert.equal(parentDiv.childNodes.length, 1);
 					assert.equal(parentDiv.childNodes[0].childNodes.length, 1);
 					assert.equal(parentDiv.childNodes[0].childNodes[0].childNodes.length, 1);
@@ -586,7 +586,7 @@ define(['chai/chai', 'orion/serviceregistry', 'orion/commandRegistry', 'orion/co
 				var promise = new Deferred();
 				setTimeout(function() {
 					try {
-						commandRegistry.renderCommands("orion.edit.quickfix", parentDiv, null, null, 'quickfix', {_annotationModel: {}}, null); //$NON-NLS-1$ //$NON-NLS-2$
+						commandRegistry.renderCommands("orion.edit.quickfix", parentDiv, null, null, 'quickfix', {annotation: {_annotationModel: {}}}, null); //$NON-NLS-1$ //$NON-NLS-2$
 						assert.equal(parentDiv.childNodes.length, 1);
 						assert.equal(parentDiv.childNodes[0].childNodes.length, 1);
 						assert.equal(parentDiv.childNodes[0].childNodes[0].childNodes.length, 3);
@@ -615,7 +615,7 @@ define(['chai/chai', 'orion/serviceregistry', 'orion/commandRegistry', 'orion/co
 				var promise = new Deferred();
 				setTimeout(function() {
 					try {
-						commandRegistry.renderCommands("orion.edit.quickfix", parentDiv, null, null, 'quickfix', {_annotationModel: {}}, null); //$NON-NLS-1$ //$NON-NLS-2$
+						commandRegistry.renderCommands("orion.edit.quickfix", parentDiv, null, null, 'quickfix', {annotation: {_annotationModel: {}}}, null); //$NON-NLS-1$ //$NON-NLS-2$
 						assert.equal(parentDiv.childNodes.length, 1);
 						assert.equal(parentDiv.childNodes[0].childNodes.length, 1);
 						assert.equal(parentDiv.childNodes[0].childNodes[0].childNodes.length, 3);
