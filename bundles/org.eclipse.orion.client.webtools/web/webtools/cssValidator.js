@@ -104,6 +104,10 @@ define("webtools/cssValidator", [
 						}
 					}
 				}
+				var cssRuleId = undefined;
+				if (id !== 'errors'){
+					cssRuleId = id;
+				}
 				if(range) {
     				problems.push({
 						id: id,
@@ -111,7 +115,11 @@ define("webtools/cssValidator", [
 						line: message.line,
 						start: range[0],
 						end: range[1],
-						severity: message.type
+						severity: message.type,
+						data: {
+							ruleSource: 'css', //$NON-NLS-1$
+							cssRuleId: cssRuleId
+						}
 					});
 				}
 			}

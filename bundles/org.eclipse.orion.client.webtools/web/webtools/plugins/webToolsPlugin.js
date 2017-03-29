@@ -203,7 +203,40 @@ define(['orion/plugin',
     	 * Register quick fixes as editor commands
     	 */
     	var cssQuickFixComputer = new cssQuickFixes.CssQuickFixes();
-
+    	
+    	provider.registerServiceProvider("orion.edit.command", //$NON-NLS-1$
+		{
+			/** @callback */
+			execute: function(editorContext, context) {
+				context.annotation.fixid = 'ignore-on-line'; //$NON-NLS-1$
+				return cssQuickFixComputer.execute(editorContext, context);
+			}
+		},
+		{
+			name: messages["quickfix-ignore-on-line"],
+			scopeId: "orion.edit.quickfix", //$NON-NLS-1$
+			id: "css.ignore.on-line.fix", //$NON-NLS-1$
+			contentType: ['text/css', 'text/html'], //$NON-NLS-1$ //$NON-NLS-2$
+			validationProperties: [{
+					source: "annotation:id", //$NON-NLS-1$
+					match: "^(?:.*\\S.*)$" //$NON-NLS-1$
+				},
+				{
+					source: "annotation:data:cssRuleId", //$NON-NLS-1$
+					match: "^(?:.*\\S.*)$" //$NON-NLS-1$
+				},
+				{
+					source: "annotation:data:ruleSource", //$NON-NLS-1$
+					match: "css" //$NON-NLS-1$
+				},
+				{
+					source: "readonly", //$NON-NLS-1$
+					match: false
+				}
+			]
+		}
+		);
+		
     	provider.registerServiceProvider("orion.edit.command",  //$NON-NLS-1$
     		cssQuickFixComputer,
     		{

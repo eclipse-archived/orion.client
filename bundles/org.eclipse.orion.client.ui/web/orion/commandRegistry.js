@@ -1285,7 +1285,7 @@ define([
 								parent.classList.add('quickFixList'); //$NON-NLS-1$
 								var QUICKFIX_ID = 'quickfixDetails'; //$NON-NLS-1$
 								var quickfixDetails = parent.childNodes.item(QUICKFIX_ID);
-								if (command.id === 'ignore.in.file.fix'){
+								if (command.id === 'ignore.in.file.fix' || command.id === 'css.ignore.on-line.fix'){
 									if (!quickfixDetails){
 										quickfixDetails = document.createElement("div");
 										quickfixDetails.id = QUICKFIX_ID;

@@ -272,6 +272,7 @@ define({//Default message bundle
 	"zero-units": "Disallow units for 0 values:",   
 	
 	// CSS Quick Fixes
+	"quickfix-ignore-on-line": "Ignore",
 	"quickfix-empty-rules": "Remove the rule",
 	"quickfix-important": "Remove '!important' annotation",
 	"quickfix-zero-units": "Remove 'px' qualifier",

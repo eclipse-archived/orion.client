@@ -510,5 +510,60 @@ define([
 				]);
 			});
 		});
+		
+		it("Test csslint allow directive: unknown property", function(/*done*/) {
+		    var val = setup({buffer: "abc{f: 22px} /* csslint allow: known-properties */", rule: {id:null, severity:3}});
+			return validator.computeProblems(val.editorContext).then(function(result) {
+				assertProblems(result, [
+				]);
+			});
+		});
+		it("Test csslint allow directive: unknown property whitespace", function(/*done*/) {
+		    var val = setup({buffer: "abc{f: 22px} /*  \t  csslint    \t   allow:     \t   known-properties,,,,, \t   */", rule: {id:null, severity:3}});
+			return validator.computeProblems(val.editorContext).then(function(result) {
+				assertProblems(result, [
+				]);
+			});
+		});
+		it("Test csslint allow directive: unknown property broken whitespace", function(/*done*/) {
+		    var val = setup({buffer: "abc{f: 22px} /* csslint allow : known-properties */", rule: {id:null, severity:3}});
+			return validator.computeProblems(val.editorContext).then(function(result) {
+				assertProblems(result, [
+					{start: 5,
+				     end: 6,
+				     line: 1,
+				     severity: 'info',
+				     description: 'Unknown property \'f\'.'
+				    }
+				]);
+			});
+		});
+		it("Test csslint allow directive: unknown property multiple entries 1", function(/*done*/) {
+		    var val = setup({buffer: "abc{f: 22px} /* csslint allow: known-properties, zero-units */", rule: {id:null, severity:3}});
+			return validator.computeProblems(val.editorContext).then(function(result) {
+				assertProblems(result, [
+				]);
+			});
+		});
+		it("Test csslint allow directive: unknown property multiple entries 2", function(/*done*/) {
+		    var val = setup({buffer: "abc{f: 22px} /* csslint allow: zero-units, known-properties */", rule: {id:null, severity:3}});
+			return validator.computeProblems(val.editorContext).then(function(result) {
+				assertProblems(result, [
+				]);
+			});
+		});
+		it("Test csslint allow directive: unknown property no entries", function(/*done*/) {
+		    var val = setup({buffer: "abc{f: 22px} /* csslint allow: */", rule: {id:null, severity:3}});
+			return validator.computeProblems(val.editorContext).then(function(result) {
+				assertProblems(result, [
+					{start: 5,
+				     end: 6,
+				     line: 1,
+				     severity: 'info',
+				     description: 'Unknown property \'f\'.'
+				    }
+				]);
+			});
+		});
 	});
 });
