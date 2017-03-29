@@ -189,6 +189,7 @@ function addNewTab(id, iframe) {
 	});
 	tabParent.appendChild(tab);
 	update();
+	return tab;
 }
 
 function setTabLabel(id, str) {
@@ -359,7 +360,7 @@ function createTab(url) {
 	document.body.appendChild(iframe);
 	var srcUrl = nodeUrl.parse(url);
 	if(srcUrl.pathname === "/" || srcUrl.pathname.endsWith(".html")){
-		addNewTab(id, iframe);	
+		addNewTab(id, iframe).click();
 	}else{
 		needToCleanFrames.push(iframe);
 	}
