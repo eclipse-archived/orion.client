@@ -21,7 +21,8 @@ var Promise = require('bluebird');
 var mkdirp = require('mkdirp');
 var fs = Promise.promisifyAll(require('fs'));
 var fileUtil = require('./fileUtil');
-var crypto = require('crypto');
+var log4js = require('log4js');
+var logger = log4js.getLogger("xfer");
 
 function getUploadsFolder(options) {
 	if (options.options) {
@@ -43,7 +44,7 @@ module.exports = function(options) {
 	var UPLOADS_FOLDER = getUploadsFolder(options);
 	
 	mkdirp(UPLOADS_FOLDER, function (err) {
-		if (err) console.error(err);
+		if (err) logger.error(err);
 	});
 
 	return express.Router()

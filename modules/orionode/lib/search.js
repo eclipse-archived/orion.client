@@ -43,7 +43,6 @@ module.exports = function(options) {
 			});
 		};
 		api.getOrionEE().on("close-server", function(){
-			console.log("Closing Search Workers")
 			searchWorkers.forEach(function(worker){
 				worker.terminate();
 			});

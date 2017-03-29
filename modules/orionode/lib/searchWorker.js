@@ -9,6 +9,8 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 /*eslint-env node*/
+var log4js = require('log4js');
+var logger = log4js.getLogger("search-worker");
 
 try {
 	var Promise = require('bluebird');
@@ -326,5 +328,5 @@ try {
 		}.bind(this));
 	}.bind(this);
 } catch (err) {
-	console.log(err.message);
+	logger.error(err.message);
 }

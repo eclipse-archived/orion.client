@@ -19,7 +19,9 @@ var express = require('express'),
 	platform = os.platform(),
 	arch = os.arch(),
 	version = electron.app.getVersion(),
-	allPrefs = prefs.readPrefs();
+	allPrefs = prefs.readPrefs(),
+	log4js = require('log4js'),
+	logger = log4js.getLogger("update");
 
 module.exports = {};
 module.exports.router = function(options) {
@@ -54,8 +56,8 @@ module.exports.router = function(options) {
 			res.status(204).end(); // no content
 		});
 		autoUpdater.on("update-error", function(error) {
-			console.log(error);
+			logger.error(error);
 			res.status(400).end(); // client error
-		})
+		});
 	});	
 };

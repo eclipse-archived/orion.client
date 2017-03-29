@@ -25,7 +25,9 @@ var express = require('express'),
 	fs = require('fs'),
 	args = require('./args'),
 	api = require('./api'),
-	generator = require('generate-password');
+	generator = require('generate-password'),
+	log4js = require('log4js'),
+	logger = log4js.getLogger("user");
 	
 var CONFIRM_MAIL = "./multitenant/EmailConfirmation.txt",
 	PWD_CONFIRM_RESET_MAIL = "./multitenant/EmailConfirmationPasswordReset.txt",
@@ -132,13 +134,13 @@ module.exports.router = function(options) {
 				};
 				transport.sendMail(mailOptions, function(error, info){
 					if (error){
-						return console.log(error + " " + info);
+						return logger.info(error + " " + info);
 					}
-					//console.log('Message sent: ' + info.response);
+					//logger.info('Message sent: ' + info.response);
 				});
 			} else {
 				// dev
-				console.log(body);
+				logger.info(body);
 			}
 		});
 	}
@@ -161,7 +163,7 @@ module.exports.router = function(options) {
 	passport.deserializeUser(orionAccount.deserializeUser());
 	
 	api.getOrionEE().on("close-server", function(){
-		console.log("Closing User MongoDB");
+		logger.info("Closing User MongoDB");
 		if(mongoose && (mongoose.connection.readyState === 1 || mongoose.connection.readyState === 2)){
 			mongoose.disconnect();
 		}

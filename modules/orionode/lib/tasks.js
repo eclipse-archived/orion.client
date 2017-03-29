@@ -13,6 +13,8 @@ var express = require('express');
 var bodyParser = require('body-parser');
 var api = require('./api'), writeError = api.writeError, writeResponse = api.writeResponse;
 var crypto = require('crypto');
+var log4js = require('log4js');
+var logger = log4js.getLogger("tasks");
 
 var MS_EXPIRATION = 86400 * 1000 * 7; /* 7 days */  // TODO should be settable per task by client
 
@@ -95,7 +97,7 @@ var TaskStoreMongoDB = function(callback) {
 		this._mongoose.connect('mongodb://localhost/orion_multitenant');
 	}
 	api.getOrionEE().on("close-server", function(){
-		console.log("Closing Task MongoDB");
+		logger.info("Closing Task MongoDB");
 		if(this._mongoose && (this._mongoose.connection.readyState === 1 || this._mongoose.connection.readyState === 2)){
 			this._mongoose.disconnect();
 		}
@@ -297,7 +299,7 @@ Task.prototype = {
 		} else {
 			taskStore.updateTask(this, function(err) {
 				if (err) {
-					console.error(err.toString());
+					logger.error(err.toString());
 				}
 			});
 		}
@@ -313,7 +315,7 @@ Task.prototype = {
 		if (typeof total === "number") this.total = total;
 		taskStore.updateTask(this, function(err) {
 			if (err) {
-				console.error(err.toString());
+				logger.error(err.toString());
 			}
 		});
 	},

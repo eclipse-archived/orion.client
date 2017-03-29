@@ -14,12 +14,14 @@ var api = require('./api'),
 	fileUtil = require('./fileUtil'),
 	fs = require('fs'),
 	http = require('http'),
-	path = require('path');
+	path = require('path'),
+	log4js = require('log4js'),
+	logger = log4js.getLogger("ttyshell");
 var pty;
 try {
 	pty = require("node-pty");
 } catch (e) {
-	console.log("WARNING: node-pty is not installed. Some features will be unavailable. Reason: " + e.message);
+	logger.info("WARNING: node-pty is not installed. Some features will be unavailable. Reason: " + e.message);
 }
 
 exports.install = function(options) {
@@ -91,7 +93,7 @@ exports.install = function(options) {
 			// Handle missing node-pty
 			if (!pty) {
 				var error = new Error('node-pty is not installed on this server. Terminal cannot be used.');
-				console.error(error);
+				logger.error(error);
 				sock.emit('fail', error.message);
 				return;
 			}
@@ -124,7 +126,7 @@ exports.install = function(options) {
 					: sock.emit('data', data);
 				});
 
-				console.log('Created new %s (fd: %d, pid: %d)',
+				logger.info('Created new %s (fd: %d, pid: %d)',
 					shell,
 					terminal.fd, 
 					terminal.pid);
