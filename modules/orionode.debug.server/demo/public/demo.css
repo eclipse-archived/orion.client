@@ -1,0 +1,40 @@
+div {
+    /* border: 1px solid #333; */
+    margin: 5px;
+    padding:5px;
+}
+
+#editor {
+    height: 100%;
+    width: 100%;
+}
+
+#debugger {
+    width: 100%;
+    float: left;
+    position: relative;
+    margin: 0;
+    padding: 0;
+}
+
+#messenger {
+    width: 100%;
+}
+
+.message-io {
+    width: 50%;
+    vertical-align: top;
+}
+
+.message-io textarea {
+    height: 550px;
+    overflow: scroll;
+    font-size: 12px;
+    font-family: monospace;
+}
+
+.message-io textarea,
+.message-io button {
+    width: 100%;
+}
+

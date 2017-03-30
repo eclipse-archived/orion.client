@@ -56,6 +56,9 @@ define([
 						},
 						"currentLine": {
 							"backgroundColor": "#EAF2FE"
+						},
+						"highlightedLine": {
+							"backgroundImage": "linear-gradient(rgba(255, 255, 153, .5) 100%, rgba(255, 255, 153, .5))"
 						}
 					},
 					"annotationRange": {
@@ -257,6 +260,9 @@ define([
 						},
 						"currentLine": {
 							"backgroundColor": "#3B4B53"
+						},
+						"highlightedLine": {
+							"backgroundImage": "linear-gradient(rgba(255, 255, 153, .5) 100%, rgba(255, 255, 153, .5))"
 						}
 					},
 					"annotationRange": {
@@ -449,6 +455,9 @@ define([
 						},
 						"currentLine": {
 							"backgroundColor": "#152935"
+						},
+						"highlightedLine": {
+							"backgroundImage": "linear-gradient(rgba(255, 255, 153, .5) 100%, rgba(255, 255, 153, .5))"
 						}
 					},
 					"annotationRange": {
@@ -712,4 +721,4 @@ define([
 			getBaseTheme: getBaseTheme
 		};
 	}
-);
+);
