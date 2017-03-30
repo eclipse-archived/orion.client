@@ -919,6 +919,62 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 			this.install();
 		},
 
+		/**
+		 * Highlight a line.
+		 * @param {number} line
+		 */
+		highlightLine: function(line) {
+			// Find any existing annotation
+			var annotationModel = this.getAnnotationModel();
+			var textModel = this.getModel();
+			if (textModel.getBaseModel) {
+				textModel = textModel.getBaseModel();
+			}
+			var type = AT.ANNOTATION_HIGHLIGHTED_LINE;
+			var annotations = annotationModel.getAnnotations(0, textModel.getCharCount());
+			var remove = null;
+			while (annotations.hasNext()) {
+				var annotation = annotations.next();
+				if (annotation.type === type) {
+					remove = annotation;
+					break;
+				}
+			}
+			var lineStart = textModel.getLineStart(line);
+			var lineEnd = textModel.getLineEnd(line);
+			var add = AT.createAnnotation(type, lineStart, lineEnd);
+			// Replace to or add the new annotation
+			if (remove) {
+				annotationModel.replaceAnnotations([remove], [add]);
+			} else {
+				annotationModel.addAnnotation(add);
+			}
+		},
+
+		/**
+		 * Unhightlight the highlighted line
+		 */
+		unhighlightLine: function() {
+			var annotationModel = this.getAnnotationModel();
+			var textModel = this.getModel();
+			if (textModel.getBaseModel) {
+				textModel = textModel.getBaseModel();
+			}
+			var type = AT.ANNOTATION_HIGHLIGHTED_LINE;
+			var annotations = annotationModel.getAnnotations(0, textModel.getCharCount());
+			var remove = null;
+			while (annotations.hasNext()) {
+				var annotation = annotations.next();
+				if (annotation.type === type) {
+					remove = annotation;
+					break;
+				}
+			}
+			if (remove) {
+				annotationModel.removeAnnotation(remove);
+			}
+		},
+
 		install : function() {
 			if (this._textView) { return; }
 
@@ -1028,7 +1084,30 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 				}
 			}
 
+			var rulerOnDblClick = /* @callback */ function(lineIndex, e) {
+				if (e.shiftKey) {
+					addRemoveBookmark.call(this, lineIndex, e);
+				} else if (e.altKey) {
+					addRemoveConditionalBreakpoint.call(this, lineIndex, e);
+				} else {
+					addRemoveBreakpoint.call(this, lineIndex, e);
+				}
+			};
+
 			var addRemoveBookmark = /* @callback */ function(lineIndex, e) {
+				addRemoveAnnotation.call(this, lineIndex, e, AT.ANNOTATION_BOOKMARK);
+			};
+
+			var addRemoveBreakpoint = /* @callback */ function(lineIndex, e) {
+				addRemoveAnnotation.call(this, lineIndex, e, AT.ANNOTATION_BREAKPOINT);
+			};
+
+			var addRemoveConditionalBreakpoint = /* @callback */ function(lineIndex, e) {
+				addRemoveAnnotation.call(this, lineIndex, e, AT.ANNOTATION_CONDITIONAL_BREAKPOINT);
+			};
+
+			/** @callback */
+			function addRemoveAnnotation(lineIndex, e, annotationType) {
 				if (lineIndex === undefined) { return; }
 				if (lineIndex === -1) { return; }
 				var view = this.getView();
@@ -1040,16 +1119,25 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 				var bookmark = null;
 				while (annotations.hasNext()) {
 					var annotation = annotations.next();
-					if (annotation.type === AT.ANNOTATION_BOOKMARK) {
+					if (annotation.type === annotationType) {
 						bookmark = annotation;
 						break;
 					}
 				}
 				if (bookmark) {
-					annotationModel.removeAnnotation(bookmark);
+					editor.dispatchEvent({
+						// This event will only be triggered by the user double clicking the side bar. (i.e. add/remove bookmark or breakpoint)
+						type: 'AnnotationModified',
+						added: [],
+						removed: [bookmark]
+					});
 				} else {
-					bookmark = AT.createAnnotation(AT.ANNOTATION_BOOKMARK, lineStart, lineEnd, editor.getText(lineStart, lineEnd));
-					annotationModel.addAnnotation(bookmark);
+					bookmark = AT.createAnnotation(annotationType, lineStart, lineEnd, editor.getText(lineStart, lineEnd));
+					editor.dispatchEvent({
+						type: 'AnnotationModified',
+						added: [bookmark],
+						removed: []
+					});
 				}
 			};
 
@@ -1069,6 +1157,7 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 						styler.addAnnotationType(AT.ANNOTATION_MATCHING_BRACKET);
 						styler.addAnnotationType(AT.ANNOTATION_CURRENT_BRACKET);
 						styler.addAnnotationType(AT.ANNOTATION_CURRENT_LINE);
+						styler.addAnnotationType(AT.ANNOTATION_HIGHLIGHTED_LINE);
 						styler.addAnnotationType(AT.ANNOTATION_READ_OCCURRENCE);
 						styler.addAnnotationType(AT.ANNOTATION_WRITE_OCCURRENCE);
 						styler.addAnnotationType(AT.ANNOTATION_SELECTED_LINKED_GROUP);
@@ -1083,13 +1172,15 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 				var rulers = this._annotationFactory.createAnnotationRulers(this._annotationModel);
 				var ruler = this._annotationRuler = rulers.annotationRuler;
 				if (ruler) {
-					ruler.onDblClick = addRemoveBookmark;
+					ruler.onDblClick = rulerOnDblClick;
 					ruler.setMultiAnnotationOverlay({html: "<div class='annotationHTML overlay'></div>"}); //$NON-NLS-0$
 					ruler.addAnnotationType(AT.ANNOTATION_ERROR);
 					ruler.addAnnotationType(AT.ANNOTATION_WARNING);
 					ruler.addAnnotationType(AT.ANNOTATION_INFO);
 					ruler.addAnnotationType(AT.ANNOTATION_TASK);
 					ruler.addAnnotationType(AT.ANNOTATION_BOOKMARK);
+					ruler.addAnnotationType(AT.ANNOTATION_BREAKPOINT);
+					ruler.addAnnotationType(AT.ANNOTATION_CONDITIONAL_BREAKPOINT);
 					ruler.addAnnotationType(AT.ANNOTATION_DIFF_ADDED);
 					ruler.addAnnotationType(AT.ANNOTATION_DIFF_DELETED);
 					ruler.addAnnotationType(AT.ANNOTATION_DIFF_MODIFIED);
@@ -1111,6 +1202,8 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 					ruler.addAnnotationType(AT.ANNOTATION_INFO);
 					ruler.addAnnotationType(AT.ANNOTATION_TASK);
 					ruler.addAnnotationType(AT.ANNOTATION_BOOKMARK);
+					ruler.addAnnotationType(AT.ANNOTATION_BREAKPOINT);
+					ruler.addAnnotationType(AT.ANNOTATION_CONDITIONAL_BREAKPOINT);
 					ruler.addAnnotationType(AT.ANNOTATION_MATCHING_BRACKET);
 					ruler.addAnnotationType(AT.ANNOTATION_CURRENT_BRACKET);
 					ruler.addAnnotationType(AT.ANNOTATION_CURRENT_LINE);
@@ -1135,7 +1228,7 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 		        this._lineNumberRuler.addAnnotationType(AT.ANNOTATION_DIFF_ADDED);
 		        this._lineNumberRuler.addAnnotationType(AT.ANNOTATION_DIFF_MODIFIED);
 		        this._lineNumberRuler.addAnnotationType(AT.ANNOTATION_DIFF_DELETED);
-				this._lineNumberRuler.onDblClick = addRemoveBookmark;
+				this._lineNumberRuler.onDblClick = rulerOnDblClick;
 				this.setLineNumberRulerVisible(this._lineNumberRulerVisible || this._lineNumberRulerVisible === undefined, true);
 			}
 
