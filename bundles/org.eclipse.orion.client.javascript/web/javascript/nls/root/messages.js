@@ -22,6 +22,7 @@ define({
 	'javascript': 'JavaScript',
 	'ternContentAssist' : 'Tern JavaScript content assist',
 	'ternProjectAssist': 'Tern project file content assist',
+	'packageJsonAssist': 'Package.json file content assist',
 	'emptyFileTemplateDoc': 'Create new default contents for the .tern-project file',
 	'prefCodeStyle':'Code Style',
 	'prefBestPractices':'Best Practices',
@@ -521,5 +522,50 @@ define({
 	'redisConnect': 'Create a new Redis client and connect.',
 	'redisSet': 'Create a new Redis client set call.',
 	'redisGet': 'Create a new Redis client get call.',
-	'redisOn': 'Create a new Redis client event handler.'
+	'redisOn': 'Create a new Redis client event handler.',
+
+//Package.json metadata
+	'packageNameDoc': 'The name is what your package is called.\n\n'+
+					 'Some rules:\n'+
+					 '* The name must be less than or equal to 214 characters. This includes the scope for scoped packages.\n'+
+					 '* The name can\'t start with a dot or an underscore.'+
+					 '* New packages must not have uppercase letters in the name.'+
+					 '* The name ends up being part of a URL, an argument on the command line, and a folder name. Therefore, the name can\'t contain any non-URL-safe characters.',
+	'packageVersionDoc': 'The version of your package. The version must be parseable by [node-semver](https://github.com/isaacs/node-semver).',
+	'packageDescriptionDoc': 'The strig description of the package.',
+	'packageKeywordsDoc': 'An array of strings that allows people discover your package as it\'s listed in npm search.',
+	'packageHomepageDoc': 'The url to the project homepage.',
+	'packageBugsDoc': 'The url to your project\'s issue tracker and / or the email address to which issues should be reported. These are helpful for people who encounter issues with your package.',
+	'packageLicenseDoc': 'The license for your package. The license should be a [valid SPDX license idenifier](https://spdx.org/licenses/).',
+	'packageAuthorDoc': 'The author of the package is one person. A person can be an object with "name" and optionally "url" and "email" fields, or a single string the NPM will parse.',
+	'packageContributorsDoc': 'The cpontributors to a package is an array of persons. A person can be an object with "name" and optionally "url" and "email" fields, or a single string the NPM will parse.',
+	'packageFilesDoc': 'This is an array of files to include in your project. If you name a folder in the array, then it will also include the files inside that folder.',
+	'packageMainDoc': 'The main field is a module ID that is the primary entry point to your program.',
+	'packageBinDoc': 'A string to an executable, or an object that maps names to executables to link on your PATH during NPM install.',
+	'packageManDoc': 'Specify either a single file or an array of filenames to put in place for the man program to find.',
+	'packageDirectoriesDoc': 'The CommonJS Packages spec details a few ways that you can indicate the structure of your package using a directories object. If you look at npm\'s package.json, you\'ll see that it has directories for doc, lib, and man.',
+	'packageDirLibDoc': 'Tell people where the bulk of your library is. Nothing special is done with the lib folder in any way, but it\'s useful meta info.',
+	'packageDirBinDoc': 'If you specify a bin directory in directories.bin, all the files in that folder will be added.',
+	'packageDirManDoc': 'A folder that is full of man pages. Sugar to generate a "man" array by walking the folder.',
+	'packageDirDocDoc': 'Put markdown files in here. Eventually, these will be displayed nicely, maybe, someday',
+	'packageDirExamplesDoc': 'Put example scripts in here. Someday, it might be exposed in some clever way.',
+	'packageDirTestDoc': 'Put your tests in here. It is currently not exposed, but it might be in the future.',
+	'packageRepositoryDoc': 'The object that contains the type and URL for where your code lives.',
+	'packageScriptsDoc': 'The "scripts" property is a dictionary containing script commands that are run at various times in the lifecycle of your package. The key is the lifecycle event, and the value is the command to run at that point.\n\n'+
+						 'See [npm-scripts](https://docs.npmjs.com/misc/scripts) to find out more about writing package scripts.',
+	'packageConfigDoc': 'A "config" object can be used to set configuration parameters used in package scripts that persist across upgrades.',
+	'packageDependenciesDoc': 'Dependencies are specified in a simple object that maps a package name to a version range. The version range is a string which has one or more space-separated descriptors. Dependencies can also be identified with a tarball or git URL.',
+	'packageDevDepsDoc': 'Optional dependencies that are required only at development time.',
+	'packagePeerDepsDoc': 'Optional dependencies to express a relationship with another package of host tool without necessarily requiring it.',
+	'packageBundledDepsDoc': 'This defines an array of package names that will be bundled when publishing the package.',
+	'packageOptionalDepsDoc': 'Optional dependencies that can be ignored if not found when installing.',
+	'packageEnginesDoc': 'The version of engines that are required to run your package.',
+	'packageEngineStrictDoc': 'This feature was removed in npm 3.0.0\n\nPrior to npm 3.0.0, this feature was used to treat this package as if the user had set engine-strict. It is no longer used.',
+	'packageOsDoc': 'Allows you to specify which operating systems your package will run on.',
+	'packageCpuDoc': 'Allows you to specify which CPU architecture your package runs on.',
+	'packagePreferGlobalDoc': 'If your package is primarily a command-line application that should be installed globally, then set this value to true to provide a warning if it is installed locally.',
+	'packagePrivateDoc': 'Allows you to tell NPM to not publish your package publically (when set to true).',
+	'packagePublishConfigDoc': 'This is a set of config values that will be used at publish-time.',
+	'packageEslintConfigDoc': 'This allows you to provide ESLint configuration options.',
+	
 });
