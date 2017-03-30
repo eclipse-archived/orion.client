@@ -25,6 +25,8 @@ define([
 	 * The following data was scraped from https://developer.mozilla.org/en-US/docs/Web/HTML/Element
 	 * These tags were missing from the scraped data and added manually:
 	 * 		a, aside, blockquote, font, marquee, noframes
+	 * These tags have been removed from the data as they will be removed in HTML 5.1
+	 * 		dialog (Bug 501551)
 	 */
 		{
 			name: "a",
@@ -237,13 +239,6 @@ define([
 			doc: Messages.dfnTagDoc,
 			url: "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/dfn"
 		},
-		// Dialog has been removed from HTML 5.1 as it is unsupported (Bug 501551)
-//		{
-//			name: "dialog",
-//			category: Messages.interactiveCategory,
-//			doc: Messages.dialogTagDoc,
-//			url: "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/dialog"
-//		},
 		{
 			name: "dir",
 			category: Messages.obsoleteTagCategory,
