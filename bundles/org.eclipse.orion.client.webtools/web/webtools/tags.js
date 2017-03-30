@@ -237,12 +237,13 @@ define([
 			doc: Messages.dfnTagDoc,
 			url: "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/dfn"
 		},
-		{
-			name: "dialog",
-			category: Messages.interactiveCategory,
-			doc: Messages.dialogTagDoc,
-			url: "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/dialog"
-		},
+		// Dialog has been removed from HTML 5.1 as it is unsupported (Bug 501551)
+//		{
+//			name: "dialog",
+//			category: Messages.interactiveCategory,
+//			doc: Messages.dialogTagDoc,
+//			url: "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/dialog"
+//		},
 		{
 			name: "dir",
 			category: Messages.obsoleteTagCategory,
