@@ -71,9 +71,12 @@ define(['i18n!cfui/nls/messages',
 			this._acceptPatch = null;
 			
 			var fullLog = "";
-			this.applicationInfo.logs.forEach(function(line){
-				fullLog += line + "\n";
-			});
+			if (this.applicationInfo){
+				this.applicationInfo.logs.forEach(function(line){
+					fullLog += line + "\n"; //$NON-NLS-1$
+				});
+			}
+
 			var selections, vScroll, hScroll;
 			if (this._scrollLock) {
 				selections = this.editor.getSelections();
