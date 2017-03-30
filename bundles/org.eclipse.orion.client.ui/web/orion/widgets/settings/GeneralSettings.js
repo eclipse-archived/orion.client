@@ -43,6 +43,11 @@ define([
 					fieldMin: 0,
 					postChange: this.setPreferences.bind(this)
 				});
+				this.enableDebuggerCheckbox = new SettingsCheckbox({
+					fieldlabel: messages["enableDebugger"],
+					fieldTitle: messages["enableDebuggerTooltip"],
+					postChange: this.setPreferences.bind(this)
+				}),
 
 				new mSection.Section(this.node, {
 					id: "fileNavigation", //$NON-NLS-0$
@@ -68,6 +73,13 @@ define([
 					: [this.enableEditorTabs, this.maximumEditorTabsTextfield]
 				});
 				editorTabs.show();
+				
+				var debuggerSubsection = new Subsection({
+					sectionName: messages["Debugger"],
+					parentNode: settingsContentElement,
+					children: [this.enableDebuggerCheckbox]
+				});
+				debuggerSubsection.show();
 			},
 
 			setPreferences: function() {
@@ -85,6 +97,7 @@ define([
 					var maxTabs = parseInt(this.maximumEditorTabsTextfield.getValue(), 10);
 					maxTabs = isNaN(maxTabs) || maxTabs< 0 ? 0 : maxTabs;
 					generalPrefs.maximumEditorTabs = maxTabs;
+					generalPrefs.enableDebugger = this.enableDebuggerCheckbox.isChecked();
 					this.preferences.setPrefs(generalPrefs);
 				}.bind(this));
 			},
@@ -118,6 +131,10 @@ define([
 					// Maximum editor tabs.
 					this.maximumEditorTabsTextfield.setValue(generalPrefs.maximumEditorTabs);
 					this.maximumEditorTabsTextfield.show();
+
+					// Enable debugger.
+					this.enableDebuggerCheckbox.setSelection(generalPrefs.enableDebugger);
+					this.enableDebuggerCheckbox.show();
 
 					if (callback) {
 						callback();

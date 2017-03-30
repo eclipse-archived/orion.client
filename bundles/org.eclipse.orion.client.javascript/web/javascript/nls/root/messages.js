@@ -128,6 +128,7 @@ define({
 	'noSparseArrays': 'Sparse array declarations:',
 	'javascriptValidation': 'Javascript Validation',
 	'jsHover': 'JavaScript Hover Provider',
+	'jsHoverEvaluationProvider': 'JavaScript Hover Evaluation Provider',
 	'removeExtraParensFixName': 'Remove gratuitous parentheses',
 	'removeExtraSemiFixName': 'Remove extra semicolon',
 	'addFallthroughCommentFixName': 'Add $FALLTHROUGH$ comment',

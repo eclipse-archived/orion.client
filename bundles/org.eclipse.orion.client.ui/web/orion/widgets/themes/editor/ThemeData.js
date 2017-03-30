@@ -90,6 +90,9 @@ define([
 						},
 						"currentLine": {
 							"backgroundColor": "#EAF2FE"
+						},
+						"highlightedLine": {
+							"backgroundImage": "linear-gradient(rgba(255, 255, 153, .5) 100%, rgba(255, 255, 153, .5))"
 						}
 					},
 					"annotationRange": {
@@ -334,6 +337,9 @@ define([
 						"currentLine": {
 							"color": "#1bd2f7",
 							"backgroundColor": "#3B4B53"
+						},
+						"highlightedLine": {
+							"backgroundImage": "linear-gradient(rgba(255, 255, 153, .5) 100%, rgba(255, 255, 153, .5))"
 						}
 					},
 					"annotationRange": {
@@ -610,4 +616,4 @@ define([
 			getBaseTheme: getBaseTheme
 		};
 	}
-);
+);

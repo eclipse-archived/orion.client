@@ -508,7 +508,7 @@ define(['require', 'i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 
 				
 				messageService.close();
 				
-				if(!data.parameters){
+				if(!data.parameters && item.parametersRequested){
 					messageService.setProgressResult({
 						Message: errorMessage,
 						Severity: "Warning" //$NON-NLS-0$
@@ -589,7 +589,7 @@ define(['require', 'i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 
 			},
 			visibleWhen: function(items) {
 				var item = forceSingleItem(items);
-				return item.ServiceId && item.Name && item.parametersRequested;
+				return item.ServiceId && item.Name;
 			}
 		});
 		commandService.addCommand(checkStateCommand);
@@ -667,7 +667,7 @@ define(['require', 'i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 
 				},
 				visibleWhen: function(items) {
 					var item = forceSingleItem(items);
-					return item.ServiceId && item.Name && item.status && (start ? true /*item.status.State==="STOPPED"*/ : item.status.State==="STARTED");
+					return item.ServiceId && item.Name && item.status && (start ? true /*item.status.State==="STOPPED"*/ : (item.status.State === "STARTED" || item.status.State === "PAUSED"));
 				}
 			});
 			commandService.addCommand(stopApplicationCommand);
@@ -1372,7 +1372,7 @@ define(['require', 'i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 
 				var command;
 				var commandParams = {
 					name: deployService.name,
-					tootlip: deployService.tooltip,
+					tooltip: deployService.tooltip,
 					id: "orion.project.deploy." + deployService.id,
 					callback: function func(data){
 						var project = data.items;
