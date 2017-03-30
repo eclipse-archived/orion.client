@@ -922,11 +922,11 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/i18n
 
 		var isFileCreationAtRootEnabled = function() {
 			return getGeneralPreferenceValue("enableFileCreationAtRoot", false);
-		}
+		};
 
 		var isFolderCreationAtRootEnabled = function() {
-			var createAtRoot = getGeneralPreferenceValue("enableFolderCreationAtRoot", false);
-		}
+			return getGeneralPreferenceValue("enableFolderCreationAtRoot", false);
+		};
 		
 		/**
 		 * Creates a new file or folder as a child of the specified parentItem.
