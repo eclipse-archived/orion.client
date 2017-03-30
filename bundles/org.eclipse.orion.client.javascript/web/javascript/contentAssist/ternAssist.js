@@ -52,7 +52,7 @@ define([
 			var index = offset;
 			while (index > 0) {
 				var char = text.substring(index - 1, index);
-				if (/[A-Za-z0-9_]/.test(char)) {
+				if (/[A-Za-z0-9_$]/.test(char)) {
 					index--;
 				} else {
 					break;
@@ -250,9 +250,10 @@ define([
         if(typeof completion.overwrite === 'boolean') {
         	proposal.overwrite = completion.overwrite;
         }
-        if(typeof completion.prefix === 'string') {
-        	//args.params.prefix = completion.prefix;
+        if(typeof completion.prefix === 'string'){
         	proposal.prefix = completion.prefix;
+    	} else if (typeof args.params.prefix === 'string') {
+        	proposal.prefix = args.params.prefix;
         }
         proposal.name = proposal.proposal = completion.name;
         if(typeof completion.type !== 'undefined') {

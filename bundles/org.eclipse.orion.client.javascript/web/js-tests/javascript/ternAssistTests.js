@@ -5536,6 +5536,56 @@ define([
 					testProposals(options, []);
 				});
 			});
+			/**
+			 * Recognize $ in var name prefix
+			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=506890
+			 * @since 15.0
+			 */
+			describe('Var name with $ Tests', function() {
+				it('Var name with $ - test prefix', function(done) {
+					var options = {
+						buffer: "var $_test = 42;\ntest",
+						prefix: "test",
+						offset: 21,
+						callback: done
+					};
+					testProposals(options, [
+					]);
+				});
+				it('Var name with $ - $ prefix', function(done) {
+					var options = {
+						buffer: "var $_test = 42;\n$",
+						prefix: "$",
+						offset: 18,
+						callback: done
+					};
+					testProposals(options, [
+						['$_test', '$_test : number'],
+					]);
+				});
+				it('Var name with $ - $_ prefix', function(done) {
+					var options = {
+						buffer: "var $_test = 42;\n$_",
+						prefix: "$_",
+						offset: 19,
+						callback: done
+					};
+					testProposals(options, [
+						['$_test', '$_test : number'],
+					]);
+				});
+				it('Var name with $ - $_tes prefix', function(done) {
+					var options = {
+						buffer: "var $_test = 42;\n$_tes",
+						prefix: "$_tes",
+						offset: 22,
+						callback: done
+					};
+					testProposals(options, [
+						['$_test', '$_test : number'],
+					]);
+				});
+			});
 		});
 	};
 });
