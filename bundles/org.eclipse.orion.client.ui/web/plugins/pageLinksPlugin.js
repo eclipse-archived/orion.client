@@ -43,7 +43,7 @@ define([
 			order: 10
 		});
 		
-		if (!util.isElectron) {
+		//if (!util.isElectron) {
 			provider.registerService("orion.page.link.category", null, {
 				id: "shell",
 				name: messages["Shell"],
@@ -51,7 +51,7 @@ define([
 				imageClass: "core-sprite-shell",
 				order: 40
 			});
-		}
+		//}
 		
 		provider.registerService("orion.page.link.category", null, {
 			id: "settings",

@@ -20,8 +20,9 @@ define([
 	'orion/metrics',
 	'orion/webui/dialogs/ConfirmDialog',
 	'orion/URITemplate',
-	'orion/PageLinks'
-], function(objects, messages, RunBarTemplate, lib, i18nUtil, mRichDropdown, mTooltip, mMetrics, mConfirmDialog, URITemplate, PageLinks) {
+	'orion/PageLinks',
+	'orion/Deferred'
+], function(objects, messages, RunBarTemplate, lib, i18nUtil, mRichDropdown, mTooltip, mMetrics, mConfirmDialog, URITemplate, PageLinks, Deferred) {
 	
 	var METRICS_LABEL_PREFIX = "RunBar"; //$NON-NLS-0$
 	var REDEPLOY_RUNNING_APP_WITHOUT_CONFIRMING = "doNotConfirmRedeployRunningApp"; //$NON-NLS-0$
@@ -40,6 +41,7 @@ define([
 	 * @param options.preferencesService
 	 * @param options.statusService
 	 * @param options.actionScopeId
+	 * @param ootions.generalPreferences
 	 */
 	function RunBar(options) {
 		this._project = null;
@@ -55,6 +57,7 @@ define([
 		this._projectClient = options.projectClient;
 		this._preferences = options.preferences;
 		this._editorInputManager = options.editorInputManager;
+		this._generalPreferences = options.generalPreferences;
 		
 		this._initialize();
 		this._setLaunchConfigurationsLabel(null);
@@ -121,6 +124,10 @@ define([
 						this.setProject (project);
 					}.bind(this));
 				}.bind(this));
+
+				if (this._generalPreferences.enableDebugger) {
+					new HoverEvaluationService(this._serviceRegistry, this);
+				}
 			} else {
 				throw new Error("this._domNode is null"); //$NON-NLS-0$
 			}
@@ -216,13 +223,20 @@ define([
 					var dropdownMenuItemSpan = lib.$(".dropdownMenuItem", createNewItem); //$NON-NLS-0$
 					dropdownMenuItemSpan.classList.add("addNewMenuItem"); //$NON-NLS-0$
 					
-					var defaultDeployCommand = this._projectCommands.getDeployProjectCommands(this._commandRegistry)[0];
-					if (defaultDeployCommand) {
-						this._commandRegistry.registerCommandContribution(createNewItem.id, defaultDeployCommand.id, 1); //$NON-NLS-0$
+					var defaultDeployCommands = this._projectCommands.getDeployProjectCommands(this._commandRegistry);
+					if (defaultDeployCommands) {
+						for (var i = 0; i < defaultDeployCommands.length; i++) {
+							this._commandRegistry.registerCommandContribution(createNewItem.id, defaultDeployCommands[i].id, i + 1); //$NON-NLS-0$
+						}
 						domNodeWrapperList = [];
 						this._commandRegistry.renderCommands(createNewItem.id, dropdownMenuItemSpan, this._project, this, "button", null, domNodeWrapperList); //$NON-NLS-0$
-						domNodeWrapperList[0].domNode.textContent = "+"; //$NON-NLS-0$
-						this._setNodeTooltip(domNodeWrapperList[0].domNode, messages["createNewTooltip"]); //$NON-NLS-0$
+						for (var i = 0; i < defaultDeployCommands.length; i++) {
+							domNodeWrapperList[i].domNode.textContent = defaultDeployCommands[i].name;
+							this._setNodeTooltip(domNodeWrapperList[i].domNode, defaultDeployCommands[i].tooltip);
+						}
+						if (defaultDeployCommands.length === 1) {
+							domNodeWrapperList[0].domNode.textContent = "+";
+						}
 					}
 				}
 			}.bind(this);
@@ -508,6 +522,11 @@ define([
 						case "STOPPED": //$NON-NLS-0$
 							this._enableControl(this._playButton);
 							this._statusLight.classList.add("statusLightRed"); //$NON-NLS-0$
+							break;
+						case "PAUSED": //$NON-NLS-0$
+							this._enableControl(this._playButton);
+							this._enableControl(this._stopButton);
+							this._statusLight.classList.add("statusLightAmber"); //$NON-NLS-0$
 							break;
 						default:
 							break;
@@ -952,6 +971,50 @@ define([
 		}
 	});
 	
+	/**
+	 * Provides hover evaluation by project
+	 * @name orion.projects.HoverEvaluationService
+	 * @param {orion.serviceregistry.ServiceRegistry} serviceRegistry
+	 * @param {orion.projects.RunBar} runbar - need this to get the current project
+	 */
+	var HoverEvaluationService = function(serviceRegistry, runbar) {
+		this._runbar = runbar;
+        serviceRegistry.registerService("orion.edit.hover", this, {
+			name: 'Hover Evaluation',
+			contentType: ["application/javascript", "text/x-c++src", "text/x-python"] // TODO: get by sub-services
+        });
+	};
+
+	objects.mixin(HoverEvaluationService.prototype, /** @lends orion.projects.HoverEvaluationService.prototype */ {
+		 /**
+		  * Evaluate the hover
+		  * @param {Object} editorContext
+		  * @param {Object} ctxt
+		  * @return {Promise.<string>}
+		  */
+		computeHoverInfo: function(editorContext, ctxt) {
+			var promise = new Deferred();
+			var launchConf = this._runbar.getSelectedLaunchConfiguration();
+			if (launchConf) {
+				this._runbar._projectClient.getProjectDeployService(launchConf.ServiceId, launchConf.Type).then(function(service){
+					if (service && service.computeHoverInfo) {
+						service.computeHoverInfo(launchConf, editorContext, ctxt).then(function(value) {
+							promise.resolve(value);
+						}, function() {
+							promise.resolve(null);
+						});
+					} else {
+						console.error('Failed to evaluate hover.');
+						promise.resolve(null);
+					}
+				});
+			} else {
+				promise.resolve(null);
+			}
+			return promise;
+		}
+	});
+
 	return {
 		RunBar: RunBar,
 		METRICS_LABEL_PREFIX: METRICS_LABEL_PREFIX
