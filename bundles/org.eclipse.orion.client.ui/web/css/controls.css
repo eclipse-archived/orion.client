@@ -335,6 +335,7 @@ div.parameterInput[contenteditable="true"]:before {
 }
 
 .selectableNavRow:hover {
+	background-color: #EAF2FE;
 }
 
 .disabledNavRow > .navColumn > .mainNavColumn {
