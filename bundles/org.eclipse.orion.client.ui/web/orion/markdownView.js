@@ -84,6 +84,7 @@ define([
 
 	function MarkdownView(options) {
 		this.fileClient = options.fileClient;
+		this.preferences = options.preferences;
 		this.progress = options.progress;
 		this.canHide = options.canHide;
 		this._node = null;
@@ -103,7 +104,7 @@ define([
 			node.appendChild(div);
 		},
 		displayInFrame: function(node, file, headerClass, titleClass, defaultTitle) {
-			var markdownSection = new mSection.Section(node, {id: "markdownSection", title: file.Name || defaultTitle || "readme", headerClass: headerClass, canHide: this.canHide}); //$NON-NLS-0$
+			var markdownSection = new mSection.Section(node, {id: "markdownSection", title: file.Name || defaultTitle || "readme", headerClass: headerClass, preferenceService: this.preferences, canHide: this.canHide}); //$NON-NLS-0$
 			if(titleClass) {
 				var titleNode = markdownSection.getTitleElement();
 				if(titleNode) {

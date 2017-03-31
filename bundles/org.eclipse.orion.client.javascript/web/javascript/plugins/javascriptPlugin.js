@@ -297,6 +297,86 @@ define([
 		});
 
 	/**
+	 * @description Makes sure the filename does not expose Orion file client-specific paths to the UI
+	 * @param {String} fileName The namw of the file
+	 * @returns {String} The cleaned up filename
+	 * @since 15.0
+	 */
+	function cleanFileName(fileName) {
+		if(fileName) {
+			if(fileName.indexOf("/file/") === 0) {
+				return fileName.slice(6);
+			} else if(fileName.indexOf("file/") === 0) {
+				return fileName.slice(5);
+			}
+		}
+		return fileName;
+	}
+
+	provider.registerService("orion.project.handler", {
+		/**
+		 * @callback
+		 */
+		getAdditionalProjectProperties: function getAdditionalProjectProperties(item, projectMetadata) {
+			return jsProject.initFrom(item.Location).then(function initFrom() {
+				return jsProject.getComputedEnvironment().then(function(env) {
+					var infos = [
+						{
+							Name: javascriptMessages.javascript,
+							Children: []
+						}
+					];
+					var val = jsProject.getProjectPath();
+					if(!val) {
+						infos[0].Children.push({Name: javascriptMessages.projectPath, Value: javascriptMessages.unknown});
+					} else {
+						infos[0].Children.push({Name: javascriptMessages.projectPath, Value: cleanFileName(val), Href: "{+OrionHome}/edit/edit.html#"+val});
+					}
+					if(env) {
+						//ECMA version
+						infos[0].Children.push({Name: javascriptMessages.ecmaVersion, Value: env.ecmaVersion});
+						//Guessed envs
+						infos[0].Children.push({Name: javascriptMessages.devEnv, Value: Object.keys(env.envs).toString()});
+						//ESLint
+						if(env.eslint) {
+							infos[0].Children.push({Name: javascriptMessages.eslintConfig,
+													Value: javascriptMessages.eslintFile,
+													Href: "{+OrionHome}/edit/edit.html#"+ env.eslint.file.name});
+						} else {
+							infos[0].Children.push({Name: javascriptMessages.eslintConfig, Value: javascriptMessages.none});	
+						}
+						//Package.json
+						if(env.packagejson) {
+							infos[0].Children.push({Name: javascriptMessages.nodeConfig,
+													Value: javascriptMessages.packagejsonFile,
+													Href: "{+OrionHome}/edit/edit.html#"+ env.packagejson.file.name});
+						} else {
+							infos[0].Children.push({Name: javascriptMessages.nodeConfig, Value: javascriptMessages.none});
+						}
+						//Tern project
+						if(env.ternproject) {
+							infos[0].Children.push({Name: javascriptMessages.ternConfig,
+													Value: javascriptMessages.ternFile,
+													Href: "{+OrionHome}/edit/edit.html#"+ env.ternproject.file.name});
+						} else {
+							infos[0].Children.push({Name: javascriptMessages.ternConfig, Value: javascriptMessages.none});
+						}
+					} else {
+						infos[0].Children.push({Name: javascriptMessages.environment, Value: javascriptMessages.noEnvironment});
+					}
+					return infos;
+				});
+			});
+		}
+	}, {
+		id: "orion.javascript.projecthandler",
+		type: "javascript",
+		validationProperties: [
+			{source: "Location"}
+		]
+	});
+
+	/**
 	 * Create the AST manager
 	 */
 	var astManager = new ASTManager.ASTManager(serviceRegistry, jsProject);

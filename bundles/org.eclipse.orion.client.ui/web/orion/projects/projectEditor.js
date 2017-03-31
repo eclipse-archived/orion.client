@@ -452,7 +452,13 @@ define([
 		renderProjectInfo: function(parent, sectionName){
 
 			var title = sectionName || messages.ProjectInfo;
-			var projectInfoSection = new mSection.Section(parent, {id: "projectInfoSection" + this.idCount, headerClass: ["sectionTreeTableHeader"], title: title, canHide: true});
+			var projectInfoSection = new mSection.Section(parent, {
+					id: "projectInfoSection" + this.idCount, 
+					headerClass: ["sectionTreeTableHeader"], 
+					title: title, 
+					preferenceService: this.preferences, 
+					canHide: true,
+					hidden: true});
 			var explorerParent = document.createElement("div");
 			explorerParent.id = "projectInformationNode" + this.idCount;
 			var projectInfoRenderer = new ProjectInfoRenderer({
@@ -482,7 +488,13 @@ define([
 						if(!cat.Name){
 							continue;
 						}
-						var addotopnalInfoSection = new mSection.Section(parent, {id: cat.Name + "Section" + this.idCount, headerClass: ["sectionTreeTableHeader"], title: cat.Name, canHide: true});
+						var additionalInfoSection = new mSection.Section(parent, {
+								id: cat.Name + "Section" + this.idCount, 
+								headerClass: ["sectionTreeTableHeader"], 
+								title: cat.Name, 
+								preferenceService: this.preferences, 
+								canHide: true,
+								hidden: true});
 						var explorerParent = document.createElement("div");
 						explorerParent.id = cat.Name + "Table" + this.idCount;
 						var additionalInfoRenderer = new AdditionalInfoRenderer({
@@ -490,7 +502,7 @@ define([
 							checkbox: false
 						}, this);
 						var additionalInfoExplorer = new mExplorer.Explorer(this.serviceRegistry, null, additionalInfoRenderer, this.commandRegistry);
-						addotopnalInfoSection.embedExplorer(additionalInfoExplorer, explorerParent);
+						additionalInfoSection.embedExplorer(additionalInfoExplorer, explorerParent);
 						additionalInfoExplorer.createTree(explorerParent, new AdditionalInfoModel(cat),  {noSelection: true});
 					}
 				}.bind(this));
@@ -506,7 +518,13 @@ define([
 
 			this.dependenciesSectionName = sectionName || "Associated Content";
 
-			var dependenciesSection = new mSection.Section(parent, {id: "projectDependenciesSection", headerClass: ["sectionTreeTableHeader"], title: this.dependenciesSectionName, canHide: true});
+			var dependenciesSection = new mSection.Section(parent, {
+					id: "projectDependenciesSection", 
+					headerClass: ["sectionTreeTableHeader"], 
+					title: this.dependenciesSectionName, 
+					preferenceService: this.preferences, 
+					canHide: true,
+					hidden: true});
 			var dependenciesParent = document.createElement("div");
 			dependenciesParent.id = "dependenciesNode";
 			var dependenciesRenderer = new DependenciesRenderer({
