@@ -26,13 +26,8 @@ define([
 ], function(estraverse, objects) {
 'use strict';
 
-    var isArray,
-        objectKeys;
+    var objectKeys;
         
-	isArray = Array.isArray || function isArray(array) {
-		return Object.prototype.toString.call(array) === '[object Array]';
-	};
-
     objectKeys = Object.keys || function (o) {
         var keys = [], key;
         for (key in o) {
@@ -91,7 +86,7 @@ define([
         for (i = 0, iz = children.length; i < iz; ++i) {
             child = node[children[i]];
             if (child) {
-                if (isArray(child)) {
+                if (Array.isArray(child)) {
                     for (j = 0, jz = child.length; j < jz; ++j) {
                         if (child[j]) {
                             if (isNode(child[j]) || isProperty(type, children[i])) {

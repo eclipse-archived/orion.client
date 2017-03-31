@@ -10115,19 +10115,6 @@ define([
 									worker.getTestState().callback(error);
 								});
 						});
-						it("should not flag var that has exported comment inline", function(callback) {
-							var topic = "// exported\nvar a;";
-							var config = { rules: {} };
-							config.rules[RULE_ID] = 1;
-							validate({buffer: topic, callback: callback, config: config}).then(
-								function (problems) {
-									assertProblems(problems, [
-									]);
-								},
-								function (error) {
-									worker.getTestState().callback(error);
-								});
-						});
 						it("should not flag var that has exported comment block", function(callback) {
 							var topic = "/* exported */\nvar a;";
 							var config = { rules: {} };
