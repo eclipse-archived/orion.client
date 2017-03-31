@@ -699,7 +699,26 @@ function rebase(req, res, commitToRebase, rebaseOperation) {
 				break;
 				
 			case "SKIP":
-				throw new Error("Not implemented yet");
+				return git.Checkout.head(repo, {
+					checkoutStrategy:
+						git.Checkout.STRATEGY.FORCE |
+						git.Checkout.STRATEGY.RECREATE_MISSING |
+						git.Checkout.STRATEGY.REMOVE_UNTRACKED
+				})
+				.then(function() {
+					return git.Rebase.open(repo, {});
+				}).then(function(rebase) {
+					if (rebase.operationCurrent() === rebase.operationEntrycount() - 1) {
+						// if skipping the last operation, then we're done here
+						rebase.finish(repo.defaultSignature());
+						// return the commit that we're currently on
+						return head;
+					}
+					// move to the next one and continue
+					return rebase.next().then(function(rebaseOperation) {
+						return repo.continueRebase();
+					});
+				});
 				
 			default:
 				work = repo.rebaseBranches("HEAD", commitToRebase, null, null, null);

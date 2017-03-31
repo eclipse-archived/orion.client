@@ -400,6 +400,23 @@ GitClient.prototype = {
 		});
 	},
 
+	rebase: function(branchToRebase, operation) {
+		var client = this;
+		this.tasks.push(function(resolve) {
+			request()
+			.post(CONTEXT_PATH + "/gitapi/commit/HEAD/file/" + client.getName())
+			.send({
+				Rebase: branchToRebase,
+				Operation: operation
+			})
+			.expect(200)
+			.end(function(err, res) {
+				assert.ifError(err);
+				client.next(resolve, res.body);
+			});
+		});
+	},
+
 	merge: function(branchToMerge, result) {
 		var client = this;
 		this.tasks.push(function(resolve) {
@@ -1055,6 +1072,209 @@ maybeDescribe("git", function() {
 
 		});
 	}); // describe("Use case 3")
+
+	describe("Rebase", function() {
+		before(setup);
+
+		describe("Skip", function() {
+			it("skip single conflict", function(finished) {
+				var conflicts = "conflicts.txt";
+				var fullConflicts = path.join(path.join(WORKSPACE, "skip-single"), conflicts);
+				var unrelated = "unrelated.txt";
+				var untracked = "untracked.txt";
+				var initial, other, beforeRebase;
+
+				var client = new GitClient("skip-single");
+				client.init();
+				// init file
+				client.setFileContents(conflicts, "");
+				// init unrelated file
+				client.setFileContents(unrelated, "unrelated");
+				// stage and commit
+				client.stage(conflicts);
+				client.stage(unrelated);
+				client.commit();
+				client.start().then(function(commit) {
+					initial = commit.Id;
+					client.setFileContents(conflicts, "A");
+					client.stage(conflicts);
+					client.commit();
+					return client.start();
+				})
+				.then(function(commit) {
+					other = commit.Id;
+					// create a branch
+					client.createBranch("other");
+					// reset back to original content
+					client.reset("HARD", initial);
+					// set file to content C
+					client.setFileContents(conflicts, "B");
+					// stage and commit
+					client.stage(conflicts);
+					client.commit();
+					return client.start();
+				})
+				.then(function(commit) {
+					beforeRebase = commit.Id;
+					client.rebase("other", "BEGIN");
+					return client.start();
+				})
+				.then(function(body) {
+					assert.equal("STOPPED", body.Result);
+					client.listBranches();
+					return client.start();
+				})
+				.then(function(body) {
+					// check that we've detached HEAD
+					assert.equal(body[0].HeadSHA, other);
+					assert.equal(body[0].Current, true);
+					assert.equal(body[0].Detached, true);
+					// check our file for conflict markers
+					var expected =
+						"<<<<<<< HEAD\n" +
+						"A\n" + 
+						"=======\n" +
+						"B\n" +
+						">>>>>>> " + other + "\n";
+					var content = fs.readFileSync(fullConflicts).toString();
+					assert.equal(content, expected);
+					// create changes in the index
+					client.setFileContents(unrelated, "index");
+					client.stage(unrelated);
+					// create changes in the working directory
+					client.setFileContents(unrelated, "working dir");
+					client.setFileContents(untracked, "to-be-deleted");
+					// skip the rebase
+					client.rebase("other", "SKIP");
+					return client.start();
+				})
+				.then(function(body) {
+					assert.equal("OK", body.Result);
+					client.status("SAFE");
+					return client.start();
+				})
+				.then(function(index) {
+					assert.equal(index.Added.length, 0);
+					assert.equal(index.Changed.length, 0);
+					assert.equal(index.Conflicting.length, 0);
+					assert.equal(index.Modified.length, 0);
+					assert.equal(index.Missing.length, 0);
+					assert.equal(index.Removed.length, 0);
+					assert.equal(index.Untracked.length, 0);
+					client.listBranches();
+					return client.start();
+				})
+				.then(function(children) {
+					assert.equal(children[0].Name, "master");
+					assert.equal(children[0].HeadSHA, other);
+					assert.equal(children[0].Current, true);
+					assert.equal(children[0].Detached, false);
+					finished();
+				})
+				.catch(function(err) {
+					finished(err);
+				});
+			});
+
+			it("skip middle", function(finished) {
+				var first = "first.txt";
+				var second = "second.txt";
+				var conflicts = "conflicts.txt";
+				var fullFirst = path.join(path.join(WORKSPACE, "skip-middle"), first);
+				var fullSecond = path.join(path.join(WORKSPACE, "skip-middle"), second);
+				var fullConflicts = path.join(path.join(WORKSPACE, "skip-middle"), conflicts);
+				var initial, other;
+
+				var client = new GitClient("skip-middle");
+				client.init();
+				// init conflicts
+				client.setFileContents(conflicts, "");
+				// init other files
+				client.setFileContents(first, "first");
+				client.setFileContents(second, "second");
+				// stage and commit
+				client.stage(conflicts);
+				client.stage(first);
+				client.stage(second);
+				client.commit();
+				client.start().then(function(commit) {
+					initial = commit.Id;
+					client.setFileContents(conflicts, "A");
+					client.stage(conflicts);
+					client.commit();
+					return client.start();
+				})
+				.then(function(commit) {
+					other = commit.Id;
+					// create a branch
+					client.createBranch("other");
+					// reset back to original content
+					client.reset("HARD", initial);
+					// change the first unrelated file
+					client.setFileContents(first, "first safe");
+					// stage and commit
+					client.stage(first);
+					client.commit();
+					return client.start();
+				})
+				.then(function() {
+					// modify the conflicted file
+					client.setFileContents(conflicts, "B");
+					// stage and commit
+					client.stage(conflicts);
+					client.commit();
+					return client.start();
+				})
+				.then(function(commit) {
+					// change the second unrelated file
+					client.setFileContents(second, "second safe");
+					// stage and commit
+					client.stage(second);
+					client.commit();
+					return client.start();
+				})
+				.then(function(commit) {
+					client.rebase("other", "BEGIN");
+					return client.start();
+				})
+				.then(function(body) {
+					assert.equal("STOPPED", body.Result);
+					client.listBranches();
+					return client.start();
+				})
+				.then(function(body) {
+					// check that we've detached HEAD
+					assert.equal(body[0].Current, true);
+					assert.equal(body[0].Detached, true);
+					// check our file for conflict markers
+					var expected =
+						"<<<<<<< HEAD\n" +
+						"A\n" + 
+						"=======\n" +
+						"B\n" +
+						">>>>>>> " + other + "\n";
+					var content = fs.readFileSync(WORKSPACE + "/skip-middle/" + conflicts).toString();
+					assert.equal(content, expected);
+					// skip the rebase
+					client.rebase("other", "SKIP");
+					return client.start();
+				})
+				.then(function(body) {
+					assert.equal("OK", body.Result);
+					content = fs.readFileSync(fullFirst).toString();
+					assert.equal(content, "first safe");
+					content = fs.readFileSync(fullSecond).toString();
+					assert.equal(content, "second safe");
+					content = fs.readFileSync(fullConflicts).toString();
+					assert.equal(content, "A");
+					finished();
+				})
+				.catch(function(err) {
+					finished(err);
+				});
+			});
+		}); // describe("Skip")
+	}); // describe("Rebase")
 
 	describe("Merge", function() {
 		before(setup);
