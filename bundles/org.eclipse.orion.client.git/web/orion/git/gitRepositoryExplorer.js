@@ -464,10 +464,6 @@ define([
 		mGlobalCommands.setPageTarget({
 			task: messages["Git"],
 			target: repository,
-			breadcrumbTarget: item,
-			makeBreadcrumbLink: function(seg, location) {
-				seg.href = repoTemplate.expand({resource: location || ""});
-			},
 			serviceRegistry: this.registry,
 			commandService: this.commandService
 		});

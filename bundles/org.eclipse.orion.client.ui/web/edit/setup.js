@@ -1554,7 +1554,6 @@ objects.mixin(EditorSetup.prototype, {
 		// TODO the command exclusions should be an API and specified by individual pages (page links)?
 		mGlobalCommands.setPageCommandExclusions(["orion.editFromMetadata"]); //$NON-NLS-0$
 		mGlobalCommands.setPageTarget({
-			viewer: enableSplitEditor ? editorViewer : null,
 			task: messages["Editor"],
 			name: targetName,
 			target: target,
@@ -1569,19 +1568,6 @@ objects.mixin(EditorSetup.prototype, {
 					return this.progressService.progress(this.fileClient.read(metadata.Parents[0].Location, true), i18nUtil.formatMessage(messages.ReadingMetadata, metadata.Parents[0].Location));
 				}
 			}.bind(this),
-			makeBreadcrumbLink: function(/**HTMLAnchorElement*/ segment, folderLocation, folder) {
-				var resource = folder ? folder.Location : this.fileClient.fileServiceRootURL(folderLocation);
-				segment.href = uriTemplate.expand({resource: resource});
-				if (folder) {
-					var fileMetadata = this.activeEditorViewer.inputManager.getFileMetadata();
-					if (fileMetadata && fileMetadata.Location === folder.Location) {
-						segment.addEventListener("click", function() { //$NON-NLS-0$
-							this.sidebarNavInputManager.reveal(folder);
-						}.bind(this));
-					}
-				}
-			}.bind(this),
-			makeBreadcrumFinalLink: true,
 			serviceRegistry: this.serviceRegistry,
 			commandService: this.commandRegistry,
 			searchService: this.searcher,

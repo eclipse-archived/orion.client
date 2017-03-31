@@ -12,16 +12,16 @@
 /*eslint-env browser, amd*/
 define([
 		'i18n!orion/nls/messages', 'i18n!orion/widgets/nls/messages', 'require', 'orion/commonHTMLFragments', 'orion/keyBinding', 'orion/EventTarget', 'orion/commands',
-		'orion/parameterCollectors', 'orion/extensionCommands', 'orion/breadcrumbs', 'orion/webui/littlelib', 'orion/i18nUtil',
+		'orion/parameterCollectors', 'orion/extensionCommands', 'orion/webui/littlelib', 'orion/i18nUtil',
 		'orion/webui/splitter', 'orion/webui/dropdown', 'orion/webui/tooltip', 'orion/contentTypes', 'orion/keyAssist',
 		'orion/widgets/themes/ThemePreferences', 'orion/widgets/themes/container/ThemeData', 'orion/Deferred',
 		'orion/widgets/UserMenu', 'orion/PageLinks', 'orion/webui/dialogs/OpenResourceDialog', '!orion/banner/banner',
 		'text!orion/banner/toolbar.html',
-		'orion/util', 'orion/customGlobalCommands', 'orion/fileClient', 'orion/webui/SideMenu', 'orion/objects', "orion/metrics",'orion/bidiUtils'
+		'orion/util', 'orion/customGlobalCommands', 'orion/webui/SideMenu', 'orion/objects', "orion/metrics"
 	],
 	function (messages, widgetMessages, require, commonHTML, KeyBinding, EventTarget, mCommands, mParameterCollectors, mExtensionCommands,
-		mBreadcrumbs, lib, i18nUtil, mSplitter, mDropdown, mTooltip, mContentTypes, mKeyAssist, mThemePreferences, mThemeData, Deferred,
-		mUserMenu, PageLinks, openResource, Banner, ToolbarTemplate, util, mCustomGlobalCommands, mFileClient, SideMenu, objects, mMetrics, mBidiUtils) {
+		lib, i18nUtil, mSplitter, mDropdown, mTooltip, mContentTypes, mKeyAssist, mThemePreferences, mThemeData, Deferred,
+		mUserMenu, PageLinks, openResource, Banner, ToolbarTemplate, util, mCustomGlobalCommands, SideMenu, objects, mMetrics) {
 	/**
 	 * This class contains static utility methods. It is not intended to be instantiated.
 	 *
@@ -365,8 +365,6 @@ define([
 		}
 	}
 
-	var currentBreadcrumb = null;
-
 	/**
 	 * Set the target of the page so that common infrastructure (breadcrumbs, related menu, etc.) can be added for the page.
 	 * @name orion.globalCommands#setPageTarget
@@ -375,19 +373,12 @@ define([
 	 * @param {Object} options The target options object.
 	 * @param {String} options.task the name of the user task that the page represents.
 	 * @param {Object} options.target the metadata describing the page resource target. Optional.
-	 * @param {String|DomNode} options.breadCrumbContainer the dom node or id of the bread crumb container. Optional. If not defined, 'location' is used as
-	 * the bread crumb container id, which is always in the page banner.
 	 * @param {String} options.name the name of the resource that is showing on the page. Optional. If a target parameter is supplied, the
 	 * target metadata name will be used if a name is not specified in the options.
 	 * @param {String} options.title the title to be used for the page. Optional. If not specified, a title will be constructed using the task
 	 * and/or name.
-	 * @param {String} options.breadcrumbRootName the name used for the breadcrumb root. Optional. If not specified, the breadcrumbTarget,
-	 * fileService, task, and name will be consulted to form a root name.
-	 * @param {Object} options.breadcrumbTarget the metadata used for the breadcrumb target. Optional. If not specified, options.target is
-	 * used as the breadcrumb target.
 	 * @param {Function} options.makeAlternate a function that can supply alternate metadata for the related pages menu if the target does not
 	 * validate against a contribution. Optional.
-	 * @param {Function} options.makeBreadcrumbLink a function that will supply a breadcrumb link based on a location shown in a breadcrumb.
 	 * Optional. If not specified, and if a target is specified, the breadcrumb link will refer to the Navigator.
 	 * @param {orion.serviceregistry.ServiceRegistry} options.serviceRegistry the registry to use for obtaining any unspecified services. Optional. If not specified, then
 	 * any banner elements requiring Orion services will not be provided.
@@ -399,79 +390,29 @@ define([
 	 * file services. If not specified, there may be reduced support for multiple file implementations.
 	 */
 	function setPageTarget(options) {
-		var name;
-		var fileSystemRootName;
-		var breadcrumbRootName = options.breadcrumbRootName;
+		var pageName;
 		var serviceRegistry = options.serviceRegistry;
 		if (options.target) { // we have metadata
 			if (options.searchService) {
 				options.searchService.setLocationByMetaData(options.target, {index: "last"});
 			}
-			if (options.fileService && !options.breadcrumbTarget && !options.staticBreadcrumb) {
-				fileSystemRootName = breadcrumbRootName ? breadcrumbRootName + " " : ""; //$NON-NLS-1$ //$NON-NLS-0$
-				fileSystemRootName = fileSystemRootName + options.fileService.fileServiceName(options.target.Location);
-				breadcrumbRootName = null;
-			}
-			name = options.name || options.target.Name;
+			pageName = options.name || options.target.Name;
 			pageItem = options.target;
 			generateRelatedLinks.call(this, serviceRegistry, options.target, exclusions, options.commandService, options.makeAlternate);
 		} else {
-			if (!options.breadcrumbTarget) {
-				breadcrumbRootName = breadcrumbRootName || options.task || options.name;
-			}
-			name = options.name;
-			generateRelatedLinks.call(this, serviceRegistry, {
-				NoTarget: ""
-			}, exclusions, options.commandService, options.makeAlternate);
+			pageName = options.name;
+			generateRelatedLinks.call(this, serviceRegistry, {NoTarget: ""}, exclusions, options.commandService, options.makeAlternate);
 		}
 		title = options.title;
 		if (!title) {
-			if (name) {
-				title = i18nUtil.formatMessage(messages["PageTitleFormat"], name, options.task);
+			if (pageName) {
+				title = i18nUtil.formatMessage(messages["PageTitleFormat"], pageName, options.task);
 			} else {
 				title = options.task;
 			}
 		}
 		window.document.title = title;
 		customGlobalCommands.afterSetPageTarget.apply(this, arguments);
-		var locationNode = options.breadCrumbContainer ? lib.node(options.breadCrumbContainer) : lib.node("location"); //$NON-NLS-0$
-		var fileClient = options.fileService || (serviceRegistry && new mFileClient.FileClient(serviceRegistry));
-		var resource = options.breadcrumbTarget || options.target;
-		var workspaceRootURL = (fileClient && resource && resource.Location) ? fileClient.fileServiceRootURL(resource.Location) : null;
-		var breadcrumbOptions = {
-			container: locationNode,
-			resource: resource,
-			rootSegmentName: breadcrumbRootName,
-			workspaceRootSegmentName: fileSystemRootName,
-			workspaceRootURL: workspaceRootURL,
-			makeFinalHref: options.makeBreadcrumFinalLink,
-			makeHref: options.makeBreadcrumbLink
-		};
-		if (locationNode) {
-			lib.empty(locationNode);
-			if (currentBreadcrumb) {
-				currentBreadcrumb.destroy();
-			}
-			if (options.staticBreadcrumb) {
-				currentBreadcrumb = new mBreadcrumbs.BreadCrumbs({
-					container: locationNode,
-					rootSegmentName: breadcrumbRootName
-				});
-			} else {
-				currentBreadcrumb = new mBreadcrumbs.BreadCrumbs(breadcrumbOptions);
-			}
-		}
-		
-		// If the viewer has a node for breadcrumbs replace it as well
-		var viewer = options.viewer;
-		if (viewer && viewer.localBreadcrumbNode) {
-			if (viewer.currentBreadcrumb) {
-				viewer.currentBreadcrumb.destroy();
-			}
-			breadcrumbOptions.id = "headerBreadcrumb" + viewer.id;
-			breadcrumbOptions.container = viewer.localBreadcrumbNode;
-			viewer.currentBreadcrumb = new mBreadcrumbs.BreadCrumbs(breadcrumbOptions);
-		}
 	}
 
 	function boundingNode(node) {
