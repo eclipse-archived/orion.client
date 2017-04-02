@@ -329,6 +329,23 @@ GitClient.prototype = {
 		});
 	},
 
+	checkoutTag: function(tagName, branchName) {
+		var client = this;
+		this.tasks.push(function(resolve) {
+			request()
+			.put(CONTEXT_PATH + "/gitapi/clone/file/" + client.getName())
+			.send({
+				Tag: tagName,
+				Branch: branchName
+			})
+			.expect(200)
+			.end(function(err, res) {
+				assert.ifError(err);
+				client.next(resolve, res.body);
+			});
+		});
+	},
+
 	deleteTag: function(tagName) {
 		var client = this;
 		this.tasks.push(function(resolve) {
@@ -1322,7 +1339,7 @@ maybeDescribe("git", function() {
 			function testBug513503(finished, testName, branchName, createConflictingTag) {
 				var tagCommit;
 
-				var client = new GitClient("bug513503-" + testName);
+				var client = new GitClient("bug513503-checkout-branch-" + testName);
 				client.init();
 				client.commit();
 				client.start().then(function(commit) {
@@ -1652,6 +1669,72 @@ maybeDescribe("git", function() {
 				testCreateTag(finished, "tag-create-annotated", true);
 			});
 		}); // describe("Create")
+
+		describe("Checkout", function() {
+
+			/**
+			 * Ensures that the user can checkout a tag by creating a local branch off of the tag.
+			 * 
+			 * @param finished the callback for notifying the test harness that the test has completed
+			 * @param testName the name of this test
+			 * @param tagName the name of the tag to create
+			 * @param branchName the name of the branch to create off of the tag
+			 */
+			function testBug513503(finished, testName, tagName, branchName) {
+				var tagCommit;
+
+				var client = new GitClient("bug513503-checkout-tag-" + testName);
+				client.init();
+				client.commit();
+				client.start().then(function(commit) {
+					tagCommit = commit.Id;
+
+					// create the tag
+					client.createTag(tagCommit, tagName);
+					// make another commit so we're further in history
+					client.commit();
+					return client.start();
+				})
+				.then(function(commit) {
+					// checkout the tag
+					client.checkoutTag(tagName, branchName);
+					// make sure we've checked out the branch
+					client.log("HEAD", branchName);
+					return client.start();
+				})
+				.then(function(body) {
+					assert.equal(body.toRef.HeadSHA, tagCommit);
+					finished();
+				})
+				.catch(function(err) {
+					finished(err);
+				});
+			};
+
+			it("bug 513503 no conflicting tag (tag)", function(finished) {
+				testBug513503(finished, "safe-tag", "tag", "tag2");
+			});
+
+			it("bug 513503 no conflicting tag (refs/heads/tag)", function(finished) {
+				testBug513503(finished, "safe-refs-heads-tag", "refs/heads/tag", "refs/heads/tag2");
+			});
+
+			it("bug 513503 no conflicting tag (refs/tags/tag)", function(finished) {
+				testBug513503(finished, "safe-refs-tags-tag", "refs/tags/tag", "refs/tags/tag2");
+			});
+
+			it("bug 513503 conflicting tag (tag)", function(finished) {
+				testBug513503(finished, "conflict-tag", "tag", "tag");
+			});
+
+			it("bug 513503 conflicting tag (refs/heads/tag)", function(finished) {
+				testBug513503(finished, "conflict-refs-heads-tag", "refs/heads/tag", "refs/heads/tag");
+			});
+
+			it("bug 513503 conflicting tag (refs/tags/tag)", function(finished) {
+				testBug513503(finished, "conflict-refs-tags-tag", "refs/tags/tag", "refs/tags/tag");
+			});
+		}); // describe("Checkout")
 
 		describe("Delete", function() {
 

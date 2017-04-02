@@ -407,8 +407,10 @@ function putClone(req, res) {
 		} else if (tag && typeof branch === "string") {
 			return git.Reference.lookup(theRepo, "refs/tags/" + tag)
 			.then(function(reference) {
-				return theRepo.getReferenceCommit(reference);
-			}).catch(function() {
+				return reference.peel(git.Object.TYPE.COMMIT);
+			}).then(function(oid) {
+				return theRepo.getCommit(oid);
+			}).catch(function(err) {
 				return theRepo.getTagByName(tag)
 				.then(function(tag) {
 					return tag.targetId();
@@ -423,7 +425,7 @@ function putClone(req, res) {
 				theCommit = commit;
 				if (branch) {
 					return git.Branch.create(theRepo, branch, commit, 0).then(function() {
-						return theRepo.checkoutBranch(branch, checkOptions);
+						return theRepo.checkoutBranch("refs/heads/" + branch, checkOptions);
 					});
 				}
 			 	return git.Checkout.tree(theRepo, commit, checkOptions).then(function() {
