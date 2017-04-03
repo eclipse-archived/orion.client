@@ -2150,19 +2150,12 @@ define([
 	        }
 	
 	        return {
-	            "Program:exit": function(programNode) {
+	            "Program:exit": function() {
 	                var unusedVars = collectUnusedVariables(context.getScope(), []);
 	
 	                for (var i = 0, l = unusedVars.length; i < l; ++i) {
 	                    var unusedVar = unusedVars[i];
-	
-	                    if (unusedVar.eslintExplicitGlobal) {
-	                        context.report({
-	                            node: programNode,
-	                            message: ProblemMessages[unusedVar.data.nls],
-	                            data: unusedVar.data
-	                        });
-	                    } else if (unusedVar.defs.length > 0) {
+						if (unusedVar.defs.length > 0) {
 	                        context.report({
 	                            node: unusedVar.identifiers[0],
 	                            message: ProblemMessages[unusedVar.data.nls],
