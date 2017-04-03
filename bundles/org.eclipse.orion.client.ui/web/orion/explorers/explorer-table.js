@@ -287,6 +287,8 @@ define([
 		});
 
 		var parentNode = lib.node(this.parentId);
+		parentNode.clicks = 0;
+		parentNode.timer = null;
 		this._clickListener = function(evt) {
 			if (!(evt.metaKey || evt.altKey || evt.shiftKey || evt.ctrlKey)) {
 				var navHandler = _self.getNavHandler();
@@ -299,17 +301,35 @@ define([
 						temp = temp.parentNode;
 					}
 					if (temp && temp._item) {
-						var link = lib.$("a", evt.target);
+						var link = lib.$("a", evt.target); // if user click the link it self, this evt.target is already the link object.!!!
 						if (link) {
+							var DELAY = 500;
 							if (evt.type === "click") {
-								window.location.href = link.href;
-								//_self._clickLink(link);
-							} else if (evt.type === "dblclick") {
-								this.handleLinkDoubleClick(link, evt);
+								evt.preventDefault();
+								evt.stopPropagation();
+								parentNode.clicks++; //count clicks
+								if (parentNode.clicks === 1) {
+									parentNode.timer = setTimeout(function() {
+										window.location.href = link.href;
+										parentNode.clicks = 0;
+									}, DELAY);
+								} else {
+									clearTimeout(parentNode.timer); //prevent single-click action
+									this.handleLinkDoubleClick(link, evt);
+									parentNode.clicks = 0; //after action performed, reset counter
+								}
+							}else if (evt.type === "dblclick")
+								evt.preventDefault(); //cancel system double-click event
 							}
-						}
 					}
 				}
+			}else if(evt.metaKey || evt.shiftKey || evt.ctrlKey){
+				this.isDesktopSelectionMode().then(function(desktopMode) {
+					if(!desktopMode){
+						var link = lib.$("a", evt.target); 
+						this.handleLinkDoubleClick(link, evt);
+					}
+				}.bind(this));
 			}
 		};
 		if (parentNode) {

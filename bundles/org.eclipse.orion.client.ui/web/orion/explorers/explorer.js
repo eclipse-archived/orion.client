@@ -70,20 +70,7 @@ exports.Explorer = (function() {
 			return new Deferred().resolve(false);
 		},
 		handleLinkDoubleClick: function(linkNode, doubleClickEvt) {
-            this.isDesktopSelectionMode().then(function(desktopMode){
-            	if(desktopMode) {
-            		doubleClickEvt.preventDefault();
-					var evt = document.createEvent("MouseEvents");
-					if(util.isMac){
-						evt.initMouseEvent("click", true, true, window,
-				        0, 0, 0, 0, 0, false, false, evt.shiftKey, true, 0, null);
-					}else{
-					    evt.initMouseEvent("click", true, true, window,
-					        0, 0, 0, 0, 0, true, false, evt.shiftKey, false, 0, null);
-					}
-				    linkNode.dispatchEvent(evt); 
-            	}
-            });
+			window.open(linkNode.href, "_blank"); // This might not work in Browswer
 		},
 		// we have changed an item on the server at the specified parent node
 		changedItem: function(parent, children) {
