@@ -610,24 +610,32 @@ exports.ExplorerNavHandler = (function() {
 					return;
 				}
 				this.explorer.isDesktopSelectionMode().then(function(desktopMode) {
-					if(!desktopMode && this.gridClickSelectionPolicy === "none" && this._onModelGrid(model, mouseEvt)){ //$NON-NLS-0$
-						return;
-					}
 					this.cursorOn(model, true, false, true);
-					if(isPad){
-						this.setSelection(model, true);
-					} else if(this._ctrlKeyOn(mouseEvt)){
-						this.setSelection(model, true, true);
-					} else if(mouseEvt.shiftKey && this._shiftSelectionAnchor){
-						var scannedSel = this._modelIterator.scan(this._shiftSelectionAnchor, model);
-						if(scannedSel){
-							this._clearSelection(true);
-							for(var i = 0; i < scannedSel.length; i++){
-								this.setSelection(scannedSel[i], true);
+					if(desktopMode){
+						if(isPad){
+							this.setSelection(model, true);
+						} else if(this._ctrlKeyOn(mouseEvt)){
+							this.setSelection(model, true, true);
+						} else if(mouseEvt.shiftKey && this._shiftSelectionAnchor){
+							var scannedSel = this._modelIterator.scan(this._shiftSelectionAnchor, model);
+							if(scannedSel){
+								this._clearSelection(true);
+								for(var i = 0; i < scannedSel.length; i++){
+									this.setSelection(scannedSel[i], true);
+								}
 							}
+						} else {
+							this.setSelection(model, false, true);
 						}
-					} else {
-						this.setSelection(model, false, true);
+					}else{
+						// Ctrl click and shift click open a new tab
+						if(this._ctrlKeyOn(mouseEvt) || mouseEvt.shiftKey){
+							// Open a new tab, don't set selection
+						}else if(isPad){
+							this.setSelection(model, true);
+						}else{
+							this.setSelection(model, false, true);
+						}
 					}
 				}.bind(this));
 			}

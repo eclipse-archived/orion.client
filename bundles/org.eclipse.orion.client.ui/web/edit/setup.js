@@ -982,7 +982,7 @@ objects.mixin(EditorViewer.prototype, {
 				evt.moved.forEach(function(item) {
 					var sourceLocation = item.source;
 					var metadata = that.tabWidget.getMetadataByLocation_(sourceLocation) || selectedMetadata;
-					if (selectedMetadata.Location.indexOf(sourceLocation) === 0) {
+					if (selectedMetadata && selectedMetadata.Location.indexOf(sourceLocation) === 0) {
 						inputManager.addEventListener("InputChanged", this.loadComplete = function() {
 							inputManager.removeEventListener("InputChanged", this.loadComplete);
 							that.tabWidget.closeTab(metadata, false);

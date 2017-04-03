@@ -333,8 +333,6 @@ define([
 				itemNode = this.createFolderNode(item);
 
 				span.appendChild(itemNode);
-				this.explorer._makeDropTarget(item, itemNode);
-				this.explorer._makeDropTarget(item, tableRow);
 			} else {
 				if (!this.openWithCommands) {
 					this.openWithCommands = mExtensionCommands.getOpenWithCommands(this.commandService);
@@ -342,6 +340,9 @@ define([
 				itemNode = createLink("", item, this.commandService, this.contentTypeService, this.openWithCommands, null, null, null, this);
 				span.appendChild(itemNode); //$NON-NLS-0$
 			}
+			span.setAttribute('draggable', true);
+			this.explorer._makeDropTarget(item, span);
+			this.explorer._makeDropTarget(item, tableRow);
 			if (itemNode) {
 				// orion.explorers.FileExplorer#getNameNode
 				itemNode.id = tableRow.id + "NameLink"; //$NON-NLS-0$
