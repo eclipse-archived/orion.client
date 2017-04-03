@@ -175,7 +175,7 @@ define([
 		this.editorInputManager = options.inputManager;
 		this.preferences = options.preferences;
 		this.generalPrefs = new mGeneralPrefs.GeneralPreferences(this.preferences);
-		this.showProjectView = options.showProjectView === undefined ? true : options.showProjectView;
+		this.showProjectView = options.showProjectView === undefined ? !options.metadata.Projects : options.showProjectView;
 		this.showFolderNav = true;
 		this._init();
 	}
