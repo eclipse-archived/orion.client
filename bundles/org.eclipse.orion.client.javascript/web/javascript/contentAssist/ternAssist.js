@@ -27,14 +27,12 @@ define([
 	 * @public
 	 * @param {javascript.ASTManager} astManager An AST manager to create ASTs with
 	 * @param {TernWorker} ternWorker The worker running Tern
-	 * @param {Function} pluginEnvironments The function to use to query the Tern server for contributed plugins
 	 * @param {?} cuprovider The CU Provider that caches compilation units
 	 * @param {JavaScriptProject} jsproject The backing Javascript project
 	 */
-	function TernContentAssist(astManager, ternWorker, pluginEnvironments, cuprovider, jsproject) {
+	function TernContentAssist(astManager, ternWorker, cuprovider, jsproject) {
 		this.astManager = astManager;
 		this.ternworker = ternWorker;
-		this.pluginenvs = pluginEnvironments;
 		this.cuprovider = cuprovider;
 		this.timeout = null;
 		this.jsProject = jsproject;

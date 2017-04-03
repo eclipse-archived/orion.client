@@ -202,13 +202,7 @@ define([
 		}
 	};
 
-	/**
-	 * Object of contributed environments
-	 *
-	 * TODO will need to listen to updated tern plugin settings once enabled to clear this cache
-	 */
-	var contributedEnvs,
-		ternWorker;
+	var ternWorker;
 
 	var handlers = {
 		'read': doRead,
@@ -580,27 +574,8 @@ define([
 		messageQueue = [];
 	}
 
-	/**
-	 * @description Queries the Tern server to return all contributed environment names from the installed plugins
-	 * @returns {Object} The object of contributed environments or null
-	 * @since 9.0
-	 */
-	function getEnvironments() {
-		var envDeferred = new Deferred();
-		if (!contributedEnvs) {
-			ternWorker.postMessage({
-				request: 'environments'
-			}, function(response) {
-				contributedEnvs = response.envs;
-				envDeferred.resolve(response.envs);
-			});
-		} else {
-			return envDeferred.resolve(contributedEnvs);
-		}
-		return envDeferred;
-	}
-
-	provider.registerService("orion.edit.contentassist", new TernAssist.TernContentAssist(astManager, ternWorker, getEnvironments, CUProvider, jsProject), //$NON-NLS-1$
+	
+	provider.registerService("orion.edit.contentassist", new TernAssist.TernContentAssist(astManager, ternWorker, CUProvider, jsProject), //$NON-NLS-1$
 		{
 			contentType: ["application/javascript", "text/html"], //$NON-NLS-1$ //$NON-NLS-2$
 			nls: 'javascript/nls/messages', //$NON-NLS-1$
