@@ -665,6 +665,7 @@ a.breadcrumb.currentLocation {
 
 .dropdownTrigger a {
 	text-decoration: none;
+	pointer-events: none;
 }
 
 .dropdownMenu {
