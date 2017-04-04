@@ -62,10 +62,9 @@ define([
 		 * @callback 
 		 */
 		computePrefix: function(editorContext, offset) {
-			var that = this;
 			return editorContext.getText().then(function (text) {
-				return text.substring(that._getPrefixStart(text, offset), offset);
-			});
+				return text.substring(this._getPrefixStart(text, offset), offset);
+			}.bind(this));
 		},
 		/**
 		 * Called by the framework to initialize this provider before any <tt>computeContentAssist</tt> calls.
@@ -78,25 +77,24 @@ define([
 		 * @description Implements the Orion content assist API v4.0
 		 */
 		computeContentAssist: function(editorContext, params) {
-			var that = this;
 			return editorContext.getFileMetadata().then(function(meta) {
 			    if(meta.contentType.id === 'text/html') {
 			        return editorContext.getText().then(function(text) {
-			        	var cu = that.cuprovider.getCompilationUnit(function(){
+			        	var cu = this.cuprovider.getCompilationUnit(function(){
 		            		return Finder.findScriptBlocks(text);
 		            	}, meta);
     			        if(cu.validOffset(params.offset)) {
-    			            return that.astManager.getAST(cu.getEditorContext()).then(function(ast) {
-			            		return that.doAssist(ast, params, meta, {ecma5:true, ecma6:true, ecma7: true, browser:true}, text);
-			            	});
+    			            return this.astManager.getAST(cu.getEditorContext()).then(function(ast) {
+			            		return this.doAssist(ast, params, meta, {ecma5:true, ecma6:true, ecma7: true, browser:true}, text);
+			            	}.bind(this));
     			        }
     			        return [];
-			        });
+			        }.bind(this));
 			    } 
-		        return that.astManager.getAST(editorContext).then(function(ast) {
-	        		return that.doAssist(ast, params, meta, {ecma5: true, ecma6: true, ecma7: true});
-	        	});
-			});
+		        return this.astManager.getAST(editorContext).then(function(ast) {
+	        		return this.doAssist(ast, params, meta, {ecma5: true, ecma6: true, ecma7: true});
+	        	}.bind(this));
+			}.bind(this));
 		},
 
 		doAssist: function(ast, params, meta, envs, htmlsource) {
@@ -338,6 +336,9 @@ define([
         if(!completion.doc) {
             obj.content += proposal.name;
         } else {
+        	if(completion.doc.indexOf('@deprecated') > -1) {
+        		proposal.style = 'strikethrough';
+        	}
         	_h = Hover.formatMarkdownHover(completion.doc);
         	if(_h) {
         		obj.content += _h.content;
