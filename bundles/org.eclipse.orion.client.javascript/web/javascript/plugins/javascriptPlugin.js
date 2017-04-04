@@ -27,6 +27,7 @@ define([
 	'javascript/jsonAstManager',
 	'javascript/support/ternproject/ternProjectSupport',
 	'javascript/support/packagejson/packageJsonSupport',
+	'javascript/support/eslint/eslintSupport',
 	'javascript/validator',
 	'javascript/occurrences',
 	'javascript/hover',
@@ -48,7 +49,7 @@ define([
 	'orion/i18nUtil',
 	'orion/URL-shim'
 ], function(PluginProvider, mServiceRegistry, Deferred, ScriptResolver, ASTManager, QuickFixes, JavaScriptFormatter, JavaScriptProject, TernAssist,
-	JsonAstManager, TernProjectSupport, PackageJsonSupport, EslintValidator, Occurrences, Hover, Outliner, AstOutliner, CUProvider, Util, Logger, GenerateDocCommand, OpenDeclCommand, OpenImplCommand,
+	JsonAstManager, TernProjectSupport, PackageJsonSupport, ESLintSupport, EslintValidator, Occurrences, Hover, Outliner, AstOutliner, CUProvider, Util, Logger, GenerateDocCommand, OpenDeclCommand, OpenImplCommand,
 	RenameCommand, RefsCommand, mJS, mJSON, mJSONSchema, mEJS, javascriptMessages, i18nUtil) {
 
 	var serviceRegistry = new mServiceRegistry.ServiceRegistry();
@@ -281,6 +282,10 @@ define([
 //Register package.json support
 	var packageJsonSupport = new PackageJsonSupport(jsonAstManager, scriptresolver);
 	packageJsonSupport.registerExtensions(provider);
+
+//Register eslintrc* support
+	var eslintSupport = new ESLintSupport(jsonAstManager, scriptresolver, jsProject);
+	eslintSupport.registerExtensions(provider);
 	
 	provider.registerService("orion.edit.model", //$NON-NLS-1$
 		{

@@ -397,6 +397,5 @@ define([
 			}
 		}
 	};
-	Object.freeze(rules.defaults);
-	return rules;
+	return Object.freeze(rules);
 });

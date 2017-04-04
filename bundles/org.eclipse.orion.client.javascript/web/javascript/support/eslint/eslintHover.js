@@ -9,20 +9,81 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-/* global doctrine */
 define([
 	'orion/objects',
 	'orion/URITemplate',
 	'estraverse/estraverse',
-	'javascript/support/packagejson/packageJsonMetadata',
+	'javascript/ruleData',
 	'javascript/finder',
-	'javascript/support/eslint/eslintHover',
 	'i18n!javascript/nls/messages',
 	'orion/i18nUtil',
-], function(Objects, URITemplate, Estraverse, Metadata, Finder, ESLintHover, Messages, i18nUtil) {
+], function(Objects, URITemplate, Estraverse, RuleData, Finder, Messages, i18nUtil) {
 
 	var astManager,
-		resolver;
+		resolver,
+		project,
+		rootItems = Object.freeze({
+			ecmaFeatures_experimentalObjectRestSpread: {
+				doc: Messages.eslintObjectSpread,
+				url: "http://eslint.org/docs/user-guide/configuring#specifying-parser-options"
+			},
+			ecmaFeatures_globalReturn: {
+				doc: Messages.eslintGlobalReturn,
+				url: "http://eslint.org/docs/user-guide/configuring#specifying-parser-options"
+			},
+			ecmaFeatures_impliedStrict: {
+				doc: Messages.eslintImpliedStrict,
+				url: "http://eslint.org/docs/user-guide/configuring#specifying-parser-options"
+			},
+			ecmaFeatures_jsx: {
+				doc: Messages.eslintJSX,
+				url: "http://eslint.org/docs/user-guide/configuring#specifying-parser-options"
+			},
+			env: {
+				doc: Messages.envDoc,
+				url: "http://eslint.org/docs/user-guide/configuring#specifying-environments"
+			},
+			"extends": {
+				doc: Messages.eslintExtendsDoc,
+				url: "http://eslint.org/docs/user-guide/configuring#extending-configuration-files"
+			},
+			globals: {
+				doc: Messages.eslintGlobalsDoc,
+				url: "http://eslint.org/docs/user-guide/configuring#specifying-globals"
+			},
+			parser: {
+				doc: Messages.eslintParserDoc,
+				url: "http://eslint.org/docs/user-guide/configuring#specifying-parser"
+			},
+			parserOptions: {
+				doc: Messages.eslintParserOptionsDoc,
+				url: "http://eslint.org/docs/user-guide/configuring#specifying-parser-options"
+			},
+			parserOptions_ecmaVersion: {
+				doc: Messages.eslintEcmaVersion,
+				url: "http://eslint.org/docs/user-guide/configuring#specifying-parser-options"
+			},
+			parserOptions_sourceType: {
+				doc: Messages.eslintSourceType,
+				url: "http://eslint.org/docs/user-guide/configuring#specifying-parser-options"
+			},
+			parserOptions_ecmaFeatures: {
+				doc: Messages.eslintParserOptionsDoc,
+				url: "http://eslint.org/docs/user-guide/configuring#specifying-parser-options"
+			},
+			plugins: {
+				doc: Messages.eslintPluginsDoc,
+				url: "http://eslint.org/docs/user-guide/configuring#configuring-plugins"
+			},
+			rules: {
+				doc: Messages.rulesDoc,
+				url: "http://eslint.org/docs/user-guide/configuring#configuring-rules"
+			},
+			settings: {
+				doc: Messages.eslintSettingsDoc,
+				url: "http://eslint.org/docs/user-guide/configuring#adding-shared-settings"
+			}
+		});
 	
 	/**
 	 * @name javascript.TernProjectHover
@@ -31,11 +92,13 @@ define([
 	 * @public
 	 * @param {javascript.JsonAstManager} jsonAstManager
 	 * @param {ScriptResolver} scriptResolver
+	 * @param {JavaScriptProject} jsProject The backing JavaScript project context
 	 * @since 15.0
 	 */
-	function PackageJsonHover(jsonAstManager, scriptResolver) {
+	function ESLintHover(jsonAstManager, scriptResolver, jsProject) {
 	    astManager = jsonAstManager;
 	    resolver = scriptResolver;
+	    project = jsProject;
 	}
 	
 	/**
@@ -64,6 +127,7 @@ define([
                         });
                     hover += file.name + '](' + href + ') - ' + file.path + '\n\n'; //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$
                 }
+
             }
             return {
                 title: title,
@@ -98,9 +162,11 @@ define([
         var siteName = path.slice(path.lastIndexOf('/') + 1);
         if(site) {
             siteName = tmp;
-            hover.content += '['+ siteName + ']('+path+')\n\n';
+            hover.content += '[!['+siteName+'](../../../webtools/images/html.png)';
+       		hover.content += siteName + ']('+path+')\n\n';
         } else {
-           hover.content += '['+ siteName + '](' + path + ') - ' + path + '\n\n';
+           hover.content += '[![' + siteName + '](../../../webtools/images/html.png)';
+           hover.content += siteName + '](' + path + ') - ' + path + '\n\n';
        }
        return hover;
 	}
@@ -140,113 +206,45 @@ define([
 	}
 	
 	/**
-	 * @description Perform the actual hover
-	 * @param {?} node The AST node we are hovering on
-	 * @returns {?} The hover object or null
-	 */
-	function doDependencyHover(node) {
-		if(node && node.parent) {
-			var p = node.parent,
-				n = node;
-			if(p.value.range[0] === node.range[0]) {
-				//hovering the version number, grab the key
-				n = p.key;
-			}
-			//TODO we need to be able to reach out to NPM for some sueful information
-		}
-		return null;
-	}
-	
-	/**
-	 * @description Returns if the node is in the root object expression
-	 * @param {?} node The AST node we are hovering over
-	 * @returns {bool} True if the node is a root property, false otherwise
-	 */
-	function isRootNode(node) {
-		if(node && node.parent) {
-			var p = node.parent;
-			if(p.type === Estraverse.Syntax.ObjectExpression) {
-				return p.parent.type === Estraverse.Syntax.Program;
-			}
-			if(p.type === Estraverse.Syntax.Property && p.parent) {
-				p = p.parent;
-				return p && p.parent && p.parent.type === Estraverse.Syntax.Program;
-			}
-		}
-		return false;
-	}
-	
-	/**
-	 * @description Returns if the node is within the eslintConfig entry
-	 * @param {?} node The AST node we are hovering over
-	 * @returns {bool} True if the node is contained within the eslintConfig entry, false otherwise
-	 */
-	function isEslint(node) {
-		if(node) {
-			var p = node.parent;
-			while(p) {
-				if(p.type === Estraverse.Syntax.Property && p.key.value === "eslintConfig") {
-					return true;
-				}
-				p = p.parent;
-			}
-		}
-		return false;
-	}
-	
-	/**
-	 * @description Computes the new parent property node from the given node. This is the first parent with type of "Property"
-	 * @param {?} node The AST node context
-	 * @returns {?} The first AST node parent of type "Property" or null
-	 */
-	function getParentProperty(node) {
-		if(node && node.parent) {
-			var p = node.parent;
-			while(p)  {
-				if(p.type === Estraverse.Syntax.Property) {
-					return p;
-				}
-				p = p.parent;
-			}
-		}
-		return null;
-	}
-	/**
 	 * @description Computes the hover information to return
-	 * @param {?} ast The AST to visit
+	 * @param {?} ast The AST or AST node to visit. It can be a normal AST node if this function is called from the API
 	 * @param {?} ctxt The context from the framework
 	 * @returns {?} The formatted markdown hover or null
 	 */
 	function doHover(ast, ctxt) {
-		var node = Finder.findNode(ctxt.offset, ast, {});
+		var node = ast;
+		if(ast.type === "Program") {
+			node = Finder.findNode(ctxt.offset, ast, {});
+		}
 		if(node) {
 			if(node.type === Estraverse.Syntax.Literal) {
-				var item = Metadata[node.value];
-				if(item && isRootNode(node)) {
+				var item = rootItems[node.value];
+				if(item) {
+					return formatSimpleHover(item);
+				}
+				item = RuleData.metadata[node.value];
+				if(item) {
 					return formatSimpleHover(item);
 				} 
 				if(node.parent) {
 					var p = node.parent;
-					if(isEslint(node)) {
-						return ESLintHover.doHover(node, ctxt);
-					}
 					switch(p.type) {
 						case Estraverse.Syntax.Property: {
 							if(typeof node.value === 'string') {
 								if(/^(?:http|https):\/\//i.test(node.value)) {
 									return formatLinkHover(node.value);
-								} else if(node.value.indexOf('file:') === 0) {
-									return doFileHover(ast, node.value.slice(5));
-								} else if(ctxt.offset > p.key.range[1] && (p.key.value === "bin" || p.key.value === "main")) {
-									return doFileHover(ast, node.value);
-								} 
-								var prop = getParentProperty(p);
-								if(prop) {
-									var key = prop.key.value;
-									if(isRootNode(prop) && key === "dependencies" || key === "devDependencies" || key === "optionalDependencies" || key === "peerDependencies" || key === "bundledDependencies") {
-										return doDependencyHover(node);
-									} else if(key === "directories") {
-										item = Metadata["directories_"+node.value];
+								}
+								if(p.key.value === "extends" && (ctxt.offset >= node.range[0] && ctxt.offset <= node.range[1])) {
+									if(node.value.indexOf("eslint:") < 0) {
+										return doFileHover(ast, node.value);
+									}
+								}
+								var gp = p.parent;
+								if(gp && gp.type === "ObjectExpression") {
+									p = gp.parent;
+									if(p.key.value === "parserOptions" || p.key.value === "ecmaFeatures") {
+										var key = p.key.value+'_'+node.value;
+										item = rootItems[key];
 										if(item) {
 											return formatSimpleHover(item);
 										}
@@ -255,15 +253,6 @@ define([
 							}
 							break;
 						}
-						case Estraverse.Syntax.ArrayExpression: {
-							var gp = p.parent;
-							if(gp && gp.type === Estraverse.Syntax.Property) {
-								if(gp.key.value === "files") {
-									return doFileHover(ast, node.value);
-								}
-							}
-							break;
-						}
 					}
 				}
 			}
@@ -271,8 +260,7 @@ define([
 		return null;
 	}
 	
-	Objects.mixin(PackageJsonHover.prototype, /** @lends javascript.support.packagejson.PackageJsonHover.prototype*/ {
-	
+	Objects.mixin(ESLintHover.prototype, /** @lends javascript.support.packagejson.PackageJsonHover.prototype*/ {
 	    /**
 	     * @description Callback from the editor to compute the hover
 	     * @function
@@ -281,17 +269,27 @@ define([
 	     * @param {?} ctxt The current selection context
 	     */
 	    computeHoverInfo: function computeHoverInfo(editorContext, ctxt) {
-	        if (ctxt.proposal && ctxt.proposal.kind === 'packagejson') {
+	        if (ctxt.proposal && ctxt.proposal.kind === 'eslint') {
 	            return ctxt.proposal.hover;
 	        }
-            return astManager.getWellFormedAST(editorContext, "package.json").then(function(ast) {
-            	if(ast) {
-            		return doHover(ast, ctxt);
-            	}
-            	return null;
-            });
+	        return editorContext.getFileMetadata().then(function metadata(meta) {
+	        	if(meta.name !== project.PACKAGE_JSON && project.lintFiles.indexOf(meta.name) > -1) {
+	        		//we don;t want to be included in package.json hover all the time - only if it calls back to this hover support
+	        		//when eslintOptions are present
+	        		return astManager.getWellFormedAST(editorContext, meta.name).then(function(ast) {
+		            	if(ast) {
+		            		return doHover(ast, ctxt);
+		            	}
+		            	return null;
+		            });
+	        	}
+	        	return null;
+	        });
 	    }
 	});
 
-	return PackageJsonHover;
+	return {
+		ESLintHover: ESLintHover,
+		doHover: doHover
+	};
 });
