@@ -48,35 +48,78 @@ define([
 			        }
 		        };
 		    }
-				
-			/**
-			 * @name assertElement
-			 * @description Checks the given element against the expected name, start and end to make sure it is outlined correctly
-			 * @function
-			 * @public
-			 * @param {Object} element The computed outline element to check
-			 * @param {String} label The expected outline label
-			 * @param {Number} start The expected start offset of the element
-			 * @param {Number} end The expected end offset of the element
-			 */
-			function assertElement(element, label, start, end) {
-				assert(element, "The tested element cannot be null");
-				assert(element.label, "The outlined element must have a label");
-				if (element.start !== 0) {
-					assert(element.start, "The outlined element must have a start range");
+		    
+		    function assertOutline(computed, expected){
+				function assertElementRecurse(curComputed, curExpected) {
+					if (Array.isArray(curComputed)) {
+						assert(Array.isArray(curExpected), "Outline has an array of elements" + printOutput(computed, expected));
+						assert.equal(curComputed.length, curExpected.length, "Outline has unexpected number of entries" + printOutput(computed, expected));
+						for (var i = 0; i < curComputed.length; i++) {
+							assertElementRecurse(curComputed[i], curExpected[i]);
+						}
+					} else {
+						assert(curComputed, "The tested element cannot be null" + printOutput(computed, expected));
+						assert(curComputed.label, "The outlined element must have a label" + printOutput(computed, expected));
+						if (curExpected.start !== 0){
+							assert.equal(curComputed.start, curExpected.start, "Wrong start range" + printOutput(computed, expected));
+							assert.equal(curComputed.end, curExpected.end, "Wrong start range" + printOutput(computed, expected));
+						}
+						var fullLabel = curComputed.label;
+						if (curComputed.labelPre){
+							fullLabel = curComputed.labelPre + fullLabel;
+						}
+						if (curComputed.labelPost){
+							fullLabel += curComputed.labelPost;
+						}
+						assert.equal(fullLabel, curExpected.label, "Wrong label" + printOutput(computed, expected));
+						if (curComputed.children){
+							assertElementRecurse(curComputed.children, curExpected.children);
+						}
+					}
 				}
-				assert(element.end, "The outlined element must have an end range");
-				var fullLabel = element.label;
-				if (element.labelPre){
-					fullLabel = element.labelPre + fullLabel;
+				try {
+					assertElementRecurse(computed, expected);
+					worker.getTestState().callback();
+				} catch(err) {
+					worker.getTestState().callback(err);
 				}
-				if (element.labelPost){
-					fullLabel += element.labelPost;
-				}
-				assert.equal(fullLabel, label, "The label is not the same");
-				assert.equal(element.start, start, "The start range is not the same");
-				assert.equal(element.end, end, "The end range is not the same");
-			}
+		    }
+		    
+		    function printOutput(computed, expected){
+		    	function printOutputRecurse(element){
+		    		var result;
+		    		if (Array.isArray(element)) {
+		    			result = '[';
+		    			for (var i = 0; i < element.length; i++) {
+		    				result += printOutputRecurse(element[i]);
+		    			}
+		    			result += ']';
+		    			return result;
+	    			}
+    				result = '{\n';
+					var label = element.label;
+					if (element.labelPre){
+						label = element.labelPre + label;
+					}
+					if (element.labelPost){
+						label += element.labelPost;
+					}
+    				result += '\tlabel: "' + label + '",\n';
+    				result += '\tstart: ' + element.start + ',\n';
+    				result += '\tend: ' + element.end + ',\n';
+    				if (element.children){
+    					result += '\tchildren:\n' + printOutputRecurse(element.children);
+					}
+    				result += '},\n';
+    				return result;
+	    		}
+				var output = '\nActual:\n';
+				output += printOutputRecurse(computed);
+				output += '\nExpected:\n';
+				output += printOutputRecurse(expected);
+				return output;
+		    }
+			
 			describe('Source Outliner Tests', function() {
 				beforeEach('Display source outline', function(done) {
 					showAST = false;
@@ -85,16 +128,12 @@ define([
 				it('testfuncDeclaration1', function(callback) {
 					var r = setup(callback, "function F1(p1, p2) {};");
 					r.outliner.computeOutline(r.editorContext).then(function(outline) {
-						try {
-							if(!outline || outline.length < 1) {
-								assert.fail("There should be one outline element");
-							}
-							assertElement(outline[0], "F1(p1, p2)", 9, 11);
-							callback();
-						}
-						catch(err) {
-							callback(err);
-						}
+						assertOutline(outline, [{
+							label: "F1(p1, p2)",
+							start: 9,
+							end: 11,
+						},
+						]);
 					});
 				});
 				/**
@@ -103,14 +142,12 @@ define([
 				it('testMemberExpressionLiteral1', function(callback) {
 					var r = setup(callback, "Foo[\'bar\'] = function() {}");
 					r.outliner.computeOutline(r.editorContext).then(function(outline) {
-						try {
-							assert(outline && outline.length > 0, "There should be one outline element");
-							assertElement(outline[0], "Foo.bar()", 0, 10);
-							callback();
-						}
-						catch(err) {
-							callback(err);
-						}
+						assertOutline(outline, [{
+							label: "Foo.bar()",
+							start: 0,
+							end: 10,
+						},
+						]);
 					});
 				});
 				/**
@@ -119,14 +156,12 @@ define([
 				it('testMemberExpressionLiteral2', function(callback) {
 					var r = setup(callback, "Foo[\'bar\'].baz = function() {}");
 					r.outliner.computeOutline(r.editorContext).then(function(outline) {
-						try {
-							assert(outline && outline.length > 0, "There should be one outline element");
-							assertElement(outline[0], "Foo.bar.baz()", 0, 14);
-							callback();
-						}
-						catch(err) {
-							callback(err);
-						}
+						assertOutline(outline, [{
+							label: "Foo.bar.baz()",
+							start: 0,
+							end: 14,
+						},
+						]);
 					});
 				});
 				/**
@@ -135,14 +170,12 @@ define([
 				it('testMemberExpressionLiteral3', function(callback) {
 					var r = setup(callback, "Foo.baz[\'bar\'] = function() {}");
 					r.outliner.computeOutline(r.editorContext).then(function(outline) {
-						try {
-							assert(outline && outline.length > 0, "There should be one outline element");
-							assertElement(outline[0], "Foo.baz.bar()", 0, 14);
-							callback();
-						}
-						catch(err) {
-							callback(err);
-						}
+						assertOutline(outline, [{
+							label: "Foo.baz.bar()",
+							start: 0,
+							end: 14,
+						},
+						]);
 					});
 				});
 				
@@ -151,114 +184,128 @@ define([
 						"\titem: function(p1, p2) {}\n"+
 						"};");
 					r.outliner.computeOutline(r.editorContext).then(function(outline) {
-						try {
-							if(!outline || outline.length < 1) {
-								assert.fail("There should be one outline element");
-							}
-							if(!outline[0].children || outline[0].children.length < 1) {
-								assert.fail("There should be one child outline element");
-							}
-							assertElement(outline[0].children[0], "item(p1, p2)", 13, 17);
-							callback();
-						}
-						catch(err) {
-							callback(err);
-						}
+						assertOutline(outline, [{
+							label: "var obj = {item}",
+							start: 4,
+							end: 7,
+							children:
+							[{
+								label: "item(p1, p2)",
+								start: 13,
+								end: 17,
+							},
+							]},
+						]);
 					});
 				});
 				it('testLabelledFuncExpr1', function(callback) {
 					var r = setup(callback, "var obj = function foo(p1, p2) {};");
 					r.outliner.computeOutline(r.editorContext).then(function(outline) {
-						try {
-							if(!outline || outline.length < 1) {
-								assert.fail("There should be one outline element");
-							}
-							assertElement(outline[0], "foo(p1, p2)", 19, 22);
-							callback();
-						}
-						catch(err) {
-							callback(err);
-						}
+						assertOutline(outline, [{
+							label: "foo(p1, p2)",
+							start: 19,
+							end: 22,
+						},
+						]);
 					});
 				});
 				it('testLabelledFuncExpr2', function(callback) {
 					var r = setup(callback, "console.log(function foo(p1, p2) {});");
 					r.outliner.computeOutline(r.editorContext).then(function(outline) {
-						try {
-							if(!outline || outline.length < 1) {
-								assert.fail("There should be one outline element");
-							}
-							assertElement(outline[0], "foo(p1, p2)", 21, 24);
-							callback();
-						}
-						catch(err) {
-							callback(err);
-						}
+						assertOutline(outline, [{
+							label: "foo(p1, p2)",
+							start: 21,
+							end: 24,
+						},
+						]);
 					});
 				});
 				
 				it('testObjectExpression1', function(callback) {
 					var r = setup(callback, "var object = {};");
 					r.outliner.computeOutline(r.editorContext).then(function(outline) {
-						try {
-							if(!outline || outline.length < 1) {
-								assert.fail("There should be one outline element");
-							}
-							assertElement(outline[0], "var object = {...}", 4, 10);
-							callback();
-						}
-						catch(err) {
-							callback(err);
-						}
+						assertOutline(outline, [{
+							label: "var object = {...}",
+							start: 4,
+							end: 10,
+						},
+						]);
 					});
 				});
 				
 				it('testObjectExpression2', function(callback) {
 					var r = setup(callback, "var object = {a: \"\", b: \"\", c: \"\"};");
 					r.outliner.computeOutline(r.editorContext).then(function(outline) {
-						try {
-							if(!outline || outline.length < 1) {
-								assert.fail("There should be one outline element");
-							}
-							assertElement(outline[0], "var object = {a, b, c}", 4, 10);
-							callback();
-						}
-						catch(err) {
-							callback(err);
-						}
+						assertOutline(outline, [{
+							label: "var object = {a, b, c}",
+							start: 4,
+							end: 10,
+							children:
+							[{
+								label: "a",
+								start: 14,
+								end: 15,
+							},
+							{
+								label: "b",
+								start: 21,
+								end: 22,
+							},
+							{
+								label: "c",
+								start: 28,
+								end: 29,
+							},
+							]
+						},
+						]);
 					});
 				});
 				
 				it('testObjectExpression3', function(callback) {
 					var r = setup(callback, "var object = {\"a\": \"\", \"b\": \"\", \"c\": \"\"};");
 					r.outliner.computeOutline(r.editorContext).then(function(outline) {
-						try {
-							if(!outline || outline.length < 1) {
-								assert.fail("There should be one outline element");
-							}
-							assertElement(outline[0], "var object = {Object, Object, Object}", 4, 10);
-							callback();
-						}
-						catch(err) {
-							callback(err);
-						}
+						assertOutline(outline, [{
+							label: "var object = {Object, Object, Object}",
+							start: 4,
+							end: 10,
+							children:
+							[{
+								label: "a",
+								start: 14,
+								end: 17,
+							},
+							{
+								label: "b",
+								start: 23,
+								end: 26,
+							},
+							{
+								label: "c",
+								start: 32,
+								end: 35,
+							},
+							]},
+						]);
 					});
 				});
 				
-				it('testObjectExpression3', function(callback) {
+				it('testObjectExpression3b', function(callback) {
 					// Max length for properties is 50 characters
 					var r = setup(callback, "var object = {A123456789B123456789C123456789D123456789E123456789: \"\"};");
 					r.outliner.computeOutline(r.editorContext).then(function(outline) {
-						try {
-							if(!outline || outline.length < 1) {
-								assert.fail("There should be one outline element");
-							}
-							assertElement(outline[0], "var object = {A123456789B123456789C123456789D123456789E123456789}", 4, 10);
-							callback();
-						}
-						catch(err) {
-							callback(err);
-						}
+						assertOutline(outline, [{
+							label: "var object = {A123456789B123456789C123456789D123456789E123456789}",
+							start: 4,
+							end: 10,
+							children:
+							[{
+								label: "A123456789B123456789C123456789D123456789E123456789",
+								start: 14,
+								end: 64,
+							},
+							]},
+						]);
 					});
 				});
 				
@@ -266,16 +313,18 @@ define([
 					// Max length for properties is 50 characters
 					var r = setup(callback, "var object = {A123456789B123456789C123456789D123456789E123456789F: \"\"};");
 					r.outliner.computeOutline(r.editorContext).then(function(outline) {
-						try {
-							if(!outline || outline.length < 1) {
-								assert.fail("There should be one outline element");
-							}
-							assertElement(outline[0], "var object = {...}", 4, 10);
-							callback();
-						}
-						catch(err) {
-							callback(err);
-						}
+						assertOutline(outline, [{
+							label: "var object = {...}",
+							start: 4,
+							end: 10,
+							children:
+							[{
+								label: "A123456789B123456789C123456789D123456789E123456789F",
+								start: 14,
+								end: 65,
+							},
+							]},
+						]);
 					});
 				});
 				
@@ -283,48 +332,63 @@ define([
 					// Max length for properties is 50 characters
 					var r = setup(callback, "var object = {a: \"\", b: \"\", A123456789B123456789C123456789D123456789E123456789F: \"\"};");
 					r.outliner.computeOutline(r.editorContext).then(function(outline) {
-						try {
-							if(!outline || outline.length < 1) {
-								assert.fail("There should be one outline element");
-							}
-							assertElement(outline[0], "var object = {a, b, ...}", 4, 10);
-							callback();
-						}
-						catch(err) {
-							callback(err);
-						}
+						assertOutline(outline, [{
+							label: "var object = {a, b, ...}",
+							start: 4,
+							end: 10,
+							children:
+							[{
+								label: "a",
+								start: 14,
+								end: 15,
+							},
+							{
+								label: "b",
+								start: 21,
+								end: 22,
+							},
+							{
+								label: "A123456789B123456789C123456789D123456789E123456789F",
+								start: 28,
+								end: 79,
+							},
+							]},
+						]);
 					});
 				});
 				
 				it('testClosure1', function(callback) {
 					var r = setup(callback, "foo.bar({});");
 					r.outliner.computeOutline(r.editorContext).then(function(outline) {
-						try {
-							if(!outline || outline.length < 1) {
-								assert.fail("There should be one outline element");
-							}
-							assertElement(outline[0], "closure {...}", 8, 10);
-							callback();
-						}
-						catch(err) {
-							callback(err);
-						}
+						assertOutline(outline, [{
+							label: "closure {...}",
+							start: 8,
+							end: 10,
+						},
+						]);
 					});
 				});
 				
-				it('testClosure1', function(callback) {
+				it('testClosure2', function(callback) {
 					var r = setup(callback, "foo.bar({a: \"\", b: \"\"});");
 					r.outliner.computeOutline(r.editorContext).then(function(outline) {
-						try {
-							if(!outline || outline.length < 1) {
-								assert.fail("There should be one outline element");
-							}
-							assertElement(outline[0], "closure {a, b}", 8, 22);
-							callback();
-						}
-						catch(err) {
-							callback(err);
-						}
+						assertOutline(outline, [{
+							label: "closure {a, b}",
+							start: 8,
+							end: 22,
+							children:
+							[{
+								label: "a",
+								start: 9,
+								end: 10,
+							},
+							{
+								label: "b",
+								start: 16,
+								end: 17,
+							},
+							]},
+						]);
 					});
 				});
 				
@@ -333,19 +397,18 @@ define([
 						"\t\"item\": function(p1, p2) {}\n"+
 						"};");
 					r.outliner.computeOutline(r.editorContext).then(function(outline) {
-						try {
-							if(!outline || outline.length < 1) {
-								assert.fail("There should be one outline element");
-							}
-							if(!outline[0].children || outline[0].children.length < 1) {
-								assert.fail("There should be one child outline element");
-							}
-							assertElement(outline[0].children[0], "item(p1, p2)", 13, 19);
-							callback();
-						}
-						catch(err) {
-							callback(err);
-						}
+						assertOutline(outline, [{
+							label: "var obj = {Object}",
+							start: 4,
+							end: 7,
+							children:
+							[{
+								label: "item(p1, p2)",
+								start: 13,
+								end: 19,
+							},
+							]},
+						]);
 					});
 				});
 				
@@ -354,19 +417,18 @@ define([
 						"\t\"item\": null\n"+
 						"};");
 					r.outliner.computeOutline(r.editorContext).then(function(outline) {
-						try {
-							if(!outline || outline.length < 1) {
-								assert.fail("There should be one outline element");
-							}
-							if(!outline[0].children || outline[0].children.length < 1) {
-								assert.fail("There should be one child outline element");
-							}
-							assertElement(outline[0].children[0], "item", 13, 19);
-							callback();
-						}
-						catch(err) {
-							callback(err);
-						}
+						assertOutline(outline, [{
+							label: "var obj = {Object}",
+							start: 4,
+							end: 7,
+							children:
+							[{
+								label: "item",
+								start: 13,
+								end: 19,
+							},
+							]},
+						]);
 					});
 				});
 				
@@ -375,19 +437,18 @@ define([
 						"\t\"item\": {}\n"+
 						"};");
 					r.outliner.computeOutline(r.editorContext).then(function(outline) {
-						try {
-							if(!outline || outline.length < 1) {
-								assert.fail("There should be one outline element");
-							}
-							if(!outline[0].children || outline[0].children.length < 1) {
-								assert.fail("There should be one child outline element");
-							}
-							assertElement(outline[0].children[0], "item {...}", 13, 19);
-							callback();
-						}
-						catch(err) {
-							callback(err);
-						}
+						assertOutline(outline, [{
+							label: "var obj = {Object}",
+							start: 4,
+							end: 7,
+							children:
+							[{
+								label: "item {...}",
+								start: 13,
+								end: 19,
+							},
+							]},
+						]);
 					});
 				});
 				
@@ -396,19 +457,18 @@ define([
 						"\t\"item\": function(p1, p2) {}\n"+
 						"};");
 					r.outliner.computeOutline(r.editorContext).then(function(outline) {
-						try {
-							if(!outline || outline.length < 1) {
-								assert.fail("There should be one outline element");
-							}
-							if(!outline[0].children || outline[0].children.length < 1) {
-								assert.fail("There should be one child outline element");
-							}
-							assertElement(outline[0].children[0], "item(p1, p2)", 13, 19);
-							callback();
-						}
-						catch(err) {
-							callback(err);
-						}
+						assertOutline(outline, [{
+							label: "var obj = {Object}",
+							start: 4,
+							end: 7,
+							children:
+							[{
+								label: "item(p1, p2)",
+								start: 13,
+								end: 19,
+							},
+							]},
+						]);
 					});
 				});
 				
@@ -417,19 +477,18 @@ define([
 						"\t\"item\": null\n"+
 						"};");
 					r.outliner.computeOutline(r.editorContext).then(function(outline) {
-						try {
-							if(!outline || outline.length < 1) {
-								assert.fail("There should be one outline element");
-							}
-							if(!outline[0].children || outline[0].children.length < 1) {
-								assert.fail("There should be one child outline element");
-							}
-							assertElement(outline[0].children[0], "item", 13, 19);
-							callback();
-						}
-						catch(err) {
-							callback(err);
-						}
+						assertOutline(outline, [{
+							label: "var obj = {Object}",
+							start: 4,
+							end: 7,
+							children:
+							[{
+								label: "item",
+								start: 13,
+								end: 19,
+							},
+							]},
+						]);
 					});
 				});
 				
@@ -438,19 +497,18 @@ define([
 						"\t\"item\": {}\n"+
 						"};");
 					r.outliner.computeOutline(r.editorContext).then(function(outline) {
-						try {
-							if(!outline || outline.length < 1) {
-								assert.fail("There should be one outline element");
-							}
-							if(!outline[0].children || outline[0].children.length < 1) {
-								assert.fail("There should be one child outline element");
-							}
-							assertElement(outline[0].children[0], "item {...}", 13, 19);
-							callback();
-						}
-						catch(err) {
-							callback(err);
-						}
+						assertOutline(outline, [{
+							label: "var obj = {Object}",
+							start: 4,
+							end: 7,
+							children:
+							[{
+								label: "item {...}",
+								start: 13,
+								end: 19,
+							},
+							]},
+						]);
 					});
 				});
 				
@@ -463,19 +521,18 @@ define([
 						"\t return {};\n"+
 						"};");
 					r.outliner.computeOutline(r.editorContext).then(function(outline) {
-						try {
-							if(!outline || outline.length < 1) {
-								assert.fail("There should be one outline element");
-							}
-							if(!outline[0].children || outline[0].children.length < 1) {
-								assert.fail("There should be one child outline element");
-							}
-							assertElement(outline[0].children[0], "return {...}", 18, 24);
-							callback();
-						}
-						catch(err) {
-							callback(err);
-						}
+						assertOutline(outline, [{
+							label: "f1()",
+							start: 9,
+							end: 11,
+							children:
+							[{
+								label: "return {...}",
+								start: 18,
+								end: 24,
+							},
+							]},
+						]);
 					});
 				});
 				
@@ -488,19 +545,18 @@ define([
 						"\t return function() {};\n"+
 						"};");
 					r.outliner.computeOutline(r.editorContext).then(function(outline) {
-						try {
-							if(!outline || outline.length < 1) {
-								assert.fail("There should be one outline element");
-							}
-							if(!outline[0].children || outline[0].children.length < 1) {
-								assert.fail("There should be one child outline element");
-							}
-							assertElement(outline[0].children[0], "return {...}", 18, 24);
-							callback();
-						}
-						catch(err) {
-							callback(err);
-						}
+						assertOutline(outline, [{
+							label: "f1()",
+							start: 9,
+							end: 11,
+							children:
+							[{
+								label: "return {...}",
+								start: 18,
+								end: 24,
+							},
+							]},
+						]);
 					});
 				});
 				
@@ -515,25 +571,30 @@ define([
 						"\t};"+
 						"};");
 					r.outliner.computeOutline(r.editorContext).then(function(outline) {
-						try {
-							if(!outline || outline.length < 1) {
-								assert.fail("There should be one outline element");
-							}
-							if(!outline[0].children || outline[0].children.length < 1) {
-								assert.fail("There should be one level one child outline element");
-							}
-							if(!outline[0].children[0].children || outline[0].children[0].children.length < 1) {
-								assert.fail("There should be one level two child outline element");
-							}
-							if(!outline[0].children[0].children[0].children || outline[0].children[0].children[0].children.length < 1) {
-								assert.fail("There should be one level three child outline element");
-							}
-							assertElement(outline[0].children[0].children[0].children[0], "return {...}", 45, 51);
-							callback();
-						}
-						catch(err) {
-							callback(err);
-						}
+						assertOutline(outline, [{
+							label: "f1()",
+							start: 9,
+							end: 11,
+							children:
+							[{
+								label: "return {f1}",
+								start: 18,
+								end: 24,
+								children:
+								[{
+									label: "f1()",
+									start: 29,
+									end: 31,
+									children:
+									[{
+										label: "return {...}",
+										start: 45,
+										end: 51,
+									},
+									]},
+								]},
+							]},
+						]);
 					});
 				});
 				
@@ -548,25 +609,30 @@ define([
 						"\t};"+
 						"};");
 					r.outliner.computeOutline(r.editorContext).then(function(outline) {
-						try {
-							if(!outline || outline.length < 1) {
-								assert.fail("There should be one outline element");
-							}
-							if(!outline[0].children || outline[0].children.length < 1) {
-								assert.fail("There should be one level one child outline element");
-							}
-							if(!outline[0].children[0].children || outline[0].children[0].children.length < 1) {
-								assert.fail("There should be one level two child outline element");
-							}
-							if(!outline[0].children[0].children[0].children || outline[0].children[0].children[0].children.length < 1) {
-								assert.fail("There should be one level three child outline element");
-							}
-							assertElement(outline[0].children[0].children[0].children[0], "return {...}", 45, 51);
-							callback();
-						}
-						catch(err) {
-							callback(err);
-						}
+						assertOutline(outline, [{
+							label: "f1()",
+							start: 9,
+							end: 11,
+							children:
+							[{
+								label: "return {f1}",
+								start: 18,
+								end: 24,
+								children:
+								[{
+									label: "f1()",
+									start: 29,
+									end: 31,
+									children:
+									[{
+										label: "return {...}",
+										start: 45,
+										end: 51,
+									},
+									]},
+								]},
+							]},
+						]);
 					});
 				});
 				
@@ -579,21 +645,120 @@ define([
 						"\t return {a: \"\", b: \"\"};\n"+
 						"};");
 					r.outliner.computeOutline(r.editorContext).then(function(outline) {
-						try {
-							if(!outline || outline.length < 1) {
-								assert.fail("There should be one outline element");
-							}
-							if(!outline[0].children || outline[0].children.length < 1) {
-								assert.fail("There should be one child outline element");
-							}
-							assertElement(outline[0].children[0], "return {a, b}", 18, 24);
-							callback();
-						}
-						catch(err) {
-							callback(err);
-						}
+						assertOutline(outline, [{
+							label: "f1()",
+							start: 9,
+							end: 11,
+							children:
+							[{
+								label: "return {a, b}",
+								start: 18,
+								end: 24,
+								children:
+								[{
+									label: "a",
+									start: 26,
+									end: 27,
+								},
+								{
+									label: "b",
+									start: 33,
+									end: 34,
+								},
+								]},
+							]},
+						]);
 					});
 				});
+				
+				it('Call Expression 1', function(callback) {
+					var r = setup(callback, "describe(function(){});");
+					r.outliner.computeOutline(r.editorContext).then(function(outline) {
+						assertOutline(outline, [{
+							label: "function() - describe(function(){...})",
+							start: 9,
+							end: 17,
+						},
+						]);
+					});
+				});
+				it('Call Expression 2', function(callback) {
+					var r = setup(callback, "describe(function(a){});");
+					r.outliner.computeOutline(r.editorContext).then(function(outline) {
+						assertOutline(outline, [{
+							label: "function(a) - describe(function(){...})",
+							start: 9,
+							end: 17,
+						},
+						]);
+					});
+				});
+				it('Call Expression 3', function(callback) {
+					var r = setup(callback, "describe(function(a, b, c){ var x = a;});");
+					r.outliner.computeOutline(r.editorContext).then(function(outline) {
+						assertOutline(outline, [{
+							label: "function(a, b, c) - describe(function(){...})",
+							start: 9,
+							end: 17,
+						},
+						]);
+					});
+				});
+				it('Call Expression 4', function(callback) {
+					var r = setup(callback, "describe('abc', function(){});");
+					r.outliner.computeOutline(r.editorContext).then(function(outline) {
+						assertOutline(outline, [{
+							label: "function() - describe('abc', function(){...})",
+							start: 16,
+							end: 24,
+						},
+						]);
+					});
+				});
+				it('Call Expression 5', function(callback) {
+					var r = setup(callback, "describe(42, function(){};");
+					r.outliner.computeOutline(r.editorContext).then(function(outline) {
+						assertOutline(outline, [{
+							label: "function() - describe(42, function(){...})",
+							start: 13,
+							end: 21,
+						},
+						]);
+					});
+				});
+				it('Call Expression 6', function(callback) {
+					var r = setup(callback, "describe(42, 'abc', function(){}, function(){});");
+					r.outliner.computeOutline(r.editorContext).then(function(outline) {
+						assertOutline(outline, [{
+							label: "function() - describe(42, 'abc', function(){...}, function(){...})",
+							start: 20,
+							end: 28,
+						},
+						{
+							label: "function() - describe(42, 'abc', function(){...}, function(){...})",
+							start: 34,
+							end: 42,
+						},
+						]);
+					});
+				});
+				it('Call Expression 7', function(callback) {
+					var r = setup(callback, "describe('123456789012345678901234567890', function(){}, function(){});");
+					r.outliner.computeOutline(r.editorContext).then(function(outline) {
+						assertOutline(outline, [{
+							label: "function() - describe('123456789012345678901234567890', function(){...}, ...)",
+							start: 43,
+							end: 51,
+						},
+						{
+							label: "function() - describe('123456789012345678901234567890', function(){...}, ...)",
+							start: 57,
+							end: 65,
+						},
+						]);
+					});
+				});
+				
 			});
 		});	
 	};

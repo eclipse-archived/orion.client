@@ -112,7 +112,12 @@ define([
 									delete node.sig;
 									break;
 								}
-								item = addElement(Signatures.computeSignature(node), Signatures.FUNCTION_IMAGE);
+								var sig = Signatures.computeSignature(node);
+								var details = Signatures.getCalleeSignature(node);
+								if (details){
+									sig.details = ' - ' + details;
+								}
+								item = addElement(sig, Signatures.FUNCTION_IMAGE);
 								if(item) {
 									scope.push(item);
 								}
@@ -120,7 +125,12 @@ define([
 								break;
 							}
 							case Estraverse.Syntax.ArrowFunctionExpression : {
-								item = addElement(Signatures.computeSignature(node), Signatures.FUNCTION_IMAGE);
+								sig = Signatures.computeSignature(node);
+								details = Signatures.getCalleeSignature(node);
+								if (details){
+									sig.details = ' - ' + details;
+								}
+								item = addElement(sig, Signatures.FUNCTION_IMAGE);
 								if (item) {
 									scope.push(item);
 								}
