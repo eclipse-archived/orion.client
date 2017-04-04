@@ -12,6 +12,12 @@ define ([
 ],
 function(util) { /* BDL */
 	
+	var bidiEnabledStorage = "/orion/preferences/bidi/bidiEnabled"; //$NON-NLS-0$
+	var bidiLayoutStorage = "/orion/preferences/bidi/bidiLayout"; //$NON-NLS-0$	
+	var LRE = "\u202A";	//$NON-NLS-0$
+	var PDF = "\u202C"; //$NON-NLS-0$
+	var RLE = "\u202B"; //$NON-NLS-0$
+		
 	function setBrowserLangDirection() {
 		
 		var lang;
@@ -23,7 +29,7 @@ function(util) { /* BDL */
 		}
 		var isBidi = lang && "ar iw he".indexOf(lang.substring(0, 2)) !== - 1;
 
-		if (isBidi) {
+		if (isBidi && isBidiEnabled()) {
 			var htmlElement = document.getElementsByTagName("html")[0];
 			if (htmlElement){ //should be always true
 				htmlElement.setAttribute ("dir", "rtl");
@@ -33,12 +39,6 @@ function(util) { /* BDL */
 	
 	setBrowserLangDirection();
 	
-	var bidiEnabledStorage = "/orion/preferences/bidi/bidiEnabled"; //$NON-NLS-0$
-	var bidiLayoutStorage = "/orion/preferences/bidi/bidiLayout"; //$NON-NLS-0$	
-	var LRE = "\u202A";	//$NON-NLS-0$
-	var PDF = "\u202C"; //$NON-NLS-0$
-	var RLE = "\u202B"; //$NON-NLS-0$
-		
 	var bidiLayout = getBidiLayout();
 
 	/**
