@@ -21,6 +21,14 @@
 	cursor: default;
 }
 
+.runBarWrapper .appLink {
+	text-decoration: none;
+}
+
+.runBarWrapper .logsLink {
+	text-decoration: none;
+}
+
 .orionSwitchWrapper .disabled {
 	cursor: default;
 }
@@ -123,14 +131,48 @@
 	margin-top: -3px;
 }
 
-.runBarButton.playButton {
-	display: inline-block;
-	font-size: 16px;
+.runBarWrapper .logStatusProgress {
+  border: 1px solid #3C71B3;
+  animation: 2s animateBorder linear infinite forwards;
 }
 
-.runBarButton.stopButton {
-	display: inline-block;
-	font-size: 16px;
+/* WebKit prefix recommended for legacy browsers */
+@-webkit-keyframes animateBorder {
+  0%, 100% {
+    border-top-color: transparent;
+    border-left-color:  #3C71B3;
+  }
+  25% {
+    border-right-color: transparent;
+    border-top-color:  #3C71B3;
+  }
+  50% {
+    border-bottom-color: transparent;
+    border-right-color:  #3C71B3;
+  }
+  75% {
+    border-left-color: transparent;
+    border-bottom-color:  #3C71B3;
+  }
+}
+
+@keyframes animateBorder {
+  0%, 100% {
+    border-top-color: transparent;
+    border-left-color:  #3C71B3;
+  }
+  25% {
+    border-right-color: transparent;
+    border-top-color:  #3C71B3;
+  }
+  50% {
+    border-bottom-color: transparent;
+    border-right-color:  #3C71B3;
+  }
+  75% {
+    border-left-color: transparent;
+    border-bottom-color:  #3C71B3;
+  }
 }
 
 .statusLabel {
@@ -213,29 +255,3 @@
 	white-space: nowrap;
 }
 
-.runBarLink {
-	-webkit-flex-grow: 0;		/* Safari */
-	flex-grow: 0;
-	-webkit-flex-shrink: 0;		/* Safari */
-	flex-shrink: 0;
-	margin: 0 2px;
-}
-
-.runBarLink:hover:not(.disabled) {
-	color: #00AED1;
-}
-
-.runBarLink:hover {
-	text-decoration: none;
-}
-
-.runBarLink.appLink{
-	font-size: 16px;
-	height: 16px;
-	line-height: 17px;
-	margin: -6px 0 0 6px;
-}
-
-.logsLink {
-	margin: -3px 0 0 10px !important;
-}

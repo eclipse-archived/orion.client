@@ -310,6 +310,12 @@ define([
 			var newConfig = evnt.newValue;
 			
 			if((evnt.type === "changeState") && newConfig){ //$NON-NLS-0$
+				this._logsLink.classList.remove('logStatusProgress');
+				if (newConfig && newConfig.status){
+					if (newConfig.status.State === "PROGRESS"){
+						this._logsLink.classList.add('logStatusProgress');
+					}
+				}
 				this._updateLaunchConfiguration(newConfig);
 			} else {
 				this._menuItemsCache = []; // clear launch configurations menu items cache

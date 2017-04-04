@@ -100,7 +100,7 @@ define({//Default message bundle
 	"openApp": "Open App",
 	"openAppTooltip": "Open the Deployed App",
 	"openLogs": "Logs",
-	"openLogsTooltip": "Open the Logs",
+	"openLogsTooltip": "Open the Deploy Log",
 	"redeployConfirmationDialogTitle": "Stop and Redeploy?",
 	"redeployConfirmationDialogMessage": "Your application ${0} will be re-deployed.",
 	"redeployConfirmationDialogCheckboxMessage": "Don't ask me again.",
