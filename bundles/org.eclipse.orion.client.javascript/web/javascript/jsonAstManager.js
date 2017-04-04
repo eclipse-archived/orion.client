@@ -16,8 +16,7 @@ define([
 	'javascript/lru',
 	'plugins/languages/json/parser'
 ], function(Deferred, Objects, LRU, Parser) {
-	var registry,
-		cache = new LRU(10),
+	var cache = new LRU(10),
 		jsoncache = new LRU(10),
 		escache = new LRU(10);
 
@@ -25,13 +24,11 @@ define([
 	 * Provides a shared AST.
 	 * @name javascript.JsonAstManager
 	 * @class Provides a shared AST for JSON files.
-	 * @param {?} serviceRegistry The platform service registry
 	 * @param {?} jsProject The backing project context
 	 * @since 15.0
 	 */
-	function JsonAstManager(serviceRegistry, jsProject) {
+	function JsonAstManager(jsProject) {
 		this.jsProject = jsProject;
-		registry = serviceRegistry;
 	}
 
 	/**
@@ -89,6 +86,8 @@ define([
 		 * @param {String} fileName The name of the file we want the AST for. This name is checked against the file metadata,
 		 * and if the names to not match, return null
 		 * @returns {orion.Promise} A promise resolving to the AST.
+		 * @deprecated This function is provided only to be able to use the malformed AST that the parser provides out of the box. Callers should
+		 * use the getWellFormedAST function that produces an ESTree-spec compliant AST
 		 */
 		getAST: function(editorContext, fileName) {
 			return editorContext.getFileMetadata().then(function(metadata) {
@@ -118,8 +117,7 @@ define([
 			});
 		},
 		/**
-		 * @name getWellFormedAST
-		 * @description Returns an ES tools compatible AST
+		 * @description Returns an ESTree spec-compliant AST
 		 * @function
 		 * @param {EditorContext} editorContext The backing editor context
 		 * @param {String} fileName The name of the file to get the AST for
@@ -212,7 +210,11 @@ define([
 							//ignore, we create a new root
 						}
 						if (ast) {
-							ast.range = [ast.body.range[0], ast.body.range[1]];
+							if(ast.body) {
+								ast.range = [ast.body.range[0], ast.body.range[1]];
+							} else {
+								ast.range = [0, text.length];
+							}
 							ast.errors = errors.map(convertError);
 							escache.put(loc, ast);
 						}

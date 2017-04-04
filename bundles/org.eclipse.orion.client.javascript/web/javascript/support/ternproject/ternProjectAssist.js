@@ -17,8 +17,8 @@ define([
 	'javascript/hover',
 	'javascript/util',
 	'orion/editor/templates',
-	'plugins/languages/json/visitor'
-], function(Objects, Messages, i18nUtil, Hover, Util, mTemplates, JsonVisitor) {
+	'javascript/finder'
+], function(Objects, Messages, i18nUtil, Hover, Util, mTemplates, Finder) {
 
 	var templates = [{
 		prefix: "",
@@ -172,27 +172,30 @@ define([
 		 * @returns {Array.<Object>} returns
 		 */
 		computeContentAssist: function computeContentAssist(editorContext, params) {
-			return astManager.getAST(editorContext, ".tern-project").then(function(ast) {
+			return astManager.getWellFormedAST(editorContext, ".tern-project").then(function(ast) {
 				var proposals = [];
-				if (!ast) {
+				if(!ast) {
+					return proposals;
+				}
+				if (!ast.body) {
 					var _templates = getTemplatesForPrefix(params.prefix);
 					_templates.forEach(function(_template) {
 						proposals.push(getProposalFromTemplate(_template, params));
 					});
 					return proposals;
 				}
-				var node = JsonVisitor.findNodeAtOffset(ast, params.offset);
+				var node = Finder.findNode(params.offset, ast);
 				if (node) {
-					if (node.type === 'object') {
-						if (!node.parent) {
+					if (node.type === 'ObjectExpression') {
+						if (node.parent && node.parent.type === 'Program') {
 							// at the root
 							Object.keys(rootOptions).forEach(function(item) {
 								addProposal(item, rootOptions[item], proposals);
 							});
 						}
 					}
-					if (node.type === 'property') {
-
+					if (node.type === 'Property') {
+						//TODO
 					}
 					return proposals;
 				}
