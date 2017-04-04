@@ -154,7 +154,7 @@ module.exports = function(options) {
 	}
 
 	var router = express.Router({mergeParams: true});
-	var jsonParser = bodyParser.json({"limit":"1000kb"});
+	var jsonParser = bodyParser.json({"limit":"10mb"});
 	router.get('*', jsonParser, function(req, res) {
 		var rest = req.params["0"].substring(1),
 			readIfExists = req.headers ? Boolean(req.headers['read-if-exists']).valueOf() : false,
