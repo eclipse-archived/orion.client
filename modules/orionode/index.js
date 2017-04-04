@@ -11,7 +11,9 @@
 /*eslint-env node */
 var express = require('express'),
 	path = require('path'),
-	fs = require('fs');
+	fs = require('fs'),
+	log4js = require('log4js'),
+	logger = log4js.getLogger("server");
 
 var LIBS = path.normalize(path.join(__dirname, 'lib/')),
 	MINIFIED_ORION_CLIENT = path.normalize(path.join(__dirname, "lib/orion.client")),
@@ -103,9 +105,9 @@ function startServer(options) {
 		}
 
 		//error handling
-		app.use(function(req, res){
+		app.use(function(err, req, res, next){
+			logger.error(err);
 			res.status(404);
-
 			// respond with html page
 //			if (req.accepts('html')) {
 //				res.render('404', { url: req.url });
