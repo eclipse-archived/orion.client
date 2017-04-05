@@ -262,7 +262,7 @@ define([
 	 * @since 12.0
 	 */
 	var jsProject = new JavaScriptProject(serviceRegistry);
-	var jsonAstManager = new JsonAstManager.JsonAstManager(jsProject);
+	var jsonAstManager = new JsonAstManager.JsonAstManager();
 	/**
 	 * Register JSON AST manager as Model Change listener
 	 */

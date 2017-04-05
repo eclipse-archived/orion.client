@@ -24,12 +24,9 @@ define([
 	 * Provides a shared AST.
 	 * @name javascript.JsonAstManager
 	 * @class Provides a shared AST for JSON files.
-	 * @param {?} jsProject The backing project context
 	 * @since 15.0
 	 */
-	function JsonAstManager(jsProject) {
-		this.jsProject = jsProject;
-	}
+	function JsonAstManager() {}
 
 	/**
 	 * Returns the key to use when caching

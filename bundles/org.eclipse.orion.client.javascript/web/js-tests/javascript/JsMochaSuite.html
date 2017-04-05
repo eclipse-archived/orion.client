@@ -43,6 +43,7 @@
 				'js-tests/javascript/quickfixGlobalTests',
 				'js-tests/javascript/es6QuickfixTests',
 				'js-tests/javascript/eslintCoreTests',
+				'js-tests/javascript/eslintHoverTests',
 				'js-tests/javascript/scriptResolverTests',
 				'js-tests/javascript/sigparserTests',
 				'js-tests/javascript/es6ValidatorTests',
@@ -52,7 +53,7 @@
 				'js-tests/javascript/computedEnvTests'
 				], function(worker, crossFileTests, ternAssistIndexTests, ternAssistModuleTests, ternAssistTests, ternCommandTests, dependencyTests, finderTests, 
 							occurrencesTests, es6OccurrencesTests, es7OccurrencesTests, es7AssistTests, astOutlinerTests, outlinerTests, es6OutlinerTests, commonJsValidatorTests, nodeValidatorTests, 
-							validatorTests, lruTests, quickfixTests, quickfixGlobalTests, es6QuickfixTests, eslintCoreTests, scriptResolverTests, sigparserTests, es6ValidatorTests, 
+							validatorTests, lruTests, quickfixTests, quickfixGlobalTests, es6QuickfixTests, eslintCoreTests, eslintHoverTests, scriptResolverTests, sigparserTests, es6ValidatorTests, 
 							ternProjectTests, ternProjectValidatorTests, computedEnvTests) {
 					var testworker;
 					before("reset timeout", function(done) {
@@ -69,6 +70,7 @@
 //					crossFileTests(testworker);
 					dependencyTests(testworker);
 					eslintCoreTests(testworker);
+					eslintHoverTests(testworker);
 					finderTests(testworker);
 					lruTests(testworker);
 					occurrencesTests(testworker);

@@ -15,10 +15,8 @@ define([
 	'javascript/validator',
 	'chai/chai',
 	'orion/Deferred',
-	"orion/i18nUtil",
-	"i18n!javascript/nls/problems",
 	'mocha/mocha', //must stay at the end, not a module
-], function(Validator, chai, Deferred, i18nUtil, Messages) {
+], function(Validator, chai, Deferred) {
 	var assert = chai.assert;
 	
 	return function(worker) {
