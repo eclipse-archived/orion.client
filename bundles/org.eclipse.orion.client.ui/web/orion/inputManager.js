@@ -568,6 +568,10 @@ define([
 				loc = "#" + loc; //$NON-NLS-0$
 			}
 			var input = PageUtil.matchResourceParameters(loc), oldInput = this._parsedLocation || {};
+			if(loc.indexOf("noreveal=true") !== -1){
+				// This indicates that the input changed from user's selection operation in the navigator. so reveal the selection again is unnecessary.
+				input.noreveal = true;
+			}
 			var encodingChanged = oldInput.encoding !== input.encoding;
 			var afterConfirm = function(){
 				var editorChanged = editor && oldInput.editor !== input.editor;

@@ -78,9 +78,13 @@ define([
 		this.treeRoot = {}; // Needed by FileExplorer.prototype.loadResourceList
 		var _self = this;
 		this.editorInputListener = function(evnt) {
-			_self.reveal(evnt.metadata).then(function() {
-				mMetrics.logPageLoadTiming("complete", window.location.pathname); //$NON-NLS-0$
-			});
+			if(!evnt.noreveal){
+				_self.reveal(evnt.metadata).then(function() {
+					mMetrics.logPageLoadTiming("complete", window.location.pathname); //$NON-NLS-0$
+				});
+			}else{
+				mMetrics.logPageLoadTiming("complete", window.location.pathname);
+			}
 		};
 		this.editorInputManager.addEventListener("InputChanged", this.editorInputListener);
 		if (sidebarNavInputManager) {
@@ -447,22 +451,10 @@ define([
 
 		_preventLinkBehavior: function(linkNode) {
 			linkNode.addEventListener("click", function(evt) {
-				this.explorer.isDesktopSelectionMode().then(function(desktopMode) {
-					if (_DEBUG) {
-						var byWho = evt.detail === 3 ? "simulation" : "user";
-						console.log("single click triggered by " + byWho);
-						console.log(evt);
-					}
-					if (desktopMode && (evt.shiftKey || evt.ctrlKey || evt.metaKey) && evt.detail !== 3) {
-						if (_DEBUG) {
-							console.log("single click prevented");
-						}
-						evt.preventDefault();
-					}
-				});
+				evt.preventDefault();
 			}.bind(this));
 			linkNode.addEventListener("dblclick", function(evt) {
-				this.explorer.handleLinkDoubleClick(linkNode, evt);
+				evt.preventDefault();
 			}.bind(this));
 		},
 		createFolderNode: function(folder) {
