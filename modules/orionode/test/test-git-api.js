@@ -182,7 +182,7 @@ GitClient.prototype = {
 			request()
 			.post(CONTEXT_PATH + "/gitapi/commit/HEAD/file/" + client.getName())
 			.send({
-				Message: "Test commit!",
+				Message: "Test commit at " + Date.now(),
 				AuthorName: "test",
 				AuthorEmail: "test@test.com",
 				CommitterName: "test",
@@ -2310,6 +2310,217 @@ maybeDescribe("git", function() {
 					assert.equal(log.Children[0].Parents[0].Name, second);
 					assert.equal(log.Children[1].Parents.length, 1);
 					assert.equal(log.Children[1].Parents[0].Name, first);
+					finished();
+				})
+				.catch(function(err) {
+					finished(err);
+				});
+			});
+
+			it("file gap", function(finished) {
+				var first, second, third;
+				var name = "test.txt";
+
+				var client = new GitClient("history-graph-file-gap");
+				client.init();
+				client.setFileContents(name, "1");
+				client.stage(name);
+				client.commit();
+				client.start().then(function(commit) {
+					first = commit.Id;
+
+					client.commit();
+					client.setFileContents(name, "2");
+					client.stage(name);
+					client.commit();
+					return client.start();
+				})
+				.then(function(commit) {
+					second = commit.Id;
+
+					client.commit();
+					client.setFileContents(name, "3");
+					client.stage(name);
+					client.commit();
+					return client.start();
+				})
+				.then(function(commit) {
+					third = commit.Id;
+
+					client.commit();
+					client.log("master", "master", name);
+					return client.start();
+				})
+				.then(function(log) {
+					assert.equal(log.Children.length, 3);
+					assert.equal(log.Children[0].Name, third);
+					assert.equal(log.Children[0].Parents.length, 1);
+					assert.equal(log.Children[0].Parents[0].Name, second);
+					assert.equal(log.Children[1].Name, second);
+					assert.equal(log.Children[1].Parents.length, 1);
+					assert.equal(log.Children[1].Parents[0].Name, first);
+					assert.equal(log.Children[2].Name, first);
+					assert.equal(log.Children[2].Parents.length, 1);
+					finished();
+				})
+				.catch(function(err) {
+					finished(err);
+				});
+			});
+
+			/**
+			 * Confirm the parent history information of the following graph.
+			 * Commit U is a commit that doesn't modify the file. The merge
+			 * commit M also doesn't modify anything. The returned history
+			 * should only consist of commits A and B.
+			 * 
+			 * Actual repository history:
+			 * 
+			 * M
+			 * |\
+			 * | \
+			 * |  \
+			 * U   B
+			 * |  /
+			 * | /
+			 * |/
+			 * A
+			 * 
+			 * Returned history for the file:
+			 * 
+			 * B
+			 * |
+			 * A
+			 */
+			it("file merge unchanged branch", function(finished) {
+				var commitA, commitB, local;
+				var name = "test.txt";
+
+				var client = new GitClient("history-graph-file-merge-unchnaged-branch");
+				client.init();
+				// create the file at commit A
+				client.setFileContents(name, "A");
+				client.stage(name);
+				client.commit();
+				client.start().then(function(commit) {
+					commitA = commit.Id;
+
+					// make the extra commit U
+					client.commit();
+					client.createBranch("other");
+					// reset
+					client.reset("HARD", commitA);
+					// create commit B
+					client.setFileContents(name, "B");
+					client.stage(name);
+					client.commit();
+					return client.start();
+				})
+				.then(function(commit) {
+					commitB = commit.Id;
+
+					// merge the unrelated branch
+					client.merge("other");
+					client.log("master", "master", name);
+					return client.start();
+				})
+				.then(function(log) {
+					assert.equal(log.Children.length, 2);
+					assert.equal(log.Children[0].Id, commitB);
+					assert.equal(log.Children[0].Parents.length, 1);
+					assert.equal(log.Children[0].Parents[0].Name, commitA);
+					assert.equal(log.Children[1].Id, commitA);
+					finished();
+				})
+				.catch(function(err) {
+					finished(err);
+				});
+			});
+
+			/**
+			 * Confirm the parent history information of the following graph.
+			 * We want to make sure that the extraneous commits A, B, C, and D
+			 * don't affect the returned history information of the modified file.
+			 * 
+			 * Actual repository history:
+			 * 
+			 * O
+			 * |\
+			 * | \
+			 * |  \
+			 * B   D
+			 * |   |
+			 * O   O
+			 * |  /
+			 * A C
+			 * |/
+			 * O
+			 * 
+			 * Returned history for the file:
+			 * 
+			 * O
+			 * |\
+			 * | \
+			 * |  \
+			 * O   O
+			 * |  /
+			 * | /
+			 * |/
+			 * O
+			 */
+			it("file merge gaps", function(finished) {
+				var initial, other, local;
+				var name = "test.txt";
+
+				var client = new GitClient("history-graph-file-merge-gaps");
+				client.init();
+				client.setFileContents(name, "1\n2\n3");
+				client.stage(name);
+				client.commit();
+				client.start().then(function(commit) {
+					initial = commit.Id;
+
+					// make the extra commit A
+					client.commit();
+					client.setFileContents(name, "1a\n2\n3");
+					client.stage(name);
+					client.commit();
+					return client.start();
+				})
+				.then(function(commit) {
+					other = commit.Id;
+					// make the extra commit B
+					client.commit();
+
+					client.createBranch("other");
+					client.reset("HARD", initial);
+					// make the extra commit C
+					client.commit();
+					client.setFileContents(name, "1\n2\n3a");
+					client.stage(name);
+					client.commit();
+					return client.start();
+				})
+				.then(function(commit) {
+					local = commit.Id;
+
+					// make the extra commit D
+					client.commit();
+					client.merge("other");
+					client.log("master", "master", name);
+					return client.start();
+				})
+				.then(function(log) {
+					assert.equal(log.Children.length, 4);
+					// merge commit with two parents
+					assert.equal(log.Children[0].Parents.length, 2);
+					assert.equal(log.Children[0].Parents[0].Name, local);
+					assert.equal(log.Children[0].Parents[1].Name, other);
+					assert.equal(log.Children[1].Id, other);
+					assert.equal(log.Children[1].Parents[0].Name, initial);
+					assert.equal(log.Children[2].Id, local);
+					assert.equal(log.Children[2].Parents[0].Name, initial);
+					assert.equal(log.Children[3].Id, initial);
 					finished();
 				})
 				.catch(function(err) {

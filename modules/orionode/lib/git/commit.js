@@ -286,6 +286,7 @@ function getCommitLog(req, res) {
 		});
 
 		var count = 0;
+		var commitJSONs = {};
 		filterPath = clone.getfileRelativePath(repo,req); 
 		function walk() {
 			return revWalk.next()
@@ -298,11 +299,22 @@ function getCommitLog(req, res) {
 				.then(function(commit) {
 					function applyFilter(filter) {
 						if (filter || filterCommit(commit) || page && count++ < skipCount) {//skip pages
+							var keys = Object.keys(commitJSONs);
+							for (var i = 0 ; i < keys.length; i++) {
+								for (var j = 0; j < commitJSONs[keys[i]].Parents.length; j++) {
+									if (commitJSONs[keys[i]].Parents[j].Name === commit.sha() && commit.parentcount() !== 0) {
+										commitJSONs[keys[i]].Parents[j] = createParentJSON(commit.parentId(0).toString(), fileDir);
+										return walk();
+									}
+								}
+							}
 							return walk();
 						}
 						return Promise.all([getDiff(repo, commit, fileDir), getCommitParents(repo, commit, fileDir)])
 						.then(function(stuff) {
-							commits.push(commitJSON(commit, fileDir, stuff[0], stuff[1]));
+							var json = commitJSON(commit, fileDir, stuff[0], stuff[1]);
+							commitJSONs[commit.sha()] = json;
+							commits.push(json);
 							if (pageSize && commits.length === pageSize) {//page done
 								sendResponse();
 								return;
@@ -406,12 +418,16 @@ function getCommitParents(repo, commit, fileDir) {
 	return commit.getParents()
 	.then(function(parents) {
 		return parents.map(function(parent) {
-			return {
-				"Location": gitRoot + "/commit/" + parent.sha() + fileDir,
-				"Name": parent.sha()
-			};
+			return createParentJSON(parent.sha(), fileDir);
 		});
 	});
+}
+
+function createParentJSON(sha, fileDir) {
+	return {
+		"Location": gitRoot + "/commit/" + sha + fileDir,
+		"Name": sha
+	};
 }
 
 function getCommitRefs(repo, fileDir, commits) {
