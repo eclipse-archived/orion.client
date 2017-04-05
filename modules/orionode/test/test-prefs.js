@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016 IBM Corporation and others.
+ * Copyright (c) 2016, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -10,6 +10,7 @@
  *******************************************************************************/
 /*eslint-env node, mocha*/
 var chai = require('chai'),
+    assert = require('assert'),
     express = require('express'),
     nodePath = require('path'),
     PrefsController = require('../lib/controllers/prefs').router,
@@ -127,12 +128,15 @@ describe('prefs', function() {
 				.expect(204);
 			});
 
-			it('should update the value', function() {
+			it('should update the value', function(finished) {
 				// Check the value
-				return request().get(PREFS_PREFIX + '/user/foo').expect(200)
-				.then(function(res) {
-					expect(res.body).to.deep.equal({ bar: 'modified', qux: 'q' });
-				});
+				setTimeout(function() {
+					request().get(PREFS_PREFIX + '/user/foo').expect(200)
+					.then(function(res) {
+						expect(res.body).to.deep.equal({ bar: 'modified', qux: 'q' });
+						finished();
+					});
+				}, 10);
 			});
 		});
 
@@ -144,11 +148,14 @@ describe('prefs', function() {
 				.expect(204);
 			});
 
-			it('should update the value', function() {
-				return request().get(PREFS_PREFIX + '/user/foo').expect(200)
-				.then(function(res) {
-					expect(res.body).to.deep.equal({ howdy: 'partner' });
-				});
+			it('should update the value', function(finished) {
+				setTimeout(function() {
+					request().get(PREFS_PREFIX + '/user/foo').expect(200)
+					.then(function(res) {
+						expect(res.body).to.deep.equal({ howdy: 'partner' });
+						finished();
+					});
+				}, 10);
 			});
 		});
 
@@ -157,9 +164,14 @@ describe('prefs', function() {
 				return request().delete(PREFS_PREFIX + '/user/foo?key=bar')
 				.expect(204);
 			});
-			it('should not have the deleted key', function() {
-				return request().get(PREFS_PREFIX + '/user/foo?key=bar')
-				.expect(404);
+			it('should not have the deleted key', function(finished) {
+				setTimeout(function() {
+					request().get(PREFS_PREFIX + '/user/foo?key=bar')
+					.expect(404).end(function(err, res) {
+						assert.ifError(err);
+						finished();
+					});
+				}, 10);
 			});
 		});
 
@@ -169,12 +181,15 @@ describe('prefs', function() {
 				.expect(204);
 			});
 
-			it('should be empty', function() {
-				// Node should be empty
-				return request().get(PREFS_PREFIX + '/user/foo').expect(200)
-				.then(function(res) {
-					expect(res.body).to.deep.equal({ });
-				});
+			it('should be empty', function(finished) {
+				setTimeout(function() {
+					// Node should be empty
+					request().get(PREFS_PREFIX + '/user/foo').expect(200)
+					.then(function(res) {
+						expect(res.body).to.deep.equal({ });
+						finished();
+					});
+				}, 10);
 			});
 		});
 
