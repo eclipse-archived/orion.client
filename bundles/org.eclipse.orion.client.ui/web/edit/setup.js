@@ -909,6 +909,9 @@ objects.mixin(EditorViewer.prototype, {
 				delete sessionStorage.lastFile;
 			}
 			var view = this.getEditorView(evt.input, metadata);
+			if(evt.input.noreveal){
+				this.noreval = true;
+			}
 			this.setEditor(view ? view.editor : null);
 			this.updateDirtyIndicator();
 			evt.editor = this.editor;
@@ -982,7 +985,7 @@ objects.mixin(EditorViewer.prototype, {
 				evt.moved.forEach(function(item) {
 					var sourceLocation = item.source;
 					var metadata = that.tabWidget.getMetadataByLocation_(sourceLocation) || selectedMetadata;
-					if (selectedMetadata.Location.indexOf(sourceLocation) === 0) {
+					if (selectedMetadata && selectedMetadata.Location.indexOf(sourceLocation) === 0) {
 						inputManager.addEventListener("InputChanged", this.loadComplete = function() {
 							inputManager.removeEventListener("InputChanged", this.loadComplete);
 							that.tabWidget.closeTab(metadata, false);
@@ -1544,10 +1547,11 @@ objects.mixin(EditorSetup.prototype, {
 			this.renderToolbars(metadata);
 		}
 		
-		this.setPageTarget(metadata);
+		this.setPageTarget(metadata, editorViewer.noreval);
+		delete editorViewer.noreval;
 	},
 	
-	setPageTarget: function (metadata) {
+	setPageTarget: function (metadata, noreveal) {
 		if (this.lastTarget && metadata && this.lastTarget.Location === metadata.Location) return;
 		this.lastTarget = metadata;
 		
@@ -1599,7 +1603,8 @@ objects.mixin(EditorSetup.prototype, {
 				contentType: this.editorInputManager.getContentType(),
 				metadata: metadata,
 				editor: editor,
-				location: window.location
+				location: window.location,
+				noreveal:noreveal
 			});
 		}
 	},
