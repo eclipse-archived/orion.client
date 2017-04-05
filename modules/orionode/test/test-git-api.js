@@ -1622,7 +1622,11 @@ maybeDescribe("git", function() {
 					assert.equal(log.Children[0].Parents[0].Name, local);
 					assert.equal(log.Children[0].Parents[1].Name, other);
 					assert.equal(log.Children[1].Id, other);
+					assert.equal(log.Children[1].Parents.length, 1);
+					assert.equal(log.Children[1].Parents[0].Name, initial);
 					assert.equal(log.Children[2].Id, local);
+					assert.equal(log.Children[2].Parents.length, 1);
+					assert.equal(log.Children[2].Parents[0].Name, initial);
 					assert.equal(log.Children[3].Id, initial);
 					finished();
 				})
@@ -1753,6 +1757,11 @@ maybeDescribe("git", function() {
 				})
 				.then(function(log) {
 					assert.equal(log.Children.length, 20);
+					// even though the first chagne is not included in the returned json,
+					// make sure the parent information is correct and pointing at the
+					// missing commit
+					assert.equal(log.Children[19].Parents.length, 1);
+					assert.equal(log.Children[19].Parents[0].Name, initial);
 					// increase the page size to 30
 					client.log("master", "master", name, { pageSize: 30 });
 					return client.start();
@@ -1773,6 +1782,38 @@ maybeDescribe("git", function() {
 				});
 			});
 		}) // describe("History");
+
+		describe("Graph", function() {
+
+			it("simple", function(finished) {
+				var first, second, third;
+
+				var client = new GitClient("history-graph-simple");
+				client.init();
+				client.commit();
+				client.start().then(function(commit) {
+					first = commit.Id;
+					client.commit();
+					return client.start();
+				})
+				.then(function(commit) {
+					second = commit.Id;
+					client.commit();
+					client.log("master", "master");
+					return client.start();
+				})
+				.then(function(log) {
+					assert.equal(log.Children[0].Parents.length, 1);
+					assert.equal(log.Children[0].Parents[0].Name, second);
+					assert.equal(log.Children[1].Parents.length, 1);
+					assert.equal(log.Children[1].Parents[0].Name, first);
+					finished();
+				})
+				.catch(function(err) {
+					finished(err);
+				});
+			});
+		}) // describe("Graph");
 	}); // describe("Log")
 
 	describe("Branches", function() {
