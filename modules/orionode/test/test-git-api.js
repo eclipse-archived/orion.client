@@ -511,22 +511,28 @@ GitClient.prototype = {
 	 *              different if <tt>branch</tt> is <tt>HEAD</tt>, in which
 	 *              case <tt>toRef</tt> should be the name of the branch that
 	 *              <tt>HEAD</tt> is pointing to
+	 * @param parameters the query parameters to include in the request
 	 */
-	log: function(branch, toRef) {
+	log: function(branch, toRef, path, parameters) {
 		if (toRef === undefined) {
 			toRef = branch;
+		}
+
+		if (path === undefined) {
+			path = "";
 		}
 
 		var client = this;
 		this.tasks.push(function(resolve) {
 			request()
-			.get(CONTEXT_PATH + '/gitapi/commit/' + util.encodeURIComponent(branch) + '/file/' + client.getName())
+			.get(CONTEXT_PATH + '/gitapi/commit/' + util.encodeURIComponent(branch) + '/file/' + client.getName() + "/" + path)
 			.expect(202)
+			.query(parameters)
 			.end(function(err, res) {
 				assert.ifError(err);
 				getGitResponse(res).then(function(res2) {
 					assert.equal(res2.JsonData.Type, "Commit");
-					assert.equal(res2.JsonData.Location, "/gitapi/commit/" + util.encodeURIComponent(branch) + "/file/" + client.getName());
+					assert.equal(res2.JsonData.Location, "/gitapi/commit/" + util.encodeURIComponent(branch) + "/file/" + client.getName() + "/" + path);
 					assert.equal(res2.JsonData.CloneLocation, "/gitapi/clone/file/" + client.getName());
 
 					assert.equal(res2.JsonData.toRef.Name, toRef);
@@ -1565,7 +1571,152 @@ maybeDescribe("git", function() {
 					finished(err);
 				});
 			});
-		})
+		}); // describe("Branch")
+
+		describe("History", function() {
+
+			/**
+			 * 1. Create a file.
+			 * 2. Delete the file.
+			 * 3. Recreate the file.
+			 * 4. The returned history should include all three commits.
+			 */
+			it("file recreate", function(finished) {
+				var add, remove, readd;
+				var name = "test.txt";
+
+				var client = new GitClient("history-file-recreate");
+				client.init();
+				client.setFileContents(name, "1\n2\n3");
+				client.stage(name);
+				client.commit();
+				client.start().then(function(commit) {
+					add = commit.Id;
+
+					client.delete(name);
+					client.stage(name);
+					client.commit();
+					return client.start();
+				})
+				.then(function(commit) {
+					remove = commit.Id;
+
+					client.setFileContents(name, "recreate");
+					client.stage(name);
+					client.commit();
+					return client.start();
+				})
+				.then(function(commit) {
+					readd = commit.Id;
+
+					client.log("master", "master", name);
+					return client.start();
+				})
+				.then(function(log) {
+					assert.equal(log.Children.length, 3);
+					assert.equal(log.Children[0].Id, readd);
+					assert.equal(log.Children[1].Id, remove);
+					assert.equal(log.Children[2].Id, add);
+					finished();
+				})
+				.catch(function(err) {
+					finished(err);
+				});
+			});
+
+			/**
+			 * 1. Create a file.
+			 * 2. Rename the file.
+			 * 3. The returned history should include both commits.
+			 */
+			it("file rename", function(finished) {
+				var add, remove, readd;
+				var name = "test.txt";
+				var name2 = "test2.txt";
+
+				var client = new GitClient("history-file-rename");
+				client.init();
+				client.setFileContents(name, "1\n2\n3");
+				client.stage(name);
+				client.commit();
+				client.start().then(function(commit) {
+					add = commit.Id;
+
+					// delete and create the other file, essentially a rename
+					client.delete(name);
+					client.setFileContents(name2, "1\n2\n3");
+					// stage both changes
+					client.stage(name);
+					client.stage(name2);
+					client.commit();
+					return client.start();
+				})
+				.then(function(commit) {
+					rename = commit.Id;
+
+					client.log("master", "master", name2);
+					return client.start();
+				})
+				.then(function(log) {
+					assert.equal(log.Children.length, 1);
+					assert.equal(log.Children[0].Id, rename);
+					finished();
+				})
+				.catch(function(err) {
+					finished(err);
+				});
+			});
+
+			/**
+			 * 1. Make 21 changes to a file.
+			 * 3. Check that 20 commits (the default page size) are returned from the history and not 21.
+			 * 4. Increase the paging size to 30 and send the request again.
+			 * 5. All 21 commits should be returned.
+			 */
+			it("paging", function(finished) {
+				this.timeout(10000);
+				var add, remove, readd;
+				var initial;
+				var name = "test.txt";
+
+				var client = new GitClient("history-file-paging");
+				client.init();
+				client.setFileContents(name, "initial");
+				client.stage(name);
+				client.commit();
+				client.start().then(function(commit) {
+					initial = commit.Id;
+
+					for (var i = 0; i < 20; i++) {
+						client.setFileContents(name, i.toString());
+						client.stage(name);
+						client.commit();
+					}
+					client.log("master", "master", name);
+					return client.start();
+				})
+				.then(function(log) {
+					assert.equal(log.Children.length, 20);
+					// increase the page size to 30
+					client.log("master", "master", name, { pageSize: 30 });
+					return client.start();
+				})
+				.then(function(log) {
+					assert.equal(log.Children.length, 21);
+					// only fetch the second page
+					client.log("master", "master", name, { page: 2 });
+					return client.start();
+				})
+				.then(function(log) {
+					assert.equal(log.Children.length, 1);
+					assert.equal(log.Children[0].Name, initial);
+					finished();
+				})
+				.catch(function(err) {
+					finished(err);
+				});
+			});
+		}) // describe("History");
 	}); // describe("Log")
 
 	describe("Branches", function() {
