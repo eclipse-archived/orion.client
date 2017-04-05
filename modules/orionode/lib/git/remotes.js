@@ -278,7 +278,7 @@ function fetchRemote(req, res, remote, branch, force) {
 		return remoteObj.fetch(
 			refSpec ? [refSpec] : null,
 			{
-				callbacks: clone.getRemoteCallbacks(req.body, task),
+				callbacks: clone.getRemoteCallbacks(req, task),
 				downloadTags: 3     // 3 = C.GIT_REMOTE_DOWNLOAD_TAGS_ALL (libgit2 const) 
 			},
 			"fetch"	
@@ -332,7 +332,7 @@ function pushRemote(req, res, remote, branch, pushSrcRef, tags, force) {
 			});
 		}
 		return remoteObj.push(
-			refSpecs, {callbacks: clone.getRemoteCallbacks(req.body, task)}
+			refSpecs, {callbacks: clone.getRemoteCallbacks(req, task)}
 		);
 	})
 	.then(function(err) {
