@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2013 IBM Corporation and others.
+ * Copyright (c) 2013, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -10,6 +10,7 @@
  *******************************************************************************/
 /*eslint-env node*/
 var child_process = require('child_process');
+var path = require('path');
 var fs = require('fs');
 var rimraf = require('rimraf');
 
@@ -17,21 +18,6 @@ function debug(msg) {
 	if (exports.DEBUG) {
 		console.log(msg);
 	}
-}
-
-function sequential_commands(cwd, commands, callback) {
-	commands = Array.prototype.slice.call(commands);
-	function next() {
-		if (!commands.length) {
-			callback();
-		} else {
-			var command = commands.shift();
-			debug('$ ' + command.cmd + ' ' + command.args.join(' '));
-			var child = child_process.spawn(command.cmd, command.args, {cwd: cwd, stdio: [null, process.stdout, process.stderr]});//'ignore'});
-			child.on('exit', next);
-		}
-	}
-	next();
 }
 
 /**
@@ -66,14 +52,18 @@ function setUp(dir, callback) {
 		echo -n "buzzzz" > "project/my folder/buzz.txt"
 		echo -n "whoa" > "project/my folder/my subfolder/quux.txt"
 		*/
-		sequential_commands(dir, [
-			{ cmd: 'mkdir', args: ['project'] },
-			{ cmd: 'mkdir', args: ['project/my folder'] },
-			{ cmd: 'mkdir', args: ['project/my folder/my subfolder'] },
-			{ cmd: 'bash',    args: ['-c', 'echo -n "hello world" > "project/fizz.txt"'] },
-			{ cmd: 'bash',    args: ['-c', 'echo -n "bzzzz"       > "project/my folder/buzz.txt"'] },
-			{ cmd: 'bash',    args: ['-c', 'echo -n "whoa"        > "project/my folder/my subfolder/quux.txt"'] }
-		], callback);
+		var projectFolder = path.join(dir, "project");
+		var myFolder = path.join(projectFolder, "my folder");
+		var subfolder = path.join(myFolder, "my subfolder");
+
+		fs.mkdirSync(projectFolder);
+		fs.mkdirSync(myFolder);
+		fs.mkdirSync(subfolder);
+
+		fs.writeFileSync(path.join(projectFolder, "fizz.txt"), "hello world");
+		fs.writeFileSync(path.join(myFolder, "buzz.txt"), "buzzzz");
+		fs.writeFileSync(path.join(subfolder, "quux.txt"), "whoa");
+		callback();
 	}
 	fs.exists(dir, function(exists) {
 		if (exists) {
