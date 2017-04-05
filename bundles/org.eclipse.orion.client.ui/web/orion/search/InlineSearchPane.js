@@ -424,7 +424,7 @@ define([
 					if(typeof prefs.filteredResources === 'string') {
 						var excludeFilesFromSetting = prefs.filteredResources || "";
 					}
-					this._excludeFilesHint.textContent = messages["The following files are excluded from general setting"] + excludeFilesFromSetting; //$NON-NLS-0$
+					this._excludeFilesHint.textContent = messages["(* = any string, ? = any character)"] + "\n" + messages["The following files are excluded from general setting"] + "\n" + excludeFilesFromSetting; //$NON-NLS-0$
 				}.bind(this));
 				this._excludeFilesHint.classList.add("fileNamePatternsHintVisible"); //$NON-NLS-0$
 			}.bind(this));
