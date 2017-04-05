@@ -100,6 +100,55 @@ function getCommitLog(req, res) {
 		if (toDateFilter && commit.timeMs() > toDateFilter) return true;
 		return false;
 	}
+	function filterCommitPath(commit, fileDir) {
+		var entryId;
+		return commit.getEntry(filterPath)
+		.then(function(entry) {
+			entryId = entry.id();
+			if (commit.parentcount() === 0) {
+				// no parent then it was an ADD
+				return false;
+			}
+
+			return commit.getParents(1)
+			.then(function(parents) {
+				return parents[0].getEntry(filterPath);
+			})
+			.then(function(parentEntry) {
+				// check if the file content changed
+				return entryId.equal(parentEntry.id()) !== 0;
+			})
+			.catch(function(err) {
+				if (err.toString().indexOf("does not exist in the given tree")) {
+					// not found in parent, was an ADD
+					return false;
+				}
+				throw err;
+			});
+		})
+		.catch(function(err) {
+			if (err.toString().indexOf("does not exist in the given tree")) {
+				// doesn't exist, check if it was deleted
+				if (commit.parentcount() === 0) {
+					// no parent then definitely doesn't exist
+					return true;
+				}
+
+				return commit.getParents(1)
+				.then(function(parents) {
+					return parents[0].getEntry(filterPath);
+				})
+				.then(function(parentEntry) {
+					// if parent entry exists then the entry was deleted
+					return false;
+				})
+				.catch(function(err) {
+					return true;
+				});
+			}
+			throw err;
+		});
+	}
 	var commits = []	, repo;
 	function sendResponse(over) {
 		var refs = scope.split("..");
@@ -233,11 +282,7 @@ function getCommitLog(req, res) {
 		}
 
 		setupRevWalk(function() {
-			if (filterPath) {
-				fileHistoryWalk();
-			} else {
-				walk();
-			}
+			walk();
 		});
 
 		var count = 0;
@@ -251,8 +296,8 @@ function getCommitLog(req, res) {
 				}
 				return repo.getCommit(oid)
 				.then(function(commit) {
-					function applyFilter() {
-						if (filterCommit(commit) || page && count++ < skipCount) {//skip pages
+					function applyFilter(filter) {
+						if (filter || filterCommit(commit) || page && count++ < skipCount) {//skip pages
 							return walk();
 						}
 						return Promise.all([getDiff(repo, commit, fileDir), getCommitParents(repo, commit, fileDir)])
@@ -265,7 +310,12 @@ function getCommitLog(req, res) {
 							walk();
 						});
 					}
-					applyFilter();
+
+					if (filterPath) {
+						return filterCommitPath(commit, fileDir).then(applyFilter);
+					} else {
+						return applyFilter(false);
+					}
 				});
 			})
 			.catch(function(error) {
@@ -283,72 +333,8 @@ function getCommitLog(req, res) {
 				}
 			});
 		}
-
-		function fileHistoryWalk() {
-			revWalk.getCommitsUntil(function(commit) {
-				// iterate through the entire history until we have no more commits
-				var parentId = commit.parentId(0);
-				return parentId !== null && parentId !== undefined;
-			}).then(function(array) {
-				setupRevWalk(function() {
-					// run a full history walk on the desired file
-					revWalk.fileHistoryWalk(filterPath, array.length).then(function(fileCommits) {
-						// client trying to skip more commits than that which affects the specified file,
-						// respond that we're done and there is nothing left
-						if (skipCount >= fileCommits.length) {
-							sendResponse(true);
-							return;
-						}
-
-						// remove the elements that need to be skipped over
-						fileCommits.splice(0, skipCount);
-						var done = true;
-						if (fileCommits.length > pageSize) {
-							// we have more commits than the page size, we won't be done
-							done = false;
-							// remove the extra commits as they don't need to be processed
-							fileCommits.splice(pageSize, fileCommits.length - pageSize);
-						}
-						var fullCommits = [];
-						function getFullCommits(fileCommits, idx) {
-							repo.getCommit(fileCommits[idx].commit.id()).then(function(c) {
-								fullCommits.push(c);
-
-								// when we've retrieved everything, iterate over them
-								if (fullCommits.length === fileCommits.length) {
-									processCommits(fullCommits, 0);	
-								} else {
-									// get the full commit of the next commit
-									getFullCommits(fileCommits, idx + 1);
-								}
-							});
-						}
-						// the commit objects from fileHistoryWalk(*) fail on getTree()
-						// which prevents us from grabbing a diff,
-						// grab a full commit from the repo using the oid
-						getFullCommits(fileCommits, 0);
-
-						function processCommits(fullCommits, idx) {
-							var commit = fullCommits[idx];
-							return Promise.all(
-								[ getDiff(repo, commit, fileDir), getCommitParents(repo, commit, fileDir) ]
-							).then(function(stuff) {
-								commits.push(commitJSON(commit, fileDir, stuff[0], stuff[1]));
-								if (idx === fullCommits.length - 1) {
-									// we're at the end, stop iterating
-									// and write the response
-									sendResponse(done);
-									return;
-								}
-								processCommits(fullCommits, idx + 1);
-							});
-						}
-					});
-				});
-			});
-		}
 	}
-	
+
 	clone.getRepo(req)
 	.then(function(_repo) {
 		repo = _repo;

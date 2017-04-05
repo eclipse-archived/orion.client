@@ -1576,6 +1576,62 @@ maybeDescribe("git", function() {
 		describe("History", function() {
 
 			/**
+			 * 1. Create a change in a branch.
+			 * 2. Create another change in a different branch.
+			 * 3. Merge the other branch in to create a merge commit.
+			 * 4. The returned history should include the merge commit.
+			 */
+			it("file merge", function(finished) {
+				var initial, other, local;
+				var name = "test.txt";
+
+				var client = new GitClient("history-file-merge");
+				client.init();
+				client.setFileContents(name, "1\n2\n3");
+				client.stage(name);
+				client.commit();
+				client.start().then(function(commit) {
+					initial = commit.Id;
+
+					client.setFileContents(name, "1a\n2\n3");
+					client.stage(name);
+					client.commit();
+					return client.start();
+				})
+				.then(function(commit) {
+					other = commit.Id;
+
+					client.createBranch("other");
+					client.reset("HARD", initial);
+					client.setFileContents(name, "1\n2\n3a");
+					client.stage(name);
+					client.commit();
+					return client.start();
+				})
+				.then(function(commit) {
+					local = commit.Id;
+
+					client.merge("other");
+					client.log("master", "master", name);
+					return client.start();
+				})
+				.then(function(log) {
+					assert.equal(log.Children.length, 4);
+					// merge commit with two parents
+					assert.equal(log.Children[0].Parents.length, 2);
+					assert.equal(log.Children[0].Parents[0].Name, local);
+					assert.equal(log.Children[0].Parents[1].Name, other);
+					assert.equal(log.Children[1].Id, other);
+					assert.equal(log.Children[2].Id, local);
+					assert.equal(log.Children[3].Id, initial);
+					finished();
+				})
+				.catch(function(err) {
+					finished(err);
+				});
+			});
+
+			/**
 			 * 1. Create a file.
 			 * 2. Delete the file.
 			 * 3. Recreate the file.
