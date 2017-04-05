@@ -302,7 +302,19 @@ define([
 						var link = lib.$("a", evt.target);
 						if (link) {
 							if (evt.type === "click") {
-								window.location.href = link.href;
+								if(util.isElectron){
+									var otherTabsHref = window.__electron.otherEditorTabsHref();
+									console.log(otherTabsHref);
+									var target = this.findItemfromNode2(evt.target);
+									var potentialExistingtab = otherTabsHref.find(function(each){
+										return target.Location === each.href;
+									});
+									if(potentialExistingtab){
+										window.__electron.clickTab(potentialExistingtab.id);
+									}
+								}else{
+									window.location.href = link.href;
+								}
 								//_self._clickLink(link);
 							} else if (evt.type === "dblclick") {
 								this.handleLinkDoubleClick(link, evt);
@@ -623,6 +635,18 @@ define([
 			}.bind(this));
 
 			return deferred;
+		},
+		findItemfromNode2: function(target) {
+			var tmp = target;
+			var source;
+			while (tmp) {
+				if (tmp._item) {
+					source = tmp._item;
+					break;
+				}
+				tmp = tmp.parentNode;
+			}
+			return source;
 		},
 
 		_makeDropTarget: function(item, node, persistAndReplace) {
