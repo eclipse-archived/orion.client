@@ -200,7 +200,7 @@ try {
 	function buildExcludeFilenamePattern(searchOpts){
 		var excludeFilenamePatterns = searchOpts.excludeFilenamePatterns;
 		//Default File Pattern
-		if(excludeFilenamePatterns.length === 0){
+		if(!excludeFilenamePatterns || excludeFilenamePatterns.length === 0){
 			return null;
 		}
 		return excludeFilenamePatterns.map(function(excludeFilenamePattern) {
