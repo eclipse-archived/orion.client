@@ -20,7 +20,8 @@ define([
 		_state, //the mutable testing state
 		callbacks, //the object of callback functions per request ID 
 		testFiles = Object.create(null), //list of xhr requests we should ignore
-		messageID = 0; //the message ID counter
+		messageID = 0, //the message ID counter
+		ignore404s = false;
 	
 	/**
 	 * @description Create a new instance of the worker
@@ -117,6 +118,14 @@ define([
 	WrappedWorker.prototype.getTestState = function() {
 		return _state;
 	};
+	/**
+	 * @description Allows an exception to be ignored during testing - for example a failed lookup for a file that does not exist,
+	 * to avoid failing a test
+	 * @param {boolean} flag The exception to ignore
+	 */
+	WrappedWorker.prototype.ignore404s = function(flag) {
+		ignore404s = flag;
+	};
 	
 	/**
 	 * @description Adds a fake file that will return the given contents when requested rather than perform an xhr
@@ -127,6 +136,13 @@ define([
 	WrappedWorker.prototype.createTestFile = function(fileName, text) {
 		testFiles[fileName] = text;
 	};
+	
+	function maybeCallback(rejection, error) {
+		if(ignore404s && rejection.status === 404) {
+				return;
+		}
+		_state.callback(new Error(error));
+	}
 	
 	function onmessage(ev) {
 		if(typeof ev.data === 'object') {
@@ -171,9 +187,9 @@ define([
 						
 						_xhr('GET', url.href, {log: true, timeout: 2000}).then(function(response) {
 							this.postMessage({request: 'read', ternID: _d.ternID, args: {contents: response.response, file: response.url, logical: _d.args.file.logical}});
-						}.bind(this), function(rejection){
+						}.bind(this), function(rejection) {
 							var error = 'XHR GET failed: ' + url.href;
-							_state.callback(new Error(error));
+							maybeCallback(rejection, error);
 							this.postMessage({request: 'read', ternID: _d.ternID, args: {error: error, logical: _d.args.file.logical, file: rejection.url}});
 						}.bind(this));
 					} else if(typeof _d.args.file === 'string') {
@@ -194,7 +210,7 @@ define([
 							this.postMessage({request: 'read', ternID: _d.ternID, args: {contents: response.target.response, file: response.target.responseURL}});
 						}.bind(this), function(rejection){
 							var error = 'XHR GET failed: ' + url.href;
-							_state.callback(new Error(error));
+							maybeCallback(rejection, error);
 							this.postMessage({request: 'read', ternID: _d.ternID, args: {error: error, logical: _d.args.file.logical, file: rejection.url}});
 						}.bind(this));
 					}

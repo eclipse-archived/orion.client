@@ -161,7 +161,7 @@ define([
 				var config = { rules: {}};
 				config.rules['no-undef'] = "warn";
 				config.skip = true;
-				validate({buffer: "var i = require('./files/node_dep1');", callback: callback, config: config, computedEnv: {amd: true}}).then(
+				validate({buffer: "var i = require('./files/node_dep1');", callback: callback, config: config, computedEnv: {envs: {amd: true}}}).then(
 				function (problems) {
 					assertProblems(problems, []); //eslint sets require and define as globals with the amd env - no warning will be shown
 				},
@@ -173,7 +173,7 @@ define([
 				var config = { rules: {}};
 				config.rules['no-undef'] = "warn";
 				config.skip = true;
-				validate({buffer: "var i = require('./files/node_dep1');", callback: callback, config: config, computedEnv: {node: true}}).then(
+				validate({buffer: "var i = require('./files/node_dep1');", callback: callback, config: config, computedEnv: {envs: {node: true}}}).then(
 				function (problems) {
 					assertProblems(problems, []); //eslint sets require and define as globals with the amd env - no warning will be shown
 				},
@@ -185,7 +185,7 @@ define([
 				var config = { rules: {}};
 				config.rules['no-undef'] = "warn";
 				config.skip = true;
-				validate({buffer: "var i = require('./files/node_dep1');", callback: callback, config: config, computedEnv: {commonjs: true}}).then(
+				validate({buffer: "var i = require('./files/node_dep1');", callback: callback, config: config, computedEnv: {envs: {commonjs: true}}}).then(
 				function (problems) {
 					assertProblems(problems, []); //eslint sets require and define as globals with the amd env - no warning will be shown
 				},
@@ -197,7 +197,7 @@ define([
 				var config = { rules: {}};
 				config.rules['no-undef'] = "warn";
 				config.skip = true;
-				validate({buffer: "var i = require('./files/node_dep1');", callback: callback, config: config, computedEnv: {jquery: true}}).then(
+				validate({buffer: "var i = require('./files/node_dep1');", callback: callback, config: config, computedEnv: {envs: {jquery: true}}}).then(
 				function (problems) {
 					assertProblems(problems, [{
 						id: 'no-undef',
@@ -214,7 +214,7 @@ define([
 				var config = { rules: {}};
 				config.rules['no-undef'] = "warn";
 				config.skip = true;
-				validate({buffer: "define(['./files/node_dep1'], function(a){});", callback: callback, config: config, computedEnv: {jquery: true}}).then(
+				validate({buffer: "define(['./files/node_dep1'], function(a){});", callback: callback, config: config, computedEnv: {envs: {jquery: true}}}).then(
 				function (problems) {
 					assertProblems(problems, [{
 						id: 'no-undef',
@@ -231,7 +231,7 @@ define([
 				var config = { rules: {}};
 				config.rules['no-undef'] = "warn";
 				config.skip = true;
-				validate({buffer: "define(['./files/node_dep1'], function(a){});", callback: callback, config: config, computedEnv: {node: true}}).then(
+				validate({buffer: "define(['./files/node_dep1'], function(a){});", callback: callback, config: config, computedEnv: {envs: {node: true}}}).then(
 				function (problems) {
 					assertProblems(problems, [{
 						id: 'no-undef',
@@ -248,7 +248,7 @@ define([
 				var config = { rules: {}};
 				config.rules['no-undef'] = "warn";
 				config.skip = true;
-				validate({buffer: "define(['./files/node_dep1'], function(a){});", callback: callback, config: config, computedEnv: {amd: true}}).then(
+				validate({buffer: "define(['./files/node_dep1'], function(a){});", callback: callback, config: config, computedEnv: {envs: {amd: true}}}).then(
 				function (problems) {
 					assertProblems(problems, []);
 				},
@@ -260,7 +260,7 @@ define([
 				var config = { rules: {}};
 				config.rules['no-undef'] = "warn";
 				config.skip = true;
-				validate({buffer: "var i = require('./files/node_dep1');", callback: callback, config: config, computedEnv: {}}).then(
+				validate({buffer: "var i = require('./files/node_dep1');", callback: callback, config: config, computedEnv: {envs: {}}}).then(
 				function (problems) {
 					assertProblems(problems, [
 					{

@@ -22,10 +22,6 @@
 		require([
 				"js-tests/javascript/testingWorker",
 				'js-tests/javascript/crossFileTests',
-				'js-tests/javascript/ternAssistIndexTests',
-				'js-tests/javascript/ternAssistModuleTests',
-				'js-tests/javascript/ternAssistTests',
-				'js-tests/javascript/ternCommandsTests',
 				'js-tests/javascript/dependencyTests',
 				'js-tests/javascript/finderTests',
 				'js-tests/javascript/occurrencesTests',
@@ -47,14 +43,12 @@
 				'js-tests/javascript/scriptResolverTests',
 				'js-tests/javascript/sigparserTests',
 				'js-tests/javascript/es6ValidatorTests',
-				'js-tests/javascript/ternProjectFileTests',
-				'js-tests/javascript/ternProjectManagerTests',
-				'js-tests/javascript/ternProjectValidatorTests',
 				'js-tests/javascript/computedEnvTests'
-				], function(worker, crossFileTests, ternAssistIndexTests, ternAssistModuleTests, ternAssistTests, ternCommandTests, dependencyTests, finderTests, 
-							occurrencesTests, es6OccurrencesTests, es7OccurrencesTests, es7AssistTests, astOutlinerTests, outlinerTests, es6OutlinerTests, commonJsValidatorTests, nodeValidatorTests, 
-							validatorTests, lruTests, quickfixTests, quickfixGlobalTests, es6QuickfixTests, eslintCoreTests, eslintHoverTests, scriptResolverTests, sigparserTests, es6ValidatorTests, 
-							ternProjectTests, ternProjectValidatorTests, computedEnvTests) {
+				], function(worker, crossFileTests, dependencyTests, finderTests, 
+							occurrencesTests, es6OccurrencesTests, es7OccurrencesTests, es7AssistTests, astOutlinerTests, 
+							outlinerTests, es6OutlinerTests, commonJsValidatorTests, nodeValidatorTests, validatorTests, 
+							lruTests, quickfixTests, quickfixGlobalTests, es6QuickfixTests, eslintCoreTests, eslintHoverTests, 
+							scriptResolverTests, sigparserTests, es6ValidatorTests, computedEnvTests) {
 					var testworker;
 					before("reset timeout", function(done) {
 						this.timeout(30000);
@@ -85,16 +79,10 @@
 					es6QuickfixTests(testworker);
 					scriptResolverTests(testworker);
 					sigparserTests(testworker);
-					ternAssistIndexTests(testworker);
-					ternAssistModuleTests(testworker);
-					ternAssistTests(testworker);
-					ternCommandTests(testworker);
 					commonJsValidatorTests(testworker);
 					nodeValidatorTests(testworker);
 					validatorTests(testworker);
 					es6ValidatorTests(testworker);
-					ternProjectTests(testworker);
-					ternProjectValidatorTests(testworker);
 					computedEnvTests(testworker);
 					testSuite.run();
 		});

@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>JavaScript Tools Mocha Tests</title>
+  <link rel="stylesheet" href="../../mocha/mocha.css" />
+  <script src="../../requirejs/require.js"></script>
+  <script>
+	/*eslint-env amd, mocha*/
+	/* eslint-disable missing-nls */
+	require({
+		baseUrl: '../../',
+		paths: {
+			text: 'requirejs/text',
+			json: "requirejs/json", 
+			i18n: 'requirejs/i18n',
+			domReady: 'requirejs/domReady'
+		}
+	});
+	require(['mocha/sauce'], function(testSuite) {
+		mocha.setup('bdd');
+		require([
+				'js-tests/javascript/testingWorker',
+				'js-tests/javascript/ternAssistIndexTests',
+				'js-tests/javascript/ternAssistModuleTests',
+				'js-tests/javascript/ternAssistTests',
+				'js-tests/javascript/ternCommandsTests',
+				'js-tests/javascript/ternProjectFileTests',
+				'js-tests/javascript/ternProjectValidatorTests',
+				'js-tests/javascript/ternProjectHoverTests',
+				'js-tests/javascript/ternProjectManagerTests' // keep this one last, it has a special flag to ignore 404s while processing leadReagerly tests
+				], 
+					function(worker, ternAssistIndexTests, ternAssistModuleTests, ternAssistTests, ternCommandTests, 
+							ternProjectFileTests, ternProjectValidatorTests, ternProjectHoverTests, ternProjectManagerTests) {
+					var testworker;
+					before("reset timeout", function(done) {
+						this.timeout(30000);
+						testworker.start(done);
+					});
+					after("stop the worker", function() {
+						if(testworker) {
+							testworker.terminate();
+						}
+					});
+					testworker = worker.instance({delayedStart: true});
+					ternAssistIndexTests(testworker);
+					ternAssistModuleTests(testworker);
+					ternAssistTests(testworker);
+					ternCommandTests(testworker);
+					ternProjectFileTests(testworker);
+					ternProjectValidatorTests(testworker);
+					ternProjectHoverTests(testworker);
+					ternProjectManagerTests(testworker);
+					testSuite.run();
+		});
+	});
+  </script>
+</head>
+<body>
+	<div id="mocha">
+		<h1>Tern Tooling Tests</h1>
+	</div>
+</body>
+</html>
