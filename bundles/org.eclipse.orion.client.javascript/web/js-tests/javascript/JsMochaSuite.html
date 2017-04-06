@@ -43,12 +43,13 @@
 				'js-tests/javascript/scriptResolverTests',
 				'js-tests/javascript/sigparserTests',
 				'js-tests/javascript/es6ValidatorTests',
-				'js-tests/javascript/computedEnvTests'
+				'js-tests/javascript/computedEnvTests',
+				'js-tests/javascript/packageJsonHoverTests'
 				], function(worker, crossFileTests, dependencyTests, finderTests, 
 							occurrencesTests, es6OccurrencesTests, es7OccurrencesTests, es7AssistTests, astOutlinerTests, 
 							outlinerTests, es6OutlinerTests, commonJsValidatorTests, nodeValidatorTests, validatorTests, 
 							lruTests, quickfixTests, quickfixGlobalTests, es6QuickfixTests, eslintCoreTests, eslintHoverTests, 
-							scriptResolverTests, sigparserTests, es6ValidatorTests, computedEnvTests) {
+							scriptResolverTests, sigparserTests, es6ValidatorTests, computedEnvTests, packageJsonHoverTests) {
 					var testworker;
 					before("reset timeout", function(done) {
 						this.timeout(30000);
@@ -84,6 +85,7 @@
 					validatorTests(testworker);
 					es6ValidatorTests(testworker);
 					computedEnvTests(testworker);
+					packageJsonHoverTests(testworker);
 					testSuite.run();
 		});
 	});

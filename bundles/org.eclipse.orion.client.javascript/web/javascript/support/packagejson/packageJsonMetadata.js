@@ -87,7 +87,7 @@ define([
 			url: "https://docs.npmjs.com/files/package.json#engines"
 		},
 		engineStrict: {
-			doc: Messages.packageEnginesStrictDoc,
+			doc: Messages.packageEngineStrictDoc,
 			url: "https://docs.npmjs.com/files/package.json#enginestrict"
 		},
 		eslintConfig: {

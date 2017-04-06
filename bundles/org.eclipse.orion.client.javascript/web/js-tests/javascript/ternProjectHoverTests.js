@@ -217,7 +217,7 @@ define([
 			});
 			it("LoadEagerly entry", function(done) {
 				var options = {
-					buffer: '{"loadEagerly": []',
+					buffer: '{"loadEagerly": []}',
 					offset: 4,
 					file: ".tern-project",
 					contentType: "javascript/config",
