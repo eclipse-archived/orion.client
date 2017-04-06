@@ -134,7 +134,7 @@
 }
 
 .searchWrapper.searchOptParamBlockHidden > .searchResultsWrapperDiv{
-	height: calc(100% - 124px);
+	height: calc(100% - 150px);
 }
 
 .searchWrapper.searchOptParamBlockHidden > .searchOptWrapperDiv > .searchMainOptionBlock > .toggleDisplayLink{
