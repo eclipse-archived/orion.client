@@ -166,19 +166,10 @@ GitClient.prototype = {
 	setFileContents: function(name, contents) {
 		var client = this;
 		this.tasks.push(function(resolve) {
-			request()
-			.put(CONTEXT_PATH + "/file/" + client.getName() + "/" + name)
-			.send(contents)
-			.expect(200)
-			.end(function(err, res) {
-				assert.ifError(err);
-				var body = res.body;
-				assert.equal(body.Directory, false);
-				assert.ok(body.ETag, 'has an ETag');
-				assert.equal(body.Location, CONTEXT_PATH + "/file/" + client.getName() + "/" + name);
-				assert.equal(body.Name, name);
-				client.next(resolve, res.body);
-			});
+			var folder = path.join(WORKSPACE, client.getName());
+			var fullPath = path.join(folder, name);
+			fs.writeFileSync(fullPath, contents);
+			client.next(resolve, null);
 		});
 	},
 
@@ -450,13 +441,14 @@ GitClient.prototype = {
 		});
 	},
 
-	merge: function(branchToMerge, result) {
+	merge: function(branchToMerge, squash) {
 		var client = this;
 		this.tasks.push(function(resolve) {
 			request()
 			.post(CONTEXT_PATH + "/gitapi/commit/HEAD/file/" + client.getName())
 			.send({
-				Merge: branchToMerge
+				Merge: branchToMerge,
+				Squash: squash
 			})
 			.expect(200)
 			.end(function(err, res) {
@@ -1579,6 +1571,428 @@ maybeDescribe("git", function() {
 				});
 			});
 		}); // describe("Conflicts")
+
+		describe("Squash", function() {
+			it("already up-to-date self", function(finished) {
+				var testName = "merge-squash-up-to-date-self"
+				var initial, other;
+
+				var client = new GitClient(testName);
+				client.init();
+				client.commit();
+				client.start().then(function(commit) {
+					initial = commit.Id;
+
+					client.merge("master", true);
+					return client.start();
+				})
+				.then(function(result) {
+					assert.equal(result.Result, "ALREADY_UP_TO_DATE");
+					assert.equal(result.FailingPaths, undefined);
+
+					client.log("master");
+					return client.start();
+				})
+				.then(function(log) {
+					// make sure that we haven't advanced in history
+					assert.equal(log.Children[0].Id, initial);
+					finished();
+				})
+				.catch(function(err) {
+					finished(err);
+				});
+			});
+
+			it("already up-to-date older commit", function(finished) {
+				var testName = "merge-squash-up-to-date-older-commit"
+				var initial, other;
+
+				var client = new GitClient(testName);
+				client.init();
+				client.createBranch("other");
+				client.commit();
+				client.start().then(function(commit) {
+					initial = commit.Id;
+
+					client.merge("other", true);
+					return client.start();
+				})
+				.then(function(result) {
+					assert.equal(result.Result, "ALREADY_UP_TO_DATE");
+					assert.equal(result.FailingPaths, undefined);
+
+					client.log("master");
+					return client.start();
+				})
+				.then(function(log) {
+					// make sure that we haven't advanced in history
+					assert.equal(log.Children[0].Id, initial);
+					finished();
+				})
+				.catch(function(err) {
+					finished(err);
+				});
+			});
+
+			it("fast-forward", function(finished) {
+				var testName = "merge-squash-ff"
+				var name = "test.txt";
+				var unrelated = "unrelated.txt";
+				var fullPath = path.join(path.join(WORKSPACE, testName), name);
+				var initial, other;
+
+				var client = new GitClient(testName);
+				client.init();
+				client.setFileContents(name, "");
+				client.stage(name);
+				client.commit();
+				client.start().then(function(commit) {
+					initial = commit.Id;
+
+					// change the file to contain "A"
+					client.setFileContents(name, "A");
+					client.stage(name);
+					client.commit();
+					return client.start();
+				})
+				.then(function(commit) {
+					client.createBranch("other");
+					// reset back to the initial state of ""
+					client.reset("HARD", initial);
+					// create an unrelated, untracked file which shouldn't stop the merge
+					client.setFileContents(unrelated, "B");
+					client.merge("other", true);
+					return client.start();
+				})
+				.then(function(result) {
+					assert.equal(result.Result, "FAST_FORWARD_SQUASHED");
+					assert.equal(result.FailingPaths, undefined);
+					// verify the squash merge
+					var content = fs.readFileSync(fullPath).toString();
+					assert.equal(content, "A");
+
+					client.log("master");
+					return client.start();
+				})
+				.then(function(log) {
+					// make sure that we haven't advanced in history
+					assert.equal(log.Children[0].Id, initial);
+					finished();
+				})
+				.catch(function(err) {
+					finished(err);
+				});
+			});
+
+			it("fast-forward dirty working tree", function(finished) {
+				var testName = "merge-squash-ff-dirty-wd"
+				var name = "test.txt";
+				var fullPath = path.join(path.join(WORKSPACE, testName), name);
+				var initial;
+
+				var client = new GitClient(testName);
+				client.init();
+				client.setFileContents(name, "");
+				client.stage(name);
+				client.commit();
+				client.start().then(function(commit) {
+					initial = commit.Id;
+
+					// change the file to contain "A"
+					client.setFileContents(name, "A");
+					client.stage(name);
+					client.commit();
+					return client.start();
+				})
+				.then(function(commit) {
+					client.createBranch("other");
+					// reset back to the initial state of ""
+					client.reset("HARD", initial);
+					// now make the working directory version dirty
+					client.setFileContents(name, "B");
+					client.merge("other", true);
+					return client.start();
+				})
+				.then(function(result) {
+					assert.equal(result.Result, "FAILED");
+					assert.equal(Object.keys(result.FailingPaths).length, 1);
+					assert.equal(result.FailingPaths[name], "");
+					finished();
+				})
+				.catch(function(err) {
+					finished(err);
+				});
+			});
+
+			it("fast-forward dirty index", function(finished) {
+				var testName = "merge-squash-ff-dirty-index"
+				var name = "test.txt";
+				var fullPath = path.join(path.join(WORKSPACE, testName), name);
+				var initial;
+
+				var client = new GitClient(testName);
+				client.init();
+				client.setFileContents(name, "");
+				client.stage(name);
+				client.commit();
+				client.start().then(function(commit) {
+					initial = commit.Id;
+
+					// change the file to contain "A"
+					client.setFileContents(name, "A");
+					client.stage(name);
+					client.commit();
+					return client.start();
+				})
+				.then(function(commit) {
+					client.createBranch("other");
+					// reset back to the initial state of ""
+					client.reset("HARD", initial);
+					// now make the index version dirty
+					client.setFileContents(name, "B");
+					client.stage(name);
+					client.merge("other", true);
+					return client.start();
+				})
+				.then(function(result) {
+					assert.equal(result.Result, "FAILED");
+					assert.equal(Object.keys(result.FailingPaths).length, 1);
+					assert.equal(result.FailingPaths[name], "");
+					finished();
+				})
+				.catch(function(err) {
+					finished(err);
+				});
+			});
+
+			it("simple", function(finished) {
+				var testName = "merge-squash-simple"
+				var name = "test.txt";
+				var unrelated = "unrelated.txt";
+				var fullPath = path.join(path.join(WORKSPACE, testName), name);
+				var initial, current;
+
+				var client = new GitClient(testName);
+				client.init();
+				client.setFileContents(name, "");
+				client.stage(name);
+				client.commit();
+				client.start().then(function(commit) {
+					initial = commit.Id;
+
+					// change the file to contain "A"
+					client.setFileContents(name, "A");
+					client.stage(name);
+					client.commit();
+					return client.start();
+				})
+				.then(function(commit) {
+					client.createBranch("other");
+					// reset back to the initial state of ""
+					client.reset("HARD", initial);
+					// make another commit so that it's not a fast-forward
+					client.commit();
+					return client.start();
+				})
+				.then(function(commit) {
+					current = commit.Id;
+
+					// create an unrelated, untracked file which shouldn't stop the merge
+					client.setFileContents(unrelated, "B");
+					client.merge("other", true);
+					return client.start();
+				})
+				.then(function(result) {
+					assert.equal(result.Result, "MERGED_SQUASHED");
+					assert.equal(result.FailingPaths, undefined);
+					// verify the squash merge
+					var content = fs.readFileSync(fullPath).toString();
+					assert.equal(content, "A");
+
+					client.log("master");
+					return client.start();
+				})
+				.then(function(log) {
+					// make sure that we haven't advanced in history
+					assert.equal(log.Children[0].Id, current);
+					finished();
+				})
+				.catch(function(err) {
+					finished(err);
+				});
+			});
+
+			it("simple dirty working tree", function(finished) {
+				var testName = "merge-squash-simple-wd"
+				var name = "test.txt";
+				var fullPath = path.join(path.join(WORKSPACE, testName), name);
+				var initial;
+
+				var client = new GitClient(testName);
+				client.init();
+				client.setFileContents(name, "");
+				client.stage(name);
+				client.commit();
+				client.start().then(function(commit) {
+					initial = commit.Id;
+
+					// change the file to contain "A"
+					client.setFileContents(name, "A");
+					client.stage(name);
+					client.commit();
+					return client.start();
+				})
+				.then(function(commit) {
+					client.createBranch("other");
+					// reset back to the initial state of ""
+					client.reset("HARD", initial);
+					// make another commit so that it's not a fast-forward
+					client.commit();
+					return client.start();
+				})
+				.then(function(commit) {
+					current = commit.Id;
+
+					// now make the working directory version dirty
+					client.setFileContents(name, "B");
+					client.merge("other", true);
+					return client.start();
+				})
+				.then(function(result) {
+					assert.equal(result.Result, "FAILED");
+					assert.equal(Object.keys(result.FailingPaths).length, 1);
+					assert.equal(result.FailingPaths[name], "");
+
+					client.log("master");
+					return client.start();
+				})
+				.then(function(log) {
+					// make sure that we haven't advanced in history
+					assert.equal(log.Children[0].Id, current);
+					finished();
+				})
+				.catch(function(err) {
+					finished(err);
+				});
+			});
+
+			it("simple dirty index", function(finished) {
+				var testName = "merge-squash-simple-index"
+				var name = "test.txt";
+				var fullPath = path.join(path.join(WORKSPACE, testName), name);
+				var initial;
+
+				var client = new GitClient(testName);
+				client.init();
+				client.setFileContents(name, "");
+				client.stage(name);
+				client.commit();
+				client.start().then(function(commit) {
+					initial = commit.Id;
+
+					// change the file to contain "A"
+					client.setFileContents(name, "A");
+					client.stage(name);
+					client.commit();
+					return client.start();
+				})
+				.then(function(commit) {
+					client.createBranch("other");
+					// reset back to the initial state of ""
+					client.reset("HARD", initial);
+					// make another commit so that it's not a fast-forward
+					client.commit();
+					return client.start();
+				})
+				.then(function(commit) {
+					current = commit.Id;
+
+					// now make the working directory version dirty
+					client.setFileContents(name, "B");
+					client.stage(name);
+					client.merge("other", true);
+					return client.start();
+				})
+				.then(function(result) {
+					assert.equal(result.Result, "FAILED");
+					assert.equal(Object.keys(result.FailingPaths).length, 1);
+					assert.equal(result.FailingPaths[name], "");
+
+					client.log("master");
+					return client.start();
+				})
+				.then(function(log) {
+					// make sure that we haven't advanced in history
+					assert.equal(log.Children[0].Id, current);
+					finished();
+				})
+				.catch(function(err) {
+					finished(err);
+				});
+			});
+
+			it("conflicts", function(finished) {
+				var testName = "merge-squash-conflicts"
+				var name = "test.txt";
+				var fullPath = path.join(path.join(WORKSPACE, testName), name);
+				var initial;
+
+				var client = new GitClient(testName);
+				client.init();
+				client.setFileContents(name, "");
+				client.stage(name);
+				client.commit();
+				client.start().then(function(commit) {
+					initial = commit.Id;
+
+					// change the file to contain "A"
+					client.setFileContents(name, "A");
+					client.stage(name);
+					client.commit();
+					return client.start();
+				})
+				.then(function(commit) {
+					client.createBranch("other");
+					// reset back to the initial state of ""
+					client.reset("HARD", initial);
+					// make a conflicting commit
+					client.setFileContents(name, "B");
+					client.stage(name);
+					client.commit();
+					return client.start();
+				})
+				.then(function(commit) {
+					current = commit.Id;
+
+					client.merge("other", true);
+					return client.start();
+				})
+				.then(function(result) {
+					// check the conflict markers
+					var expected = "<<<<<<< ours\n" +
+						"B\n" +
+						"=======\n" +
+						"A\n" + 
+						">>>>>>> theirs\n";
+					var content = fs.readFileSync(fullPath).toString();
+					assert.equal(content, expected);
+					assert.equal(result.Result, "CONFLICTING");
+					assert.equal(result.FailingPaths, undefined);
+
+
+					client.log("master");
+					return client.start();
+				})
+				.then(function(log) {
+					// make sure that we haven't advanced in history
+					assert.equal(log.Children[0].Id, current);
+					finished();
+				})
+				.catch(function(err) {
+					finished(err);
+				});
+			});
+		}); // describe("Squash")
 	}); // describe("Merge")
 
 	describe("Cherry-Pick", function() {

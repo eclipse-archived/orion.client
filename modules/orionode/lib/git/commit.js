@@ -767,8 +767,53 @@ function merge(req, res, branchToMerge, squash) {
 	.then(function(_commit) {
 		commit = _commit;
 		if (squash) {
-			throw new Error("Not implemented yet");
+			// find a common ancestor
+			return git.Merge.base(repo, head, commit.id()).then(function(base) {
+				// the common ancestor is the commit we're trying to merge
+				if (base.equal(commit.id())) {
+					// already up-to-date, nothing to do
+					oid = head;
+					return;
+				}
+
+				var mergeIndex;
+				// try to merge
+				return git.Merge.commits(repo, head, commit)
+				.then(function(index) {
+					mergeIndex = index;
+					return repo.getStatus();
+				})
+				.then(function(statuses) {
+					paths = {};
+					// see what's in the index/wd
+					statuses = statuses.map(function(status) {
+						return status.path();
+					});
+					// compare it with what's in the index
+					var entries = mergeIndex.entries();
+					entries.forEach(function(entry) {
+						if (statuses.indexOf(entry.path) !== -1) {
+							paths[entry.path] = "";
+						}
+					});
+					// no conflicts, then we're fine
+					if (Object.keys(paths).length === 0) {
+						// common ancestor is HEAD, fast-forward
+						if (base.equal(head.id())) {
+							oid = commit.id();
+						}
+
+						conflicting = mergeIndex.hasConflicts();
+						paths = undefined;
+						// checkout the merged index
+						return git.Checkout.index(repo, mergeIndex, {
+							checkoutStrategy: git.Checkout.STRATEGY.FORCE
+						});
+					}
+				});
+			});
 		}
+
 		return repo.mergeBranches("HEAD", branchToMerge)
 		.then(function(_oid) {
 			oid = _oid;
@@ -792,11 +837,16 @@ function merge(req, res, branchToMerge, squash) {
 		});
 	})
 	.then(function() {
-		var mergeResult = "MERGED";
-		if (oid && oid.toString() === head.id().toString()) mergeResult = "ALREADY_UP_TO_DATE";
-		else if (oid && oid.toString() === commit.id().toString()) mergeResult = "FAST_FORWARD";
-		else if (paths) mergeResult = "FAILED";
-		else if (conflicting) mergeResult = "CONFLICTING";
+		var mergeResult = squash ? "MERGED_SQUASHED" : "MERGED";
+		if (oid && oid.toString() === head.id().toString()) {
+			mergeResult = "ALREADY_UP_TO_DATE";
+		} else if (oid && oid.toString() === commit.id().toString()) {
+			mergeResult = squash ? "FAST_FORWARD_SQUASHED" : "FAST_FORWARD";
+		} else if (paths) {
+			mergeResult = "FAILED";
+		} else if (conflicting) {
+			mergeResult = "CONFLICTING";
+		}
 		writeResponse(200, res, null, {
 			"Result": mergeResult,
 			"FailingPaths": paths
