@@ -137,30 +137,14 @@ GitClient.prototype = {
 		});
 	},
 
-	postFile: function(parentFolder, name, isDirectory) {
+	createFolder: function(name) {
 		var client = this;
 		this.tasks.push(function(resolve) {
-			var encodedName = encodeURIComponent(name);
-			request()
-			.post(CONTEXT_PATH + '/file/' + client.getName() + parentFolder)
-			.send({ Name: name, Directory: isDirectory })
-			.expect(201)
-			.end(function(err, res) {
-				var body = res.body
-				assert.ifError(err);
-				assert.equal(body.Name, name);
-				assert.equal(body.Directory, isDirectory);
-				client.next(resolve, body);
-			});
+			var folder = path.join(WORKSPACE, client.getName());
+			var fullPath = path.join(folder, name);
+			fs.mkdirSync(fullPath);
+			client.next(resolve, null);
 		});
-	},
-
-	createFile: function(parentFolder, name) {
-		this.postFile(parentFolder, name, false);
-	},
-
-	createFolder: function(parentFolder, name) {
-		this.postFile(parentFolder, name, true);
 	},
 
 	setFileContents: function(name, contents) {
@@ -2573,7 +2557,7 @@ maybeDescribe("git", function() {
 				var client = new GitClient("bug512285");
 				// init a new Git repository
 				client.init();
-				client.createFile("/", "a%b.txt");
+				client.setFileContents("a%b.txt");
 				client.stage("a%b.txt");
 				client.status("SAFE");
 				client.start().then(function(index) {
@@ -2609,12 +2593,12 @@ maybeDescribe("git", function() {
 				// init a new Git repository
 				client.init();
 				// create a few folders
-				client.createFolder("/", "a b");
-				client.createFolder("/", "modules");
-				client.createFolder("/modules/", "orionode");
+				client.createFolder("a b");
+				client.createFolder("modules");
+				client.createFolder("modules/orionode");
 
 				// tests > /a%b.txt
-				client.createFile("/", "a%b.txt");
+				client.setFileContents("a%b.txt");
 				client.status("SAFE");
 				client.start().then(function(status) {
 					var git = status.Untracked[0].Git;
@@ -2627,7 +2611,7 @@ maybeDescribe("git", function() {
 
 					client.delete("/a%b.txt");
 					// tests > /a b/test.txt
-					client.createFile("/a b/", "test.txt");
+					client.setFileContents("a b/test.txt");
 					client.status("SAFE");
 					return client.start();
 				})
@@ -2642,7 +2626,7 @@ maybeDescribe("git", function() {
 
 					client.delete("/a b/test.txt");
 					// tests > /modules/orionode/hello.js
-					client.createFile("/modules/orionode/", "hello.js");
+					client.setFileContents("/modules/orionode/hello.js");
 					client.status("SAFE");
 					return client.start();
 				})
