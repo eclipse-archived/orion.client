@@ -266,6 +266,11 @@ define([
 	        var results = CSSLint.verify("@import url('foo.css');");
 	        assertAstResults(results, ast);
 	    });
+	    it("@import 3 url string with follow up rule", function() {
+	    	var ast = '{"type":"StyleSheet","range":[0,27],"body":[{"type":"Import","range":[0,18],"uri":{"type":"Uri","range":[8,17]}},{"type":"Rule","range":[20,27],"selectorBody":{"type":"SelectorBody","range":[20,24],"selectors":[{"type":"Selector","range":[20,23],"text":"abc"}]},"declarationBody":{"type":"DeclarationBody","range":[24,27],"declarations":[]}}]}';
+	    	var results = CSSLint.verify("@import 'foo.css';\n\nabc { }");
+	        assertAstResults(results, ast);
+		});
 	    it("@namespace 1", function() {
 	        var ast = '{"type":"StyleSheet","range":[0,22],"body":[{"type":"Namespace","range":[0,22],"uri":{"type":"Uri","range":[11,21]}}]}';
 	        var results = CSSLint.verify("@namespace url(myURL);");

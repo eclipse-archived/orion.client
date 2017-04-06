@@ -1116,6 +1116,9 @@ Parser.prototype = function(){
                 
                 //must end with a semicolon
                 tokenStream.mustMatch(Tokens.SEMICOLON);
+                
+                this.endNode(node, tokenStream.curr().range[1]); //ORION AST generation
+                
                 this._readWhitespace();
                 
                 if (emit !== false){
@@ -1127,7 +1130,6 @@ Parser.prototype = function(){
                         col:    importToken.startCol
                     });
                 }
-                this.endNode(node, tokenStream.curr().range[1]); //ORION AST generation
             },
 
             _namespace: function(emit){

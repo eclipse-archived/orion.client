@@ -144,6 +144,22 @@ define([
 			];
 			return runTest({buffer: "abc { a: 1; } "}, '', 14, expected);
 		});
+		it('General - after @import', function() {
+			var expected = [
+				{ description: 'Rule : element { }', proposal: 'element {\n\t\n}'},
+				{ description: 'Rule : #id { }', proposal: '#id {\n\t\n}'},
+				{ description: 'Rule : .class { }', proposal: '#id {\n\t\n}'},
+				{ description: '@charset', proposal: '@charset "charset";'},
+				{ description: '@import', proposal: '@import "url";'},
+				{ description: '@namespace', proposal: '@namespace "url";'},
+				{ description: '@media', proposal: '@media media-query-list {\n\t\n}'},
+				{ description: '@supports', proposal: '@supports (condition) {\n\t\n}'},
+				{ description: '@page', proposal: '@page page-selector-list {\n\t\n}'},
+				{ description: '@font-face', proposal: '@font-face {\n\tfont-family: "family-name";\n\tsrc: "url";\n}'},
+				{ description: '@keyframes', proposal: '@keyframes name {\n\t\n}'},
+			];
+			return runTest({buffer: "@import \"foo\";\n"}, '', 15, expected);
+		});
 		it('General - ru prefix', function() {
 			var expected = [
 				{ description: 'Rule : element { }', proposal: 'element {\n\t\n}'},
