@@ -78,7 +78,7 @@ function virtualHost(vhost, req, res, next) {
 				} else {
 					path = mPath.join(options.workspaceDir, username.substring(0, 2), username, "OrionContent", mapping.Target, relative);
 				}
-				if (fs.existsSync(path)) {
+				if (fs.existsSync(path) && fs.lstatSync(path).isFile()) {
 					res.sendFile(path);
 					return true;
 				}
