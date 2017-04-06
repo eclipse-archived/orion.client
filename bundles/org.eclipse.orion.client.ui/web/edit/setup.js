@@ -899,7 +899,7 @@ objects.mixin(EditorViewer.prototype, {
 			if (metadata) {
 				var tabHref = evt.location.href;
 				var lastFile = PageUtil.hash();
-				if (sessionStorage.lastFile === lastFile) {
+				if (sessionStorage.lastFile === lastFile || lastFile.length === 0) {
 					tabHref = uriTemplate.expand({resource: metadata.Location});
 					lastFile = tabHref;
 				}
