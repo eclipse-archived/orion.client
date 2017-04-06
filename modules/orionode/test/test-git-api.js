@@ -1473,6 +1473,111 @@ maybeDescribe("git", function() {
 					finished(err);
 				});
 			});
+
+			it("dirty working dir prevents checkout", function(finished) {
+				var name = "conflicts.txt";
+				var initial, tip;
+
+				var client = new GitClient("merge-conflicts-dirty-wd");
+				client.init();
+				client.setFileContents(name, "A");
+				client.stage(name);
+				client.commit();
+				client.start().then(function(commit) {
+					initial = commit.Id;
+
+					client.setFileContents(name, "B");
+					client.stage(name);
+					client.commit();
+					return client.start();
+				})
+				.then(function(commit) {
+					otherBranch = commit.Id;
+
+					client.createBranch("other");
+					client.reset("HARD", initial);
+					client.setFileContents(name, "C");
+					client.stage(name);
+					client.commit();
+					return client.start();
+				})
+				.then(function(commit) {
+					tip = commit.Id;
+					// make the working directory version dirty
+					client.setFileContents(name, "D");
+					client.merge("other");
+					return client.start();
+				})
+				.then(function(result) {
+					assert.equal(result.Result, "FAILED");
+					assert.equal(Object.keys(result.FailingPaths).length, 1);
+					assert.equal(result.FailingPaths[name], "");
+
+					client.log("master");
+					return client.start();
+				})
+				.then(function(log) {
+					// ensure that the branch hasn't moved
+					assert.equal(log.Children[0].Id, tip);
+					finished();
+				})
+				.catch(function(err) {
+					finished(err);
+				});
+			});
+
+			it("dirty index prevents checkout", function(finished) {
+				var name = "conflicts.txt";
+				var initial, tip;
+
+				var client = new GitClient("merge-conflicts-dirty-index");
+				client.init();
+				client.setFileContents(name, "A");
+				client.stage(name);
+				client.commit();
+				client.start().then(function(commit) {
+					initial = commit.Id;
+
+					client.setFileContents(name, "B");
+					client.stage(name);
+					client.commit();
+					return client.start();
+				})
+				.then(function(commit) {
+					otherBranch = commit.Id;
+
+					client.createBranch("other");
+					client.reset("HARD", initial);
+					client.setFileContents(name, "C");
+					client.stage(name);
+					client.commit();
+					return client.start();
+				})
+				.then(function(commit) {
+					tip = commit.Id;
+					// make the index version dirty
+					client.setFileContents(name, "D");
+					client.stage(name);
+					client.merge("other");
+					return client.start();
+				})
+				.then(function(result) {
+					assert.equal(result.Result, "FAILED");
+					assert.equal(Object.keys(result.FailingPaths).length, 1);
+					assert.equal(result.FailingPaths[name], "");
+
+					client.log("master");
+					return client.start();
+				})
+				.then(function(log) {
+					// ensure that the branch hasn't moved
+					assert.equal(log.Children[0].Id, tip);
+					finished();
+				})
+				.catch(function(err) {
+					finished(err);
+				});
+			});
 		}); // describe("Conflicts")
 	}); // describe("Merge")
 

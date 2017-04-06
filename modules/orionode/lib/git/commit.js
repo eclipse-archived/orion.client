@@ -795,6 +795,7 @@ function merge(req, res, branchToMerge, squash) {
 		var mergeResult = "MERGED";
 		if (oid && oid.toString() === head.id().toString()) mergeResult = "ALREADY_UP_TO_DATE";
 		else if (oid && oid.toString() === commit.id().toString()) mergeResult = "FAST_FORWARD";
+		else if (paths) mergeResult = "FAILED";
 		else if (conflicting) mergeResult = "CONFLICTING";
 		writeResponse(200, res, null, {
 			"Result": mergeResult,
@@ -813,7 +814,7 @@ function getConflictingPaths(repo, head, commit) {
 	.then(function(tree) {
 		tree2 = tree;
 		// get the common ancestor between HEAD and the other branch
-		return Merge.base(repo, head, commit)
+		return git.Merge.base(repo, head, commit)
 		.then(function(ancestor) {
 			return ancestor.getTree();
 		})
