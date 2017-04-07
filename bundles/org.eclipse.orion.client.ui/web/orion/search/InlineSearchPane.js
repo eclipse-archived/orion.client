@@ -114,6 +114,7 @@ define([
 				lib.empty(lib.node("searchPageActions"));
 				lib.empty(lib.node("searchPageActionsRight"));
 				lib.empty(this._searchResultsWrapperDiv);
+				this._searchResultExplorer._replaceRenderer.cleanBreadCrumbs();
 			//}
 			this.hideReplacePreview();
 		},
@@ -161,7 +162,7 @@ define([
 			this._submitSearch();
 		},
 		
-		updateSearchScopeFromSelection(meta){
+		updateSearchScopeFromSelection: function(meta){
 			if(meta){
 				this._searcher._setLocationbyURL(meta);
 			}
@@ -199,6 +200,7 @@ define([
 		},
 				
 		_submitSearch: function(){
+			this._searchResultExplorer._replaceRenderer.cleanBreadCrumbs();
 			var deferredOptions = this.getOptions();
 			deferredOptions.then(function(options){
 				options.replace = null;
