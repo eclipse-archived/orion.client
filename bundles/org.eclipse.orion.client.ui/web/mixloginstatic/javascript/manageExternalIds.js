@@ -162,7 +162,11 @@ define(["i18n!orion/mixloginstatic/nls/messages", "orion/xhr", "orion/webui/litt
 		}).then(function(xhrResult) {
 			loadUserData(jsonData.Location);
 		}, function(xhrResult) {
-			console.error(xhrResult.error);
+			if (xhrResult.status === 409){
+				alert(messages["AccountAlreadyConnected"]);
+			} else {	
+				console.error(xhrResult.error);
+			}
 		});
 	};
 
