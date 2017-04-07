@@ -44,6 +44,8 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 		this._undoStack = options.undoStack;
 		this._statusReporter = options.statusReporter;
 		this._title = null;
+		this._isTouched = false;
+		this._initializing = true;
 		var that = this;
 		this._listener = {
 			onChanged: function(e) {
@@ -70,6 +72,12 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 		/** @private */
 		checkDirty : function() {
 			this.setDirty(this._undoStack && !this._undoStack.isClean());
+		},
+		
+		/** @private */
+		setPermanent : function() {
+			this.dispatchEvent({type: "BecomePermanent"});
+			this._isTouched = true;
 		},
 		/**
 		 * Focus the the editor view. The default implementation does nothing.
@@ -185,6 +193,10 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 			if (this._dirty === dirty) { return; }
 			this._dirty = dirty;
 			this.onDirtyChanged({type: "DirtyChanged"}); //$NON-NLS-0$
+			if(!this._initializing && !this._isTouched){
+				this.setPermanent();
+			}
+			this._initializing = false;
 		},
 		/**
 		 * Sets a flag indicating whether the editor contents have been modified since

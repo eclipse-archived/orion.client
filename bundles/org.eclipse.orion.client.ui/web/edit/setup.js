@@ -909,6 +909,9 @@ objects.mixin(EditorViewer.prototype, {
 				delete sessionStorage.lastFile;
 			}
 			var view = this.getEditorView(evt.input, metadata);
+			if(evt.input.noreveal){
+				this.noreval = true;
+			}
 			this.setEditor(view ? view.editor : null);
 			this.updateDirtyIndicator();
 			evt.editor = this.editor;
@@ -982,7 +985,7 @@ objects.mixin(EditorViewer.prototype, {
 				evt.moved.forEach(function(item) {
 					var sourceLocation = item.source;
 					var metadata = that.tabWidget.getMetadataByLocation_(sourceLocation) || selectedMetadata;
-					if (selectedMetadata.Location.indexOf(sourceLocation) === 0) {
+					if (selectedMetadata && selectedMetadata.Location.indexOf(sourceLocation) === 0) {
 						inputManager.addEventListener("InputChanged", this.loadComplete = function() {
 							inputManager.removeEventListener("InputChanged", this.loadComplete);
 							that.tabWidget.closeTab(metadata, false);
@@ -1107,6 +1110,7 @@ objects.mixin(EditorViewer.prototype, {
 		if (this.editor === newEditor) { return; }
 		if (this.editor) {
 			this.editor.removeEventListener("DirtyChanged", this.editorDirtyListener); //$NON-NLS-0$
+			this.editor.removeEventListener("BecomePermanent", this.editorPermanentStateListener); //$NON-NLS-0$
 		}
 		this.editor = newEditor;
 		if (this.editor) {
@@ -1114,6 +1118,9 @@ objects.mixin(EditorViewer.prototype, {
 				this.activateContext.editorViewers.forEach(function(editorViewer){
 					editorViewer.updateDirtyIndicator();
 				});
+			}.bind(this));
+			this.editor.addEventListener("BecomePermanent", this.editorPermanentStateListener = function() { //$NON-NLS-0$
+				window.__electron.makeTabPermanent(window.name);
 			}.bind(this));
 		}
 	},
@@ -1544,10 +1551,11 @@ objects.mixin(EditorSetup.prototype, {
 			this.renderToolbars(metadata);
 		}
 		
-		this.setPageTarget(metadata);
+		this.setPageTarget(metadata, editorViewer.noreval);
+		delete editorViewer.noreval;
 	},
 	
-	setPageTarget: function (metadata) {
+	setPageTarget: function (metadata, noreveal) {
 		if (this.lastTarget && metadata && this.lastTarget.Location === metadata.Location) return;
 		this.lastTarget = metadata;
 		
@@ -1599,7 +1607,8 @@ objects.mixin(EditorSetup.prototype, {
 				contentType: this.editorInputManager.getContentType(),
 				metadata: metadata,
 				editor: editor,
-				location: window.location
+				location: window.location,
+				noreveal:noreveal
 			});
 		}
 	},

@@ -663,6 +663,10 @@ a.breadcrumb.currentLocation {
 	color: #00AED1 !important;
 }
 
+.desktopmode .dropdownTrigger a {
+	text-decoration: none;
+	pointer-events: none;
+}
 .dropdownTrigger a {
 	text-decoration: none;
 }

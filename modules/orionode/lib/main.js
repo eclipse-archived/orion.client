@@ -16,6 +16,7 @@ var contextSrcEl = null;
 var activeIndex = 0;
 var isInitiatingWorkspace = false;
 var needToCleanFrames = [];
+var transientTab = null;
 
 function redrawButtons() {
 	var bar = document.querySelector("#bar");
@@ -105,6 +106,9 @@ function addNewTab(id, iframe) {
 	closeBt.textContent = "x";
 	tab.appendChild(closeBt);
 	closeBt.addEventListener("click", function(evt) {
+		if(tab.classList.contains("transient")){
+			transientTab = null;
+		}
 		iframe.parentNode.removeChild(iframe);
 		tab.parentNode.removeChild(tab);
 		update();
@@ -305,7 +309,7 @@ function createNewTabButton(url){
 	newTabButton.innerHTML = newTabButtonText;
 	newTabButton.classList.add("openNewTab");
 	function newTab() {
-		createTab(url);
+		createTab(url,true);
 	}
 	newTabButton.addEventListener("click", newTab);
 	bar.appendChild(newTabButton);
@@ -318,51 +322,73 @@ function bindfocus(){
 	getActiveTab().focus();
 }
 
-function createTab(url) {
-	var iframe = document.createElement("iframe");
-	iframe.frameBorder = "0";
-	iframe.classList.add("tabContent");
-	iframe.src = url;
-	var id = Date.now();
-	iframe.id = "iframe" + id;
-	iframe.addEventListener("load", function() {
-		iframe.contentWindow.confirm = window.confirm;
-		iframe.contentWindow.alert = window.alert;
-		iframe.contentWindow.__electron = electron;
-
-		var target = iframe.contentDocument.querySelector('head > title');
-		if (target) {
-			var observer = new window.WebKitMutationObserver(function(mutations) {
-				if (mutations) {
-					setTabLabel(id, iframe.contentDocument.title);
-					setTabIcon(id,iframe.contentDocument.head);
-				}
-			});
-			observer.observe(target, {
-				subtree: true,
-				characterData: true,
-				childList: true
-			});
-		}
-		setTabLabel(id, iframe.contentDocument.title);
-		setTabIcon(id, iframe.contentDocument.head);
-		iframe.contentWindow.addEventListener("click", function() {
-			var menu = document.querySelector("#context-menu");
-			var activeClassName = "context-menu-items-open";
-			menu.classList.remove(activeClassName);
+function createTab(url, forceNew) {
+	if(!forceNew){
+		var iframes = document.querySelectorAll(".tabContent");
+		var potentialExsitingIframe = Array.prototype.find.call(iframes,function(iframe){
+			return iframe.contentWindow.location.href === url;
 		});
-		if(isInitiatingWorkspace){
-			var tabbuttons = document.querySelectorAll(".tabItem");
-			tabbuttons[activeIndex] && tabbuttons[activeIndex].click();
-			isInitiatingWorkspace = false;
-		}
-	});
-	document.body.appendChild(iframe);
-	var srcUrl = nodeUrl.parse(url);
-	if(srcUrl.pathname === "/" || srcUrl.pathname.endsWith(".html")){
-		addNewTab(id, iframe).click();
+	}
+	if(!forceNew && potentialExsitingIframe){
+		clickTab(potentialExsitingIframe.id.substr(6));
+	}else if(!forceNew && transientTab){
+		var correspondingiframeId = 'iframe' + transientTab.id.substr(3);
+		var corrspondingiframe = document.querySelector('#'+correspondingiframeId);
+		corrspondingiframe.src = url;
 	}else{
-		needToCleanFrames.push(iframe);
+		var iframe = document.createElement("iframe");
+		iframe.frameBorder = "0";
+		iframe.classList.add("tabContent");
+		iframe.src = url;
+		var id = Date.now();
+		iframe.id = "iframe" + id;
+		iframe.name = "iframe" + id;
+		iframe.addEventListener("load", function() {
+			iframe.contentWindow.confirm = window.confirm;
+			iframe.contentWindow.alert = window.alert;
+			electron.makeTabPermanent = makeTabPermanent;
+			electron.createTab = createTab;
+			iframe.contentWindow.__electron = electron;
+	
+			var target = iframe.contentDocument.querySelector('head > title');
+			if (target) {
+				var observer = new window.WebKitMutationObserver(function(mutations) {
+					if (mutations) {
+						setTabLabel(id, iframe.contentDocument.title);
+						setTabIcon(id,iframe.contentDocument.head);
+					}
+				});
+				observer.observe(target, {
+					subtree: true,
+					characterData: true,
+					childList: true
+				});
+			}
+			setTabLabel(id, iframe.contentDocument.title);
+			setTabIcon(id, iframe.contentDocument.head);
+			iframe.contentWindow.addEventListener("click", function() {
+				var menu = document.querySelector("#context-menu");
+				var activeClassName = "context-menu-items-open";
+				menu.classList.remove(activeClassName);
+			});
+			if(isInitiatingWorkspace){
+				var tabbuttons = document.querySelectorAll(".tabItem");
+				tabbuttons[activeIndex] && tabbuttons[activeIndex].click();
+				isInitiatingWorkspace = false;
+			}
+		});
+		document.body.appendChild(iframe);
+		var srcUrl = nodeUrl.parse(url);
+		if(srcUrl.pathname === "/" || srcUrl.pathname.endsWith(".html")){
+			var newTab = addNewTab(id, iframe);
+			newTab.click();
+			if(!transientTab){
+				transientTab = newTab;
+				newTab.classList.add("transient")
+			}
+		}else{
+			needToCleanFrames.push(iframe);
+		}
 	}
 }
 
@@ -467,6 +493,36 @@ function getPosition(e) {
 		x: posx,
 		y: posy
 	};
+}
+function otherEditorTabsHref(){
+	var iframes = document.querySelectorAll(".tabContent");
+	var editorTabsInfo = [];
+	Array.prototype.forEach.call(iframes,function(iframe){
+		var href = iframe.contentWindow.location.href.replace(/http:\/\/localhost:\w+\//, "");
+		if(href.indexOf("/edit/edit.html")){
+			editorTabsInfo.push({
+				id : iframe.id.substr(6),
+				href : iframe.contentWindow.location.href.replace(/http:\/\/localhost:\w+\/edit\/edit.html\#/, "")
+			});
+		}
+	});
+	return editorTabsInfo;
+}
+function clickTab(id){
+	var correspondingTabId = 'tab' + id;
+	var correspondingTab = document.querySelector('#'+correspondingTabId);
+	correspondingTab.click();
+}
+function makeTabPermanent(iframeId){
+	if(iframeId){
+		var correspondingTabId = 'tab' + iframeId.substr(6);
+		var activeTransientTab = document.querySelector('#'+correspondingTabId);
+		activeTransientTab.classList.remove("transient");
+		transientTab = null;
+	}else{
+		transientTab.classList.remove("transient");
+		transientTab = null;
+	}
 }
 function collectTabsUrl(){
 	var ipcRenderer = electron.ipcRenderer;
