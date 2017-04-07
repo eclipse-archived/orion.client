@@ -337,10 +337,11 @@ module.exports.router = function(options) {
 		orionAccount.findByUsername(req.params.id, function(err, user) {
 			if (err) return res.status(404).end();
 			if (!user) {
-				res.writeHead(400, "User not fount: " + req.params.id);
+				res.writeHead(400, "User not found: " + req.params.id);
 				return res.end();
 			}
 			var hasNewPassword = typeof req.body.Password !== "undefined";
+			var promiseChain = Promise.resolve();
 			// users other than admin have to know the old password to set a new one
 			if (!isAdmin(req.params.id)) {
 				//TODO
@@ -348,19 +349,46 @@ module.exports.router = function(options) {
 			if (typeof req.body.UserName !== "undefined") user.username = req.body.UserName;
 			if (typeof req.body.FullName !== "undefined") user.fullname = req.body.FullName;
 			if (typeof req.body.Email !== "undefined") user.email = req.body.Email;
-			if (typeof req.body.OAuth !== "undefined") user.oauth = req.body.OAuth;
+			if (typeof req.body.OAuth !== "undefined") {
+				promiseChain = promiseChain.then(function(){
+					return new Promise(function(resolve, reject){
+						orionAccount.find({oauth: new RegExp("^" + req.body.OAuth + "$", "m")}, function(err, existing) {
+							if (err) {
+								reject(err);
+								return;
+							}
+							if (existing && existing.length) {
+								res.writeHead(409, "This account is already linked to someone else");
+								res.end();
+								reject();
+								return;
+							}
+							user.oauth = req.body.OAuth;
+							resolve();
+						});
+					});
+				});
+			}
 			function save(err) {
 				if (err) res.writeHead(400, "Failed to update: " + req.params.id);
 				return res.status(200).end();
 			}
-			if (hasNewPassword) {
-				user.setPassword(req.body.Password, function(err, user) {
-					if (err) res.writeHead(400, "Failed to update: " + req.params.id);
+			promiseChain.then(function(){
+				if (hasNewPassword) {
+					user.setPassword(req.body.Password, function(err, user) {
+						if (err) res.writeHead(400, "Failed to update: " + req.params.id);
+						user.save(save);
+					});
+				} else {
 					user.save(save);
-				});
-			} else {
-				user.save(save);
-			}
+				}
+			}).catch(function(err){
+				if (err) {
+					// Indicated unhandled error
+					res.writeHead(500, "An internal error has occured");
+					res.send();
+				}
+			});
 		});
 	});
 

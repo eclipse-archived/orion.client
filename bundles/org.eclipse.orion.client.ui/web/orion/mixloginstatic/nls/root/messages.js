@@ -14,4 +14,5 @@ define({//Default message bundle
 	"ConfirmRemove" : "Are you sure you want to remove ${0} from the list of your external accounts?",
 	"Remove" : "Remove",
 	"RemoveExternalAccount" : "Remove ${0}",
+	'AccountAlreadyConnected': 'This account is already connected to another user',
 });
