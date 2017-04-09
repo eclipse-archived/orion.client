@@ -316,7 +316,33 @@ function getCommitLog(req, res) {
 							commitJSONs[commit.sha()] = json;
 							commits.push(json);
 							if (pageSize && commits.length === pageSize) {//page done
-								sendResponse();
+								if (filterPath) {
+									var missing = [];
+									// look for commits that are pointing at a parent that
+									// doesn't exist in the list of returned commits
+									var keys = Object.keys(commitJSONs);
+									for (var i = 0 ; i < keys.length; i++) {
+										for (var j = 0; j < commitJSONs[keys[i]].Parents.length; j++) {
+											var name = commitJSONs[keys[i]].Parents[j].Name;
+											if (commitJSONs[name] === undefined) {
+												// pointing at a commit that hasn't been resolved, mark it
+												missing.push(name);
+											}
+										}
+									}
+
+									if (missing.length === 0) {
+										sendResponse();
+									} else {
+										// resolve the parents so we actually have the JSON point
+										// at the true parent commit related to the file
+										var current = missing[0];
+										revWalk.push(missing[0]);
+										resolveParents(missing);
+									}
+								} else {
+									sendResponse();
+								}
 								return;
 							}
 							walk();
@@ -329,6 +355,57 @@ function getCommitLog(req, res) {
 						return applyFilter(false);
 					}
 				});
+			})
+			.catch(function(error) {
+				if (error.errno === git.Error.CODE.ITEROVER) {
+					sendResponse(true);
+				} else {
+					task.done({
+						HttpCode: 404,
+						Code: 0,
+						DetailedMessage: error.message,
+						JsonData: {},
+						Message: error.message,
+						Severity: "Error"
+					});
+				}
+			});
+		}
+
+		function resolveParents(missing) {
+			var candidate;
+			return revWalk.next().then(function(oid) {
+				return repo.getCommit(oid);
+			})
+			.then(function(commit) {
+				candidate = commit;
+				return filterCommitPath(commit, fileDir);
+			})
+			.then(function(filter) {
+				if (filter) {
+					// have to filter this commit, keep going
+					return resolveParents(missing);
+				} else {
+					// this commit is not being filtered, update the parent information
+					var keys = Object.keys(commitJSONs);
+					for (var i = 0 ; i < keys.length; i++) {
+						for (var j = 0; j < commitJSONs[keys[i]].Parents.length; j++) {
+							if (commitJSONs[keys[i]].Parents[j].Name === missing[0]) {
+								commitJSONs[keys[i]].Parents[j] = createParentJSON(candidate.sha(), fileDir);
+							}
+						}
+					}
+
+					// remove the resolved commit
+					missing.shift();
+					if (missing.length === 0) {
+						sendResponse();
+					} else {
+						// still more to go, resolve the next one
+						revWalk.push(missing[0]);
+						return resolveParents(missing);
+					}
+				}
 			})
 			.catch(function(error) {
 				if (error.errno === git.Error.CODE.ITEROVER) {

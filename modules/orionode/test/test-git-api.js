@@ -2361,6 +2361,32 @@ maybeDescribe("git", function() {
 					assert.equal(log.Children[1].Parents[0].Name, first);
 					assert.equal(log.Children[2].Name, first);
 					assert.equal(log.Children[2].Parents.length, 1);
+
+					client.log("master", "master", name, { page: 1, pageSize: 1 });
+					return client.start();
+				})
+				.then(function(log) {
+					assert.equal(log.Children.length, 1);
+					assert.equal(log.Children[0].Name, third);
+					assert.equal(log.Children[0].Parents.length, 1);
+					assert.equal(log.Children[0].Parents[0].Name, second);
+
+					client.log("master", "master", name, { page: 2, pageSize: 1 });
+					return client.start();
+				})
+				.then(function(log) {
+					assert.equal(log.Children.length, 1);
+					assert.equal(log.Children[0].Name, second);
+					assert.equal(log.Children[0].Parents.length, 1);
+					assert.equal(log.Children[0].Parents[0].Name, first);
+
+					client.log("master", "master", name, { page: 3, pageSize: 1 });
+					return client.start();
+				})
+				.then(function(log) {
+					assert.equal(log.Children.length, 1);
+					assert.equal(log.Children[0].Name, first);
+					assert.equal(log.Children[0].Parents.length, 1);
 					finished();
 				})
 				.catch(function(err) {
@@ -2521,6 +2547,27 @@ maybeDescribe("git", function() {
 					assert.equal(log.Children[2].Id, local);
 					assert.equal(log.Children[2].Parents[0].Name, initial);
 					assert.equal(log.Children[3].Id, initial);
+
+					client.log("master", "master", name, { page: 1, pageSize: 2 });
+					return client.start();
+				})
+				.then(function(log) {
+					assert.equal(log.Children.length, 2);
+					// merge commit with two parents
+					assert.equal(log.Children[0].Parents.length, 2);
+					assert.equal(log.Children[0].Parents[0].Name, local);
+					assert.equal(log.Children[0].Parents[1].Name, other);
+					assert.equal(log.Children[1].Id, other);
+					assert.equal(log.Children[1].Parents[0].Name, initial);
+
+					client.log("master", "master", name, { page: 2, pageSize: 2 });
+					return client.start();
+				})
+				.then(function(log) {
+					assert.equal(log.Children.length, 2);
+					assert.equal(log.Children[0].Id, local);
+					assert.equal(log.Children[0].Parents[0].Name, initial);
+					assert.equal(log.Children[1].Id, initial);
 					finished();
 				})
 				.catch(function(err) {
