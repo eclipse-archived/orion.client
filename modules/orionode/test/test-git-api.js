@@ -2548,6 +2548,16 @@ maybeDescribe("git", function() {
 					assert.equal(log.Children[2].Parents[0].Name, initial);
 					assert.equal(log.Children[3].Id, initial);
 
+					client.log("master", "master", name, { page: 1, pageSize: 1 });
+					return client.start();
+				})
+				.then(function(log) {
+					assert.equal(log.Children.length, 1);
+					// merge commit with two parents
+					assert.equal(log.Children[0].Parents.length, 2);
+					assert.equal(log.Children[0].Parents[0].Name, local);
+					assert.equal(log.Children[0].Parents[1].Name, other);
+
 					client.log("master", "master", name, { page: 1, pageSize: 2 });
 					return client.start();
 				})

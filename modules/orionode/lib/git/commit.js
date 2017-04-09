@@ -337,6 +337,8 @@ function getCommitLog(req, res) {
 										// resolve the parents so we actually have the JSON point
 										// at the true parent commit related to the file
 										var current = missing[0];
+										revWalk = repo.createRevWalk();
+										revWalk.sorting(git.Revwalk.SORT.TOPOLOGICAL);
 										revWalk.push(missing[0]);
 										resolveParents(missing);
 									}
@@ -402,6 +404,8 @@ function getCommitLog(req, res) {
 						sendResponse();
 					} else {
 						// still more to go, resolve the next one
+						revWalk = repo.createRevWalk();
+						revWalk.sorting(git.Revwalk.SORT.TOPOLOGICAL);
 						revWalk.push(missing[0]);
 						return resolveParents(missing);
 					}
