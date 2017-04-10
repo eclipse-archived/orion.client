@@ -2140,6 +2140,152 @@ maybeDescribe("git", function() {
 
 			/**
 			 * 1. Create a file.
+			 * 2. Create some changes in branch 1.
+			 * 3. Create a different change in branch 2.
+			 * 4. Merge the other branch 1 in.
+			 * 5. Discard the other branch 1's changes.
+			 * 6. The history should not include the merge commit.
+			 * 
+			 * In the following example, only commits A and E will
+			 * be included as all the changes in B, C, and D have been
+			 * discarded in favour of E. The merge commit will not
+			 * be included as it does not actually include any content
+			 * change for the file in question.
+			 * 
+			 * M
+			 * |\
+			 * | \
+			 * |  D
+			 * |  |
+			 * E  C
+			 * |  |
+			 * |  B
+			 * | /
+			 * |/
+			 * A
+			 */
+			it("file merge discard", function(finished) {
+				var initial, modify, local;
+				var name = "test.txt";
+
+				var client = new GitClient("history-file-merge-discard");
+				client.init();
+				client.setFileContents(name, "A");
+				client.stage(name);
+				client.commit();
+				client.start().then(function(commit) {
+					initial = commit.Id;
+
+					// create some other changes
+					client.setFileContents(name, "B");
+					client.stage(name);
+					client.commit();
+					client.setFileContents(name, "C");
+					client.stage(name);
+					client.commit();
+					client.setFileContents(name, "D");
+					client.stage(name);
+					client.commit();
+					client.createBranch("other");
+					client.reset("HARD", initial);
+					client.setFileContents(name, "E");
+					client.stage(name);
+					client.commit();
+					return client.start();
+				})
+				.then(function(commit) {
+					modify = commit.Id;
+
+					client.merge("other");
+					// override the content with the current branch's
+					client.setFileContents(name, "E");
+					// stage and resolve the conflict
+					client.stage(name);
+					// create the merge commit
+					client.commit();
+					client.log("master", "master", name);
+					return client.start();
+				})
+				.then(function(log) {
+					assert.equal(log.Children.length, 2);
+					assert.equal(log.Children[0].Id, modify);
+					assert.equal(log.Children[0].Parents.length, 1);
+					assert.equal(log.Children[0].Parents[0].Name, initial);
+					assert.equal(log.Children[1].Id, initial);
+					finished();
+				})
+				.catch(function(err) {
+					finished(err);
+				});
+			});
+
+			/**
+			 * 1. Create a file in commit A.
+			 * 2. Create a change for the file in commit B in a branch.
+			 * 3. Create another change for a different file in commit X in another branch.
+			 * 4. Merge the other branch in to create a merge commit M.
+			 * 5. The history should not include the merge commit.
+			 * 
+			 * In the following example, the merge commit M is only bringing in
+			 * an unrelated change X and does not modify the original file. Hence,
+			 * the returned history will only include commits A and B.
+			 * 
+			 * M
+			 * |\
+			 * | \
+			 * B  X
+			 * | /
+			 * |/
+			 * A
+			 */
+			it("file unrelated merge", function(finished) {
+				var initial, modify, local;
+				var name = "test.txt";
+				var unrelated = "unrelated.txt";
+
+				var client = new GitClient("history-file-unrelated-merge");
+				client.init();
+				client.setFileContents(name, "A");
+				client.stage(name);
+				client.commit();
+				client.start().then(function(commit) {
+					initial = commit.Id;
+
+					client.setFileContents(name, "B");
+					client.stage(name);
+					client.commit();
+					return client.start();
+				})
+				.then(function(commit) {
+					modify = commit.Id;
+
+					client.createBranch("other");
+					client.reset("HARD", initial);
+					client.setFileContents(unrelated, "unrelated");
+					client.stage(unrelated);
+					client.commit();
+					return client.start();
+				})
+				.then(function(commit) {
+					client.merge("other");
+					client.log("master", "master", name);
+					return client.start();
+				})
+				.then(function(log) {
+					assert.equal(log.Children.length, 2);
+					assert.equal(log.Children[0].Id, modify);
+					assert.equal(log.Children[0].Parents.length, 1);
+					assert.equal(log.Children[0].Parents[0].Name, initial);
+					assert.equal(log.Children[1].Id, initial);
+					finished();
+				})
+				.catch(function(err) {
+					finished(err);
+				});
+			});
+
+			/**
+			 * 1. Create a file.
 			 * 2. Delete the file.
 			 * 3. Recreate the file.
 			 * 4. The returned history should include all three commits.
@@ -2223,6 +2369,48 @@ maybeDescribe("git", function() {
 				.then(function(log) {
 					assert.equal(log.Children.length, 1);
 					assert.equal(log.Children[0].Id, rename);
+					finished();
+				})
+				.catch(function(err) {
+					finished(err);
+				});
+			});
+
+			/**
+			 * 1. Create a file in a branch.
+			 * 2. Merge that branch in.
+			 * 3. The returned history should not include the merge commit.
+			 */
+			it("file merge new", function(finished) {
+				this.timeout(0);
+				var initial, modify, local;
+				var name = "test.txt";
+				var unrelated = "unrelated.txt";
+
+				var client = new GitClient("history-file-merge-new");
+				client.init();
+				client.commit();
+				client.start().then(function(commit) {
+					initial = commit.Id;
+
+					client.setFileContents(name, "A");
+					client.stage(name);
+					client.commit();
+					return client.start();
+				})
+				.then(function(commit) {
+					modify = commit.Id;
+
+					client.createBranch("other");
+					client.reset("HARD", initial);
+					client.commit();
+					client.merge("other");
+					client.log("master", "master", name);
+					return client.start();
+				})
+				.then(function(log) {
+					assert.equal(log.Children.length, 1);
+					assert.equal(log.Children[0].Id, modify);
 					finished();
 				})
 				.catch(function(err) {
@@ -2576,6 +2764,106 @@ maybeDescribe("git", function() {
 				.then(function(log) {
 					assert.equal(log.Children.length, 2);
 					assert.equal(log.Children[0].Id, local);
+					assert.equal(log.Children[0].Parents[0].Name, initial);
+					assert.equal(log.Children[1].Id, initial);
+					finished();
+				})
+				.catch(function(err) {
+					finished(err);
+				});
+			});
+
+			/**
+			 * Actual repository history:
+			 * 
+			 * O
+			 * |
+			 * O
+			 * |
+			 * M
+			 * |\
+			 * | \
+			 * X  O
+			 * | /
+			 * |/
+			 * O
+			 * 
+			 * Returned history for the file:
+			 * 
+			 * O
+			 * |
+			 * O
+			 * |
+			 * O
+			 * |
+			 * O
+			 */
+			it("file unrelated merge", function(finished) {
+				var initial, modify, extra, extra2;
+				var name = "test.txt";
+				var unrelated = "unrelated.txt";
+
+				var client = new GitClient("graph-file-unrelated-merge");
+				client.init();
+				client.setFileContents(name, "A");
+				client.stage(name);
+				client.commit();
+				client.start().then(function(commit) {
+					initial = commit.Id;
+
+					client.setFileContents(name, "B");
+					client.stage(name);
+					client.commit();
+					return client.start();
+				})
+				.then(function(commit) {
+					modify = commit.Id;
+					client.createBranch("other");
+					client.reset("HARD", initial);
+					// create an unrelated file
+					client.setFileContents(unrelated, "unrelated");
+					client.stage(unrelated);
+					client.commit();
+					return client.start();
+				})
+				.then(function(commit) {
+					client.merge("other");
+					// create two other commits at the tip of the branch
+					client.setFileContents(name, "C");
+					client.stage(name);
+					client.commit();
+					return client.start();
+				})
+				.then(function(commit) {
+					extra = commit.Id;
+
+					client.setFileContents(name, "D");
+					client.stage(name);
+					client.commit();
+					return client.start();
+				})
+				.then(function(commit) {
+					extra2 = commit.Id;
+
+					client.log("master", "master", name, { page: 1, pageSize: 2 });
+					return client.start();
+				})
+				.then(function(log) {
+					assert.equal(log.Children.length, 2);
+					assert.equal(log.Children[0].Id, extra2);
+					assert.equal(log.Children[0].Parents.length, 1);
+					assert.equal(log.Children[0].Parents[0].Name, extra);
+					assert.equal(log.Children[1].Id, extra);
+					assert.equal(log.Children[1].Parents.length, 1);
+					assert.equal(log.Children[1].Parents[0].Name, modify);
+
+					client.log("master", "master", name, { page: 2, pageSize: 2 });
+					return client.start();
+				})
+				.then(function(log) {
+					assert.equal(log.Children.length, 2);
+					assert.equal(log.Children[0].Id, modify);
+					assert.equal(log.Children[0].Parents.length, 1);
 					assert.equal(log.Children[0].Parents[0].Name, initial);
 					assert.equal(log.Children[1].Id, initial);
 					finished();

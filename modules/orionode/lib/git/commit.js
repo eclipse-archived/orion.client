@@ -100,34 +100,92 @@ function getCommitLog(req, res) {
 		if (toDateFilter && commit.timeMs() > toDateFilter) return true;
 		return false;
 	}
-	function filterCommitPath(commit, fileDir) {
+	function filterCommitPath(commit, fileDir, keep, ignore) {
+		// check if this commit is from a branch that should be ignored
+		for (var i = 0; i < ignore.length; i++) {
+			if (ignore[i].equal(commit.id())) {
+				for (var j = 0; j < commit.parentcount(); j++) {
+					// check if this parent should be skipped or iterated over
+					var shouldKeep = keep.some(function(oid) {
+						return oid.equal(commit.parentId(j));
+					});
+					if (!shouldKeep) {
+						ignore.push(commit.parentId(j));
+					}
+				}
+				return Promise.resolve(true);
+			}
+		}
+
 		var entryId;
 		return commit.getEntry(filterPath)
 		.then(function(entry) {
 			entryId = entry.id();
-			if (commit.parentcount() === 0) {
-				// no parent then it was an ADD
-				return false;
-			}
-
-			return commit.getParents(1)
-			.then(function(parents) {
-				return parents[0].getEntry(filterPath);
-			})
-			.then(function(parentEntry) {
-				// check if the file content changed
-				return entryId.equal(parentEntry.id()) !== 0;
-			})
-			.catch(function(err) {
-				if (err.toString().indexOf("does not exist in the given tree")) {
-					// not found in parent, was an ADD
+			switch (commit.parentcount()) {
+				case 0:
+					// no parent then it was an ADD
 					return false;
-				}
-				throw err;
-			});
+				case 1:
+					return commit.getParents(1)
+					.then(function(parents) {
+						return parents[0].getEntry(filterPath);
+					})
+					.then(function(parentEntry) {
+						// check if the file content changed
+						return entryId.equal(parentEntry.id()) !== 0;
+					})
+					.catch(function(err) {
+						if (err.toString().indexOf("does not exist in the given tree") !== -1) {
+							// not found in parent, was an ADD
+							return false;
+						}
+						throw err;
+					});
+				default:
+					var parentOids = [];
+					for (var i = 0; i < commit.parentcount(); i++) {
+						parentOids.push(commit.parentId(i));
+					}
+					var parents;
+					return commit.getParents(commit.parentcount())
+					.then(function(_parents) {
+						parents = _parents;
+						// for every parent, check if the entry exists
+						var promises = parents.map(function(parent) {
+							return parent.getEntry(filterPath).catch(function(err) {
+								if (err.toString().indexOf("does not exist in the given tree") !== -1) {
+									return null;
+								}
+								throw err;
+							});
+						});
+						return Promise.all(promises)
+					})
+					.then(function(entries) {
+						// find the common ancestor amongst the parents
+						return resolveAncestor(parentOids)
+						.then(function(base) {
+							for (var i = 0; i < entries.length; i++) {
+								if (entries[i] !== null && entries[i].id().equal(entryId)) {
+									// if the entry id is the same as a parent, that means
+									// the content from the other branches should be ignored
+									for (var j = 0; j < entries.length; j++) {
+										if (i !== j) {
+											ignore.push(parents[j].id());
+										}
+									}
+									// mark the common ancestor as not to be skipped over
+									keep.push(base);
+									return true;
+								}
+							}
+							return  false;
+						});
+					});
+			}
 		})
 		.catch(function(err) {
-			if (err.toString().indexOf("does not exist in the given tree")) {
+			if (err.toString().indexOf("does not exist in the given tree") !== -1) {
 				// doesn't exist, check if it was deleted
 				if (commit.parentcount() === 0) {
 					// no parent then definitely doesn't exist
@@ -147,6 +205,18 @@ function getCommitLog(req, res) {
 				});
 			}
 			throw err;
+		});
+	}
+	function resolveAncestor(parents) {
+		var tree = parents.pop();
+		var tree2 = parents.pop();
+		return git.Merge.base(repo, tree, tree2).then(function(base) {
+			if (parents.length === 0) {
+				return base;
+			} else {
+				parents.push(base);
+				return resolveAncestor(parents);
+			}
 		});
 	}
 	var commits = []	, repo;
@@ -286,6 +356,8 @@ function getCommitLog(req, res) {
 		});
 
 		var count = 0;
+		var keep = [];
+		var ignore = [];
 		var commitJSONs = {};
 		filterPath = clone.getfileRelativePath(repo,req); 
 		function walk() {
@@ -340,7 +412,7 @@ function getCommitLog(req, res) {
 										revWalk = repo.createRevWalk();
 										revWalk.sorting(git.Revwalk.SORT.TOPOLOGICAL);
 										revWalk.push(missing[0]);
-										resolveParents(missing);
+										resolveParents(missing, keep, ignore);
 									}
 								} else {
 									sendResponse();
@@ -352,7 +424,7 @@ function getCommitLog(req, res) {
 					}
 
 					if (filterPath) {
-						return filterCommitPath(commit, fileDir).then(applyFilter);
+						return filterCommitPath(commit, fileDir, keep, ignore).then(applyFilter);
 					} else {
 						return applyFilter(false);
 					}
@@ -374,19 +446,19 @@ function getCommitLog(req, res) {
 			});
 		}
 
-		function resolveParents(missing) {
+		function resolveParents(missing, keep, ignore) {
 			var candidate;
 			return revWalk.next().then(function(oid) {
 				return repo.getCommit(oid);
 			})
 			.then(function(commit) {
 				candidate = commit;
-				return filterCommitPath(commit, fileDir);
+				return filterCommitPath(commit, fileDir, keep, ignore);
 			})
 			.then(function(filter) {
 				if (filter) {
 					// have to filter this commit, keep going
-					return resolveParents(missing);
+					return resolveParents(missing, keep, ignore);
 				} else {
 					// this commit is not being filtered, update the parent information
 					var keys = Object.keys(commitJSONs);
@@ -407,7 +479,7 @@ function getCommitLog(req, res) {
 						revWalk = repo.createRevWalk();
 						revWalk.sorting(git.Revwalk.SORT.TOPOLOGICAL);
 						revWalk.push(missing[0]);
-						return resolveParents(missing);
+						return resolveParents(missing, keep, ignore);
 					}
 				}
 			})
