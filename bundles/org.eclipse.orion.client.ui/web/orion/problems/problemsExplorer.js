@@ -244,7 +244,7 @@ define([
 		/** @callback */
 	    getScopingParams: function(item) {
 	        return {
-	            name: mUiUtils.path2FolderName(item.path, item.name)
+	            name: mUiUtils.path2FolderName(item.path)
 	        };
 	    },
 	    /** @callback */

@@ -331,13 +331,13 @@ define([
 	/**
 	 * Returns the folder name from path.
 	 * @param {String} filePath
-	 * @param {String} fileName
 	 * @param {Boolean} keepTailSlash
 	 * @returns {String}
 	 */
-	function path2FolderName(filePath, fileName, keepTailSlash){
-		var tail = keepTailSlash ? 0: 1;
-		return filePath.substring(0, filePath.length - encodeURIComponent(fileName).length - tail);
+	function path2FolderName(filePath, keepTailSlash){
+		var pathSegs = filePath.split("/");
+		pathSegs.splice(pathSegs.length -1, 1);
+		return keepTailSlash ? pathSegs.join("/") + "/" : pathSegs.join("/");
 	}
 	
 	function _timeDifference(timeStamp) {
