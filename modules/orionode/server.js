@@ -34,6 +34,9 @@ var configFile = args.config || args.c || path.join(__dirname, 'orion.conf');
 
 var configParams = argslib.readConfigFileSync(configFile) || {};
 
+// Patches the fs module to use graceful-fs instead
+require('graceful-fs').gracefulify(fs)
+
 function startServer(cb) {
 	
 	var workspaceArg = args.workspace || args.w;
