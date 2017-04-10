@@ -9,8 +9,6 @@ existing desktop IDE concepts to the browser. See the [Orion wiki](http://wiki.e
 information about Orion.
 
 
-####*IMPORTANT: Orion Development happens at Eclipse.org, not GitHub.com.  Please Contribute using Eclipse.org tooling.*
-
 Contributing
 ------------
 
