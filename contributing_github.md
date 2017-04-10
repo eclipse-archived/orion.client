@@ -6,7 +6,7 @@ how you might contribute.
 
 **NOTE:** Orion is in the process of transitioning development from Eclipse.org to github.com.  As a result, information about the probject can be found in both places.
 
-#Project description
+#Project Description
 
 Orion's objective is to create a browser-based open tool integration platform which is focused on
 developing for the web, in the web. Tools are written in JavaScript and run in the browser. Great care has
