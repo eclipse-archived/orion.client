@@ -11,13 +11,9 @@ information about Orion.
 Contributing
 ------------
 
-Orion source code is available in an Eclipse Git repository, and there is also a mirror
-on GitHub. For complete details on getting the source and getting setup to develop Orion,
-see the [Orion wiki](http://wiki.eclipse.org/Orion/Getting_the_source).
+Orion source code is available in a [GitHub repository](https://github.com/eclipse/orion.client). For complete details on getting the source and getting setup to develop Orion, see the [Orion wiki](http://wiki.eclipse.org/Orion/Getting_the_source).
 
-Bug reports are welcome in [bugzilla](https://bugs.eclipse.org/bugs/enter_bug.cgi?product=Orion).
-
-Patches are welcome as pull requests.
+Bug reports and patches are welcome in [bugzilla](https://bugs.eclipse.org/bugs/enter_bug.cgi?product=Orion), you can also open pull requests directly against the [repository on GitHub](https://github.com/eclipse/orion.client).
 
 How to build Orion using Maven
 ------------------------------
