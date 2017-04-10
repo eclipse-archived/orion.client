@@ -162,9 +162,9 @@ try {
 				searchTerm = "\\b" + searchTerm + "\\b";
 			}
 			if (!searchOpts.searchTermCaseSensitive) {
-				searchTerm = new RegExp(searchTerm, "i");
+				searchTerm = new RegExp(searchTerm, "im");
 			} else {
-				searchTerm = new RegExp(searchTerm);
+				searchTerm = new RegExp(searchTerm, "m");
 			}
 		}
 		return searchTerm;
