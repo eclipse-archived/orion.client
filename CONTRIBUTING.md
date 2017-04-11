@@ -13,13 +13,12 @@ IDE experience in a browser tab.
 
 Developer resources
 --------------------
-####IMPORTANT: Orion Development happens at Eclipse.org, not GitHub.com.  Please Contribute using Eclipse.org tooling.
 
 Everything you would ever want to know about how to contribute to Orion can
 be [found on the contributing wiki](http://wiki.eclipse.org/Orion/Contributing_Code).
 
-Preferably, code contributions should be made using Gerrit. While we can work with pull requests on GitHub, 
-the code there acts solely as a mirror, and is not used for development.
+Preferably, code contributions should be made using a pull request against this repository. Contributions 
+can also be made by attaching a patch to the bug you want to work on.
 
 More information regarding source code management, builds, coding standards, and more.
 
@@ -34,7 +33,9 @@ Eclipse Foundation [Contributor License Agreement](https://www.eclipse.org/legal
    create an account with the Eclipse Foundation if you have not already done so.
 2. Click on "Contributor License Agreement", and complete the form.
 
-Be sure to use the same email address in your Eclipse account that you intend to use when you commit to Git.
+Be sure to use the same email address in your Eclipse account that you intend to use when you commit to Git. You
+also have to make sure that your GitHub ID is linked to your Eclipse account. More information on linking your GitHub ID
+can be [found here](https://wiki.eclipse.org/Social_Coding/Hosting_a_Project_at_GitHub#Moving_Your_Existing_Project_Repositories_to_GitHub).
 
 Contact
 --------
