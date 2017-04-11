@@ -96,7 +96,6 @@ function getPullRequest(req, res) {
 		cloneDir = gitRoot + "/clone" + fileDir;
 		remoteDir = gitRoot + "/remote" + fileDir;
 		return request(userAgentHeader, function (error, response, body) {
-				console.log(response.headers["x-ratelimit-remaining"])
 				if(isSsh && response.statusCode === 304){
 					bodyJson = JSON.parse(unmodifedPullrequestBody);
 					task.done({
