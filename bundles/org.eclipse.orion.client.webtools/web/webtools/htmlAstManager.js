@@ -59,7 +59,7 @@ define([
 			this.tagstack.push(node);
 		},
 		/** @callback */
-		onclosetag: function(tagname, range) {
+		onclosetag: function(tagname, range, isSelfClosing) {
 			var tag = this._getLastTag();
 			if (tag && tag.name === tagname) {
 				if (range) {
@@ -72,6 +72,10 @@ define([
 						tag.range[1] = tag.openrange[1] + tag.text.value.length;
 						tag.endrange = [tag.openrange[1], tag.openrange[1]];
 					}
+				}
+				// If the tag is self closing <span/>
+				if (isSelfClosing){
+					tag.selfClosing = true;
 				}
 				this.tagstack.pop();
 			}

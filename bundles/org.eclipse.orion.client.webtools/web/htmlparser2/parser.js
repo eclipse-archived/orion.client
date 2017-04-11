@@ -291,7 +291,7 @@ define([
 		//(cheaper check than in onclosetag)
 		if(this._stack[this._stack.length - 1] === name){
 			if(this._cbs.onclosetag){
-				this._cbs.onclosetag(name);
+				this._cbs.onclosetag(name, null, true);  // TODO Orion 15.0 Mark self closing tags
 			}
 			this._stack.pop();
 		}
