@@ -1,0 +1,67 @@
+<!doctype html>
+<html>
+    <head>
+		<meta name="copyright" content="Copyright (c) IBM Corporation and others 2010, 2014." >
+		<meta http-equiv="Content-Language" content="en-us">
+		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+		<title>Pluggable Editor Demo</title>
+	    <link rel="stylesheet" type="text/css" href="editorBuild/code_edit/built-codeEdit.css"/>
+		<style type="text/css">
+			.demoTitle{
+				border: none;
+				vertical-align: middle;
+				overflow: hidden;
+				text-align: left;
+				margin-left: 15%;
+				margin-right: 15%;
+				padding-bottom: 5px;
+				position: relative;
+			}
+			.demoBody{
+				border: 1px solid;
+				vertical-align: middle;
+				border-color: blue;
+				overflow: hidden;
+				text-align: left;
+				margin-left: 15%;
+				margin-right: 15%;
+				margin-bottom: 15px;
+				padding-bottom: 5px;
+				position: relative;
+				height: 450px;
+			}
+			.orionPage {
+			    background-color: white;
+			    width: 100%;
+			    height: 100%;
+			}
+		</style>
+		<script src="editorBuild/code_edit/built-codeEdit.js"></script>
+		<script>
+			/*globals orion */
+			window.onload=function(){
+				var codeEdit = new orion.codeEdit();
+				var contents = "CREATE TABLE STATS" + "\n"; 
+				contents += "(ID INTEGER REFERENCES STATION(ID),"  + "\n"; 
+				contents += "MONTH INTEGER CHECK (MONTH BETWEEN 1 AND 12),"  + "\n"; 
+				contents += "TEMP_F REAL CHECK (TEMP_F BETWEEN -80 AND 150),"  + "\n"; 
+				contents += "RAIN_I REAL CHECK (RAIN_I BETWEEN 0 AND 100),"  + "\n"; 
+				contents += "PRIMARY KEY (ID, MONTH));"  + "\n"; 
+				codeEdit.create({parent: "embeddedEditor", contentType: "application/sql", contents: contents}).then(function(editorViewer) {
+					document.getElementById("progressMessageDiv").textContent = "Plugins loaded!";
+					//You can call APIs from editorViewer.editor  for further actions.
+				});
+			};
+		</script>
+    </head>
+	<body id="orion-browser" spellcheck="false" class="orionPage">
+		<div class="demoTitle">
+			<p>This is a demo for the light-weight version of <b>Orion Code Edit</b> widget. This demo only consumes the <b>JSON tooling</b> of the widget. Copy and paste any JSON file contents here and see the validation and syntax highlighting</p> 
+		</div>
+		<div class="demoTitle">
+			<span id = "progressMessageDiv" style="color: green">Loading language tooling plugins...</span>
+		</div>
+		<div class="demoBody" id="embeddedEditor">
+		</div>
+	</body>
+</html>
