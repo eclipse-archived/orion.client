@@ -4,9 +4,9 @@ Thanks for your interest in this project.
 
 Project description
 --------------------
-Orion's objective is to create a browser-based open tool integration platform which is entirely focused on
-developing for the web, in the web. Tools are written in JavaScript and run in the browser. Great care has
-been taken to provide a web experience for development, rather than to recreate the traditional desktop
+Orion is an open-source development platform focused on creating applications for the web, in the web. 
+Tools are written in JavaScript and run in the browser, locally and in Electron. Great care has
+been taken to provide a world class web development experience, rather than to recreate the traditional desktop
 IDE experience in a browser tab.
 
 - [https://projects.eclipse.org/projects/ecd.orion](https://projects.eclipse.org/projects/ecd.orion)
