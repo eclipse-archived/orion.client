@@ -9,18 +9,14 @@
  *		 IBM Corporation - initial API and implementation
  *******************************************************************************/
 /*eslint-env node */
-var api = require('../api'), writeError = api.writeError;
-var git = require('nodegit');
 var clone = require('./clone');
-var path = require('path');
 var express = require('express');
-var util = require('./util');
 var request = require('request');
-var https = require('https');
 var bodyParser = require('body-parser');
 var url = require("url");
-var fs = require('fs');
 var tasks = require('../tasks');
+var etag;
+var unmodifedPullrequestBody;
 
 module.exports = {};
 
@@ -71,9 +67,14 @@ function getPullRequest(req, res) {
     
 	var task = new tasks.Task(res, false, true, 0, false);
 	if(gitUrl){
+		var isSsh = false;
+		if (gitUrl.indexOf("@") < gitUrl.indexOf(":")){
+			gitUrl = "ssh://" + gitUrl;
+			isSsh = true;
+		}
 		var parsedURL = url.parse(gitUrl);
 		var pathnames = parsedURL["pathname"].split("/");   
-		var username = pathnames[1];
+		var username = isSsh ? pathnames[1].substr(1) : pathnames[1];
 		var projectname = pathnames[2].replace(/\.git$/g, "");
 		var pullrequestUrl = "https://api.github.com/repos/" + username +"/" + projectname + "/pulls";
 		if(clientID && clientSecret){
@@ -84,6 +85,9 @@ function getPullRequest(req, res) {
 		url: pullrequestUrl,
 		headers: authHeader ? {'User-Agent': 'request',	'Authorization': authHeader} : {'User-Agent': 'request'}
 	};
+	if(etag && isSsh){
+		userAgentHeader.headers["If-None-Match"] = etag;
+	}
 	
 	var fileDir, cloneDir, remoteDir,bodyJson;
 	clone.getRepo(req)
@@ -92,8 +96,23 @@ function getPullRequest(req, res) {
 		cloneDir = gitRoot + "/clone" + fileDir;
 		remoteDir = gitRoot + "/remote" + fileDir;
 		return request(userAgentHeader, function (error, response, body) {
-				if (!error && response.statusCode === 200) {
+				console.log(response.headers["x-ratelimit-remaining"])
+				if(isSsh && response.statusCode === 304){
+					bodyJson = JSON.parse(unmodifedPullrequestBody);
+					task.done({
+						HttpCode: 200,
+						Code: 0,
+						DetailedMessage: "OK",
+						JsonData: pullRequestJSON(cloneDir,remoteDir,bodyJson),
+						Message: "OK",
+						Severity: "Ok"
+					});
+				}else if (!error && response.statusCode === 200) {
 					bodyJson = JSON.parse(body);
+					if(isSsh){
+						unmodifedPullrequestBody = body;
+						etag = response.headers["etag"];
+					}
 					task.done({
 						HttpCode: 200,
 						Code: 0,
@@ -126,6 +145,8 @@ function getPullRequest(req, res) {
 					});
 				}
 			});
+	}).catch(function(err){
+		clone.handleRemoteError(task, err, gitRoot + "/clone" + fileDir);
 	});
 	function toBase64 (str) {
 		return (new Buffer(str || '', 'utf8')).toString('base64');
