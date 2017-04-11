@@ -17,7 +17,7 @@ Bug reports and patches are welcome in [bugzilla](https://bugs.eclipse.org/bugs/
 
 How to build Orion using Maven
 ------------------------------
-
+  
 ### Install Maven:
 
 Install latest Maven 3.0 from http://maven.apache.org
