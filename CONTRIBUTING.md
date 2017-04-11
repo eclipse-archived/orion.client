@@ -4,12 +4,18 @@ Thanks for your interest in this project.
 
 Project description
 --------------------
-Orion is an open-source development platform focused on creating applications for the web, in the web. 
-Tools are written in JavaScript and run in the browser, locally and in Electron. Great care has
-been taken to provide a world class web development experience, rather than to recreate the traditional desktop
+
+Orion is an open-source development platform focused on creating applications for the web, in the web.
+
+The vision behind Orion is to move software development to the web by 
+enabling open tool integration through HTTP and REST, JSON, OAuth, OpenID, and others. 
+We exploit internet design principles throughout, allowing Orion to be easily run in the browser, locally and in Electron. 
+
+Great care has been taken to provide a world class web development experience, rather than to recreate the traditional desktop
 IDE experience in a browser tab.
 
-- [https://projects.eclipse.org/projects/ecd.orion](https://projects.eclipse.org/projects/ecd.orion)
+Please refer to our [project page](https://projects.eclipse.org/projects/ecd.orion) for plan and overall project information, or
+head over to the [wiki](http://wiki.eclipse.org/Orion) for even more information about Orion.
 
 Developer resources
 --------------------
