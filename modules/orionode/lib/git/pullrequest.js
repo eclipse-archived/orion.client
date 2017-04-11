@@ -15,6 +15,8 @@ var request = require('request');
 var bodyParser = require('body-parser');
 var url = require("url");
 var tasks = require('../tasks');
+var etag;
+var unmodifedPullrequestBody;
 
 module.exports = {};
 
@@ -83,6 +85,9 @@ function getPullRequest(req, res) {
 		url: pullrequestUrl,
 		headers: authHeader ? {'User-Agent': 'request',	'Authorization': authHeader} : {'User-Agent': 'request'}
 	};
+	if(etag && isSsh){
+		userAgentHeader.headers["If-None-Match"] = etag;
+	}
 	
 	var fileDir, cloneDir, remoteDir,bodyJson;
 	clone.getRepo(req)
@@ -91,8 +96,23 @@ function getPullRequest(req, res) {
 		cloneDir = gitRoot + "/clone" + fileDir;
 		remoteDir = gitRoot + "/remote" + fileDir;
 		return request(userAgentHeader, function (error, response, body) {
-				if (!error && response.statusCode === 200) {
+				console.log(response.headers["x-ratelimit-remaining"])
+				if(isSsh && response.statusCode === 304){
+					bodyJson = JSON.parse(unmodifedPullrequestBody);
+					task.done({
+						HttpCode: 200,
+						Code: 0,
+						DetailedMessage: "OK",
+						JsonData: pullRequestJSON(cloneDir,remoteDir,bodyJson),
+						Message: "OK",
+						Severity: "Ok"
+					});
+				}else if (!error && response.statusCode === 200) {
 					bodyJson = JSON.parse(body);
+					if(isSsh){
+						unmodifedPullrequestBody = body;
+						etag = response.headers["etag"];
+					}
 					task.done({
 						HttpCode: 200,
 						Code: 0,
