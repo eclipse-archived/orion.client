@@ -15,8 +15,6 @@ var request = require('request');
 var bodyParser = require('body-parser');
 var url = require("url");
 var tasks = require('../tasks');
-var etag;
-var unmodifedPullrequestBody;
 
 module.exports = {};
 
@@ -85,9 +83,6 @@ function getPullRequest(req, res) {
 		url: pullrequestUrl,
 		headers: authHeader ? {'User-Agent': 'request',	'Authorization': authHeader} : {'User-Agent': 'request'}
 	};
-	if(etag && isSsh){
-		userAgentHeader.headers["If-None-Match"] = etag;
-	}
 	
 	var fileDir, cloneDir, remoteDir,bodyJson;
 	clone.getRepo(req)
@@ -96,22 +91,8 @@ function getPullRequest(req, res) {
 		cloneDir = gitRoot + "/clone" + fileDir;
 		remoteDir = gitRoot + "/remote" + fileDir;
 		return request(userAgentHeader, function (error, response, body) {
-				if(isSsh && response.statusCode === 304){
-					bodyJson = JSON.parse(unmodifedPullrequestBody);
-					task.done({
-						HttpCode: 200,
-						Code: 0,
-						DetailedMessage: "OK",
-						JsonData: pullRequestJSON(cloneDir,remoteDir,bodyJson),
-						Message: "OK",
-						Severity: "Ok"
-					});
-				}else if (!error && response.statusCode === 200) {
+				if (!error && response.statusCode === 200) {
 					bodyJson = JSON.parse(body);
-					if(isSsh){
-						unmodifedPullrequestBody = body;
-						etag = response.headers["etag"];
-					}
 					task.done({
 						HttpCode: 200,
 						Code: 0,
@@ -133,7 +114,16 @@ function getPullRequest(req, res) {
 						Message: message,
 						Severity: "Error"
 					});
-				} else {
+				} else if (!error && response.statusCode === 403 && body.indexOf("API rate limit exceeded") !== -1) {
+					task.done({
+						HttpCode: 403,
+						Code: 0,
+						JsonData: {},
+						DetailedMessage: "There are some limitation to get pull requests list using SSH, please use HTTPS to clone the repo and have full experience of pull requests",
+						Message: "Unable to fetch pull request info.",
+						Severity: "Warning"
+					});
+				}else {
 					task.done({
 						HttpCode: 403,
 						Code: 0,
