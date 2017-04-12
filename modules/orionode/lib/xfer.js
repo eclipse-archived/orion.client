@@ -256,8 +256,7 @@ function getXfer(req, res) {
 function getXferFrom(req, res, filePath) {
 	var zip = archiver('zip');
 	zip.pipe(res);
-	var folderName = filePath.replace(/.zip$/, "");
-	filePath = fileUtil.safeFilePath(req.user.workspaceDir, folderName);
+	var folderName = req.params["0"].replace(/.zip$/, "");
 	write(zip, filePath, filePath)
 	.then(function() {
 		zip.finalize();

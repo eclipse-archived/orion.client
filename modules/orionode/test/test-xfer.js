@@ -24,7 +24,7 @@ var app = express()
 	req.user = { workspaceDir: WORKSPACE };
 	next();
 })
-.use(CONTEXT_PATH + '/xfer', require("../lib/xfer")({ fileRoot: CONTEXT_PATH + "/xfer" }));
+.use(CONTEXT_PATH + '/xfer', require("../lib/xfer").router({ fileRoot: CONTEXT_PATH + "/xfer" }));
 
 var request = supertest.bind(null, app);
 
