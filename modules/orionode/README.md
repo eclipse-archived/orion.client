@@ -25,6 +25,7 @@ and then running `cd modules/orionode && npm install`.
   pwd=[secretpassword]
   ```
   This prevents unauthorized access to your Orion server.
+
 3. Run `npm start orion` or `node [node_modules]/orion/server.js`.
 4. Go to **[http://localhost:8081](http://localhost:8081)** to use Orion. You will be prompted with a basic auth dialog; enter the password you chose earlier (leave the user name blank).
 
