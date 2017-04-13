@@ -95,6 +95,8 @@ define([
 		this.statusService = options.statusService;
 		this.editorCommands = options.editorCommands;
 		this.fileClient = options.fileService;
+		this.gitClient = options.gitClient;
+		this.sshClient = options.sshClient;
 		this.inputManager = options.inputManager;
 		this.preferences = options.preferences;
 		this.readonly = options.readonly;

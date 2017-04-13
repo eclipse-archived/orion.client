@@ -32,8 +32,10 @@ define([
 	'orion/regex',
 	'orion/PageUtil',
 	'orion/uiUtils',
-	'orion/util'
-], function(messages, i18nUtil, lib, DropDownMenu, Deferred, URITemplate, mCommands, mKeyBinding, mCommandRegistry, mExtensionCommands, mContentTypes, mSearchUtils, objects, mPageUtil, PageLinks, mAnnotations, regex, PageUtil, mUIUtils, util) {
+	'orion/util',
+	'orion/git/logic/gitPush',
+	'orion/git/logic/gitCommit'
+], function(messages, i18nUtil, lib, DropDownMenu, Deferred, URITemplate, mCommands, mKeyBinding, mCommandRegistry, mExtensionCommands, mContentTypes, mSearchUtils, objects, mPageUtil, PageLinks, mAnnotations, regex, PageUtil, mUIUtils, util, mGitPushLogic, mGitCommitLogic) {
 
 	var exports = {};
 
@@ -134,6 +136,7 @@ define([
 		this.serviceRegistry = options.serviceRegistry;
 		this.commandService = options.commandRegistry;
 		this.fileClient = options.fileClient;
+		this.gitClient = options.gitClient;
 		this.preferences = options.preferences;
 		this.inputManager = options.inputManager;
 		this.renderToolbars = options.renderToolbars;
@@ -172,6 +175,7 @@ define([
 			this._createGotoLineCommnand();
 			this._createFindCommnand();
 			this._createBlameCommand();
+			this._createCommitCommand();
 			this._createDiffCommand();
 			this._createShowTooltipCommand();
 			this._createUndoStackCommands();
@@ -238,7 +242,6 @@ define([
 		},
 		registerCommands: function() {
 			var commandRegistry = this.commandService;
-			
 			commandRegistry.registerCommandContribution("settingsActions", "orion.edit.settings", 1, null, false, new mKeyBinding.KeyBinding("s", true, true), null, this); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			commandRegistry.registerCommandContribution(this.editToolbarId || this.toolbarId, "orion.edit.undo", 400, this.editToolbarId ? "orion.menuBarEditGroup/orion.edit.undoGroup" : null, !this.editToolbarId, new mKeyBinding.KeyBinding('z', true), null, this); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-3$
 			commandRegistry.registerCommandContribution(this.editToolbarId || this.toolbarId, "orion.edit.redo", 401, this.editToolbarId ? "orion.menuBarEditGroup/orion.edit.undoGroup" : null, !this.editToolbarId, util.isMac ? new mKeyBinding.KeyBinding('z', true, true) : new mKeyBinding.KeyBinding('y', true), null, this); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-4$
@@ -251,8 +254,9 @@ define([
 			commandRegistry.registerCommandContribution(this.editToolbarId || this.pageNavId , "orion.edit.format", 2, this.editToolbarId ? "orion.menuBarEditGroup/orion.edit.formatGroup" : null, !this.editToolbarId, new mKeyBinding.KeyBinding('f', false, true, true), new mCommandRegistry.URLBinding("format", "format"), this); //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-5$
 			commandRegistry.registerCommandContribution(this.toolbarId, "orion.keyAssist", 0, "orion.menuBarToolsGroup", false, new mKeyBinding.KeyBinding(191, false, true, true)); //$NON-NLS-1$ //$NON-NLS-0$ //$NON-NLS-2$
 			commandRegistry.registerCommandContribution(this.toolbarId , "orion.edit.showTooltip", 1, "orion.menuBarToolsGroup", false, new mKeyBinding.KeyBinding(113), null, this);//$NON-NLS-1$ //$NON-NLS-2$ 
-			commandRegistry.registerCommandContribution(this.toolbarId , "orion.edit.blame", 2, "orion.menuBarToolsGroup", false, new mKeyBinding.KeyBinding('b', true, true), new mCommandRegistry.URLBinding("blame", "blame"), this); //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-5$
-			commandRegistry.registerCommandContribution(this.toolbarId , "orion.edit.diff", 3, "orion.menuBarToolsGroup", false, new mKeyBinding.KeyBinding('d', true, true), new mCommandRegistry.URLBinding("diff", "diff"), this); //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-5$
+			commandRegistry.registerCommandContribution(this.toolbarId , "orion.edit.commit", 2, "orion.menuBarToolsGroup", false, new mKeyBinding.KeyBinding('c', true, true), new mCommandRegistry.URLBinding("commit", "commit"), this); //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-5$
+			commandRegistry.registerCommandContribution(this.toolbarId , "orion.edit.blame", 3, "orion.menuBarToolsGroup", false, new mKeyBinding.KeyBinding('b', true, true), new mCommandRegistry.URLBinding("blame", "blame"), this); //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-5$
+			commandRegistry.registerCommandContribution(this.toolbarId , "orion.edit.diff", 4, "orion.menuBarToolsGroup", false, new mKeyBinding.KeyBinding('d', true, true), new mCommandRegistry.URLBinding("diff", "diff"), this); //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-5$
 
 			// 'Delimiters' cascade
 			var index = 0;
@@ -848,6 +852,87 @@ define([
 				}
 			});
 			this.commandService.addCommand(findCommand);
+		},
+
+		_createCommitCommand: function(){
+			var that = this;
+			var commitParams = new mCommandRegistry.ParametersDescription(
+				[
+					new mCommandRegistry.CommandParameter('message', 'text', messages.commitMessage),
+					new mCommandRegistry.CommandParameter('authorName', 'text', messages.commitAuthorName),
+					new mCommandRegistry.CommandParameter('authorEmail', 'text', messages.commitAuthorEmail),
+					new mCommandRegistry.CommandParameter('committerName', 'text', messages.commitCommitterName),
+					new mCommandRegistry.CommandParameter('committerEmail', 'text', messages.commitCommitterEmail)
+				], //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+				{hasOptionalParameters: false}
+			);
+			
+			var pushOptions = {
+				serviceRegistry : that.serviceRegistry,
+				commandService : that.commandService,
+				tags : true
+			};
+			var commitOptions = {
+				serviceRegistry : that.serviceRegistry,
+				commandService : that.commandService,
+			};
+			var pushLogic = mGitPushLogic(pushOptions);
+			var commitLogic = mGitCommitLogic(commitOptions);
+			var displayErrorOnStatus = commitLogic.displayErrorOnStatus;
+			var commitCallback = commitLogic.perform;
+			var pushCallback = pushLogic.perform;
+
+			var commitCommand = new mCommands.Command({
+				name: messages.Commit,
+				tooltip: messages.commitTooltip,
+				parameters: commitParams,
+				id: "orion.edit.commit", //$NON-NLS-0$
+				visibleWhen: /** @callback */ function(items, data) {
+					var editor = data.handler.editor || that.editor;
+					var blamer = data.handler.blamer || that.blamer;
+					return editor && editor.installed && blamer;
+				},
+				callback: function(data) {
+					var editor = data.handler.editor || that.editor;
+					var blamer = data.handler.blamer || that.blamer;
+					var promise = that.gitClient.getGitClone(blamer.inputManager.getFileMetadata().Git.CloneLocation);
+					var userData = {
+						Message: data.parameters.valueFor("message"),
+						Amend: false,
+						AuthorName: data.parameters.valueFor("authorName"),
+						AuthorEmail: data.parameters.valueFor("authorMessage"),
+						CommitterName: data.parameters.valueFor("committerName"),
+						CommitterEmail: data.parameters.valueFor("committerEmail"),
+						persist: false
+					};
+					// Allows this command to be push only as well
+					if (userData.Message){
+						var result;
+						// Stage and commit
+						promise = promise.then(function(res){
+							result = res;
+							return that.serviceRegistry.getService("orion.git.provider").stage(blamer.inputManager.getFileMetadata().Git.IndexLocation);
+						}).then(function(){
+							data.handler.status = {
+								Clone: result.Children[0]
+							};
+							data.userData = userData;
+							return commitCallback(data);
+						}).then(function(){
+							return Promise.resolve(result);
+						});
+					}
+					promise = promise.then(function(res){
+						return that.gitClient.getGitBranch(res.Children[0].BranchLocation + "?commits=0&page=1&pageSize=1");
+					}).then(function(res){
+						data.items.LocalBranch = res.Children[0];
+						data.items.Remote = res.Children[0].RemoteLocation[0].Children[0];
+						data.errorData = {};
+						return pushCallback(data);
+					});
+				}
+			});
+			this.commandService.addCommand(commitCommand);
 		},
 
 		_createBlameCommand: function(){

@@ -54,14 +54,15 @@ define([
 	'orion/customGlobalCommands',
 	'orion/generalPreferences',
 	'orion/breadcrumbs',
-	'orion/keyBinding'
+	'orion/keyBinding',
+	'orion/git/gitClient',
+	'orion/ssh/sshTools'
 ], function(
 	messages, Sidebar, mInputManager, mCommands, mGlobalCommands,
 	mTextModelFactory, mUndoStack,
 	mFolderView, mEditorView, mPluginEditorView , mMarkdownView, mMarkdownEditor,
 	mCommandRegistry, mContentTypes, mFileClient, mFileCommands, mEditorCommands, mSelection, mStatus, mProgress, mOperationsClient, mOutliner, mDialogs, mExtensionCommands, ProjectCommands, mSearchClient,
-	EventTarget, URITemplate, i18nUtil, PageUtil, util, objects, lib, Deferred, mProjectClient, mSplitter, mTooltip, bidiUtils, mCustomGlobalCommands, mGeneralPrefs, mBreadcrumbs, mKeyBinding
-) {
+	EventTarget, URITemplate, i18nUtil, PageUtil, util, objects, lib, Deferred, mProjectClient, mSplitter, mTooltip, bidiUtils, mCustomGlobalCommands, mGeneralPrefs, mBreadcrumbs, mKeyBinding, mGitClient, mSshTools) {
 
 var exports = {};
 
@@ -1178,13 +1179,16 @@ objects.mixin(EditorSetup.prototype, {
 		// Editor needs additional services
 		this.outlineService = new mOutliner.OutlineService({serviceRegistry: serviceRegistry, preferences: this.preferences});
 		this.contentTypeRegistry = new mContentTypes.ContentTypeRegistry(serviceRegistry);
+		this.gitClient = new mGitClient.GitService(serviceRegistry);
 		this.fileClient = new mFileClient.FileClient(serviceRegistry);
+		this.sshClient = new mSshTools.SshService(serviceRegistry);
 		this.projectClient = new mProjectClient.ProjectClient(serviceRegistry, this.fileClient);
 		this.searcher = new mSearchClient.Searcher({serviceRegistry: serviceRegistry, commandService: this.commandRegistry, fileService: this.fileClient});
 		this.editorCommands = new mEditorCommands.EditorCommandFactory({
 			serviceRegistry: serviceRegistry,
 			commandRegistry: this.commandRegistry,
 			fileClient: this.fileClient,
+			gitClient: this.gitClient,
 			preferences: this.preferences,
 			renderToolbars: this.renderToolbars.bind(this),
 			searcher: this.searcher,

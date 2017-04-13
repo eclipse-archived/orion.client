@@ -12,6 +12,13 @@
  ******************************************************************************/
 /*eslint-env browser, amd*/
 define({
+	"Commit": "Commit and Push",
+	"commitTooltip":"Create a commit and push it to remote",
+	"commitMessage": "Commit Message",
+	"commitAuthorName": "Author Name",
+	"commitAuthorEmail": "Author Email",
+	"commitCommitterName": "Committer Name",
+	"commitCommitterEmail": "Committer Email",
 	"Editor": "Editor",
 	"switchEditor": "Switch Editor",
 	"Fetching": "Fetching: ${0}",
