@@ -630,6 +630,10 @@ objects.mixin(TabWidget.prototype, {
 	getDraggedNode: function() {
 		return this.beingDragged;
 	},
+	transientToPermenant : function(){
+		this.transientTab.editorTabNode.classList.remove("transient");
+		this.transientTab = null;
+	},
 	addTab: function(metadata, href) {
 		var fileList = this.fileList;
 		var fileToAdd = null;
@@ -656,17 +660,20 @@ objects.mixin(TabWidget.prototype, {
 					break;
 				}
 			}
+//		} else if (this.transientTab){
 		} else {
 			// Store file information
 			fileToAdd = {
 				callback: this.widgetClick,
-				checked:true, 
+				checked:true,
 				href: href,
 				metadata: metadata,
 				name: metadata.Name,
 			};
 			// Create and store a new editorTab
-			editorTab = this.editorTabs[metadata.Location] = this.createTab_(metadata, href);
+			editorTab = this.editorTabs[metadata.Location] = this.transientTab = this.createTab_(metadata, href);
+			editorTab.editorTabNode.classList.add("transient");
+			this.transientTab.location = metadata.Location;
 		}
 
 		// Add the file to our dropdown menu
@@ -913,6 +920,14 @@ objects.mixin(EditorViewer.prototype, {
 			this.updateDirtyIndicator();
 			evt.editor = this.editor;
 			this.pool.metadata = metadata;
+			this.pool.model.addEventListener("postChanged", function(evt){
+				if(this.pool.undoStack._unsavedChanges && this.pool.undoStack._unsavedChanges.length > 0){
+					if(this.tabWidget.transientTab.location ===this.pool.metadata.Location){
+						console.log("make transient tab Permenant")
+						this.tabWidget.transientToPermenant();
+					}
+				}
+			}.bind(this));
 			if (this.shown) {
 				var href = window.location.href;
 				this.activateContext.setActiveEditorViewer(this);
