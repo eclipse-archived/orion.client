@@ -6,8 +6,9 @@ define([
 	'orion/objects',
 	'orion/widgets/input/SettingsCheckbox',
 	'orion/widgets/input/SettingsTextfield',
-	'orion/widgets/settings/Subsection', 
-], function(messages, mSection, lib, objects, SettingsCheckbox, SettingsTextfield, Subsection) {
+	'orion/widgets/settings/Subsection',
+	'orion/util'
+], function(messages, mSection, lib, objects, SettingsCheckbox, SettingsTextfield, Subsection, util) {
 	function GeneralSettings(options, node) {
 		objects.mixin(this, options);
 		this.node = node;
@@ -21,27 +22,21 @@ define([
 
 			createSections: function(){
 				/* - desktop selection policy fields ----------------------------------------------------- */
-				this.generalFields = [
-					new SettingsCheckbox( {fieldlabel: messages["desktopSelectionPolicy"],
-						fieldTitle: messages["desktopSelectionPolicyTooltip"],
-						postChange: this.setPreferences.bind(this)
-					}),
-					new SettingsTextfield({
-						fieldlabel: messages["filteredResources"],
-						fieldTitle: messages["filteredResourcesTooltip"],
-						postChange: this.setPreferences.bind(this)
-					}),
-					new SettingsCheckbox({
-						fieldlabel: messages["enableEditorTabs"],
-						fieldTitle: messages["enableEditorTabsTooltip"],
-						postChange: this.setPreferences.bind(this)
-					}),
-					new SettingsTextfield({
-						fieldlabel: messages["maximumEditorTabs"],
-						fieldTitle: messages["maximumEditorTabsTooltip"],
-						postChange: this.setPreferences.bind(this)
-					})
-				];
+				this.desktopSelectionPolicyCheckbox = new SettingsCheckbox( {fieldlabel: messages["desktopSelectionPolicy"],
+					fieldTitle: messages["desktopSelectionPolicyTooltip"],
+					postChange: this.setPreferences.bind(this)
+				});
+				this.filteredResourcesTextfield = new SettingsTextfield({
+					fieldlabel: messages["filteredResources"],
+					fieldTitle: messages["filteredResourcesTooltip"],
+					postChange: this.setPreferences.bind(this)
+				});
+				this.maximumEditorTabsTextfield = new SettingsTextfield({
+					fieldlabel: messages["maximumEditorTabs"],
+					fieldTitle: messages["maximumEditorTabsTooltip"],
+					postChange: this.setPreferences.bind(this)
+				});
+				
 
 				new mSection.Section(this.node, {
 					id: "fileNavigation", //$NON-NLS-0$
@@ -56,25 +51,19 @@ define([
 				var fileSubsection = new Subsection({
 					sectionName: messages["Files"],
 					parentNode: settingsContentElement,
-					children: [this.generalFields[0], this.generalFields[1]]
+					children: util.isElectron ? [this.filteredResourcesTextfield, this.maximumEditorTabsTextfield] 
+					: [this.desktopSelectionPolicyCheckbox, this.filteredResourcesTextfield, this.maximumEditorTabsTextfield]
 				});
 				fileSubsection.show();
-				
-				var editorTabs = new Subsection({
-					sectionName: messages["EditorTabs"],
-					parentNode: settingsContentElement,
-					children: [this.generalFields[2], this.generalFields[3]]
-				});
-				editorTabs.show();
 			},
 
 			setPreferences: function() {
 				// Return the promise for test purposes.
 				return this.preferences.getPrefs().then(function (generalPrefs) {
-					generalPrefs.desktopSelectionPolicy = this.generalFields[0].isChecked();
-					generalPrefs.filteredResources = this.generalFields[1].getValue();
-					generalPrefs.enableEditorTabs = this.generalFields[2].isChecked();
-					var maxTabs = parseInt(this.generalFields[3].getValue(), 10);
+					generalPrefs.desktopSelectionPolicy = this.desktopSelectionPolicyCheckbox.isChecked();
+					generalPrefs.filteredResources = this.filteredResourcesTextfield.getValue();
+					generalPrefs.enableEditorTabs = this.desktopSelectionPolicyCheckbox.isChecked();
+					var maxTabs = parseInt(this.maximumEditorTabsTextfield.getValue(), 10);
 					maxTabs = isNaN(maxTabs) ? 0 : maxTabs;
 					generalPrefs.maximumEditorTabs = maxTabs;
 					this.preferences.setPrefs(generalPrefs);
@@ -87,24 +76,22 @@ define([
 				}
 				this.createElements();
 				this.preferences.getPrefs().then(function (generalPrefs) {
-					this.generalFields[0].setSelection(generalPrefs.desktopSelectionPolicy);
-					this.generalFields[0].show();
+					if(!util.isElectron){
+						this.desktopSelectionPolicyCheckbox.setSelection(generalPrefs.desktopSelectionPolicy);
+						this.desktopSelectionPolicyCheckbox.show();
+					}
 
 					//filtered resources
 					if(typeof generalPrefs.filteredResources !== 'string') {
-						this.generalFields[1].setValue(".git, .DS_Store"); //default
+						this.filteredResourcesTextfield.setValue(".git, .DS_Store"); //default
 					} else {
-						this.generalFields[1].setValue(generalPrefs.filteredResources);
+						this.filteredResourcesTextfield.setValue(generalPrefs.filteredResources);
 					}
-					this.generalFields[1].show();
-					
-					// Enable editor tabs.
-					this.generalFields[2].setSelection(generalPrefs.enableEditorTabs);
-					this.generalFields[2].show();
+					this.filteredResourcesTextfield.show();
 					
 					// Maximum editor tabs.
-					this.generalFields[3].setValue(generalPrefs.maximumEditorTabs);
-					this.generalFields[3].show();
+					this.maximumEditorTabsTextfield.setValue(generalPrefs.maximumEditorTabs);
+					this.maximumEditorTabsTextfield.show();
 
 					if (callback) {
 						callback();
