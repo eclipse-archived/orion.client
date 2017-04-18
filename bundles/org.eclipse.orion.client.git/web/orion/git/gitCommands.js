@@ -33,11 +33,12 @@ define([
 	'orion/git/logic/gitCommit',
 	'orion/objects',
 	'orion/bidiUtils',
+	'orion/util',
 	'orion/URL-shim'
 ], function(
 	messages, require, EventTarget, Deferred, i18nUtil, lib, mCommands, mCommandRegistry, mGitUtil, GitPreferenceStorage,
 	GitConfigPreference, mCloneGitRepository, mApplyPatch, URITemplate, mGitCommonLogic, mGitPushLogic, 
-	mGitStashLogic, mGitCommitLogic, objects, bidiUtils) {
+	mGitStashLogic, mGitCommitLogic, objects, bidiUtils, util) {
 
 /**
  * @namespace The global container for eclipse APIs.
@@ -500,6 +501,7 @@ var exports = {};
 			hrefCallback: function(data) {
 				return require.toUrl(editTemplate.expand({resource: data.items.ContentLocation || data.items.location}));
 			},
+			hrefTarget : util.isElectron ? "_blank" : "_self",
 			visibleWhen: function(item) {
 				switch (item.type) {
 				case "Modified": //$NON-NLS-0$

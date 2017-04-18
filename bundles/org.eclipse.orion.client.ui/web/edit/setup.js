@@ -429,7 +429,7 @@ objects.mixin(TabWidget.prototype, {
 	setTabStorage: function() {
 		var mappedFiles = this.fileList.map(function(f) {
 			if (!f.metadata.Directory) {
-				return {metadata: f.metadata, href: f.href};
+				return {metadata: f.metadata, href: f.href, isTransient: f.isTransient};
 			}
 		});
 		sessionStorage["editorTabs_" + this.id] = JSON.stringify(mappedFiles);
@@ -440,7 +440,7 @@ objects.mixin(TabWidget.prototype, {
 				var cachedTabs = JSON.parse(sessionStorage["editorTabs_" + this.id]);
 				cachedTabs.reverse().forEach(function(cachedTab) {
 					if (cachedTab) {
-						this.addTab(cachedTab.metadata, cachedTab.href);
+						this.addTab(cachedTab.metadata, cachedTab.href, true, cachedTab.isTransient);
 					}
 				}.bind(this));
 			} catch (e) {
@@ -669,7 +669,7 @@ objects.mixin(TabWidget.prototype, {
 		
 		tab.breadcrumb = new mBreadcrumbs.BreadCrumbs(breadcrumbOptions);
 	},
-	addTab: function(metadata, href) {
+	addTab: function(metadata, href, isRestoreTabsFromStorage, isTransient) {
 		var fileList = this.fileList;
 		var fileToAdd = null;
 		var curEditorTabNode = null;
@@ -696,7 +696,7 @@ objects.mixin(TabWidget.prototype, {
 			}
 			// Add the file to our dropdown menu
 			this.fileList.unshift(fileToAdd);
-		} else if (this.transientTab){
+		} else if (!isRestoreTabsFromStorage && this.transientTab){
 			this.transientTab.fileNameNode.textContent = metadata.Name;
 			fileToAdd = {
 				callback: this.widgetClick,
@@ -731,12 +731,15 @@ objects.mixin(TabWidget.prototype, {
 				href: href,
 				metadata: metadata,
 				name: metadata.Name,
-				isTransient: true
+				isTransient: isRestoreTabsFromStorage ? isTransient : true
 			};
 			// Create and store a new editorTab
-			editorTab = this.editorTabs[metadata.Location] = this.transientTab = this.createTab_(metadata, href);
-			editorTab.editorTabNode.classList.add("transient");
-			this.transientTab.location = metadata.Location;
+			editorTab = this.editorTabs[metadata.Location] = this.createTab_(metadata, href);
+			if(!isRestoreTabsFromStorage || (isRestoreTabsFromStorage && isTransient)){
+				editorTab.editorTabNode.classList.add("transient");
+				this.transientTab = editorTab;
+				this.transientTab.location = metadata.Location;
+			}
 			// Add the file to our dropdown menu
 			this.fileList.unshift(fileToAdd);
 		}
