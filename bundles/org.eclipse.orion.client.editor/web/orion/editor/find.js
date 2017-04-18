@@ -192,6 +192,7 @@ define("orion/editor/find", [ //$NON-NLS-0$
 		this._editor = editor;
 		this._undoStack = undoStack;
 		this._showAll = true;
+		this._selectedLines = false;
 		this._visible = false;
 		this._caseInsensitive = true;
 		this._wrap = true;
@@ -209,6 +210,7 @@ define("orion/editor/find", [ //$NON-NLS-0$
 		this._listeners = {
 			onEditorFocus: function(e) {
 				that._removeCurrentAnnotation(e);
+				that.setOptions({selectedLines: false});
 			}
 		};
 		this.setOptions(options);
@@ -241,6 +243,15 @@ define("orion/editor/find", [ //$NON-NLS-0$
 			}.bind(this));
 		},
 		getStartOffset: function() {
+			if(this.isRangeSearch()) {
+				var where = this._editor.getCaretOffset();
+				if (this._reverse) {
+					where = this._editor.getSelection().start -1;
+				}
+				if(where >= this._start && where <= this._end) {
+					return where;
+				}
+			}
 			if (this._start !== undefined) {
 				return this._start;
 			}
@@ -285,6 +296,9 @@ define("orion/editor/find", [ //$NON-NLS-0$
 				}
 			}
 			this._removeAllAnnotations();
+			if(this._selectedLines) {
+				this.setOptions({selectedLines: false});
+			}
 			var textView = this._editor.getTextView();
 			if (textView) {
 				textView.removeEventListener("Focus", this._listeners.onEditorFocus); //$NON-NLS-0$
@@ -334,6 +348,8 @@ define("orion/editor/find", [ //$NON-NLS-0$
 				Deferred.when(this._editor.getModel().find({
 					string: string,
 					start: start,
+					rangeStart: this._start,
+					rangeEnd: this._end,
 					reverse: false,
 					wrap: this._wrap,
 					regex: this._regex,
@@ -420,6 +436,15 @@ define("orion/editor/find", [ //$NON-NLS-0$
 						}
 					}
 				}
+				if ((options.selectedLines === true || options.selectedLines === false) && this._selectedLinesl !== options.selectedLines) {
+					this._selectedLines = options.selectedLines;
+					if (this._selectedLines) {
+						this.annotateSearchRange();
+					} else {
+						this.annotateSearchRange(true);
+					}
+					this.postSelectedLines();
+				}
 				if (options.caseInsensitive === true || options.caseInsensitive === false) {
 					this._caseInsensitive = options.caseInsensitive;
 				}
@@ -489,11 +514,53 @@ define("orion/editor/find", [ //$NON-NLS-0$
 				this._undoStack.endCompoundChange();
 			}
 		},
+		isRangeSearch: function() {
+			return 	this._start !== null && this._start !== undefined && this._end !== null && this._end !== undefined;
+		},
+		_updateSearchRange: function() {
+			if(this._selectedLineModel) {
+				this._start = this._selectedLineModel.start;
+				this._end = this._selectedLineModel.end;
+			}
+		},
+		annotateSearchRange: function(remove) {
+			var type = mAnnotations.AnnotationType.ANNOTATION_SEARCH_RANGE;
+			var annotationModel = this._editor.getAnnotationModel();
+			if (annotationModel) {
+				annotationModel.removeAnnotations(type);
+				this.setOptions({start: undefined, end: undefined});
+				this._selectedLines = false;
+				this._selectedLineModel = null;
+				if(remove) {
+					return;
+				}
+				var selection = this._editor.getSelection();
+				var textModel = this._editor.getModel();
+				var startL = 0;
+				var endL = 0;
+				if(textModel && selection.start !== selection.end) {
+					startL = textModel.getLineAtOffset(selection.start);
+					endL = textModel.getLineAtOffset(selection.end - 1);
+				}
+				if(endL > startL) {
+					this._selectedLines = true;
+	 		 		var rangeStart = textModel.getLineStart(startL);
+	 		 		var rangeEnd = textModel.getLineEnd(endL);
+					this._editor.setSelection(rangeStart, rangeStart, true);
+					this.setOptions({start: rangeStart, end: rangeEnd});
+					this._selectedLineModel = mAnnotations.AnnotationType.createAnnotation(type, rangeStart, rangeEnd);
+	 		 		annotationModel.addAnnotation(this._selectedLineModel);
+				}
+			}
+		},
+		postSelectedLines: function(/*selectedLines*/) {
+		},
 		_findFromModel: function(string, startOffset, noWrap) {
 			return this._editor.getModel().find({
 				string: string,
 				start: startOffset,
-				end: this._end,
+				rangeStart: this._start,
+				rangeEnd: this._end,
 				reverse: this._reverse,
 				wrap: noWrap ? false: this._wrap,
 				regex: this._regex,
@@ -597,6 +664,7 @@ define("orion/editor/find", [ //$NON-NLS-0$
 				newStr = editor.getText(start, end).replace(new RegExp(searchStr, this._caseInsensitive ? "i" : ""), newStr); //$NON-NLS-0$
 			}
 			editor.setText(newStr, start, end);
+			this._updateSearchRange();
 			editor.setSelection(start, start + newStr.length, true);
 		},
 		_markAllOccurrences: function() {
@@ -617,6 +685,9 @@ define("orion/editor/find", [ //$NON-NLS-0$
 				var string = this.getFindString();
 				Deferred.when(this._editor.getModel().find({
 					string: string,
+					start: this._start,
+					rangeStart: this._start,
+					rangeEnd: this._end,
 					regex: this._regex,
 					wholeWord: this._wholeWord,
 					caseInsensitive: this._caseInsensitive

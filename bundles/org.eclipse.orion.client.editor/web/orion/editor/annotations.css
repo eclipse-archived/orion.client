@@ -13,6 +13,7 @@
 .annotation.matchingBracket, 
 .annotation.currentLine,
 .annotation.matchingSearch,
+.annotation.searchRange,
 .annotation.currentSearch,
 .annotation.readOccurrence,
 .annotation.writeOccurrence,
@@ -307,3 +308,6 @@
 	background-color: #EAF2FE;
 }
 
+.annotationLine.searchRange {
+	background-color: #d3d3d3;
+}
