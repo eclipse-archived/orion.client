@@ -10,7 +10,7 @@
  ******************************************************************************/
 /*eslint-env browser, amd*/
 /*global URL*/
-define(['i18n!orion/nls/messages', 'orion/webui/littlelib', 'orion/PageUtil', 'orion/webui/tooltip', 'orion/URL-shim'], function(messages, lib, PageUtil, mTooltip) {
+define(['i18n!orion/nls/messages', 'orion/webui/littlelib', 'orion/PageUtil', 'orion/webui/tooltip', 'orion/util', 'orion/URL-shim'], function(messages, lib, PageUtil, mTooltip, util) {
 	var LOCAL_STORAGE_NAME = "sideMenuNavigation";
 	var OPEN_STATE = "open";
 	var CLOSED_STATE = "closed";
@@ -330,6 +330,9 @@ define(['i18n!orion/nls/messages', 'orion/webui/littlelib', 'orion/PageUtil', 'o
 					});
 					var bestLink = links.shift();
 					anchor.href = bestLink.href;
+					if(util.isElectron){
+						anchor.target = "_blank";
+					}
 				}
 			}, this);
 			this._show();
