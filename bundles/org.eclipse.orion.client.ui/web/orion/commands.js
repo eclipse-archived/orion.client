@@ -371,6 +371,9 @@ define([
 			} else {  // no href
 				element.href = "#"; //$NON-NLS-0$
 			}
+			if(command.hrefTarget){
+				element.target = command.hrefTarget;
+			}
 		} else {
 			if (command.type === "switch") { //$NON-NLS-0$
 				element = clickTarget = document.createElement("div"); //$NON-NLS-0$
@@ -694,6 +697,7 @@ define([
 			this.callback = options.callback; // optional callback that should be called when command is activated (clicked)
 			this.preCallback = options.preCallback; // optional callback that should be called when command is activated (clicked)
 			this.hrefCallback = options.hrefCallback; // optional callback that returns an href for a command link
+			this.hrefTarget = options.hrefTarget; // optional href target determinds if a new tab should be opened
 			this.choiceCallback = options.choiceCallback; // optional callback indicating that the command will supply secondary choices.  
 														// A choice is an object with a name, callback, and optional image
 			this.positioningNode = options.positioningNode; // optional positioning node choice command.
