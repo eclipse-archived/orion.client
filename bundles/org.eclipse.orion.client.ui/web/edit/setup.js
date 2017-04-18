@@ -638,6 +638,37 @@ objects.mixin(TabWidget.prototype, {
 		this.transientTab.editorTabNode.classList.remove("transient");
 		this.transientTab = null;
 	},
+	createNewBreadCrumb: function(tab, metadata){
+		var localBreadcrumbNode = document.createElement("div");
+		var tipContainer = tab.fileNodeToolTip.contentContainer();
+		tipContainer.appendChild(localBreadcrumbNode);
+		var makeHref = function(segment, folderLocation, folder) {
+			var resource = folder ? folder.Location : this.fileClient.fileServiceRootURL(folderLocation);
+			segment.href = uriTemplate.expand({resource: resource});
+			if (folder) {
+				if (metadata && metadata.Location === folder.Location) {
+					segment.addEventListener("click", function() { //$NON-NLS-0$
+						if (this.sidebarNavInputManager){
+							this.sidebarNavInputManager.reveal(folder);
+						}
+					}.bind(this));
+				}
+			}
+		}.bind(this);
+		
+		var breadcrumbOptions = {
+			container: localBreadcrumbNode,
+			resource: metadata,
+			workspaceRootSegmentName: this.fileClient.fileServiceName(metadata.Location),
+			workspaceRootURL: this.fileClient.fileServiceRootURL(metadata.Location),
+			makeFinalHref: true,
+			makeHref: makeHref,
+			// This id should be unique regardless of editor views open.
+			id: "breadcrumb" + metadata.Location + this.breadcrumbUniquifier
+		};
+		
+		tab.breadcrumb = new mBreadcrumbs.BreadCrumbs(breadcrumbOptions);
+	},
 	addTab: function(metadata, href) {
 		var fileList = this.fileList;
 		var fileToAdd = null;
@@ -686,8 +717,7 @@ objects.mixin(TabWidget.prototype, {
 					transientTab.href = "#"+ metadata.Location;
 					transientTab.location = metadata.Location
 					transientTab.breadcrumb.destroy();
-					transientTab.fileNodeToolTip.destroy();
-//					this.createNewBreadCrumb(transientTab);
+					this.createNewBreadCrumb(transientTab, metadata);
 					// Remove old breadcrum and add new, change the propertis of this editorTabs object, so that callbacks use new value.
 					editorTab  = this.editorTabs[metadata.Location] = transientTab;
 					break;
