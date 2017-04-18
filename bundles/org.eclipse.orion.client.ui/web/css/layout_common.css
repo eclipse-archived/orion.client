@@ -388,7 +388,7 @@ hard-coded numbers elsewhere.
 	border-top: 1px solid black;
 	border-right: 1px solid black;
 	display: flex;
-	flex: 0 1 160px;
+	flex: 0 1 auto;
     overflow-x: hidden;
 }
 

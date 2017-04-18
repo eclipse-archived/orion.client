@@ -635,7 +635,7 @@ objects.mixin(TabWidget.prototype, {
 		this.fileList.forEach(function(file){
 			file.isTransient = false;
 		})
-		this.transientTab.editorTabNode.classList.remove("transient");
+		this.transientTab && this.transientTab.editorTabNode.classList.remove("transient");
 		this.transientTab = null;
 	},
 	createNewBreadCrumb: function(tab, metadata){
@@ -933,6 +933,9 @@ objects.mixin(EditorViewer.prototype, {
 
 		this.tabWidget.addEventListener("TabClosed", function(evt) {
 			this.modelPool.release(evt.resource, this.id);
+			if(this.tabWidget.transientTab && evt.resource === this.tabWidget.transientTab.location){
+				 this.tabWidget.transientTab = null;
+			}
 		}.bind(this));
 
 		this.tabWidget.addEventListener("EditorTabTransfer", function(evt) {
@@ -1060,7 +1063,7 @@ objects.mixin(EditorViewer.prototype, {
 				evt.moved.forEach(function(item) {
 					var sourceLocation = item.source;
 					var metadata = that.tabWidget.getMetadataByLocation_(sourceLocation) || selectedMetadata;
-					if (selectedMetadata.Location.indexOf(sourceLocation) === 0) {
+					if (selectedMetadata && selectedMetadata.Location.indexOf(sourceLocation) === 0) {
 						inputManager.addEventListener("InputChanged", this.loadComplete = function() {
 							inputManager.removeEventListener("InputChanged", this.loadComplete);
 							that.tabWidget.closeTab(metadata, false);
@@ -1389,6 +1392,9 @@ objects.mixin(EditorSetup.prototype, {
 		this.editorCommands.setSideBar(sidebar);
 		this.sidebarNavInputManager.addEventListener("rootChanged", function(evt) { //$NON-NLS-0$
 			this.lastRoot = evt.root;
+		}.bind(this));
+		this.sidebarNavInputManager.addEventListener("fileDoubleClicked", function(evt) { //$NON-NLS-0$
+			this.editorViewers[0].tabWidget.transientToPermenant();
 		}.bind(this));
 		this.sidebarNavInputManager.addEventListener("filesystemChanged", function(evt) { //$NON-NLS-0$
 			this.fileClient.loadWorkspaces(evt.newInput).then(function(workspaces) {
