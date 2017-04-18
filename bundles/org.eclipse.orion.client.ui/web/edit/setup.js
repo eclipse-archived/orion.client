@@ -504,6 +504,7 @@ objects.mixin(TabWidget.prototype, {
 		}
 	},
 	createTab_ : function(metadata, href) {
+		var that = this;
 		var editorTab = document.createElement("div");
 		editorTab.className = "editorTab";
 		if (!this.enableEditorTabs) {
@@ -513,7 +514,6 @@ objects.mixin(TabWidget.prototype, {
 		editorTab.setAttribute("role", "tab");
 		editorTab.setAttribute("aria-controls", "editorViewerContent_Panel" + this.id);
 
-		
 		this.editorTabContainer.appendChild(editorTab);
 		
 		var dirtyIndicator = document.createElement("span");
@@ -535,13 +535,15 @@ objects.mixin(TabWidget.prototype, {
 		closeButton.className = "editorTabCloseButton";
 		// Unicode multiplication sign
 		closeButton.textContent = "\u2715";
+		closeButton.metadata = metadata;
 		closeButton.addEventListener("click", function(e) {
 			e.stopPropagation();
 			var isDirty = dirtyIndicator.style.display !== "none";
-			this.closeTab(metadata, isDirty);
-		}.bind(this));
-
+			that.closeTab(this.metadata, isDirty);
+		});
 		editorTab.appendChild(closeButton);
+		editorTab.metadata = metadata;
+		editorTab.href = href;
 		
 		var fileNodeTooltip = new mTooltip.Tooltip({
 			node: curFileNode,
@@ -581,42 +583,41 @@ objects.mixin(TabWidget.prototype, {
 		var breadcrumb = new mBreadcrumbs.BreadCrumbs(breadcrumbOptions);
 		
 		editorTab.addEventListener("click", function() {
-			this.setWindowLocation(href);
-		}.bind(this));
+			that.setWindowLocation(this.href);
+		});
 
 		editorTab.addEventListener("mouseup", function(e) {
 			var button = e.which;
 			if (button === 2) {
 				e.preventDefault();
 				var isDirty = dirtyIndicator.style.display !== "none";
-				this.closeTab(metadata, isDirty);
+				that.closeTab(this.metadata, isDirty);
 			}
-		}.bind(this));
+		});
 
 		editorTab.addEventListener("dragstart", function(e) {
-			if (this.fileList.length === 1) {
+			if (that.fileList.length === 1) {
 				e.preventDefault();
 				return false;
 			}
-			this.beingDragged = {node: e.target, metadata: metadata, href: href, parent: this};
+			that.beingDragged = {node: e.target, metadata: this.metadata, href: this.href, parent: that};
 			setTimeout(function() {
 				tipContainer.parentNode.classList.add('hideOnDrag');
 				e.target.classList.add('hideOnDrag');
 			});
-		}.bind(this));
+		});
 		
 		editorTab.addEventListener("dragend", function(e) {
-			if (this.afterDragActions) {
+			if (that.afterDragActions) {
 				setTimeout(function() {
-					this.afterDragActions.dragCleanup();
-					this.afterDragActions = null;
-				}.bind(this));
+					that.afterDragActions.dragCleanup();
+					that.afterDragActions = null;
+				}.bind(that));
 			}
-			this.beingDragged = null;
+			that.beingDragged = null;
 			tipContainer.parentNode.classList.remove('hideOnDrag');
 			e.target.classList.remove('hideOnDrag');
-		}.bind(this));
-
+		});
 		return {
 			editorTabNode: editorTab,
 			dirtyIndicatorNode: dirtyIndicator,
@@ -631,6 +632,9 @@ objects.mixin(TabWidget.prototype, {
 		return this.beingDragged;
 	},
 	transientToPermenant : function(){
+		this.fileList.forEach(function(file){
+			file.isTransient = false;
+		})
 		this.transientTab.editorTabNode.classList.remove("transient");
 		this.transientTab = null;
 	},
@@ -648,7 +652,6 @@ objects.mixin(TabWidget.prototype, {
 			curEditorTabNode.classList.remove("focusedEditorTab");
 			curEditorTabNode.setAttribute("aria-selected", "false");
 		}
-
 		// If the editor tab exists, reuse it.
 		if (this.editorTabs.hasOwnProperty(metadata.Location)) {
 			// Remove the item from the file list if it is present.
@@ -660,7 +663,36 @@ objects.mixin(TabWidget.prototype, {
 					break;
 				}
 			}
-//		} else if (this.transientTab){
+			// Add the file to our dropdown menu
+			this.fileList.unshift(fileToAdd);
+		} else if (this.transientTab){
+			this.transientTab.fileNameNode.textContent = metadata.Name;
+			fileToAdd = {
+				callback: this.widgetClick,
+				checked:true,
+				href: href,
+				metadata: metadata,
+				name: metadata.Name,
+				isTransient: true
+			};
+			for (var i = 0; i < this.fileList.length; i++) {
+				if (this.fileList[i].isTransient) {
+					this.fileList.splice(i, 1, fileToAdd)
+					var transientTab = this.editorTabs[this.transientTab.location];
+					delete this.editorTabs[this.transientTab.location];
+					transientTab.editorTabNode.metadata = metadata;
+					transientTab.editorTabNode.href = href;
+					transientTab.closeButtonNode.metadata = metadata;
+					transientTab.href = "#"+ metadata.Location;
+					transientTab.location = metadata.Location
+					transientTab.breadcrumb.destroy();
+					transientTab.fileNodeToolTip.destroy();
+//					this.createNewBreadCrumb(transientTab);
+					// Remove old breadcrum and add new, change the propertis of this editorTabs object, so that callbacks use new value.
+					editorTab  = this.editorTabs[metadata.Location] = transientTab;
+					break;
+				}
+			}
 		} else {
 			// Store file information
 			fileToAdd = {
@@ -669,15 +701,16 @@ objects.mixin(TabWidget.prototype, {
 				href: href,
 				metadata: metadata,
 				name: metadata.Name,
+				isTransient: true
 			};
 			// Create and store a new editorTab
 			editorTab = this.editorTabs[metadata.Location] = this.transientTab = this.createTab_(metadata, href);
 			editorTab.editorTabNode.classList.add("transient");
 			this.transientTab.location = metadata.Location;
+			// Add the file to our dropdown menu
+			this.fileList.unshift(fileToAdd);
 		}
 
-		// Add the file to our dropdown menu
-		this.fileList.unshift(fileToAdd);
 		
 		// Style the editor tab
 		editorTab.editorTabNode.classList.add("focusedEditorTab");
@@ -922,7 +955,7 @@ objects.mixin(EditorViewer.prototype, {
 			this.pool.metadata = metadata;
 			this.pool.model.addEventListener("postChanged", function(evt){
 				if(this.pool.undoStack._unsavedChanges && this.pool.undoStack._unsavedChanges.length > 0){
-					if(this.tabWidget.transientTab.location ===this.pool.metadata.Location){
+					if(this.tabWidget.transientTab && this.tabWidget.transientTab.location === this.pool.metadata.Location){
 						console.log("make transient tab Permenant")
 						this.tabWidget.transientToPermenant();
 					}
