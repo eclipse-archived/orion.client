@@ -89,6 +89,9 @@
 .editorTheme .annotationRange.matchingSearch {
 	background-color: #c3e1ff;
 }
+.editorTheme .annotationRange.searchRange {
+	background-color: #d3d3d3;
+}
 .editorTheme .annotationRange.writeOccurrence {
 	background-color: #ffff00;
 }
