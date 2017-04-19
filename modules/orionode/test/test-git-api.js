@@ -458,14 +458,15 @@ GitClient.prototype = {
 		});
 	},
 
-	compare: function(source, target) {
+	compare: function(source, target, parameters) {
 		var client = this;
 		this.tasks.push(function(resolve) {
 			source = util.encodeURIComponent(source);
 			target = util.encodeURIComponent(target);
 
 			request()
-			.get(CONTEXT_PATH + "/gitapi/commit/" + source + ".." + target + "/file/" + client.getName())
+			.get(CONTEXT_PATH + "/gitapi/commit/" + target + ".." + source + "/file/" + client.getName())
+			.query(parameters)
 			.expect(202)
 			.end(function(err, res) {
 				assert.ifError(err);
@@ -2044,8 +2045,58 @@ maybeDescribe("git", function() {
 				client.createBranch("other");
 				client.commit();
 				// compare master with the created branch
-				client.compare("refs/heads/master", "refs/heads/other");
-				client.start().then(function() {
+				client.compare("refs/heads/master", "refs/heads/other", { mergeBase: true });
+				client.start().then(function(result) {
+					assert.equal(result.AheadCount, 1);
+					assert.equal(result.BehindCount, 0);
+					finished();
+				})
+				.catch(function(err) {
+					finished(err);
+				});
+			});
+
+			it("bug 515428", function(finished) {
+				var repository;
+				var initial, modify, extra, extra2;
+				var name = "test.txt";
+				var unrelated = "unrelated.txt";
+
+				var client = new GitClient("merge-unrelated-identical-content");
+				client.init();
+				// create a file with content "A" in it
+				client.setFileContents(name, "A");
+				client.stage(name);
+				client.commit();
+				client.start().then(function(commit) {
+					initial = commit.Id;
+					// open the repository using NodeGit
+					var testPath = path.join(WORKSPACE, "merge-unrelated-identical-content");
+					return git.Repository.open(testPath);
+				})
+				.then(function(repo) {
+					repository = repo;
+					return repository.refreshIndex();
+				})
+				.then(function(index) {
+					// get the oid of the current repository state
+					return index.writeTree();
+				})
+				.then(function(oid) {
+					// using that oid, create a commit in another branch with no parent commit
+					return repository.createCommit("refs/heads/other",
+						git.Signature.default(repository),
+						git.Signature.default(repository),
+							"unrelated", oid, [ ]);
+					})
+				.then(function() {
+					// merge in the branch with an unrelated history
+					client.compare("refs/heads/master", "refs/heads/other", { mergeBase: true });
+					return client.start();
+				})
+				.then(function(result) {
+					assert.equal(result.AheadCount, 2);
+					assert.equal(result.BehindCount, 1);
 					finished();
 				})
 				.catch(function(err) {
