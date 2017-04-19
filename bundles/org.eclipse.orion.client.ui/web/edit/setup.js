@@ -627,7 +627,8 @@ objects.mixin(TabWidget.prototype, {
 			breadcrumb: breadcrumb,
 			closeButtonNode: closeButton,
 			fileNodeToolTip: fileNodeTooltip,
-			href: href
+			href: href,
+			tabWidgetContextItemindex: 1
 		};
 	},
 	getDraggedNode: function() {
@@ -834,9 +835,9 @@ objects.mixin(TabWidget.prototype, {
 			}
 		}.bind(this);
 		contextMenu.addEventListener("triggered", contextMenuTriggered);
-		this.registerTabWidgetContextMenu();
+		this.registerTabWidgetContextMenu(editorTab);
 	},
-	registerTabWidgetContextMenu: function(){
+	registerTabWidgetContextMenu: function(editorTab){
 		var closeOtherTabWidgetCommand = new mCommands.Command({
 			name: messages.closeOthers,
 			id: "orion.tabWidget.closeothers", //$NON-NLS-0$
@@ -851,9 +852,49 @@ objects.mixin(TabWidget.prototype, {
 				}.bind(this));
 			}.bind(this)
 		});
+		var closeToRight = new mCommands.Command({
+			name: messages.closeTotheRight,
+			id: "orion.tabWidget.closetoright", //$NON-NLS-0$
+			visibleWhen: /** @callback */ function(items, data) {
+				return Object.keys(this.editorTabs).length > 1;
+			}.bind(this),
+			callback: function(commandInvocation) {
+				// Get the right hand tabs from this.editorTab parent.
+				var firstNodeIndexToRemove;
+				Array.prototype.find.call(this.editorTabContainer.childNodes, function(node, index){
+					if(node.href === commandInvocation.userData){
+						firstNodeIndexToRemove = index + 1;
+						return true;
+					}
+				})
+				var closingButtons = [];
+				for(var j = firstNodeIndexToRemove; j < this.editorTabContainer.childNodes.length; j++){
+					var closeButton = this.editorTabContainer.childNodes[j].querySelector(".editorTabCloseButton");
+					closingButtons.push(closeButton);
+				}
+				closingButtons.forEach(function(closeButton){
+					closeButton.click();
+				});
+			}.bind(this)
+		});
+		var keepOpen = new mCommands.Command({
+			name: messages.keepOpen,
+			id: "orion.tabWidget.keepOpen", //$NON-NLS-0$
+			visibleWhen: /** @callback */ function(items, data) {
+				return this.transientTab && data.userData === this.transientTab.href;
+			}.bind(this),
+			callback: function(commandInvocation) {
+				this.transientToPermenant();
+			}.bind(this)
+		});
 		this.commandRegistry.addCommand(closeOtherTabWidgetCommand);
+		this.commandRegistry.addCommand(closeToRight);
+		this.commandRegistry.addCommand(keepOpen);
 		// tabWidget context menu
-		this.commandRegistry.registerCommandContribution("tabWidgetContextMenuActions", "orion.tabWidget.closeothers", this.tabWidgetContextItemindex++); //$NON-NLS-1$ //$NON-NLS-2$
+		this.commandRegistry.addCommandGroup("tabWidgetContextMenuActions", "orion.tabWidgetContextMenuGroup", 100, null, null, null, null, null, "dropdownSelection"); //$NON-NLS-1$ //$NON-NLS-2$
+		this.commandRegistry.registerCommandContribution("tabWidgetContextMenuActions", "orion.tabWidget.closeothers", editorTab.tabWidgetContextItemindex++,"orion.tabWidgetContextMenuActions/orion.tabWidget.closeGroup"); //$NON-NLS-1$ //$NON-NLS-2$
+		this.commandRegistry.registerCommandContribution("tabWidgetContextMenuActions", "orion.tabWidget.closetoright", editorTab.tabWidgetContextItemindex++,"orion.tabWidgetContextMenuActions/orion.tabWidget.closeGroup"); //$NON-NLS-1$ //$NON-NLS-2$
+		this.commandRegistry.registerCommandContribution("tabWidgetContextMenuActions", "orion.tabWidget.keepOpen", editorTab.tabWidgetContextItemindex++,"orion.tabWidgetContextMenuActions/orion.tabWidget.others", false, new mKeyBinding.KeyBinding('K', true, true)); //$NON-NLS-1$ //$NON-NLS-2$
 	},
 	scrollToTab: function(tab) {
 		var sib = tab.previousSibling;

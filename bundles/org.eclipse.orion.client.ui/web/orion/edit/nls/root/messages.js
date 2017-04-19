@@ -119,5 +119,7 @@ define({
 	"selectNextTab": "Select Next Editor Tab",
 	"selectPreviousTab": "Select Previous Editor Tab",
 	"showTabDropdown": "Display Open Editor Tabs",
-	"closeOthers":"Close Others"
+	"closeOthers":"Close Others Tabs",
+	"closeTotheRight":"Close Tabs To The Right",
+	"keepOpen":"Keep Open"
 });
