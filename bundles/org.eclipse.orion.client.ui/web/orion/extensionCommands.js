@@ -10,8 +10,8 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 /*eslint-env browser, amd*/
-define(["orion/Deferred", "orion/commands", 	'orion/PageUtil', "orion/contentTypes", "orion/URITemplate", "orion/i18nUtil", "orion/PageLinks", "i18n!orion/edit/nls/messages", "orion/URL-shim"],
-	function(Deferred, mCommands, PageUtil, mContentTypes, URITemplate, i18nUtil, PageLinks, messages){
+define(["orion/Deferred", "orion/commands", 	'orion/PageUtil', "orion/contentTypes", "orion/URITemplate", "orion/i18nUtil", "orion/PageLinks", "i18n!orion/edit/nls/messages", "orion/util", "orion/URL-shim"],
+	function(Deferred, mCommands, PageUtil, mContentTypes, URITemplate, i18nUtil, PageLinks, messages, util){
 
 	/**
 	 * Utility methods
@@ -462,6 +462,9 @@ define(["orion/Deferred", "orion/commands", 	'orion/PageUtil', "orion/contentTyp
 						}
 						return href;
 					};
+					if(util.isElectron && info.uriTemplate && info.uriTemplate.indexOf("{+OrionHome}/git/git-repository.html") !== -1){
+						commandOptions.hrefTarget = "_blank";
+					}
 				} else {
 					var inf = info;
 					commandOptions.callback = function(data){
@@ -509,6 +512,7 @@ define(["orion/Deferred", "orion/commands", 	'orion/PageUtil', "orion/contentTyp
 			isEditor: info.isEditor,
 			showGlobally: info.showGlobally
 		};
+		
 		// Quickfixes for annotations are handled via commands, this option enable quickfixes to apply to all annotations
 		if (info.fixAllEnabled){
 			commandOptions.fixAllEnabled = true;
