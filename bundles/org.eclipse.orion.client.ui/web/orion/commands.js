@@ -513,6 +513,9 @@ define([
 			} else {  // no href
 				element.href = "#"; //$NON-NLS-0$
 			}
+			if(command.hrefTarget){
+				element.target = command.hrefTarget;
+			}
 			element.addEventListener("keydown", function(e) { //$NON-NLS-0$
 				if (e.keyCode === lib.KEY.ENTER || e.keyCode === lib.KEY.SPACE) {
 					element.click();
