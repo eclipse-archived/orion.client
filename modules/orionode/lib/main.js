@@ -298,8 +298,8 @@ function bindfocus(){
 
 function createTab(url) {
 	var iframes = document.querySelectorAll(".tabContent");
+	var urlSegs = url.split("#");
 	var potentialExsitingIframe = Array.prototype.find.call(iframes,function(iframe){
-		var urlSegs = url.split("#");
 		if(urlSegs[0].indexOf("/edit/edit.html") !== -1){
 			return iframe.contentWindow.location.href.indexOf(urlSegs[0]) === 0;  // Always open the Editor page in this case
 		}else if(urlSegs[0].indexOf("/git/git-repository.html") !== -1){
@@ -313,8 +313,8 @@ function createTab(url) {
 		}
 	});
 	if(potentialExsitingIframe){
-		if(url.indexOf("/edit/edit.html#/file") !== -1){
-			potentialExsitingIframe.src = url;
+		if(urlSegs[0].indexOf("/edit/edit.html") !== -1 && urlSegs[1].split("/").length > 3){
+			potentialExsitingIframe.src = url; // Change the src only if it's edit page and the url is targeting some file inside the project folder 
 		}
 		clickTab(potentialExsitingIframe.id.substr(6));
 	}else{
