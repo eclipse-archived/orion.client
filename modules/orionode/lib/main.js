@@ -299,8 +299,18 @@ function bindfocus(){
 function createTab(url) {
 	var iframes = document.querySelectorAll(".tabContent");
 	var potentialExsitingIframe = Array.prototype.find.call(iframes,function(iframe){
-		var firstSeg = url.split("#")[0]
-		return iframe.contentWindow.location.href.indexOf(firstSeg) === 0;
+		var urlSegs = url.split("#");
+		if(urlSegs[0].indexOf("/edit/edit.html") !== -1){
+			return iframe.contentWindow.location.href.indexOf(urlSegs[0]) === 0;  // Always open the Editor page in this case
+		}else if(urlSegs[0].indexOf("/git/git-repository.html") !== -1){
+			if(urlSegs[1].indexOf("/gitapi/commit") !== -1){
+				return iframe.contentWindow.location.href === url;   // Find exactly the git page of the exact Commit or should open a new git tab
+			}else{ // For all the other cases
+				return iframe.contentWindow.location.href.indexOf(urlSegs[0]+"#/gitapi/clone") === 0  // Find a /clone git page, or should open a new git tab 
+			}
+		}else{
+			return iframe.contentWindow.location.href.indexOf(urlSegs[0]) === 0;  // For all the other cases, open the same html page, like settings
+		}
 	});
 	if(potentialExsitingIframe){
 		if(url.indexOf("/edit/edit.html#/file") !== -1){
