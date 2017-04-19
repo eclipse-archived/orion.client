@@ -63,7 +63,7 @@ define([
 				replaceInput.value = replaceString;
 			}
 			var that = this;
-			this.setOptions({selectedLines: true});
+			this.setOptions({selectedLines: true, multipleLine: true});
 			window.setTimeout(function() {
 				that._rootDiv.className = "textViewFind show"; //$NON-NLS-0$
 				input.select();
@@ -151,8 +151,8 @@ define([
 		_toggle: function(prop, button) {
 			var options = {};
 			options[prop] = !this["_" + prop]; //$NON-NLS-0$
-			this.setOptions(options);
 			this._checked(options[prop], button);
+			this.setOptions(options);
 		},
 		_checked: function(checked, button) {
 			button.className = "textViewFindButton"; //$NON-NLS-0$
