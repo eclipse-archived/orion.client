@@ -520,19 +520,29 @@ function getCommitLog(req, res) {
 			})
 			.then(function(commit) {
 				commit1 = commit;
-				return git.Merge.base(repo, commit0, commit1).then(function(oid){
-					return oid;
+				// find the common ancestor for calculating incoming/outgoing changes
+				return git.Merge.base(repo, commit0, commit1)
+				.catch(function(err) {
+					if (err.message === "No merge base found") {
+						return null;
+					}
+					throw err;
 				});
 			})
 			.then(function(oid) {
-				mergeBaseCommitOid = oid;
 				var revWalkForCounting1 = repo.createRevWalk();
-				revWalkForCounting1.sorting(git.Revwalk.SORT.TOPOLOGICAL);
-				revWalkForCounting1.pushRange(mergeBaseCommitOid.tostrS() + ".." + commit0.id().tostrS());	//count for incomings
-				
 				var revWalkForCounting2 = repo.createRevWalk();
+				revWalkForCounting1.sorting(git.Revwalk.SORT.TOPOLOGICAL);
 				revWalkForCounting2.sorting(git.Revwalk.SORT.TOPOLOGICAL);
-				revWalkForCounting2.pushRange(mergeBaseCommitOid.tostrS() + ".." + commit1.id().tostrS()); // count for outgoing
+				if (oid === null) {
+					// no common ancestor, just count everything
+					revWalkForCounting1.push(commit0.id().tostrS()); // incoming changes
+					revWalkForCounting2.push(commit1.id().tostrS()); // outgoing changes
+				} else {
+					mergeBaseCommitOid = oid;
+					revWalkForCounting1.pushRange(mergeBaseCommitOid.tostrS() + ".." + commit0.id().tostrS()); // incoming changes
+					revWalkForCounting2.pushRange(mergeBaseCommitOid.tostrS() + ".." + commit1.id().tostrS()); // outgoing changes
+				}
 				
 				return Promise.all([countCommit(revWalkForCounting1),countCommit(revWalkForCounting2)]);	
 			}).then(function(results){
