@@ -304,10 +304,11 @@
 /* Styles for lines of text */
 .annotationLine {
 }
+.annotationLine.searchRange {
+	background-color: #D3D3D3;
+}
+
 .annotationLine.currentLine {
 	background-color: #EAF2FE;
 }
 
-.annotationLine.searchRange {
-	background-color: #d3d3d3;
-}

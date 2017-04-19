@@ -173,6 +173,13 @@ define(['i18n!orion/settings/nls/messages'
 			id: "editorThemeCurrentSearch",
 			value: defaultColor
 		}, {
+			display: messages["editorTheme search range background"],
+			objPath: [
+				"styles annotationLine searchRange backgroundColor"
+			],
+			id: "editorThemeSearchRange",
+			value: defaultColor
+		}, {
 			display: messages["editorTheme documentation task color"],
 			objPath: [
 				"styles keyword other documentation task color"

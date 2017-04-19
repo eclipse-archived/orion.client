@@ -439,9 +439,9 @@ define("orion/editor/find", [ //$NON-NLS-0$
 				if ((options.selectedLines === true || options.selectedLines === false) && this._selectedLinesl !== options.selectedLines) {
 					this._selectedLines = options.selectedLines;
 					if (this._selectedLines) {
-						this.annotateSearchRange();
+						this.annotateSearchRange(options.multipleLine);
 					} else {
-						this.annotateSearchRange(true);
+						this.annotateSearchRange(options.multipleLine, true);
 					}
 					this.postSelectedLines();
 				}
@@ -523,7 +523,7 @@ define("orion/editor/find", [ //$NON-NLS-0$
 				this._end = this._selectedLineModel.end;
 			}
 		},
-		annotateSearchRange: function(remove) {
+		annotateSearchRange: function(multipleLine, remove) {
 			var type = mAnnotations.AnnotationType.ANNOTATION_SEARCH_RANGE;
 			var annotationModel = this._editor.getAnnotationModel();
 			if (annotationModel) {
@@ -538,15 +538,18 @@ define("orion/editor/find", [ //$NON-NLS-0$
 				var textModel = this._editor.getModel();
 				var startL = 0;
 				var endL = 0;
-				if(textModel && selection.start !== selection.end) {
-					startL = textModel.getLineAtOffset(selection.start);
-					endL = textModel.getLineAtOffset(selection.end - 1);
+				if(textModel) {
+					endL = startL = textModel.getLineAtOffset(selection.start);
+					if(selection.start !== selection.end) {
+						endL = textModel.getLineAtOffset(selection.end - 1);
+					}
 				}
-				if(endL > startL) {
+				if(endL > startL || !multipleLine) {
 					this._selectedLines = true;
 	 		 		var rangeStart = textModel.getLineStart(startL);
 	 		 		var rangeEnd = textModel.getLineEnd(endL);
 					this._editor.setSelection(rangeStart, rangeStart, true);
+					annotationModel.removeAnnotations(mAnnotations.AnnotationType.ANNOTATION_CURRENT_LINE);
 					this.setOptions({start: rangeStart, end: rangeEnd});
 					this._selectedLineModel = mAnnotations.AnnotationType.createAnnotation(type, rangeStart, rangeEnd);
 	 		 		annotationModel.addAnnotation(this._selectedLineModel);

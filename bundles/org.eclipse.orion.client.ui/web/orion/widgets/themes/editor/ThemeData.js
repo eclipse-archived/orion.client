@@ -51,6 +51,9 @@ define([
 				"name": "Prospecto",
 				"styles": {
 					"annotationLine": {
+						"searchRange": {
+							"backgroundColor": "#D3D3D3"
+						},
 						"currentLine": {
 							"backgroundColor": "#EAF2FE"
 						}
@@ -249,6 +252,9 @@ define([
 					"fontFamily": defaultFont,
 					"fontSize": defaultFontSize,
 					"annotationLine": {
+						"searchRange": {
+							"backgroundColor": "#6C7279"
+						},
 						"currentLine": {
 							"backgroundColor": "#3B4B53"
 						}
@@ -438,6 +444,9 @@ define([
 				"name": "Ceol",
 				"styles": {
 					"annotationLine": {
+						"searchRange": {
+							"backgroundColor": "#6C7279"
+						},
 						"currentLine": {
 							"backgroundColor": "#152935"
 						}

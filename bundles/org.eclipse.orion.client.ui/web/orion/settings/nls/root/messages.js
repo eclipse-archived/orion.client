@@ -334,6 +334,7 @@ define({//Default message bundle
     "editorTheme matching bracket background": "Matching bracket background",
     "editorTheme matching search background": "Matching search background",
     "editorTheme current search background": "Current search background",
+    "editorTheme search range background": "Search range background",
     "editorTheme documentation task color": "Documentation task color",
     "editorTheme property name color": "Property name color",
     "editorTheme tag": "Tag",

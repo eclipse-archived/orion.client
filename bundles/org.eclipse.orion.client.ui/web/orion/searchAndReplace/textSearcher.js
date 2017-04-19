@@ -72,7 +72,7 @@ define([
 				var replaceDiv = document.getElementById("localSearchReplaceWith"); //$NON-NLS-0$
 				replaceDiv.value = replaceString;
 			}
-			this.setOptions({selectedLines: true});
+			this.setOptions({selectedLines: true, multipleLine: true});
 			window.setTimeout(function() {
 				findDiv.select();
 				findDiv.focus();
