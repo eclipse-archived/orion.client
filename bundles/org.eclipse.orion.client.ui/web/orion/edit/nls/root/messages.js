@@ -118,5 +118,6 @@ define({
 	"No":"No",
 	"selectNextTab": "Select Next Editor Tab",
 	"selectPreviousTab": "Select Previous Editor Tab",
-	"showTabDropdown": "Display Open Editor Tabs"	
+	"showTabDropdown": "Display Open Editor Tabs",
+	"closeOthers":"Close Others"
 });
