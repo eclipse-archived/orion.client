@@ -316,6 +316,9 @@ function createTab(url) {
 		if(urlSegs[0].indexOf("/edit/edit.html") !== -1 && urlSegs[1].split("/").length > 3){
 			potentialExsitingIframe.src = url; // Change the src only if it's edit page and the url is targeting some file inside the project folder 
 		}
+		if(urlSegs[1].indexOf("/gitapi/clone") !== -1){
+			potentialExsitingIframe.contentWindow.location.reload();  // Refresh the git page in this case, to get the correct contents, otherwise user have to refresh the page themselves.
+		}
 		clickTab(potentialExsitingIframe.id.substr(6));
 	}else{
 		var iframe = document.createElement("iframe");
