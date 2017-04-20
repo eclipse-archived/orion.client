@@ -711,7 +711,8 @@ objects.mixin(TabWidget.prototype, {
 			};
 			for (var i = 0; i < this.fileList.length; i++) {
 				if (this.fileList[i].isTransient) {
-					this.fileList.splice(i, 1, fileToAdd)
+					this.fileList.splice(i, 1)
+					this.fileList.unshift(fileToAdd);
 					var transientTab = this.editorTabs[this.transientTab.location];
 					delete this.editorTabs[this.transientTab.location];
 					transientTab.editorTabNode.metadata = metadata;
@@ -750,10 +751,8 @@ objects.mixin(TabWidget.prototype, {
 		// Style the editor tab
 		editorTab.editorTabNode.classList.add("focusedEditorTab");
 		editorTab.editorTabNode.setAttribute("aria-selected", "true");
-
 		// Update the selected file
 		this.selectedFile = this.fileList[0];
-
 		// Enforce maximum editor tabs
 		if (this.maximumEditorTabs > 0 && fileList.length > this.maximumEditorTabs) {
 			var resourceClosing = fileList[fileList.length-1].metadata;
