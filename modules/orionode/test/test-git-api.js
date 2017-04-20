@@ -286,7 +286,11 @@ GitClient.prototype = {
 		});
 	},
 
-	createTag: function(commitSHA, tagName, annotated, message) {
+	createTag: function(commitSHA, tagName, annotated, message, expectedStatusCode) {
+		if (expectedStatusCode === undefined) {
+			expectedStatusCode = 200;
+		}
+
 		var client = this;
 		this.tasks.push(function(resolve) {
 			request()
@@ -296,7 +300,7 @@ GitClient.prototype = {
 				Annotated: annotated,
 				Message: message
 			})
-			.expect(200)
+			.expect(expectedStatusCode)
 			.end(function(err, res) {
 				assert.ifError(err);
 				client.next(resolve, res.body);
@@ -3025,6 +3029,48 @@ maybeDescribe("git", function() {
 
 			it("annotated", function(finished) {
 				testCreateTag(finished, "tag-create-annotated", true);
+			});
+
+			/**
+			 * 1. Create a tag with a name.
+			 * 2. Create a tag on the same commit with the same name.
+			 * 3. Check that the server isn't trying to set headers
+			 *    after a response has been sent.
+			 */
+			it("bug 515315", function(finished) {
+				var testName = "tag-bug515315";
+				var tagName = "tag515315";
+				var commitSHA;
+
+				var client = new GitClient(testName);
+				client.init();
+				client.commit();
+				client.start().then(function(commit) {
+					commitSHA = commit.Id;
+
+					client.createTag(commitSHA, tagName, false, null);
+					client.listTags();
+					return client.start();
+				})
+				.then(function(tags) {
+					// only created one tag
+					assert.equal(tags.length, 1);
+					assertTag(tags[0], tagName, false, testName, commitSHA);
+
+					// create a tag with the same name, this should cause a 403
+					client.createTag(commitSHA, tagName, false, null, 403);
+					client.listTags();
+					return client.start();
+				})
+				.then(function(tags) {
+					// still only one tag
+					assert.equal(tags.length, 1);
+					assertTag(tags[0], tagName, false, testName, commitSHA);
+					finished();
+				})
+				.catch(function(err) {
+					finished(err);
+				});
 			});
 		}); // describe("Create")
 
