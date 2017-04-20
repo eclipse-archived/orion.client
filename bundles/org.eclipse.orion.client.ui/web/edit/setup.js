@@ -718,7 +718,6 @@ objects.mixin(TabWidget.prototype, {
 					transientTab.editorTabNode.metadata = metadata;
 					transientTab.editorTabNode.href = href;
 					transientTab.closeButtonNode.metadata = metadata;
-					transientTab.href = "#"+ metadata.Location;
 					transientTab.location = metadata.Location
 					transientTab.breadcrumb.destroy();
 					this.createNewBreadCrumb(transientTab, metadata);
@@ -1076,7 +1075,6 @@ objects.mixin(EditorViewer.prototype, {
 			this.pool.model.addEventListener("postChanged", function(evt){
 				if(this.pool.undoStack._unsavedChanges && this.pool.undoStack._unsavedChanges.length > 0){
 					if(this.tabWidget.transientTab && this.tabWidget.transientTab.location === this.pool.metadata.Location){
-						console.log("make transient tab Permenant")
 						this.tabWidget.transientToPermenant();
 					}
 				}
