@@ -307,8 +307,10 @@ define([
 							} else if (evt.type === "dblclick") {
 								this.isDesktopSelectionMode().then(function(desktopMode) {
 									if(desktopMode){
+										var href = evt.srcElement.querySelector("a").href;
 										this.dispatchEvent({
-											type: "fileDoubleClicked"
+											type: "fileDoubleClicked",
+											href: href
 										});
 									}else{
 										this.handleLinkDoubleClick(link, evt);
