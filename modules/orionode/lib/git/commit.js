@@ -1182,14 +1182,11 @@ function tag(req, res, commitId, name, isAnnotated, message) {
 		return getCommitParents(theRepo, thisCommit, fileDir);
 	})
 	.then(function(parents){
-		theParents = parents;
+		writeResponse(200, res, null, commitJSON(thisCommit, fileDir, theDiffs, parents));
 	})
 	.catch(function(err) {
 		writeError(403, res, err.message);
 	})
-	.done(function() {
-		writeResponse(200, res, null, commitJSON(thisCommit, fileDir, theDiffs, theParents));
-	});
 }
 
 function putCommit(req, res) {
