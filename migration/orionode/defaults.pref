@@ -1,0 +1,12 @@
+{
+	"/plugins":{
+		"js/orionSharedWorker.js": true,
+		"git/plugins/gitPlugin.html":true,
+		"webtools/plugins/webToolsPlugin.html":true,
+		"javascript/plugins/javascriptPlugin.html":true,
+		"edit/content/imageViewerPlugin.html":true,
+		"edit/content/jsonEditorPlugin.html":true,
+		"cfui/plugins/cFPlugin.html":true,
+		"cfui/plugins/cFDeployPlugin.html":true
+	}
+}

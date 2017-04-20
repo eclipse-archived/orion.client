@@ -1,0 +1,69 @@
+{
+  "name": "amd-to-es6",
+  "version": "0.1.0",
+  "description": "Convert AMD modules into ES6 modules",
+  "author": {
+    "name": "Jon Bretman"
+  },
+  "main": "index.js",
+  "bin": {
+    "amdtoes6": "./bin/amdtoes6"
+  },
+  "files": [
+    "bin/",
+    "command-line.js",
+    "index.js"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jonbretman/amd-to-as6.git"
+  },
+  "directories": {
+    "test": "test"
+  },
+  "dependencies": {
+    "acorn-jsx": "^2.0.0",
+    "commander": "^2.4.0",
+    "falafel": "~1.2.0",
+    "glob": "^4.0.6",
+    "js-beautify": "~1.5.1",
+    "mkdirp": "^0.5.0"
+  },
+  "devDependencies": {
+    "nodeunit": "~0.9.0"
+  },
+  "scripts": {
+    "test": "nodeunit test/spec.js"
+  },
+  "license": "ISC",
+  "gitHead": "8d4072f6e854bc4b4a34a5425eb865eaecd4e580",
+  "bugs": {
+    "url": "https://github.com/jonbretman/amd-to-as6/issues"
+  },
+  "homepage": "https://github.com/jonbretman/amd-to-as6#readme",
+  "_id": "amd-to-es6@0.1.0",
+  "_shasum": "ed0004cd16dbfbf2f32437576ab5205c1c727226",
+  "_from": "amd-to-es6@latest",
+  "_npmVersion": "2.14.7",
+  "_nodeVersion": "4.2.2",
+  "_npmUser": {
+    "name": "jonbretman",
+    "email": "jon.bretman@gmail.com"
+  },
+  "maintainers": [
+    {
+      "name": "jonbretman",
+      "email": "jon.bretman@gmail.com"
+    }
+  ],
+  "dist": {
+    "shasum": "ed0004cd16dbfbf2f32437576ab5205c1c727226",
+    "tarball": "https://registry.npmjs.org/amd-to-es6/-/amd-to-es6-0.1.0.tgz"
+  },
+  "_npmOperationalInternal": {
+    "host": "packages-12-west.internal.npmjs.com",
+    "tmp": "tmp/amd-to-es6-0.1.0.tgz_1460014907013_0.16325630829669535"
+  },
+  "_resolved": "https://registry.npmjs.org/amd-to-es6/-/amd-to-es6-0.1.0.tgz",
+  "readme": "ERROR: No README data found!"
+}
