@@ -161,7 +161,7 @@ define([
 			this._submitSearch();
 		},
 		
-		updateSearchScopeFromSelection(meta){
+		updateSearchScopeFromSelection: function(meta){
 			if(meta){
 				this._searcher._setLocationbyURL(meta);
 			}
