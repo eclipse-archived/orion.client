@@ -634,12 +634,17 @@ objects.mixin(TabWidget.prototype, {
 	getDraggedNode: function() {
 		return this.beingDragged;
 	},
-	transientToPermenant : function(){
-		this.fileList.forEach(function(file){
-			file.isTransient = false;
-		})
-		this.transientTab && this.transientTab.editorTabNode.classList.remove("transient");
-		this.transientTab = null;
+	transientToPermenant : function(href){
+		if(this.transientTab && this.transientTab.href === href){
+			this.fileList.find(function(file){
+				if(file.href === href){
+					file.isTransient = false;
+					return true;
+				}
+			})
+			this.transientTab && this.transientTab.editorTabNode.classList.remove("transient");
+			this.transientTab = null;
+		}
 	},
 	createNewBreadCrumb: function(tab, metadata){
 		var localBreadcrumbNode = document.createElement("div");
@@ -719,6 +724,7 @@ objects.mixin(TabWidget.prototype, {
 					transientTab.editorTabNode.href = href;
 					transientTab.closeButtonNode.metadata = metadata;
 					transientTab.location = metadata.Location
+					transientTab.href = href;
 					transientTab.breadcrumb.destroy();
 					this.createNewBreadCrumb(transientTab, metadata);
 					// Remove old breadcrum and add new, change the propertis of this editorTabs object, so that callbacks use new value.
@@ -973,7 +979,7 @@ objects.mixin(EditorViewer.prototype, {
 				return data.userData && this.tabWidget.transientTab && data.userData === this.tabWidget.transientTab.href;
 			}.bind(this),
 			callback: function(commandInvocation) {
-				this.tabWidget.transientToPermenant();
+				this.tabWidget.transientToPermenant(commandInvocation.userData);
 			}.bind(this)
 		});
 		this.commandRegistry.addCommand(closeOtherTabWidgetCommand);
@@ -1075,7 +1081,7 @@ objects.mixin(EditorViewer.prototype, {
 			this.pool.model.addEventListener("postChanged", function(evt){
 				if(this.pool.undoStack._unsavedChanges && this.pool.undoStack._unsavedChanges.length > 0){
 					if(this.tabWidget.transientTab && this.tabWidget.transientTab.location === this.pool.metadata.Location){
-						this.tabWidget.transientToPermenant();
+						this.tabWidget.transientToPermenant(this.tabWidget.transientTab.href);
 					}
 				}
 			}.bind(this));
@@ -1479,7 +1485,7 @@ objects.mixin(EditorSetup.prototype, {
 			this.lastRoot = evt.root;
 		}.bind(this));
 		this.sidebarNavInputManager.addEventListener("fileDoubleClicked", function(evt) { //$NON-NLS-0$
-			this.editorViewers[0].tabWidget.transientToPermenant();
+			this.activeEditorViewer.tabWidget.transientToPermenant(evt.href);
 		}.bind(this));
 		this.sidebarNavInputManager.addEventListener("filesystemChanged", function(evt) { //$NON-NLS-0$
 			this.fileClient.loadWorkspaces(evt.newInput).then(function(workspaces) {
