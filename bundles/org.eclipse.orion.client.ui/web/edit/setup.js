@@ -772,7 +772,6 @@ objects.mixin(TabWidget.prototype, {
 			editorTab.closeButtonNode.style.display = "none";
 		}
 		this.setTabStorage();
-		this.createTabWidgetContextMenu(editorTab);
 		return editorTab;
 	},
 	removeTab: function(metadata) {
@@ -815,86 +814,6 @@ objects.mixin(TabWidget.prototype, {
 			this.setWindowLocation(this.selectedFile.href)
 		}
 		this.setTabStorage();
-	},
-	createTabWidgetContextMenu: function(editorTab){
-		var tabWidgetContextMenuNode = document.createElement("ul"); //$NON-NLS-0$
-		tabWidgetContextMenuNode.className = "dropdownMenu"; //$NON-NLS-0$
-		tabWidgetContextMenuNode.setAttribute("role", "menu"); //$NON-NLS-1$ //$NON-NLS-2$
-		editorTab.editorTabNode.appendChild(tabWidgetContextMenuNode);
-		// Hook the context menu to the tabWidget's editorTabNode node
-		var contextMenu = new mContextMenu.ContextMenu({
-			dropdown: tabWidgetContextMenuNode,
-			triggerNode: editorTab.editorTabNode
-		});
-		//function called when the context menu is triggered to set the nav selection properly
-		var contextMenuTriggered = function(wrapper) {
-			var re = wrapper.event;
-			if (re.target) {
-				this.commandRegistry.destroy(tabWidgetContextMenuNode); // remove previous content
-				this.commandRegistry.renderCommands("tabWidgetContextMenuActions", tabWidgetContextMenuNode, null, this, "menu", re.currentTarget.href ); //$NON-NLS-1$ //$NON-NLS-2$
-			}
-		}.bind(this);
-		contextMenu.addEventListener("triggered", contextMenuTriggered);
-		this.registerTabWidgetContextMenu(editorTab);
-	},
-	registerTabWidgetContextMenu: function(editorTab){
-		var closeOtherTabWidgetCommand = new mCommands.Command({
-			name: messages.closeOthers,
-			id: "orion.tabWidget.closeothers", //$NON-NLS-0$
-			visibleWhen: /** @callback */ function(items, data) {
-				return Object.keys(this.editorTabs).length > 1;
-			}.bind(this),
-			callback: function(commandInvocation) {
-				Object.keys(this.editorTabs).forEach(function(tab){
-					if(commandInvocation.userData.indexOf(tab) === -1){
-						this.editorTabs[tab].closeButtonNode.click();
-					}
-				}.bind(this));
-			}.bind(this)
-		});
-		var closeToRight = new mCommands.Command({
-			name: messages.closeTotheRight,
-			id: "orion.tabWidget.closetoright", //$NON-NLS-0$
-			visibleWhen: /** @callback */ function(items, data) {
-				return Object.keys(this.editorTabs).length > 1;
-			}.bind(this),
-			callback: function(commandInvocation) {
-				// Get the right hand tabs from this.editorTab parent.
-				var firstNodeIndexToRemove;
-				Array.prototype.find.call(this.editorTabContainer.childNodes, function(node, index){
-					if(node.href === commandInvocation.userData){
-						firstNodeIndexToRemove = index + 1;
-						return true;
-					}
-				})
-				var closingButtons = [];
-				for(var j = firstNodeIndexToRemove; j < this.editorTabContainer.childNodes.length; j++){
-					var closeButton = this.editorTabContainer.childNodes[j].querySelector(".editorTabCloseButton");
-					closingButtons.push(closeButton);
-				}
-				closingButtons.forEach(function(closeButton){
-					closeButton.click();
-				});
-			}.bind(this)
-		});
-		var keepOpen = new mCommands.Command({
-			name: messages.keepOpen,
-			id: "orion.tabWidget.keepOpen", //$NON-NLS-0$
-			visibleWhen: /** @callback */ function(items, data) {
-				return this.transientTab && data.userData === this.transientTab.href;
-			}.bind(this),
-			callback: function(commandInvocation) {
-				this.transientToPermenant();
-			}.bind(this)
-		});
-		this.commandRegistry.addCommand(closeOtherTabWidgetCommand);
-		this.commandRegistry.addCommand(closeToRight);
-		this.commandRegistry.addCommand(keepOpen);
-		// tabWidget context menu
-		this.commandRegistry.addCommandGroup("tabWidgetContextMenuActions", "orion.tabWidgetContextMenuGroup", 100, null, null, null, null, null, "dropdownSelection"); //$NON-NLS-1$ //$NON-NLS-2$
-		this.commandRegistry.registerCommandContribution("tabWidgetContextMenuActions", "orion.tabWidget.closeothers", editorTab.tabWidgetContextItemindex++,"orion.tabWidgetContextMenuActions/orion.tabWidget.closeGroup"); //$NON-NLS-1$ //$NON-NLS-2$
-		this.commandRegistry.registerCommandContribution("tabWidgetContextMenuActions", "orion.tabWidget.closetoright", editorTab.tabWidgetContextItemindex++,"orion.tabWidgetContextMenuActions/orion.tabWidget.closeGroup"); //$NON-NLS-1$ //$NON-NLS-2$
-		this.commandRegistry.registerCommandContribution("tabWidgetContextMenuActions", "orion.tabWidget.keepOpen", editorTab.tabWidgetContextItemindex++,"orion.tabWidgetContextMenuActions/orion.tabWidget.others", false, new mKeyBinding.KeyBinding('K', true, true)); //$NON-NLS-1$ //$NON-NLS-2$
 	},
 	scrollToTab: function(tab) {
 		var sib = tab.previousSibling;
@@ -977,6 +896,7 @@ objects.mixin(EditorViewer.prototype, {
 		this.createInputManager();
 		this.createTabWidget();
 		this.createEditorView();
+		this.createTabWidgetContextMenu();
 	},
 	
 	createTextModel: function() {
@@ -985,6 +905,87 @@ objects.mixin(EditorViewer.prototype, {
 	
 	createEditorView: function() {
 		this.editorView = new mEditorView.EditorView(this.defaultOptions());
+	},
+	createTabWidgetContextMenu: function(){
+		var tabWidgetContextMenuNode = document.createElement("ul"); //$NON-NLS-0$
+		tabWidgetContextMenuNode.className = "dropdownMenu"; //$NON-NLS-0$
+		tabWidgetContextMenuNode.setAttribute("role", "menu"); //$NON-NLS-1$ //$NON-NLS-2$
+		tabWidgetContextMenuNode.style.zIndex = "201";  // Need to be greater than tooltipcontainer's zindex which is 200
+		this.tabWidget.editorTabContainer.parentElement.appendChild(tabWidgetContextMenuNode);
+		// Hook the context menu to the tabWidget's editorTabNode node
+		var contextMenu = new mContextMenu.ContextMenu({
+			dropdown: tabWidgetContextMenuNode,
+			triggerNode: this.tabWidget.editorTabContainer
+		});
+		//function called when the context menu is triggered to set the nav selection properly
+		var contextMenuTriggered = function(wrapper) {
+			var re = wrapper.event;
+			if (re.target) {
+				this.commandRegistry.destroy(tabWidgetContextMenuNode); // remove previous content
+				this.commandRegistry.renderCommands("tabWidgetContextMenuActions", tabWidgetContextMenuNode, null, this, "menu", re.srcElement.parentElement.href || ""); //$NON-NLS-1$ //$NON-NLS-2$
+			}
+		}.bind(this);
+		contextMenu.addEventListener("triggered", contextMenuTriggered);
+		this.registerTabWidgetContextMenu();
+	},
+	registerTabWidgetContextMenu: function(){
+		var closeOtherTabWidgetCommand = new mCommands.Command({
+			name: messages.closeOthers,
+			id: "orion.tabWidget.closeothers", //$NON-NLS-0$
+			visibleWhen: /** @callback */ function(items, data) {
+				return data.userData && Object.keys(this.tabWidget.editorTabs).length > 1;
+			}.bind(this),
+			callback: function(commandInvocation) {
+				Object.keys(this.tabWidget.editorTabs).forEach(function(tab){
+					if(commandInvocation.userData.indexOf(tab) === -1){
+						this.tabWidget.editorTabs[tab].closeButtonNode.click();
+					}
+				}.bind(this));
+			}.bind(this)
+		});
+		var closeToRight = new mCommands.Command({
+			name: messages.closeTotheRight,
+			id: "orion.tabWidget.closetoright", //$NON-NLS-0$
+			visibleWhen: /** @callback */ function(items, data) {
+				return data.userData && Object.keys(this.tabWidget.editorTabs).length > 1;
+			}.bind(this),
+			callback: function(commandInvocation) {
+				// Get the right hand tabs from this.editorTab parent.
+				var firstNodeIndexToRemove;
+				Array.prototype.find.call(this.tabWidget.editorTabContainer.childNodes, function(node, index){
+					if(node.href === commandInvocation.userData){
+						firstNodeIndexToRemove = index + 1;
+						return true;
+					}
+				})
+				var closingButtons = [];
+				for(var j = firstNodeIndexToRemove; j < this.tabWidget.editorTabContainer.childNodes.length; j++){
+					var closeButton = this.tabWidget.editorTabContainer.childNodes[j].querySelector(".editorTabCloseButton");
+					closingButtons.push(closeButton);
+				}
+				closingButtons.forEach(function(closeButton){
+					closeButton.click();
+				});
+			}.bind(this)
+		});
+		var keepOpen = new mCommands.Command({
+			name: messages.keepOpen,
+			id: "orion.tabWidget.keepOpen", //$NON-NLS-0$
+			visibleWhen: /** @callback */ function(items, data) {
+				return data.userData && this.tabWidget.transientTab && data.userData === this.tabWidget.transientTab.href;
+			}.bind(this),
+			callback: function(commandInvocation) {
+				this.tabWidget.transientToPermenant();
+			}.bind(this)
+		});
+		this.commandRegistry.addCommand(closeOtherTabWidgetCommand);
+		this.commandRegistry.addCommand(closeToRight);
+		this.commandRegistry.addCommand(keepOpen);
+		// tabWidget context menu
+		this.commandRegistry.addCommandGroup("tabWidgetContextMenuActions", "orion.tabWidgetContextMenuGroup", 100, null, null, null, null, null, "dropdownSelection"); //$NON-NLS-1$ //$NON-NLS-2$
+		this.commandRegistry.registerCommandContribution("tabWidgetContextMenuActions", "orion.tabWidget.closeothers", this.tabWidget.tabWidgetContextItemindex++,"orion.tabWidgetContextMenuActions/orion.tabWidget.closeGroup"); //$NON-NLS-1$ //$NON-NLS-2$
+		this.commandRegistry.registerCommandContribution("tabWidgetContextMenuActions", "orion.tabWidget.closetoright", this.tabWidget.tabWidgetContextItemindex++,"orion.tabWidgetContextMenuActions/orion.tabWidget.closeGroup"); //$NON-NLS-1$ //$NON-NLS-2$
+		this.commandRegistry.registerCommandContribution("tabWidgetContextMenuActions", "orion.tabWidget.keepOpen", this.tabWidget.tabWidgetContextItemindex++,"orion.tabWidgetContextMenuActions/orion.tabWidget.others", false, new mKeyBinding.KeyBinding('K', true, true)); //$NON-NLS-1$ //$NON-NLS-2$
 	},
 	
 	createTabWidget: function() {
@@ -995,6 +996,7 @@ objects.mixin(EditorViewer.prototype, {
 			fileClient: this.fileClient,
 			generalPreferences: this.generalPreferences,
 			inputManager: this.inputManager,
+			tabWidgetContextItemindex: 1,
 			activateEditorViewer: function() {
 				this.activateContext.setActiveEditorViewer(this);
 			}.bind(this)
