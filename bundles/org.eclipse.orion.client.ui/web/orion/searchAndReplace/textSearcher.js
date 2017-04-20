@@ -54,9 +54,6 @@ define([
 		show: function(options) {
 			mFind.Find.prototype.show.call(this, options);
 			var findString = options.findString;
-			if(!this.isRangeSearch()){
-				this._addRecentfind(findString);
-			}
 			var replaceString = options.replaceString;
 			var findDiv = document.getElementById("localSearchFindWith"); //$NON-NLS-0$
 			if (!findDiv) {
@@ -73,6 +70,9 @@ define([
 				replaceDiv.value = replaceString;
 			}
 			this.setOptions({selectedLines: true, multipleLine: true});
+			if(!this.isRangeSearch()){
+				this._addRecentfind(findString);
+			}
 			window.setTimeout(function() {
 				findDiv.select();
 				findDiv.focus();
