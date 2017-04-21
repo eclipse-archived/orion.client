@@ -833,11 +833,13 @@ define([
 									// this is part of a folder upload, upload the file directly without showing
 									// progress for it but call decrementEntryCount when the upload finishes
 									var unzip = file.name.indexOf(".zip") === file.name.length - 4 && window.confirm(i18nUtil.formatMessage(messages["Unzip ${0}?"], file.name)); //$NON-NLS-1$ //$NON-NLS-0$
-									var handlers = {
-										error: function(event) {
+									performDrop(target, file, explorer, unzip, false, true).then(
+										decrementEntryCount,
+										function(error) {
+											decrementEntryCount();
 											var errorMessage = messages["UploadingFileErr"] + file.name;
-											if (event && event.Message) {
-												errorMessage += " [" + event.Message + "]";
+											if (error && error.Message) {
+												errorMessage += " [" + error.Message + "]";
 											}
 											if (statusService) {
 												statusService.setProgressResult({
@@ -847,10 +849,8 @@ define([
 											} else {
 												window.console.log(errorMessage);
 											}
-										},
-										loadend: decrementEntryCount
-									};
-									performDrop(target, file, explorer, unzip, false, handlers, true);
+										}
+									);
 								} else {
 									explorer._uploadFile(item, file, true);
 								}
@@ -992,26 +992,23 @@ define([
 					var progressBar = uploadNodeContainer.progressBar;
 					var cancelButton = uploadNodeContainer.cancelButton;
 					var destroy = uploadNodeContainer.destroyFunction;
+					var ignoreErrors = false;
 
 					var statusService = this.registry.getService("orion.page.message"); //$NON-NLS-0$
 
-					var handlers = {
-						progress: function(event) {
-							var percentageText = "";
-							if (event.lengthComputable) {
-								percentageText = Math.floor(event.loaded / event.total * 100) + "%";
-								progressBar.style.width = percentageText;
-								var loadedKB = Math.round(event.loaded / 1024);
-								var totalKB = Math.round(event.total / 1024);
-								progressBar.title = messages["Upload progress: "] + percentageText + ",  " + loadedKB + "/" + totalKB + " KB"; //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-								refNode.title = progressBar.title;
+					var unzip = file.name.indexOf(".zip") === file.name.length - 4 && window.confirm(i18nUtil.formatMessage(messages["Unzip ${0}?"], file.name)); //$NON-NLS-1$ //$NON-NLS-0$
+					var promise = this.dragAndDrop(targetItem, file, this, unzip, false, true);
+					var done = function() {
+						destroy();
+						this.changedItem(targetItem, true);
+					}.bind(this);
+					promise.then(
+						done,
+						function(error) {
+							done();
+							if (ignoreErrors) {
+								return;
 							}
-						},
-						loadend: function(event) {
-							destroy();
-							this.changedItem(targetItem, true);
-						}.bind(this),
-						error: function(event) {
 							var errorMessage = messages["UploadingFileErr"] + file.name;
 							if (event && event.Message) {
 								errorMessage += " [" + event.Message + "]";
@@ -1024,14 +1021,23 @@ define([
 							} else {
 								window.console.log(errorMessage);
 							}
+						},
+						function(event) {
+							var percentageText = "";
+							if (event.lengthComputable) {
+								percentageText = Math.floor(event.loaded / event.total * 100) + "%";
+								progressBar.style.width = percentageText;
+								var loadedKB = Math.round(event.loaded / 1024);
+								var totalKB = Math.round(event.total / 1024);
+								progressBar.title = messages["Upload progress: "] + percentageText + ",  " + loadedKB + "/" + totalKB + " KB"; //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+								refNode.title = progressBar.title;
+							}
 						}
-					};
-
-					var unzip = file.name.indexOf(".zip") === file.name.length - 4 && window.confirm(i18nUtil.formatMessage(messages["Unzip ${0}?"], file.name)); //$NON-NLS-1$ //$NON-NLS-0$
-					var req = this.dragAndDrop(targetItem, file, this, unzip, false, handlers, true);
+					);
 
 					cancelButton.addEventListener("click", function() {
-						req.abort();
+						ignoreErrors = true;
+						promise.cancel();
 					});
 				}.bind(this));
 			}.bind(this);

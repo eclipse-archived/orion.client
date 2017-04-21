@@ -49,10 +49,11 @@ define([
 	'orion/generalPreferences',
 	'orion/metrics',
 	'orion/util',
+	'orion/xhr'
 ], function(messages, mCommands, mGlobalCommands, PageUtil, lib, i18nUtil, objects, mOperationsClient, URITemplate, 
 		ThemeBuilder, SettingsList, mStatus, mThemePreferences, editorThemeData, containerThemeData, editorThemeImporter, SplitSelectionLayout, PluginList, 
 		GitSettings, EditorSettings, EditorWidget, ContainerWidget, ThemeSettings, ContainerSetup, editorSetup, ContainerScopeList, EditorScopeList, UserSettings, GlobalizationSettings, GeneralSettings, 
-		mEditorPreferences, mGeneralPreferences, mMetrics, util) {
+		mEditorPreferences, mGeneralPreferences, mMetrics, util, xhr) {
 
 	
 	/**
@@ -77,20 +78,17 @@ define([
 		this.settingsCore.pluginRegistry.addEventListener("started", pluginsUpdated);
 		this.settingsCore.pluginRegistry.addEventListener("stopped", pluginsUpdated);
 		this.settingsCore.pluginRegistry.addEventListener("updated", pluginsUpdated);
-		
-		var xhr = new XMLHttpRequest();
+
 		this.versionString = null;
-		xhr.onreadystatechange = function() {
-			if (xhr.readyState === 4 && xhr.status === 200){
-				var resp = JSON.parse(xhr.responseText);
+		xhr("GET", "../version", {}).then(
+			function(result) {
+				var resp = JSON.parse(result.responseText);
 				if (typeof resp.build === "string"){
 					this.versionString = i18nUtil.formatMessage(messages["version"], resp.build);
 					this.statusService.setMessage(this.versionString);
 				}
-			}
-		}.bind(this);
-		xhr.open("GET", "../version",  true); //$NON-NLS-1$ //$NON-NLS-2$
-		xhr.send(null);
+			}.bind(this)
+		);
 	}
 	SettingsContainer.prototype = Object.create(superPrototype);
 	objects.mixin(SettingsContainer.prototype, {

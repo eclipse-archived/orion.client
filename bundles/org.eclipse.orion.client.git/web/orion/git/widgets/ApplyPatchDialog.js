@@ -11,7 +11,7 @@
  
 /*eslint-env browser, amd*/
 
-define([ 'i18n!git/nls/gitmessages', 'orion/webui/dialog', 'orion/xsrfUtils' ], function(messages, dialog, xsrfUtils) {
+define([ 'i18n!git/nls/gitmessages', 'orion/webui/dialog', 'orion/xsrfUtils', 'orion/xhr' ], function(messages, dialog, xsrfUtils, xhr) {
 
 	function ApplyPatchDialog(options) {
 		this._init(options);
@@ -100,28 +100,27 @@ define([ 'i18n!git/nls/gitmessages', 'orion/webui/dialog', 'orion/xsrfUtils' ], 
 		formData.append("url", this.$patchurl.value);
 		formData.append("radio", this.$fileRadio.checked ? "fileRadio" : "urlRadio");
 
-		this.req = new XMLHttpRequest();
-		this.req.open('post', this.options.diffLocation);
-		this.req.setRequestHeader("Orion-Version", "1");
-		this.req.onreadystatechange = this.handleReadyState.bind(this);
-		xsrfUtils.addCSRFNonce(this.req);
-		this.req.send(formData);
-	};
-
-	/** @callback */
-	ApplyPatchDialog.prototype.handleReadyState = function(state) {
-		if (this.req.readyState === 4) {
-			if (this.req.status === 200){
-				if (this.options.deferred){
-					this.options.deferred.resolve(this.req.responseText);
+		// TODO the following should move to gitClient
+		var opts = {
+			headers: {
+				"Orion-Version": "1"
+			},
+			data: formData
+		};
+		return xhr("POST", this.options.diffLocation, opts).then(
+			function(result) {
+				if (this.options.deferred) {
+					this.options.deferred.resolve(result.responseText);
 				}
-			} else {
+				this.hide();
+			}.bind(this),
+			function(error) {
 				if (this.options.deferred){
-					this.options.deferred.reject(this.req.responseText);
+					this.options.deferred.reject(error.responseText);
 				}
-			}
-			this.hide();
-		}
+				this.hide();
+			}.bind(this)
+		);
 	};
 
 	ApplyPatchDialog.prototype.constructor = ApplyPatchDialog;

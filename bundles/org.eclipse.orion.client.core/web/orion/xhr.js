@@ -118,7 +118,8 @@ define([
 			}
 		});
 		
-		xhr.onabort = function() {
+		var eventSource = options.upload ? xhr.upload : xhr;
+		eventSource.onabort = function() {
 			aborted = true;
 			if (!cancelled) {
 				var cancelError = new Error("Cancel");
@@ -128,7 +129,7 @@ define([
 		};
 		xhr.onload = function() {
 			var result = makeResult(url, options, xhr);
-			if(200 <= xhr.status && xhr.status < 400) {
+			if (200 <= xhr.status && xhr.status < 400) {
 				d.resolve(result);
 			} else {
 				d.reject(result);
@@ -137,14 +138,14 @@ define([
 				}
 			}
 		};
-		xhr.onerror = function() {
+		eventSource.onerror = function() {
 			var result = makeResult(url, options, xhr);
 			d.reject(result);
 			if (log && typeof console !== 'undefined') { //$NON-NLS-0$
 				console.log(new Error(xhr.statusText));
 			}
 		};
-		xhr.onprogress = function(progressEvent) {
+		eventSource.onprogress = function(progressEvent) {
 			progressEvent.xhr = xhr;
 			d.progress(progressEvent);
 		};
