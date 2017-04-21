@@ -587,11 +587,8 @@ function countCommit(revWalk){
 }
 
 function getCommitParents(repo, commit, fileDir) {
-	return commit.getParents()
-	.then(function(parents) {
-		return parents.map(function(parent) {
-			return createParentJSON(parent.sha(), fileDir);
-		});
+	return commit.parents().map(function(parent) {
+		return createParentJSON(parent.toString(), fileDir);
 	});
 }
 
