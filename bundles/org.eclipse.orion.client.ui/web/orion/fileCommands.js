@@ -16,8 +16,8 @@
 define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/i18nUtil', 'orion/uiUtils', 'orion/fileUtils', 'orion/commands', 'orion/fileDownloader',
 	'orion/commandRegistry', 'orion/contentTypes', 'orion/compare/compareUtils', 
 	'orion/Deferred', 'orion/webui/dialogs/DirectoryPrompterDialog',
-	'orion/EventTarget', 'orion/form', 'orion/xsrfUtils', 'orion/bidiUtils', 'orion/util'],
-	function(messages, lib, i18nUtil, mUIUtils, mFileUtils, mCommands, mFileDownloader, mCommandRegistry, mContentTypes, mCompareUtils, Deferred, DirPrompter, EventTarget, form, xsrfUtils, bidiUtils, util){
+	'orion/EventTarget', 'orion/form', 'orion/xhr', 'orion/bidiUtils', 'orion/util'],
+	function(messages, lib, i18nUtil, mUIUtils, mFileUtils, mCommands, mFileDownloader, mCommandRegistry, mContentTypes, mCompareUtils, Deferred, DirPrompter, EventTarget, form, xhr, bidiUtils, util){
 
 	/**
 	 * Utility methods
@@ -72,85 +72,87 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/i18n
 	 * events describing the file upload.
 	 * @param {Boolean} unzip
 	 * @param {Boolean} force
-	 * @param {Object} handlers Optional. An object which contains handlers for the different events that the upload can fire.
-	 * 			handlers.progress The handler function that should be called when progress occurs.
-	 * 			handlers.load The handler function that should be called when the transfer completes successfully.
-	 * 			handlers.error The handler function that should be called if the transfer fails.
-	 * 			handlers.abort The handler function that should be called if the transfer is cancelled by the user.
-	 * 			handlers.loadend The handler function that should be called when the transfer completes (regardless of success or failure).
 	 * @param {Boolean} preventNotification Optional. true if a model event should not be dispatched after the file is uploaded, false otherwise
 	 * @returns {XMLHttpRequest} The XMLHttpRequest object that was created and used for the upload.
 	 */
-	fileCommandUtils.uploadFile = function(targetFolder, file, explorer, unzip, force, handlers, preventNotification) { 
-		var req = new XMLHttpRequest();
-		
-		if (handlers) {
-			if (handlers.progress) {
-				//transfer in progress
-				req.upload.addEventListener("progress", handlers.progress, false);
-			}
-			if (handlers.load) {
-				//transfer finished successfully
-				req.upload.addEventListener("load", handlers.load, false);	
-			}
-			if (handlers.error) {
-				//transfer failed
-				req.upload.addEventListener("error", handlers.error, false);	
-			}
-			if (handlers.abort) {
-				//transfer cancelled
-				req.upload.addEventListener("abort", handlers.abort, false);
-			}
-			if (handlers.loadend) {
-				//transfer finished, status unknown
-				req.addEventListener("loadend", handlers.loadend, false);
-			}
-		}
-
-		req.open('post', targetFolder.ImportLocation, true);
-		req.setRequestHeader("X-Requested-With", "XMLHttpRequest"); //$NON-NLS-1$ //$NON-NLS-0$
-		req.setRequestHeader("Slug", form.encodeSlug(file.name)); //$NON-NLS-0$
-		xsrfUtils.addCSRFNonce(req);
-
+	fileCommandUtils.uploadFile = function(targetFolder, file, explorer, unzip, force, preventNotification) {
 		var xferOptions = force ? "overwrite-older": "no-overwrite";
 		// TODO if we want to unzip zip files, don't use this...
 		if (!unzip) {
 			 xferOptions += "," + "raw";
 		}
-		req.setRequestHeader("X-Xfer-Options", xferOptions); //$NON-NLS-1$
-		req.setRequestHeader("Content-Type", "application/octet-stream"); //$NON-NLS-0$
-		req.onreadystatechange = function(state) {
-			if(req.readyState === 4) {
-				if (req.status === 400){
-					var result = {};
-					try{
-						result = JSON.parse(req.responseText);
-					}catch(e){
-					}
-					if(result.JsonData && result.JsonData.ExistingFiles){
-						var confirmFunction = (explorer && explorer.serviceRegistry) ? explorer.serviceRegistry.getService("orion.page.dialog").confirm : confirm; //$NON-NLS-0$
-						if(confirmFunction(result.Message + "\nWould you like to retry the import with force overwriting?")){
-							fileCommandUtils.uploadFile(targetFolder, file, explorer, unzip, true, handlers);
-							return;
-						}
-					}
-					if (result.Severity === "Error") {
-						if (handlers && handlers.error) {
-							handlers.error(result);
-							return;
-						}
-						errorHandler(result);
-					}
-				}
+
+		var opts = {
+			headers: {
+				"Slug": form.encodeSlug(file.name), //$NON-NLS-0$
+				"Orion-Version": "1", //$NON-NLS-1$ //$NON-NLS-0$
+				"X-Xfer-Options": xferOptions, //$NON-NLS-0$
+				"Content-Type": "application/octet-stream" //$NON-NLS-1$ //$NON-NLS-0$
+			},
+			data: file,
+			upload: true
+		};
+
+		var ignoreError = false;
+		var promise = new Deferred();
+		var xhrPromise = xhr("POST", targetFolder.ImportLocation, opts).then(
+			function(result) {
 				if (!preventNotification) {
 					//TODO Not sure if we should send out event from file Client here
 					dispatchModelEventOn({ type: "create", parent: targetFolder, newValue: null /* haven't fetched the new file in Orion yet */ }); //$NON-NLS-0$	
 				}
+				promise.resolve(result);
+			},
+			function(error) {
+				if (ignoreError) {
+					return;
+				}
+
+				var result = {};
+				try {
+					result = JSON.parse(error.responseText);
+				} catch(e) {
+				}
+				if (error.status === 400) {
+				 	if (result.JsonData && result.JsonData.ExistingFiles) {
+				 		var retry = function() {
+							fileCommandUtils.uploadFile(targetFolder, file, explorer, unzip, true, preventNotification).then(
+								promise.resolve,
+								promise.reject,
+								promise.progress);
+				 		};
+				 		var retryMessage = result.Message + "\nWould you like to retry the import with force overwriting?";
+
+				 		if (explorer && explorer.serviceRegistry) {
+				 			explorer.serviceRegistry.getService("orion.page.dialog").confirm(retryMessage, function(response) {
+			 					if (response) {
+			 						retry();
+		 						} else {
+		 							promise.reject(result);
+		 						}
+							});
+			 				return;
+				 		}
+			 			if (confirm(retryMessage)) {
+			 				retry();
+			 				return;
+		 				}
+					}
+				}
+				promise.reject(result);
+			},
+			function(progress) {
+				promise.progress(progress);
 			}
-		}.bind(this);
-		req.send(file);
+		);
+		promise.then(null, function(error) {
+			if (error instanceof Error && error.name === "Cancel") {
+				ignoreError = true;
+				xhrPromise.cancel();
+			}
+		});
 		
-		return req;
+		return promise;
 	};
 
 	/**
