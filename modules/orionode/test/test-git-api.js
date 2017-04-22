@@ -1384,6 +1384,184 @@ maybeDescribe("git", function() {
 	describe("Merge", function() {
 		before(setup);
 
+		/**
+		 * Test suite for merging two branches that don't share a common ancestor.
+		 */
+		describe("Unrelated", function() {
+			it("identical content", function(finished) {
+				var testName = "merge-unrelated-identical-content";
+				var repository;
+				var initial, modify, extra, extra2;
+				var name = "test.txt";
+				var unrelated = "unrelated.txt";
+
+				var client = new GitClient(testName);
+				client.init();
+				// create a file with content "A" in it
+				client.setFileContents(name, "A");
+				client.stage(name);
+				client.commit();
+				client.start().then(function(commit) {
+					initial = commit.Id;
+					// open the repository using NodeGit
+					var testPath = path.join(WORKSPACE, "merge-unrelated-identical-content");
+					return git.Repository.open(testPath);
+				})
+				.then(function(repo) {
+					repository = repo;
+					return repository.refreshIndex();
+				})
+				.then(function(index) {
+					// get the oid of the current repository state
+					return index.writeTree();
+				})
+				.then(function(oid) {
+					// using that oid, create a commit in another branch with no parent commit
+					return repository.createCommit("refs/heads/other",
+						git.Signature.default(repository),
+						git.Signature.default(repository),
+							"unrelated", oid, [ ]);
+					})
+				.then(function() {
+					// merge in the branch with an unrelated history
+					client.merge("other");
+					return client.start();
+				})
+				.then(function(result) {
+					// should have succeeded, content was in fact identical
+					assert.equal(result.Result, "MERGED");
+					assert.equal(result.FailingPaths, undefined);
+
+					// check that the status is clean
+					client.status("SAFE");
+					return client.start();
+				})
+				.then(function() {
+					finished();
+				})
+				.catch(function(err) {
+					finished(err);
+				});
+			});
+
+			it("dirty working dir", function(finished) {
+				var testName = "merge-unrelated-dirty-working-dir";
+				var repository;
+				var initial, modify, extra, extra2;
+				var name = "test.txt";
+				var unrelated = "unrelated.txt";
+
+				var client = new GitClient(testName);
+				client.init();
+				client.setFileContents(name, "1\n2\n3");
+				client.stage(name);
+				client.commit();
+				client.start().then(function(commit) {
+					initial = commit.Id;
+					client.setFileContents(name, "a\nb\nc");
+					client.stage(name);
+					return client.start();
+				})
+				.then(function() {
+					// open the repository using NodeGit
+					var testPath = path.join(WORKSPACE, testName);
+					return git.Repository.open(testPath);
+				})
+				.then(function(repo) {
+					repository = repo;
+					return repository.refreshIndex();
+				})
+				.then(function(index) {
+					// get the oid of the current repository state
+					return index.writeTree();
+				})
+				.then(function(oid) {
+					// using that oid, create a commit in another branch with no parent commit
+					return repository.createCommit("refs/heads/other",
+						git.Signature.default(repository),
+						git.Signature.default(repository),
+							"unrelated", oid, [ ]);
+					})
+				.then(function() {
+					// reset and make the working directory dirty
+					client.reset("HARD", initial);
+					client.setFileContents(name, "B");
+					// merge in the branch with an unrelated history
+					client.merge("other");
+					return client.start();
+				})
+				.then(function(result) {
+					// should have failed because of the dirty working dir
+					assert.equal(result.Result, "FAILED");
+					assert.equal(Object.keys(result.FailingPaths).length, 1);
+					assert.equal(result.FailingPaths[name], "");
+					finished();
+				})
+				.catch(function(err) {
+					finished(err);
+				});
+			});
+
+			it("dirty index", function(finished) {
+				var testName = "merge-unrelated-dirty-index";
+				var repository;
+				var initial, modify, extra, extra2;
+				var name = "test.txt";
+				var unrelated = "unrelated.txt";
+
+				var client = new GitClient(testName);
+				client.init();
+				client.setFileContents(name, "1\n2\n3");
+				client.stage(name);
+				client.commit();
+				client.start().then(function(commit) {
+					initial = commit.Id;
+					client.setFileContents(name, "a\nb\nc");
+					client.stage(name);
+					return client.start();
+				})
+				.then(function() {
+					// open the repository using NodeGit
+					var testPath = path.join(WORKSPACE, testName);
+					return git.Repository.open(testPath);
+				})
+				.then(function(repo) {
+					repository = repo;
+					return repository.refreshIndex();
+				})
+				.then(function(index) {
+					// get the oid of the current repository state
+					return index.writeTree();
+				})
+				.then(function(oid) {
+					// using that oid, create a commit in another branch with no parent commit
+					return repository.createCommit("refs/heads/other",
+						git.Signature.default(repository),
+						git.Signature.default(repository),
+							"unrelated", oid, [ ]);
+					})
+				.then(function() {
+					// reset and make the working directory dirty
+					client.reset("HARD", initial);
+					client.setFileContents(name, "B");
+					client.stage(name);
+					// merge in the branch with an unrelated history
+					client.merge("other");
+					return client.start();
+				})
+				.then(function(result) {
+					// should have failed because of the dirty working dir
+					assert.equal(result.Result, "FAILED");
+					assert.equal(Object.keys(result.FailingPaths).length, 1);
+					assert.equal(result.FailingPaths[name], "");
+					finished();
+				})
+				.catch(function(err) {
+					finished(err);
+				});
+			});
+		});
+
 		describe("Conflicts", function() {
 			it("POST commit will resolve merge in progress", function(finished) {
 				var name = "conflicts.txt";

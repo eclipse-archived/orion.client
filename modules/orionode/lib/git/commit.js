@@ -993,26 +993,29 @@ function merge(req, res, branchToMerge, squash) {
 			});
 		}
 
-		return repo.mergeBranches("HEAD", branchToMerge)
-		.then(function(_oid) {
-			oid = _oid;
-		})
-		.catch(function(index) {
-			// the merge failed due to conflicts
-			conflicting = true;
-			return git.AnnotatedCommit.lookup(repo, commit.id())
-			.then(function(annotated) {
-				var retCode = git.Merge.merge(repo, annotated, null, null);
-				if (retCode === git.Error.CODE.ECONFLICT) {
-					// checkout failed due to a conflict
-					return getConflictingPaths(repo, head, commit)
-					.then(function(conflictingPaths) {
-						paths = conflictingPaths;
-					});
-				} else if (retCode !== git.Error.CODE.OK) {
-					throw new Error("Internal merge failure (error code " + retCode + ")");
-				}
+		// try to find a common ancestor before merging
+		return git.Merge.base(repo, head, commit.id())
+		.then(function() {
+			return repo.mergeBranches("HEAD", branchToMerge)
+			.then(function(_oid) {
+				oid = _oid;
+			})
+			.catch(function(index) {
+				// the merge failed due to conflicts
+				conflicting = true;
+				return forceMerge(repo, head, commit, branchToMerge, false, function(conflictingPaths) {
+					paths = conflictingPaths;
+				});
 			});
+		})
+		.catch(function(err) {
+			if (err.message === "No merge base found") {
+				// no common ancestor between the two branches, force the merge
+				return forceMerge(repo, head, commit, branchToMerge, true, function(conflictingPaths) {
+					paths = conflictingPaths;
+				});
+			}
+			throw err;
 		});
 	})
 	.then(function() {
@@ -1033,6 +1036,42 @@ function merge(req, res, branchToMerge, squash) {
 	})
 	.catch(function(err) {
 		writeError(400, res, err.message);
+	});
+}
+
+/**
+ * Force a merge from the specified comment onto HEAD. This may leave
+ * the repository in a conflicted state. If there are no conflits, a
+ * merge commit will be created to complete the merge.
+ * 
+ * @param {Repository} repo the repository to perform the merge in
+ * @param {Commit} head the commit that HEAD is pointing at
+ * @param {Commit} commit the commit to merge in
+ * @param {String} branchToMerge the name of the other branch
+ * @param {boolean} createMergeCommit <tt>true</tt> if a merge commit should be created automatically,
+ *                                    <tt>false</tt> otherwise
+ * @param {Function} conflictingPathsCallback the callback to notify if the merge fails due to
+ *                                            conflicting paths in the working directory or the index
+ */
+function forceMerge(repo, head, commit, branchToMerge, createMergeCommit, conflictingPathsCallback) {
+	return git.AnnotatedCommit.lookup(repo, commit.id())
+	.then(function(annotated) {
+		var retCode = git.Merge.merge(repo, annotated, null, null);
+		if (retCode === git.Error.CODE.ECONFLICT) {
+			// checkout failed due to a conflict
+			return getConflictingPaths(repo, head, commit).then(conflictingPathsCallback);
+		} else if (retCode !== git.Error.CODE.OK) {
+			throw new Error("Internal merge failure (error code " + retCode + ")");
+		}
+
+		if (createMergeCommit) {
+			var signature = repo.defaultSignature();
+			var message = "Merged branch '" + branchToMerge + "'"; 
+			return createCommit(repo,
+				signature.name(), signature.email(),
+				signature.name(), signature.email(),
+				message, false, false);
+		}
 	});
 }
 
