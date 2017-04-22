@@ -3105,6 +3105,83 @@ maybeDescribe("git", function() {
 					finished(err);
 				});
 			});
+
+			/**
+			 * 1. Create a file in branch A in commit O.
+			 * 2. Create the same file with the same content in branch B
+			 *    with a fresh history in commit O'.
+			 * 3. Add an empty commit in branch B.
+			 * 4. Merge branch B into branch A.
+			 * 5. The returned history should only contain commit O.
+			 * 
+			 * Actual repository history:
+			 * 
+			 * M
+			 * |\
+			 * | \
+			 * O U
+			 *   |
+			 *   O'
+			 * 
+			 * Returned history for the file:
+			 * 
+			 * O
+			 */
+			it("unrelated identical content", function(finished) {
+				var repository;
+				var initial, indexOid;
+				var name = "test.txt";
+
+				var client = new GitClient("graph-unrelated-identical-content");
+				client.init();
+				// create a file with content "A" in it
+				client.setFileContents(name, "A");
+				client.stage(name);
+				client.commit();
+				client.start().then(function(commit) {
+					initial = commit.Id;
+					// open the repository using NodeGit
+					var testPath = path.join(WORKSPACE, "graph-unrelated-identical-content");
+					return git.Repository.open(testPath);
+				})
+				.then(function(repo) {
+					repository = repo;
+					return repository.refreshIndex();
+				})
+				.then(function(index) {
+					// get the oid of the current repository state
+					return index.writeTree();
+				})
+				.then(function(oid) {
+					indexOid = oid;
+					// using that oid, create a commit in another branch with no parent commit
+					return repository.createCommit("refs/heads/other",
+						git.Signature.default(repository),
+						git.Signature.default(repository),
+							"unrelated", indexOid, [ ]);
+				})
+				.then(function(commit) {
+					return repository.createCommit("refs/heads/other",
+						git.Signature.default(repository),
+						git.Signature.default(repository),
+							"unrelated", indexOid, [ commit ])
+				})
+				.then(function() {
+					// merge in the branch with an unrelated history
+					client.merge("other");
+					client.log("master", "master", name);
+					return client.start();
+				})
+				.then(function(log) {
+					assert.equal(log.Children.length, 1);
+					assert.equal(log.Children[0].Id, initial);
+					assert.equal(log.Children[0].Parents.length, 1);
+					finished();
+				})
+				.catch(function(err) {
+					finished(err);
+				});
+			});
 		}) // describe("Graph");
 	}); // describe("Log")
 

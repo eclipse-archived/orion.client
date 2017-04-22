@@ -175,7 +175,9 @@ function getCommitLog(req, res) {
 										}
 									}
 									// mark the common ancestor as not to be skipped over
-									keep.push(base);
+									if (base !== null) {
+										keep.push(base);
+									}
 									return true;
 								}
 							}
@@ -217,6 +219,13 @@ function getCommitLog(req, res) {
 				parents.push(base);
 				return resolveAncestor(parents);
 			}
+		})
+		.catch(function(err) {
+			if (err.message === "No merge base found") {
+				// two commits in unrelated histories
+				return null;
+			}
+			throw err;
 		});
 	}
 	var commits = []	, repo;
