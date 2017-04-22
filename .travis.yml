@@ -10,7 +10,7 @@ sudo: false
 env:
   matrix:
     - export NODE_VERSION="4"
-    - export NODE_VERSION="6.5"
+    - export NODE_VERSION="6"
 
 matrix:
   fast_finish: true
