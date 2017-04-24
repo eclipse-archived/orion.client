@@ -18,6 +18,13 @@ For full instructions, see the [Getting Started guide](https://wiki.eclipse.org/
 and then running `cd modules/orionode && npm install`.
 * Orion has an optional dependency on the node-pty package, which is not installed by default. You can install this package with `npm install node-pty`.  If this package is not installed then an error message will be displayed when the server is run, but will still run fine.
 
+#### Nodegit Installation
+During the installation from [NPM](https://www.npmjs.com/package/orion), Nodegit will try to find binaries for your installed version of Node.js / operating system. If it has them, they will be downloaded and the installation will complete normally.
+If however, it does not have a pre-built version ready to go, Nodegit will start up its builder to try and create the binaries it requires. Depending on your operating system and build-time tools you have installed, this will complete normally and everything will work fine. 
+If you are missing build tools that it needs to build its binaries, the install will fail.
+
+If your build / install does fail, please read [Nodegits' build page](http://www.nodegit.org/guides/install/from-source/) to make sure you have all the expected tools installed and try running ```npm install orion``` again.
+
 ### Running the server
 1. Browse to the directory where you installed Orion, usually `node_modules/orion/`.
 2. Edit the `orion.conf` file. Uncomment the following line, replacing the password with something of your choice:
