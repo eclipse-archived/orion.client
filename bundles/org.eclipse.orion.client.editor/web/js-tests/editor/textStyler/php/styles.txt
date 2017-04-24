@@ -240,7 +240,8 @@
 {"start":912,"end":932,"style":{"styleClass":"string quoted double"}}
 {"start":932,"end":933,"style":{"styleClass":"source php embedded"}}
 {"start":934,"end":936,"style":{"styleClass":"entity name declaration php"}}
-{"start":987,"end":990,"style":{"styleClass":"entity name declaration php"}}
+{"start":987,"end":989,"style":{"styleClass":"entity name declaration php"}}
+{"start":989,"end":990,"style":{"styleClass":"source php embedded"}}
 {"start":990,"end":1002,"style":{"styleClass":"keyword operator php"}}
 {"start":1002,"end":1003,"style":{"styleClass":"punctuation section parens begin"}}
 {"start":1003,"end":1011,"style":{"styleClass":"source php embedded"}}
