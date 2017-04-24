@@ -248,12 +248,10 @@ define("orion/editor/find", [ //$NON-NLS-0$
 				if (this._reverse) {
 					where = this._editor.getSelection().start -1;
 				}
-				if(where >= this._start && where <= this._end) {
+				if(where >= this._searchRangeModel.start && where <= this._searchRangeModel.end) {
 					return where;
-				}
-			}
-			if (this._start !== undefined) {
-				return this._start;
+				} 
+				return this._searchRangeModel.start;
 			}
 			if (this._reverse) {
 				return this._editor.getSelection().start - 1;
@@ -348,8 +346,8 @@ define("orion/editor/find", [ //$NON-NLS-0$
 				Deferred.when(this._editor.getModel().find({
 					string: string,
 					start: start,
-					rangeStart: this._start,
-					rangeEnd: this._end,
+					rangeStart: this._searchRangeModel ? this._searchRangeModel.start : undefined,
+					rangeEnd: this._searchRangeModel ? this._searchRangeModel.end : undefined,
 					reverse: false,
 					wrap: this._wrap,
 					regex: this._regex,
@@ -515,13 +513,7 @@ define("orion/editor/find", [ //$NON-NLS-0$
 			}
 		},
 		isRangeSearch: function() {
-			return 	this._start !== null && this._start !== undefined && this._end !== null && this._end !== undefined;
-		},
-		_updateSearchRange: function() {
-			if(this._selectedLineModel) {
-				this._start = this._selectedLineModel.start;
-				this._end = this._selectedLineModel.end;
-			}
+			return this._searchRangeModel !== null && this._searchRangeModel !== undefined;
 		},
 		annotateSearchRange: function(multipleLine, remove) {
 			var type = mAnnotations.AnnotationType.ANNOTATION_SEARCH_RANGE;
@@ -530,7 +522,7 @@ define("orion/editor/find", [ //$NON-NLS-0$
 				annotationModel.removeAnnotations(type);
 				this.setOptions({start: undefined, end: undefined});
 				this._selectedLines = false;
-				this._selectedLineModel = null;
+				this._searchRangeModel = null;
 				if(remove) {
 					return;
 				}
@@ -547,12 +539,12 @@ define("orion/editor/find", [ //$NON-NLS-0$
 				if(endL > startL || !multipleLine) {
 					this._selectedLines = true;
 	 		 		var rangeStart = textModel.getLineStart(startL);
-	 		 		var rangeEnd = textModel.getLineEnd(endL);
+	 		 		var rangeEnd = textModel.getLineEnd(endL, true);
 					this._editor.setSelection(rangeStart, rangeStart, true);
 					annotationModel.removeAnnotations(mAnnotations.AnnotationType.ANNOTATION_CURRENT_LINE);
 					this.setOptions({start: rangeStart, end: rangeEnd});
-					this._selectedLineModel = mAnnotations.AnnotationType.createAnnotation(type, rangeStart, rangeEnd);
-	 		 		annotationModel.addAnnotation(this._selectedLineModel);
+					this._searchRangeModel = mAnnotations.AnnotationType.createAnnotation(type, rangeStart, rangeEnd);
+	 		 		annotationModel.addAnnotation(this._searchRangeModel);
 				}
 			}
 		},
@@ -562,8 +554,8 @@ define("orion/editor/find", [ //$NON-NLS-0$
 			return this._editor.getModel().find({
 				string: string,
 				start: startOffset,
-				rangeStart: this._start,
-				rangeEnd: this._end,
+				rangeStart: this._searchRangeModel ? this._searchRangeModel.start : undefined,
+				rangeEnd: this._searchRangeModel ? this._searchRangeModel.end : undefined,
 				reverse: this._reverse,
 				wrap: noWrap ? false: this._wrap,
 				regex: this._regex,
@@ -667,7 +659,6 @@ define("orion/editor/find", [ //$NON-NLS-0$
 				newStr = editor.getText(start, end).replace(new RegExp(searchStr, this._caseInsensitive ? "i" : ""), newStr); //$NON-NLS-0$
 			}
 			editor.setText(newStr, start, end);
-			this._updateSearchRange();
 			editor.setSelection(start, start + newStr.length, true);
 		},
 		_markAllOccurrences: function() {
@@ -689,8 +680,8 @@ define("orion/editor/find", [ //$NON-NLS-0$
 				Deferred.when(this._editor.getModel().find({
 					string: string,
 					start: this._start,
-					rangeStart: this._start,
-					rangeEnd: this._end,
+					rangeStart: this._searchRangeModel ? this._searchRangeModel.start : undefined,
+					rangeEnd: this._searchRangeModel ? this._searchRangeModel.end : undefined,
 					regex: this._regex,
 					wholeWord: this._wholeWord,
 					caseInsensitive: this._caseInsensitive
