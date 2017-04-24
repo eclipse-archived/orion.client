@@ -788,7 +788,7 @@ define("orion/editor/annotations", ['i18n!orion/editor/nls/messages', 'orion/edi
 					e.changed.push(annotation);
 				} else if (annotation.end <= start) {
 					//nothing
-				} else if (annotation.start < start && end < annotation.end) {
+				} else if (annotation.start <= start && end < annotation.end) {//Annotation renderer does not render the last character
 					annotation._oldStart = annotation.start;
 					annotation._oldEnd = annotation.end;
 					annotation.end += changeCount;
