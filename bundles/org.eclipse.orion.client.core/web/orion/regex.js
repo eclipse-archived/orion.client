@@ -26,6 +26,7 @@ define("orion/regex", [], function() { //$NON-NLS-0$
 	 */
 	function escape(str) {
 		return str.replace(/([\\$\^*\/+?\.\(\)|{}\[\]])/g, "\\$&"); //$NON-NLS-0$
+		//return str.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, "\\$&");
 	}
 
 	/**

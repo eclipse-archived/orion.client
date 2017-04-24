@@ -492,6 +492,12 @@ define("orion/editor/find", [ //$NON-NLS-0$
 				}	
 				this._savedOptions.push(this.getOptions());
 				this.setOptions(tempOptions);
+				if(tempOptions.findString && this._regex) {
+					tempOptions.findString = mRegex.escape(tempOptions.findString);
+					tempOptions.findString = tempOptions.findString.split("\n").join("\\n");
+					tempOptions.findString = tempOptions.findString.split("\r").join("\\r");
+					tempOptions.findString = tempOptions.findString.split("\t").join("\\t");
+				}
 			}
 			this._startOffset = this._editor.getSelection().start;
 			this._editor.getTextView().addEventListener("Focus", this._listeners.onEditorFocus); //$NON-NLS-0$
