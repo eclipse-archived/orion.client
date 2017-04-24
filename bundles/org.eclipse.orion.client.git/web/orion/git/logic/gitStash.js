@@ -1,6 +1,6 @@
 /******************************************************************************* 
  * @license
- * Copyright (c) 2014 IBM Corporation and others.
+ * Copyright (c) 2014, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -95,7 +95,7 @@ define([
 			var item = data.items.status || data.handler.status || data.items;
 			var gitStashLocation = item.Clone.StashLocation;
 
-			gitService.doStashPop(gitStashLocation).then(function(resp){
+			gitService.doStashPop(gitStashLocation).then(/* @callback */function(resp){
 				d.resolve(data);
 			}, function(error){
 				d.reject(error);
