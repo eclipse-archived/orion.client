@@ -18,8 +18,9 @@
 define([
 	'orion/Deferred',
 	'orion/xsrfUtils',
+	'orion/urlModifiers',
 	'orion/URL-shim', // no exports, must come last
-], function(Deferred, xsrfUtils) {
+], function(Deferred, xsrfUtils, urlModifiers) {
 
 	/**
 	 * @name orion.xhr.Result
@@ -94,6 +95,8 @@ define([
 	// TODO: upload progress, user/password
 	function _xhr(method, url, options/*, XMLHttpRequestImpl */) {
 		options = options || {};
+		url = urlModifiers.modifyUrl(url);
+
 		var xhr = (arguments.length > 3 && arguments[3]) ? arguments[3] : new XMLHttpRequest(); //$NON-NLS-0$
 		var d = new Deferred();
 		var headers = options.headers || {};
