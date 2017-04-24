@@ -116,7 +116,7 @@ define("orion/editor/stylers/text_x-php/syntax", ["orion/editor/stylers/lib/synt
 		contentTypes: ["text/x-php"],
 		patterns: [
 			{
-				begin: "(?i)<(\\?|%(?!php))(?:=|php\\s)?",
+				begin: "(?i)<(\\?|%(?!php))(?:=|php(?:\\s|$))?",
 				end: "[\\1]>",
 				captures: {
 					0: {name: "entity.name.declaration.php"}
