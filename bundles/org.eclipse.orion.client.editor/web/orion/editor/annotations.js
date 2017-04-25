@@ -893,7 +893,12 @@ define("orion/editor/annotations", ['i18n!orion/editor/nls/messages', 'orion/edi
 						}
 					}
 				}
-			}
+				if (style.html) {
+					result.html = style.html;
+				}
+				if (style.node) {
+					result.node = style.node;
+				}			}
 			return result;
 		},
 		_mergeStyleRanges: function(ranges, styleRange) {
