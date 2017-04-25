@@ -88,6 +88,7 @@ module.exports.start = function(startServer, configParams) {
 	
 	function updateWorkspacePrefs(workspace, _allPrefs){
 		var allPrefs = _allPrefs ? _allPrefs : prefs.readPrefs();
+		if (!allPrefs.user.workspace) allPrefs.user.workspace = {};
 		allPrefs.user.workspace.currentWorkspace = workspace;
 		if(!allPrefs.user.workspace.recentWorkspaces){
 			allPrefs.user.workspace.recentWorkspaces = [];
