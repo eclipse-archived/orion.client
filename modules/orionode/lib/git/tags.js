@@ -113,7 +113,7 @@ function getTags(req, res) {
 
 			return getTagCommit(theRepo, theRef)
 			.then(function(commit) {
-				writeResponse(200, res, null, tagJSON(theRef.name(), theRef.shorthand(), commit.sha(), commit.timeMs(), fileDir, annotated));
+				writeResponse(200, res, null, tagJSON(theRef.name(), theRef.shorthand(), commit.sha(), commit.timeMs(), fileDir, annotated), true);
 			});
 		})
 		.catch(function(err) {
@@ -185,7 +185,7 @@ function getTags(req, res) {
 					resp['PreviousLocation'] = prevLocation;
 				}
 	
-				writeResponse(200, res, null, resp);
+				writeResponse(200, res, null, resp, true);
 			});
 		});
 	})

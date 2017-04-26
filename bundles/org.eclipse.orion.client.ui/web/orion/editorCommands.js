@@ -182,6 +182,7 @@ define([
 			this._createSaveCommand();
 			this._createOpenFolderCommand();
 			this._createOpenRecentCommand();
+			this._createSwitchWorkspaceCommand();
 			return this._createEditCommands();
 		},
 		//TODO: We need a better way invoke side bar action 
@@ -202,7 +203,7 @@ define([
 		updateCommands: function(target) {
 			target = target || {};
 			this.editor = target.editor;
-			this.inputManager = target.inputManager;
+			this.inputManager = target.inputManager || target.editorInputManager;
 			this.localSettings = target.localSettings;
 			this.differ = target.differ;
 			this.blamer = target.blamer;
@@ -244,6 +245,7 @@ define([
 			commandRegistry.registerCommandContribution(this.editToolbarId || this.toolbarId, "orion.edit.redo", 401, this.editToolbarId ? "orion.menuBarEditGroup/orion.edit.undoGroup" : null, !this.editToolbarId, util.isMac ? new mKeyBinding.KeyBinding('z', true, true) : new mKeyBinding.KeyBinding('y', true), null, this); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-4$
 			commandRegistry.registerCommandContribution(this.saveToolbarId || this.toolbarId, "orion.edit.openFolder", 1, this.saveToolbarId ? "orion.menuBarFileGroup/orion.edit.saveGroup" : null, false, new mKeyBinding.KeyBinding('o', true)); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			commandRegistry.registerCommandContribution(this.saveToolbarId || this.toolbarId, "orion.edit.openRecent", 3, this.saveToolbarId ? "orion.menuBarFileGroup/orion.edit.saveGroup" : null, false, null); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			commandRegistry.registerCommandContribution(this.saveToolbarId || this.toolbarId, "orion.edit.switchWorkspace", 0, this.saveToolbarId ? "orion.menuBarFileGroup/orion.edit.workspaceGroup" : null, false, null); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			commandRegistry.registerCommandContribution(this.saveToolbarId || this.toolbarId, "orion.openResource", 1, this.saveToolbarId ? "orion.menuBarFileGroup/orion.edit.saveGroup" : null, false, new mKeyBinding.KeyBinding('f', true, true)); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			commandRegistry.registerCommandContribution(this.saveToolbarId || this.toolbarId, "orion.edit.save", 2, this.saveToolbarId ? "orion.menuBarFileGroup/orion.edit.saveGroup" : null, false, new mKeyBinding.KeyBinding('s', true), null, this); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-3$
 			commandRegistry.registerCommandContribution(this.editToolbarId || this.pageNavId, "orion.edit.gotoLine", 3, this.editToolbarId ? "orion.menuBarEditGroup/orion.findGroup" : null, !this.editToolbarId, new mKeyBinding.KeyBinding('l', !util.isMac, false, false, util.isMac), new mCommandRegistry.URLBinding("gotoLine", "line"), this); //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-5$
@@ -629,6 +631,34 @@ define([
 				}
 			});
 			this.commandService.addCommand(saveCommand);
+		},
+		_createSwitchWorkspaceCommand: function() {
+			var that = this;
+			this.fileClient.loadWorkspaces().then(function(workspaces) {
+				var uriTemplate = new URITemplate("#{,resource,params*}"); //$NON-NLS-0$
+				var command = new mCommands.Command({
+					name: messages.SwitchWorkspace,
+					tooltip: messages.SwitchWorkspaceTip,
+					id: "orion.edit.switchWorkspace", //$NON-NLS-0$
+					visibleWhen: /** @callback */ function(items, data) {
+						return workspaces && workspaces.length > 1;
+					},
+					choiceCallback: function() {
+						var inputManager = this.inputManager || that.inputManager;
+						var metadata = inputManager && inputManager.getFileMetadata();
+						return workspaces.map(function(w) {
+							return {
+								name: w.Name,
+								checked: metadata && (metadata.WorkspaceLocation || metadata.Location) === w.Location,
+								callback: function() {
+									window.location = uriTemplate.expand({resource: w.Location});
+								}
+							};
+						});
+					}
+				});
+				that.commandService.addCommand(command);
+			});
 		},
 		_createOpenFolderCommand: function() {
 			var that = this;

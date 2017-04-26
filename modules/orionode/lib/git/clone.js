@@ -34,6 +34,9 @@ module.exports.router = function(options) {
 	if (!gitRoot) { throw new Error('options.gitRoot is required'); }
 	if (!workspaceRoot) { throw new Error('options.workspaceRoot is required'); }
 	
+	/* Note that context path was not included in file and workspace root. */
+	var contextPath = options && options.options && options.options.configParams["orion.context.path"] || "";
+	
 	module.exports.getRepo = getRepo;
 	module.exports.getClones = getClones;
 	module.exports.getRemoteCallbacks = getRemoteCallbacks;
@@ -44,7 +47,7 @@ module.exports.router = function(options) {
 	module.exports.getfileDirPath = getfileDirPath;
 	module.exports.getfileAbsolutePath = getfileAbsolutePath;
 	module.exports.getfileRelativePath = getfileRelativePath;
-	module.exports.isWorkspace = isWorkspace;
+	module.exports.getUniqueFileName = getUniqueFileName;
 	module.exports.getSignature = getSignature;
 	module.exports.getCommit = getCommit;
 	module.exports.postClone = postClone;
@@ -52,8 +55,7 @@ module.exports.router = function(options) {
 	return express.Router()
 	.use(bodyParser.json())
 	.get(workspaceRoot + '*', getClone)
-	.get(fileRoot + '/:rootDir*', getClone)
-	.get(fileRoot, getClone)
+	.get(fileRoot + '*', getClone)
 	.put(fileRoot + '*', putClone)
 	.delete(fileRoot + '*', deleteClone)
 	.post('*', postInit);
@@ -63,7 +65,7 @@ function cloneJSON(base, location, giturl, parents, submodules) {
 		"BranchLocation": gitRoot + "/branch" + location,
 		"CommitLocation": gitRoot + "/commit" + location,
 		"ConfigLocation": gitRoot + "/config/clone" + location,
-		"ContentLocation": location,
+		"ContentLocation": contextPath + location,
 		"DiffLocation": gitRoot + "/diff/Default" + location,
 		"HeadLocation": gitRoot + "/commit/HEAD" + location,
 		"IndexLocation": gitRoot + "/index" + location,
@@ -89,10 +91,10 @@ function cloneJSON(base, location, giturl, parents, submodules) {
 	return result;
 }
 	
-function getRepoByPath(filePath,workspaceDir) {
+function getRepoByPath(filePath, workspaceDir) {
 	while (!fs.existsSync(filePath)) {
 		filePath = path.dirname(filePath);
-		if (filePath.length <= workspaceDir) return Promise.reject(new Error("Forbidden"));
+		if (filePath.length <= workspaceDir.length) return Promise.reject(new Error("Forbidden"));
 	}
  	var ceiling = path.dirname(workspaceDir);
 	if (!fs.statSync(filePath).isDirectory()) {
@@ -107,42 +109,40 @@ function getRepoByPath(filePath,workspaceDir) {
 function getRepo(req) {
 	var u = url.parse(req.url, true);
 	var restpath = u.pathname.split(fileRoot)[1] || "";
-	var filePath = path.join(req.user.workspaceDir, restpath);
-	return getRepoByPath(filePath,req.user.workspaceDir);
+	var file = fileUtil.getFile(req, restpath);
+	req.file = file;
+	return getRepoByPath(file.path, file.workspaceDir);
 }
 
-function getfileDir(repo ,req) {
+function getfileDir(repo, req) {
 	var fileDir;
-	if(repo.workdir().slice(0, -1).length === req.user.workspaceDir.length){
-		fileDir = api.join(fileRoot);
-	}else{
-		fileDir = api.join(fileRoot, repo.workdir().substring(req.user.workspaceDir.length + 1));
+	var file = req.workspaceDir ? req : req.file;
+	if (repo.workdir().slice(0, -1).length === file.workspaceDir.length) {
+		fileDir = api.join(fileRoot, file.workspaceId);
+	} else {
+		fileDir = api.join(fileRoot, file.workspaceId, repo.workdir().substring(file.workspaceDir.length + 1));
 	}
 	return fileDir;
 }
 
-function getfileDirPath(repo ,req) {
+function getfileDirPath(repo, req) {
 	var fileDirpath;
-	if(repo.workdir().slice(0, -1).length === req.user.workspaceDir.length){
+	var file = req.workspaceDir ? req : req.file;
+	if(repo.workdir().slice(0, -1).length === file.workspaceDir.length){
 		fileDirpath = path.join(fileRoot, path.sep);
 	}else{
-		fileDirpath = path.join(fileRoot, repo.workdir().substring(req.user.workspaceDir.length + 1));
+		fileDirpath = path.join(fileRoot, file.workspaceId, repo.workdir().substring(file.workspaceDir.length + 1));
 	}
 	return fileDirpath;
 }
 
 function getfileAbsolutePath(req) {
-	var fileAbsolutePath = path.join(req.user.workspaceDir, req.params["0"] || "");
-	return fileAbsolutePath;
+	return fileUtil.getFile(req, req.params["0"] || "").path;
 }
 
 function getfileRelativePath(repo, req) {
 	var fileRelativePath = api.toURLPath(getfileAbsolutePath(req).substring(repo.workdir().length));
 	return fileRelativePath;
-}
-
-function isWorkspace(req){
-	return !fs.existsSync(path.join(req.user.workspaceDir,'.git'));
 }
 
 function getCommit(repo, refOrCommit) {
@@ -168,14 +168,16 @@ function getClone(req, res) {
 		writeResponse(200, res, null, {
 			"Children": repos,
 			"Type": "Clone"
-		});
+		}, true);
 	});
 }
 
 function getClones(req, res, callback) {
 	var repos = [];
 	
-	var rootDir = path.join(req.user.workspaceDir, req.params.rootDir || "");
+	var rest = req.params["0"].substring(1);
+	var file = fileUtil.getFile(req, rest);
+	var rootDir = file.path;
 		
 	checkDirectory(rootDir, function(err) {
 		if (err) return writeError(403, res, err.message);
@@ -263,7 +265,7 @@ function getClones(req, res, callback) {
 			git.Repository.open(dir)
 			.then(function(repo) {
 				var base = path.basename(dir);
-				var location = getfileDir(repo ,req);
+				var location = getfileDir(repo, file);
 				pushRepo(repos, repo, base, location, null, [], function() { cb(); });
 	 		})
 			.catch(function() {
@@ -306,24 +308,53 @@ function configRepo(repo, username, email) {
 	});
 }
 
+function getClonePath(req) {
+	var workspacePath = req.body.Location;
+	var filePath = req.body.Path;
+	if (filePath && filePath.split("/").length < 3) {
+		filePath = undefined;
+	}
+	var file, rest;
+	var contextPathSegCount = (req.contextPath || "").split("/").length - 1;
+	if (filePath) {
+		rest = filePath.split("/").slice(2 + contextPathSegCount).join("/");
+		file = fileUtil.getFile(req, rest);
+	} else if (workspacePath) {
+		rest = workspacePath.split("/").slice(2 + contextPathSegCount).join("/");
+		file = fileUtil.getFile(req, rest);
+		if (file) {
+			var cloneName = req.body.Name;
+			var cloneUrl = req.body.GitUrl;
+			if (!cloneName && cloneUrl) {
+				if (cloneUrl.charAt(cloneUrl.length - 1) === "/") {
+					cloneUrl = cloneUrl.slice(0, -1);
+				}	
+				cloneName = cloneUrl.substring(cloneUrl.lastIndexOf("/") + 1).replace(".git", "");
+			}
+			if (!cloneName) return null;
+			file.path = getUniqueFileName(file.path, cloneName);
+		}
+	}
+	return file;
+}
+
 function postInit(req, res) {
 	if (req.body.GitUrl) {
 		postClone(req, res);
 	} else {
-		
-		if (req.body.Name === undefined) {
-			return writeError(400, res);
+		var file = getClonePath(req);
+		if (!file) {
+			return writeError(400, res, "Invalid parameters");
 		}
 		
-		var initDir = req.user.workspaceDir + '/' + req.body.Name;
 		var theRepo, index, author, committer;
 
-		fs.mkdir(initDir, function(err){
-			if (err) {
-				return writeError(409, res);
+		fs.mkdir(file.path, function(err) {
+			if (err && err.code !== "EEXIST") {
+				return writeError(400, res);
 			}
 
-			git.Repository.init(initDir, 0)
+			git.Repository.init(file.path, 0)
 			.then(function(repo) {
 				theRepo = repo;
 				return configRepo(repo, req.body.GitName, req.body.GitMail);
@@ -345,8 +376,8 @@ function postInit(req, res) {
 			})
 			.then(function() {
 				writeResponse(201, res, null, {
-					"Location": gitRoot + "/clone"+  fileRoot + "/" + req.body.Name
-				});
+					"Location": gitRoot + "/clone" + fileRoot + "/" + file.workspaceId + api.toURLPath(file.path.substring(file.workspaceDir.length))
+				}, true);
 			})
 			.catch(function(err){
 				writeError(403, res);
@@ -362,7 +393,7 @@ function putClone(req, res) {
 	var tag = req.body.Tag;
 	var removeUntracked = req.body.RemoveUntracked;
 	if ((!paths || !paths.length) && !branch && !tag) {
-		return writeError(400, "Invalid parameters");
+		return writeError(400, res, "Invalid parameters");
 	}
 
 	var theRepo, theCommit;
@@ -445,8 +476,9 @@ function putClone(req, res) {
 }
 
 function deleteClone(req, res) {
-	var clonePath = req.params["0"];
-	rmdir(fileUtil.safeFilePath(req.user.workspaceDir, clonePath), function(err) {
+	var rest = req.params["0"];
+	var file = fileUtil.getFile(req, rest);
+	rmdir(file.path, function(err) {
 		if (err) return writeError(500, res, err);
 		res.status(200).end();
 	});
@@ -595,18 +627,15 @@ function getUniqueFileName(folder, file) {
 function postClone(req, res) {
 	var repo;
 	var cloneUrl = req.body.GitUrl;
-	if (cloneUrl.charAt(cloneUrl.length - 1) === "/") {
-		cloneUrl = cloneUrl.slice(0, -1);
-	}	
-	var dirName = cloneUrl.substring(cloneUrl.lastIndexOf("/") + 1).replace(".git", "");
-	var folder = req.user.workspaceDir;
-	if (req.body.Path) {
-		folder = path.join(folder, req.body.Path.substring(fileRoot.length));
+	
+	var file = getClonePath(req);
+	if (!file) {
+		return writeError(400, res, "Invalid parameters");
 	}
 	
 	var task = new tasks.Task(res, false, true, 0, true);
 	
-	return git.Clone.clone(cloneUrl, getUniqueFileName(folder, dirName), {
+	return git.Clone.clone(cloneUrl, file.path, {
 		fetchOpts: {
 			callbacks: getRemoteCallbacks(req, task)
 		}
@@ -627,7 +656,7 @@ function postClone(req, res) {
 			Code: 0,
 			DetailedMessage: "OK",
 			JsonData: {
-				Location: gitRoot + "/clone" + fileRoot + "/" + dirName
+				Location: gitRoot + "/clone" + fileRoot + "/" + file.workspaceId + api.toURLPath(file.path.substring(file.workspaceDir.length))
 			},
 			Message: "OK",
 			Severity: "Ok"

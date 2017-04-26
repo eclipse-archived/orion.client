@@ -95,12 +95,12 @@ mBootstrap.startup().then(function(core) {
 		commandRegistry.processURL(window.location.href);
 	}
 	
-	function loadWorspace() {
-		return progress.progress(fileClient.loadWorkspace(), messages["Loading default workspace"]); //$NON-NLS-0$
+	function loadWorkspace(resource) {
+		return progress.progress(fileClient.getWorkspace(resource), messages["Loading default workspace"]); //$NON-NLS-0$
 	}
 	
-	loadWorspace().then(function(workspace){
-		explorer.setDefaultPath(workspace.Location);
+	loadWorkspace(params.resource || params.workspace).then(function(workspace){
+		explorer.setWorkspace(workspace);
 		
 		var projectDescription = {};
 		for(var k in params){
@@ -134,8 +134,8 @@ mBootstrap.startup().then(function(core) {
 		if(previousResourceValue !== resource){
 			previousResourceValue = resource;
 		
-			loadWorspace().then(function(workspace){
-				explorer.setDefaultPath(workspace.Location);
+			loadWorkspace(resource || params.workspace).then(function(workspace){
+				explorer.setWorkspace(workspace);
 				explorer.redisplay();
 			});
 		}

@@ -77,8 +77,8 @@ define(['orion/browserCompatibility', 'orion/bootstrap', 'orion/Deferred', 'orio
 									});
 			} else {
 				resolveFileNames =  diffProvider.getComplexFileURL(compareParams.resource).then(function (json){
-					if(json.New) {
-						return Deferred.all([fileClient.read(json.New, true)], 
+					if(json.New || json.NewLocation) {
+						return Deferred.all([fileClient.read(json.New || json.NewLocation, true)], 
 											function(/*error*/) {
 												startWithFileNames(null, compareParams); 
 											}).then( function(metadatas) {

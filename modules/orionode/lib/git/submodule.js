@@ -42,18 +42,25 @@ function putSubmodule(req, res) {
 	});
 }
 function postSubmodule(req, res) {
-	var repo, submodule, subrepo;
+	var url = req.body.GitUrl;
+	if (!url) {
+		return writeError(400, res, "Invalid parameters");
+	}
+	
+	var repo, submodule, subrepo, rest;
 	return clone.getRepo(req)
 	.then(function(_repo) {
 		repo = _repo;
-		var url = req.body.GitUrl;
 		var path = req.body.Name;
-		if (!path && url) {
+		if (!path) {
 			if (req.body.Path) {
-				path = api.join(req.user.workspaceDir, req.body.Path.slice(1)).substring(repo.workdir());
+				var contextPathSegCount = req.contextPath.split("/").length - 1;
+				rest = req.body.Path.split("/").slice(2 + contextPathSegCount).join("/");
+				path = fileUtil.getFile(req, rest).path;
 			} else if (req.body.Location) {
-				path = clone.getUniqueFileName(req.user.workspaceDir, url.substring(url.lastIndexOf("/") + 1).replace(".git", ""));
+				path = clone.getUniqueFileName(req.file.path, url.substring(url.lastIndexOf("/") + 1).replace(".git", ""));
 			}
+			path = path.substring(repo.workdir().length);
 		}
 		return git.Submodule.addSetup(repo, url, path, 1)
 		.then(function() {
@@ -91,8 +98,8 @@ function deleteSubmodule(req, res) {
 	return clone.getRepo(req)
 	.then(function(_subrepo) {
 		subrepo = _subrepo;
-		var restpath = req.params["0"].split("/").slice(0, -1).join("/");
-		return git.Repository.discover(api.join(req.user.workspaceDir, restpath), 0, req.user.workspaceDir).then(function(buf) {
+		var file = fileUtil.getFile(req, req.params["0"].split("/").slice(0, -1).join("/"));
+		return git.Repository.discover(file.path, 0, file.workspaceDir).then(function(buf) {
 			return git.Repository.open(buf.toString());
 		});
 	})

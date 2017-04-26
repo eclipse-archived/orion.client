@@ -84,7 +84,11 @@ function(messages, dialog, mFileUtils, mSelection, mExplorer, mExplorerTable, bi
 	DirectoryPrompterDialog.prototype.loadFolderList = function(path) {
 		path = mFileUtils.makeRelative(path);
 		if(this._targetFolder) {
-			path = this._fileClient.fileServiceRootURL(this._targetFolder.Location);
+			if (this._targetFolder.Projects) {
+				path = this._targetFolder.Location;
+			} else {
+				path = this._targetFolder.WorkspaceLocation || this._fileClient.fileServiceRootURL(this._targetFolder.Location);
+			}
 		}
 		this.selection = new mSelection.Selection(this._serviceRegistry, "orion.directoryPrompter.selection"); //$NON-NLS-0$
 

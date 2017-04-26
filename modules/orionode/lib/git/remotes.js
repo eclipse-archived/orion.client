@@ -110,7 +110,7 @@ function getRemotes(req, res) {
 				writeResponse(200, res, null, {
 					"Children": r,
 					"Type": "Remote"
-				});
+				}, true);
 			});
 		});
 	}
@@ -152,7 +152,7 @@ function getRemotes(req, res) {
 					if (err) {
 						return writeError(403, res);
 					}
-					writeResponse(200, res, null, remoteJSON(theRemote, fileDir, branches));
+					writeResponse(200, res, null, remoteJSON(theRemote, fileDir, branches), true);
 				});
 			});
 		});
@@ -175,7 +175,7 @@ function getRemotes(req, res) {
 			return theRepo.getBranchCommit(branch);
 		})
 		.then(function(commit) {
-			writeResponse(200, res, null, remoteBranchJSON(theBranch, commit, theRemote, fileDir));
+			writeResponse(200, res, null, remoteBranchJSON(theBranch, commit, theRemote, fileDir), true);
 		})
 		.catch(function() {
 			return writeError(403, res);
@@ -203,7 +203,7 @@ function addRemote(req, res) {
 		function done () {
 			writeResponse(201, res, null, {
 				"Location": gitRoot + "/remote/" + util.encodeURIComponent(remoteName) + fileDir
-			});
+			}, true);
 		}
 		args.readConfigFile(configFile, function(err, config) {
 			if (err) {

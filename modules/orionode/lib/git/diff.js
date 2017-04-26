@@ -61,11 +61,11 @@ function getDiff(req, res) {
 		if (includeURIs) {
 			var p = api.toURLPath(path.join(fileDir, filePath));
 			URIs = {
-				"Base": getBaseLocation(scope, p),
+				"BaseLocation": getBaseLocation(scope, p),
 				"CloneLocation": gitRoot + "/clone" + fileDir,
 				"Location": gitRoot + "/diff/" + util.encodeURIComponent(scope) + fileDir + filePath,
-				"New": getNewLocation(scope, p),
-				"Old": getOldLocation(scope, p),
+				"NewLocation": getNewLocation(scope, p),
+				"OldLocation": getOldLocation(scope, p),
 				"Type": "Diff"
 			};
 		}
@@ -80,7 +80,7 @@ function getDiff(req, res) {
 			if (includeDiff && includeURIs) {
 				body += "--BOUNDARY\n";
 				body += "Content-Type: application/json\n\n";
-				body += JSON.stringify(URIs);
+				body += JSON.stringify(api.encodeLocation(URIs));
 				body += "--BOUNDARY\n";
 				body += "Content-Type: plain/text\n\n";
 				body += diffContents.join("");
@@ -91,13 +91,12 @@ function getDiff(req, res) {
 				res.setHeader("Content-Disposition", "attachment; filename=\"changes.patch\"");
 				res.setHeader('Content-Type', 'plain/text');
 			} else if (includeDiffs) {
-				body += JSON.stringify(diffs);
+				body += JSON.stringify(api.encodeLocation(diffs));
 				res.setHeader('Content-Type', 'application/json');
 			} else if (includeURIs) {
-				body += JSON.stringify(URIs);
+				body += JSON.stringify(api.encodeLocation(URIs));
 				res.setHeader('Content-Type', 'application/json');
 			}
-			res.setHeader('Content-Length', body.length);
 			return res.status(200).end(body);
 		}
 		if (includeDiff || includeDiffs) {
@@ -137,19 +136,19 @@ function changeType(patch) {
 function getOldLocation(scope, path) {
 	if (scope.indexOf("..") !== -1) {
 		var commits = scope.split("..");
-		return gitRoot + "/commit/" + util.encodeURIComponent(commits[0]) + path + "?parts=body";
+		return {pathname: gitRoot + "/commit/" + util.encodeURIComponent(commits[0]) + path, query: {parts: "body"}};
 	} else if (scope === "Cached") {
-		return gitRoot + "/commit/HEAD" + path + "?parts=body";
+		return {pathname: gitRoot + "/commit/HEAD" + path, query: {parts: "body"}};
 	} else if (scope === "Default") {
 		return gitRoot + "/index" + path;
 	}
-	return gitRoot + "/commit/" + util.encodeURIComponent(scope) + path + "?parts=body";
+	return {pathname: gitRoot + "/commit/" + util.encodeURIComponent(scope) + path, query: {parts: "body"}};
 }
 
 function getNewLocation(scope, path) {
 	if (scope.indexOf("..") !== -1) {
 		var commits = scope.split("..");
-		return gitRoot + "/commit/" + util.encodeURIComponent(commits[1]) + path + "?parts=body";
+		return {pathname: gitRoot + "/commit/" + util.encodeURIComponent(commits[1]) + path, query: {parts: "body"}};
 	} else if (scope === "Cached") {
 		return gitRoot + "/index" + path;
 	}
@@ -160,9 +159,9 @@ function getBaseLocation(scope, path) {
 	if (scope.indexOf("..") !== -1) {
 		var commits = scope.split("..");
 		//TODO find merge base
-		return gitRoot + "/commit/" + util.encodeURIComponent(commits[1]) + path + "?parts=body";
+		return {pathname: gitRoot + "/commit/" + util.encodeURIComponent(commits[1]) + path, query: {parts: "body"}};
 	} else if (scope === "Cached") {
-		return gitRoot + "/commit/HEAD" + path + "?parts=body";
+		return {pathname: gitRoot + "/commit/HEAD" + path, query: {parts: "body"}};
 	}
 	return gitRoot + "/index" + path;
 }
@@ -471,6 +470,6 @@ function postDiff(req, res) {
 	var contextPathSegCount = req.contextPath.split("/").length - 1;
 	segments[3 + contextPathSegCount] = segments[3 + contextPathSegCount] + ".." + util.encodeURIComponent(newCommit);
 	var location = url.format({pathname: segments.join("/"), query: originalUrl.query});
-	writeResponse(200, res, {'Location':location}, {Location: location});
+	writeResponse(200, res, {'Location':location}, {Location: location}, false); // Avoid double encoding
 }
 };

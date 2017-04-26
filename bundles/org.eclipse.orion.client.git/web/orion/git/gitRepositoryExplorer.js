@@ -208,8 +208,8 @@ define([
 		}
 	};
 	
-	GitRepositoryExplorer.prototype.setDefaultPath = function(defaultPath){
-		this.defaultPath = defaultPath;
+	GitRepositoryExplorer.prototype.setWorkspace = function(workspace){
+		this.workspace = workspace;
 	};
 	
 	GitRepositoryExplorer.prototype.changedItem = function() {
@@ -227,15 +227,11 @@ define([
 		}
 		var pageParams = PageUtil.matchResourceParameters();
 		var selection = pageParams.resource;
-		var path = this.defaultPath;
-		var relativePath = mFileUtils.makeRelative(path);
 		
-		//NOTE: require.toURL needs special logic here to handle "gitapi/clone"
-		var gitapiCloneUrl = require.toUrl("gitapi/clone._"); //$NON-NLS-0$
-		gitapiCloneUrl = gitapiCloneUrl.substring(0, gitapiCloneUrl.length-2);
+		this.defaultPath = require.toUrl("/workspace/" + this.workspace.Id || ""); //$NON-NLS-0$
 		
-		var location = relativePath[0] === "/" ? gitapiCloneUrl + relativePath : gitapiCloneUrl + "/" + relativePath; //$NON-NLS-1$ //$NON-NLS-0$
-		this.display(location, selection, processURLs);
+		var reposLocation = require.toUrl("gitapi/clone/workspace/" + this.workspace.Id || ""); //$NON-NLS-0$
+		this.display(reposLocation, selection, processURLs);
 	};
 	
 	GitRepositoryExplorer.prototype.destroyRepositories = function() {

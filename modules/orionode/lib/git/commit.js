@@ -51,7 +51,7 @@ function commitJSON(commit, fileDir, diffs, parents) {
 		"Children":[],
 		"CommitterEmail": commit.committer().email(),
 		"CommitterName": commit.committer().name(),
-		"ContentLocation": gitRoot + "/commit/" + commit.sha() + fileDir + "?parts=body",
+		"ContentLocation": {pathname: gitRoot + "/commit/" + commit.sha() + fileDir, query: {parts: "body"}},
 		"DiffLocation": gitRoot + "/diff/" + commit.sha() + fileDir,
 		"Location": gitRoot + "/commit/" + commit.sha() + fileDir,
 		"CloneLocation": gitRoot + "/clone" + fileDir,
@@ -705,7 +705,7 @@ function getDiff(repo, commit, fileDir) {
 			"Children": diffs
 		};
 		if (patches.length > 100) {
-			result.NextLocation = gitRoot + "/diff/" + range + fileDir + "?pageSize=" + pageSize + "&page=" + (page + 1);
+			result.NextLocation = {pathname: gitRoot + "/diff/" + range + fileDir, query: {pageSize: pageSize, page: page + 1}};
 		}
 		return result;
 	});
@@ -732,7 +732,7 @@ function getCommitBody(req, res) {
 	})
 	.then(function(blob) {
 		var resp = blob.toString();
-		writeResponse(200, res, {'Content-Type':'application/octect-stream','Content-Length': resp.length}, resp, null, true);
+		writeResponse(200, res, {'Content-Type':'application/octect-stream','Content-Length': resp.length}, resp, false, true);
 	}).catch(function(err) {
 		writeError(404, res, err.message);
 	});
@@ -746,7 +746,7 @@ function identifyNewCommitResource(req, res, newCommit) {
 	var location = url.format({pathname: segments.join("/"), query: originalUrl.query});
 	writeResponse(200, res, null, {
 		"Location": location
-	});
+	}, false); // Avoid double encoding
 }
 
 function revert(req, res, commitToRevert) {
@@ -1230,11 +1230,11 @@ function tag(req, res, commitId, name, isAnnotated, message) {
 		return getCommitParents(theRepo, thisCommit, fileDir);
 	})
 	.then(function(parents){
-		writeResponse(200, res, null, commitJSON(thisCommit, fileDir, theDiffs, parents));
+		writeResponse(200, res, null, commitJSON(thisCommit, fileDir, theDiffs, parents), true);
 	})
 	.catch(function(err) {
 		writeError(403, res, err.message);
-	})
+	});
 }
 
 function putCommit(req, res) {
@@ -1304,7 +1304,7 @@ function postCommit(req, res) {
 		return getCommitParents(theRepo, thisCommit, fileDir);
 	})
 	.then(function(parents){
-		writeResponse(200, res, null, commitJSON(thisCommit, fileDir, theDiffs, parents));
+		writeResponse(200, res, null, commitJSON(thisCommit, fileDir, theDiffs, parents), true);
 	})
 	.catch(function(err) {
 		writeError(403, res, err.message);

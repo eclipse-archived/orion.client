@@ -9,17 +9,11 @@
  *		 IBM Corporation - initial API and implementation
  *******************************************************************************/
 /*eslint-env node */
-var api = require('../api'), writeError = api.writeError;
-var git = require('nodegit');
 var clone = require('./clone');
-var path = require('path');
 var express = require('express');
-var util = require('./util');
 var request = require('request');
-var https = require('https');
 var bodyParser = require('body-parser');
 var url = require("url");
-var fs = require('fs');
 var tasks = require('../tasks');
 
 module.exports = {};
@@ -77,7 +71,7 @@ function getPullRequest(req, res) {
 		var projectname = pathnames[2].replace(/\.git$/g, "");
 		var pullrequestUrl = "https://api.github.com/repos/" + username +"/" + projectname + "/pulls";
 		if(clientID && clientSecret){
-			pullrequestUrl += "?client_id="+clientID+"&client_secret="+clientSecret+"";
+			pullrequestUrl += "?client_id="+clientID+"&client_secret="+clientSecret;
 		}
 	}
 	var userAgentHeader = {

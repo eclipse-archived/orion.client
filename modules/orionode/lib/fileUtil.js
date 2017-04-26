@@ -31,7 +31,7 @@ var fs = Promise.promisifyAll(require('fs'));
  * @param {Function} callback Invoked as func(error?, children)
  * @returns A promise
  */
-var getChildren = exports.getChildren = function(fileRoot, workspaceDir, directory, depth, excludes) {
+var getChildren = exports.getChildren = function(fileRoot, workspaceRoot, workspaceDir, directory, depth, excludes) {
 	return fs.readdirAsync(directory)
 	.then(function(files) {
 		return Promise.map(files, function(file) {
@@ -41,7 +41,7 @@ var getChildren = exports.getChildren = function(fileRoot, workspaceDir, directo
 			var filepath = path.join(directory, file);
 			return fs.statAsync(filepath)
 			.then(function(stats) {
-				return fileJSON(fileRoot, workspaceDir, filepath, stats, depth ? depth - 1 : 0);
+				return fileJSON(fileRoot, workspaceRoot, {workspaceDir: workspaceDir, path: filepath}, stats, depth ? depth - 1 : 0);
 			})
 			.catch(function() {
 				return null; // suppress rejection
@@ -81,6 +81,28 @@ var safeFilePath = exports.safeFilePath = function(workspaceDir, filepath) {
 	return safePath(workspaceDir, path.join(workspaceDir, filepath));
 };
 
+var getMetastore = exports.getMetastore = function(req) {
+	var ms = req.app.locals.metastore;
+	if (!ms) {
+		throw new Error("No metastore found");
+	}
+	return ms;
+};
+
+var getFile = exports.getFile = function(req, rest) {
+	if (!rest) return null;
+	var store = getMetastore(req);
+	if (rest[0] === "/") rest = rest.substring(1);
+	var segments = rest.split("/");
+	var workspaceId = segments.shift();
+	var workspaceDir = store.getWorkspaceDir(workspaceId);
+	return {
+		workspaceId: workspaceId,
+		workspaceDir: workspaceDir,
+		path: safeFilePath(workspaceDir, segments.join("/"))
+	};
+};
+
 var getParents = exports.getParents = function(fileRoot, relativePath, includeFolder) {
 	var segs = relativePath.split('/');
 	if(segs && segs.length > 0 && segs[segs.length-1] === ""){// pop the last segment if it is empty. In this case wwwpath ends with "/".
@@ -108,12 +130,13 @@ var getParents = exports.getParents = function(fileRoot, relativePath, includeFo
  * @description Tries to compute the project path for the given file path
  * @param {string} workspaceDir The root workspace directory
  * @param {string} fileRoot The root file path of the server
- * @param {string} relativePath The path we want the project for
+ * @param {Object} file The file we want the project for
  * @param {?} options The optional map of options to use while looking for a project
  * @returns {Promise} A promise to resolve the project
  * @since 14.0
  */
-var getProject = exports.getProject = function getProject(workspaceDir, fileRoot, relativePath, options) {
+exports.getProject = function getProject(fileRoot, workspaceRoot, file, options) {
+	var relativePath = file.path;
 	var parents = getParents(fileRoot, relativePath, true),
 		names = options && typeof options.names === "object" ? options.names : {};
 	names['.git'] = {isDirectory: true};
@@ -123,10 +146,10 @@ var getProject = exports.getProject = function getProject(workspaceDir, fileRoot
 		for(var i = 0, len = parents.length; i < len; i++) {
 			var parentFile = parents[i],
 				filepath = parentFile.Location.slice(fileRoot.length);
-			if(filepath.indexOf(workspaceDir) !== 0) {
+			if(filepath.indexOf(file.workspaceDir) !== 0) {
 				break;
 			}
-			promises.push(findProject(fileRoot, workspaceDir, filepath, names));
+			promises.push(findProject(fileRoot, workspaceRoot, file.workspaceDir, filepath, names));
 		}
 		return Promise.any(promises);
 	}
@@ -141,9 +164,9 @@ var getProject = exports.getProject = function getProject(workspaceDir, fileRoot
  * @since 14.0
  * @returns {Promise} Returns a promise to try and resolve the project from the context
  */
-function findProject(fileRoot, workspaceDir, filepath, names) {
+function findProject(fileRoot, workspaceRoot, workspaceDir, filepath, names) {
 	return new Promise(function(resolve, reject) {
-		return getChildren(fileRoot, workspaceDir, filepath, 1).then(function(children) {
+		return getChildren(fileRoot, workspaceRoot, workspaceDir, filepath, 1).then(function(children) {
 			if(Array.isArray(children) && children.length > 0) {
 				for(var i = 0, len = children.length; i < len; i++) {
 					var c = children[i],
@@ -260,6 +283,17 @@ function getBoolean(obj, key) {
 	return Object.prototype.hasOwnProperty.call(obj, key) && (val === true || val === 'true');
 }
 
+/**
+ * File decorator interface.
+ */
+exports.FileDecorator = FileDecorator;
+function FileDecorator() {
+}
+Object.assign(FileDecorator.prototype, {
+	decorate: function(req, file, json) {
+	}
+});
+
 var decorators = [];
 /**
  * Shared decorator, used by workspace as well.
@@ -269,30 +303,31 @@ exports.getDecorators = function(){
 };
 /**
  * Used to add different decorators to generate respond json.
- * @param {func} decorator functions to be added;
+ * @param {FileDecorator} decorator to be added;
  */
-exports.addDecorator = function(func) {
-	decorators.push(func);
+exports.addDecorator = function(decorator) {
+	decorators.push(decorator);
 };
 
 /**
  * Helper for fulfilling a file metadata GET request.
  * @param {String} fileRoot The "/file" prefix or equivalent.
+ * @param {String} workspaceRoot The "/file" prefix or equivalent.
  * @param {Object} req HTTP request object
  * @param {Object} res HTTP response object
- * @param {String} filepath The physical path to the file on the server.
+ * @param {String} file The physical path and workspaceDir to the file on the server.
  * @param {Object} stats
  * @param {String} etag
  * @param {Boolean} [includeChildren=false]
  * @param {Object} [metadataMixins] Additional metadata to mix in to the response object.
  */
-var writeFileMetadata = exports.writeFileMetadata = function(fileRoot, req, res, gitRoot, filepath, stats, etag, depth, metadataMixins) {
+var writeFileMetadata = exports.writeFileMetadata = function(req, res, fileRoot, workspaceRoot, file, stats, etag, depth, metadataMixins) {
 	var result;
-	return fileJSON(fileRoot, req.user.workspaceDir, filepath, stats, depth, metadataMixins)
+	return fileJSON(fileRoot, workspaceRoot, file, stats, depth, metadataMixins)
 	.then(function(originalJson) {
 		result = originalJson;
 		return Promise.map(decorators, function(decorator){
-			return decorator(gitRoot, fileRoot, req, filepath, result);			
+			return decorator.decorate(req, file, result);			
 		});
 	})
 	.then(function(){
@@ -304,12 +339,12 @@ var writeFileMetadata = exports.writeFileMetadata = function(fileRoot, req, res,
 	})
 	.catch(api.writeError.bind(null, 500, res));
 };
-function fileJSON(fileRoot, workspaceDir, filepath, stats, depth, metadataMixins) {
+function fileJSON(fileRoot, workspaceRoot, file, stats, depth, metadataMixins) {
 	depth = depth || 0;
 	var isDir = stats.isDirectory();
-	var wwwpath = api.toURLPath(filepath.substring(workspaceDir.length + 1));
+	var wwwpath = api.toURLPath(file.path.substring(file.workspaceDir.length + 1));
 	var result = {
-		Name: path.basename(filepath),
+		Name: path.basename(file.path),
 		Location: getFileLocation(fileRoot, wwwpath, isDir),
 		Directory: isDir,
 		LocalTimeStamp: stats.mtime.getTime(),
@@ -325,6 +360,7 @@ function fileJSON(fileRoot, workspaceDir, filepath, stats, depth, metadataMixins
 			result[property] = metadataMixins[property];
 		});
 	}
+	result.WorkspaceLocation = workspaceRoot;
 	if (!isDir) {
 		return Promise.resolve(result);
 	}
@@ -335,7 +371,7 @@ function fileJSON(fileRoot, workspaceDir, filepath, stats, depth, metadataMixins
 	if (depth <= 0) {
 		return Promise.resolve(result);
 	}
-	return getChildren(fileRoot, workspaceDir, filepath, depth)
+	return getChildren(fileRoot, workspaceRoot, file.workspaceDir, file.path, depth)
 	.then(function(children) {
 		result.Children = children;
 		return result;
@@ -345,15 +381,16 @@ function fileJSON(fileRoot, workspaceDir, filepath, stats, depth, metadataMixins
 /**
  * Helper for fulfilling a file POST request (for example, copy, move, or create).
  * @param {String} fileRoot The route of the /file handler (not including context path)
+ * @param {String} workspaceRoot The route of the /workspace handler (not including context path)
  * @param {Object} req
  * @parma {Object} res
  * @param {String} wwwpath
- * @param {String} destFilepath
+ * @param {String} destFile
  * @param {Object} [metadata] Additional metadata to be mixed in to the File response.
  * @param {Number} [statusCode] Status code to send on a successful response. By default, `201 Created` is sent if
  * a new resource was created, and and `200 OK` if an existing resource was overwritten.
  */
-exports.handleFilePOST = function(gitRoot, fileRoot, req, res, destFilepath, metadataMixins, statusCode) {
+exports.handleFilePOST = function(workspaceRoot, fileRoot, req, res, destFile, metadataMixins, statusCode) {
 	var isDirectory = req.body && getBoolean(req.body, 'Directory');
 	var writeResponse = function(isOverwrite) {
 		// TODO: maybe set ReadOnly and Executable based on fileAtts
@@ -363,15 +400,15 @@ exports.handleFilePOST = function(gitRoot, fileRoot, req, res, destFilepath, met
 			// Status code 200 indicates that an existing resource was replaced, or we're POSTing to a URL
 			res.status(isOverwrite ? 200 : 201);
 		}
-		return fs.statAsync(destFilepath)
+		return fs.statAsync(destFile.path)
 		.then(function(stats) {
-			return writeFileMetadata(fileRoot, req, res, gitRoot, destFilepath, stats, /*etag*/null, /*depth*/0, metadataMixins);
+			return writeFileMetadata(req, res, api.join(fileRoot, destFile.workspaceId), api.join(workspaceRoot, destFile.workspaceId), destFile, stats, /*etag*/null, /*depth*/0, metadataMixins);
 		})
 		.catch(function(err) {
 			api.writeError(500, res, err.message);
 		});
 	};
-	fs.statAsync(destFilepath)
+	fs.statAsync(destFile.path)
 	.catchReturn({ code: 'ENOENT' }, null) // suppress reject when file does not exist
 	.then(function(stats) {
 		return !!stats; // just return whether the file existed
@@ -391,10 +428,10 @@ exports.handleFilePOST = function(gitRoot, fileRoot, req, res, destFilepath, met
 			if (!sourceUrl) {
 				return api.writeError(400, res, 'Missing Location property in request body');
 			}
-			var sourceFilepath = safeFilePath(req.user.workspaceDir, api.rest(fileRoot, api.matchHost(req, sourceUrl)));
-			return fs.statAsync(sourceFilepath)
+			var sourceFile = getFile(req, sourceUrl.replace(/^\/file/, ""));
+			return fs.statAsync(sourceFile.path)
 			.then(function(/*stats*/) {
-				return isCopy ? copy(sourceFilepath, destFilepath) : fs.renameAsync(sourceFilepath, destFilepath);
+				return isCopy ? copy(sourceFile.path, destFile.path) : fs.renameAsync(sourceFile.path, destFile.path);
 			})
 			.then(writeResponse.bind(null, destExists))
 			.catch(function(err) {
@@ -407,10 +444,10 @@ exports.handleFilePOST = function(gitRoot, fileRoot, req, res, destFilepath, met
 		// Just a regular file write
 		return Promise.resolve()
 		.then(function(){
-			return destExists ? fs.unlinkAsync(destFilepath) : null;
+			return destExists ? fs.unlinkAsync(destFile.path) : null;
 		})
 		.then(function() {
-			return isDirectory ? fs.mkdirAsync(destFilepath) : fs.writeFileAsync(destFilepath, '');
+			return isDirectory ? fs.mkdirAsync(destFile.path) : fs.writeFileAsync(destFile.path, '');
 		})
 		.then(writeResponse.bind(null, destExists))
 		.catch(api.writeError.bind(null, 500, res));

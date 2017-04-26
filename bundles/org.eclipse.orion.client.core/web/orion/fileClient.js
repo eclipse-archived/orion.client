@@ -142,6 +142,13 @@ define([
 				}, 100);
 				return d;
 			},
+			/* @callback */
+			read: function(loc) {
+				if (loc === "/") {
+					return this.loadWorkspace(loc);
+				}
+				return _noMatch(loc);
+			},
 			/**
 			 * @description Computes the project context from the given location
 			 * @param {String} context The resource context to find the project for
@@ -155,7 +162,6 @@ define([
 			deleteFile: _noMatch,
 			moveFile: _noMatch,
 			copyFile: _noMatch,
-			read: _noMatch,
 			write: _noMatch
 		};
 
@@ -340,13 +346,13 @@ define([
 		},
 
 		/**
-		 * Loads all the user's workspaces. Returns a deferred that will provide the loaded
-		 * workspaces when ready.
+		 * Loads all the user's workspaces for the specified file system. Returns a deferred
+		 * that will provide the loaded workspaces when ready.
 		 * @public
 		 * @return {Deferred} A deferred that will load all workspaces
 		 */
-		loadWorkspaces: function() {
-			return _doServiceCall(this._getService(), "loadWorkspaces", arguments); //$NON-NLS-1$
+		loadWorkspaces: function(systemLocation) {
+			return _doServiceCall(this._getService(systemLocation), "loadWorkspaces", arguments); //$NON-NLS-1$
 		},
 
 		/**
@@ -359,6 +365,16 @@ define([
 		 */
 		loadWorkspace: function(workspaceLocation) {
 			return _doServiceCall(this._getService(workspaceLocation), "loadWorkspace", arguments); //$NON-NLS-1$
+		},
+		
+		/**
+		 * Gets the workspace of the specified resource location.
+		 * 
+		 * @param resourceLocation the resource to lookup the workspace
+		 * @return {Deferred} A deferred that will load the specified workspace
+		 */
+		getWorkspace: function(resourceLocation) {
+			return _doServiceCall(this._getService(resourceLocation), "getWorkspace", arguments); //$NON-NLS-1$
 		},
 
 		/**
@@ -429,7 +445,7 @@ define([
 			return this._createArtifact(parentLocation, "createFile", eventData, arguments);
 		},
 		/**
-		 * Deletes a file, directory, or project.
+		 * Deletes a file, directory, project or workspace.
 		 * @param {String} deleteLocation The location of the file or directory to delete.
 		 * @param {Object} eventData The event data that will be sent back.
 		 * @public

@@ -721,7 +721,7 @@ define(['require', 'i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 
 
 				projectClient.getProjectDeployService(item.ServiceId, item.Type).then(function(service){
 					if(service && service.deploy){
-						fileClient.loadWorkspace(item.project.ContentLocation).then(function(projectFolder){
+						fileClient.getWorkspace(item.project.ContentLocation).then(function(){
 							runDeploy(launchConfToPass, {project: item.project, deployService: service, data: data, errorHandler: errorHandler, projectClient: projectClient, commandService: commandService, launchConfiguration: item});
 						});
 					}
@@ -741,7 +741,7 @@ define(['require', 'i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 
 			imageClass: "core-sprite-trashcan",
 			callback: function(data) {
 				var item = forceSingleItem(data.items);
-				fileClient.loadWorkspace(item.project.ContentLocation).then(function(){
+				fileClient.getWorkspace(item.project.ContentLocation).then(function(){
 					projectClient.getProjectDeployService(item.ServiceId, item.Type).then(function(service){
 						if(service){
 							runDeleteLaunchConfiguration(item, {
@@ -783,7 +783,7 @@ define(['require', 'i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 
 
 				projectClient.getProjectDeployService(item.ServiceId, item.Type).then(function(service){
 					if(service && service.deploy){
-						fileClient.loadWorkspace(item.project.ContentLocation).then(function(projectFolder){
+						fileClient.getWorkspace(item.project.ContentLocation).then(function(){
 							runEdit(launchConfToPass, {project: item.project, deployService: service, data: data, errorHandler: errorHandler, projectClient: projectClient, commandService: commandService, launchConfiguration: item});
 						});
 					}
@@ -1220,7 +1220,7 @@ define(['require', 'i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 
 					return;
 				}
 				var item = forceSingleItem(data.items);
-				fileClient.loadWorkspace(fileClient.fileServiceRootURL(item.Location)).then(function(workspace) {
+				fileClient.getWorkspace(item.Location).then(function(workspace) {
 					progress.progress(projectClient.createProject(workspace.ChildrenLocation, {Name: name}),i18nUtil.formatMessage( messages["Creating project ${0}"], name)).then(function(project){
 						dispatchNewProject(workspace, project);
 					}, errorHandler);
@@ -1256,7 +1256,7 @@ define(['require', 'i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 
 
 					var handleOk = function(event) { //$NON-NLS-0$
 						var projectName = event.value;
-						fileClient.loadWorkspace(fileClient.fileServiceRootURL(item.Location)).then(function(workspace) {
+						fileClient.getWorkspace(item.Location).then(function(workspace) {
 							progress.progress(projectClient.createProject(workspace.ChildrenLocation, {Name: projectName}),i18nUtil.formatMessage( messages["Creating project ${0}"], projectName)).then(function(project){
 								dispatchNewProject(workspace, project).then(function(fileMetadata) {
 									for (var i = 0; i < fileInput.files.length; i++) {
@@ -1339,7 +1339,7 @@ define(['require', 'i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 
 							return;
 						}
 						var item = forceSingleItem(data.items);
-						fileClient.loadWorkspace(fileClient.fileServiceRootURL(item.Location)).then(function(workspace) {
+						fileClient.getWorkspace(item.Location).then(function(workspace) {
 							progress.progress(projectClient.createProject(workspace.ChildrenLocation, {Name: name, ContentLocation: url}), i18nUtil.formatMessage( messages["Creating project ${0}"], name)).then(function(project){
 								dispatchNewProject(workspace, project);
 							});

@@ -18,140 +18,6 @@ var logger = log4js.getLogger("tasks");
 
 var MS_EXPIRATION = 86400 * 1000 * 7; /* 7 days */  // TODO should be settable per task by client
 
-var TaskStoreInMemory = function() {
-	this._taskList = {};
-};
-
-TaskStoreInMemory.prototype = {
-	createTask: function(taskObj, callback) {
-		this._taskList[taskObj.id] = taskObj;
-		callback(null);
-	},
-	deleteTask: function(id, callback) {
-		delete this._taskList[id];
-		callback(null);
-	},
-	getTask: function(id, callback) {
-		callback(null, this._taskList[id]);
-	},
-	getTasksForUser: function(username, callback) {
-		var result = [];
-		Object.keys(this._taskList).forEach(function(id) {
-			if (this._taskList[id].username === username) {
-				result.push(this._taskList[id]);
-			}
-		}.bind(this));
-		callback(null, result);
-	},
-	updateTask: function(taskObj, callback) {
-		callback(null);
-	}
-};
-
-var TaskStoreMongoDB = function(callback) {
-	this._mongoose = require("mongoose");
-	var taskSchema = new this._mongoose.Schema({
-		id: {
-			type: String,
-			required: true,
-			unique: true
-		},
-		username: {
-			type: String,
-			required: true
-		},
-		keep: {
-			type: Boolean,
-			required: true
-		},
-		lengthComputable: {
-			type: Boolean,
-			required: true
-		},
-		type: {
-			type: String,
-			required: true
-		},
-		loaded: Number,
-		total: Number,
-		message: String,
-		result: this._mongoose.Schema.Types.Mixed,
-		timestamp: Number,
-		expires: Number,
-		cancelable: Boolean
-		// uriUnqualStrategy: String // TODO needed?
-	});
-	
-	this._orionTask = this._mongoose.model("orionTask", taskSchema);
-	if (this._mongoose.connection.readyState) {
-		/* connection already successfully established */
-		callback(null, this);
-	} else {
-		/* connect to mongo */
-		var db = this._mongoose.connection;
-		db.once('error', callback);
-		db.once('open', function() {
-			db.removeListener('error', callback);
-			callback(null, this);
-		}.bind(this));
-		this._mongoose.connect('mongodb://localhost/orion_multitenant');
-	}
-	api.getOrionEE().on("close-server", function(){
-		logger.info("Closing Task MongoDB");
-		if(this._mongoose && (this._mongoose.connection.readyState === 1 || this._mongoose.connection.readyState === 2)){
-			this._mongoose.disconnect();
-		}
-	});
-};
-
-TaskStoreMongoDB.prototype = {
-	createTask: function(taskObj, callback) {
-		taskObj._mongooseTask = new this._orionTask();
-		this.updateTask(taskObj, callback);
-	},
-	deleteTask: function(id, callback) {
-		this._orionTask.remove({id: id}, callback);
-	},
-	getTask: function(id, callback) {
-		this._orionTask.find(
-			{id: id},
-			function(err, mongooseTasks) {
-				if (err) {
-					callback(err);
-				} else {
-					callback(null, mongooseTasks[0]);
-				}
-			});
-	},
-	getTasksForUser: function(username, callback) {
-		this._orionTask.find({username: username}, callback);
-	},	
-	updateTask: function(taskObj, callback) {
-		var mongooseTask = taskObj._mongooseTask;
-		mongooseTask.id = taskObj.id;
-		mongooseTask.username = taskObj.username;
-		mongooseTask.keep = Boolean(taskObj.keep);
-		mongooseTask.lengthComputable = Boolean(taskObj.lengthComputable);
-		mongooseTask.type = taskObj.type;
-
-		mongooseTask.loaded = taskObj.loaded;
-		mongooseTask.total = taskObj.total;
-		mongooseTask.message = taskObj.message;
-
-		mongooseTask.result = taskObj.result;
-		mongooseTask.timestamp = taskObj.timestamp;
-		if (taskObj.expires) {
-			mongooseTask.expires = taskObj.expires;
-		}
-		mongooseTask.cancelable = Boolean(taskObj.cancelable);
-//		if (taskObj.uriUnequalStrategy) {
-//			mongooseTask.uriUnequalStrategy = taskObj.uriUnequalStrategy; // TODO needed?
-//		}
-
-		mongooseTask.save(callback);
-	}
-};
-
 var taskCount = 0;
 var taskStore;
 var taskRoot = "/task";
@@ -159,21 +25,8 @@ var taskRoot = "/task";
 function orionTasksAPI(options) {
 	taskRoot = options.taskRoot;
 	if (!taskRoot) { throw new Error('options.taskRoot is required'); }
-
-	if (!taskStore) {
-		if (options.singleUser) {
-			taskStore = new TaskStoreInMemory();
-		} else {
-			new TaskStoreMongoDB(function(error, result) {
-				if (error) {
-					/* fall back to in-memory task store */
-					taskStore = new TaskStoreInMemory();
-				} else {
-					taskStore = result;
-				}
-			});
-		}
-	}
+	taskStore = options.options && options.options.metastore;
+	if (!taskStore) { throw new Error('options.options.metastore is required'); }
 
 	return express.Router()
 	.use(bodyParser.json())
@@ -286,7 +139,7 @@ Task.prototype = {
 				} else {
 					if (this.result.JsonData) {
 						res.statusCode = this.result.HttpCode;
-						var resp = JSON.stringify(this.result.JsonData);
+						var resp = JSON.stringify(api.encodeLocation(this.result.JsonData));
 						res.setHeader('Content-Type', 'application/json');
 						res.setHeader('Content-Length', resp.length);
 						res.end(resp);

@@ -86,7 +86,7 @@ exports.DefaultDiffProvider = (function() {
 		_resolveComplexFileURL: function(complexURL) {
 			var that = this;
 			return this._diffProvider.getDiffFileURI(complexURL).then(function(jsonData, secondArg) {
-				return that._resolveTwoFiles(jsonData.Old, jsonData.New);
+				return that._resolveTwoFiles(jsonData.Old || jsonData.OldLocation, jsonData.New || jsonData.NewLocation);
 			}, function(){});
 		},
 		

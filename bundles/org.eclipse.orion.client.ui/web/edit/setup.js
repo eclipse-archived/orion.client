@@ -554,7 +554,7 @@ objects.mixin(TabWidget.prototype, {
 		tipContainer.appendChild(localBreadcrumbNode);
 		
 		var makeHref = function(segment, folderLocation, folder) {
-			var resource = folder ? folder.Location : this.fileClient.fileServiceRootURL(folderLocation);
+			var resource = folder ? folder.Location : folderLocation;
 			segment.href = uriTemplate.expand({resource: resource});
 			if (folder) {
 				if (metadata && metadata.Location === folder.Location) {
@@ -571,7 +571,7 @@ objects.mixin(TabWidget.prototype, {
 			container: localBreadcrumbNode,
 			resource: metadata,
 			workspaceRootSegmentName: this.fileClient.fileServiceName(metadata.Location),
-			workspaceRootURL: this.fileClient.fileServiceRootURL(metadata.Location),
+			workspaceRootURL: metadata.WorkspaceLocation || this.fileClient.fileServiceRootURL(metadata.Location),
 			makeFinalHref: true,
 			makeHref: makeHref,
 			// This id should be unique regardless of editor views open.
@@ -972,7 +972,7 @@ objects.mixin(EditorViewer.prototype, {
 								inputManager.removeEventListener("InputChanged", this.loadComplete);
 								that.tabWidget.closeTab(metadata, false);
 							}.bind(this));
-							inputManager.setInput(newLocation || fileClient.fileServiceRootURL(metadata.Location));
+							inputManager.setInput(newLocation || metadata.WorkspaceLocation || fileClient.fileServiceRootURL(metadata.Location));
 						} else {
 							that.tabWidget.closeTab(metadata, false);
 						}
@@ -987,7 +987,7 @@ objects.mixin(EditorViewer.prototype, {
 							inputManager.removeEventListener("InputChanged", this.loadComplete);
 							that.tabWidget.closeTab(metadata, false);
 						}.bind(this));
-						inputManager.setInput(item.result && item.result.Location || fileClient.fileServiceRootURL(selectedMetadata.Location));
+						inputManager.setInput(item.result && item.result.Location || metadata.WorkspaceLocation || fileClient.fileServiceRootURL(selectedMetadata.Location));
 					} else if (that.tabWidget.editorTabs.hasOwnProperty(sourceLocation)) {
 						that.tabWidget.closeTab(metadata, false);
 					}
@@ -1312,11 +1312,21 @@ objects.mixin(EditorSetup.prototype, {
 		this.sidebarNavInputManager.addEventListener("rootChanged", function(evt) { //$NON-NLS-0$
 			this.lastRoot = evt.root;
 		}.bind(this));
-		var gotoInput = function(evt) {
-			var newInput = evt.newInput || evt.parent || "";
-			window.location = uriTemplate.expand({resource: newInput.resource || newInput, params: newInput.params || []});
-		};
-		this.sidebarNavInputManager.addEventListener("filesystemChanged", gotoInput); //$NON-NLS-0$
+		this.sidebarNavInputManager.addEventListener("filesystemChanged", function(evt) { //$NON-NLS-0$
+			this.fileClient.loadWorkspaces(evt.newInput).then(function(workspaces) {
+				var resource = PageUtil.matchResourceParameters().resource;
+				this.fileClient.getWorkspace(resource).then(function(workspace) {
+					if (!workspaces.some(function(w) {
+						if (w.Id === workspace.Id) {
+							window.location = uriTemplate.expand({resource: w.Location});
+							return true;
+						}
+					})) {
+						window.location = uriTemplate.expand({resource: evt.newInput});
+					}
+				});
+			}.bind(this));
+		}.bind(this));
 		this.sidebarNavInputManager.addEventListener("create", function(evt) { //$NON-NLS-0$
 			if (evt.newValue && !evt.ignoreRedirect) {
 				window.location = this.computeNavigationHref(evt.newValue);
@@ -1677,8 +1687,8 @@ objects.mixin(EditorSetup.prototype, {
 				this.editorViewers[1].inputManager.setInput(PageUtil.hash());
 			}
 		} else if (oldSplitterMode !== undefined && oldSplitterMode !== MODE_SINGLE && mode === MODE_SINGLE) {
-			var currentLocation = this.editorViewers[1].inputManager.getFileMetadata().Location;
-			var rootLocation = this.fileClient.fileServiceRootURL(currentLocation);
+			var metadata = this.editorViewers[1].inputManager.getFileMetadata();
+			var rootLocation = metadata.WorkspaceLocation || this.fileClient.fileServiceRootURL(metadata.Location);
 			this.editorViewers[1].shown = false;
 			var editorTabsEnabled = this.generalPreferences && this.generalPreferences.enableEditorTabs;
 			if (!editorTabsEnabled) {

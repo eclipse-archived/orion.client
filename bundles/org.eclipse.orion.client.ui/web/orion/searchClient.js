@@ -56,7 +56,7 @@ define([
 			var locationName = "";
 			var noneRootMeta = null;
 			this._setLocationbyURL(meta);
-			this._searchRootLocation = this._fileClient.fileServiceRootURL(meta.Location);
+			this._searchRootLocation = meta.WorkspaceLocation || this._fileClient.fileServiceRootURL(meta.Location);
 			if(useParentLocation && meta && meta.Parents && meta.Parents.length > 0){
 				if(useParentLocation.index === "last"){
 					noneRootMeta = meta.Parents[meta.Parents.length-1];
@@ -144,7 +144,7 @@ define([
 					}
 					break;
 				case "workspace":
-					return this._fileClient.fileServiceRootURL();
+					return this.getSearchRootLocation();
 				case "other":
 					if(this._searchLocation_other){
 						return this._searchLocation_other;
@@ -160,16 +160,10 @@ define([
 			return this._searchLocationName;
 		},
 		getSearchRootLocation: function(){
-			if(this._searchRootLocation){
-				return this._searchRootLocation;
-			}
-			return this._fileClient.fileServiceRootURL();
+			return this._searchRootLocation || this._fileClient.fileServiceRootURL();
 		},
 		getChildrenLocation: function(){
-			if(this._childrenLocation){
-				return this._childrenLocation;
-			}
-			return this._fileClient.fileServiceRootURL();
+			return this._childrenLocation || this.getSearchRootLocation();
 		},
 		addDisplaycallback: function(displayCallback, searchScopeOption){
 			this._displaycallBack = displayCallback;

@@ -12,12 +12,13 @@
 define([
 	'i18n!orion/edit/nls/messages',
 	'orion/objects',
+	'orion/Deferred',
 	'orion/widgets/nav/common-nav',
 	'orion/PageUtil',
 	'orion/widgets/filesystem/filesystemSwitcher',
 	'orion/generalPreferences',
 	'orion/URL-shim'
-], function(messages, objects, mCommonNav, PageUtil, mFilesystemSwitcher, mGeneralPreferences) {
+], function(messages, objects, Deferred, mCommonNav, PageUtil, mFilesystemSwitcher, mGeneralPreferences) {
 	var CommonNavExplorer = mCommonNav.CommonNavExplorer;
 	var CommonNavRenderer = mCommonNav.CommonNavRenderer;
 
@@ -56,8 +57,10 @@ define([
 		 */
 		reroot: function(item) {
 			this.scope("");
-			return this.loadRoot(this.fileClient.fileServiceRootURL(item.Location)).then(function() {
-				return this.showItem(item, false); // call with reroot=false to avoid recursion
+			return this.fileClient.getWorkspace(item.Location).then(function(workspace) {
+				return this.loadRoot(workspace).then(function() {
+					return this.showItem(item, false); // call with reroot=false to avoid recursion
+				}.bind(this));
 			}.bind(this));
 		},
 		onModelCreate: function(evt) {
@@ -145,17 +148,18 @@ define([
 				var params = PageUtil.matchResourceParameters();
 				var navigate = params.navigate,
 					resource = params.resource;
-				var root = navigate || this.lastRoot || this.fileClient.fileServiceRootURL(resource || "");
-				this.explorer.display(root).then(function() {
-					if (sessionStorage.navSelection) {
-						try {
-							JSON.parse(sessionStorage.navSelection).forEach(function(sel) {
-								this.explorer.select(sel, true);
-							}.bind(this));
-						} catch (e) {} finally {
-							delete sessionStorage.navSelection;
+				Deferred.when(navigate || this.lastRoot || this.fileClient.getWorkspace(resource)).then(function(root) {
+					this.explorer.display(root).then(function() {
+						if (sessionStorage.navSelection) {
+							try {
+								JSON.parse(sessionStorage.navSelection).forEach(function(sel) {
+									this.explorer.select(sel, true);
+								}.bind(this));
+							} catch (e) {} finally {
+								delete sessionStorage.navSelection;
+							}
 						}
-					}
+					}.bind(this));
 				}.bind(this));
 			}.bind(this));
 		},
