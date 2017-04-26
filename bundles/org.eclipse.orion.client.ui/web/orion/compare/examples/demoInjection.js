@@ -97,14 +97,16 @@ function(Compare) {
 		var interval = parseInt(bAnimateInterval.options[bAnimateInterval.selectedIndex].value, 10);
 		window.setTimeout(animateDiffs, interval);
 	}
-	var GOTO_LINE = 15;
+	var GOTO_LINE = 23;
 	
 	var div2Insert = document.createElement("DIV");
 	div2Insert.classList.add("injectedDiv");
 	var select123 = document.createElement("SELECT");
+	select123.classList.add("selectDiv");
 	div2Insert.appendChild(select123);
-	div2Insert.appendChild(document.createElement("TEXTAREA"));
-	
+	var textArea = document.createElement("TEXTAREA");
+	div2Insert.appendChild(textArea);
+	textArea.placeholder = "Please put your review here...";
 	["Reviewer1", 
 	 "Reviewer2", 
 	 "Reviewer3", 
@@ -114,7 +116,7 @@ function(Compare) {
 	].forEach(function(item) {
 		var c = document.createElement("option");
 		c.text = item;
-		select123.options.add(c, 1);
+		select123.options.add(c);
 		
 	});
 	
