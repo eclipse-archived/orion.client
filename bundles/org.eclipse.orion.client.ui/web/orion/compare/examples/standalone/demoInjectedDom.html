@@ -30,6 +30,22 @@
 			margin-left:5px;
 			border:1px solid #bebebe;
 		}
+		textarea {
+			margin-top: 5px;
+			margin-left: 10px;
+			width: 730px;
+			height: 30px;
+		}
+		.selectDiv {
+			margin-top: 5px;
+			margin-left: 10px;
+		}
+		.injectedDiv {
+			width:  750px;
+			height: 70px;
+			outline: 2px dotted black;
+			background-color: yellow;
+		}	
 	</style>
 	<!--
     <link rel="stylesheet" type="text/css" href="built-compare.css"/>
@@ -87,9 +103,29 @@
             Content: contentOnRight
         }
     };
-	var GOTO_LINE = 12;
 	var compare = new Compare(options, "compareCmdDiv", "twoWay", true/*toggleable*/); //$NON-NLS-1$ //$NON-NLS-0$
-	var div2Insert = document.createElement("TEXTAREA");
+	var GOTO_LINE = 22;
+	
+	var div2Insert = document.createElement("DIV");
+	div2Insert.classList.add("injectedDiv");
+	var select123 = document.createElement("SELECT");
+	select123.classList.add("selectDiv");
+	div2Insert.appendChild(select123);
+	var textArea = document.createElement("TEXTAREA");
+	div2Insert.appendChild(textArea);
+	textArea.placeholder = "Please put your review here...";
+	["Reviewer1", 
+	 "Reviewer2", 
+	 "Reviewer3", 
+	 "Reviewer4", 
+	 "Reviewer5", 
+	 "Reviewer6"
+	].forEach(function(item) {
+		var c = document.createElement("option");
+		c.text = item;
+		select123.options.add(c);
+		
+	});
 	
 	function hookUp() {
 		compare.getCompareView().getWidget().addEventListener("contentLoaded", function(){ //$NON-NLS-0$
