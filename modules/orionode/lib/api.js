@@ -99,18 +99,23 @@ var PercentReplaceRegex = /\%/g;
 function encodeLocation(obj) {
 	for (var p in obj) {
 		if (p.match(LocationRegex)) {
-			if (typeof obj[p] === "object") {
+			if (Array.isArray(obj[p])) {
+				obj[p].forEach(function(o) {
+					encodeLocation(o);
+				});
+			} else if (typeof obj[p] === "object") {
 				if(obj[p].pathname){
 					obj[p].pathname = obj[p].pathname.replace(PercentReplaceRegex, "%25");
 				}
 				obj[p] = url.format(obj[p]);
-			} else {
+			} else if (obj[p]) {
 				obj[p] = url.format({pathname: obj[p].replace(PercentReplaceRegex, "%25")});
 			}
 		} else if (typeof obj[p] === "object") {
 			encodeLocation(obj[p]);
 		}
 	}
+	return obj;
 }
 
 /**
@@ -173,4 +178,5 @@ exports.rest = rest;
 exports.join = join;
 exports.writeError = writeError;
 exports.writeResponse = writeResponse;
+exports.encodeLocation = encodeLocation;
 exports.getOrionEE = getOrionEE;

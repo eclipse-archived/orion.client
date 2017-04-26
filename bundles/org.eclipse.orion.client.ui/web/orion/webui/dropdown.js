@@ -158,10 +158,6 @@ define(['orion/webui/littlelib', 'orion/EventTarget'], function(lib, EventTarget
 					} 
 					this._boundAutoDismiss = this._autoDismiss.bind(this);
 
-					// add auto dismiss.  Clicking anywhere but trigger or a submenu item means close.
-					var submenuNodes = lib.$$array(".dropdownSubMenu", this._dropdownNode); //$NON-NLS-0$
-					lib.addAutoDismiss([this._triggerNode].concat(submenuNodes), this._boundAutoDismiss);
-
 					this._triggerNode.classList.add("dropdownTriggerOpen"); //$NON-NLS-0$
 					if (this._selectionClass) {
 						this._triggerNode.classList.add(this._selectionClass);
@@ -172,7 +168,15 @@ define(['orion/webui/littlelib', 'orion/EventTarget'], function(lib, EventTarget
 					if (this._dropdownNode.scrollHeight > this._dropdownNode.offsetHeight) {
 						this._buttonsAdded = addScrollButtons.call(this);
 					}
-					
+
+					// add auto dismiss.  Clicking anywhere but trigger or a submenu item means close.
+					var submenuNodes = lib.$$array(".dropdownSubMenu", this._dropdownNode); //$NON-NLS-0$
+					var list = [this._triggerNode].concat(submenuNodes);
+					if (this._buttonsAdded) {
+						list.push(this._topScrollButton);
+						list.push(this._bottomScrollButton);
+					}
+					lib.addAutoDismiss(list, this._boundAutoDismiss);
 					this._positionDropdown(mouseEvent);
 					
 					if (this._buttonsAdded) {
@@ -400,9 +404,15 @@ define(['orion/webui/littlelib', 'orion/EventTarget'], function(lib, EventTarget
 			 		var menuBounds = this._dropdownNode.getBoundingClientRect();
 			 		if (this._selectedItem.offsetTop < this._dropdownNode.scrollTop) {
 		 				this._selectedItem.scrollIntoView(true);
+		 				if (this._dropdownNode.scrollTop < 5) {
+		 					this._dropdownNode.scrollTop = 0;
+		 				}
 		 			}
 		 			else if (itemBounds.bottom > menuBounds.bottom) {
 		 				this._selectedItem.scrollIntoView(false);
+		 				if ((this._dropdownNode.scrollHeight - this._dropdownNode.scrollTop - this._dropdownNode.clientHeight) < 5) {
+		 					this._dropdownNode.scrollTop = this._dropdownNode.scrollHeight - this._dropdownNode.clientHeight;
+		 				}
 		 			}
 		 			updateScrollButtonVisibility.call(this);
 				}
@@ -527,17 +537,31 @@ define(['orion/webui/littlelib', 'orion/EventTarget'], function(lib, EventTarget
 			this._topScrollButton.classList.add("menuScrollButton", "menuTopScrollButton", "core-sprite-openarrow");
 			this._bottomScrollButton.classList.add("menuScrollButton", "menuBottomScrollButton", "core-sprite-openarrow");
 
-			var activeScrollIntervalId;
-			this._topScrollButton.addEventListener("mouseenter", function() {
-				clearInterval();
-				activeScrollIntervalId = window.setInterval(scrollUp, 10);
-			});
-			this._bottomScrollButton.addEventListener("mouseenter", function() {
-				clearInterval();
-				activeScrollIntervalId = window.setInterval(scrollDown, 10);
-			});
-			this._topScrollButton.addEventListener("mouseleave", function() { clearInterval(); });
-			this._bottomScrollButton.addEventListener("mouseleave", function() { clearInterval(); });
+			this._topScrollButton.addEventListener("mousedown", function(evt){ //$NON-NLS-0$
+				if (this._activeScrollInterval) {
+					window.clearInterval(this._activeScrollInterval);
+				}
+				this._activeScrollInterval = window.setInterval(scrollUp.bind(null, evt.shiftKey ? 20 : 2), 10);
+			}.bind(this));
+			this._topScrollButton.addEventListener("mouseup", function(){ //$NON-NLS-0$
+				if (this._activeScrollInterval) {
+					window.clearInterval(this._activeScrollInterval);
+					this._activeScrollInterval = null;
+				}
+			}.bind(this));
+			
+			this._bottomScrollButton.addEventListener("mousedown", function(evt){ //$NON-NLS-0$
+				if (this._activeScrollInterval) {
+					window.clearInterval(this._activeScrollInterval);
+				}
+				this._activeScrollInterval = window.setInterval(scrollDown.bind(null, evt.shiftKey ? 20 : 2), 10);
+			}.bind(this));
+			this._bottomScrollButton.addEventListener("mouseup", function(){ //$NON-NLS-0$
+				if (this._activeScrollInterval) {
+					window.clearInterval(this._activeScrollInterval);
+					this._activeScrollInterval = null;
+				}
+			}.bind(this));
 		
 			this._dropdownNode.parentNode.insertBefore(this._topScrollButton, this._dropdownNode);
 			this._dropdownNode.parentNode.insertBefore(this._bottomScrollButton, this._dropdownNode.nextElementSibling);
@@ -547,21 +571,14 @@ define(['orion/webui/littlelib', 'orion/EventTarget'], function(lib, EventTarget
 		updateScrollButtonVisibility.call(this);
 		return true;
 		
-		function scrollDown() {
-			dropdown._dropdownNode.scrollTop+=2;
+		function scrollDown(increment) {
+			dropdown._dropdownNode.scrollTop+=increment;
 			updateScrollButtonVisibility.call(dropdown);
 		}
 		
-		function scrollUp() {
-			dropdown._dropdownNode.scrollTop-=2;
+		function scrollUp(increment) {
+			dropdown._dropdownNode.scrollTop-=increment;
 			updateScrollButtonVisibility.call(dropdown);
-		}
-		
-		function clearInterval() {
-			if (activeScrollIntervalId) {
-				window.clearInterval(activeScrollIntervalId);
-				activeScrollIntervalId = null;
-			}
 		}
 	}
 	
@@ -594,10 +611,12 @@ define(['orion/webui/littlelib', 'orion/EventTarget'], function(lib, EventTarget
 	 * Positions the top and bottom scroll buttons according to where the dropdown list is positioned
 	*/
 	function positionScrollButtons() {
+		this._topScrollButton.style.width = this._dropdownNode.clientWidth + 1 + "px";
+		this._bottomScrollButton.style.width = this._dropdownNode.clientWidth + 1 + "px";
 		this._topScrollButton.style.top = this._dropdownNode.style.top;
-		this._topScrollButton.style.left = this._dropdownNode.style.left;
-		this._bottomScrollButton.style.top = Number(this._dropdownNode.style.top.replace("px", "")) + (this._dropdownNode.clientHeight-this._bottomScrollButton.clientHeight)+"px";
-		this._bottomScrollButton.style.left = this._dropdownNode.style.left;
+		this._topScrollButton.style.left = this._topScrollButton.parentNode.clientWidth + "px";
+		this._bottomScrollButton.style.top = Number(this._dropdownNode.style.top.replace("px", "")) + (this._dropdownNode.clientHeight-this._bottomScrollButton.clientHeight + 1)+"px";
+		this._bottomScrollButton.style.left = this._bottomScrollButton.parentNode.clientWidth + "px";
 	}
 		
 	Dropdown.prototype.constructor = Dropdown;

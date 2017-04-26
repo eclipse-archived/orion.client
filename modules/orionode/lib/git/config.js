@@ -63,7 +63,7 @@ function getAConfig(req, res) {
 				value = config[section] && config[section][name];
 			}
 			if (value !== undefined) {
-				writeResponse(200, res, null, configJSON(key, value, fileDir));
+				writeResponse(200, res, null, configJSON(key, value, fileDir), true);
 			} else {
 				writeError(404, res, "There is no config entry with key provided");
 			}
@@ -93,7 +93,7 @@ function getConfig(req, res) {
 				"CloneLocation": gitRoot + "/clone" + fileDir,
 				"Location": gitRoot + "/config/clone"+ fileDir,
 				"Type": "Config"
-			});
+			}, true);
 
 			function getFullPath(config, prefix) {
 				if (typeof config !== "object" || Array.isArray(config)) {
@@ -140,7 +140,7 @@ function updateConfig(req, res, key, value, callback) {
 					}
 					if (result.value) {
 						var resp = configJSON(key, result.value, fileDir);
-						writeResponse(result.status, res, {"Location":resp.Location}, resp);
+						writeResponse(result.status, res, {"Location":resp.Location}, resp, true);
 					} else {
 						res.status(result.status).end();
 					}

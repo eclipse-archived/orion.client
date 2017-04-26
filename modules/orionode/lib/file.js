@@ -13,29 +13,30 @@ var express = require('express');
 var bodyParser = require('body-parser');
 var ETag = require('./util/etag');
 var fs = require('fs');
+var mkdirp = require('mkdirp');
 var nodePath = require('path');
 var api = require('./api');
 var fileUtil = require('./fileUtil');
 var writeError = api.writeError;
 
-function getParam(req, paramName) {
-	return req.query[paramName];
-}
-
 module.exports = function(options) {
 	var fileRoot = options.fileRoot;
-	var gitRoot = options.gitRoot;
+	var workspaceRoot = options.workspaceRoot;
 	if (!fileRoot) { throw new Error('options.fileRoot is required'); }
-	if (!gitRoot) { throw new Error('options.gitRoot is required'); }
+	if (!workspaceRoot) { throw new Error('options.workspaceRoot is required'); }
+	
+	var router = express.Router({mergeParams: true});
+	var jsonParser = bodyParser.json({"limit":"10mb"});
+	router.get('*', jsonParser, getFile);
+	router.put('*', putFile);
+	router.post('*', jsonParser, postFile);
+	router.delete('*', deleteFile);
 
-	var writeFileMetadata = function() {
-		var args = Array.prototype.slice.call(arguments, 0);
-		var originalFileUrl = fileRoot;
-		return fileUtil.writeFileMetadata.apply(null, [originalFileUrl].concat(args));
-	};
-	var getSafeFilePath = function(req, rest) {
-		return fileUtil.safeFilePath(req.user.workspaceDir, rest);
-	};
+	return router;
+	
+	function getParam(req, paramName) {
+		return req.query[paramName];
+	}
 
 	function writeFileContents(res, filepath, stats, etag) {
 		if (stats.isDirectory()) {
@@ -60,10 +61,10 @@ module.exports = function(options) {
 	function handleDiff(req, res, rest, body) {
 		var diffs = body.diff || [];
 		var contents = body.contents;
-		var patchPath = getSafeFilePath(req, rest);
-		fs.exists(patchPath, function(destExists) {
+		var file = fileUtil.getFile(req, rest);
+		fs.exists(file.path, function(destExists) {
 			if (destExists) {
-				fs.readFile(patchPath, function (error, data) {
+				fs.readFile(file.path, function (error, data) {
 					if (error) {
 						writeError(500, res, error);
 						return;
@@ -79,19 +80,19 @@ module.exports = function(options) {
 						var buffer = {
 							_text: [newContents], 
 							replaceText: function (text, start, end) {
-								var offset = 0, chunk = 0, length;
+								var offset = 0, chunk = 0, _length;
 								while (chunk<this._text.length) {
-									length = this._text[chunk].length; 
-									if (start <= offset + length) { break; }
-									offset += length;
+									_length = this._text[chunk].length; 
+									if (start <= offset + _length) { break; }
+									offset += _length;
 									chunk++;
 								}
 								var firstOffset = offset;
 								var firstChunk = chunk;
 								while (chunk<this._text.length) {
-									length = this._text[chunk].length; 
-									if (end <= offset + length) { break; }
-									offset += length;
+									_length = this._text[chunk].length; 
+									if (end <= offset + _length) { break; }
+									offset += _length;
 									chunk++;
 								}
 								var lastOffset = offset;
@@ -128,7 +129,7 @@ module.exports = function(options) {
 							newContents = contents;
 						}
 					}
-					fs.writeFile(patchPath, newContents, function(err) {
+					fs.writeFile(file.path, newContents, function(err) {
 						if (err) {
 							writeError(500, res, error);
 							return;
@@ -137,12 +138,12 @@ module.exports = function(options) {
 							writeError(406, res, new Error('Bad file diffs. Please paste this content in a bug report: \u00A0\u00A0 \t' + JSON.stringify(body)));
 							return;
 						}
-						fs.stat(patchPath, function(error, stats) {
+						fs.stat(file.path, function(error, stats) {
 							if (err) {
 								writeError(500, res, error);
 								return;
 							}
-							writeFileMetadata(req, res, gitRoot, patchPath, stats, ETag.fromString(newContents) /*the new ETag*/);
+							fileUtil.writeFileMetadata(req, res, api.join(fileRoot, file.workspaceId), api.join(workspaceRoot, file.workspaceId), file, stats, ETag.fromString(newContents) /*the new ETag*/);
 						});
 					});
 					
@@ -153,34 +154,34 @@ module.exports = function(options) {
 		});
 	}
 
-	var router = express.Router({mergeParams: true});
-	var jsonParser = bodyParser.json({"limit":"10mb"});
-	router.get('*', jsonParser, function(req, res) {
+	function getFile(req, res) {
 		var rest = req.params["0"].substring(1),
 			readIfExists = req.headers ? Boolean(req.headers['read-if-exists']).valueOf() : false,
-			filepath = getSafeFilePath(req, rest);
-		if(filepath && req.query && req.query.project === "true") {
+			file = fileUtil.getFile(req, rest);
+		if(file.path && req.query && req.query.project === "true") {
 			var n = req.query.names ? req.query.names.split(',') : [],
 				names = {};
 			n.forEach(function(item) {
 				names[decodeURIComponent(item)] = Object.create(null);
 			});
-			return fileUtil.getProject(req.user.workspaceDir, fileRoot, filepath, {names: names}).then(function(project) {
+			var parentFileRoot = api.join(fileRoot, file.workspaceId);
+			var parentWorkspaceRoot = api.join(workspaceRoot, file.workspaceId);
+			return fileUtil.getProject(parentFileRoot, parentWorkspaceRoot, file, {names: names}).then(function(project) {
 				return fileUtil.withStatsAndETag(project, function(error, stats, etag) {
 					if (error && error.code === 'ENOENT') {
 						res.sendStatus(204);
 					} else if(error) {
 						writeError(500, res, error);
 					} else {
-						writeFileMetadata(req, res, gitRoot, project, stats, etag, 0);
+						fileUtil.writeFileMetadata(req, res, parentFileRoot, parentWorkspaceRoot, {workspaceDir: file.workspaceDir, workspaceId: file.workspaceId, path: project}, stats, etag, 0);
 					}
 				});
-			}, function reject(err) {
+			}, function reject() {
 				//don't send back 404, this API asks a question, it does not ask to actually get a resource
 				res.sendStatus(204);
 			});
 		}
-		return fileUtil.withStatsAndETag(filepath, function(error, stats, etag) {
+		return fileUtil.withStatsAndETag(file.path, function(error, stats, etag) {
 			if (error && error.code === 'ENOENT') {
 				if(typeof readIfExists === 'boolean' && readIfExists) {
 					res.sendStatus(204);
@@ -191,43 +192,48 @@ module.exports = function(options) {
 				writeError(500, res, error);
 			} else if (stats.isFile() && getParam(req, 'parts') !== 'meta') {
 				// GET file contents
-				writeFileContents(res, filepath, stats, etag);
+				writeFileContents(res, file.path, stats, etag);
 			} else {
 				var depth = stats.isDirectory() && Number(getParam(req, 'depth')) || 0;
-				writeFileMetadata(req, res, gitRoot, filepath, stats, etag, depth);
+				fileUtil.writeFileMetadata(req, res, api.join(fileRoot, file.workspaceId), api.join(workspaceRoot, file.workspaceId), file, stats, etag, depth);
 			}
 		});
-	});
+	}
 
-	router.put('*', function(req, res) {
+	function putFile(req, res) {
 		var rest = req.params["0"].substring(1);
-		var filepath = getSafeFilePath(req, rest);
+		var file = fileUtil.getFile(req, rest);
 		if (getParam(req, 'parts') === 'meta') {
 			// TODO implement put of file attributes
 			res.sendStatus(501);
 			return;
 		}
 		function write() {
-			var ws = fs.createWriteStream(filepath);
-			ws.on('finish', function() {
-				fileUtil.withStatsAndETag(filepath, function(error, stats, etag) {
-					if (error && error.code === 'ENOENT') {
-						res.status(404).end();
-						return;
-					}
-					writeFileMetadata(req, res, gitRoot, filepath, stats, etag);
+			mkdirp(nodePath.dirname(file.path), function(err) {
+				if (err) {
+					return writeError(500, res, err);
+				}
+				var ws = fs.createWriteStream(file.path);
+				ws.on('finish', function() {
+					fileUtil.withStatsAndETag(file.path, function(error, stats, etag) {
+						if (error && error.code === 'ENOENT') {
+							res.status(404).end();
+							return;
+						}
+						fileUtil.writeFileMetadata(req, res, api.join(fileRoot, file.workspaceId), api.join(workspaceRoot, file.workspaceId), file, stats, etag);
+					});
 				});
+				ws.on('error', function(err) {
+					writeError(500, res, err);
+				});
+				req.pipe(ws);
 			});
-			ws.on('error', function(err) {
-				writeError(500, res, err);
-			});
-			req.pipe(ws);
 		}
 		var ifMatchHeader = req.headers['if-match'];
 		if (!ifMatchHeader) {
 			return write();
 		}
-		fileUtil.withETag(filepath, function(error, etag) {
+		fileUtil.withETag(file.path, function(error, etag) {
 			if (error && error.code === 'ENOENT') {
 				res.status(404).end();
 			} else if (ifMatchHeader && ifMatchHeader !== etag) {
@@ -236,51 +242,53 @@ module.exports = function(options) {
 				write();
 			}
 		});
-	});
+	}
 
-	// POST - parse json body
-	router.post('*', jsonParser, function(req, res) {
+	function postFile(req, res) {
 		var rest = req.params["0"].substring(1);
 		var diffPatch = req.headers['x-http-method-override'];
 		if (diffPatch === "PATCH") {
 			handleDiff(req, res, rest, req.body);
 			return;
 		}
-		var name = fileUtil.decodeSlug(req.headers.slug) || req.body && req.body.Name;
-		if (!name) {
+		var fileName = fileUtil.decodeSlug(req.headers.slug) || req.body && req.body.Name;
+		if (!fileName) {
 			writeError(400, res, new Error('Missing Slug header or Name property'));
 			return;
 		}
 
-		var filepath = getSafeFilePath(req, nodePath.join(rest, name));
-		fileUtil.handleFilePOST(gitRoot, fileRoot, req, res, filepath);
-	});
+		var file = fileUtil.getFile(req, nodePath.join(rest, fileName));
+		fileUtil.handleFilePOST(workspaceRoot, fileRoot, req, res, file);
+	}
 
-	// DELETE - no request body
-	router.delete('*', function(req, res) {
+	function deleteFile(req, res) {
 		var rest = req.params["0"].substring(1);
-		var filepath = getSafeFilePath(req, rest);
-		fileUtil.withStatsAndETag(filepath, function(error, stats, etag) {
-			var ifMatchHeader = req.headers['if-match'];
-			if (error && error.code === 'ENOENT') {
-				return res.sendStatus(204);
-			} else if (ifMatchHeader && ifMatchHeader !== etag) {
-				return res.sendStatus(412);
-			}
-			var callback = function(error) {
+		var file = fileUtil.getFile(req, rest);
+		fileUtil.withStatsAndETag(file.path, function(error, stats, etag) {
+			function done(error) {
 				if (error) {
 					writeError(500, res, error);
 					return;
 				}
 				res.sendStatus(204);
-			};
+			}
+			function checkWorkspace(error) {
+				if (!error && file.path === file.workspaceDir) {
+					fileUtil.getMetastore(req).deleteWorkspace(file.workspaceId, done);
+				}
+				done(error);
+			}
+			var ifMatchHeader = req.headers['if-match'];
+			if (error && error.code === 'ENOENT') {
+				return checkWorkspace();
+			} else if (ifMatchHeader && ifMatchHeader !== etag) {
+				return res.sendStatus(412);
+			}
 			if (stats.isDirectory()) {
-				fileUtil.rumRuff(filepath, callback);
+				fileUtil.rumRuff(file.path, checkWorkspace);
 			} else {
-				fs.unlink(filepath, callback);
+				fs.unlink(file.path, checkWorkspace);
 			}
 		});
-	});
-
-	return router;
+	}
 };

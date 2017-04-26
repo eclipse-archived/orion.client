@@ -13,6 +13,7 @@
 define([
 	'i18n!orion/edit/nls/messages',
 	'orion/objects',
+	'orion/Deferred',
 	'orion/webui/littlelib',
 	'orion/explorers/explorer-table',
 	'orion/explorers/navigatorRenderer',
@@ -29,7 +30,7 @@ define([
 	'orion/metrics',
 	'orion/util'
 ], function(
-	messages, objects, lib, mExplorer, mNavigatorRenderer, mKeyBinding,
+	messages, objects, Deferred, lib, mExplorer, mNavigatorRenderer, mKeyBinding,
 	FileCommands, ProjectCommands, ExtensionCommands, mGlobalCommands, Selection, URITemplate, PageUtil, mContextMenu, mGeneralPreferences, mMetrics, util
 ) {
 	var _DEBUG = false;
@@ -201,15 +202,10 @@ define([
 			});
 		},
 		scopeUp: function() {
-			var navigate;
-			var root = this.treeRoot;
-			var prnt = root.Parents && root.Parents[0];
-			if (prnt) {
-				navigate = prnt.ChildrenLocation;
-			} else {
-				navigate = this.fileClient.fileServiceRootURL(root.Location);
-			}
-			this.scope(navigate);
+			var prnt = this.treeRoot.Parents && this.treeRoot.Parents[0];
+			Deferred.when(prnt && prnt.ChildrenLocation || this.fileClient.getWorkspace(this.treeRoot.Location)).then(function(navigate) {
+				this.scope(navigate);
+			}.bind(this));
 		},
 		scopeDown: function(item) {
 			this.scope(item.ChildrenLocation);

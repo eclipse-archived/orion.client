@@ -31,7 +31,7 @@ try {
 	var submodule = require('./git/submodule');
 	var tree = require('./git/tree');
 	var pullrequest = require('./git/pullrequest');
-	var gitFileDecorator = require('./git/gitfiledecorator').gitFileDecorator;
+	var GitFileDecorator = require('./git/gitfiledecorator').GitFileDecorator;
 } catch (e) {
 	hasNodegit = false;
 	if (e.code === "MODULE_NOT_FOUND" && e.message.indexOf("nodegit") >= 0) {
@@ -82,6 +82,6 @@ function Git(options) {
 	router.use("/submodule", submodule.router(options));
 	router.use("/tree", tree.router(options));
 	router.use("/pullRequest", pullrequest.router(options));
-	fileUtil.addDecorator(gitFileDecorator);
+	fileUtil.addDecorator(new GitFileDecorator(options));
 	return router;
 }

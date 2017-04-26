@@ -11,6 +11,7 @@
 /*eslint-env node */
 var express = require("express");
 var api = require("../api"), writeError = api.writeError;
+var fileUtil = require("../fileUtil");
 var bodyParser = require("body-parser");
 var target = require("./target");
 var tasks = require("../tasks");
@@ -144,13 +145,14 @@ function _getAppwithAppName(userId, encodeName, appTarget){
 }
 function toOrionLocation(req, location){
 	if(location && location.length !== 0 && location.indexOf(fileRoot) === 0){
-		return path.join(req.user.workspaceDir, location.substring(fileRoot.length)); 
+		var file = fileUtil.getFile(req, location.substring(fileRoot.length));
+		return file.path; 
 	}
 }
 function toAppLocation(req,location){
 	if(location && location.length !== 0 && location.indexOf(fileRoot) === 0){
-		var foldername = location.replace(fileRoot,"").split("/")[1];
-		return path.join(req.user.workspaceDir, foldername); 
+		var file = fileUtil.getFile(req, location.substring(fileRoot.length));
+		return path.join(file.workspaceDir, location.replace(fileRoot,"").split("/").slice(0, 2).join("/")); 
 	}
 }
 function putapps(req, res){

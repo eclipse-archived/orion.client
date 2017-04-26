@@ -717,31 +717,20 @@ and (max-device-width : 1024px)  {
 }
 
 .menuScrollButton {
-	background-color: rgba(0,0,0,0) !important;
-	color: #3B4B54 !important;
+	background: linear-gradient(rgba(1,1,1,.2), white) !important;
+	color: black !important;
 	display: none;
 	cursor: pointer;
-	height: 24px;
-	opacity: 0.5;
+	height: 20px;
 	position: absolute;
+	outline: none; /* these button must not take focus*/
 	width: 100%;
-	max-width: 125px;
 	z-index: 200;
 }
 
 .menuTopScrollButton {
 	-webkit-transform: rotate(180deg);		/* Safari */
 	transform: rotate(180deg);
-}
-
-button.menuScrollButton.menuTopScrollButton.core-sprite-openarrow::before {
-	font-size: larger;
-	padding-right: 90px;
-}
-
-button.menuScrollButton.menuBottomScrollButton.core-sprite-openarrow::before {
-	font-size: larger;
-	padding-left: 90px;
 }
 /* End of dropdown menu scroll buttons */
 

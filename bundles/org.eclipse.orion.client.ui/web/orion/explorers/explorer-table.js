@@ -1173,7 +1173,7 @@ define([
 			if (!item || !this.model || !this.myTree) {
 				return deferred.reject();
 			}
-			if (!this.myTree.showRoot && item.Location === this.treeRoot.Location) {
+			if (!this.myTree.showRoot && (item.Location === this.treeRoot.Location || item.Location === this.treeRoot.ContentLocation)) {
 				return deferred.resolve(this.treeRoot);
 			}
 			var row = this.getRow(item);
@@ -1318,15 +1318,12 @@ define([
 				path = path.ChildrenLocation || path.ContentLocation;
 			}
 			path = mFileUtils.makeRelative(path);
-			if (!force && path === this._lastPath) {
-				return new Deferred().resolve(this.treeRoot);
-			}
-			this._lastPath = path;
 			var self = this;
-			if (force || path !== this.treeRoot.Path) {
-				return this.load(this.fileClient.loadWorkspace(path), messages["Loading "] + path, postLoad).then(function(p) {
+			if (force || path !== this.treeRoot.Path || path !== this._lastPath) {
+				this._lastPath = path;
+				return this.load(this.fileClient.read(path, true), messages["Loading "] + path, postLoad).then(function() {
 					self.treeRoot.Path = path;
-					return new Deferred().resolve(self.treeRoot);
+					return self.treeRoot;
 				}, function(err) {
 					self.treeRoot.Path = null;
 					return new Deferred().reject(err);

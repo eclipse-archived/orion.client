@@ -36,17 +36,16 @@ exports.install = function(options) {
 		throw new Error('missing optons.workspaceDir');
 	}
 
-	function resolvePath(userWorkspaceDir, wwwPath, callback) {
-		var filePath = api.rest(fileRoot, wwwPath || "");
-		if(!filePath){
-			filePath = api.rest(fileRoot, fileRoot);
-		}
+	function resolvePath(req, userWorkspaceDir, wwwPath, callback) {
+		var rest = api.rest(fileRoot, wwwPath || "");
 		// Check if the cwd passed in exists. If not, fall back to the user's
 		// workspace dir
-		var cwd = fileUtil.safeFilePath(userWorkspaceDir, filePath);
+		
+		var file = fileUtil.getFile(req, rest);
+		var cwd = file.path;
 		fs.stat(cwd, function(err, stats) {
 			if (err || !stats.isDirectory()) {
-				cwd = userWorkspaceDir;
+				cwd = file.workspaceDir || userWorkspaceDir;
 			}
 			callback(cwd);
 		});
@@ -103,11 +102,10 @@ exports.install = function(options) {
 				sock.emit('fail', 'Not authenticated.');
 				return;
 			}
-
 			if (req.user.workspace) {
 				userWorkspaceDir = path.join(userWorkspaceDir, req.user.workspace);
 			}
-			resolvePath(userWorkspaceDir, cwd, function(realCWD) {
+			resolvePath(req, userWorkspaceDir, cwd, function(realCWD) {
 				var buff = [];
 				// Open Terminal Connection
 				var shell = process.platform === 'win32' ? 'powershell.exe' : (process.env.SHELL || 'sh');

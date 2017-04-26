@@ -90,6 +90,8 @@ define({
 	"OpenWith": "Open With",
 	"OpenRelated": "Open Related",
 	"OpenFolder": "Open Folder",
+	"SwitchWorkspace": "Switch To",
+	"SwitchWorkspaceTip": "Switch workspaces",
 	"OpenRecent": "Open Recent",
 	"OpenFolderTip": "Change the root folder",
 	"Dependency": "Dependency",

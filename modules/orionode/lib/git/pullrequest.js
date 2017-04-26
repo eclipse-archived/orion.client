@@ -76,7 +76,7 @@ function getPullRequest(req, res) {
 		var projectname = pathnames[2].replace(/\.git$/g, "");
 		var pullrequestUrl = "https://api.github.com/repos/" + username +"/" + projectname + "/pulls";
 		if(clientID && clientSecret){
-			pullrequestUrl += "?client_id="+clientID+"&client_secret="+clientSecret+"";
+			pullrequestUrl += "?client_id="+clientID+"&client_secret="+clientSecret;
 		}
 	}
 	var userAgentHeader = {

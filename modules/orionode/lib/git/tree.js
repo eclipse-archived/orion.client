@@ -15,6 +15,7 @@ var clone = require('./clone');
 var path = require('path');
 var express = require('express');
 var util = require('./util');
+var fileUtil = require('../fileUtil');
 var mime = require('mime');
 
 module.exports = {};
@@ -24,6 +25,9 @@ module.exports.router = function(options) {
 	var gitRoot = options.gitRoot;
 	if (!fileRoot) { throw new Error('options.fileRoot is required'); }
 	if (!gitRoot) { throw new Error('options.gitRoot is required'); }
+	
+	/* Note that context path was not included in file and workspace root. */
+	var contextPath = options && options.options && options.options.configParams["orion.context.path"] || "";
 	
 	return express.Router()
 	.get('/', getTree)
@@ -37,7 +41,7 @@ function treeJSON(location, name, timestamp, dir, length) {
 		Directory: dir,
 		Length: length,
 		Location: gitRoot + "/tree" + location,
-		ChildrenLocation: dir ? gitRoot + "/tree" + location + "?depth=1": undefined,
+		ChildrenLocation: dir ? {pathname: gitRoot + "/tree" + location, query: {depth: 1}}: undefined,
 		Attributes: {
 			ReadOnly: true
 		}
@@ -47,21 +51,50 @@ function treeJSON(location, name, timestamp, dir, length) {
 function getTree(req, res) {
 	var repo;
 	
-	if(clone.isWorkspace(req)){
-		if (!req.params["0"]) {
-			return clone.getClones(req, res, function(repos) {
-				var tree = treeJSON("", "/", 0, true, 0);
+	if (!req.params[0]) {
+		var workspaceRoot = gitRoot + "/tree" + fileRoot;
+		api.writeResponse(null, res, null, {
+				Id: req.user.username,
+				Name: req.user.username,
+				UserName: req.user.fullname || req.user.username,
+				Workspaces: req.user.workspaces.map(function(w) {
+					return {
+						Id: w.id,
+						Location: api.join(workspaceRoot, w.id),
+						Name: w.name
+					};
+				})
+			}, true);
+		return;
+	}
+	
+	var segmentCount = req.params["0"].split("/").length;
+	if (segmentCount < 2) {
+		writeError(409, res);
+		return;
+	}
+	
+	if (segmentCount === 2) {
+		var file = fileUtil.getFile(req, req.params["0"]);
+		fileUtil.getMetastore(req).getWorkspace(file.workspaceId, function(err, workspace) {
+			if (err) {
+				return writeError(400, res, err);
+			}
+			clone.getClones(req, res, function(repos) {
+				var tree = treeJSON(api.join(fileRoot, workspace.id), workspace.name, 0, true, 0);
+				tree.Id = workspace.id;
 				var children = tree.Children = [];
 				function add(repos) {
 					repos.forEach(function(repo) {
-						children.push(treeJSON(repo.ContentLocation, repo.Name, 0, true, 0));
+						children.push(treeJSON(repo.ContentLocation.substring(contextPath.length), repo.Name, 0, true, 0));
 						if (repo.Children) add(repo.Children);
 					});
 				}
 				add(repos, tree);
-				writeResponse(200, res, null, tree);
+				writeResponse(200, res, null, tree, true);
 			});
-		}
+		});
+		return;
 	}
 	
 	var filePath;
@@ -87,7 +120,7 @@ function getTree(req, res) {
 			.then(function(children) {
 				var tree = treeJSON(location, path.basename(req.params["0"] || ""), 0, true, 0);
 				tree.Children = children;
-				writeResponse(200, res, null, tree);
+				writeResponse(200, res, null, tree, true);
 			});
 		}
 		var segments = filePath.split("/");
@@ -119,7 +152,7 @@ function getTree(req, res) {
 					return treeJSON(path.join(refLocation, entry.path()), entry.name(), 0, entry.isDirectory(), 0);
 				});
 				createParents(result);
-				return writeResponse(200, res, null, result);
+				return writeResponse(200, res, null, result, true);
 			}
 			if (p) {
 				return tree.getEntry(p)
@@ -129,7 +162,7 @@ function getTree(req, res) {
 							var result = treeJSON(path.join(refLocation, entry.path()), entry.name(), 0, entry.isDirectory(), 0);
 							result.ETag = entry.sha();
 							createParents(result);
-							return writeResponse(200, res, null, result);
+							return writeResponse(200, res, null, result, true);
 						}
 						return entry.getBlob()
 						.then(function(blob) {
@@ -144,7 +177,7 @@ function getTree(req, res) {
 								writeResponse(200, res, {
 									'Content-Type':'application/octect-stream',
 									'Content-Length': resp.length,
-									'ETag': '\"' + entry.sha() + '\"'}, resp, null, true);
+									'ETag': '\"' + entry.sha() + '\"'}, resp, false, true);
 							}
 						});
 					}

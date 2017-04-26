@@ -70,7 +70,7 @@ function getStash(req, res) {
 			"Location" : gitRoot + "/stash" + fileDir,
 			"CloneLocation" : gitRoot + "/clone" + fileDir,
 			"Type" : "StashCommit"
-		});
+		}, true);
 	})
 	.catch(function(err) {
 		writeError(500, res, err.message);

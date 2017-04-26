@@ -503,7 +503,6 @@ define([
 			this._searcher.setLocationOther(otherLocationString);
 			localStorage.setItem("/inlineSearchScopeOption", "other");
 			localStorage.setItem("/inlineSearchOtherScope", otherLocationString);
-			this._targetFolder = otherLocationString;
 			this._displaySelectedSearchScope([otherLocationString]);
 			this._searcher.addDisplaycallback(this._displaySelectedSearchScope.bind(this),"other");
 		},
@@ -563,7 +562,7 @@ define([
 		},
 		
 		_getOtherScope: function(){
-			return localStorage.getItem("/inlineSearchOtherScope") || "/file";
+			return localStorage.getItem("/inlineSearchOtherScope") || this._fileClient.fileServiceRootURL();
 		},
 		
 		_initSearchScope: function() {
