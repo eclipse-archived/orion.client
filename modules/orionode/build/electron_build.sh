@@ -38,7 +38,7 @@ update_config_files() {
 	pkg_version=$(jsawk -i package.json 'return this.version')
 	
 	# remove multi-user dependencies from package.json
-	sed -i.bak -E '/(passport*|mongoose|mongodb|nodemailer|connect-mongo)/d' package.json
+	sed -i.bak -E '/(mongoose|mongodb|nodemailer|connect-mongo)/d' package.json
 	
 	# update build id
 	if [ ! -z "$BUILD_ID" ]; then
