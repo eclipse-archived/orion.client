@@ -305,15 +305,19 @@ define([
 								window.location.href = link.href;
 								//_self._clickLink(link);
 							} else if (evt.type === "dblclick") {
-								this.isDesktopSelectionMode().then(function(desktopMode) {
-									if(desktopMode){
+								this.isEditorTabsEnabled().then(function(editorTabsEnabled) {
+									if(editorTabsEnabled){
 										var href = evt.srcElement.querySelector("a").href;
 										this.dispatchEvent({
 											type: "fileDoubleClicked",
 											href: href
 										});
 									}else{
-										this.handleLinkDoubleClick(link, evt);
+										this.isDesktopSelectionMode().then(function(desktopMode){
+											if(desktopMode){
+												this.handleLinkDoubleClick(link, evt);
+											}
+										}.bind(this));
 									}
 								}.bind(this));
 							}
