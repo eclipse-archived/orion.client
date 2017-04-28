@@ -148,7 +148,8 @@ define([
 				var params = PageUtil.matchResourceParameters();
 				var navigate = params.navigate,
 					resource = params.resource;
-				Deferred.when(navigate || this.lastRoot || this.fileClient.getWorkspace(resource)).then(function(root) {
+				var input = this.editorInputManager.getFileMetadata();
+				Deferred.when(navigate || this.lastRoot || (input && input.WorkspaceLocation) || (input.Projects && input.Location) || this.fileClient.getWorkspace(resource)).then(function(root) {
 					this.explorer.display(root).then(function() {
 						if (sessionStorage.navSelection) {
 							try {
