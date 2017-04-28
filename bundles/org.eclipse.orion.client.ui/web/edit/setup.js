@@ -744,7 +744,7 @@ objects.mixin(TabWidget.prototype, {
 			};
 			// Create and store a new editorTab
 			editorTab = this.editorTabs[metadata.Location] = this.createTab_(metadata, href);
-			if(!isRestoreTabsFromStorage || (isRestoreTabsFromStorage && isTransient)){
+			if((!isRestoreTabsFromStorage && this.enableEditorTabs) || (isRestoreTabsFromStorage && isTransient && this.enableEditorTabs)){
 				editorTab.editorTabNode.classList.add("transient");
 				this.transientTab = editorTab;
 				this.transientTab.location = metadata.Location;
