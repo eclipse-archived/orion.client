@@ -124,6 +124,11 @@ define([
 				return genealPrefs.desktopSelectionPolicy;
 			});
 		},
+		isEditorTabsEnabled: function() {
+			return this.generalPreferences.getPrefs().then(function(genealPrefs) {
+				return genealPrefs.enableEditorTabs;
+			});
+		},
 		onModelCreate: function(evt) {
 			return FileExplorer.prototype.onModelCreate.call(this, evt).then(function() {
 				if (evt && evt.select) {
