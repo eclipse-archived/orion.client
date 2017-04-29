@@ -775,6 +775,7 @@ define([
 
             styles.comment.color = getValuesFromXML(xml, "singleLineComment");
             styles.annotationLine.currentLine.backgroundColor = getValuesFromXML(xml, "currentLine");
+            styles.annotationLine.highlightedLine.backgroundImage = getValuesFromXML(xml, "highlightedLine");
 
             // Eclipse themes do not set the background color for matching brackets. Instead, they set a border for the matching bracket.
             styles.annotationRange.matchingBracket.backgroundColor = "transparent";
@@ -940,4 +941,4 @@ define([
             ThemeImporter:ThemeImporter
         };
     }
-);
+);

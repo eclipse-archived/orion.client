@@ -64,8 +64,15 @@ define(['i18n!orion/settings/nls/messages'
 			display: messages["editorTheme current line background"],
 			objPath: [
 				"styles annotationLine currentLine backgroundColor"
-			], 
-			id: "editorThemeColorCurrentLineBackground", 
+			],
+			id: "editorThemeColorCurrentLineBackground",
+			value: defaultColor
+		}, {
+			display: messages["editorTheme highlighted line background"],
+			objPath: [
+				"styles annotationLine highlightedLine backgroundImage"
+			],
+			id: "editorThemeColorHighlightedLineBackground",
 			value: defaultColor
 		}, {
 			display: messages["editorTheme comment"],
