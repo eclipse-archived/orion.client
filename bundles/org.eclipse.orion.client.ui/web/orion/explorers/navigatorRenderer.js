@@ -327,7 +327,7 @@ define([
 			col.setAttribute("role", "presentation"); //$NON-NLS-1$ //$NON-NLS-2$
 			span.className = "mainNavColumn"; //$NON-NLS-0$
 			var itemNode;
-			var isDesktopMode = this.explorer._parentNode.parentNode.classList.contains("desktopmode");
+			var isDesktopMode = this.explorer._parentNode && this.explorer._parentNode.parentNode.classList.contains("desktopmode");
 			if (item.Directory) {
 				// defined in ExplorerRenderer.  Sets up the expand/collapse behavior
 				this.getExpandImage(tableRow, span);
