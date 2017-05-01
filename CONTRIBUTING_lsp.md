@@ -34,4 +34,4 @@ Be sure to use the same email address in your Eclipse account that you intend to
 
 Contact the project developers via the project's "dev" list.
 
-- [https://dev.eclipse.org/mailman/listinfo/orion-dev] (https://dev.eclipse.org/mailman/listinfo/orion-dev)
+- [https://dev.eclipse.org/mailman/listinfo/orion-dev]
