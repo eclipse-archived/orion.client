@@ -6,7 +6,7 @@ Thanks for your interest in this project.
 
 1) Clone the git repository : [https://git.eclipse.org/r/orion/org.eclipse.orion.client] and checkout the `java-lsp` branch.
 
-2) Get the lsp server from the Git repo: [https://github.com/gorkem/java-language-server] and follow the `README.md` file to build it.
+2) Get the lsp server from the Git repo: [https://github.com/eclipse/eclipse.jdt.ls.git] and follow the `README.md` file to build it.
 
 3) Install the lsp server in the `org.eclipse.orion.client/modules/orionode/server` folder.
 
@@ -15,7 +15,7 @@ Thanks for your interest in this project.
   - start it by using: `node --debug server.js -p 8083 --w <workspace_path>`
   This runs the Node.js Orion server on localhost:8083.
 
-5) Open the browser on `http://local.orion.org:8083`.
+5) Open the browser on `http://localhost:8083`.
 The Orion client with the Java™ plugin requires a Node.js Orion server that is enabled for the language server connections.
 This is why for now we use a local Node.js server instead of the instance running on orion.eclipse.org.
 
