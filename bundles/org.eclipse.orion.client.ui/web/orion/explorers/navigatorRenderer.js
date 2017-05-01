@@ -327,27 +327,20 @@ define([
 			col.setAttribute("role", "presentation"); //$NON-NLS-1$ //$NON-NLS-2$
 			span.className = "mainNavColumn"; //$NON-NLS-0$
 			var itemNode;
-			var isDesktopMode = this.explorer._parentNode && this.explorer._parentNode.parentNode.classList.contains("desktopmode");
 			if (item.Directory) {
 				// defined in ExplorerRenderer.  Sets up the expand/collapse behavior
 				this.getExpandImage(tableRow, span);
 				itemNode = this.createFolderNode(item);
+
 				span.appendChild(itemNode);
-				if(!isDesktopMode){
-					this.explorer._makeDropTarget(item, itemNode);
-					this.explorer._makeDropTarget(item, tableRow);
-				}
+				this.explorer._makeDropTarget(item, itemNode);
+				this.explorer._makeDropTarget(item, tableRow);
 			} else {
 				if (!this.openWithCommands) {
 					this.openWithCommands = mExtensionCommands.getOpenWithCommands(this.commandService);
 				}
 				itemNode = createLink("", item, this.commandService, this.contentTypeService, this.openWithCommands, null, null, null, this);
 				span.appendChild(itemNode); //$NON-NLS-0$
-			}
-			if(isDesktopMode){
-				span.setAttribute('draggable', true);
-				this.explorer._makeDropTarget(item, span);
-				this.explorer._makeDropTarget(item, tableRow);
 			}
 			if (itemNode) {
 				// orion.explorers.FileExplorer#getNameNode

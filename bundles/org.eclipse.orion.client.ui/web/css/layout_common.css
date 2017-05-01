@@ -373,6 +373,7 @@ hard-coded numbers elsewhere.
 .editorTabContainer {
 	align-items: flex-start;
 	display: flex;
+	flex: 1;
 	flex-direction: row;
 	list-style: none;
 	margin: 0;
@@ -388,8 +389,7 @@ hard-coded numbers elsewhere.
 	border-top: 1px solid black;
 	border-right: 1px solid black;
 	display: flex;
-	flex: 0 1 auto;
-    overflow-x: hidden;
+	flex: 0 0 auto;
 }
 
 .editorTabsDisabled {
@@ -421,12 +421,6 @@ hard-coded numbers elsewhere.
 	padding-left: 5px;
 	margin-left: 5px;
 	margin-right: 5px;
-	overflow: hidden;
-    white-space: nowrap;
-    flex: 1 1 auto;
-}
-.transient {
-	font-style: italic;
 }
 
 .editorViewerTabDropdown {
