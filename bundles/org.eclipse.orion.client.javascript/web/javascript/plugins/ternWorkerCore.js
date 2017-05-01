@@ -139,8 +139,13 @@ require([
       function fallback(err) {
         options = defaultOptions.serverOptions();
         options.getFile = _getFile;
-        startAndMessage(options);
-        if (err) {
+        try {
+          startAndMessage(options);
+          if(err) {
+            post(Serialize.serializeError(err));
+          }
+        }
+        catch (err) {
           post(Serialize.serializeError(err));
         }
       }
@@ -150,25 +155,23 @@ require([
        * @param {Object} options The options to start the server with
        */
       function startAndMessage(options) {
-        try {
-          ternserver = new Tern.Server(options);
-          if (Array.isArray(options.loadEagerly) && options.loadEagerly.length > 0) {
-            options.loadEagerly.forEach(function (file) {
-              ternserver.addFile(file);
-            });
-          }
-          callback({request: 'start_server', state: "server_ready"}); //$NON-NLS-1$ //$NON-NLS-2$
-        } catch (err) {
-          fallback(err);
+        ternserver = new Tern.Server(options);
+        if (Array.isArray(options.loadEagerly) && options.loadEagerly.length > 0) {
+          options.loadEagerly.forEach(function (file) {
+            ternserver.addFile(file);
+          });
         }
+        callback({request: 'start_server', state: "server_ready"}); //$NON-NLS-1$ //$NON-NLS-2$
       }
 
       Deferred.all(loadPlugins(options.plugins, projectLoc)).then(function () {
-        Deferred.all(loadDefs(defNames, projectLoc)).then(function (json) {
+        return Deferred.all(loadDefs(defNames, projectLoc));
+      })
+        .then(function (json) {
           options.defs = json;
           startAndMessage(options);
-        }, fallback);
-      }, fallback);
+        }, fallback)
+        .then(undefined, fallback);
     }
 
     post({request: "worker_ready"}); //$NON-NLS-1$
