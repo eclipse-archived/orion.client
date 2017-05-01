@@ -16,6 +16,7 @@ define([
 	'i18n!orion/edit/nls/messages',
 	'orion/i18nUtil',
 	'orion/webui/littlelib',
+	'orion/fileUtils',
 	'orion/widgets/input/DropDownMenu',
 	'orion/Deferred',
 	'orion/URITemplate',
@@ -33,7 +34,7 @@ define([
 	'orion/PageUtil',
 	'orion/uiUtils',
 	'orion/util'
-], function(messages, i18nUtil, lib, DropDownMenu, Deferred, URITemplate, mCommands, mKeyBinding, mCommandRegistry, mExtensionCommands, mContentTypes, mSearchUtils, objects, mPageUtil, PageLinks, mAnnotations, regex, PageUtil, mUIUtils, util) {
+], function(messages, i18nUtil, lib, fileUtil, DropDownMenu, Deferred, URITemplate, mCommands, mKeyBinding, mCommandRegistry, mExtensionCommands, mContentTypes, mSearchUtils, objects, mPageUtil, PageLinks, mAnnotations, regex, PageUtil, mUIUtils, util) {
 
 	var exports = {};
 
@@ -635,6 +636,17 @@ define([
 		_createSwitchWorkspaceCommand: function() {
 			var that = this;
 			this.fileClient.loadWorkspaces().then(function(workspaces) {
+				this.fileClient.addEventListener("Changed", function(evt) {
+					if (evt.deleted) {
+						if (evt.deleted.some(function(item) {
+							return fileUtil.isAtRoot(item.deleteLocation);
+						})) {
+							this.fileClient.loadWorkspaces().then(function(newWorkspaces) {
+								workspaces = newWorkspaces;
+							});
+						}
+					}
+				}.bind(this));
 				var uriTemplate = new URITemplate("#{,resource,params*}"); //$NON-NLS-0$
 				var command = new mCommands.Command({
 					name: messages.SwitchWorkspace,
@@ -658,7 +670,7 @@ define([
 					}
 				});
 				that.commandService.addCommand(command);
-			});
+			}.bind(this));
 		},
 		_createOpenFolderCommand: function() {
 			var that = this;
