@@ -376,6 +376,7 @@ define(['orion/objects', 'orion/commands', 'orion/outliner', 'orion/webui/little
 						if(searchText) {
 							this._inlineSearchPane.setSearchText(searchText);
 							this._inlineSearchPane.showSearchOptions();
+							this._inlineSearchPane.focusOnTextInput();
 						} else {
 							this._inlineSearchPane.hide();
 						}

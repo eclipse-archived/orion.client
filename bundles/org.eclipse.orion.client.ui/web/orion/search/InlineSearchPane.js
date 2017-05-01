@@ -92,11 +92,15 @@ define([
 		isVisible: function() {
 			return this._slideout.isVisible() && (this === this._slideout.getCurrentViewMode());
 		},
-				
+		
+		focusOnTextInput: function() {
+			window.setTimeout(this._focusOnTextInput, 200);
+		},
+		
 		show: function() {
 			this.previousDocumentTitle = window.document.title;
 			SlideoutViewMode.prototype.show.call(this);
-			window.setTimeout(this._focusOnTextInput, 100);
+			this.focusOnTextInput();
 		},
 		
 		hide: function() {
