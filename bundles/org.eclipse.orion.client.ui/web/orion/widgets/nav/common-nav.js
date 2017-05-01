@@ -73,11 +73,6 @@ define([
 		this._sidebarContextMenuNode.id = this.parentId + "ContextMenu"; //$NON-NLS-0$
 
 		this._parentNode.parentNode.insertBefore(this._sidebarContextMenuNode, this._parentNode);
-		this.preferences.get("/general/settings").then(function (settings) {
-			if(settings.generalSettings.desktopSelectionPolicy){
-				this._parentNode.parentNode.classList.add("desktopmode");
-			}
-		}.bind(this));
 
 		this.contextMenuActionsScope = this._sidebarContextMenuNode.id + "commonNavContextMenu"; //$NON-NLS-0$
 
@@ -96,9 +91,6 @@ define([
 
 			// Broadcast changes of our explorer root to the sidebarNavInputManager
 			this.addEventListener("rootChanged", function(evnt) {
-				sidebarNavInputManager.dispatchEvent(evnt);
-			});
-			this.addEventListener("fileDoubleClicked", function(evnt) {
 				sidebarNavInputManager.dispatchEvent(evnt);
 			});
 		}
@@ -122,11 +114,6 @@ define([
 		isDesktopSelectionMode: function() {
 			return this.generalPreferences.getPrefs().then(function(genealPrefs) {
 				return genealPrefs.desktopSelectionPolicy;
-			});
-		},
-		isEditorTabsEnabled: function() {
-			return this.generalPreferences.getPrefs().then(function(genealPrefs) {
-				return genealPrefs.enableEditorTabs;
 			});
 		},
 		onModelCreate: function(evt) {
@@ -453,22 +440,25 @@ define([
 	objects.mixin(CommonNavRenderer.prototype, {
 		showFolderLinks: true,
 		oneColumn: true,
+
 		_preventLinkBehavior: function(linkNode) {
 			linkNode.addEventListener("click", function(evt) {
 				this.explorer.isDesktopSelectionMode().then(function(desktopMode) {
-					if(desktopMode){
- 						evt.preventDefault();
- 					}
+					if (_DEBUG) {
+						var byWho = evt.detail === 3 ? "simulation" : "user";
+						console.log("single click triggered by " + byWho);
+						console.log(evt);
+					}
+					if (desktopMode && (evt.shiftKey || evt.ctrlKey || evt.metaKey) && evt.detail !== 3) {
+						if (_DEBUG) {
+							console.log("single click prevented");
+						}
+						evt.preventDefault();
+					}
 				});
 			}.bind(this));
 			linkNode.addEventListener("dblclick", function(evt) {
-				this.explorer.isDesktopSelectionMode().then(function(desktopMode) {
-					if(desktopMode){
-						evt.preventDefault();
-					}else{
-						this.explorer.handleLinkDoubleClick(linkNode, evt);
-					}
-				});
+				this.explorer.handleLinkDoubleClick(linkNode, evt);
 			}.bind(this));
 		},
 		createFolderNode: function(folder) {

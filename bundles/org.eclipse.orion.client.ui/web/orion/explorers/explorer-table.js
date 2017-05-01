@@ -305,21 +305,7 @@ define([
 								window.location.href = link.href;
 								//_self._clickLink(link);
 							} else if (evt.type === "dblclick") {
-								this.isEditorTabsEnabled().then(function(editorTabsEnabled) {
-									if(editorTabsEnabled){
-										var href = evt.srcElement.querySelector("a").href;
-										this.dispatchEvent({
-											type: "fileDoubleClicked",
-											href: href
-										});
-									}else{
-										this.isDesktopSelectionMode().then(function(desktopMode){
-											if(desktopMode){
-												this.handleLinkDoubleClick(link, evt);
-											}
-										}.bind(this));
-									}
-								}.bind(this));
+								this.handleLinkDoubleClick(link, evt);
 							}
 						}
 					}
@@ -640,7 +626,6 @@ define([
 		},
 
 		_makeDropTarget: function(item, node, persistAndReplace) {
-			var that = this;
 			if (this.dragAndDrop) {
 				var explorer = this;
 				var performDrop = this.dragAndDrop;
@@ -659,22 +644,13 @@ define([
 				}
 
 				var dragStart = function(evt) {
-					var currentSelections = that.selection.getSelections();
-					if(currentSelections.length > 1){
-						dragStartTarget = currentSelections;
-						var crt = this.cloneNode(true);
-						crt.style.display = "none";
-						evt.dataTransfer.setDragImage(crt, 0, 0);
-						// For Electron Orion, export multiple selections using Electron APIs
-					}else{
-						dragStartTarget = evt.target;
-						var source = findItemfromNode(dragStartTarget);
-						if (source) {
-							var exportName = source.Directory ? source.Name + ".zip" : source.Name;
-							var downloadUrl = new URL(source.Directory ? (source.ExportLocation || source.Location) : source.Location, self.location.href).href;
-							evt.dataTransfer.setData('DownloadURL', "application/zip,application/octet-stream:" + exportName + ":" + downloadUrl);
-						}
- 					}
+					dragStartTarget = evt.target;
+					var source = findItemfromNode(dragStartTarget);
+					if (source) {
+						var exportName = source.Directory ? dragStartTarget.text + ".zip" : dragStartTarget.text;
+						var downloadUrl = new URL(source.Directory ? (source.ExportLocation || source.Location) : source.Location, self.location.href).href;
+						evt.dataTransfer.setData('DownloadURL', "application/zip,application/octet-stream:" + exportName + ":" + downloadUrl);
+					}
 				};
 
 				if (persistAndReplace) {
@@ -919,10 +895,14 @@ define([
 				var drop = function(evt) {
 					var i, deferred;
 					node.classList.remove("dragOver"); //$NON-NLS-0$
-					var currentSelections = this.selection.getSelections();
-					
-					function finishDrop(source){
+
+					if (dragStartTarget) {
 						var fileClient = explorer.fileClient;
+						var source = findItemfromNode(dragStartTarget);
+						if (!source) {
+							return;
+						}
+
 						var isCopy = dropEffect === "copy";
 						var func = isCopy ? fileClient.copyFile : fileClient.moveFile;
 						deferred = func.apply(fileClient, [source.Location, item.Location, source.Name]);
@@ -951,19 +931,7 @@ define([
 							}
 							errorHandler(error);
 						});
-					}
-					if (dragStartTarget) {
-						if(Array.isArray(dragStartTarget)){
-							dragStartTarget.forEach(function(each){
-								finishDrop(each);
-							});	
-						}else{
-							var source = findItemfromNode(dragStartTarget);
-							if (!source) {
-								return;
-							}
-							finishDrop(source);
-						}
+
 						// webkit supports testing for and traversing directories
 						// http://wiki.whatwg.org/wiki/DragAndDropEntries
 					} else if (evt.dataTransfer.items && evt.dataTransfer.items.length > 0) {
@@ -1002,7 +970,7 @@ define([
 					}
 					this._oldDrop = drop;
 				}
-				node.addEventListener("drop", drop.bind(this), false);
+				node.addEventListener("drop", drop, false);
 			}
 		},
 

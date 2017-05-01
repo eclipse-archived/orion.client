@@ -252,7 +252,8 @@ function getActiveTab() {
 function load() {
 	var pageControlCallbacks = redrawButtons();
 	createTab(window.location.hash.substr(1));
-	registerElectronMenu(pageControlCallbacks);
+	var newTabCallback = createNewTabButton(window.location.hash.substr(1));
+	registerElectronMenu(pageControlCallbacks, newTabCallback);
 	window.addEventListener("resize", function() {
 		if (this.timeout) window.clearTimeout(this.timeout);
 		this.timeout = window.setTimeout(function() {
@@ -263,7 +264,7 @@ function load() {
 	collectTabsUrl();
 }
 
-function registerElectronMenu(pageControlCallbacks){
+function registerElectronMenu(pageControlCallbacks, newTabCallback){
 	function switchForwardTabs(){
 		var activeTab = document.querySelector(".tabItem.active");
 		var nextTabButton = activeTab.nextSibling;
@@ -284,6 +285,7 @@ function registerElectronMenu(pageControlCallbacks){
 				{label: "Forward", accelerator:process.platform === "darwin"? "CmdOrCtrl+Right" :"Alt+Right", click: pageControlCallbacks.historyForward},
 				{label: "Refresh", accelerator:process.platform === "darwin"? "CmdOrCtrl+R" :"Ctrl+R", click: pageControlCallbacks.refreshPage},
 				{label: "RefreshOnF5", accelerator:process.platform === "darwin"? "" :"F5", visible:false, click: pageControlCallbacks.refreshPage},
+				{label: "New Tab", accelerator:process.platform === "darwin"? "CmdOrCtrl+T" :"Ctrl+T", click: newTabCallback.newTab},
 				{label: "Move to Next Tab", accelerator:process.platform === "darwin"? "Ctrl+Tab" :"Ctrl+Tab", click: switchForwardTabs},
 				{label: "Move to Previous Tab", accelerator:process.platform === "darwin"? "Ctrl+Shift+Tab" :"Ctrl+Shift+Tab", click: switchBackwardTabs}
 			]
@@ -292,88 +294,78 @@ function registerElectronMenu(pageControlCallbacks){
 	Menu.setApplicationMenu(menu);
 }
 
+function createNewTabButton(url){
+	var bar = document.querySelector("#bar");
+	var newTabButton = document.createElement("a"),
+		newTabButtonTitle = process.platform === "darwin"? "New Tab (Cmd+T)" :"New Tab (Ctrl+T)",
+		newTabButtonText = "+";
+	
+	newTabButton.title = newTabButtonTitle;
+	newTabButton.setAttribute("aria-label", newTabButtonTitle);
+	newTabButton.innerHTML = newTabButtonText;
+	newTabButton.classList.add("openNewTab");
+	function newTab() {
+		createTab(url);
+	}
+	newTabButton.addEventListener("click", newTab);
+	bar.appendChild(newTabButton);
+	return {
+		newTab:newTab
+	};
+}
+
 function bindfocus(){
 	getActiveTab().focus();
 }
 
 function createTab(url) {
-	var iframes = document.querySelectorAll(".tabContent");
-	var urlSegs = url.split("#");
-	var potentialExsitingIframe = Array.prototype.find.call(iframes,function(iframe){
-		if(urlSegs[0].indexOf("/edit/edit.html") !== -1){
-			return iframe.contentWindow.location.href.indexOf(urlSegs[0]) === 0;  // Always open the Editor page in this case
-		}else if(urlSegs[0].indexOf("/git/git-repository.html") !== -1){
-			if(urlSegs[1].indexOf("/gitapi/commit") !== -1){
-				return iframe.contentWindow.location.href === url;   // Find exactly the git page of the exact Commit or should open a new git tab
-			}else{ // For all the other cases
-				return iframe.contentWindow.location.href.indexOf(urlSegs[0]+"#/gitapi/clone") === 0  // Find a /clone git page, or should open a new git tab 
-			}
-		}else{
-			return iframe.contentWindow.location.href.indexOf(urlSegs[0]) === 0;  // For all the other cases, open the same html page, like settings
+	var iframe = document.createElement("iframe");
+	iframe.frameBorder = "0";
+	iframe.classList.add("tabContent");
+	iframe.src = url;
+	var id = Date.now();
+	iframe.id = "iframe" + id;
+	iframe.addEventListener("load", function() {
+		iframe.contentWindow.confirm = window.confirm;
+		iframe.contentWindow.alert = window.alert;
+		iframe.contentWindow.__electron = electron;
+
+		var target = iframe.contentDocument.querySelector('head > title');
+		if (target) {
+			var observer = new window.WebKitMutationObserver(function(mutations) {
+				if (mutations) {
+					setTabLabel(id, iframe.contentDocument.title);
+					setTabIcon(id,iframe.contentDocument.head);
+				}
+			});
+			observer.observe(target, {
+				subtree: true,
+				characterData: true,
+				childList: true
+			});
+		}
+		setTabLabel(id, iframe.contentDocument.title);
+		setTabIcon(id, iframe.contentDocument.head);
+		iframe.contentWindow.addEventListener("click", function() {
+			var menu = document.querySelector("#context-menu");
+			var activeClassName = "context-menu-items-open";
+			menu.classList.remove(activeClassName);
+		});
+		if(isInitiatingWorkspace){
+			var tabbuttons = document.querySelectorAll(".tabItem");
+			tabbuttons[activeIndex] && tabbuttons[activeIndex].click();
+			isInitiatingWorkspace = false;
 		}
 	});
-	if(potentialExsitingIframe){
-		if(urlSegs[0].indexOf("/edit/edit.html") !== -1 && urlSegs[1].split("/").length > 3){
-			potentialExsitingIframe.src = url; // Change the src only if it's edit page and the url is targeting some file inside the project folder 
-		}
-		if(urlSegs[1].indexOf("/gitapi/clone") !== -1){
-			potentialExsitingIframe.contentWindow.location.reload();  // Refresh the git page in this case, to get the correct contents, otherwise user have to refresh the page themselves.
-		}
-		clickTab(potentialExsitingIframe.id.substr(6));
+	document.body.appendChild(iframe);
+	var srcUrl = nodeUrl.parse(url);
+	if(srcUrl.pathname === "/" || srcUrl.pathname.endsWith(".html")){
+		addNewTab(id, iframe).click();
 	}else{
-		var iframe = document.createElement("iframe");
-		iframe.frameBorder = "0";
-		iframe.classList.add("tabContent");
-		iframe.src = url;
-		var id = Date.now();
-		iframe.id = "iframe" + id;
-		iframe.addEventListener("load", function() {
-			iframe.contentWindow.confirm = window.confirm;
-			iframe.contentWindow.alert = window.alert;
-			iframe.contentWindow.__electron = electron;
-	
-			var target = iframe.contentDocument.querySelector('head > title');
-			if (target) {
-				var observer = new window.WebKitMutationObserver(function(mutations) {
-					if (mutations) {
-						setTabLabel(id, iframe.contentDocument.title);
-						setTabIcon(id,iframe.contentDocument.head);
-					}
-				});
-				observer.observe(target, {
-					subtree: true,
-					characterData: true,
-					childList: true
-				});
-			}
-			setTabLabel(id, iframe.contentDocument.title);
-			setTabIcon(id, iframe.contentDocument.head);
-			iframe.contentWindow.addEventListener("click", function() {
-				var menu = document.querySelector("#context-menu");
-				var activeClassName = "context-menu-items-open";
-				menu.classList.remove(activeClassName);
-			});
-			if(isInitiatingWorkspace){
-				var tabbuttons = document.querySelectorAll(".tabItem");
-				tabbuttons[activeIndex] && tabbuttons[activeIndex].click();
-				isInitiatingWorkspace = false;
-			}
-		});
-		document.body.appendChild(iframe);
-		var srcUrl = nodeUrl.parse(url);
-		if(srcUrl.pathname === "/" || srcUrl.pathname.endsWith(".html")){
-			addNewTab(id, iframe).click();
-		}else{
-			needToCleanFrames.push(iframe);
-		}
+		needToCleanFrames.push(iframe);
 	}
 }
 
-function clickTab(id){
-	var correspondingTabId = 'tab' + id;
-	var correspondingTab = document.querySelector('#'+correspondingTabId);
-	correspondingTab.click();
-}
 function setActiveIndex(index){
 	isInitiatingWorkspace = true;
 	activeIndex = index;
