@@ -4,7 +4,7 @@ Thanks for your interest in this project.
 
 #Steps to reproduce:
 
-1) Clone the git repository : [https://git.eclipse.org/r/orion/org.eclipse.orion.client] and checkout the `java-lsp` branch.
+1) Clone the git repository : [https://github.com/eclipse/orion.client] and checkout the `java-lsp` branch.
 
 2) Get the lsp server from the Git repo: [https://github.com/eclipse/eclipse.jdt.ls.git] and follow the `README.md` file to build it.
 
@@ -18,6 +18,12 @@ Thanks for your interest in this project.
 5) Open the browser on `http://localhost:8083`.
 The Orion client with the Java™ plugin requires a Node.js Orion server that is enabled for the language server connections.
 This is why for now we use a local Node.js server instead of the instance running on orion.eclipse.org.
+
+6) In order to help users to test the latest integration, we provide a Dockerfile and a shell script that can be used to build 
+a docker image that contains the latest version of the orion Node.js server with lsp support and the latest implementation of the
+Java lsp server provided by the eclipse.jst.ls project. In order to do so, you need to go to the folder `orion.client/modules/orionode/`.
+Then invoke: `./docker_build.sh` command. Once done, start your image using: `docker run -p 8081:8081 orionlsp` and open your browser on:
+`http://localhost:8081/`. You will start with an empty workspace in which you can git clone a project with java files and test the lsp support.
 
 #Contributor License Agreement
 
