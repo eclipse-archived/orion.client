@@ -175,7 +175,6 @@ define([
 		 * @returns {orion.Promise}
 		 */
 		loadRoot: function(childrenLocation, force) {
-			childrenLocation = (childrenLocation && childrenLocation.ChildrenLocation) || childrenLocation || "";
 			return this.commandsRegistered.then(function() {
 				if (childrenLocation && typeof childrenLocation === "object") {
 					return this.load(childrenLocation);
