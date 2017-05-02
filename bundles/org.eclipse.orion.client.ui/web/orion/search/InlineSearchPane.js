@@ -94,7 +94,7 @@ define([
 		},
 		
 		focusOnTextInput: function() {
-			window.setTimeout(this._focusOnTextInput, 200);
+			window.setTimeout(this._focusOnTextInput, 100);
 		},
 		
 		show: function() {
