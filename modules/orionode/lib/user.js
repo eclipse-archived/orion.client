@@ -465,7 +465,7 @@ module.exports.router = function(options) {
 				return res.end();
 			}
 			crypto.randomBytes(AUTH_TOKEN_BYTES, function(randomBytes) {
-				store.updateUser({ authToken: randomBytes }, function(err, user) {
+				store.updateUser(user.username, { authToken: randomBytes }, function(err, user) {
 					if (err) {
 						logError(err);
 						res.status(500).json({ Severity: "Error", Message: "Error updating user" });
