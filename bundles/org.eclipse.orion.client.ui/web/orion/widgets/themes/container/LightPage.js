@@ -315,8 +315,7 @@ define({
 			"color": "#3C71B3 !important"
 		},
 		".split": {
-			"background": "#C4C5C8",
-			"width": "4px"
+			"background": "#C4C5C8"
 		},
 		".splitThumb": {
 			"background": "#C4C5C8"
