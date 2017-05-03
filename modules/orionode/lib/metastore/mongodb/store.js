@@ -298,7 +298,7 @@ Object.assign(MongoDbMetastore.prototype, {
 				});
 			} else if (typeof userData.authToken !== 'undefined') {
 				// NOTE this ignores the provided auth token and generates a new one internally
-				userData.setAuthToken(function(err, user) {
+				user.setAuthToken(function(err, user) {
 					if (err) {
 						return callback(err);
 					}
