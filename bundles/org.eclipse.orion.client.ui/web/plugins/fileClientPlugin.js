@@ -10,7 +10,7 @@
  ******************************************************************************/
 
 /*eslint-env browser, amd*/
-define(["orion/Deferred", "orion/plugin", "orion/util", "plugins/filePlugin/fileImpl", 'i18n!orion/navigate/nls/messages', "domReady!"], function(Deferred, PluginProvider, util, FileServiceImpl, messages) {
+define(["orion/Deferred", "orion/plugin", "plugins/filePlugin/fileImpl", 'i18n!orion/navigate/nls/messages', "domReady!"], function(Deferred, PluginProvider, FileServiceImpl, messages) {
 	function trace(implementation) {
 		var method;
 		var traced = {};
