@@ -81,7 +81,7 @@ define(["orion/Deferred", "orion/plugin", "orion/util", "plugins/filePlugin/file
 		//provider.registerService("orion.core.file", trace(service), {
 		provider.registerService("orion.core.file", service, {
 			//Name: 'Orion Content',  // HACK  see https://bugs.eclipse.org/bugs/show_bug.cgi?id=386509
-			Name: util.isElectron ? messages["File System"] : messages['Orion Content'],
+			Name: messages['Root'],
 			nls: 'orion/navigate/nls/messages',
 			top: fileBase,
 			ranking: -1,
