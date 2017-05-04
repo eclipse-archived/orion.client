@@ -96,6 +96,7 @@ define({//Default message bundle
 	"Actions": "Actions",
 	"Orion Content": "Orion Content",
 	"File System": "File System",
+	"Root": "Root",
 	"Create new content": "Create new content",
 	"Import from HTTP...": "HTTP",
 	"File URL:": "File URL:",
