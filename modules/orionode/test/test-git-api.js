@@ -178,6 +178,50 @@ GitClient.prototype = {
 		});
 	},
 
+	clone: function(url, name) {
+		var client = this;
+		this.tasks.push(function(resolve) {
+			request()
+			.post(CONTEXT_PATH + "/gitapi/clone/")
+			.send({
+				GitUrl: url,
+				Location: FILE_ROOT,
+				Name: name
+			})
+			.expect(202)
+			.end(function(err, res) {
+				assert.ifError(err);
+				getGitResponse(res).then(function(res2) {
+					assert.equal(res2.HttpCode, 200);
+					assert.equal(res2.Message, "OK");
+					assert.equal(res2.JsonData.Location, "/gitapi/clone/file/orionode/" + name);
+					client.next(resolve, res2.JsonData);
+				})
+				.catch(function(err) {
+					assert.ifError(err);
+				});
+			});
+		});
+	},
+
+	listRepositories: function(url, name) {
+		var client = this;
+		this.tasks.push(function(resolve) {
+			request()
+			.get(CONTEXT_PATH + "/gitapi/clone/workspace/orionode")
+			// .send({
+			// 	GitUrl: url,
+			// 	Location: FILE_ROOT,
+			// 	Name: name
+			// })
+			.expect(200)
+			.end(function(err, res) {
+				assert.equal(res.body.Type, "Clone");
+				client.next(resolve, res.body);
+			});
+		});
+	},
+
 	commit: function() {
 		var client = this;
 		this.tasks.push(function(resolve) {
@@ -215,7 +259,7 @@ GitClient.prototype = {
 		var client = this;
 		this.tasks.push(function(resolve) {
 			request()
-			.get(CONTEXT_PATH + "/gitapi/status" + FILE_ROOT + client.getName())
+			.get(CONTEXT_PATH + "/gitapi/status" + FILE_ROOT + util.encodeURIComponent(client.getName()))
 			.expect(200)
 			.end(function(err, res) {
 				assert.ifError(err);
@@ -533,6 +577,21 @@ GitClient.prototype = {
 				.catch(function(err) {
 					assert.ifError(err);
 				});
+			});
+		});
+	},
+
+	getConfig: function() {
+		var client = this;
+		this.tasks.push(function(resolve) {
+			request()
+			.get(CONTEXT_PATH + "/gitapi/config/clone/file/orionode/" + util.encodeURIComponent(client.getName()))
+			.expect(200)
+			.end(function(err, res) {
+				assert.ifError(err);
+				assert.ok(res.body.Children.length > 0);
+				assert.equal(res.body.Type, "Config");
+				client.next(resolve, res.body);
 			});
 		});
 	}
@@ -3490,6 +3549,17 @@ maybeDescribe("git", function() {
 	describe("Status", function() {
 		before(setup);
 
+		describe("Get", function() {
+			it("bug 516088", function(finished) {
+				var client = new GitClient("status-bug516088-あいうえお");
+				client.init();
+				client.status("SAFE");
+				client.start().then(function(res) {
+					finished();
+				})
+			});
+		});
+
 		describe("DiffLocation", function() {
 
 			/**
@@ -3657,6 +3727,15 @@ maybeDescribe("git", function() {
 					.catch(done);
 				});
 			});
+		});
+
+		it("bug 516088", function(finished) {
+			var client = new GitClient("bug516088-config-あいうえお");
+			client.init();
+			client.getConfig();
+			client.start().then(function(res) {
+				finished();
+			})
 		});
 	}); // describe("config")
 

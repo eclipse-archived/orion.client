@@ -18,6 +18,7 @@ var fs = require('fs');
 var args = require('../args');
 var async = require('async');
 var fileUtil = require('../fileUtil');
+var util = require('./util');
 var tasks = require('../tasks');
 var express = require('express');
 var bodyParser = require('body-parser');
@@ -95,6 +96,7 @@ function cloneJSON(base, location, giturl, parents, submodules) {
 }
 	
 function getRepoByPath(filePath, workspaceDir) {
+	filePath = util.decodeURIComponent(filePath);
 	while (!fs.existsSync(filePath)) {
 		filePath = path.dirname(filePath);
 		if (filePath.length <= workspaceDir.length) return Promise.reject(new Error("Forbidden"));
