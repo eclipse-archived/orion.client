@@ -74,7 +74,7 @@ define([
 
 		this._parentNode.parentNode.insertBefore(this._sidebarContextMenuNode, this._parentNode);
 		this.preferences.get("/general/settings").then(function (settings) {
-			if(settings.generalSettings.desktopSelectionPolicy){
+			if(typeof settings.generalSettings === 'undefined' || settings.generalSettings.desktopSelectionPolicy){
 				this._parentNode.parentNode.classList.add("desktopmode");
 			}
 		}.bind(this));
@@ -122,6 +122,11 @@ define([
 		isDesktopSelectionMode: function() {
 			return this.generalPreferences.getPrefs().then(function(genealPrefs) {
 				return genealPrefs.desktopSelectionPolicy;
+			});
+		},
+		isEditorTabsEnabled: function() {
+			return this.generalPreferences.getPrefs().then(function(genealPrefs) {
+				return genealPrefs.enableEditorTabs;
 			});
 		},
 		onModelCreate: function(evt) {

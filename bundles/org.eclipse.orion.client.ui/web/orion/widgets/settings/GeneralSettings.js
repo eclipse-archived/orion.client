@@ -31,12 +31,16 @@ define([
 					fieldTitle: messages["filteredResourcesTooltip"],
 					postChange: this.setPreferences.bind(this)
 				});
+				this.enableEditorTabs = new SettingsCheckbox({
+					fieldlabel: messages["enableEditorTabs"],
+					fieldTitle: messages["enableEditorTabsTooltip"],
+					postChange: this.setPreferences.bind(this)
+				});
 				this.maximumEditorTabsTextfield = new SettingsTextfield({
 					fieldlabel: messages["maximumEditorTabs"],
 					fieldTitle: messages["maximumEditorTabsTooltip"],
 					postChange: this.setPreferences.bind(this)
 				});
-				
 
 				new mSection.Section(this.node, {
 					id: "fileNavigation", //$NON-NLS-0$
@@ -51,10 +55,17 @@ define([
 				var fileSubsection = new Subsection({
 					sectionName: messages["Files"],
 					parentNode: settingsContentElement,
-					children: util.isElectron ? [this.filteredResourcesTextfield, this.maximumEditorTabsTextfield] 
-					: [this.desktopSelectionPolicyCheckbox, this.filteredResourcesTextfield, this.maximumEditorTabsTextfield]
+					children: util.isElectron ? [this.filteredResourcesTextfield] 
+					: [this.desktopSelectionPolicyCheckbox, this.filteredResourcesTextfield]
 				});
 				fileSubsection.show();
+				var editorTabs = new Subsection({
+					sectionName: messages["EditorTabs"],
+					parentNode: settingsContentElement,
+					children: util.isElectron ?[this.maximumEditorTabsTextfield]
+					: [this.enableEditorTabs, this.maximumEditorTabsTextfield]
+				});
+				editorTabs.show();
 			},
 
 			setPreferences: function() {
@@ -62,7 +73,13 @@ define([
 				return this.preferences.getPrefs().then(function (generalPrefs) {
 					generalPrefs.desktopSelectionPolicy = this.desktopSelectionPolicyCheckbox.isChecked();
 					generalPrefs.filteredResources = this.filteredResourcesTextfield.getValue();
-					generalPrefs.enableEditorTabs = this.desktopSelectionPolicyCheckbox.isChecked();
+					generalPrefs.enableEditorTabs = this.enableEditorTabs.isChecked();
+					if(this.enableEditorTabs.isChecked()){
+						this.desktopSelectionPolicyCheckbox.setChecked("true");
+						this.desktopSelectionPolicyCheckbox.disableCheckBox();
+					}else{
+						this.desktopSelectionPolicyCheckbox.enableCheckBox();
+					}
 					var maxTabs = parseInt(this.maximumEditorTabsTextfield.getValue(), 10);
 					maxTabs = isNaN(maxTabs) ? 0 : maxTabs;
 					generalPrefs.maximumEditorTabs = maxTabs;
@@ -79,6 +96,13 @@ define([
 					if(!util.isElectron){
 						this.desktopSelectionPolicyCheckbox.setSelection(generalPrefs.desktopSelectionPolicy);
 						this.desktopSelectionPolicyCheckbox.show();
+						// Enable editor tabs.
+						this.enableEditorTabs.setSelection(generalPrefs.enableEditorTabs);
+						this.enableEditorTabs.show();
+						
+						if(generalPrefs.enableEditorTabs){
+							this.desktopSelectionPolicyCheckbox.disableCheckBox();
+						}
 					}
 
 					//filtered resources

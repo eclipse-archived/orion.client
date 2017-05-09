@@ -303,7 +303,7 @@ function createTab(url) {
 		if(urlSegs[0].indexOf("/edit/edit.html") !== -1){
 			return iframe.contentWindow.location.href.indexOf(urlSegs[0]) === 0;  // Always open the Editor page in this case
 		}else if(urlSegs[0].indexOf("/git/git-repository.html") !== -1){
-			if(urlSegs[1].indexOf("/gitapi/commit") !== -1){
+			if(urlSegs[1] && urlSegs[1].indexOf("/gitapi/commit") !== -1){
 				return iframe.contentWindow.location.href === url;   // Find exactly the git page of the exact Commit or should open a new git tab
 			}else{ // For all the other cases
 				return iframe.contentWindow.location.href.indexOf(urlSegs[0]+"#/gitapi/clone") === 0  // Find a /clone git page, or should open a new git tab 
@@ -316,7 +316,7 @@ function createTab(url) {
 		if(urlSegs[0].indexOf("/edit/edit.html") !== -1 && urlSegs[1].split("/").length > 3){
 			potentialExsitingIframe.src = url; // Change the src only if it's edit page and the url is targeting some file inside the project folder 
 		}
-		if(urlSegs[1].indexOf("/gitapi/clone") !== -1){
+		if(urlSegs[1] && urlSegs[1].indexOf("/gitapi/clone") !== -1){
 			potentialExsitingIframe.contentWindow.location.reload();  // Refresh the git page in this case, to get the correct contents, otherwise user have to refresh the page themselves.
 		}
 		clickTab(potentialExsitingIframe.id.substr(6));

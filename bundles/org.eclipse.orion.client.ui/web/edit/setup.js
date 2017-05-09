@@ -280,11 +280,12 @@ function TabWidget(options) {
 	tabWidgetDropdownNode.setAttribute("aria-haspopup", "true");
 
 	this.parent.appendChild(tabWidgetDropdownNode);
-	this.restoreTabsFromStorage();
 
 	if (this.enableEditorTabs) {
 		this.createDropdown_();
 	}
+	
+	this.restoreTabsFromStorage(); // have to be after createDropdown_ call.
 }
 
 TabWidget.prototype = {};
@@ -293,7 +294,7 @@ objects.mixin(TabWidget.prototype, {
 		var fileList = this.fileList;
 		var that = this;
 		this.widgetClick = function cb() {
-			that.setWindowLocation(this.href);
+			that.setWindowLocation(this.href.split("#")[0] + "#" + this.metadata.Location); // using location of metadata is the most reliable value, href itself might be wrong when this tab was generated with some server delay.
 		};
 
 		var tabCommand = new mCommands.Command({
@@ -342,7 +343,7 @@ objects.mixin(TabWidget.prototype, {
 
 		if (isDirty) {
 			if (this.selectedFile.href !== href) {
-				this.setWindowLocation(href);
+				this.setWindowLocation(href.split("#")[0]  + "#" +  metadata.Location); // using location of metadata is the most reliable value, href itself might be wrong when this tab was generated with some server delay.
 			}
 		}
 
@@ -585,7 +586,7 @@ objects.mixin(TabWidget.prototype, {
 		var breadcrumb = new mBreadcrumbs.BreadCrumbs(breadcrumbOptions);
 		
 		editorTab.addEventListener("click", function() {
-			that.setWindowLocation(this.href);
+			that.setWindowLocation(this.href.split("#")[0]  + "#" +  this.metadata.Location); // using location of metadata is the most reliable value, href itself might be wrong when this tab was generated with some server delay.
 		});
 
 		editorTab.addEventListener("mouseup", function(e) {
@@ -744,7 +745,7 @@ objects.mixin(TabWidget.prototype, {
 			};
 			// Create and store a new editorTab
 			editorTab = this.editorTabs[metadata.Location] = this.createTab_(metadata, href);
-			if(!isRestoreTabsFromStorage || (isRestoreTabsFromStorage && isTransient)){
+			if((!isRestoreTabsFromStorage && this.enableEditorTabs) || (isRestoreTabsFromStorage && isTransient && this.enableEditorTabs)){
 				editorTab.editorTabNode.classList.add("transient");
 				this.transientTab = editorTab;
 				this.transientTab.location = metadata.Location;
@@ -815,7 +816,7 @@ objects.mixin(TabWidget.prototype, {
 
 		if (lastHref !== this.selectedFile.href) {
 			this.activateEditorViewer();
-			this.setWindowLocation(this.selectedFile.href)
+			this.setWindowLocation(this.selectedFile.href.split("#")[0]  + "#" +  this.selectedFile.metadata.Location); // using location of metadata is the most reliable value, href itself might be wrong when this tab was generated with some server delay.
 		}
 		this.setTabStorage();
 	},
