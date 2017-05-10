@@ -756,7 +756,7 @@ define([
 				title: title,
 				contentType: this.getContentType(),
 				metadata: metadata,
-				location: window.location,
+				location: this._location,
 				contents: contents
 			};
 			this._logMetrics("open"); //$NON-NLS-0$

@@ -252,7 +252,7 @@ function TabWidget(options) {
 	this.editorTabs = {};
 	this.breadcrumbUniquifier = "_editor_" + this.id;
 	var generalPrefs = this.generalPreferences || {};
-	this.enableEditorTabs = generalPrefs.hasOwnProperty("enableEditorTabs") ? generalPrefs.enableEditorTabs : false;
+	this.enableEditorTabs = util.isElectron ? true : generalPrefs.hasOwnProperty("enableEditorTabs") ? generalPrefs.enableEditorTabs : false;
 	this.maximumEditorTabs = generalPrefs.hasOwnProperty("maximumEditorTabs") ? generalPrefs.maximumEditorTabs : 0;
 	this.beingDragged = null;
 	
@@ -294,12 +294,12 @@ objects.mixin(TabWidget.prototype, {
 		var fileList = this.fileList;
 		var that = this;
 		this.widgetClick = function cb() {
-			that.setWindowLocation(this.href.split("#")[0] + "#" + this.metadata.Location); // using location of metadata is the most reliable value, href itself might be wrong when this tab was generated with some server delay.
+			that.setWindowLocation(this.href);
 		};
 
 		var tabCommand = new mCommands.Command({
 			selectionClass: "dropdownSelection",
-			name: messages["AllTabsDropDown"],
+			name: util.isMac ? messages["AllTabsDropDownMac"] : messages["AllTabsDropDown"],
 			imageClass: "core-sprite-list",
 			id: "orion.edit.selectEditor",
 			visableWhen: function() {
@@ -343,7 +343,7 @@ objects.mixin(TabWidget.prototype, {
 
 		if (isDirty) {
 			if (this.selectedFile.href !== href) {
-				this.setWindowLocation(href.split("#")[0]  + "#" +  metadata.Location); // using location of metadata is the most reliable value, href itself might be wrong when this tab was generated with some server delay.
+				this.setWindowLocation(href);
 			}
 		}
 
@@ -452,26 +452,6 @@ objects.mixin(TabWidget.prototype, {
 		}
 	},
 	registerAdditionalCommands: function() {
-		var nextTab = new mCommands.Command({
-			name: messages["selectNextTab"],
-			id: "orion.edit.selectNextTab",
-			visibleWhen: function() {
-				return true;
-			},
-			callback: this.selectNextTab.bind(this)
-		});
-		this.commandRegistry.addCommand(nextTab);
-
-		var previousTab = new mCommands.Command({
-			name: messages["selectPreviousTab"],
-			id: "orion.edit.selectPreviousTab",
-			visibleWhen: function() {
-				return true;
-			},
-			callback: this.selectPreviousTab.bind(this)
-		});
-		this.commandRegistry.addCommand(previousTab);
-
 		var showTabDropdown = new mCommands.Command({
 			name: messages["showTabDropdown"],
 			id: "orion.edit.showTabDropdown",
@@ -484,27 +464,9 @@ objects.mixin(TabWidget.prototype, {
 		});
 		this.commandRegistry.addCommand(showTabDropdown);
 
-		this.commandRegistry.registerCommandContribution(this.editorTabContainer.id , "orion.edit.selectNextTab", 0, null, true, new mKeyBinding.KeyBinding(117, true), null, this);
-		this.commandRegistry.registerCommandContribution(this.editorTabContainer.id , "orion.edit.selectPreviousTab", 0, null, true, new mKeyBinding.KeyBinding(117, true, true), null, this);
 		this.commandRegistry.registerCommandContribution(this.editorTabContainer.id , "orion.edit.showTabDropdown", 0, null, true, new mKeyBinding.KeyBinding('e', true, true), null, this);
 
 		this.commandRegistry.renderCommands(this.editorTabContainer.id, this.editorTabContainer.id, this, this, "button");
-	},
-	selectPreviousTab: function() {
-		var selectedTab = this.getCurrentEditorTabNode();
-		if (selectedTab.previousSibling !== null) {
-			selectedTab.previousSibling.click();
-		} else {
-			selectedTab.parentNode.lastChild.click();
-		}
-	},
-	selectNextTab: function() {
-		var selectedTab = this.getCurrentEditorTabNode();
-		if (selectedTab.nextSibling !== null) {
-			selectedTab.nextSibling.click();
-		} else {
-			selectedTab.parentNode.firstChild.click();
-		}
 	},
 	createTab_ : function(metadata, href) {
 		var that = this;
@@ -586,7 +548,7 @@ objects.mixin(TabWidget.prototype, {
 		var breadcrumb = new mBreadcrumbs.BreadCrumbs(breadcrumbOptions);
 		
 		editorTab.addEventListener("click", function() {
-			that.setWindowLocation(this.href.split("#")[0]  + "#" +  this.metadata.Location); // using location of metadata is the most reliable value, href itself might be wrong when this tab was generated with some server delay.
+			that.setWindowLocation(this.href);
 		});
 
 		editorTab.addEventListener("mouseup", function(e) {
@@ -636,9 +598,10 @@ objects.mixin(TabWidget.prototype, {
 		return this.beingDragged;
 	},
 	transientToPermenant : function(href){
-		if(this.transientTab && this.transientTab.href === href){
+		var hrefHash = href && href.split("#")[1];
+		if(this.transientTab && hrefHash && hrefHash.indexOf(this.transientTab.location) === 0){
 			this.fileList.find(function(file){
-				if(file.href === href){
+				if(hrefHash.indexOf(file.metadata.Location) === 0){
 					file.isTransient = false;
 					return true;
 				}
@@ -816,7 +779,7 @@ objects.mixin(TabWidget.prototype, {
 
 		if (lastHref !== this.selectedFile.href) {
 			this.activateEditorViewer();
-			this.setWindowLocation(this.selectedFile.href.split("#")[0]  + "#" +  this.selectedFile.metadata.Location); // using location of metadata is the most reliable value, href itself might be wrong when this tab was generated with some server delay.
+			this.setWindowLocation(this.selectedFile.href);
 		}
 		this.setTabStorage();
 	},
@@ -983,14 +946,49 @@ objects.mixin(EditorViewer.prototype, {
 				this.tabWidget.transientToPermenant(commandInvocation.userData);
 			}.bind(this)
 		});
+		var nextTab = new mCommands.Command({
+			name: messages["selectNextTab"],
+			id: "orion.tabWidget.selectNextTab",
+			visibleWhen: function(items, data) {
+				return data.handler.tabWidget.fileList.length > 1;
+			},
+			callback: function(){
+				var selectedTab = this.tabWidget.getCurrentEditorTabNode();
+				if (selectedTab.nextSibling !== null) {
+					selectedTab.nextSibling.click();
+				} else {
+					selectedTab.parentNode.firstChild.click();
+				}
+			}
+		});
+		var previousTab = new mCommands.Command({
+			name: messages["selectPreviousTab"],
+			id: "orion.tabWidget.selectPreviousTab",
+			visibleWhen: function(items, data) {
+				return data.handler.tabWidget.fileList.length > 1;
+			},
+			callback: function(){
+				var selectedTab = this.tabWidget.getCurrentEditorTabNode();
+				if (selectedTab.previousSibling !== null) {
+					selectedTab.previousSibling.click();
+				} else {
+					selectedTab.parentNode.lastChild.click();
+				}
+			}
+		});
 		this.commandRegistry.addCommand(closeOtherTabWidgetCommand);
 		this.commandRegistry.addCommand(closeToRight);
 		this.commandRegistry.addCommand(keepOpen);
+		this.commandRegistry.addCommand(nextTab);
+		this.commandRegistry.addCommand(previousTab);
+		
 		// tabWidget context menu
 		this.commandRegistry.addCommandGroup("tabWidgetContextMenuActions", "orion.tabWidgetContextMenuGroup", 100, null, null, null, null, null, "dropdownSelection"); //$NON-NLS-1$ //$NON-NLS-2$
 		this.commandRegistry.registerCommandContribution("tabWidgetContextMenuActions", "orion.tabWidget.closeothers", this.tabWidget.tabWidgetContextItemindex++,"orion.tabWidgetContextMenuActions/orion.tabWidget.closeGroup"); //$NON-NLS-1$ //$NON-NLS-2$
 		this.commandRegistry.registerCommandContribution("tabWidgetContextMenuActions", "orion.tabWidget.closetoright", this.tabWidget.tabWidgetContextItemindex++,"orion.tabWidgetContextMenuActions/orion.tabWidget.closeGroup"); //$NON-NLS-1$ //$NON-NLS-2$
 		this.commandRegistry.registerCommandContribution("tabWidgetContextMenuActions", "orion.tabWidget.keepOpen", this.tabWidget.tabWidgetContextItemindex++,"orion.tabWidgetContextMenuActions/orion.tabWidget.others", false, new mKeyBinding.KeyBinding('K', true, true)); //$NON-NLS-1$ //$NON-NLS-2$
+		this.commandRegistry.registerCommandContribution("tabWidgetContextMenuActions" , "orion.tabWidget.selectNextTab", this.tabWidget.tabWidgetContextItemindex++, "orion.tabWidgetContextMenuActions/orion.tabWidget.traverse", false, new mKeyBinding.KeyBinding(117, true), null, this);
+		this.commandRegistry.registerCommandContribution("tabWidgetContextMenuActions" , "orion.tabWidget.selectPreviousTab", this.tabWidget.tabWidgetContextItemindex++, "orion.tabWidgetContextMenuActions/orion.tabWidget.traverse", false, new mKeyBinding.KeyBinding(117, true, true), null, this);
 	},
 	
 	createTabWidget: function() {
@@ -1063,12 +1061,8 @@ objects.mixin(EditorViewer.prototype, {
 		inputManager.addEventListener("InputChanged", function(evt) { //$NON-NLS-0$
 			var metadata = evt.metadata;
 			if (metadata) {
-				var tabHref = evt.location.href;
+				var tabHref = this.activateContext.computeNavigationHref(evt.metadata);
 				var lastFile = PageUtil.hash();
-				if (sessionStorage.lastFile === lastFile || lastFile.length === 0) {
-					tabHref = uriTemplate.expand({resource: metadata.Location});
-					lastFile = tabHref;
-				}
 				sessionStorage.lastFile = lastFile;
 				this.tabWidget.addTab(metadata, tabHref);
 			} else {

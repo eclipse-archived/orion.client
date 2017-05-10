@@ -462,7 +462,7 @@ define(["orion/Deferred", "orion/commands", 	'orion/PageUtil', "orion/contentTyp
 						}
 						return href;
 					};
-					if(util.isElectron && info.uriTemplate && info.uriTemplate.indexOf("{+OrionHome}/git/git-repository.html") !== -1){
+					if(util.isElectron && info.uriTemplate){
 						commandOptions.hrefTarget = "_blank";
 					}
 				} else {

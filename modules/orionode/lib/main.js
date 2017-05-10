@@ -313,7 +313,7 @@ function createTab(url) {
 		}
 	});
 	if(potentialExsitingIframe){
-		if(urlSegs[0].indexOf("/edit/edit.html") !== -1 && urlSegs[1].split("/").length > 3){
+		if(urlSegs[0].indexOf("/edit/edit.html") !== -1 && urlSegs[1] && urlSegs[1].split("/").length > 4){
 			potentialExsitingIframe.src = url; // Change the src only if it's edit page and the url is targeting some file inside the project folder 
 		}
 		if(urlSegs[1] && urlSegs[1].indexOf("/gitapi/clone") !== -1){

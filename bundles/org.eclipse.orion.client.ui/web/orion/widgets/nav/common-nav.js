@@ -73,11 +73,15 @@ define([
 		this._sidebarContextMenuNode.id = this.parentId + "ContextMenu"; //$NON-NLS-0$
 
 		this._parentNode.parentNode.insertBefore(this._sidebarContextMenuNode, this._parentNode);
-		this.preferences.get("/general/settings").then(function (settings) {
-			if(typeof settings.generalSettings === 'undefined' || settings.generalSettings.desktopSelectionPolicy){
-				this._parentNode.parentNode.classList.add("desktopmode");
-			}
-		}.bind(this));
+		if(util.isElectron){
+			this._parentNode.parentNode.classList.add("desktopmode");
+		}else{
+			this.preferences.get("/general/settings").then(function (settings) {
+				if(typeof settings.generalSettings === 'undefined' || settings.generalSettings.desktopSelectionPolicy){
+					this._parentNode.parentNode.classList.add("desktopmode");
+				}
+			}.bind(this));
+		}
 
 		this.contextMenuActionsScope = this._sidebarContextMenuNode.id + "commonNavContextMenu"; //$NON-NLS-0$
 
@@ -121,12 +125,12 @@ define([
 	objects.mixin(CommonNavExplorer.prototype, /** @lends orion.sidebar.CommonNavExplorer.prototype */ {
 		isDesktopSelectionMode: function() {
 			return this.generalPreferences.getPrefs().then(function(genealPrefs) {
-				return genealPrefs.desktopSelectionPolicy;
+				return util.isElectron ? true : genealPrefs.desktopSelectionPolicy;
 			});
 		},
 		isEditorTabsEnabled: function() {
 			return this.generalPreferences.getPrefs().then(function(genealPrefs) {
-				return genealPrefs.enableEditorTabs;
+				return util.isElectron ? true : genealPrefs.enableEditorTabs;
 			});
 		},
 		onModelCreate: function(evt) {
