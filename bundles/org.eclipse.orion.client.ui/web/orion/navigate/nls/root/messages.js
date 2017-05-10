@@ -58,7 +58,6 @@ define({//Default message bundle
 	"Uploaded Content": "Uploaded Content",
 	"Clone Git Repository": "Clone Git Repository",
 	"Clone a git repository": "Clone a git repository",
-	"Link to Server": "Link to Server",
 	"LinkContent": "Link to existing content on the server",
 	"CreateLinkedFolder": "Create a folder that links to an existing folder on the server.",
 	"Server path:": "Server path:",
