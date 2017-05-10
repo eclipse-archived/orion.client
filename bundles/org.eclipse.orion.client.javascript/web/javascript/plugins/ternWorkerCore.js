@@ -74,12 +74,10 @@ function(Tern, defaultOptions, Deferred, Objects, Serialize, Messages, i18nUtil)
         var options = defaultOptions.serverOptions();
         options.getFile = _getFile;
         
-        var pluginsDir = defaultOptions.pluginsDir;
         var defNames = [], plugins, projectLoc;
         if (jsonOptions) {
 			projectLoc = jsonOptions.projectLoc;
 			plugins = jsonOptions.plugins;
-			pluginsDir = jsonOptions.pluginsDir;
 			if(jsonOptions.libs) {
 				mergeArray(defNames, jsonOptions.libs);
 			}
@@ -163,7 +161,7 @@ function(Tern, defaultOptions, Deferred, Objects, Serialize, Messages, i18nUtil)
 				fallback(err);
 			}
 		}
-		Deferred.all(loadPlugins(options.plugins, pluginsDir)).then(/* @callback */ function(plugins) {
+		Deferred.all(loadPlugins(options.plugins, projectLoc)).then(function() {
 			Deferred.all(loadDefs(defNames, projectLoc)).then(function(json) {
 				options.defs = json;
 				startAndMessage(options);
@@ -695,48 +693,45 @@ function(Tern, defaultOptions, Deferred, Objects, Serialize, Messages, i18nUtil)
     /**
      * @description Loads the plugins listed in the given plugins object
      * @param {Object} plugins The object of plugins
-     * @param {String} pluginsDir The base directory to load plugins from, if not defined, the default of 'tern/plugin/' is assumed
+     * @param {String} projectDir The base directory of the project
      * @returns {Promise} The promise to resolve all of the plugin loads
      * @since 11.0
      */
-    function loadPlugins(plugins, pluginsDir) {
+    function loadPlugins(plugins, projectDir) {
 		var promises = [];
-		//TODO disable for now, as it does not work
-//		if(plugins) {
-//			Object.keys(plugins).forEach(function(key) {
-//				if(defaultOptions.plugins.required[key] || defaultOptions.plugins.optional[key]) {
-//					//default plugins are statically loaded
-//					return;
-//				}
-//				var plugin = plugins[key];
-//				if(!plugin || typeof plugin !== 'object') {
-//					return;
-//				}
-//				var loc = plugin.location;
-//				if(typeof loc !== 'string') {
-//					if(typeof pluginsDir === 'string') {
-//						loc = pluginsDir + key;
-//					} else {
-//						//assume it is in /tern/plugin/
-//						loc = 'tern/plugin/' + key; //$NON-NLS-1$
-//					}
-//				}
-//				var deferred = new Deferred();
-//				try {
-//					promises.push(deferred);    		
-//					requirejs([loc], function(_) {
-//						deferred.resolve(_);
-//					},
-//					function(err) {
-//						deferred.reject(err);
-//					});
-//				}
-//				catch(err) {
-//					post(err);
-//					deferred.reject(err);
-//				}
-//			});
-//		}
+		if(plugins) {
+			Object.keys(plugins).forEach(function(key) {
+				if(defaultOptions.plugins.required[key] || defaultOptions.plugins.optional[key]) {
+					//default plugins are statically loaded
+					return;
+				}
+				var plugin = plugins[key];
+				if(!plugin || typeof plugin !== 'object') {
+					return;
+				}
+				if(typeof plugin.location === 'string' && typeof key === 'string') {
+					var deferred = new Deferred(),
+						loc = /^.tern-plugins/.test(plugin.location) ? projectDir + plugin.location : plugin.location;
+					promises.push(deferred);
+					_getFile({file: loc, tourl: true}, function(err, meta) {
+						var config = {};
+						loc = !err && meta && meta.file && meta.file.url ? meta.file.url : plugin.location;
+						config[key] = loc;
+						requirejs.config({
+							paths: config
+						});
+						requirejs([loc], /* @callback */ function(p) {
+							return deferred.resolve(key); //doesn't matter what we resolve, just that the plugin loaded into require
+						}, function(err) {
+							delete plugins[key];
+							promises.pop();
+							post("Tern plugin '"+key+"' from '"+loc+"'failed to load.\n\nReason:\n"+ Serialize.serializeError(err));
+							return deferred.resolve(err);
+						});	
+					});
+				}
+			});
+		}
 		return promises;
     }
     
@@ -763,8 +758,6 @@ function(Tern, defaultOptions, Deferred, Objects, Serialize, Messages, i18nUtil)
 					if(idx > -1) {
 						//a default def, get it
 						_defs.push(new Deferred().resolve(defaultOptions.defs[idx]));
-					} else {
-						//TODO do we want to support loading defs from arbitrary locations?
 					}
 				}
 			});
