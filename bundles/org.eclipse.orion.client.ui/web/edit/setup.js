@@ -1758,12 +1758,12 @@ exports.setUpEditor = function(serviceRegistry, pluginRegistry, preferences, rea
 				setup.createRunBar().then(function() {
 					setup.editorViewers.push(setup.createEditorViewer());
 					setup.setActiveEditorViewer(setup.editorViewers[0]);
-					if (enableSplitEditor) {
-						var mode = Number(sessionStorage.splitterSelection) || MODE_SINGLE;
-						setup.createSplitMenu();
-						setup.splitterMode = MODE_SINGLE;
-						setup.splitMenuChoices[mode].callback();
-					}
+//					if (enableSplitEditor) {
+//						var mode = Number(sessionStorage.splitterSelection) || MODE_SINGLE;
+//						setup.createSplitMenu();
+//						setup.splitterMode = MODE_SINGLE;
+//						setup.splitMenuChoices[mode].callback();
+//					}
 					setup.load();
 				});
 			});
