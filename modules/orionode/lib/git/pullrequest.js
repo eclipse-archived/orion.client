@@ -119,7 +119,8 @@ function getPullRequest(req, res) {
 						HttpCode: 403,
 						Code: 0,
 						JsonData: {},
-						DetailedMessage: "There are some limitation to get pull requests list using SSH, please use HTTPS to clone the repo and have full experience of pull requests",
+						DetailedMessage: "Pull requests for this repository will not be displayed because you have reached the GitHUB API limit while requesting your pull request list." 
+							+ isSsh ? "Please consider cloning the repo with HTTPS protocol instead of SSH. This will increase our API limit." : "",
 						Message: "Unable to fetch pull request info.",
 						Severity: "Warning"
 					});
