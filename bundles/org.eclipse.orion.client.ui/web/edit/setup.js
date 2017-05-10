@@ -903,8 +903,9 @@ objects.mixin(EditorViewer.prototype, {
 			visibleWhen: /** @callback */ function(items, data) {
 				return data.userData && Object.keys(this.tabWidget.editorTabs).length > 1;
 			}.bind(this),
-			callback: function() {
-				this.tabWidget.editorTabs[this.tabWidget.selectedFile.metadata.Location].closeButtonNode.click();
+			callback: function(commandInvocation) {
+				var targetEditorTab = this.tabWidget.editorTabs[commandInvocation.userData.split("#")[1]] || this.tabWidget.editorTabs[this.tabWidget.selectedFile.metadata.Location]; // the targetEditorTab is the activetab when user use keybinds to close, otherwise is the selected one.
+				targetEditorTab.closeButtonNode.click();
 			}.bind(this)
 		});
 		var closeOtherTabWidgetCommand = new mCommands.Command({
@@ -995,8 +996,8 @@ objects.mixin(EditorViewer.prototype, {
 		
 		// tabWidget context menu
 		this.commandRegistry.addCommandGroup("tabWidgetContextMenuActions", "orion.tabWidgetContextMenuGroup", 100, null, null, null, null, null, "dropdownSelection"); //$NON-NLS-1$ //$NON-NLS-2$
-		this.commandRegistry.registerCommandContribution("tabWidgetContextMenuActions", "orion.tabWidget.closeself", this.tabWidget.tabWidgetContextItemindex++,"orion.tabWidgetContextMenuActions/orion.tabWidget.closeGroup",false, new mKeyBinding.KeyBinding('W', true, true)); //$NON-NLS-1$ //$NON-NLS-2$
-		this.commandRegistry.registerCommandContribution("tabWidgetContextMenuActions", "orion.tabWidget.closeothers", this.tabWidget.tabWidgetContextItemindex++,"orion.tabWidgetContextMenuActions/orion.tabWidget.closeGroup",false, new mKeyBinding.KeyBinding('T', true, true)); //$NON-NLS-1$ //$NON-NLS-2$
+		this.commandRegistry.registerCommandContribution("tabWidgetContextMenuActions", "orion.tabWidget.closeself", this.tabWidget.tabWidgetContextItemindex++,"orion.tabWidgetContextMenuActions/orion.tabWidget.closeGroup",false, new mKeyBinding.KeyBinding(118, true)); //$NON-NLS-1$ //$NON-NLS-2$
+		this.commandRegistry.registerCommandContribution("tabWidgetContextMenuActions", "orion.tabWidget.closeothers", this.tabWidget.tabWidgetContextItemindex++,"orion.tabWidgetContextMenuActions/orion.tabWidget.closeGroup",false, new mKeyBinding.KeyBinding(119, true)); //$NON-NLS-1$ //$NON-NLS-2$
 		this.commandRegistry.registerCommandContribution("tabWidgetContextMenuActions", "orion.tabWidget.closetoright", this.tabWidget.tabWidgetContextItemindex++,"orion.tabWidgetContextMenuActions/orion.tabWidget.closeGroup"); //$NON-NLS-1$ //$NON-NLS-2$
 		this.commandRegistry.registerCommandContribution("tabWidgetContextMenuActions", "orion.tabWidget.keepOpen", this.tabWidget.tabWidgetContextItemindex++,"orion.tabWidgetContextMenuActions/orion.tabWidget.others", false, new mKeyBinding.KeyBinding('K', true, true)); //$NON-NLS-1$ //$NON-NLS-2$
 		this.commandRegistry.registerCommandContribution("tabWidgetContextMenuActions" , "orion.tabWidget.selectNextTab", this.tabWidget.tabWidgetContextItemindex++, "orion.tabWidgetContextMenuActions/orion.tabWidget.traverse", false, new mKeyBinding.KeyBinding(117, true), null, this);
@@ -1059,6 +1060,7 @@ objects.mixin(EditorViewer.prototype, {
 			selection: this.selection,
 			contentTypeRegistry: this.contentTypeRegistry,
 			generalPreferences: this.generalPreferences,
+			isEditorTabsEnabled: util.isElectron ? true : this.generalPreferences && this.generalPreferences.hasOwnProperty("enableEditorTabs") ? this.generalPreferences.enableEditorTabs : false,
 			confirm: function(message, buttonCallbackList, targetNode){
 				targetNode = targetNode || this.tabWidget.getCurrentEditorTabNode();
 				this.commandRegistry.confirmWithButtons(targetNode, message, buttonCallbackList);

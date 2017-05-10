@@ -144,8 +144,7 @@ define([
 		this.isUnsavedWarningNeeed = options.isUnsavedWarningNeeed;
 		this.confirm = options.confirm;
 		this.generalPreferences = options.generalPreferences || {};
-		var generalPrefs = this.generalPreferences || {};
-		this.isEditorTabsEnabled = generalPrefs.hasOwnProperty("enableEditorTabs") ? generalPrefs.enableEditorTabs : true;
+		this.isEditorTabsEnabled = options.isEditorTabsEnabled || false;
 		this._input = this._title = "";
 		if (this.fileClient) {
 			this.fileClient.addEventListener("Changed", function(evt) { //$NON-NLS-0$
