@@ -1036,35 +1036,6 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/i18n
 		});
 		commandService.addCommand(newProjectCommand);
 		
-		var linkProjectCommand = new mCommands.Command({
-			name: messages["Link to Server"],
-			tooltip: messages["LinkContent"],
-			description: messages["CreateLinkedFolder"],
-			imageClass: "core-sprite-link", //$NON-NLS-0$
-			id: "orion.new.linkProject", //$NON-NLS-0$
-			parameters: new mCommandRegistry.ParametersDescription([new mCommandRegistry.CommandParameter('name', 'text', messages['Name:'], messages['New Folder']), new mCommandRegistry.CommandParameter('url', 'url', messages['Server path:'], '')]), //$NON-NLS-5$ //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-			callback: function(data) {
-				var createFunction = function(name, url) {
-					if (name && url) {
-						var deferred = fileClient.createProject(explorer.treeRoot.ChildrenLocation, name, url, true);
-						progressService.showWhile(deferred, i18nUtil.formatMessage(messages["Linking to ${0}"], url)).then(function(newFolder) {
-						}, errorHandler);
-					}
-				};
-				if (data.parameters && data.parameters.valueFor('name') && data.parameters.valueFor('url')) { //$NON-NLS-1$ //$NON-NLS-0$
-					createFunction(data.parameters.valueFor('name'), data.parameters.valueFor('url')); //$NON-NLS-1$ //$NON-NLS-0$
-				} else {
-					errorHandler(messages["NameLocationNotClear"]);
-				}
-			},
-			visibleWhen: function(item) {
-				var createLinkProjectEnabled = getGeneralPreferenceValue("enableLinkProjectCreation", true);
-				return canCreateProject(item) && createLinkProjectEnabled;
-			}
-		});
-		commandService.addCommand(linkProjectCommand);
-
-		
 		var goUpCommand = new mCommands.Command({
 			name: messages["Go Up"],
 			tooltip: messages["GoUpToParent"],
