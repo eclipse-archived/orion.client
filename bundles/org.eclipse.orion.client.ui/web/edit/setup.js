@@ -897,6 +897,16 @@ objects.mixin(EditorViewer.prototype, {
 		this.registerTabWidgetContextMenu();
 	},
 	registerTabWidgetContextMenu: function(){
+		var closeSelfTabWidgetCommand = new mCommands.Command({
+			name: messages.closeSelf,
+			id: "orion.tabWidget.closeself", //$NON-NLS-0$
+			visibleWhen: /** @callback */ function(items, data) {
+				return data.userData && Object.keys(this.tabWidget.editorTabs).length > 1;
+			}.bind(this),
+			callback: function() {
+				this.tabWidget.editorTabs[this.tabWidget.selectedFile.metadata.Location].closeButtonNode.click();
+			}.bind(this)
+		});
 		var closeOtherTabWidgetCommand = new mCommands.Command({
 			name: messages.closeOthers,
 			id: "orion.tabWidget.closeothers", //$NON-NLS-0$
@@ -950,7 +960,7 @@ objects.mixin(EditorViewer.prototype, {
 			name: messages["selectNextTab"],
 			id: "orion.tabWidget.selectNextTab",
 			visibleWhen: function(items, data) {
-				return data.handler.tabWidget.fileList.length > 1;
+				return Object.keys(data.handler.tabWidget.editorTabs).length > 1;
 			},
 			callback: function(){
 				var selectedTab = this.tabWidget.getCurrentEditorTabNode();
@@ -965,7 +975,7 @@ objects.mixin(EditorViewer.prototype, {
 			name: messages["selectPreviousTab"],
 			id: "orion.tabWidget.selectPreviousTab",
 			visibleWhen: function(items, data) {
-				return data.handler.tabWidget.fileList.length > 1;
+				return Object.keys(data.handler.tabWidget.editorTabs).length > 1;
 			},
 			callback: function(){
 				var selectedTab = this.tabWidget.getCurrentEditorTabNode();
@@ -976,6 +986,7 @@ objects.mixin(EditorViewer.prototype, {
 				}
 			}
 		});
+		this.commandRegistry.addCommand(closeSelfTabWidgetCommand);
 		this.commandRegistry.addCommand(closeOtherTabWidgetCommand);
 		this.commandRegistry.addCommand(closeToRight);
 		this.commandRegistry.addCommand(keepOpen);
@@ -984,7 +995,8 @@ objects.mixin(EditorViewer.prototype, {
 		
 		// tabWidget context menu
 		this.commandRegistry.addCommandGroup("tabWidgetContextMenuActions", "orion.tabWidgetContextMenuGroup", 100, null, null, null, null, null, "dropdownSelection"); //$NON-NLS-1$ //$NON-NLS-2$
-		this.commandRegistry.registerCommandContribution("tabWidgetContextMenuActions", "orion.tabWidget.closeothers", this.tabWidget.tabWidgetContextItemindex++,"orion.tabWidgetContextMenuActions/orion.tabWidget.closeGroup"); //$NON-NLS-1$ //$NON-NLS-2$
+		this.commandRegistry.registerCommandContribution("tabWidgetContextMenuActions", "orion.tabWidget.closeself", this.tabWidget.tabWidgetContextItemindex++,"orion.tabWidgetContextMenuActions/orion.tabWidget.closeGroup",false, new mKeyBinding.KeyBinding('W', true, true)); //$NON-NLS-1$ //$NON-NLS-2$
+		this.commandRegistry.registerCommandContribution("tabWidgetContextMenuActions", "orion.tabWidget.closeothers", this.tabWidget.tabWidgetContextItemindex++,"orion.tabWidgetContextMenuActions/orion.tabWidget.closeGroup",false, new mKeyBinding.KeyBinding('T', true, true)); //$NON-NLS-1$ //$NON-NLS-2$
 		this.commandRegistry.registerCommandContribution("tabWidgetContextMenuActions", "orion.tabWidget.closetoright", this.tabWidget.tabWidgetContextItemindex++,"orion.tabWidgetContextMenuActions/orion.tabWidget.closeGroup"); //$NON-NLS-1$ //$NON-NLS-2$
 		this.commandRegistry.registerCommandContribution("tabWidgetContextMenuActions", "orion.tabWidget.keepOpen", this.tabWidget.tabWidgetContextItemindex++,"orion.tabWidgetContextMenuActions/orion.tabWidget.others", false, new mKeyBinding.KeyBinding('K', true, true)); //$NON-NLS-1$ //$NON-NLS-2$
 		this.commandRegistry.registerCommandContribution("tabWidgetContextMenuActions" , "orion.tabWidget.selectNextTab", this.tabWidget.tabWidgetContextItemindex++, "orion.tabWidgetContextMenuActions/orion.tabWidget.traverse", false, new mKeyBinding.KeyBinding(117, true), null, this);

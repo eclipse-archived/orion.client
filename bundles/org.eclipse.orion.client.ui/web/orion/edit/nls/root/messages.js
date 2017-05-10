@@ -122,5 +122,6 @@ define({
 	"showTabDropdown": "Display Open Editor Tabs",
 	"closeOthers":"Close Others Tabs",
 	"closeTotheRight":"Close Tabs To The Right",
-	"keepOpen":"Keep Open"
+	"keepOpen":"Keep Open",
+	"closeSelf":"Close"
 });
