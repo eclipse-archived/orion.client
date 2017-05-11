@@ -72,7 +72,7 @@ buildConfigModules.forEach(function(optimizedModule, i) {
 	checksum.setProperty("fingerprint.hash.css." + i);
 	checksum.perform();
 	var orgName = srcFile.getName();
-	var mappedName = orgName.replace(/.css$/, "") + "." + project.getProperty("fingerprint.hash.css." + i) + ".css";
+	var mappedName = orgName.replaceAll(/.css$/, "") + "." + project.getProperty("fingerprint.hash.css." + i) + ".css";
 	cssMaps.push({name: orgName, mappedName: mappedName});
 	var destFile = new Packages.java.io.File(srcFile.getParent(), mappedName);
 	var task = project.createTask("copy");
