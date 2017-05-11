@@ -37,6 +37,14 @@
 		</replace>
 	</target>
 
+	<scriptdef name="fingerprintModules" language="javascript" src="${builder}/scripts/fingerprintModules.js">
+		<attribute name="buildfile" />
+		<attribute name="todir" />
+	</scriptdef>
+	<target name="fingerprint" unless="skipFingerprint">
+		<fingerprintModules todir="${out}" buildfile="${buildfile}" />
+	</target>
+
 	<scriptdef name="stageBundles" language="javascript" src="${builder}/scripts/stageBundles.js">
 		<attribute name="buildfile" />
 		<attribute name="todir" />
@@ -69,6 +77,16 @@
 					<identitymapper />
 					<globmapper from="*" to="*.map" />
 					<globmapper from="*" to="*.src.js" />
+					<scriptmapper language="javascript">
+						var s = new Packages.java.io.File(source).getName();
+						s = s.replaceAll("(.*).js", "$1.*.js");
+						var parent = new Packages.java.io.File(source).getParent();
+						if (parent) {
+							self.addMappedName(new Packages.java.io.File(parent.toString(), s));
+						} else {
+							self.addMappedName(s);
+						}
+					</scriptmapper>
 				</compositemapper>
 			</chainedmapper>
 		</pathconvert>
@@ -145,6 +163,10 @@
 				</args>
 			</rjs>
 
+			<antcall target="fingerprint">
+				<param name="buildfile" value="${buildfile}" />
+				<param name="todir" value="${out}" />
+			</antcall>
 			<copyBackBundles buildfile="${buildfile}" out="${out}" />
 			<updateRequire buildfile="${buildfile}" />
 		</sequential>
@@ -490,13 +512,25 @@
 		<!-- copy css back -->
 		<!-- TODO! this should be done automatically using the ${buildConfig} -->
 		<copy todir="${orionClient}/bundles/org.eclipse.orion.client.ui/web" >
-			<fileset dir="${optimized}" includes="**/*.css" excludes="git/,profile/"/>
+			<fileset dir="${optimized}" includes="**/*.css" excludes="git/,profile/,cfui/,help/,orion/editor/,js-tests/editor/,examples/,mocha/"/>
+		</copy>
+		<copy todir="${orionClient}/bundles/org.eclipse.orion.client.cf/web" >
+			<fileset dir="${optimized}" includes="cfui/**/*.css" />
+		</copy>
+		<copy todir="${orionClient}/bundles/org.eclipse.orion.client.help/web" >
+			<fileset dir="${optimized}" includes="help/**/*.css" />
 		</copy>
 		<copy todir="${orionClient}/bundles/org.eclipse.orion.client.git/web" >
 			<fileset dir="${optimized}" includes="git/**/*.css" />
 		</copy>
 		<copy todir="${orionClient}/bundles/org.eclipse.orion.client.users/web" >
 			<fileset dir="${optimized}" includes="profile/**/*.css" />
+		</copy>
+		<copy todir="${orionClient}/bundles/org.eclipse.orion.client.editor/web" >
+			<fileset dir="${optimized}" includes="orion/editor/**/*.css,js-tests/editor/**/*.css,examples/**/*.css" />
+		</copy>
+		<copy todir="${orionClient}/bundles/org.eclipse.orion.client.core/web" >
+			<fileset dir="${optimized}" includes="mocha/**/*.css" />
 		</copy>
 	</target>
 

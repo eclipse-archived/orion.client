@@ -1,9 +1,9 @@
-@import "../../css/layout.css";
-@import "../../css/ide.css";
-@import "../../css/sections.css";
-@import "../../css/images.css";
-@import "../../orion/editor/rulers.css";
-@import "../../css/theme.css";
+@import "../css/layout.css";
+@import "../css/ide.css";
+@import "../css/sections.css";
+@import "../css/images.css";
+@import "../orion/editor/rulers.css";
+@import "../css/theme.css";
 
 #LogsNavigationTitle {
     -moz-user-select: none;
