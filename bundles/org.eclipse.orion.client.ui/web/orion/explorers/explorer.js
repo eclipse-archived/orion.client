@@ -69,6 +69,9 @@ exports.Explorer = (function() {
 		isDesktopSelectionMode: function() {
 			return new Deferred().resolve(false);
 		},
+		isEditorTabsEnabled: function() {
+			return new Deferred().resolve(false);
+		},
 		handleLinkDoubleClick: function(linkNode, doubleClickEvt) {
             this.isDesktopSelectionMode().then(function(desktopMode){
             	if(desktopMode) {

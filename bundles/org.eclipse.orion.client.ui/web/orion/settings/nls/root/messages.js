@@ -40,7 +40,7 @@ define({//Default message bundle
 	"filteredResources": "Filtered Resources (comma-separated list):",
 	"filteredResourcesTooltip": "The comma-separated list of resources to be filtered from view and searching. Specify * to match one or more characters. Specify ? to match a single character.",
 	"Files": "Files",
-	"enableEditorTabs": "Enable Editor Tab Support",
+	"enableEditorTabs": "Enable Editor Tab Support (Works in Desktop selection policy)",
 	"enableEditorTabsTooltip": "Enables the display and management of multiple files on the editor page.",
 	"maximumEditorTabs": "Maximum Allowed Editor Tabs (0 for unlimited)",
 	"maximumEditorTabsTooltip": "Controls the maximum number of editor tabs to be open at any given time. Use 0 for unlimited.",

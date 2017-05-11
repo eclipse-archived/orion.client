@@ -50,6 +50,7 @@ define([
 	'orion/projectClient',
 	'orion/webui/splitter',
 	'orion/webui/tooltip',
+	'orion/webui/contextmenu',
 	'orion/bidiUtils',
 	'orion/customGlobalCommands',
 	'orion/generalPreferences',
@@ -60,7 +61,7 @@ define([
 	mTextModelFactory, mUndoStack,
 	mFolderView, mEditorView, mPluginEditorView , mMarkdownView, mMarkdownEditor,
 	mCommandRegistry, mContentTypes, mFileClient, mFileCommands, mEditorCommands, mSelection, mStatus, mProgress, mOperationsClient, mOutliner, mDialogs, mExtensionCommands, ProjectCommands, mSearchClient,
-	EventTarget, URITemplate, i18nUtil, PageUtil, util, objects, lib, Deferred, mProjectClient, mSplitter, mTooltip, bidiUtils, mCustomGlobalCommands, mGeneralPrefs, mBreadcrumbs, mKeyBinding
+	EventTarget, URITemplate, i18nUtil, PageUtil, util, objects, lib, Deferred, mProjectClient, mSplitter, mTooltip, mContextMenu, bidiUtils, mCustomGlobalCommands, mGeneralPrefs, mBreadcrumbs, mKeyBinding
 ) {
 
 var exports = {};
@@ -244,13 +245,14 @@ function TabWidget(options) {
 	EventTarget.attach(this);
 	objects.mixin(this, options);
 	this.selectedFile = null;
+	this.tabWidgetContextItemindex = 1;
 	this.commandRegistry = options.commandRegistry;
 	
 	this.fileList = [];
 	this.editorTabs = {};
 	this.breadcrumbUniquifier = "_editor_" + this.id;
 	var generalPrefs = this.generalPreferences || {};
-	this.enableEditorTabs = generalPrefs.hasOwnProperty("enableEditorTabs") ? generalPrefs.enableEditorTabs : false;
+	this.enableEditorTabs = util.isElectron ? true : generalPrefs.hasOwnProperty("enableEditorTabs") ? generalPrefs.enableEditorTabs : false;
 	this.maximumEditorTabs = generalPrefs.hasOwnProperty("maximumEditorTabs") ? generalPrefs.maximumEditorTabs : 0;
 	this.beingDragged = null;
 	
@@ -278,11 +280,12 @@ function TabWidget(options) {
 	tabWidgetDropdownNode.setAttribute("aria-haspopup", "true");
 
 	this.parent.appendChild(tabWidgetDropdownNode);
-	this.restoreTabsFromStorage();
 
 	if (this.enableEditorTabs) {
 		this.createDropdown_();
 	}
+	
+	this.restoreTabsFromStorage(); // have to be after createDropdown_ call.
 }
 
 TabWidget.prototype = {};
@@ -296,7 +299,7 @@ objects.mixin(TabWidget.prototype, {
 
 		var tabCommand = new mCommands.Command({
 			selectionClass: "dropdownSelection",
-			name: messages["AllTabsDropDown"],
+			name: util.isMac ? messages["AllTabsDropDownMac"] : messages["AllTabsDropDown"],
 			imageClass: "core-sprite-list",
 			id: "orion.edit.selectEditor",
 			visableWhen: function() {
@@ -429,7 +432,7 @@ objects.mixin(TabWidget.prototype, {
 	setTabStorage: function() {
 		var mappedFiles = this.fileList.map(function(f) {
 			if (!f.metadata.Directory) {
-				return {metadata: f.metadata, href: f.href};
+				return {metadata: f.metadata, href: f.href, isTransient: f.isTransient};
 			}
 		});
 		sessionStorage["editorTabs_" + this.id] = JSON.stringify(mappedFiles);
@@ -440,7 +443,7 @@ objects.mixin(TabWidget.prototype, {
 				var cachedTabs = JSON.parse(sessionStorage["editorTabs_" + this.id]);
 				cachedTabs.reverse().forEach(function(cachedTab) {
 					if (cachedTab) {
-						this.addTab(cachedTab.metadata, cachedTab.href);
+						this.addTab(cachedTab.metadata, cachedTab.href, true, cachedTab.isTransient);
 					}
 				}.bind(this));
 			} catch (e) {
@@ -449,26 +452,6 @@ objects.mixin(TabWidget.prototype, {
 		}
 	},
 	registerAdditionalCommands: function() {
-		var nextTab = new mCommands.Command({
-			name: messages["selectNextTab"],
-			id: "orion.edit.selectNextTab",
-			visibleWhen: function() {
-				return true;
-			},
-			callback: this.selectNextTab.bind(this)
-		});
-		this.commandRegistry.addCommand(nextTab);
-
-		var previousTab = new mCommands.Command({
-			name: messages["selectPreviousTab"],
-			id: "orion.edit.selectPreviousTab",
-			visibleWhen: function() {
-				return true;
-			},
-			callback: this.selectPreviousTab.bind(this)
-		});
-		this.commandRegistry.addCommand(previousTab);
-
 		var showTabDropdown = new mCommands.Command({
 			name: messages["showTabDropdown"],
 			id: "orion.edit.showTabDropdown",
@@ -481,29 +464,12 @@ objects.mixin(TabWidget.prototype, {
 		});
 		this.commandRegistry.addCommand(showTabDropdown);
 
-		this.commandRegistry.registerCommandContribution(this.editorTabContainer.id , "orion.edit.selectNextTab", 0, null, true, new mKeyBinding.KeyBinding(117, true), null, this);
-		this.commandRegistry.registerCommandContribution(this.editorTabContainer.id , "orion.edit.selectPreviousTab", 0, null, true, new mKeyBinding.KeyBinding(117, true, true), null, this);
 		this.commandRegistry.registerCommandContribution(this.editorTabContainer.id , "orion.edit.showTabDropdown", 0, null, true, new mKeyBinding.KeyBinding('e', true, true), null, this);
 
 		this.commandRegistry.renderCommands(this.editorTabContainer.id, this.editorTabContainer.id, this, this, "button");
 	},
-	selectPreviousTab: function() {
-		var selectedTab = this.getCurrentEditorTabNode();
-		if (selectedTab.previousSibling !== null) {
-			selectedTab.previousSibling.click();
-		} else {
-			selectedTab.parentNode.lastChild.click();
-		}
-	},
-	selectNextTab: function() {
-		var selectedTab = this.getCurrentEditorTabNode();
-		if (selectedTab.nextSibling !== null) {
-			selectedTab.nextSibling.click();
-		} else {
-			selectedTab.parentNode.firstChild.click();
-		}
-	},
 	createTab_ : function(metadata, href) {
+		var that = this;
 		var editorTab = document.createElement("div");
 		editorTab.className = "editorTab";
 		if (!this.enableEditorTabs) {
@@ -513,7 +479,6 @@ objects.mixin(TabWidget.prototype, {
 		editorTab.setAttribute("role", "tab");
 		editorTab.setAttribute("aria-controls", "editorViewerContent_Panel" + this.id);
 
-		
 		this.editorTabContainer.appendChild(editorTab);
 		
 		var dirtyIndicator = document.createElement("span");
@@ -535,13 +500,15 @@ objects.mixin(TabWidget.prototype, {
 		closeButton.className = "editorTabCloseButton";
 		// Unicode multiplication sign
 		closeButton.textContent = "\u2715";
+		closeButton.metadata = metadata;
 		closeButton.addEventListener("click", function(e) {
 			e.stopPropagation();
 			var isDirty = dirtyIndicator.style.display !== "none";
-			this.closeTab(metadata, isDirty);
-		}.bind(this));
-
+			that.closeTab(this.metadata, isDirty);
+		});
 		editorTab.appendChild(closeButton);
+		editorTab.metadata = metadata;
+		editorTab.href = href;
 		
 		var fileNodeTooltip = new mTooltip.Tooltip({
 			node: curFileNode,
@@ -581,42 +548,41 @@ objects.mixin(TabWidget.prototype, {
 		var breadcrumb = new mBreadcrumbs.BreadCrumbs(breadcrumbOptions);
 		
 		editorTab.addEventListener("click", function() {
-			this.setWindowLocation(href);
-		}.bind(this));
+			that.setWindowLocation(this.href);
+		});
 
 		editorTab.addEventListener("mouseup", function(e) {
 			var button = e.which;
 			if (button === 2) {
 				e.preventDefault();
 				var isDirty = dirtyIndicator.style.display !== "none";
-				this.closeTab(metadata, isDirty);
+				that.closeTab(this.metadata, isDirty);
 			}
-		}.bind(this));
+		});
 
 		editorTab.addEventListener("dragstart", function(e) {
-			if (this.fileList.length === 1) {
+			if (that.fileList.length === 1) {
 				e.preventDefault();
 				return false;
 			}
-			this.beingDragged = {node: e.target, metadata: metadata, href: href, parent: this};
+			that.beingDragged = {node: e.target, metadata: this.metadata, href: this.href, parent: that};
 			setTimeout(function() {
 				tipContainer.parentNode.classList.add('hideOnDrag');
 				e.target.classList.add('hideOnDrag');
 			});
-		}.bind(this));
+		});
 		
 		editorTab.addEventListener("dragend", function(e) {
-			if (this.afterDragActions) {
+			if (that.afterDragActions) {
 				setTimeout(function() {
-					this.afterDragActions.dragCleanup();
-					this.afterDragActions = null;
-				}.bind(this));
+					that.afterDragActions.dragCleanup();
+					that.afterDragActions = null;
+				}.bind(that));
 			}
-			this.beingDragged = null;
+			that.beingDragged = null;
 			tipContainer.parentNode.classList.remove('hideOnDrag');
 			e.target.classList.remove('hideOnDrag');
-		}.bind(this));
-
+		});
 		return {
 			editorTabNode: editorTab,
 			dirtyIndicatorNode: dirtyIndicator,
@@ -624,13 +590,58 @@ objects.mixin(TabWidget.prototype, {
 			breadcrumb: breadcrumb,
 			closeButtonNode: closeButton,
 			fileNodeToolTip: fileNodeTooltip,
-			href: href
+			href: href,
+			tabWidgetContextItemindex: 1
 		};
 	},
 	getDraggedNode: function() {
 		return this.beingDragged;
 	},
-	addTab: function(metadata, href) {
+	transientToPermenant : function(href){
+		var hrefHash = href && href.split("#")[1];
+		if(this.transientTab && hrefHash && hrefHash.indexOf(this.transientTab.location) === 0){
+			this.fileList.find(function(file){
+				if(hrefHash.indexOf(file.metadata.Location) === 0){
+					file.isTransient = false;
+					return true;
+				}
+			})
+			this.transientTab && this.transientTab.editorTabNode.classList.remove("transient");
+			this.transientTab = null;
+		}
+	},
+	createNewBreadCrumb: function(tab, metadata){
+		var localBreadcrumbNode = document.createElement("div");
+		var tipContainer = tab.fileNodeToolTip.contentContainer();
+		tipContainer.appendChild(localBreadcrumbNode);
+		var makeHref = function(segment, folderLocation, folder) {
+			var resource = folder ? folder.Location : this.fileClient.fileServiceRootURL(folderLocation);
+			segment.href = uriTemplate.expand({resource: resource});
+			if (folder) {
+				if (metadata && metadata.Location === folder.Location) {
+					segment.addEventListener("click", function() { //$NON-NLS-0$
+						if (this.sidebarNavInputManager){
+							this.sidebarNavInputManager.reveal(folder);
+						}
+					}.bind(this));
+				}
+			}
+		}.bind(this);
+		
+		var breadcrumbOptions = {
+			container: localBreadcrumbNode,
+			resource: metadata,
+			workspaceRootSegmentName: this.fileClient.fileServiceName(metadata.Location),
+			workspaceRootURL: this.fileClient.fileServiceRootURL(metadata.Location),
+			makeFinalHref: true,
+			makeHref: makeHref,
+			// This id should be unique regardless of editor views open.
+			id: "breadcrumb" + metadata.Location + this.breadcrumbUniquifier
+		};
+		
+		tab.breadcrumb = new mBreadcrumbs.BreadCrumbs(breadcrumbOptions);
+	},
+	addTab: function(metadata, href, isRestoreTabsFromStorage, isTransient) {
 		var fileList = this.fileList;
 		var fileToAdd = null;
 		var curEditorTabNode = null;
@@ -644,7 +655,6 @@ objects.mixin(TabWidget.prototype, {
 			curEditorTabNode.classList.remove("focusedEditorTab");
 			curEditorTabNode.setAttribute("aria-selected", "false");
 		}
-
 		// If the editor tab exists, reuse it.
 		if (this.editorTabs.hasOwnProperty(metadata.Location)) {
 			// Remove the item from the file list if it is present.
@@ -656,29 +666,62 @@ objects.mixin(TabWidget.prototype, {
 					break;
 				}
 			}
+			// Add the file to our dropdown menu
+			this.fileList.unshift(fileToAdd);
+		} else if (!isRestoreTabsFromStorage && this.transientTab){
+			this.transientTab.fileNameNode.textContent = metadata.Name;
+			fileToAdd = {
+				callback: this.widgetClick,
+				checked:true,
+				href: href,
+				metadata: metadata,
+				name: metadata.Name,
+				isTransient: true
+			};
+			for (var i = 0; i < this.fileList.length; i++) {
+				if (this.fileList[i].isTransient) {
+					this.fileList.splice(i, 1)
+					this.fileList.unshift(fileToAdd);
+					var transientTab = this.editorTabs[this.transientTab.location];
+					delete this.editorTabs[this.transientTab.location];
+					transientTab.editorTabNode.metadata = metadata;
+					transientTab.editorTabNode.href = href;
+					transientTab.closeButtonNode.metadata = metadata;
+					transientTab.location = metadata.Location
+					transientTab.href = href;
+					transientTab.breadcrumb.destroy();
+					this.createNewBreadCrumb(transientTab, metadata);
+					// Remove old breadcrum and add new, change the propertis of this editorTabs object, so that callbacks use new value.
+					editorTab  = this.editorTabs[metadata.Location] = transientTab;
+					break;
+				}
+			}
 		} else {
 			// Store file information
 			fileToAdd = {
 				callback: this.widgetClick,
-				checked:true, 
+				checked:true,
 				href: href,
 				metadata: metadata,
 				name: metadata.Name,
+				isTransient: isRestoreTabsFromStorage ? isTransient : true
 			};
 			// Create and store a new editorTab
 			editorTab = this.editorTabs[metadata.Location] = this.createTab_(metadata, href);
+			if((!isRestoreTabsFromStorage && this.enableEditorTabs) || (isRestoreTabsFromStorage && isTransient && this.enableEditorTabs)){
+				editorTab.editorTabNode.classList.add("transient");
+				this.transientTab = editorTab;
+				this.transientTab.location = metadata.Location;
+			}
+			// Add the file to our dropdown menu
+			this.fileList.unshift(fileToAdd);
 		}
 
-		// Add the file to our dropdown menu
-		this.fileList.unshift(fileToAdd);
-		
 		// Style the editor tab
 		editorTab.editorTabNode.classList.add("focusedEditorTab");
 		editorTab.editorTabNode.setAttribute("aria-selected", "true");
-
 		// Update the selected file
 		this.selectedFile = this.fileList[0];
-
 		// Enforce maximum editor tabs
 		if (this.maximumEditorTabs > 0 && fileList.length > this.maximumEditorTabs) {
 			var resourceClosing = fileList[fileList.length-1].metadata;
@@ -736,7 +779,7 @@ objects.mixin(TabWidget.prototype, {
 
 		if (lastHref !== this.selectedFile.href) {
 			this.activateEditorViewer();
-			this.setWindowLocation(this.selectedFile.href)
+			this.setWindowLocation(this.selectedFile.href);
 		}
 		this.setTabStorage();
 	},
@@ -821,6 +864,7 @@ objects.mixin(EditorViewer.prototype, {
 		this.createInputManager();
 		this.createTabWidget();
 		this.createEditorView();
+		this.createTabWidgetContextMenu();
 	},
 	
 	createTextModel: function() {
@@ -829,6 +873,135 @@ objects.mixin(EditorViewer.prototype, {
 	
 	createEditorView: function() {
 		this.editorView = new mEditorView.EditorView(this.defaultOptions());
+	},
+	createTabWidgetContextMenu: function(){
+		var tabWidgetContextMenuNode = document.createElement("ul"); //$NON-NLS-0$
+		tabWidgetContextMenuNode.className = "dropdownMenu"; //$NON-NLS-0$
+		tabWidgetContextMenuNode.setAttribute("role", "menu"); //$NON-NLS-1$ //$NON-NLS-2$
+		tabWidgetContextMenuNode.style.zIndex = "201";  // Need to be greater than tooltipcontainer's zindex which is 200
+		this.tabWidget.editorTabContainer.parentElement.appendChild(tabWidgetContextMenuNode);
+		// Hook the context menu to the tabWidget's editorTabNode node
+		var contextMenu = new mContextMenu.ContextMenu({
+			dropdown: tabWidgetContextMenuNode,
+			triggerNode: this.tabWidget.editorTabContainer
+		});
+		//function called when the context menu is triggered to set the nav selection properly
+		var contextMenuTriggered = function(wrapper) {
+			var re = wrapper.event;
+			if (re.target) {
+				this.commandRegistry.destroy(tabWidgetContextMenuNode); // remove previous content
+				this.commandRegistry.renderCommands("tabWidgetContextMenuActions", tabWidgetContextMenuNode, null, this, "menu", re.srcElement.parentElement.href || ""); //$NON-NLS-1$ //$NON-NLS-2$
+			}
+		}.bind(this);
+		contextMenu.addEventListener("triggered", contextMenuTriggered);
+		this.registerTabWidgetContextMenu();
+	},
+	registerTabWidgetContextMenu: function(){
+		var closeSelfTabWidgetCommand = new mCommands.Command({
+			name: messages.closeSelf,
+			id: "orion.tabWidget.closeself", //$NON-NLS-0$
+			visibleWhen: /** @callback */ function(items, data) {
+				return data.userData && Object.keys(this.tabWidget.editorTabs).length > 1;
+			}.bind(this),
+			callback: function(commandInvocation) {
+				var targetEditorTab = this.tabWidget.editorTabs[commandInvocation.userData.split("#")[1]] || this.tabWidget.editorTabs[this.tabWidget.selectedFile.metadata.Location]; // the targetEditorTab is the activetab when user use keybinds to close, otherwise is the selected one.
+				targetEditorTab.closeButtonNode.click();
+			}.bind(this)
+		});
+		var closeOtherTabWidgetCommand = new mCommands.Command({
+			name: messages.closeOthers,
+			id: "orion.tabWidget.closeothers", //$NON-NLS-0$
+			visibleWhen: /** @callback */ function(items, data) {
+				return data.userData && Object.keys(this.tabWidget.editorTabs).length > 1;
+			}.bind(this),
+			callback: function(commandInvocation) {
+				Object.keys(this.tabWidget.editorTabs).forEach(function(tab){
+					if(commandInvocation.userData.indexOf(tab) === -1){
+						this.tabWidget.editorTabs[tab].closeButtonNode.click();
+					}
+				}.bind(this));
+			}.bind(this)
+		});
+		var closeToRight = new mCommands.Command({
+			name: messages.closeTotheRight,
+			id: "orion.tabWidget.closetoright", //$NON-NLS-0$
+			visibleWhen: /** @callback */ function(items, data) {
+				return data.userData && Object.keys(this.tabWidget.editorTabs).length > 1;
+			}.bind(this),
+			callback: function(commandInvocation) {
+				// Get the right hand tabs from this.editorTab parent.
+				var firstNodeIndexToRemove;
+				Array.prototype.find.call(this.tabWidget.editorTabContainer.childNodes, function(node, index){
+					if(node.href === commandInvocation.userData){
+						firstNodeIndexToRemove = index + 1;
+						return true;
+					}
+				})
+				var closingButtons = [];
+				for(var j = firstNodeIndexToRemove; j < this.tabWidget.editorTabContainer.childNodes.length; j++){
+					var closeButton = this.tabWidget.editorTabContainer.childNodes[j].querySelector(".editorTabCloseButton");
+					closingButtons.push(closeButton);
+				}
+				closingButtons.forEach(function(closeButton){
+					closeButton.click();
+				});
+			}.bind(this)
+		});
+		var keepOpen = new mCommands.Command({
+			name: messages.keepOpen,
+			id: "orion.tabWidget.keepOpen", //$NON-NLS-0$
+			visibleWhen: /** @callback */ function(items, data) {
+				return data.userData && this.tabWidget.transientTab && data.userData === this.tabWidget.transientTab.href;
+			}.bind(this),
+			callback: function(commandInvocation) {
+				this.tabWidget.transientToPermenant(commandInvocation.userData);
+			}.bind(this)
+		});
+		var nextTab = new mCommands.Command({
+			name: messages["selectNextTab"],
+			id: "orion.tabWidget.selectNextTab",
+			visibleWhen: function(items, data) {
+				return Object.keys(data.handler.tabWidget.editorTabs).length > 1;
+			},
+			callback: function(){
+				var selectedTab = this.tabWidget.getCurrentEditorTabNode();
+				if (selectedTab.nextSibling !== null) {
+					selectedTab.nextSibling.click();
+				} else {
+					selectedTab.parentNode.firstChild.click();
+				}
+			}
+		});
+		var previousTab = new mCommands.Command({
+			name: messages["selectPreviousTab"],
+			id: "orion.tabWidget.selectPreviousTab",
+			visibleWhen: function(items, data) {
+				return Object.keys(data.handler.tabWidget.editorTabs).length > 1;
+			},
+			callback: function(){
+				var selectedTab = this.tabWidget.getCurrentEditorTabNode();
+				if (selectedTab.previousSibling !== null) {
+					selectedTab.previousSibling.click();
+				} else {
+					selectedTab.parentNode.lastChild.click();
+				}
+			}
+		});
+		this.commandRegistry.addCommand(closeSelfTabWidgetCommand);
+		this.commandRegistry.addCommand(closeOtherTabWidgetCommand);
+		this.commandRegistry.addCommand(closeToRight);
+		this.commandRegistry.addCommand(keepOpen);
+		this.commandRegistry.addCommand(nextTab);
+		this.commandRegistry.addCommand(previousTab);
+		
+		// tabWidget context menu
+		this.commandRegistry.addCommandGroup("tabWidgetContextMenuActions", "orion.tabWidgetContextMenuGroup", 100, null, null, null, null, null, "dropdownSelection"); //$NON-NLS-1$ //$NON-NLS-2$
+		this.commandRegistry.registerCommandContribution("tabWidgetContextMenuActions", "orion.tabWidget.closeself", this.tabWidget.tabWidgetContextItemindex++,"orion.tabWidgetContextMenuActions/orion.tabWidget.closeGroup",false, new mKeyBinding.KeyBinding(118, true)); //$NON-NLS-1$ //$NON-NLS-2$
+		this.commandRegistry.registerCommandContribution("tabWidgetContextMenuActions", "orion.tabWidget.closeothers", this.tabWidget.tabWidgetContextItemindex++,"orion.tabWidgetContextMenuActions/orion.tabWidget.closeGroup",false, new mKeyBinding.KeyBinding(119, true)); //$NON-NLS-1$ //$NON-NLS-2$
+		this.commandRegistry.registerCommandContribution("tabWidgetContextMenuActions", "orion.tabWidget.closetoright", this.tabWidget.tabWidgetContextItemindex++,"orion.tabWidgetContextMenuActions/orion.tabWidget.closeGroup"); //$NON-NLS-1$ //$NON-NLS-2$
+		this.commandRegistry.registerCommandContribution("tabWidgetContextMenuActions", "orion.tabWidget.keepOpen", this.tabWidget.tabWidgetContextItemindex++,"orion.tabWidgetContextMenuActions/orion.tabWidget.others", false, new mKeyBinding.KeyBinding('K', true, true)); //$NON-NLS-1$ //$NON-NLS-2$
+		this.commandRegistry.registerCommandContribution("tabWidgetContextMenuActions" , "orion.tabWidget.selectNextTab", this.tabWidget.tabWidgetContextItemindex++, "orion.tabWidgetContextMenuActions/orion.tabWidget.traverse", false, new mKeyBinding.KeyBinding(117, true), null, this);
+		this.commandRegistry.registerCommandContribution("tabWidgetContextMenuActions" , "orion.tabWidget.selectPreviousTab", this.tabWidget.tabWidgetContextItemindex++, "orion.tabWidgetContextMenuActions/orion.tabWidget.traverse", false, new mKeyBinding.KeyBinding(117, true, true), null, this);
 	},
 	
 	createTabWidget: function() {
@@ -839,6 +1012,7 @@ objects.mixin(EditorViewer.prototype, {
 			fileClient: this.fileClient,
 			generalPreferences: this.generalPreferences,
 			inputManager: this.inputManager,
+			tabWidgetContextItemindex: 1,
 			activateEditorViewer: function() {
 				this.activateContext.setActiveEditorViewer(this);
 			}.bind(this)
@@ -863,6 +1037,9 @@ objects.mixin(EditorViewer.prototype, {
 
 		this.tabWidget.addEventListener("TabClosed", function(evt) {
 			this.modelPool.release(evt.resource, this.id);
+			if(this.tabWidget.transientTab && evt.resource === this.tabWidget.transientTab.location){
+				 this.tabWidget.transientTab = null;
+			}
 		}.bind(this));
 
 		this.tabWidget.addEventListener("EditorTabTransfer", function(evt) {
@@ -883,6 +1060,7 @@ objects.mixin(EditorViewer.prototype, {
 			selection: this.selection,
 			contentTypeRegistry: this.contentTypeRegistry,
 			generalPreferences: this.generalPreferences,
+			isEditorTabsEnabled: util.isElectron ? true : this.generalPreferences && this.generalPreferences.hasOwnProperty("enableEditorTabs") ? this.generalPreferences.enableEditorTabs : false,
 			confirm: function(message, buttonCallbackList, targetNode){
 				targetNode = targetNode || this.tabWidget.getCurrentEditorTabNode();
 				this.commandRegistry.confirmWithButtons(targetNode, message, buttonCallbackList);
@@ -897,12 +1075,8 @@ objects.mixin(EditorViewer.prototype, {
 		inputManager.addEventListener("InputChanged", function(evt) { //$NON-NLS-0$
 			var metadata = evt.metadata;
 			if (metadata) {
-				var tabHref = evt.location.href;
+				var tabHref = this.activateContext.computeNavigationHref(evt.metadata);
 				var lastFile = PageUtil.hash();
-				if (sessionStorage.lastFile === lastFile || lastFile.length === 0) {
-					tabHref = uriTemplate.expand({resource: metadata.Location});
-					lastFile = tabHref;
-				}
 				sessionStorage.lastFile = lastFile;
 				this.tabWidget.addTab(metadata, tabHref);
 			} else {
@@ -913,6 +1087,13 @@ objects.mixin(EditorViewer.prototype, {
 			this.updateDirtyIndicator();
 			evt.editor = this.editor;
 			this.pool.metadata = metadata;
+			this.pool.model.addEventListener("postChanged", function(evt){
+				if(this.pool.undoStack._unsavedChanges && this.pool.undoStack._unsavedChanges.length > 0){
+					if(this.tabWidget.transientTab && this.tabWidget.transientTab.location === this.pool.metadata.Location){
+						this.tabWidget.transientToPermenant(this.tabWidget.transientTab.href);
+					}
+				}
+			}.bind(this));
 			if (this.shown) {
 				var href = window.location.href;
 				this.activateContext.setActiveEditorViewer(this);
@@ -982,7 +1163,7 @@ objects.mixin(EditorViewer.prototype, {
 				evt.moved.forEach(function(item) {
 					var sourceLocation = item.source;
 					var metadata = that.tabWidget.getMetadataByLocation_(sourceLocation) || selectedMetadata;
-					if (selectedMetadata.Location.indexOf(sourceLocation) === 0) {
+					if (selectedMetadata && selectedMetadata.Location.indexOf(sourceLocation) === 0) {
 						inputManager.addEventListener("InputChanged", this.loadComplete = function() {
 							inputManager.removeEventListener("InputChanged", this.loadComplete);
 							that.tabWidget.closeTab(metadata, false);
@@ -1326,6 +1507,9 @@ objects.mixin(EditorSetup.prototype, {
 					}
 				});
 			}.bind(this));
+		}.bind(this));
+		this.sidebarNavInputManager.addEventListener("fileDoubleClicked", function(evt) { //$NON-NLS-0$
+			this.activeEditorViewer.tabWidget.transientToPermenant(evt.href);
 		}.bind(this));
 		this.sidebarNavInputManager.addEventListener("create", function(evt) { //$NON-NLS-0$
 			if (evt.newValue && !evt.ignoreRedirect) {

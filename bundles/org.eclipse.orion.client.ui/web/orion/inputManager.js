@@ -144,8 +144,7 @@ define([
 		this.isUnsavedWarningNeeed = options.isUnsavedWarningNeeed;
 		this.confirm = options.confirm;
 		this.generalPreferences = options.generalPreferences || {};
-		var generalPrefs = this.generalPreferences || {};
-		this.isEditorTabsEnabled = generalPrefs.hasOwnProperty("enableEditorTabs") ? generalPrefs.enableEditorTabs : true;
+		this.isEditorTabsEnabled = options.isEditorTabsEnabled || false;
 		this._input = this._title = "";
 		if (this.fileClient) {
 			this.fileClient.addEventListener("Changed", function(evt) { //$NON-NLS-0$
@@ -756,7 +755,7 @@ define([
 				title: title,
 				contentType: this.getContentType(),
 				metadata: metadata,
-				location: window.location,
+				location: this._location,
 				contents: contents
 			};
 			this._logMetrics("open"); //$NON-NLS-0$

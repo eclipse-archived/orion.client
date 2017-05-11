@@ -334,6 +334,10 @@ div.parameterInput[contenteditable="true"]:before {
 	border-spacing: 8px;
 }
 
+.desktopmode .selectableNavRow:hover {
+	background-color: #EAF2FE;
+}
+
 .selectableNavRow:hover {
 }
 
