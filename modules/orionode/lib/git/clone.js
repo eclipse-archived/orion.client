@@ -85,6 +85,9 @@ function cloneJSON(base, location, giturl, parents, submodules) {
 		result["PullRequestLocation"] = gitRoot + "/pullRequest" + location;
 	}
 	function isGithubURL(checkUrl){
+		if (checkUrl.indexOf("@") < checkUrl.indexOf(":")){
+ 			checkUrl = "ssh://" + checkUrl;
+ 		}
 		var hostname = url.parse(checkUrl)["hostname"];
 		return hostname === "github.com";
 	}
