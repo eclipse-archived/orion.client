@@ -484,12 +484,9 @@ define([
 	    	var parentSegs = item.location.split("/");
 	    	var parents = [];
 	 		parentSegs.reduce(function(acc, curV, curI, array){
-	 			var path;
 	 			if(curI !== array.length -1){
-	 				if(!acc){
-	 					path = acc + "/" +  curV + "/";     
-	 				}else{
-	 					path = acc + curV + "/";
+					var path = (acc ? acc : "/") +  curV + "/";
+					if(curI > 2){ //skip "file" and "orionode" for breadcrumb segs
 	 					parents.push({
 			 				Name: curV,
 			 				Location: path
