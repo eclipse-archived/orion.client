@@ -11,7 +11,8 @@
 
 /*eslint-env browser, amd*/
 define([
-	"orion/plugin", 
+	"orion/plugin",
+	"plugins/authForm",
 	"plugins/fileClientPlugin",
 	"plugins/authenticationPlugin",
 	"plugins/googleAnalyticsPlugin",
@@ -22,15 +23,14 @@ define([
 	"plugins/webEditingPlugin",
 	"profile/userservicePlugin",
 	"plugins/helpPlugin",
-	"shell/plugins/shellPagePlugin",
-	"plugins/site/sitePlugin"
-], function(PluginProvider) {
+], function(PluginProvider, authForm) {
 	
 	var plugins = Array.prototype.slice.call(arguments);
-	plugins.shift();
+	plugins.shift(); // orion/plugin
+	plugins.shift(); // plugins/authForm
 
 	function connect(pluginProvider) {
-		var login = new URL("../mixloginstatic/LoginWindow.html", self.location.href).href;
+		var login = authForm();
 		var headers = {
 			name: "Orion Core Support",
 			version: "1.0",
