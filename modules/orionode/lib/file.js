@@ -257,7 +257,7 @@ module.exports = function(options) {
 			return;
 		}
 
-		var file = fileUtil.getFile(req, nodePath.join(rest, fileName));
+		var file = fileUtil.getFile(req, api.join(rest, fileName));
 		fileUtil.handleFilePOST(workspaceRoot, fileRoot, req, res, file);
 	}
 
