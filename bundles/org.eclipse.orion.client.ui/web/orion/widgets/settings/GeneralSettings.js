@@ -40,6 +40,11 @@ define([
 						fieldlabel: messages["maximumEditorTabs"],
 						fieldTitle: messages["maximumEditorTabsTooltip"],
 						postChange: this.setPreferences.bind(this)
+					}),				
+					new SettingsCheckbox({
+						fieldlabel: "Enable Multiple Workspaces:",
+						fieldTitle: "Allow the creation of multiple workspaces per user.",
+						postChange: this.setPreferences.bind(this)
 					})
 				];
 
@@ -56,7 +61,7 @@ define([
 				var fileSubsection = new Subsection({
 					sectionName: messages["Files"],
 					parentNode: settingsContentElement,
-					children: [this.generalFields[0], this.generalFields[1]]
+					children: [this.generalFields[0], this.generalFields[1], this.generalFields[4]]
 				});
 				fileSubsection.show();
 				
@@ -71,6 +76,7 @@ define([
 			setPreferences: function() {
 				// Return the promise for test purposes.
 				return this.preferences.getPrefs().then(function (generalPrefs) {
+					generalPrefs.enableWorkspaces = this.generalFields[4].isChecked();
 					generalPrefs.desktopSelectionPolicy = this.generalFields[0].isChecked();
 					generalPrefs.filteredResources = this.generalFields[1].getValue();
 					generalPrefs.enableEditorTabs = this.generalFields[2].isChecked();
@@ -105,6 +111,10 @@ define([
 					// Maximum editor tabs.
 					this.generalFields[3].setValue(generalPrefs.maximumEditorTabs);
 					this.generalFields[3].show();
+					
+					// Enable workspace tabs.
+					this.generalFields[4].setSelection(generalPrefs.enableWorkspaces);
+					this.generalFields[4].show();
 
 					if (callback) {
 						callback();

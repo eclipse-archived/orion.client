@@ -26,6 +26,7 @@ define([
 		filteredResources: '.git, .DS_Store',
 		enableEditorTabs: false,
 		maximumEditorTabs: 0,
+		enableWorkspaces: false,
 		enableFileCreationAtRoot: false,
 		enableFolderCreationAtRoot: false,
 		enableProjectCreation: true,
