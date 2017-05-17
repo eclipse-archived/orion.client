@@ -9,14 +9,23 @@
  * Contributors: IBM Corporation - initial API and implementation
  *******************************************************************************/
 /*eslint-env browser, amd*/
-define(['i18n!orion/nls/messages', 'orion/webui/littlelib', 'orion/webui/dialogs/OperationsDialog'], 
-function(messages, lib, mOperationsDialog) {
+define(['i18n!orion/nls/messages', 'orion/webui/littlelib', 'orion/webui/dialogs/OperationsDialog',
+	'orion/webui/tooltip',
+], 
+function(messages, lib, mOperationsDialog, Tooltip) {
 	
 	function ProgressMonitorTool(progressPane, commandRegistry){
 		if(this._progressPane){
 			return;
 		}
 		this._progressPane = lib.node(progressPane);
+
+		this._progressPane.tooltip = new Tooltip.Tooltip({
+			node: this._progressPane,
+			text: messages["Operations"],
+			position: ["above", "below", "right", "left"] //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		});
+
 		this._operationsDialog = new mOperationsDialog.OperationsDialog({triggerNode: this._progressPane, commandRegistry: commandRegistry});
 		var that = this;
 		this._progressPane.addEventListener("keydown", function(evt) {  //$NON-NLS-0$

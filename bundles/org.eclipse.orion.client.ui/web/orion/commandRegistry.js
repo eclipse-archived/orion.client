@@ -1305,7 +1305,7 @@ define([
 								id = renderType + command.id + index;  // // using the index ensures unique ids within the DOM when a command repeats for each item
 								element = Commands.createCommandItem(parent, command, invocation, id, null, renderType === "tool", onClick);
 							}
-							mNavUtils.generateNavGrid(domNodeWrapperList, element);
+							mNavUtils.generateNavGrid(domNodeWrapperList, element, null, null, true);
 							invocation.domNode = element;
 							index++;
 						}
