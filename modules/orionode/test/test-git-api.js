@@ -419,6 +419,29 @@ GitClient.prototype = {
 		});
 	},
 
+	stash: function(includeUntracked, statusCode) {
+		if (typeof statusCode !== 'number') {
+			statusCode = 200;
+		}
+
+		var client = this;
+		this.tasks.push(function(resolve) {
+			request()
+			.post(CONTEXT_PATH + "/gitapi/stash" + FILE_ROOT + client.getName())
+			.send({
+				IncludeUntracked: includeUntracked,
+			})
+			.expect(statusCode)
+			.end(function(err, res) {
+				assert.ifError(err);
+				if (statusCode === 404) {
+					assert.equal(res.body.Message, "Cannot stash changes - There is nothing to stash.");
+				}
+				client.next(resolve, res.body);
+			});
+		});
+	},
+
 	/**
 	 * Pops the first entry in the stash and applies it on top of the current working tree state.
 	 * 
@@ -437,6 +460,25 @@ GitClient.prototype = {
 			.expect(statusCode)
 			.end(function(err, res) {
 				assert.ifError(err);
+				if (statusCode === 400) {
+					assert.equal(res.body.Message, "Failed to apply stashed changes due to an empty stash.");
+				}
+				client.next(resolve, res.body);
+			});
+		});
+	},
+
+	listStash: function(statusCode) {
+		var client = this;
+		this.tasks.push(function(resolve) {
+			request()
+			.get(CONTEXT_PATH + "/gitapi/stash" + FILE_ROOT + client.getName())
+			.expect(200)
+			.end(function(err, res) {
+				assert.ifError(err);
+				assert.equal(res.body.CloneLocation, "/gitapi/clone" + FILE_ROOT + client.getName());
+				assert.equal(res.body.Location, "/gitapi/stash" + FILE_ROOT + client.getName());
+				assert.equal(res.body.Type, "StashCommit");
 				client.next(resolve, res.body);
 			});
 		});
@@ -3632,6 +3674,123 @@ maybeDescribe("git", function() {
 	}); // describe("Status")
 
 	describe("Stash", function() {
+		before(setup);
+
+		describe("List", function() {
+			it("simple", function(finished) {
+				var client = new GitClient("stash-list-simple");
+				client.init();
+				client.listStash();
+				client.start().then(function(body) {
+					assert.equal(body.Children.length, 0);
+
+					client.setFileContents("a.txt", "abc");
+					client.stage("a.txt");
+					client.commit();
+					client.setFileContents("a.txt", "def");
+					client.stash();
+					client.listStash();
+					return client.start();
+				})
+				.then(function(body) {
+					assert.equal(body.Children.length, 1);
+					finished();
+				})
+				.catch(function(err) {
+					finished(err);
+				});
+			}); // it("empty stash")"
+		}); // describe("List")
+
+		describe("Save", function() {
+			it("dirty working directory", function(finished) {
+				var testName = "stash-save-dirty-wd";
+				var file = "a.txt";
+				var filePath = path.join(path.join(WORKSPACE, testName), file);
+				var client = new GitClient(testName);
+				client.init();
+				// track this file
+				client.setFileContents(file, "abc");
+				client.stage(file);
+				client.commit();
+
+				// modify the file
+				client.setFileContents(file, "abcx");
+				// client.setFileContents(file, "def");
+				client.stash();
+				client.start().then(function(body) {
+					var content = fs.readFileSync(filePath).toString();
+					assert.equal(content, "abc");
+					finished();
+				})
+				.catch(function(err) {
+					finished(err);
+				});
+			}); // it("dirty working directory")
+
+			it("dirty index", function(finished) {
+				var testName = "stash-save-dirty-index";
+				var file = "a.txt";
+				var filePath = path.join(path.join(WORKSPACE, testName), file);
+				var client = new GitClient(testName);
+				client.init();
+				// track this file
+				client.setFileContents(file, "abc");
+				client.stage(file);
+				client.commit();
+
+				// modify the file
+				client.setFileContents(file, "abcx");
+				client.stage(file);
+				client.stash();
+				client.start().then(function(body) {
+					var content = fs.readFileSync(filePath).toString();
+					assert.equal(content, "abc");
+					finished();
+				})
+				.catch(function(err) {
+					finished(err);
+				});
+			}); // it("dirty index")
+
+			function stashUntracked(testName, includeUntracked, finished) {
+				var file = "a.txt";
+				var filePath = path.join(path.join(WORKSPACE, testName), "b.txt");
+				var client = new GitClient(testName);
+				client.init();
+				// track this file
+				client.setFileContents(file, "abc");
+				client.stage(file);
+				client.commit();
+
+				// create the other file
+				client.setFileContents("b.txt", "other");
+				client.stash(includeUntracked, includeUntracked ? 200 : 404);
+				client.start().then(function(body) {
+					// the stash should have deleted/ignored the file depending on
+					// whether untracked files should be included
+					assert.equal(fs.existsSync(filePath), !includeUntracked);
+					if (!includeUntracked) {
+						// untracked files not included, content should be unchanged
+						var content = fs.readFileSync(filePath).toString();
+						assert.equal(content, "other");
+					}
+					finished();
+				})
+				.catch(function(err) {
+					finished(err);
+				});
+			}
+
+			it("untracked ignored", function(finished) {
+				stashUntracked("stash-save-untracked-ignored", false, finished);
+			}); // it("untracked ignored")
+
+			it("untracked stashed", function(finished) {
+				stashUntracked("stash-save-untracked-stashed", true, finished);
+			}); // it("untracked ignored")
+		}); // describe("Save")
+
 		describe("Pop", function() {
 
 			/**
@@ -3643,13 +3802,46 @@ maybeDescribe("git", function() {
 				client.init();
 				client.stashPop(400);
 				client.start().then(function(body) {
-					assert.equal('Failed to apply stashed changes due to an empty stash.', body.Message);
 					finished();
 				})
 				.catch(function(err) {
 					finished(err);
 				});
 			}); // it("empty stash")"
+
+			it("simple", function(finished) {
+				var testName = "stash-pop-simple";
+				var file = "a.txt";
+				var filePath = path.join(path.join(WORKSPACE, testName), file);
+				var client = new GitClient(testName);
+				client.init();
+				// track this file
+				client.setFileContents(file, "abc");
+				client.stage(file);
+				client.commit();
+
+				client.setFileContents(file, "abcx");
+				client.stash();
+				client.listStash();
+				client.start().then(function(body) {
+					assert.equal(body.Children.length, 1);
+					var content = fs.readFileSync(filePath).toString();
+					assert.equal(content, "abc");
+
+					client.stashPop();
+					client.listStash();
+					return client.start();
+				})
+				.then(function(body) {
+					content = fs.readFileSync(filePath).toString();
+					assert.equal(content, "abcx");
+					assert.equal(body.Children.length, 0);
+					finished();
+				})
+				.catch(function(err) {
+					finished(err);
+				});
+			}); // it("simple")
 		}); // describe("Pop")
 	}); // describe("Stash")
 
