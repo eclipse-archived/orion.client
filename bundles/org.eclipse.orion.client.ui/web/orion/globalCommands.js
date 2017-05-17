@@ -58,7 +58,7 @@ define([
 			var dropdownTrigger = lib.node("userTrigger"); //$NON-NLS-0$
 			dropdownTrigger.setAttribute("aria-label", optionsLabel);
 
-			new mTooltip.Tooltip({
+			dropdownTrigger.tooltip = new mTooltip.Tooltip({
 				node: dropdownTrigger,
 				text: optionsLabel,
 				position: ["below", "left"] //$NON-NLS-1$ //$NON-NLS-0$
@@ -775,6 +775,38 @@ define([
 
 			commandRegistry.addCommand(operationsCommand);
 			commandRegistry.registerCommandContribution("globalActions", "orion.backgroundOperations", 100, null, true, new KeyBinding.KeyBinding('o', true, true)); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+
+			var showTooltipCommand = new mCommands.Command({
+				name: messages.showTooltip,
+				tooltip: messages.showTooltipTooltip,
+				id: "orion.edit.showTooltip", //$NON-NLS-0$
+				visibleWhen: /** @callback */ function(items, data) {
+					return true;
+				},
+				callback: function() {
+					var domFocus = document.activeElement;
+					if (this.editor && this.editor._domNode.contains(domFocus)) {
+						var editor = this.editor;
+						var tooltip = editor.getTooltip();
+						var tv = editor.getTextView();
+						var offset = tv.getCaretOffset();
+						var pos = tv.getLocationAtOffset(offset);
+						tooltip.show({
+							x: pos.x,
+							y: pos.y,
+							getTooltipInfo: function() {
+								return editor._getTooltipInfo(this.x, this.y);
+							}
+						}, false, true);
+					} else if (domFocus.commandTooltip || domFocus.tooltip) {
+						var tooltip = domFocus.commandTooltip ? domFocus.commandTooltip : domFocus.tooltip;
+						tooltip._showByKB = true;
+						tooltip.show();
+					}
+				}
+			});
+			commandRegistry.addCommand(showTooltipCommand);
+			commandRegistry.registerCommandContribution("globalActions" , "orion.edit.showTooltip", 1, null, true, new KeyBinding.KeyBinding(113), null, this);//$NON-NLS-1$
 
 			// Key assist
 			keyAssist = new mKeyAssist.KeyAssistPanel({
