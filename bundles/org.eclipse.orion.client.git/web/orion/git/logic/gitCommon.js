@@ -138,7 +138,12 @@ define(['orion/git/util','orion/i18nUtil','orion/git/gitPreferenceStorage','orio
 				var display = {};
 				display.Severity = jsonData.Severity || "Error"; //$NON-NLS-0$
 				display.HTML = false;
-				display.Message = translateGitStatusMessages(jsonData.DetailedMessage ? jsonData.DetailedMessage : jsonData.Message);
+				var msg = translateGitStatusMessages(jsonData.DetailedMessage ? jsonData.DetailedMessage : jsonData.Message);
+				if (jsonData.HttpCode === 403) {
+					display.Message = i18nUtil.formatMessage(messages.ForbiddenAccess, msg);				
+				} else {
+					display.Message = msg;
+				}
 				serviceRegistry.getService("orion.page.message").setProgressResult(display); //$NON-NLS-0$
 				
 				if (callback) {
@@ -366,7 +371,12 @@ define(['orion/git/util','orion/i18nUtil','orion/git/gitPreferenceStorage','orio
 				var display = {};
 				display.Severity = jsonData.Severity || "Error"; //$NON-NLS-0$
 				display.HTML = false;
-				display.Message = jsonData.DetailedMessage ? jsonData.DetailedMessage : jsonData.Message;
+				var msg = jsonData.DetailedMessage ? jsonData.DetailedMessage : jsonData.Message;
+				if (jsonData.HttpCode === 403) {
+					display.Message = i18nUtil.formatMessage(messages.ForbiddenAccess, msg);				
+				} else {
+					display.Message = msg;
+				}
 				serviceRegistry.getService("orion.page.message").setProgressResult(display); //$NON-NLS-0$
 				
 				if (callback) {
