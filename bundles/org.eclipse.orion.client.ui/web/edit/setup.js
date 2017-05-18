@@ -432,7 +432,7 @@ objects.mixin(TabWidget.prototype, {
 	setTabStorage: function() {
 		var mappedFiles = this.fileList.map(function(f) {
 			if (!f.metadata.Directory) {
-				return {metadata: f.metadata, href: f.href, isTransient: f.isTransient};
+				return {metadata: {Location: f.metadata.Location, Name: f.metadata.Name, WorkspaceLocation: f.metadata.WorkspaceLocation, Directory: f.metadata.Directory}, href: f.href, isTransient: f.isTransient};
 			}
 		});
 		sessionStorage["editorTabs_" + this.id] = JSON.stringify(mappedFiles);
@@ -597,7 +597,7 @@ objects.mixin(TabWidget.prototype, {
 	getDraggedNode: function() {
 		return this.beingDragged;
 	},
-	transientToPermenant : function(href){
+	transientToPermenant: function(href){
 		var hrefHash = href && href.split("#")[1];
 		if(this.transientTab && hrefHash && hrefHash.indexOf(this.transientTab.location) === 0){
 			this.fileList.find(function(file){
@@ -641,7 +641,7 @@ objects.mixin(TabWidget.prototype, {
 		
 		tab.breadcrumb = new mBreadcrumbs.BreadCrumbs(breadcrumbOptions);
 	},
-	addTab: function(metadata, href, isRestoreTabsFromStorage, isTransient) {
+	addTab: function(metadata, href, isRestoreTabsFromStorage, isTransientFromStorage) {
 		var fileList = this.fileList;
 		var fileToAdd = null;
 		var curEditorTabNode = null;
@@ -698,23 +698,34 @@ objects.mixin(TabWidget.prototype, {
 			}
 		} else {
 			// Store file information
+			var isTransient = true;
+			if(isRestoreTabsFromStorage){
+				isTransient = isTransientFromStorage;
+			}else if(this.potentialTransientHref && new URL(this.potentialTransientHref).hash === new URL(href).hash){
+				isTransient = false;
+			}
 			fileToAdd = {
 				callback: this.widgetClick,
 				checked:true,
 				href: href,
 				metadata: metadata,
 				name: metadata.Name,
-				isTransient: isRestoreTabsFromStorage ? isTransient : true
+				isTransient: isTransient
 			};
 			// Create and store a new editorTab
 			editorTab = this.editorTabs[metadata.Location] = this.createTab_(metadata, href);
-			if((!isRestoreTabsFromStorage && this.enableEditorTabs) || (isRestoreTabsFromStorage && isTransient && this.enableEditorTabs)){
+			if(this.enableEditorTabs && isTransient){
 				editorTab.editorTabNode.classList.add("transient");
 				this.transientTab = editorTab;
 				this.transientTab.location = metadata.Location;
 			}
 			// Add the file to our dropdown menu
 			this.fileList.unshift(fileToAdd);
+		}
+		if(this.potentialTransientHref){
+			// In the case doubleclick event reveived before the transient tab is created, 
+			this.transientToPermenant(this.potentialTransientHref);
+			this.potentialTransientHref = null;
 		}
 
 		// Style the editor tab
@@ -890,7 +901,7 @@ objects.mixin(EditorViewer.prototype, {
 			var re = wrapper.event;
 			if (re.target) {
 				this.commandRegistry.destroy(tabWidgetContextMenuNode); // remove previous content
-				this.commandRegistry.renderCommands("tabWidgetContextMenuActions", tabWidgetContextMenuNode, null, this, "menu", re.srcElement.parentElement.href || ""); //$NON-NLS-1$ //$NON-NLS-2$
+				this.commandRegistry.renderCommands("tabWidgetContextMenuActions", tabWidgetContextMenuNode, re.srcElement.metadata || re.srcElement.parentElement.metadata, this, "menu", re.srcElement.parentElement.href || ""); //$NON-NLS-1$ //$NON-NLS-2$
 			}
 		}.bind(this);
 		contextMenu.addEventListener("triggered", contextMenuTriggered);
@@ -904,7 +915,7 @@ objects.mixin(EditorViewer.prototype, {
 				return data.userData && Object.keys(this.tabWidget.editorTabs).length > 1;
 			}.bind(this),
 			callback: function(commandInvocation) {
-				var targetEditorTab = this.tabWidget.editorTabs[commandInvocation.userData.split("#")[1]] || this.tabWidget.editorTabs[this.tabWidget.selectedFile.metadata.Location]; // the targetEditorTab is the activetab when user use keybinds to close, otherwise is the selected one.
+				var targetEditorTab = this.tabWidget.editorTabs[commandInvocation.items.Location] || this.tabWidget.editorTabs[this.tabWidget.selectedFile.metadata.Location]; // the targetEditorTab is the activetab when user use keybinds to close, otherwise is the selected one.
 				targetEditorTab.closeButtonNode.click();
 			}.bind(this)
 		});
@@ -916,7 +927,7 @@ objects.mixin(EditorViewer.prototype, {
 			}.bind(this),
 			callback: function(commandInvocation) {
 				Object.keys(this.tabWidget.editorTabs).forEach(function(tab){
-					if(commandInvocation.userData.indexOf(tab) === -1){
+					if(commandInvocation.items.Location !== tab){
 						this.tabWidget.editorTabs[tab].closeButtonNode.click();
 					}
 				}.bind(this));
@@ -932,7 +943,7 @@ objects.mixin(EditorViewer.prototype, {
 				// Get the right hand tabs from this.editorTab parent.
 				var firstNodeIndexToRemove;
 				Array.prototype.find.call(this.tabWidget.editorTabContainer.childNodes, function(node, index){
-					if(node.href === commandInvocation.userData){
+					if(node.metadata.Location === commandInvocation.items.Location){
 						firstNodeIndexToRemove = index + 1;
 						return true;
 					}
@@ -951,7 +962,7 @@ objects.mixin(EditorViewer.prototype, {
 			name: messages.keepOpen,
 			id: "orion.tabWidget.keepOpen", //$NON-NLS-0$
 			visibleWhen: /** @callback */ function(items, data) {
-				return data.userData && this.tabWidget.transientTab && data.userData === this.tabWidget.transientTab.href;
+				return data.userData && this.tabWidget.transientTab && data.items.Location === this.tabWidget.transientTab.location;
 			}.bind(this),
 			callback: function(commandInvocation) {
 				this.tabWidget.transientToPermenant(commandInvocation.userData);
@@ -1509,6 +1520,7 @@ objects.mixin(EditorSetup.prototype, {
 			}.bind(this));
 		}.bind(this));
 		this.sidebarNavInputManager.addEventListener("fileDoubleClicked", function(evt) { //$NON-NLS-0$
+			this.activeEditorViewer.tabWidget.potentialTransientHref = evt.href;
 			this.activeEditorViewer.tabWidget.transientToPermenant(evt.href);
 		}.bind(this));
 		this.sidebarNavInputManager.addEventListener("create", function(evt) { //$NON-NLS-0$
