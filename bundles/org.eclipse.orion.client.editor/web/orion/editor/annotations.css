@@ -30,17 +30,17 @@
 	background-color: rgb(184, 103, 163);
 }
 .annotation.diffAdded {
-	background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAMAAAADCAIAAADZSiLoAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAaSURBVBhXY5x/KoyBgSHBdCUTkIIAGIuBAQBMsAMD4UOAtwAAAABJRU5ErkJggg==);
+	background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAQAAAADCAYAAAC09K7GAAAAGklEQVQYV2Pce7v7PwMDA4OzaikjiGYkKAAAZdgMBOA1thkAAAAASUVORK5CYII=);
 	background-repeat: repeat-y;
 	color: #CCCCCC;
 }
 .annotation.diffModified {
-	background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAMAAAADCAYAAABWKLW/AAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsIAAA7CARUoSoAAAAAcSURBVBhXYwzdevs/AxCs8lJhYAIxYACJw8AAAIlKBAKlNXzqAAAAAElFTkSuQmCC);
+	background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAQAAAADCAYAAAC09K7GAAAAGklEQVQYV2PsOfv8PwMDA0OJsSQjiGYkKAAAaJAMBLPhgI8AAAAASUVORK5CYII=);
 	background-repeat: repeat-y;
 	color: #CCCCCC;
 }
 .annotation.diffDeleted {
-	background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAMAAAADCAIAAADZSiLoAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAVSURBVBhXY3growJBDP9hAMb6/x8ADgMVdmD2Og4AAAAASUVORK5CYII=);
+	background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAQAAAADCAYAAAC09K7GAAAAFklEQVQYV2P8z8DwnwEJMCJzQGwMAQBhOAICSwrQUwAAAABJRU5ErkJggg==);
 	background-repeat: repeat-x;
 	color: #CCCCCC;
 }
@@ -155,17 +155,17 @@
 	height: 32px;
 }
 .annotationHTML.diffAdded {
-	background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAMAAAADCAIAAADZSiLoAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAaSURBVBhXY5x/KoyBgSHBdCUTkIIAGIuBAQBMsAMD4UOAtwAAAABJRU5ErkJggg==);
+	background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAQAAAADCAYAAAC09K7GAAAAGklEQVQYV2Pce7v7PwMDA4OzaikjiGYkKAAAZdgMBOA1thkAAAAASUVORK5CYII=);
 	background-repeat: repeat-y;
 	background-position: left top;
 }
 .annotationHTML.diffDeleted {
-	background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAMAAAADCAIAAADZSiLoAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAVSURBVBhXY3growJBDP9hAMb6/x8ADgMVdmD2Og4AAAAASUVORK5CYII=);
+	background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAQAAAADCAYAAAC09K7GAAAAFklEQVQYV2P8z8DwnwEJMCJzQGwMAQBhOAICSwrQUwAAAABJRU5ErkJggg==);
 	background-repeat: repeat-x;
 	background-position: left top;
 }
 .annotationHTML.diffModified {
-	background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAMAAAADCAYAAABWKLW/AAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsIAAA7CARUoSoAAAAAcSURBVBhXYwzdevs/AxCs8lJhYAIxYACJw8AAAIlKBAKlNXzqAAAAAElFTkSuQmCC);
+	background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAQAAAADCAYAAAC09K7GAAAAGklEQVQYV2PsOfv8PwMDA0OJsSQjiGYkKAAAaJAMBLPhgI8AAAAASUVORK5CYII=);
 	background-repeat: repeat-y;
 	background-position: left top;
 }
@@ -292,7 +292,7 @@
 	background-color: #53D1FF;
 }
 .annotationRange.linkedGroup {
-	outline: 1px solid #707070;
+	outline: 1px dashed #707070;
 }
 .annotationRange.currentLinkedGroup {
 	background-color: #C3E1FF;

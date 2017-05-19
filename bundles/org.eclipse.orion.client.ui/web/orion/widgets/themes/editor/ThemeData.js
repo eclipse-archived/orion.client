@@ -40,7 +40,7 @@ define([
 		
 		var defaultFont = '"Consolas", "Monaco", "Vera Mono", monospace'; //$NON-NLS-0$
 		var defaultFontSize = '12px'; //$NON-NLS-0$
-		var prospecto, darker, ceol;
+		var prospecto, darker;
 
 		function ThemeData() {
 
@@ -50,6 +50,38 @@ define([
 				"className": "prospecto",
 				"name": "Prospecto",
 				"styles": {
+					"lines":{
+						"isTopLevel": true,
+						"annotation" : {
+							"diffAdded" : {
+								"backgroundColor": "rgba(159, 202, 86, 0.68)"
+							},
+							"diffModified": {
+								"backgroundColor": "rgba(85, 181, 219, 0.67)"
+							},
+							"blame":{
+								"color": "#707070",
+								"backgroundColor": "rgb(255, 132, 44)"
+							},
+							"currentBlame":{
+								"backgroundColor": "rgb(184, 103, 163)"
+							}
+						}
+					},
+					"annotationOverview":{
+						"warning": {
+							"backgroundColor": "#B27F21"
+						},
+						"info":{
+							"backgroundColor": "#001DF5"
+						},
+						"error":{
+							"backgroundColor": "#EC3324"
+						},
+						"diffDeleted":{
+							"color": "#EC111D"
+						}
+					},
 					"annotationLine": {
 						"searchRange": {
 							"backgroundColor": "#D3D3D3"
@@ -67,12 +99,17 @@ define([
 						},
 						"matchingSearch": {
 							"backgroundColor": "#c3e1ff",
+							"outline": "1px solid",
+							"outlineColor": "rgba(24, 159, 227, 0)",
 							"currentSearch": {
 								"backgroundColor": "#53d1ff"
 							}
 						},
 						"writeOccurrence": {
 							"backgroundColor": "#ECD099"
+						},
+						"readOccurrence": {
+							"backgroundColor": "#CACACA"
 						}
 					},
 					"backgroundColor": "#ffffff",
@@ -120,6 +157,9 @@ define([
 								"task": {
 									"color": "#006DD4"
 								}
+							},
+							"directive" : {
+								"color": "#9F4177"
 							}
 						}
 					},
@@ -251,53 +291,111 @@ define([
 				"styles": {
 					"fontFamily": defaultFont,
 					"fontSize": defaultFontSize,
+					"lines":{
+						"isTopLevel": true,
+						"annotation" : {
+							"diffAdded" : {
+								"color" : "rgb(36, 36, 36)",
+								"backgroundColor": "rgb(116, 149, 73)"
+							},
+							"diffModified": {
+								"color" : "rgb(19, 19, 19)",
+								"backgroundColor": "rgb(66, 133, 162)"
+							},
+							"blame":{
+								"color": "#ebebeb",
+								"backgroundColor": "rgb(177, 74, 0)"
+							},
+							"currentBlame":{
+								"backgroundColor": "rgb(160, 77, 217)"
+							}
+						}
+					},
+					"annotationOverview":{
+						"warning": {
+							"backgroundColor": "#F6C003"
+						},
+						"info":{
+							"backgroundColor": "#65C8FF"
+						},
+						"error":{
+							"backgroundColor": "#FF898C"
+						},
+						"diffDeleted":{
+							"color": "#FF898C"
+						}
+					},
 					"annotationLine": {
 						"searchRange": {
 							"backgroundColor": "#6C7279"
 						},
 						"currentLine": {
+							"color": "#1bd2f7",
 							"backgroundColor": "#3B4B53"
 						}
 					},
 					"annotationRange": {
 						"currentBracket": {
+							"color": "#94EAFB",
 							"backgroundColor": "#006E00"
 						},
 						"currentSearch": {
 							"backgroundColor": "#5d5d5d"
 						},
 						"matchingBracket": {
+							"color": "#94EAFB",
 							"backgroundColor": "#006E00"
 						},
 						"matchingSearch": {
 							"backgroundColor": "#363636",
+							"outline": "1px solid",
+							"outlineColor": "rgba(24, 159, 227, 1)",
 							"currentSearch": {
 								"backgroundColor": "#465e47"
 							}
 						},
 						"writeOccurrence": {
-							"backgroundColor": "#093f59"
+							"backgroundColor": "#093f59",
+							"outline": "1px solid #BEA100"
+						},
+						"readOccurrence": {
+							"backgroundColor": "#CACACA",
+							"outline": "1px solid #BEA100"
 						},
 						"selectedLinkedGroup": {
-							"backgroundColor": "rgb(16,106,91)"
+							"backgroundColor": "rgb(16,106,91)",
+							"outline": "1px solid #BEA100"
 						},
 						"currentLinkedGroup": {
-							"backgroundColor": "rgba(16,106,91,0.8)"
+							"backgroundColor": "rgba(16,106,91,0.8)",
+							"outline": "1px solid #BEA100"
+						},
+						"warning":{
+							"backgroundImage": "url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAQAAAADCAYAAAC09K7GAAAAH0lEQVQYV2NkgIJvB5j/czn8ZWQE8WEcEM0I48BUAgBwnQ68Y+viTgAAAABJRU5ErkJggg==)"
+						},
+						"info":{
+							"backgroundImage": "url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAQAAAADCAYAAAC09K7GAAAAH0lEQVQYV2NkgILUE///z7ZgZGQE8WEcEM0I48BUAgB9cA8vM5pJ1QAAAABJRU5ErkJggg==)"
+						},
+						"error":{
+							"backgroundImage": "url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAQAAAADCAYAAAC09K7GAAAAHUlEQVQYV2NkgIL/nT3/GctLGBlBfBgHTMM4MJUAe30PF+f8aegAAAAASUVORK5CYII=)"
 						}
 					},
 					"backgroundColor": "#1A252D",
 					"color": "#07ADCF",
 					"comment": {
-						"color": "#93A2AA",
+						"color": "#ADB9C0",
 					},
 					"constant": {
 						"color": "#F47D64",
+						"numeric": {
+							"color": "#D3AAFE"
+						}
 					},
 					"entity": {
 						"name": {
 							"color": "#98937B",
 							"function": {
-								"color": "#67BBB8",
+								"color": "#7EC5C3",
 								"fontWeight": "bold"
 							}
 						},
@@ -322,6 +420,9 @@ define([
 								"task": {
 									"color": "#8db6f1"
 								}
+							},
+							"directive" : {
+								"color": "#DAA1C0"
 							}
 						}
 					},
@@ -368,22 +469,22 @@ define([
 					"meta": {
 						"documentation": {
 							"annotation": {
-								"color": "#7F9FBF"
+								"color": "#A1BAD5"
 							},
 							"tag": {
-								"color": "#7F7F9F"
+								"color": "#8888A6"
 							}
 						},
 						"preprocessor": {
 							"color": "#A4A4A4"
 						},
 						"tag": {
-							"color": "#8781BD"
+							"color": "#C0BDDC"
 						}
 					},
 					"punctuation": {
 						"operator": {
-							"color":"#FF8C00"
+							"color":"#FFA83E"
 						}
 					},
 					"ruler": {
@@ -393,7 +494,7 @@ define([
 						"color": "#93A2AA",
 					},
 					"string": {
-						"color": "#01B199",
+						"color": "#01D1B6",
 						"interpolated": {
 							"color": "#dadada"
 						}
@@ -425,224 +526,19 @@ define([
 					},
 					"variable": {
 						"language": {
-							"color": "#8781BD",
+							"color": "#8983BE",
 							"fontWeight": "bold"
 						},
 						"other": {
 							"color": "#E038AD"
 						},
 						"parameter": {
-							"color": "#D1416F"
+							"color": "#8CD211"
 						}
 					}
 				}
 			};
 			this.styles.push(darker);
-
-			ceol = {
-				"className": "ceol",
-				"name": "Ceol",
-				"styles": {
-					"annotationLine": {
-						"searchRange": {
-							"backgroundColor": "#6C7279"
-						},
-						"currentLine": {
-							"backgroundColor": "#152935"
-						}
-					},
-					"annotationRange": {
-						"currentBracket": {
-							"backgroundColor": "#4178be"
-						},
-						"matchingBracket": {
-							"backgroundColor": "#4178be"
-						},
-						"matchingSearch": {
-							"backgroundColor": "#A6266E",
-							"currentSearch": {
-								"backgroundColor": "#008571"
-							}
-						},
-						"writeOccurrence": {
-							"backgroundColor": "#ffff00"
-						}
-					},
-					"backgroundColor": "#152935",
-					"color": "#ffa5b4",
-					"comment": {
-						"color": "#406d89"
-					},
-					"constant": {
-						"color": "#7cc7ff",
-						"numeric": {
-							"color": "#71c9ff",
-							"hex": {
-								"color": "#71c9ff"
-							}
-						}
-					},
-					"entity": {
-						"name": {
-							"color": "#7D7755",
-							"function": {
-								"color": "#67BBB8",
-								"fontWeight": "bold"
-							}
-						},
-						"other": {
-							"attribute-name": {
-								"color": "#5F9EA0"
-							}
-						}
-					},
-					"fontFamily": defaultFont,
-					"fontSize": defaultFontSize,
-					"keyword": {
-						"control": {
-							"color": "#a7fae6",
-							"fontWeight": "bold"
-						},
-						"operator": {
-							"color": "#a7fae6",
-							"fontWeight": "bold"
-						},
-						"other": {
-							"documentation": {
-								"color": "#7F9FBF",
-								"task": {
-									"color": "#5595ff"
-								}
-							}
-						}
-					},
-					"markup": {
-						"bold": {
-							"fontWeight": "bold"
-						},
-						"heading": {
-							"color": "#0000FF"
-						},
-						"italic": {
-							"fontStyle": "italic"
-						},
-						"list": {
-							"color": "#CC4C07"
-						},
-						"other": {
-							"separator": {
-								"color": "#00008F"
-							},
-							"strikethrough": {
-								"textDecoration": "line-through"
-							},
-							"table": {
-								"color": "#3C802C"
-							}
-						},
-						"quote": {
-							"color": "#446FBD"
-						},
-						"raw": {
-							"fontFamily": "monospace",
-							"html": {
-								"backgroundColor": "#E4F7EF"
-							}
-						},
-						"underline": {
-							"link": {
-								"textDecoration": "underline"
-							}
-						}
-					},
-					"meta": {
-						"documentation": {
-							"annotation": {
-								"color": "#7F9FBF"
-							},
-							"tag": {
-								"color": "#7F7F9F"
-							}
-						},
-						"preprocessor": {
-							"color": "#A4A4A4"
-						},
-						"tag": {
-							"attribute": {
-								"color": "#eed2ff"
-							},
-							"color": "#a7fae7"
-						}
-					},
-					"punctuation": {
-						"operator": {
-							"color": "#ba8ff7"
-						}
-					},
-					"ruler": {
-						"annotations": {
-							"backgroundColor": "#112935"
-						},
-						"backgroundColor": "#112935",
-						"overview": {
-							"backgroundColor": "#112935"
-						}
-					},
-					"rulerLines": {
-						"color": "#396f8a",
-						"even": {
-							"color": "#396f8a"
-						},
-						"odd": {
-							"color": "#396f8a"
-						}
-					},
-					"string": {
-						"color": "#61cdff",
-						"interpolated": {
-							"color": "#151515"
-						}
-					},
-					"support": {
-						"type": {
-							"propertyName": {
-								"color": "#a7fae7"
-							}
-						}
-					},
-					"textviewContent ::-moz-selection": {
-						"backgroundColor": "rgba(50,92,128,0.99)"
-					},
-					"textviewContent ::selection": {
-						"backgroundColor": "rgba(50,92,128,0.99)"
-					},
-					"textviewLeftRuler": {
-						"borderColor": "#112935"
-					},
-					"textviewRightRuler": {
-						"borderColor": "#112935"
-					},
-					"textviewSelection": {
-						"backgroundColor": "rgba(50,92,128,0.99)"
-					},
-					"textviewSelectionUnfocused": {
-						"backgroundColor": "rgba(50,92,128,0.99)"
-					},
-					"variable": {
-						"language": {
-							"color": "#a2f9e7",
-							"fontWeight": "bold"
-						},
-						"other": {
-							"color": "#DB0FA6"
-						},
-						"parameter": {
-							"color": "#a2f9e7"
-						}
-					}
-				}
-			};
-			this.styles.push(ceol);
 		}
 		
 		function getStyles(){
