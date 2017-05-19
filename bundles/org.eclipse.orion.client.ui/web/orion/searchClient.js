@@ -273,7 +273,7 @@ define([
 						if (!path) {
 							path = loc.substring(rootURL ? rootURL.length : 0); //remove file service root from path
 						}
-						converted.push({location: loc, path: path, name: hit.Name});
+						converted.push({location: loc, path: path, name: hit.Name, workspace: this._searchRootLocation});
 					}
 				}
 			}

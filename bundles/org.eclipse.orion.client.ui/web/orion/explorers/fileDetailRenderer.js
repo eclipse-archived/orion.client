@@ -448,8 +448,7 @@ define([
 				tipContainer.appendChild(localBreadcrumbNode);
 				
 				var makeHref = function(segment, folderLocation, folder) {
-					var resource = folder ? folder.Location : this.explorer.fileClient.fileServiceRootURL(folderLocation);
-					segment.href = uriTemplate.expand({resource: resource});
+					segment.href = uriTemplate.expand({resource: folderLocation});
 					if (folder) {
 						if (metadata && metadata.Location === folder.Location) {
 							segment.addEventListener("click", function() { //$NON-NLS-0$
@@ -465,7 +464,7 @@ define([
 					container: localBreadcrumbNode,
 					resource: metadata,
 					workspaceRootSegmentName: this.explorer.fileClient.fileServiceName(metadata.Location),
-					workspaceRootURL: this.explorer.fileClient.fileServiceRootURL(metadata.Location),
+					workspaceRootURL: metadata.workspace,
 					makeFinalHref: true,
 					makeHref: makeHref,
 					// This id should be unique regardless of editor views open.
@@ -497,6 +496,7 @@ define([
 	 		});
 	 		parents = parents.reverse().slice(0);
 	 		fileMeta.Parents = parents;
+	 		fileMeta.workspace = item.workspace;
 	 		return fileMeta;
 	    },
 	    
