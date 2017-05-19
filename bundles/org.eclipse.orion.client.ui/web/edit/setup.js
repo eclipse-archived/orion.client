@@ -547,9 +547,15 @@ objects.mixin(TabWidget.prototype, {
 		
 		var breadcrumb = new mBreadcrumbs.BreadCrumbs(breadcrumbOptions);
 		
-		editorTab.addEventListener("click", function() {
-			that.setWindowLocation(this.href);
-		});
+		var editorTabClickHandler = function(evt){
+			if (evt.type === "click") {
+				that.setWindowLocation(this.href);
+			} else if (evt.type === "dblclick") {
+				that.transientToPermenant(this.href);
+			}
+		};
+		editorTab.addEventListener("click", editorTabClickHandler);
+		editorTab.addEventListener("dblclick", editorTabClickHandler);
 
 		editorTab.addEventListener("mouseup", function(e) {
 			var button = e.which;
