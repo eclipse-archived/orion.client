@@ -901,7 +901,8 @@ objects.mixin(EditorViewer.prototype, {
 			var re = wrapper.event;
 			if (re.target) {
 				this.commandRegistry.destroy(tabWidgetContextMenuNode); // remove previous content
-				this.commandRegistry.renderCommands("tabWidgetContextMenuActions", tabWidgetContextMenuNode, re.srcElement.metadata || re.srcElement.parentElement.metadata, this, "menu", re.srcElement.parentElement.href || ""); //$NON-NLS-1$ //$NON-NLS-2$
+				var target = re.target || re.srcElement;
+				this.commandRegistry.renderCommands("tabWidgetContextMenuActions", tabWidgetContextMenuNode, target.metadata || target.parentElement.metadata, this, "menu", target.parentElement.href || ""); //$NON-NLS-1$ //$NON-NLS-2$
 			}
 		}.bind(this);
 		contextMenu.addEventListener("triggered", contextMenuTriggered);
