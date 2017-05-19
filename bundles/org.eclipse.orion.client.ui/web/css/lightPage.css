@@ -284,6 +284,10 @@
 	border-width: 4px;
 }
 
+.lightPage .desktopmode .selectableNavRow:hover {
+	background-color: #EAF2FE;
+}
+
 @-webkit-keyframes rotateThis {
 	0% {
 		transform: rotate(0deg);
