@@ -307,7 +307,8 @@ define([
 							} else if (evt.type === "dblclick") {
 								this.isEditorTabsEnabled().then(function(editorTabsEnabled) {
 									if(editorTabsEnabled){
-										var href = evt.srcElement.querySelector("a").href;
+										var target = evt.target || evt.srcElement;
+										var href = target.querySelector("a").href;
 										this.dispatchEvent({
 											type: "fileDoubleClicked",
 											href: href

@@ -547,9 +547,15 @@ objects.mixin(TabWidget.prototype, {
 		
 		var breadcrumb = new mBreadcrumbs.BreadCrumbs(breadcrumbOptions);
 		
-		editorTab.addEventListener("click", function() {
-			that.setWindowLocation(this.href);
-		});
+		var editorTabClickHandler = function(evt){
+			if (evt.type === "click") {
+				that.setWindowLocation(this.href);
+			} else if (evt.type === "dblclick") {
+				that.transientToPermenant(this.href);
+			}
+		};
+		editorTab.addEventListener("click", editorTabClickHandler);
+		editorTab.addEventListener("dblclick", editorTabClickHandler);
 
 		editorTab.addEventListener("mouseup", function(e) {
 			var button = e.which;
@@ -901,7 +907,8 @@ objects.mixin(EditorViewer.prototype, {
 			var re = wrapper.event;
 			if (re.target) {
 				this.commandRegistry.destroy(tabWidgetContextMenuNode); // remove previous content
-				this.commandRegistry.renderCommands("tabWidgetContextMenuActions", tabWidgetContextMenuNode, re.srcElement.metadata || re.srcElement.parentElement.metadata, this, "menu", re.srcElement.parentElement.href || ""); //$NON-NLS-1$ //$NON-NLS-2$
+				var target = re.target || re.srcElement;
+				this.commandRegistry.renderCommands("tabWidgetContextMenuActions", tabWidgetContextMenuNode, target.metadata || target.parentElement.metadata, this, "menu", target.parentElement.href || ""); //$NON-NLS-1$ //$NON-NLS-2$
 			}
 		}.bind(this);
 		contextMenu.addEventListener("triggered", contextMenuTriggered);
