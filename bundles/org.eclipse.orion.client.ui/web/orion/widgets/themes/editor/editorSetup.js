@@ -72,10 +72,10 @@ define([
 	 		annotationModel.addAnnotation(AT.createAnnotation(AT.ANNOTATION_INFO, 4, 10, "Variable 'crypto' shadows a global member."));
 	 		annotationModel.addAnnotation(AT.createAnnotation(AT.ANNOTATION_ERROR, 381, 413, "Unreachable code"));
 	 		annotationModel.addAnnotation(AT.createAnnotation(AT.ANNOTATION_WARNING, 564, 577, "errorVariable' is undefined."));
-	 		annotationModel.addAnnotation(AT.createAnnotation(AT.ANNOTATION_DIFF_MODIFIED, 85, 247));
-	 		annotationModel.addAnnotation(AT.createAnnotation(AT.ANNOTATION_DIFF_ADDED, 353, 378));
-	 		annotationModel.addAnnotation(AT.createAnnotation(AT.ANNOTATION_DIFF_DELETED, 350, 352));
-	 		annotationModel.addAnnotation(AT.createAnnotation(AT.ANNOTATION_BLAME, 500, 530, "Theme editing feature commit 1"));
+	 		annotationModel.addAnnotation(AT.createAnnotation(AT.ANNOTATION_DIFF_MODIFIED, 190, 225));
+	 		annotationModel.addAnnotation(AT.createAnnotation(AT.ANNOTATION_DIFF_ADDED, 450, 470));
+	 		annotationModel.addAnnotation(AT.createAnnotation(AT.ANNOTATION_DIFF_DELETED, 140, 141));
+	 		annotationModel.addAnnotation(AT.createAnnotation(AT.ANNOTATION_BLAME, 515, 530, "Theme editing feature commit 1"));
 	 		annotationModel.addAnnotation(AT.createAnnotation(AT.ANNOTATION_BLAME, 550, 551, "Theme editing feature commit 2"));
 	 		annotationModel.addAnnotation(AT.createAnnotation(AT.ANNOTATION_CURRENT_BLAME, 550, 551, ""));
 		}else if(lang === "css"){
