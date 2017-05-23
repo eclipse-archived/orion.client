@@ -22,7 +22,7 @@ define([
 		manifestContents = manifestContents || { applications: [{}] };
 		var manifestInstrumentation = {};
 
-		if(!manifestContents.applications.length > 0)
+		if(!manifestContents.applications.length)
 			manifestContents.applications.push({});
 
 		if(manifestContents.applications[0].host !== results.host)
