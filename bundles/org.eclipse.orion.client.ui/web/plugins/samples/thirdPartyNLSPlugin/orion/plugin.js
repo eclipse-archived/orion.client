@@ -172,7 +172,7 @@
                     params[i] = obj;
                 }
             });
-            var response = typeof messageId === undefined ? null : {
+            var response = typeof messageId === "undefined" ? null : {
                 id: messageId,
                 result: null,
                 error: null

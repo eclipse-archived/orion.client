@@ -107,7 +107,7 @@ function getTags(req, res) {
 			return isAnnotated(theRepo, ref);
 		})
 		.then(function(annotated) {
-			if (typeof annotated === 'String') {
+			if (typeof annotated === 'string') {
 				return writeError(400, res, annotated);
 			}
 
@@ -146,7 +146,7 @@ function getTags(req, res) {
 			async.each(referenceList, function(ref,callback) {
 				isAnnotated(theRepo, ref)
 				.then(function(annotated) {
-					if (typeof annotated === 'String') {
+					if (typeof annotated === 'string') {
 						return writeError(400, res, annotated);
 					}
 					getTagCommit(theRepo, ref)
