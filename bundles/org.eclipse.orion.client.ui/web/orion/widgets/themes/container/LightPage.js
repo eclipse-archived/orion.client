@@ -240,6 +240,10 @@ define({
 				"border-color": "rgb(60, 113, 179)"
 			}
 		},
+		".editorTabCloseButton:hover": {
+			"background-color": "rgba(60, 113, 179, 1)",
+			"color": "#FFFFFF"
+		},
 		".projectNavColumn": {
 			"color": "#000000"
 		},

@@ -443,7 +443,7 @@ define({
 			}
 		},
 		".editorTabCloseButton:hover": {
-			"background-color": "#1BB199",
+			"background-color": "rgba(27, 177, 153, 1)",
 			"color": "#FFFFFF"
 		},
 		".editorTab": {

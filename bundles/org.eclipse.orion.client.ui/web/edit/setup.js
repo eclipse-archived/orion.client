@@ -497,9 +497,8 @@ objects.mixin(TabWidget.prototype, {
 		curFileNode.textContent = curFileNodeName;
 
 		var closeButton = document.createElement("div");
-		closeButton.className = "editorTabCloseButton";
+		closeButton.className = "editorTabCloseButton core-sprite-close imageSprite ";
 		// Unicode multiplication sign
-		closeButton.textContent = "\u2715";
 		closeButton.metadata = metadata;
 		closeButton.addEventListener("click", function(e) {
 			e.stopPropagation();
