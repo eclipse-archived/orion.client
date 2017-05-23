@@ -77,7 +77,7 @@ mBootstrap.startup().then(function(core) {
 			}
 		}
 		if(error.HttpCode && error.HttpCode === 401){
-			promptLogin(cFService, url).then(
+			promptLogin(cFService).then(
 				function(){
 					displayTargets();
 				},

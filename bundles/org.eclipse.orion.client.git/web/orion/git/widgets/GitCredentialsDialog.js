@@ -242,7 +242,7 @@ define([ 'i18n!git/nls/gitmessages', 'orion/git/gitPreferenceStorage', 'orion/we
 						process(loadedPrivateKey);
 					}
 				};
-			}(this.privateKeyFile));
+			}());
 
 			reader.readAsText(this.privateKeyFile);
 		} else if (loadedPrivateKey.length > 0) {

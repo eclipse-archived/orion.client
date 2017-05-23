@@ -49,7 +49,7 @@
 		radio1.checked = "true";
 		radio1.onclick = function(){
 			    if (document.getElementById("radio1").checked){
-		        changeLinks(contentTableRows, "orionhub.org", "80");
+		        changeLinks(contentTableRows, "orionhub.org");
 		    }
 		}
 		
@@ -62,7 +62,7 @@
 		radio2.type = "radio";
 		radio2.onclick = function(){
 			    if (document.getElementById("radio2").checked){
-		        changeLinks(contentTableRows, "orion.eclipse.org", "80");
+		        changeLinks(contentTableRows, "orion.eclipse.org");
 		    }
 		}
 		
