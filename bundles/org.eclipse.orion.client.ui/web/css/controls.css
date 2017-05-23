@@ -1324,7 +1324,7 @@ html[dir="rtl"] .sectionWrapper, html[dir="rtl"] .sectionTable{ /* ACGC */
 .sectionTable td {
 	border-bottom: 1px solid #f1f3f4;
 	vertical-align: middle;
-	color: #707070;
+	color: #606060;
 }
 
 .sectionTable tr:last-child td{

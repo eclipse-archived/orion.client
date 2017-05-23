@@ -67,7 +67,7 @@ define({
 			"border-width": "1px",
 			"border-style": "solid",
 			"border-color": "#3C71B3",
-			"color": "#3C71B3"
+			"color": "#376FB2"
 		},
 		".commandButton.disabled": {
 			"color": "#cdcdcd"
@@ -131,13 +131,16 @@ define({
 			},
 			".gitCommitMessageTopRow": {
 				"border-color": "#3C71B3"
+			},
+			".gitCommitMore":{
+				"color": "#004A60 !important"
 			}
 		},
 		".gitCommitMessageSection": {
 			"background-color": "rgba(60, 113, 179, 0.25)"
 		},
 		".gitCommitMore": {
-			"color": "#3C71B3 !important"
+			"color": "#005F88 !important"
 		},
 		".gitStatusIcon": {
 			"color": "#3C71B3 !important"
@@ -146,7 +149,7 @@ define({
 			"background-color": "rgba(60, 113, 179, 0.25)"
 		},
 		".gitStatusTitle": {
-			"color": "#3C71B3 !important"
+			"color": "#0462AB !important"
 		},
 		".label.parameterInput": {
 			"color": "#FFFFFF !important"

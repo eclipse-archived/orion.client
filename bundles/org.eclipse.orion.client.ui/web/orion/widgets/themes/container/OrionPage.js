@@ -26,24 +26,24 @@ define({
 		},
 		".desktopmode": {
 			".selectableNavRow:hover": {
-				"background-color": "rgba(27, 177, 153, 0.25)"
+				"background-color": "rgba(0, 123, 79, 0.25)"
 			}
 		},
 		".checkedRow": {
-			"background-color": "#1BB199 !important",
+			"background-color": "#007b4f !important",
 			"color": "#FFFFFF !important",
 			".commandButton": {
 				"border-color": "white",
 				"color": "#FFFFFF"
 			},
 			".commandButton:not(.primaryButton):focus": {
-				"background": "rgba(27,177,153,0.50)",
-				"box-shadow": "0 1px 2px 0 rgb(27, 177, 153)",
+				"background": "rgba(0, 123, 79,0.50)",
+				"box-shadow": "0 1px 2px 0 rgb(0, 123, 79)",
 				"color": "#FFFFFF"
 			},
 			".commandButton:not(.primaryButton):hover": {
-				"background": "rgba(27,177,153,0.50)",
-				"box-shadow": "0 1px 2px 0 rgb(27, 177, 153)",
+				"background": "rgba(0, 123, 79,0.50)",
+				"box-shadow": "0 1px 2px 0 rgb(0, 123, 79)",
 				"color": "#FFFFFF"
 			},
 			".gitStatusIcon": {
@@ -66,8 +66,8 @@ define({
 			"background-color": "rgba(0, 0, 0, 0)",
 			"border-width": "1px",
 			"border-style": "solid",
-			"border-color": "#1BB199",
-			"color": "#1BB199"
+			"border-color": "#007b4f",
+			"color": "#007b4f"
 		},
 		".commandButton.disabled": {
 			"color": "#cdcdcd"
@@ -76,13 +76,13 @@ define({
 			"border-color": "#ccc"
 		},
 		".commandButton:not(.primaryButton):focus": {
-			"background-color": "rgba(27,177,153,0.25)",
-			"box-shadow": "0 1px 2px 0 rgb(27, 177, 153)",
+			"background-color": "rgba(0, 123, 79,0.25)",
+			"box-shadow": "0 1px 2px 0 rgb(0, 123, 79)",
 			"color": "#FFFFFF"
 		},
 		".commandButton:not(.primaryButton):hover": {
-			"background-color": "rgba(27,177,153,0.25)",
-			"box-shadow": "0 1px 2px 0 rgb(27, 177, 153)",
+			"background-color": "rgba(0, 123, 79,0.25)",
+			"box-shadow": "0 1px 2px 0 rgb(0, 123, 79)",
 			"color": "#FFFFFF"
 		},
 		".content-fixedHeight": {
@@ -92,7 +92,7 @@ define({
 			"color": "red"
 		},
 		".dialogTitle": {
-			"background-color": "#1BB199 !important",
+			"background-color": "#007b4f !important",
 			"color": "#FFFFFF !important"
 		},
 		".dropdownButtonWithIcon": {
@@ -106,8 +106,8 @@ define({
 		},
 		".dropdownMenu": {
 			".dropdownMenuItemSelected": {
-				"background": "rgba(27,177,153,0.25)",
-				"border-left-color": "#1BB199"
+				"background": "rgba(0, 123, 79,0.25)",
+				"border-left-color": "#007b4f"
 			}
 		},
 		".dropdownTrigger:not(.dropdownDefaultButton)": {
@@ -130,23 +130,35 @@ define({
 				"border-color": "rgb(60, 113, 179)"
 			},
 			".gitCommitMessageTopRow": {
-				"border-color": "#1BB199"
+				"border-color": "#007b4f"
+			},
+			".gitCommitMore":{
+				"color": "#004e00 !important"
 			}
 		},
 		".gitCommitMessageSection": {
-			"background-color": "rgba(27,177,153,0.25)"
+			"background-color": "rgba(0, 123, 79,0.25)"
 		},
 		".gitCommitMore": {
-			"color": "#1BB199 !important"
+			"color": "#006800 !important"
 		},
 		".gitStatusIcon": {
-			"color": "#1BB199 !important"
+			"color": "#007b4f !important"
 		},
 		".gitStatusSection": {
-			"background-color": "rgba(27,177,153,0.25)"
+			"background-color": "rgba(0, 123, 79,0.25)",
+			".stretch":{
+				"color": "#5e5e5e"
+			}
+		},
+		".gitChangeListCheckLabel":{
+			"color": "#5e5e5e"
+		},
+		".gitChangeListChangedStatus":{
+			"color": "#5e5e5e"
 		},
 		".gitStatusTitle": {
-			"color": "#1BB199 !important"
+			"color": "#005200 !important"
 		},
 		".label.parameterInput": {
 			"color": "#FFFFFF !important"
@@ -160,21 +172,21 @@ define({
 			}
 		},
 		".launchConfigurationsWrapper>.launchConfigurationsButton.dropdownTrigger": {
-			"background-color": "#1BB199 !important",
+			"background-color": "#007b4f !important",
 			"color": "#FFFFFF !important"
 		},
 		".launchConfsDropdown": {
 			".dropdownDefaultButton": {
-				"background-color": "#1BB199 !important",
+				"background-color": "#007b4f !important",
 				"color": "#FFFFFF !important"
 			}
 		},
 		".launchConfsLabel": {
-			"background-color": "#1BB199 !important",
+			"background-color": "#007b4f !important",
 			"color": "#FFFFFF !important"
 		},
 		".liveUpdateLabel": {
-			"color": "#1BB199 !important"
+			"color": "#007b4f !important"
 		},
 		".mainToolbar": {
 			"background-color": "#26343F",
@@ -204,11 +216,11 @@ define({
 				"color": "#26343F !important"
 			},
 			".gitSectionLabel": {
-				"background-color": "#1BB199 !important",
+				"background-color": "#007B4F !important",
 				"color": "#FFFFFF !important"
 			},
 			".sectionWrapper": {
-				"background-color": "#1BB199 !important",
+				"background-color": "#007b4f !important",
 				"color": "#FFFFFF !important"
 			}
 		},
@@ -216,24 +228,24 @@ define({
 			"background": "#3B4B54 !important"
 		},
 		".navbar-item-selected": {
-			"background-color": "#1BB199 !important",
+			"background-color": "#007b4f !important",
 			"color": "#FFFFFF !important"
 		},
 		".orionSwitchLabel": {
-			"background-color": "#1BB199 !important",
+			"background-color": "#007b4f !important",
 			"color": "#FFFFFF !important"
 		},
 		".outlineExplorer": {
 			".treeIterationCursorRow_Dotted": {
-				"background-color": "#1BB199 !important",
+				"background-color": "#007b4f !important",
 				"color": "#FFFFFF !important"
 			}
 		},
 		".primaryButton": {
-			"background-color": "#1BB199 !important",
+			"background-color": "#007b4f !important",
 			"border-width": "1px",
 			"border-style": "solid",
-			"border-color": "#1BB199 !important",
+			"border-color": "#007b4f !important",
 			"border-radius": "0 !important",
 			"color": "#FFFFFF !important"
 		},
@@ -248,8 +260,8 @@ define({
 		},
 		".searchResultsWrapperDiv": {
 			".selectableNavRow:hover": {
-				"background": "rgba(27,177,153,0.25)",
-				"border-left-color": "#1BB199"
+				"background": "rgba(0, 123, 79,0.25)",
+				"border-left-color": "#007b4f"
 			}
 		},
 		".sectionTable": {
@@ -266,14 +278,14 @@ define({
 			"color": "#FFFFFF !important"
 		},
 		".sideMenuItem>.submenu-trigger:hover": {
-			"color": "#1BB199 !important"
+			"color": "#007b4f !important"
 		},
 		".sideMenuItemActive": {
-			"background-color": "#1BB199 !important",
+			"background-color": "#007b4f !important",
 			"color": "#FFFFFF !important"
 		},
 		".sideMenuItemActive:hover": {
-			"background": "rgba(27,177,153,0.25) !important",
+			"background": "rgba(0, 123, 79,0.25) !important",
 			"color": "#FFFFFF"
 		},
 		".sidebarWrapper": {
@@ -281,7 +293,7 @@ define({
 			"color": "#FFFFFF"
 		},
 		".slideParameters": {
-			"background-color": "#1BB199 !important",
+			"background-color": "#007b4f !important",
 			"color": "#FFFFFF !important"
 		},
 		".splash": {
@@ -289,7 +301,7 @@ define({
 			"box-shadow": "none"
 		},
 		".splashAbout": {
-			"color": "#1BB199 !important"
+			"color": "#007b4f !important"
 		},
 		".splashDetailedMessage": {
 			"color": "#FFFFFF"
@@ -320,7 +332,7 @@ define({
 			"color": "#FFFFFF"
 		},
 		".splashVerbal": {
-			"color": "#1BB199 !important"
+			"color": "#007b4f !important"
 		},
 		".split": {
 			"background": "#3B4B54"
@@ -376,16 +388,16 @@ define({
 			"color": "#FFFFFF"
 		},
 		".tooltip": {
-			"background-color": "#1BB199 !important",
+			"background-color": "#007b4f !important",
 			"border-width": "1px",
 			"border-style": "solid",
-			"border-color": "#1BB199",
+			"border-color": "#007b4f",
 			"color": "#FFFFFF !important",
 			"h2": {
 				"color": "#FFFFFF !important"
 			},
 			".navlinkonpage": {
-				"background-color": "#1BB199 !important",
+				"background-color": "#007b4f !important",
 				"color": "#FFFFFF !important"
 			},
 			".operationError": {
@@ -393,37 +405,38 @@ define({
 			}
 		},
 		".tooltipTailFromabove:after": {
-			"border-top-color": "#1BB199"
+			"border-top-color": "#007b4f"
 		},
 		".tooltipTailFromabove:before": {
-			"border-top-color": "#1BB199"
+			"border-top-color": "#007b4f"
 		},
 		".tooltipTailFrombelow:after": {
-			"border-bottom-color": "#1BB199"
+			"border-bottom-color": "#007b4f"
 		},
 		".tooltipTailFrombelow:before": {
-			"border-bottom-color": "#1BB199"
+			"border-bottom-color": "#007b4f"
 		},
 		".tooltipTailFromleft:after": {
-			"border-left-color": "#1BB199"
+			"border-left-color": "#007b4f"
 		},
 		".tooltipTailFromleft:before": {
-			"border-left-color": "#1BB199"
+			"border-left-color": "#007b4f"
 		},
 		".tooltipTailFromright:after": {
-			"border-right-color": "#1BB199"
+			"border-right-color": "#007b4f"
 		},
 		".tooltipTailFromright:before": {
-			"border-right-color": "#1BB199"
+			"border-right-color": "#007b4f"
 		},
 		".treeIterationCursorRow": {
-			"background-color": "rgba(27,177,153,0.25)"
+			"background-color": "rgba(0, 123, 79,0.25)"
 		},
 		".treeIterationCursorRow_Dotted": {
-			"background-color": "rgba(27,177,153,0.25)"
+			"background-color": "rgba(0, 123, 79,0.25)"
 		},
 		".treeTableRow": {
 			"span.core-sprite-closedarrow:hover" : {
+<<<<<<< HEAD
 				"color": "#707070",
 				"background-color": "#A5B5BC"
 			},
@@ -440,6 +453,12 @@ define({
 			"span.core-sprite-openarrow:hover" : {
 				"color": "white",
 				"background-color": "#A5B5BC"
+=======
+				"color": "#007b4f"
+			},
+			"span.core-sprite-openarrow:hover" : {
+				"color": "#007b4f"
+>>>>>>> 131322f2c83f10945227eab109e0d886ec5e95d8
 			}
 		},
 		".workingTarget": {
@@ -458,12 +477,12 @@ define({
 		},
 		".primaryButton:hover": {
 			".primaryButton:focus": {
-				"background": "#1BB199",
-				"border-color": "#1BB199"
+				"background": "#007b4f",
+				"border-color": "#007b4f"
 			}
 		},
 		".editorTabCloseButton:hover": {
-			"background-color": "rgba(27, 177, 153, 1)",
+			"background-color": "rgba(0, 123, 79, 1)",
 			"color": "#FFFFFF"
 		},
 		".editorTab": {

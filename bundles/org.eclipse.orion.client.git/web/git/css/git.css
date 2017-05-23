@@ -543,7 +543,7 @@ _:-moz-tree-row(hover), .gitChangeListCheck { /* Firefox  HACK */
 .gitCommitMore {
 	padding: 0;
 	margin: 10px 5px 5px 0;
-	opacity: 0.6;
+	opacity: 0.81;
 	border: none;
 	background: transparent;
 	color: #00aed1;
