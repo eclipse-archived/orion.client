@@ -399,13 +399,14 @@ hard-coded numbers elsewhere.
 
 .editorTabCloseButton {
 	border-radius: 50%;
-	margin: auto 5px auto 5px;
-	font-size: 12px;
-	height: 10px;
-	line-height: 10px;
-	padding: 1px;
-	text-align: center;
-	width: 10px;
+    margin: auto 5px auto 5px !important;
+    font-size: 12px !important;
+    height: 10px;
+    line-height: 10px !important;
+    padding: 0 1.5px 1.5px 0px !important;
+    text-align: center;
+    width: 10px;
+    font-style: normal;
 }
 
 .editorTabCloseButton:hover {
