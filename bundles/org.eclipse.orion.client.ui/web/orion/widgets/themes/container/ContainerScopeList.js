@@ -186,7 +186,8 @@ define(['i18n!orion/settings/nls/messages'
 				"styles .treeIterationCursorRow background-color",
 				"styles .treeIterationCursorRow_Dotted background-color",
 				"styles .treeTableRow span.core-sprite-closedarrow:hover color",
-				"styles .treeTableRow span.core-sprite-openarrow:hover color"
+				"styles .treeTableRow span.core-sprite-openarrow:hover color",
+				"styles .desktopmode .selectableNavRow:hover background-color" //.25 opcacity
 			],
 			id: "flavorColor",
 			value: defaultColor

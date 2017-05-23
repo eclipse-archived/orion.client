@@ -24,6 +24,11 @@ define({
 		".auxpane": {
 			"background": "#3B4B54 !important"
 		},
+		".desktopmode": {
+			".selectableNavRow:hover": {
+				"background-color": "rgba(27, 177, 153, 0.25)"
+			}
+		},
 		".checkedRow": {
 			"background-color": "#1BB199 !important",
 			"color": "#FFFFFF !important",
