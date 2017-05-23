@@ -90,7 +90,7 @@ function getTree(req, res) {
 						if (repo.Children) add(repo.Children);
 					});
 				}
-				add(repos, tree);
+				add(repos);
 				writeResponse(200, res, null, tree, true);
 			});
 		});
