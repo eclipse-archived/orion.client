@@ -301,7 +301,7 @@ define({
 			"box-shadow": "none"
 		},
 		".splashAbout": {
-			"color": "#007b4f !important"
+			"color": "#00D78C !important"
 		},
 		".splashDetailedMessage": {
 			"color": "#FFFFFF"
@@ -332,7 +332,7 @@ define({
 			"color": "#FFFFFF"
 		},
 		".splashVerbal": {
-			"color": "#007b4f !important"
+			"color": "#00D78C !important"
 		},
 		".split": {
 			"background": "#3B4B54"
