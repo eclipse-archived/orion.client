@@ -106,6 +106,8 @@ define(['i18n!orion/settings/nls/messages'
 				"styles .editorTabCloseButton:hover background-color",
 				"styles .editorTab border-top",
 				"styles .editorTab border-right",
+				"styles .textviewTooltip .commandButton:not(.primaryButton):hover background-color", //.25 opcacity
+				"styles .textviewTooltip .commandButton:not(.primaryButton):focus background-color" //.25 opcacity
 			],
 			id: "tertiaryBackgroundColor",
 			value: defaultColor
@@ -188,7 +190,9 @@ define(['i18n!orion/settings/nls/messages'
 				"styles .treeTableRow span.core-sprite-closedarrow:hover color",
 				"styles .treeTableRow span.core-sprite-openarrow:hover color",
 				"styles .desktopmode .selectableNavRow:hover background-color", //.25 opcacity
-				"styles .editorTabCloseButton:hover background-color"
+				"styles .editorTabCloseButton:hover background-color",
+				"styles .contentassist .selected background-color",
+				"styles .textviewTooltip background-color"
 			],
 			id: "flavorColor",
 			value: defaultColor

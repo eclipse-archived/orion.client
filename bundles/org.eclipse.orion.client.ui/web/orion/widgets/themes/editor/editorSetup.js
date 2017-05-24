@@ -69,15 +69,15 @@ define([
 		var AT = mAnnotations.AnnotationType;
 		if(lang === "js"){
 			var annotationModel = editor.getAnnotationModel();
-	 		annotationModel.addAnnotation(AT.createAnnotation(AT.ANNOTATION_INFO, 4, 10, "Variable 'crypto' shadows a global member."));
-	 		annotationModel.addAnnotation(AT.createAnnotation(AT.ANNOTATION_ERROR, 381, 413, "Unreachable code"));
-	 		annotationModel.addAnnotation(AT.createAnnotation(AT.ANNOTATION_WARNING, 564, 577, "errorVariable' is undefined."));
-	 		annotationModel.addAnnotation(AT.createAnnotation(AT.ANNOTATION_DIFF_MODIFIED, 190, 225));
-	 		annotationModel.addAnnotation(AT.createAnnotation(AT.ANNOTATION_DIFF_ADDED, 450, 470));
-	 		annotationModel.addAnnotation(AT.createAnnotation(AT.ANNOTATION_DIFF_DELETED, 140, 141));
-	 		annotationModel.addAnnotation(AT.createAnnotation(AT.ANNOTATION_BLAME, 515, 530, "Theme editing feature commit 1"));
-	 		annotationModel.addAnnotation(AT.createAnnotation(AT.ANNOTATION_BLAME, 550, 551, "Theme editing feature commit 2"));
-	 		annotationModel.addAnnotation(AT.createAnnotation(AT.ANNOTATION_CURRENT_BLAME, 550, 551, ""));
+	 		annotationModel.addAnnotation(AT.createAnnotation(AT.ANNOTATION_INFO, 228, 234, "Variable 'crypto' shadows a global member."));
+	 		annotationModel.addAnnotation(AT.createAnnotation(AT.ANNOTATION_ERROR, 374, 406, "Unreachable code"));
+	 		annotationModel.addAnnotation(AT.createAnnotation(AT.ANNOTATION_WARNING, 327, 340, "errorVariable' is undefined."));
+	 		annotationModel.addAnnotation(AT.createAnnotation(AT.ANNOTATION_DIFF_MODIFIED, 160, 161));
+	 		annotationModel.addAnnotation(AT.createAnnotation(AT.ANNOTATION_DIFF_ADDED, 130, 131));
+	 		annotationModel.addAnnotation(AT.createAnnotation(AT.ANNOTATION_DIFF_DELETED, 70, 71));
+	 		annotationModel.addAnnotation(AT.createAnnotation(AT.ANNOTATION_BLAME, 450, 451, "Theme editing feature commit 1"));
+	 		annotationModel.addAnnotation(AT.createAnnotation(AT.ANNOTATION_BLAME, 480, 481, "Theme editing feature commit 2"));
+	 		annotationModel.addAnnotation(AT.createAnnotation(AT.ANNOTATION_CURRENT_BLAME, 480, 481, ""));
 		}else if(lang === "css"){
 			var annotationModel = editor.getAnnotationModel();
 			annotationModel.addAnnotation(AT.createAnnotation(AT.ANNOTATION_INFO, 225, 232, "Duplicate property 'display' found."));

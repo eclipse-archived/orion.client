@@ -240,10 +240,6 @@ define({
 				"border-color": "rgb(60, 113, 179)"
 			}
 		},
-		".editorTabCloseButton:hover": {
-			"background-color": "rgba(60, 113, 179, 1)",
-			"color": "#FFFFFF"
-		},
 		".projectNavColumn": {
 			"color": "#000000"
 		},
@@ -361,7 +357,16 @@ define({
 				"color": "white",
 				"margin-bottom": "2px"
 			},
-			"color": "#FFFFFF"
+			"color": "#FFFFFF",
+			"background-color": "rgb(60, 113, 179)",
+			".commandButton:not(.primaryButton):hover":{
+				"color": "white",
+   				"background-color": "rgba(196, 197, 200, 0.25)"
+			},
+			".commandButton:not(.primaryButton):focus":{
+				"color": "white",
+   				"background-color": "rgba(196, 197, 200, 0.25)"
+			}
 		},
 		".titleActionContainer": {
 			"background": "#F5F7FA !important",
@@ -416,10 +421,22 @@ define({
 		},
 		".treeTableRow": {
 			"span.core-sprite-closedarrow:hover" : {
-				"color": "#3C71B3"
+				"color": "#707070",
+				"background-color": "#A5B5BC"
 			},
 			"span.core-sprite-openarrow:hover" : {
-				"color": "#3C71B3"
+				"color": "#707070",
+				"background-color": "#A5B5BC"
+			}
+		},
+		".treeTableRow.checkedRow": {
+			"span.core-sprite-closedarrow:hover" : {
+				"color": "white",
+				"background-color": "#A5B5BC"
+			},
+			"span.core-sprite-openarrow:hover" : {
+				"color": "white",
+				"background-color": "#A5B5BC"
 			}
 		},
 		".workingTarget": {
@@ -443,7 +460,7 @@ define({
 			}
 		},
 		".editorTabCloseButton:hover": {
-			"background-color": "#3D72B3",
+			"background-color": "rgba(60, 113, 179, 1)",
 			"color": "#FFFFFF"
 		},
 		".editorTab": {
@@ -453,6 +470,10 @@ define({
 		".focusedEditorTab": {
 			"background-color": "#FFFFFF",
 			"color": "#152935"
+		},
+		".contentassist .selected":{
+			"background-color": "#3C71B3",
+			"background": "#3C71B3"
 		}
 	}
 });

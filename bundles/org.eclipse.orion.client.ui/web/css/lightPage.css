@@ -284,6 +284,10 @@
 	border-width: 4px;
 }
 
+.lightPage .uploadNodeText{
+	color: black;
+}
+
 @-webkit-keyframes rotateThis {
 	0% {
 		transform: rotate(0deg);
