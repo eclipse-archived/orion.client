@@ -33,7 +33,7 @@ define({
 			"background-color": "#1BB199 !important",
 			"color": "#FFFFFF !important",
 			".commandButton": {
-				"border-color": "#26343F",
+				"border-color": "white",
 				"color": "#FFFFFF"
 			},
 			".commandButton:not(.primaryButton):focus": {
@@ -62,7 +62,6 @@ define({
 		".checkedRow>td>span>a":{
 			"color": "#FFFFFF !important"
 		},
-
 		".commandButton": {
 			"background-color": "rgba(0, 0, 0, 0)",
 			"border-width": "1px",
@@ -356,12 +355,21 @@ define({
 		".textviewTooltip": {
 			".commandButton": {
 				"background-color": "inherit",
-				"border": "1px solid #325C80",
-				"border-color": "#26343F",
+				"border": "1px solid white",
+				"border-color": "white",
 				"color": "white",
 				"margin-bottom": "2px"
 			},
-			"color": "#FFFFFF"
+			"color": "#FFFFFF",
+			"background-color": "rgb(27, 177, 153)",
+			".commandButton:not(.primaryButton):hover":{
+				"color": "white",
+    			"background-color": "rgba(59, 75, 84,0.25)"
+			},
+			".commandButton:not(.primaryButton):focus":{
+				"color": "white",
+    			"background-color": "rgba(59, 75, 84,0.25)"			
+    		}
 		},
 		".titleActionContainer": {
 			"background": "#3B4B54 !important",
@@ -416,10 +424,22 @@ define({
 		},
 		".treeTableRow": {
 			"span.core-sprite-closedarrow:hover" : {
-				"color": "#1BB199"
+				"color": "#707070",
+				"background-color": "#A5B5BC"
 			},
 			"span.core-sprite-openarrow:hover" : {
-				"color": "#1BB199"
+				"color": "#707070",
+				"background-color": "#A5B5BC"
+			}
+		},
+		".treeTableRow.checkedRow": {
+			"span.core-sprite-closedarrow:hover" : {
+				"color": "white",
+				"background-color": "#A5B5BC"
+			},
+			"span.core-sprite-openarrow:hover" : {
+				"color": "white",
+				"background-color": "#A5B5BC"
 			}
 		},
 		".workingTarget": {
@@ -453,6 +473,10 @@ define({
 		".focusedEditorTab": {
 			"background-color": "#26343F",
 			"color": "#FFFFFF"
+		},
+		".contentassist .selected":{
+			"background-color": "#1BB199",
+			"background": "#1BB199"
 		}
 	}
 });

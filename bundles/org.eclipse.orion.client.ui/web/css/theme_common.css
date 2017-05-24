@@ -663,6 +663,10 @@ a.breadcrumb.currentLocation {
 	color: #00AED1 !important;
 }
 
+.orionPage .findOptionsDiv .dropdownTrigger:not(.dropdownDefaultButton) {
+	color: white !important;
+}
+
 .desktopmode .dropdownTrigger a {
 	text-decoration: none;
 	pointer-events: none;
@@ -1196,8 +1200,8 @@ a.breadcrumb.currentLocation {
 }
 
 .contentassist .selected {
-	background-color: #1BB199 !important;
-	background: #1BB199 !important;
+	background-color: #1BB199;
+	background: #1BB199;
 	border-radius: 0; 
 	color: #FFF;
 }

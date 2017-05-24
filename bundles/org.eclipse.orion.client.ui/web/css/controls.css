@@ -1513,6 +1513,7 @@ html[dir="rtl"] .progressBarWrapper { /* ACGC */
 	text-overflow: ellipsis;
 	vertical-align: middle;
 	white-space: nowrap;
+	color: white;
 }
 
 .progressBarWrapper .progressBar {
