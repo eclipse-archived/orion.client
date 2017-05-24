@@ -121,7 +121,7 @@ define(['orion/webui/littlelib'], function(lib) {
 				lib.addAutoDismiss([this._tip, this._node], function() {self.hide();});
 
 				if (this._showByKB) {
-					this._tip.tabIndex = "1";
+					this._tip.tabIndex = "0";
 					this._tip.addEventListener("keydown", function (e) {
 						if (e.keyCode === lib.KEY.ESCAPE) {
 							self._node.focus();

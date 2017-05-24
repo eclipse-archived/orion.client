@@ -174,7 +174,6 @@ define([
 			this._createFindCommnand();
 			this._createBlameCommand();
 			this._createDiffCommand();
-			this._createShowTooltipCommand();
 			this._createUndoStackCommands();
 			this._createClipboardCommands();
 			this._createDelimiterCommands();
@@ -981,39 +980,6 @@ define([
 				}
 			});
 			this.commandService.addCommand(diffCommand);
-		},
-
-		_createShowTooltipCommand: function(){
-//			var that = this;
-//			var showTooltipCommand = new mCommands.Command({
-//				name: messages.showTooltip,
-//				tooltip: messages.showTooltipTooltip,
-//				id: "orion.edit.showTooltip", //$NON-NLS-0$
-//				visibleWhen: /** @callback */ function(items, data) {
-//					var editor = data.handler.editor || that.editor;
-//					return editor && editor.installed;
-//				},
-//				callback: function() {
-//					var domFocus = document.activeElement;
-//					var editor = this.editor || that.editor;
-//					if (editor._domNode.contains(domFocus)) {
-//						var tooltip = editor.getTooltip();
-//						var tv = editor.getTextView();
-//						var offset = tv.getCaretOffset();
-//						var pos = tv.getLocationAtOffset(offset);
-//						tooltip.show({
-//							x: pos.x,
-//							y: pos.y,
-//							getTooltipInfo: function() {
-//								return editor._getTooltipInfo(this.x, this.y);
-//							}
-//						}, false, true);
-//					} else if (domFocus) {
-//						
-//					}
-//				}
-//			});
-//			this.commandService.addCommand(showTooltipCommand);
 		},
 		_onServiceRemoved: function(serviceReference) {
 			if (serviceReference.getProperty("objectClass").indexOf("orion.edit.command") !== -1) { //$NON-NLS-1$ //$NON-NLS-2$

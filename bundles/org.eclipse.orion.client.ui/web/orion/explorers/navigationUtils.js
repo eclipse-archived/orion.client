@@ -22,7 +22,7 @@ define([], function() {
 	 */
 	 
 	 
-	function generateNavGrid(domNodeWrapperList, domNode, widget, onClick, hideOutline) {
+	function generateNavGrid(domNodeWrapperList, domNode, widget, onClick, showOutline) {
 		if(isPad){
 			return;
 		}
@@ -30,7 +30,7 @@ define([], function() {
 			return;
 		}
 		domNodeWrapperList.push({domNode: domNode});
-		if (!hideOutline) {
+		if (!showOutline) {
 			domNode.style.outline = "none"; //$NON-NLS-0$
 		}
 
