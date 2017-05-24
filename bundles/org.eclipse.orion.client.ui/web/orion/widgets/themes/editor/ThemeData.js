@@ -57,6 +57,7 @@ define([
 								"backgroundColor": "rgba(159, 202, 86, 0.68)"
 							},
 							"diffModified": {
+								"color": "#515151",
 								"backgroundColor": "rgba(85, 181, 219, 0.67)"
 							},
 							"blame":{
@@ -64,6 +65,7 @@ define([
 								"backgroundColor": "rgb(255, 132, 44)"
 							},
 							"currentBlame":{
+								"color": "#1B1B1B",
 								"backgroundColor": "rgb(184, 103, 163)"
 							}
 						}
@@ -208,7 +210,7 @@ define([
 								"color": "#37739f"
 							},
 							"tag": {
-								"color": "#7F7F9F"
+								"color": "#737396"
 							}
 						},
 						"preprocessor": {
@@ -307,7 +309,7 @@ define([
 								"backgroundColor": "rgb(177, 74, 0)"
 							},
 							"currentBlame":{
-								"backgroundColor": "rgb(160, 77, 217)"
+								"backgroundColor": "rgb(148, 53, 211)"
 							}
 						}
 					},
@@ -526,7 +528,7 @@ define([
 					},
 					"variable": {
 						"language": {
-							"color": "#8983BE",
+							"color": "#8983BF",
 							"fontWeight": "bold"
 						},
 						"other": {
