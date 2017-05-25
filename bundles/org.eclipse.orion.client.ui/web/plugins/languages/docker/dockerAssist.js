@@ -34,7 +34,7 @@ define([
 			directiveCheck: for (var i = 0; i < buffer.length; i++) {
 				switch (buffer.charAt(i)) {
 					case '#':
-						// in a comment, no proposals to suggest
+						// in the first comment of the file, look for directives
 						var directive = "";
 						var capture = false;
 						escapeCheck: for (var j = i + 1; j < buffer.length; j++) {
@@ -49,9 +49,11 @@ define([
 									continue;
 								case '=':
 									if (directive === "escape") {
+										// '=' found and the directive that has been declared is the escape directive,
+										// record its value so we know what the escape character of this Dockerfile is
 										capture = true;
 									} else {
-										// not a proper directive, stop
+										// unknown directive found, stop searching
 										break escapeCheck;
 									}
 									break;
