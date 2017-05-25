@@ -182,6 +182,15 @@ define([
 					"WORKDIR relative/path\n" +
 					"```" + 
 					i18nUtil.formatMessage.call(null, dockerMessages["hoverOnlineDocumentationFooter"], "https://docs.docker.com/engine/reference/builder/#workdir")
+			},
+
+			escape: {
+				type: "markdown",
+				content: dockerMessages["hoverEscape"] +
+					"```\n" + 
+					"# escape=`\n" +
+					"```" +
+					i18nUtil.formatMessage.call(null, dockerMessages["hoverOnlineDocumentationFooter"], "https://docs.docker.com/engine/reference/builder/#escape")
 			}
 		};
 
@@ -218,6 +227,43 @@ define([
 					return editorContext.getLineStart(line);
 				}).then(function(lineStart) {
 					for (var i = lineStart; i < textLength; i++) {
+						if (content.charAt(i) === '#') {
+							// might be hovering over a directive
+							var directive = "";
+							var directiveOffset = -1;
+							var stop = false;
+							for (var j = i + 1; j < textLength; j++) {
+								if (content.charAt(j) === '=') {
+									if (directiveOffset === -1) {
+										// record the end offset for the directive if not already recorded
+										directiveOffset = j;
+									}
+									break;
+								} else if (content.charAt(j) === ' ' || content.charAt(j)  === '\t'
+										|| content.charAt(j) === '\r' || content.charAt(j)  === '\n') {
+									if (directive !== "" && !stop) {
+										// directive has been captured, stop and record the ending offset
+										directiveOffset = j;
+										stop = true;
+									}
+									continue;
+								}
+
+								if (stop) {
+									// a whitespace was encountered and we should stop capturing but
+									// another character was found, so this is not a directive
+									return null;
+								} else {
+									// capture the directive
+									directive = directive + content.charAt(j);
+								}
+							}
+							// check to make sure the user is hovering over the directive itself
+							if (i <= context.offset && context.offset <= j) {
+								return markdowns[directive.toLowerCase()];
+							}
+							return null;
+						}
 						// skip initial whitespace at the beginning of the line
 						if (content.charAt(i) !== ' ' && content.charAt(i) !== '\t') {
 							for (var j = i + 1; j < textLength; j++) {

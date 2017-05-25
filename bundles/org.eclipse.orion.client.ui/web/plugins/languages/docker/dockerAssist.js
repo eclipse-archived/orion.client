@@ -30,10 +30,12 @@ define([
 
 	Objects.mixin(DockerContentAssist.prototype, {
 		computeProposals: function (buffer, offset, context) {
+			var firstCommentIdx = -1;
 			var escapeCharacter = "\\";
 			directiveCheck: for (var i = 0; i < buffer.length; i++) {
 				switch (buffer.charAt(i)) {
 					case '#':
+						firstCommentIdx = i;
 						// in the first comment of the file, look for directives
 						var directive = "";
 						var capture = false;
@@ -70,7 +72,7 @@ define([
 									break;
 							}
 						}
-						break;
+						break directiveCheck;
 					case ' ':
 					case '\t':
 						// ignore whitespace
@@ -88,6 +90,14 @@ define([
 			commentCheck: for (i = offset - 1; i >= 0; i--) {
 				switch (buffer.charAt(i)) {
 					case '#':
+						if (i === firstCommentIdx) {
+							// we're in the first comment, might need to suggest
+							// the escape directive as a proposal
+							var directivePrefix = buffer.substring(i + 1, offset).trimLeft().toLowerCase();
+							if ("escape".indexOf(directivePrefix) === 0) {
+								return [ createEscape(context.prefix, offset - context.prefix.length, this.markdowns["escape"]) ];
+							}
+						}
 						// in a comment, no proposals to suggest
 						return [];
 					case ' ':
@@ -761,6 +771,25 @@ define([
 				}
 			],
 			escapePosition: offset + 13,
+			hover: markdown
+		};
+	}
+
+	function createEscape(prefix, offset, markdown) {
+		return {
+			name: "escape",
+			description: "=`",
+			proposal: "escape=`",
+			prefix: prefix,
+			overwrite: true,
+			positions: [
+				// linked mode for '`'
+				{
+					offset: offset + 7,
+					length: 1
+				}
+			],
+			escapePosition: offset + 8,
 			hover: markdown
 		};
 	}
