@@ -19,8 +19,9 @@ define([
 	'orion/compare/compareCommands',
 	'orion/compare/resourceComparer',
 	'orion/webui/littlelib',
+	'orion/bidiUtils',
 	'orion/git/util'
-], function(messages, Tooltip, mCompareCommands, mResourceComparer, lib, mGitUtil) {
+], function(messages, Tooltip, mCompareCommands, mResourceComparer, lib, bidiUtils, mGitUtil) {
 	var exports = Object.create(mGitUtil); // extend util
 
 	function createFilter(section, msg, callback) {
@@ -31,6 +32,7 @@ define([
 		filter.type = "search"; //$NON-NLS-1$
 		filter.placeholder = msg;
 		filter.setAttribute("aria-label", msg); //$NON-NLS-1$ 
+		bidiUtils.initInputField(filter);
 		filterDiv.appendChild(filter);
 		
 		var createTooltip = function(button) {

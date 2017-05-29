@@ -14,11 +14,12 @@
 /*global URL*/
 define(["require", "i18n!orion/shell/nls/messages", "orion/bootstrap", "orion/commandRegistry", "orion/fileClient", "orion/dialogs", "orion/searchClient", "orion/globalCommands",
 		"orion/shell/Shell", "orion/webui/treetable", "shell/shellPageFileService", "shell/paramType-file", "shell/paramType-plugin", "shell/paramType-service",
-		"orion/i18nUtil", "orion/extensionCommands", "orion/contentTypes", "orion/PageUtil", "orion/URITemplate", "orion/Deferred",
+		"orion/i18nUtil", "orion/extensionCommands", "orion/contentTypes", "orion/bidiUtils", "orion/PageUtil", "orion/URITemplate", "orion/Deferred",
 		"orion/status", "orion/progress", "orion/operationsClient", "shell/resultWriters", "orion/metrics", "orion/URL-shim", "orion/urlModifier"],
 	function(require, messages, mBootstrap, mCommandRegistry, mFileClient, mDialogs, mSearchClient, mGlobalCommands, mShell, mTreeTable, mShellPageFileService, mFileParamType,
-		mPluginParamType, mServiceParamType, i18nUtil, mExtensionCommands, mContentTypes, PageUtil, URITemplate, Deferred, mStatus, mProgress,
+		mPluginParamType, mServiceParamType, i18nUtil, mExtensionCommands, mContentTypes, bidiUtils, PageUtil, URITemplate, Deferred, mStatus, mProgress,
 		mOperationsClient, mResultWriters, mMetrics, _, urlModifier) {
+
 
 	var shellPageFileService, fileClient, commandRegistry, output, fileType;
 	var hashUpdated = false;
@@ -257,11 +258,13 @@ define(["require", "i18n!orion/shell/nls/messages", "orion/bootstrap", "orion/co
 			link.href = "#" + node.Location; //$NON-NLS-0$
 			link.className = "shellPageDirectory"; //$NON-NLS-0$
 			link.textContent = node.Name;
+			link.dir = bidiUtils.getTextDirection(link.textContent);
 			return link;
 		}
 		link.href = computeEditURL(node);
 		link.target = "_blank";  //$NON-NLS-0$
 		link.textContent = node.Name;
+		link.dir = bidiUtils.getTextDirection(link.textContent);
 		return link;
 	}
 
@@ -271,7 +274,7 @@ define(["require", "i18n!orion/shell/nls/messages", "orion/bootstrap", "orion/co
 		var span = document.createElement("span"); //$NON-NLS-0$
 		span.appendChild(document.createTextNode(isInitial ? messages["Initial directory: "] : messages["Changed to: "]));
 		var bold = document.createElement("b"); //$NON-NLS-0$
-		bold.appendChild(document.createTextNode(dirName));
+		bold.appendChild(document.createTextNode(bidiUtils.enforceSTT(dirName, 'filepath')));
 		span.appendChild(bold);
 		return span;
 	}

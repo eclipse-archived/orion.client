@@ -369,9 +369,9 @@ define([
 
 							description = repo.GitUrl ? messages["git url:"] + repo.GitUrl : messages["(no remote)"];
 							if(repo.SubmoduleStatus && repo.SubmoduleStatus.Type ==="UNINITIALIZED" ){
-								subDescription = messages["location: "] + repo.SubmoduleStatus.Path;
+								subDescription = messages["location: "] + bidiUtils.enforceSTT(repo.SubmoduleStatus.Path, 'filepath');
 							}else {
-								subDescription = repo.Content ? messages["location: "] + repo.Content.Path : ellipses;
+								subDescription = repo.Content ? messages["location: "] + bidiUtils.enforceSTT(repo.Content.Path, 'filepath') : ellipses;
 							}
 							
 

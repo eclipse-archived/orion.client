@@ -35,6 +35,7 @@
   padding: 2px 3px;
   -moz-padding-start: 8px;
   -webkit-padding-start: 8px;
+  text-align: left;
 }
 
 .gcli-menu-desc {

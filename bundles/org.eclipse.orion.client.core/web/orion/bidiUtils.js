@@ -8,9 +8,10 @@
  *
  *******************************************************************************/
 define ([
-	"orion/util"
+	"orion/util",
+	"orion/bidiFormat"
 ],
-function(util) { /* BDL */
+function(util, bidiFormat) { /* BDL */
 	
 	var bidiEnabledStorage = "/orion/preferences/bidi/bidiEnabled"; //$NON-NLS-0$
 	var bidiLayoutStorage = "/orion/preferences/bidi/bidiLayout"; //$NON-NLS-0$	
@@ -172,6 +173,13 @@ function(util) { /* BDL */
 		}
 		return range;
 	}
+	
+	function enforceSTT(text, type) {
+		if (isBidiEnabled() && text && type) {
+			return bidiFormat.getString(text, type, {subDir : getBidiLayout()} , false, 'en');
+		}
+	    return text;
+	}
 
 		
 	return {
@@ -179,6 +187,7 @@ function(util) { /* BDL */
 		getTextDirection: getTextDirection,		
 		enforceTextDirWithUcc: enforceTextDirWithUcc,
 		initInputField: initInputField,
-		enforceTextDir: enforceTextDir
+		enforceTextDir: enforceTextDir,
+		enforceSTT: enforceSTT
 	};
 });
