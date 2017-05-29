@@ -11,7 +11,7 @@
  *******************************************************************************/
 
 /*eslint-env browser, amd*/
-define(["orion/Deferred", "orion/urlUtils", "marked/marked"], function(Deferred, mUrlUtils, marked) {
+define(["orion/Deferred", "orion/urlUtils", "marked/marked", "orion/bidiUtils"], function(Deferred, mUrlUtils, marked, bidiUtils) {
 
 	var orion = {};
 	orion.shellPage = {};
@@ -122,7 +122,7 @@ define(["orion/Deferred", "orion/urlUtils", "marked/marked"], function(Deferred,
 					if (segments.length) {
 						mUrlUtils.processURLSegments(element, segments);				
 					} else {
-						element.textContent = string;
+						element.textContent = bidiUtils.enforceTextDirWithUcc(string);
 					}
 				}
 				var children = element.childNodes;

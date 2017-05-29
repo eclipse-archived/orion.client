@@ -233,6 +233,8 @@ objects.mixin(SiteEditor.prototype, {
 				_self.nameInvalid.classList.add("visible"); //$NON-NLS-0$
 			}
 		});
+		bidiUtils.initInputField(this.name);
+		
 		this.hostHint.addEventListener("change", function(event) { //$NON-NLS-0$
 			if (_self.hostHint.checkValidity()) {
 				_self.hostHint.classList.remove("invalid"); //$NON-NLS-0$
@@ -242,6 +244,7 @@ objects.mixin(SiteEditor.prototype, {
 				_self.hostInvalid.classList.add("visible"); //$NON-NLS-0$
 			}
 		});
+		bidiUtils.initInputField(this.hostHint);
 
 		// "Convert to self hosting" command
 		var self = this;

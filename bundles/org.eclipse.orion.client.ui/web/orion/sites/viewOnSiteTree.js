@@ -11,8 +11,8 @@
 /*eslint-env browser, amd*/
 define(['i18n!orion/sites/nls/messages', 'orion/i18nUtil', 'orion/Deferred', 'orion/globalCommands',
 		'orion/sites/siteUtils', 'orion/sites/siteClient', 'orion/webui/treetable',
-		'orion/webui/littlelib'],
-		function(messages, i18nUtil, Deferred, mGlobalCommands, mSiteUtils, mSiteClient, treetable, lib) {
+		'orion/webui/littlelib', 'orion/bidiUtils'],
+		function(messages, i18nUtil, Deferred, mGlobalCommands, mSiteUtils, mSiteClient, treetable, lib, bidiUtils) {
 	var formatMessage = i18nUtil.formatMessage;
 	var TableTree = treetable.TableTree;
 	var ViewOnSiteTree;
@@ -251,7 +251,7 @@ define(['i18n!orion/sites/nls/messages', 'orion/i18nUtil', 'orion/Deferred', 'or
 				actionCol.id = tableRow.id + "col2"; //$NON-NLS-0$
 
 				// Site config column
-				siteConfigCol.textContent = item.Placeholder ? messages["New Site"] : siteConfig.Name;
+				siteConfigCol.textContent = item.Placeholder ? messages["New Site"] : bidiUtils.enforceTextDirWithUcc(siteConfig.Name);
 
 				// Action column
 				var actionsWrapper = document.createElement("span"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
@@ -327,7 +327,7 @@ define(['i18n!orion/sites/nls/messages', 'orion/i18nUtil', 'orion/Deferred', 'or
 
 				options.renderer = new ViewOnSiteRenderer(options);
 				if (options.label) {
-					document.getElementById(options.label).textContent = formatMessage(messages.ViewOnSiteCaption, file.Name);
+					document.getElementById(options.label).textContent = formatMessage(messages.ViewOnSiteCaption, bidiUtils.enforceTextDirWithUcc(file.Name));
 				}
 
 				// Create tree widget
