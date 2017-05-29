@@ -16,6 +16,7 @@ var clone = require('./clone');
 var express = require('express');
 var bodyParser = require('body-parser');
 var util = require('./util');
+var git = require('nodegit');
 
 module.exports = {};
 
@@ -84,30 +85,50 @@ function getConfig(req, res) {
 			if (err) {
 				return writeError(400, res, err.message);
 			}
-			configs = [];
-
-			getFullPath(config, "");
-
-			writeResponse(200, res, null, {
-				"Children": configs,
-				"CloneLocation": gitRoot + "/clone" + fileDir,
-				"Location": gitRoot + "/config/clone"+ fileDir,
-				"Type": "Config"
-			}, true);
-
-			function getFullPath(config, prefix) {
-				if (typeof config !== "object" || Array.isArray(config)) {
-					if (!filter || prefix.indexOf(filter) !== -1) {
-						configs.push(configJSON(prefix, config, fileDir));
-					}
-				} else {
-					for (var property in config) {
-						if (config.hasOwnProperty(property)) {
-							getFullPath(config[property], prefix === "" ? property : prefix + "." + property);
+			var waitFor = Promise.resolve();
+			if(options.options.configParams["orion.single.user"]){
+				var user = config.user || (config.user = {});
+				if(!user.name){
+					waitFor = git.Config.openDefault().then(function(defaultConfig){
+						var fillUserName = defaultConfig.getString("user.name").then(function(defaultConfigValue) {
+							return defaultConfigValue && (user.name = defaultConfigValue);
+						});
+						var fillUserEmail = defaultConfig.getString("user.email").then(function(defaultConfigValue) {
+							return defaultConfigValue && (user.email = defaultConfigValue);
+						});
+						return Promise.all([fillUserName,fillUserEmail]);
+					}).then(function(){
+						args.writeConfigFile(configFile, config, function(err) {});
+					});
+				}
+			}
+			return waitFor.then(function(){
+				configs = [];
+				
+				getFullPath(config, "");
+				
+				writeResponse(200, res, null, {
+					"Children": configs,
+					"CloneLocation": gitRoot + "/clone" + fileDir,
+					"Location": gitRoot + "/config/clone"+ fileDir,
+					"Type": "Config"
+				}, true);
+				
+				function getFullPath(config, prefix) {
+					if (typeof config !== "object" || Array.isArray(config)) {
+						if (!filter || prefix.indexOf(filter) !== -1) {
+							configs.push(configJSON(prefix, config, fileDir));
+						}
+					} else {
+						for (var property in config) {
+							if (config.hasOwnProperty(property)) {
+								getFullPath(config[property], prefix === "" ? property : prefix + "." + property);
+							}
 						}
 					}
 				}
-			}
+			});
+		//TODO read user prefs if no username/email is specified -> git/config/userInfo (GitName && GitEmail)
 		});
 	})
 	.catch(function(err) {
