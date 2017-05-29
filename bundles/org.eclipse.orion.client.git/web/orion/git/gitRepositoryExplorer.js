@@ -339,8 +339,9 @@ define([
 			} else {
 				mMetrics.logPageLoadTiming("interactive", window.location.pathname);
 				mMetrics.logPageLoadTiming("complete", window.location.pathname);
+				this.loadingDeferred.resolve();
 			}
-		};
+		}.bind(this);
 	
 		if (!repository && this.repositoriesNavigator && this.repositoriesNavigator.model) {
 			this.preferencesService.get("/git/settings").then(function(prefs) {  //$NON-NLS-0$
