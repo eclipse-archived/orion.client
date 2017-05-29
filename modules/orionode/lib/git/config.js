@@ -91,18 +91,14 @@ function getConfig(req, res) {
 				if(!user.name){
 					waitFor = git.Config.openDefault().then(function(defaultConfig){
 						var fillUserName = defaultConfig.getString("user.name").then(function(defaultConfigValue) {
-							return user.name = defaultConfigValue;
+							return defaultConfigValue && (user.name = defaultConfigValue);
 						});
 						var fillUserEmail = defaultConfig.getString("user.email").then(function(defaultConfigValue) {
-							return user.email = defaultConfigValue;
+							return defaultConfigValue && (user.email = defaultConfigValue);
 						});
 						return Promise.all([fillUserName,fillUserEmail]);
 					}).then(function(){
-						args.writeConfigFile(configFile, config, function(err) {
-							if (err) {
-								return writeError(400, res, err.message);
-							}
-						});
+						args.writeConfigFile(configFile, config, function(err) {});
 					});
 				}
 			}
