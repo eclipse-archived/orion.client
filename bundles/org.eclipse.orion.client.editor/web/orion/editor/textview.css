@@ -8,7 +8,7 @@
 }
 
 .textviewSelection {
-	background: rgba(180, 213, 255, 0.99);
+	background: rgb(180, 213, 255);
 }
 .textviewContent ::-moz-selection {
 	background: rgba(180, 213, 255, 0.99);

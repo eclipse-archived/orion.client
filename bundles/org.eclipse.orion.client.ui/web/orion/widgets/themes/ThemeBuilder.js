@@ -190,9 +190,9 @@ function(messages, i18nUtil, mCommands, mCommandRegistry, lib, mTooltip, colors,
 			var imageDataUrl;
 			if(id.substr(11,4) === "Wave"){  //cases for underline wavies, instead of saving Hex to css, use dataUrl for background-images. So the id for wavies has to be editorThemeWave...
 				imageDataUrl = composeImageData("Wave", val);
-			}else if(id.substr(26, 6) === "AMDiff"){
+			}else if(id.substr(26, 6) === "AMDiff"){ // case for DiffAdded and DiffModifed images
 				imageDataUrl = composeImageData("AMDiff", val);
-			}else if(id.substr(26, 5) === "DDiff"){
+			}else if(id.substr(26, 5) === "DDiff"){ // case for DiffDeleted image
 				imageDataUrl = composeImageData("DDiff", val);
 			}
 			for (var i = 0; i < scopeList.length; i++){
