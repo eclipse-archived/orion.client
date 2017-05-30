@@ -301,7 +301,7 @@ define({
 			"box-shadow": "none"
 		},
 		".splashAbout": {
-			"color": "#00D78C !important"
+			"color": "#1BB199 !important"
 		},
 		".splashDetailedMessage": {
 			"color": "#FFFFFF"
@@ -332,7 +332,7 @@ define({
 			"color": "#FFFFFF"
 		},
 		".splashVerbal": {
-			"color": "#00D78C !important"
+			"color": "#1BB199 !important"
 		},
 		".split": {
 			"background": "#3B4B54"
@@ -373,14 +373,14 @@ define({
 				"margin-bottom": "2px"
 			},
 			"color": "#FFFFFF",
-			"background-color": "rgb(27, 177, 153)",
+			"background-color": "rgb(18, 123, 107)",
 			".commandButton:not(.primaryButton):hover":{
 				"color": "white",
-    			"background-color": "rgba(59, 75, 84,0.25)"
+    			"background-color": "rgba(59, 75, 84, 0.25)"
 			},
 			".commandButton:not(.primaryButton):focus":{
 				"color": "white",
-    			"background-color": "rgba(59, 75, 84,0.25)"			
+    			"background-color": "rgba(59, 75, 84, 0.25)"			
     		}
 		},
 		".titleActionContainer": {
@@ -487,8 +487,8 @@ define({
 			"color": "#FFFFFF"
 		},
 		".contentassist .selected":{
-			"background-color": "#1BB199",
-			"background": "#1BB199"
+			"background-color": "#127b6b",
+			"background": "#127b6b"
 		}
 	}
 });
