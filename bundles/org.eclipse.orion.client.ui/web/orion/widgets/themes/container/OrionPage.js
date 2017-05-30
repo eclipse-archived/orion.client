@@ -436,8 +436,6 @@ define({
 		},
 		".treeTableRow": {
 			"span.core-sprite-closedarrow:hover" : {
-<<<<<<< HEAD
-<<<<<<< HEAD
 				"color": "#707070",
 				"background-color": "#A5B5BC"
 			},
@@ -454,19 +452,7 @@ define({
 			"span.core-sprite-openarrow:hover" : {
 				"color": "white",
 				"background-color": "#A5B5BC"
-=======
-				"color": "#007b4f"
 			},
-			"span.core-sprite-openarrow:hover" : {
-				"color": "#007b4f"
->>>>>>> 131322f2c83f10945227eab109e0d886ec5e95d8
-=======
-				"color": "#127b6b"
-			},
-			"span.core-sprite-openarrow:hover" : {
-				"color": "#127b6b"
->>>>>>> 131322f2c83f10945227eab109e0d886ec5e95d8
-			}
 		},
 		".workingTarget": {
 			"background-color": "#FFFFFF"
