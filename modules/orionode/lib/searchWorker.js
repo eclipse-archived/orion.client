@@ -126,7 +126,11 @@ try {
 		})) {
 			return;
 		}
-		var filePath = dirLocation + filename;
+		var filePath = dirLocation;
+		if (filePath.substring(filePath.length - 1) !== path.sep) {
+			filePath = filePath + path.sep;
+		}
+		filePath += filename;
 		return fs.statAsync(filePath)
 		.then(function(stats) {
 			/*eslint consistent-return:0*/
@@ -191,35 +195,36 @@ try {
 			return;
 		}
 
-		return fs.readdirAsync(searchOpts.searchScope)
-		.then(function(children) {
-			var results = [];
-			return Promise.map(children, function(child) {
-				return searchFile(searchOpts.fileRoot, searchOpts.workspaceDir, searchOpts.searchScope, child, searchPattern, filenamePatterns, excludeFilenamePatterns, results);
-			}, { concurrency: SUBDIR_SEARCH_CONCURRENCY })
-			.then(function() {
-				return {
-					"response": {
-						"docs": results,
-						"numFound": results.length,
-						"start": 0
-					},
-					"responseHeader": {
-						"params": {
-							"fl": "Name,NameLower,Length,Directory,LastModified,Location,Path,RegEx,CaseSensitive",
-							"fq": [
-								"Location:"+ searchOpts.location,
-								"UserName:anonymous"
-							],
-							"rows": "10000",
-							"sort": "Path asc",
-							"start": "0",
-							"wt": "json"
-						},
-						"status": 0
-					}
-				};
+		var results = [];
+		return Promise.map(searchOpts.searchScope, function(scope) {
+			return fs.readdirAsync(scope.path)
+			.then(function(children) {
+				return Promise.map(children, function(child) {
+					return searchFile(scope.fileRoot, scope.workspaceDir, scope.path, child, searchPattern, filenamePatterns, excludeFilenamePatterns, results);
+				}, { concurrency: SUBDIR_SEARCH_CONCURRENCY });
 			});
+		}, { concurrency: SUBDIR_SEARCH_CONCURRENCY }).then(function() {
+			return {
+				"response": {
+					"docs": results,
+					"numFound": results.length,
+					"start": 0
+				},
+				"responseHeader": {
+					"params": {
+						"fl": "Name,NameLower,Length,Directory,LastModified,Location,Path,RegEx,CaseSensitive",
+						"fq": [
+							"Location:"+ searchOpts.location,
+							"UserName:anonymous"
+						],
+						"rows": "10000",
+						"sort": "Path asc",
+						"start": "0",
+						"wt": "json"
+					},
+					"status": 0
+				}
+			};
 		});
 	}
 	

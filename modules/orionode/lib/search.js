@@ -134,7 +134,6 @@ module.exports = function(options) {
 		var searchOpts = new SearchOptions(req.originalUrl, req.contextPath);
 		buildSearchOptions(searchOpts);
 
-		var searchScope;
 		var loc = searchOpts.location;
 		loc = loc.replace(/^\/file/, "");
 		loc = loc.replace(/^\/workspace/, "");
@@ -142,19 +141,27 @@ module.exports = function(options) {
 			
 		var file = fileUtil.getFile(req, loc);
 		
-		if (!file) {
+		if (file) {
+			file.fileRoot = api.join(req.contextPath, "file", file.workspaceId);
+			searchOpts.searchScope = [file];
+		} else {
+			var store = fileUtil.getMetastore(req);
+			searchOpts.searchScope = req.user.workspaces.map(function(w) {
+				var path = store.getWorkspaceDir(w.id);
+				return {
+					path: path,
+					workspaceId: w.id,
+					workspaceDir: path,
+					fileRoot: api.join(req.contextPath, "file", w.id)
+				};
+			});
+		}
+		
+		if (!searchOpts.searchScope || !searchOpts.searchScope.length) {
 			api.writeError(400, res);
 			return;
 		}
-		
-		searchScope = file.path;
-		if (searchScope.charAt(searchScope.length - 1) !== path.sep) {
-			searchScope = searchScope + path.sep;
-		}
-		searchOpts.fileRoot = api.join(req.contextPath, "file", file.workspaceId);
-		searchOpts.workspaceDir = file.workspaceDir;
-		searchOpts.searchScope = searchScope;
-		
+
 		search(searchOpts).then(function(result) {
 			api.writeResponse(200, res, null, result);
 		}).catch (function(err) {
