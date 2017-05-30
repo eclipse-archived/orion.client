@@ -100,11 +100,11 @@ define([
 							"backgroundColor": "#ADFFAD"
 						},
 						"matchingSearch": {
-							"backgroundColor": "#c3e1ff",
+							"backgroundColor": "#C3E1FF",
 							"outline": "1px solid",
 							"outlineColor": "rgba(24, 159, 227, 0)",
 							"currentSearch": {
-								"backgroundColor": "#53d1ff"
+								"backgroundColor": "#53D1FF"
 							}
 						},
 						"writeOccurrence": {
@@ -114,10 +114,10 @@ define([
 							"backgroundColor": "#CACACA"
 						}
 					},
-					"backgroundColor": "#ffffff",
+					"backgroundColor": "#FFFFFF",
 					"color": "#151515",
 					"comment": {
-						"color": "#357d21"
+						"color": "#357D21"
 					},
 					"constant": {
 						"color": "#9932CC",
@@ -132,7 +132,7 @@ define([
 						"name": {
 							"color": "#7D7755",
 							"function": {
-								"color": "#007b78",
+								"color": "#007B78",
 								"fontWeight": "bold"
 							}
 						},
@@ -146,7 +146,7 @@ define([
 					"fontSize": defaultFontSize,
 					"keyword": {
 						"control": {
-							"color": "#c04600",
+							"color": "#C04600",
 							"fontWeight": "bold"
 						},
 						"operator": {
@@ -155,7 +155,7 @@ define([
 						},
 						"other": {
 							"documentation": {
-								"color": "#37739f",
+								"color": "#37739F",
 								"task": {
 									"color": "#006DD4"
 								}
@@ -176,7 +176,7 @@ define([
 							"fontStyle": "italic"
 						},
 						"list": {
-							"color": "#c04600"
+							"color": "#C04600"
 						},
 						"other": {
 							"separator": {
@@ -186,11 +186,11 @@ define([
 								"textDecoration": "line-through"
 							},
 							"table": {
-								"color": "#357d21"
+								"color": "#357D21"
 							}
 						},
 						"quote": {
-							"color": "#314dce"
+							"color": "#314DCE"
 						},
 						"raw": {
 							"fontFamily": "monospace",
@@ -207,7 +207,7 @@ define([
 					"meta": {
 						"documentation": {
 							"annotation": {
-								"color": "#37739f"
+								"color": "#37739F"
 							},
 							"tag": {
 								"color": "#737396"
@@ -217,9 +217,9 @@ define([
 							"color": "#A4A4A4"
 						},
 						"tag": {
-							"color": "#c04600",
+							"color": "#C04600",
 							"attribute": {
-								"color": "#58727e"
+								"color": "#58727E"
 							}
 						}
 					},
@@ -230,18 +230,18 @@ define([
 					},
 					"ruler": {
 						"annotations": {
-							"backgroundColor": "#ffffff"
+							"backgroundColor": "#FFFFFF"
 						},
-						"backgroundColor": "#ffffff",
+						"backgroundColor": "#FFFFFF",
 						"overview": {
-							"backgroundColor": "#ffffff"
+							"backgroundColor": "#FFFFFF"
 						}
 					},
 					"rulerLines": {
 						"color": "#767676"
 					},
 					"string": {
-						"color": "#314dce",
+						"color": "#314DCE",
 						"interpolated": {
 							"color": "#151515"
 						}
@@ -260,10 +260,10 @@ define([
 						"backgroundColor": "rgba(180,213,255,0.99)"
 					},
 					"textviewLeftRuler": {
-						"borderColor": "#ffffff"
+						"borderColor": "#FFFFFF"
 					},
 					"textviewRightRuler": {
-						"borderColor": "#ffffff"
+						"borderColor": "#FFFFFF"
 					},
 					"textviewSelection": {
 						"backgroundColor": "rgba(180,213,255,0.99)"
@@ -305,7 +305,7 @@ define([
 								"backgroundColor": "rgb(66, 133, 162)"
 							},
 							"blame":{
-								"color": "#ebebeb",
+								"color": "#EBEBEB",
 								"backgroundColor": "rgb(177, 74, 0)"
 							},
 							"currentBlame":{
@@ -315,7 +315,7 @@ define([
 					},
 					"annotationOverview":{
 						"warning": {
-							"backgroundColor": "#F6C003"
+							"backgroundColor": "#FFFF00"
 						},
 						"info":{
 							"backgroundColor": "#65C8FF"
@@ -324,7 +324,7 @@ define([
 							"backgroundColor": "#FF898C"
 						},
 						"diffDeleted":{
-							"color": "#FF898C"
+							"color": "#FF0000"
 						}
 					},
 					"annotationLine": {
@@ -353,7 +353,7 @@ define([
 							"outline": "1px solid",
 							"outlineColor": "rgba(24, 159, 227, 1)",
 							"currentSearch": {
-								"backgroundColor": "#465e47"
+								"backgroundColor": "#465E47"
 							}
 						},
 						"writeOccurrence": {
@@ -373,7 +373,7 @@ define([
 							"outline": "1px solid #BEA100"
 						},
 						"warning":{
-							"backgroundImage": "url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAQAAAADCAYAAAC09K7GAAAAH0lEQVQYV2NkgIJvB5j/czn8ZWQE8WEcEM0I48BUAgBwnQ68Y+viTgAAAABJRU5ErkJggg==)"
+							"backgroundImage": "url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAQAAAADCAYAAAC09K7GAAAAHUlEQVQYV2NkgIL//xn+MzIyMDKC+DAOmIZxYCoBNEkMAR1F6ZQAAAAASUVORK5CYII=)"
 						},
 						"info":{
 							"backgroundImage": "url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAQAAAADCAYAAAC09K7GAAAAH0lEQVQYV2NkgILUE///z7ZgZGQE8WEcEM0I48BUAgB9cA8vM5pJ1QAAAABJRU5ErkJggg==)"
@@ -382,7 +382,7 @@ define([
 							"backgroundImage": "url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAQAAAADCAYAAAC09K7GAAAAHUlEQVQYV2NkgIL/nT3/GctLGBlBfBgHTMM4MJUAe30PF+f8aegAAAAASUVORK5CYII=)"
 						}
 					},
-					"backgroundColor": "#1A252D",
+					"backgroundColor": "#26343F",
 					"color": "#07ADCF",
 					"comment": {
 						"color": "#ADB9C0",
@@ -420,7 +420,7 @@ define([
 							"documentation": {
 								"color": "#7F9FBF",
 								"task": {
-									"color": "#8db6f1"
+									"color": "#8DB6F1"
 								}
 							},
 							"directive" : {
@@ -433,7 +433,7 @@ define([
 							"fontWeight": "bold"
 						},
 						"heading": {
-							"color": "#91c23d"
+							"color": "#91C23D"
 						},
 						"italic": {
 							"fontStyle": "italic"
@@ -443,7 +443,7 @@ define([
 						},
 						"other": {
 							"separator": {
-								"color": "#e8d075"
+								"color": "#E8D075"
 							},
 							"strikethrough": {
 								"textDecoration": "line-through"
@@ -474,7 +474,7 @@ define([
 								"color": "#A1BAD5"
 							},
 							"tag": {
-								"color": "#8888A6"
+								"color": "#9898B2"
 							}
 						},
 						"preprocessor": {
@@ -490,7 +490,7 @@ define([
 						}
 					},
 					"ruler": {
-						"backgroundColor": "#1A252D"
+						"backgroundColor": "#26343F"
 					},
 					"rulerLines": {
 						"color": "#93A2AA",
@@ -498,7 +498,7 @@ define([
 					"string": {
 						"color": "#01D1B6",
 						"interpolated": {
-							"color": "#dadada"
+							"color": "#DADADA"
 						}
 					},
 					"support": {
@@ -528,7 +528,7 @@ define([
 					},
 					"variable": {
 						"language": {
-							"color": "#8983BF",
+							"color": "#9994CA",
 							"fontWeight": "bold"
 						},
 						"other": {

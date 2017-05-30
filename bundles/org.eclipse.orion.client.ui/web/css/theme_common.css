@@ -756,7 +756,7 @@ a.breadcrumb.currentLocation {
 }
 
 .dropdownMenu .dropdownMenuItemSelected {
-	background-color: rgba(27,177,153, 0.1);
+	background-color: rgba(16,106,91, 0.1);
 	border-left-color: #1BB199;
 }
 

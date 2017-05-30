@@ -247,16 +247,7 @@ define(['i18n!orion/settings/nls/messages'
 			],
 			id: "editorSelection",
 			value: defaultColor
-		},{
-			display: messages["editorTheme warning color"],
-			objPath: [
-				"styles annotationOverview warning backgroundColor",
-				"styles annotationOverview warning borderColor",
-				"styles annotationRange warning backgroundImage"
-			],
-			id: "editorThemeWaveWarning",
-			value: defaultColor
-		},{
+		}, {
 			display: messages["editorTheme info color"],
 			objPath: [
 				"styles annotationOverview info backgroundColor",
@@ -265,7 +256,16 @@ define(['i18n!orion/settings/nls/messages'
 			],
 			id: "editorThemeWaveInfo",
 			value: defaultColor
-		},{
+		}, {
+			display: messages["editorTheme warning color"],
+			objPath: [
+				"styles annotationOverview warning backgroundColor",
+				"styles annotationOverview warning borderColor",
+				"styles annotationRange warning backgroundImage"
+			],
+			id: "editorThemeWaveWarning",
+			value: defaultColor
+		}, {
 			display: messages["editorTheme error color"],
 			objPath: [
 				"styles annotationOverview error backgroundColor",
@@ -273,6 +273,16 @@ define(['i18n!orion/settings/nls/messages'
 				"styles annotationRange error backgroundImage"
 			],
 			id: "editorThemeWaveError",
+			value: defaultColor
+		}, {
+			display: messages["editorTheme lines annotation diffDeleted"],
+			objPath: [
+				"styles annotationOverview diffDeleted color",
+				"styles lines annotation diffDeleted backgroundImage",
+				"styles annotation diffDeleted backgroundImage",
+				"styles annotationHTML diffDeleted backgroundImage"
+			],
+			id: "editorThemeLinesAnnotationDDiffDeleted",
 			value: defaultColor
 		}, {
 			display: messages["editorTheme lines annotation diffAdded"],
@@ -293,16 +303,6 @@ define(['i18n!orion/settings/nls/messages'
 				"styles annotationHTML diffModified backgroundImage"
 			],
 			id: "editorThemeLinesAnnotationAMDiffModifed",
-			value: defaultColor
-		}, {
-			display: messages["editorTheme lines annotation diffDeleted"],
-			objPath: [
-				"styles annotationOverview diffDeleted color",
-				"styles lines annotation diffDeleted backgroundImage",
-				"styles annotation diffDeleted backgroundImage",
-				"styles annotationHTML diffDeleted backgroundImage"
-			],
-			id: "editorThemeLinesAnnotationDDiffDeleted",
 			value: defaultColor
 		}, {
 			display: messages["editorTheme annotation blame"],
