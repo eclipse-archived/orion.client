@@ -919,11 +919,11 @@ html[dir="rtl"] .checkColumn { /* ACGC */
 }
 
 .treeIterationCursorRow {
-	background-color: rgba(27, 177, 153, 0.3);
+	background-color: rgba(16,106,91, 0.3);
 }
 
 .treeIterationCursorRow_Dotted {
-	background-color: rgba(27, 177, 153, 0.3);
+	background-color: rgba(16,106,91, 0.3);
 }
 
 .searchCmdGroupMargin {

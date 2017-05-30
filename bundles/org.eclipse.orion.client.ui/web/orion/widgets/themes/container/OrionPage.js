@@ -26,7 +26,7 @@ define({
 		},
 		".desktopmode": {
 			".selectableNavRow:hover": {
-				"background-color": "rgba(16,106,91, 0.50)"
+				"background-color": "rgba(16,106,91, 0.25)"
 			}
 		},
 		".checkedRow": {
@@ -163,7 +163,7 @@ define({
 			"color": "#5e5e5e"
 		},
 		".gitStatusTitle": {
-			"color": "#005200 !important"
+			"color": "#0d584c !important"
 		},
 		".label.parameterInput": {
 			"color": "#FFFFFF !important"
@@ -227,6 +227,12 @@ define({
 			".sectionWrapper": {
 				"background-color": "#106A5B !important",
 				"color": "#FFFFFF !important"
+			},
+			".commandButton:not(.primaryButton):focus": {
+				"color": "#FFFFFF"
+			},
+			".commandButton:not(.primaryButton):hover": {
+				"color": "#FFFFFF"
 			}
 		},
 		".mainpane": {
@@ -447,24 +453,12 @@ define({
 				"color": "#1BB199"
 			}
 		},
-		".treeTableRow.gitCommitListSection": {
-			"span.core-sprite-closedarrow:hover" : {
-				"color": "#707070",
-				"background-color": "#A5B5BC"
-			},
-			"span.core-sprite-openarrow:hover" : {
-				"color": "#707070",
-				"background-color": "#A5B5BC"
-			}
-		},
 		".treeTableRow.checkedRow.gitCommitListSection": {
 			"span.core-sprite-closedarrow:hover" : {
-				"color": "white",
-				"background-color": "#A5B5BC"
+				"color": "lightgray",
 			},
 			"span.core-sprite-openarrow:hover" : {
-				"color": "white",
-				"background-color": "#A5B5BC"
+				"color": "lightgray",
 			},
 		},
 		".workingTarget": {
