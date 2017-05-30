@@ -26,7 +26,7 @@ define({
 		},
 		".desktopmode": {
 			".selectableNavRow:hover": {
-				"background-color": "rgba(16,106,91, 0.25)"
+				"background-color": "rgba(16,106,91, 0.50)"
 			}
 		},
 		".checkedRow": {
