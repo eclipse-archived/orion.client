@@ -294,9 +294,26 @@ define(['orion/webui/littlelib'], function(lib) {
 		},
 		
 		/**
+		 * Turn off(hide permanantly) the tooltip in purpose, and this tooltip won't show until it been turned on
+		 */
+		turnOff: function() {
+			this.isTurnedOff = true;
+		},
+		
+		/**
+		 * Turn on the tooltip, and this tooltip will then work normally
+		 */
+		turnOn: function() {
+			this.isTurnedOff = false;
+		},
+		
+		/**
 		 * Show the tooltip.
 		 */			
 		show: function() {
+			if(this.isTurnedOff){
+				return;
+			}
 			if (this.isShowing()) { //$NON-NLS-0$
 				return;
 			}

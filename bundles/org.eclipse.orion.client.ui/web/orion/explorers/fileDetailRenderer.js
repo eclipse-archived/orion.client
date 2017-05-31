@@ -89,8 +89,14 @@ define([
     
     function showFullPath(parentNode, show) {
 		if (show) {
+			tooltips.forEach(function(tooltip){
+        		tooltip.turnOff();
+        	});
         	parentNode.classList.add("showFullPath"); //$NON-NLS-0$
         } else {
+        	tooltips.forEach(function(tooltip){
+        		tooltip.turnOn();
+        	});
         	parentNode.classList.remove("showFullPath"); //$NON-NLS-0$
         }
     }
@@ -384,7 +390,7 @@ define([
 						this._lastFileIconDom = span;
 	                	span = _createSpan(null, this.getFileSpanId(item), col, null);
 	                    this.renderFileElement(item, span, this.explorer.model);
-		                this.generateBreadCrumb(tableRow, this.generateFileMetaForBreadCrumb(item));
+		                this.generateBreadCrumb(tableRow, this.generateFileMetaForBreadCrumb(item), this.explorer._shouldShowFullPath);
 	                } else if (item.type === "group") { //$NON-NLS-0$
 	                	col.colSpan = 2;
 	                	span = _createSpan(null, null, col, null);
@@ -429,7 +435,7 @@ define([
 	        return col;
 	    },
 	    
-	    generateBreadCrumb: function(tableRow, metadata){
+	    generateBreadCrumb: function(tableRow, metadata, shouldShowFullPath){
 	    	if(typeof metadata === "string"){
 	    		var groupNodeTooltip = new mTooltip.Tooltip({
 					node: tableRow,
@@ -463,14 +469,15 @@ define([
 				var breadcrumbOptions = {
 					container: localBreadcrumbNode,
 					resource: metadata,
-					workspaceRootSegmentName: this.explorer.fileClient.fileServiceName(metadata.Location),
-					workspaceRootURL: metadata.workspace,
 					makeFinalHref: true,
 					makeHref: makeHref,
 					// This id should be unique regardless of editor views open.
 					id: "breadcrumb" + metadata.Location + breadcrumbUniquifier
 				};
 				new mBreadcrumbs.BreadCrumbs(breadcrumbOptions);
+				if(shouldShowFullPath){
+					fileNodeTooltip.turnOff();
+				}
 				tooltips.push(fileNodeTooltip);
 	    	}
 	    },

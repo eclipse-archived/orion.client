@@ -187,9 +187,9 @@ a:hover {
 	color: #E6E6E6;
 	-webkit-flex-grow: 0;		/* Safari */
 	flex-grow: 0;
-	font: 9pt;
-	font-family: "HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue", 
-		Helvetica, Tahoma, Geneva, Arial, "Lucida Grande", sans-serif;
+	font-size: 9pt;
+	font-family: HelveticaNeue, "Helvetica Neue", HelveticaNeueRoman, HelveticaNeue-Roman, "Helvetica Neue Roman", 
+		TeXGyreHerosRegular, Helvetica, Tahoma, Geneva, Arial, sans-serif;
 	overflow: hidden;
 	text-decoration: none;
 	text-overflow: ellipsis;
@@ -215,11 +215,9 @@ a.breadcrumb:hover {
 }
 
 .currentLocation {
-	padding-top:1px;
-	font-weight: bold;
 	font-size: 9pt;
-	font-family: "HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue", 
-		Helvetica, Tahoma, Geneva, Arial, "Lucida Grande", sans-serif;
+	font-family: HelveticaNeue, "Helvetica Neue", HelveticaNeueRoman, HelveticaNeue-Roman, "Helvetica Neue Roman", 
+		TeXGyreHerosRegular, Helvetica, Tahoma, Geneva, Arial, sans-serif;
 	color: #E6E6E6;
 	text-decoration: none;
 	line-height: 10pt;
@@ -235,14 +233,12 @@ div.currentLocation {
 }
 
 a.currentLocation:hover {
-	font-weight: bold;
 	color: #00AED1;
  	text-decoration: none;
 	border-bottom: 1px dotted;
 }
 
 a.breadcrumb.currentLocation {
-	font-weight: bold;
 	margin: 0;
 }
 
@@ -823,7 +819,7 @@ a.breadcrumb.currentLocation {
 	color: white;
 	background-color: #158d7a;
 	border-radius: 3px;
-	padding: 8px;
+	padding: 4px;
 	clear: both;
 	float: left;
 	border: 1px solid #158d7a;
