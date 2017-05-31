@@ -86,7 +86,7 @@ function getConfig(req, res) {
 				return writeError(400, res, err.message);
 			}
 			var waitFor = Promise.resolve();
-			if(options.options.configParams["orion.single.user"]){
+			if(options && options.options && options.options.configParams["orion.single.user"]){
 				var user = config.user || (config.user = {});
 				if(!user.name){
 					waitFor = git.Config.openDefault().then(function(defaultConfig){
