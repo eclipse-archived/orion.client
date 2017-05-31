@@ -16,6 +16,33 @@ define(["orion/util"], function(util) {
 	 */
 
 	/**
+	 * Holds useful <code>keyCode</code> values.
+	 * @name orion.webui.littlelib.KEY
+	 * @static
+	 */
+	var KEY = {
+		BKSPC: 8,
+		TAB: 9,
+		ENTER: 13,
+		SHIFT: 16,
+		CONTROL: 17,
+		ALT: 18,
+		ESCAPE: 27,
+		SPACE: 32,
+		PAGEUP: 33,
+		PAGEDOWN: 34,
+		END: 35,
+		HOME: 36,
+		LEFT: 37,
+		UP: 38,
+		RIGHT: 39,
+		DOWN: 40,
+		INSERT: 45,
+		DEL: 46,
+		COMMAND: 91
+	};
+
+	/**
 	 * Alias for <code>node.querySelector()</code>.
 	 * @name orion.webui.littlelib.$
 	 * @function
@@ -149,12 +176,12 @@ define(["orion/util"], function(util) {
 		}
 		return result;
 	}
-
+	
 	/* 
 	 * Inspired by http://brianwhitmer.blogspot.com/2009/05/jquery-ui-tabbable-what.html
 	 */
 	function firstTabbable(node) {
-		if (_getTabIndex(node) >= 0) {
+		if (_getTabIndex(node) >= 0 && !node.disabled) {
 			return node;
 		}
 		if (node.hasChildNodes()) {
@@ -167,22 +194,49 @@ define(["orion/util"], function(util) {
 		}
 		return null;
 	}
-	
+
 	function lastTabbable(node) {
-		if (_getTabIndex(node) >= 0) {
-			return node;
-		}
 		if (node.hasChildNodes()) {
-			for (var i=node.childNodes.length - 1; i>=0; i--) {
+			for (var i = node.childNodes.length-1; i >= 0; i--) {
 				var result = lastTabbable(node.childNodes[i]);
 				if (result) {
 					return result;
 				}
 			}
 		}
+		if (_getTabIndex(node) >= 0 && !node.disabled) {
+			return node;
+		}
 		return null;
 	}
 
+	/* Trap the tabs within the given parent */
+	function trapTabs(parentElement) {
+		if (parentElement.tabTrapInstalled)
+			return;
+		
+		parentElement.addEventListener("keydown", function (e) { //$NON-NLS-0$
+			if(e.keyCode === KEY.TAB) {
+				var first = firstTabbable(parentElement);
+				var last = lastTabbable(parentElement);
+				
+				if (first && last) {
+					if (e.target === last && !e.shiftKey) {
+						// wrap to first tabbable
+						first.focus();
+						stop(e);
+					}
+					else if (e.target === first && e.shiftKey) {
+						// wrap to last tabbable
+						last.focus();
+						stop(e);
+					}
+				}
+			} 
+		}, true);
+		parentElement.tabTrapInstalled = true;
+	}
+	
 	var variableRegEx = /\$\{([^\}]+)\}/;
 	// Internal helper
 	function processNodes(node, replace) {
@@ -390,33 +444,6 @@ define(["orion/util"], function(util) {
 			frames[i].parentNode.style.pointerEvents = enable ? "" : "none"; //$NON-NLS-0$
 		}
 	}
-
-	/**
-	 * Holds useful <code>keyCode</code> values.
-	 * @name orion.webui.littlelib.KEY
-	 * @static
-	 */
-	var KEY = {
-		BKSPC: 8,
-		TAB: 9,
-		ENTER: 13,
-		SHIFT: 16,
-		CONTROL: 17,
-		ALT: 18,
-		ESCAPE: 27,
-		SPACE: 32,
-		PAGEUP: 33,
-		PAGEDOWN: 34,
-		END: 35,
-		HOME: 36,
-		LEFT: 37,
-		UP: 38,
-		RIGHT: 39,
-		DOWN: 40,
-		INSERT: 45,
-		DEL: 46,
-		COMMAND: 91
-	};
 	/**
 	 * Maps a <code>keyCode</code> to <tt>KEY</tt> name. This is the inverse of {@link orion.webui.littlelib.KEY}.
 	 * @private
@@ -474,6 +501,7 @@ define(["orion/util"], function(util) {
 		empty: empty,
 		firstTabbable: firstTabbable,
 		lastTabbable: lastTabbable,
+		trapTabs: trapTabs,
 		pixelValueOf: pixelValueOf,
 		stop: stop,
 		processTextNodes: processTextNodes,
