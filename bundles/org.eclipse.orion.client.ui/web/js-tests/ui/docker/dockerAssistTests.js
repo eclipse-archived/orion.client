@@ -708,7 +708,28 @@ define([
 					testEscape("", "VOLUME", "\\");
 					testEscape("", "WORKDIR", "\\");
 				});
-				
+
+				it("#escape=\\n", function() {
+					testEscape("#escape=\n", "ADD", "\\");
+					testEscape("#escape=\n", "ARG", "\\");
+					testEscape("#escape=\n", "CMD", "\\");
+					testEscape("#escape=\n", "COPY", "\\");
+					testEscape("#escape=\n", "ENTRYPOINT", "\\");
+					testEscape("#escape=\n", "ENV", "\\");
+					testEscape("#escape=\n", "EXPOSE", "\\");
+					testEscape("#escape=\n", "FROM", "\\");
+					testEscape("#escape=\n", "HEALTHCHECK", "\\");
+					testEscape("#escape=\n", "LABEL", "\\");
+					testEscape("#escape=\n", "MAINTAINER", "\\");
+					testEscape("#escape=\n", "ONBUILD", "\\");
+					testEscape("#escape=\n", "RUN", "\\");
+					testEscape("#escape=\n", "SHELL", "\\");
+					testEscape("#escape=\n", "STOPSIGNAL", "\\");
+					testEscape("#escape=\n", "USER", "\\");
+					testEscape("#escape=\n", "VOLUME", "\\");
+					testEscape("#escape=\n", "WORKDIR", "\\");
+				});
+
 				it("#escape=`\\n", function() {
 					testEscape("#escape=`\n", "ADD", "`");
 					testEscape("#escape=`\n", "ARG", "`");
@@ -1106,6 +1127,15 @@ define([
 					testEscape("#\r\nescape=`", "USER", "\\");
 					testEscape("#\r\nescape=`", "VOLUME", "\\");
 					testEscape("#\r\nescape=`", "WORKDIR", "\\");
+				});
+
+				it("#escape=x", function() {
+					var content = "#escape=x\nFROM x\n";
+					var proposals = compute(content, content.length, {
+						prefix: "",
+						line: ""
+					});
+					assertAllProposals(proposals, content.length, "");
 				});
 			});
 		});

@@ -61,9 +61,10 @@ define([
 									break;
 								default:
 									if (capture) {
-										// the escape directive should be a single character,
-										// so it should be followed by whitespace
-										if (j + 1 === buffer.length || isWhitespace(buffer.charAt(j + 1))) {
+										// the escape directive should be a single character and followed by whitespace,
+										// it should also either be a backslash or a backtick
+										if ((j + 1 === buffer.length || isWhitespace(buffer.charAt(j + 1)))
+												&& (char === '\\' || char === '`')) {
 											escapeCharacter = char;
 										}
 										break escapeCheck;
