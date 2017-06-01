@@ -42,7 +42,7 @@ update_config_files() {
 	
 	# update build id
 	if [ ! -z "$BUILD_ID" ]; then
-		sed -i.bak "s/orion\.buildId\=/orion\.buildId\=${BUILD_ID}/" orion.conf
+		sed -i.bak "s/orion\.buildId\=.*/orion\.buildId\=${BUILD_ID}/" orion.conf
 		sed -i.bak "s/var BUILD_ID \= \"unknown\"\;/var BUILD_ID \= \"${BUILD_ID}\"\;/" lib/version.js
 	fi
 	
@@ -56,7 +56,7 @@ update_config_files() {
 	# set udpate server
 	if [ ! -z "$UPDATE_SERVER" ]; then
 		update_url=$(echo ${UPDATE_SERVER} | sed -e 's/[\/&.-]/\\&/g') # for autoUpdater
-		sed -i .bak 's/orion\.autoUpdater\.url\=/orion\.autoUpdater\.url\='"${update_url}"'/' orion.conf
+		sed -i .bak 's/orion\.autoUpdater\.url\=.*/orion\.autoUpdater\.url\='"${update_url}"'/' orion.conf
 		latest_build=$(curl -s ${UPDATE_SERVER}"/api/version/latest" | jsawk 'return this.tag')
 		if [ ! -z "$latest_build" ]; then
 			download_url=$(echo ${UPDATE_SERVER}"/download" | sed -e 's/[\/&.-]/\\&/g') # for remoteReleases
@@ -97,7 +97,10 @@ nodegit_lib=${NODEGIT_DIR}/v${nodegit_version}/electron/v${electron_version}/mac
 if [ -f "$nodegit_lib" ]; then
 	cp $nodegit_lib ./node_modules/nodegit/build/Release
 fi
+# Capitalize name in package.json
+sed -i .bak "s/\"name\": \"${name}\",/\"name\": \"Orion\",/" package.json
 npm run dist:osx
+sed -i .bak "s/\"name\": \"Orion\",/\"name\": \"${name}\",/" package.json
 
 # Build windows setup, etc
 nodegit_lib=${NODEGIT_DIR}/v${nodegit_version}/electron/v${electron_version}/windows/nodegit.node
