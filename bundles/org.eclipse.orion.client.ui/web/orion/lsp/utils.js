@@ -46,6 +46,10 @@ define([
 					if (result.contents.length === 0) {
 						return new Deferred().resolve('');
 					}
+					var hoverContents = result.contents[0];
+					if (typeof hoverContents === 'string' && hoverContents.length === 0) {
+						return new Deferred().resolve('');
+					}
 					hover.content = result.contents[0];
 				} else if (typeof result.contents === 'string') {
 					if (result.contents.length === 0) {
