@@ -1,4 +1,4 @@
-FROM java:8
+FROM airdock/oracle-jdk
 
 ARG JAVA_LANGUAGE_SERVER
 ARG NODE_VERSION
@@ -12,9 +12,9 @@ RUN curl -L http://download.eclipse.org/jdtls/snapshots/$JAVA_LANGUAGE_SERVER -o
   && rm /home/java-language-server/java-server.tar.gz
 
 # install node 4.4.1 which is the version that matches the one used on hudson for nodejs server builds
-RUN curl -SLO "http://nodejs.org/dist/v$NODE_VERSION/node-v$NODE_VERSION-linux-x64.tar.xz" \
-  && tar -xJf "node-v$NODE_VERSION-linux-x64.tar.xz" -C /usr/local --strip-components=1 \
-  && rm "node-v$NODE_VERSION-linux-x64.tar.xz" \
+RUN curl -SLO "http://nodejs.org/dist/v$NODE_VERSION/node-v$NODE_VERSION-linux-x64.tar.gz" \
+  && tar -xzvf "node-v$NODE_VERSION-linux-x64.tar.gz" -C /usr/local --strip-components=1 \
+  && rm "node-v$NODE_VERSION-linux-x64.tar.gz" \
   && ln -s /usr/local/bin/node /usr/local/bin/nodejs
 
 # Create app directory
