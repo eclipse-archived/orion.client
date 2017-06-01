@@ -484,6 +484,26 @@ GitClient.prototype = {
 		});
 	},
 
+	stashDrop: function(revision, statusCode, message) {
+		if (typeof statusCode !== 'number') {
+			statusCode = 200;
+		}
+
+		var client = this;
+		this.tasks.push(function(resolve) {
+			request()
+			.delete(CONTEXT_PATH + "/gitapi/stash/" + revision + FILE_ROOT + client.getName())
+			.expect(statusCode)
+			.end(function(err, res) {
+				assert.ifError(err);
+				if (statusCode !== 200) {
+					assert.equal(res.body.Message, message);
+				}
+				client.next(resolve, res.body);
+			});
+		});
+	},
+
 	reset: function(type, id) {
 		var client = this;
 		this.tasks.push(function(resolve) {
@@ -3843,6 +3863,67 @@ maybeDescribe("git", function() {
 				});
 			}); // it("simple")
 		}); // describe("Pop")
+
+		describe("Drop", function() {
+
+			/**
+			 * Drop the stash when it is empty.
+			 */
+			it("empty stash", function(finished) {
+				var client = new GitClient("stash-drop-empty");
+				// init a new Git repository
+				client.init();
+				// try dropping the whole stash
+				client.stashDrop(null, 400, "Failed to drop stashed changes due to an empty stash.");
+				client.start().then(function(body) {
+					finished();
+				})
+				.catch(function(err) {
+					finished(err);
+				});
+			}); // it("empty stash")"
+
+			/**
+			 * Drop a given stash revision when the stash is empty.
+			 */
+			it("empty stash with stash rev", function(finished) {
+				var client = new GitClient("stash-drop-empty-stash-rev");
+				// init a new Git repository
+				client.init();
+				// try dropping a stash revision while the stash is not empty
+				client.stashDrop("rev123", 400, "Failed to drop stashed changes due to an empty stash.");
+				client.start().then(function(body) {
+					finished();
+				})
+				.catch(function(err) {
+					finished(err);
+				});
+			}); // it("empty stash with invalid stash rev")"
+
+			/**
+			 * Put something in the stash and then ask Orion to drop an invalid stash revision from the stash.
+			 */
+			it("invalid stash rev", function(finished) {
+				var file = "a.txt";
+				var client = new GitClient("stash-drop-invalid");
+				client.init();
+				// track this file
+				client.setFileContents(file, "abc");
+				client.stage(file);
+				client.commit();
+
+				// modify the file
+				client.setFileContents(file, "abcx");
+				client.stash();
+				client.stashDrop("rev123", 400, "Invalid stash reference rev123.");
+				client.start().then(function(body) {
+					finished();
+				})
+				.catch(function(err) {
+					finished(err);
+				});
+			}); // it("invalid stash rev")"
+		}); // describea("Drop")
 	}); // describe("Stash")
 
 	describe("config", function() {
