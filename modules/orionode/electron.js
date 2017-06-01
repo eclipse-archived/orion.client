@@ -159,22 +159,40 @@ module.exports.start = function(startServer, configParams) {
 		if (process.platform === 'darwin') {
 			if (!Menu.getApplicationMenu()) {
 				var template = [{
-					label: "Application",
+					label: electron.app.getName(),
 					submenu: [
-						{ label: "About Application", selector: "orderFrontStandardAboutPanel:" },
+						{role: 'about'},
 						{ type: "separator" },
-						{ label: "Quit", accelerator: "Command+Q", click: function() { electron.app.quit(); }}
+						{role: 'hide'},
+					    {role: 'hideothers'},
+					    {role: 'unhide'},
+					    {type: 'separator'},
+					    {role: 'quit'}
 					]}, {
 					label: "Edit",
 					submenu: [
-						{ label: "Undo", accelerator: "CmdOrCtrl+Z", selector: "undo:" },
-						{ label: "Redo", accelerator: "Shift+CmdOrCtrl+Z", selector: "redo:" },
-						{ type: "separator" },
-						{ label: "Cut", accelerator: "CmdOrCtrl+X", selector: "cut:" },
-						{ label: "Copy", accelerator: "CmdOrCtrl+C", selector: "copy:" },
-						{ label: "Paste", accelerator: "CmdOrCtrl+V", selector: "paste:" },
-						{ label: "Select All", accelerator: "CmdOrCtrl+A", selector: "selectAll:" }
-					]},
+						{role: 'undo'},
+					    {role: 'redo'},
+					    {type: 'separator'},
+					    {role: 'cut'},
+					    {role: 'copy'},
+					    {role: 'paste'},
+						{role: 'selectall'}
+					]},  {
+					    label: 'View',
+					    submenu: [
+					      {role: 'resetzoom'},
+					      {role: 'zoomin'},
+					      {role: 'zoomout'},
+					      {type: 'separator'},
+					      {role: 'togglefullscreen'}
+					 ]}, {
+					    role: 'window',
+					    submenu: [
+					      {role: 'minimize'},
+					      {role: 'close'}
+					    ]
+					  },
 					{label: "Debug",
 					submenu: [
 						{ label: "Toggle Developer Tools", accelerator: "Cmd+Option+I", click: function (item, focusedWindow) {
