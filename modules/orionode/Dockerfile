@@ -34,7 +34,7 @@ WORKDIR /home/orion/orionode
 # install sample project for demoing
 RUN mkdir -p /home/workspace
 
-EXPOSE 8081
+EXPOSE 8083
 
 WORKDIR /home/orion/orionode
-CMD [ "node", "server.js","-w","/home/workspace" ]
+CMD [ "node", "server.js", "-p", "8083", "-w","/home/workspace" ]
