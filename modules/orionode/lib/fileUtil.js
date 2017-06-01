@@ -89,9 +89,7 @@ var getMetastore = exports.getMetastore = function(req) {
 	return ms;
 };
 
-var getFile = exports.getFile = function(req, rest) {
-	if (!rest) return null;
-	var store = getMetastore(req);
+var getFile2 = exports.getFile2 = function(store, rest) {
 	if (rest[0] === "/") rest = rest.substring(1);
 	var segments = rest.split("/");
 	var workspaceId = segments.shift();
@@ -101,6 +99,12 @@ var getFile = exports.getFile = function(req, rest) {
 		workspaceDir: workspaceDir,
 		path: safeFilePath(workspaceDir, segments.join("/"))
 	};
+};
+
+var getFile = exports.getFile = function(req, rest) {
+	if (!rest) return null;
+	var store = getMetastore(req);
+	return getFile2(store, rest);
 };
 
 var getParents = exports.getParents = function(fileRoot, relativePath, includeFolder) {

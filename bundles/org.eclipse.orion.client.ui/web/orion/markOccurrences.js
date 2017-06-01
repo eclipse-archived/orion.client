@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2013, 2014 IBM Corporation and others.
+ * Copyright (c) 2013, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -11,13 +11,16 @@
 
 /*eslint-env browser, amd*/
 define([
-	'orion/Deferred'
-], function(Deferred) {
+	'orion/Deferred',
+	'orion/lsp/utils'
+], function(Deferred, Utils) {
 
-	function MarkOccurrences(serviceRegistry, inputManager, editor) {
+	function MarkOccurrences(serviceRegistry, inputManager, editor, languageServerRegistry) {
 		this.registry = serviceRegistry;
 		this.inputManager = inputManager;
 		this.editor = editor;
+		this.languageServerRegistry = languageServerRegistry;
+		this._languageServer = null;
 	}
 	MarkOccurrences.prototype = {
 		/**
@@ -57,7 +60,6 @@ define([
 						filteredServiceRefs.push(d);
 					}
 				}
-				
 				// Return a promise that gives the service references that aren't null
 				return Deferred.all(filteredServiceRefs, function(error) {return {_error: error}; }).then(
 					function(serviceRefs) {
@@ -73,65 +75,76 @@ define([
 			}
 			
 			var occurrenceTimer;
-			var that = this;
 			var selectionListener = function() {
 				if (occurrenceTimer) {
 					window.clearTimeout(occurrenceTimer);
 				}
-				if (!that.occurrencesVisible) { return; }
+				if (!this.occurrencesVisible) { return; }
 				occurrenceTimer = window.setTimeout(function() {
 					occurrenceTimer = null;
-					var editor = that.editor;
-					var selections = editor.getSelections();
+					var selections = this.editor.getSelections();
 					if (selections.length > 1) {
-						that.editor.showOccurrences([]);
+						this.editor.showOccurrences([]);
 						return;
 					}
 					var context = {
 						selection: selections[0],
-						contentType: that.inputManager.getContentType().id
+						contentType: this.inputManager.getContentType().id
 					};
 					
-					if(Array.isArray(that.occurrencesServices) && that.occurrencesServices.length > 0) {
-						var servicePromises = [];
-						var allOccurrences = [];
-						for (var i=0; i<that.occurrencesServices.length; i++) {
-							var serviceEntry = that.occurrencesServices[i];
+					var servicePromises = [];
+					var allOccurrences = [];
+					if(Array.isArray(this.occurrencesServices) && this.occurrencesServices.length > 0) {
+						for (var i=0; i<this.occurrencesServices.length; i++) {
+							var serviceEntry = this.occurrencesServices[i];
 							if (serviceEntry){
-								servicePromises.push(serviceEntry.computeOccurrences(editor.getEditorContext(), context).then(function (occurrences) {
+								servicePromises.push(serviceEntry.computeOccurrences(this.editor.getEditorContext(), context).then(function (occurrences) {
 									allOccurrences = allOccurrences.concat(occurrences);
-								}));	
+								}));
 							}
 						}
-						Deferred.all(servicePromises).then(function(){
-							that.editor.showOccurrences(allOccurrences);
-						});
 					}
-				}, 500);
-			};
+					if (this._languageServer && this._languageServer.isDocumentHighlightEnabled()) {
+						servicePromises.push(Utils.computeOccurrences(this._languageServer, this.inputManager, this.editor, context).then(function (occurrences) {
+							allOccurrences = allOccurrences.concat(occurrences);
+						}));
+					}
+					Deferred.all(servicePromises).then(function(){
+						this.editor.showOccurrences(allOccurrences);
+					}.bind(this));
+				}.bind(this), 500);
+			}.bind(this);
 						
-			that.inputManager.addEventListener("InputChanged", function(evt) {
-				var textView = that.editor.getTextView();
+			this.inputManager.addEventListener("InputChanged", function(evt) {
+				var textView = this.editor.getTextView();
+				var addedSelectionListener = false;
 				if (textView) {
 					textView.removeEventListener("Selection", selectionListener);
-					getServiceRefs(that.registry, evt.contentType, evt.title).then(function(serviceRefs) {
+					getServiceRefs(this.registry, evt.contentType, evt.title).then(function(serviceRefs) {
 						if (!serviceRefs || serviceRefs.length === 0) {
 							if (occurrenceTimer) {
 								window.clearTimeout(occurrenceTimer);
 							}
 						} else {
-							that.occurrencesServices = [];
+							this.occurrencesServices = [];
 							for (var a=0; a<serviceRefs.length; a++) {
-								var service = that.registry.getService(serviceRefs[a]);
+								var service = this.registry.getService(serviceRefs[a]);
 								if (service){
-									that.occurrencesServices.push(service);
+									this.occurrencesServices.push(service);
 								}
 							}
-							textView.addEventListener("Selection", selectionListener);
+							if (!addedSelectionListener) {
+								addedSelectionListener = true;
+								textView.addEventListener("Selection", selectionListener);
+							}
 						}
-					});
+					}.bind(this));
+					this._languageServer = this.languageServerRegistry.getServerByContentType(evt.contentType);
+					if (this._languageServer && !addedSelectionListener) {
+						textView.addEventListener("Selection", selectionListener);
+					}
 				}
-			});
+			}.bind(this));
 		}
 	};
 	return {MarkOccurrences: MarkOccurrences};

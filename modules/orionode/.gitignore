@@ -19,3 +19,4 @@ dist/
 # Ignore per-user Orionode data
 .workspace*/
 test/.test_workspace/
+/server/

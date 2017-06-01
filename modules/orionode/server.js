@@ -21,7 +21,10 @@ var auth = require('./lib/middleware/auth'),
 	util = require('util'),
 	argslib = require('./lib/args'),
 	ttyShell = require('./lib/tty_shell'),
+	languageServer = require('./lib/languageServer'),
 	api = require('./lib/api');
+
+
 
 // Get the arguments, the workspace directory, and the password file (if configured), then launch the server
 var args = argslib.parseArgs(process.argv);
@@ -144,6 +147,7 @@ function startServer(cb) {
 					gracefulShutdown();
 				}
 			});
+			languageServer.install({ io: io, workspaceDir: workspaceDir, metastore: orion.locals.metastore }); //TODO no good for multiuser
 		} catch (e) {
 			logger.error(e && e.stack);
 		}

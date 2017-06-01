@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2011, 2016 IBM Corporation and others.
+ * Copyright (c) 2011, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -10,20 +10,20 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 /*eslint-env browser, amd*/
-/*eslint-disable no-else-return, no-extra-parens*/
-define("orion/editor/contentAssist", [
-	'i18n!orion/editor/nls/messages',
-	'orion/keyBinding',
-	'orion/editor/keyModes',
-	'orion/editor/eventTarget',
-	'orion/Deferred',
-	'orion/objects',
-	'orion/editor/tooltip',
-	'orion/editor/util',
-	'orion/util',
-	'orion/webui/littlelib',
-	'orion/metrics'
-], function(messages, mKeyBinding, mKeyModes, mEventTarget, Deferred, objects, mTooltip, textUtil, util, lib, mMetrics) {
+define("orion/editor/contentAssist", [ //$NON-NLS-0$
+	'i18n!orion/editor/nls/messages', //$NON-NLS-0$
+	'orion/keyBinding', //$NON-NLS-0$
+	'orion/editor/keyModes', //$NON-NLS-0$
+	'orion/editor/eventTarget', //$NON-NLS-0$
+	'orion/Deferred', //$NON-NLS-0$
+	'orion/objects', //$NON-NLS-0$
+	'orion/editor/tooltip', //$NON-NLS-0$
+	'orion/editor/util', //$NON-NLS-0$
+	'orion/util', //$NON-NLS-0$
+	'orion/webui/littlelib', //$NON-NLS-0$
+	'orion/metrics', //$NON-NLS-0$
+	'orion/lsp/utils'
+], function(messages, mKeyBinding, mKeyModes, mEventTarget, Deferred, objects, mTooltip, textUtil, util, lib, mMetrics, Utils) {
 	/**
 	 * @name orion.editor.ContentAssistProvider
 	 * @class Interface defining a provider of content assist proposals.
@@ -191,15 +191,16 @@ define("orion/editor/contentAssist", [
 				end: mapEnd
 			};
 			this.setState(State.INACTIVE);
-			var proposalText = typeof proposal === "string" ? proposal : proposal.proposal;
-			view.setText(proposalText, start, end);
+			var proposalText = typeof proposal === "string" ? proposal : proposal.proposal; //$NON-NLS-0$
+			var offset = 0;
 			if (proposal.additionalEdits) {
-				var edit;
-				for (var i = 0; i < proposal.additionalEdits.length; i++) {
-					edit = proposal.additionalEdits[i];
+				for (var i = proposal.additionalEdits.length - 1; i >= 0 ; i--) {
+					var edit = proposal.additionalEdits[i];
 					view.setText(edit.text, edit.offset, edit.offset + edit.length);
+					offset += edit.text.length;
 				}
 			}
+			view.setText(proposalText, start + offset, end + offset);
 			this.dispatchEvent({type: "ProposalApplied", data: data}); //$NON-NLS-0$
 			mMetrics.logEvent("contentAssist", "apply"); //$NON-NLS-1$ //$NON-NLS-0$
 			return true;
@@ -277,7 +278,7 @@ define("orion/editor/contentAssist", [
 			// the beginning of the selection and the current caret offset
 			var offset = this.textView.getCaretOffset();
 			var sel = this.textView.getSelection();
-			var selectionStart = Math.min(sel.start, sel.end);			
+			var selectionStart = Math.min(sel.start, sel.end);
 			this._initialCaretOffset = Math.min(offset, selectionStart);
 			this._computedProposals = null;
 			delete this._autoApply;
@@ -407,7 +408,13 @@ define("orion/editor/contentAssist", [
 					indentation: indentation
 				};
 				try {
-					if ((func = provider.computeContentAssist)) {
+					if (providerInfo.lspServer) {
+						// completion comes from the lsp service
+						ecProvider = _self.editorContextProvider;
+						editorContext = ecProvider.getEditorContext();
+						params = objects.mixin(params, ecProvider.getOptions());
+						promise = Utils.computeContentAssist(provider, editorContext, params);
+					} else if ((func = provider.computeContentAssist)) {
 						ecProvider = _self.editorContextProvider;
 						editorContext = ecProvider.getEditorContext();
 						params = objects.mixin(params, ecProvider.getOptions());
@@ -637,7 +644,7 @@ define("orion/editor/contentAssist", [
 			
 			this._providers = providerInfoArray;
 			this._charTriggersInstalled = providerInfoArray.some(function(info){
-				return info.charTriggers;
+				return info.charTriggers || info.lspServer;
 			});
 			this._updateAutoTriggerListenerState();
 		},
@@ -731,7 +738,24 @@ define("orion/editor/contentAssist", [
 					// check if the charTriggers RegExp matches the currentChar
 					// we're assuming that this will fail much more often than
 					// the excludedStyles test so do this first for better performance
-					var charTriggers = info.charTriggers;
+					var charTriggers = null;
+					if (info.lspServer) {
+						var capabilities = info.provider.capabilities;
+						if (capabilities && capabilities.completionProvider) {
+							// we should get the completion options
+							var completionOptions = capabilities.completionProvider;
+
+							// build up the regex for triggerCharacters
+							var triggers = "[";
+							completionOptions.triggerCharacters.forEach(function(character) {
+							triggers += character;
+							});
+							triggers += "]";
+							info.charTriggers = new RegExp(triggers);
+						}
+						delete info.lspServer;
+					} 
+					charTriggers= info.charTriggers;
 					if (charTriggers && charTriggers.test(currentChar)) {
 						var isExcluded = false;
 						var excludedStyles = info.excludedStyles;

@@ -31,6 +31,7 @@
     "mongodb": "^2.1.7",
     "mongoose": "^4.4.6",
     "multiparty": "^4.1.2",
+    "net" : "^1.0.2",
     "nodegit": "0.16.0",
     "nodemailer": "^2.3.0",
     "passport": "^0.3.2",

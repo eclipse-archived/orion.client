@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2016 IBM Corporation and others.
+ * Copyright (c) 2016, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -12,14 +12,16 @@
 /*eslint-env browser, amd*/
 
 define ([
-], function() {
+	'orion/lsp/utils'
+], function(Utils) {
 	
-	function Formatter(serviceRegistry, inputManager, editor) {
+	function Formatter(serviceRegistry, inputManager, editor, languageServerRegistry) {
 		this.serviceRegistry = serviceRegistry;
 		this.inputManager = inputManager;
 		this.editor = editor;
+		this.languageServerRegistry = languageServerRegistry;
 	}
-	
+
 	Formatter.prototype = {
 		getFormatter: function() {
 			var inputManagerContentType = this.inputManager.getContentType();
@@ -42,16 +44,75 @@ define ([
 			}
 			return null;
 		},
+		getLspFormatter : function() {
+			// check lsp extensions
+			var inputManagerContentType = this.inputManager.getContentType();
+			return this.languageServerRegistry.getServerByContentType(inputManagerContentType);
+		},
 		isVisible: function() {
-			return !!this.getFormatter();
+			if (this.getFormatter()) {
+				return true;
+			}
+			var languageServer = this.getLspFormatter();
+			if (languageServer) {
+				return languageServer.isFormatDocumentEnabled() || languageServer.isRangeFormatDocumentEnabled();
+			}
+			return false;
 		},
 		
 		doFormat: function() {
+			var selection = this.editor.getSelection();
 			var service = this.getFormatter();
 			if (service) {
-				var selection = this.editor.getSelection();
 				var context = {start: selection.start, end: selection.end};
 				return service.format(this.editor.getEditorContext(), context);
+			}
+			// check lsp formatters
+			var lspFormatter = this.getLspFormatter();
+			if (lspFormatter) {
+				if (selection.start !== selection.end) {
+					// we want to format the selected text only
+					var start = Utils.getPosition(this.editor, selection.start);
+					var end = Utils.getPosition(this.editor, selection.end);
+					return lspFormatter.rangeFormatting(this.inputManager.getFileMetadata().Location, start, end, {}).then(
+						function(edits) {
+							console.log("Range format action invoked");
+							if (Array.isArray(edits) && edits.length !== 0) {
+								this.editor.setText({
+									text: edits.map(function(e) {
+										return e.newText;
+									}),
+									selection: edits.map(function(edit) {
+										var range = edit.range;
+										return {
+											start: this.editor.getLineStart(range.start.line) + range.start.character,
+											end: this.editor.getLineStart(range.end.line) + range.end.character
+										};
+									}.bind(this)),
+									preserveSelection: true
+								});
+							}
+						}.bind(this));
+				}
+				return lspFormatter.formatDocument(this.inputManager.getFileMetadata().Location, {}).then(
+					function(edits) {
+						console.log("Format action invoked");
+						if (Array.isArray(edits) && edits.length !== 0) {
+							this.editor.setText({
+								text: edits.map(function(e) {
+									return e.newText;
+								}),
+								selection: edits.map(function(edit) {
+									var range = edit.range;
+									return {
+										start: this.editor.getLineStart(range.start.line) + range.start.character,
+										end: this.editor.getLineStart(range.end.line) + range.end.character
+									};
+								}.bind(this)),
+								preserveSelection: true
+							});
+						}
+					}.bind(this));
 			}
 		}
 	};

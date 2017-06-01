@@ -4,6 +4,7 @@
 		"shell/plugins/shellPagePlugin.html": true,
 		"plugins/site/sitePlugin.html": true,
 		"plugins/languages/json/jsonPlugin.html": true,
+		"plugins/languages/java/javaPlugin.html": true,
 		"git/plugins/gitPlugin.html":true,
 		"webtools/plugins/webToolsPlugin.html":true,
 		"javascript/plugins/javascriptPlugin.html":true,

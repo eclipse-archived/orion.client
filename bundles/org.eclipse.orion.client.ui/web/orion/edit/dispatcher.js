@@ -85,6 +85,21 @@ define([], function() {
 			var listener = function(evnt) {
 				// Inject metadata about the file being edited into the event.
 				evnt.file = _self.getServiceFileObject();
+				//TODO - total hack for the language server
+				if (evnt.type === "ModelChanging") {
+					var model = textView.getModel();
+					var sl = model.getLineAtOffset(evnt.start), el = this.getLineAtOffset(evnt.start + evnt.removedCharCount);
+					evnt.range = {
+						start: {
+							line: sl,
+							character: evnt.start - model.getLineStart(sl)
+						},
+						end: {
+							line: el,
+							character: evnt.start + evnt.removedCharCount - model.getLineStart(el)
+						}
+					};
+				}
 				serviceMethod(evnt).then(/*No return value*/);
 			};
 			var serviceId = serviceReference.getProperty('service.id'); //$NON-NLS-0$

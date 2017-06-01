@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2011, 2015 IBM Corporation and others.
+ * Copyright (c) 2011, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License v1.0
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution
@@ -151,6 +151,8 @@ define([
 		this.differ = options.differ;
 		this.blamer = options.blamer;
 		this.formatter = options.formatter;
+		this.gotoDefinition = options.gotoDefinition;
+		this.references = options.references;
 		var that = this;
 		this.listener = {
 			onServiceAdded: function(event) {
@@ -179,6 +181,8 @@ define([
 			this._createDelimiterCommands();
 			this._createEncodingCommand();
 			this._createFormatterCommand();
+			this._createGotoDefinitionCommand();
+			this._createReferencesCommand();
 			this._createSaveCommand();
 			this._createOpenFolderCommand();
 			this._createOpenRecentCommand();
@@ -208,6 +212,8 @@ define([
 			this.differ = target.differ;
 			this.blamer = target.blamer;
 			this.formatter = target.formatter;
+			this.gotoDefinition = target.gotoDefinition;
+			this.references = target.references;
 			this.textSearcher = target.textSearcher;
 			
 			if (this._recreateEditCommands) {
@@ -255,6 +261,8 @@ define([
 			commandRegistry.registerCommandContribution(this.toolbarId , "orion.edit.showTooltip", 1, "orion.menuBarToolsGroup", false, null, null, this);//$NON-NLS-1$ //$NON-NLS-2$ 
 			commandRegistry.registerCommandContribution(this.toolbarId , "orion.edit.blame", 2, "orion.menuBarToolsGroup", false, new mKeyBinding.KeyBinding('b', true, true), new mCommandRegistry.URLBinding("blame", "blame"), this); //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-5$
 			commandRegistry.registerCommandContribution(this.toolbarId , "orion.edit.diff", 3, "orion.menuBarToolsGroup", false, new mKeyBinding.KeyBinding('d', true, true), new mCommandRegistry.URLBinding("diff", "diff"), this); //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-5$
+			commandRegistry.registerCommandContribution(this.toolbarId , "orion.edit.gotoDefinition", 4, "orion.menuBarToolsGroup", false, new mKeyBinding.KeyBinding('g', true, true), null, this); //$NON-NLS-1$ //$NON-NLS-2$
+			commandRegistry.registerCommandContribution(this.toolbarId , "orion.edit.references", 5, "orion.menuBarToolsGroup", false, new mKeyBinding.KeyBinding('r', true, true), null, this); //$NON-NLS-1$ //$NON-NLS-2$
 
 			// 'Delimiters' cascade
 			var index = 0;
@@ -312,6 +320,8 @@ define([
 			commandRegistry.registerCommandContribution(this.editorContextMenuId, "orion.edit.reloadWithEncoding", 1000, "orion.editorContextMenuGroup/orion.editorContextMenuToolsGroup"); //$NON-NLS-1$ //$NON-NLS-2$
 			commandRegistry.registerCommandContribution(this.editorContextMenuId , "orion.edit.blame", 1, "orion.editorContextMenuGroup/orion.editorContextMenuToolsGroup", false); //$NON-NLS-1$ //$NON-NLS-2$
 			commandRegistry.registerCommandContribution(this.editorContextMenuId , "orion.edit.diff", 2, "orion.editorContextMenuGroup/orion.editorContextMenuToolsGroup", false); //$NON-NLS-1$ //$NON-NLS-2$
+			commandRegistry.registerCommandContribution(this.editorContextMenuId , "orion.edit.gotoDefinition", 3, "orion.editorContextMenuGroup/orion.editorContextMenuToolsGroup", false); //$NON-NLS-1$ //$NON-NLS-2$
+			commandRegistry.registerCommandContribution(this.editorContextMenuId , "orion.edit.references", 4, "orion.editorContextMenuGroup/orion.editorContextMenuToolsGroup", false); //$NON-NLS-1$ //$NON-NLS-2$
 
 			// 'Delimiters' cascade
 			commandRegistry.addCommandGroup(this.editorContextMenuId, "orion.editorContextMenuDelimitersGroup", 999, messages["Convert Line Delimiters"], "orion.editorContextMenuGroup/orion.editorContextMenuToolsGroup"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
@@ -954,6 +964,62 @@ define([
 				}
 			});
 			this.commandService.addCommand(formatterCommand);
+		},
+
+		_createGotoDefinitionCommand: function(){
+			var that = this;
+			var gotoDefinitionCommand = new mCommands.Command({
+				name: messages.GotoDefinition,
+				tooltip: messages.GotoDefinitionTooltip,
+				id: "orion.edit.gotoDefinition", //$NON-NLS-0$
+				parameters: new mCommandRegistry.ParametersDescription([new mCommandRegistry.CommandParameter('gotoDefinition', 'boolean')], {clientCollect: true}), //$NON-NLS-1$ //$NON-NLS-0$
+				visibleWhen: /** @callback */ function(items, data) {
+					var inputManager = data.handler.inputManager || that.inputManager;
+					if (inputManager && inputManager.getReadOnly()) {
+						return false;
+					}
+					var editor = data.handler.editor || that.editor;
+					var gotoDefinition = data.handler.gotoDefinition || that.gotoDefinition;
+					return editor && editor.installed && gotoDefinition && gotoDefinition.isVisible();
+				},
+				callback: function(data) {
+					var editor = this.editor || that.editor;
+					var gotoDefinition = this.gotoDefinition || that.gotoDefinition;
+					gotoDefinition.execute();
+					editor.focus();
+				}
+			});
+			this.commandService.addCommand(gotoDefinitionCommand);
+		},
+
+		_createReferencesCommand: function(){
+			var that = this;
+			var referencesCommand = new mCommands.Command({
+				name: messages.References,
+				tooltip: messages.ReferencesTooltip,
+				id: "orion.edit.references", //$NON-NLS-0$
+				parameters: new mCommandRegistry.ParametersDescription([new mCommandRegistry.CommandParameter('references', 'boolean')], {clientCollect: true}), //$NON-NLS-1$ //$NON-NLS-0$
+				visibleWhen: /** @callback */ function(items, data) {
+					var inputManager = data.handler.inputManager || that.inputManager;
+					if (inputManager && inputManager.getReadOnly()) {
+						return false;
+					}
+					var editor = data.handler.editor || that.editor;
+					var references = data.handler.references || that.references;
+					return editor && editor.installed && references && references.isVisible();
+				},
+				callback: function(data) {
+					var editor = this.editor || that.editor;
+					var references = this.references || that.references;
+					references.execute().then(function(result) {
+						if(that.sideBar) {
+							that.sideBar.fillSearchPane(result.searchParams, result.refResult ? result : null);
+						}
+					});
+					editor.focus();
+				}
+			});
+			this.commandService.addCommand(referencesCommand);
 		},
 
 		_createDiffCommand: function(){

@@ -1574,7 +1574,7 @@ objects.mixin(EditorSetup.prototype, {
 	 * @since 9.0
 	 */
 	openEditor: function(loc, options) {
-		var href = this.computeNavigationHref({Location: loc}, {start: options.start, end: options.end});
+		var href = this.computeNavigationHref({Location: loc}, {start: options.start, end: options.end, line: options.line, offset: options.offset, length: options.length});
 		if (!href)
 			return;
 			
