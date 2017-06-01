@@ -122,7 +122,7 @@ function deleteStash(req, res) {
 					index = i;
 				}
 			} else {
-				all.push(git.Stash.drop(repo, index));				
+				all.push(git.Stash.drop(repo, i));
 			} 
 		})
 		.then(function() {

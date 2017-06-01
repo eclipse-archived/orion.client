@@ -489,6 +489,10 @@ GitClient.prototype = {
 			statusCode = 200;
 		}
 
+		if (revision === undefined) {
+			revision = "";
+		}
+
 		var client = this;
 		this.tasks.push(function(resolve) {
 			request()
@@ -3916,7 +3920,35 @@ maybeDescribe("git", function() {
 				client.setFileContents(file, "abcx");
 				client.stash();
 				client.stashDrop("rev123", 400, "Invalid stash reference rev123.");
+				client.listStash();
 				client.start().then(function(body) {
+					assert.equal(body.Children.length, 1);
+					finished();
+				})
+				.catch(function(err) {
+					finished(err);
+				});
+			}); // it("invalid stash rev")"
+
+			/**
+			 * Stash something and then ask Orion to drop the entire stash.
+			 */
+			it("all", function(finished) {
+				var file = "a.txt";
+				var client = new GitClient("stash-drop-all");
+				client.init();
+				// track this file
+				client.setFileContents(file, "abc");
+				client.stage(file);
+				client.commit();
+
+				// modify the file
+				client.setFileContents(file, "abcx");
+				client.stash();
+				client.stashDrop();
+				client.listStash();
+				client.start().then(function(body) {
+					assert.equal(body.Children.length, 0);
 					finished();
 				})
 				.catch(function(err) {
