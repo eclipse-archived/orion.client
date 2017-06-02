@@ -13,7 +13,7 @@ var fileUtil = require('./fileUtil');
 var express = require('express');
 var tree = require('./shared/tree');
 var sharedUtil = require('./shared/sharedUtil');
-var sharedDecorator = require('./shared/sharedDecorator').sharedDecorator;
+var SharedFileDecorator = require('./shared/sharedDecorator').SharedFileDecorator;
 var jwt = require('jsonwebtoken');
 
 module.exports.router = function(options, extraOptions) {
@@ -60,7 +60,7 @@ module.exports.router = function(options, extraOptions) {
 	router.use("/tree", tree.router(extraOptions));
 	router.use("/project", require('./shared/db/sharedProjects')(extraOptions));
 	router.use("/user", require('./shared/db/userProjects')(extraOptions));
-	fileUtil.addDecorator(sharedDecorator);
+	fileUtil.addDecorator(new SharedFileDecorator(options));
 	sharedUtil(extraOptions);
 	return [checkCollabAuthenticated, router];
 }

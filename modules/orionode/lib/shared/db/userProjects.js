@@ -16,9 +16,8 @@ var express = require('express'),
 	cookieParser = require('cookie-parser'),
 	bodyParser = require('body-parser'),
 	mongoose = require('mongoose'),
-	Promise = require('bluebird'),
-	fs = require('fs'),
-	args = require('../../args');
+	fileUtil= require('../../fileUtil'),
+	Promise = require('bluebird');
 
 function userProjectJSON(username) {
 	return {
@@ -137,22 +136,21 @@ module.exports = function(options) {
 	 */
 	app.post('/:project/:user', function(req, res) {
 		//TODO make sure project has been shared first.
-		var project = req.params.project;
+		var project = fileUtil.getFile(req, decodeURIComponent(req.params.project).substring(5));
 		var user = req.params.user;
-		project = path.join(workspaceRoot, req.user.workspace, project);
 
-		if (!sharedUtil.projectExists(project)) {
+		if (!sharedUtil.projectExists(project.path)) {
 			throw new Error("Project does not exist");
 		}
 
-		project = projectsCollection.getProjectRoot(project);
+		project = projectsCollection.getProjectRoot(project.path);
 
 		projectsCollection.addUserToProject(user, project)
 		.then(function(doc) {
 			return addProjectToUser(user, project);
 		})
 		.then(function(result) {
-			res.end();
+			return res.end();
 		})
 		.catch(function(err){
 			// just need one of these
@@ -166,10 +164,9 @@ module.exports = function(options) {
 	 * Project might have been deleted or just user removed from shared list.
 	 */
 	app.delete('/:project/:user', function(req, res) {
-		var project = req.params.project;
+		var project = fileUtil.getFile(req, decodeURIComponent(req.params.project).substring(5));
 		var user = req.params.user;
-		project = path.join(workspaceRoot, req.user.workspace, project);
-		project = projectsCollection.getProjectRoot(project);
+		project = projectsCollection.getProjectRoot(project.path);
 
 		projectsCollection.removeUserFromProject(user, project)
 		.then(function() {
