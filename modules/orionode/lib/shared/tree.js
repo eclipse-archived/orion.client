@@ -144,22 +144,23 @@ module.exports.router = function(options) {
 	 * For file save.
 	 */
 	function putFile(req, res) {
-		var filepath = fileUtil.safeFilePath(workspaceRoot, req.params["0"]);
-		var fileRoot = req.params["0"];
+		var rest = req.params["0"];
+		var file = fileUtil.getFile(req, rest);
+		var fileRoot = options.fileRoot;
 		if (req.params['parts'] === 'meta') {
 			// TODO implement put of file attributes
 			res.sendStatus(501);
 			return;
 		}
 		function write() {
-			var ws = fs.createWriteStream(filepath);
+			var ws = fs.createWriteStream(file.path);
 			ws.on('finish', function() {
-				fileUtil.withStatsAndETag(filepath, function(error, stats, etag) {
+				fileUtil.withStatsAndETag(file.path, function(error, stats, etag) {
 					if (error && error.code === 'ENOENT') {
 						res.status(404).end();
 						return;
 					}
-					writeFileMetadata(fileRoot, req, res, filepath, stats, etag);
+					writeFileMetadata(fileRoot, req, res, file.path, stats, etag);
 				});
 			});
 			ws.on('error', function(err) {
@@ -206,9 +207,9 @@ module.exports.router = function(options) {
 	 * For file delete.
 	 */
 	function deleteFile(req, res) {
-		var rest = req.params["0"].substring(1);
-		var filepath = fileUtil.safeFilePath(workspaceRoot, rest);
-		fileUtil.withStatsAndETag(filepath, function(error, stats, etag) {
+		var rest = req.params["0"];
+		var file = fileUtil.getFile(req, rest);
+		fileUtil.withStatsAndETag(file.path, function(error, stats, etag) {
 			var callback = function(error) {
 				if (error) {
 					writeError(500, res, error);
@@ -224,9 +225,9 @@ module.exports.router = function(options) {
 			} else if (ifMatchHeader && ifMatchHeader !== etag) {
 				return res.sendStatus(412);
 			} else if (stats.isDirectory()) {
-				fileUtil.rumRuff(filepath, callback);
+				fileUtil.rumRuff(file.path, callback);
 			} else {
-				fs.unlink(filepath, callback);
+				fs.unlink(file.path, callback);
 			}
 		});
 	}
@@ -321,11 +322,10 @@ module.exports.router = function(options) {
 			if (!filepath) {
 				writeError(404, res, 'Session not found: ' + hubid);
 				return;
-			} else {
-				res.write('{}');
-				res.end();
-				return;
-			}
+			} 
+			res.write('{}');
+			res.end();
+			return;
 		});
 	}
 
@@ -333,13 +333,14 @@ module.exports.router = function(options) {
 	 * Export
 	 */
 	function getXfer(req, res) {
-		var filePath = req.params["0"];
+		var rest = req.params["0"];
+		var file = fileUtil.getFile(req, rest);
 		
-		if (path.extname(filePath) !== ".zip") {
+		if (path.extname(file.path) !== ".zip") {
 			return writeError(400, res, "Export is not a zip");
 		}
 		
-		filePath = fileUtil.safeFilePath(workspaceRoot, filePath.replace(/.zip$/, ""));
+		var filePath = file.path.replace(/.zip$/, "");
 		xfer.getXferFrom(req, res, filePath);
 	}
 
@@ -347,8 +348,8 @@ module.exports.router = function(options) {
 	 * Import
 	 */
 	function postImportXfer(req, res) {
-		var filePath = req.params["0"];
-		filePath = fileUtil.safeFilePath(workspaceRoot, filePath);
-		xfer.postImportXferTo(req, res, filePath);
+		var rest = req.params["0"];
+		var file = fileUtil.getFile(req, rest);
+		xfer.postImportXferTo(req, res, file.path);
 	}
 };

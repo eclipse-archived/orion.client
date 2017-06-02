@@ -11,14 +11,10 @@
 /*eslint-env node */
 /*eslint no-console:1*/
 var api = require('../api'), writeError = api.writeError;
-var url = require("url");
 var path = require("path");
 var fs = require('fs');
 var fileUtil = require('../fileUtil');
-var express = require('express');
-var bodyParser = require('body-parser');
 var Promise = require('bluebird');
-var sharedProjects = require('./db/sharedProjects')
 var userProjects = require('./db/userProjects');
 
 module.exports = function(options) {
