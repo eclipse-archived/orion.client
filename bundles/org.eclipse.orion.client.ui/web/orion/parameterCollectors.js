@@ -105,11 +105,13 @@ define(['i18n!orion/nls/messages', 'orion/webui/littlelib', 'orion/bidiUtils', '
 
 				if (focusNode) {
 					this._oldFocusNode = window.document.activeElement;
+					var slideContainer = this._activeElements.slideContainer;
 					window.setTimeout(function() {
 						focusNode.focus();
 						if (focusNode.select) {
 							focusNode.select();
 						}
+						lib.trapTabs(slideContainer);
 					}, 0);
 				}
 				if (this._activeElements.commandNode) {

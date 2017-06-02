@@ -468,7 +468,7 @@ define([
 						dropDown.updateContent = localSettings.show.bind(localSettings);
 						var menu = dropDown.getContentNode();
 						menu.tabIndex = menu.style.marginTop = 0;
-					}
+					}					
 					dropDown.click();
 				}
 			});

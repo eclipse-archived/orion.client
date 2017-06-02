@@ -351,6 +351,8 @@ define(['orion/webui/littlelib'], function(lib) {
 				this._tip.focus();
 			}
 			
+			lib.trapTabs(this._tip);
+			
 			if (this._afterShowing) {
 				this._afterShowing();
 			}

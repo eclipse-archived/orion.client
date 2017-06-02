@@ -444,6 +444,10 @@ define("orion/widgets/settings/EditorSettings", //$NON-NLS-0$
 			this.oldPrefs = editorPrefs;
 			this.createElements();
 			this.setValues(editorPrefs);
+			
+			if (this.node && this.local) {
+				lib.trapTabs(this.node);
+			}
 		},
 		_forEach: function(callback) {
 			for (var section in sections) {

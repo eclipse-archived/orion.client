@@ -327,10 +327,10 @@ define([
 					tooltip.show();
 					if (focusNode) {
 						window.setTimeout(function() {
-								focusNode.focus();
-								if (focusNode.select) {
-									focusNode.select();
-								}
+							focusNode.focus();
+							if (focusNode.select) {
+								focusNode.select();
+							}
 						}, 0);	
 					}
 				}
@@ -439,10 +439,10 @@ define([
 							if (commandInvocation.domParent) commandInvocation.domParent.classList.add("parameterPopupOpen"); //$NON-NLS-0$
 							if (focusNode) {
 								window.setTimeout(function() {
-										focusNode.focus();
-										if (focusNode.select) {
-											focusNode.select();
-										}
+									focusNode.focus();
+									if (focusNode.select) {
+										focusNode.select();
+									}
 								}, 0);
 							}
 							collecting = true;
