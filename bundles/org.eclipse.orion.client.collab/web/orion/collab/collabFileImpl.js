@@ -17,9 +17,27 @@ define(["orion/xhr", "orion/Deferred", "orion/URL-shim",  "orion/form"], functio
 		this.fileBase = fileBase;
 	}
 	
+	function makeAbsolute(loc) {
+		return new URL(loc, self.location.href).href;
+	}
+	
+	function _normalizeLocations(data) {
+		if (data && typeof data === "object") {
+			Object.keys(data).forEach(function(key) {
+				var value = data[key];
+				if (key.indexOf("Location") !== -1) {
+					data[key] = makeAbsolute(value);
+				} else {
+					_normalizeLocations(value);
+				}
+			});
+		}
+		return data;
+	}
 	var GIT_TIMEOUT = 60000;
 
 	CollabFileImpl.prototype = {
+		
 		fetchChildren: function(location) {
 			var fetchLocation = location;
 			if (fetchLocation===this.fileBase) {
@@ -41,24 +59,69 @@ define(["orion/xhr", "orion/Deferred", "orion/URL-shim",  "orion/form"], functio
 			});
 		},
 		loadWorkspaces: function() {
-			return this.loadWorkspace(this._repoURL);
-		},
-		loadWorkspace: function(location) {
+			var loc = this.fileBase;
 			var suffix = "/sharedWorkspace/";
-			if (location && location.indexOf(suffix, location.length - suffix.length) !== -1) {
-				location += "tree/";
+			if (loc && loc.indexOf(suffix, loc.length - suffix.length) !== -1) {
+				loc += "/tree";
 			}
-			
-			return xhr("GET", location,{ //$NON-NLS-0$
+			return xhr("GET", loc, {
 				headers: {
-					"Orion-Version": "1", //$NON-NLS-0$  //$NON-NLS-1$
-					"Content-Type": "charset=UTF-8" //$NON-NLS-0$  //$NON-NLS-1$
+					"Orion-Version": "1"
 				},
 				timeout: GIT_TIMEOUT
 			}).then(function(result) {
 				var jsonData = result.response ? JSON.parse(result.response) : {};
-				return jsonData || {};
-			});
+				return jsonData.Workspaces;
+			}).then(function(result) {
+				if (this.makeAbsolute) {
+					_normalizeLocations(result);
+				}
+				return result;
+			}.bind(this));	
+		},
+		loadWorkspace: function(loc) {
+			var suffix = "/sharedWorkspace/";
+			if (loc && loc.indexOf(suffix, loc.length - suffix.length) !== -1) {
+				loc += "/tree";
+			}
+			return xhr("GET", loc, {
+				headers: {
+					"Orion-Version": "1"
+				},
+				timeout: GIT_TIMEOUT,
+				log: false
+			}).then(function(result) {
+				var jsonData = result.response ? JSON.parse(result.response) : {};
+				//in most cases the returned object is the workspace we care about
+				//user didn't specify a workspace so we are at the root
+				//just pick the first location in the provided list
+				if (jsonData.Workspaces && jsonData.Workspaces.length > 0) {
+					return this.loadWorkspace(jsonData.Workspaces[0].Location);
+				}
+				return jsonData;
+			}.bind(this)).then(function(result) {
+				if (this.makeAbsolute) {
+					_normalizeLocations(result);
+				}
+				return result;
+			}.bind(this));
+		},
+		getWorkspace: function(resourceLocation) {
+			//TODO move this to server to avoid path math?
+			var id = resourceLocation || "";
+			if (id.indexOf(this.fileBase) === 0) id = id.substring(this.fileBase.length);
+			id = id.split("/");
+			if (id.length > 2 && (id[1] === "file")) id = id[2];
+			return this.loadWorkspaces().then(function(workspaces) {
+				var loc = "";
+				workspaces.some(function(workspace) {
+					if (workspace.Id === id) {
+						loc = workspace.Location;
+						return true;
+					}
+				});
+				return this.loadWorkspace(loc);
+			}.bind(this));
 		},
 		createProject: function(url, projectName, serverPath, create) {
 			throw new Error("Not supported"); //$NON-NLS-0$ 
