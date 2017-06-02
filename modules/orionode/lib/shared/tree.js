@@ -31,7 +31,7 @@ module.exports.router = function(options) {
 
 	return express.Router()
 	.get('/', getSharedWorkspace)
-	.get('/file*', ensureAccess, getTree)
+	.get('/file*', getTree)
 	.put('/file*', ensureAccess, putFile)
 	.post('/file*', ensureAccess, postFile)
 	.delete('/file*', ensureAccess, deleteFile)
@@ -45,25 +45,24 @@ module.exports.router = function(options) {
 	 * Get shared projects for the user.
 	 */
 	function getSharedWorkspace(req, res) {
+		var sharedWorkspaceRoot = "/sharedWorkspace" + "/tree" + options.fileRoot
+		if (!req.params[0]) {
+			api.writeResponse(null, res, null, {
+					Id: req.user.username,
+					Name: req.user.username,
+					UserName: req.user.fullname || req.user.username,
+					Workspaces: req.user.workspaces.map(function(w) {
+						return {
+							Id: w.id,
+							Location: api.join(sharedWorkspaceRoot, w.id),
+							Name: w.name
+						};
+					})
+				}, true);
+			return;
+		}
 		//if its the base call, return all Projects that are shared with the user
-		return sharedUtil.getSharedProjects(req, res, function(projects) {
-			var tree = sharedUtil.treeJSON("/", "", 0, true, 0, false);
-			var children = tree.Children = [];
-			function add(projects) {
-				projects.forEach(function(project) {
-					children.push(sharedUtil.treeJSON(project.Name, project.Location, 0, true, 0, false));
-					if (project.Children) add(project.Children);
-				});
-			}
-			add(projects, tree);
-			tree["Projects"] = children.map(function(c) {
-				return {
-					Id: c.Name,
-					Location:  c.Location,
-				};
-			});
-			res.status(200).json(tree);
-		});
+		
 	}
 
 	function ensureAccess(req, res, next) {
@@ -85,6 +84,33 @@ module.exports.router = function(options) {
 	 * return files and folders below current folder or retrieve file contents.
 	 */
 	function getTree(req, res) {
+		var segmentCount = req.params["0"].split("/").length;
+		if (segmentCount < 2) {
+			writeError(409, res);
+			return;
+		}
+		
+		if (segmentCount === 2) {
+			return sharedUtil.getSharedProjects(req, res, function(projects) {
+				var tree = sharedUtil.treeJSON("/", "", 0, true, 0, false);
+				var children = tree.Children = [];
+				function add(projects) {
+					projects.forEach(function(project) {
+						children.push(sharedUtil.treeJSON(project.Name, project.Location, 0, true, 0, false));
+						if (project.Children) add(project.Children);
+					});
+				}
+				add(projects, tree);
+				tree["Projects"] = children.map(function(c) {
+					return {
+						Id: c.Name,
+						Location:  c.Location,
+					};
+				});
+				res.status(200).json(tree);
+			});
+		}
+		
 		var tree;
 		var filePath = fileUtil.safeFilePath(workspaceRoot, req.params["0"]);
 		var fileRoot = req.params["0"];
@@ -118,7 +144,7 @@ module.exports.router = function(options) {
 						tree.Attributes = {};
 						tree["Attributes"].hubID = hub;
 					}
-					res.status(200).json(tree);
+					return res.status(200).json(tree);
 				})
 				.catch(api.writeError.bind(null, 500, res));
 			} else if (stats.isFile()) {
