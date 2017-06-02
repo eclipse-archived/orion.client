@@ -443,12 +443,26 @@ GitClient.prototype = {
 	},
 
 	/**
-	 * Pops the first entry in the stash and applies it on top of the current working tree state.
+	 * Applies the entry in the stash that matches the given revision
+	 * on top of the current working tree state. If no revision is
+	 * specified, the 0-th entry in the stash will be applied and
+	 * dropped akin to an invocation of `git stash pop` on the
+	 * command line.
 	 * 
-	 * @param {number} [statusCode] an optional HTTP status code that will be returned by the request,
+	 * @param {string} [revision] the SHA hash of the revision to apply,
+	 *                            if not set, the entry at the 0-th index
+	 *                            in the stash will be applied and dropped
+	 *                            from the stash
+	 * @param {number} [statusCode] an optional HTTP status code expected from the server,
 	 *                              if not set, a 200 OK will be expected
+	 * @param {string} [message] an optional error message that the server
+	 *                           is expected to send back if statusCode is 400
 	 */
-	stashPop: function(statusCode) {
+	stashApply: function(revision, statusCode, message) {
+		if (revision === undefined) {
+			revision = "";
+		}
+
 		if (typeof statusCode !== 'number') {
 			statusCode = 200;
 		}
@@ -456,16 +470,26 @@ GitClient.prototype = {
 		var client = this;
 		this.tasks.push(function(resolve) {
 			request()
-			.put(CONTEXT_PATH + "/gitapi/stash" + FILE_ROOT + client.getName())
+			.put(CONTEXT_PATH + "/gitapi/stash/" + revision + FILE_ROOT + client.getName())
 			.expect(statusCode)
 			.end(function(err, res) {
 				assert.ifError(err);
 				if (statusCode === 400) {
-					assert.equal(res.body.Message, "Failed to apply stashed changes due to an empty stash.");
+					assert.equal(res.body.Message, message);
 				}
 				client.next(resolve, res.body);
 			});
 		});
+	},
+
+	/**
+	 * Pops the first entry in the stash and applies it on top of the current working tree state.
+	 * 
+	 * @param {number} [statusCode] an optional HTTP status code that will be returned by the request,
+	 *                              if not set, a 200 OK will be expected
+	 */
+	stashPop: function(statusCode) {
+		this.stashApply("", statusCode, "Failed to apply stashed changes due to an empty stash.");
 	},
 
 	listStash: function(statusCode) {
@@ -3867,6 +3891,45 @@ maybeDescribe("git", function() {
 				});
 			}); // it("simple")
 		}); // describe("Pop")
+
+		describe("Apply", function() {
+
+			it("empty stash", function(finished) {
+				var client = new GitClient("stash-apply-empty");
+				// init a new Git repository
+				client.init();
+				client.stashApply("rev123", 400, "Failed to apply stashed changes due to an empty stash.");
+				client.start().then(function(body) {
+					finished();
+				})
+				.catch(function(err) {
+					finished(err);
+				});
+			}); // it("empty stash")"
+
+			it("invalid stash rev", function(finished) {
+				var file = "a.txt";
+				var client = new GitClient("stash-apply-invalid");
+				client.init();
+				// track this file
+				client.setFileContents(file, "abc");
+				client.stage(file);
+				client.commit();
+
+				// modify the file
+				client.setFileContents(file, "abcx");
+				client.stash();
+				client.stashApply("rev123", 400, "Invalid stash reference rev123.");
+				client.listStash();
+				client.start().then(function(body) {
+					assert.equal(body.Children.length, 1);
+					finished();
+				})
+				.catch(function(err) {
+					finished(err);
+				});
+			}); // it("invalid stash rev")
+		}); // describe("Apply")
 
 		describe("Drop", function() {
 

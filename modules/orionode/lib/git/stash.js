@@ -84,20 +84,37 @@ function putStash(req, res) {
 	.then(function(_repo) {
 		repo = _repo;
 		if (stashRev) {
-			var index;
+			var empty = true;
+			var index = -1;
 			return git.Stash.foreach(repo, /* @callback */ function(i, message, oid) {
+				empty = false;
 				if (oid.toString() === stashRev) {
 					index = i;
 				}
 			})
 			.then(function() {
-				return git.Stash.apply(repo, index, git.Stash.APPLY_FLAGS.APPLY_REINSTATE_INDEX);
+				if (empty) {
+					return "Failed to apply stashed changes due to an empty stash.";
+				} else if (index === -1) {
+					return "Invalid stash reference " + stashRev + ".";
+				}
+				return git.Stash.apply(repo, index, git.Stash.APPLY_FLAGS.APPLY_REINSTATE_INDEX)
+				.then(function() {
+					return null;
+				});
 			});
 		}
-		return git.Stash.pop(repo, 0, git.Stash.APPLY_FLAGS.APPLY_REINSTATE_INDEX);
+		return git.Stash.pop(repo, 0, git.Stash.APPLY_FLAGS.APPLY_REINSTATE_INDEX)
+		.then(function() {
+			return null;
+		});
 	})
-	.then(function() {
-		res.status(200).end();
+	.then(function(message) {
+		if (message === null) {
+			res.status(200).end();
+		} else {
+			writeError(400, res, message);
+		}
 	})
 	.catch(function(err) {
 		if (err.message === "Reference 'refs/stash' not found"){
