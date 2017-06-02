@@ -13,13 +13,10 @@
 var express = require('express'),
 	expressSession = require('express-session'),
 	MongoStore = require('connect-mongo')(expressSession),
-	passport = require('passport'),
 	cookieParser = require('cookie-parser'),
 	bodyParser = require('body-parser'),
 	mongoose = require('mongoose'),
-	Promise = require('bluebird'),
-	fs = require('fs'),
-	args = require('../../args');
+	Promise = require('bluebird');
 	
 function projectJSON(project) {
 	return {
@@ -244,13 +241,11 @@ module.exports = function(options) {
 	 */
 	app.post('/:project', function(req, res) {
 		var project = req.params.project;
-		project = path.join(workspaceRoot, req.user.workspace, project);
+		project = path.join("/",req.user._doc.workspace,project);
 
-		if (!sharedUtil.projectExists(project)) {
+		if (!sharedUtil.projectExists(path.join(req.user.workspaceDir, project))) {
 			throw new Error("Project does not exist");
 		}
-
-		project = getProjectRoot(project);
 
 		//if add project was successful, return
 		addProject(project)
@@ -264,13 +259,11 @@ module.exports = function(options) {
 	 */
 	app.delete('/:project', function(req, res) {
 		var project = req.params.project;
-		project = path.join(workspaceRoot, req.user.workspace, project);
+		project = path.join("/",req.user._doc.workspace,project);
 
-		if (!sharedUtil.projectExists(project)) {
+		if (!sharedUtil.projectExists(path.join(req.user.workspaceDir, project))) {
 			throw new Error("Project does not exist");
 		}
-
-		project = getProjectRoot(project);
 
 		//if remove project was successful, return 200
 		removeProject(project)

@@ -37,7 +37,7 @@ define(['orion/collab/shareProjectClient'], function(shareProjectClient) {
 			parameters: new mCommandRegistry.ParametersDescription([new mCommandRegistry.CommandParameter('username', 'text', "Username:", "Enter username here")]), //$NON-NLS-5$ //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			callback: function(data) {
 				var username = data.parameters.parameterTable.username.value;
-				var project = data.items[0].Name;
+				var project = encodeURIComponent(data.items[0].Location);
 				shareProjectClient.addUser(username, project);
 			},
 			visibleWhen: function(item) {
@@ -60,7 +60,7 @@ define(['orion/collab/shareProjectClient'], function(shareProjectClient) {
 			parameters: new mCommandRegistry.ParametersDescription([new mCommandRegistry.CommandParameter('username', 'text', "Username:", "Enter username here")]), //$NON-NLS-5$ //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			callback: function(data) {
 				var username = data.parameters.parameterTable.username.value;
-				var project = data.items[0].Name;
+				var project = encodeURIComponent(data.items[0].Location);
 				shareProjectClient.removeUser(username, project);
 			},
 			visibleWhen: function(item) {

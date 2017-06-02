@@ -335,7 +335,7 @@ var writeFileMetadata = exports.writeFileMetadata = function(req, res, fileRoot,
 			result.ETag = etag;
 			res.setHeader('ETag', etag);
 		}
-		api.writeResponse(null, res, null, result, true, true);
+		return api.writeResponse(null, res, null, result, true, true);
 	})
 	.catch(api.writeError.bind(null, 500, res));
 };
