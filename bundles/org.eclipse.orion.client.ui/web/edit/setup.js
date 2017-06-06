@@ -1539,7 +1539,8 @@ objects.mixin(EditorSetup.prototype, {
 							return true;
 						}
 					})) {
-						window.location = uriTemplate.expand({resource: evt.newInput});
+						window.location = uriTemplate.expand({resource: workspaces[0].Location});
+//						window.location = uriTemplate.expand({resource: evt.newInput});
 					}
 				});
 			}.bind(this));
