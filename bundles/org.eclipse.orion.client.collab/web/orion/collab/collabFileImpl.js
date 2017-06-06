@@ -41,7 +41,11 @@ define(["orion/xhr", "orion/Deferred", "orion/URL-shim",  "orion/form"], functio
 		fetchChildren: function(location) {
 			var fetchLocation = location;
 			if (fetchLocation===this.fileBase) {
-				return new Deferred().resolve([]);
+				return this.loadWorkspaces().then(function(workspaces) {
+					return Deferred.all(workspaces.map(function(workspace) {
+						return this.read(workspace.Location, true);
+					}.bind(this)));
+				}.bind(this));
 			}
 			//If fetch location does not have ?depth=, then we need to add the depth parameter. Otherwise server will not return any children
 			if (fetchLocation.indexOf("?depth=") === -1) { //$NON-NLS-0$
@@ -58,7 +62,8 @@ define(["orion/xhr", "orion/Deferred", "orion/URL-shim",  "orion/form"], functio
 				return jsonData.Children || [];
 			});
 		},
-		loadWorkspaces: function() {
+		loadWorkspaces: function(loc) {
+			// For sharedworkspace, there's only one workspace.
 			var loc = this.fileBase;
 			var suffix = "/sharedWorkspace/";
 			if (loc && loc.indexOf(suffix, loc.length - suffix.length) !== -1) {
@@ -72,11 +77,6 @@ define(["orion/xhr", "orion/Deferred", "orion/URL-shim",  "orion/form"], functio
 			}).then(function(result) {
 				var jsonData = result.response ? JSON.parse(result.response) : {};
 				return jsonData.Workspaces;
-			}).then(function(result) {
-				if (this.makeAbsolute) {
-					_normalizeLocations(result);
-				}
-				return result;
 			}.bind(this));	
 		},
 		loadWorkspace: function(loc) {
@@ -86,25 +86,14 @@ define(["orion/xhr", "orion/Deferred", "orion/URL-shim",  "orion/form"], functio
 			}
 			return xhr("GET", loc, {
 				headers: {
-					"Orion-Version": "1"
+					"Orion-Version": "1",
+					"Content-Type": "charset=UTF-8" 
 				},
-				timeout: GIT_TIMEOUT,
-				log: false
+				timeout: GIT_TIMEOUT
 			}).then(function(result) {
 				var jsonData = result.response ? JSON.parse(result.response) : {};
-				//in most cases the returned object is the workspace we care about
-				//user didn't specify a workspace so we are at the root
-				//just pick the first location in the provided list
-				if (jsonData.Workspaces && jsonData.Workspaces.length > 0) {
-					return this.loadWorkspace(jsonData.Workspaces[0].Location);
-				}
-				return jsonData;
-			}.bind(this)).then(function(result) {
-				if (this.makeAbsolute) {
-					_normalizeLocations(result);
-				}
-				return result;
-			}.bind(this));
+				return jsonData || {};
+			});
 		},
 		getWorkspace: function(resourceLocation) {
 			//TODO move this to server to avoid path math?
@@ -122,6 +111,7 @@ define(["orion/xhr", "orion/Deferred", "orion/URL-shim",  "orion/form"], functio
 				});
 				return this.loadWorkspace(loc);
 			}.bind(this));
+//			return this.loadWorkspace(resourceLocation);
 		},
 		createProject: function(url, projectName, serverPath, create) {
 			throw new Error("Not supported"); //$NON-NLS-0$ 
