@@ -141,6 +141,9 @@ define(['i18n!orion/nls/messages', 'orion/webui/littlelib', 'orion/PageUtil', 'o
 					listItem.appendChild(anchor);
 					sideMenuList.appendChild(listItem);
 					anchor.setAttribute("aria-label", listItem.categoryName);
+					if (this._currentCategory === categoryInfo.id) {
+						anchor.setAttribute("aria-current", "page");
+					}
 					anchor.commandTooltip = new mTooltip.Tooltip({
 						node: anchor,
 						text: listItem.categoryName,
