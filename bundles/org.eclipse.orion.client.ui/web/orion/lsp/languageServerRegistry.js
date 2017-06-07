@@ -86,6 +86,9 @@ define([
 			 * @returns {LanguageServer} A language server impl - if one is mapped
 			 */
 			function getServerByContentType(contentType) {
+				if (!contentType) {
+					return null;
+				}
 				this.init();
 				var value = _contentTypes.get(contentType.id);
 				return value ? value : null;
