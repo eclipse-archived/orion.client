@@ -34,7 +34,7 @@ define(["orion/xhr", "orion/Deferred", "orion/URL-shim",  "orion/form"], functio
 		}
 		return data;
 	}
-	var GIT_TIMEOUT = 60000;
+	var COLLAB_TIMEOUT = 60000;
 
 	CollabFileImpl.prototype = {
 		
@@ -56,7 +56,7 @@ define(["orion/xhr", "orion/Deferred", "orion/URL-shim",  "orion/form"], functio
 					"Orion-Version": "1", //$NON-NLS-0$  //$NON-NLS-1$
 					"Content-Type": "charset=UTF-8" //$NON-NLS-0$  //$NON-NLS-1$
 				},
-				timeout: GIT_TIMEOUT
+				timeout: COLLAB_TIMEOUT
 			}).then(function(result) {
 				var jsonData = result.response ? JSON.parse(result.response) : {};
 				return jsonData.Children || [];
@@ -73,27 +73,33 @@ define(["orion/xhr", "orion/Deferred", "orion/URL-shim",  "orion/form"], functio
 				headers: {
 					"Orion-Version": "1"
 				},
-				timeout: GIT_TIMEOUT
+				timeout: COLLAB_TIMEOUT
 			}).then(function(result) {
 				var jsonData = result.response ? JSON.parse(result.response) : {};
 				return jsonData.Workspaces;
 			}.bind(this));	
 		},
 		loadWorkspace: function(loc) {
-			var suffix = "/sharedWorkspace/";
-			if (loc && loc.indexOf(suffix, loc.length - suffix.length) !== -1) {
-				loc += "/tree";
+			if (loc === this.fileBase) {
+				loc = null;
 			}
-			return xhr("GET", loc, {
+			return xhr("GET", loc ? loc : this.fileBase, {
 				headers: {
-					"Orion-Version": "1",
-					"Content-Type": "charset=UTF-8" 
+					"Orion-Version": "1"
 				},
-				timeout: GIT_TIMEOUT
+				timeout: COLLAB_TIMEOUT
 			}).then(function(result) {
 				var jsonData = result.response ? JSON.parse(result.response) : {};
-				return jsonData || {};
-			});
+				//in most cases the returned object is the workspace we care about
+				if (loc) {
+					return jsonData;
+				}
+				//user didn't specify a workspace so we are at the root
+				//just pick the first location in the provided list
+				if (jsonData.Workspaces.length > 0) {
+					return this.loadWorkspace(jsonData.Workspaces[0].Location);
+				}
+			}.bind(this));
 		},
 		getWorkspace: function(resourceLocation) {
 			//TODO move this to server to avoid path math?
@@ -111,7 +117,6 @@ define(["orion/xhr", "orion/Deferred", "orion/URL-shim",  "orion/form"], functio
 				});
 				return this.loadWorkspace(loc);
 			}.bind(this));
-//			return this.loadWorkspace(resourceLocation);
 		},
 		createProject: function(url, projectName, serverPath, create) {
 			throw new Error("Not supported"); //$NON-NLS-0$ 
@@ -302,7 +307,7 @@ define(["orion/xhr", "orion/Deferred", "orion/URL-shim",  "orion/form"], functio
 		readBlob: function(location) {
 			return xhr("GET", location, { //$NON-NLS-0$ 
 				responseType: "arraybuffer", //$NON-NLS-0$ 
-				timeout: GIT_TIMEOUT
+				timeout: COLLAB_TIMEOUT
 			}).then(function(result) {
 				return result.response;
 			});
