@@ -269,6 +269,15 @@ define([
 						input.classList.add("parameterInput");
 						bidiUtils.initInputField(input);
 						parent.appendChild(input);
+						input.addEventListener("keydown", function(evt){
+							if(lib.KEY.ENTER === evt.keyCode){
+								buttonStringCallList[0].callback && buttonStringCallList[0].callback(input.value);  // as defined in propmt method, the first button is ok button
+								closeFunction();
+							}else if(lib.KEY.ESCAPE === evt.keyCode){
+								buttonStringCallList[1].callback && buttonStringCallList[1].callback("");   // as defined in propmt method, the second button is cancel button
+								closeFunction();
+							}
+						}, false);
 					}
 					
 					var buttons = Object.keys(buttonStringCallList).map(function(key){
@@ -289,7 +298,7 @@ define([
 						button.className = "dismissButton";
 						return button;
 					});
-					return buttons[0];
+					return style === "PROMPT" ? input : buttons[0];
 				};
 				this._parameterCollector.close();
 				if(!node){
