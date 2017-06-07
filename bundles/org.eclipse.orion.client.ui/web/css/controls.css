@@ -1562,6 +1562,7 @@ html[dir="rtl"] .uploadNode .uploadCancelButton { /* ACGC */
 .promptDialogMessage {
 	color: #222;
 	margin: 0 2px 4px 2px;
+	white-space: pre;
 }
 
 .promptDialogInput {
