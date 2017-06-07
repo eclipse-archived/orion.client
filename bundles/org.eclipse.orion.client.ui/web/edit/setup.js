@@ -34,6 +34,8 @@ define([
 	'orion/status',
 	'orion/progress',
 	'orion/operationsClient',
+	'orion/git/gitClient',
+	'orion/ssh/sshTools', 
 	'orion/outliner',
 	'orion/dialogs',
 	'orion/extensionCommands',
@@ -60,7 +62,7 @@ define([
 	messages, Sidebar, mInputManager, mCommands, mGlobalCommands,
 	mTextModelFactory, mUndoStack,
 	mFolderView, mEditorView, mPluginEditorView , mMarkdownView, mMarkdownEditor,
-	mCommandRegistry, mContentTypes, mFileClient, mFileCommands, mEditorCommands, mSelection, mStatus, mProgress, mOperationsClient, mOutliner, mDialogs, mExtensionCommands, ProjectCommands, mSearchClient,
+	mCommandRegistry, mContentTypes, mFileClient, mFileCommands, mEditorCommands, mSelection, mStatus, mProgress, mOperationsClient, mGitClient, mSshTools, mOutliner, mDialogs, mExtensionCommands, ProjectCommands, mSearchClient,
 	EventTarget, URITemplate, i18nUtil, PageUtil, util, objects, lib, Deferred, mProjectClient, mSplitter, mTooltip, mContextMenu, bidiUtils, mCustomGlobalCommands, mGeneralPrefs, mBreadcrumbs, mKeyBinding
 ) {
 
@@ -1372,6 +1374,8 @@ objects.mixin(EditorSetup.prototype, {
 		this.dialogService = new mDialogs.DialogService(serviceRegistry);
 		this.commandRegistry = new mCommandRegistry.CommandRegistry({selection: this.selection});
 		this.progressService = new mProgress.ProgressService(serviceRegistry, this.operationsClient, this.commandRegistry);
+		this.sshService = new mSshTools.SshService(serviceRegistry);
+		this.gitClient = new mGitClient.GitService(serviceRegistry);
 		
 		// Editor needs additional services
 		this.outlineService = new mOutliner.OutlineService({serviceRegistry: serviceRegistry, preferences: this.preferences});

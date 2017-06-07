@@ -31,11 +31,6 @@ define([
 					fieldTitle: messages["filteredResourcesTooltip"],
 					postChange: this.setPreferences.bind(this)
 				});
-				this.enableWorkspaces = new SettingsCheckbox({
-					fieldlabel: "Enable Multiple Workspaces:",
-					fieldTitle: "Allow the creation of multiple workspaces per user.",
-					postChange: this.setPreferences.bind(this)
-				});
 				this.enableEditorTabs = new SettingsCheckbox({
 					fieldlabel: messages["enableEditorTabs"],
 					fieldTitle: messages["enableEditorTabsTooltip"],
@@ -61,7 +56,7 @@ define([
 					sectionName: messages["Files"],
 					parentNode: settingsContentElement,
 					children: util.isElectron ? [this.filteredResourcesTextfield] 
-					: [this.desktopSelectionPolicyCheckbox, this.filteredResourcesTextfield, this.enableWorkspaces]
+					: [this.desktopSelectionPolicyCheckbox, this.filteredResourcesTextfield]
 				});
 				fileSubsection.show();
 				var editorTabs = new Subsection({
@@ -85,7 +80,6 @@ define([
 					}else{
 						this.desktopSelectionPolicyCheckbox.enableCheckBox();
 					}
-					generalPrefs.enableWorkspaces = this.enableWorkspaces.isChecked();
 					var maxTabs = parseInt(this.maximumEditorTabsTextfield.getValue(), 10);
 					maxTabs = isNaN(maxTabs) ? 0 : maxTabs;
 					generalPrefs.maximumEditorTabs = maxTabs;
@@ -111,9 +105,6 @@ define([
 						}
 					}
 					
-					this.enableWorkspaces.setSelection(generalPrefs.enableWorkspaces);
-					this.enableWorkspaces.show();
-
 					//filtered resources
 					if(typeof generalPrefs.filteredResources !== 'string') {
 						this.filteredResourcesTextfield.setValue(".git, .DS_Store"); //default
