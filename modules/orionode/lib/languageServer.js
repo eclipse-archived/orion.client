@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016 IBM Corporation and others.
+ * Copyright (c) 2016, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -257,6 +257,10 @@ exports.install = function(options) {
 					if (textDocument && textDocument.uri) {
 						var workspaceFile = fileUtil.getFile2(options.metastore, textDocument.uri.replace(/^\/file/, ''));
 						textDocument.uri = workspaceUrl + workspaceFile.path.slice(workspaceFile.workspaceDir.length);
+						// convert backslashes to slashes only if on Windows
+						if (path.sep === '\\') {
+							textDocument.uri = textDocument.uri.replace(/\\/g, "/");
+						}
 					}
 					var s = JSON.stringify(data);
 					if (!ready) {
