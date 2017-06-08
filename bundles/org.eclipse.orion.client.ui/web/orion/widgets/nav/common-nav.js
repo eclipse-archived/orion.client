@@ -60,10 +60,10 @@ define([
 		var sidebarNavInputManager = this.sidebarNavInputManager = params.sidebarNavInputManager;
 		this.toolbarNode = params.toolbarNode;
 
-		this.fileActionsScope = "fileActions"; //$NON-NLS-0$
-		this.editActionsScope = "editActions"; //$NON-NLS-0$
-		this.viewActionsScope = "viewActions"; //$NON-NLS-0$
-		this.toolsActionsScope = "toolsActions"; //$NON-NLS-0$
+		this.fileActionsScope = "menuBarActions"; //$NON-NLS-0$
+		this.editActionsScope = "menuBarActions"; //$NON-NLS-0$
+		this.viewActionsScope = "menuBarActions"; //$NON-NLS-0$
+		this.toolsActionsScope = "menuBarActions"; //$NON-NLS-0$
 		this.additionalActionsScope = "extraActions"; //$NON-NLS-0$
 
 		this._parentNode = lib.node(this.parentId);

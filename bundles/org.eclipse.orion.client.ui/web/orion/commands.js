@@ -290,6 +290,7 @@ define([
 		}
 		if (parentElement.nodeName.toLowerCase() === "ul") {
 			var li = document.createElement("li");
+			li.setAttribute("role", "none");
 			parentElement.appendChild(li);
 			parentElement = li;
 		} else {
@@ -470,6 +471,7 @@ define([
 		}
 		if (parent.nodeName.toLowerCase() === "ul") { //$NON-NLS-0$
 			var li = document.createElement("li"); //$NON-NLS-0$
+			li.setAttribute("role", "none");
 			parent.appendChild(li);
 			parent = li;
 		} else {
@@ -732,6 +734,7 @@ define([
 			choices.forEach(function(choice) {
 				if (choice.name) {
 					var itemNode = document.createElement("li"); //$NON-NLS-0$
+					itemNode.setAttribute("role", "none");
 					parent.appendChild(itemNode);
 					var node = document.createElement("span"); //$NON-NLS-0$
 					node.tabIndex = 0; 

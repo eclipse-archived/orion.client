@@ -69,7 +69,7 @@ define(['orion/webui/littlelib'], function(lib) {
 				this._node.addEventListener("mouseover", this._mouseoverHandler = function(event) { //$NON-NLS-0$
 					if (lib.contains(self._node, event.target)) {
 						self.show();
-						lib.stop(event);
+						//lib.stop(event);
 					}
 				}, false);
 				
