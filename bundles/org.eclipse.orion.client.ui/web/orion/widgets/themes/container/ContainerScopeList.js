@@ -107,7 +107,8 @@ define(['i18n!orion/settings/nls/messages'
 				"styles .editorTab border-top",
 				"styles .editorTab border-right",
 				"styles .textviewTooltip .commandButton:not(.primaryButton):hover background-color", //.25 opcacity
-				"styles .textviewTooltip .commandButton:not(.primaryButton):focus background-color" //.25 opcacity
+				"styles .textviewTooltip .commandButton:not(.primaryButton):focus background-color", //.25 opcacity
+				"styles .gitCommitListSection .commandButton.orionButton.dropdownTrigger:hover background-color" //.25 opcacity
 			],
 			id: "tertiaryBackgroundColor",
 			value: defaultColor
