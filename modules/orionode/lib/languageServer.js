@@ -18,6 +18,9 @@ var net = require('net');
 var fs = require('fs');
 var fileUtil = require('./fileUtil');
 
+var log4js = require('log4js');
+var logger = log4js.getLogger("lsp");
+
 var IN_PORT = 8123;
 var OUT_PORT = 8124;
 
@@ -57,11 +60,13 @@ function fork(modulePath, args, options, callback) {
 		execArgv: options.execArgv
 	});
 	childProcess.once('error', function(err) {
-		console.log(err);
+		logger.error("Java process error event");
+		logger.error(err);
 		reject(err);
 	});
 	childProcess.once('exit', function(err) {
-		console.log(err);
+		logger.error("Java process exit event");
+		logger.error(err);
 		reject(err);
 	});
 	resolve(childProcess);
@@ -163,16 +168,16 @@ function parseMessage(data, workspaceUrl, sock) {
 				try {
 					json = JSON.parse(contents.toString('utf8'));
 				} catch(e) {
-					console.log(e);
-					console.log("==================== START CURRENT DATA =============================\n");
-					console.log("contents = " + contents);
-					console.log("messageSize = " + messageSize);
-					console.log("full data contents = " + dataContents);
-					console.log("headerSizeIndex = " + headerSizeIndex);
-					console.log("raw data = " + data);
-					console.log("raw data slice= " + data.slice(headerSizeIndex + 4, headerSizeIndex + 4 + messageSize));
-					console.log("remaining data = " + remainingData);
-					console.log("==================== END CURRENT DATA =============================\n");
+					logger.error(e);
+					logger.error("==================== START CURRENT DATA =============================\n");
+					logger.error("contents = " + contents);
+					logger.error("messageSize = " + messageSize);
+					logger.error("full data contents = " + dataContents);
+					logger.error("headerSizeIndex = " + headerSizeIndex);
+					logger.error("raw data = " + data);
+					logger.error("raw data slice= " + data.slice(headerSizeIndex + 4, headerSizeIndex + 4 + messageSize));
+					logger.error("remaining data = " + remainingData);
+					logger.error("==================== END CURRENT DATA =============================\n");
 				}
 				if (json) {
 					if (json.params) {
@@ -192,7 +197,7 @@ function parseMessage(data, workspaceUrl, sock) {
 							&& json.params.message === "Ready") {
 						ready = true;
 					}
-					console.log(JSON.stringify(json));
+					logger.info(JSON.stringify(json));
 					sock.emit('data', json);
 				}
 			} else {
@@ -208,49 +213,51 @@ function parseMessage(data, workspaceUrl, sock) {
 			remainingData = null;
 		}
 	} catch (err) {
-		console.log(err);
+		logger.error(err);
 	}
 }
 
 exports.install = function(options) {
 	var io = options.io;
 	if (!io) {
-		throw new Error('missing options.io');
+		logger.error('Missing options.io. LSP features will be disabled.');
+		return;
 	}
 	var workspaceUrl = "file:///" + options.workspaceDir.replace(/\\/g, "/");
 	
 	var javaHome = process.env["JAVA_HOME"];
 	if (!javaHome) {
-		throw new Error('JAVA_HOME needs to be set');
+		logger.error('JAVA_HOME needs to be set. LSP featrues will be disabled');
+		return;
 	}
 
 	io.of('/languageServer').on('connection', function(sock) {
 		sock.on('start', /* @callback */ function(cwd) {
 			var receiveFromServer = net.createServer({}, function(stream) {
-				console.log('receiveFromServer socket connected');
+				logger.info('receiveFromServer socket connected');
 				stream.on('data', function(data) {
 					parseMessage(data, workspaceUrl, sock);
 				});
 				stream.on('error', function(err) {
-					console.log('receiveFromServer stream error: ' + err.toString());
+					logger.error('receiveFromServer stream error: ' + err.toString());
 				});
 				stream.on('end', function() {
-					console.log('receiveFromServer disconnected');
+					logger.info('receiveFromServer disconnected');
 				});
 			});
 			receiveFromServer.listen(IN_PORT, null, null, function() {
-				console.log("Listening to lsp server replies");
+				logger.info("Listening to lsp server replies");
 			});
 			receiveFromServer.on('error', function(err) {
-				console.log('receiveFromServer error: ' + err.toString());
+				logger.error('receiveFromServer error: ' + err.toString());
 			});
 			receiveFromServer.on('end', function() {
-				console.log('Disconnected receiveFromServer');
+				logger.info('Disconnected receiveFromServer');
 			});
 
 			var startup = true;
 			var sendToServer = net.createServer({}, function(stream) {
-				console.log('sendToServer socket connected');
+				logger.info('sendToServer socket connected');
 
 				sock.on('data', function(data) {
 					var textDocument = data.params && data.params.textDocument;
@@ -269,14 +276,14 @@ exports.install = function(options) {
 							return;
 						}
 					}
-					console.log('data sent : ' + s);
+					logger.info('data sent : ' + s);
 					stream.write("Content-Length: " + s.length + "\r\n\r\n" + s);
 				});
 				stream.on('error', function(err) {
-					console.log('sendToServer stream error: ' + err.toString());
+					logger.error('sendToServer stream error: ' + err.toString());
 				});
 				stream.on('end', function() {
-					console.log('sendToServer stream disconnected');
+					logger.info('sendToServer stream disconnected');
 				});
 				if (sock && startup) {
 					startup = false;
@@ -289,13 +296,13 @@ exports.install = function(options) {
 
 			});
 			sendToServer.listen(OUT_PORT, null, null, function() {
-				console.log("sendToServer socket is listening");
+				logger.info("sendToServer socket is listening");
 			});
 			sendToServer.on('error', function(err) {
-				console.log('sendToServer socket error: ' + err.toString());
+				logger.error('sendToServer socket error: ' + err.toString());
 			});
 			sendToServer.on('end', function() {
-				console.log('Disconnected sendToServer');
+				logger.info('Disconnected sendToServer');
 			});
 			var serverClosed = false;
 			var closeServer = function () {
@@ -309,11 +316,11 @@ exports.install = function(options) {
 			runJavaServer(javaHome).then(function(child) {
 				child.on('error', function(err) {
 					closeServer();
-					console.log('java server process error: ' + err.toString());
+					logger.error('java server process error: ' + err.toString());
 				});
 				child.once('error', function(err) {
 					closeServer();
-					console.log(err);
+					logger.error(err);
 				});
 				child.once('exit', function() {
 					closeServer();
