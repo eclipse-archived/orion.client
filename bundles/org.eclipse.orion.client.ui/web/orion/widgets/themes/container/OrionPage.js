@@ -124,11 +124,6 @@ define({
 			"background": "#26343F"
 		},
 		".gitCommitMessage": {
-			"gitCommitMessageTopRow": {
-				"border-width": "1px",
-				"border-style": "solid",
-				"border-color": "rgb(60, 113, 179)"
-			},
 			".gitCommitMessageTopRow": {
 				"border-color": "#106A5B"
 			},
@@ -207,9 +202,6 @@ define({
 				"color": "#000000 !important"
 			},
 			".commandButton.orionButton.dropdownTrigger.launchConfigurationsButton": {
-				"dropdownArrowDown": {
-					"color": "white"
-				},
 				".dropdownArrowDown": {
 					"color": "#FFFFFF"
 				}
