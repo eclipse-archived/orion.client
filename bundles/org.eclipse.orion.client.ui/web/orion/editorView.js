@@ -474,7 +474,7 @@ define([
 					// check lsp implementation for the current content type
 					var lspServer = languageServerRegistry.getServerByContentType(fileContentType);
 					if (lspServer) {
-						providerInfoArray.push({provider: lspServer, id: lspServer._id, lspServer: true, excludedStyles: "(string.*)"});
+						providerInfoArray.push({provider: lspServer, id: lspServer._id, lspServer: true, excludedStyles: new RegExp("(string.*)")});
 					}
 				}
 
