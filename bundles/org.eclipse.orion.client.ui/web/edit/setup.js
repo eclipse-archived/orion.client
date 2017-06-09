@@ -53,6 +53,7 @@ define([
 	'orion/webui/splitter',
 	'orion/webui/tooltip',
 	'orion/webui/contextmenu',
+	'orion/webui/menubar',
 	'orion/bidiUtils',
 	'orion/customGlobalCommands',
 	'orion/generalPreferences',
@@ -63,7 +64,7 @@ define([
 	mTextModelFactory, mUndoStack,
 	mFolderView, mEditorView, mPluginEditorView , mMarkdownView, mMarkdownEditor,
 	mCommandRegistry, mContentTypes, mFileClient, mFileCommands, mEditorCommands, mSelection, mStatus, mProgress, mOperationsClient, mGitClient, mSshTools, mOutliner, mDialogs, mExtensionCommands, ProjectCommands, mSearchClient,
-	EventTarget, URITemplate, i18nUtil, PageUtil, util, objects, lib, Deferred, mProjectClient, mSplitter, mTooltip, mContextMenu, bidiUtils, mCustomGlobalCommands, mGeneralPrefs, mBreadcrumbs, mKeyBinding
+	EventTarget, URITemplate, i18nUtil, PageUtil, util, objects, lib, Deferred, mProjectClient, mSplitter, mTooltip, mContextMenu, mMenuBar, bidiUtils, mCustomGlobalCommands, mGeneralPrefs, mBreadcrumbs, mKeyBinding
 ) {
 
 var exports = {};
@@ -85,10 +86,8 @@ function MenuBar(options) {
 	this.fileClient = options.fileClient;
 	this.editorCommands = options.editorCommands;
 	this.parentNode = options.parentNode;
-	this.fileActionsScope = "fileActions"; //$NON-NLS-0$
-	this.editActionsScope = "editActions"; //$NON-NLS-0$
-	this.viewActionsScope = "viewActions"; //$NON-NLS-0$
-	this.toolsActionsScope = "toolsActions"; //$NON-NLS-0$
+	this.menuBarActionScope = "menuBarActions";
+	this.toolsActionsScope = "menuBarActions"; //$NON-NLS-0$
 	this.additionalActionsScope = "extraActions"; //$NON-NLS-0$
 	this.createActionSections();
 	
@@ -98,7 +97,7 @@ MenuBar.prototype = {};
 objects.mixin(MenuBar.prototype, {
 	createActionSections: function() {
 		var _self = this;
-		[this.fileActionsScope, this.editActionsScope, this.viewActionsScope, this.toolsActionsScope, this.additionalActionsScope].reverse().forEach(function(id) {
+		[this.additionalActionsScope].reverse().forEach(function(id) {
 			if (!_self[id]) {
 				var elem = document.createElement("ul"); //$NON-NLS-0$
 				elem.id = id;
@@ -113,20 +112,31 @@ objects.mixin(MenuBar.prototype, {
 			}
 		});
 
+		// Create the main menu bar
+		var editMenuBar = document.createElement("ul"); //$NON-NLS-0$
+		var menuBarScope = editMenuBar.id = this.menuBarActionScope;
+		editMenuBar.setAttribute("role", "menubar");
+		var menuBar = new mMenuBar.MenuBar({
+			dropdown: editMenuBar,
+		});
+		
+		
+		editMenuBar.classList.add("layoutLeft"); //$NON-NLS-0$
+		editMenuBar.classList.add("commandList"); //$NON-NLS-0$
+		editMenuBar.classList.add("pageActions"); //$NON-NLS-0$
+		_self.parentNode.insertBefore(editMenuBar, _self.parentNode.firstChild);
+
 		var commandRegistry = this.commandRegistry;
-		var fileActionsScope = this.fileActionsScope;
-		var editActionsScope = this.editActionsScope;
-		var viewActionsScope = this.viewActionsScope;
 		var toolsActionsScope = this.toolsActionsScope;
 		
-		commandRegistry.addCommandGroup(fileActionsScope, "orion.menuBarFileGroup", 1000, messages["File"], null, messages["noActions"], null, null, "dropdownSelection"); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-		commandRegistry.addCommandGroup(editActionsScope, "orion.menuBarEditGroup", 100, messages["Edit"], null, messages["noActions"], null, null, "dropdownSelection"); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-		commandRegistry.addCommandGroup(viewActionsScope, "orion.menuBarViewGroup", 100, messages["View"], null, messages["noActions"], null, null, "dropdownSelection"); //$NON-NLS-1$ //$NON-NLS-2$
-		commandRegistry.addCommandGroup(toolsActionsScope, "orion.menuBarToolsGroup", 100, messages["Tools"], null, null, null, null, "dropdownSelection"); //$NON-NLS-1$ //$NON-NLS-2$
+		commandRegistry.addCommandGroup(menuBarScope, "orion.menuBarFileGroup", 1, messages["File"], null, messages["noActions"], null, null, "dropdownSelection"); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		commandRegistry.addCommandGroup(menuBarScope, "orion.menuBarEditGroup", 2, messages["Edit"], null, messages["noActions"], null, null, "dropdownSelection"); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		commandRegistry.addCommandGroup(menuBarScope, "orion.menuBarViewGroup", 3, messages["View"], null, messages["noActions"], null, null, "dropdownSelection"); //$NON-NLS-1$ //$NON-NLS-2$
+		commandRegistry.addCommandGroup(menuBarScope, "orion.menuBarToolsGroup", 4, messages["Tools"], null, null, null, null, "dropdownSelection"); //$NON-NLS-1$ //$NON-NLS-2$
 		
-		commandRegistry.addCommandGroup(fileActionsScope, "orion.newContentGroup", 0, messages["New"], "orion.menuBarFileGroup", null, null, null, "dropdownSelection"); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-		commandRegistry.addCommandGroup(fileActionsScope, "orion.importGroup", 100, messages["Import"], "orion.menuBarFileGroup", null, null, null, "dropdownSelection"); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-		commandRegistry.addCommandGroup(fileActionsScope, "orion.exportGroup", 1001, messages["Export"], "orion.menuBarFileGroup", null, null, null, "dropdownSelection"); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		commandRegistry.addCommandGroup(menuBarScope, "orion.newContentGroup", 0, messages["New"], "orion.menuBarFileGroup", null, null, null, "dropdownSelection"); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		commandRegistry.addCommandGroup(menuBarScope, "orion.importGroup", 100, messages["Import"], "orion.menuBarFileGroup", null, null, null, "dropdownSelection"); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		commandRegistry.addCommandGroup(menuBarScope, "orion.exportGroup", 1001, messages["Export"], "orion.menuBarFileGroup", null, null, null, "dropdownSelection"); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 	},
 	createCommands: function() {
 		var serviceRegistry = this.serviceRegistry;
@@ -171,14 +181,10 @@ objects.mixin(MenuBar.prototype, {
 			this.editorCommands.updateCommands(editorViewer.getCurrentEditorView());
 		}
 		var commandRegistry = this.commandRegistry, serviceRegistry = this.serviceRegistry;
-		commandRegistry.registerSelectionService(this.fileActionsScope, visible ? selection : null);
-		commandRegistry.registerSelectionService(this.editActionsScope, visible ? selection : null);
-		commandRegistry.registerSelectionService(this.viewActionsScope, visible ? selection : null);
+		commandRegistry.registerSelectionService(this.menuBarActionScope, visible ? selection : null);
 		mFileCommands.setExplorer(explorer);
 		ProjectCommands.setExplorer(explorer);
-		mFileCommands.updateNavTools(serviceRegistry, commandRegistry, explorer, null, [this.fileActionsScope, this.editActionsScope, this.viewActionsScope], treeRoot, true);
-		commandRegistry.destroy(this.toolsActionsScope);
-		commandRegistry.renderCommands(this.toolsActionsScope, this.toolsActionsScope, metadata, explorer, "tool"); //$NON-NLS-0$
+		mFileCommands.updateNavTools(serviceRegistry, commandRegistry, explorer, null, [this.menuBarActionScope], treeRoot, true);
 		commandRegistry.destroy(this.additionalActionsScope);
 		commandRegistry.renderCommands(this.additionalActionsScope, this.additionalActionsScope, treeRoot, explorer, "button"); //$NON-NLS-0$
 	}
@@ -1391,9 +1397,9 @@ objects.mixin(EditorSetup.prototype, {
 			renderToolbars: this.renderToolbars.bind(this),
 			searcher: this.searcher,
 			readonly: this.readonly,
-			toolbarId: "toolsActions", //$NON-NLS-0$
-			saveToolbarId: "fileActions", //$NON-NLS-0$
-			editToolbarId: "editActions", //$NON-NLS-0$
+			toolbarId: "menuBarActions", //$NON-NLS-0$
+			saveToolbarId: "menuBarActions", //$NON-NLS-0$
+			editToolbarId: "menuBarActions", //$NON-NLS-0$
 			navToolbarId: "pageNavigationActions", //$NON-NLS-0$
 			editorContextMenuId: "editorContextMenuActions", //$NON-NLS-0$
 		});
@@ -1497,9 +1503,9 @@ objects.mixin(EditorSetup.prototype, {
 			selection: this.selection,
 			serviceRegistry: this.serviceRegistry,
 			sidebarNavInputManager: this.sidebarNavInputManager,
-			switcherScope: "viewActions", //$NON-NLS-0$
-			editScope: "editActions", //$NON-NLS-0$
-			toolsScope: "toolsActions", //$NON-NLS-0$
+			switcherScope: "menuBarActions", //$NON-NLS-0$
+			editScope: "menuBarActions", //$NON-NLS-0$
+			toolsScope: "menuBarActions", //$NON-NLS-0$
 			menuBar: this.menuBar,
 			toolbar: this.sidebarToolbar
 		});
