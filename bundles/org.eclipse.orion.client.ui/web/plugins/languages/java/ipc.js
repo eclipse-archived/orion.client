@@ -176,7 +176,16 @@ define([
 	IPC.prototype.initialize = function initialize(processId, workspaceDir) {
 		return this.sendMessage(this.id++, messageTypes.initialize, {
 			rootPath: workspaceDir,
-			processId: processId
+			processId: processId,
+			capabilities: {
+				textDocument: {
+					completion: {
+						completionItem: {
+							snippetSupport: true
+						}
+					}
+				}
+			}
 		});
 	};
 

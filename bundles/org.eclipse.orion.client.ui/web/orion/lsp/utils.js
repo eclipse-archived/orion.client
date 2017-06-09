@@ -301,8 +301,25 @@ define([
 					temp.proposal = item.label;
 				}
 				if (temp.proposal) {
-					// remove {{ and }} around parameter's names
-					temp.proposal = temp.proposal.replace(/{{/gi, "").replace(/}}/gi, "");
+					var mod = temp.proposal;
+					var index = mod.indexOf("${");
+					temp.positions = [];
+					if (index === -1) {
+						temp.escapePosition = mod.length;
+					} else {
+						while (index !== -1) {
+							mod = mod.substring(0, index) + mod.substring(index + 4);
+							var endIndex = mod.indexOf("}");
+							mod = mod.substring(0, endIndex) + mod.substring(endIndex + 1);
+							temp.positions.push({
+								offset: index,
+								length: endIndex - index
+							});
+							index = mod.indexOf("${");
+						}
+						temp.proposal = mod;
+						temp.escapePosition = mod.length;
+					}
 				}
 				if (item.documentation) {
 					temp.hover = {
@@ -320,7 +337,7 @@ define([
 					});
 					temp.additionalEdits = tempEdits;
 				}
-				return convertEachProposal(editorContext, temp);
+				return convertEachProposal(editorContext, item, temp);
 			});
 		});
 	}
@@ -338,7 +355,27 @@ define([
 		});
 	}
 
-	function convertEachProposal(editorContext, proposal) {
+	/**
+	 * Converts the linked mode and escape positional offsets of this
+	 * proposal to the full offset within the document.
+	 * 
+	 * @param {Deferred} deferred the promise for resolving the converted proposal
+	 * @param editorContext the current context of the editor
+	 * @param item the converted JSON item from the LSP
+	 * @param proposal the proposal to have its linked mode and escape positions converted
+	 */
+	function convertPositions(deferred, editorContext, item, proposal) {
+		editorContext.getLineStart(item.textEdit.range.start.line).then(function(startLineOffset) {
+			var completionOffset = item.textEdit.range.start.character + startLineOffset;
+			for (var i = 0; i < proposal.positions.length; i++) {
+				proposal.positions[i].offset = completionOffset + proposal.positions[i].offset;
+			}
+			proposal.escapePosition = completionOffset + proposal.escapePosition;
+			deferred.resolve(proposal);
+		});
+	}
+
+	function convertEachProposal(editorContext, item, proposal) {
 		var deferred = new Deferred();
 		if (proposal.additionalEdits) {
 			var additionalEditsLength = proposal.additionalEdits.length;
@@ -348,10 +385,16 @@ define([
 					edit.length = newAdditionalEdit.end - edit.offset;
 					delete edit.range;
 					if (index === additionalEditsLength - 1) {
-						deferred.resolve(proposal);
+						if (item.textEdit) {
+							convertPositions(deferred, editorContext, item, proposal);
+						} else {
+							deferred.resolve(proposal);
+						}
 					}
 				});
 			});
+		} else if (item.textEdit) {
+			convertPositions(deferred, editorContext, item, proposal);
 		} else {
 			deferred.resolve(proposal);
 		}
