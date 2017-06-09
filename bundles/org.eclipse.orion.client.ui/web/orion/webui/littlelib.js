@@ -210,6 +210,40 @@ define(["orion/util"], function(util) {
 		return null;
 	}
 
+	/*
+	 * Special hook to show the context menu on Shift + F10 (macs only)
+	 */
+	function installShowContextMenu() {
+		if (util.isMac) {
+			document.addEventListener("keydown", function (evt) {
+				if (evt.keyCode === 121 && evt.shiftKey) {
+					var rect, xPos, yPos;
+					var focusElement = document.activeElement;
+	
+					if (focusElement.contentEditable === "true") {
+						var selection = window.getSelection();
+						var range = selection.getRangeAt(0); //get the text range
+						rect = range.getBoundingClientRect();
+						xPos = rect.left;
+						yPos = rect.top + rect.height;
+						
+					} else {
+						rect = bounds(focusElement);
+						xPos = rect.left + (rect.width/2);
+						yPos = rect.top + (rect.height/2);
+					}
+	
+					var e = focusElement.ownerDocument.createEvent("MouseEvents");
+					e.initMouseEvent("contextmenu", true, true,
+					    focusElement.ownerDocument.defaultView, 1, 0, 0, xPos, yPos, false,
+					    false, false, false,2, null);
+					return !focusElement.dispatchEvent(e);				
+				}
+			}, true);
+		}
+	}
+	installShowContextMenu();
+	
 	/* Trap the tabs within the given parent */
 	function trapTabs(parentElement) {
 		if (parentElement.tabTrapInstalled)
