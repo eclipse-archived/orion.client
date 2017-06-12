@@ -19,8 +19,8 @@ var express = require('express'),
 	platform = os.platform(),
 	arch = os.arch(),
 	version = electron.app.getVersion(),
-	allPrefs = prefs.readPrefs(),
 	log4js = require('log4js'),
+	tasks = require('./tasks'),
 	logger = log4js.getLogger("update");
 
 module.exports = {};
@@ -31,33 +31,71 @@ module.exports.router = function(options) {
 	return express.Router()
 	.use(bodyParser.json())
 	.post('/downloadUpdates', function (req, res) {
+		var allPrefs = prefs.readPrefs();
+		var updateChannel = allPrefs.user && allPrefs.user.updateChannel && allPrefs.user.updateChannel.url ? allPrefs.user.updateChannel.url : configParams["orion.autoUpdater.defaultChannel"];
+		var task = new tasks.Task(res, false, true, 0, true);
 		if (platform === "linux") {
-			electron.shell.openExternal(feedURL + '/download/channel/' + allPrefs.user.updateChannel + '/linux');
-			res.status(200).end();
+			electron.shell.openExternal(feedURL + '/download/channel/' + updateChannel + '/linux');
 		} else {
-			autoUpdater.setFeedURL(feedURL + '/update/channel/' + allPrefs.user.updateChannel + '/' + platform + '_' + arch + '/' + version);
+			autoUpdater.setFeedURL(feedURL + '/update/channel/' + updateChannel + '/' + platform + '_' + arch + '/' + version);
 			autoUpdater.checkForUpdates();
-			res.status(200).end();
 		}
+		autoUpdater.on("update-downloaded", /* @callback */ function(event, releaseNotes, releaseName, releaseDate, updateURL) {
+			task.done({
+				HttpCode: 200,
+				Code: 0,
+				DetailedMessage: "OK",
+				JsonData: {
+					"note": releaseNotes
+				},
+				Message: "OK",
+				Severity: "Ok"
+			});
+		});
 	})
 	.get("/resolveNewVersion", function (req, res) {
+		var task = new tasks.Task(res, false, true, 0, true);
 		if (!feedURL) {
-			return res.status(400).end();
+			 task.done({
+			 	HttpCode: 200,
+			 	Code: 0,
+			 	DetailedMessage: "OK",
+			 	Message: "OK",
+			 	Severity: "Ok"
+			 });
 		}
-		allPrefs.user.updateChannel = req.query.updateChannel;
-		prefs.writePrefs(allPrefs);
-		var resolveURL = feedURL + '/api/resolve?platform=' + platform + '&channel=' + allPrefs.user.updateChannel;
+		var resolveURL = feedURL + '/api/resolve?platform=' + platform + '&channel=' + req.query.updateChannel.name;
 		autoUpdater.setResolveURL(resolveURL);
 		autoUpdater.resolveNewVersion(true);
 		autoUpdater.on("update-available-manual", function(newVersion) {
-			res.status(200).end(newVersion); // OK
+			console.log(newVersion);
+			task.done({
+				HttpCode: 200,
+				Code: 0,
+				JsonData: {"newVersion":newVersion},
+				DetailedMessage: "OK",
+				Message: "OK",
+				Severity: "Ok"
+			});
 		});
 		autoUpdater.on("update-not-available", function() {
-			res.status(204).end(); // no content
+			task.done({
+				HttpCode: 204,
+				Code: 0,
+				DetailedMessage: "OK",
+				Message: "OK",
+				Severity: "Ok"
+			});
 		});
 		autoUpdater.on("update-error", function(error) {
 			logger.error(error);
-			res.status(400).end(); // client error
+			task.done({
+				HttpCode: 204,
+				Code: 0,
+				DetailedMessage: "OK",
+				Message: "OK",
+				Severity: "Ok"
+			});
 		});
 	});	
 };

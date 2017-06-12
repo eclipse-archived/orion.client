@@ -467,9 +467,23 @@ define({
 			"background-color": "#FFFFFF",
 			"color": "#152935"
 		},
-		".contentassist .selected":{
+		".contentassist .selected": {
 			"background-color": "#3C71B3",
 			"background": "#3C71B3"
+		},
+		".progressWatch.running": {
+			".watchButton": {
+				"border-color": "black"
+			},
+			".watchBody": {
+				"border-color": "black"
+			},
+			".watchBody .hand.longHour > .darkSide": {
+				"background-color": "black",
+			},
+			".watchBody .hand.longMinute > .darkSide": {
+				"background-color": "black",
+			}
 		}
 	}
 });
