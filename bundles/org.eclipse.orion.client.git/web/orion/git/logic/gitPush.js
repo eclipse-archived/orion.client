@@ -20,8 +20,9 @@ define([
 	'orion/git/gitPreferenceStorage',
 	'orion/git/logic/gitCommon',
 	'orion/Deferred',
-	'orion/objects'
-], function(messages,i18nUtil,mCommandRegistry,GitPreferenceStorage, mGitCommon, Deferred, objects) {
+	'orion/objects',
+	'orion/urlModifier'
+], function(messages,i18nUtil,mCommandRegistry,GitPreferenceStorage, mGitCommon, Deferred, objects, urlModifier) {
 	
 	var handleGitServiceResponse = mGitCommon.handleGitServiceResponse;
 	var gatherSshCredentials = mGitCommon.gatherSshCredentials;
@@ -104,7 +105,7 @@ define([
 									var listener;
 									(function(authUrl) {
 										listener = new mCommandRegistry.CommandEventListener("click", function(event, commandInvocation) { //$NON-NLS-0$
-											window.location = authUrl;
+											window.location = urlModifier(authUrl);
 										});
 									})(jsonData.JsonData.GitHubAuth + "?ref=" + encodeURIComponent(window.location.href)); //$NON-NLS-0$
 									parameters.push(new mCommandRegistry.CommandParameter("gitAuth", "button", null, "Authorize with GitHub", null, listener)); //$NON-NLS-1$ //$NON-NLS-0$

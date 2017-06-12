@@ -588,7 +588,7 @@ var exports = {};
 								var listener;
 								(function(authUrl) {
 									listener = new mCommandRegistry.CommandEventListener("click", function(event, commandInvocation) { //$NON-NLS-0$
-										window.location = authUrl;
+										window.location = urlModifier(authUrl);
 									});
 								})(jsonData.JsonData.GitHubAuth + "?ref=" + encodeURIComponent(window.location.href)); //$NON-NLS-0$
 								parameters.push(new mCommandRegistry.CommandParameter("gitAuth", "button", null, "Authorize with GitHub", null, listener)); //$NON-NLS-1$ //$NON-NLS-0$
@@ -2231,7 +2231,7 @@ var exports = {};
 					url += data.items.Diffs.Children[i].NewPath;
 				}
 			}
-			window.open(url);
+			window.open(urlModifier(url));
 		};
 			
 		var showStagedPatchCommand = new mCommands.Command({
