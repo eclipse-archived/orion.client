@@ -25,9 +25,10 @@ define([
 	'orion/URITemplate',
 	'orion/PageUtil',
 	'orion/PageLinks',
+	'orion/urlModifier',
 	'orion/URL-shim', // no exports
 ], function(messages, lib, mBootstrap, mStatus, mProgress, mCommandRegistry, mFileClient, mOperationsClient, mSearchClient, 
-			mGlobalCommands, URITemplate, PageUtil, PageLinks) {
+			mGlobalCommands, URITemplate, PageUtil, PageLinks, urlModifier) {
 
 	mBootstrap.startup().then(function(core) {
 		var serviceRegistry = core.serviceRegistry;
@@ -184,7 +185,7 @@ define([
 							saveFileContents(fileClient, fileMetadata, {sourceLocation: data.sourceLocation}, function() {
 								if (window.confirm(messages["ContentSavedMsg"])) {
 									// go to the navigator
-									window.location.href = orionHome + "/edit/edit.html#" + fileMetadata.Parents[0].ChildrenLocation; //$NON-NLS-0$
+									window.location.href = urlModifier(orionHome + "/edit/edit.html#" + fileMetadata.Parents[0].ChildrenLocation); //$NON-NLS-0$
 								} else {
 									loadContent();
 								}

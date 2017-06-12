@@ -11,7 +11,7 @@
  *******************************************************************************/
 /*eslint-env browser, amd*/
 
-define(['require', 'orion/Deferred', 'orion/serviceregistry', 'orion/preferences', 'orion/pluginregistry', 'orion/config'], function(require, Deferred, mServiceregistry, mPreferences, mPluginRegistry, mConfig) {
+define(['require', 'orion/Deferred', 'orion/serviceregistry', 'orion/preferences', 'orion/pluginregistry', 'orion/config', 'orion/urlModifier'], function(require, Deferred, mServiceregistry, mPreferences, mPluginRegistry, mConfig, urlModifier) {
 
 	var once; // Deferred
 
@@ -67,7 +67,7 @@ define(['require', 'orion/Deferred', 'orion/serviceregistry', 'orion/preferences
 						if (!user) {
 							return auth.getAuthForm(window.location.href).then(function(formURL) {
 								setTimeout(function() {
-									window.location = formURL;
+									window.location = urlModifier(formURL);
 								}, 0);
 								return new Deferred().reject({});
 							});

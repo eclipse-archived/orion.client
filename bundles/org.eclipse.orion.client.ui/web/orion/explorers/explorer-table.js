@@ -22,8 +22,9 @@ define([
 	'orion/EventTarget',
 	'orion/objects',
 	'orion/util',
-	'orion/generalPreferences'
-], function(messages, Deferred, lib, i18nUtil, mFileUtils, mExplorer, EventTarget, objects, util, mGeneralPrefs) {
+	'orion/generalPreferences',
+	'orion/urlModifier'
+], function(messages, Deferred, lib, i18nUtil, mFileUtils, mExplorer, EventTarget, objects, util, mGeneralPrefs, urlModifier) {
 
 	var generalPreferences;
 	
@@ -302,7 +303,7 @@ define([
 						var link = lib.$("a", evt.target);
 						if (link) {
 							if (evt.type === "click") {
-								window.location.href = link.href;
+								window.location.href = urlModifier(link.href);
 								//_self._clickLink(link);
 							} else if (evt.type === "dblclick") {
 								this.isEditorTabsEnabled().then(function(editorTabsEnabled) {

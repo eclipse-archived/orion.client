@@ -16,8 +16,9 @@ define([
 	'orion/webui/dropdown',
 	'orion/util',
 	'orion/webui/dialog',
-	'orion/xhr'
-], function(messages, lib, PageLinks, Dropdown, util, dialog, xhr) {
+	'orion/xhr',
+	'orion/urlModifier'
+], function(messages, lib, PageLinks, Dropdown, util, dialog, xhr, urlModifier) {
 	
 	function UserMenu(options) {
 		this._displaySignOut = true;
@@ -94,7 +95,7 @@ define([
 								}
 							}
 							authService.getAuthForm(PageLinks.getOrionHome()).then(function(formURL) {
-								window.location = formURL;
+								window.location = urlModifier(formURL);
 							});
 						});
 					});
