@@ -58,13 +58,14 @@ define([
 	'orion/customGlobalCommands',
 	'orion/generalPreferences',
 	'orion/breadcrumbs',
-	'orion/keyBinding'
+	'orion/keyBinding',
+	'orion/urlModifier'
 ], function(
 	messages, Sidebar, mInputManager, mCommands, mGlobalCommands,
 	mTextModelFactory, mUndoStack,
 	mFolderView, mEditorView, mPluginEditorView , mMarkdownView, mMarkdownEditor,
 	mCommandRegistry, mContentTypes, mFileClient, mFileCommands, mEditorCommands, mSelection, mStatus, mProgress, mOperationsClient, mGitClient, mSshTools, mOutliner, mDialogs, mExtensionCommands, ProjectCommands, mSearchClient,
-	EventTarget, URITemplate, i18nUtil, PageUtil, util, objects, lib, Deferred, mProjectClient, mSplitter, mTooltip, mContextMenu, mMenuBar, bidiUtils, mCustomGlobalCommands, mGeneralPrefs, mBreadcrumbs, mKeyBinding
+	EventTarget, URITemplate, i18nUtil, PageUtil, util, objects, lib, Deferred, mProjectClient, mSplitter, mTooltip, mContextMenu, mMenuBar, bidiUtils, mCustomGlobalCommands, mGeneralPrefs, mBreadcrumbs, mKeyBinding, urlModifier
 ) {
 
 var exports = {};
@@ -364,7 +365,7 @@ objects.mixin(TabWidget.prototype, {
 		this.dispatchEvent(closingEvent);
 	},
 	setWindowLocation: function(href) {
-		window.location = href;
+		window.location = urlModifier(href);
 	},
 	dragenterListener_: function(e) {
 		e.preventDefault();
@@ -1541,7 +1542,7 @@ objects.mixin(EditorSetup.prototype, {
 		}.bind(this));
 		this.sidebarNavInputManager.addEventListener("create", function(evt) { //$NON-NLS-0$
 			if (evt.newValue && !evt.ignoreRedirect) {
-				window.location = this.computeNavigationHref(evt.newValue);
+				window.location = urlModifier(this.computeNavigationHref(evt.newValue));
 			}
 		}.bind(this));
 	},
@@ -1602,11 +1603,11 @@ objects.mixin(EditorSetup.prototype, {
 				if (hash === window.location.hash.substring(1)) {
 					this.activeEditorViewer.inputManager.setInput(hash);
 				} else {
-					window.location = href;
+					window.location = urlModifier(href);
 				}
 				break;
 			case 'tab':
-				window.open(href);
+				window.open(urlModifier(href));
 				break;
 			case 'split':
 				var locWithParams = href.split('#')[1];

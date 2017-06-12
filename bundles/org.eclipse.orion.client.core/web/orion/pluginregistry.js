@@ -12,7 +12,7 @@
 /* eslint-disable missing-nls */
 /*eslint-env browser, amd*/
 /*global URL*/
-define(["orion/Deferred", "orion/EventTarget", "orion/URL-shim"], function(Deferred, EventTarget) {
+define(["orion/Deferred", "orion/EventTarget", "orion/urlModifier", "orion/URL-shim"], function(Deferred, EventTarget, urlModifier) {
     
     function _equal(obj1, obj2) {
         var keys1 = Object.keys(obj1);
@@ -1130,7 +1130,7 @@ define(["orion/Deferred", "orion/EventTarget", "orion/URL-shim"], function(Defer
                 } else {
                    	var iframe = document.createElement("iframe"); //$NON-NLS-0$
                     iframe.name = url + "_" + channel._startTime;
-                    iframe.src = url;
+					iframe.src = urlModifier(url);
                     iframe.onload = function() {
                         log("handshake"); //$NON-NLS-0$
                         channel._handshake = true;

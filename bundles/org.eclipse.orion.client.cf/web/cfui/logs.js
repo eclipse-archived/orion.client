@@ -12,11 +12,11 @@
 define(['i18n!cfui/nls/messages', 'orion/webui/littlelib', 'orion/bootstrap', 'orion/status', 'orion/progress', 'orion/commandRegistry',  'orion/keyBinding', 'orion/dialogs', 'orion/selection',
 	'orion/contentTypes','orion/fileClient', 'orion/operationsClient', 'orion/searchClient', 'orion/globalCommands', 'orion/editorCommands', 'orion/links', 'orion/cfui/cFClient',
 	'orion/PageUtil', 'orion/cfui/logView', 'orion/section', 'orion/metrics', 'orion/cfui/widgets/CfLoginDialog', 'orion/i18nUtil', 'orion/projectClient', 'orion/webui/RichDropdown',
-	'orion/PageLinks', 'orion/URITemplate', 'orion/commands'],
+	'orion/PageLinks', 'orion/URITemplate', 'orion/commands', 'orion/urlModifier'],
 	function(messages, lib, mBootstrap, mStatus, mProgress, CommandRegistry, KeyBinding, mDialogs, mSelection,
 	mContentTypes, mFileClient, mOperationsClient, mSearchClient, mGlobalCommands, mEditorCommands, mLinks,
 	mCFClient, PageUtil, mLogView, mSection, mMetrics, CfLoginDialog, i18Util, mProjectClient, mRichDropdown,
-	PageLinks, URITemplate, mCommands) {
+	PageLinks, URITemplate, mCommands, urlModifier) {
 	mBootstrap.startup().then(
 		function(core) {
 			var serviceRegistry = core.serviceRegistry;
@@ -274,7 +274,7 @@ define(['i18n!cfui/nls/messages', 'orion/webui/littlelib', 'orion/bootstrap', 'o
 							launchConfLocation: launchConf.File.Location
 						}
 					});
-					window.location.href = newUrl;
+					window.location.href = urlModifier(newUrl);
 					launchConfDropdown.setDropdownTriggerButtonName(getLaunchConfName(launchConf));
 				}
 

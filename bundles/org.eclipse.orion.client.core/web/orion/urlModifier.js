@@ -10,38 +10,9 @@
  *******************************************************************************/
 
 /*eslint-env browser, amd*/
-define(function() {
-
-	var modifiers = [];
-
-	function addModifier(value) {
-		if (typeof value === "function") {
-			modifiers.push(value);
-		}
-	}
-	
-	function removeModifier(value) {
-		if (typeof value === "function") {
-			for (var i = 0; i < modifiers.length; i++) {
-				if (modifiers[i] === value) {
-					modifiers.splice(i, 1);
-					return;
-				}
-			}
-		}
-	}
-	
+define(function() {	
 	function modifyUrl(value) {
-		var result = value;
-		modifiers.forEach(function(current) {
-			result = current(result) || result;
-		});
-		return result;
+		return value;
 	}
-
-	return {
-		addModifier: addModifier,		
-		removeModifier: removeModifier,
-		modifyUrl: modifyUrl
-	};
+	return modifyUrl;
 });

@@ -18,8 +18,9 @@ define([
 	'orion/webui/dialog',
 	'orion/xhr',
 	'orion/operation',
-	'orion/Deferred'
-], function(messages, lib, PageLinks, Dropdown, util, dialog, xhr, operation, Deferred) {
+	'orion/Deferred',
+	'orion/urlModifier'
+], function(messages, lib, PageLinks, Dropdown, util, dialog, xhr, operation, Deferred, urlModifier) {
 	
 	function UserMenu(options) {
 		this._displaySignOut = true;
@@ -97,7 +98,7 @@ define([
 								}
 							}
 							authService.getAuthForm(PageLinks.getOrionHome()).then(function(formURL) {
-								window.location = formURL;
+								window.location = urlModifier(formURL);
 							});
 						});
 					});

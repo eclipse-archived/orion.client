@@ -21,7 +21,8 @@ define("orion/widgets/settings/EditorSettings", //$NON-NLS-0$
 	'orion/widgets/input/SettingsCheckbox',  //$NON-NLS-0$
 	'orion/widgets/input/SettingsSelect', //$NON-NLS-0$
 	'orion/widgets/settings/Subsection', //$NON-NLS-0$
-], function (messages, mSection, commands, objects, PageLinks, lib, SettingsTextfield, SettingsCheckbox, SettingsSelect, Subsection) {
+	'orion/urlModifier'
+], function (messages, mSection, commands, objects, PageLinks, lib, SettingsTextfield, SettingsCheckbox, SettingsSelect, Subsection, urlModifier) {
 	var KEY_MODES = [
 		{value: "", label: messages.Default},
 		{value: "Emacs", label: "Emacs"}, //$NON-NLS-1$ //$NON-NLS-2$
@@ -279,7 +280,7 @@ define("orion/widgets/settings/EditorSettings", //$NON-NLS-0$
 								options:options,
 								postChange: function(){
 									if (select.select.value === "customize"){
-										window.open(orionHome + "/settings/settings.html#,category=themeSettings", "_self"); //$NON-NLS-1$ //$NON-NLS-2$
+										window.open(urlModifier(orionHome + "/settings/settings.html#,category=themeSettings"), "_self"); //$NON-NLS-1$ //$NON-NLS-2$
 									} else {
 										var setTheme = themePreferences.setTheme.bind(themePreferences);
 										setTheme(select.select.value);

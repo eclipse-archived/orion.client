@@ -10,8 +10,8 @@
  ******************************************************************************/
 
 /*eslint-env browser, amd*/
-define(['orion/browserCompatibility', 'orion/bootstrap', 'domReady!'], function(mBrowserCompatibility, mBootstrap) {
+define(['orion/browserCompatibility', 'orion/bootstrap', 'orion/urlModifier', 'domReady!'], function(mBrowserCompatibility, mBootstrap, urlModifier) {
 	mBootstrap.startup().then(function(core) {
-		window.location = "edit/edit.html";
+		window.location = urlModifier("edit/edit.html");
 	});
 });

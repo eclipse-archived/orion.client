@@ -15,10 +15,10 @@
 define(["require", "i18n!orion/shell/nls/messages", "orion/bootstrap", "orion/commandRegistry", "orion/fileClient", "orion/searchClient", "orion/globalCommands",
 		"orion/shell/Shell", "orion/webui/treetable", "shell/shellPageFileService", "shell/paramType-file", "shell/paramType-plugin", "shell/paramType-service",
 		"orion/i18nUtil", "orion/extensionCommands", "orion/contentTypes", "orion/PageUtil", "orion/URITemplate", "orion/Deferred",
-		"orion/status", "orion/progress", "orion/operationsClient", "shell/resultWriters", "orion/metrics", "orion/URL-shim"],
+		"orion/status", "orion/progress", "orion/operationsClient", "shell/resultWriters", "orion/metrics", "orion/URL-shim", "orion/urlModifier"],
 	function(require, messages, mBootstrap, mCommandRegistry, mFileClient, mSearchClient, mGlobalCommands, mShell, mTreeTable, mShellPageFileService, mFileParamType,
 		mPluginParamType, mServiceParamType, i18nUtil, mExtensionCommands, mContentTypes, PageUtil, URITemplate, Deferred, mStatus, mProgress,
-		mOperationsClient, mResultWriters, mMetrics, _) {
+		mOperationsClient, mResultWriters, mMetrics, _, urlModifier) {
 
 	var shellPageFileService, fileClient, commandRegistry, output, fileType;
 	var hashUpdated = false;
@@ -213,9 +213,9 @@ define(["require", "i18n!orion/shell/nls/messages", "orion/bootstrap", "orion/co
 			resource: node.Location
 		});
 		if (replace) {
-			window.location.replace(url);
+			window.location.replace(urlModifier(url));
 		} else {
-			window.location.href = url;
+			window.location.href = urlModifier(url);
 		}
 		mGlobalCommands.setPageTarget({task: messages.Shell, serviceRegistry: serviceRegistry, commandService: commandRegistry, target: node});
 	}
@@ -287,7 +287,7 @@ define(["require", "i18n!orion/shell/nls/messages", "orion/bootstrap", "orion/co
 
 	function editExec(args) {
 		var url = computeEditURL(args.file.getValue()[0]);
-		window.open(url);
+		window.open(urlModifier(url));
 	}
 
 	function lsExec(args, context) {
@@ -869,7 +869,7 @@ define(["require", "i18n!orion/shell/nls/messages", "orion/bootstrap", "orion/co
 			delete parameters.command;
 			var template = new URITemplate(PAGE_TEMPLATE);
 			var url = template.expand(parameters);
-			window.location.href = url;
+			window.location.href = urlModifier(url);
 		}
 
 		shell.setFocusToInput();

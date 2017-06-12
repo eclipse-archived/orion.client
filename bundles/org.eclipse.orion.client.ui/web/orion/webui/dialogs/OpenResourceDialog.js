@@ -271,9 +271,9 @@ define([
 				if (link) {
 					lib.stop(evt);
 					if(util.isMac ? evt.metaKey : evt.ctrlKey){
-						window.open(link.href);
+						window.open(urlModifier(link.href));
 					} else {
-						window.location.href = link.href;
+						window.location.href = urlModifier(link.href);
 						self.hide();
 					}
 					self._saveOpenedFileName(link.resource);

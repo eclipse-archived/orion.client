@@ -11,8 +11,8 @@
 
 /*eslint-env browser, amd*/
 define(['i18n!orion/compare/nls/messages', 'require', 'orion/webui/littlelib', 'orion/i18nUtil', 'orion/explorers/explorer', 'orion/fileClient', 'orion/commands', 
-		'orion/explorers/navigationUtils', 'orion/crawler/searchCrawler', 'orion/compare/compareUtils', 'orion/searchUtils', 'orion/selection'], 
-		function(messages, require, lib, i18nUtil, mExplorer, mFileClient, mCommands, mNavUtils, mSearchCrawler, mCompareUtils, mSearchUtils, mSelection) {
+		'orion/explorers/navigationUtils', 'orion/crawler/searchCrawler', 'orion/compare/compareUtils', 'orion/searchUtils', 'orion/selection', 'orion/urlModifier'], 
+		function(messages, require, lib, i18nUtil, mExplorer, mFileClient, mCommands, mNavUtils, mSearchCrawler, mCompareUtils, mSearchUtils, mSelection, urlModifier) {
 	var _DEBUG_ = false;
 	function _logInfo(info) {
 		if(_DEBUG_) {
@@ -150,7 +150,7 @@ define(['i18n!orion/compare/nls/messages', 'require', 'orion/webui/littlelib', '
 			_place(document.createTextNode(displayName), span, "only");//$NON-NLS-0$
 			mNavUtils.addNavGrid(this.explorer.getNavDict(), item, span);
 			_connect(span, "click", function() { //$NON-NLS-0$
-				window.open(linkRef);
+				window.open(urlModifier(linkRef));
 			});
 			_connect(span, "mouseover", function() { //$NON-NLS-0$
 				span.style.cursor ="pointer"; //$NON-NLS-0$
@@ -172,7 +172,7 @@ define(['i18n!orion/compare/nls/messages', 'require', 'orion/webui/littlelib', '
 			_place(document.createTextNode(fileService + "/" + item.fullPathName), span, "only"); //$NON-NLS-1$ //$NON-NLS-0$
 			mNavUtils.addNavGrid(this.explorer.getNavDict(), item, span);
 			_connect(span, "click", function() { //$NON-NLS-0$
-				window.open(linkRef);
+				window.open(urlModifier(linkRef));
 			});
 			_connect(span, "mouseover", function() { //$NON-NLS-0$
 				span.style.cursor ="pointer"; //$NON-NLS-0$

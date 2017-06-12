@@ -20,8 +20,9 @@ define([
 	'text!orion/webui/dropdowntriggerbuttonwitharrow.html',
 	'text!orion/webui/checkedmenuitem.html',
 	'orion/webui/tooltip',
-	'orion/metrics'
-], function(messages, i18nUtil, lib, mCommandsProxy, Dropdown, DropdownButtonFragment, DropdownButtonWithArrowFragment, CheckedMenuItemFragment, Tooltip, mMetrics) {
+	'orion/metrics',
+	'orion/urlModifier'
+], function(messages, i18nUtil, lib, mCommandsProxy, Dropdown, DropdownButtonFragment, DropdownButtonWithArrowFragment, CheckedMenuItemFragment, Tooltip, mMetrics, urlModifier) {
 		/**
 		 * @name orion.commands.NO_IMAGE
 		 * @description Image data for 16x16 transparent png.
@@ -63,11 +64,11 @@ define([
 					var href = command.hrefCallback.call(invocation.handler || window, invocation);
 					if (href.then){
 						href.then(function(l){
-							window.open(l);
+							window.open(urlModifier(l));
 						});
 					} else {
 						// We assume window open since there's no link gesture to tell us what to do.
-						window.open(href);
+						window.open(urlModifier(href));
 					}
 					return true;
 				} else if (invocation.commandRegistry) {

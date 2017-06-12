@@ -34,11 +34,12 @@ define([
 	'orion/objects',
 	'orion/bidiUtils',
 	'orion/util',
+	'orion/urlModifier',
 	'orion/URL-shim'
 ], function(
 	messages, require, EventTarget, Deferred, i18nUtil, lib, mCommands, mCommandRegistry, mGitUtil, GitPreferenceStorage,
 	GitConfigPreference, mCloneGitRepository, mApplyPatch, URITemplate, mGitCommonLogic, mGitPushLogic, 
-	mGitStashLogic, mGitCommitLogic, objects, bidiUtils, util) {
+	mGitStashLogic, mGitCommitLogic, objects, bidiUtils, util, urlModifier) {
 
 /**
  * @namespace The global container for eclipse APIs.
@@ -587,7 +588,7 @@ var exports = {};
 								var listener;
 								(function(authUrl) {
 									listener = new mCommandRegistry.CommandEventListener("click", function(event, commandInvocation) { //$NON-NLS-0$
-										window.location = authUrl;
+										window.location = urlModifier(authUrl);
 									});
 								})(jsonData.JsonData.GitHubAuth + "?ref=" + encodeURIComponent(window.location.href)); //$NON-NLS-0$
 								parameters.push(new mCommandRegistry.CommandParameter("gitAuth", "button", null, "Authorize with GitHub", null, listener)); //$NON-NLS-1$ //$NON-NLS-0$
@@ -1579,7 +1580,7 @@ var exports = {};
 											fileClient.write(repoJson.Children[0].ContentLocation + '.git/.projectInfo', pDescContent).then( //$NON-NLS-0$
 												function(){
 													var editLocation = require.toUrl(editTemplate.expand({resource: repoJson.Children[0].ContentLocation}));
-													window.location = editLocation;
+													window.location = urlModifier(editLocation);
 												}
 											);
 										}
@@ -1603,9 +1604,10 @@ var exports = {};
 									gitService.getGitClone(p.Git.CloneLocation).then(
 										function(repoJson){
 											if (repoJson.Children[0].GitUrl === item.url){
-												window.location = require.toUrl(editTemplate.expand({
+												var url = require.toUrl(editTemplate.expand({
 													resource: repoJson.Children[0].ContentLocation
 												}));
+												window.location = urlModifier(url);
 											} else {
 //												console.info("Folder project is used");
 											}
@@ -2229,7 +2231,7 @@ var exports = {};
 					url += data.items.Diffs.Children[i].NewPath;
 				}
 			}
-			window.open(url);
+			window.open(urlModifier(url));
 		};
 			
 		var showStagedPatchCommand = new mCommands.Command({

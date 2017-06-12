@@ -16,8 +16,8 @@
 define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/i18nUtil', 'orion/uiUtils', 'orion/fileUtils', 'orion/commands', 'orion/fileDownloader',
 	'orion/commandRegistry', 'orion/contentTypes', 'orion/compare/compareUtils', 
 	'orion/Deferred', 'orion/webui/dialogs/DirectoryPrompterDialog',
-	'orion/EventTarget', 'orion/form', 'orion/xhr', 'orion/bidiUtils', 'orion/util'],
-	function(messages, lib, i18nUtil, mUIUtils, mFileUtils, mCommands, mFileDownloader, mCommandRegistry, mContentTypes, mCompareUtils, Deferred, DirPrompter, EventTarget, form, xhr, bidiUtils, util){
+	'orion/EventTarget', 'orion/form', 'orion/xhr', 'orion/bidiUtils', 'orion/util', 'orion/urlModifier'],
+	function(messages, lib, i18nUtil, mUIUtils, mFileUtils, mCommands, mFileDownloader, mCommandRegistry, mContentTypes, mCompareUtils, Deferred, DirPrompter, EventTarget, form, xhr, bidiUtils, util, urlModifier) {
 
 	/**
 	 * Utility methods
@@ -757,7 +757,7 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/i18n
 					func: function(targetFolder) { 
 						if (targetFolder && targetFolder.Location) {
 							var compareURL = mCompareUtils.generateCompareTreeHref(data.items[0].Location, {compareTo: targetFolder.Location, readonly: true});
-							window.open(compareURL);
+							window.open(urlModifier(compareURL));
 						}
 					}
 				});
@@ -1283,7 +1283,7 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/i18n
 			id: id,
 			callback: function(data) {
 				if (href) {
-					window.open(href);
+					window.open(urlModifier(href));
 				} else {
 					if (data.parameters && data.parameters.valueFor('folderName')) { //$NON-NLS-0$
 						var newFolderName = data.parameters.valueFor('folderName'); //$NON-NLS-0$
