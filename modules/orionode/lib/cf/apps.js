@@ -542,7 +542,7 @@ function bindRoute(req, appTarget){
 function uploadBits(req, appTarget){
 	var cloudAccessToken;
 	var archiveredFilePath;
-	return target.getAccessToken(req.user.username)
+	return target.getAccessToken(req.user.username, appTarget)
 	.then(function(token){
 		cloudAccessToken = token;
 		return archiveTarget(appCache.appStore)
