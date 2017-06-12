@@ -108,6 +108,46 @@ define(['orion/webui/littlelib', 'orion/EventTarget'], function(lib, EventTarget
 					}.bind(this), false);
 				}
 			}
+			
+			var self = this;
+			this._dropdownNode.addEventListener("mouseover", function(event) {
+				if (event.target === event.currentTarget)
+					return;
+					
+				var item = event.target;
+				while (item !== event.currentTarget && item.tagName.toLowerCase() !== "li")  {
+					item = item.parentNode;
+				}
+				
+				var isMenuBarItem = item.parentNode.getAttribute("role") === "menubar";
+				item = item.childNodes[0]; // the 'trigger'
+				
+				if (isMenuBarItem) {
+					var openMBItem = null;
+					var menuBar = item.parentNode.parentNode;
+					var mbItems = menuBar.dropdown.getItems();
+					for (var i = 0; i < mbItems.length; i++) {
+						var mbItem = mbItems[i];
+						if (mbItem.classList.contains("dropdownTriggerOpen")) {
+							openMBItem = mbItem;
+						}
+					}
+					
+					// only open if there's already an opened menu bar item
+					if (openMBItem && openMBItem !== item) {
+						openMBItem.dropdown.close(false);
+						item.dropdown.open(event);
+					}
+				} else {
+					if (item.dropdown) {
+						item.dropdown.open(event);
+					} else {
+						self._closeSelectedSubmenu();
+						lib.stop(event);
+					}
+					self._selectItem(item); // select the item on mouseover
+				}
+			}, false);
 						
 			// keys
 			this._dropdownNode.addEventListener("keydown", this._dropdownKeyDown.bind(this), false); //$NON-NLS-0$
@@ -297,7 +337,7 @@ define(['orion/webui/littlelib', 'orion/EventTarget'], function(lib, EventTarget
 		 *
 		 */
 		getItems: function() {
-			var items = lib.$$array("li:not(.dropdownSeparator) > .dropdownMenuItem", this._dropdownNode, true); //$NON-NLS-0$
+			var items = lib.$$array("li:not(.dropdownSeparator) > [role='menuitem']", this._dropdownNode, true); //$NON-NLS-0$
 			// We only want the direct li children, not any descendants.  But we can't preface a query with ">"
 			// So we do some reachy filtering here.
 			var filtered = [];
@@ -308,21 +348,6 @@ define(['orion/webui/littlelib', 'orion/EventTarget'], function(lib, EventTarget
 				}
 			});
 			
-			//add handler to close open submenu when other items in the parent menu are hovered
-			filtered.forEach(function(item){
-				if (!item._hasDropdownMouseover) {
-					item.addEventListener("mouseover", function(e){ //$NON-NLS-0$
-						if (item.dropdown) {
-							item.dropdown.open(e);
-						} else {
-							self._closeSelectedSubmenu();
-							lib.stop(e);
-						}
-						self._selectItem(item); // select the item on mouseover
-					});
-					item._hasDropdownMouseover = true;
-				}
-			});
 			return filtered;
 		},
 		
@@ -345,8 +370,21 @@ define(['orion/webui/littlelib', 'orion/EventTarget'], function(lib, EventTarget
 		 * A key is down in the dropdown node
 		 */
 		 _dropdownKeyDown: function(event) {
+		 	if (event.keyCode === lib.KEY.TAB) {
+		 		if (this._selectedItem) {
+		 			var keepIterating = true;
+		 			while (keepIterating) {
+						keepIterating = this.close(true);
+						if (this._parentDropdown && keepIterating) {
+							this._parentDropdown._dropdownNode.focus();
+						}
+					}
+		 		}
+		 		return;  // Allow the TAB to propagate
+		 	}
 			if (event.keyCode === lib.KEY.UP || event.keyCode === lib.KEY.DOWN || event.keyCode === lib.KEY.RIGHT || event.keyCode === lib.KEY.ENTER || event.keyCode === lib.KEY.LEFT) {
-				var items = this.getItems();	
+				var items = this.getItems();
+				var isMenuBar = this._dropdownNode.getAttribute("role") === "menubar";
 				if (items.length && items.length > 0) {
 					if (this._selectedItem) {
 						var index = items.indexOf(this._selectedItem);
@@ -355,23 +393,63 @@ define(['orion/webui/littlelib', 'orion/EventTarget'], function(lib, EventTarget
 							index = items.indexOf(this._selectedItem.parentNode);
 						}
 						if (index >= 0) {
-							if (event.keyCode === lib.KEY.UP && index > 0) {
-								index--;
-								this._selectItem(items[index]);
-							} else if (event.keyCode === lib.KEY.DOWN && index < items.length - 1) {
-								index++;
-								this._selectItem(items[index]);
-							} else if (event.keyCode === lib.KEY.ENTER || event.keyCode === lib.KEY.RIGHT) {
+							if (event.keyCode === lib.KEY.UP && !isMenuBar) {
+								if (index > 0) {
+									index--;
+									this._selectItem(items[index]);
+								} else if (this._triggerNode) {
+									var parentMenu = this._triggerNode.parentNode.parentNode;
+									if (parentMenu.getAttribute("role") === "menubar") {
+										this.close(true);
+										if (this._parentDropdown) {
+											this._parentDropdown._dropdownNode.focus();
+										}
+									}
+								}
+							} else if (event.keyCode === lib.KEY.DOWN) {
+								if (isMenuBar) {
+									if (this._selectedItem.classList.contains("dropdownTrigger") && this._selectedItem.dropdown) { //$NON-NLS-0$
+										this._selectedItem.dropdown.open();
+										this._selectedItem.dropdown._selectItem(); // select first item in submenu
+									}
+								} else {
+									if (index < items.length - 1) {
+										index++;
+										this._selectItem(items[index]);
+									}
+								}
+							} else if (event.keyCode === lib.KEY.RIGHT) {
+								if (isMenuBar) {
+									if (index < items.length - 1) {
+										index++;
+										this._selectItem(items[index]);
+									}
+								} else {
+									if (this._selectedItem.classList.contains("dropdownTrigger") && this._selectedItem.dropdown) { //$NON-NLS-0$
+										this._selectedItem.dropdown.open();
+										this._selectedItem.dropdown._selectItem(); // select first item in submenu
+									}
+								}
+							} else if (event.keyCode === lib.KEY.ENTER) {
 								if (this._selectedItem.classList.contains("dropdownTrigger") && this._selectedItem.dropdown) { //$NON-NLS-0$
 									this._selectedItem.dropdown.open();
 									this._selectedItem.dropdown._selectItem(); // select first item in submenu
-								} else if (event.keyCode === lib.KEY.ENTER) {
+								} else {
 									this._selectedItem.click();
 								}
-							} else if (event.keyCode === lib.KEY.LEFT && this._selectedItem.parentNode.parentNode.classList.contains("dropdownMenuOpen")) { //$NON-NLS-0$
-								this.close(true);
-								if (this._parentDropdown) {
-									this._parentDropdown._dropdownNode.focus();
+							} else if (event.keyCode === lib.KEY.LEFT) {
+								if (isMenuBar) {
+									if (index > 0) {
+										index--;
+										this._selectItem(items[index]);
+									}
+								} else {
+									if (this._selectedItem.parentNode.parentNode.classList.contains("dropdownMenuOpen")) { //$NON-NLS-0$
+										this.close(true);
+										if (this._parentDropdown) {
+											this._parentDropdown._dropdownNode.focus();
+										}
+									}
 								}
 							}
 						}
@@ -382,6 +460,9 @@ define(['orion/webui/littlelib', 'orion/EventTarget'], function(lib, EventTarget
 				}
 			} else if (event.keyCode === lib.KEY.ESCAPE) {
 				this.close(true);
+				if (this._parentDropdown) {
+					this._parentDropdown._dropdownNode.focus();
+				}
 				lib.stop(event);
 			}
 		 },
@@ -486,7 +567,7 @@ define(['orion/webui/littlelib', 'orion/EventTarget'], function(lib, EventTarget
 		innerNodeType = innerNodeType === undefined ? "span" : innerNodeType; //$NON-NLS-0$
 	 	
 	 	var element = document.createElement(innerNodeType); //$NON-NLS-0$
-		element.tabIndex = 0;
+		//element.tabIndex = 0;
 		element.className = "dropdownMenuItem"; //$NON-NLS-0$
 		element.setAttribute("role", "menuitem");  //$NON-NLS-0$ //$NON-NLS-1$
 		
@@ -498,6 +579,7 @@ define(['orion/webui/littlelib', 'orion/EventTarget'], function(lib, EventTarget
 		}
 	 	
 	 	var li = document.createElement("li"); //$NON-NLS-0$
+	 	li.setAttribute("role", "none");
 	 	li.appendChild(element); //$NON-NLS-0$
 		
 		return li;

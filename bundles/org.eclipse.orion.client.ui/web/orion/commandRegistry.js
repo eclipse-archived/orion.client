@@ -269,6 +269,15 @@ define([
 						input.classList.add("parameterInput");
 						bidiUtils.initInputField(input);
 						parent.appendChild(input);
+						input.addEventListener("keydown", function(evt){
+							if(lib.KEY.ENTER === evt.keyCode){
+								buttonStringCallList[0].callback && buttonStringCallList[0].callback(input.value);  // as defined in propmt method, the first button is ok button
+								closeFunction();
+							}else if(lib.KEY.ESCAPE === evt.keyCode){
+								buttonStringCallList[1].callback && buttonStringCallList[1].callback("");   // as defined in propmt method, the second button is cancel button
+								closeFunction();
+							}
+						}, false);
 					}
 					
 					var buttons = Object.keys(buttonStringCallList).map(function(key){
@@ -289,7 +298,7 @@ define([
 						button.className = "dismissButton";
 						return button;
 					});
-					return buttons[0];
+					return style === "PROMPT" ? input : buttons[0];
 				};
 				this._parameterCollector.close();
 				if(!node){
@@ -1085,7 +1094,8 @@ define([
 					
 					var childContributions = contribution.children;
 					var created;
-					if (renderType === "tool" || renderType === "button") { //$NON-NLS-0$ //$NON-NLS-1$
+					
+					if (renderType === "tool" || renderType === "button" || renderType === "menubar") { //$NON-NLS-0$ //$NON-NLS-1$
 						if (contribution.title) {
 							// We need a named menu button.  We used to first render into the menu and only 
 							// add a menu button in the dom when we knew items were actually rendered.
@@ -1107,12 +1117,23 @@ define([
 							}
 						
 							created = self._createDropdownMenu(parent, contribution.title, null /*nested*/, null /*populateFunc*/, contribution.imageClass, contribution.tooltip, contribution.selectionClass, null, defaultInvocation, contribution.pretendDefaultActionId, contribution.extraClasses);
+							
 							if(domNodeWrapperList){
 								mNavUtils.generateNavGrid(domNodeWrapperList, created.menuButton);
 							}
 
 							// render the children asynchronously
 							if (created) {
+								// If this is the first dropdown in the menu bar then make it tabbable
+								if (renderType === "menubar") {
+									created.menuButton.tabIndex = parent.childElementCount === 1 ? "0" : "-1";
+									created.menuButton.addEventListener("focus", function(evt) {
+										var menuItem = evt.currentTarget;
+										var menubarDropdown = menuItem.parentNode.parentNode.dropdown;
+										menubarDropdown._selectItem(menuItem);
+									}, true);
+								}
+								
 //								window.setTimeout(function() {
 									self._render(scopeId, contribution.children, created.menu, items, handler, "menu", userData, domNodeWrapperList);  //$NON-NLS-0$
 									// special post-processing when we've created a menu in an image bar.  We want to get rid 
@@ -1248,6 +1269,7 @@ define([
 								nested = false;
 								if (parent.nodeName.toLowerCase() === "ul") { //$NON-NLS-0$
 									menuParent = document.createElement("li"); //$NON-NLS-0$
+									menuParent.setAttribute("role", "none");
 									parent.appendChild(menuParent);
 								}
 							} else {
@@ -1341,6 +1363,7 @@ define([
 			} else {
 				if (parent.nodeName.toLowerCase() === "ul") { //$NON-NLS-0$
 					menuParent = document.createElement("li"); //$NON-NLS-0$
+					menuParent.setAttribute("role", "none");
 					parent.appendChild(menuParent);
 					destroyButton = menuParent;
 				}
@@ -1398,8 +1421,10 @@ define([
 			if (!this._checkForTrailingSeparator(dropdown, "menu")) { //$NON-NLS-0$
 				var item = document.createElement("li"); //$NON-NLS-0$
 				item.classList.add("dropdownSeparator"); //$NON-NLS-0$
+				item.setAttribute("role", "none");
 				var sep = document.createElement("span"); //$NON-NLS-0$
 				sep.classList.add("dropdownSeparator"); //$NON-NLS-0$
+				sep.setAttribute("role", "separator");
 				item.appendChild(sep);
 				dropdown.appendChild(item);
 			}
@@ -1417,6 +1442,7 @@ define([
 			var sep;
 			if (parent.nodeName.toLowerCase() === "ul") { //$NON-NLS-0$
 				sep = document.createElement("li"); //$NON-NLS-0$
+				sep.setAttribute("role", "none");
 				parent.appendChild(sep);
 			} else {
 				sep = document.createElement("span"); //$NON-NLS-0$

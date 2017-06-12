@@ -152,7 +152,7 @@ function toOrionLocation(req, location){
 function toAppLocation(req,location){
 	if(location && location.length !== 0 && location.indexOf(fileRoot) === 0){
 		var file = fileUtil.getFile(req, location.substring(fileRoot.length));
-		return path.join(file.workspaceDir, location.replace(fileRoot,"").split("/").slice(0, 2).join("/")); 
+		return path.join(file.workspaceDir, location.replace(fileRoot,"").split("/")[2]);
 	}
 }
 function putapps(req, res){
@@ -542,7 +542,7 @@ function bindRoute(req, appTarget){
 function uploadBits(req, appTarget){
 	var cloudAccessToken;
 	var archiveredFilePath;
-	return target.getAccessToken(req.user.username)
+	return target.getAccessToken(req.user.username, appTarget)
 	.then(function(token){
 		cloudAccessToken = token;
 		return archiveTarget(appCache.appStore)

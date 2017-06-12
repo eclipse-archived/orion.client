@@ -186,9 +186,9 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/i18n
 							commandRegistry.destroy(selectionTools);
 							var isNoSelection = !selections || (Array.isArray(selections) && !selections.length);
 							if (rootSelection && isNoSelection) {
-								commandRegistry.renderCommands(selectionTools.id, selectionTools, item, explorer, "button");  //$NON-NLS-0$
+								commandRegistry.renderCommands(selectionTools.id, selectionTools, item, explorer, "menubar");  //$NON-NLS-0$
 							} else {
-								commandRegistry.renderCommands(selectionTools.id, selectionTools, null, explorer, "button"); //$NON-NLS-1$ //$NON-NLS-0$
+								commandRegistry.renderCommands(selectionTools.id, selectionTools, null, explorer, "menubar"); //$NON-NLS-1$ //$NON-NLS-0$
 							}
 						});
 					}

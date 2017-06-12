@@ -75,6 +75,11 @@ define({
 		".commandButton.orionButton.dropdownTrigger:hover": {
 			"border-color": "#ccc"
 		},
+		".gitCommitListSection": {
+			".commandButton.orionButton.dropdownTrigger:hover": {
+				"background-color": "rgba(196, 197, 200, 0.25)",
+			}
+		},
 		".commandButton:not(.primaryButton):focus": {
 			"background-color": "rgba(60, 113, 179, 0.25)",
 			"box-shadow": "0 1px 2px 0 rgb(60, 113, 179)",
@@ -124,11 +129,6 @@ define({
 			"background": "#FFFFFF"
 		},
 		".gitCommitMessage": {
-			"gitCommitMessageTopRow": {
-				"border-width": "1px",
-				"border-style": "solid",
-				"border-color": "rgb(60, 113, 179)"
-			},
 			".gitCommitMessageTopRow": {
 				"border-color": "#3C71B3"
 			},
@@ -193,9 +193,6 @@ define({
 				"color": "#000000 !important"
 			},
 			".commandButton.orionButton.dropdownTrigger.launchConfigurationsButton": {
-				"dropdownArrowDown": {
-					"color": "white"
-				},
 				".dropdownArrowDown": {
 					"color": "#FFFFFF"
 				}

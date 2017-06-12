@@ -27,7 +27,6 @@ define([
 		filteredResources: '.git, .DS_Store',
 		enableEditorTabs: util.isElectron ? true: false,
 		maximumEditorTabs: 0,
-		enableWorkspaces: true,
 		enableFileCreationAtRoot: false,
 		enableFolderCreationAtRoot: false,
 		enableProjectCreation: true,

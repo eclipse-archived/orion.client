@@ -1041,7 +1041,7 @@ define([
 					if (that.inputManager.getReadOnly()) {
 						return false;
 					}
-					return !commandVisibleWhen || commandVisibleWhen(items);
+					return !commandVisibleWhen || commandVisibleWhen(inputManager.getFileMetadata());
 				};
 				options.callback = function(data) {
 					var editor = this.editor || that.editor;
