@@ -325,7 +325,7 @@ function getClonePath(req) {
 		rest = filePath.split("/").slice(2 + contextPathSegCount).join("/");
 		file = fileUtil.getFile(req, rest);
 	} else if (workspacePath) {
-		rest = workspacePath.split("/").slice(2 + contextPathSegCount).join("/");
+		rest = workspacePath.split("/").slice(2).join("/");
 		file = fileUtil.getFile(req, rest);
 		if (file) {
 			var cloneName = req.body.Name;
