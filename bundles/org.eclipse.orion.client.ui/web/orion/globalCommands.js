@@ -808,6 +808,46 @@ define([
 			commandRegistry.addCommand(showTooltipCommand);
 			commandRegistry.registerCommandContribution("globalActions" , "orion.edit.showTooltip", 1, null, true, new KeyBinding.KeyBinding(113), null, this);//$NON-NLS-1$
 
+			var focusNextSplitter = new mCommands.Command({
+				name: messages.nextSplitter,
+				tooltip: messages.nextSplitterTooltip,
+				id: "orion.focusSplitter", //$NON-NLS-0$
+				visibleWhen: /** @callback */ function(items, data) {
+					return true;
+				},
+				callback: function() {
+					var curFocus = document.activeElement;
+					
+					var items = lib.$$array(".split", document.body, true); //$NON-NLS-0$
+					if (items.length > 0) {
+						var theSplitter = items[0];
+						
+						// Filter out invisible splitters
+						for (var j = 0; j < items.length; j++) {
+							if (!items[j].offsetParent) {
+								items.slice(items[j], 1);
+							}
+						}
+							
+						for (var i = 0; i < items.length; i++) {
+							var splitter = items[i];
+							// If a splitter is the current focus then we choose the next one..
+							if (splitter === curFocus) {
+								if (i < items.length-1) {
+									theSplitter = items[i+1];
+									break;
+								}
+							}
+						}
+						
+						theSplitter.tabIndex = "0"; // Allow the splitter to take focus
+						theSplitter.focus();
+					}
+				}
+			});
+			commandRegistry.addCommand(focusNextSplitter);
+			commandRegistry.registerCommandContribution("globalActions" , "orion.focusSplitter", 1, null, true, new KeyBinding.KeyBinding(190, true, true), null, this);//$NON-NLS-1$
+
 			// Key assist
 			keyAssist = new mKeyAssist.KeyAssistPanel({
 				commandRegistry: commandRegistry
