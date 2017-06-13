@@ -46,8 +46,12 @@ define(['require', 'orion/Deferred', 'orion/serviceregistry', 'orion/preferences
 						Object.keys(pluginsPreference).forEach(function(key) {
 							var url = require.toUrl(key);
 							if (!pluginRegistry.getPlugin(url)) {
-								installs.push(pluginRegistry.installPlugin(url,{autostart: "lazy"}).then(function(plugin) { //$NON-NLS-1$
-									return plugin.start({lazy:true});
+								var manifest = pluginsPreference[key];
+								if (typeof manifest !== "object") {
+									manifest = {autostart: "lazy"};
+								}
+								installs.push(pluginRegistry.installPlugin(url, manifest).then(function(plugin) { //$NON-NLS-1$
+									return plugin.start({lazy: "lazy" === manifest.autostart});
 								}));
 							}
 						});	
