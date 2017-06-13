@@ -114,6 +114,10 @@ define([
 			} else {
 				this.$splitter.addEventListener("mousedown", this._mouseDown.bind(this), false); //$NON-NLS-0$
 				window.addEventListener("mouseup", this._mouseUp.bind(this), false); //$NON-NLS-0$
+				
+				// Keyboard support
+				this.$splitter.addEventListener("keydown", this._keyDown.bind(this), false); //$NON-NLS-0$
+				this.$splitter.addEventListener("blur", this._focusLost.bind(this), false); //$NON-NLS-0$
 			}
 			window.addEventListener("resize", this._resize.bind(this), false);  //$NON-NLS-0$
 		},
@@ -350,6 +354,16 @@ define([
 			return newOffset;
 		},
 
+		_calcSplitterPercantage: function() {
+			var lRect = lib.bounds(this.$leading);
+			var tRect = lib.bounds(this.$trailing);
+			
+			if (this._vertical) {
+				return lRect.height / (lRect.height + tRect.height);
+			}
+			return lRect.width / (lRect.width + tRect.width);
+		},
+		
 		_adjustToOffset: function() {
 			if (this._offset < 0) {
 				this._offset = 0;
@@ -380,6 +394,9 @@ define([
 				// Hide the DIV if it's zero sized
 				this.$trailing.style.visibility = this._offset === 0 ? "hidden" : "visible"; //$NON-NLS-1$ //$NON-NLS-2$
 			}
+			
+			var pct = this._calcSplitterPercantage();
+			this.$splitter.setAttribute("aria-valuenow", pct*100);
 		},
 
 		_resize: function() {
@@ -524,6 +541,36 @@ define([
 				this._up();
 				lib.stop(event);
 			}
+		},
+
+		_keyDown: function(evt) {
+			var rect = lib.bounds(this.$splitter);
+
+			if (evt.keyCode === lib.KEY.UP && this._vertical) {
+				this._move(rect.left, rect.top - 25);
+			} else if (evt.keyCode === lib.KEY.DOWN && this._vertical) {
+				this._move(rect.left, rect.top + 25);
+			} else if (evt.keyCode === lib.KEY.LEFT && !this._vertical) {
+				this._move(rect.left - 25, rect.top);
+			} else if (evt.keyCode === lib.KEY.RIGHT && !this._vertical) {
+				this._move(rect.left + 25, rect.top);
+			} else if (evt.keyCode === lib.KEY.ENTER) {
+				if (this._thumb) {
+					this._thumbDown();
+				}
+			} else if (evt.keyCode === lib.KEY.ESCAPE) {
+				// put the focus on the 'primary' pane
+				var primaryPane = this._thumb && !this._collapseTrailing ? this.$trailing : this.$leading;
+				var toFocus = lib.firstTabbable(primaryPane);
+				if (toFocus) {
+					toFocus.focus();
+				}
+			}
+		},
+
+		_focusLost: function(evt) {
+			// Ensure that the splitter can't get focus
+			this.$splitter.tabIndex = "-1";
 		},
 		
 		_touchStart: function(event) {

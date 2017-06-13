@@ -57,6 +57,11 @@
 	background: #c4c5c8;
 }
 
+.lightPage .split:focus {
+	outline: none;
+	background: #00FF00;
+}
+
 .lightPage .splitThumb {
 	background: #c4c5c8
 }

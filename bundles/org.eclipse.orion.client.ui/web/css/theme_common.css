@@ -620,6 +620,11 @@ a.breadcrumb.currentLocation {
 	background: #3B4B54;
 }
 
+.split:focus {
+	background: #00FF00;
+	outline: none;
+}
+
 .splitTracking {
 	background: #3B4B54;
 }

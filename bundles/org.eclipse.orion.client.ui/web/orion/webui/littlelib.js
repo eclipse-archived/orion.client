@@ -181,7 +181,7 @@ define(["orion/util"], function(util) {
 	 * Inspired by http://brianwhitmer.blogspot.com/2009/05/jquery-ui-tabbable-what.html
 	 */
 	function firstTabbable(node) {
-		if (_getTabIndex(node) >= 0 && !node.disabled) {
+		if (_getTabIndex(node) >= 0 && !node.disabled && node.offsetParent) {
 			return node;
 		}
 		if (node.hasChildNodes()) {
@@ -204,7 +204,7 @@ define(["orion/util"], function(util) {
 				}
 			}
 		}
-		if (_getTabIndex(node) >= 0 && !node.disabled) {
+		if (_getTabIndex(node) >= 0 && !node.disabled && node.offsetParent) {
 			return node;
 		}
 		return null;
