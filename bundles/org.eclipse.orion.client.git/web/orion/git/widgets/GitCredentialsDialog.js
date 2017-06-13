@@ -11,8 +11,8 @@
  
 /*eslint-env browser, amd*/
 
-define([ 'i18n!git/nls/gitmessages', 'orion/git/gitPreferenceStorage', 'orion/webui/dialog', 'orion/git/util'],
- function(messages, GitPreferenceStorage, dialog, mGitUtil) {
+define([ 'i18n!git/nls/gitmessages', 'orion/git/gitPreferenceStorage', 'orion/webui/dialog', 'orion/git/util', 'orion/urlModifier'],
+ function(messages, GitPreferenceStorage, dialog, mGitUtil, urlModifier) {
 
 	/**
 	 * Usage: <code>new GitCredentialsDialog(options).show();</code>
@@ -126,7 +126,7 @@ define([ 'i18n!git/nls/gitmessages', 'orion/git/gitPreferenceStorage', 'orion/we
 			this.$authButton.value = messages.AuthorizeWithGitHub;
 			(function(authUrl) {
 				this.$authButton.addEventListener("click", function(e) { //$NON-NLS-0$
-					window.location.href = authUrl;
+					window.location.href = urlModifier(authUrl);
 				});
 			}.bind(this))(this.options.errordata.GitHubAuth + "?ref=" + encodeURIComponent(window.location.href) + ",cloneGitRepository=" + encodeURIComponent(this.options.errordata.Url)); //$NON-NLS-1$ //$NON-NLS-0$
 		} else {
@@ -242,7 +242,7 @@ define([ 'i18n!git/nls/gitmessages', 'orion/git/gitPreferenceStorage', 'orion/we
 						process(loadedPrivateKey);
 					}
 				};
-			}(this.privateKeyFile));
+			}());
 
 			reader.readAsText(this.privateKeyFile);
 		} else if (loadedPrivateKey.length > 0) {

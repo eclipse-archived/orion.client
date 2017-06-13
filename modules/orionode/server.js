@@ -21,7 +21,7 @@ var auth = require('./lib/middleware/auth'),
 	util = require('util'),
 	argslib = require('./lib/args'),
 	ttyShell = require('./lib/tty_shell'),
-	orion = require('./index.js');
+	api = require('./lib/api');
 
 // Get the arguments, the workspace directory, and the password file (if configured), then launch the server
 var args = argslib.parseArgs(process.argv);
@@ -57,13 +57,17 @@ function startServer(cb) {
 		var password = argslib.readPasswordFile(passwordFile);
 		var dev = Object.prototype.hasOwnProperty.call(args, 'dev');
 		var log = Object.prototype.hasOwnProperty.call(args, 'log');
+		// init logging
+		var log4js = require('log4js');
+		log4js.configure(path.join(__dirname, 'config/log4js.json'));
+		var logger = log4js.getLogger('server');
 		if (dev) {
-			console.log('Development mode: client code will not be cached.');
+			logger.info('Development mode: client code will not be cached.');
 		}
 		if (passwordFile) {
-			console.log(util.format('Using password from file: %s', passwordFile));
+			logger.info(util.format('Using password from file: %s', passwordFile));
 		}
-		console.log(util.format('Using workspace: %s', workspaceDir));
+		logger.info(util.format('Using workspace: %s', workspaceDir));
 		
 		var server;
 		try {
@@ -87,17 +91,23 @@ function startServer(cb) {
 			}
 			
 			app.use(compression());
-			app.use(listenContextPath ? contextPath : "/", function(req,res,next){ req.contextPath = contextPath; next();},orion({
+			var orion = require('./index.js')({
 				workspaceDir: workspaceDir,
 				configParams: configParams,
 				maxAge: dev ? 0 : undefined,
-			}));
+			});
+			app.use(listenContextPath ? contextPath : "/", function(req, res, next){
+				req.contextPath = contextPath;
+				next();
+			}, orion);
+			
+			server = require('http-shutdown')(server);
 			var io = socketio.listen(server, { 'log level': 1, path: (listenContextPath ? contextPath : '' ) + '/socket.io' });
-			ttyShell.install({ io: io, app: app, fileRoot: contextPath + '/file', workspaceDir: workspaceDir });
+			ttyShell.install({ io: io, app: orion, fileRoot: contextPath + '/file', workspaceDir: workspaceDir });
 
 			server.on('listening', function() {
 				configParams.port = port;
-				console.log(util.format('Listening on port %d...', port));
+				logger.info(util.format('Listening on port %d...', port));
 				if (cb) {
 					cb();
 				}
@@ -109,8 +119,33 @@ function startServer(cb) {
 				}
 			});
 			server.listen(port);
+			
+			// this function is called when you want the server to die gracefully
+			// i.e. wait for existing connections
+			var gracefulShutdown = function() {
+				logger.info("Received kill signal, shutting down gracefully.");
+				api.getOrionEE().emit("close-socket");
+				server.shutdown(function() {
+					api.getOrionEE().emit("close-server");// Disconnect Mongoose // Close Search Workers
+					logger.info("Closed out remaining connections.");
+					process.exit();
+				});
+				setTimeout(function() {
+					api.getOrionEE().emit("close-server");
+					logger.error("Could not close connections in time, forcefully shutting down");
+					process.exit();
+				}, configParams["shutdown.timeout"]);
+			};
+			// listen for TERM signal .e.g. kill 
+			process.on('SIGTERM', gracefulShutdown);
+			var stdin = process.openStdin();
+			stdin.addListener("data", function(d) {
+				if(d.toString().trim() === "shutdown"){
+					gracefulShutdown();
+				}
+			});
 		} catch (e) {
-			console.error(e && e.stack);
+			logger.error(e && e.stack);
 		}
 	});
 }

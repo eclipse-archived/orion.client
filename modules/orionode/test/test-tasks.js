@@ -18,18 +18,17 @@ var CONTEXT_PATH = '';
 var username = "testUser" + Date.now();
 var taskIds = [];
 
-var app = express()
-.use(/* @callback */ function(req, res, next) {
-	req.user = { username: username };
-	next();
-})
-.use(CONTEXT_PATH + '/taskHelper', require('./support/task_helper').router({
+var app = express();
+var options = {};
+options.metastore = app.locals.metastore = require('../lib/metastore/fs/store')({workspaceDir: ""});
+app.locals.metastore.setup(app);
+app.use(CONTEXT_PATH + '/taskHelper', require('./support/task_helper').router({
 	root: '/taskHelper',
-	singleUser: true
+	options: options
 }))
 .use(CONTEXT_PATH + '/task', tasks.router({
 	taskRoot: CONTEXT_PATH + '/task',
-	singleUser: true
+	options: options
 }));
 
 var request = supertest.bind(null, app);

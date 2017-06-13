@@ -90,9 +90,11 @@ define([
 
 			if (element.name && element.openrange) {
 				if (!element.endrange || (element.endrange[0] === element.openrange[1] && element.endrange[1] === element.openrange[1])) {
-					if (Tags.voidElements.indexOf(element.name) < 0) {
-						if (!isOptionalClose(element)){
-							return createProblem(element.openrange, 'tag-close', i18nUtil.formatMessage(Messages['tag-close'], element.name), opts['tag-close']); //$NON-NLS-1$
+					if (!element.selfClosing){
+						if (Tags.voidElements.indexOf(element.name) < 0) {
+							if (!isOptionalClose(element)){
+								return createProblem(element.openrange, 'tag-close', i18nUtil.formatMessage(Messages['tag-close'], element.name), opts['tag-close']); //$NON-NLS-1$
+							}
 						}
 					}
 				}

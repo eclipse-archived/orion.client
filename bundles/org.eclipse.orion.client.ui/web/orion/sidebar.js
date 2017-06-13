@@ -372,8 +372,17 @@ define(['orion/objects', 'orion/commands', 'orion/outliner', 'orion/webui/little
 				},
 				callback: function (data) {
 					if (this._inlineSearchPane.isVisible()) {
-						this._inlineSearchPane.hide();
+						var searchText = getSearchText();
+						if(searchText) {
+							this._inlineSearchPane.setSearchText(searchText);
+							this._inlineSearchPane.showSearchOptions();
+							this._inlineSearchPane.focusOnTextInput();
+						} else {
+							this._inlineSearchPane.hide();
+						}
 					} else {
+						this._inlineSearchPane.updateSearchScopeFromSelection(data.items.length > 0 ? (typeof data.items[0] === 'string' ? this.editorInputManager.inputManager.getFileMetadata() : data.items[0])
+							: data.items);
 						var mainSplitter = mGlobalCommands.getMainSplitter();
 						if (mainSplitter.splitter.isClosed()) {
 							mainSplitter.splitter.toggleSidePanel();

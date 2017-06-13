@@ -38,7 +38,7 @@ button::-moz-focus-inner {
     padding: 0;
 }
 
-input {
+input, div.parameterInput[contenteditable="true"] {
 	-moz-user-select: text;
 	text-indent: 0;
 	text-shadow: none;
@@ -49,7 +49,7 @@ input {
 	margin-left: 5px;
 }
 
-textarea {
+textarea  {
 	border: 1px solid #bbb;
 }
 

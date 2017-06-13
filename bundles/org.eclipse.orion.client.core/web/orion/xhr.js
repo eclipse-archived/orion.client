@@ -18,8 +18,9 @@
 define([
 	'orion/Deferred',
 	'orion/xsrfUtils',
+	'orion/urlModifier',
 	'orion/URL-shim', // no exports, must come last
-], function(Deferred, xsrfUtils) {
+], function(Deferred, xsrfUtils, urlModifier) {
 
 	/**
 	 * @name orion.xhr.Result
@@ -94,6 +95,8 @@ define([
 	// TODO: upload progress, user/password
 	function _xhr(method, url, options/*, XMLHttpRequestImpl */) {
 		options = options || {};
+		url = urlModifier(url);
+
 		var xhr = (arguments.length > 3 && arguments[3]) ? arguments[3] : new XMLHttpRequest(); //$NON-NLS-0$
 		var d = new Deferred();
 		var headers = options.headers || {};
@@ -118,7 +121,8 @@ define([
 			}
 		});
 		
-		xhr.onabort = function() {
+		var eventSource = options.upload ? xhr.upload : xhr;
+		eventSource.onabort = function() {
 			aborted = true;
 			if (!cancelled) {
 				var cancelError = new Error("Cancel");
@@ -128,7 +132,7 @@ define([
 		};
 		xhr.onload = function() {
 			var result = makeResult(url, options, xhr);
-			if(200 <= xhr.status && xhr.status < 400) {
+			if (200 <= xhr.status && xhr.status < 400) {
 				d.resolve(result);
 			} else {
 				d.reject(result);
@@ -137,14 +141,14 @@ define([
 				}
 			}
 		};
-		xhr.onerror = function() {
+		eventSource.onerror = function() {
 			var result = makeResult(url, options, xhr);
 			d.reject(result);
 			if (log && typeof console !== 'undefined') { //$NON-NLS-0$
 				console.log(new Error(xhr.statusText));
 			}
 		};
-		xhr.onprogress = function(progressEvent) {
+		eventSource.onprogress = function(progressEvent) {
 			progressEvent.xhr = xhr;
 			d.progress(progressEvent);
 		};

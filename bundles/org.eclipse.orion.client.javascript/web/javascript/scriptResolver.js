@@ -85,7 +85,12 @@ define([
 			var dotext = '.' + ext;
 			var pref = this._removePrefix(name);
 			var filename = pref.length > 1 ? pref[1] : pref[0];
-			var idx = filename.lastIndexOf('/');
+			var idx = filename.lastIndexOf('/'),
+				extidx = filename.lastIndexOf('.');
+			if(extidx > idx) {
+				ext = filename.slice(extidx+1);
+				dotext = '.'+ext;
+			}
 			var searchname = filename.slice(idx + 1);
 
 			// Search for it

@@ -10,6 +10,7 @@
  *******************************************************************************/
 /*eslint-env node */
 var express = require('express');
+var api = require('./api');
 
 module.exports = {};
 
@@ -22,8 +23,7 @@ module.exports.router = function(options) {
 	return express.Router()
 	.get('*', /* @callback */ function (req, res) {
 		var buildID = configParams["orion.buildId"] || BUILD_ID;
-		res.setHeader("Cache-Control", "no-cache");
-		return res.status(200).json({
+		return api.writeResponse(200, res, null, {
 			build: buildID
 		});
 	});

@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2012, 2014 IBM Corporation and others.
+ * Copyright (c) 2012, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -14,11 +14,12 @@
 define([
 	'orion/editor/textTheme',
 	'orion/widgets/themes/container/ThemeSheetWriter',
+	'orion/Deferred',
 	'orion/widgets/themes/ThemeVersion',
 	'orion/widgets/themes/container/LightPage',
 	'orion/widgets/themes/container/OrionPage'
 ],
-	function(mTextTheme, ThemeSheetWriter, THEMES_VERSION, LightPage, OrionPage) {
+	function(mTextTheme, ThemeSheetWriter, Deferred, THEMES_VERSION, LightPage, OrionPage) {
 
 	// *******************************************************************************
 	//
@@ -27,33 +28,90 @@ define([
 	//
 	// *******************************************************************************
 
-		function ThemeData(){
+		function ThemeData(serviceRegistry){
 			this.styles = [];
 			this.styles.push(LightPage);
 			this.styles.push(OrionPage);
+			this.protectedThemes = ["Light", "Dark"];
+			this.provider = null;
+			if (serviceRegistry && serviceRegistry.getServiceReferences("orion.core.container.themes.provider").length > 0) {
+				this.provider = serviceRegistry.getService("orion.core.container.themes.provider");
+			}
 		}
 		
 		function getStyles(){
-			return this.styles;
+			var d = new Deferred();
+			var defaultStyles = this.styles;
+			if (this.provider) {
+				this.provider.getStyles().then(function(providedStyles) {
+					d.resolve(providedStyles);
+				}, function() { 
+					d.resolve(defaultStyles);
+				});
+			} else {
+				d.resolve(defaultStyles);
+			}
+			return d;
+		}
+		
+		function getThemeVersion() {
+			var d = new Deferred();
+			if (this.provider) {
+				this.provider.getThemeVersion().then(function(version) {
+					d.resolve(version);
+				}, function() {
+					d.resolve(THEMES_VERSION);
+				});
+			}
+			else {
+				d.resolve(THEMES_VERSION);
+			}
+			return d;
 		}
 		
 		ThemeData.prototype.styles = [];
 		ThemeData.prototype.getStyles = getStyles;
+		ThemeData.prototype.getThemeVersion = getThemeVersion;
 		
 		function getProtectedThemes() {
-			return ["Light", "Dark"];
+			var d = new Deferred();
+			var defaultProtectedThemes = this.protectedThemes;
+			if (this.provider) {
+				this.provider.getProtectedThemes().then(function(providedProtectedThemes) {
+					d.resolve(providedProtectedThemes);
+				}, function() {
+					d.resolve(defaultProtectedThemes);
+				});
+			} else {
+				d.resolve(defaultProtectedThemes);
+			}
+			return d;
 		}
 
 		ThemeData.prototype.getProtectedThemes = getProtectedThemes;
 		
+		function getDefaultTheme() {
+			var d = new Deferred();
+			var useLightTheme = document.body.classList.contains("lightPage");
+			var defaultTheme = useLightTheme ? 'Light' : 'Dark';
+			if (this.provider) {
+				this.provider.getDefaultTheme().then(function(defaultTheme) {
+					d.resolve(defaultTheme);
+				}, function() {
+					d.resolve(defaultTheme);
+				});
+			} else {
+				d.resolve(defaultTheme);
+			}
+			return d;
+		}
+		ThemeData.prototype.getDefaultTheme = getDefaultTheme;
+		
 		function getThemeStorageInfo(){
-			var useLightTheme = document.body.classList.contains("lightPage"); //$NON-NLS-0$
 			return {
 				storage: '/themes',
 				styleset: 'containerStyles',
-				defaultTheme: useLightTheme ? 'Light' : 'Dark', //$NON-NLS-1$  //$NON-NLS-0$
 				selectedKey: 'containerSelected',
-				version: THEMES_VERSION
 			};
 		}
 		
@@ -73,4 +131,4 @@ define([
 			getStyles:getStyles
 		};
 	}
-);
+);

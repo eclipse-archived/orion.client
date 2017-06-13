@@ -69,7 +69,7 @@ define(['orion/webui/littlelib'], function(lib) {
 				this._node.addEventListener("mouseover", this._mouseoverHandler = function(event) { //$NON-NLS-0$
 					if (lib.contains(self._node, event.target)) {
 						self.show();
-						lib.stop(event);
+						//lib.stop(event);
 					}
 				}, false);
 				
@@ -107,6 +107,7 @@ define(['orion/webui/littlelib'], function(lib) {
 				this._tip.classList.add("tooltipContainer"); //$NON-NLS-0$
 				this._tipInner = document.createElement("div");  //$NON-NLS-0$
 				this._tipInner.classList.add("tooltip");  //$NON-NLS-0$
+				
 				if (this._text) {
 					this._tipTextContent = document.createElement("div");  //$NON-NLS-0$
 					this._tipTextContent.classList.add("textContent");  //$NON-NLS-0$
@@ -118,6 +119,17 @@ define(['orion/webui/littlelib'], function(lib) {
 				document.body.appendChild(this._tip);
 				var self = this;
 				lib.addAutoDismiss([this._tip, this._node], function() {self.hide();});
+
+				if (this._showByKB) {
+					this._tip.tabIndex = "0";
+					this._tip.addEventListener("keydown", function (e) {
+						if (e.keyCode === lib.KEY.ESCAPE) {
+							self._node.focus();
+							self.hide();
+						}
+					}, false);
+				}
+
 				if (this._trigger === "mouseover") { //$NON-NLS-0$
 					this._tipInner.setAttribute("role", "tooltip"); //$NON-NLS-2$ //$NON-NLS-1$
 					this._tipInner.id = "tooltip" + Date.now(); //$NON-NLS-0$
@@ -282,9 +294,26 @@ define(['orion/webui/littlelib'], function(lib) {
 		},
 		
 		/**
+		 * Turn off(hide permanantly) the tooltip in purpose, and this tooltip won't show until it been turned on
+		 */
+		turnOff: function() {
+			this.isTurnedOff = true;
+		},
+		
+		/**
+		 * Turn on the tooltip, and this tooltip will then work normally
+		 */
+		turnOn: function() {
+			this.isTurnedOff = false;
+		},
+		
+		/**
 		 * Show the tooltip.
 		 */			
 		show: function() {
+			if(this.isTurnedOff){
+				return;
+			}
 			if (this.isShowing()) { //$NON-NLS-0$
 				return;
 			}
@@ -317,6 +346,13 @@ define(['orion/webui/littlelib'], function(lib) {
 			if (!positioned) {
 				this._positionTip(this._position[0], false, true);  // force it in, it doesn't fit anywhere
 			}
+			
+			if (this._showByKB) {
+				this._tip.focus();
+			}
+			
+			lib.trapTabs(this._tip);
+			
 			if (this._afterShowing) {
 				this._afterShowing();
 			}
@@ -326,6 +362,8 @@ define(['orion/webui/littlelib'], function(lib) {
 		 * Hide the tooltip.
 		 */			
 		hide: function(hideDelay) {
+			this._showByKB = undefined;
+			
 			if (this._timeout) {
 				window.clearTimeout(this._timeout);
 				this._timeout = null;

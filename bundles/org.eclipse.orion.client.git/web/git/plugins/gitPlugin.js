@@ -126,6 +126,18 @@ define([
 		order: 1000, // low priority
 		uriTemplate: "{+OrionHome}/git/git-repository.html#"
 	});
+
+	provider.registerService("orion.page.link.related", {}, {
+		name: gitmessages["Repositories"],
+		id: "orion.git.repositories2",
+		nls: "git/nls/gitmessages",
+		category: "git",
+		order: 800, // low priority
+		validationProperties: [
+			{source: "WorkspaceLocation|Location", variableName: "GitWorkspaceLocation"}
+		],
+		uriTemplate: "{+OrionHome}/git/git-repository.html#,workspace={,GitWorkspaceLocation}"
+	});
 	
 	provider.registerService("orion.navigate.command", {}, {
 		name: gitmessages["Git Log"],
@@ -324,7 +336,7 @@ define([
 	}
 	var queries = new URL(window.location.href).query;
 	var gitFSPattern = queries.get("gitFSPattern");
-	var gitBase = gitFSPattern ? gitFSPattern : makeParentRelative(new URL("../../gitapi/", window.location.href).href);
+	var gitBase = gitFSPattern ? gitFSPattern : makeParentRelative(new URL("../../gitapi", window.location.href).href);
 	var service = new GitFileImpl(gitBase);
 
 	provider.registerService("orion.core.file", service, {

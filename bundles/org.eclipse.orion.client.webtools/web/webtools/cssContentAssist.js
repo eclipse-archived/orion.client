@@ -307,8 +307,11 @@ define([
 								if (!type){
 									type = CSSLint.ValidationTypes.complex[value];
 								}
-								if (type && typeof type === 'string'){
+								if (typeof type === 'string'){
 									this._getComplexValueProposals(params, proposals, type);
+								} else if (typeof type === 'object' && type.match && type.toString()){
+									// Matcher object has a data string we can parse
+									this._getComplexValueProposals(params, proposals, type.toString());
 								} else if (proposals.length === 0){
 									// Provide default inherit and initial proposals if we have nothing else
 									if(jsUtil.looselyMatches(namePrefix, 'inherit')) { //$NON-NLS-1$

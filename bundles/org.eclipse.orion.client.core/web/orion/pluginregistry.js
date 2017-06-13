@@ -12,7 +12,7 @@
 /* eslint-disable missing-nls */
 /*eslint-env browser, amd*/
 /*global URL*/
-define(["orion/Deferred", "orion/EventTarget", "orion/URL-shim"], function(Deferred, EventTarget) {
+define(["orion/Deferred", "orion/EventTarget", "orion/urlModifier", "orion/URL-shim"], function(Deferred, EventTarget, urlModifier) {
     
     function _equal(obj1, obj2) {
         var keys1 = Object.keys(obj1);
@@ -140,6 +140,8 @@ define(["orion/Deferred", "orion/EventTarget", "orion/URL-shim"], function(Defer
         this.__objectId = objectId;
         this.__methods = methods;
     }
+    
+    var VERSION = 15.0; // This version is used to flush plugin metadata
 
     /**
      * Creates a new plugin. This constructor is private and should only be called by the plugin registry.
@@ -196,6 +198,7 @@ define(["orion/Deferred", "orion/EventTarget", "orion/URL-shim"], function(Defer
         var _services = _manifest.services || [];
         var _autostart = _manifest.autostart;
         var _lastModified = _manifest.lastModified || 0;
+        var _metadataVersion = _manifest.metadataVersion;
 
         var _state = "installed";
 
@@ -573,6 +576,7 @@ define(["orion/Deferred", "orion/EventTarget", "orion/URL-shim"], function(Defer
                 headers: _headers,
                 services: _services,
                 autostart: _autostart,
+                metadataVersion: VERSION,
                 lastModified: _lastModified
             });
         }
@@ -750,7 +754,7 @@ define(["orion/Deferred", "orion/EventTarget", "orion/URL-shim"], function(Defer
                     _internalRegistry.dispatchEvent(new PluginEvent("lazy activation", _this));
                 }
                 var now = Date.now();
-		        if (!this.getLastModified() || now > this.getLastModified() + 86400000) { // 24 hours
+		        if (!this.getLastModified() || now > this.getLastModified() + 86400000 || _metadataVersion !== VERSION) { // 24 hours
 	                 return this.update();
                 }
                 return new Deferred().resolve();
@@ -1126,7 +1130,7 @@ define(["orion/Deferred", "orion/EventTarget", "orion/URL-shim"], function(Defer
                 } else {
                    	var iframe = document.createElement("iframe"); //$NON-NLS-0$
                     iframe.name = url + "_" + channel._startTime;
-                    iframe.src = url;
+					iframe.src = urlModifier(url);
                     iframe.onload = function() {
                         log("handshake"); //$NON-NLS-0$
                         channel._handshake = true;

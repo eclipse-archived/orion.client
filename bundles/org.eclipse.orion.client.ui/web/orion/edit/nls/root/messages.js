@@ -60,7 +60,8 @@ define({
 	"SplitHorizontal": "Split Horizontal",
 	"SplitPipInPip": "Picture in Picture",
 	"SplitModeTooltip": "Change split editor mode",
-	"AllTabsDropDown": "Open Tabs",
+	"AllTabsDropDown": "Open Tabs (Ctrl + Shift + E)",
+	"AllTabsDropDownMac": "Open Tabs (Cmd + Shift + E)",
 	"SidePanel": "Side Panel",
 	"SidePanelTooltip": "Choose what to show in the side panel.",
 	"Slideout": "Slideout",
@@ -90,6 +91,8 @@ define({
 	"OpenWith": "Open With",
 	"OpenRelated": "Open Related",
 	"OpenFolder": "Open Folder",
+	"SwitchWorkspace": "Switch To",
+	"SwitchWorkspaceTip": "Switch workspaces",
 	"OpenRecent": "Open Recent",
 	"OpenFolderTip": "Change the root folder",
 	"Dependency": "Dependency",
@@ -116,5 +119,9 @@ define({
 	"No":"No",
 	"selectNextTab": "Select Next Editor Tab",
 	"selectPreviousTab": "Select Previous Editor Tab",
-	"showTabDropdown": "Display Open Editor Tabs"	
+	"showTabDropdown": "Display Open Editor Tabs",
+	"closeOthers":"Close Others Tabs",
+	"closeTotheRight":"Close Tabs To The Right",
+	"keepOpen":"Keep Open",
+	"closeSelf":"Close"
 });

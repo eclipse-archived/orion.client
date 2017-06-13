@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2011, 2015 IBM Corporation and others.
+ * Copyright (c) 2011, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License v1.0
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution
@@ -25,7 +25,7 @@ define(['domReady', 'orion/xhr', './common', './jquery', 'orion/URL-shim'], func
 
 	function formHTML(newsFeedData, elementId, limit) {
 		var html = "";
-		var newsFeedEntries = newsFeedData.entries;
+		var newsFeedEntries = newsFeedData && Array.isArray(newsFeedData.entries) ? newsFeedData.entries : [];
 		// Limit for the number of items to display
 		var limit;
 
@@ -55,7 +55,7 @@ define(['domReady', 'orion/xhr', './common', './jquery', 'orion/URL-shim'], func
 			url: document.location.protocol + "//ajax.googleapis.com/ajax/services/feed/load?v=1.0&num=10&callback=?&q=" + encodeURIComponent(url),
 			dataType: "json",
 			success: function(data) {
-				callback(data.responseData.feed, elementId, 3);
+				callback(data.responseData ? data.responseData.feed : null, elementId, 3);
 			}
 		});
 	}

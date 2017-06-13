@@ -407,6 +407,35 @@ define([
 					]);
 				});
 			});
+			it("tag-close self closing tag 1", function() {
+			    var val = setup({buffer: '<html/>', rule: {id:null, severity:1}});
+				return validator.computeProblems(val.editorContext).then(function(result) {
+					assertProblems(result, [
+					]);
+				});
+			});
+			it("tag-close self closing tag 2", function() {
+			    var val = setup({buffer: '<abc/>', rule: {id:null, severity:1}});
+				return validator.computeProblems(val.editorContext).then(function(result) {
+					assertProblems(result, [
+					]);
+				});
+			});
+			it("tag-close non-self closing tag sanity check", function() {
+			    var val = setup({buffer: '<abc>', rule: {id:null, severity:1}});
+				return validator.computeProblems(val.editorContext).then(function(result) {
+					assertProblems(result, [
+						{start: 0, end: 5, severity: "info", description: "No matching closing tag for 'abc'."},
+					]);
+				});
+			});
+			it("tag-close self closing tag 3", function() {
+			    var val = setup({buffer: '<abc def="ghi"/>', rule: {id:null, severity:1}});
+				return validator.computeProblems(val.editorContext).then(function(result) {
+					assertProblems(result, [
+					]);
+				});
+			});
 			describe('tag-close HTML5 Optional', function(){
 				describe('No content following, implemented in HTML Validator Rules', function(){
 					it("tag-close optional html tag 1", function() {

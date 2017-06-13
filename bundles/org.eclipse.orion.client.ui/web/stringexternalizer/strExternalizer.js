@@ -30,9 +30,6 @@ mSearchClient, mFileClient, mOperationsClient, mSearchResults, mGlobalCommands, 
 			mGlobalCommands.setPageTarget({
 				task: "Externalize Strings",
 				target: metadata,
-				makeBreadcrumbLink: function(seg, location) {
-					seg.href = require.toUrl("stringexternalizer/strExternalizer.html") + "#" + location;
-				}, //$NON-NLS-0$
 				serviceRegistry: serviceRegistry,
 				fileService: fileClient,
 				searchService: searcher,

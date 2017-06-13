@@ -63,7 +63,9 @@ define(['i18n!orion/settings/nls/messages'
 		}, {
 			display: messages["editorTheme current line background"],
 			objPath: [
-				"styles annotationLine currentLine backgroundColor"
+				"styles annotationLine currentLine backgroundColor",
+				"styles annotationOverview currentLine backgroundColor",
+				"styles annotationOverview currentLine borderColor",
 			], 
 			id: "editorThemeColorCurrentLineBackground", 
 			value: defaultColor
@@ -159,6 +161,13 @@ define(['i18n!orion/settings/nls/messages'
 			id: "editorThemeMatchingBracket",
 			value: defaultColor
 		}, {
+			display: messages["editorTheme dark searchmatch box"],
+			objPath: [
+				"styles annotationRange matchingSearch outlineColor",
+			],
+			id: "editorThemeDarkSearchmatchBoxColor",
+			value: defaultColor
+		}, {
 			display: messages["editorTheme matching search background"],
 			objPath: [
 				"styles annotationRange matchingSearch backgroundColor"
@@ -173,11 +182,25 @@ define(['i18n!orion/settings/nls/messages'
 			id: "editorThemeCurrentSearch",
 			value: defaultColor
 		}, {
+			display: messages["editorTheme search range background"],
+			objPath: [
+				"styles annotationLine searchRange backgroundColor"
+			],
+			id: "editorThemeSearchRange",
+			value: defaultColor
+		}, {
 			display: messages["editorTheme documentation task color"],
 			objPath: [
 				"styles keyword other documentation task color"
 			],
 			id: "editorThemeDocumentationTask",
+			value: defaultColor
+		}, {
+			display: messages["editorTheme keyword directive color"],
+			objPath: [
+				"styles keyword other directive color"
+			],
+			id: "editorThemeDirectiveTask",
 			value: defaultColor
 		}, {
 			display: messages["editorTheme property name color"],
@@ -200,6 +223,20 @@ define(['i18n!orion/settings/nls/messages'
 			],
 			id: "editorThemeMetaTagAttribute",
 			value: defaultColor
+		},{
+			display: messages["editorTheme doc annotation attribute"],   
+			objPath: [
+				"styles meta documentation annotation color"
+			],
+			id: "editorThemeMetaDocAnnotaionAttribute",
+			value: defaultColor
+		},{
+			display: messages["editorTheme doc tag attribute"],   
+			objPath: [
+				"styles meta documentation tag color"
+			],
+			id: "editorThemeMetaDocTagAttribute",
+			value: defaultColor
 		}, {
 			display: messages["editorTheme selection background"],
 			objPath: [
@@ -209,6 +246,78 @@ define(['i18n!orion/settings/nls/messages'
 				"styles textviewSelectionUnfocused backgroundColor"
 			],
 			id: "editorSelection",
+			value: defaultColor
+		}, {
+			display: messages["editorTheme info color"],
+			objPath: [
+				"styles annotationOverview info backgroundColor",
+				"styles annotationOverview info borderColor",
+				"styles annotationRange info backgroundImage"
+			],
+			id: "editorThemeWaveInfo",
+			value: defaultColor
+		}, {
+			display: messages["editorTheme warning color"],
+			objPath: [
+				"styles annotationOverview warning backgroundColor",
+				"styles annotationOverview warning borderColor",
+				"styles annotationRange warning backgroundImage"
+			],
+			id: "editorThemeWaveWarning",
+			value: defaultColor
+		}, {
+			display: messages["editorTheme error color"],
+			objPath: [
+				"styles annotationOverview error backgroundColor",
+				"styles annotationOverview error borderColor",
+				"styles annotationRange error backgroundImage"
+			],
+			id: "editorThemeWaveError",
+			value: defaultColor
+		}, {
+			display: messages["editorTheme lines annotation diffDeleted"],
+			objPath: [
+				"styles annotationOverview diffDeleted color",
+				"styles lines annotation diffDeleted backgroundImage",
+				"styles annotation diffDeleted backgroundImage",
+				"styles annotationHTML diffDeleted backgroundImage"
+			],
+			id: "editorThemeLinesAnnotationDDiffDeleted",
+			value: defaultColor
+		}, {
+			display: messages["editorTheme lines annotation diffAdded"],
+			objPath: [
+				"styles lines annotation diffAdded backgroundColor",
+				"styles annotationOverview diffAdded backgroundColor",
+				"styles annotation diffAdded backgroundImage",
+				"styles annotationHTML diffAdded backgroundImage"
+			],
+			id: "editorThemeLinesAnnotationAMDiffAdded",
+			value: defaultColor
+		}, {
+			display: messages["editorTheme lines annotation diffModified"],
+			objPath: [
+				"styles lines annotation diffModified backgroundColor",
+				"styles annotationOverview diffModified backgroundColor",
+				"styles annotation diffModified backgroundImage",
+				"styles annotationHTML diffModified backgroundImage"
+			],
+			id: "editorThemeLinesAnnotationAMDiffModifed",
+			value: defaultColor
+		}, {
+			display: messages["editorTheme annotation blame"],
+			objPath: [
+				"styles lines annotation blame backgroundColor",
+			],
+			id: "editorThemeBlame",
+			value: defaultColor
+		}, {
+			display: messages["editorTheme annotation currentBlame"],
+			objPath: [
+				"styles lines annotation currentBlame backgroundColor",
+				"styles annotationOverview currentBlame backgroundColor",
+			],
+			id: "editorThemeCurrentBlame",
 			value: defaultColor
 		}
 	];

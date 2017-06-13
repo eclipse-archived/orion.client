@@ -24,15 +24,16 @@ define([
 	'javascript/javascriptFormatter',
 	'javascript/javascriptProject',
 	'javascript/contentAssist/ternAssist',
-	'javascript/contentAssist/ternProjectAssist',
+	'javascript/jsonAstManager',
+	'javascript/support/ternproject/ternProjectSupport',
+	'javascript/support/packagejson/packageJsonSupport',
+	'javascript/support/eslint/eslintSupport',
 	'javascript/validator',
-	'javascript/ternProjectValidator',
 	'javascript/occurrences',
 	'javascript/hover',
 	'javascript/outliner',
 	'javascript/astOutliner',
 	'javascript/cuProvider',
-	'javascript/ternProjectManager',
 	'orion/util',
 	'javascript/logger',
 	'javascript/commands/generateDocCommand',
@@ -47,8 +48,8 @@ define([
 	'i18n!javascript/nls/messages',
 	'orion/i18nUtil',
 	'orion/URL-shim'
-], function(PluginProvider, mServiceRegistry, Deferred, ScriptResolver, ASTManager, QuickFixes, JavaScriptFormatter, JavaScriptProject, TernAssist, TernProjectAssist,
-	EslintValidator, TernProjectValidator, Occurrences, Hover, Outliner, AstOutliner, CUProvider, TernProjectManager, Util, Logger, GenerateDocCommand, OpenDeclCommand, OpenImplCommand,
+], function(PluginProvider, mServiceRegistry, Deferred, ScriptResolver, ASTManager, QuickFixes, JavaScriptFormatter, JavaScriptProject, TernAssist,
+	JsonAstManager, TernProjectSupport, PackageJsonSupport, ESLintSupport, EslintValidator, Occurrences, Hover, Outliner, AstOutliner, CUProvider, Util, Logger, GenerateDocCommand, OpenDeclCommand, OpenImplCommand,
 	RenameCommand, RefsCommand, mJS, mJSON, mJSONSchema, mEJS, javascriptMessages, i18nUtil) {
 
 	var serviceRegistry = new mServiceRegistry.ServiceRegistry();
@@ -202,13 +203,7 @@ define([
 		}
 	};
 
-	/**
-	 * Object of contributed environments
-	 *
-	 * TODO will need to listen to updated tern plugin settings once enabled to clear this cache
-	 */
-	var contributedEnvs,
-		ternWorker;
+	var ternWorker;
 
 	var handlers = {
 		'read': doRead,
@@ -262,13 +257,36 @@ define([
 			Logger.log(err);
 		});
 
-	var ternProjectManager = new TernProjectManager.TernProjectManager(ternWorker, scriptresolver, serviceRegistry, setStarting);
-
 	/**
 	 * Create a new JavaScript project context
 	 * @since 12.0
 	 */
 	var jsProject = new JavaScriptProject(serviceRegistry);
+	var jsonAstManager = new JsonAstManager.JsonAstManager();
+	/**
+	 * Register JSON AST manager as Model Change listener
+	 */
+	provider.registerService("orion.edit.model", //$NON-NLS-1$
+		{
+			onModelChanging: jsonAstManager.onModelChanging.bind(jsonAstManager),
+			onInputChanged: jsonAstManager.onInputChanged.bind(jsonAstManager)
+		},
+		{
+			contentType: ["application/json", "javascript/config"] //$NON-NLS-1$ //$NON-NLS-2$
+		});
+		
+// Register .tern-project support
+	var ternProjectSupport = new TernProjectSupport(serviceRegistry, jsProject, jsonAstManager, ternWorker, scriptresolver, setStarting);
+	ternProjectSupport.registerExtensions(provider);
+
+//Register package.json support
+	var packageJsonSupport = new PackageJsonSupport(jsonAstManager, scriptresolver);
+	packageJsonSupport.registerExtensions(provider);
+
+//Register eslintrc* support
+	var eslintSupport = new ESLintSupport(jsonAstManager, scriptresolver, jsProject);
+	eslintSupport.registerExtensions(provider);
+	
 	provider.registerService("orion.edit.model", //$NON-NLS-1$
 		{
 			onInputChanged: jsProject.onInputChanged.bind(jsProject)
@@ -277,7 +295,85 @@ define([
 			contentType: ["application/javascript", "text/html", "application/json"] //$NON-NLS-1$ //$NON-NLS-2$//$NON-NLS-3$
 		});
 
-	jsProject.addHandler(ternProjectManager);
+	/**
+	 * @description Makes sure the filename does not expose Orion file client-specific paths to the UI
+	 * @param {String} fileName The namw of the file
+	 * @returns {String} The cleaned up filename
+	 * @since 15.0
+	 */
+	function cleanFileName(fileName) {
+		if(fileName) {
+			if(fileName.indexOf("/file/") === 0) {
+				return fileName.slice(6);
+			} else if(fileName.indexOf("file/") === 0) {
+				return fileName.slice(5);
+			}
+		}
+		return fileName;
+	}
+
+	provider.registerService("orion.project.handler", {
+		/**
+		 * @callback
+		 */
+		getAdditionalProjectProperties: function getAdditionalProjectProperties(item, projectMetadata) {
+			return jsProject.initFrom(item.Location).then(function initFrom() {
+				return jsProject.getComputedEnvironment().then(function(env) {
+					var infos = [
+						{
+							Name: javascriptMessages.javascript,
+							Children: []
+						}
+					];
+					var val = jsProject.getProjectPath();
+					if(!val) {
+						infos[0].Children.push({Name: javascriptMessages.projectPath, Value: javascriptMessages.unknown});
+					} else {
+						infos[0].Children.push({Name: javascriptMessages.projectPath, Value: cleanFileName(val), Href: "{+OrionHome}/edit/edit.html#"+val});
+					}
+					if(env) {
+						//ECMA version
+						infos[0].Children.push({Name: javascriptMessages.ecmaVersion, Value: env.ecmaVersion});
+						//Guessed envs
+						infos[0].Children.push({Name: javascriptMessages.devEnv, Value: Object.keys(env.envs).toString()});
+						//ESLint
+						if(env.eslint) {
+							infos[0].Children.push({Name: javascriptMessages.eslintConfig,
+													Value: javascriptMessages.eslintFile,
+													Href: "{+OrionHome}/edit/edit.html#"+ env.eslint.file.name});
+						} else {
+							infos[0].Children.push({Name: javascriptMessages.eslintConfig, Value: javascriptMessages.none});	
+						}
+						//Package.json
+						if(env.packagejson) {
+							infos[0].Children.push({Name: javascriptMessages.nodeConfig,
+													Value: javascriptMessages.packagejsonFile,
+													Href: "{+OrionHome}/edit/edit.html#"+ env.packagejson.file.name});
+						} else {
+							infos[0].Children.push({Name: javascriptMessages.nodeConfig, Value: javascriptMessages.none});
+						}
+						//Tern project
+						if(env.ternproject) {
+							infos[0].Children.push({Name: javascriptMessages.ternConfig,
+													Value: javascriptMessages.ternFile,
+													Href: "{+OrionHome}/edit/edit.html#"+ env.ternproject.file.name});
+						} else {
+							infos[0].Children.push({Name: javascriptMessages.ternConfig, Value: javascriptMessages.none});
+						}
+					} else {
+						infos[0].Children.push({Name: javascriptMessages.environment, Value: javascriptMessages.noEnvironment});
+					}
+					return infos;
+				});
+			});
+		}
+	}, {
+		id: "orion.javascript.projecthandler",
+		type: "javascript",
+		validationProperties: [
+			{source: "Location"}
+		]
+	});
 
 	/**
 	 * Create the AST manager
@@ -297,6 +393,15 @@ define([
 		};
 		var fileClient = serviceRegistry.getService("orion.core.file.client"); //$NON-NLS-1$
 		if (typeof request.args.file === 'object') {
+			if(request.args.file.tourl) {
+				var f = request.args.file.file;
+				response.args.file = request.args.file;
+				response.args.file.url = f;
+				if(/^[/]?file/.test(f)) {
+					response.args.file.url = new URL(f, self.location.origin).href;
+				}
+				return ternWorker.postMessage(response);
+			}
 			var _l = request.args.file.logical;
 			response.args.logical = _l;
 			if (request.args.file.env === 'node') {
@@ -321,7 +426,7 @@ define([
 				}
 			}
 		} else {
-			_normalRead(response, request.args.file, fileClient);
+			_normalRead(response, request.args.file, fileClient);	
 		}
 	}
 	/**
@@ -483,27 +588,8 @@ define([
 		messageQueue = [];
 	}
 
-	/**
-	 * @description Queries the Tern server to return all contributed environment names from the installed plugins
-	 * @returns {Object} The object of contributed environments or null
-	 * @since 9.0
-	 */
-	function getEnvironments() {
-		var envDeferred = new Deferred();
-		if (!contributedEnvs) {
-			ternWorker.postMessage({
-				request: 'environments'
-			}, function(response) {
-				contributedEnvs = response.envs;
-				envDeferred.resolve(response.envs);
-			});
-		} else {
-			return envDeferred.resolve(contributedEnvs);
-		}
-		return envDeferred;
-	}
-
-	provider.registerService("orion.edit.contentassist", new TernAssist.TernContentAssist(astManager, ternWorker, getEnvironments, CUProvider, jsProject), //$NON-NLS-1$
+	
+	provider.registerService("orion.edit.contentassist", new TernAssist.TernContentAssist(astManager, ternWorker, CUProvider, jsProject), //$NON-NLS-1$
 		{
 			contentType: ["application/javascript", "text/html"], //$NON-NLS-1$ //$NON-NLS-2$
 			nls: 'javascript/nls/messages', //$NON-NLS-1$
@@ -512,26 +598,6 @@ define([
 			charTriggers: "[.]", //$NON-NLS-1$
 			excludedStyles: "(string.*)", //$NON-NLS-1$
 			autoApply: false
-		});
-
-	provider.registerService("orion.edit.contentassist", //$NON-NLS-1$
-		{
-			/** @callback */
-			computeContentAssist: function(editorContext, params) {
-				return editorContext.getFileMetadata().then(function(meta) {
-					if (meta.name === ".tern-project") {
-						return editorContext.getText().then(function(text) {
-							return TernProjectAssist.getProposals(text, params);
-						});
-					}
-				});
-			}
-		},
-		{
-			contentType: ["application/json"], //$NON-NLS-1$
-			nls: 'javascript/nls/messages', //$NON-NLS-1$
-			name: 'ternProjectAssist', //$NON-NLS-1$
-			id: "orion.edit.contentassist.javascript.tern.project" //$NON-NLS-1$
 		});
 
 	/**
@@ -568,27 +634,8 @@ define([
 			name: javascriptMessages['jsHover'],
 			contentType: ["application/javascript", "text/html"] //$NON-NLS-1$ //$NON-NLS-2$
 		});
-
-	provider.registerService("orion.edit.validator", //$NON-NLS-1$
-		{
-			/**
-			 * @callback
-			 */
-			computeProblems: function(editorContext, context, config) {
-				return editorContext.getFileMetadata().then(function(meta) {
-					if (meta.name === '.tern-project') {
-						return editorContext.getText().then(function(text) {
-							return TernProjectValidator.validateAST(text);
-						});
-					}
-					return null;
-				});
-			}
-		},
-		{
-			contentType: ["application/json"] //$NON-NLS-1$
-		});
-
+		
+	
 	/**
 	 * Register AST manager as Model Change listener
 	 */

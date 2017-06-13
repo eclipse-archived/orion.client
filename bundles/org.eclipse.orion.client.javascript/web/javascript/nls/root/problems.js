@@ -7,7 +7,6 @@
  * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html).
  *
  ******************************************************************************/
-/* eslint-env amd */
 define({
     'eslintValidationFailure': 'ESLint failed to validate this file because an error occurred: ${0}',
 	'check-tern-plugin': 'To work in the \'${0}\' environment, the \'${1}\' plugin must be running.',
@@ -194,7 +193,6 @@ define({
 	'unknown-require-description' : 'Report missing libraries or missing tern plugins.',
 	'noTrailingSpaces' : 'Trailing spaces not allowed.',
 	'no-trailing-spaces-description': 'Disallow trailing whitespace at the end of lines.',
-
 
 	//.tern-project file validation messages
 	'notNum': "'${0}' must be a number",

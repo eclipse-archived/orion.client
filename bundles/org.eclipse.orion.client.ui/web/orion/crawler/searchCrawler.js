@@ -200,9 +200,9 @@ define(['i18n!orion/crawler/nls/messages', 'orion/i18nUtil', 'orion/searchUtils'
 				//We can not purely sort on Location because "Location" includes the file name at the tail.
 				//E.g. "DDD/f1_2_1.css" will be lined up after "DDD/AAA/f1_2_2.html" if we do so.
 				var location1 = a.Location && a.Location.toLowerCase();
-				n1 = mUiUtils.path2FolderName(location1, a.Name && a.Name.toLowerCase(), true);
+				n1 = mUiUtils.path2FolderName(location1, true);
 				var location2 = b.Location && b.Location.toLowerCase();
-				n2 = mUiUtils.path2FolderName(location2, b.Name && b.Name.toLowerCase(), true);
+				n2 = mUiUtils.path2FolderName(location2, true);
 				if (n1 < n2) { return -1; }
 				if (n1 > n2) { return 1; }
 				//If the same folder appears to two files, then we sort on file name

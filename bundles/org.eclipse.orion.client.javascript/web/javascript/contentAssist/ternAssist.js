@@ -27,14 +27,12 @@ define([
 	 * @public
 	 * @param {javascript.ASTManager} astManager An AST manager to create ASTs with
 	 * @param {TernWorker} ternWorker The worker running Tern
-	 * @param {Function} pluginEnvironments The function to use to query the Tern server for contributed plugins
 	 * @param {?} cuprovider The CU Provider that caches compilation units
 	 * @param {JavaScriptProject} jsproject The backing Javascript project
 	 */
-	function TernContentAssist(astManager, ternWorker, pluginEnvironments, cuprovider, jsproject) {
+	function TernContentAssist(astManager, ternWorker, cuprovider, jsproject) {
 		this.astManager = astManager;
 		this.ternworker = ternWorker;
-		this.pluginenvs = pluginEnvironments;
 		this.cuprovider = cuprovider;
 		this.timeout = null;
 		this.jsProject = jsproject;
@@ -52,7 +50,7 @@ define([
 			var index = offset;
 			while (index > 0) {
 				var char = text.substring(index - 1, index);
-				if (/[A-Za-z0-9_]/.test(char)) {
+				if (/[A-Za-z0-9_$]/.test(char)) {
 					index--;
 				} else {
 					break;
@@ -64,10 +62,9 @@ define([
 		 * @callback 
 		 */
 		computePrefix: function(editorContext, offset) {
-			var that = this;
 			return editorContext.getText().then(function (text) {
-				return text.substring(that._getPrefixStart(text, offset), offset);
-			});
+				return text.substring(this._getPrefixStart(text, offset), offset);
+			}.bind(this));
 		},
 		/**
 		 * Called by the framework to initialize this provider before any <tt>computeContentAssist</tt> calls.
@@ -80,25 +77,24 @@ define([
 		 * @description Implements the Orion content assist API v4.0
 		 */
 		computeContentAssist: function(editorContext, params) {
-			var that = this;
 			return editorContext.getFileMetadata().then(function(meta) {
 			    if(meta.contentType.id === 'text/html') {
 			        return editorContext.getText().then(function(text) {
-			        	var cu = that.cuprovider.getCompilationUnit(function(){
+			        	var cu = this.cuprovider.getCompilationUnit(function(){
 		            		return Finder.findScriptBlocks(text);
 		            	}, meta);
     			        if(cu.validOffset(params.offset)) {
-    			            return that.astManager.getAST(cu.getEditorContext()).then(function(ast) {
-			            		return that.doAssist(ast, params, meta, {ecma5:true, ecma6:true, ecma7: true, browser:true}, text);
-			            	});
+    			            return this.astManager.getAST(cu.getEditorContext()).then(function(ast) {
+			            		return this.doAssist(ast, params, meta, {ecma5:true, ecma6:true, ecma7: true, browser:true}, text);
+			            	}.bind(this));
     			        }
     			        return [];
-			        });
+			        }.bind(this));
 			    } 
-		        return that.astManager.getAST(editorContext).then(function(ast) {
-	        		return that.doAssist(ast, params, meta, {ecma5: true, ecma6: true, ecma7: true});
-	        	});
-			});
+		        return this.astManager.getAST(editorContext).then(function(ast) {
+	        		return this.doAssist(ast, params, meta, {ecma5: true, ecma6: true, ecma7: true});
+	        	}.bind(this));
+			}.bind(this));
 		},
 
 		doAssist: function(ast, params, meta, envs, htmlsource) {
@@ -250,9 +246,10 @@ define([
         if(typeof completion.overwrite === 'boolean') {
         	proposal.overwrite = completion.overwrite;
         }
-        if(typeof completion.prefix === 'string') {
-        	//args.params.prefix = completion.prefix;
+        if(typeof completion.prefix === 'string'){
         	proposal.prefix = completion.prefix;
+    	} else if (typeof args.params.prefix === 'string') {
+        	proposal.prefix = args.params.prefix;
         }
         proposal.name = proposal.proposal = completion.name;
         if(typeof completion.type !== 'undefined') {
@@ -339,6 +336,9 @@ define([
         if(!completion.doc) {
             obj.content += proposal.name;
         } else {
+        	if(completion.doc.indexOf('@deprecated') > -1) {
+        		proposal.style = 'strikethrough';
+        	}
         	_h = Hover.formatMarkdownHover(completion.doc);
         	if(_h) {
         		obj.content += _h.content;

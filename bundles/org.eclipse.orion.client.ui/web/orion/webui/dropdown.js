@@ -108,6 +108,46 @@ define(['orion/webui/littlelib', 'orion/EventTarget'], function(lib, EventTarget
 					}.bind(this), false);
 				}
 			}
+			
+			var self = this;
+			this._dropdownNode.addEventListener("mouseover", function(event) {
+				if (event.target === event.currentTarget)
+					return;
+					
+				var item = event.target;
+				while (item !== event.currentTarget && item.tagName.toLowerCase() !== "li")  {
+					item = item.parentNode;
+				}
+				
+				var isMenuBarItem = item.parentNode.getAttribute("role") === "menubar";
+				item = item.childNodes[0]; // the 'trigger'
+				
+				if (isMenuBarItem) {
+					var openMBItem = null;
+					var menuBar = item.parentNode.parentNode;
+					var mbItems = menuBar.dropdown.getItems();
+					for (var i = 0; i < mbItems.length; i++) {
+						var mbItem = mbItems[i];
+						if (mbItem.classList.contains("dropdownTriggerOpen")) {
+							openMBItem = mbItem;
+						}
+					}
+					
+					// only open if there's already an opened menu bar item
+					if (openMBItem && openMBItem !== item) {
+						openMBItem.dropdown.close(false);
+						item.dropdown.open(event);
+					}
+				} else {
+					if (item.dropdown) {
+						item.dropdown.open(event);
+					} else {
+						self._closeSelectedSubmenu();
+						lib.stop(event);
+					}
+					self._selectItem(item); // select the item on mouseover
+				}
+			}, false);
 						
 			// keys
 			this._dropdownNode.addEventListener("keydown", this._dropdownKeyDown.bind(this), false); //$NON-NLS-0$
@@ -158,10 +198,6 @@ define(['orion/webui/littlelib', 'orion/EventTarget'], function(lib, EventTarget
 					} 
 					this._boundAutoDismiss = this._autoDismiss.bind(this);
 
-					// add auto dismiss.  Clicking anywhere but trigger or a submenu item means close.
-					var submenuNodes = lib.$$array(".dropdownSubMenu", this._dropdownNode); //$NON-NLS-0$
-					lib.addAutoDismiss([this._triggerNode].concat(submenuNodes), this._boundAutoDismiss);
-
 					this._triggerNode.classList.add("dropdownTriggerOpen"); //$NON-NLS-0$
 					if (this._selectionClass) {
 						this._triggerNode.classList.add(this._selectionClass);
@@ -172,7 +208,15 @@ define(['orion/webui/littlelib', 'orion/EventTarget'], function(lib, EventTarget
 					if (this._dropdownNode.scrollHeight > this._dropdownNode.offsetHeight) {
 						this._buttonsAdded = addScrollButtons.call(this);
 					}
-					
+
+					// add auto dismiss.  Clicking anywhere but trigger or a submenu item means close.
+					var submenuNodes = lib.$$array(".dropdownSubMenu", this._dropdownNode); //$NON-NLS-0$
+					var list = [this._triggerNode].concat(submenuNodes);
+					if (this._buttonsAdded) {
+						list.push(this._topScrollButton);
+						list.push(this._bottomScrollButton);
+					}
+					lib.addAutoDismiss(list, this._boundAutoDismiss);
 					this._positionDropdown(mouseEvent);
 					
 					if (this._buttonsAdded) {
@@ -293,7 +337,7 @@ define(['orion/webui/littlelib', 'orion/EventTarget'], function(lib, EventTarget
 		 *
 		 */
 		getItems: function() {
-			var items = lib.$$array("li:not(.dropdownSeparator) > .dropdownMenuItem", this._dropdownNode, true); //$NON-NLS-0$
+			var items = lib.$$array("li:not(.dropdownSeparator) > [role='menuitem']", this._dropdownNode, true); //$NON-NLS-0$
 			// We only want the direct li children, not any descendants.  But we can't preface a query with ">"
 			// So we do some reachy filtering here.
 			var filtered = [];
@@ -304,21 +348,6 @@ define(['orion/webui/littlelib', 'orion/EventTarget'], function(lib, EventTarget
 				}
 			});
 			
-			//add handler to close open submenu when other items in the parent menu are hovered
-			filtered.forEach(function(item){
-				if (!item._hasDropdownMouseover) {
-					item.addEventListener("mouseover", function(e){ //$NON-NLS-0$
-						if (item.dropdown) {
-							item.dropdown.open(e);
-						} else {
-							self._closeSelectedSubmenu();
-							lib.stop(e);
-						}
-						self._selectItem(item); // select the item on mouseover
-					});
-					item._hasDropdownMouseover = true;
-				}
-			});
 			return filtered;
 		},
 		
@@ -341,8 +370,21 @@ define(['orion/webui/littlelib', 'orion/EventTarget'], function(lib, EventTarget
 		 * A key is down in the dropdown node
 		 */
 		 _dropdownKeyDown: function(event) {
+		 	if (event.keyCode === lib.KEY.TAB) {
+		 		if (this._selectedItem) {
+		 			var keepIterating = true;
+		 			while (keepIterating) {
+						keepIterating = this.close(true);
+						if (this._parentDropdown && keepIterating) {
+							this._parentDropdown._dropdownNode.focus();
+						}
+					}
+		 		}
+		 		return;  // Allow the TAB to propagate
+		 	}
 			if (event.keyCode === lib.KEY.UP || event.keyCode === lib.KEY.DOWN || event.keyCode === lib.KEY.RIGHT || event.keyCode === lib.KEY.ENTER || event.keyCode === lib.KEY.LEFT) {
-				var items = this.getItems();	
+				var items = this.getItems();
+				var isMenuBar = this._dropdownNode.getAttribute("role") === "menubar";
 				if (items.length && items.length > 0) {
 					if (this._selectedItem) {
 						var index = items.indexOf(this._selectedItem);
@@ -351,23 +393,63 @@ define(['orion/webui/littlelib', 'orion/EventTarget'], function(lib, EventTarget
 							index = items.indexOf(this._selectedItem.parentNode);
 						}
 						if (index >= 0) {
-							if (event.keyCode === lib.KEY.UP && index > 0) {
-								index--;
-								this._selectItem(items[index]);
-							} else if (event.keyCode === lib.KEY.DOWN && index < items.length - 1) {
-								index++;
-								this._selectItem(items[index]);
-							} else if (event.keyCode === lib.KEY.ENTER || event.keyCode === lib.KEY.RIGHT) {
+							if (event.keyCode === lib.KEY.UP && !isMenuBar) {
+								if (index > 0) {
+									index--;
+									this._selectItem(items[index]);
+								} else if (this._triggerNode) {
+									var parentMenu = this._triggerNode.parentNode.parentNode;
+									if (parentMenu.getAttribute("role") === "menubar") {
+										this.close(true);
+										if (this._parentDropdown) {
+											this._parentDropdown._dropdownNode.focus();
+										}
+									}
+								}
+							} else if (event.keyCode === lib.KEY.DOWN) {
+								if (isMenuBar) {
+									if (this._selectedItem.classList.contains("dropdownTrigger") && this._selectedItem.dropdown) { //$NON-NLS-0$
+										this._selectedItem.dropdown.open();
+										this._selectedItem.dropdown._selectItem(); // select first item in submenu
+									}
+								} else {
+									if (index < items.length - 1) {
+										index++;
+										this._selectItem(items[index]);
+									}
+								}
+							} else if (event.keyCode === lib.KEY.RIGHT) {
+								if (isMenuBar) {
+									if (index < items.length - 1) {
+										index++;
+										this._selectItem(items[index]);
+									}
+								} else {
+									if (this._selectedItem.classList.contains("dropdownTrigger") && this._selectedItem.dropdown) { //$NON-NLS-0$
+										this._selectedItem.dropdown.open();
+										this._selectedItem.dropdown._selectItem(); // select first item in submenu
+									}
+								}
+							} else if (event.keyCode === lib.KEY.ENTER) {
 								if (this._selectedItem.classList.contains("dropdownTrigger") && this._selectedItem.dropdown) { //$NON-NLS-0$
 									this._selectedItem.dropdown.open();
 									this._selectedItem.dropdown._selectItem(); // select first item in submenu
-								} else if (event.keyCode === lib.KEY.ENTER) {
+								} else {
 									this._selectedItem.click();
 								}
-							} else if (event.keyCode === lib.KEY.LEFT && this._selectedItem.parentNode.parentNode.classList.contains("dropdownMenuOpen")) { //$NON-NLS-0$
-								this.close(true);
-								if (this._parentDropdown) {
-									this._parentDropdown._dropdownNode.focus();
+							} else if (event.keyCode === lib.KEY.LEFT) {
+								if (isMenuBar) {
+									if (index > 0) {
+										index--;
+										this._selectItem(items[index]);
+									}
+								} else {
+									if (this._selectedItem.parentNode.parentNode.classList.contains("dropdownMenuOpen")) { //$NON-NLS-0$
+										this.close(true);
+										if (this._parentDropdown) {
+											this._parentDropdown._dropdownNode.focus();
+										}
+									}
 								}
 							}
 						}
@@ -378,6 +460,9 @@ define(['orion/webui/littlelib', 'orion/EventTarget'], function(lib, EventTarget
 				}
 			} else if (event.keyCode === lib.KEY.ESCAPE) {
 				this.close(true);
+				if (this._parentDropdown) {
+					this._parentDropdown._dropdownNode.focus();
+				}
 				lib.stop(event);
 			}
 		 },
@@ -400,9 +485,15 @@ define(['orion/webui/littlelib', 'orion/EventTarget'], function(lib, EventTarget
 			 		var menuBounds = this._dropdownNode.getBoundingClientRect();
 			 		if (this._selectedItem.offsetTop < this._dropdownNode.scrollTop) {
 		 				this._selectedItem.scrollIntoView(true);
+		 				if (this._dropdownNode.scrollTop < 5) {
+		 					this._dropdownNode.scrollTop = 0;
+		 				}
 		 			}
 		 			else if (itemBounds.bottom > menuBounds.bottom) {
 		 				this._selectedItem.scrollIntoView(false);
+		 				if ((this._dropdownNode.scrollHeight - this._dropdownNode.scrollTop - this._dropdownNode.clientHeight) < 5) {
+		 					this._dropdownNode.scrollTop = this._dropdownNode.scrollHeight - this._dropdownNode.clientHeight;
+		 				}
 		 			}
 		 			updateScrollButtonVisibility.call(this);
 				}
@@ -476,7 +567,7 @@ define(['orion/webui/littlelib', 'orion/EventTarget'], function(lib, EventTarget
 		innerNodeType = innerNodeType === undefined ? "span" : innerNodeType; //$NON-NLS-0$
 	 	
 	 	var element = document.createElement(innerNodeType); //$NON-NLS-0$
-		element.tabIndex = 0;
+		//element.tabIndex = 0;
 		element.className = "dropdownMenuItem"; //$NON-NLS-0$
 		element.setAttribute("role", "menuitem");  //$NON-NLS-0$ //$NON-NLS-1$
 		
@@ -488,6 +579,7 @@ define(['orion/webui/littlelib', 'orion/EventTarget'], function(lib, EventTarget
 		}
 	 	
 	 	var li = document.createElement("li"); //$NON-NLS-0$
+	 	li.setAttribute("role", "none");
 	 	li.appendChild(element); //$NON-NLS-0$
 		
 		return li;
@@ -527,17 +619,31 @@ define(['orion/webui/littlelib', 'orion/EventTarget'], function(lib, EventTarget
 			this._topScrollButton.classList.add("menuScrollButton", "menuTopScrollButton", "core-sprite-openarrow");
 			this._bottomScrollButton.classList.add("menuScrollButton", "menuBottomScrollButton", "core-sprite-openarrow");
 
-			var activeScrollIntervalId;
-			this._topScrollButton.addEventListener("mouseenter", function() {
-				clearInterval();
-				activeScrollIntervalId = window.setInterval(scrollUp, 10);
-			});
-			this._bottomScrollButton.addEventListener("mouseenter", function() {
-				clearInterval();
-				activeScrollIntervalId = window.setInterval(scrollDown, 10);
-			});
-			this._topScrollButton.addEventListener("mouseleave", function() { clearInterval(); });
-			this._bottomScrollButton.addEventListener("mouseleave", function() { clearInterval(); });
+			this._topScrollButton.addEventListener("mousedown", function(evt){ //$NON-NLS-0$
+				if (this._activeScrollInterval) {
+					window.clearInterval(this._activeScrollInterval);
+				}
+				this._activeScrollInterval = window.setInterval(scrollUp.bind(null, evt.shiftKey ? 20 : 2), 10);
+			}.bind(this));
+			this._topScrollButton.addEventListener("mouseup", function(){ //$NON-NLS-0$
+				if (this._activeScrollInterval) {
+					window.clearInterval(this._activeScrollInterval);
+					this._activeScrollInterval = null;
+				}
+			}.bind(this));
+			
+			this._bottomScrollButton.addEventListener("mousedown", function(evt){ //$NON-NLS-0$
+				if (this._activeScrollInterval) {
+					window.clearInterval(this._activeScrollInterval);
+				}
+				this._activeScrollInterval = window.setInterval(scrollDown.bind(null, evt.shiftKey ? 20 : 2), 10);
+			}.bind(this));
+			this._bottomScrollButton.addEventListener("mouseup", function(){ //$NON-NLS-0$
+				if (this._activeScrollInterval) {
+					window.clearInterval(this._activeScrollInterval);
+					this._activeScrollInterval = null;
+				}
+			}.bind(this));
 		
 			this._dropdownNode.parentNode.insertBefore(this._topScrollButton, this._dropdownNode);
 			this._dropdownNode.parentNode.insertBefore(this._bottomScrollButton, this._dropdownNode.nextElementSibling);
@@ -547,21 +653,14 @@ define(['orion/webui/littlelib', 'orion/EventTarget'], function(lib, EventTarget
 		updateScrollButtonVisibility.call(this);
 		return true;
 		
-		function scrollDown() {
-			dropdown._dropdownNode.scrollTop+=2;
+		function scrollDown(increment) {
+			dropdown._dropdownNode.scrollTop+=increment;
 			updateScrollButtonVisibility.call(dropdown);
 		}
 		
-		function scrollUp() {
-			dropdown._dropdownNode.scrollTop-=2;
+		function scrollUp(increment) {
+			dropdown._dropdownNode.scrollTop-=increment;
 			updateScrollButtonVisibility.call(dropdown);
-		}
-		
-		function clearInterval() {
-			if (activeScrollIntervalId) {
-				window.clearInterval(activeScrollIntervalId);
-				activeScrollIntervalId = null;
-			}
 		}
 	}
 	
@@ -594,10 +693,12 @@ define(['orion/webui/littlelib', 'orion/EventTarget'], function(lib, EventTarget
 	 * Positions the top and bottom scroll buttons according to where the dropdown list is positioned
 	*/
 	function positionScrollButtons() {
+		this._topScrollButton.style.width = this._dropdownNode.clientWidth + 1 + "px";
+		this._bottomScrollButton.style.width = this._dropdownNode.clientWidth + 1 + "px";
 		this._topScrollButton.style.top = this._dropdownNode.style.top;
-		this._topScrollButton.style.left = this._dropdownNode.style.left;
-		this._bottomScrollButton.style.top = Number(this._dropdownNode.style.top.replace("px", "")) + (this._dropdownNode.clientHeight-this._bottomScrollButton.clientHeight)+"px";
-		this._bottomScrollButton.style.left = this._dropdownNode.style.left;
+		this._topScrollButton.style.left = this._topScrollButton.parentNode.clientWidth + "px";
+		this._bottomScrollButton.style.top = Number(this._dropdownNode.style.top.replace("px", "")) + (this._dropdownNode.clientHeight-this._bottomScrollButton.clientHeight + 1)+"px";
+		this._bottomScrollButton.style.left = this._bottomScrollButton.parentNode.clientWidth + "px";
 	}
 		
 	Dropdown.prototype.constructor = Dropdown;

@@ -75,7 +75,7 @@ define([
 		serviceRegistry.registerService("orion.core.file.client", testFileClient);
 		serviceRegistry.registerService("orion.page.message", progressService);
 		var resolver = new Resolver.ScriptResolver(serviceRegistry);
-		var ternManager = new Manager.TernProjectManager(worker,	 resolver, serviceRegistry);
+		var ternManager = new Manager.TernProjectManager(worker, resolver, serviceRegistry);
 		
 		function testLoadOptions(jsonOptions, expectedResultSnippet){
 			assert.equal(progressService.lastMessage, null, "No options loaded, should have no progress message");
@@ -88,12 +88,15 @@ define([
 				} else {
 					assert.equal(progressService.lastResult, null, "Did not expected a result message");
 				}
-			}.bind(ternManager));
+			});
 		}
 		
 		describe("Tern Project Manager tests", function() {
 			//we don't reset the server because the manager drives starts
 			this.timeout(10000);
+			before(function() {
+				worker.ignore404s(true);
+			});
 			beforeEach(function(){
 				progressService.lastMessage = null;
 				progressService.lastResult = null;

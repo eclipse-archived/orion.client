@@ -29,9 +29,9 @@ define([
 		    var contentType = options.contentType ? options.contentType : 'text/css';
 		    resultMgr = new ResultMgr();
 		    validator = new CssValidator(resultMgr);
-		    validator._restoreRules();
+		    resultMgr._restoreRules();
 			var rule = options.rule;
-			validator._enableOnly(rule.id, rule.severity);
+			resultMgr._enableOnly(rule.id, rule.severity);
 			var editorContext = {
 				/*override*/
 				getText: function() {
@@ -136,7 +136,7 @@ define([
 				     end: 6,
 				     line: 2,
 				     severity: 'info',
-				     description: 'Use of !important.'
+				     description: 'Using !important leads to specificity issues.'
 				    }
 				]);
 			});
@@ -149,73 +149,74 @@ define([
 				     end: 6,
 				     line: 2,
 				     severity: 'error',
-				     description: 'Use of !important.'
+				     description: 'Using !important leads to specificity issues.'
 				    },
 				    {start: 1,
 				     end: 6,
 				     line: 3,
 				     severity: 'error',
-				     description: 'Use of !important.'
+				     description: 'Using !important leads to specificity issues.'
 				    },
 				    {start: 1,
 				     end: 6,
 				     line: 4,
 				     severity: 'error',
-				     description: 'Use of !important.'
+				     description: 'Using !important leads to specificity issues.'
 				    },
 				    {start: 1,
 				     end: 6,
 				     line: 5,
 				     severity: 'error',
-				     description: 'Use of !important.'
+				     description: 'Using !important leads to specificity issues.'
 				    },
 				    {start: 1,
 				     end: 6,
 				     line: 6,
 				     severity: 'error',
-				     description: 'Use of !important.'
+				     description: 'Using !important leads to specificity issues.'
 				    },
 				    {start: 1,
 				     end: 6,
 				     line: 7,
 				     severity: 'error',
-				     description: 'Use of !important.'
+				     description: 'Using !important leads to specificity issues.'
 				    },
 				    {start: 1,
 				     end: 6,
 				     line: 8,
 				     severity: 'error',
-				     description: 'Use of !important.'
+				     description: 'Using !important leads to specificity issues.'
 				    },
 				    {start: 1,
 				     end: 6,
 				     line: 9,
 				     severity: 'error',
-				     description: 'Use of !important.'
+				     description: 'Using !important leads to specificity issues.'
 				    },
 				    {start: 1,
 				     end: 6,
 				     line: 10,
 				     severity: 'error',
-				     description: 'Use of !important.'
+				     description: 'Using !important leads to specificity issues.'
 				    },
 				    {start: 1,
 				     end: 6,
 				     line: 11,
 				     severity: 'error',
-				     description: 'Use of !important.'
+				     description: 'Using !important leads to specificity issues.'
 				    },
 				    {start: 1,
 				     end: 6,
 				     line: 12,
 				     severity: 'error',
-				     description: 'Use of !important.'
+				     description: 'Using !important leads to specificity issues.'
 				    },
-				    {start: 0,
-				     end: 3,
-				     severity: 'warning',
-				     description: 'Too many !important declarations (11), try to use less than 10 to avoid specificity issues.'
-				    }
+				    // We disable the 'too many' warning as it is unhelpful and doesn't work with ignore quickfixes
+//				    {start: 0,
+//				     end: 3,
+//				     severity: 'warning',
+//				     description: 'Too many !important declarations (11), try to use less than 10 to avoid specificity issues.'
+//				    }
 				]);
 			});
 		});
@@ -227,73 +228,74 @@ define([
 				     end: 6,
 				     line: 3,
 				     severity: 'error',
-				     description: 'Use of !important.'
+				     description: 'Using !important leads to specificity issues.'
 				    },
 				    {start: 1,
 				     end: 6,
 				     line: 4,
 				     severity: 'error',
-				     description: 'Use of !important.'
+				     description: 'Using !important leads to specificity issues.'
 				    },
 				    {start: 1,
 				     end: 6,
 				     line: 5,
 				     severity: 'error',
-				     description: 'Use of !important.'
+				     description: 'Using !important leads to specificity issues.'
 				    },
 				    {start: 1,
 				     end: 6,
 				     line: 6,
 				     severity: 'error',
-				     description: 'Use of !important.'
+				     description: 'Using !important leads to specificity issues.'
 				    },
 				    {start: 1,
 				     end: 6,
 				     line: 7,
 				     severity: 'error',
-				     description: 'Use of !important.'
+				     description: 'Using !important leads to specificity issues.'
 				    },
 				    {start: 1,
 				     end: 6,
 				     line: 8,
 				     severity: 'error',
-				     description: 'Use of !important.'
+				     description: 'Using !important leads to specificity issues.'
 				    },
 				    {start: 1,
 				     end: 6,
 				     line: 9,
 				     severity: 'error',
-				     description: 'Use of !important.'
+				     description: 'Using !important leads to specificity issues.'
 				    },
 				    {start: 1,
 				     end: 6,
 				     line: 10,
 				     severity: 'error',
-				     description: 'Use of !important.'
+				     description: 'Using !important leads to specificity issues.'
 				    },
 				    {start: 1,
 				     end: 6,
 				     line: 11,
 				     severity: 'error',
-				     description: 'Use of !important.'
+				     description: 'Using !important leads to specificity issues.'
 				    },
 				    {start: 1,
 				     end: 6,
 				     line: 12,
 				     severity: 'error',
-				     description: 'Use of !important.'
+				     description: 'Using !important leads to specificity issues.'
 				    },
 				    {start: 1,
 				     end: 6,
 				     line: 13,
 				     severity: 'error',
-				     description: 'Use of !important.'
+				     description: 'Using !important leads to specificity issues.'
 				    },
-				    {start: 15,
-				     end: 18,
-				     severity: 'warning',
-				     description: 'Too many !important declarations (11), try to use less than 10 to avoid specificity issues.'
-				    }
+				    // We disable the 'too many' warning as it is unhelpful and doesn't work with ignore quickfixes
+//				    {start: 15,
+//				     end: 18,
+//				     severity: 'warning',
+//				     description: 'Too many !important declarations (11), try to use less than 10 to avoid specificity issues.'
+//				    }
 				]);
 			});
 		});
@@ -507,6 +509,61 @@ define([
 		    var val = setup({buffer: "abc{fill: red}", rule: {id:null, severity:3}});
 			return validator.computeProblems(val.editorContext).then(function(result) {
 				assertProblems(result, [
+				]);
+			});
+		});
+		
+		it("Test csslint allow directive: unknown property", function(/*done*/) {
+		    var val = setup({buffer: "abc{f: 22px} /* csslint allow: known-properties */", rule: {id:null, severity:3}});
+			return validator.computeProblems(val.editorContext).then(function(result) {
+				assertProblems(result, [
+				]);
+			});
+		});
+		it("Test csslint allow directive: unknown property whitespace", function(/*done*/) {
+		    var val = setup({buffer: "abc{f: 22px} /*  \t  csslint    \t   allow:     \t   known-properties,,,,, \t   */", rule: {id:null, severity:3}});
+			return validator.computeProblems(val.editorContext).then(function(result) {
+				assertProblems(result, [
+				]);
+			});
+		});
+		it("Test csslint allow directive: unknown property broken whitespace", function(/*done*/) {
+		    var val = setup({buffer: "abc{f: 22px} /* csslint allow : known-properties */", rule: {id:null, severity:3}});
+			return validator.computeProblems(val.editorContext).then(function(result) {
+				assertProblems(result, [
+					{start: 5,
+				     end: 6,
+				     line: 1,
+				     severity: 'info',
+				     description: 'Unknown property \'f\'.'
+				    }
+				]);
+			});
+		});
+		it("Test csslint allow directive: unknown property multiple entries 1", function(/*done*/) {
+		    var val = setup({buffer: "abc{f: 22px} /* csslint allow: known-properties, zero-units */", rule: {id:null, severity:3}});
+			return validator.computeProblems(val.editorContext).then(function(result) {
+				assertProblems(result, [
+				]);
+			});
+		});
+		it("Test csslint allow directive: unknown property multiple entries 2", function(/*done*/) {
+		    var val = setup({buffer: "abc{f: 22px} /* csslint allow: zero-units, known-properties */", rule: {id:null, severity:3}});
+			return validator.computeProblems(val.editorContext).then(function(result) {
+				assertProblems(result, [
+				]);
+			});
+		});
+		it("Test csslint allow directive: unknown property no entries", function(/*done*/) {
+		    var val = setup({buffer: "abc{f: 22px} /* csslint allow: */", rule: {id:null, severity:3}});
+			return validator.computeProblems(val.editorContext).then(function(result) {
+				assertProblems(result, [
+					{start: 5,
+				     end: 6,
+				     line: 1,
+				     severity: 'info',
+				     description: 'Unknown property \'f\'.'
+				    }
 				]);
 			});
 		});

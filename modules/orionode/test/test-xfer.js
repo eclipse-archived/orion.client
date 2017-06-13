@@ -18,13 +18,12 @@ var xfer = require('../lib/xfer');
 
 var CONTEXT_PATH = '';
 var WORKSPACE = path.join(__dirname, '.test_workspace');
+var WORKSPACE_ID = "orionode";
 
-var app = express()
-.use(function(req, res, next) {
-	req.user = { workspaceDir: WORKSPACE };
-	next();
-})
-.use(CONTEXT_PATH + '/xfer', require("../lib/xfer")({ fileRoot: CONTEXT_PATH + "/xfer" }));
+var app = express();
+app.locals.metastore = require('../lib/metastore/fs/store')({workspaceDir: WORKSPACE});
+app.locals.metastore.setup(app);
+app.use(CONTEXT_PATH + '/xfer', require("../lib/xfer")({ fileRoot: CONTEXT_PATH + "/xfer" }));
 
 var request = supertest.bind(null, app);
 
@@ -39,7 +38,7 @@ describe("Xfer API", function() {
 			assert.equal(fs.existsSync(WORKSPACE + "/donotexist"), false);
 			// ask the server to export the non-existent folder
 			request()
-			.get(CONTEXT_PATH + "/xfer/export/donotexist.zip")
+			.get(CONTEXT_PATH + "/xfer/export/"+ WORKSPACE_ID + "/donotexist.zip")
 			.expect(404)
 			.end(function(err, res) {
 				assert.ifError(err);

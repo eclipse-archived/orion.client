@@ -13,8 +13,9 @@
 define([
 	'orion/webui/littlelib',
 	'orion/treeModelIterator',
-	'orion/uiUtils'
-], function(lib, mTreeModelIterator, UiUtils){
+	'orion/uiUtils',
+	'orion/urlModifier'
+], function(lib, mTreeModelIterator, UiUtils, urlModifier) {
 
 var exports = {};
 var userAgent = navigator.userAgent;
@@ -764,9 +765,9 @@ exports.ExplorerNavHandler = (function() {
 				var div = this.explorer.renderer.getRowActionElement(this.model.getId(curModel));
 				if(div.href){
 					if(this._ctrlKeyOn(e)){
-						window.open(div.href);
+						window.open(urlModifier(div.href));
 					} else {
-						window.location.href = div.href;
+						window.location.href = urlModifier(div.href);
 					}
 				}
 			}

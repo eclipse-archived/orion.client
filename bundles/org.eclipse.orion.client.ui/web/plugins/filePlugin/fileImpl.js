@@ -196,10 +196,12 @@ define(["orion/Deferred", "orion/xhr", "orion/URL-shim", "orion/operation", "ori
 		 */
 		fetchChildren: function(loc, options) {
 			var fetchLocation = loc;
-			if (fetchLocation === this.fileBase) {
-				return this.loadWorkspace(fetchLocation).then(function(jsondata) {
-					return jsondata.Children || [];
-				});
+			if (fetchLocation === this.fileBase || fetchLocation === this.workspaceBase) {
+				return this.loadWorkspaces().then(function(workspaces) {
+					return Deferred.all(workspaces.map(function(workspace) {
+						return this.read(workspace.Location, true);
+					}.bind(this)));
+				}.bind(this));
 			}
 			//If fetch location does not have ?depth=, then we need to add the depth parameter. Otherwise server will not return any children
 			if (fetchLocation.indexOf("?depth=") === -1) { //$NON-NLS-0$
@@ -232,13 +234,17 @@ define(["orion/Deferred", "orion/xhr", "orion/URL-shim", "orion/operation", "ori
 		 * passed as a parameter to the provided onCreate function.
 		 * @param {String} _name The name of the new workspace
 		 */
-		_createWorkspace: function(_name) {
+		createWorkspace: function(_name, id) {
 			//return the deferred so client can chain on post-processing
+			var data = {};
+			data.Id = id;
 			return _xhr("POST", this.workspaceBase, {
 				headers: {
 					"Orion-Version": "1",
+					"Content-Type": "application/json;charset=UTF-8",
 					"Slug": form.encodeSlug(_name)
 				},
+				data: JSON.stringify(data),
 				timeout: 15000
 			}).then(function(result) {
 				var jsonData = result.response ? JSON.parse(result.response) : {};
@@ -288,21 +294,38 @@ define(["orion/Deferred", "orion/xhr", "orion/URL-shim", "orion/operation", "ori
 				//in most cases the returned object is the workspace we care about
 				if (loc) {
 					return jsonData;
-				} else {
-					//user didn't specify a workspace so we are at the root
-					//just pick the first location in the provided list
-					if (jsonData.Workspaces.length > 0) {
-						return this.loadWorkspace(jsonData.Workspaces[0].Location);
-					} else {
-						//no workspace exists, and the user didn't specify one. We'll create one for them
-						return this._createWorkspace("Orion Content");
-					}
 				}
+				//user didn't specify a workspace so we are at the root
+				//just pick the first location in the provided list
+				if (jsonData.Workspaces.length > 0) {
+					return this.loadWorkspace(jsonData.Workspaces[0].Location);
+				}
+				//no workspace exists, and the user didn't specify one. We'll create one for them
+				return this.createWorkspace("Orion Content");
 			}.bind(this)).then(function(result) {
 				if (this.makeAbsolute) {
 					_normalizeLocations(result);
 				}
 				return result;
+			}.bind(this));
+		},
+		
+		getWorkspace: function(resourceLocation) {
+			//TODO move this to server to avoid path math?
+			var id = resourceLocation || "";
+			if (id.indexOf(this.fileBase) === 0) id = id.substring(this.fileBase.length);
+			else if (id.indexOf(this.workspaceBase) === 0) id = id.substring(this.workspaceBase.length);
+			id = id.split("/");
+			id = id.length > 0 && id[1];
+			return this.loadWorkspaces().then(function(workspaces) {
+				var loc = "";
+				workspaces.some(function(workspace) {
+					if (workspace.Id === id) {
+						loc = workspace.Location;
+						return true;
+					}
+				});
+				return this.loadWorkspace(loc);
 			}.bind(this));
 		},
 

@@ -23,7 +23,6 @@ define([
 
 	return function(worker) {
 		var ternAssist;
-		var envs = Object.create(null);
 		var astManager = new ASTManager.ASTManager();
 		var jsFile = 'tern_content_assist_index_test_script.js';
 		var htmlFile = 'tern_content_assist_index_test_script.html';
@@ -69,7 +68,6 @@ define([
 			worker.postMessage({request: 'delFile', args:{file: jsFile}});
 			worker.postMessage({request: 'delFile', args:{file: htmlFile}});
 			
-			envs = typeof options.env === 'object' ? options.env : Object.create(null);
 			var editorContext = {
 				/*override*/
 				getText: function() {
@@ -187,9 +185,7 @@ define([
 			this.timeout(10000);
 			before('Message the server for warm up', function(done) {
 				CUProvider.setUseCache(false);
-				ternAssist = new TernAssist.TernContentAssist(astManager, worker, function() {
-					return new Deferred().resolve(envs);
-				}, CUProvider, jsProject);
+				ternAssist = new TernAssist.TernContentAssist(astManager, worker, CUProvider, jsProject);
 				worker.start(done); // Reset the tern server state to remove any prior files
 			});
 		

@@ -289,6 +289,16 @@ textarea.parameterInput {
 	width: 50em;
 }
 
+div.parameterInput[contenteditable="true"] {
+	width: 30em;
+	display: inline-block;
+	background-color: white;	
+}
+
+div.parameterInput[contenteditable="true"]:before {
+    content: "\feff ";
+}
+
 .parameterPopup {
 	min-width: 15em;
 	max-width: 100em;
@@ -322,9 +332,6 @@ textarea.parameterInput {
 .navRow {
 	vertical-align: baseline;
 	border-spacing: 8px;
-}
-
-.selectableNavRow:hover {
 }
 
 .disabledNavRow > .navColumn > .mainNavColumn {
@@ -912,11 +919,11 @@ html[dir="rtl"] .checkColumn { /* ACGC */
 }
 
 .treeIterationCursorRow {
-	background-color: rgba(27, 177, 153, 0.3);
+	background-color: rgba(16,106,91, 0.3);
 }
 
 .treeIterationCursorRow_Dotted {
-	background-color: rgba(27, 177, 153, 0.3);
+	background-color: rgba(16,106,91, 0.3);
 }
 
 .searchCmdGroupMargin {
@@ -1317,7 +1324,7 @@ html[dir="rtl"] .sectionWrapper, html[dir="rtl"] .sectionTable{ /* ACGC */
 .sectionTable td {
 	border-bottom: 1px solid #f1f3f4;
 	vertical-align: middle;
-	color: #707070;
+	color: #606060;
 }
 
 .sectionTable tr:last-child td{
@@ -1506,6 +1513,7 @@ html[dir="rtl"] .progressBarWrapper { /* ACGC */
 	text-overflow: ellipsis;
 	vertical-align: middle;
 	white-space: nowrap;
+	color: white;
 }
 
 .progressBarWrapper .progressBar {
@@ -1554,6 +1562,7 @@ html[dir="rtl"] .uploadNode .uploadCancelButton { /* ACGC */
 .promptDialogMessage {
 	color: #222;
 	margin: 0 2px 4px 2px;
+	white-space: pre;
 }
 
 .promptDialogInput {

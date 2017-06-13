@@ -30,7 +30,7 @@ module.exports.start = function(startServer, configParams) {
 	electron.app.buildId = configParams["orion.buildId"];
 
 	if (feedURL) {
-		var updateChannel = allPrefs.user && allPrefs.user.updateChannel ? allPrefs.user.updateChannel : configParams["orion.autoUpdater.defaultChannel"],
+		var updateChannel = allPrefs.user && allPrefs.user.updateChannel && allPrefs.user.updateChannel.name ? allPrefs.user.updateChannel.name : configParams["orion.autoUpdater.defaultChannel"],
 			latestUpdateURL;
 		if (platform === "linux") {
 			latestUpdateURL = feedURL + '/download/channel/' + updateChannel + '/linux';
@@ -88,6 +88,7 @@ module.exports.start = function(startServer, configParams) {
 	
 	function updateWorkspacePrefs(workspace, _allPrefs){
 		var allPrefs = _allPrefs ? _allPrefs : prefs.readPrefs();
+		if (!allPrefs.user.workspace) allPrefs.user.workspace = {};
 		allPrefs.user.workspace.currentWorkspace = workspace;
 		if(!allPrefs.user.workspace.recentWorkspaces){
 			allPrefs.user.workspace.recentWorkspaces = [];
@@ -107,14 +108,16 @@ module.exports.start = function(startServer, configParams) {
 		prefs.writePrefs(allPrefs);
 	}
 	
-	function updateLastOpendTabsPrefs(tabs, originalWorkspace){
+	function updateLastOpendTabsPrefs(tabs, activeIndex, originalWorkspace){
 		var allPrefs = prefs.readPrefs();
 		var openedTabs = allPrefs.user && allPrefs.user.workspace && allPrefs.user.workspace.openedTabs;
 		if(!openedTabs){
 			((allPrefs.user || (allPrefs.user = {})).workspace || (allPrefs.user.workspace = {})).openedTabs || (allPrefs.user.workspace.openedTabs={});
 		}
 		var currentWorkspace = (originalWorkspace ? originalWorkspace : allPrefs.user.workspace.currentWorkspace) || configParams.workspace;
-		allPrefs.user.workspace.openedTabs[currentWorkspace] = tabs;
+		allPrefs.user.workspace.openedTabs[currentWorkspace] = {};
+		allPrefs.user.workspace.openedTabs[currentWorkspace].tabs = tabs;
+		allPrefs.user.workspace.openedTabs[currentWorkspace].activeIndex = activeIndex;
 		prefs.writePrefs(allPrefs);
 	}
 
@@ -156,22 +159,40 @@ module.exports.start = function(startServer, configParams) {
 		if (process.platform === 'darwin') {
 			if (!Menu.getApplicationMenu()) {
 				var template = [{
-					label: "Application",
+					label: electron.app.getName(),
 					submenu: [
-						{ label: "About Application", selector: "orderFrontStandardAboutPanel:" },
+						{role: 'about'},
 						{ type: "separator" },
-						{ label: "Quit", accelerator: "Command+Q", click: function() { electron.app.quit(); }}
+						{role: 'hide'},
+					    {role: 'hideothers'},
+					    {role: 'unhide'},
+					    {type: 'separator'},
+					    {role: 'quit'}
 					]}, {
 					label: "Edit",
 					submenu: [
-						{ label: "Undo", accelerator: "CmdOrCtrl+Z", selector: "undo:" },
-						{ label: "Redo", accelerator: "Shift+CmdOrCtrl+Z", selector: "redo:" },
-						{ type: "separator" },
-						{ label: "Cut", accelerator: "CmdOrCtrl+X", selector: "cut:" },
-						{ label: "Copy", accelerator: "CmdOrCtrl+C", selector: "copy:" },
-						{ label: "Paste", accelerator: "CmdOrCtrl+V", selector: "paste:" },
-						{ label: "Select All", accelerator: "CmdOrCtrl+A", selector: "selectAll:" }
-					]},
+						{role: 'undo'},
+					    {role: 'redo'},
+					    {type: 'separator'},
+					    {role: 'cut'},
+					    {role: 'copy'},
+					    {role: 'paste'},
+						{role: 'selectall'}
+					]},  {
+					    label: 'View',
+					    submenu: [
+					      {role: 'resetzoom'},
+					      {role: 'zoomin'},
+					      {role: 'zoomout'},
+					      {type: 'separator'},
+					      {role: 'togglefullscreen'}
+					 ]}, {
+					    role: 'window',
+					    submenu: [
+					      {role: 'minimize'},
+					      {role: 'close'}
+					    ]
+					  },
 					{label: "Debug",
 					submenu: [
 						{ label: "Toggle Developer Tools", accelerator: "Cmd+Option+I", click: function (item, focusedWindow) {
@@ -290,8 +311,8 @@ module.exports.start = function(startServer, configParams) {
 				}
 				event.preventDefault();
 				nextWindow.webContents.send('collect-tabs-info','closeorion');	
-				ipcMain.on("collected-tabs-info-closeorion", function(event, args){
-					updateLastOpendTabsPrefs(args);
+				ipcMain.on("collected-tabs-info-closeorion", function(event, args, activeIndex){
+					updateLastOpendTabsPrefs(args, activeIndex);
 					exit();
 				});
 			});
@@ -309,14 +330,15 @@ module.exports.start = function(startServer, configParams) {
 			api.getOrionEE().on("workspace-changed",function(workspaces){
 				newTargetWorkspace = workspaces[0];
 				originalWorkspace = workspaces[1];
-				// step1: collect tabs info
+				// step1: update new pref's currentworkspace and recentworkspaces with newTargetWorkspace
+				updateWorkspacePrefs(newTargetWorkspace);
+				// step2: collect tabs info
 				nextWindow.webContents.send('collect-tabs-info','changeworkspace');
 			});
 			api.getOrionEE().on("open-tabs", function(){
 				var allPrefs = prefs.readPrefs();
-				// step3: update new pref's currentworkspace and recentworkspaces with newTargetWorkspace
-				updateWorkspacePrefs(newTargetWorkspace, allPrefs);
-				var openedTabs = allPrefs.user && allPrefs.user.workspace && allPrefs.user.workspace.openedTabs && allPrefs.user.workspace.openedTabs[newTargetWorkspace] || [];
+				var openedTabs = allPrefs.user && allPrefs.user.workspace && allPrefs.user.workspace.openedTabs && allPrefs.user.workspace.openedTabs[newTargetWorkspace] && allPrefs.user.workspace.openedTabs[newTargetWorkspace]["tabs"] || [];
+				var activeIndex = allPrefs.user && allPrefs.user.workspace && allPrefs.user.workspace.openedTabs && allPrefs.user.workspace.openedTabs[newTargetWorkspace] && allPrefs.user.workspace.openedTabs[newTargetWorkspace]["activeIndex"] || 0;
 				var hostUrl = "http://localhost:" + configParams.port;
 				// step4: open tabs of new current workspace if any saved before
 				if(openedTabs.length > 0 && openedTabs[0] !== 'about:blank'){
@@ -326,13 +348,14 @@ module.exports.start = function(startServer, configParams) {
 							nextWindow.webContents.executeJavaScript('window.open("' + hostUrl + "/" + openedTabs[i] + '");');
 						}
 					}
+					nextWindow.webContents.executeJavaScript('setActiveIndex("' + activeIndex + '");');
 				}else{ // if user open that workspace for the first time
 					nextWindow.webContents.executeJavaScript('createTab("' + hostUrl + '");');
 				}
 			});
-			ipcMain.on("collected-tabs-info-changeworkspace", function(event, args){
-				updateLastOpendTabsPrefs(args, originalWorkspace);
-				// step2: close all tabs of last workspace
+			ipcMain.on("collected-tabs-info-changeworkspace", function(event, args, activeIndex){
+				updateLastOpendTabsPrefs(args, activeIndex, originalWorkspace);
+				// step3: close all tabs of last workspace
 				nextWindow.webContents.executeJavaScript('closeAllTabs();');
 				api.getOrionEE().emit("open-tabs");
 			});
@@ -341,11 +364,13 @@ module.exports.start = function(startServer, configParams) {
 		startServer(function() {
 			var mainWindow,
 			 	hostUrl = "http://localhost:" + configParams.port,
-			 	openedTabs = allPrefs.user && allPrefs.user.workspace && allPrefs.user.workspace.openedTabs && allPrefs.user.workspace.openedTabs[prefsWorkspace] || [];
-
+			 	openedTabs = allPrefs.user && allPrefs.user.workspace && allPrefs.user.workspace.openedTabs && allPrefs.user.workspace.openedTabs[prefsWorkspace] && allPrefs.user.workspace.openedTabs[prefsWorkspace]["tabs"] || [],
+				activeIndex = allPrefs.user && allPrefs.user.workspace && allPrefs.user.workspace.openedTabs && allPrefs.user.workspace.openedTabs[prefsWorkspace] && allPrefs.user.workspace.openedTabs[prefsWorkspace]["activeIndex"] || 0;
+				
 			if(relativeFileUrl){
 				var fileUrl = hostUrl + "/edit/edit.html#/file" + relativeFileUrl;
 				openedTabs.unshift("edit/edit.html#/file" + relativeFileUrl);
+				activeIndex = 0;
 			}
 			if(readyToOpenDir && prefsWorkspace !== configParams.workspace){
 				mainWindow = createWindow(fileUrl ? fileUrl : hostUrl);
@@ -357,6 +382,7 @@ module.exports.start = function(startServer, configParams) {
 							mainWindow.webContents.executeJavaScript('window.open("' + hostUrl + "/" + openedTabs[i] + '");');
 						}
 					}
+					mainWindow.webContents.executeJavaScript('setActiveIndex("' + activeIndex + '");');
 				}else{ // if user open Orion for the first time
 					mainWindow = createWindow(hostUrl);
 				}

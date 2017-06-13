@@ -1184,7 +1184,7 @@ define("orion/editor/rulers", [
 				windowDiv.addEventListener("touchend", function(event) { //$NON-NLS-0$
 					var touches = event.touches;
 					if (touches.length === 0) {
-						up(event);
+						up();
 					}
 				});
 				windowDiv.addEventListener("touchmove", function(event) { //$NON-NLS-0$
@@ -1220,7 +1220,7 @@ define("orion/editor/rulers", [
 					stop(event);
 				});
 				zoomView.addEventListener("MouseUp", function(event) { //$NON-NLS-0$
-					up(event);
+					up();
 					stop(event);
 				});
 				zoomView.addEventListener("MouseMove", function(event) { //$NON-NLS-0$

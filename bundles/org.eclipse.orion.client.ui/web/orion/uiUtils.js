@@ -13,8 +13,9 @@ define([
 	'i18n!orion/nls/messages',
 	'orion/webui/littlelib',
 	'orion/i18nUtil',
-	'orion/bidiUtils'
-], function(messages, lib, i18nUtil, bidiUtils) {
+	'orion/bidiUtils',
+	'orion/urlModifier'
+], function(messages, lib, i18nUtil, bidiUtils, urlModifier) {
 	/**
 	 * This class contains static utility methods. It is not intended to be instantiated.
 	 * @class This class contains static utility methods.
@@ -277,9 +278,9 @@ define([
 	 */
 	function followLink(href, event) {
 		if (event && openInNewWindow(event)) {
-			window.open(href);
+			window.open(urlModifier(href));
 		} else {
-			window.location = href;
+			window.location = urlModifier(href);
 		}
 	}
 	
@@ -331,13 +332,13 @@ define([
 	/**
 	 * Returns the folder name from path.
 	 * @param {String} filePath
-	 * @param {String} fileName
 	 * @param {Boolean} keepTailSlash
 	 * @returns {String}
 	 */
-	function path2FolderName(filePath, fileName, keepTailSlash){
-		var tail = keepTailSlash ? 0: 1;
-		return filePath.substring(0, filePath.length - encodeURIComponent(fileName).length - tail);
+	function path2FolderName(filePath, keepTailSlash){
+		var pathSegs = filePath.split("/");
+		pathSegs.splice(pathSegs.length -1, 1);
+		return keepTailSlash ? pathSegs.join("/") + "/" : pathSegs.join("/");
 	}
 	
 	function _timeDifference(timeStamp) {

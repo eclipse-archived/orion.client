@@ -144,6 +144,22 @@ define([
 			];
 			return runTest({buffer: "abc { a: 1; } "}, '', 14, expected);
 		});
+		it('General - after @import', function() {
+			var expected = [
+				{ description: 'Rule : element { }', proposal: 'element {\n\t\n}'},
+				{ description: 'Rule : #id { }', proposal: '#id {\n\t\n}'},
+				{ description: 'Rule : .class { }', proposal: '#id {\n\t\n}'},
+				{ description: '@charset', proposal: '@charset "charset";'},
+				{ description: '@import', proposal: '@import "url";'},
+				{ description: '@namespace', proposal: '@namespace "url";'},
+				{ description: '@media', proposal: '@media media-query-list {\n\t\n}'},
+				{ description: '@supports', proposal: '@supports (condition) {\n\t\n}'},
+				{ description: '@page', proposal: '@page page-selector-list {\n\t\n}'},
+				{ description: '@font-face', proposal: '@font-face {\n\tfont-family: "family-name";\n\tsrc: "url";\n}'},
+				{ description: '@keyframes', proposal: '@keyframes name {\n\t\n}'},
+			];
+			return runTest({buffer: "@import \"foo\";\n"}, '', 15, expected);
+		});
 		it('General - ru prefix', function() {
 			var expected = [
 				{ description: 'Rule : element { }', proposal: 'element {\n\t\n}'},
@@ -225,6 +241,24 @@ define([
 			var expected = [
 			];
 			return runTest({buffer: "abc{ cue-before: "}, '', 16, expected);
+		});
+		it('Property value - complex type with Matcher object, text-decoration-line', function() {
+			var expected = [
+				{ name: 'none', proposal: 'none'},
+				{ name: 'underline', proposal: 'underline'},
+				{ name: 'overline', proposal: 'overline'},
+				{ name: 'line-through', proposal: 'line-through'},
+				{ name: 'blink', proposal: 'blink'},
+			];
+			return runTest({buffer: "abc{ text-decoration-line: "}, '', 27, expected);
+		});
+		it('Property value - complex type with Matcher object, text-decoration, do prefix', function() {
+			var expected = [
+				{ name: 'double', proposal: 'double'},
+				{ name: 'dotted', proposal: 'dotted'},
+				{ name: 'dodgerblue', proposal: 'dodgerblue'},
+			];
+			return runTest({buffer: "abc{ text-decoration: do"}, 'do', 24, expected);
 		});
 		
 		it('Conditional at rules media 1', function() {

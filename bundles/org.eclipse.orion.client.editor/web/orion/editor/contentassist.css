@@ -24,6 +24,11 @@
 	font-weight: normal;
 }
 
+.contentassist .proposal-strikethrough {
+	font-weight: normal;
+	text-decoration: line-through;
+}
+
 .contentassist hr{
 	border: 0;
 	height: 0;

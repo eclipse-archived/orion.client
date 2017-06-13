@@ -248,8 +248,9 @@ define([
 	                contents: result.contents,
 	                location: result.location,
 	                totalMatches: result.totalMatches,
-	                parentLocation: mUiUtils.path2FolderName(result.location, result.name, true),
-	                fullPathName: mUiUtils.path2FolderName(result.path, result.name)
+	                workspace: result.workspace,
+	                parentLocation: mUiUtils.path2FolderName(result.location, true),
+	                fullPathName: mUiUtils.path2FolderName(result.path)
 	            };
             if(children) {//If the children is already generated, we need convert it back to UI model.
             	var newChildren = [];
@@ -319,8 +320,8 @@ define([
 	                contents: fileResult.contents,
 	                location: fileResult.location,
 	                totalMatches: fileResult.totalMatches,
-	                parentLocation: mUiUtils.path2FolderName(fileResult.location, fileResult.name, true),
-	                fullPathName: mUiUtils.path2FolderName(fileResult.path, fileResult.name)
+	                parentLocation: mUiUtils.path2FolderName(fileResult.location, true),
+	                fullPathName: mUiUtils.path2FolderName(fileResult.path)
 	            };
 	            this._indexedFileItems.push(hasOne);
 	    	}

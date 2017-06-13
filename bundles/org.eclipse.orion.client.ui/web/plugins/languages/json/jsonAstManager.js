@@ -57,7 +57,7 @@ define([
 				return new Deferred().resolve(ast);
 			}
 			return editorContext.getText().then(function(text) {
-				ast = parse(text, metadata ? metadata.location : 'unknown'); //$NON-NLS-1$
+				ast = parse(text);
 				cache.set(loc, ast);
 				return ast;
 			});

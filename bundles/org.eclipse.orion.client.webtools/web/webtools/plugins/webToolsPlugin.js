@@ -79,6 +79,19 @@ define(['orion/plugin',
     	});
     	
     	/**
+    	 * Register result manager as pref manager
+    	 */
+    	provider.registerService("orion.cm.managedservice", cssResultMgr, { //$NON-NLS-1$
+    		pid: 'csslint.config.potential'  //$NON-NLS-1$
+    	});
+    	provider.registerService("orion.cm.managedservice", cssResultMgr, { //$NON-NLS-1$
+    		pid: 'csslint.config.compat'  //$NON-NLS-1$
+    	});
+    	provider.registerService("orion.cm.managedservice", cssResultMgr, { //$NON-NLS-1$
+    		pid: 'csslint.config.perf'  //$NON-NLS-1$
+    	});
+    	
+    	/**
     	 * Register AST manager as Model Change listener
     	 */
     	provider.registerService("orion.edit.model", {  //$NON-NLS-1$
@@ -102,7 +115,6 @@ define(['orion/plugin',
     	provider.registerService(["orion.edit.validator", "orion.cm.managedservice"], new mCssValidator(cssResultMgr), //$NON-NLS-1$ //$NON-NLS-2$
     		{
     			contentType: ["text/css", "text/html"], //$NON-NLS-1$ //$NON-NLS-2$
-    			pid: 'csslint.config'  //$NON-NLS-1$
     		}
     	);
 
@@ -191,7 +203,40 @@ define(['orion/plugin',
     	 * Register quick fixes as editor commands
     	 */
     	var cssQuickFixComputer = new cssQuickFixes.CssQuickFixes();
-
+    	
+    	provider.registerServiceProvider("orion.edit.command", //$NON-NLS-1$
+		{
+			/** @callback */
+			execute: function(editorContext, context) {
+				context.annotation.fixid = 'ignore-on-line'; //$NON-NLS-1$
+				return cssQuickFixComputer.execute(editorContext, context);
+			}
+		},
+		{
+			name: messages["quickfix-ignore-on-line"],
+			scopeId: "orion.edit.quickfix", //$NON-NLS-1$
+			id: "css.ignore.on-line.fix", //$NON-NLS-1$
+			contentType: ['text/css', 'text/html'], //$NON-NLS-1$ //$NON-NLS-2$
+			validationProperties: [{
+					source: "annotation:id", //$NON-NLS-1$
+					match: "^(?:.*\\S.*)$" //$NON-NLS-1$
+				},
+				{
+					source: "annotation:data:cssRuleId", //$NON-NLS-1$
+					match: "^(?:.*\\S.*)$" //$NON-NLS-1$
+				},
+				{
+					source: "annotation:data:ruleSource", //$NON-NLS-1$
+					match: "css" //$NON-NLS-1$
+				},
+				{
+					source: "readonly", //$NON-NLS-1$
+					match: false
+				}
+			]
+		}
+		);
+		
     	provider.registerServiceProvider("orion.edit.command",  //$NON-NLS-1$
     		cssQuickFixComputer,
     		{
@@ -534,56 +579,22 @@ define(['orion/plugin',
     	provider.registerService("orion.core.setting",  //$NON-NLS-1$
     		{},
     		{	settings: [
-    				{	pid: "csslint.config",  //$NON-NLS-1$
-    					name: messages["csslintValidator"],
-    					tags: "validation webtools css csslint".split(" "),  //$NON-NLS-1$  //$NON-NLS-1$
+    				{	pid: "csslint.config.potential",  //$NON-NLS-1$
+    					name: messages["csslintValidatorPotential"],
+    					tags: "validation webtools css csslint".split(" "),  //$NON-NLS-1$
     					category: "css",  //$NON-NLS-1$
     					categoryLabel: messages["css"],
     					properties: [
     						{
-    							id: "validate_adjoining_classes", //$NON-NLS-1$
-    							name: messages["adjoining-classes"],
-    							type: "number", //$NON-NLS-1$
-    							defaultValue: ignore,
-    							options: severities
-    						},
-    						{
     							id: "validate_box_model", //$NON-NLS-1$
     							name: messages["box-model"],
     							type: "number", //$NON-NLS-1$
-    							defaultValue: info,
-    							options: severities
-    						},
-    						{
-    							id: "validate_box_sizing", //$NON-NLS-1$
-    							name: messages["box-sizing"],
-    							type: "number", //$NON-NLS-1$
     							defaultValue: ignore,
-    							options: severities
-    						},
-    						{
-    							id: "validate_bulletproof_font_face", //$NON-NLS-1$
-    							name: messages["bulletproof-font-face"],
-    							type: "number", //$NON-NLS-1$
-    							defaultValue: info,
-    							options: severities
-    						},
-    						{
-    							id: "validate_compatible_vendor_prefixes", //$NON-NLS-1$
-    							name: messages["compatible-vendor-prefixes"],
-    							type: "number", //$NON-NLS-1$
-    							defaultValue: info,
     							options: severities
     						},
     						{
     							id: "validate_display_property_grouping", //$NON-NLS-1$
     							name: messages["display-property-grouping"],
-    							type: "number", //$NON-NLS-1$
-    							defaultValue: info,
-    							options: severities
-    						},{
-    							id: "validate_duplicate_background_images", //$NON-NLS-1$
-    							name: messages["duplicate-background-images"],
     							type: "number", //$NON-NLS-1$
     							defaultValue: info,
     							options: severities
@@ -603,62 +614,6 @@ define(['orion/plugin',
     							options: severities
     						},
     						{
-    							id: "validate_fallback_colors", //$NON-NLS-1$
-    							name: messages["fallback-colors"],
-    							type: "number", //$NON-NLS-1$
-    							defaultValue: info,
-    							options: severities
-    						},
-    						{
-    							id: "validate_floats", //$NON-NLS-1$
-    							name: messages["floats"],
-    							type: "number", //$NON-NLS-1$
-    							defaultValue: info,
-    							options: severities
-    						},
-    						{
-    							id: "validate_font_faces", //$NON-NLS-1$
-    							name: messages["font-faces"],
-    							type: "number", //$NON-NLS-1$
-    							defaultValue: info,
-    							options: severities
-    						},
-    						{
-    							id: "validate_font_sizes", //$NON-NLS-1$
-    							name: messages["font-sizes"],
-    							type: "number", //$NON-NLS-1$
-    							defaultValue: info,
-    							options: severities
-    						},
-    						{
-    							id: "validate_gradients", //$NON-NLS-1$
-    							name: messages["gradients"],
-    							type: "number", //$NON-NLS-1$
-    							defaultValue: info,
-    							options: severities
-    						},
-    						{
-    							id: "validate_ids", //$NON-NLS-1$
-    							name: messages["ids"],
-    							type: "number", //$NON-NLS-1$
-    							defaultValue: info,
-    							options: severities
-    						},
-    						{
-    							id: "validate_imports", //$NON-NLS-1$
-    							name: messages["import"],
-    							type: "number", //$NON-NLS-1$
-    							defaultValue: info,
-    							options: severities
-    						},
-    						{
-    							id: "validate_important", //$NON-NLS-1$
-    							name: messages["important"],
-    							type: "number", //$NON-NLS-1$
-    							defaultValue: info,
-    							options: severities
-    						},
-    						{
     							id: "validate_known_properties", //$NON-NLS-1$
     							name: messages["known-properties"],
     							type: "number", //$NON-NLS-1$
@@ -673,8 +628,58 @@ define(['orion/plugin',
     							options: severities
     						},
     						{
-    							id: "validate_overqualified_elements", //$NON-NLS-1$
-    							name: messages["overqualified-elements"],
+    							id: "validate_text_indent", //$NON-NLS-1$
+    							name: messages["text-indent"],
+    							type: "number", //$NON-NLS-1$
+    							defaultValue: info,
+    							options: severities
+    						},
+    					]
+    				},
+    				{	pid: "csslint.config.compat",  //$NON-NLS-1$
+    					name: messages["csslintValidatorCompat"],
+    					tags: "validation webtools css csslint".split(" "),  //$NON-NLS-1$  //$NON-NLS-1$
+    					category: "css",  //$NON-NLS-1$
+    					categoryLabel: messages["css"],
+    					properties: [
+    						{
+    							id: "validate_adjoining_classes", //$NON-NLS-1$
+    							name: messages["adjoining-classes"],
+    							type: "number", //$NON-NLS-1$
+    							defaultValue: ignore,
+    							options: severities
+    						},
+    						{
+    							id: "validate_box_sizing", //$NON-NLS-1$
+    							name: messages["box-sizing"],
+    							type: "number", //$NON-NLS-1$
+    							defaultValue: ignore,
+    							options: severities
+    						},
+    						{
+    							id: "validate_bulletproof_font_face", //$NON-NLS-1$
+    							name: messages["bulletproof-font-face"],
+    							type: "number", //$NON-NLS-1$
+    							defaultValue: ignore,
+    							options: severities
+    						},
+    						{
+    							id: "validate_compatible_vendor_prefixes", //$NON-NLS-1$
+    							name: messages["compatible-vendor-prefixes"],
+    							type: "number", //$NON-NLS-1$
+    							defaultValue: info,
+    							options: severities
+    						},
+    						{
+    							id: "validate_fallback_colors", //$NON-NLS-1$
+    							name: messages["fallback-colors"],
+    							type: "number", //$NON-NLS-1$
+    							defaultValue: ignore,
+    							options: severities
+    						},
+    						{
+    							id: "validate_gradients", //$NON-NLS-1$
+    							name: messages["gradients"],
     							type: "number", //$NON-NLS-1$
     							defaultValue: info,
     							options: severities
@@ -683,21 +688,7 @@ define(['orion/plugin',
     							id: "validate_qualified_headings", //$NON-NLS-1$
     							name: messages["qualified-headings"],
     							type: "number", //$NON-NLS-1$
-    							defaultValue: info,
-    							options: severities
-    						},
-    						{
-    							id: "validate_regex_selectors", //$NON-NLS-1$
-    							name: messages["regex-selectors"],
-    							type: "number", //$NON-NLS-1$
-    							defaultValue: info,
-    							options: severities
-    						},
-    						{
-    							id: "validate_rules_count", //$NON-NLS-1$
-    							name: messages["rules-count"],
-    							type: "number", //$NON-NLS-1$
-    							defaultValue: info,
+    							defaultValue: ignore,
     							options: severities
     						},
     						{
@@ -715,52 +706,24 @@ define(['orion/plugin',
     							options: severities
     						},
     						{
-    							id: "validate_shorthand", //$NON-NLS-1$
-    							name: messages["shorthand"],
-    							type: "number", //$NON-NLS-1$
-    							defaultValue: info,
-    							options: severities
-    						},
-    						{
     							id: "validate_star_property_hack", //$NON-NLS-1$
     							name: messages["star-property-hack"],
     							type: "number", //$NON-NLS-1$
-    							defaultValue: info,
-    							options: severities
-    						},
-    						{
-    							id: "validate_text_indent", //$NON-NLS-1$
-    							name: messages["text-indent"],
-    							type: "number", //$NON-NLS-1$
-    							defaultValue: info,
+    							defaultValue: ignore,
     							options: severities
     						},
     						{
     							id: "validate_underscore_property_hack", //$NON-NLS-1$
     							name: messages["underscore-property-hack"],
     							type: "number", //$NON-NLS-1$
-    							defaultValue: info,
+    							defaultValue: ignore,
     							options: severities
     						},
     						{
     							id: "validate_unique_headings", //$NON-NLS-1$
     							name: messages["unique-headings"],
     							type: "number", //$NON-NLS-1$
-    							defaultValue: info,
-    							options: severities
-    						},
-    						{
-    							id: "validate_universal_selector", //$NON-NLS-1$
-    							name: messages["universal-selector"],
-    							type: "number", //$NON-NLS-1$
-    							defaultValue: info,
-    							options: severities
-    						},
-    						{
-    							id: "validate_unqualified_attributes", //$NON-NLS-1$
-    							name: messages["unqualified-attributes"],
-    							type: "number", //$NON-NLS-1$
-    							defaultValue: info,
+    							defaultValue: ignore,
     							options: severities
     						},
     						{
@@ -769,15 +732,122 @@ define(['orion/plugin',
     							type: "number", //$NON-NLS-1$
     							defaultValue: info,
     							options: severities
+    						}
+    					]
+    				},
+    				{	pid: "csslint.config.perf",  //$NON-NLS-1$
+    					name: messages["csslintValidatorPerf"],
+    					tags: "validation webtools css csslint".split(" "),  //$NON-NLS-1$  //$NON-NLS-1$
+    					category: "css",  //$NON-NLS-1$
+    					categoryLabel: messages["css"],
+    					properties: [
+    						{
+    							id: "validate_duplicate_background_images", //$NON-NLS-1$
+    							name: messages["duplicate-background-images"],
+    							type: "number", //$NON-NLS-1$
+    							defaultValue: ignore,
+    							options: severities
+    						},
+    						{
+    							id: "validate_floats", //$NON-NLS-1$
+    							name: messages["floats"],
+    							type: "number", //$NON-NLS-1$
+    							defaultValue: ignore,
+    							options: severities
+    						},
+    						{
+    							id: "validate_font_faces", //$NON-NLS-1$
+    							name: messages["font-faces"],
+    							type: "number", //$NON-NLS-1$
+    							defaultValue: ignore,
+    							options: severities
+    						},
+    						{
+    							id: "validate_font_sizes", //$NON-NLS-1$
+    							name: messages["font-sizes"],
+    							type: "number", //$NON-NLS-1$
+    							defaultValue: ignore,
+    							options: severities
+    						},
+    						{
+    							id: "validate_ids", //$NON-NLS-1$
+    							name: messages["ids"],
+    							type: "number", //$NON-NLS-1$
+    							defaultValue: ignore,
+    							options: severities
+    						},
+    						{
+    							id: "validate_imports", //$NON-NLS-1$
+    							name: messages["import"],
+    							type: "number", //$NON-NLS-1$
+    							defaultValue: ignore,
+    							options: severities
+    						},
+    						{
+    							id: "validate_important", //$NON-NLS-1$
+    							name: messages["important"],
+    							type: "number", //$NON-NLS-1$
+    							defaultValue: ignore,
+    							options: severities
+    						},
+    						{
+    							id: "validate_order_alphabetical", //$NON-NLS-1$
+    							name: messages["order-alphabetical"],
+    							type: "number", //$NON-NLS-1$
+    							defaultValue: ignore,
+    							options: severities
+    						},
+    						{
+    							id: "validate_overqualified_elements", //$NON-NLS-1$
+    							name: messages["overqualified-elements"],
+    							type: "number", //$NON-NLS-1$
+    							defaultValue: ignore,
+    							options: severities
+    						},
+    						{
+    							id: "validate_regex_selectors", //$NON-NLS-1$
+    							name: messages["regex-selectors"],
+    							type: "number", //$NON-NLS-1$
+    							defaultValue: ignore,
+    							options: severities
+    						},
+    						{
+    							id: "validate_rules_count", //$NON-NLS-1$
+    							name: messages["rules-count"],
+    							type: "number", //$NON-NLS-1$
+    							defaultValue: ignore,
+    							options: severities
+    						},
+    						{
+    							id: "validate_shorthand", //$NON-NLS-1$
+    							name: messages["shorthand"],
+    							type: "number", //$NON-NLS-1$
+    							defaultValue: ignore,
+    							options: severities
+    						},
+    						{
+    							id: "validate_universal_selector", //$NON-NLS-1$
+    							name: messages["universal-selector"],
+    							type: "number", //$NON-NLS-1$
+    							defaultValue: ignore,
+    							options: severities
+    						},
+    						{
+    							id: "validate_unqualified_attributes", //$NON-NLS-1$
+    							name: messages["unqualified-attributes"],
+    							type: "number", //$NON-NLS-1$
+    							defaultValue: ignore,
+    							options: severities
     						},
     						{
     							id: "validate_zero_units", //$NON-NLS-1$
     							name: messages["zero-units"],
     							type: "number", //$NON-NLS-1$
-    							defaultValue: info,
+    							defaultValue: ignore,
     							options: severities
     						}]
-    				}]
+    				}
+    			]
     		}
 		);
 

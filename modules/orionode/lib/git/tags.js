@@ -9,7 +9,7 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 /*eslint-env node */
-var api = require('../api'), writeError = api.writeError;
+var api = require('../api'), writeError = api.writeError, writeResponse = api.writeResponse;
 var git = require('nodegit');
 var async = require('async');
 var url = require('url');
@@ -107,13 +107,13 @@ function getTags(req, res) {
 			return isAnnotated(theRepo, ref);
 		})
 		.then(function(annotated) {
-			if (typeof annotated === 'String') {
+			if (typeof annotated === 'string') {
 				return writeError(400, res, annotated);
 			}
 
 			return getTagCommit(theRepo, theRef)
 			.then(function(commit) {
-				res.status(200).json(tagJSON(theRef.name(), theRef.shorthand(), commit.sha(), commit.timeMs(), fileDir, annotated));
+				writeResponse(200, res, null, tagJSON(theRef.name(), theRef.shorthand(), commit.sha(), commit.timeMs(), fileDir, annotated), true);
 			});
 		})
 		.catch(function(err) {
@@ -146,7 +146,7 @@ function getTags(req, res) {
 			async.each(referenceList, function(ref,callback) {
 				isAnnotated(theRepo, ref)
 				.then(function(annotated) {
-					if (typeof annotated === 'String') {
+					if (typeof annotated === 'string') {
 						return writeError(400, res, annotated);
 					}
 					getTagCommit(theRepo, ref)
@@ -185,7 +185,7 @@ function getTags(req, res) {
 					resp['PreviousLocation'] = prevLocation;
 				}
 	
-				res.status(200).json(resp);
+				writeResponse(200, res, null, resp, true);
 			});
 		});
 	})
@@ -195,7 +195,7 @@ function getTags(req, res) {
 }
 
 function deleteTag(req, res) {
-	var tagName = decodeURIComponent(req.params.tagName);
+	var tagName = util.decodeURIComponent(req.params.tagName);
 	return clone.getRepo(req)
 	.then(function(repo) {
 		return git.Tag.delete(repo, tagName);

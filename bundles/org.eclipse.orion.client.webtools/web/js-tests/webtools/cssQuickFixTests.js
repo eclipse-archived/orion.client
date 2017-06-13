@@ -32,8 +32,8 @@ define([
 
 		afterEach(function(){
 			// Reset the rule severities to defaults
-			if (validator){
-				validator._restoreRules();
+			if (resultMgr){
+				resultMgr._restoreRules();
 			}
 		});
 
@@ -49,7 +49,7 @@ define([
 		    resultMgr = new ResultMgr();
 			validator = new CssValidator(resultMgr);
 			var rule = options.rule;
-			validator._enableOnly(rule.id, rule.severity);
+			resultMgr._enableOnly(rule.id, rule.severity);
 			var fixComputer = new CssQuickFixes.CssQuickFixes();
 			var editorContext = {
 				/*override*/
@@ -121,6 +121,11 @@ define([
 	                	});
                 	}
                 }
+                
+                if (options.fixid){
+                	annot.fixid = options.fixid;
+                }
+                
                 return obj.fixComputer.execute(obj.editorContext, {annotation: annot}).then(function(){
                 	assert(contentsChanged, "No fixes were executed");
                 });
@@ -134,7 +139,11 @@ define([
     	 */
     	function assertFixes(computed, start, end, expected) {
 	        assert(computed !== null && typeof computed !== 'undefined', 'There should be fixes');
-    	    assert(computed.indexOf(expected.value) > -1, 'The fix: '+computed+' does not match the expected fix of: '+expected.value);
+	        if (typeof expected.value === 'string' && expected.value.length > 0){
+    	    	assert(computed.indexOf(expected.value) > -1, 'The fix: '+computed+' does not match the expected fix of: '+expected.value);
+	    	} else {
+	    		assert.equal(computed, expected.value);
+	    	}
     	    assert.equal(start, expected.start, 'The fix location {' + start + ',' + end + '} does not match the expected position {'+ expected.start + ',' + expected.end + '}');
     	    assert.equal(end, expected.end, 'The fix location {' + start + ',' + end + '} does not match the expected position {'+ expected.start + ',' + expected.end + '}');
 	    }
@@ -191,6 +200,26 @@ define([
 		                      rule: rule,
 		                      expected: expected});
 		});
+		
+		it("Test empty-rules - multiple selectors", function() {
+		    var rule = createTestRule('empty-rules');
+		    var expected = {value: "",
+		                    start: 0,
+		                    end: 25};
+		    return getFixes({buffer: '\truleA, \truleB, \truleC {}\n',
+		                      rule: rule,
+		                      expected: expected});
+		});
+		
+		it("Test empty-rules - multiple selectors multiple lines", function() {
+		    var rule = createTestRule('empty-rules');
+		    var expected = {value: "",
+		                    start: 0,
+		                    end: 24};
+		    return getFixes({buffer: '\truleA,\n\truleB,\n\truleC {}',
+		                      rule: rule,
+		                      expected: expected});
+		});
 
 		it("Test important - single line", function() {
 		    var rule = createTestRule('important');
@@ -231,7 +260,7 @@ define([
 		});
 		it("Test important - trailing spaces", function() {
 		    var rule = createTestRule('important');
-		    var expected = {value: "",
+		    var expected = {value: "\n",
 		                    start: 20,
 		                    end: 40};
 		    return getFixes({buffer: 'rule {\n border : 0px !important       \t\n;\n}',
@@ -264,6 +293,97 @@ define([
 		                    start: 16,
 		                    end: 19};
 		    return getFixes({buffer: 'rule {\n border : 0px;\n}',
+		                      rule: rule,
+		                      expected: expected});
+		});
+		
+		it("Test empty-rules ignore - single line", function() {
+		    var rule = createTestRule('empty-rules');
+		    var expected = {value: " /* csslint allow: empty-rules */",
+		                    start: 7,
+		                    end: 7};
+		    return getFixes({buffer: 'rule {}',
+		    				  fixid: "ignore-on-line",
+		                      rule: rule,
+		                      expected: expected});
+		});
+		it("Test zero-units ignore - multi line", function() {
+		    var rule = createTestRule('zero-units');
+		    var expected = {value: "/* csslint allow: zero-units */",
+		                    start: 21,
+		                    end: 21};
+		    return getFixes({buffer: 'rule {\n border : 0px;\n}',
+		     				  fixid: "ignore-on-line",
+		                      rule: rule,
+		                      expected: expected});
+		});
+		it("Test important ignore - missing semi", function() {
+		    var rule = createTestRule('important');
+		    var expected = {value: "/* csslint allow: important */",
+		                    start: 31,
+		                    end: 31};
+		    return getFixes({buffer: 'rule { border : 0px !important}',
+		                      fixid: "ignore-on-line",
+		                      rule: rule,
+		                      expected: expected});
+		});
+		it("Test ignore with existing directive - one entry", function() {
+		    var rule = createTestRule('important');
+		    var expected = {value: ", important",
+		                    start: 61,
+		                    end: 61};
+		    return getFixes({buffer: 'rule { \\nborder : 0px !important /* csslint allow: zero-units */\n} ',
+		                      fixid: "ignore-on-line",
+		                      rule: rule,
+		                      expected: expected});
+		});
+		it("Test ignore with existing directive - one entry, trailing comma", function() {
+		    var rule = createTestRule('important');
+		    var expected = {value: " important",
+		                    start: 62,
+		                    end: 62};
+		    return getFixes({buffer: 'rule { \\nborder : 0px !important /* csslint allow: zero-units,   */\n} ',
+		                      fixid: "ignore-on-line",
+		                      rule: rule,
+		                      expected: expected});
+		});
+		it("Test ignore with existing directive - multiple entries", function() {
+		    var rule = createTestRule('zero-units');
+		    var expected = {value: ", zero-units",
+		                    start: 72,
+		                    end: 72};
+		    return getFixes({buffer: 'rule { \\nborder : 0px !important /* csslint allow: important, empty-rule */\n} ',
+		                      fixid: "ignore-on-line",
+		                      rule: rule,
+		                      expected: expected});
+		});
+		it("Test ignore with existing directive - multiple entries, trailing comma", function() {
+		    var rule = createTestRule('zero-units');
+		    var expected = {value: " zero-units",
+		                    start: 73,
+		                    end: 73};
+		    return getFixes({buffer: 'rule { \\nborder : 0px !important /* csslint allow: important, empty-rule, */\n} ',
+		                      fixid: "ignore-on-line",
+		                      rule: rule,
+		                      expected: expected});
+		});
+		it("Test ignore with existing directive - no entries", function() {
+		    var rule = createTestRule('important');
+		    var expected = {value: "important",
+		                    start: 53,
+		                    end: 53};
+		    return getFixes({buffer: 'rule { \\nborder : 0px !important /* csslint allow: */\n} ',
+		                      fixid: "ignore-on-line",
+		                      rule: rule,
+		                      expected: expected});
+		});
+		it("Test ignore with existing directive - extra whitespace", function() {
+		    var rule = createTestRule('important');
+		    var expected = {value: ", important",
+		                    start: 67,
+		                    end: 67};
+		    return getFixes({buffer: 'rule { \\nborder : 0px !important /* \t csslint \t allow: \t zero-units \t */\n} ',
+		                      fixid: "ignore-on-line",
 		                      rule: rule,
 		                      expected: expected});
 		});

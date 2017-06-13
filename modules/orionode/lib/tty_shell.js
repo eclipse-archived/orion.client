@@ -14,13 +14,14 @@ var api = require('./api'),
 	fileUtil = require('./fileUtil'),
 	fs = require('fs'),
 	http = require('http'),
-	path = require('path');
+	path = require('path'),
+	log4js = require('log4js'),
+	logger = log4js.getLogger("ttyshell");
 var pty;
 try {
 	pty = require("node-pty");
 } catch (e) {
-	console.error(e.message);
-	console.error("node-pty is not installed. Some features will be unavailable.");
+	logger.info("WARNING: node-pty is not installed. Some features will be unavailable. Reason: " + e.message);
 }
 
 exports.install = function(options) {
@@ -35,17 +36,16 @@ exports.install = function(options) {
 		throw new Error('missing optons.workspaceDir');
 	}
 
-	function resolvePath(userWorkspaceDir, wwwPath, callback) {
-		var filePath = api.rest(fileRoot, wwwPath || "");
-		if(!filePath){
-			filePath = api.rest(fileRoot, fileRoot);
-		}
+	function resolvePath(req, userWorkspaceDir, wwwPath, callback) {
+		var rest = api.rest(fileRoot, wwwPath || "");
 		// Check if the cwd passed in exists. If not, fall back to the user's
 		// workspace dir
-		var cwd = fileUtil.safeFilePath(userWorkspaceDir, filePath);
+		
+		var file = fileUtil.getFile(req, rest);
+		var cwd = file.path;
 		fs.stat(cwd, function(err, stats) {
 			if (err || !stats.isDirectory()) {
-				cwd = userWorkspaceDir;
+				cwd = file.workspaceDir || userWorkspaceDir;
 			}
 			callback(cwd);
 		});
@@ -81,12 +81,18 @@ exports.install = function(options) {
 				onStart(passedCwd);
 			}
 		});
+		
+		var disconnectSocket = function(){
+			sock.disconnect();
+			api.getOrionEE().removeListener("close-socket", disconnectSocket);
+		};
+		api.getOrionEE().on("close-socket", disconnectSocket);
 
 		function onStart(cwd) {
 			// Handle missing node-pty
 			if (!pty) {
 				var error = new Error('node-pty is not installed on this server. Terminal cannot be used.');
-				console.error(error);
+				logger.error(error);
 				sock.emit('fail', error.message);
 				return;
 			}
@@ -96,15 +102,14 @@ exports.install = function(options) {
 				sock.emit('fail', 'Not authenticated.');
 				return;
 			}
-
 			if (req.user.workspace) {
 				userWorkspaceDir = path.join(userWorkspaceDir, req.user.workspace);
 			}
-			resolvePath(userWorkspaceDir, cwd, function(realCWD) {
+			resolvePath(req, userWorkspaceDir, cwd, function(realCWD) {
 				var buff = [];
 				// Open Terminal Connection
 				var shell = process.platform === 'win32' ? 'powershell.exe' : (process.env.SHELL || 'sh');
-				var terminal = pty.fork(shell, [], {
+				var terminal = pty.spawn(shell, [], {
 					name: require('fs').existsSync('/usr/share/terminfo/x/xterm-256color')
 					? 'xterm-256color'
 					: 'xterm',
@@ -119,7 +124,7 @@ exports.install = function(options) {
 					: sock.emit('data', data);
 				});
 
-				console.log('Created new %s (fd: %d, pid: %d)',
+				logger.info('Created new %s (fd: %d, pid: %d)',
 					shell,
 					terminal.fd, 
 					terminal.pid);
@@ -135,13 +140,11 @@ exports.install = function(options) {
 				});
 
 				sock.on('disconnect', function() {
-					terminal.destroy()
+					terminal.destroy();
 					// termsocket = null;
 				});
 
-				terminal.on('exit', function() {
-					sock.disconnect();
-				});
+				terminal.on('exit', disconnectSocket);
 
 				while (buff.length) {
 					sock.emit('data', buff.shift());
@@ -149,7 +152,7 @@ exports.install = function(options) {
 
 				sock.emit('ready');
 			});
-		};
+		}
 	});
 };
 

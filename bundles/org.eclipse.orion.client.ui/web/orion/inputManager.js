@@ -144,8 +144,7 @@ define([
 		this.isUnsavedWarningNeeed = options.isUnsavedWarningNeeed;
 		this.confirm = options.confirm;
 		this.generalPreferences = options.generalPreferences || {};
-		var generalPrefs = this.generalPreferences || {};
-		this.isEditorTabsEnabled = generalPrefs.hasOwnProperty("enableEditorTabs") ? generalPrefs.enableEditorTabs : true;
+		this.isEditorTabsEnabled = options.isEditorTabsEnabled || false;
 		this._input = this._title = "";
 		if (this.fileClient) {
 			this.fileClient.addEventListener("Changed", function(evt) { //$NON-NLS-0$
@@ -245,6 +244,8 @@ define([
 						window.clearTimeout(progressTimeout);
 					}
 				}.bind(this);
+				// Read metadata
+				var metadataURI = resource;
 				var errorHandler = function(error) {
 					clearProgressTimeout();
 					var statusService = null;
@@ -254,11 +255,9 @@ define([
 						statusService = this.statusService;
 					}
 					handleError(statusService, error);
-					this._setNoInput(true);
+					this._setNoInput(metadataURI);
 				}.bind(this);
 				this._acceptPatch = null;
-				// Read metadata
-				var metadataURI = resource;
 				if (!this._isSameParent(metadataURI)) {
 					var uri = new URL(metadataURI);
 					uri.query.set("tree", localStorage.useCompressedTree ? "compressed" : "decorated"); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$
@@ -619,7 +618,7 @@ define([
 					}
 				} else {
 					saveSession();
-					this._setNoInput(true);
+					this._setNoInput("");
 				}
 			}.bind(this);
 			if (editor && editor.isDirty() && !this.isEditorTabsEnabled) {
@@ -721,18 +720,11 @@ define([
 			var textPlain = this.contentTypeRegistry.getContentType("text/plain"); //$NON-NLS-0$
 			return this.contentTypeRegistry.isExtensionOf(contentType, textPlain);
 		},
-		_setNoInput: function(loadRoot) {
-			if (loadRoot) {
-				this.fileClient.loadWorkspace("").then(function(root) {
-					this._input = root.ChildrenLocation;
-					this._setInputContents(root.ChildrenLocation, null, root, root);
-				}.bind(this));
-				return;
-			}
-			// No input, no editor.
-			this._input = this._title = this._fileMetadata = null;
-			this.setContentType(null);
-			this.dispatchEvent({ type: "InputChanged", input: null }); //$NON-NLS-0$
+		_setNoInput: function(resource) {
+			this.fileClient.getWorkspace(resource).then(function(workspace) {
+				this._input = workspace.ChildrenLocation;
+				this._setInputContents(workspace.ChildrenLocation, null, workspace, workspace);
+			}.bind(this));
 		},
 		_setInputContents: function(input, title, contents, metadata, noSetInput, isCachedContent) {
 			var _name, isDir = false;
@@ -763,7 +755,7 @@ define([
 				title: title,
 				contentType: this.getContentType(),
 				metadata: metadata,
-				location: window.location,
+				location: this._location,
 				contents: contents
 			};
 			this._logMetrics("open"); //$NON-NLS-0$

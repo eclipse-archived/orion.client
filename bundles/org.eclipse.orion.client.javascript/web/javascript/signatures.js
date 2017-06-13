@@ -11,7 +11,8 @@
  *******************************************************************************/
 /*eslint-env amd*/
 define([
-], function() {
+	"javascript/finder",
+], function(Finder) {
 
 	var Signatures = {
 		/**
@@ -57,6 +58,36 @@ define([
 					details: val.details,
 					range: this.getSignatureSourceRangeFrom(astnode)
 				};
+			}
+			return null;
+		},
+		
+		/**
+		 * @name getCalleeSignature
+		 * @description Returns a signature string describing the parent call expression of the given node. astnode must be
+		 * a function expression or arrow expression.  astnode.parent must be available. Will return <code>null</code> otherwise.
+		 * If call expression's first argument is a string under 30 chars, it will be included in the signature.
+		 * @function
+		 * @public
+		 * @param {Object} astnode The AST node to parse and compute the signature from
+		 * @returns {String} returns a signature string or <code>null</code>
+		 */
+		getCalleeSignature: function getCalleeSignature(astnode){
+			if (astnode && astnode.type === 'FunctionExpression' || astnode.type === 'ArrowFunctionExpression'){
+				var callExpr = astnode.parent;
+				if (!callExpr){
+					var foundNode = Finder.findNode(astnode.start, astnode.sourceFile.ast, {parents: true});
+					if (foundNode){
+						callExpr = foundNode.parents[foundNode.parents.length-1];
+					}
+				}
+				if (callExpr && callExpr.type === 'CallExpression'){
+					if (callExpr.callee && callExpr.callee.name){
+						var sig = callExpr.callee.name;
+						sig += this.getArgumentsFrom(callExpr);
+						return sig;
+					}
+				}
 			}
 			return null;
 		},
@@ -144,6 +175,54 @@ define([
 		},
 		
 		/**
+		 * @name getPropertyListFrom
+		 * @description Retrieves the arguments from the given astnode if it is a CallExpression.
+		 * @function
+		 * @public
+		 * @memberof javascript.Signatures.prototype
+		 * @param {Object} astnode The AST node to compute the arguments from
+		 * @returns {String} A list of arguments, comma separated in source defined order, surrounded by () 
+		 * 			Ellipsis will be added if no properties are available or max length reached.
+		 */
+		getArgumentsFrom: function(astnode) {
+			var maxLength = 50;
+			if(astnode) {
+				var callArgs = astnode.arguments;
+				if(callArgs && callArgs.length > 0) {
+					var len = callArgs.length;
+					var argName;
+					var value = '(';
+					for(var i = 0; i < len; i++) {
+						var callArg = callArgs[i];
+						if (callArg.type === 'ArrayExpression'){
+							argName = '[]'; //$NON-NLS-1$
+						} else if (callArg.type === 'ObjectExpression'){
+							argName = '{}'; //$NON-NLS-1$
+						} else if (callArg.type === 'Literal' && typeof callArg.raw === 'string'){
+							argName = callArg.raw;
+						} else if (callArg.type === 'FunctionExpression'){
+							argName = 'function(){...}'; //$NON-NLS-1$
+						} else if (callArg.type === 'ArrowFunctionExpression'){
+							argName = '() => {...}'; //$NON-NLS-1$
+						}
+						if ((value.length + argName.length) > (maxLength+1)){
+							value += '...';   //$NON-NLS-0$
+							break;
+						} else {
+							value += argName;
+							if(i < len -1) {
+								value += ', ';  //$NON-NLS-0$
+							}
+						}
+					}
+					value += ')';
+					return value;
+				}
+			}
+			return '()';  //$NON-NLS-0$
+		},
+		
+		/**
 		 * @name getNameFrom
 		 * @description Returns an object describing what to display for the given AST node. If there is an attached doc node it
 		 * will be consulted to help compute the name to display
@@ -202,7 +281,7 @@ define([
 						if(afeparams) {
 							name += afeparams;
 						}
-						name += ') => {}';
+						name += ')';
 						break;
 					case 'FunctionExpression' :
 						name = 'function(';  //$NON-NLS-0$

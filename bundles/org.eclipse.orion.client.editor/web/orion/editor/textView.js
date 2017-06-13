@@ -6541,7 +6541,7 @@ define("orion/editor/textView", [  //$NON-NLS-1$
 			}	
 		},
 		_isOverOverlayScroll: function() {
-			var scrollShowing = Date.now() - this._lastScrollTime < 200;
+			var scrollShowing = Date.now() - this._lastScrollTime < 1000;
 			if (!scrollShowing) {
 				return {};
 			}

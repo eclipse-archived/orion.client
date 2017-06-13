@@ -10,7 +10,7 @@
 /*eslint-env browser, amd*/
 define({//Default message bundle
 	"Compare": "Compare", //$NON-NLS-0$  //$NON-NLS-1$
-	"GitFileSysName": "Git File System", //$NON-NLS-0$  //$NON-NLS-1$
+	"GitFileSysName": "Git Root", //$NON-NLS-0$  //$NON-NLS-1$
 	"View the side-by-side compare": "View the side-by-side compare", //$NON-NLS-0$  //$NON-NLS-1$
 	"WorkingDirVer": "Open Working Directory", //$NON-NLS-0$  //$NON-NLS-1$
 	"Working Directory": "Working Directory", //$NON-NLS-0$  //$NON-NLS-1$
@@ -620,6 +620,7 @@ define({//Default message bundle
 	"MorePullRequests": "More pull requests for \"${0}\"", //$NON-NLS-0$  //$NON-NLS-1$
 	"MorePullRequestsProgress": "Loading more pull requests for \"${0}\"...", //$NON-NLS-0$  //$NON-NLS-1$
 	"Authorize to get pull requests": "Authorize to get pull requests", //$NON-NLS-0$  //$NON-NLS-1$
+	"ForbiddenAccess": "You do not have permission to perform this operation. Details: ${0}", //$NON-NLS-0$  //$NON-NLS-1$
 	"CherryPickProgress": "Cherry Pick in progress", //$NON-NLS-0$  //$NON-NLS-1$
 	"MergeProgress": "Merge in progress", //$NON-NLS-0$  //$NON-NLS-1$
 	"OpenGithubPullRequest": "Open Github Page", //$NON-NLS-0$  //$NON-NLS-1$

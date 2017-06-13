@@ -9,7 +9,7 @@
  *	 IBM Corporation - initial API and implementation
  *******************************************************************************/
 /*eslint-env node */
-var api = require('../api'), writeError = api.writeError;
+var api = require('../api'), writeError = api.writeError, writeResponse = api.writeResponse;
 var args = require('../args');
 var async = require('async');
 var git = require('nodegit');
@@ -107,10 +107,10 @@ function getRemotes(req, res) {
 					cb();
 				});
 			}, function() {
-				res.status(200).json({
+				writeResponse(200, res, null, {
 					"Children": r,
 					"Type": "Remote"
-				});
+				}, true);
 			});
 		});
 	}
@@ -152,7 +152,7 @@ function getRemotes(req, res) {
 					if (err) {
 						return writeError(403, res);
 					}
-					res.status(200).json(remoteJSON(theRemote, fileDir, branches));
+					writeResponse(200, res, null, remoteJSON(theRemote, fileDir, branches), true);
 				});
 			});
 		});
@@ -175,7 +175,7 @@ function getRemotes(req, res) {
 			return theRepo.getBranchCommit(branch);
 		})
 		.then(function(commit) {
-			res.status(200).json(remoteBranchJSON(theBranch, commit, theRemote, fileDir));
+			writeResponse(200, res, null, remoteBranchJSON(theBranch, commit, theRemote, fileDir), true);
 		})
 		.catch(function() {
 			return writeError(403, res);
@@ -201,9 +201,9 @@ function addRemote(req, res) {
 		var remoteName = remote ? remote.name() : req.body.Remote;
 		var configFile = api.join(repo.path(), "config");
 		function done () {
-			res.status(201).json({
+			writeResponse(201, res, null, {
 				"Location": gitRoot + "/remote/" + util.encodeURIComponent(remoteName) + fileDir
-			});
+			}, true);
 		}
 		args.readConfigFile(configFile, function(err, config) {
 			if (err) {
@@ -278,7 +278,7 @@ function fetchRemote(req, res, remote, branch, force) {
 		return remoteObj.fetch(
 			refSpec ? [refSpec] : null,
 			{
-				callbacks: clone.getRemoteCallbacks(req.body, task),
+				callbacks: clone.getRemoteCallbacks(req, task),
 				downloadTags: 3     // 3 = C.GIT_REMOTE_DOWNLOAD_TAGS_ALL (libgit2 const) 
 			},
 			"fetch"	
@@ -332,7 +332,7 @@ function pushRemote(req, res, remote, branch, pushSrcRef, tags, force) {
 			});
 		}
 		return remoteObj.push(
-			refSpecs, {callbacks: clone.getRemoteCallbacks(req.body, task)}
+			refSpecs, {callbacks: clone.getRemoteCallbacks(req, task)}
 		);
 	})
 	.then(function(err) {

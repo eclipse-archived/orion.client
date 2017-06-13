@@ -72,6 +72,9 @@ function Tooltip (view, editor) {
 			this._tooltipDiv.style.visibility = "hidden"; //$NON-NLS-0$
 			this._tipShowing = false;
 			document.body.appendChild(tooltipDiv);
+			
+			lib.trapTabs(this._tooltipDiv);
+			
 			var self = this;
 			textUtil.addEventListener(document, "mousedown", this._mouseDownHandler = function(event) {
 				if (!self.isVisible()) { return; }

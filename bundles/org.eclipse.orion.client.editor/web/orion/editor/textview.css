@@ -1,7 +1,7 @@
 .textview {
 	color: #333;
 	background-color: white;
-	font-family: "Consolas", "Monaco", "Vera Mono", monospace;
+	font-family: "Consolas", "Menlo", "Monaco", "Vera Mono", monospace;
 	font-size: 12px;
 	min-width: 50px;
 	min-height: 50px;
@@ -11,10 +11,10 @@
 	background: rgb(180, 213, 255);
 }
 .textviewContent ::-moz-selection {
-	background: rgb(180, 213, 255);
+	background: rgba(180, 213, 255, 0.99);
 }
 .textviewContent ::selection {
-	background: rgb(180, 213, 255);
+	background: rgba(180, 213, 255, 0.99);
 }
 .textviewSelectionUnfocused {
 	background: lightgray;

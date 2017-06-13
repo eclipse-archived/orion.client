@@ -96,6 +96,7 @@ define("orion/editor/contentAssist", [
 		selected : "selected", //$NON-NLS-0$
 		hr : "proposal-hr", //$NON-NLS-0$
 		emphasis : "proposal-emphasis", //$NON-NLS-0$
+		strikethrough: "proposal-strikethrough",
 		noemphasis : "proposal-noemphasis", //$NON-NLS-0$
 		noemphasis_title : "proposal-noemphasis-title", //$NON-NLS-0$
 		noemphasis_title_keywords : "proposal-noemphasis-title-keywords", //$NON-NLS-0$

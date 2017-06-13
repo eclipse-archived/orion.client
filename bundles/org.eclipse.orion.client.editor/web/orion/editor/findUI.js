@@ -63,11 +63,17 @@ define([
 				replaceInput.value = replaceString;
 			}
 			var that = this;
+			this.setOptions({selectedLines: true, multipleLine: true});
 			window.setTimeout(function() {
 				that._rootDiv.className = "textViewFind show"; //$NON-NLS-0$
 				input.select();
 				input.focus();
 			}, 0);
+		},
+		postSelectedLines: function(/*selectedLines*/) {
+			if(this._selectedLinesUI) {
+				this._checked(this._selectedLines, this._selectedLinesUI);
+			}
 		},
 		_create: function() {
 			var that = this;
@@ -116,6 +122,7 @@ define([
 			}
 
 			group = util.createElement(document, 'span'); //$NON-NLS-0$
+			that._selectedLinesUI = that._createButton(document, group, messages.selectedLines, function(evt) { that._toggle("selectedLines", evt.target); }, this._selectedLines, messages.selectedLinesTooltip, messages.selectedLinesTooltip); //$NON-NLS-0$
 			that._createButton(document, group, messages.regex, function(evt) { that._toggle("regex", evt.target); }, this._regex, messages.regexTooltip, messages.regexTooltip); //$NON-NLS-0$
 			that._createButton(document, group, messages.caseInsensitive, function(evt) { that._toggle("caseInsensitive", evt.target); }, this._caseInsensitive, messages.caseInsensitiveTooltip, messages.caseInsensitiveTooltip); //$NON-NLS-0$
 			that._createButton(document, group, messages.wholeWord, function(evt) { that._toggle("wholeWord", evt.target); }, this._wholeWord, messages.wholeWordTooltip, messages.wholeWordTooltip); //$NON-NLS-0$
@@ -144,8 +151,8 @@ define([
 		_toggle: function(prop, button) {
 			var options = {};
 			options[prop] = !this["_" + prop]; //$NON-NLS-0$
-			this.setOptions(options);
 			this._checked(options[prop], button);
+			this.setOptions(options);
 		},
 		_checked: function(checked, button) {
 			button.className = "textViewFindButton"; //$NON-NLS-0$

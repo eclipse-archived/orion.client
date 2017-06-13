@@ -92,11 +92,15 @@ define([
 		isVisible: function() {
 			return this._slideout.isVisible() && (this === this._slideout.getCurrentViewMode());
 		},
-				
+		
+		focusOnTextInput: function() {
+			window.setTimeout(this._focusOnTextInput, 100);
+		},
+		
 		show: function() {
 			this.previousDocumentTitle = window.document.title;
 			SlideoutViewMode.prototype.show.call(this);
-			window.setTimeout(this._focusOnTextInput, 100);
+			this.focusOnTextInput();
 		},
 		
 		hide: function() {
@@ -114,6 +118,7 @@ define([
 				lib.empty(lib.node("searchPageActions"));
 				lib.empty(lib.node("searchPageActionsRight"));
 				lib.empty(this._searchResultsWrapperDiv);
+				this._searchResultExplorer._replaceRenderer.cleanBreadCrumbs();
 			//}
 			this.hideReplacePreview();
 		},
@@ -161,6 +166,12 @@ define([
 			this._submitSearch();
 		},
 		
+		updateSearchScopeFromSelection: function(meta){
+			if(meta){
+				this._searcher._setLocationbyURL(meta);
+			}
+		},
+		
 		_generateAnnotations: function(fileLocation, editor) {
 			this._searchResultExplorer.findFileNode(fileLocation).then(function(fileNode) {
 				if(fileNode && fileNode.children && editor) {
@@ -193,6 +204,7 @@ define([
 		},
 				
 		_submitSearch: function(){
+			this._searchResultExplorer._replaceRenderer.cleanBreadCrumbs();
 			var deferredOptions = this.getOptions();
 			deferredOptions.then(function(options){
 				options.replace = null;
@@ -418,7 +430,7 @@ define([
 					if(typeof prefs.filteredResources === 'string') {
 						var excludeFilesFromSetting = prefs.filteredResources || "";
 					}
-					this._excludeFilesHint.textContent = messages["The following files are excluded from general setting"] + excludeFilesFromSetting; //$NON-NLS-0$
+					this._excludeFilesHint.textContent = messages["(* = any string, ? = any character)"] + "\n" + messages["The following files are excluded from general setting"] + "\n" + excludeFilesFromSetting; //$NON-NLS-0$
 				}.bind(this));
 				this._excludeFilesHint.classList.add("fileNamePatternsHintVisible"); //$NON-NLS-0$
 			}.bind(this));
@@ -497,7 +509,6 @@ define([
 			this._searcher.setLocationOther(otherLocationString);
 			localStorage.setItem("/inlineSearchScopeOption", "other");
 			localStorage.setItem("/inlineSearchOtherScope", otherLocationString);
-			this._targetFolder = otherLocationString;
 			this._displaySelectedSearchScope([otherLocationString]);
 			this._searcher.addDisplaycallback(this._displaySelectedSearchScope.bind(this),"other");
 		},
@@ -557,7 +568,7 @@ define([
 		},
 		
 		_getOtherScope: function(){
-			return localStorage.getItem("/inlineSearchOtherScope") || "/file";
+			return localStorage.getItem("/inlineSearchOtherScope") || this._fileClient.fileServiceRootURL();
 		},
 		
 		_initSearchScope: function() {

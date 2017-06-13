@@ -15,10 +15,8 @@ define([
 	'javascript/validator',
 	'chai/chai',
 	'orion/Deferred',
-	"orion/i18nUtil",
-	"i18n!javascript/nls/problems",
 	'mocha/mocha', //must stay at the end, not a module
-], function(Validator, chai, Deferred, i18nUtil, Messages) {
+], function(Validator, chai, Deferred) {
 	var assert = chai.assert;
 	
 	return function(worker) {
@@ -163,7 +161,7 @@ define([
 				var config = { rules: {}};
 				config.rules['no-undef'] = "warn";
 				config.skip = true;
-				validate({buffer: "var i = require('./files/node_dep1');", callback: callback, config: config, computedEnv: {amd: true}}).then(
+				validate({buffer: "var i = require('./files/node_dep1');", callback: callback, config: config, computedEnv: {envs: {amd: true}}}).then(
 				function (problems) {
 					assertProblems(problems, []); //eslint sets require and define as globals with the amd env - no warning will be shown
 				},
@@ -175,7 +173,7 @@ define([
 				var config = { rules: {}};
 				config.rules['no-undef'] = "warn";
 				config.skip = true;
-				validate({buffer: "var i = require('./files/node_dep1');", callback: callback, config: config, computedEnv: {node: true}}).then(
+				validate({buffer: "var i = require('./files/node_dep1');", callback: callback, config: config, computedEnv: {envs: {node: true}}}).then(
 				function (problems) {
 					assertProblems(problems, []); //eslint sets require and define as globals with the amd env - no warning will be shown
 				},
@@ -187,7 +185,7 @@ define([
 				var config = { rules: {}};
 				config.rules['no-undef'] = "warn";
 				config.skip = true;
-				validate({buffer: "var i = require('./files/node_dep1');", callback: callback, config: config, computedEnv: {commonjs: true}}).then(
+				validate({buffer: "var i = require('./files/node_dep1');", callback: callback, config: config, computedEnv: {envs: {commonjs: true}}}).then(
 				function (problems) {
 					assertProblems(problems, []); //eslint sets require and define as globals with the amd env - no warning will be shown
 				},
@@ -199,7 +197,7 @@ define([
 				var config = { rules: {}};
 				config.rules['no-undef'] = "warn";
 				config.skip = true;
-				validate({buffer: "var i = require('./files/node_dep1');", callback: callback, config: config, computedEnv: {jquery: true}}).then(
+				validate({buffer: "var i = require('./files/node_dep1');", callback: callback, config: config, computedEnv: {envs: {jquery: true}}}).then(
 				function (problems) {
 					assertProblems(problems, [{
 						id: 'no-undef',
@@ -216,7 +214,7 @@ define([
 				var config = { rules: {}};
 				config.rules['no-undef'] = "warn";
 				config.skip = true;
-				validate({buffer: "define(['./files/node_dep1'], function(a){});", callback: callback, config: config, computedEnv: {jquery: true}}).then(
+				validate({buffer: "define(['./files/node_dep1'], function(a){});", callback: callback, config: config, computedEnv: {envs: {jquery: true}}}).then(
 				function (problems) {
 					assertProblems(problems, [{
 						id: 'no-undef',
@@ -233,7 +231,7 @@ define([
 				var config = { rules: {}};
 				config.rules['no-undef'] = "warn";
 				config.skip = true;
-				validate({buffer: "define(['./files/node_dep1'], function(a){});", callback: callback, config: config, computedEnv: {node: true}}).then(
+				validate({buffer: "define(['./files/node_dep1'], function(a){});", callback: callback, config: config, computedEnv: {envs: {node: true}}}).then(
 				function (problems) {
 					assertProblems(problems, [{
 						id: 'no-undef',
@@ -250,7 +248,7 @@ define([
 				var config = { rules: {}};
 				config.rules['no-undef'] = "warn";
 				config.skip = true;
-				validate({buffer: "define(['./files/node_dep1'], function(a){});", callback: callback, config: config, computedEnv: {amd: true}}).then(
+				validate({buffer: "define(['./files/node_dep1'], function(a){});", callback: callback, config: config, computedEnv: {envs: {amd: true}}}).then(
 				function (problems) {
 					assertProblems(problems, []);
 				},
@@ -262,7 +260,7 @@ define([
 				var config = { rules: {}};
 				config.rules['no-undef'] = "warn";
 				config.skip = true;
-				validate({buffer: "var i = require('./files/node_dep1');", callback: callback, config: config, computedEnv: {}}).then(
+				validate({buffer: "var i = require('./files/node_dep1');", callback: callback, config: config, computedEnv: {envs: {}}}).then(
 				function (problems) {
 					assertProblems(problems, [
 					{

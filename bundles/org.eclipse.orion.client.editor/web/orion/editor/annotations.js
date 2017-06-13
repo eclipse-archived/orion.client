@@ -194,6 +194,10 @@ define("orion/editor/annotations", ['i18n!orion/editor/nls/messages', 'orion/edi
 	 */
 	AnnotationType.ANNOTATION_MATCHING_SEARCH = "orion.annotation.matchingSearch"; //$NON-NLS-0$
 	/**
+	 * Search range annotation type.
+	 */
+	AnnotationType.ANNOTATION_SEARCH_RANGE = "orion.annotation.searchRange"; //$NON-NLS-0$
+	/**
 	 * Read Occurrence annotation type.
 	 */
 	AnnotationType.ANNOTATION_READ_OCCURRENCE = "orion.annotation.readOccurrence"; //$NON-NLS-0$
@@ -313,6 +317,7 @@ define("orion/editor/annotations", ['i18n!orion/editor/nls/messages', 'orion/edi
 	registerType(AnnotationType.ANNOTATION_MATCHING_BRACKET);
 	registerType(AnnotationType.ANNOTATION_CURRENT_SEARCH);
 	registerType(AnnotationType.ANNOTATION_MATCHING_SEARCH);
+	registerType(AnnotationType.ANNOTATION_SEARCH_RANGE, true);
 	registerType(AnnotationType.ANNOTATION_READ_OCCURRENCE);
 	registerType(AnnotationType.ANNOTATION_WRITE_OCCURRENCE);
 	registerType(AnnotationType.ANNOTATION_SELECTED_LINKED_GROUP);
@@ -783,7 +788,7 @@ define("orion/editor/annotations", ['i18n!orion/editor/nls/messages', 'orion/edi
 					e.changed.push(annotation);
 				} else if (annotation.end <= start) {
 					//nothing
-				} else if (annotation.start < start && end < annotation.end) {
+				} else if (annotation.start <= start && end < annotation.end) {//Annotation renderer does not render the last character
 					annotation._oldStart = annotation.start;
 					annotation._oldEnd = annotation.end;
 					annotation.end += changeCount;
@@ -888,7 +893,12 @@ define("orion/editor/annotations", ['i18n!orion/editor/nls/messages', 'orion/edi
 						}
 					}
 				}
-			}
+				if (style.html) {
+					result.html = style.html;
+				}
+				if (style.node) {
+					result.node = style.node;
+				}			}
 			return result;
 		},
 		_mergeStyleRanges: function(ranges, styleRange) {

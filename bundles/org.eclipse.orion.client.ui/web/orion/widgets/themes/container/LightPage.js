@@ -24,6 +24,11 @@ define({
 		".auxpane": {
 			"background": "#C4C5C8 !important"
 		},
+		".desktopmode": {
+			".selectableNavRow:hover": {
+				"background-color": "rgba(60, 113, 179, 0.25)"
+			}
+		},
 		".checkedRow": {
 			"background-color": "#3C71B3 !important",
 			"color": "#FFFFFF !important",
@@ -62,13 +67,18 @@ define({
 			"border-width": "1px",
 			"border-style": "solid",
 			"border-color": "#3C71B3",
-			"color": "#3C71B3"
+			"color": "#376FB2"
 		},
 		".commandButton.disabled": {
 			"color": "#cdcdcd"
 		},
 		".commandButton.orionButton.dropdownTrigger:hover": {
 			"border-color": "#ccc"
+		},
+		".gitCommitListSection": {
+			".commandButton.orionButton.dropdownTrigger:hover": {
+				"background-color": "rgba(196, 197, 200, 0.25)",
+			}
 		},
 		".commandButton:not(.primaryButton):focus": {
 			"background-color": "rgba(60, 113, 179, 0.25)",
@@ -119,20 +129,18 @@ define({
 			"background": "#FFFFFF"
 		},
 		".gitCommitMessage": {
-			"gitCommitMessageTopRow": {
-				"border-width": "1px",
-				"border-style": "solid",
-				"border-color": "rgb(60, 113, 179)"
-			},
 			".gitCommitMessageTopRow": {
 				"border-color": "#3C71B3"
+			},
+			".gitCommitMore":{
+				"color": "#004A60 !important"
 			}
 		},
 		".gitCommitMessageSection": {
 			"background-color": "rgba(60, 113, 179, 0.25)"
 		},
 		".gitCommitMore": {
-			"color": "#3C71B3 !important"
+			"color": "#005F88 !important"
 		},
 		".gitStatusIcon": {
 			"color": "#3C71B3 !important"
@@ -141,7 +149,7 @@ define({
 			"background-color": "rgba(60, 113, 179, 0.25)"
 		},
 		".gitStatusTitle": {
-			"color": "#3C71B3 !important"
+			"color": "#0462AB !important"
 		},
 		".label.parameterInput": {
 			"color": "#FFFFFF !important"
@@ -185,9 +193,6 @@ define({
 				"color": "#000000 !important"
 			},
 			".commandButton.orionButton.dropdownTrigger.launchConfigurationsButton": {
-				"dropdownArrowDown": {
-					"color": "white"
-				},
 				".dropdownArrowDown": {
 					"color": "#FFFFFF"
 				}
@@ -315,8 +320,7 @@ define({
 			"color": "#3C71B3 !important"
 		},
 		".split": {
-			"background": "#C4C5C8",
-			"width": "4px"
+			"background": "#C4C5C8"
 		},
 		".splitThumb": {
 			"background": "#C4C5C8"
@@ -353,7 +357,16 @@ define({
 				"color": "white",
 				"margin-bottom": "2px"
 			},
-			"color": "#FFFFFF"
+			"color": "#FFFFFF",
+			"background-color": "rgb(60, 113, 179)",
+			".commandButton:not(.primaryButton):hover":{
+				"color": "white",
+   				"background-color": "rgba(196, 197, 200, 0.25)"
+			},
+			".commandButton:not(.primaryButton):focus":{
+				"color": "white",
+   				"background-color": "rgba(196, 197, 200, 0.25)"
+			}
 		},
 		".titleActionContainer": {
 			"background": "#F5F7FA !important",
@@ -414,6 +427,14 @@ define({
 				"color": "#3C71B3"
 			}
 		},
+		".treeTableRow.checkedRow.gitCommitListSection": {
+			"span.core-sprite-closedarrow:hover" : {
+				"color": "lightgray",
+			},
+			"span.core-sprite-openarrow:hover" : {
+				"color": "lightgray",
+			}
+		},
 		".workingTarget": {
 			"background-color": "#FFFFFF"
 		},
@@ -435,7 +456,7 @@ define({
 			}
 		},
 		".editorTabCloseButton:hover": {
-			"background-color": "#3D72B3",
+			"background-color": "rgba(60, 113, 179, 1)",
 			"color": "#FFFFFF"
 		},
 		".editorTab": {
@@ -445,6 +466,24 @@ define({
 		".focusedEditorTab": {
 			"background-color": "#FFFFFF",
 			"color": "#152935"
+		},
+		".contentassist .selected": {
+			"background-color": "#3C71B3",
+			"background": "#3C71B3"
+		},
+		".progressWatch.running": {
+			".watchButton": {
+				"border-color": "black"
+			},
+			".watchBody": {
+				"border-color": "black"
+			},
+			".watchBody .hand.longHour > .darkSide": {
+				"background-color": "black",
+			},
+			".watchBody .hand.longMinute > .darkSide": {
+				"background-color": "black",
+			}
 		}
 	}
 });

@@ -1,6 +1,9 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+	<meta name="copyright" content="Copyright (c) IBM Corporation and others 2014, 2017." >
+	<meta http-equiv="Content-Language" content="en-us">
 	<title>Webtools Mocha Tests</title>
 	<link rel="stylesheet" href="../../mocha/mocha.css" />
 	<script src="../../requirejs/require.js"></script>
@@ -17,18 +20,20 @@
 	require(["mocha/sauce"], function(mocha) {
 		mocha.setup("bdd");
 		require([
+			"js-tests/webtools/cssContentAssistTests",
+			"js-tests/webtools/cssHoverTests",
 			"js-tests/webtools/cssOutlinerTests",
 			"js-tests/webtools/cssQuickFixTests",
 			"js-tests/webtools/cssValidatorTests",
 			"js-tests/webtools/cssParserTests",
-			"js-tests/webtools/cssContentAssistTests",
 			"js-tests/webtools/utilTests",
 			"js-tests/webtools/htmlHoverTests",
 			"js-tests/webtools/htmlOccurrencesTests",
 			"js-tests/webtools/htmlParserTests",
 			"js-tests/webtools/htmlContentAssistTests",
 			"js-tests/webtools/htmlValidatorTests",
-			"js-tests/webtools/htmlOutlineTests"
+			"js-tests/webtools/htmlOutlineTests",
+			"js-tests/webtools/htmlFormatterTests"
 		], function(){
 			mocha.run();
 		});

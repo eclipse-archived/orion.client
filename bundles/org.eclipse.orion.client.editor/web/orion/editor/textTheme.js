@@ -133,16 +133,27 @@ define("orion/editor/textTheme", //$NON-NLS-0$
 				var localResult = [];
 				var keys = Object.keys(object);
 				keys.forEach(function(key) {
-					var value = object[key];
-					if (typeof(value) === "string") { //$NON-NLS-0$
-						localResult.push("\t" + convertCSSname(key) + ": " + value + ";"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-					} else {
-						parseStyles(
-							value,
-							className === key ? ancestors : ancestors + (isTopLevel ? " ." : ".") + key, //$NON-NLS-1$ //$NON-NLS-0$
-							className,
-							false,
-							result);
+					if(key !== "isTopLevel"){
+						var value = object[key];
+						if (typeof(value) === "string") { //$NON-NLS-0$
+							localResult.push("\t" + convertCSSname(key) + ": " + value + ";"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+						} else {
+							if(value.isTopLevel){
+								parseStyles(
+									value,
+									className === key ? ancestors : ancestors + (isTopLevel ? " ." : ".") + key, //$NON-NLS-1$ //$NON-NLS-0$
+									className,
+									true,
+									result);
+							}else{
+								parseStyles(
+									value,
+									className === key ? ancestors : ancestors + (isTopLevel ? " ." : ".") + key, //$NON-NLS-1$ //$NON-NLS-0$
+									className,
+									false,
+									result);
+							}
+						}
 					}
 				});
 				if (localResult.length) {

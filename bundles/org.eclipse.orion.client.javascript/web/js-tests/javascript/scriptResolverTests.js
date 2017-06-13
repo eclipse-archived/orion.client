@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2015 IBM Corporation and others.
+ * Copyright (c) 2015, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -63,6 +63,15 @@ define([
 		var resolver = new Resolver.ScriptResolver(serviceRegistry);
 	
 		describe('Script resolver tests', function() {
+			it('Test getWorkspaceFile for json!-prefixed files', function() {
+				testFileClient.createTestFiles(['ecma1.json', 'ecma2.json.js']);
+				return resolver.getWorkspaceFile('json!ecma1.json').then(function(files) {
+					assert(Array.isArray(files), 'There should have been a files array returned');
+					assert.equal(files.length, 1, 'There should have been one file returned');
+					assert.equal(files[0].location, testFileClient.fileServiceRootURL()+'/ecma1.json', 'Should have found file object with location TestingRoot/ecma1.json');
+					assert.equal(files[0].name, 'ecma1.json', 'Should have found file object with name equal to ecma1.json');
+				});
+			});
 			it('Test getWorkspaceFile 1', function() {
 				testFileClient.createTestFiles(['foo.js', 'foobar.js']);
 				return resolver.getWorkspaceFile('foo').then(function(files) {

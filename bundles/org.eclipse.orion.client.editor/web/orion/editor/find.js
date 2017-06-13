@@ -192,6 +192,7 @@ define("orion/editor/find", [ //$NON-NLS-0$
 		this._editor = editor;
 		this._undoStack = undoStack;
 		this._showAll = true;
+		this._selectedLines = false;
 		this._visible = false;
 		this._caseInsensitive = true;
 		this._wrap = true;
@@ -209,6 +210,7 @@ define("orion/editor/find", [ //$NON-NLS-0$
 		this._listeners = {
 			onEditorFocus: function(e) {
 				that._removeCurrentAnnotation(e);
+				that.setOptions({selectedLines: false});
 			}
 		};
 		this.setOptions(options);
@@ -241,8 +243,15 @@ define("orion/editor/find", [ //$NON-NLS-0$
 			}.bind(this));
 		},
 		getStartOffset: function() {
-			if (this._start !== undefined) {
-				return this._start;
+			if(this.isRangeSearch()) {
+				var where = this._editor.getCaretOffset();
+				if (this._reverse) {
+					where = this._editor.getSelection().start -1;
+				}
+				if(where >= this._searchRangeModel.start && where <= this._searchRangeModel.end) {
+					return where;
+				} 
+				return this._searchRangeModel.start;
 			}
 			if (this._reverse) {
 				return this._editor.getSelection().start - 1;
@@ -285,6 +294,9 @@ define("orion/editor/find", [ //$NON-NLS-0$
 				}
 			}
 			this._removeAllAnnotations();
+			if(this._selectedLines) {
+				this.setOptions({selectedLines: false});
+			}
 			var textView = this._editor.getTextView();
 			if (textView) {
 				textView.removeEventListener("Focus", this._listeners.onEditorFocus); //$NON-NLS-0$
@@ -334,6 +346,8 @@ define("orion/editor/find", [ //$NON-NLS-0$
 				Deferred.when(this._editor.getModel().find({
 					string: string,
 					start: start,
+					rangeStart: this._searchRangeModel ? this._searchRangeModel.start : undefined,
+					rangeEnd: this._searchRangeModel ? this._searchRangeModel.end : undefined,
 					reverse: false,
 					wrap: this._wrap,
 					regex: this._regex,
@@ -420,6 +434,15 @@ define("orion/editor/find", [ //$NON-NLS-0$
 						}
 					}
 				}
+				if ((options.selectedLines === true || options.selectedLines === false) && this._selectedLinesl !== options.selectedLines) {
+					this._selectedLines = options.selectedLines;
+					if (this._selectedLines) {
+						this.annotateSearchRange(options.multipleLine);
+					} else {
+						this.annotateSearchRange(options.multipleLine, true);
+					}
+					this.postSelectedLines();
+				}
 				if (options.caseInsensitive === true || options.caseInsensitive === false) {
 					this._caseInsensitive = options.caseInsensitive;
 				}
@@ -469,6 +492,12 @@ define("orion/editor/find", [ //$NON-NLS-0$
 				}	
 				this._savedOptions.push(this.getOptions());
 				this.setOptions(tempOptions);
+				if(tempOptions.findString && this._regex) {
+					tempOptions.findString = mRegex.escape(tempOptions.findString);
+					tempOptions.findString = tempOptions.findString.split("\n").join("\\n");
+					tempOptions.findString = tempOptions.findString.split("\r").join("\\r");
+					tempOptions.findString = tempOptions.findString.split("\t").join("\\t");
+				}
 			}
 			this._startOffset = this._editor.getSelection().start;
 			this._editor.getTextView().addEventListener("Focus", this._listeners.onEditorFocus); //$NON-NLS-0$
@@ -489,11 +518,50 @@ define("orion/editor/find", [ //$NON-NLS-0$
 				this._undoStack.endCompoundChange();
 			}
 		},
+		isRangeSearch: function() {
+			return this._searchRangeModel !== null && this._searchRangeModel !== undefined;
+		},
+		annotateSearchRange: function(multipleLine, remove) {
+			var type = mAnnotations.AnnotationType.ANNOTATION_SEARCH_RANGE;
+			var annotationModel = this._editor.getAnnotationModel();
+			if (annotationModel) {
+				annotationModel.removeAnnotations(type);
+				this.setOptions({start: undefined, end: undefined});
+				this._selectedLines = false;
+				this._searchRangeModel = null;
+				if(remove) {
+					return;
+				}
+				var selection = this._editor.getSelection();
+				var textModel = this._editor.getModel();
+				var startL = 0;
+				var endL = 0;
+				if(textModel) {
+					endL = startL = textModel.getLineAtOffset(selection.start);
+					if(selection.start !== selection.end) {
+						endL = textModel.getLineAtOffset(selection.end - 1);
+					}
+				}
+				if(endL > startL || !multipleLine) {
+					this._selectedLines = true;
+	 		 		var rangeStart = textModel.getLineStart(startL);
+	 		 		var rangeEnd = textModel.getLineEnd(endL, true);
+					this._editor.setSelection(rangeStart, rangeStart, true);
+					annotationModel.removeAnnotations(mAnnotations.AnnotationType.ANNOTATION_CURRENT_LINE);
+					this.setOptions({start: rangeStart, end: rangeEnd});
+					this._searchRangeModel = mAnnotations.AnnotationType.createAnnotation(type, rangeStart, rangeEnd);
+	 		 		annotationModel.addAnnotation(this._searchRangeModel);
+				}
+			}
+		},
+		postSelectedLines: function(/*selectedLines*/) {
+		},
 		_findFromModel: function(string, startOffset, noWrap) {
 			return this._editor.getModel().find({
 				string: string,
 				start: startOffset,
-				end: this._end,
+				rangeStart: this._searchRangeModel ? this._searchRangeModel.start : undefined,
+				rangeEnd: this._searchRangeModel ? this._searchRangeModel.end : undefined,
 				reverse: this._reverse,
 				wrap: noWrap ? false: this._wrap,
 				regex: this._regex,
@@ -617,6 +685,9 @@ define("orion/editor/find", [ //$NON-NLS-0$
 				var string = this.getFindString();
 				Deferred.when(this._editor.getModel().find({
 					string: string,
+					start: this._start,
+					rangeStart: this._searchRangeModel ? this._searchRangeModel.start : undefined,
+					rangeEnd: this._searchRangeModel ? this._searchRangeModel.end : undefined,
 					regex: this._regex,
 					wholeWord: this._wholeWord,
 					caseInsensitive: this._caseInsensitive

@@ -9,7 +9,7 @@
  * IBM Corporation - initial API and implementation
  *******************************************************************************/
 /*eslint-env node */
-var api = require('./api'), writeError = api.writeError;
+var api = require('./api'), writeError = api.writeError, writeResponse = api.writeResponse;
 var archiver = require('archiver');
 var unzip = require('unzip2');
 var request = require('request');
@@ -21,7 +21,8 @@ var Promise = require('bluebird');
 var mkdirp = require('mkdirp');
 var fs = Promise.promisifyAll(require('fs'));
 var fileUtil = require('./fileUtil');
-var crypto = require('crypto');
+var log4js = require('log4js');
+var logger = log4js.getLogger("xfer");
 
 function getUploadsFolder(options) {
 	if (options.options) {
@@ -43,7 +44,7 @@ module.exports = function(options) {
 	var UPLOADS_FOLDER = getUploadsFolder(options);
 	
 	mkdirp(UPLOADS_FOLDER, function (err) {
-		if (err) console.error(err);
+		if (err) logger.error(err);
 	});
 
 	return express.Router()
@@ -60,7 +61,7 @@ function reportTransferFailure(res, err) {
 	if (err.message) {
 		message += ": " + err.message;
 	}
-	return res.status(400).json({
+	return writeResponse(400, res, null, {
 				Severity: "Error",
 				HttpCode: 400,
 				Code: 0,
@@ -70,8 +71,8 @@ function reportTransferFailure(res, err) {
 }
 
 function postImportXfer(req, res) {
-	var filePath = req.params["0"];
-	filePath = fileUtil.safeFilePath(req.user.workspaceDir, filePath);
+	var rest = req.params["0"];
+	var file = fileUtil.getFile(req, rest);
 	var xferOptions = getOptions(req);
 	if (xferOptions.indexOf("sftp") !== -1) {
 		return writeError(500, res, "Not implemented yet.");
@@ -94,7 +95,7 @@ function postImportXfer(req, res) {
 			reportTransferFailure(res, err);
 		});
 		ws.on('finish', function() {
-			completeTransfer(req, res, tempFile, filePath, fileName, xferOptions, shouldUnzip);
+			completeTransfer(req, res, tempFile, file, fileName, xferOptions, shouldUnzip);
 		});
 		request.pipe(ws);
 	}
@@ -139,14 +140,14 @@ function excluded(excludes, rootName, outputName) {
 	return excluded(excludes, rootName, path.dirname(outputName));
 }
 
-function completeTransfer(req, res, tempFile, filePath, fileName, xferOptions, shouldUnzip) {
+function completeTransfer(req, res, tempFile, file, fileName, xferOptions, shouldUnzip) {
 	var overwrite = xferOptions.indexOf("overwrite-older") !== -1;
 	function overrideError(files) {
-		res.status(400).json({
+		writeResponse(400, res, null, {
 			Severity: "Error",
 			HttpCode:400,
 			Code: 0,
-			Message: "Failed to transfer all files to " + filePath.substring(req.user.workspaceDir.length) + 
+			Message: "Failed to transfer all files to " + file.path.substring(file.workspaceDir.length) + 
 				", the following files could not be overwritten: " + files.join(","),
 			JsonData: {
 				ExistingFiles: files
@@ -155,7 +156,7 @@ function completeTransfer(req, res, tempFile, filePath, fileName, xferOptions, s
 	}
 	if (shouldUnzip) {
 		var excludes = (req.query.exclude || "").split(",");
-		if (fs.existsSync(path.join(filePath, ".git"))) {
+		if (fs.existsSync(path.join(file.path, ".git"))) {
 			excludes.push(".git");
 		}
 		var failed = [];
@@ -164,8 +165,8 @@ function completeTransfer(req, res, tempFile, filePath, fileName, xferOptions, s
 		.on('entry', function (entry) {
 			var entryName = entry.path;
 			var type = entry.type; // 'Directory' or 'File' 
-			var outputName = path.join(filePath, entryName);
-			if (!excluded(excludes, filePath, outputName)) {
+			var outputName = path.join(file.path, entryName);
+			if (!excluded(excludes, file.path, outputName)) {
 				if (type === "File") {
 					if (!overwrite && fs.existsSync(outputName)) {
 						failed.push(entryName);
@@ -173,7 +174,7 @@ function completeTransfer(req, res, tempFile, filePath, fileName, xferOptions, s
 						return;
 					}
 					// make sure all sub folders exist
-					var subfolderPath = path.join(filePath, path.dirname(entryName));
+					var subfolderPath = path.join(file.path, path.dirname(entryName));
 					if (!fs.existsSync(subfolderPath)) {
 						mkdirp.sync(subfolderPath);
 					}
@@ -196,12 +197,12 @@ function completeTransfer(req, res, tempFile, filePath, fileName, xferOptions, s
 		})
 		.on('error', function(error) {
 			if (res) {
-				res.status(400).json({
+				writeResponse(200, res, null, {
 					Severity: "Error",
 					HttpCode:400,
 					Code: 0,
 					Message: "Failed during file unzip: " + error.message
-				}).end();
+				});
 				res = null;
 			}
 		})
@@ -211,37 +212,37 @@ function completeTransfer(req, res, tempFile, filePath, fileName, xferOptions, s
 				if (failed.length) {
 					return overrideError(failed);
 				}
-				res.setHeader("Location", fileRoot + filePath.substring(req.user.workspaceDir.length));
+				res.setHeader("Location", api.join(fileRoot, file.workspaceId, file.path.substring(file.workspaceDir.length)));
 				res.status(201).end();
 				res = null;
 			}
 		});
 	} else {
-		var file = path.join(filePath, fileName);
-		if (!overwrite && fs.existsSync(file)) {
+		var newFile = path.join(file.path, fileName);
+		if (!overwrite && fs.existsSync(newFile)) {
 			return overrideError([fileName]);
 		}
-		fs.rename(tempFile, file, function(err) {
+		fs.rename(tempFile, newFile, function(err) {
 			if (err) {
 				return writeError(400, res, "Transfer failed");
 			}
-			res.setHeader("Location", fileRoot + filePath.substring(req.user.workspaceDir.length));
+			res.setHeader("Location", api.join(fileRoot, file.workspaceId, file.path.substring(file.workspaceDir.length)));
 			res.status(201).end();
 		});
 	}
 }
 	
 function getXfer(req, res) {
-	var filePath = req.params["0"];
+	var rest = req.params["0"];
+	var file = fileUtil.getFile(req, rest);
 	
-	if (path.extname(filePath) !== ".zip") {
+	if (path.extname(file.path) !== ".zip") {
 		return writeError(400, res, "Export is not a zip");
 	}
 	
 	var zip = archiver('zip');
 	zip.pipe(res);
-	var folderName = filePath.replace(/.zip$/, "");
-	filePath = fileUtil.safeFilePath(req.user.workspaceDir, folderName);
+	var filePath = file.path.replace(/.zip$/, "");
 	write(zip, filePath, filePath)
 	.then(function() {
 		zip.finalize();
@@ -249,7 +250,7 @@ function getXfer(req, res) {
 	.catch(function(err) {
 		if (err.code === "ENOENT") {
 			// bug 511513, use a custom message so that the server's workspace path isn't leaked
-			writeError(404, res, "Folder '" + folderName + "' does not exist");
+			writeError(404, res, "Folder '" + filePath.substring(file.workspaceDir.length + 1) + "' does not exist");
 		} else {
 			writeError(500, res, err.message);
 		}

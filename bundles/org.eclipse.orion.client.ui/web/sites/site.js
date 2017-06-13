@@ -45,10 +45,6 @@ define(['require', 'i18n!orion/sites/nls/messages', 'orion/i18nUtil', 'orion/boo
 					mGlobalCommands.setPageTarget({
 						task: messages["Edit Site"],
 						target: site,
-						breadcrumbTarget: item,
-						makeBreadcrumbLink: function(seg, location){
-							seg.href = require.toUrl("sites/sites.html"); //$NON-NLS-0$
-						},
 						serviceRegistry: serviceRegistry, fileService: fileClient, commandService: commandRegistry
 					});
 					mGlobalCommands.setDirtyIndicator(widget.isDirty());

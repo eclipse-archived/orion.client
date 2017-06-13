@@ -39,6 +39,9 @@ define([
 			if (expected[i].data || expected[i].data === ''){
 				assert.equal(expected[i].data, results[i].data, 'Different node data. \nResult node:\n' + rString + '\nExpected node:\n' + eString + '\nResult:\n' + resultString + '\nExpected:\n' + expectedString + '\n');
 			}
+			if (expected[i].selfClosing){
+				assert.equal(expected[i].selfClosing, results[i].selfClosing, 'Expected a self closing tag to be marked as such.  \nResult node:\n' + rString + '\nExpected node:\n' + eString + '\nResult:\n' + resultString + '\nExpected:\n' + expectedString + '\n');
+			}
 			if (expected[i].range){
 				assert(results[i].range, 'Missing node range. \nResult node:\n' + rString + '\nExpected node:\n' + eString + '\nResult:\n' + resultString + '\nExpected:\n' + expectedString + '\n');
 				assert.equal(expected[i].range[0], results[i].range[0], 'Different node range. \nResult node:\n' + rString + '\nExpected node:\n' + eString + '\nResult:\n' + resultString + '\nExpected:\n' + expectedString + '\n');
@@ -284,6 +287,7 @@ define([
 	    		{
 	    			name: 'html',
 	    			type: 'tag',
+	    			selfclosing: true,
 	    			range: [0,7],
 	    			openrange: [0,7]
 	    		}
@@ -307,6 +311,7 @@ define([
 	    		{
 	    			name: 'img',
 	    			type: 'tag',
+	    			selfclosing: true,
 	    			range: [0,6],
 	    			openrange: [0,6]
 	    		}
@@ -345,6 +350,7 @@ define([
 	    					"range":[30,48],
 	    					"openrange":[30,48],
 	    					"name":"stop",
+	    					selfclosing: true,
 	    					"type":"tag",
 	    					"attributes":[{
 	    						"offset":{
@@ -372,6 +378,7 @@ define([
 	    		{
 	    			name: 'span',
 	    			type: 'tag',
+	    			selfclosing: true,
 	    			range: [0,7],
 	    			openrange: [0,7]
 	    		}

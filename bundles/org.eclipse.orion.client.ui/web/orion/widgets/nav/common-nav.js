@@ -13,6 +13,7 @@
 define([
 	'i18n!orion/edit/nls/messages',
 	'orion/objects',
+	'orion/Deferred',
 	'orion/webui/littlelib',
 	'orion/explorers/explorer-table',
 	'orion/explorers/navigatorRenderer',
@@ -29,7 +30,7 @@ define([
 	'orion/metrics',
 	'orion/util'
 ], function(
-	messages, objects, lib, mExplorer, mNavigatorRenderer, mKeyBinding,
+	messages, objects, Deferred, lib, mExplorer, mNavigatorRenderer, mKeyBinding,
 	FileCommands, ProjectCommands, ExtensionCommands, mGlobalCommands, Selection, URITemplate, PageUtil, mContextMenu, mGeneralPreferences, mMetrics, util
 ) {
 	var _DEBUG = false;
@@ -59,10 +60,10 @@ define([
 		var sidebarNavInputManager = this.sidebarNavInputManager = params.sidebarNavInputManager;
 		this.toolbarNode = params.toolbarNode;
 
-		this.fileActionsScope = "fileActions"; //$NON-NLS-0$
-		this.editActionsScope = "editActions"; //$NON-NLS-0$
-		this.viewActionsScope = "viewActions"; //$NON-NLS-0$
-		this.toolsActionsScope = "toolsActions"; //$NON-NLS-0$
+		this.fileActionsScope = "menuBarActions"; //$NON-NLS-0$
+		this.editActionsScope = "menuBarActions"; //$NON-NLS-0$
+		this.viewActionsScope = "menuBarActions"; //$NON-NLS-0$
+		this.toolsActionsScope = "menuBarActions"; //$NON-NLS-0$
 		this.additionalActionsScope = "extraActions"; //$NON-NLS-0$
 
 		this._parentNode = lib.node(this.parentId);
@@ -72,6 +73,15 @@ define([
 		this._sidebarContextMenuNode.id = this.parentId + "ContextMenu"; //$NON-NLS-0$
 
 		this._parentNode.parentNode.insertBefore(this._sidebarContextMenuNode, this._parentNode);
+		if(util.isElectron){
+			this._parentNode.parentNode.classList.add("desktopmode");
+		}else{
+			this.preferences.get("/general/settings").then(function (settings) {
+				if(typeof settings.generalSettings === 'undefined' || settings.generalSettings.desktopSelectionPolicy){
+					this._parentNode.parentNode.classList.add("desktopmode");
+				}
+			}.bind(this));
+		}
 
 		this.contextMenuActionsScope = this._sidebarContextMenuNode.id + "commonNavContextMenu"; //$NON-NLS-0$
 
@@ -90,6 +100,9 @@ define([
 
 			// Broadcast changes of our explorer root to the sidebarNavInputManager
 			this.addEventListener("rootChanged", function(evnt) {
+				sidebarNavInputManager.dispatchEvent(evnt);
+			});
+			this.addEventListener("fileDoubleClicked", function(evnt) {
 				sidebarNavInputManager.dispatchEvent(evnt);
 			});
 		}
@@ -112,7 +125,12 @@ define([
 	objects.mixin(CommonNavExplorer.prototype, /** @lends orion.sidebar.CommonNavExplorer.prototype */ {
 		isDesktopSelectionMode: function() {
 			return this.generalPreferences.getPrefs().then(function(genealPrefs) {
-				return genealPrefs.desktopSelectionPolicy;
+				return util.isElectron ? true : genealPrefs.desktopSelectionPolicy;
+			});
+		},
+		isEditorTabsEnabled: function() {
+			return this.generalPreferences.getPrefs().then(function(genealPrefs) {
+				return util.isElectron ? true : genealPrefs.enableEditorTabs;
 			});
 		},
 		onModelCreate: function(evt) {
@@ -174,7 +192,6 @@ define([
 		 * @returns {orion.Promise}
 		 */
 		loadRoot: function(childrenLocation, force) {
-			childrenLocation = (childrenLocation && childrenLocation.ChildrenLocation) || childrenLocation || "";
 			return this.commandsRegistered.then(function() {
 				if (childrenLocation && typeof childrenLocation === "object") {
 					return this.load(childrenLocation);
@@ -201,15 +218,10 @@ define([
 			});
 		},
 		scopeUp: function() {
-			var navigate;
-			var root = this.treeRoot;
-			var prnt = root.Parents && root.Parents[0];
-			if (prnt) {
-				navigate = prnt.ChildrenLocation;
-			} else {
-				navigate = this.fileClient.fileServiceRootURL(root.Location);
-			}
-			this.scope(navigate);
+			var prnt = this.treeRoot.Parents && this.treeRoot.Parents[0];
+			Deferred.when(prnt && prnt.ChildrenLocation || this.fileClient.getWorkspace(this.treeRoot.Location)).then(function(navigate) {
+				this.scope(navigate);
+			}.bind(this));
 		},
 		scopeDown: function(item) {
 			this.scope(item.ChildrenLocation);
@@ -243,9 +255,6 @@ define([
 			commandRegistry.registerCommandContribution(fileActionsScope, "eclipse.newFile", 1, "orion.menuBarFileGroup/orion.newContentGroup/orion.new.default"); //$NON-NLS-1$ //$NON-NLS-0$
 			commandRegistry.registerCommandContribution(fileActionsScope, "eclipse.newFolder", 2, "orion.menuBarFileGroup/orion.newContentGroup/orion.new.default", false, null /*, new mCommandRegistry.URLBinding("newFolder", "name")*/ ); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			commandRegistry.registerCommandContribution(fileActionsScope, "orion.new.project", 3, "orion.menuBarFileGroup/orion.newContentGroup/orion.new.default"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-			if (!util.isElectron) {
-				commandRegistry.registerCommandContribution(fileActionsScope, "orion.new.linkProject", 4, "orion.menuBarFileGroup/orion.newContentGroup/orion.new.default"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-			}
 
 			if (!util.isElectron) {
 				// Import actions
@@ -283,9 +292,6 @@ define([
 			commandRegistry.registerCommandContribution(contextMenuActionsScope, "eclipse.newFile", 1, "orion.commonNavContextMenuGroup/orion.newGroup/orion.New"); //$NON-NLS-1$ //$NON-NLS-0$
 			commandRegistry.registerCommandContribution(contextMenuActionsScope, "eclipse.newFolder", 2, "orion.commonNavContextMenuGroup/orion.newGroup/orion.New", false, null /*, new mCommandRegistry.URLBinding("newFolder", "name")*/ ); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			commandRegistry.registerCommandContribution(contextMenuActionsScope, "orion.new.project", 3, "orion.commonNavContextMenuGroup/orion.newGroup/orion.New"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-			if (!util.isElectron) {
-				commandRegistry.registerCommandContribution(contextMenuActionsScope, "orion.new.linkProject", 4, "orion.commonNavContextMenuGroup/orion.newGroup/orion.New"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-			}
 
 			// Context Menu edit group actions
 			commandRegistry.registerCommandContribution(contextMenuActionsScope, "eclipse.cut", 1, "orion.commonNavContextMenuGroup/orion.editGroup", false); //$NON-NLS-1$ //$NON-NLS-0$
@@ -311,7 +317,7 @@ define([
 			}
 
 			// Context Menu search action
-			commandRegistry.registerCommandContribution(contextMenuActionsScope, "orion.searchInFolder", 1, "orion.commonNavContextMenuGroup"); //$NON-NLS-0$
+			commandRegistry.registerCommandContribution(contextMenuActionsScope, "orion.openSearch", 1, "orion.commonNavContextMenuGroup"); //$NON-NLS-0$
 			commandRegistry.registerCommandContribution(contextMenuActionsScope, "orion.problemsInFolder", 2, "orion.commonNavContextMenuGroup"); //$NON-NLS-0$
 
 
@@ -444,25 +450,22 @@ define([
 	objects.mixin(CommonNavRenderer.prototype, {
 		showFolderLinks: true,
 		oneColumn: true,
-
 		_preventLinkBehavior: function(linkNode) {
 			linkNode.addEventListener("click", function(evt) {
 				this.explorer.isDesktopSelectionMode().then(function(desktopMode) {
-					if (_DEBUG) {
-						var byWho = evt.detail === 3 ? "simulation" : "user";
-						console.log("single click triggered by " + byWho);
-						console.log(evt);
-					}
-					if (desktopMode && (evt.shiftKey || evt.ctrlKey || evt.metaKey) && evt.detail !== 3) {
-						if (_DEBUG) {
-							console.log("single click prevented");
-						}
-						evt.preventDefault();
-					}
+					if(desktopMode){
+ 						evt.preventDefault();
+ 					}
 				});
 			}.bind(this));
 			linkNode.addEventListener("dblclick", function(evt) {
-				this.explorer.handleLinkDoubleClick(linkNode, evt);
+				this.explorer.isDesktopSelectionMode().then(function(desktopMode) {
+					if(desktopMode){
+						evt.preventDefault();
+					}else{
+						this.explorer.handleLinkDoubleClick(linkNode, evt);
+					}
+				});
 			}.bind(this));
 		},
 		createFolderNode: function(folder) {

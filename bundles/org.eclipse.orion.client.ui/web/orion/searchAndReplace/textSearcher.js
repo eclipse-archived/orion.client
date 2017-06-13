@@ -54,7 +54,6 @@ define([
 		show: function(options) {
 			mFind.Find.prototype.show.call(this, options);
 			var findString = options.findString;
-			this._addRecentfind(findString);
 			var replaceString = options.replaceString;
 			var findDiv = document.getElementById("localSearchFindWith"); //$NON-NLS-0$
 			if (!findDiv) {
@@ -69,6 +68,10 @@ define([
 			if (replaceString) {
 				var replaceDiv = document.getElementById("localSearchReplaceWith"); //$NON-NLS-0$
 				replaceDiv.value = replaceString;
+			}
+			this.setOptions({selectedLines: true, multipleLine: true});
+			if(!this.isRangeSearch()){
+				this._addRecentfind(findString);
 			}
 			window.setTimeout(function() {
 				findDiv.select();
@@ -145,6 +148,13 @@ define([
 						optionMenu.dropdown.close(true);
 					});
 				
+				that._selectedLinesUI = mCommands.createCheckedMenuItem(optionMenu.menu, messages["Selected Lines"], that._selectedLines,
+					function(event) {
+						var checked = event.target.checked;
+						that.setOptions({selectedLines: checked});
+						optionMenu.dropdown.close(true);
+					});
+				
 				mCommands.createCheckedMenuItem(optionMenu.menu, messages["Case sensitive"], !that._caseInsensitive,
 					function(event) {
 						that.setOptions({caseInsensitive: !event.target.checked});
@@ -193,6 +203,11 @@ define([
 				return searchStringInput;
 			},
 			function(){that.hide();});
+		},
+		postSelectedLines: function(/*selectedLines*/) {
+			if(this._selectedLinesUI) {
+				this._selectedLinesUI.checked = this._selectedLines;
+			}
 		},
 		_storeRecentFind: function(recentFinds, eventTarget, deleting){
 			this._serviceRegistry.getService("orion.core.preference").put("/window/favorites", {recentFind: recentFinds}).then(function() {  //$NON-NLS-1$ //$NON-NLS-2$

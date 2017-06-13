@@ -10,12 +10,13 @@
  *******************************************************************************/
 /*eslint-env node */
 /*globals configs:true val:true*/
-var api = require('../api'), writeError = api.writeError;
+var api = require('../api'), writeError = api.writeError, writeResponse = api.writeResponse;
 var args = require('../args');
 var clone = require('./clone');
 var express = require('express');
 var bodyParser = require('body-parser');
 var util = require('./util');
+var git = require('nodegit');
 
 module.exports = {};
 
@@ -63,7 +64,7 @@ function getAConfig(req, res) {
 				value = config[section] && config[section][name];
 			}
 			if (value !== undefined) {
-				res.status(200).json(configJSON(key, value, fileDir));
+				writeResponse(200, res, null, configJSON(key, value, fileDir), true);
 			} else {
 				writeError(404, res, "There is no config entry with key provided");
 			}
@@ -84,30 +85,50 @@ function getConfig(req, res) {
 			if (err) {
 				return writeError(400, res, err.message);
 			}
-			configs = [];
-
-			getFullPath(config, "");
-
-			res.status(200).json({
-				"Children": configs,
-				"CloneLocation": gitRoot + "/clone" + fileDir,
-				"Location": gitRoot + "/config/clone"+ fileDir,
-				"Type": "Config"
-			});
-
-			function getFullPath(config, prefix) {
-				if (typeof config !== "object" || Array.isArray(config)) {
-					if (!filter || prefix.indexOf(filter) !== -1) {
-						configs.push(configJSON(prefix, config, fileDir));
-					}
-				} else {
-					for (var property in config) {
-						if (config.hasOwnProperty(property)) {
-							getFullPath(config[property], prefix === "" ? property : prefix + "." + property);
+			var waitFor = Promise.resolve();
+			if(options && options.options && options.options.configParams["orion.single.user"]){
+				var user = config.user || (config.user = {});
+				if(!user.name){
+					waitFor = git.Config.openDefault().then(function(defaultConfig){
+						var fillUserName = defaultConfig.getString("user.name").then(function(defaultConfigValue) {
+							return defaultConfigValue && (user.name = defaultConfigValue);
+						});
+						var fillUserEmail = defaultConfig.getString("user.email").then(function(defaultConfigValue) {
+							return defaultConfigValue && (user.email = defaultConfigValue);
+						});
+						return Promise.all([fillUserName,fillUserEmail]);
+					}).then(function(){
+						args.writeConfigFile(configFile, config, function(err) {});
+					});
+				}
+			}
+			return waitFor.then(function(){
+				configs = [];
+				
+				getFullPath(config, "");
+				
+				writeResponse(200, res, null, {
+					"Children": configs,
+					"CloneLocation": gitRoot + "/clone" + fileDir,
+					"Location": gitRoot + "/config/clone"+ fileDir,
+					"Type": "Config"
+				}, true);
+				
+				function getFullPath(config, prefix) {
+					if (typeof config !== "object" || Array.isArray(config)) {
+						if (!filter || prefix.indexOf(filter) !== -1) {
+							configs.push(configJSON(prefix, config, fileDir));
+						}
+					} else {
+						for (var property in config) {
+							if (config.hasOwnProperty(property)) {
+								getFullPath(config[property], prefix === "" ? property : prefix + "." + property);
+							}
 						}
 					}
 				}
-			}
+			});
+		//TODO read user prefs if no username/email is specified -> git/config/userInfo (GitName && GitEmail)
 		});
 	})
 	.catch(function(err) {
@@ -140,8 +161,7 @@ function updateConfig(req, res, key, value, callback) {
 					}
 					if (result.value) {
 						var resp = configJSON(key, result.value, fileDir);
-						res.setHeader("Location", resp.Location);
-						res.status(result.status).json(resp);
+						writeResponse(result.status, res, {"Location":resp.Location}, resp, true);
 					} else {
 						res.status(result.status).end();
 					}

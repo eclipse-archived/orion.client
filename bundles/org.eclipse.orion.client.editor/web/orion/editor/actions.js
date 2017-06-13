@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2013 IBM Corporation and others.
+ * Copyright (c) 2013, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License v1.0
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution
@@ -1002,20 +1002,23 @@ define("orion/editor/actions", [ //$NON-NLS-0$
 			}
 
 			//if the proposal specifies linked positions, build the model and enter linked mode
-			if (proposal.positions && proposal.positions.length > 0 && this.linkedMode) {
+			if (Array.isArray(proposal.positions) && this.linkedMode) {
 				var positionGroups = [];
-				for (var i = 0; i < proposal.positions.length; ++i) {
-					positionGroups[i] = {
-						positions: [{
-							offset: proposal.positions[i].offset,
-							length: proposal.positions[i].length
-						}]
-					};
-				}
-				this.linkedMode.enterLinkedMode({
-					groups: positionGroups,
-					escapePosition: escapePosition()
+				proposal.positions.forEach(function(pos) {
+					//ignore bad proposal values
+					//@see https://bugs.eclipse.org/bugs/show_bug.cgi?id=513146
+					if(typeof pos.offset === "number" && typeof pos.length === "number") {
+						positionGroups.push({positions: [{offset: pos.offset, length: pos.length}]});
+					}
 				});
+				if(positionGroups.length > 0) {
+					this.linkedMode.enterLinkedMode({
+						groups: positionGroups,
+						escapePosition: escapePosition()
+					});
+				} else {
+					this.editor.getTextView().setCaretOffset(escapePosition());
+				}
 			} else if (proposal.groups && proposal.groups.length > 0 && this.linkedMode) {
 				this.linkedMode.enterLinkedMode({
 					groups: proposal.groups,
@@ -1023,8 +1026,7 @@ define("orion/editor/actions", [ //$NON-NLS-0$
 				});
 			} else if (typeof proposal.escapePosition === "number") { //$NON-NLS-0$
 				//we don't want linked mode, but there is an escape position, so just set cursor position
-				var textView = this.editor.getTextView();
-				textView.setCaretOffset(proposal.escapePosition);
+				this.editor.getTextView().setCaretOffset(proposal.escapePosition);
 			}
 			return true;
 		},

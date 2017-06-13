@@ -14,8 +14,9 @@ define([
 	'orion/widgets/themes/container/ThemeSheetWriter',
 	'orion/widgets/themes/container/ThemeData',
 	'orion/widgets/themes/ThemeBuilder',
-	'orion/widgets/settings/GeneralSettings'
-], function(chai, ThemeSheetWriter, ThemeData, ThemeBuilder, GeneralSettings) {
+	'orion/widgets/settings/GeneralSettings',
+	'orion/Deferred',
+], function(chai, ThemeSheetWriter, ThemeData, ThemeBuilder, GeneralSettings, Deferred) {
 	var assert = chai.assert;
 
 	describe("Widgets", function() {
@@ -25,9 +26,9 @@ define([
 			var preferences = {};
 			var mockPrefs = {
 				getPrefs: function() {
-					return new Promise(function (resolve) {
-						resolve(preferences);
-					});
+					var d = new Deferred();
+					d.resolve(preferences);
+					return d;
 				},
 				setPrefs: function(prefs) {
 					preferences = prefs;
@@ -52,9 +53,9 @@ define([
 				
 				// set mock functions to retrieve values for existing settings
 				generalSettingsWidget.generalFields = [{
-					isChecked: ()=>{return desktopSelectionPolicy;}
+					isChecked: function() {return desktopSelectionPolicy;}
 				},{
-					getValue: ()=>{return filteredResources;}
+					getValue: function() {return filteredResources;}
 				}];
 				
 				generalSettingsWidget.setPreferences().then(function() {
@@ -78,18 +79,18 @@ define([
 				afterEach(tearDown);
 
 				it("Should return 2 default style strings", function() {
-					var expected, actual;
-					expected = 2;
-					actual = themeData.getStyles();
-					assert.isArray(actual);
-					assert.equal(actual.length, expected);
+					var expected = 2;
+					themeData.getStyles().then(function(actual) {
+						assert.isArray(actual);
+						assert.equal(actual.length, expected);						
+					});
 				});
 				it("Should return protected themes", function() {
-					var expected, actual;
-					expected = 2;
-					actual = themeData.getProtectedThemes();
-					assert.isArray(actual);
-					assert.equal(actual.length, expected);
+					var expected = 2;
+					themeData.getProtectedThemes().then(function(actual) {
+						assert.isArray(actual);
+						assert.equal(actual.length, expected);
+					});
 				});
 			}),
 			describe("Theme Sheet Writer Tests", function() {
@@ -194,7 +195,7 @@ define([
 					themeBuilder = new ThemeBuilder({
 						themeData: {},
 						toolbarId: {},
-						serviceRegistry: {getService: ()=>{}},
+						serviceRegistry: {getService: function () {}},
 						
 					});
 				},

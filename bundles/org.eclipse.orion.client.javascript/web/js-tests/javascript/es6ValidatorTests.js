@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2016 IBM Corporation and others.
+ * Copyright (c) 2016, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License v1.0
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution
@@ -193,6 +193,87 @@ define([
 			//NO-UNUSED-VARS-UNREAD ---------------------------------------------
 			describe("no-unused-vars", function() {
 				var RULE_ID = 'no-unused-vars';
+				it("handle exports 1", function(done) {
+					var topic = "export default class XX {}";
+					var config = { rules: {} };
+					config.rules[RULE_ID] = 1;
+					validate({buffer: topic, callback: done, config: config}).then(
+						function (problems) {
+							assertProblems(problems, []);
+						},
+						function (error) {
+							worker.getTestState().callback(error);
+						});
+				});
+				it("handle exports 2", function(done) {
+					var topic = "class XX {} export default XX;";
+					var config = { rules: {} };
+					config.rules[RULE_ID] = 1;
+					validate({buffer: topic, callback: done, config: config}).then(
+						function (problems) {
+							assertProblems(problems, []);
+						},
+						function (error) {
+							worker.getTestState().callback(error);
+						});
+				});
+				it("handle exports 3", function(done) {
+					var topic = "class XX {}";
+					var config = { rules: {} };
+					config.rules[RULE_ID] = 1;
+					validate({buffer: topic, callback: done, config: config}).then(
+						function (problems) {
+							assertProblems(problems, [{
+								id: RULE_ID,
+								severity: 'warning',
+								description: "'XX' is unused.",
+								nodeType: "Identifier"
+							}]);
+						},
+						function (error) {
+							worker.getTestState().callback(error);
+						});
+				});
+				it("handle exports 4", function(done) {
+					var topic = "class XX {} class YY {} export default XX;";
+					var config = { rules: {} };
+					config.rules[RULE_ID] = 1;
+					validate({buffer: topic, callback: done, config: config}).then(
+						function (problems) {
+							assertProblems(problems, [{
+								id: RULE_ID,
+								severity: 'warning',
+								description: "'YY' is unused.",
+								nodeType: "Identifier"
+							}]);
+						},
+						function (error) {
+							worker.getTestState().callback(error);
+						});
+				});
+				it("handle exports 5", function(done) {
+					var topic = "class XX {} class YY {}";
+					var config = { rules: {} };
+					config.rules[RULE_ID] = 1;
+					validate({buffer: topic, callback: done, config: config}).then(
+						function (problems) {
+							assertProblems(problems, [{
+								id: RULE_ID,
+								severity: 'warning',
+								description: "'XX' is unused.",
+								nodeType: "Identifier"
+							},
+							{
+								id: RULE_ID,
+								severity: 'warning',
+								description: "'YY' is unused.",
+								nodeType: "Identifier"
+							}]);
+						},
+						function (error) {
+							worker.getTestState().callback(error);
+						});
+				});
 				it("flag unused var in list matching", function(callback) {
 					var topic = "var [a] = [1];";
 					var config = { rules: {} };

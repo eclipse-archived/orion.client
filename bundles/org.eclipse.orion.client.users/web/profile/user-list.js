@@ -15,8 +15,8 @@
 define(['i18n!profile/nls/messages', 'require', 'orion/i18nUtil', 'orion/bootstrap', 'orion/status', 'orion/progress', 'orion/operationsClient', 
 			'orion/commandRegistry', 'orion/commands', 'orion/selection',
 	        'orion/searchClient', 'orion/fileClient', 'orion/globalCommands', 'orion/profile/UsersList',
-	        'orion/profile/dialogs/NewUserDialog', 'orion/profile/dialogs/ResetPasswordDialog'], 
-			function(messages, require, i18nUtil, mBootstrap, mStatus, mProgress, mOperationsClient, mCommandRegistry, mCommands, mSelection, mSearchClient, mFileClient, mGlobalCommands, mUsersList, NewUserDialog, ResetPasswordDialog) {
+	        'orion/profile/dialogs/NewUserDialog', 'orion/profile/dialogs/ResetPasswordDialog', 'orion/urlModifier'], 
+			function(messages, require, i18nUtil, mBootstrap, mStatus, mProgress, mOperationsClient, mCommandRegistry, mCommands, mSelection, mSearchClient, mFileClient, mGlobalCommands, mUsersList, NewUserDialog, ResetPasswordDialog, urlModifier) {
 
 	mBootstrap.startup().then(function(core) {
 		var serviceRegistry = core.serviceRegistry;
@@ -93,7 +93,7 @@ define(['i18n!profile/nls/messages', 'require', 'orion/i18nUtil', 'orion/bootstr
 				var name = data.parameters && data.parameters.valueFor('name'); //$NON-NLS-0$
 				var findFunction = function(name) {
 					var href = require.toUrl("profile/user-profile.html") +"#/users/" + name;
-					window.location.href = href;
+					window.location.href = urlModifier(href);
 				};
 				if (name) {
 					findFunction(name);

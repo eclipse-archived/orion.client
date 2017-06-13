@@ -23,7 +23,6 @@ define([
 
 	return function(worker) {
 		var ternAssist;
-		var envs = Object.create(null);
 		var astManager = new ASTManager.ASTManager();
 		var jsFile = 'tern_content_assist_test_script.js';
 		var htmlFile = 'tern_content_assist_test_script.html';
@@ -70,7 +69,6 @@ define([
 			worker.postMessage({request: 'delFile', args:{file: jsFile}});
 			worker.postMessage({request: 'delFile', args:{file: htmlFile}});
 			
-			envs = typeof options.env === 'object' ? options.env : Object.create(null);
 			var editorContext = {
 				/*override*/
 				getText: function() {
@@ -183,9 +181,7 @@ define([
 			this.timeout(20000);
 			before('Message the server for warm up', function(done) {
 				CUProvider.setUseCache(false);
-				ternAssist = new TernAssist.TernContentAssist(astManager, worker, function() {
-					return new Deferred().resolve(envs);
-				}, CUProvider, jsProject);
+				ternAssist = new TernAssist.TernContentAssist(astManager, worker, CUProvider, jsProject);
 				worker.start(done, {options: {libs: ['ecma5', 'ecma6']}}); // Reset the tern server state to remove any prior files
 			});
 		
@@ -5534,6 +5530,56 @@ define([
 						contenttype: "text/html",
 						callback: done};
 					testProposals(options, []);
+				});
+			});
+			/**
+			 * Recognize $ in var name prefix
+			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=506890
+			 * @since 15.0
+			 */
+			describe('Var name with $ Tests', function() {
+				it('Var name with $ - test prefix', function(done) {
+					var options = {
+						buffer: "var $_test = 42;\ntest",
+						prefix: "test",
+						offset: 21,
+						callback: done
+					};
+					testProposals(options, [
+					]);
+				});
+				it('Var name with $ - $ prefix', function(done) {
+					var options = {
+						buffer: "var $_test = 42;\n$",
+						prefix: "$",
+						offset: 18,
+						callback: done
+					};
+					testProposals(options, [
+						['$_test', '$_test : number'],
+					]);
+				});
+				it('Var name with $ - $_ prefix', function(done) {
+					var options = {
+						buffer: "var $_test = 42;\n$_",
+						prefix: "$_",
+						offset: 19,
+						callback: done
+					};
+					testProposals(options, [
+						['$_test', '$_test : number'],
+					]);
+				});
+				it('Var name with $ - $_tes prefix', function(done) {
+					var options = {
+						buffer: "var $_test = 42;\n$_tes",
+						prefix: "$_tes",
+						offset: 22,
+						callback: done
+					};
+					testProposals(options, [
+						['$_test', '$_test : number'],
+					]);
 				});
 			});
 		});

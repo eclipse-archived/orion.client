@@ -122,7 +122,7 @@ function(messages, require, Deferred, i18nUtil, mExplorer, mUiUtils, mSearchUtil
 			this._listRoot.children[i].type = "file"; //$NON-NLS-0$
 			this._listRoot.children[i].linkLocation = require.toUrl("edit/edit.html") + "#" + this._listRoot.children[i].Location; //$NON-NLS-1$ //$NON-NLS-0$
 			this._listRoot.children[i].fullPathName = mUiUtils.fullPathNameByMeta(this._listRoot.children[i].Parents);
-			this._listRoot.children[i].parentLocation = mUiUtils.path2FolderName(this._listRoot.children[i].Location, this._listRoot.children[i].Name, true);
+			this._listRoot.children[i].parentLocation = mUiUtils.path2FolderName(this._listRoot.children[i].Location, true);
 			for (var j = 0; j < this._listRoot.children[i].nonnls.length; j++) {
 				this._listRoot.children[i].nonnls[j].type = "detail"; //$NON-NLS-0$
 				this._listRoot.children[i].nonnls[j].parent = this._listRoot.children[i]; //.parent is reserved for tree visitor

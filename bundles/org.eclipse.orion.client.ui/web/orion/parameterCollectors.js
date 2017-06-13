@@ -11,8 +11,8 @@
  *******************************************************************************/
 /*eslint-env browser, amd*/
 
-define(['i18n!orion/nls/messages', 'orion/webui/littlelib', 'orion/bidiUtils'], 
-        function(messages, lib, bidiUtils) {
+define(['i18n!orion/nls/messages', 'orion/webui/littlelib', 'orion/bidiUtils', 'orion/bidiFormat'], 
+        function(messages, lib, bidiUtils, bidiFormat) {
 
 	
 	/**
@@ -105,11 +105,13 @@ define(['i18n!orion/nls/messages', 'orion/webui/littlelib', 'orion/bidiUtils'],
 
 				if (focusNode) {
 					this._oldFocusNode = window.document.activeElement;
+					var slideContainer = this._activeElements.slideContainer;
 					window.setTimeout(function() {
 						focusNode.focus();
 						if (focusNode.select) {
 							focusNode.select();
 						}
+						lib.trapTabs(slideContainer);
 					}, 0);
 				}
 				if (this._activeElements.commandNode) {
@@ -135,6 +137,10 @@ define(['i18n!orion/nls/messages', 'orion/webui/littlelib', 'orion/bidiUtils'],
 					if (!validate(field.parameterName, field.checked, field)) {
 						return true;
 					}
+				} else if (field.type === "url" && field.nodeName === "DIV") { //$NON-NLS-0$
+					if (!validate(field.parameterName, field.textContent.trim(), field)) {
+						return true;
+					}
 				} else if (field.type !== "button") { //$NON-NLS-0$
 					if (!validate(field.parameterName, field.value.trim(), field)) {
 						return true;
@@ -152,6 +158,10 @@ define(['i18n!orion/nls/messages', 'orion/webui/littlelib', 'orion/bidiUtils'],
 			}
 			
 			if (lib.$$array("textArea", parent).some(isValid)) {  //$NON-NLS-0$
+				return false;
+			}
+			
+			if (lib.$$array("div[contenteditable=true]", parent).some(isValid)) {  //$NON-NLS-0$
 				return false;
 			}
 			
@@ -269,16 +279,24 @@ define(['i18n!orion/nls/messages', 'orion/webui/littlelib', 'orion/bidiUtils'],
 							}
 						}
 					} else {
+						var isSTT = (bidiUtils.isBidiEnabled() && parm.type === "url"); //$NON-NLS-0$
 						if (!field) {
-							field = document.createElement("input"); //$NON-NLS-0$
+							field = (!isSTT ? document.createElement("input") : document.createElement("div")); //$NON-NLS-0$
 							field.type = parm.type;
-							field.id = id;							
+							field.id = id;
+							if (isSTT) {
+								field.contentEditable = true;							
+							}
 							parent.appendChild(field);
 						}
 						if (parm.value) {
-							field.value = parm.value;
-						}
-						bidiUtils.initInputField(field);
+							if (!isSTT) {
+								field.value = parm.value;
+							} else {
+								field.innerHTML = bidiFormat.getHtml(parm.value, "url", {}, false, "en");								
+							}
+						}					
+						(!isSTT ? bidiUtils.initInputField(field) : bidiFormat.attach(field, "url", {}, false, "en"));
 					}
 					field.classList.add("parameterInput"); //$NON-NLS-0$
 					// for fun

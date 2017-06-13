@@ -419,7 +419,7 @@ define([
 					var hover = Object.create(null);
 					hover.type = 'markdown'; //$NON-NLS-1$
 					hover.content = "";
-					if (tag.category === "Obsolete and deprecated elements"){
+					if (tag.obsolete){
 						hover.content += Messages['obsoleteTag'];
 					}
 					if (tag.doc){
@@ -462,10 +462,12 @@ define([
 							}
 							break;
 					}
-					if (tag.category === "Obsolete and deprecated elements"){
-						desc += Messages['obsoleteTagDesc'];
+					var style = "emphasis";
+					if (tag.obsolete){
+						style = "strikethrough";
+						//desc += Messages['obsoleteTagDesc'];
 					}
-					var proposal = this.makeComputedProposal(proposalText, tag.name, desc, hover, params.prefix);
+					var proposal = this.makeComputedProposal(proposalText, tag.name, desc, hover, params.prefix, style);
 					// The prefix not being includes prevents content assist staying open while typing
 //					if (source.charAt(params.offset - prefix.length - 1) === '<'){
 //						prefix = '<' + prefix;
@@ -790,9 +792,10 @@ define([
 		 * @param {String} description The description for the proposal
 		 * @param {Object} hover The markdown hover object for the proposal
 		 * @param {String} prefix The prefix for the proposal
+		 * @param {String} style The optional style. If omitted, defaults to 'emphasis'
 		 * @since 10.0   
 		 */
-		makeComputedProposal: function(proposal, name, description, hover, prefix) {
+		makeComputedProposal: function(proposal, name, description, hover, prefix, style) {
 			return {
 				proposal: proposal,
 				relevance: 100,
@@ -800,7 +803,7 @@ define([
 				description: description,
 				hover: hover,
 				prefix: prefix,
-				style: 'emphasis', //$NON-NLS-1$
+				style: typeof style === 'string' ? style : 'emphasis', //$NON-NLS-1$
 				overwrite: true,
 				kind: 'html' //$NON-NLS-1$
 		    };

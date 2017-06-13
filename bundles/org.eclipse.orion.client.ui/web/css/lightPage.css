@@ -55,7 +55,11 @@
 
 .lightPage .split {
 	background: #c4c5c8;
-	width: 4px;
+}
+
+.lightPage .split:focus {
+	outline: none;
+	background: #00FF00;
 }
 
 .lightPage .splitThumb {
@@ -283,6 +287,10 @@
 	height: 40px;
 	width: 40px;
 	border-width: 4px;
+}
+
+.lightPage .uploadNodeText{
+	color: black;
 }
 
 @-webkit-keyframes rotateThis {

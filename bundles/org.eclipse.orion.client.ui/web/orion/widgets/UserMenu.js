@@ -16,8 +16,11 @@ define([
 	'orion/webui/dropdown',
 	'orion/util',
 	'orion/webui/dialog',
-	'orion/xhr'
-], function(messages, lib, PageLinks, Dropdown, util, dialog, xhr) {
+	'orion/xhr',
+	'orion/operation',
+	'orion/Deferred',
+	'orion/urlModifier'
+], function(messages, lib, PageLinks, Dropdown, util, dialog, xhr, operation, Deferred, urlModifier) {
 	
 	function UserMenu(options) {
 		this._displaySignOut = true;
@@ -39,6 +42,7 @@ define([
 			if( options.signOut !== undefined ){
 				this._displaySignOut = options.signOut;
 			}
+			this.prefsService = options.serviceRegistry.getService("orion.core.preference");
  		},
 		
 		
@@ -94,7 +98,7 @@ define([
 								}
 							}
 							authService.getAuthForm(PageLinks.getOrionHome()).then(function(formURL) {
-								window.location = formURL;
+								window.location = urlModifier(formURL);
 							});
 						});
 					});
@@ -210,29 +214,34 @@ define([
 						{ 
 							text: messages["Download"],
 							callback: function() {
-								xhr("POST", "/update/downloadUpdates")
-									.then(function(result) {
-										document.querySelector("#updateDownloading").style.display = updateDownloading;
-										document.querySelector("#updateChannel").style.display = 
-										document.querySelector("#aboutDownloadUpdates").style.display =
-										document.querySelector("#updateAvailable").style.display = "none";
-									}, function(error) {
-										document.querySelector("#updateError").style.display = updateError;
-										document.querySelector("#aboutDownloadUpdates").style.display =
-										document.querySelector("#updateDownloading").style.display =
-										document.querySelector("#updateAvailable").style.display = "none";
-									});
-							},
+								var progress = serviceRegistry.getService("orion.page.progress"); //$NON-NLS-0$
+								var progressService = serviceRegistry.getService("orion.page.message");
+								var deferred = progress.progress(this.downloadUpdateOperation(), messages["Downloading"]);
+								progressService.createProgressMonitor(deferred, messages["Downloading"]);
+								deferred.then(function(result) {
+									document.querySelector("#updateDownloading").style.display = updateDownloading;
+									document.querySelector("#updateChannel").style.display = 
+									document.querySelector("#aboutDownloadUpdates").style.display =
+									document.querySelector("#updateAvailable").style.display = "none";
+								}, function(error) {
+									document.querySelector("#updateError").style.display = updateError;
+									document.querySelector("#aboutDownloadUpdates").style.display =
+									document.querySelector("#updateDownloading").style.display =
+									document.querySelector("#updateAvailable").style.display = "none";
+								});
+							}.bind(this),
 							id: "aboutDownloadUpdates" 
 						},
 						{
 							text: messages["Check for Updates"],
 							callback: function() {
-								var channelOptions = document.getElementById('channelOptions'),
-									updateChannel = channelOptions.options[channelOptions.selectedIndex].id;
-								xhr("GET", '/update/resolveNewVersion?updateChannel=' + updateChannel)
-									.then(function(result) {
-										if (result.response) {
+								var	updateChannel = channelOptions.options[channelOptions.selectedIndex].id;
+								var progress = serviceRegistry.getService("orion.page.progress"); //$NON-NLS-0$
+								var progressService = serviceRegistry.getService("orion.page.message");
+								var deferred = progress.progress(this.checkForUpdateOperation('/update/resolveNewVersion?updateChannel=' + updateChannel), messages["Checking for Update"]);
+								progressService.createProgressMonitor(deferred, messages["Checking for Update"]);
+								deferred.then(function(result) {
+										if (result && result.newVersion) {
 											document.querySelector("#aboutDownloadUpdates").style.display = aboutDownloadUpdates;
 											document.querySelector("#updateAvailable").style.display = updateAvailable;
 											document.querySelector("#updateUnavailable").style.display = 
@@ -245,8 +254,8 @@ define([
 									}, function(error) {
 										document.querySelector("#updateError").style.display = updateError;
 										document.querySelector("#aboutResolveNewVersion").style.display = "none";
-									});
-							},
+								});
+							}.bind(this),
 							id: "aboutResolveNewVersion"
 						},
 						{
@@ -264,13 +273,22 @@ define([
 						var updateAvailable = document.querySelector("#updateAvailable").style.display;
 						var updateError = document.querySelector("#updateError").style.display;
 						var updateDownloading = document.querySelector("#updateDownloading").style.display;
+						var channelOptions = document.getElementById('channelOptions');
 						document.querySelector("#aboutDownloadUpdates").style.display = 
 						document.querySelector("#updateAvailable").style.display = 
 						document.querySelector("#updateUnavailable").style.display = 
 						document.querySelector("#updateError").style.display = 
 						document.querySelector("#updateDownloading").style.display = "none";
+						this.prefsService.get("/updateChannel").then(function(prefs) {
+							channelOptions.selectedIndex = prefs.name && prefs.name === "alpha" ? 1 : 0;
+						});
+						channelOptions.addEventListener("change", function(event){
+							this.prefsService.put("/updateChannel", {
+								name : channelOptions[channelOptions.selectedIndex].id
+							});
+						}.bind(this));
 						newDialog.show();
-					});
+					}.bind(this));
 					getCategory(0).appendChild(about.parentNode);
 				}
 
@@ -318,6 +336,46 @@ define([
 				}
 			}
 			this.renderServices();
+		},
+		checkForUpdateOperation : function(updateChannel){
+			var service = this;
+			var clientDeferred = new Deferred();
+			xhr("GET", updateChannel)
+			.then(function(result) {
+				service._getUpdateServiceResponse(clientDeferred, result);
+			}, function(error){
+				service._handleUpdateServiceResponseError(clientDeferred, error);
+			});
+			return clientDeferred;
+		},
+		downloadUpdateOperation : function(){
+			var service = this;
+			var clientDeferred = new Deferred();
+			xhr("POST", '/update/downloadUpdates')
+			.then(function(result) {
+				service._getUpdateServiceResponse(clientDeferred, result);
+			}, function(error){
+				service._handleUpdateServiceResponseError(clientDeferred, error);
+			});
+			return clientDeferred;
+		},
+		_getUpdateServiceResponse : function(deferred, result) {
+			var response =  result.response ? JSON.parse(result.response) : null;
+			
+			if (result.xhr && result.xhr.status === 202) {
+				var def = operation.handle(response.Location);
+				def.then(deferred.resolve, function(data) {
+					data.failedOperation = response.Location;
+					deferred.reject(data);
+				}, deferred.progress);
+				deferred.then(null, function(error){def.reject(error);});
+				return;
+			}
+			deferred.resolve(response);
+			return;
+		},
+		_handleUpdateServiceResponseError: function(deferred, error){
+			deferred.reject(error);
 		}
 	};
 	UserMenu.prototype.constructor = UserMenu;

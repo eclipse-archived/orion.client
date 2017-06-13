@@ -181,18 +181,7 @@ define(['orion/webui/littlelib', 'orion/uiUtils'],
 			
 			// When tabbing out of the dialog, using the above technique (restore to last focus) will put the focus on the last element, but
 			// we want it on the first element, so let's prevent the user from tabbing out of the dialog.
-			var lastTabbable =  lib.lastTabbable(this.$buttonContainer) || lib.lastTabbable(this.$parent);
-			if (lastTabbable) {
-				lastTabbable.addEventListener("keydown", function (e) { //$NON-NLS-0$
-					if(e.keyCode === lib.KEY.TAB) {
-						var firstTabbable = self._getFirstFocusField();
-						if (firstTabbable && firstTabbable !== e.target) {
-							firstTabbable.focus();
-						}
-						lib.stop(e);
-					} 
-				}, false);
-			}
+			lib.trapTabs(this.$frame);
 		},
 		
 		_addChildDialog: function(dialog) {
@@ -296,6 +285,7 @@ define(['orion/webui/littlelib', 'orion/uiUtils'],
 			this.$lastFocusedElement = this.$originalFocus = document.activeElement;
 			this.$frame.style.top = top + "px"; //$NON-NLS-0$
 			this.$frame.style.left = left + "px"; //$NON-NLS-0$ 
+			this.$frame.style["max-width"] = "calc(100% - " + left + "px";
 			this.$frame.classList.add("dialogShowing"); //$NON-NLS-0$
 			if (typeof this._afterShowing === "function") { //$NON-NLS-0$
 				this._afterShowing();

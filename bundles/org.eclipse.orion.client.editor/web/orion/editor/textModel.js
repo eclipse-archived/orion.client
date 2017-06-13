@@ -59,7 +59,8 @@ define("orion/editor/textModel", ['orion/editor/eventTarget', 'orion/regex', 'or
 		 * @property {Boolean} [caseInsensitive=false] whether or not search is case insensitive.
 		 * @property {Boolean} [reverse=false] whether or not to search backwards.
 		 * @property {Number} [start=0] The start offset to start searching
-		 * @property {Number} [end=charCount] The end offset of the search. Used to search in a given range.
+		 * @property {Number} [rangeStart] The range start offset of the search. Used to search in a given range.
+		 * @property {Number} [rangeEnd] The range end offset of the search. Used to search in a given range.
 		 */
 		/**
 		 * @class This object represents a find occurrences iterator.
@@ -113,8 +114,9 @@ define("orion/editor/textModel", ['orion/editor/eventTarget', 'orion/regex', 'or
 				var wrap = options.wrap;
 				var wholeWord = options.wholeWord;
 				var start = options.start || 0;
-				var end = options.end;
-				var isRange = end !== null && end !== undefined;
+				var rangeStart = options.rangeStart;
+				var rangeEnd = options.rangeEnd;
+				var isRange = rangeStart !== null && rangeStart !== undefined && rangeEnd !== null && rangeEnd !== undefined;
 				if (flags.indexOf("g") === -1) { flags += "g"; } //$NON-NLS-1$ //$NON-NLS-2$
 				if (flags.indexOf("m") === -1) { flags += "m"; } //$NON-NLS-1$ //$NON-NLS-2$
 				if (caseInsensitive) {
@@ -125,8 +127,8 @@ define("orion/editor/textModel", ['orion/editor/eventTarget', 'orion/regex', 'or
 				}
 				var text = this._text[0], result, lastIndex, offset = 0;
 				if (isRange) {
-					var s = start < end ? start : end;
-					var e = start < end ? end : start;
+					var s = rangeStart < rangeEnd ? rangeStart : rangeEnd;
+					var e = rangeStart < rangeEnd ? rangeEnd : rangeStart;
 					text = text.substring(s, e);
 					offset = s;
 				}
@@ -159,9 +161,7 @@ define("orion/editor/textModel", ['orion/editor/eventTarget', 'orion/regex', 'or
 						return match;
 					};
 				} else {
-					if (!isRange) {
-						re.lastIndex = start;
-					}
+					re.lastIndex = start - offset;
 					skip = function() {
 						while (true) {
 							lastIndex = re.lastIndex;
