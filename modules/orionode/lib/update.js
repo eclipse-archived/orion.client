@@ -64,16 +64,15 @@ module.exports.router = function(options) {
 			 	Severity: "Ok"
 			 });
 		}
-		var resolveURL = feedURL + '/api/resolve?platform=' + platform + '&channel=' + req.query.updateChannel.name;
+		var resolveURL = feedURL + '/api/resolve?platform=' + platform + '&channel=' + req.query.updateChannel;
 		autoUpdater.setResolveURL(resolveURL);
 		autoUpdater.resolveNewVersion(true);
 		autoUpdater.on("update-available-manual", function(newVersion) {
-			console.log(newVersion);
 			task.done({
 				HttpCode: 200,
 				Code: 0,
 				JsonData: {"newVersion":newVersion},
-				DetailedMessage: "OK",
+				DetailedMessage: "update-available-manual",
 				Message: "OK",
 				Severity: "Ok"
 			});
@@ -82,7 +81,7 @@ module.exports.router = function(options) {
 			task.done({
 				HttpCode: 204,
 				Code: 0,
-				DetailedMessage: "OK",
+				DetailedMessage: "update-not-available",
 				Message: "OK",
 				Severity: "Ok"
 			});
@@ -92,7 +91,7 @@ module.exports.router = function(options) {
 			task.done({
 				HttpCode: 204,
 				Code: 0,
-				DetailedMessage: "OK",
+				DetailedMessage: "update-error",
 				Message: "OK",
 				Severity: "Ok"
 			});
