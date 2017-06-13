@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2016 IBM Corporation and others.
+ * Copyright (c) 2016, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -93,9 +93,7 @@ define("webtools/htmlFormatter", [
 		 * @param {Object} context The current selection context
 		 */
 		format: function(editorContext, context) {
-			var deferred = new Deferred();
-			this._format(editorContext, deferred, config.rules);
-			return deferred;
+			return this._format(editorContext, config.rules);
 		},
 	
 		/**
@@ -103,11 +101,10 @@ define("webtools/htmlFormatter", [
 		 * @function
 		 * @private
 		 * @param {orion.edit.EditorContext} editorContext The given editor context
-		 * @param {Deferred} deferred the given deferred object
 		 * @param {Object} configuration the given configuration
 		 * @since 6.0
 		 */
-		_format: function(editorContext, deferred, configuration) {
+		_format: function(editorContext, configuration) {
 			return editorContext.getSelection().then(function(selection) {
 				var start = selection.start;
 				var end = selection.end;
@@ -115,23 +112,19 @@ define("webtools/htmlFormatter", [
 					return editorContext.getText(start, end).then(function(text) {
 						var formatted = Beautifier.html_beautify(text, configuration);
 						if (formatted) {
-							deferred.resolve(editorContext.setText(formatted.text, start, end));
-						} else {
-							deferred.reject();
+							return editorContext.setText(formatted, start, end);
 						}
-						return deferred;
-					}.bind(this));
+						return new Deferred().reject();
+					});
 				}
 				return editorContext.getText().then(function(text) {
 					var formatted = Beautifier.html_beautify(text, configuration);
 					if (formatted) {
-						deferred.resolve(editorContext.setText(formatted));
-					} else {
-						deferred.reject();
+						return editorContext.setText(formatted);
 					}
-					return deferred;
-				}.bind(this));
-			}.bind(this));
+					return new Deferred().reject();
+				});
+			});
 		},
 		
 		/**
