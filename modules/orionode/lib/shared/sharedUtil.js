@@ -18,6 +18,7 @@ var Promise = require('bluebird');
 var userProjects = require('./db/userProjects');
 
 module.exports = function(options) {
+	var SEPARATOR = "-";
     var workspaceRoot = options.options.workspaceDir;
     if (!workspaceRoot) { throw new Error('options.options.workspaceDir path required'); }
 
@@ -28,6 +29,11 @@ module.exports = function(options) {
     module.exports.getChildren = getChildren;
     module.exports.getSharedProjects = getSharedProjects;
     module.exports.projectExists = projectExists;
+    module.exports.getfileRoot = getfileRoot;
+    module.exports.decodeUserIdFromWorkspaceId = decodeUserIdFromWorkspaceId;
+    module.exports.decodeWorkspaceNameFromWorkspaceId = decodeWorkspaceNameFromWorkspaceId;
+    module.exports.getProjectRoot = getProjectRoot;
+    module.exports.getProjectLocationFromWorkspaceId = getProjectLocationFromWorkspaceId;
 
 	function projectExists(fullpath) {
         return fs.existsSync(fullpath);
@@ -134,5 +140,45 @@ module.exports = function(options) {
             }
             callback(projects);
         });
+    }
+    
+    function getfileRoot(workspaceId) {
+		var userId = decodeUserIdFromWorkspaceId(workspaceId);
+		return path.join(userId.substring(0,2), userId, decodeWorkspaceNameFromWorkspaceId(workspaceId));
+	}
+	function decodeUserIdFromWorkspaceId(workspaceId) {
+		var index = workspaceId.lastIndexOf(SEPARATOR);
+		if (index === -1) return null;
+		return workspaceId.substring(0, index);
+	}
+	
+	function decodeWorkspaceNameFromWorkspaceId(workspaceId) {
+		var index = workspaceId.lastIndexOf(SEPARATOR);
+		if (index === -1) return null;
+		return workspaceId.substring(index + 1);
+	}
+
+    /**
+     * Removes the root server workspace, and trailing file tree within project.
+     * Example:
+     * input: "C:\Users\IBM_ADMIN\node.workspace\mo\mourad\OrionContent\web\hello.html"
+     * return: "\mo\mourad\OrionContent\web" which is the unique project path format that can be found in the database.
+     */
+    function getProjectRoot(filepath) {
+        var index = filepath.indexOf(workspaceRoot);
+        if (index === -1) return undefined;
+        index += workspaceRoot.length;
+        filepath = filepath.substring(index);
+        return filepath.split(path.sep).slice(0,5).join(path.sep);
+    }
+    
+    /**
+     * /user1-orionContent/test/testfile  -> /us/user1/orionContent/test
+     */
+    function getProjectLocationFromWorkspaceId(filepath) {
+    	var segs = filepath.split(path.sep);
+		var fileRoot = getfileRoot(segs[1]);
+		var realPath = path.join("/", fileRoot, segs[2]);
+		return realPath;
     }
 }

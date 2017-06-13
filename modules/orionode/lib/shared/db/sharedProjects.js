@@ -40,7 +40,6 @@ module.exports = function(options) {
 	var app = express.Router();
 	module.exports.getHubID = getHubID;
 	module.exports.getProjectPathFromHubID = getProjectPathFromHubID;
-	module.exports.getProjectRoot = getProjectRoot;
 	module.exports.addUserToProject = addUserToProject;
 	module.exports.removeUserFromProject = removeUserFromProject;
 	module.exports.getUsersInProject = getUsersInProject;
@@ -142,7 +141,7 @@ module.exports = function(options) {
 	}
 	
     function getHubID(filepath) {
-        var project = getProjectRoot(filepath);
+        var project = sharedUtil.getProjectRoot(filepath);
 
 		var query = sharedProject.findOne({
 			location: project,
@@ -165,20 +164,6 @@ module.exports = function(options) {
 			return doc ? doc.location : undefined;
 		});
 	}
-
-    /**
-     * Removes the root server workspace, and trailing file tree within project.
-     * Example:
-     * input: "C:\Users\IBM_ADMIN\node.workspace\mo\mourad\OrionContent\web\hello.html"
-     * return: "\mo\mourad\OrionContent\web" which is the unique project path format that can be found in the database.
-     */
-    function getProjectRoot(filepath) {
-        var index = filepath.indexOf(workspaceRoot);
-        if (index === -1) return undefined;
-        index += workspaceRoot.length;
-        filepath = filepath.substring(index);
-        return filepath.split(path.sep).slice(0,5).join(path.sep);
-    }
 
 	/**
 	 * Returns the list of users that the project is shared with.
