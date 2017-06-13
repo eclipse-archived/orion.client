@@ -32,7 +32,7 @@ module.exports.router = function(options) {
 	.use(bodyParser.json())
 	.post('/downloadUpdates', function (req, res) {
 		var allPrefs = prefs.readPrefs();
-		var updateChannel = allPrefs.user && allPrefs.user.updateChannel && allPrefs.user.updateChannel.url ? allPrefs.user.updateChannel.url : configParams["orion.autoUpdater.defaultChannel"];
+		var updateChannel = allPrefs.user && allPrefs.user.updateChannel && allPrefs.user.updateChannel.name ? allPrefs.user.updateChannel.name : configParams["orion.autoUpdater.defaultChannel"];
 		var task = new tasks.Task(res, false, true, 0, true);
 		if (platform === "linux") {
 			electron.shell.openExternal(feedURL + '/download/channel/' + updateChannel + '/linux');
