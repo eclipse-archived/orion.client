@@ -10,15 +10,13 @@
  *******************************************************************************/
 /*eslint-env node */
 var api = require('../api'), writeError = api.writeError;
-var git = require('nodegit');
 var path = require('path');
 var express = require('express');
-var mime = require('mime');
 var sharedUtil = require('./sharedUtil');
 var fileUtil = require('../fileUtil');
+var ofile = require('../file');
 var fs = require('fs');
 var sharedProjects = require('./db/sharedProjects');
-var writeError = api.writeError;
 
 module.exports = {};
 
@@ -32,7 +30,6 @@ module.exports.router = function(options) {
 
 	return express.Router()
 	.get('/file/:WorkspaceId*', getTree)
-	.get('/*', getSharedWorkspace)
 	.put('/file*', ensureAccess, putFile)
 	.post('/file*', ensureAccess, postFile)
 	.delete('/file*', ensureAccess, deleteFile)
@@ -40,8 +37,9 @@ module.exports.router = function(options) {
 	.put('/save/:hubId/*', saveFile)
 	.get('/session/:hubId', checkSession)
 	.get('/xfer/export*', getXfer)
-	.post('/xfer/import*', postImportXfer);
-
+	.post('/xfer/import*', postImportXfer)
+	.get('/*', getSharedWorkspace);
+	
 	/**
 	 * Get shared projects for the user.
 	 */
@@ -70,25 +68,9 @@ module.exports.router = function(options) {
 				}, true);
 		});
 	}
-	
-	function getfileRoot(workspaceId) {
-		var userId = decodeUserIdFromWorkspaceId(workspaceId);
-		return path.join(userId.substring(0,2), userId, decodeWorkspaceNameFromWorkspaceId(workspaceId));
-	}
-	function decodeUserIdFromWorkspaceId(workspaceId) {
-		var index = workspaceId.lastIndexOf(SEPARATOR);
-		if (index === -1) return null;
-		return workspaceId.substring(0, index);
-	}
-	
-	function decodeWorkspaceNameFromWorkspaceId(workspaceId) {
-		var index = workspaceId.lastIndexOf(SEPARATOR);
-		if (index === -1) return null;
-		return workspaceId.substring(index + 1);
-	}
 
 	function ensureAccess(req, res, next) {
-		var project = sharedProjects.getProjectRoot(path.join(workspaceRoot, req.params["0"]));
+		var project = sharedUtil.getProjectLocationFromWorkspaceId(req.params["0"]);
 		var username = req.user.username;
 
 		sharedProjects.getUsersInProject(project)
@@ -111,7 +93,7 @@ module.exports.router = function(options) {
 		if(projectName){
 			var tree;
 			var fileRoot =path.join("/", workspaceId, req.params["0"]);
-			var realfileRootPath = getfileRoot(workspaceId);
+			var realfileRootPath = sharedUtil.getfileRoot(workspaceId);
 			var filePath = path.join(workspaceRoot,realfileRootPath, req.params["0"]);
 			var readIfExists = req.headers ? Boolean(req.headers['read-if-exists']).valueOf() : false;
 			fileUtil.withStatsAndETag(filePath, function(err, stats, etag) {
@@ -219,7 +201,7 @@ module.exports.router = function(options) {
 			req.pipe(ws);
 		}
 		var ifMatchHeader = req.headers['if-match'];
-		fileUtil.withETag(filepath, function(error, etag) {
+		fileUtil.withETag(file.path, function(error, etag) {
 			if (error && error.code === 'ENOENT') {
 				res.status(404).end();
 			}
@@ -292,7 +274,7 @@ module.exports.router = function(options) {
 				res.setHeader('ETag', etag);
 			}
 			res.setHeader("Cache-Control", "no-cache");
-			api.write(null, res, null, result);
+			api.writeResponse(null, res, null, result, true, true);
 		})
 		.catch(api.writeError.bind(null, 500, res));
 	};

@@ -143,7 +143,7 @@ module.exports = function(options) {
 			throw new Error("Project does not exist");
 		}
 
-		project = projectsCollection.getProjectRoot(project.path);
+		project = sharedUtil.getProjectRoot(project.path);
 
 		projectsCollection.addUserToProject(user, project)
 		.then(function(doc) {
@@ -166,7 +166,7 @@ module.exports = function(options) {
 	app.delete('/:project/:user', function(req, res) {
 		var project = fileUtil.getFile(req, decodeURIComponent(req.params.project).substring(5));
 		var user = req.params.user;
-		project = projectsCollection.getProjectRoot(project.path);
+		project = sharedUtil.getProjectRoot(project.path);
 
 		projectsCollection.removeUserFromProject(user, project)
 		.then(function() {
