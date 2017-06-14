@@ -17,6 +17,8 @@ var fs = require('fs'),
 
 module.exports.start = function(startServer, configParams) {
 	var electron = require('electron'),
+		log4js = require('log4js'),
+		logger = log4js.getLogger('electron'),
 		autoUpdater = require('./lib/autoUpdater'),
 		spawn = require('child_process').spawn,
 		allPrefs = prefs.readPrefs(),
@@ -39,6 +41,8 @@ module.exports.start = function(startServer, configParams) {
 		}
 		var resolveURL = feedURL + '/api/resolve?platform=' + platform + '&channel=' + updateChannel;
 		
+		logger.debug("resolveURL", resolveURL);
+		logger.debug("latestUpdateURL", latestUpdateURL);
 		autoUpdater.setResolveURL(resolveURL);
 		autoUpdater.setFeedURL(latestUpdateURL);
 	}
@@ -159,7 +163,7 @@ module.exports.start = function(startServer, configParams) {
 		if (process.platform === 'darwin') {
 			if (!Menu.getApplicationMenu()) {
 				var template = [{
-					label: electron.app.getName(),
+					label: name,
 					submenu: [
 						{role: 'about'},
 						{ type: "separator" },
@@ -225,7 +229,7 @@ module.exports.start = function(startServer, configParams) {
 			}
 		}
 		autoUpdater.on("error", function(error) {
-			console.log(error);
+			logger.error(error);
 		});
 		autoUpdater.on("update-available-automatic", function(newVersion) {
 			if (platform === "linux" && !linuxDialog) {
@@ -249,6 +253,7 @@ module.exports.start = function(startServer, configParams) {
 		});
 		autoUpdater.on("update-downloaded", /* @callback */ function(event, releaseNotes, releaseName, releaseDate, updateURL) {
 			updateDownloaded = true;
+			logger.debug("update-downloaded: ", releaseName);
 			if (!updateDialog) {
 				electron.dialog.showMessageBox({
 					type: 'question',
@@ -308,6 +313,7 @@ module.exports.start = function(startServer, configParams) {
 					}else{
 						nextWindow.destroy();
 					}
+					log4js.shutdown();
 				}
 				event.preventDefault();
 				nextWindow.webContents.send('collect-tabs-info','closeorion');	

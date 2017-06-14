@@ -37,6 +37,7 @@ module.exports.router = function(options) {
 		if (platform === "linux") {
 			electron.shell.openExternal(feedURL + '/download/channel/' + updateChannel + '/linux');
 		} else {
+			logger.debug("setFeedURL = ",feedURL + '/update/channel/' + updateChannel + '/' + platform + '_' + arch + '/' + version);
 			autoUpdater.setFeedURL(feedURL + '/update/channel/' + updateChannel + '/' + platform + '_' + arch + '/' + version);
 			autoUpdater.checkForUpdates();
 		}
