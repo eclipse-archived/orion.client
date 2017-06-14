@@ -3,12 +3,13 @@
         "server": "INFO",
         "audit-logs": "INFO",
         "xfer": "ERROR",
-        "update": "ERROR",
+        "update": "DEBUG",
         "user": "INFO",
         "ttyshell": "INFO",
         "tasks": "INFO",
         "search-worker": "ERROR",
-        "git": "ERROR"
+        "git": "ERROR",
+        "electron": "ALL"
     },
     "appenders": [
         {
