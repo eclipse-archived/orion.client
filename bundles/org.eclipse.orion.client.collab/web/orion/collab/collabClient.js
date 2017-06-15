@@ -371,9 +371,10 @@ define(['orion/collab/ot', 'orion/collab/collabFileAnnotation', 'orion/collab/ot
 			var workspace = this.getFileSystemPrefix();
 			if (workspace !== '/file/') {
 		        //get everything after 'workspace name'
-		        return this.location.substring(this.location.indexOf(workspace) + workspace.length).split('/').slice(3).join('/');
+		        // /sharedWorkspace/tree/file/ji/jiangxin87/OrionContent/orders-api-uselessTesting_X/app.js .  ->   orders-api-uselessTesting_X/app.js
+		        return this.location.substring(this.location.indexOf(workspace) + workspace.length).split('/').slice(1).join('/');
 			} else {
-		        return this.location.substring(this.location.indexOf(workspace) + workspace.length, this.location.length);
+		        return this.location.split("/").slice(3).join("/");
 			}
 		},
 
@@ -571,7 +572,7 @@ define(['orion/collab/ot', 'orion/collab/collabFileAnnotation', 'orion/collab/ot
 		 * For example we potentially need to convert a '/file/web/potato.js' to '/sharedWorkspace/tree/file/web/potato.js'
 		 * and vice-versa, depending on our file system and the sender's filesystem.
 		 */
-		maybeTransformLocation: function(Location) {
+		maybeTransformLocation: function(Location) { //Location = "/file/orders-api-uselessTesting_X/app.js"
 			var loc = this.getFileSystemPrefix();
 			// if in same workspace
 			if (Location.substr(contextPath.length).indexOf(loc) === 0) {
@@ -580,10 +581,10 @@ define(['orion/collab/ot', 'orion/collab/collabFileAnnotation', 'orion/collab/ot
 				var oppositeLoc = loc == '/file/' ? '/sharedWorkspace/tree/file/' : '/file/';
 				// we need to replace sharedWorkspace... with /file and vice versa.
 				// we also need to replace workspace info for shared workspace or add it when its not the case.
-				var file = this.projectRelativeLocation(Location);
-				var currFile = this.projectRelativeLocation(location.hash.substr(1));
-				var prefix = location.hash.substr(1, location.hash.lastIndexOf(currFile) - 1);
-				Location = prefix + file;
+				var file = this.projectRelativeLocation(Location);       // orders-api-uselessTesting_X/app.js
+				var currFile = this.projectRelativeLocation(location.hash.substr(1));   // currFile = "orders-api-uselessTesting_X/app.js"
+				var prefix = location.hash.substr(1, location.hash.lastIndexOf(currFile) - 1);   // prefix = "/sharedWorkspace/tree/file/ji/jiangxin87/OrionContent/"
+				Location = prefix + file;   // Location = "/sharedWorkspace/tree/file/ji/jiangxin87/OrionContent/orders-api-uselessTesting_X/app.js"
 				return Location;
 			}
 		},
@@ -594,7 +595,7 @@ define(['orion/collab/ot', 'orion/collab/collabFileAnnotation', 'orion/collab/ot
 				return location.substr((contextPath + '/file/').length);
 			} else {
 				// Shared workspace
-				return location.substr(contextPath.length).split('/').slice(7).join('/');
+				return location.substr(contextPath.length).split('/').slice(5).join('/');
 			}
 		},
 
