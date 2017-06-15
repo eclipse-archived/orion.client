@@ -88,13 +88,17 @@ module.exports.router = function(options) {
 	 * return files and folders below current folder or retrieve file contents.
 	 */
 	function getTree(req, res) {
-		var projectName = req.params["0"];
-		var workspaceId = req.params.WorkspaceId;
+		var projectName = req.params["0"];  // projectName = /test
+		var workspaceId = req.params.WorkspaceId;  // workspaceId = sidney-OrionContent
 		if(projectName){
-			var tree;
-			var fileRoot =path.join("/", workspaceId, req.params["0"]);
-			var realfileRootPath = sharedUtil.getfileRoot(workspaceId);
-			var filePath = path.join(workspaceRoot,realfileRootPath, req.params["0"]);
+			var tree, filePath;
+			if(workspaceId){
+				var fileRoot =path.join("/", workspaceId, req.params["0"]);  // fileRoot = /sidney-OrionContent/test
+				var realfileRootPath = sharedUtil.getfileRoot(workspaceId); // = si/sidney/OrionContent
+				filePath = path.join(workspaceRoot,realfileRootPath, req.params["0"]);  // "/Users/xinyijiang/IBM/openSourceWorkspace/orion.client/modules/orionode/.workspace/si/sidney/OrionContent/test" 
+			}else{
+				filePath = path.join(workspaceRoot, req.params["0"]);
+			}
 			var readIfExists = req.headers ? Boolean(req.headers['read-if-exists']).valueOf() : false;
 			fileUtil.withStatsAndETag(filePath, function(err, stats, etag) {
 				if (err && err.code === 'ENOENT') {
