@@ -276,7 +276,7 @@ define(['orion/collab/ot', 'orion/collab/collabFileAnnotation', 'orion/collab/ot
 		 */
 		updateSelfFileAnnotation: function() {
 			if (this.collabMode) {
-				this.addOrUpdateCollabFileAnnotation(this.getClientId(), this.maybeTransformLocation(contextPath + '/file/' + this.currentDocPath()), this.editing);
+				this.addOrUpdateCollabFileAnnotation(this.getClientId(), contextPath + this.currentDoc(), this.editing);
 			}
 		},
 
@@ -367,29 +367,16 @@ define(['orion/collab/ot', 'orion/collab/collabFileAnnotation', 'orion/collab/ot
 			}
 		},
 
+		/**
+		 *  peal /shardworkspace/tree/file/user-orionContent/testfolder/testfile of /file/user-orionContent/testfolder/testfile to /user-orionContent/testfolder/testfile
+		 */
 		currentDoc: function() {
 			var workspace = this.getFileSystemPrefix();
-			if (workspace !== '/file/') {
-		        //get everything after 'workspace name'
-		        // /sharedWorkspace/tree/file/ji/jiangxin87/OrionContent/orders-api-uselessTesting_X/app.js .  ->   orders-api-uselessTesting_X/app.js
-		        return this.location.substring(this.location.indexOf(workspace) + workspace.length).split('/').slice(1).join('/');
-			} else {
-		        return this.location.split("/").slice(3).join("/");
-			}
+			return this.location.substring(this.location.indexOf(workspace) + workspace.length);
 		},
-		
-		currentDocPath:  function() {
-			var workspace = this.getFileSystemPrefix();
-			if (workspace !== '/file/') {
-		        return this.location.substring(this.location.indexOf(workspace) + workspace.length).split('/').slice(1).join('/');
-			} else {
-		        return this.location.split("/").slice(2).join("/");
-			}
-		},
-		
 
 		getFileSystemPrefix: function() {
-			return this.location.substr(contextPath.length).indexOf('/sharedWorkspace') === 0 ? '/sharedWorkspace/tree/file/' : '/file/';
+			return this.location.substr(contextPath.length).indexOf('/sharedWorkspace') === 0 ? '/sharedWorkspace/tree/file' : '/file';
 		},
 
 		viewInstalled: function(event) {
@@ -584,32 +571,17 @@ define(['orion/collab/ot', 'orion/collab/collabFileAnnotation', 'orion/collab/ot
 		 */
 		maybeTransformLocation: function(Location) { //Location = "/file/orders-api-uselessTesting_X/app.js"
 			var loc = this.getFileSystemPrefix();
-			// if in same workspace
-			if (Location.substr(contextPath.length).indexOf(loc) === 0) {
-				var workspaceID = this.location.substr(contextPath.length + loc).split("/")[2];
-				var result;
-				if(Location.indexOf(workspaceID) !== -1){
-					result = Location;
-				}else{
-					result = loc + workspaceID + Location.substr(loc.length -1 );
-				}
-				return result;   
-			} else {
-				var oppositeLoc = loc == '/file/' ? '/sharedWorkspace/tree/file/' : '/file/';
-				// we need to replace sharedWorkspace... with /file and vice versa.
-				// we also need to replace workspace info for shared workspace or add it when its not the case.
-				var file = this.projectRelativeLocation(Location);       // orders-api-uselessTesting_X/app.js
-				var currFile = this.projectRelativeLocation(location.hash.substr(1));   // currFile = "orders-api-uselessTesting_X/app.js"
-				var prefix = location.hash.substr(1, location.hash.lastIndexOf(currFile) - 1);   // prefix = "/sharedWorkspace/tree/file/ji/jiangxin87/OrionContent/"
-				Location = prefix + file;   // Location = "/sharedWorkspace/tree/file/ji/jiangxin87/OrionContent/orders-api-uselessTesting_X/app.js"
-				return Location;
-			}
+			return loc + Location;
 		},
 
+
+		/*
+		 *  Generate the location string for the tooltip for each collabrator.
+		 */
 		projectRelativeLocation: function(location) {
 			if (location.substr(contextPath.length).indexOf('/file/') === 0) {
 				// Local workspace
-				return location.substr((contextPath + '/file/').length);
+				return location.substr(contextPath.length).split("/").slice(3).join('/')
 			} else {
 				// Shared workspace
 				return location.substr(contextPath.length).split('/').slice(5).join('/');

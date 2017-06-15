@@ -29,11 +29,11 @@ module.exports.router = function(options) {
 	var SEPARATOR = "-";
 
 	return express.Router()
-	.get('/file/:WorkspaceId*', getTree)
+	.get('/file/:workspaceId*', getTree)
 	.put('/file*', ensureAccess, putFile)
 	.post('/file*', ensureAccess, postFile)
 	.delete('/file*', ensureAccess, deleteFile)
-	.get('/load/:hubId/*', loadFile)
+	.get('/load/:hubId/:workspaceId*', loadFile)
 	.put('/save/:hubId/*', saveFile)
 	.get('/session/:hubId', checkSession)
 	.get('/xfer/export*', getXfer)
@@ -89,16 +89,12 @@ module.exports.router = function(options) {
 	 */
 	function getTree(req, res) {
 		var projectName = req.params["0"];  // projectName = /test
-		var workspaceId = req.params.WorkspaceId;  // workspaceId = sidney-OrionContent
+		var workspaceId = req.params.workspaceId;  // workspaceId = sidney-OrionContent
 		if(projectName){
 			var tree, filePath;
-			if(workspaceId){
-				var fileRoot =path.join("/", workspaceId, req.params["0"]);  // fileRoot = /sidney-OrionContent/test
-				var realfileRootPath = sharedUtil.getfileRoot(workspaceId); // = si/sidney/OrionContent
-				filePath = path.join(workspaceRoot,realfileRootPath, req.params["0"]);  // "/Users/xinyijiang/IBM/openSourceWorkspace/orion.client/modules/orionode/.workspace/si/sidney/OrionContent/test" 
-			}else{
-				filePath = path.join(workspaceRoot, req.params["0"]);
-			}
+			var fileRoot =path.join("/", workspaceId, req.params["0"]);  // fileRoot = /sidney-OrionContent/test
+			var realfileRootPath = sharedUtil.getfileRoot(workspaceId); // = si/sidney/OrionContent
+			filePath = path.join(workspaceRoot,realfileRootPath, req.params["0"]);  // "/Users/xinyijiang/IBM/openSourceWorkspace/orion.client/modules/orionode/.workspace/si/sidney/OrionContent/test" 
 			var readIfExists = req.headers ? Boolean(req.headers['read-if-exists']).valueOf() : false;
 			fileUtil.withStatsAndETag(filePath, function(err, stats, etag) {
 				if (err && err.code === 'ENOENT') {
@@ -151,7 +147,7 @@ module.exports.router = function(options) {
 			});
 		}else{
 			return sharedUtil.getSharedProjects(req, res, function(projects) {
-				var tree = sharedUtil.treeJSON(req.params.WorkspaceId, "/" + workspaceId, 0, true, 0, false);
+				var tree = sharedUtil.treeJSON(req.params.workspaceId, "/" + workspaceId, 0, true, 0, false);
 				var children = tree.Children = [];
 				function add(projects) {
 					projects.forEach(function(project) {
@@ -315,10 +311,6 @@ module.exports.router = function(options) {
 				writeError(404, res, 'Session not found: ' + hubid);
 				return;
 			}
-			// remove project name from path
-			filepath = filepath.substring(0, filepath.lastIndexOf(path.sep));
-			filepath = path.join(filepath, relativeFilePath);
-			req.params['0'] = filepath;
 			getTree(req, res);
 		});
 	}
@@ -329,7 +321,7 @@ module.exports.router = function(options) {
 			writeError(403, res, 'Forbidden');
 			return;
 		}
-		var relativeFilePath = req.params['0'];
+		// var relativeFilePath = req.params['0'];
 		var hubid = req.params['hubId'];
 
 		return sharedProjects.getProjectPathFromHubID(hubid)
@@ -339,9 +331,9 @@ module.exports.router = function(options) {
 				return;
 			}
 			//remove project name from path
-			filepath = filepath.substring(0, filepath.lastIndexOf(path.sep));
-			filepath = path.join(filepath, relativeFilePath);
-			req.params['0'] = filepath;
+			// filepath = filepath.substring(0, filepath.lastIndexOf(path.sep));
+			// filepath = path.join(filepath, relativeFilePath);
+			// req.params['0'] = filepath;
 			putFile(req, res);
 		});
 	}

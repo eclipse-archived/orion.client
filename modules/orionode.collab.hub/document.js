@@ -217,7 +217,7 @@ class Document {
         var self = this;
         return new Promise(function(resolve, reject) {
             Request({
-                uri: FILE_LOAD_URL + self.sessionId + '/' + self.id, 
+                uri: FILE_LOAD_URL + self.sessionId + self.id, 
                 headers: {
                     Authorization: 'Bearer ' + SERVER_TOKEN
                 }
@@ -253,7 +253,7 @@ class Document {
             };
             Request({
                 method: 'PUT',
-                uri: FILE_SAVE_URL + self.sessionId + '/' + path,
+                uri: FILE_SAVE_URL + self.sessionId  + path,
                 headers: headerData,
                 body: self.ot.document
             }, function(error, response, body) {
