@@ -190,14 +190,14 @@ define(['orion/collab/ot', 'orion/collab/collabFileAnnotation', 'orion/collab/ot
 		 * @param {boolean} editing
 		 */
 		addOrUpdateCollabFileAnnotation: function(clientId, url, editing) {
-			if (url) {
-				url = this.maybeTransformLocation(url);
-			}
 			var peer = this.getPeer(clientId);
 			// Peer might be loading. Once it is loaded, this annotation will be automatically updated,
 			// so we can safely leave it blank.
 			var name = (peer && peer.name) ? peer.name : 'Unknown';
 			var color = (peer && peer.color) ? peer.color : '#000000';
+			if (url) {
+				url = this.maybeTransformLocation(url);
+			}
 			this.collabFileAnnotations[clientId] = new CollabFileAnnotation(name, color, url, this.projectRelativeLocation(url), editing);
 			this._requestFileAnnotationUpdate();
 		},
@@ -276,7 +276,7 @@ define(['orion/collab/ot', 'orion/collab/collabFileAnnotation', 'orion/collab/ot
 		 */
 		updateSelfFileAnnotation: function() {
 			if (this.collabMode) {
-				this.addOrUpdateCollabFileAnnotation(this.getClientId(), this.maybeTransformLocation(contextPath + '/file/' + this.currentDoc()), this.editing);
+				this.addOrUpdateCollabFileAnnotation(this.getClientId(), this.maybeTransformLocation(contextPath + '/file/' + this.currentDocPath()), this.editing);
 			}
 		},
 
@@ -377,6 +377,16 @@ define(['orion/collab/ot', 'orion/collab/collabFileAnnotation', 'orion/collab/ot
 		        return this.location.split("/").slice(3).join("/");
 			}
 		},
+		
+		currentDocPath:  function() {
+			var workspace = this.getFileSystemPrefix();
+			if (workspace !== '/file/') {
+		        return this.location.substring(this.location.indexOf(workspace) + workspace.length).split('/').slice(1).join('/');
+			} else {
+		        return this.location.split("/").slice(2).join("/");
+			}
+		},
+		
 
 		getFileSystemPrefix: function() {
 			return this.location.substr(contextPath.length).indexOf('/sharedWorkspace') === 0 ? '/sharedWorkspace/tree/file/' : '/file/';
@@ -576,7 +586,14 @@ define(['orion/collab/ot', 'orion/collab/collabFileAnnotation', 'orion/collab/ot
 			var loc = this.getFileSystemPrefix();
 			// if in same workspace
 			if (Location.substr(contextPath.length).indexOf(loc) === 0) {
-				return Location;
+				var workspaceID = this.location.substr(contextPath.length + loc).split("/")[2];
+				var result;
+				if(Location.indexOf(workspaceID) !== -1){
+					result = Location;
+				}else{
+					result = loc + workspaceID + Location.substr(loc.length -1 );
+				}
+				return result;   
 			} else {
 				var oppositeLoc = loc == '/file/' ? '/sharedWorkspace/tree/file/' : '/file/';
 				// we need to replace sharedWorkspace... with /file and vice versa.
