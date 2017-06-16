@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2013, 2015 IBM Corporation and others.
+ * Copyright (c) 2013, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -1908,14 +1908,17 @@ define([
 				var text = "a; var a;";
 				return computeOccurrences(text, getOptions(done, 7,7), [{start:0, end:1}, {start:7, end:8}]);
 			});
-			describe('Define and Require Statement Occurrences Tests', function(done) {
+			describe('Define and Require Statement Occurrences Tests', function() {
+				beforeEach("Ensure test files", function() {
+					worker.createTestFile('A', "");
+					worker.createTestFile('B', "");
+				});
 				/**
 				 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=451957
 				 * @since 10.0
 				 */
 				it('Unnamed Define statement 1', function(done) {
-					worker.createTestFile('A', "");
-					worker.createTestFile('B', "");
+					
 					var text = "define(['A', 'B'], function (a, b) { var x = a; var y = b; });";
 					return computeOccurrences(text, getOptions(done, 10,10), [{start:8, end:11}, {start:29, end:30}, {start:45, end:46}]);
 				});
