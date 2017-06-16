@@ -190,11 +190,11 @@ define(["orion/xhr", "orion/Deferred", "orion/URL-shim",  "orion/form"], functio
 					"X-Create-Options": "no-overwrite," + (isMove ? "move" : "copy"),
 					"Content-Type": "application/json;charset=UTF-8"
 				},
+				timeout : COLLAB_TIMEOUT,
 				data: JSON.stringify({
 					"Location": sourceLocation,
 					"Name": _name
-				}),
-				timeout: 15000
+				})
 			}).then(function(result) {
 				return result.response ? JSON.parse(result.response) : null;
 			});

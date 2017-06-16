@@ -16,7 +16,9 @@ var sharedUtil = require('./shared/sharedUtil');
 var SharedFileDecorator = require('./shared/sharedDecorator').SharedFileDecorator;
 var jwt = require('jsonwebtoken');
 
-module.exports.router = function(options, extraOptions) {
+module.exports.router = function(options) {
+	if (!options.fileRoot) { throw new Error('options.fileRoot is required'); }
+	if (!options.sharedWorkspaceFileRoot) { throw new Error('options.sharedWorkspaceFileRoot is required'); }
 
 	/**
 	 * This method ensures that the websocket trying to retrieve and save content is authenticated.
@@ -24,7 +26,7 @@ module.exports.router = function(options, extraOptions) {
 	 */
 	function checkCollabAuthenticated(req, res, next) {
 		if (req.user) {
-			req.user.workspaceDir = options.workspaceDir + (req.user.workspace ? "/" + req.user.workspace : "");
+			req.user.workspaceDir = options.options.workspaceDir + (req.user.workspace ? "/" + req.user.workspace : "");
 			next();
 		} else if (req.headers['authorization'] && checkCollabServerToken(req.headers['authorization'])){
 			next();
@@ -42,25 +44,19 @@ module.exports.router = function(options, extraOptions) {
 			return false;
 		}
 		try {
-			var decoded = jwt.verify(authorization.substr(7), options.configParams["orion.jwt.secret"]);
+			var decoded = jwt.verify(authorization.substr(7), options.options.configParams["orion.jwt.secret"]);
 			return true;
 		} catch (ex) {
 			return false;
 		}
 	}
-
-	extraOptions.options = options;
-	var contextPath = options && options.configParams["orion.context.path"] || "";
-	var fileRoot = extraOptions.fileRoot;
-	if (!fileRoot) { throw new Error('extraOptions.root path required'); }
-	extraOptions.fileRoot = contextPath + fileRoot;
 	
 	var router = express.Router();
 
-	router.use("/tree", tree.router(extraOptions));
-	router.use("/project", require('./shared/db/sharedProjects')(extraOptions));
-	router.use("/user", require('./shared/db/userProjects')(extraOptions));
-	fileUtil.addDecorator(new SharedFileDecorator(options));
-	sharedUtil(extraOptions);
+	router.use("/tree", tree.router(options));
+	router.use("/project", require('./shared/db/sharedProjects')(options));
+	router.use("/user", require('./shared/db/userProjects')(options));
+	fileUtil.addDecorator(new SharedFileDecorator(options.options));
+	sharedUtil(options);
 	return [checkCollabAuthenticated, router];
-}
+};

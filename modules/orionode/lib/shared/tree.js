@@ -14,21 +14,21 @@ var path = require('path');
 var express = require('express');
 var sharedUtil = require('./sharedUtil');
 var fileUtil = require('../fileUtil');
-var ofile = require('../file');
 var fs = require('fs');
 var sharedProjects = require('./db/sharedProjects');
+var xfer = require('../xfer');
+var bodyParser = require('body-parser');
 
 module.exports = {};
 
 module.exports.router = function(options) {
-	var workspaceRoot = options.options.workspaceDir;
-	var sharedRoot = options.root;
-	if (!workspaceRoot) { throw new Error('options.options.workspaceDir required'); }
-	var xfer = require('../xfer');
-	var contextPath = options.options.configParams["orion.context.path"] || "";
+	var workspaceDir = options.options.workspaceDir;
+	if (!workspaceDir) { throw new Error('options.options.workspaceDir required'); }
+	var sharedWorkspaceFileRoot = options.sharedWorkspaceFileRoot;
 	var SEPARATOR = "-";
 
 	return express.Router()
+	.use(bodyParser.json())
 	.get('/file/:workspaceId*', getTree)
 	.put('/file*', ensureAccess, putFile)
 	.post('/file*', ensureAccess, postFile)
@@ -46,7 +46,7 @@ module.exports.router = function(options) {
 	function getSharedWorkspace(req, res) {
 		return sharedUtil.getSharedProjects(req, res, function(projects) {
 				var workspaces = [];
-				var sharedWorkspaceRoot = "/sharedWorkspace" + "/tree" + options.fileRoot;
+				
 				projects.forEach(function(project){
 					var projectSegs = project.Location.split("/");
 					var projectBelongingWorkspaceId = projectSegs[2] + SEPARATOR + projectSegs[3];
@@ -55,7 +55,7 @@ module.exports.router = function(options) {
 					})){
 						workspaces.push({
 							Id: projectBelongingWorkspaceId,
-							Location: api.join(sharedWorkspaceRoot, projectBelongingWorkspaceId),
+							Location: api.join(sharedWorkspaceFileRoot, projectBelongingWorkspaceId),
 							Name: projectSegs[3]
 						});
 					}
@@ -94,7 +94,7 @@ module.exports.router = function(options) {
 			var tree, filePath;
 			var fileRoot =path.join("/", workspaceId, req.params["0"]);  // fileRoot = /sidney-OrionContent/test
 			var realfileRootPath = sharedUtil.getfileRoot(workspaceId); // = si/sidney/OrionContent
-			filePath = path.join(workspaceRoot,realfileRootPath, req.params["0"]);  // "/Users/xinyijiang/IBM/openSourceWorkspace/orion.client/modules/orionode/.workspace/si/sidney/OrionContent/test" 
+			filePath = path.join(workspaceDir,realfileRootPath, req.params["0"]);  // "/Users/xinyijiang/IBM/openSourceWorkspace/orion.client/modules/orionode/.workspace/si/sidney/OrionContent/test" 
 			var readIfExists = req.headers ? Boolean(req.headers['read-if-exists']).valueOf() : false;
 			fileUtil.withStatsAndETag(filePath, function(err, stats, etag) {
 				if (err && err.code === 'ENOENT') {
@@ -221,7 +221,7 @@ module.exports.router = function(options) {
 		var rest = req.params["0"].substring(1);
 		var diffPatch = req.headers['x-http-method-override'];
 		if (diffPatch === "PATCH") {
-			handleDiff(req, res, rest, req.body);
+			// This shouldn't happen in collaboration
 			return;
 		}
 		var name = fileUtil.decodeSlug(req.headers.slug) || req.body && req.body.Name;
@@ -229,10 +229,10 @@ module.exports.router = function(options) {
 			writeError(400, res, new Error('Missing Slug header or Name property'));
 			return;
 		}
-
-		req.user.workspaceDir = workspaceRoot;
-		var filepath = path.join(workspaceRoot, rest, name);
-		fileUtil.handleFilePOST(null, contextPath + sharedRoot, req, res, filepath);
+		
+		req.user.workspaceDir = workspaceDir;
+		var file = fileUtil.getFile(req, api.join(rest, name));
+		fileUtil.handleFilePOST("/workspace", sharedWorkspaceFileRoot, req, res, file);
 	}
 
 	/**
@@ -266,7 +266,7 @@ module.exports.router = function(options) {
 
 	function writeFileMetadata(fileRoot, req, res, filepath, stats, etag) {
 		var result;
-		return fileJSON(fileRoot, workspaceRoot, filepath, stats)
+		return fileJSON(fileRoot, workspaceDir, filepath, stats)
 		.then(function(originalJson){
 			result = originalJson;
 			if (etag) {
