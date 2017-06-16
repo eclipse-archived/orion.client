@@ -69,7 +69,7 @@ function startServer(options) {
 			additionalEndpoints.forEach(function(additionalEndpoint){
 				if(additionalEndpoint.endpoint){
 					additionalEndpoint.authenticated ? app.use(additionalEndpoint.endpoint, checkAuthenticated, require(additionalEndpoint.module).router(options))
-						: app.use(additionalEndpoint.endpoint, require(additionalEndpoint.module).router(options, additionalEndpoint.extraOptions));
+						: app.use(additionalEndpoint.endpoint, require(additionalEndpoint.module).router(options));
 				}else{
 					var extraModule = require(additionalEndpoint.module);
 					var middleware = extraModule.router ? extraModule.router(options) : extraModule(options);
@@ -77,6 +77,8 @@ function startServer(options) {
 				}
 			});
 		}
+		
+		app.use('/sharedWorkspace', require('./lib/sharedWorkspace').router({sharedWorkspaceFileRoot: contextPath + '/sharedWorkspace/tree/file', fileRoot: contextPath + '/file', options: options  }));
 		app.use(require('./lib/user').router(options));
 		app.use('/site', checkAuthenticated, require('./lib/sites')(options));
 		app.use('/task', checkAuthenticated, require('./lib/tasks').router({ taskRoot: contextPath + '/task', options: options}));

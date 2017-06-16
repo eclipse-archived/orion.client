@@ -196,7 +196,7 @@ define(['orion/collab/ot', 'orion/collab/collabFileAnnotation', 'orion/collab/ot
 			var name = (peer && peer.name) ? peer.name : 'Unknown';
 			var color = (peer && peer.color) ? peer.color : '#000000';
 			if (url) {
-				url = this.maybeTransformLocation(url);
+				url = this.getFileSystemPrefix() + url;
 			}
 			this.collabFileAnnotations[clientId] = new CollabFileAnnotation(name, color, url, this.projectRelativeLocation(url), editing);
 			this._requestFileAnnotationUpdate();
@@ -532,32 +532,32 @@ define(['orion/collab/ot', 'orion/collab/collabFileAnnotation', 'orion/collab/ot
 
 			switch (operation) {
 				case 'created':
-					var parentLocation = this.maybeTransformLocation(data.parent);
+					var parentLocation = this.transformLocation(data.parent);
 					var result = data.result;
 					if (result) {
 						result.Parents = []; //is parents even needed for this operation?
-						result.Location = this.maybeTransformLocation(result.Location);
+						result.Location = this.transformLocation(result.Location);
 					}
 					evt.created = [{'parent': parentLocation, 'result': result, 'eventData': evtData}];
 					break;
 				case 'deleted':
-					var deleteLocation = this.maybeTransformLocation(data.deleteLocation);
+					var deleteLocation = this.transformLocation(data.deleteLocation);
 					evt.deleted = [{'deleteLocation': deleteLocation, 'eventData': evtData}];
 					break;
 				case 'moved':
-					var sourceLocation = this.maybeTransformLocation(data.source);
-					var targetLocation = this.maybeTransformLocation(data.target);
+					var sourceLocation = this.transformLocation(data.source);
+					var targetLocation = this.transformLocation(data.target);
 					var result = data.result;
 					result.Parents = []; //is parents even needed for this operation?
-					result.Location = this.maybeTransformLocation(result.Location);
+					result.Location = this.transformLocation(result.Location);
 					evt.moved = [{'source': sourceLocation, 'target': targetLocation, 'result': result, 'eventData': evtData}];
 					break;
 				case 'copied':
-					var sourceLocation = this.maybeTransformLocation(data.source);
-					var targetLocation = this.maybeTransformLocation(data.target);
+					var sourceLocation = this.transformLocation(data.source);
+					var targetLocation = this.transformLocation(data.target);
 					var result = data.result;
 					result.Parents = []; //is parents even needed for this operation?
-					result.Location = this.maybeTransformLocation(result.Location);
+					result.Location = this.transformLocation(result.Location);
 					evt.copied = [{'source': sourceLocation, 'target': targetLocation, 'result': result, 'eventData': evtData}];
 					break;
 			}
@@ -566,14 +566,14 @@ define(['orion/collab/ot', 'orion/collab/collabFileAnnotation', 'orion/collab/ot
 		},
 
 		/**
-		 * For example we potentially need to convert a '/file/web/potato.js' to '/sharedWorkspace/tree/file/web/potato.js'
+		 * For example we need to convert a '/file/web-orionContent/potato.js' to '/sharedWorkspace/tree/file/web-orionContent/potato.js'
 		 * and vice-versa, depending on our file system and the sender's filesystem.
 		 */
-		maybeTransformLocation: function(Location) { //Location = "/file/orders-api-uselessTesting_X/app.js"
+		transformLocation: function(location) { //Location = "/file/orders-api-uselessTesting_X/app.js"
+			var filePath = location.replace(/^.*\/file/, "");
 			var loc = this.getFileSystemPrefix();
-			return loc + Location;
+			return loc + filePath;
 		},
-
 
 		/*
 		 *  Generate the location string for the tooltip for each collabrator.
