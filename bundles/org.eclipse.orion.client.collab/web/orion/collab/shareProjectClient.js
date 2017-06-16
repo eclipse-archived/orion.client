@@ -11,7 +11,7 @@
 
 /*eslint-env browser, amd*/
 /*global URL*/
-define(["orion/xhr", "orion/Deferred", "orion/URL-shim",  "orion/form"], function(xhr, Deferred, _, form) {
+define(["orion/xhr", "orion/URL-shim"], function(xhr) {
 	var contextPath = location.pathname.substr(0, location.pathname.lastIndexOf('/edit/edit.html'));
 	return {
 		shareProjectUrl: contextPath + "/sharedWorkspace/project/",
