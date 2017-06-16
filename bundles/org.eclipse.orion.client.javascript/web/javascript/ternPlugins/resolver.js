@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2015, 2016 IBM Corporation and others.
+ * Copyright (c) 2015, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -9,21 +9,19 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-/*eslint-env amd, browser*/
 define([
 	"tern/lib/tern",
-	"tern/lib/infer"
-], function(tern, infer) {
+	"tern/lib/infer",
+	"javascript/lru"
+], function(tern, infer, LRU) {
 	
-	var _resolved = Object.create(null);
+	var _resolved = new LRU(),
+		_files = new LRU();
 	
-	function moduleResolve(_name, parentFile) {
+	function moduleResolve(_name /*, parentFile*/) {
 		var resolved = getResolved(_name);
-		if (resolved && resolved.file){
-			if (resolved.contents){
-				return {file: resolved.file, contents: resolved.contents};
-			}
-			return resolved.file;
+		if (resolved && typeof resolved.contents === "string") {
+			return resolved;
 		}
 		return null;
 	}
@@ -34,7 +32,15 @@ define([
 	 * @sinnce 9.0
 	 */
 	function getResolved(_name) {
-		return _resolved[_name];
+		var val = _resolved.get(_name);
+		if(val) {
+			var _f = _files.get(val.file);
+			if(_f && _f.file) {
+				return _f;
+			}
+			return val;
+		}
+		return null;
 	}
 	
 	/**
@@ -44,16 +50,14 @@ define([
 	 * @since 9.0
 	 */
 	function resolveDependencies(server, loc) {
-	    var keys = Object.keys(_resolved);
-	    for (var i = 0; i < keys.length; i++) {
-	        var key = keys[i];
-	        var dep = _resolved[key];
+	    _resolved.keys().forEach(/* @callback */ function(key) {
 	        //we will try again for a timed out read
-	        if (dep && (dep.pending || dep.file)) {
-	      	  continue;
+	        var value = _resolved.get(key);
+	        if (value && (value.pending || value.file)) {
+	      	  return;
 	        }
 	  		resolve(server, key, loc);
-		}
+	    });
 	}
 	
 	/**
@@ -65,28 +69,32 @@ define([
 	 * @since 9.0
 	 */
 	function resolve(server, key, loc) {
-		if(_resolved[key].pending || _resolved[key].err) {
-			//if we are waiting don't fire of another request
+		var item = _resolved.get(key);
+		if(item.pending || item.err) {
+			//if we are waiting don't fire off another request
 			return;
 		}
 		var resetPending = function(key) {
-			clearTimeout(_resolved[key].timeout);
-			_resolved[key].file = null;
-			_resolved[key].contents = '';
-			_resolved[key].err = "Read operation timed out."; //$NON-NLS-1$
-			delete _resolved[key].pending;
-			server.finishAsyncAction(_resolved[key].err);
+			var r = _resolved.get(key);
+			clearTimeout(r.timeout);
+			r.file = null;
+			r.contents = '';
+			r.err = "Read operation timed out."; //$NON-NLS-1$
+			delete r.pending;
+			server.finishAsyncAction(r.err);
 		};
   		server.startAsyncAction();
-  		_resolved[key].pending = true;
-  		_resolved[key].timeout = setTimeout(resetPending, 10000, key);
-		server.options.getFile({logical: key, file: loc, env: _resolved[key].env}, function(err, _file) {
-			clearTimeout(_resolved[key].timeout);
-			_resolved[key].file = _file.file;
-	   		_resolved[key].contents = typeof _file.contents === 'string' ? _file.contents : '';
-	   		_resolved[key].logical = _file.logical;
-	   		_resolved[key].err = err;
-	   		delete _resolved[key].pending;
+  		item.pending = true;
+  		item.timeout = setTimeout(resetPending, 10000, key);
+		server.options.getFile({logical: key, file: loc, env: item.env}, function(err, _file) {
+			clearTimeout(item.timeout);
+			item.file = _file.file;
+			if(!_files.containsKey(_file.file)) {
+				_files.put(_file.file, {file: _file.file, contents: typeof _file.contents === 'string' ? _file.contents : ''});
+			}
+	   		item.logical = _file.logical;
+	   		item.err = err;
+	   		delete item.pending;
 	   		server.finishAsyncAction(err);
 		});
 	}
@@ -113,13 +121,12 @@ define([
 			return waitOnResolve(server);
 		}
 		var done = true;
-		var keys = Object.keys(_resolved);
+		var keys = _resolved.keys();
 		for(var i = 0; i < keys.length; i++) {
-			if(_resolved[keys[i]]) {
-				continue;
+			if(_resolved.get(keys[i]).pending) {
+				done = false;
+				break;
 			}
-			done = false;
-			break;
 		}
 		if(!done) {
 			return waitOnResolve(server);
@@ -139,7 +146,8 @@ define([
 			for(var i = 0; i < ast.dependencies.length; i++) {
 				var _d = _getDependencyName(ast.dependencies[i]);
 				if(_d) {
-					if(typeof _resolved[_d] === 'object') {
+					var val = _resolved.get(_d);
+					if(val && typeof val === 'object') {
 						continue; //we already resolved it or are trying, keep going
 					}
 					if(typeof ignores === 'object') {
@@ -160,10 +168,10 @@ define([
 					if(typeof test === 'function' && !test(_d)) {
 						continue;
 					}
-					_resolved[_d] = Object.create(null);
-					_resolved[_d].env = ast.dependencies[i].env;
+					var f = Object.create(null);
+					f.env = ast.dependencies[i].env;
+					_resolved.put(_d, f);
 				}
-				
 			}
 			resolveDependencies(server, ast.sourceFile ? ast.sourceFile.name : null);
 		}  	
@@ -183,14 +191,61 @@ define([
 		return null;
 	}
 	
-	tern.registerPlugin("resolver", /* @callback */ function(server, options) { //$NON-NLS-1$
+	/**
+	 * @name possibleMatch
+	 * @description Checks if the given file name is a possible match to the given logical name
+	 * @param {String} fileName The full path of the file loaded by Tern
+	 * @param {String} logicalName The logical name from the cached entry in error state 
+	 * @returns {bool} True if it is a possible match, false otherwise
+	 */
+	function possibleMatch(fileName, logicalName) {
+		if(fileName && logicalName) {
+			var f = fileName;
+			f = f.slice(0, f.lastIndexOf('.js'));
+			return f.lastIndexOf(logicalName) === f.length-1;
+		}
+		return false;
+	}
+	
+	tern.registerPlugin("resolver", /* @callback */ function resolverPluginHandler(server, options) {
 	    server.loadPlugin("modules"); //$NON-NLS-1$
 	    server.mod.modules.resolvers.push(moduleResolve);
-	    server.on("postParse", function(ast, text){ //$NON-NLS-1$
+	    server.on("postParse", /* @callback */ function postParseHandler(ast, text){
 	    	doPostParse(server, ast, infer.cx().definitions, null);
 	    });
-	    server.on("preInfer", function(ast, scope){ //$NON-NLS-1$
+	    server.on("preInfer", /* @callback */ function preInferHandler(ast, scope){
 	    	doPreInfer(server);
+	    });
+	    server.on("preParse", function preParseHandler(text, options) {
+	    	var file = options.directSourceFile;
+	    	if(file && file.name) {
+	    		//update the cached source for this file if it exists
+	    		var f = _files.get(file.name);
+    			if(f) {
+    				f.contents = text;
+    			}
+	    		//if a file is parsed and is cached in an error state, it means the file has been created
+				//in the editor - remove it from the cache so it will be re-fetched the next time it is 
+				//requested as a dependency
+				_resolved.keys().forEach(function(key) {
+					var val = _resolved.get(key);
+					if(val && val.err) {
+						if(possibleMatch(file.name, val.logical)) {
+							_resolved.remove(key);
+							console.log("removed: "+file.name+" from resolver cache");
+						}
+					}
+				});
+	    	}
+	    });
+	    server.on("beforeLoad", /* @callback */ function beforeLoadHandler(file) {
+			if(file && typeof file.name === "string") {
+				
+			}
+	    });
+	    server.on("reset", function resetHandler() {
+	    	_resolved.clear();
+	    	_files.clear();
 	    });
   });
   
