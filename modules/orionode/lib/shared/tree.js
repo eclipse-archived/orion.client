@@ -25,7 +25,6 @@ module.exports.router = function(options) {
 	var workspaceDir = options.options.workspaceDir;
 	if (!workspaceDir) { throw new Error('options.options.workspaceDir required'); }
 	var sharedWorkspaceFileRoot = options.sharedWorkspaceFileRoot;
-	var SEPARATOR = "-";
 
 	return express.Router()
 	.use(bodyParser.json())
@@ -46,10 +45,9 @@ module.exports.router = function(options) {
 	function getSharedWorkspace(req, res) {
 		return sharedUtil.getSharedProjects(req, res, function(projects) {
 				var workspaces = [];
-				
 				projects.forEach(function(project){
 					var projectSegs = project.Location.split("/");
-					var projectBelongingWorkspaceId = projectSegs[2] + SEPARATOR + projectSegs[3];
+					var projectBelongingWorkspaceId = sharedUtil.getWorkspaceIdFromprojectLocation(project.Location);
 					if(!workspaces.some(function(workspace){
 						return workspace.Id === projectBelongingWorkspaceId;
 					})){
@@ -70,12 +68,12 @@ module.exports.router = function(options) {
 	}
 
 	function ensureAccess(req, res, next) {
-		var project = sharedUtil.getProjectLocationFromWorkspaceId(req.params["0"]);
+		var project = sharedUtil.getRealLocation(req.params["0"]);
 		var username = req.user.username;
 
 		sharedProjects.getUsersInProject(project)
 		.then(function(users) {
-			if (!project || !users || !users.some(function(user) {return user == username})) {
+			if (!project || !users || !users.some(function(user) {return user === username;})) {
 				res.writeHead(401, "Not authenticated");
 				res.end();
 			} else {
@@ -152,7 +150,7 @@ module.exports.router = function(options) {
 				function add(projects) {
 					projects.forEach(function(project) {
 						var projectSegs = project.Location.split("/");
-						var projectBelongingWorkspaceId = projectSegs[2] + SEPARATOR + projectSegs[3];
+						var projectBelongingWorkspaceId = sharedUtil.getWorkspaceIdFromprojectLocation(project.Location);
 						if(projectBelongingWorkspaceId === workspaceId){
 							children.push(sharedUtil.treeJSON(project.Name, path.join("/", projectBelongingWorkspaceId, projectSegs[4]), 0, true, 0, false));
 							if (project.Children) add(project.Children);
