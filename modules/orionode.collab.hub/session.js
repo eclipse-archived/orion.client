@@ -208,6 +208,9 @@ class Session {
                             }
                         });
                         this.notifyAll(c, outMsg);
+                    } else if(msg.operation === 'copied'){
+                        outMsg.operation = 'copied';
+                        this.notifyAll(c, outMsg);
                     } else {
                         c.send(JSON.stringify({
                             type: 'error',
