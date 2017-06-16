@@ -19,8 +19,8 @@ var userProjects = require('./db/userProjects');
 
 module.exports = function(options) {
 	var SEPARATOR = "-";
-    var workspaceRoot = options.options.workspaceDir;
-    if (!workspaceRoot) { throw new Error('options.options.workspaceDir path required'); }
+    var workspaceDir = options.options.workspaceDir;
+    if (!workspaceDir) { throw new Error('options.options.workspaceDir path required'); }
 
     var contextPath = options.options.configParams['orion.context.path'];
 
@@ -33,7 +33,8 @@ module.exports = function(options) {
     module.exports.decodeUserIdFromWorkspaceId = decodeUserIdFromWorkspaceId;
     module.exports.decodeWorkspaceNameFromWorkspaceId = decodeWorkspaceNameFromWorkspaceId;
     module.exports.getProjectRoot = getProjectRoot;
-    module.exports.getProjectLocationFromWorkspaceId = getProjectLocationFromWorkspaceId;
+    module.exports.getRealLocation = getRealLocation;
+    module.exports.getWorkspaceIdFromprojectLocation = getWorkspaceIdFromprojectLocation;
 
 	function projectExists(fullpath) {
         return fs.existsSync(fullpath);
@@ -165,9 +166,9 @@ module.exports = function(options) {
      * return: "\mo\mourad\OrionContent\web" which is the unique project path format that can be found in the database.
      */
     function getProjectRoot(filepath) {
-        var index = filepath.indexOf(workspaceRoot);
+        var index = filepath.indexOf(workspaceDir);
         if (index === -1) return undefined;
-        index += workspaceRoot.length;
+        index += workspaceDir.length;
         filepath = filepath.substring(index);
         return filepath.split(path.sep).slice(0,5).join(path.sep);
     }
@@ -175,10 +176,15 @@ module.exports = function(options) {
     /**
      * /user1-orionContent/test/testfile  -> /us/user1/orionContent/test
      */
-    function getProjectLocationFromWorkspaceId(filepath) {
+    function getRealLocation(filepath) {
     	var segs = filepath.split(path.sep);
 		var fileRoot = getfileRoot(segs[1]);
 		var realPath = path.join("/", fileRoot, segs[2]);
 		return realPath;
+    }
+
+    function getWorkspaceIdFromprojectLocation(projectLocation){
+        var projectSegs = projectLocation.split("/");
+		return projectSegs[2] + SEPARATOR + projectSegs[3];
     }
 }
