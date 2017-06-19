@@ -340,6 +340,9 @@ define({
 		".split": {
 			"background": "#3B4B54"
 		},
+		".split:focus": {
+			"background": "#00FF00"
+		},
 		".splitThumb": {
 			"background": "#3B4B54"
 		},
