@@ -250,11 +250,11 @@ function getXfer(req, res) {
 		return writeError(400, res, "Export is not a zip");
 	}
 	
-    var filePath = file.path.replace(/.zip$/, "");
-	getXferFrom(req, res, filePath);
+	getXferFrom(req, res, file);
 }
 
-function getXferFrom(req, res, filePath) {
+function getXferFrom(req, res, file) {
+	var filePath = file.path.replace(/.zip$/, "");
 	var zip = archiver('zip');
 	zip.pipe(res);
 	write(zip, filePath, filePath)
