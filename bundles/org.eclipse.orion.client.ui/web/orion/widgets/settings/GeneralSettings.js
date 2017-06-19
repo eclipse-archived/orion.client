@@ -39,6 +39,7 @@ define([
 				this.maximumEditorTabsTextfield = new SettingsTextfield({
 					fieldlabel: messages["maximumEditorTabs"],
 					fieldTitle: messages["maximumEditorTabsTooltip"],
+					fieldType: "number",
 					postChange: this.setPreferences.bind(this)
 				});
 
@@ -81,7 +82,7 @@ define([
 						this.desktopSelectionPolicyCheckbox.enableCheckBox();
 					}
 					var maxTabs = parseInt(this.maximumEditorTabsTextfield.getValue(), 10);
-					maxTabs = isNaN(maxTabs) ? 0 : maxTabs;
+					maxTabs = isNaN(maxTabs) || maxTabs< 0 ? 0 : maxTabs;
 					generalPrefs.maximumEditorTabs = maxTabs;
 					this.preferences.setPrefs(generalPrefs);
 				}.bind(this));

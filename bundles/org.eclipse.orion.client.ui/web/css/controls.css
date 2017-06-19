@@ -1093,6 +1093,10 @@ html[dir="rtl"] .uploadChooser{ /* ACGC */
 	width: 120px;
 }
 
+.setting-control[type="number"] {
+	width: 120px;
+}
+
 .local {
 	display: table;
 }
