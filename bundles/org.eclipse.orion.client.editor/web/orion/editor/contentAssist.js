@@ -741,7 +741,7 @@ define("orion/editor/contentAssist", [ //$NON-NLS-0$
 					var charTriggers = null;
 					if (info.lspServer) {
 						var capabilities = info.provider.capabilities;
-						if (capabilities && capabilities.completionProvider) {
+						if (capabilities && capabilities.completionProvider && !info.charTriggers) {
 							// we should get the completion options
 							var completionOptions = capabilities.completionProvider;
 
@@ -753,7 +753,6 @@ define("orion/editor/contentAssist", [ //$NON-NLS-0$
 							triggers += "]";
 							info.charTriggers = new RegExp(triggers);
 						}
-						delete info.lspServer;
 					} 
 					charTriggers= info.charTriggers;
 					if (charTriggers && charTriggers.test(currentChar)) {
