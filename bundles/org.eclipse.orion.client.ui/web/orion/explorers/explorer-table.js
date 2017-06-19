@@ -61,7 +61,7 @@ define([
 	FileModel.prototype = new mExplorer.ExplorerModel();
 	objects.mixin(FileModel.prototype, /** @lends orion.explorer.FileModel.prototype */ {
 		destroy: function () {
-			removeEventListener(this._annotationChangedHandler, this._annotationChangedHandler);
+			this.fileClient.removeEventListener("AnnotationChanged", this._annotationChangedHandler);
 			mExplorer.ExplorerModel.prototype.destroy.call(this);
 		},
 
