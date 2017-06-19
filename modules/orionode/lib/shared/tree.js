@@ -366,8 +366,7 @@ module.exports.router = function(options) {
 			return writeError(400, res, "Export is not a zip");
 		}
 		
-		var filePath = file.path.replace(/.zip$/, "");
-		xfer.getXferFrom(req, res, filePath);
+		xfer.getXferFrom(req, res, file);
 	}
 
 	/**
