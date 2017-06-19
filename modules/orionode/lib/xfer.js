@@ -11,7 +11,6 @@
 /*eslint-env node */
 var api = require('./api'), writeError = api.writeError, writeResponse = api.writeResponse;
 var archiver = require('archiver');
-var unzip = require('unzip2');
 var request = require('request');
 var express = require('express');
 var path = require('path');
@@ -23,6 +22,7 @@ var fs = Promise.promisifyAll(require('fs'));
 var fileUtil = require('./fileUtil');
 var log4js = require('log4js');
 var logger = log4js.getLogger("xfer");
+var yauzl = require("yauzl");
 
 function getUploadsFolder(options) {
 	if (options.options) {
@@ -99,7 +99,7 @@ function postImportXferTo(req, res, file) {
 			fileName = path.basename(sourceURL);
 		}
 	}
-	if (!fileName && !unzip) {
+	if (!fileName) {
 		return writeError(400, res, "Transfer request must indicate target filename");
 	}
 	function upload(request) {
@@ -175,56 +175,68 @@ function completeTransfer(req, res, tempFile, file, fileName, xferOptions, shoul
 			excludes.push(".git");
 		}
 		var failed = [];
-		fs.createReadStream(tempFile)
-		.pipe(unzip.Parse())
-		.on('entry', function (entry) {
-			var entryName = entry.path;
-			var type = entry.type; // 'Directory' or 'File' 
-			var outputName = path.join(file.path, entryName);
-			if (!excluded(excludes, file.path, outputName)) {
-				if (type === "File") {
-					if (!overwrite && fs.existsSync(outputName)) {
-						failed.push(entryName);
-						entry.autodrain();
-						return;
+		yauzl.open(tempFile, {
+			lazyEntries: true,
+			validateEntrySizes: true
+		}, function(err, zipfile) {
+			if (err) throw err;
+			zipfile.readEntry();
+			zipfile.on("close", function() {
+				fs.unlink(tempFile, function(exp){});
+				if (res) {
+					if (failed.length) {
+						return overrideError(failed);
 					}
-					// make sure all sub folders exist
-					var subfolderPath = path.join(file.path, path.dirname(entryName));
-					if (!fs.existsSync(subfolderPath)) {
-						mkdirp.sync(subfolderPath);
-					}
-					var writeStream = fs.createWriteStream(outputName);
-					writeStream.on('error', function(err) {
-						if (res) {
-							reportTransferFailure(res, err);
-							res = null;
+					res.setHeader("Location", api.join(fileRoot, file.workspaceId, file.path.substring(file.workspaceDir.length+1)));
+					writeResponse(201, res);
+					res = null;
+				}
+			});
+			zipfile.on("error",function(err){
+				if (res) {
+					return writeError(400, res, "Failed during file unzip: " + err.message);
+				}
+			});
+			zipfile.on("entry", function(entry) {
+				var entryName = entry.fileName;
+				var outputName = path.join(file.path, entryName);
+				if (!excluded(excludes, file.path, outputName)) {
+					if (/\/$/.test(entry.fileName)) {
+						if (!fs.existsSync(outputName)) {
+							mkdirp.sync(outputName);	
 						}
-					});
-					entry.pipe(writeStream);
-				} else if (type === "Directory") {
-					if (!fs.existsSync(outputName)) {
-						mkdirp.sync(outputName);
+						zipfile.readEntry();
+					}else {
+						if (!overwrite && fs.existsSync(outputName) || entry.isEncrypted()) {
+							failed.push(entryName);
+							zipfile.readEntry();
+							return;
+						}
+						// make sure all sub folders exist
+						var subfolderPath = path.join(file.path, path.dirname(entryName));
+						if (!fs.existsSync(subfolderPath)) {
+							mkdirp.sync(subfolderPath);
+						}
+						var writeStream = fs.createWriteStream(outputName);
+						zipfile.openReadStream(entry, {decompress: entry.isCompressed() ? true : null}, function(err, readStream) {
+							if (err) throw err;
+							readStream.on("end", function() {
+								zipfile.readEntry();
+							});
+							readStream.pipe(writeStream);
+						});
+						writeStream.on('error', function(err) {
+							if (res) {
+								reportTransferFailure(res, err);
+								res = null;
+							}
+						});
 					}
+				}else{
+					zipfile.readEntry();
 				}
-			} else {
-				entry.autodrain();
-			}
-		})
-		.on('error', function(error) {
-			if (res) {
-				return writeError(400, res, "Failed during file unzip: " + error.message);
-			}
-		})
-		.on('close', function() {
-			fs.unlink(tempFile);
-			if (res) {
-				if (failed.length) {
-					return overrideError(failed);
-				}
-				res.setHeader("Location", api.join(fileRoot, file.workspaceId, file.path.substring(file.workspaceDir.length+1)));
-				writeResponse(201, res);
-				res = null;
-			}
+				return;
+			});
 		});
 	} else {
 		var newFile = path.join(file.path, fileName);
