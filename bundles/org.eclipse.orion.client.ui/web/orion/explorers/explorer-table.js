@@ -179,7 +179,6 @@ define([
 					}
 				}
 			}
-			console.assert(Array.isArray(evt.annotations));
 			evt.annotations.forEach(function(annotation) {
 				model._annotations.push(annotation);
 			});

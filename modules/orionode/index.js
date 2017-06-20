@@ -68,8 +68,9 @@ function startServer(options) {
 			var additionalEndpoints = require(options.configParams["additional.endpoint"]);
 			additionalEndpoints.forEach(function(additionalEndpoint){
 				if(additionalEndpoint.endpoint){
-					additionalEndpoint.authenticated ? app.use(additionalEndpoint.endpoint, checkAuthenticated, require(additionalEndpoint.module).router(options))
-						: app.use(additionalEndpoint.endpoint, require(additionalEndpoint.module).router(options));
+					additionalEndpoint.authenticated ? 
+						app.use(additionalEndpoint.endpoint, checkAuthenticated, require(additionalEndpoint.module).router(options))	 : 
+						app.use(additionalEndpoint.endpoint, require(additionalEndpoint.module).router(options));
 				}else{
 					var extraModule = require(additionalEndpoint.module);
 					var middleware = extraModule.router ? extraModule.router(options) : extraModule(options);
