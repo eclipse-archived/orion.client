@@ -187,7 +187,6 @@ define(['i18n!orion/nls/messages', 'orion/webui/littlelib', 'orion/Deferred'], f
 			// TODO: should I move this part to renderer? If so, how?
 			var tree = this;
 			var annotations = tree._treeModel.getAnnotations();
-			console.assert(Array.isArray(annotations));
 			// Remove existing annotations
 			var existingAnnotations = this._parent.getElementsByClassName('treeAnnotationOn');
 			var annotationsToRemove = [];
