@@ -21,6 +21,7 @@ define({//Default message bundle
 	"EnterName": "Enter a new name for '${0}'",
 	"ChooseFolder": "Choose folder...",
 	"Rename": "Rename",
+	"Refresh": "Refresh",
 	"RenameFilesFolders": "Rename the selected files or folders",
 	"CompareEach": "Compare with each other",
 	"Compare 2 files": "Compare the selected 2 files with each other",

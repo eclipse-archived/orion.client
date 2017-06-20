@@ -30,6 +30,7 @@ define([
 		enableFolderCreationAtRoot: false,
 		enableProjectCreation: true,
 		enableLinkProjectCreation: true,
+		enableRefreshButton: false,
 	};
 
 	function GeneralPreferences(preferences, callback) {

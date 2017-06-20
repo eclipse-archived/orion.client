@@ -928,6 +928,27 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/i18n
 			return getGeneralPreferenceValue("enableFolderCreationAtRoot", false);
 		};
 		
+		var isRefreshButtonEnabled = function() {
+			return getGeneralPreferenceValue("enableRefreshButton", false);
+		};
+		
+		var refreshCommand = new mCommands.Command({
+			name: messages["Refresh"],
+			id: "eclipse.file.refresh",
+			callback: function() {
+				var fc = serviceRegistry.getService("orion.core.file.client"); //$NON-NLS-1$
+				fc.dispatchEvent({
+					type: "Changed",
+					refresh: [{}]
+				});
+			},
+			visibleWhen: function() {
+				return isRefreshButtonEnabled();
+			}
+		});
+
+		commandService.addCommand(refreshCommand);
+		
 		/**
 		 * Creates a new file or folder as a child of the specified parentItem.
 		 */
