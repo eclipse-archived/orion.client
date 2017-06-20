@@ -1040,7 +1040,7 @@ define([
 						done,
 						function(error) {
 							done();
-							if (ignoreErrors) {
+							if (ignoreErrors || error.userCanceled) {
 								return;
 							}
 							var errorMessage = messages["UploadingFileErr"] + file.name;

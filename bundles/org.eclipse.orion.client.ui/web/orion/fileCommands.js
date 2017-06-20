@@ -128,6 +128,7 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/i18n
 			 					if (response) {
 			 						retry();
 		 						} else {
+		 							result.userCanceled = true;
 		 							promise.reject(result);
 		 						}
 							});
