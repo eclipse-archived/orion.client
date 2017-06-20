@@ -306,14 +306,15 @@ module.exports.start = function(startServer, configParams) {
 					allPrefs.windowBounds = nextWindow.getBounds();
 					allPrefs.windowBounds.maximized = nextWindow.isMaximized();
 					prefs.writePrefs(allPrefs);
-					if (updateDownloaded) {
-						nextWindow.webContents.session.clearCache(function() {
+					log4js.shutdown(function(){
+						if (updateDownloaded) {
+							nextWindow.webContents.session.clearCache(function() {
+								nextWindow.destroy();
+							});
+						}else{
 							nextWindow.destroy();
-						});
-					}else{
-						nextWindow.destroy();
-					}
-					log4js.shutdown();
+						}
+					});
 				}
 				event.preventDefault();
 				nextWindow.webContents.send('collect-tabs-info','closeorion');	
