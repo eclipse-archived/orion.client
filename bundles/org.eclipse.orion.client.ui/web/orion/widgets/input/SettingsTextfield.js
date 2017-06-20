@@ -55,8 +55,11 @@ define(['orion/objects', 'orion/webui/littlelib', 'orion/widgets/input/TextField
 				if(this.fieldTitle) {
 					this.mylabel.parentNode.title = this.fieldTitle;
 				}
-				if(this.fieldType){
+				if(this.fieldType) {
 					this.textfield.type = this.fieldType;
+				}
+				if(this.fieldMin !== undefined) {
+					this.textfield.min = this.fieldMin;
 				}
 			}
 		}

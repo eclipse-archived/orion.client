@@ -40,6 +40,7 @@ define([
 					fieldlabel: messages["maximumEditorTabs"],
 					fieldTitle: messages["maximumEditorTabsTooltip"],
 					fieldType: "number",
+					fieldMin: 0,
 					postChange: this.setPreferences.bind(this)
 				});
 
