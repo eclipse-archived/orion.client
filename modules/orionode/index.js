@@ -78,7 +78,7 @@ function startServer(options) {
 				}
 			});
 		}
-		if(options.configParams["collabMode"]){
+		if(options.configParams["orion.collab.enabled"]){
 			app.use('/sharedWorkspace', require('./lib/sharedWorkspace').router({sharedWorkspaceFileRoot: contextPath + '/sharedWorkspace/tree/file', fileRoot: contextPath + '/file', options: options  }));
 		}
 		app.use(require('./lib/user').router(options));
@@ -104,6 +104,9 @@ function startServer(options) {
 			var prependStaticAssets = options.configParams["prepend.static.assets"] && options.configParams["prepend.static.assets"].split(",") || [];
 			var appendStaticAssets = options.configParams["append.static.assets"] && options.configParams["append.static.assets"].split(",") || [];
 			var orionode_static = path.normalize(path.join(LIBS, 'orionode.client/'));
+			if(options.configParams["orion.collab.enabled"]){
+				appendStaticAssets.push('./bundles/org.eclipse.orion.client.collab/web');
+			}
 			app.use(require('./lib/orion_static')({ orionClientRoot: ORION_CLIENT, maxAge: options.maxAge, orionode_static: orionode_static, prependStaticAssets: prependStaticAssets, appendStaticAssets: appendStaticAssets}));
 		}
 

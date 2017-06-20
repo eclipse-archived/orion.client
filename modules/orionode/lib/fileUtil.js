@@ -428,7 +428,7 @@ exports.handleFilePOST = function(workspaceRoot, fileRoot, req, res, destFile, m
 			if (!sourceUrl) {
 				return api.writeError(400, res, 'Missing Location property in request body');
 			}
-			var sourceFile = getFile(req, sourceUrl.replace(/^.*\/file/, ""));
+			var sourceFile = getFile(req, sourceUrl.replace(new RegExp("^"+fileRoot), ""));
 			return fs.statAsync(sourceFile.path)
 			.then(function(/*stats*/) {
 				return isCopy ? copy(sourceFile.path, destFile.path) : fs.renameAsync(sourceFile.path, destFile.path);
