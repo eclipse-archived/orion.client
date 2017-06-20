@@ -379,6 +379,9 @@ define([
 			if (evt && evt.created) {
 				return this._handleResourceCreate(evt);
 			}
+			if (evt && evt.refresh) {
+				return this._handleResourceRefresh(evt);
+			}
 			return new Deferred().resolve();
 		},
 		_handleResourceCreate: function(evt) {
@@ -412,6 +415,24 @@ define([
 			return this.onModelDelete(newEvent).then(function( /*result*/ ) {
 				return items[0];
 			});
+		},
+		_handleResourceRefresh: function(evt) {
+			// Get previous selection to display after refresh.
+			var selected = this.selection && this.selection.getSelection() ? this.selection.getSelection() : null;
+			// If no item is selected, default to the item in the current window hash
+			if (!selected) {
+				selected = {Location: window.location.href.split("#")[1]};
+			}
+			var selectedItem = this._getUIModel(selected.Location);
+			var promises = evt.refresh.map(function(refreshItem) {
+				var item = refreshItem && refreshItem.Location ? refreshItem : this.model.root;
+				return new Deferred().resolve(this.changedItem(item, item === this.model.root));
+			}.bind(this));
+			return Deferred.all(promises).then(function() {
+				if (selectedItem) {
+					this.reveal(selectedItem, true);
+				}
+			}.bind(this));
 		},
 		_handleResourceMoveOrCopy: function(evt) {
 			//Convert the item array( {source, target, result} ) to an array of {newValue, oldValue, parent}
