@@ -141,14 +141,16 @@ function startServer(cb) {
 				server.shutdown(function() {
 					api.getOrionEE().emit("close-server");// Disconnect Mongoose // Close Search Workers
 					logger.info("Closed out remaining connections.");
-					log4js.shutdown();
-					process.exit();
+					log4js.shutdown(function(){
+						process.exit();
+					});
 				});
 				setTimeout(function() {
 					api.getOrionEE().emit("close-server");
 					logger.error("Could not close connections in time, forcefully shutting down");
-					log4js.shutdown();
-					process.exit();
+					log4js.shutdown(function(){
+						process.exit();
+					});
 				}, configParams["shutdown.timeout"]);
 			};
 			// listen for TERM signal .e.g. kill 
