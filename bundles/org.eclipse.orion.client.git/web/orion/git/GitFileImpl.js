@@ -38,7 +38,7 @@ define(["orion/xhr", "orion/Deferred", "orion/encoding-shim", "orion/URL-shim"],
 	}
 
 	GitFileImpl.prototype = {
-		fetchChildren: function(location) {
+		fetchChildren: function(location, options) {
 			var fetchLocation = location;
 			if (fetchLocation===this.fileBase) {
 				return this.loadWorkspaces().then(function(workspaces) {
@@ -51,13 +51,17 @@ define(["orion/xhr", "orion/Deferred", "orion/encoding-shim", "orion/URL-shim"],
 			if (fetchLocation.indexOf("?depth=") === -1) { //$NON-NLS-0$
 				fetchLocation += "?depth=1"; //$NON-NLS-0$
 			}
-			return xhr("GET", fetchLocation,{ //$NON-NLS-0$
+			var opts = {
 				headers: {
 					"Orion-Version": "1", //$NON-NLS-0$  //$NON-NLS-1$
 					"Content-Type": "charset=UTF-8" //$NON-NLS-0$  //$NON-NLS-1$
 				},
 				timeout: GIT_TIMEOUT
-			}).then(function(result) {
+			};
+			if (options && typeof options.readIfExists === 'boolean') {
+				opts.headers["read-if-exists"] = Boolean(options.readIfExists).toString();
+			}
+			return xhr("GET", fetchLocation, opts).then(function(result) {  //$NON-NLS-0$
 				var jsonData = result.response ? JSON.parse(result.response) : {};
 				return jsonData.Children || [];
 			});
@@ -147,7 +151,11 @@ define(["orion/xhr", "orion/Deferred", "orion/encoding-shim", "orion/URL-shim"],
 		copyFile: function(sourceLocation, targetLocation, name) {
 			throw new Error("Not supported"); //$NON-NLS-0$ 
 		},
-		read: function(location, isMetadata, options) {
+		read: function(location, isMetadata, acceptPatch, options) {
+			if (typeof acceptPatch === 'object') {
+				options = acceptPatch;
+				acceptPatch = false;
+			}
 			var url = new URL(location, window.location);
 			if (isMetadata) {
 				url.query.set("parts", "meta"); //$NON-NLS-0$  //$NON-NLS-1$

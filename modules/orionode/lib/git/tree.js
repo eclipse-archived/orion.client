@@ -49,6 +49,7 @@ function treeJSON(location, name, timestamp, dir, length) {
 }
 
 function getTree(req, res) {
+	var readIfExists = req.headers ? Boolean(req.headers['read-if-exists']).valueOf() : false;
 	var repo;
 	
 	if (!req.params[0]) {
@@ -191,7 +192,11 @@ function getTree(req, res) {
 		});
 	})
 	.catch(function(err) {
-		writeError(404, res, err.message);
+		if (typeof readIfExists === 'boolean' && readIfExists) {
+			res.sendStatus(204);
+		}else{
+			writeError(404, res, err.message);
+		}
 	});
 }
 
