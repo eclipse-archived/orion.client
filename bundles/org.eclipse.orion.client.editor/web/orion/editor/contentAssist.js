@@ -747,9 +747,12 @@ define("orion/editor/contentAssist", [ //$NON-NLS-0$
 
 							// build up the regex for triggerCharacters
 							var triggers = "[";
-							completionOptions.triggerCharacters.forEach(function(character) {
-							triggers += character;
-							});
+							// don't assume that the language server supports trigger characters
+							if (completionOptions.triggerCharacters) {
+								completionOptions.triggerCharacters.forEach(function(character) {
+									triggers += character;
+								});
+							}
 							triggers += "]";
 							info.charTriggers = new RegExp(triggers);
 						}
