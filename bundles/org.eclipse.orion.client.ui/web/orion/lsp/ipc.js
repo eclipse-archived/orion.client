@@ -13,6 +13,16 @@
 define([], function() {
 
 	/**
+	 * The object of codes for the server to indicate how the host
+	 * should synchronize document changes to the language server.
+	 */
+	IPC.prototype.TEXT_DOCUMENT_SYNC_KIND = Object.freeze({
+		None: 0,
+		Full: 1,
+		Incremental: 2
+	});
+
+	/**
 	 * The object of error codes
 	 * @see https://github.com/Microsoft/language-server-protocol/blob/master/protocol.md#response-message
 	 */

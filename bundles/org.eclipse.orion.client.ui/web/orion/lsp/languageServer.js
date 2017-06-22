@@ -107,6 +107,27 @@ define([
 			return this.capabilities;
 		},
 
+		/**
+		 * Retrieves the method in which the server wishes to have documents synchronized by.
+		 * 
+		 * @return {number} a TextDocumentSyncKind, may be None, Full, or Incremental
+		 */
+		getTextDocumentSync: function() {
+			if (this.capabilities && this.capabilities.textDocumentSync) {
+				var kind = this.capabilities.textDocumentSync;
+				if (this.capabilities.textDocumentSync.change) {
+					kind = this.capabilities.textDocumentSync.change;
+				}
+				switch (kind) {
+					case this.ipc.TEXT_DOCUMENT_SYNC_KIND.None:
+					case this.ipc.TEXT_DOCUMENT_SYNC_KIND.Incremental:
+					case this.ipc.TEXT_DOCUMENT_SYNC_KIND.Full:
+						return kind;
+				}
+			}
+			return this.ipc.TEXT_DOCUMENT_SYNC_KIND.None;
+		},
+
 		isDefinitionEnabled: function() {
 			return this.capabilities && this.capabilities.definitionProvider;
 		},

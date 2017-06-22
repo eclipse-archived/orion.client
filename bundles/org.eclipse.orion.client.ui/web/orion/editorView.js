@@ -385,9 +385,9 @@ define([
 					}
 					if (!evnt.start) return;
 
-					var textDocumentSync = languageServer.capabilities.textDocumentSync;
+					var textDocumentSync = languageServer.getTextDocumentSync();
 					if (textDocumentSync) {
-						if (textDocumentSync === 1 || textDocumentSync.change === 1) {
+						if (textDocumentSync === languageServer.ipc.TEXT_DOCUMENT_SYNC_KIND.Full) {
 							// TextDocumentSyncKind.Full, send the entire document
 							// get the text before it was modified
 							var text = textView.getText();
@@ -398,7 +398,7 @@ define([
 							};
 							var metaData = inputManager.getFileMetadata();
 							languageServer.didChange(metaData.Location, openedDocument.version++, [change]);
-						} else if (textDocumentSync === 2 || textDocumentSync.change === 2) {
+						} else if (textDocumentSync === languageServer.ipc.TEXT_DOCUMENT_SYNC_KIND.Incremental) {
 							// TextDocumentSyncKind.Incremental, only send what changed
 							var change = {
 								range: Utils.getRange(editor, evnt.start, evnt.start),
