@@ -1356,7 +1356,7 @@ define(["orion/Deferred", "orion/EventTarget", "orion/urlModifier", "orion/URL-s
 
             if (configuration.plugins) {
                 Object.keys(configuration.plugins).forEach(function(key) {
-		            var url = _normalizeURL(url);
+		            var url = _normalizeURL(key);
 		            //                    if (!httpOrHttps.test(url)) {
 		            //                        console.log("Illegal Plugin URL: " + url);
 		            //                        return;
