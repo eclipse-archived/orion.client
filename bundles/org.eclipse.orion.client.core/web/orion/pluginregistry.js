@@ -1251,7 +1251,7 @@ define(["orion/Deferred", "orion/EventTarget", "orion/urlModifier", "orion/URL-s
                 return _state;
             },
             handleServiceError: function(plugin, error) {
-                if (error && (error.status === 401 || error.status === 403)) {
+                if (error && (error.status === 401 || error.status === 591)) {
                     var headers = plugin.getHeaders();
                     var name = plugin.getName() || plugin.getLocation();
                     var span = document.createElement("span");
