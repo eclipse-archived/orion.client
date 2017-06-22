@@ -384,13 +384,27 @@ define([
 						return;
 					}
 					if (!evnt.start) return;
-					var change = {
-						range: Utils.getRange(editor, evnt.start, evnt.start),
-						rangeLength: evnt.removedCharCount,
-						text: evnt.text
-					};
-					var metaData = inputManager.getFileMetadata();
-					languageServer.didChange(metaData.Location, openedDocument.version++, [change]);
+
+					var textDocumentSync = languageServer.capabilities.textDocumentSync;
+					if (textDocumentSync) {
+						if (textDocumentSync === 1 || textDocumentSync.change === 1) {
+							// TextDocumentSyncKind.Full, send the entire document
+							var change = {
+								text: textView.getText()
+							};
+							var metaData = inputManager.getFileMetadata();
+							languageServer.didChange(metaData.Location, openedDocument.version++, [change]);
+						} else if (textDocumentSync === 2 || textDocumentSync.change === 2) {
+							// TextDocumentSyncKind.Incremental, only send what changed
+							var change = {
+								range: Utils.getRange(editor, evnt.start, evnt.start),
+								rangeLength: evnt.removedCharCount,
+								text: evnt.text
+							};
+							var metaData = inputManager.getFileMetadata();
+							languageServer.didChange(metaData.Location, openedDocument.version++, [change]);
+						}
+					}
 				});
 				return textView;
 			};
