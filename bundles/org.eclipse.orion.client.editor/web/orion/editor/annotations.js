@@ -585,7 +585,7 @@ define("orion/editor/annotations", ['i18n!orion/editor/nls/messages', 'orion/edi
 				skip = function() {
 					while (i < annotations.length) {
 						var a =  annotations[i++];
-						if ((start === a.start) || (start > a.start ? start < a.end : a.start < end)) {
+						if ((start === a.start) || (a.start === a.end && a.end === end) || (start > a.start ? start < a.end : a.start < end)) {
 							return a;
 						}
 						if (a.start >= end) {
