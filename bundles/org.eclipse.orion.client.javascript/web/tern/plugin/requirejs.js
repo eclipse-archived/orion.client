@@ -1,30 +1,62 @@
 /* eslint-disable */
 (function(mod) {
   if (typeof exports == "object" && typeof module == "object") // CommonJS
-    return mod(require("../lib/infer"), require("../lib/tern"), require("./modules"));
+    return mod(require("../lib/infer"), require("../lib/tern"));
   if (typeof define == "function" && define.amd) // AMD
-    return define(["../lib/infer", "../lib/tern", "./modules"], mod);
+    return define(["../lib/infer", "../lib/tern", "javascript/ternPlugins/resolver"], mod);
   mod(tern, tern);
-})(function(infer, tern) {
+})(function(infer, tern, resolver) {
   "use strict";
+  
+  function flattenPath(path) {
+    if (!/(^|\/)(\.\/|[^\/]+\/\.\.\/)/.test(path)) return path;
+    var parts = path.split("/");
+    for (var i = 0; i < parts.length; ++i) {
+      if (parts[i] == "." || !parts[i]) parts.splice(i--, 1);
+      else if (i && parts[i] == "..") { parts.splice(i - 1, 2); i -= 2; }
+    }
+    return parts.join("/");
+  }
+
+  function resolveName(name, data) {
+    var excl = name.indexOf("!");
+    if (excl > -1) name = name.slice(0, excl);
+
+    var opts = data.options;
+    var hasExt = /\.js$/.test(name);
+    if (hasExt || /^(?:\w+:|\/)/.test(name))
+      return name + (hasExt ? "" : ".js");
+
+    var base = opts.baseURL || "";
+    if (base && base.charAt(base.length - 1) != "/") base += "/";
+    if (opts.paths) {
+      var known = opts.paths[name];
+      if (known) return flattenPath(base + known + ".js");
+      var dir = name.match(/^([^\/]+)(\/.*)$/);
+      if (dir) {
+        known = opts.paths[dir[1]];
+        if (known) return flattenPath(base + known + dir[2] + ".js");
+      }
+    }
+    return flattenPath(base + name + ".js");
+  }
 
   function getRequire(data) {
     if (!data.require) {
       data.require = new infer.Fn("require", infer.ANull, [infer.cx().str], ["module"], new infer.AVal);
       data.require.computeRet = function(_self, _args, argNodes) {
         if (argNodes.length && argNodes[0].type == "Literal" && typeof argNodes[0].value == "string")
-          return getInterface(path.join(path.dirname(data.currentFile), argNodes[0].value), data);
+          return getInterface(argNodes[0].value, data); //ORION
         return infer.ANull;
       };
     }
     return data.require;
   }
-  
-  var EXPORT_OBJ_WEIGHT = 50;
 
   function getModuleInterface(data, exports) {
     var mod = new infer.Obj(infer.cx().definitions.requirejs.module, "module");
     var expProp = mod.defProp("exports");
+    
     expProp.propagate(getModule(data.currentFile, data));
     exports.propagate(expProp, EXPORT_OBJ_WEIGHT);
     return mod;
@@ -37,14 +69,67 @@
   }
 
   function getInterface(name, data) {
-  	// TODO Is this check necessary now that getModule does a lookup, not a resolve?
-	var parent = name !== data.currentFile ? data.currentFile : undefined;
-	var data = data.server.mod.modules.resolveModule(name, parent);
-	return data;
+    if (data.options.override && Object.prototype.hasOwnProperty.call(data.options.override, name)) {
+      var over = data.options.override[name];
+      if (typeof over == "string" && over.charAt(0) == "=") return infer.def.parsePath(over.slice(1));
+      if (typeof over == "object") {
+        var known = getKnownModule(name, data);
+        if (known) return known;
+        var scope = data.interfaces[stripJSExt(name)] = new infer.Obj(null, stripJSExt(name));
+        infer.def.load(over, scope);
+        return scope;
+      }
+      name = over;
+    }
+	//ORION
+	known = getModule(name, data);
+    if (known && known.origin) {
+    	var contents = known.contents;
+    	if(data.server.fileMap[known.origin]) {
+    		contents = null; //don't force a purge for a context that will not be recomputed
+    	}
+      data.server.addFile(known.origin, contents, data.currentFile);
+    }
+    return known || infer.ANull;
+  }
+
+  function getKnownModule(name, data) {
+    var val = resolver.getResolved(name); //ORION
+  	if(val && val.file) {
+    	return data.interfaces[stripJSExt(val.file)];
+    }
+    return null;
   }
 
   function getModule(name, data) {
-  	return data.server.mod.modules.get(name)
+  	if(name === data.currentFile) {
+  		var _f = stripJSExt(name);
+  		var known = data.interfaces[_f];
+  		if(!known) {
+  			known = new infer.AVal();
+  			known.origin = name;
+  			data.interfaces[_f] = known;
+  		}
+  		return known;
+  	}
+  	var known = getKnownModule(name, data);
+    if (!known) {
+      var val = resolver.getResolved(name); //ORION
+      if(val && val.file) {
+	      known = data.interfaces[stripJSExt(val.file)] = new infer.AVal();
+	      data.shortNames[stripJSExt(val.file)] = name; // ORION Collect short names for module name completion
+	      known.origin = val.file;
+	      known.contents = val.contents;
+	      known.reqName = name;
+      }
+	}
+    return known;
+  }
+
+  var EXPORT_OBJ_WEIGHT = 50;
+
+  function stripJSExt(f) {
+    return f.replace(/\.js$/, '');
   }
 
   var path = {
@@ -57,8 +142,7 @@
       else return to;
     },
     join: function(a, b) {
-      // TODO Orion the resolver plugin figures out the absolute path so we want to keep the relative path here for ./foo dependencies
-      if (b /*&& b.charAt(0) != "."*/) return b;
+      if (b && b.charAt(0) != ".") return b;
       if (a && b) return a + "/" + b;
       else return (a || "") + (b || "");
     }
@@ -79,13 +163,12 @@
       var node = argNodes[args.length == 2 ? 0 : 1];
       var base = path.relative(server.projectDir, path.dirname(node.sourceFile.name));
       if (node.type == "Literal" && typeof node.value == "string") {
-        node.required = interf(path.join(base, node.value), data);
+        node.required = interf(node.value); //ORION
         deps.push(node.required);
       } else if (node.type == "ArrayExpression") for (var i = 0; i < node.elements.length; ++i) {
         var elt = node.elements[i];
-        //ORION a sparse array entry will cause this to throw an error
-        if (elt && elt.type == "Literal" && typeof elt.value == "string") {
-          elt.required = interf(path.join(base, elt.value), data);
+        if (elt && elt.type == "Literal" && typeof elt.value == "string") { //ORION elt might be null
+          elt.required = interf(elt.value); //ORION
           deps.push(elt.required);
         }
       }
@@ -112,11 +195,11 @@
     return infer.ANull;
   }
 
- infer.registerFunction("requirejs_define", function(_self, args, argNodes) {
+  infer.registerFunction("requirejs_define", function(_self, args, argNodes) {
     if (!args.length) return infer.ANull
-    
+
     var server = infer.cx().parent, data = server.mod.requireJS
-    return runModule(infer.cx().parent, args, argNodes, getModule(data.currentFile, data))
+    return runModule(server, args, argNodes, getModule(data.currentFile, data))
   });
 
   infer.registerFunction("requirejs_require", function(_self, args, argNodes) {
@@ -156,40 +239,27 @@
       }
     }
     return infer.ANull;
-});
+  });
 
-  
-// TODO Can we remove this as modules.js should propagate}//
+  function preCondenseReach(state) {
+    var interfaces = infer.cx().parent.mod.requireJS.interfaces;
+    var rjs = state.roots["!requirejs"] = new infer.Obj(null);
+    for (var name in interfaces) {
+      var prop = rjs.defProp(name.replace(/\./g, "`"));
+      interfaces[name].propagate(prop);
+      prop.origin = interfaces[name].origin;
+    }
+  }
 
-//  function preCondenseReach(state//{
-//  	var data = cx.parent.mod.require//;
-//    var interfaces = infer.cx().parent.mod.requireJS.interfac//;
-//    var rjs = state.roots["!requirejs"] = new infer.Obj(nul//;
-//    for (var name in interfaces//{
-//      var prop = rjs.defProp(name.replace(/\./g, "`"//;
-//      var module = getModule(name, dat//;
-//      if (modul//{
-//      	module.propagate(pro//;
-//      	prop.origin = module.orig//;
-//    //}
-//  //}
-//  }
-//
-//  function postLoadDef(data) {
-//    var cx = infer.cx(), interfaces = cx.definitions[data["!name"]]["!requirejs"];
-//    var data = cx.parent.mod.requireJS;
-//    if (interfaces) for (var name in interfaces.props) {
-//      interfaces.props[name].propagate(getInterface(name, data));
-//    }
-//  }
+  function postLoadDef(data) {
+    var cx = infer.cx(), interfaces = cx.definitions[data["!name"]]["!requirejs"];
+    var data = cx.parent.mod.requireJS;
+    if (interfaces) for (var name in interfaces.props) {
+      interfaces.props[name].propagate(getInterface(name, data));
+    }
+  }
 
   tern.registerPlugin("requirejs", function(server, options) {
-    // TODO getExports?
-    server.loadPlugin("modules");
-    
-    // TODO mod name tests, import tests
-    // completable types rather than findCompletions
-    
     server.mod.requireJS = {
       interfaces: Object.create(null),
       options: options || {},
@@ -200,42 +270,121 @@
     server.on("beforeLoad", function(file) {
       this.mod.requireJS.currentFile = file.name;
     });
-    server.on("reset", function(l){
+    server.on("reset", function() {
+      this.mod.requireJS.interfaces = Object.create(null);
+      this.mod.requireJS.shortNames = Object.create(null); // ORION Collect the short names rather than full Orion path for module completion
       this.mod.requireJS.require = null;
+      resolver.doReset();
+    });
+	server.on("preParse", function preParseHandler(text, options) {
+		resolver.doPreParse(text, options);
+	});
+    server.on("preCondenseReach", preCondenseReach)
+    server.on("postLoadDef", postLoadDef)
+    server.on("typeAt", findTypeAt)
+    server.on("completion", findCompletions)
+    
+    // ORION Hook into postParse, preInfer events
+    server.on("postParse", function(ast, text){
+    	resolver.doPostParse(server, ast, infer.cx().definitions);
+    });
+    server.on("preInfer", function(ast, scope){
+    	resolver.doPreInfer(server);
     });
 
-    server.mod.modules.modNameTests.push(isModuleName)
-    // TODO Do we need a separate import checker?
-//    server.mod.modules.importTests.push(isImport)
-    server.mod.modules.completableTypes.Identifier = true;
-    server.mod.modules.completableTypes.Literal = true;
+    server.addDefs(defs)
+  });
 
-    server.addDefs(defs);
-    
-});
+  function findTypeAt(_file, _pos, expr, type) {
+    if (!expr || expr.node.type != "Literal" ||
+        typeof expr.node.value != "string" || !expr.node.required)
+      return type;
 
-  function _getAST(node){
-  	// ORION In our version of Acorn the AST is not available on the given node
-    var ast = node.sourceFile.ast;
-    if (!ast){
-        var server = infer.cx().parent;
-        ast = server.fileMap[node.sourceFile.name];
-        if (!ast) return;
-        ast = ast.ast;
-    }
-    return ast;
+    // The `type` is a value shared for all string literals.
+    // We must create a copy before modifying `origin` and `originNode`.
+    // Otherwise all string literals would point to the last jump location
+    type = Object.create(type);
+
+    // Provide a custom origin location pointing to the require()d file
+    var exportedType = expr.node.required;
+    type.origin = exportedType.origin;
+    type.originNode = exportedType.originNode;
+    if (exportedType.doc) type.doc = exportedType.doc
+    if (exportedType.url) type.url = exportedType.url
+    return type;
   }
-  
-  function isModuleName(node) {
-    if (node.type != "Literal" || typeof node.value != "string") return
-    
-    var callExpr = infer.findExpressionAround(_getAST(node), null, node.end, null, "CallExpression");
+
+  function findCompletions(file, query) {
+    var wordEnd = tern.resolvePos(file, query.end);
+    var callExpr = infer.findExpressionAround(file.ast, null, wordEnd, file.scope, "CallExpression");
     if (!callExpr) return;
     var callNode = callExpr.node;
-    if (callNode.callee.type != "Identifier") return;
-    if (!(callNode.callee.name == "define" || callNode.callee.name == "require" || callNode.callee.name == "requirejs")) return
-    if (callNode.arguments.length < 1 || (callNode.arguments[0].type != "ArrayExpression" && (callNode.arguments.length < 2 || callNode.arguments[1].type != "ArrayExpression"))) return;
-    return node.value;
+    if (callNode.callee.type != "Identifier" ||
+        !(callNode.callee.name == "define" || callNode.callee.name == "require" || callNode.callee.name == "requirejs")||
+        callNode.arguments.length < 1 || callNode.arguments[0].type != "ArrayExpression") return;
+    var argNode = findRequireModule(callNode.arguments[0].elements, wordEnd);
+    if (!argNode) return;
+    var word = argNode.raw.slice(1, wordEnd - argNode.start), quote = argNode.raw.charAt(0);
+    if (word && word.charAt(word.length - 1) == quote)
+      word = word.slice(0, word.length - 1);
+    var completions = completeModuleName(query, word, file.name);
+    if (argNode.end == wordEnd + 1 && file.text.charAt(wordEnd) == quote)
+      ++wordEnd;
+    return {
+      start: tern.outputPos(query, file, argNode.start),
+      end: tern.outputPos(query, file, wordEnd),
+      isProperty: false,
+      isObjectKey: false,
+      completions: completions.map(function(rec) {
+        var name = typeof rec == "string" ? rec : rec.name;
+        
+        // TODO ORION: Stringify the name adds the quotes around the proposal which Orion doesn't handle in sortProposals
+        var string = name;
+//        var string = JSON.stringify(name)
+//        if (quote == "'") string = quote + string.slice(1, string.length -1).replace(/'/g, "\\'") + quote
+        
+        if (typeof rec == "string") return string;
+        rec.displayName = name;
+        rec.name = string;
+        return rec;
+      })
+    };
+  }
+
+  function findRequireModule(argsNode, wordEnd) {
+    for (var i = 0; i < argsNode.length; i++) {
+      var argNode = argsNode[i];
+      if (argNode.type == "Literal" && typeof argNode.value == "string" &&
+          argNode.start < wordEnd && argNode.end > wordEnd) return argNode;
+    }
+  }
+
+  function completeModuleName(query, word, parentFile) {
+    var cx = infer.cx(), server = cx.parent, data = server.mod.requireJS;
+    var currentName = stripJSExt(parentFile);
+    var base = data.options.baseURL || "";
+    if (base && base.charAt(base.length - 1) != "/") base += "/";
+
+    if (query.caseInsensitive) word = word.toLowerCase();
+
+ 	// ORION Use short names for completion rather than resolved Orion path that is stored in data.interfaces
+    var completions = [],
+    	modules = data.interfaces;
+    for (var name in modules) {
+    	// ORION Allow empty files to be completed
+      if (name == currentName /*|| !modules[name].getType()*/) continue;
+      
+      // ORION Use short name
+      if (!data.shortNames[name]) continue;
+      name = data.shortNames[name];
+
+      var moduleName = name.substring(base.length, name.length);
+      if (moduleName &&
+          !(query.filter !== false && word &&
+            (query.caseInsensitive ? moduleName.toLowerCase() : moduleName).indexOf(word) !== 0))
+        tern.addCompletion(query, completions, moduleName, modules[name]);
+    }
+    return completions;
   }
 
   var defs = {
