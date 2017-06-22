@@ -169,8 +169,10 @@ function getCommitLog(req, res) {
 								if (entries[i] !== null && entries[i].id().equal(entryId)) {
 									// if the entry id is the same as a parent, that means
 									// the content from the other branches should be ignored
+									// as they have been discarded in favour of the changes
+									// of this particular branch of history
 									for (var j = 0; j < entries.length; j++) {
-										if (i !== j) {
+										if (i !== j && (base === null || !parents[j].id().equal(base))) {
 											ignore.push(parents[j].id());
 										}
 									}

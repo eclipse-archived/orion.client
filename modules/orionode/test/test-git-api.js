@@ -3039,6 +3039,96 @@ maybeDescribe("git", function() {
 
 			/**
 			 * Confirm the parent history information of the following graph.
+			 * The merge commit has B as its first parent and C as its second
+			 * parent. It keeps the changes from C after the merge.
+			 * Commits A, B, and C all modify the file.
+			 * 
+			 * Actual repository history:
+			 * 
+			 * M
+			 * |\
+			 * | \
+			 * |  \
+			 * U   C
+			 * |  /
+			 * | /
+			 * |/
+			 * B
+			 * |
+			 * A
+			 * 
+			 * Returned history for the file:
+			 * 
+			 * C
+			 * |
+			 * B
+			 * |
+			 * A
+			 */
+			it("bug518591", function(finished) {
+				var commitA, commitB, commitC, local;
+				var name = "test.txt";
+				var testName = "bug518591";
+				var fullPath = path.join(WORKSPACE, testName);
+				var client = new GitClient(testName);
+				client.init();
+				// create the file at commit A
+				client.setFileContents(name, "A");
+				client.stage(name);
+				client.commit();
+				client.start().then(function(commit) {
+					commitA = commit.Id;
+					// modify to B
+					client.setFileContents(name, "B");
+					client.stage(name);
+					client.commit();
+					return client.start();
+				})
+				.then(function(commit) {
+					commitB = commit.Id;
+					// create commit C
+					client.setFileContents(name, "C");
+					client.stage(name);
+					client.commit();
+					return client.start();
+				})
+				.then(function(commit) {
+					commitC = commit.Id;
+					// branch
+					client.createBranch("other");
+					// reset to B
+					client.reset("HARD", commitB);
+					return client.start();
+				})
+				.then(function() {
+					return git.Repository.open(fullPath);
+				})
+				.then(function(repo) {
+					// merge the other branch without fast-forwarding using NodeGit APIs
+					return repo.mergeBranches("HEAD", "other", null, git.Merge.PREFERENCE.NO_FASTFORWARD);
+				})
+				.then(function() {
+					client.log("master", "master", name);
+					return client.start();
+				})
+				.then(function(log) {
+					assert.equal(log.Children.length, 3);
+					assert.equal(log.Children[0].Id, commitC);
+					assert.equal(log.Children[0].Parents.length, 1);
+					assert.equal(log.Children[0].Parents[0].Name, commitB);
+					assert.equal(log.Children[1].Id, commitB);
+					assert.equal(log.Children[1].Parents.length, 1);
+					assert.equal(log.Children[1].Parents[0].Name, commitA);
+					assert.equal(log.Children[2].Id, commitA);
+					finished();
+				})
+				.catch(function(err) {
+					finished(err);
+				});
+			});
+
+			/**
+			 * Confirm the parent history information of the following graph.
 			 * We want to make sure that the extraneous commits A, B, C, and D
 			 * don't affect the returned history information of the modified file.
 			 * 
