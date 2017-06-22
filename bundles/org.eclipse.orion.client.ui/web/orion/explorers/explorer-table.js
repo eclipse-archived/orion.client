@@ -183,7 +183,7 @@ define([
 		},
 		_isExpression: function(fileFilter) {
 			if (fileFilter) {
-				return fileFilter.includes("*") || fileFilter.includes("?");
+				return (fileFilter.indexOf("*") > -1) || (fileFilter.indexOf("?") > -1);
 			}
 			return false;
 		},
