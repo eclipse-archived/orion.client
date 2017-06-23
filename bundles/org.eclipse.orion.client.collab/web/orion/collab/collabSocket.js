@@ -29,7 +29,6 @@ define(['orion/EventTarget','socket.io/socket.io'], function(EventTarget, io) {
         var self = this;
 		
 		this.socket = io.connect( hubUrl+ "?sessionId=" +sessionId, { path: "/socket.io/" });
-//        this.socket = new WebSocket(hubUrl + sessionId);
 
         this.socket.on('connect', function() {
             self.dispatchEvent({
@@ -43,7 +42,7 @@ define(['orion/EventTarget','socket.io/socket.io'], function(EventTarget, io) {
             });
         });
         
-        this.socket.on('error', function() {
+        this.socket.on('error', function(e) {
            self.dispatchEvent({
                 type: 'error',
                 error: e
