@@ -22,12 +22,12 @@ var JWT_SECRET = config.jwt_secret;
 
 var app = express();
 var server = http.createServer(app);
-var io = require('socket.io')(server);
+var io = require('socket.io').listen(server);
 var sessions = new SessionManager();
 
 io.on('connection', function(sock) {
     // Get session ID
-    var sessionId = url.parse(sock.upgradeReq.url).pathname.substr(1);
+    var sessionId = sock.conn.request._query.sessionId;
 
     /**
      * Handle the initial message (authentication)

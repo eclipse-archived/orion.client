@@ -28,39 +28,39 @@ define(['orion/EventTarget','socket.io/socket.io'], function(EventTarget, io) {
 	function CollabSocket(hubUrl, sessionId) {
         var self = this;
 		
-		this.socket = io.connect( hubUrl+ sessionId, { path: socketioPath });
+		this.socket = io.connect( hubUrl+ "?sessionId=" +sessionId, { path: "/socket.io/" });
 //        this.socket = new WebSocket(hubUrl + sessionId);
 
-        this.socket.onopen = function() {
+        this.socket.on('connect', function() {
             self.dispatchEvent({
                 type: 'ready'
             });
-        };
-
-        this.socket.onclose = function() {
+        });
+        
+        this.socket.on('disconnect', function() {
             self.dispatchEvent({
                 type: 'close'
             });
-        };
-
-        this.socket.onerror = function(e) {
-            self.dispatchEvent({
+        });
+        
+        this.socket.on('error', function() {
+           self.dispatchEvent({
                 type: 'error',
                 error: e
             });
             console.error(e);
-        };
+        });
 
-        this.socket.onmessage = function(e) {
+        this.socket.on('message', function(data) {
             self.dispatchEvent({
                 type: 'message',
-                data: e.data
+                data: data
             });
             if (DEBUG) {
-                var msgObj = JSON.parse(e.data);
+                var msgObj = JSON.parse(data);
                 console.log('CollabSocket In: ' + msgObj.type, msgObj);
             }
-        };
+        });
 
         EventTarget.attach(this);
 	}
