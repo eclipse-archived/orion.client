@@ -140,8 +140,17 @@ define([
 			if(Array.isArray(results) && results.length > 0) {
 				var outline = [];
 				results.forEach(function(result) {
+					var offset = result.location.range.start.character;
+					var node = {
+						label: result.name,
+						labelPost: ' (' + resolveSymbolKind(result.kind) + ')',
+						line: result.location.range.start.line + 1,
+						offset: offset,
+						length: result.location.range.end.character - offset,
+						children: []
+					};
 					if(!result.containerName) {
-						outline.push({label: result.name, children: []});
+						outline.push(node);
 					} else {
 						var idx = _findContainerIndex(outline, result.containerName),
 							_p;
@@ -151,14 +160,7 @@ define([
 						} else {
 							_p = outline[idx];
 						}
-						var offset = result.location.range.start.character;
-						_p.children.push({
-							label: result.name,
-							labelPost: ' ('+resolveSymbolKind(result.kind)+')',
-							line: result.location.range.start.line+1,
-							offset: offset,
-							length: result.location.range.end.character-offset
-						});
+						_p.children.push(node);
 					}
 				});
 				return outline;
