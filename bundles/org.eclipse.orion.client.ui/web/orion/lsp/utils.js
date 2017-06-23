@@ -241,7 +241,11 @@ define([
 		return editorContext.getFileMetadata().then(function(meta) {
 			return getEditorContextPosition(editorContext, args.selection.start).then(function(position) {
 				return provider.completion(meta.location, position).then(function(results) {
-						var items  = results.items;
+						// textDocument/completion requests may return a CompletionItem[] or a CompletionList
+						var items = results;
+						if (results.items) {
+							items = results.items;
+						}
 						if (Array.isArray(items) && items.length > 0) {
 							return Deferred.all(resolveCompletionItems(provider, editorContext, items)).then(function(proposals) {
 								return new Deferred().resolve(proposals);
