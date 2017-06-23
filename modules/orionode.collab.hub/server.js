@@ -17,26 +17,23 @@ var http = require('http');
 var jwt = require('jsonwebtoken');
 var SessionManager = require('./session_manager');
 var url = require('url');
-var ws = require('ws');
 
 var JWT_SECRET = config.jwt_secret;
 
 var app = express();
 var server = http.createServer(app);
-var wss = new ws.Server({
-    server: server
-});
+var io = require('socket.io')(server);
 var sessions = new SessionManager();
 
-wss.on('connection', function(ws) {
+io.on('connection', function(sock) {
     // Get session ID
-    var sessionId = url.parse(ws.upgradeReq.url).pathname.substr(1);
+    var sessionId = url.parse(sock.upgradeReq.url).pathname.substr(1);
 
     /**
      * Handle the initial message (authentication)
      * Once this client is authenticated, assign it to a session.
      */
-    ws.on('message', function initMsgHandler(msg) {
+    sock.on('message', function initMsgHandler(msg) {
         try {
             var msgObj = JSON.parse(msg);
             if (msgObj.type !== 'authenticate') {
@@ -50,14 +47,14 @@ wss.on('connection', function(ws) {
             var user = jwt.verify(msgObj.token, JWT_SECRET);
 
             // Give the control to a session
-            sessions.addConnection(sessionId, ws, msgObj.clientId, user.username).then(function() {
-                ws.removeListener('message', initMsgHandler);
-                ws.send(JSON.stringify({ type: 'authenticated' }));
+            sessions.addConnection(sessionId, sock, msgObj.clientId, user.username).then(function() {
+//                sock.removeListener('message', initMsgHandler);
+                sock.send(JSON.stringify({ type: 'authenticated' }));
             }).catch(function(err) {
-                ws.send(JSON.stringify({ type: 'error', error: err }));
+                sock.send(JSON.stringify({ type: 'error', error: err }));
             });
         } catch (ex) {
-            ws.send(JSON.stringify({
+            sock.send(JSON.stringify({
                 type: 'error',
                 message: ex.message
             }));
