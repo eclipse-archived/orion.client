@@ -33,6 +33,9 @@ orion.CompareRuler = (function() {
 			}
 			return result;
 		},
+		getAnnotationTypePriority: function(type) {
+			return 1;
+		},
 		getWidestAnnotation: function() {
 			return {html: this.getHTML(-1), style: this.getStyle(-1)};
 		},
