@@ -389,8 +389,12 @@ define([
 					if (textDocumentSync) {
 						if (textDocumentSync === 1 || textDocumentSync.change === 1) {
 							// TextDocumentSyncKind.Full, send the entire document
+							// get the text before it was modified
+							var text = textView.getText();
+							// get the substrings then insert the text in between
+							text = text.substring(0, evnt.start) + evnt.text + text.substring(evnt.start + evnt.removedCharCount);
 							var change = {
-								text: textView.getText()
+								text: text
 							};
 							var metaData = inputManager.getFileMetadata();
 							languageServer.didChange(metaData.Location, openedDocument.version++, [change]);
