@@ -12,7 +12,7 @@
 /*eslint-env browser, amd */
 /* Initializes websocket connection */
 
-define(['orion/EventTarget'], function(EventTarget) {
+define(['orion/EventTarget','socket.io/socket.io'], function(EventTarget, io) {
     'use strict;'
 
     var DEBUG = false;
@@ -27,8 +27,9 @@ define(['orion/EventTarget'], function(EventTarget) {
      */
 	function CollabSocket(hubUrl, sessionId) {
         var self = this;
-
-        this.socket = new WebSocket(hubUrl + sessionId);
+		
+		this.socket = io.connect( hubUrl+ sessionId, { path: socketioPath });
+//        this.socket = new WebSocket(hubUrl + sessionId);
 
         this.socket.onopen = function() {
             self.dispatchEvent({
