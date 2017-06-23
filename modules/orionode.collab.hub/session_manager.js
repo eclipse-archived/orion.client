@@ -41,7 +41,7 @@ class SessionManager {
      * Add a connection to session
      * 
      * @param {string} sessionId
-     * @param {WebSocket} ws
+     * @param {Socket.io} io
      * @param {string} clientId
      * @param {string} name
      * 
@@ -49,7 +49,7 @@ class SessionManager {
      * 
      * @return {Promise}
      */
-    addConnection(sessionId, ws, clientId, name) {
+    addConnection(sessionId, io, clientId, name) {
         var self = this;
         return new Promise(function(resolve, reject) {
             var session = self._sessions[sessionId];
@@ -77,7 +77,7 @@ class SessionManager {
                             // Add new session
                             session = new Session(sessionId);
                             self._sessions[sessionId] = session;
-                            self.addConnectionToSession(session, ws, new Client(clientId, name));
+                            self.addConnectionToSession(session, io, new Client(clientId, name));
                             self._sessionWaitingClients[sessionId].forEach(function(deferred) {
                                 deferred.resolve();
                             });
@@ -86,7 +86,7 @@ class SessionManager {
                     });
                 }
             } else { 
-                self.addConnectionToSession(session, ws, new Client(clientId, name));
+                self.addConnectionToSession(session, io, new Client(clientId, name));
                 resolve();
             }
         });
@@ -96,29 +96,29 @@ class SessionManager {
      * Add a connection to an existing session
      * 
      * @param {Session} session
-     * @param {WebSocket} ws
+     * @param {Socket.io} io
      * @param {Client} client
      */
-    addConnectionToSession(session, ws, client) {
+    addConnectionToSession(session, io, client) {
         var self = this;
-        session.connectionJoined(ws, client);
+        session.connectionJoined(io, client);
 
-        ws.on('message', function(msg) {
+        io.on('message', function(msg) {
             var msgObj;
             try {
                 msgObj = JSON.parse(msg);
             } catch(ex) {
-                ws.send(JSON.stringify({
+                io.send(JSON.stringify({
                     type: 'error',
                     error: 'Invalid JSON.'
                 }));
                 return;
             }
-            session.onmessage(ws, msgObj);
+            session.onmessage(io, msgObj);
         });
 
-        ws.on('close', function(msg) {
-            session.connectionLeft(ws, function(empty) {
+        io.on('disconnect', function(msg) {
+            session.connectionLeft(io, function(empty) {
                 if (empty) {
                     delete self._sessions[session.sessionId];
                 }

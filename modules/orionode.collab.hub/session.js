@@ -38,7 +38,7 @@ class ConnectionStatus {
 class Session {
 
     constructor(sessionId) {
-        /** @type {Map.<WebSocket, Client>} */
+        /** @type {Map.<Socket.io, Client>} */
         this.clients = new Map();
         this.connectionStats = new ConnectionStatus();
         /** @type {Object.<string, Document>} */
@@ -49,13 +49,13 @@ class Session {
     /**
      * Add a connection
      * 
-     * @param {WebSocket} c
+     * @param {Socket.io} io
      * @param {Client} client
      */
-    connectionJoined(c, client) {
-        this.clients.set(c, client);
+    connectionJoined(io, client) {
+        this.clients.set(io, client);
         this.connectionStats.connections++;
-        this.notifyAll(c, {
+        this.notifyAll(io, {
             type: 'client-joined',
             clientId: client.clientId,
             name: client.name,
@@ -66,17 +66,17 @@ class Session {
     /**
      * Remove a connection
      * 
-     * @param {WebSocket} c
+     * @param {Socket.io} io
      * @param {function} callback - calls when it's done, with a boolean
      *     parameter indicates whether there is no conenctions left.
      */
-    connectionLeft(c, callback) {
+    connectionLeft(io, callback) {
         var self = this;
-        var client = this.clients.get(c);
+        var client = this.clients.get(io);
         if (client) {
-            this.clients.delete(c);
+            this.clients.delete(io);
 
-            this.notifyAll(c, {
+            this.notifyAll(io, {
                 type: 'client-left',
                 clientId: client.clientId
             });
@@ -85,7 +85,7 @@ class Session {
             var doc = client.doc;
             if (doc && this.docs[doc]) {
                 // check with the document if this is the last user. If so, clear the doc from memory.
-                this.docs[doc].leaveDocument(c, client.clientId, function(lastPerson) {
+                this.docs[doc].leaveDocument(io, client.clientId, function(lastPerson) {
                     if (lastPerson) {
                         self.docs[doc].destroy();
                         delete self.docs[doc];
@@ -101,15 +101,15 @@ class Session {
     /**
      * Handles incoming message
      * 
-     * @param {WebSocket} c
+     * @param {Socket.io} io
      * @param {Object} msg
      */
-    onmessage(c, msg) {
-        var client = this.clients.get(c);
+    onmessage(io, msg) {
+        var client = this.clients.get(io);
         var self = this;
 
         if (msg.type === 'ping') {
-            c.send(JSON.stringify({
+            io.send(JSON.stringify({
                 type: 'pong'
             }));
             return;
@@ -118,14 +118,14 @@ class Session {
         // if its a doc specific message, only send it to the clients involved. Otherwise send to all.
         if (msg.doc) {
             if (msg.type === 'join-document') {
-                this.joinDocument(c, msg, client, msg.doc);
+                this.joinDocument(io, msg, client, msg.doc);
                 client.doc = msg.doc;
             } else {
                 var doc = this.docs[msg.doc];
                 if (doc) {
-                    doc.onmessage(c, msg, client);
+                    doc.onmessage(io, msg, client);
                 } else {
-                    c.send(JSON.stringify({
+                    io.send(JSON.stringify({
                         type: 'error',
                         error: 'Invalid document ' + msg.doc
                     }));
@@ -134,7 +134,7 @@ class Session {
         } else {
             if (msg.type === 'leave-document') {
                 if (client.doc && this.docs[client.doc]) {
-                    this.leaveDocument(c, msg, client);
+                    this.leaveDocument(io, msg, client);
                 }
             } else if (msg.type === 'update-client') {
                 if (msg.name) {
@@ -151,12 +151,12 @@ class Session {
                 }
                 var outMsg = client.serialize();
                 outMsg.type = 'client-updated';
-                this.notifyAll(c, outMsg);
+                this.notifyAll(io, outMsg);
             } else if (msg.type === 'get-clients') {
                 this.clients.forEach(function(peerClient) {
                     var outMsg = peerClient.serialize();
                     outMsg.type = 'client-joined';
-                    c.send(JSON.stringify(outMsg));
+                    io.send(JSON.stringify(outMsg));
                 });
             } else if (msg.type === 'file-operation') {
                 var outMsg = {
@@ -172,7 +172,7 @@ class Session {
                 try {
                     if (msg.operation === 'created') {
                         outMsg.operation = 'created';
-                        this.notifyAll(c, outMsg);
+                        this.notifyAll(io, outMsg);
                     } else if (msg.operation === 'moved') {
                         outMsg.operation = 'moved';
                         var promises = [];
@@ -195,7 +195,7 @@ class Session {
                             }));
                         });
                         Promise.all(promises).then(function() {
-                            self.notifyAll(c, outMsg);
+                            self.notifyAll(io, outMsg);
                         });
                     } else if (msg.operation === 'deleted') {
                         outMsg.operation = 'deleted';
@@ -207,25 +207,25 @@ class Session {
                                 delete self.docs[from];
                             }
                         });
-                        this.notifyAll(c, outMsg);
+                        this.notifyAll(io, outMsg);
                     } else if(msg.operation === 'copied'){
                         outMsg.operation = 'copied';
-                        this.notifyAll(c, outMsg);
+                        this.notifyAll(io, outMsg);
                     } else {
-                        c.send(JSON.stringify({
+                        io.send(JSON.stringify({
                             type: 'error',
                             error: 'Invalid file operation: ' + msg.operation
                         }));
                     }
                 } catch (ex) {
-                    c.send(JSON.stringify({
+                    io.send(JSON.stringify({
                         type: 'error',
                         error: 'Invalid operation.'
                     }));
                     console.error(ex);
                 }
             } else {
-                c.send(JSON.stringify({
+                io.send(JSON.stringify({
                     type: 'error',
                     error: 'Unknown message type: ' + msg.type
                 }));
@@ -236,14 +236,14 @@ class Session {
     /**
      * Join a document
      * 
-     * @param {WebSocket} c
+     * @param {WebSocket} io
      * @param {Object} msg
      * @param {Client} client
      * @param {string} doc
      */
-    joinDocument(c, msg, client, doc) {
+    joinDocument(io, msg, client, doc) {
         if (client.doc && this.docs[client.doc]) {
-            this.leaveDocument(c, msg, client);
+            this.leaveDocument(io, msg, client);
         }
         // if we don't have the document, let's start it up.
         if (!this.docs[doc]) {
@@ -251,24 +251,24 @@ class Session {
             this.docs[doc] = new Document(doc, this.sessionId);
             this.docs[doc].startOT()
             .then(function() {
-                self.docs[doc].onmessage(c, msg, client);
+                self.docs[doc].onmessage(io, msg, client);
             });
         } else {
-            this.docs[doc].onmessage(c, msg, client);
+            this.docs[doc].onmessage(io, msg, client);
         }
     }
 
     /**
      * Leave the client's document
      * 
-     * @param {WebSocket} c
+     * @param {WebSocket} io
      * @param {Object} msg
      * @param {Client} client
      */
-    leaveDocument(c, msg, client) {
+    leaveDocument(io, msg, client) {
         var self = this;
         var doc = client.doc;
-        this.docs[doc].leaveDocument(c, msg.clientId, function(lastPerson) {
+        this.docs[doc].leaveDocument(io, msg.clientId, function(lastPerson) {
             if (lastPerson) {
                 self.docs[doc].destroy();
                 delete self.docs[doc];
@@ -280,15 +280,15 @@ class Session {
     /**
      * Send message to all clients
      * 
-     * @param {WebSocket} c
+     * @param {WebSocket} io
      * @param {Object} msg
      * @param {boolean} [includeSender=false]
      */
-    notifyAll(c, msg, includeSender) {
+    notifyAll(io, msg, includeSender) {
         includeSender = !!includeSender;
         var msgStr = JSON.stringify(msg);
         this.clients.forEach(function(client, conn) {
-            if (conn === c && !includeSender) {
+            if (conn === io && !includeSender) {
                 return;
             }
             try {
