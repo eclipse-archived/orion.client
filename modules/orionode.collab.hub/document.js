@@ -81,7 +81,7 @@ class Document {
     /**
      * Add a client to this document
      * 
-     * @param {WebSocket} connection
+     * @param {Socket.io} connection
      * @param {string} clientId
      * @param {Client} client
      */
@@ -136,7 +136,7 @@ class Document {
     /**
      * Handle incoming message
      * 
-     * @param {WebSocket} connection
+     * @param {Socket.io} connection
      * @param {Object} msg
      * @param {Client} client
      */
@@ -179,7 +179,7 @@ class Document {
     /**
      * Initialize client's document
      * 
-     * @param {WebSocket} c
+     * @param {Socket.io} c
      */
     sendInit(c) {
         var self = this;
@@ -271,7 +271,7 @@ class Document {
     /**
      * Send every client's selection
      * 
-     * @param {WebSocket} connection
+     * @param {Socket.io} connection
      */
     sendAllSelections(connection) {
         this.clients.forEach(function(client, clientConnection) {
@@ -317,7 +317,7 @@ class Document {
     /**
      * Broadcast message
      * 
-     * @param {WebSocket} connection
+     * @param {Socket.io} connection
      * @param {Object} message
      * @param {boolean} [includeSender=false]
      */

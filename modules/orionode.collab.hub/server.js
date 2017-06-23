@@ -48,7 +48,7 @@ io.on('connection', function(sock) {
 
             // Give the control to a session
             sessions.addConnection(sessionId, sock, msgObj.clientId, user.username).then(function() {
-//                sock.removeListener('message', initMsgHandler);
+               sock.removeListener('message', initMsgHandler);
                 sock.send(JSON.stringify({ type: 'authenticated' }));
             }).catch(function(err) {
                 sock.send(JSON.stringify({ type: 'error', error: err }));
