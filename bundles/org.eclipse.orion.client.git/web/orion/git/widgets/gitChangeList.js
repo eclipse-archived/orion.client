@@ -476,17 +476,31 @@ define([
 				}
 			});
 			if(isDirty) {
-				var doSave = window.confirm(messages.confirmUnsavedChanges);
-				if(!doSave) {
-					return new Deferred().resolve();
-				}
-				var promises = [];
-				modelList.forEach( function(child) {
-					if(child.children && child.children.length === 1 && child.children[0].resourceComparer && child.children[0].resourceComparer.isDirty() && child.children[0].resourceComparer.save) {
-						promises.push(child.children[0].resourceComparer.save(doSave));
-					}
-				});				
-				return Deferred.all(promises);
+				var dialog = this.registry.getService("orion.page.dialog");
+				var d = new Deferred();
+				dialog.confirm(messages.confirmUnsavedChanges, function(){
+					var promises = [];
+					modelList.forEach( function(child) {
+						if(child.children && child.children.length === 1 && child.children[0].resourceComparer && child.children[0].resourceComparer.isDirty() && child.children[0].resourceComparer.save) {
+							promises.push(child.children[0].resourceComparer.save(true));
+						}
+					});				
+					return d.resolve(Deferred.all(promises));
+				}, null, "Unchanged" , function(){
+					return d.resolve();
+				});
+				return d;
+//				var doSave = window.confirm(messages.confirmUnsavedChanges);
+//				if(!doSave) {
+//					return new Deferred().resolve();
+//				}
+//				var promises = [];
+//				modelList.forEach( function(child) {
+//					if(child.children && child.children.length === 1 && child.children[0].resourceComparer && child.children[0].resourceComparer.isDirty() && child.children[0].resourceComparer.save) {
+//						promises.push(child.children[0].resourceComparer.save(doSave));
+//					}
+//				});				
+//				return Deferred.all(promises);
 			} else {
 				return new Deferred().resolve(true);
 			}

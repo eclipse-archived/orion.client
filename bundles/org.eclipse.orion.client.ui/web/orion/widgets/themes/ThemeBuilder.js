@@ -500,22 +500,24 @@ function(messages, i18nUtil, mCommands, mCommandRegistry, lib, mTooltip, colors,
 	function deleteTheme(){
 		this.preferences.getProtectedThemes(function(protectedThemes) {
 			//if default theme
+			var node = document.getElementById("editorTheme");
 			if (protectedThemes.indexOf(currentTheme.name) !== -1){
-				window.alert(currentTheme.name + messages["cannotDeleteMsg"]);
-			}
-			else if (confirm(messages["confirmDeleteMsg"]) === true){
-				this.preferences.getTheme(function(themeStyles) {
-					var themeName = currentTheme.name;
-
-					for (var i = 0; i < themeStyles.styles.length; i++) {
-						if (themeStyles.styles[i].name === themeName) {
-							themeStyles.styles.splice(i, 1);
-							break;
+				this.commandService.alarm(node, currentTheme.name + messages["cannotDeleteMsg"], messages['Ok']);
+			}else{
+				this.commandService.confirm(node, messages["confirmDeleteMsg"], messages['Ok'], messages['Cancel'], false, function() {
+					this.preferences.getTheme(function(themeStyles) {
+						var themeName = currentTheme.name;
+	
+						for (var i = 0; i < themeStyles.styles.length; i++) {
+							if (themeStyles.styles[i].name === themeName) {
+								themeStyles.styles.splice(i, 1);
+								break;
+							}
 						}
-					}
-					// show the first theme
-					this.preferences.setTheme(themeStyles.styles[0].name, themeStyles.styles).then(function() {
-						this.populateThemes();
+						// show the first theme
+						this.preferences.setTheme(themeStyles.styles[0].name, themeStyles.styles).then(function() {
+							this.populateThemes();
+						}.bind(this));
 					}.bind(this));
 				}.bind(this));
 			}
@@ -529,22 +531,14 @@ function(messages, i18nUtil, mCommands, mCommandRegistry, lib, mTooltip, colors,
 		}
 		this.preferences.getProtectedThemes(function(protectedThemes) {
 			if (protectedThemes.indexOf(currentTheme.name) !== -1) {
-				if(util.isElectron){
-					var node = document.getElementById("editorThemeName");
-					this.commandService.prompt(node, i18nUtil.formatMessage(messages["cannotModifyMsg"], currentTheme.name), messages['Ok'], messages['Cancel'], 
-						messages["defaultImportedThemeName"], false, function(newName) {
-							if (newName && newName.length > 0 && protectedThemes.indexOf(newName) === -1) {
-								currentTheme.name = newName;
-								this.addTheme(currentTheme);
-							}
-						}.bind(this));
-				} else {
-					var newName = prompt(i18nUtil.formatMessage(messages["cannotModifyMsg"], currentTheme.name), messages["defaultImportedThemeName"]);
-					if (newName && newName.length > 0 && protectedThemes.indexOf(newName) === -1) {
-						currentTheme.name = newName;
-						this.addTheme(currentTheme);
-					}
-				}
+				var node = document.getElementById("editorThemeName");
+				this.commandService.prompt(node, i18nUtil.formatMessage(messages["cannotModifyMsg"], currentTheme.name), messages['Ok'], messages['Cancel'], 
+					messages["defaultImportedThemeName"], false, function(newName) {
+						if (newName && newName.length > 0 && protectedThemes.indexOf(newName) === -1) {
+							currentTheme.name = newName;
+							this.addTheme(currentTheme);
+						}
+					}.bind(this));
 			} else {
 				this.addTheme(currentTheme);
 			}

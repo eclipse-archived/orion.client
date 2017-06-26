@@ -1111,7 +1111,9 @@ objects.mixin(EditorViewer.prototype, {
 			if (metadata) {
 				var tabHref = this.activateContext.computeNavigationHref(evt.metadata);
 				var lastFile = PageUtil.hash();
-				sessionStorage.lastFile = lastFile;
+				if (lastFile  === "#" + metadata.Location){
+					sessionStorage.lastFile = lastFile;
+				}
 				this.tabWidget.addTab(metadata, tabHref);
 			} else {
 				delete sessionStorage.lastFile;

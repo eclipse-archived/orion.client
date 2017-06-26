@@ -244,6 +244,19 @@ define([
 		},
 		
 		/**
+		 * Open an alarm tooltip
+		 *
+		 * @param {DOMElement} node the dom node that is displaying the command
+		 * @param {String} message the message to show when confirming the command
+		 * @param {String} yesString the label to show on a yes/true choice
+		 * @param {Function} onConfirm a function that will be called when the user confirms the command.  The function
+		 * will be called with boolean indicating whether the command was confirmed.
+		 */
+		alarm: function(node, message, yesString, onConfirm) {
+			this._popupDialog(false, "ALARM", node, message, [{label:yesString,callback:onConfirm,type:"ok"}]);
+		},
+		
+		/**
 		 * Open a parameter collector to confirm a command or collect user input.
 		 *
 		 * @param {Boolean} modal indicates whether the confirmation prompt should be modal.

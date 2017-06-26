@@ -128,7 +128,7 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/i18n
 								promise.reject,
 								promise.progress);
 				 		};
-				 		var retryMessage = result.Message + "\nWould you like to retry the import with forced overwrite?";
+				 		var retryMessage = result.Message + "\n\nWould you like to retry the import with forced overwrite?";
 
 				 		if (explorer && explorer.serviceRegistry) {
 				 			explorer.serviceRegistry.getService("orion.page.dialog").confirm(retryMessage, function(response) {

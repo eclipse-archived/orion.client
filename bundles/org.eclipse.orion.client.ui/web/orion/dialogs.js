@@ -32,7 +32,7 @@ define(['orion/webui/dialogs/ConfirmDialog'], function(mConfirmDialog){
 		 * @param {String} message The confirmation message
 		 * @param {Function} onDone The function to invoke upon confirmation.
 		 */
-		 confirm : function(msg, onDone, node, title) {
+		 confirm : function(msg, onDone, node, title, onCancel) {
 		 	if(node){
 			 	this._commandRegistry.confirmWithButtons(node, msg,[{label:"OK",callback:function(){
 						onDone(true);
@@ -47,8 +47,10 @@ define(['orion/webui/dialogs/ConfirmDialog'], function(mConfirmDialog){
 				dialog.show();
 				var _self = this;
 				dialog.addEventListener("dismiss", function(event) {
-					if (event.value) {
-					    onDone(event.value);
+					if (event.value === true) {
+					    onDone(true);
+					}else if(event.value === false){
+						onCancel(true);
 					}
 				});
 		 	}
