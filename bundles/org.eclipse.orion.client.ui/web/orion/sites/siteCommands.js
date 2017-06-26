@@ -205,7 +205,7 @@ define(['i18n!orion/sites/nls/messages', 'orion/commandRegistry', 'orion/command
 						});
 						Deferred.all(deletes).then(unwrap(data.items)).then(userData.deleteCallback, userData.errorCallback);
 					}
-				});
+				}, data.domNode);
 			}});
 		commandService.addCommand(deleteCommand);
 	}

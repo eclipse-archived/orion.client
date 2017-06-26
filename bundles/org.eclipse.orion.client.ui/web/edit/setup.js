@@ -1400,8 +1400,8 @@ objects.mixin(EditorSetup.prototype, {
 		this.selection = new mSelection.Selection(serviceRegistry);
 		this.operationsClient = new mOperationsClient.OperationsClient(serviceRegistry);
 		this.statusService = new mStatus.StatusReportingService(serviceRegistry, this.operationsClient, "statusPane", "notifications", "notificationArea"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$ //$NON-NLS-3$
-		this.dialogService = new mDialogs.DialogService(serviceRegistry);
 		this.commandRegistry = new mCommandRegistry.CommandRegistry({selection: this.selection});
+		this.dialogService = new mDialogs.DialogService(serviceRegistry, this.commandRegistry);
 		this.progressService = new mProgress.ProgressService(serviceRegistry, this.operationsClient, this.commandRegistry);
 		this.sshService = new mSshTools.SshService(serviceRegistry);
 		this.gitClient = new mGitClient.GitService(serviceRegistry);

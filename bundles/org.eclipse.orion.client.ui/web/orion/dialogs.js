@@ -10,7 +10,7 @@
  *******************************************************************************/
 
 /*eslint-env browser, amd*/
-define([], function(){
+define(['orion/webui/dialogs/ConfirmDialog'], function(mConfirmDialog){
 	/**
 	 * Constructs a new dialog service. Clients should obtain a dialog service by
 	 * requesting the service <tt>orion.page.dialog</tt> from the service registry. This 
@@ -20,8 +20,9 @@ define([], function(){
 	 * information dialogs.
 	 * @name orion.dialogs.DialogService
 	 */
-	function DialogService(serviceRegistry) {
+	function DialogService(serviceRegistry, commandRegistry) {
 		this._serviceRegistry = serviceRegistry;
+		this._commandRegistry = commandRegistry;
 		this._serviceRegistration = serviceRegistry.registerService("orion.page.dialog", this); //$NON-NLS-0$
 	}
 
@@ -31,8 +32,26 @@ define([], function(){
 		 * @param {String} message The confirmation message
 		 * @param {Function} onDone The function to invoke upon confirmation.
 		 */
-		 confirm : function(msg, onDone) {
-		 onDone(window.confirm(msg));
+		 confirm : function(msg, onDone, node, title) {
+		 	if(node){
+			 	this._commandRegistry.confirmWithButtons(node, msg,[{label:"OK",callback:function(){
+						onDone(true);
+					},type:"ok"},{label:"Cancel",callback:function(){
+						onDone(false);
+					},type:"cancel"}]);
+		 	}else{
+				var dialog = new mConfirmDialog.ConfirmDialog({
+					confirmMessage: msg,
+					title: title
+				});
+				dialog.show();
+				var _self = this;
+				dialog.addEventListener("dismiss", function(event) {
+					if (event.value) {
+					    onDone(event.value);
+					}
+				});
+		 	}
 		 },
 		 /**
 		 * Prompts the user to select one or more files

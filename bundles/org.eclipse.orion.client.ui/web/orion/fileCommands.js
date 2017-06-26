@@ -60,6 +60,13 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/i18n
 			dispatcher.dispatchEvent(event);
 		}
 	}
+	
+	function removeLastModifiedFile(contentLocation){
+		var lastEditedFile = sessionStorage.lastFile;
+		if (lastEditedFile && lastEditedFile.lastIndexOf("#" + contentLocation, 0) === 0){
+			delete sessionStorage.lastFile
+		}
+	}
 
 	/**
 	 * Uploads a file
@@ -815,6 +822,7 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/i18n
 							return Deferred.when(getLogicalModelItems(item), function(logicalItems) {
 								item = logicalItems.item;
 								var _delete = fileClient.deleteFile(deleteLocation, {itemLocation: item.Location});
+								removeLastModifiedFile(item.Location);
 								return progressService.showWhile(_delete, i18nUtil.formatMessage(messages["Deleting ${0}"], deleteLocation)).then(
 									function() {
 										// Remove deleted item from copy/paste buffer
@@ -828,7 +836,7 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/i18n
 						Deferred.all(deferredDeletes).then(function() {
 							fileClient.thawChangeEvents();
 						}, errorHandler);
-					}
+					}, null, messages["Delete"]
 				);	
 			}});
 		commandService.addCommand(deleteCommand);
@@ -1233,7 +1241,7 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/i18n
 									}
 								}
 								if (prompt) {
-									var node = document.getElementById("pageSidebar" + item.Location.split('/').slice(1).join(""));
+									var node = document.getElementById("pageSidebar" + item.Location.split('/').slice(1).join("") + "MainCol");
 									commandService.prompt(node, i18nUtil.formatMessage(messages['EnterName'], bidiUtils.enforceTextDirWithUcc(selectedItem.Name)), messages['Ok'], messages['Cancel'], 
 										i18nUtil.formatMessage(messages['Copy of ${0}'], selectedItem.Name), false, function(newname) {
 											// user cancelled?  don't copy this one
@@ -1242,7 +1250,7 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/i18n
 											}
 											name = newname;
 											doOperation();
-									});
+									}, "below");
 								}else{
 									doOperation();
 								}

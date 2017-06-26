@@ -12,6 +12,7 @@
 /*eslint-env browser, amd*/
 /*globals confirm*/
 
+/*eslint-disable no-extra-parens */
 define([
 	'i18n!git/nls/gitmessages',
 	'require',
@@ -547,123 +548,130 @@ var exports = {};
 		commandService.addCommand(openGitDiff);
 		
 		var fetchCallback = function(data, force, confirmMsg) {
-			var d = new Deferred();
-			if (confirmMsg && !confirm(confirmMsg)) {
-				d.reject();
-				return d;
-			}
-
-			var item = data.items;
-			var noAuth = false;
-			if (item.LocalBranch && item.Remote) {
-				noAuth = item.noAuth;
-				item = item.Remote;
-			}
-			
-			if (item.Remote) {
-				noAuth = item.noAuth;
-				item = item.Remote;
-			}
-			
-			var path = item.Location;
-			var name = item.Name;
-			var commandInvocation = data;
-			
-			var handleResponse = function(jsonData, commandInvocation){
-				if (jsonData.JsonData.HostKey){
-					commandInvocation.parameters = null;
-					commandInvocation.errorData = jsonData.JsonData;
-					commandInvocation.errorData.failedOperation = jsonData.failedOperation;
-					commandService.collectParameters(commandInvocation);
-				} else if (!commandInvocation.optionsRequested){
-					var gitPreferenceStorage = new GitPreferenceStorage(serviceRegistry);
-					gitPreferenceStorage.isEnabled().then(
-						function(isStorageEnabled){
-							var parameters = [];
-							if (!jsonData.JsonData.User) {
-								parameters.push(new mCommandRegistry.CommandParameter("sshuser", "text", messages['User Name:'])); //$NON-NLS-1$ //$NON-NLS-0$
-							}
-							parameters.push(new mCommandRegistry.CommandParameter("sshpassword", "password", messages['Password:'])); //$NON-NLS-1$ //$NON-NLS-0$
-							if (jsonData.JsonData.GitHubAuth) {
-								var listener;
-								(function(authUrl) {
-									listener = new mCommandRegistry.CommandEventListener("click", function(event, commandInvocation) { //$NON-NLS-0$
-										window.location = urlModifier(authUrl);
-									});
-								})(jsonData.JsonData.GitHubAuth + "?ref=" + encodeURIComponent(window.location.href)); //$NON-NLS-0$
-								parameters.push(new mCommandRegistry.CommandParameter("gitAuth", "button", null, "Authorize with GitHub", null, listener)); //$NON-NLS-1$ //$NON-NLS-0$
-							}
-							if (isStorageEnabled) {
-								parameters.push(new mCommandRegistry.CommandParameter("saveCredentials", "boolean", messages["Don't prompt me again:"])); //$NON-NLS-1$ //$NON-NLS-0$
-							}
-							commandInvocation.parameters = new mCommandRegistry.ParametersDescription(parameters, {hasOptionalParameters: true});
-							commandInvocation.errorData = jsonData.JsonData;
-							commandInvocation.errorData.failedOperation = jsonData.failedOperation;
-							commandService.collectParameters(commandInvocation);
-						}
-					);
-				} else {
-					commandInvocation.errorData = jsonData.JsonData;
-					commandInvocation.errorData.failedOperation = jsonData.failedOperation;
-					commandService.collectParameters(commandInvocation);
-				}
-			};
-			
-			var fetchLogic = function(){
-				if (commandInvocation.parameters && commandInvocation.parameters.optionsRequested){
-					commandInvocation.parameters = null;
-					commandInvocation.optionsRequested = true;
-					commandService.collectParameters(commandInvocation);
-					return;
+			var doFetchWork = function(){
+				var item = data.items;
+				var noAuth = false;
+				if (item.LocalBranch && item.Remote) {
+					noAuth = item.noAuth;
+					item = item.Remote;
 				}
 				
-				if(commandInvocation.errorData && commandInvocation.errorData.failedOperation){
-					var progress = serviceRegistry.getService("orion.page.progress"); //$NON-NLS-0$
-					progress.removeOperation(commandInvocation.errorData.failedOperation);
+				if (item.Remote) {
+					noAuth = item.noAuth;
+					item = item.Remote;
 				}
 				
-				exports.gatherSshCredentials(serviceRegistry, commandInvocation, null).then(
-					function(options) {
-						var gitService = serviceRegistry.getService("orion.git.provider"); //$NON-NLS-0$
-						var statusService = serviceRegistry.getService("orion.page.message"); //$NON-NLS-0$
-						var progress = serviceRegistry.getService("orion.page.progress"); //$NON-NLS-0$
-						var deferred = progress.progress(gitService.doFetch(path, force,
-								options.gitSshUsername,
-								options.gitSshPassword,
-								options.knownHosts,
-								options.gitPrivateKey,
-								options.gitPassphrase), messages["Fetching remote: "] + name);
-						statusService.createProgressMonitor(deferred, messages["Fetching remote: "] + name);
-						deferred.then(
-							function(jsonData) {
-								exports.handleGitServiceResponse(jsonData, serviceRegistry, 
-									function() {
-										d.resolve();
-									}, function (jsonData) {
-										handleResponse(jsonData, commandInvocation);
-									}
-								);
-							}, function(jsonData) {
-								var code = jsonData.status || jsonData.HttpCode;
-								if (noAuth && (code === 400 || code === 401)) {
-									d.reject();
-									return;
+				var path = item.Location;
+				var name = item.Name;
+				var commandInvocation = data;
+				
+				var handleResponse = function(jsonData, commandInvocation){
+					if (jsonData.JsonData.HostKey){
+						commandInvocation.parameters = null;
+						commandInvocation.errorData = jsonData.JsonData;
+						commandInvocation.errorData.failedOperation = jsonData.failedOperation;
+						commandService.collectParameters(commandInvocation);
+					} else if (!commandInvocation.optionsRequested){
+						var gitPreferenceStorage = new GitPreferenceStorage(serviceRegistry);
+						gitPreferenceStorage.isEnabled().then(
+							function(isStorageEnabled){
+								var parameters = [];
+								if (!jsonData.JsonData.User) {
+									parameters.push(new mCommandRegistry.CommandParameter("sshuser", "text", messages['User Name:'])); //$NON-NLS-1$ //$NON-NLS-0$
 								}
-								exports.handleGitServiceResponse(jsonData, serviceRegistry, 
-									function() {
-										d.resolve();
-									}, function (jsonData) {
-										handleResponse(jsonData, commandInvocation);
-									}
-								);
+								parameters.push(new mCommandRegistry.CommandParameter("sshpassword", "password", messages['Password:'])); //$NON-NLS-1$ //$NON-NLS-0$
+								if (jsonData.JsonData.GitHubAuth) {
+									var listener;
+									(function(authUrl) {
+										listener = new mCommandRegistry.CommandEventListener("click", function(event, commandInvocation) { //$NON-NLS-0$
+											window.location = urlModifier(authUrl);
+										});
+									})(jsonData.JsonData.GitHubAuth + "?ref=" + encodeURIComponent(window.location.href)); //$NON-NLS-0$
+									parameters.push(new mCommandRegistry.CommandParameter("gitAuth", "button", null, "Authorize with GitHub", null, listener)); //$NON-NLS-1$ //$NON-NLS-0$
+								}
+								if (isStorageEnabled) {
+									parameters.push(new mCommandRegistry.CommandParameter("saveCredentials", "boolean", messages["Don't prompt me again:"])); //$NON-NLS-1$ //$NON-NLS-0$
+								}
+								commandInvocation.parameters = new mCommandRegistry.ParametersDescription(parameters, {hasOptionalParameters: true});
+								commandInvocation.errorData = jsonData.JsonData;
+								commandInvocation.errorData.failedOperation = jsonData.failedOperation;
+								commandService.collectParameters(commandInvocation);
 							}
 						);
-					},
-					d.reject
-				);
+					} else {
+						commandInvocation.errorData = jsonData.JsonData;
+						commandInvocation.errorData.failedOperation = jsonData.failedOperation;
+						commandService.collectParameters(commandInvocation);
+					}
+				};
+				
+				var fetchLogic = function(){
+					if (commandInvocation.parameters && commandInvocation.parameters.optionsRequested){
+						commandInvocation.parameters = null;
+						commandInvocation.optionsRequested = true;
+						commandService.collectParameters(commandInvocation);
+						return;
+					}
+					
+					if(commandInvocation.errorData && commandInvocation.errorData.failedOperation){
+						var progress = serviceRegistry.getService("orion.page.progress"); //$NON-NLS-0$
+						progress.removeOperation(commandInvocation.errorData.failedOperation);
+					}
+					
+					exports.gatherSshCredentials(serviceRegistry, commandInvocation, null).then(
+						function(options) {
+							var gitService = serviceRegistry.getService("orion.git.provider"); //$NON-NLS-0$
+							var statusService = serviceRegistry.getService("orion.page.message"); //$NON-NLS-0$
+							var progress = serviceRegistry.getService("orion.page.progress"); //$NON-NLS-0$
+							var deferred = progress.progress(gitService.doFetch(path, force,
+									options.gitSshUsername,
+									options.gitSshPassword,
+									options.knownHosts,
+									options.gitPrivateKey,
+									options.gitPassphrase), messages["Fetching remote: "] + name);
+							statusService.createProgressMonitor(deferred, messages["Fetching remote: "] + name);
+							deferred.then(
+								function(jsonData) {
+									exports.handleGitServiceResponse(jsonData, serviceRegistry, 
+										function() {
+											d.resolve();
+										}, function (jsonData) {
+											handleResponse(jsonData, commandInvocation);
+										}
+									);
+								}, function(jsonData) {
+									var code = jsonData.status || jsonData.HttpCode;
+									if (noAuth && (code === 400 || code === 401)) {
+										d.reject();
+										return;
+									}
+									exports.handleGitServiceResponse(jsonData, serviceRegistry, 
+										function() {
+											d.resolve();
+										}, function (jsonData) {
+											handleResponse(jsonData, commandInvocation);
+										}
+									);
+								}
+							);
+						},
+						d.reject
+					);
+				};
+				
+				fetchLogic();
+				
 			};
-			
-			fetchLogic();
+			var d = new Deferred();
+			if(confirmMsg){
+				commandService.confirmWithButtons(data.domNode, confirmMsg, [{label:"OK",callback:function(){
+					doFetchWork();
+				},type:"ok"},{label:"Cancel",callback:function(){
+					d.reject();
+				},type:"cancel"}]);
+			}else{
+				doFetchWork();
+			}
 			return d;
 		};
 		var fetchVisibleWhen = function(item) {

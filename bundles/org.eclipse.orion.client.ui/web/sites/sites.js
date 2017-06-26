@@ -18,12 +18,12 @@ define(['orion/browserCompatibility', 'orion/bootstrap', 'orion/status', 'orion/
 			var serviceRegistry = core.serviceRegistry;
 			var preferences = core.preferences;
 			// Register services
-			var dialogService = new mDialogs.DialogService(serviceRegistry);
+			var commandRegistry = new mCommandRegistry.CommandRegistry({ });
+			var dialogService = new mDialogs.DialogService(serviceRegistry, commandRegistry);
 			var operationsClient = new mOperationsClient.OperationsClient(serviceRegistry);
 			var statusService = new mStatus.StatusReportingService(serviceRegistry, operationsClient, "statusPane", "notifications", "notificationArea"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			
 			var selection = new mSelection.Selection(serviceRegistry);
-			var commandRegistry = new mCommandRegistry.CommandRegistry({ });
 			var progressService = new mProgress.ProgressService(serviceRegistry, operationsClient, commandRegistry);
 
 			var fileClient = new mFileClient.FileClient(serviceRegistry);

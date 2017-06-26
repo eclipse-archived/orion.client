@@ -60,165 +60,166 @@ define([
 				var itemTargetBranch = data.targetBranch;
 				
 				var confirmedWarnings = data.confirmedWarnings;
-				if(force && !confirmedWarnings){
-					if(!confirm(messages["OverrideContentOfRemoteBr"]+"\n\n"+messages['Are you sure?'])){ //$NON-NLS-0$
-						d.reject();
-						return;
-					} else {
-						data.confirmedWarnings = true;
-						confirmedWarnings = true;
+				var doCommandWork = function(){
+					var item = data.items;
+					if (item.Remote) {
+						itemTargetBranch = item.Remote;
 					}
-				}
-			
-				var item = data.items;
-				if (item.Remote) {
-					itemTargetBranch = item.Remote;
-				}
-				if (item.LocalBranch) {
-					item = item.LocalBranch;
-				}
-				if (item.toRef) {
-					item = item.toRef;
-				}
-				var commandInvocation = data;
-				if (!commandInvocation.command) {
-					commandInvocation.command = {};
-					commandInvocation.command.callback = command;
-				}
-
-				var handleResponse = function(jsonData, commandInvocation){
-					if (jsonData.JsonData.HostKey){
-						commandInvocation.parameters = null;
-						commandInvocation.errorData = jsonData.JsonData;
-						commandInvocation.errorData.failedOperation = jsonData.failedOperation;
-						commandService.collectParameters(commandInvocation,sshSlideoutCloseCallback);
-					} else if (!commandInvocation.optionsRequested){
-						var gitPreferenceStorage = new GitPreferenceStorage(serviceRegistry);
-						gitPreferenceStorage.isEnabled().then(
-							function(isStorageEnabled) {
-								var parameters = [];
-								if (!jsonData.JsonData.User) {
-									parameters.push(new mCommandRegistry.CommandParameter("sshuser", "text", messages['User Name:'])); //$NON-NLS-1$ //$NON-NLS-0$
-								}
-								parameters.push(new mCommandRegistry.CommandParameter("sshpassword", "password", messages['Password:'])); //$NON-NLS-1$ //$NON-NLS-0$
-								if (jsonData.JsonData.GitHubAuth) {
-									var listener;
-									(function(authUrl) {
-										listener = new mCommandRegistry.CommandEventListener("click", function(event, commandInvocation) { //$NON-NLS-0$
-											window.location = urlModifier(authUrl);
-										});
-									})(jsonData.JsonData.GitHubAuth + "?ref=" + encodeURIComponent(window.location.href)); //$NON-NLS-0$
-									parameters.push(new mCommandRegistry.CommandParameter("gitAuth", "button", null, "Authorize with GitHub", null, listener)); //$NON-NLS-1$ //$NON-NLS-0$
-								}
-								if (isStorageEnabled) {
-									parameters.push(new mCommandRegistry.CommandParameter("saveCredentials", "boolean", messages["Don't prompt me again:"])); //$NON-NLS-1$ //$NON-NLS-0$
-								}
-								commandInvocation.parameters = new mCommandRegistry.ParametersDescription(parameters, {hasOptionalParameters: true});
-								commandInvocation.errorData = jsonData.JsonData;
-								commandInvocation.errorData.failedOperation = jsonData.failedOperation;
-								commandService.collectParameters(commandInvocation, sshSlideoutCloseCallback);
-							}
-						);
-					} else {
-						commandInvocation.errorData = jsonData.JsonData;
-						commandInvocation.errorData.failedOperation = jsonData.failedOperation;
-						commandService.collectParameters(commandInvocation,sshSlideoutCloseCallback);
+					if (item.LocalBranch) {
+						item = item.LocalBranch;
 					}
-				};
-				
-				if (commandInvocation.parameters && commandInvocation.parameters.optionsRequested){
-					commandInvocation.parameters = null;
-					commandInvocation.optionsRequested = true;
-					commandService.collectParameters(commandInvocation,sshSlideoutCloseCallback);
-					return;
-				}
-				var gitService = serviceRegistry.getService("orion.git.provider"); //$NON-NLS-0$
-				var progress = serviceRegistry.getService("orion.page.progress"); //$NON-NLS-0$
-				
-				if(commandInvocation.errorData && commandInvocation.errorData.failedOperation){
-					progress.removeOperation(commandInvocation.errorData.failedOperation);
-				}
-				
-				var handlePush = function(options, location, ref, name, force){
-					var progressService = serviceRegistry.getService("orion.page.message"); //$NON-NLS-0$
-					var deferred = progress.progress(gitService.doPush(location, ref, tags, force, //$NON-NLS-0$
-							options.gitSshUsername, options.gitSshPassword, options.knownHosts,
-							options.gitPrivateKey, options.gitPassphrase), messages['Pushing remote: '] + name);
-					progressService.createProgressMonitor(deferred, messages['Pushing remote: '] + name);
-					deferred.then(
-						function(jsonData){
-							handleGitServiceResponse(jsonData, serviceRegistry, 
-								function() {
-									if (!jsonData.HttpCode) {
-										var display = {};
-										display.HTML = true;
-										display.Severity = jsonData.Severity || "Error"; //$NON-NLS-0$
-										if (display.Severity !== "Ok") {
-											var result = jsonData.Updates.length ? "<b>" +  messages["PushResult"] + "</b>\n" : ""; //$NON-NLS-0$ //$NON-NLS-1$
-											result += "<table class=\"gitPushUpdates\">"; //$NON-NLS-0$
-											jsonData.Updates.forEach(function (update) {
-												var message = update.Message || messages["Push_" + update.Result] || "";
-												result += "<tr>"; //$NON-NLS-0$
-												result += "<td><b>" + update.LocalName + " => " + update.RemoteName + "</b></td><td>" + message + "</td>"; //$NON-NLS-0$ //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
-												result += "</tr>"; //$NON-NLS-0$
+					if (item.toRef) {
+						item = item.toRef;
+					}
+					var commandInvocation = data;
+					if (!commandInvocation.command) {
+						commandInvocation.command = {};
+						commandInvocation.command.callback = command;
+					}
+	
+					var handleResponse = function(jsonData, commandInvocation){
+						if (jsonData.JsonData.HostKey){
+							commandInvocation.parameters = null;
+							commandInvocation.errorData = jsonData.JsonData;
+							commandInvocation.errorData.failedOperation = jsonData.failedOperation;
+							commandService.collectParameters(commandInvocation,sshSlideoutCloseCallback);
+						} else if (!commandInvocation.optionsRequested){
+							var gitPreferenceStorage = new GitPreferenceStorage(serviceRegistry);
+							gitPreferenceStorage.isEnabled().then(
+								function(isStorageEnabled) {
+									var parameters = [];
+									if (!jsonData.JsonData.User) {
+										parameters.push(new mCommandRegistry.CommandParameter("sshuser", "text", messages['User Name:'])); //$NON-NLS-1$ //$NON-NLS-0$
+									}
+									parameters.push(new mCommandRegistry.CommandParameter("sshpassword", "password", messages['Password:'])); //$NON-NLS-1$ //$NON-NLS-0$
+									if (jsonData.JsonData.GitHubAuth) {
+										var listener;
+										(function(authUrl) {
+											listener = new mCommandRegistry.CommandEventListener("click", function(event, commandInvocation) { //$NON-NLS-0$
+												window.location = urlModifier(authUrl);
 											});
-											result += "</table>"; //$NON-NLS-0$
-											if (jsonData.Message) {
-												result +=  "<pre class=\"gitPushMessage\">" + jsonData.Message + "</pre>"|| ""; //$NON-NLS-0$ //$NON-NLS-1$
-											}
-											display.Message = "<span class=\"gitPushResult\">" + result + "</span>"; //$NON-NLS-0$ //$NON-NLS-1$
-										} else {
-											display.HTML = false;
-											display.Message = i18nUtil.formatMessage(messages["PushingRemoteSucceeded"], name); //$NON-NLS-0$ 
-											var isGerrit = name.split('/')[1];
-											if (isGerrit === "for") {
-												var idx = jsonData.Message.indexOf("New Changes:");
-												if (idx>0) {
-													var subMsg = jsonData.Message.slice(idx);
-													var changeURLs = subMsg.match(/http[s]?:\/\/.*[\n\t ]/g);
-													if (changeURLs) {
-														display.Message = i18nUtil.formatMessage(messages["PushingGerritChangeSucceeded"], //$NON-NLS-0$ 
-															name, changeURLs[0]);
+										})(jsonData.JsonData.GitHubAuth + "?ref=" + encodeURIComponent(window.location.href)); //$NON-NLS-0$
+										parameters.push(new mCommandRegistry.CommandParameter("gitAuth", "button", null, "Authorize with GitHub", null, listener)); //$NON-NLS-1$ //$NON-NLS-0$
+									}
+									if (isStorageEnabled) {
+										parameters.push(new mCommandRegistry.CommandParameter("saveCredentials", "boolean", messages["Don't prompt me again:"])); //$NON-NLS-1$ //$NON-NLS-0$
+									}
+									commandInvocation.parameters = new mCommandRegistry.ParametersDescription(parameters, {hasOptionalParameters: true});
+									commandInvocation.errorData = jsonData.JsonData;
+									commandInvocation.errorData.failedOperation = jsonData.failedOperation;
+									commandService.collectParameters(commandInvocation, sshSlideoutCloseCallback);
+								}
+							);
+						} else {
+							commandInvocation.errorData = jsonData.JsonData;
+							commandInvocation.errorData.failedOperation = jsonData.failedOperation;
+							commandService.collectParameters(commandInvocation,sshSlideoutCloseCallback);
+						}
+					};
+					
+					if (commandInvocation.parameters && commandInvocation.parameters.optionsRequested){
+						commandInvocation.parameters = null;
+						commandInvocation.optionsRequested = true;
+						commandService.collectParameters(commandInvocation,sshSlideoutCloseCallback);
+						return;
+					}
+					var gitService = serviceRegistry.getService("orion.git.provider"); //$NON-NLS-0$
+					var progress = serviceRegistry.getService("orion.page.progress"); //$NON-NLS-0$
+					
+					if(commandInvocation.errorData && commandInvocation.errorData.failedOperation){
+						progress.removeOperation(commandInvocation.errorData.failedOperation);
+					}
+					
+					var handlePush = function(options, location, ref, name, force){
+						var progressService = serviceRegistry.getService("orion.page.message"); //$NON-NLS-0$
+						var deferred = progress.progress(gitService.doPush(location, ref, tags, force, //$NON-NLS-0$
+								options.gitSshUsername, options.gitSshPassword, options.knownHosts,
+								options.gitPrivateKey, options.gitPassphrase), messages['Pushing remote: '] + name);
+						progressService.createProgressMonitor(deferred, messages['Pushing remote: '] + name);
+						deferred.then(
+							function(jsonData){
+								handleGitServiceResponse(jsonData, serviceRegistry, 
+									function() {
+										if (!jsonData.HttpCode) {
+											var display = {};
+											display.HTML = true;
+											display.Severity = jsonData.Severity || "Error"; //$NON-NLS-0$
+											if (display.Severity !== "Ok") {
+												var result = jsonData.Updates.length ? "<b>" +  messages["PushResult"] + "</b>\n" : ""; //$NON-NLS-0$ //$NON-NLS-1$
+												result += "<table class=\"gitPushUpdates\">"; //$NON-NLS-0$
+												jsonData.Updates.forEach(function (update) {
+													var message = update.Message || messages["Push_" + update.Result] || "";
+													result += "<tr>"; //$NON-NLS-0$
+													result += "<td><b>" + update.LocalName + " => " + update.RemoteName + "</b></td><td>" + message + "</td>"; //$NON-NLS-0$ //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+													result += "</tr>"; //$NON-NLS-0$
+												});
+												result += "</table>"; //$NON-NLS-0$
+												if (jsonData.Message) {
+													result +=  "<pre class=\"gitPushMessage\">" + jsonData.Message + "</pre>"|| ""; //$NON-NLS-0$ //$NON-NLS-1$
+												}
+												display.Message = "<span class=\"gitPushResult\">" + result + "</span>"; //$NON-NLS-0$ //$NON-NLS-1$
+											} else {
+												display.HTML = false;
+												display.Message = i18nUtil.formatMessage(messages["PushingRemoteSucceeded"], name); //$NON-NLS-0$ 
+												var isGerrit = name.split('/')[1];
+												if (isGerrit === "for") {
+													var idx = jsonData.Message.indexOf("New Changes:");
+													if (idx>0) {
+														var subMsg = jsonData.Message.slice(idx);
+														var changeURLs = subMsg.match(/http[s]?:\/\/.*[\n\t ]/g);
+														if (changeURLs) {
+															display.Message = i18nUtil.formatMessage(messages["PushingGerritChangeSucceeded"], //$NON-NLS-0$ 
+																name, changeURLs[0]);
+														}
 													}
 												}
 											}
+											serviceRegistry.getService("orion.page.message").setProgressResult(display); //$NON-NLS-0$
 										}
-										serviceRegistry.getService("orion.page.message").setProgressResult(display); //$NON-NLS-0$
-									}
-									if (itemTargetBranch && !itemTargetBranch.Id) {
-										gitService.getGitBranch(itemTargetBranch.Location).then(function(remote) {
-											objects.mixin(itemTargetBranch, remote);
+										if (itemTargetBranch && !itemTargetBranch.Id) {
+											gitService.getGitBranch(itemTargetBranch.Location).then(function(remote) {
+												objects.mixin(itemTargetBranch, remote);
+												d.resolve();
+											}, d.resolve);
+										} else {
 											d.resolve();
-										}, d.resolve);
-									} else {
-										d.resolve();
+										}
+									}, function (jsonData) {
+										handleResponse(jsonData, commandInvocation);
 									}
-								}, function (jsonData) {
-									handleResponse(jsonData, commandInvocation);
-								}
-							);
-						}, function(jsonData) {
-							handleGitServiceResponse(jsonData, serviceRegistry, 
-								function() {
-									d.resolve();
-								}, function (jsonData) {
-									handleResponse(jsonData, commandInvocation);
-								}
-							);
+								);
+							}, function(jsonData) {
+								handleGitServiceResponse(jsonData, serviceRegistry, 
+									function() {
+										d.resolve();
+									}, function (jsonData) {
+										handleResponse(jsonData, commandInvocation);
+									}
+								);
+							}
+						);
+					};
+	
+					gatherSshCredentials(serviceRegistry, commandInvocation,null,sshCredentialsDialogCallback).then(
+						function(options) {
+							if(itemTargetBranch){
+								handlePush(options, itemTargetBranch.Location, "HEAD", itemTargetBranch.Name, force); //$NON-NLS-0$
+								return;
+							} else {
+								d.reject();
+							}
 						}
 					);
 				};
-
-				gatherSshCredentials(serviceRegistry, commandInvocation,null,sshCredentialsDialogCallback).then(
-					function(options) {
-						if(itemTargetBranch){
-							handlePush(options, itemTargetBranch.Location, "HEAD", itemTargetBranch.Name, force); //$NON-NLS-0$
-							return;
-						} else {
-							d.reject();
-						}
-					}
-				);
+				if(force && !confirmedWarnings){
+					commandService.confirmWithButtons(data.domNode, messages["OverrideContentOfRemoteBr"]+"\n\n"+messages['Are you sure?'], [{label:"OK",callback:function(){
+						doCommandWork();
+					},type:"ok"},{label:"Cancel",callback:function(){
+						d.reject();
+					},type:"cancel"}]);
+				}else{
+					doCommandWork();
+				}
 			} 
 			command(data);
 			return d;
