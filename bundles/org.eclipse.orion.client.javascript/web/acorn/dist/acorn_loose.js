@@ -1262,7 +1262,9 @@ lp$2.parseExprList = function(close, allowEmpty) {
   this.pushCx()
   var indent = this.curIndent, line = this.curLineStart, elts = []
   this.next() // Opening bracket
-  while (!this.closes(close, indent + 1, line)) {
+  //ORION - recover from white-space
+  var blockHeuristic = this.last && this.last.type === acorn.tokTypes.bracketL;
+  while (!this.closes(close, indent + 1, line, blockHeuristic)) {
     if (this$1.eat(acorn.tokTypes.comma)) {
       elts.push(allowEmpty ? null : this$1.dummyIdent())
       continue
