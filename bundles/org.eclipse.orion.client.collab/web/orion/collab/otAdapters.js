@@ -40,7 +40,7 @@ define(['orion/collab/collabPeer', 'orion/collab/ot', 'orion/uiUtils'], function
     };
 
     OrionSocketAdapter.prototype.constructor = OrionSocketAdapter;
-    
+
     /**
      * Send authenticate message
      */
@@ -574,7 +574,7 @@ define(['orion/collab/collabPeer', 'orion/collab/ot', 'orion/uiUtils'], function
     };
 
     OrionEditorAdapter.prototype.getSelection = function () {
-        return ot.Selection.createCursor(this.editor.getSelection().start);
+        return new ot.Selection([new ot.Selection.Range(this.editor.getSelection().start, this.editor.getSelection().end)]);
     };
 
     OrionEditorAdapter.prototype.setSelection = function (selection) {
@@ -608,15 +608,6 @@ define(['orion/collab/collabPeer', 'orion/collab/ot', 'orion/uiUtils'], function
         var lastLine = this.model.getLineCount()-1;
         var lineStartOffset = this.model.getLineStart(currLine);
 
-        if (offset) {
-            //decide whether or not it is worth sending (if line has changed or needs updating).
-            if (currLine !== this.myLine || currLine === lastLine || currLine === 0) {
-                // Send this change
-            } else {
-                return;
-            }
-        }
-
         this.myLine = currLine;
 
         // Self-tracking
@@ -630,7 +621,12 @@ define(['orion/collab/collabPeer', 'orion/collab/ot', 'orion/uiUtils'], function
         if (this.changeInProgress) {
             this.selectionChanged = true;
         } else {
-            this.trigger('selectionChange');
+            if(!this.editor._listener.mouseDown){
+              // Trigger 'selectionChange' (send messges) only if mouse is up.
+              // This prevents from sending multiple messages
+              // while user is selecting.
+              this.trigger('selectionChange');
+            }
         }
     };
 
@@ -646,7 +642,10 @@ define(['orion/collab/collabPeer', 'orion/collab/ot', 'orion/uiUtils'], function
         var peer = this.collabClient.getPeer(clientId);
         var name = peer ? peer.name : undefined;
         color = peer ? peer.color : color;
+
         this.updateLineAnnotation(clientId, selection, name, color);
+        this.updateHighlight(clientId, selection, name, color);
+
         var self = this;
         return {
             clear: function() {
@@ -654,6 +653,13 @@ define(['orion/collab/collabPeer', 'orion/collab/ot', 'orion/uiUtils'], function
             }
         };
     };
+
+    OrionEditorAdapter.prototype.updateHighlight = function(id, selection, name, color, force) {
+      // Extracting 'highlight' information out of 'selection' object
+      var ranges = selection.ranges[0];
+
+      this.collabClient.textView._addHighlight(id, color, ranges.anchor, ranges.head);
+    }
 
     OrionEditorAdapter.prototype.updateLineAnnotation = function(id, selection, name, color, force) {
         force = !!force;
