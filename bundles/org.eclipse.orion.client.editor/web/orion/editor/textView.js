@@ -8002,8 +8002,9 @@ define("orion/editor/textView", [  //$NON-NLS-1$
     // Constructor
     //   PeerHighlight(view)
     //
-    // Function
+    // Functions
     //   addHighlight
+    //   createHighlightDiv
     //   update
     //   destroy
     //
@@ -8055,14 +8056,26 @@ define("orion/editor/textView", [  //$NON-NLS-1$
     this.update();
   }
 
+  PeerHighlight.prototype.createHighlightDiv = function(color) {
+    var div = util.createElement(this._view._parent.ownerDocument, "div"); //$NON-NLS-1$
+
+    div.style.position = 'absolute';
+
+    // Styles
+    div.style.backgroundColor = color;
+    div.style.opacity = 0.25;
+    div.style.zIndex = 2;
+
+    // Let clicks fall through the div
+    div.style.pointerEvents = 'none';
+
+    return div;
+  }
+
   /**
    * This function updates highlight views
    */
   PeerHighlight.prototype.update = function() {
-    // CSS Variables
-    var zIndexOfHighlight = 2;
-    var highlightOpacity = 0.25;
-
     // Get references and store them in local variables
     var model = this._view._model;
     var parent = this._view._clipDiv;
@@ -8103,13 +8116,8 @@ define("orion/editor/textView", [  //$NON-NLS-1$
       }
 
       // DIV 1 - for first line selection
-      var div = util.createElement(this._view._parent.ownerDocument, "div"); //$NON-NLS-1$
-      div.style.position = 'absolute';
-      div.style.pointerEvents = 'none';
-      div.style.backgroundColor = color;
-      div.style.opacity = highlightOpacity;
-      div.style.zIndex = zIndexOfHighlight;
-      div.style.height = this._view._getLineHeight() + 'px';
+      var div = this.createHighlightDiv(color);
+      div.style.height = lineHeight + 'px';
       div.style.top = (startpx - toppx + divVoffset) + 'px';
       div.style.left = ((charWidth * (start - lineOffsets[startLineNumber])) + 2) + 'px';
 
@@ -8120,34 +8128,24 @@ define("orion/editor/textView", [  //$NON-NLS-1$
         // If selection spans multiple lines,
         // make div1 select only first line
         // and use div 2 for middle block and div 3 for trailing end
-        div.style.width = '100%';
+        div.style.width = '100%'; // TODO Fix: account for 2px on the right. i.e. width = 100% - 2px
       }
       // End of div 1
 
       // DIV 2 - for middle block
-      var div2 = util.createElement(this._view._parent.ownerDocument, "div"); //$NON-NLS-1$
-      div2.style.position = 'absolute';
-      div2.style.pointerEvents = 'none';
-      div2.style.backgroundColor = color;
-      div2.style.opacity = highlightOpacity;
-      div2.style.zIndex = zIndexOfHighlight;
+      var div2 = this.createHighlightDiv(color);
       div2.style.height = ((endpx - toppx) - (startpx - toppx) - lineHeight) + 'px';
       div2.style.top = (startpx - toppx + lineHeight + divVoffset) + 'px';
       div2.style.left = '2px';
-      div2.style.width = '100%';
+      div2.style.width = '100%'; // TODO Fix: account for 2px on the right. i.e. width = 100% - 2px
       // End of div 2
 
       // DIV 3 - for trailing end
-      var div3 = util.createElement(this._view._parent.ownerDocument, "div"); //$NON-NLS-1$
-      div3.style.position = 'absolute';
-      div3.style.pointerEvents = 'none';
-      div3.style.backgroundColor = color;
-      div3.style.opacity = highlightOpacity;
-      div3.style.zIndex = zIndexOfHighlight;
-      div3.style.height = this._view._getLineHeight() + 'px';
+      var div3 = this.createHighlightDiv(color);
+      div3.style.height = lineHeight + 'px';
       div3.style.top = (endpx - toppx + divVoffset) + 'px';
       div3.style.left = '2px';
-      div3.style.width = (charWidth * (end - lineOffsets[endLineNumber])) + 'px';
+      div3.style.width = (charWidth * (end - lineOffsets[endLineNumber])) + 'px'; // TODO Fix: account for 2px on the right. i.e. width = 100% - 2px
       // End of div 3
 
       // Append Child
