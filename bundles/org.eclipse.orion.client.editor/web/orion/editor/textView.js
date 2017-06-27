@@ -8081,23 +8081,29 @@ define("orion/editor/textView", [  //$NON-NLS-1$
     var parent = this._view._clipDiv;
     var lineOffsets = model._model._lineOffsets;
 
-    // Remove all highlights if there exist any
-    this._divs.forEach(function(div) {
-      div.remove();
-    });
-    this._divs = [];
 
-    // For all highlights
-    for (var h in this._highlights) {
+    // Dimension constants
+    var lineHeight = this._view._getLineHeight();
+    var charWidth = 7.2246;
+    /**
+     * Relative position in the document
+     * that is currently at the top edge of the view
+     */
+    var toppx = this._view.getTopPixel();
+    var divVoffset = 0;
+    if (toppx === 0) {
+      divVoffset = 4;
+    }
+    // End of Dimension constants
 
-      // store start, end, and color in local variable
-      var start = this._highlights[h].start;
-      var end = this._highlights[h].end;
-      var color = this._highlights[h].color;
 
-      // Dimension constants
-      var lineHeight = this._view._getLineHeight();
-      var charWidth = 7.2246;
+    // For all peer highlights
+    for (var userid in this._highlights) {
+
+      // store start, end, and color of peer in local variable
+      var start = this._highlights[userid].start;
+      var end = this._highlights[userid].end;
+      var color = this._highlights[userid].color;
 
       // get line number of 'start' and 'end' (char location) of the highlight
       var startLineNumber = model.getLineAtOffset(start);
@@ -8106,61 +8112,69 @@ define("orion/editor/textView", [  //$NON-NLS-1$
       var startpx = startLineNumber * lineHeight;
       var endpx = endLineNumber * lineHeight;
 
-      // Relative position in the document
-      // that is currently at the top edge of the view
-      var toppx = this._view.getTopPixel();
 
-      var divVoffset = 0;
-      if (toppx === 0) {
-        divVoffset = 4;
+      // Reference to the 3 divs
+      var div1, div2, div3;
+      if (this._divs[userid]){
+        // Get divs if divs already exist for the peer
+        div1 = this._divs[userid].div1;
+        div2 = this._divs[userid].div2;
+        div3 = this._divs[userid].div3;
+      } else {
+        // Create divs if they dont already exist for this peer
+        div1 = this.createHighlightDiv(color);
+        div2 = this.createHighlightDiv(color);
+        div3 = this.createHighlightDiv(color);
+
+        // Append Child
+        this._divs[userid] = {}
+        this._divs[userid].div1 = div1;
+        this._divs[userid].div2 = div2;
+        this._divs[userid].div3 = div3;
+        parent.appendChild(div1);
+        parent.appendChild(div2);
+        parent.appendChild(div3);
       }
+
+
+      // ******************* Highlight div dimension logic ****************** //
+      // TODO Fix: account for 2px on the right. i.e. width = 100% - 2px
 
       // DIV 1 - for first line selection
-      var div = this.createHighlightDiv(color);
-      div.style.height = lineHeight + 'px';
-      div.style.top = (startpx - toppx + divVoffset) + 'px';
-      div.style.left = ((charWidth * (start - lineOffsets[startLineNumber])) + 2) + 'px';
-
-      if (startLineNumber === endLineNumber) {
-        // If selection is in one line
-        div.style.width = ((end - start) * charWidth) + 'px';
-      } else {
-        // If selection spans multiple lines,
-        // make div1 select only first line
-        // and use div 2 for middle block and div 3 for trailing end
-        div.style.width = '100%'; // TODO Fix: account for 2px on the right. i.e. width = 100% - 2px
-      }
+      div1.style.height = lineHeight + 'px';
+      div1.style.top = (startpx - toppx + divVoffset) + 'px';
+      div1.style.left = ((charWidth * (start - lineOffsets[startLineNumber])) + 2) + 'px';
       // End of div 1
 
       // DIV 2 - for middle block
-      var div2 = this.createHighlightDiv(color);
-      div2.style.height = ((endpx - toppx) - (startpx - toppx) - lineHeight) + 'px';
       div2.style.top = (startpx - toppx + lineHeight + divVoffset) + 'px';
       div2.style.left = '2px';
-      div2.style.width = '100%'; // TODO Fix: account for 2px on the right. i.e. width = 100% - 2px
+      div2.style.width = '100%';
       // End of div 2
 
       // DIV 3 - for trailing end
-      var div3 = this.createHighlightDiv(color);
       div3.style.height = lineHeight + 'px';
       div3.style.top = (endpx - toppx + divVoffset) + 'px';
       div3.style.left = '2px';
-      div3.style.width = (charWidth * (end - lineOffsets[endLineNumber])) + 'px'; // TODO Fix: account for 2px on the right. i.e. width = 100% - 2px
       // End of div 3
 
-      // Append Child
-      parent.appendChild(div);
-      this._divs.push(div);
-
-      parent.appendChild(div2);
-      this._divs.push(div2);
-
-      if (startLineNumber !== endLineNumber) {
-        parent.appendChild(div3);
-        this._divs.push(div3);
+      // If peer's whole selection is on one line
+      if (startLineNumber === endLineNumber) {
+        div1.style.width = ((end - start) * charWidth) + 'px';
+        div2.style.height = '0px';
+        div3.style.width = '0px';
+      } else {
+        // If peer's selection spans multiple lines: draw...
+        // div1 only on first line,
+        // div2 for the middle block, and
+        // div3 for the trailing end of the peer's selection
+        div1.style.width = '100%';
+        div2.style.height = ((endpx - toppx) - (startpx - toppx) - lineHeight) + 'px';
+        div3.style.width = (charWidth * (end - lineOffsets[endLineNumber])) + 'px';
       }
+      // *************** End of Highlight div dimension logic *************** //
 
-    } // end of loop
+    } // end of for each peer highlight loop
 
   } // End of PeerHighlight.update()
 
