@@ -651,9 +651,8 @@ define("orion/editor/textView", [  //$NON-NLS-1$
 	}
 	TextLine.prototype = /** @lends orion.editor.TextLine.prototype */ {
 		/** @private */
-		create: function(_parent, div, drawing) {
+		create: function(_parent, div) {
 			if (this._lineDiv) { return; }
-			this.drawing = drawing;
 			var child = this._lineDiv = this._createLine(_parent, div, this.lineIndex);
 			child._line = this;
 			return child;
@@ -890,11 +889,7 @@ define("orion/editor/textView", [  //$NON-NLS-1$
 				child.innerHTML = style.html;
 				child.ignore = true;
 			} else if (style && style.node) {
-				if (this.drawing) {
-					child.appendChild(style.node);
-				} else {
-					child.appendChild(style.node.cloneNode(true));
-				}
+				child.appendChild(style.node);
 				child.ignore = true;
 			} else if (style && style.bidi) {				
 				child.ignore = true;
@@ -5967,6 +5962,7 @@ define("orion/editor/textView", [  //$NON-NLS-1$
 
 			/* Destroy DOM */
 			this._domSelection = null;
+			this._peerHighlight = null;
 			this._clipboardDiv = null;
 			this._rootDiv = null;
 			this._scrollDiv = null;
@@ -7370,6 +7366,14 @@ define("orion/editor/textView", [  //$NON-NLS-1$
 				}
 			}
 		},
+    /**
+     * Update highlights
+     */
+    _updatePeerHighlight: function() {
+      if (this._peerHighlight) {
+        this._peerHighlight.update();
+      }
+    },
 		_update: function(hScrollOnly) {
 			if (this._redrawCount > 0) { return; }
 			if (this._updateTimer) {
@@ -7486,14 +7490,14 @@ define("orion/editor/textView", [  //$NON-NLS-1$
 				var frag = doc.createDocumentFragment();
 				for (lineIndex=lineStart; lineIndex<=lineEnd; lineIndex++) {
 					if (!child || child.lineIndex > lineIndex) {
-						new TextLine(this, lineIndex).create(frag, null, true);
+						new TextLine(this, lineIndex).create(frag, null);
 					} else {
 						if (frag.firstChild) {
 							clientDiv.insertBefore(frag, child);
 							frag = doc.createDocumentFragment();
 						}
 						if (child && child.lineChanged) {
-							child = new TextLine(this, lineIndex).create(frag, child, true);
+							child = new TextLine(this, lineIndex).create(frag, child);
 							child.lineChanged = false;
 						}
 						child = this._getLineNext(child);
@@ -7752,7 +7756,9 @@ define("orion/editor/textView", [  //$NON-NLS-1$
 					}
 				}
 			}
+
 			this._updateDOMSelection();
+      this._updatePeerHighlight();
 
 			if (needUpdate) {
 				var ensureCaretVisible = this._ensureCaretVisible;
@@ -7961,10 +7967,217 @@ define("orion/editor/textView", [  //$NON-NLS-1$
 				this.redraw();
 				this._resetLineWidth();
 			}
-		}
-	};//end prototype
+		},
+    /**
+     * Called from 'otAdapter.js'. Initiates work on highlight on the 'textView'
+     *
+     * @param {String} id - Peer id
+     * @param {String} color - Color that will be used for highlight peer's selection
+     * @param {Int} start - Char where peer's selection started
+     * @param {Int} end - Char where peer's selection ended
+     */
+    _addHighlight: function(id, color, start, end) {
+      // if the instance of 'textView' doesnt have an instance of PeerHighlight,
+      // then create one
+      if (this._peerHighlight === undefined) {
+        this._peerHighlight = new PeerHighlight(this);
+      }
+
+      // Add highlight
+      this._peerHighlight.addHighlight(id, color, start, end);
+    }
+	};
+
+  /**
+   * This class manages collab peer's highlights on user's screen
+   */
+  function PeerHighlight(view) {
+    // List of class variables and functions
+    //
+    // Variables
+    //   _view
+    //   _divs
+    //   _highlights
+    //
+    // Constructor
+    //   PeerHighlight(view)
+    //
+    // Function
+    //   addHighlight
+    //   update
+    //   destroy
+    //
+
+    /**
+     * Reference to parent 'textView' instance
+     */
+    this._view = view;
+
+    /**
+     * Array of all child 'divs' that (together) creates highlight
+     */
+    this._divs = [];
+
+    /**
+     * Data structure that stores all highlights.
+     * This also enforces rendering of only one highlight at a time.
+     * Even though collab peers can highlight multiple sections on their side.
+     *
+     * _highlights = [
+     *   idOfUser1: {
+     *     'color': 'hexString',
+     *     'start': int,
+     *     'end': int
+     *   },
+     *   idOfUser2: {
+     *     ...
+     *   },
+     *   ...
+     * ]
+     */
+    this._highlights = [];
+
+  }
+
+  /**
+   * This function adds peer's highlight on the screen
+   */
+  PeerHighlight.prototype.addHighlight = function(id, color, start, end) {
+
+    // Add/update data structure
+    this._highlights[id] = {
+      'color': color,
+      'start': start,
+      'end': end
+    };
+
+    // Update the views
+    this.update();
+  }
+
+  /**
+   * This function updates highlight views
+   */
+  PeerHighlight.prototype.update = function() {
+    // CSS Variables
+    var zIndexOfHighlight = 2;
+    var highlightOpacity = 0.25;
+
+    // Get references and store them in local variables
+    var model = this._view._model;
+    var parent = this._view._clipDiv;
+    var lineOffsets = model._model._lineOffsets;
+
+    // Remove all highlights if there exist any
+    this._divs.forEach(function(div) {
+      div.remove();
+    });
+    this._divs = [];
+
+    // For all highlights
+    for (var h in this._highlights) {
+
+      // store start, end, and color in local variable
+      var start = this._highlights[h].start;
+      var end = this._highlights[h].end;
+      var color = this._highlights[h].color;
+
+      // Dimension constants
+      var lineHeight = this._view._getLineHeight();
+      var charWidth = 7.2246;
+
+      // get line number of 'start' and 'end' (char location) of the highlight
+      var startLineNumber = model.getLineAtOffset(start);
+      var endLineNumber = model.getLineAtOffset(end);
+      // Convert them from 'line number' to 'px'
+      var startpx = startLineNumber * lineHeight;
+      var endpx = endLineNumber * lineHeight;
+
+      // Relative position in the document
+      // that is currently at the top edge of the view
+      var toppx = this._view.getTopPixel();
+
+      var divVoffset = 0;
+      if (toppx === 0) {
+        divVoffset = 4;
+      }
+
+      // DIV 1 - for first line selection
+      var div = util.createElement(this._view._parent.ownerDocument, "div"); //$NON-NLS-1$
+      div.style.position = 'absolute';
+      div.style.pointerEvents = 'none';
+      div.style.backgroundColor = color;
+      div.style.opacity = highlightOpacity;
+      div.style.zIndex = zIndexOfHighlight;
+      div.style.height = this._view._getLineHeight() + 'px';
+      div.style.top = (startpx - toppx + divVoffset) + 'px';
+      div.style.left = ((charWidth * (start - lineOffsets[startLineNumber])) + 2) + 'px';
+
+      if (startLineNumber === endLineNumber) {
+        // If selection is in one line
+        div.style.width = ((end - start) * charWidth) + 'px';
+      } else {
+        // If selection spans multiple lines,
+        // make div1 select only first line
+        // and use div 2 for middle block and div 3 for trailing end
+        div.style.width = '100%';
+      }
+      // End of div 1
+
+      // DIV 2 - for middle block
+      var div2 = util.createElement(this._view._parent.ownerDocument, "div"); //$NON-NLS-1$
+      div2.style.position = 'absolute';
+      div2.style.pointerEvents = 'none';
+      div2.style.backgroundColor = color;
+      div2.style.opacity = highlightOpacity;
+      div2.style.zIndex = zIndexOfHighlight;
+      div2.style.height = ((endpx - toppx) - (startpx - toppx) - lineHeight) + 'px';
+      div2.style.top = (startpx - toppx + lineHeight + divVoffset) + 'px';
+      div2.style.left = '2px';
+      div2.style.width = '100%';
+      // End of div 2
+
+      // DIV 3 - for trailing end
+      var div3 = util.createElement(this._view._parent.ownerDocument, "div"); //$NON-NLS-1$
+      div3.style.position = 'absolute';
+      div3.style.pointerEvents = 'none';
+      div3.style.backgroundColor = color;
+      div3.style.opacity = highlightOpacity;
+      div3.style.zIndex = zIndexOfHighlight;
+      div3.style.height = this._view._getLineHeight() + 'px';
+      div3.style.top = (endpx - toppx + divVoffset) + 'px';
+      div3.style.left = '2px';
+      div3.style.width = (charWidth * (end - lineOffsets[endLineNumber])) + 'px';
+      // End of div 3
+
+      // Append Child
+      parent.appendChild(div);
+      this._divs.push(div);
+
+      parent.appendChild(div2);
+      this._divs.push(div2);
+
+      if (startLineNumber !== endLineNumber) {
+        parent.appendChild(div3);
+        this._divs.push(div3);
+      }
+
+    } // end of loop
+
+  } // End of PeerHighlight.update()
+
+  PeerHighlight.prototype.destroy = function() {
+    // Remove all highlight divs
+    this._divs.forEach(function(div) {
+      div.remove();
+    });
+
+    this._view = null;
+    this._divs = null;
+    this._highlights = null;
+  }
+
 	mEventTarget.EventTarget.addMixin(TextView.prototype);
 	
 	return {TextView: TextView};
 });
-
