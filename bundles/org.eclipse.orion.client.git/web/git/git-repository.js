@@ -56,10 +56,10 @@ mBootstrap.startup().then(function(core) {
 	var serviceRegistry = core.serviceRegistry;
 	var preferences = core.preferences;
 	
-	new mDialogs.DialogService(serviceRegistry);
+	var commandRegistry = new mCommandRegistry.CommandRegistry({selection: selection});
+	new mDialogs.DialogService(serviceRegistry, commandRegistry);
 	var selection = new mSelection.Selection(serviceRegistry);
 	new mSshTools.SshService(serviceRegistry);
-	var commandRegistry = new mCommandRegistry.CommandRegistry({selection: selection});
 	var operationsClient = new mOperationsClient.OperationsClient(serviceRegistry);
 	var progress = new mProgress.ProgressService(serviceRegistry, operationsClient, commandRegistry);
 	var statusService = new mStatus.StatusReportingService(serviceRegistry, operationsClient, "statusPane", "notifications", "notificationArea"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$

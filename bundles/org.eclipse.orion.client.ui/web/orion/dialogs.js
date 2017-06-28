@@ -10,7 +10,7 @@
  *******************************************************************************/
 
 /*eslint-env browser, amd*/
-define(['orion/webui/dialogs/ConfirmDialog'], function(mConfirmDialog){
+define(['orion/webui/dialogs/ConfirmDialog','i18n!orion/nls/messages'], function(mConfirmDialog, messages){
 	/**
 	 * Constructs a new dialog service. Clients should obtain a dialog service by
 	 * requesting the service <tt>orion.page.dialog</tt> from the service registry. This 
@@ -32,7 +32,7 @@ define(['orion/webui/dialogs/ConfirmDialog'], function(mConfirmDialog){
 		 * @param {String} message The confirmation message
 		 * @param {Function} onDone The function to invoke upon confirmation.
 		 */
-		 confirm : function(msg, onDone, node, title, onCancel) {
+		 confirm : function(msg, onDone, node, title) {
 		 	if(node){
 			 	this._commandRegistry.confirmWithButtons(node, msg,[{label:"OK",callback:function(){
 						onDone(true);
@@ -42,7 +42,7 @@ define(['orion/webui/dialogs/ConfirmDialog'], function(mConfirmDialog){
 		 	}else{
 				var dialog = new mConfirmDialog.ConfirmDialog({
 					confirmMessage: msg,
-					title: title
+					title: title || messages.Confirm
 				});
 				dialog.show();
 				var _self = this;
@@ -50,7 +50,7 @@ define(['orion/webui/dialogs/ConfirmDialog'], function(mConfirmDialog){
 					if (event.value === true) {
 					    onDone(true);
 					}else if(event.value === false){
-						onCancel(true);
+						onDone(false);
 					}
 				});
 		 	}

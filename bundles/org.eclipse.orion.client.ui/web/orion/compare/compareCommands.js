@@ -47,6 +47,8 @@ exports.CompareCommandFactory = (function() {
 			var commandSpanId = this.options.commandSpanId;
 			var toggleCommandSpanId = this.options.toggleCommandSpanId;
 			var commandService = this.options.commandService;
+			var serviceRegistry = this.options.serviceRegistry;
+			var parentDiv = this.options.parentDivId;
 			if(!commandService || (!commandSpanId && !toggleCommandSpanId)){
 				return;
 			}
@@ -91,11 +93,16 @@ exports.CompareCommandFactory = (function() {
 				preCallback: function(data) {
 					var widget = data.handler.getWidget();
 					if(typeof widget.options.onSave === "function" && widget.isDirty()) { //$NON-NLS-0$
-						var doSave = window.confirm(messages.confirmUnsavedChanges);
-						if(!doSave) {
-							return new Deferred().resolve();
-						}
-						return widget.options.onSave(doSave);
+						var d = new Deferred();
+						var dialog = serviceRegistry.getService("orion.page.dialog");
+						dialog.confirm(messages.confirmUnsavedChanges, function(result){
+							if(result){
+								d.resolve(widget.options.onSave(true));
+							}else{
+								d.resolve();
+							}
+						});
+						return d;
 					}
 					return new Deferred().resolve(true);
 				},
@@ -122,11 +129,17 @@ exports.CompareCommandFactory = (function() {
 				preCallback: function(data) {
 					var widget = data.handler.getWidget();
 					if(typeof widget.options.onSave === "function" && widget.isDirty()) { //$NON-NLS-0$
-						var doSave = window.confirm(messages.confirmUnsavedChanges);
-						if(!doSave) {
-							return new Deferred().resolve();
-						}
-						return widget.options.onSave(doSave);
+					
+						var d = new Deferred();
+						var dialog = serviceRegistry.getService("orion.page.dialog");
+						dialog.confirm(messages.confirmUnsavedChanges, function(result){
+							if(result){
+								d.resolve(widget.options.onSave(true));
+							}else{
+								d.resolve();
+							}
+						});
+						return d;
 					}
 					return new Deferred().resolve(true);
 				},

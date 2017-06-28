@@ -156,17 +156,18 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/commands', 'orion/
 			// git authentication update
 			var gitPreferenceStorage = new GitPreferenceStorage(this.registry);
 			if( this.gitCredentialsFields[0].isChecked() ){
-				var confirmMessage = messages["BrowserCredStoreMsg"] + '\n' + messages["AskEnableKeyStorage"];
-				if(window.confirm(confirmMessage)){
-					gitPreferenceStorage.enable().then(
-						function(){
-							messageService.setProgressResult( messages['GitCredsUpdateSuccess'] );
-						}
-					);
-				} else {
-					// user hit cancel, uncheck checkbox
-					this.gitCredentialsFields[0].setChecked(false);
-				}
+				var confirmMessage = messages["BrowserCredStoreMsg"] + '\n\n' + messages["AskEnableKeyStorage"];
+				this.dialogService.confirm(confirmMessage, function(result){
+					if(result){
+						gitPreferenceStorage.enable().then(
+							function(){
+								messageService.setProgressResult( messages['GitCredsUpdateSuccess'] );
+							}
+						);
+					}else{
+						this.gitCredentialsFields[0].setChecked(false);
+					}			
+				}.bind(this),this.gitCredentialsFields[0].node);
 			} else {
 				gitPreferenceStorage.disable().then(
 					function(){

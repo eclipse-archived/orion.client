@@ -12,11 +12,11 @@
 
 /*eslint-env browser, amd*/
 /*global URL*/
-define(["require", "i18n!orion/shell/nls/messages", "orion/bootstrap", "orion/commandRegistry", "orion/fileClient", "orion/searchClient", "orion/globalCommands",
+define(["require", "i18n!orion/shell/nls/messages", "orion/bootstrap", "orion/commandRegistry", "orion/fileClient", "orion/dialogs", "orion/searchClient", "orion/globalCommands",
 		"orion/shell/Shell", "orion/webui/treetable", "shell/shellPageFileService", "shell/paramType-file", "shell/paramType-plugin", "shell/paramType-service",
 		"orion/i18nUtil", "orion/extensionCommands", "orion/contentTypes", "orion/PageUtil", "orion/URITemplate", "orion/Deferred",
 		"orion/status", "orion/progress", "orion/operationsClient", "shell/resultWriters", "orion/metrics", "orion/URL-shim", "orion/urlModifier"],
-	function(require, messages, mBootstrap, mCommandRegistry, mFileClient, mSearchClient, mGlobalCommands, mShell, mTreeTable, mShellPageFileService, mFileParamType,
+	function(require, messages, mBootstrap, mCommandRegistry, mFileClient, mDialogs, mSearchClient, mGlobalCommands, mShell, mTreeTable, mShellPageFileService, mFileParamType,
 		mPluginParamType, mServiceParamType, i18nUtil, mExtensionCommands, mContentTypes, PageUtil, URITemplate, Deferred, mStatus, mProgress,
 		mOperationsClient, mResultWriters, mMetrics, _, urlModifier) {
 
@@ -485,18 +485,23 @@ define(["require", "i18n!orion/shell/nls/messages", "orion/bootstrap", "orion/co
 		var result = context.createPromise();
 		if (args.plugin.isAllPlugin) {
 			var msg = messages["UninstallAllPlugsMsg"];
-			if (!window.confirm(msg)) {
-				return messages.Aborted;
-			}
-			args.plugin.uninstall().then(
-				function() {
-					preferences.remove("/plugins", args.plugin.getPluginLocations()); //$NON-NLS-1$
-					result.resolve(messages.Succeeded);
-				},
-				function(error) {
-					result.resolve(error);
+			
+			var dialog = serviceRegistry.getService("orion.page.dialog");
+			dialog.confirm(msg, function(result){
+				if(result){
+					args.plugin.uninstall().then(
+						function() {
+							preferences.remove("/plugins", args.plugin.getPluginLocations()); //$NON-NLS-1$
+							result.resolve(messages.Succeeded);
+						},
+						function(error) {
+							result.resolve(error);
+						}
+					);
+				}else{
+					return messages.Aborted;
 				}
-			);
+			});
 		} else {
 			var location = args.plugin.getLocation();
 			var plugin = pluginRegistry.getPlugin(location);
@@ -822,6 +827,7 @@ define(["require", "i18n!orion/shell/nls/messages", "orion/bootstrap", "orion/co
 		preferences = core.preferences;
 
 		commandRegistry = new mCommandRegistry.CommandRegistry({});
+		new mDialogs.DialogService(serviceRegistry, commandRegistry);
 		fileClient = new mFileClient.FileClient(serviceRegistry);
 		var searcher = new mSearchClient.Searcher({serviceRegistry: serviceRegistry, commandService: commandRegistry, fileService: fileClient});
 		var operationsClient = new mOperationsClient.OperationsClient(serviceRegistry);

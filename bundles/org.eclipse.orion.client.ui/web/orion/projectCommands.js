@@ -1294,13 +1294,20 @@ define(['require', 'i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 
 							} else if (nonZipFiles.length > 0) {
 								message = i18nUtil.formatMessage(messages["notZip"], nonZipFiles.join(', '));
 							}
-							if(nonZipFiles.length == 0 || window.confirm(message)) {
-								projectNameDialog.show();	// ask user for project name
+							if(nonZipFiles.length == 0) {
+								projectNameDialog.show();
+							}else{
+								var dialog = this.serviceRegistry.getService("orion.page.dialog");								
+								dialog.confirm(message, function(result){
+									if(result){
+										projectNameDialog.show(); // ask user for project name
+									}
+									fileInput.removeEventListener("change", changeListener);
+								});	
 							}
 						}
-
 						fileInput.removeEventListener("change", changeListener);
-					};
+					}.bind(this);
 					fileInput.addEventListener("change", changeListener);
 
 					// Launch file picker. Note that at the time when this code was written, web browser

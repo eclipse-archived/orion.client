@@ -658,17 +658,17 @@ var exports = {};
 						d.reject
 					);
 				};
-				
 				fetchLogic();
-				
 			};
 			var d = new Deferred();
 			if(confirmMsg){
-				commandService.confirmWithButtons(data.domNode, confirmMsg, [{label:"OK",callback:function(){
-					doFetchWork();
-				},type:"ok"},{label:"Cancel",callback:function(){
-					d.reject();
-				},type:"cancel"}]);
+				commandService.confirm(data.domNode, confirmMsg, messages.OK, messages.Cancel, false, function(result){
+					if(result){
+						doFetchWork();
+					}else{
+						d.reject();
+					}
+				});
 			}else{
 				doFetchWork();
 			}

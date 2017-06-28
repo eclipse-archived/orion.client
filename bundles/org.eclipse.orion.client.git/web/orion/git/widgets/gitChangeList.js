@@ -478,29 +478,20 @@ define([
 			if(isDirty) {
 				var dialog = this.registry.getService("orion.page.dialog");
 				var d = new Deferred();
-				dialog.confirm(messages.confirmUnsavedChanges, function(){
-					var promises = [];
-					modelList.forEach( function(child) {
-						if(child.children && child.children.length === 1 && child.children[0].resourceComparer && child.children[0].resourceComparer.isDirty() && child.children[0].resourceComparer.save) {
-							promises.push(child.children[0].resourceComparer.save(true));
-						}
-					});				
-					return d.resolve(Deferred.all(promises));
-				}, null, "Unchanged" , function(){
-					return d.resolve();
+				dialog.confirm(messages.confirmUnsavedChanges, function(result){
+					if(result){
+						var promises = [];
+						modelList.forEach( function(child) {
+							if(child.children && child.children.length === 1 && child.children[0].resourceComparer && child.children[0].resourceComparer.isDirty() && child.children[0].resourceComparer.save) {
+								promises.push(child.children[0].resourceComparer.save(true));
+							}
+						});				
+						return d.resolve(Deferred.all(promises));
+					}else{
+						return d.resolve();
+					}
 				});
 				return d;
-//				var doSave = window.confirm(messages.confirmUnsavedChanges);
-//				if(!doSave) {
-//					return new Deferred().resolve();
-//				}
-//				var promises = [];
-//				modelList.forEach( function(child) {
-//					if(child.children && child.children.length === 1 && child.children[0].resourceComparer && child.children[0].resourceComparer.isDirty() && child.children[0].resourceComparer.save) {
-//						promises.push(child.children[0].resourceComparer.save(doSave));
-//					}
-//				});				
-//				return Deferred.all(promises);
 			} else {
 				return new Deferred().resolve(true);
 			}
@@ -527,16 +518,20 @@ define([
 			});
 			this.createTree(this.parentId, model, {
 				setFocus: false, // do not steal focus on load
-				preCollapse: function(rowItem) {
+				preCollapse: function(rowItem, row) {
 					if(rowItem && rowItem.children && rowItem.children.length === 1 && rowItem.children[0].resourceComparer) {
 						if(!rowItem.children[0].resourceComparer.isDirty()) {
 							return new Deferred().resolve(true);
 						}
-						var doSave = window.confirm(messages.confirmUnsavedChanges);
-						return rowItem.children[0].resourceComparer.save(doSave);
+						var d = new Deferred();
+						var dialog = this.registry.getService("orion.page.dialog");
+						dialog.confirm(messages.confirmUnsavedChanges, function(result){
+							return d.resolve(rowItem.children[0].resourceComparer.save(result));
+						}, row.lastChild.firstChild.lastChild || row);
+						return d;
 					}
 					return new Deferred().resolve(true);
-				},
+				}.bind(this),
 				onComplete: function(tree) {
 					var model = that.model;
 					var selectFunc = function() {
