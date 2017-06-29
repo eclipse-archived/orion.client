@@ -143,7 +143,7 @@ define([
 		};
 		
 		var diffProvider = new mResourceComparer.DefaultDiffProvider(serviceRegistry);
-		var cmdProvider = new mCompareCommands.CompareCommandFactory({commandService: commandService, commandSpanId: commandSpanId, toggleCommandSpanId: toggleCommandSpanId, gridRenderer: gridRenderer, serviceRegistry: serviceRegistry, parentDivId: parentDivId});
+		var cmdProvider = new mCompareCommands.CompareCommandFactory({commandService: commandService, commandSpanId: commandSpanId, toggleCommandSpanId: toggleCommandSpanId, gridRenderer: gridRenderer, serviceRegistry: serviceRegistry});
 		var ignoreWhitespace = false;
 		var mode = "inline";  //$NON-NLS-0$
 		if (preferencesService) {

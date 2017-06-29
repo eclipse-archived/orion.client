@@ -48,7 +48,6 @@ exports.CompareCommandFactory = (function() {
 			var toggleCommandSpanId = this.options.toggleCommandSpanId;
 			var commandService = this.options.commandService;
 			var serviceRegistry = this.options.serviceRegistry;
-			var parentDiv = this.options.parentDivId;
 			if(!commandService || (!commandSpanId && !toggleCommandSpanId)){
 				return;
 			}

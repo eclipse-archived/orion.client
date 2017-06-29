@@ -212,11 +212,13 @@ define([
 					);
 				};
 				if(force && !confirmedWarnings){
-					commandService.confirmWithButtons(data.domNode, messages["OverrideContentOfRemoteBr"]+"\n\n"+messages['Are you sure?'], [{label:"OK",callback:function(){
-						doCommandWork();
-					},type:"ok"},{label:"Cancel",callback:function(){
-						d.reject();
-					},type:"cancel"}]);
+					commandService.confirm(data.domNode, messages["OverrideContentOfRemoteBr"]+"\n\n"+messages['Are you sure?'], messages["OK"], messages["Cancel"], false, function(result){
+						if(result){
+							doCommandWork();
+						}else{
+							d.reject();
+						}
+					});
 				}else{
 					doCommandWork();
 				}
