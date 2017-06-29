@@ -102,7 +102,7 @@ bundles.forEach(function(bundle) {
 		task.setValue('"' + map.mappedName + '"');
 		task.setDir(bundle.web);
 		task.setIncludes("**/*.html");
-		task.setExcludes("**/embeddedEditor/*");
+		task.setExcludes("**/embeddedEditor/**");
 		task.perform();	
 	});
 	cssMaps.forEach(function(map) {
@@ -111,7 +111,7 @@ bundles.forEach(function(bundle) {
 		task.setValue('"' + map.mappedName + '"');
 		task.setDir(bundle.web);
 		task.setIncludes("**/*.html");
-		task.setExcludes("**/embeddedEditor/*");
+		task.setExcludes("**/embeddedEditor/**");
 		task.perform();	
 	});
 });
