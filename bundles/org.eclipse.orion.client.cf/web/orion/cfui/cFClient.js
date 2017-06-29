@@ -71,7 +71,9 @@ define(['i18n!cfui/nls/messages', 'require', 'orion/xhr', 'orion/Deferred', 'ori
 						Message : messages["problemWhilePerformingTheAction"]
 					};
 				}
-				json.HttpCode = response.status;
+				if (!json.HttpCode) {
+					json.HttpCode = response.status;
+				}
 				return json;
 			},
 
