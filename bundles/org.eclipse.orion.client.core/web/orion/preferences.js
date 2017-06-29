@@ -191,7 +191,7 @@ define(['require', 'orion/Deferred', 'orion/EventTarget', 'orion/xhr'], function
 					that._currentPromise = null;
 					d.resolve(cached);
 				}, function(error) {
-					if (error.xhr.status === 401 || error.xhr.status === 591 || error.xhr.status === 404 ) {
+					if (error.xhr.status === 401 || error.xhr.status === 491 || error.xhr.status === 404 ) {
 						that._cache.set(namespace, {});
 						that._currentPromise = null;
 						d.resolve({});

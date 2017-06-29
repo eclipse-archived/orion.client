@@ -392,6 +392,9 @@ define([
 					}
 					return appState;
 				}, function(error) {
+					if (error && error.HttpCode === 401) {
+						throw error;
+					}
 					return this._getTargets().then(function(result){
 						if(result.clouds){
 							result.clouds.forEach(function(data){
