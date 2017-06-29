@@ -1084,7 +1084,7 @@ objects.mixin(EditorViewer.prototype, {
 			});
 		}.bind(this));
 	},
-
+	
 	createInputManager: function() {
 		var inputManager = this.inputManager = new mInputManager.InputManager({
 			serviceRegistry: this.serviceRegistry,
@@ -1105,7 +1105,7 @@ objects.mixin(EditorViewer.prototype, {
 			isUnsavedWarningNeeed:function(){
 				return this.getOpenEditorCount(this.inputManager.getFileMetadata()) === 1;
 			}.bind(this)
-		});
+		});	
 		inputManager.addEventListener("InputChanged", function(evt) { //$NON-NLS-0$
 			var metadata = evt.metadata;
 			if (metadata) {
@@ -1121,13 +1121,23 @@ objects.mixin(EditorViewer.prototype, {
 			this.updateDirtyIndicator();
 			evt.editor = this.editor;
 			this.pool.metadata = metadata;
-			this.pool.model.addEventListener("postChanged", function(evt){
-				if(this.pool.undoStack._unsavedChanges && this.pool.undoStack._unsavedChanges.length > 0){
+			this.editor.isFileInitiallyLoaded = false; 
+			var textView = this.editor._textView || this.editor._undoStack.view;
+			textView.addEventListener("ModelChanged", function(){
+				if(this.editor.isFileInitiallyLoaded){
 					if(this.tabWidget.transientTab && this.tabWidget.transientTab.location === this.pool.metadata.Location){
 						this.tabWidget.transientToPermenant(this.tabWidget.transientTab.href);
 					}
 				}
 			}.bind(this));
+			var flagInitialLoad = function(evt){
+					if(typeof evt.contentsSaved === "undefined"){
+						this.editor.isFileInitiallyLoaded = true; 
+					}
+					this.editor.removeEventListener("InputChanged", flagInitialLoad);
+				}.bind(this);
+			this.editor.addEventListener("InputChanged", flagInitialLoad);
+			
 			if (this.shown) {
 				var href = window.location.href;
 				this.activateContext.setActiveEditorViewer(this);
