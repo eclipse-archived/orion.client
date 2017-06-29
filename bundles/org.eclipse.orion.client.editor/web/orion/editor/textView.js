@@ -8016,6 +8016,19 @@ define("orion/editor/textView", [  //$NON-NLS-1$
 
     /**
      * Array of all child 'divs' that (together) creates highlight
+     *
+     * _divs = [
+     *    userId1: {
+     *      div1: <div style="..."></div>
+     *      div2: <div style="..."></div>
+     *      div3: <div style="..."></div>
+     *    },
+     *    userId2: {
+     *      ...
+     *    },
+     *    ...
+     * ] // end of _divs
+     *
      */
     this._divs = [];
 
@@ -8180,9 +8193,13 @@ define("orion/editor/textView", [  //$NON-NLS-1$
 
   PeerHighlight.prototype.destroy = function() {
     // Remove all highlight divs
-    this._divs.forEach(function(div) {
-      div.remove();
-    });
+
+    for (var peerId in this._divs) { // Foreach peer
+      for (var divNum in this._divs[peerId]) { // for each highlight div
+        // remove the divs (max 3 divs)
+        this._divs[peerId][divNum].remove();
+      }
+    }
 
     this._view = null;
     this._divs = null;
