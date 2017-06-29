@@ -517,6 +517,8 @@ define([
 				
 				if (!_status.error && ("PROGRESS" !== _status.State)) {
 					this._startStatusPolling();
+				} else if (_status.error && _status.error.HttpCode === 401) {
+					this._stopStatusPolling();
 				}
 			}
 			
@@ -937,7 +939,9 @@ define([
 						var interval = Date.now() - startTime;
 						mMetrics.logTiming("deployment", "check status (poll)", interval, launchConfiguration.Type); //$NON-NLS-1$ //$NON-NLS-2$
 
-						launchConfiguration.status = _status;
+						if (_status) {
+							launchConfiguration.status = _status;
+						}
 						this._updateLaunchConfiguration(launchConfiguration);
 					}.bind(this));
 				}.bind(this), STATUS_POLL_INTERVAL_MS);

@@ -229,7 +229,7 @@ define(['i18n!cfui/nls/messages', "orion/bootstrap", 'orion/Deferred', 'orion/cf
 				}
 			)
 		}, function(error){
-				if(error.HttpCode == 401 || error.HttpCode == 403){
+				if(error.HttpCode === 401){
 					handleError(error);
 				}
 				postError(error);
