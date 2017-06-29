@@ -7985,6 +7985,14 @@ define("orion/editor/textView", [  //$NON-NLS-1$
 
       // Add highlight
       this._peerHighlight.addHighlight(id, color, start, end);
+    },
+    /**
+     * This function is called when a peer leaves. This function calls
+     * the 'removePeer' funtion of the 'PeerHighlight' instance of
+     * this TextView.
+     */
+    _removePeerHighlight: function(id) {
+      this._peerHighlight.removePeer(id);
     }
 	};
 
@@ -8067,6 +8075,21 @@ define("orion/editor/textView", [  //$NON-NLS-1$
 
     // Update the views
     this.update();
+  }
+
+  /**
+   * This function removes:
+   * - the peer (from '_highlights') and
+   * - The 3 div elements (in '_divs') that presents highlight of the peer
+   */
+  PeerHighlight.prototype.removePeer = function(peerId) {
+    // Remove peer from data structure
+    delete this._highlights.peerId;
+
+    // Remove divs
+    for (var divNum in this._divs[peerId]) {
+      this._divs[peerId][divNum].remove();
+    }
   }
 
   PeerHighlight.prototype.createHighlightDiv = function(color) {
@@ -8193,12 +8216,8 @@ define("orion/editor/textView", [  //$NON-NLS-1$
 
   PeerHighlight.prototype.destroy = function() {
     // Remove all highlight divs
-
-    for (var peerId in this._divs) { // Foreach peer
-      for (var divNum in this._divs[peerId]) { // for each highlight div
-        // remove the divs (max 3 divs)
-        this._divs[peerId][divNum].remove();
-      }
+    for (var peerId in this._divs) {
+      this.removePeer(peerId);
     }
 
     this._view = null;
