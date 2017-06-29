@@ -294,6 +294,7 @@ define(['orion/collab/collabPeer', 'orion/collab/ot', 'orion/uiUtils'], function
 
             case 'client-left':
                 this.collabClient.removePeer(msg.clientId);
+                this.collabClient.textView._removePeerHighlight(msg.clientId);
                 break;
 
             default:
