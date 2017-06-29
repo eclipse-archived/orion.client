@@ -154,9 +154,9 @@ define([
 				name: messages["Browser"],
 				nls: "orion/nls/messages",
 				uriTemplate:  "{+Location}",
-				validationProperties: [{
-					source: "!Projects" // Filter out workspace; Raw only applies to regular files and folders.
-				}]
+				validationProperties: [
+					{source: "Directory", match: false} // Filter out workspace; Raw only applies to regular files.
+				]
 			});
 		}
 	}
