@@ -130,7 +130,7 @@
 	function hookUp() {
 		compare.getCompareView().getWidget().addEventListener("contentLoaded", function(){ //$NON-NLS-0$
 	 		compare.getCompareView().getWidget().gotoLine(GOTO_LINE, 0, 0, function() {
-	 			
+	 			return;
 	 			/*
 	 			 * Things you only need to do once
 	 			 */
@@ -149,7 +149,7 @@
 	 		 	
 	 		 	//As the annotation model is a range that is based on the charater offset of the {star, end}, you have to use the textModel to calculate that)
 	 		 	var textModel = compare.getCompareView().getWidget().getMainEditor().getTextView().getModel();
-	 		 	var endIndex = textModel.getLineStart(lineNumber + 1);
+	 		 	var endIndex = textModel.getLineEnd(lineNumber);
 	 		 	var startIndex = endIndex;//textModel.getLineStart(lineNumber);
 	 		 	
 	 		 	//Add your annotation type to the editor 
@@ -223,29 +223,49 @@
 		window.setTimeout(animateDiffs, interval);
 	}
 	function doCompare() {
-		var widget = compare.getCompareView().getWidget();
-		if(widget.type === "twoWay"){ //$NON-NLS-0$
-			var editors = widget.getEditors();
-			var oldContents = editors[0].getTextView().getText();
-			var newContents = editors[1].getTextView().getText();
-			if(compareType === "byTwoContents"){ //$NON-NLS-0$
-				widget.options.oldFile.Content = oldContents;
-				widget.options.newFile.Content = newContents;
-				widget.options.oldFile.URL = null;
-				widget.options.newFile.URL = null;
-			} else {
-				widget.options.oldFile.URL = oldContents;
-				widget.options.newFile.URL = newContents;
-				bCompareType.selectedIndex = 0;
-				compareType = bCompareType.options[bCompareType.selectedIndex].value;
-				bContentTypeTD.style.display = "block"; //$NON-NLS-0$
-			}
-			widget.options.mapper = null;
-			compare.refresh(true);
-			hookUp();
-			//widget.refresh();
-		}
-	}
+	 			/*
+	 			 * Things you only need to do once
+	 			 */
+	 			//getMainEditor is the new API by which you can get either the left hand side editor in tow way mode or just he merged editor in inline mode
+	 			var editor = compare.getCompareView().getWidget().getMainEditor();
+	 		 	//annotationModel is the handler you add or remove you annotation models
+	 		 	var annotationModel = editor.getAnnotationModel();
+	  		 	if(!annotationModel){
+			 		return;
+	 		 	}
+	 		 	//Get the line styler inside the editor
+			 	var annoStyler = editor.getAnnotationStyler();
+	 		 	
+	 		 	//Get the REAL line number(if in inline mode, the GOTO_LINE has to be calculated because the textView is a merged one )
+	 		 	var lineNumber = compare.getCompareView().getWidget().getLineNumber(GOTO_LINE);
+	 		 	
+	 		 	//As the annotation model is a range that is based on the charater offset of the {star, end}, you have to use the textModel to calculate that)
+	 		 	var textModel = compare.getCompareView().getWidget().getMainEditor().getTextView().getModel();
+	 		 	var endIndex = textModel.getLineEnd(lineNumber);
+	 		 	var startIndex = endIndex;//textModel.getLineStart(lineNumber);
+	 		 	
+	 		 	//Add your annotation type to the editor 
+	 		 	annoStyler.addAnnotationType("compare.demo.customize.linehighlight");
+	 		 	//Add the same annotation type ot the annotation ruler(gutter)
+	 		 	editor.getAnnotationRuler().addAnnotationType("compare.demo.customize.linehighlight");
+	  			/*
+	 			 * Eond of things you only need to do once
+	 			 */
+			 	
+	  		 	//Add and/or remove your annotation models
+	 		 	//The first param is an array of the annotations you want to remove
+	 		 	//The second param is an array of the annotations you want to add
+	 		 	annotationModel.replaceAnnotations([], [{
+		 		 	start: startIndex,
+		 		 	end: endIndex,
+		 		 	title: "",
+		 		 	type: "compare.demo.customize.linehighlight",
+		 		 	html: "",
+		 		 	//style: {styleClass: "lineHighlightGutter"}, //Gutter style at the line
+		 		 	rangeStyle: {styleClass: "lineHighlightGutter2", node: div2Insert},
+		 		 	//rangeStyle: {styleClass: "lineHighlightGutter1", html: "<div style='width:100px;height:30px;background-color:blue'></div>"},
+		 //		 	lineStyle: {styleClass: "lineHighlight"} //The line style in the editor
+	 		 	}]);	}
 	function onCompareType(evt) {
 		compareType = bCompareType.options[bCompareType.selectedIndex].value;
 		var widget = compare.getCompareView().getWidget();
