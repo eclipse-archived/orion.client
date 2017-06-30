@@ -1,11 +1,10 @@
-Orion 8.0 GVT Test Plan
-========
-##Author: Libing wang (libing_wang@ca.ibm.com)
-##Revision: 2.0
-##Date: April 11th, 2015
+# Orion 8.0 GVT Test Plan
 
-Overview
-========
+## Author: Libing wang (libing_wang@ca.ibm.com)
+## Revision: 2.0
+## Date: April 11th, 2015
+
+# Overview
 This test plan covers how to log into an Orion account as a specific GVT Tester and how to walk
 through the Orion User Interface and Pages checking for GVT issues.
 
@@ -27,18 +26,17 @@ that file, click to the right but in the same horizontal space as the filename
 
 ![image](images/image01.png)
 
-Logging In
-========
+# Logging In
 Use gvttester1, gvttester2, gvttester3 as user names to login to  http://tvt80.orion.eclipse.org:9000/.
 
 All tests are prefixed with a GVT##### for referencing in bug reports if necessary
 
-#Part 1  Editor
-##GVT0100  After logging in you will be put into the Editor Page. Check the following page
+# Part 1  Editor
+## GVT0100  After logging in you will be put into the Editor Page. Check the following page
 
 ![image](images/image02.png)
 
-##GVT0110  Create a new Basic Project using the File menu.
+## GVT0110  Create a new Basic Project using the File menu.
 1) Click on File->New->Project->Basic. Enter a project name of your choice in the prompt that appears.
 
 ![image](images/image03.png)
@@ -47,7 +45,7 @@ All tests are prefixed with a GVT##### for referencing in bug reports if necessa
 
 ![image](images/image04.png)
 
-##GVT0120  Modify the Project Name, Description, and Site.
+## GVT0120  Modify the Project Name, Description, and Site.
 1) Move your mouse over the project “Name” in the “Project Information” section on the right-hand
 side and click on it. Modify the name.
 
@@ -69,7 +67,7 @@ this is the expected behavior.
 
 ![image](images/image06.png)
 
-##GVT0130  New file/folder creation
+## GVT0130  New file/folder creation
 1) Create a new file using the File menu. Click on File->New->File
 
 2) Input a file name of your choice and press the Enter key
@@ -87,7 +85,7 @@ steps 1-3 and selecting Folder instead of File from the File->New menu in step 1
 
 ![image](images/image09.png)
 
-##GVT0140  File/Folder renaming
+## GVT0140  File/Folder renaming
 1) Right click on your newly created file and select “Rename” from the context menu.
 
 ![image](images/image10.png)
@@ -99,7 +97,7 @@ now has the new name you selected.
 
 ![image](images/image11.png)
 
-##GVT0150  Find renamed file using “Find File” dialog
+## GVT0150  Find renamed file using “Find File” dialog
 1) Ensure that the file you renamed in the previous test is NOT open in the editor. You can do this by
 opening the project.json file or by clicking on the renamed folder to open it.
 
@@ -122,7 +120,7 @@ OS), or use the File menu, to save the content.
 3) Navigate to the renamed folder by clicking on the folder name in the navigator.
 4) Open the file you modified in step 2 again and verify that the content was saved correctly.
 
-##GVT0170  Searching and replacing in a file
+## GVT0170  Searching and replacing in a file
 1) Open the file you created in the previous step.
 
 2) Ensure the file has at least 3 lines of content with repeated words and save it. You can do this by
@@ -155,7 +153,7 @@ press “Replace”.
 
 ![image](images/image16.png)
 
-##GVT0180  Incremental find
+## GVT0180  Incremental find
 1) Open the file you modified in the previous test
 
 2) Use the incremental find function Ctrl+J (Cmd+J MacOS)
@@ -164,8 +162,8 @@ press “Replace”.
 
 ![image](images/image17.png)
 
-#Part 2  Repositories
-##GVT0200  Clone a repository
+# Part 2  Repositories
+## GVT0200  Clone a repository
 1) In the vertical side-menu click on the repositories link
 
 ![image](images/git01.png)
@@ -192,7 +190,7 @@ adds some code you can look at. Click on the repository drop down button and sel
 
 ![image](images/git05.png)
 
-##GVT0210  Changing a file
+## GVT0210  Changing a file
 1) Press Ctrl+Shift+F (Cmd+Shift+F MacOS) and type “index.html” in the dialog that appears. Click
 on the index.html file link.
 
@@ -214,7 +212,7 @@ highlighted in green containing the string that you entered in step 2.
 
 ![image](images/git08.png)
 
-##GVT0220  Git commit
+## GVT0220  Git commit
 1) On the right hand side of the repository page, check the check box on the left side of the “index.html” file name.
 2) Enter a commit message in the language of your choice and hit “Submit”.
 
@@ -234,8 +232,8 @@ in steps 2 and 3 is being displayed correctly.
 
 ![image](images/git12.png)
 
-#Part 3  Search
-##GVT00300  Search in the language of your choice
+# Part 3  Search
+## GVT00300  Search in the language of your choice
 1) In the editor page, right click on the "MyClonedFolder" created in part 2 and select "search in folder...".
 
 ![image](images/search01.png)
@@ -248,7 +246,7 @@ in steps 2 and 3 is being displayed correctly.
 
 ![image](images/search03.png)
 
-##GVT00310  Global replace
+## GVT00310  Global replace
 1) Click on "edit seach" link in the search result pane.
 
 2) Click on "Switch to replace mode" link and put a replace term in the replace box. Click on "replace".
@@ -266,8 +264,8 @@ makes sense.
 5) Use Ctrl+Shift+F (Cmd+Shift+F MacOS) to open the the file you just modified in the editor and
 check that the text was replaced successfully
 
-#Part 4  Orion Console
-##GVT00400  ls, change directory, auto-complete, edit
+# Part 4  Orion Console
+## GVT00400  ls, change directory, auto-complete, edit
 1) Click on the shell icon in the vertical side-menu
 
 2) The Shell page should open and the cursor should be in the input area at the bottom of the page
@@ -296,8 +294,8 @@ enter
 
 ![image](images/shell03.png)
 
-#Part 5  Sites
-##GVT00500  Creating, starting, stopping and deleting site
+# Part 5  Sites
+## GVT00500  Creating, starting, stopping and deleting site
 1) Click on the Sites icon in the vertical side-menu.
 
 2) When the “Sites” page appears, press the “Create” button.
@@ -328,8 +326,8 @@ it.
 
 ![image](images/site05.png)
 
-#Part 6  Global functionality
-##GVT00600  Keyboard shortcuts filtering
+# Part 6  Global functionality
+## GVT00600  Keyboard shortcuts filtering
 1) Open any editable file in the editor
 
 2) Press the “options” button in the top right and click on Keyboard Shortcuts in the dropdown menu
@@ -342,7 +340,7 @@ close the dialog.
 
 ![image](images/gf02.png)
 
-#Part 7  Cleanup and signout
+# Part 7  Cleanup and signout
 1) Click on the Editor (pencil) icon in the vertical side-menu
 
 2) Hold the Ctrl (Cmd MacOS) key and select both top-level folders you created in the navigator using
@@ -360,4 +358,3 @@ that you DO want to delete them.
 If all the steps above were followed in sequence then the testing account should be left in the same
 state as when you started.
 Page
-
