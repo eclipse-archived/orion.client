@@ -435,7 +435,7 @@ GitClient.prototype = {
 			.end(function(err, res) {
 				assert.ifError(err);
 				if (statusCode === 404) {
-					assert.equal(res.body.Message, "Cannot stash changes - There is nothing to stash.");
+					assert.equal(res.body.Message, "cannot stash changes - there is nothing to stash.");
 				}
 				client.next(resolve, res.body);
 			});
