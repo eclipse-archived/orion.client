@@ -135,6 +135,7 @@ define(['orion/webui/littlelib', 'orion/EventTarget'], function(lib, EventTarget
 					
 					// only open if there's already an opened menu bar item
 					if (openMBItem && openMBItem !== item) {
+						openMBItem.dropdown._closeSelectedSubmenu();
 						openMBItem.dropdown.close(false);
 						item.dropdown.open(event);
 					}
