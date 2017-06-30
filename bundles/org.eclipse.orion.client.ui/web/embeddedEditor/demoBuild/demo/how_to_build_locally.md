@@ -1,4 +1,4 @@
-##To build the embedded/pluggable editor locally
+## To build the embedded/pluggable editor locally
 ### CD to your Orion client code root, e.g., c:\OrionSource\org.eclipse.orion.client
 ### Use th following maven command
 
