@@ -11,7 +11,7 @@
  *******************************************************************************/
 /*eslint-env browser, amd*/
 
-define(['require', 'orion/Deferred', 'orion/serviceregistry', 'orion/preferences', 'orion/pluginregistry', 'orion/config'], function(require, Deferred, mServiceregistry, mPreferences, mPluginRegistry, mConfig) {
+define(['require', 'orion/Deferred', 'orion/serviceregistry', 'orion/preferences', 'orion/pluginregistry', 'orion/config', 'orion/urlModifier'], function(require, Deferred, mServiceregistry, mPreferences, mPluginRegistry, mConfig, urlModifier) {
 
 	var once; // Deferred
 
@@ -46,8 +46,12 @@ define(['require', 'orion/Deferred', 'orion/serviceregistry', 'orion/preferences
 						Object.keys(pluginsPreference).forEach(function(key) {
 							var url = require.toUrl(key);
 							if (!pluginRegistry.getPlugin(url)) {
-								installs.push(pluginRegistry.installPlugin(url,{autostart: "lazy"}).then(function(plugin) { //$NON-NLS-1$
-									return plugin.start({lazy:true});
+								var manifest = pluginsPreference[key];
+								if (typeof manifest !== "object") {
+									manifest = {autostart: "lazy"};
+								}
+								installs.push(pluginRegistry.installPlugin(url, manifest).then(function(plugin) { //$NON-NLS-1$
+									return plugin.start({lazy: "lazy" === manifest.autostart});
 								}));
 							}
 						});	
@@ -67,7 +71,7 @@ define(['require', 'orion/Deferred', 'orion/serviceregistry', 'orion/preferences
 						if (!user) {
 							return auth.getAuthForm(window.location.href).then(function(formURL) {
 								setTimeout(function() {
-									window.location = formURL;
+									window.location = urlModifier(formURL);
 								}, 0);
 								return new Deferred().reject({});
 							});

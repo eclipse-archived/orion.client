@@ -44,6 +44,14 @@ define(['orion/objects', 'orion/webui/littlelib'], function(objects, lib) {
 			this.checkbox.checked = value;
 		},
 		
+		disableCheckBox: function(){
+			this.checkbox.disabled = true;
+		},
+		
+		enableCheckBox: function(){
+			this.checkbox.disabled = false;
+		},
+		
 		getSelection: function(){
 			return this.isChecked();
 		},

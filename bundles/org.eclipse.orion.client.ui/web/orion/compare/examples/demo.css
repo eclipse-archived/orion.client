@@ -16,3 +16,32 @@ body {
 	overflow: hidden;
 	background-color: #ededed;
 }
+
+.lineHighlight{
+	outline: 2px dotted black;
+}
+.lineHighlightGutter{
+	background-image: url('problem.gif');;
+}
+.lineHighlightGutter1{
+	background-color: red;
+}
+.lineHighlightGutter2{
+	border-width: 3px;
+}
+textarea {
+	margin-top: 5px;
+	margin-left: 10px;
+	width: 730px;
+	height: 30px;
+}
+.selectDiv {
+	margin-top: 5px;
+	margin-left: 10px;
+}
+.injectedDiv {
+	width:  750px;
+	height: 70px;
+	outline: 2px dotted black;
+	background-color: yellow;
+}

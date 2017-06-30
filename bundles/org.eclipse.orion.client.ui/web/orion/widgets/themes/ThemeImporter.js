@@ -790,6 +790,7 @@ define([
 
 
             styles.annotationRange.writeOccurrence.backgroundColor = getValuesFromXML(xml, "writeOccurrenceIndication");
+            styles.annotationRange.searchRange.backgroundColor = getValuesFromXML(xml, "searchRangeIndication");
             styles.constant.color = getValuesFromXML(xml, "constant");
             styles.entity.name.color = getValuesFromXML(xml, "class");
             styles.entity.name.function.color = getValuesFromXML(xml, "class");

@@ -38,16 +38,12 @@ var samplePrefData = {
 };
 
 var app = express();
-app.use(/* @callback */ function(req, res, next) {
-	req.user = { workspaceDir: WORKSPACE_DIR };
-	next();
-})
-.use(PREFS_PREFIX, PrefsController({
-	configParams: {
-		'orion.single.user': false, // use workspaceDir from req.user
-	},
-	ttl: 50, // flush after 50 ms
-}));
+var options = {
+	workspaceDir: WORKSPACE_DIR
+};
+app.locals.metastore = require('../lib/metastore/fs/store')(options);
+app.locals.metastore.setup(app);
+app.use(PREFS_PREFIX, PrefsController(options));
 
 var request = supertest.bind(null, app);
 

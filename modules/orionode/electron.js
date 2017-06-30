@@ -17,6 +17,8 @@ var fs = require('fs'),
 
 module.exports.start = function(startServer, configParams) {
 	var electron = require('electron'),
+		log4js = require('log4js'),
+		logger = log4js.getLogger('electron'),
 		autoUpdater = require('./lib/autoUpdater'),
 		spawn = require('child_process').spawn,
 		allPrefs = prefs.readPrefs(),
@@ -30,7 +32,7 @@ module.exports.start = function(startServer, configParams) {
 	electron.app.buildId = configParams["orion.buildId"];
 
 	if (feedURL) {
-		var updateChannel = allPrefs.user && allPrefs.user.updateChannel ? allPrefs.user.updateChannel : configParams["orion.autoUpdater.defaultChannel"],
+		var updateChannel = allPrefs.user && allPrefs.user.updateChannel && allPrefs.user.updateChannel.name ? allPrefs.user.updateChannel.name : configParams["orion.autoUpdater.defaultChannel"],
 			latestUpdateURL;
 		if (platform === "linux") {
 			latestUpdateURL = feedURL + '/download/channel/' + updateChannel + '/linux';
@@ -39,6 +41,8 @@ module.exports.start = function(startServer, configParams) {
 		}
 		var resolveURL = feedURL + '/api/resolve?platform=' + platform + '&channel=' + updateChannel;
 		
+		logger.debug("resolveURL", resolveURL);
+		logger.debug("latestUpdateURL", latestUpdateURL);
 		autoUpdater.setResolveURL(resolveURL);
 		autoUpdater.setFeedURL(latestUpdateURL);
 	}
@@ -88,6 +92,7 @@ module.exports.start = function(startServer, configParams) {
 	
 	function updateWorkspacePrefs(workspace, _allPrefs){
 		var allPrefs = _allPrefs ? _allPrefs : prefs.readPrefs();
+		if (!allPrefs.user.workspace) allPrefs.user.workspace = {};
 		allPrefs.user.workspace.currentWorkspace = workspace;
 		if(!allPrefs.user.workspace.recentWorkspaces){
 			allPrefs.user.workspace.recentWorkspaces = [];
@@ -158,22 +163,40 @@ module.exports.start = function(startServer, configParams) {
 		if (process.platform === 'darwin') {
 			if (!Menu.getApplicationMenu()) {
 				var template = [{
-					label: "Application",
+					label: name,
 					submenu: [
-						{ label: "About Application", selector: "orderFrontStandardAboutPanel:" },
+						{role: 'about'},
 						{ type: "separator" },
-						{ label: "Quit", accelerator: "Command+Q", click: function() { electron.app.quit(); }}
+						{role: 'hide'},
+					    {role: 'hideothers'},
+					    {role: 'unhide'},
+					    {type: 'separator'},
+					    {role: 'quit'}
 					]}, {
 					label: "Edit",
 					submenu: [
-						{ label: "Undo", accelerator: "CmdOrCtrl+Z", selector: "undo:" },
-						{ label: "Redo", accelerator: "Shift+CmdOrCtrl+Z", selector: "redo:" },
-						{ type: "separator" },
-						{ label: "Cut", accelerator: "CmdOrCtrl+X", selector: "cut:" },
-						{ label: "Copy", accelerator: "CmdOrCtrl+C", selector: "copy:" },
-						{ label: "Paste", accelerator: "CmdOrCtrl+V", selector: "paste:" },
-						{ label: "Select All", accelerator: "CmdOrCtrl+A", selector: "selectAll:" }
-					]},
+						{role: 'undo'},
+					    {role: 'redo'},
+					    {type: 'separator'},
+					    {role: 'cut'},
+					    {role: 'copy'},
+					    {role: 'paste'},
+						{role: 'selectall'}
+					]},  {
+					    label: 'View',
+					    submenu: [
+					      {role: 'resetzoom'},
+					      {role: 'zoomin'},
+					      {role: 'zoomout'},
+					      {type: 'separator'},
+					      {role: 'togglefullscreen'}
+					 ]}, {
+					    role: 'window',
+					    submenu: [
+					      {role: 'minimize'},
+					      {role: 'close'}
+					    ]
+					  },
 					{label: "Debug",
 					submenu: [
 						{ label: "Toggle Developer Tools", accelerator: "Cmd+Option+I", click: function (item, focusedWindow) {
@@ -206,7 +229,7 @@ module.exports.start = function(startServer, configParams) {
 			}
 		}
 		autoUpdater.on("error", function(error) {
-			console.log(error);
+			logger.error(error);
 		});
 		autoUpdater.on("update-available-automatic", function(newVersion) {
 			if (platform === "linux" && !linuxDialog) {
@@ -230,6 +253,7 @@ module.exports.start = function(startServer, configParams) {
 		});
 		autoUpdater.on("update-downloaded", /* @callback */ function(event, releaseNotes, releaseName, releaseDate, updateURL) {
 			updateDownloaded = true;
+			logger.debug("update-downloaded: ", releaseName);
 			if (!updateDialog) {
 				electron.dialog.showMessageBox({
 					type: 'question',
@@ -282,13 +306,15 @@ module.exports.start = function(startServer, configParams) {
 					allPrefs.windowBounds = nextWindow.getBounds();
 					allPrefs.windowBounds.maximized = nextWindow.isMaximized();
 					prefs.writePrefs(allPrefs);
-					if (updateDownloaded) {
-						nextWindow.webContents.session.clearCache(function() {
+					log4js.shutdown(function(){
+						if (updateDownloaded) {
+							nextWindow.webContents.session.clearCache(function() {
+								nextWindow.destroy();
+							});
+						}else{
 							nextWindow.destroy();
-						});
-					}else{
-						nextWindow.destroy();
-					}
+						}
+					});
 				}
 				event.preventDefault();
 				nextWindow.webContents.send('collect-tabs-info','closeorion');	

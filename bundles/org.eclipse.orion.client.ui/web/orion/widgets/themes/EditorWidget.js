@@ -19,11 +19,11 @@ define(['i18n!orion/settings/nls/messages',
 function(messages, lib, mSetup, jsExample, htmlExample, cssExample, javaExample) {
 	
 	var editorLanguage;
-	var htmlExclusions = [];
-	var jsExclusions = ["editorThemePropertyName", "editorThemeMetaTag", "editorThemeMetaTagAttribute"];
-	var javaExclusions = ["editorThemeColorEntityColor", "editorThemeFunctionParameterColor", "editorThemePropertyName", "editorThemeMetaTag", "editorThemeMetaTagAttribute"];
-	var cssExclusions = ["editorThemeColorEntityColor", "editorThemeControlColor", "editorThemeLanguageVariableColor", "editorThemeOperatorColor", "editorThemeFunctionParameterColor", "editorThemeLogicalOperatorColor", "editorThemeMetaTag", "editorThemeMetaTagAttribute"];
-
+	var htmlExclusions = ["editorThemeColorEntityColor", "editorThemeFunctionParameterColor", "editorThemePropertyName", "editorThemeMetaTag", "editorThemeMetaTagAttribute","editorThemeDirectiveTask","editorThemeWaveWarning","editorThemeWaveInfo","editorThemeWaveError","editorThemeLinesAnnotationAMDiffAdded","editorThemeLinesAnnotationAMDiffModifed","editorThemeLinesAnnotationDDiffDeleted","editorThemeBlame","editorThemeCurrentBlame"];
+	var jsExclusions = ["editorThemePropertyName", "editorThemeMetaTag", "editorThemeMetaTagAttribute","editorThemeDirectiveTask"];
+	var javaExclusions = ["editorThemeColorEntityColor", "editorThemeFunctionParameterColor", "editorThemePropertyName", "editorThemeMetaTag", "editorThemeMetaTagAttribute","editorThemeDirectiveTask","editorThemeWaveWarning","editorThemeWaveInfo","editorThemeWaveError","editorThemeLinesAnnotationAMDiffAdded","editorThemeLinesAnnotationAMDiffModifed","editorThemeLinesAnnotationDDiffDeleted","editorThemeBlame","editorThemeCurrentBlame"];
+	var cssExclusions = ["editorThemeColorEntityColor", "editorThemeControlColor", "editorThemeLanguageVariableColor", "editorThemeOperatorColor", "editorThemeFunctionParameterColor", "editorThemeLogicalOperatorColor", "editorThemeMetaTag", "editorThemeMetaTagAttribute","editorThemeLinesAnnotationAMDiffAdded","editorThemeLinesAnnotationAMDiffModifed","editorThemeLinesAnnotationDDiffDeleted","editorThemeBlame","editorThemeCurrentBlame"];
+	
 	//initializes the default html structure
 	EditorWidget.prototype.template = "<div class='editorSection'>" +
 											"<div class='editorSectionHeader'>" +
@@ -86,7 +86,7 @@ function(messages, lib, mSetup, jsExample, htmlExample, cssExample, javaExample)
 				case "javascript":
 					return jsExclusions;
 				case "html":
-					return javaExclusions;
+					return htmlExclusions;
 				case "css":
 					return cssExclusions;
 				case "java":

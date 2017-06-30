@@ -183,7 +183,7 @@ define([
 			if(workspaceMetadata){
 				readProjectFromWorkspace.call(that, fileMetadata, workspaceMetadata, deferred);
 			} else {
-				this.fileClient.loadWorkspace().then(function(workspace){
+				this.fileClient.getWorkspace(fileMetadata.Location).then(function(workspace){
 					readProjectFromWorkspace.call(that, fileMetadata, workspace, deferred);
 				});
 			}

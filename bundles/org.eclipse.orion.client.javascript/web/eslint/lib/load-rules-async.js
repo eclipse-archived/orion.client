@@ -2896,7 +2896,7 @@ define([
     		if (node.value.toLowerCase() === 'use strict'){
     			return;
     		}
-    		if(/^(?:[\.,-\/#!$%\^&\*;:{}=\-_`~()@\+\?><\[\]\+])$/.test(node.value)) {
+    		if(/^(?:[\.,-\/#!$%\^&\*;:{}=\-_`~()@\+\?><\[\]])$/.test(node.value)) {
     			return; //don't nag about punctuation
     		} else if(/^(?:==|!=|===|!==|=>)$/.test(node.value)) {
     			return; //don't nag about operators

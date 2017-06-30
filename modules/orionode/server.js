@@ -21,8 +21,7 @@ var auth = require('./lib/middleware/auth'),
 	util = require('util'),
 	argslib = require('./lib/args'),
 	ttyShell = require('./lib/tty_shell'),
-	api = require('./lib/api'),
-	orion = require('./index.js');
+	api = require('./lib/api');
 
 // Get the arguments, the workspace directory, and the password file (if configured), then launch the server
 var args = argslib.parseArgs(process.argv);
@@ -40,6 +39,7 @@ function startServer(cb) {
 	var workspaceConfigParam = configParams.workspace;
 	var contextPath = configParams["orion.context.path"] || "";
 	var listenContextPath = configParams["orion.context.listenPath"] || false;
+	var homeDir = os.homedir();
 	var workspaceDir;
 	if (workspaceArg) {
 		// -workspace passed in command line is relative to cwd
@@ -48,7 +48,7 @@ function startServer(cb) {
 		 // workspace param in orion.conf is relative to the server install dir.
 		workspaceDir = path.resolve(__dirname, workspaceConfigParam);
 	} else if (configParams.isElectron) {
-		workspaceDir =  path.join(os.homedir(), '.orion', '.workspace');
+		workspaceDir =  path.join(homeDir, '.orion', '.workspace');
 	} else {
 		workspaceDir = path.join(__dirname, '.workspace');
 	}
@@ -61,6 +61,18 @@ function startServer(cb) {
 		// init logging
 		var log4js = require('log4js');
 		log4js.configure(path.join(__dirname, 'config/log4js.json'));
+		if(configParams.isElectron){
+			log4js.loadAppender('file');
+			var logPath = path.join(homeDir, '.orion', 'orion.log');
+			if(process.platform === 'darwin'){
+				logPath = path.join(homeDir, '/Library/Logs/Orion', 'orion.log');
+			}else if(process.platform === 'linux'){
+				logPath = path.join(homeDir, '/.config', 'orion.log');
+			}else if(process.platform === 'win32'){
+				logPath = path.join(homeDir, '\AppData\Roaming\Orion', 'orion.log');
+			}
+			log4js.addAppender(log4js.appenders.file(logPath, null, 5000000));
+		}
 		var logger = log4js.getLogger('server');
 		if (dev) {
 			logger.info('Development mode: client code will not be cached.');
@@ -92,15 +104,19 @@ function startServer(cb) {
 			}
 			
 			app.use(compression());
-			app.use(listenContextPath ? contextPath : "/", function(req,res,next){ req.contextPath = contextPath; next();},orion({
+			var orion = require('./index.js')({
 				workspaceDir: workspaceDir,
 				configParams: configParams,
 				maxAge: dev ? 0 : undefined,
-			}));
+			});
+			app.use(listenContextPath ? contextPath : "/", function(req, res, next){
+				req.contextPath = contextPath;
+				next();
+			}, orion);
 			
 			server = require('http-shutdown')(server);
 			var io = socketio.listen(server, { 'log level': 1, path: (listenContextPath ? contextPath : '' ) + '/socket.io' });
-			ttyShell.install({ io: io, app: app, fileRoot: contextPath + '/file', workspaceDir: workspaceDir });
+			ttyShell.install({ io: io, app: orion, fileRoot: contextPath + '/file', workspaceDir: workspaceDir });
 
 			server.on('listening', function() {
 				configParams.port = port;
@@ -125,12 +141,16 @@ function startServer(cb) {
 				server.shutdown(function() {
 					api.getOrionEE().emit("close-server");// Disconnect Mongoose // Close Search Workers
 					logger.info("Closed out remaining connections.");
-					process.exit();
+					log4js.shutdown(function(){
+						process.exit();
+					});
 				});
 				setTimeout(function() {
 					api.getOrionEE().emit("close-server");
 					logger.error("Could not close connections in time, forcefully shutting down");
-					process.exit();
+					log4js.shutdown(function(){
+						process.exit();
+					});
 				}, configParams["shutdown.timeout"]);
 			};
 			// listen for TERM signal .e.g. kill 

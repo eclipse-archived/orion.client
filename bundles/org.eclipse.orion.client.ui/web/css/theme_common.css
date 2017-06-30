@@ -187,9 +187,9 @@ a:hover {
 	color: #E6E6E6;
 	-webkit-flex-grow: 0;		/* Safari */
 	flex-grow: 0;
-	font: 9pt;
-	font-family: "HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue", 
-		Helvetica, Tahoma, Geneva, Arial, "Lucida Grande", sans-serif;
+	font-size: 9pt;
+	font-family: HelveticaNeue, "Helvetica Neue", HelveticaNeueRoman, HelveticaNeue-Roman, "Helvetica Neue Roman", 
+		TeXGyreHerosRegular, Helvetica, Tahoma, Geneva, Arial, sans-serif;
 	overflow: hidden;
 	text-decoration: none;
 	text-overflow: ellipsis;
@@ -215,11 +215,9 @@ a.breadcrumb:hover {
 }
 
 .currentLocation {
-	padding-top:1px;
-	font-weight: bold;
 	font-size: 9pt;
-	font-family: "HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue", 
-		Helvetica, Tahoma, Geneva, Arial, "Lucida Grande", sans-serif;
+	font-family: HelveticaNeue, "Helvetica Neue", HelveticaNeueRoman, HelveticaNeue-Roman, "Helvetica Neue Roman", 
+		TeXGyreHerosRegular, Helvetica, Tahoma, Geneva, Arial, sans-serif;
 	color: #E6E6E6;
 	text-decoration: none;
 	line-height: 10pt;
@@ -235,14 +233,12 @@ div.currentLocation {
 }
 
 a.currentLocation:hover {
-	font-weight: bold;
 	color: #00AED1;
  	text-decoration: none;
 	border-bottom: 1px dotted;
 }
 
 a.breadcrumb.currentLocation {
-	font-weight: bold;
 	margin: 0;
 }
 
@@ -624,6 +620,11 @@ a.breadcrumb.currentLocation {
 	background: #3B4B54;
 }
 
+.split:focus {
+	background: #00FF00;
+	outline: none;
+}
+
 .splitTracking {
 	background: #3B4B54;
 }
@@ -661,6 +662,15 @@ a.breadcrumb.currentLocation {
 
 .dialogContent .dropdownTrigger:not(.dropdownDefaultButton):not(:hover) {
 	color: #00AED1 !important;
+}
+
+.orionPage .findOptionsDiv .dropdownTrigger:not(.dropdownDefaultButton) {
+	color: white !important;
+}
+
+.desktopmode .dropdownTrigger a {
+	text-decoration: none;
+	pointer-events: none;
 }
 
 .dropdownTrigger a {
@@ -747,7 +757,7 @@ a.breadcrumb.currentLocation {
 }
 
 .dropdownMenu .dropdownMenuItemSelected {
-	background-color: rgba(27,177,153, 0.1);
+	background-color: rgba(16,106,91, 0.1);
 	border-left-color: #1BB199;
 }
 
@@ -814,7 +824,7 @@ a.breadcrumb.currentLocation {
 	color: white;
 	background-color: #158d7a;
 	border-radius: 3px;
-	padding: 8px;
+	padding: 4px;
 	clear: both;
 	float: left;
 	border: 1px solid #158d7a;
@@ -1191,8 +1201,8 @@ a.breadcrumb.currentLocation {
 }
 
 .contentassist .selected {
-	background-color: #1BB199 !important;
-	background: #1BB199 !important;
+	background-color: #1BB199;
+	background: #1BB199;
 	border-radius: 0; 
 	color: #FFF;
 }

@@ -20,8 +20,9 @@ define([
 	'text!orion/webui/dropdowntriggerbuttonwitharrow.html',
 	'text!orion/webui/checkedmenuitem.html',
 	'orion/webui/tooltip',
-	'orion/metrics'
-], function(messages, i18nUtil, lib, mCommandsProxy, Dropdown, DropdownButtonFragment, DropdownButtonWithArrowFragment, CheckedMenuItemFragment, Tooltip, mMetrics) {
+	'orion/metrics',
+	'orion/urlModifier'
+], function(messages, i18nUtil, lib, mCommandsProxy, Dropdown, DropdownButtonFragment, DropdownButtonWithArrowFragment, CheckedMenuItemFragment, Tooltip, mMetrics, urlModifier) {
 		/**
 		 * @name orion.commands.NO_IMAGE
 		 * @description Image data for 16x16 transparent png.
@@ -63,11 +64,11 @@ define([
 					var href = command.hrefCallback.call(invocation.handler || window, invocation);
 					if (href.then){
 						href.then(function(l){
-							window.open(l);
+							window.open(urlModifier(l));
 						});
 					} else {
 						// We assume window open since there's no link gesture to tell us what to do.
-						window.open(href);
+						window.open(urlModifier(href));
 					}
 					return true;
 				} else if (invocation.commandRegistry) {
@@ -290,6 +291,7 @@ define([
 		}
 		if (parentElement.nodeName.toLowerCase() === "ul") {
 			var li = document.createElement("li");
+			li.setAttribute("role", "none");
 			parentElement.appendChild(li);
 			parentElement = li;
 		} else {
@@ -370,6 +372,9 @@ define([
 				element.href = href; 
 			} else {  // no href
 				element.href = "#"; //$NON-NLS-0$
+			}
+			if(command.hrefTarget){
+				element.target = command.hrefTarget;
 			}
 		} else {
 			if (command.type === "switch") { //$NON-NLS-0$
@@ -467,6 +472,7 @@ define([
 		}
 		if (parent.nodeName.toLowerCase() === "ul") { //$NON-NLS-0$
 			var li = document.createElement("li"); //$NON-NLS-0$
+			li.setAttribute("role", "none");
 			parent.appendChild(li);
 			parent = li;
 		} else {
@@ -509,6 +515,9 @@ define([
 				element.href = href;
 			} else {  // no href
 				element.href = "#"; //$NON-NLS-0$
+			}
+			if(command.hrefTarget){
+				element.target = command.hrefTarget;
 			}
 			element.addEventListener("keydown", function(e) { //$NON-NLS-0$
 				if (e.keyCode === lib.KEY.ENTER || e.keyCode === lib.KEY.SPACE) {
@@ -694,6 +703,7 @@ define([
 			this.callback = options.callback; // optional callback that should be called when command is activated (clicked)
 			this.preCallback = options.preCallback; // optional callback that should be called when command is activated (clicked)
 			this.hrefCallback = options.hrefCallback; // optional callback that returns an href for a command link
+			this.hrefTarget = options.hrefTarget; // optional href target determinds if a new tab should be opened
 			this.choiceCallback = options.choiceCallback; // optional callback indicating that the command will supply secondary choices.  
 														// A choice is an object with a name, callback, and optional image
 			this.positioningNode = options.positioningNode; // optional positioning node choice command.
@@ -725,6 +735,7 @@ define([
 			choices.forEach(function(choice) {
 				if (choice.name) {
 					var itemNode = document.createElement("li"); //$NON-NLS-0$
+					itemNode.setAttribute("role", "none");
 					parent.appendChild(itemNode);
 					var node = document.createElement("span"); //$NON-NLS-0$
 					node.tabIndex = 0; 

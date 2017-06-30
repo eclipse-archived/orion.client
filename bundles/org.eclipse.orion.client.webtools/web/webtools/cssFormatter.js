@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2016 IBM Corporation and others.
+ * Copyright (c) 2016, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -98,12 +98,12 @@ define("webtools/cssFormatter", [
 					return editorContext.getText(start, end).then(function(text) {
 						var formatted = Beautifier.css_beautify(text, configuration);
 						if (formatted) {
-							deferred.resolve(editorContext.setText(formatted.text, start, end));
+							deferred.resolve(editorContext.setText(formatted, start, end));
 						} else {
 							deferred.reject();
 						}
 						return deferred;
-					}.bind(this));
+					});
 				}
 				return editorContext.getText().then(function(text) {
 					var formatted = Beautifier.css_beautify(text, configuration);
@@ -113,8 +113,8 @@ define("webtools/cssFormatter", [
 						deferred.reject();
 					}
 					return deferred;
-				}.bind(this));
-			}.bind(this));
+				});
+			});
 		},
 		
 		/**

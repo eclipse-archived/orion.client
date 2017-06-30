@@ -125,15 +125,10 @@ define([
 			});
 		},
 		scopeUp: function() {
-			var navigate;
-			var root = this.treeRoot;
-			var prnt = root.Parents && root.Parents[0];
-			if (prnt) {
-				navigate = prnt.ChildrenLocation;
-			} else {
-				navigate = this.fileClient.fileServiceRootURL(root.Location);
-			}
-			this.scope(navigate);
+			var prnt = this.treeRoot.Parents && this.treeRoot.Parents[0];
+			Deferred.when(prnt && prnt.ChildrenLocation || this.fileClient.getWorkspace(this.treeRoot.Location)).then(function(navigate) {
+				this.scope(navigate);
+			}.bind(this));
 		},
 		scopeDown: function(item) {
 			this.scope(item.ChildrenLocation);
@@ -272,6 +267,9 @@ define([
 							});
 							foldersSection.embedExplorer(this.folderNavExplorer);
 							this.folderNavExplorer.setCommandsVisible(this._isCommandsVisible());
+							var actionsNodeScope = foldersSection.getActionElement().id;
+							this.commandRegistry.registerCommandContribution(actionsNodeScope, "eclipse.deleteFile", 0); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-4$
+							this.commandRegistry.renderCommands(actionsNodeScope, actionsNodeScope, this._metadata, this.folderNavExplorer, "tool"); //$NON-NLS-0$	
 							this.folderNavExplorer.loadRoot(this._metadata);
 						}
 					} else if (sectionName === "readme") {

@@ -103,7 +103,6 @@ define([
 		plugins: plugins,
 		defs: defs,
 		defNames: defNames,
-		pluginsDir: 'tern/plugin/',
 		serverOptions: _serverOptions
 	};
 });

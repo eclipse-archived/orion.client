@@ -146,7 +146,7 @@ module.exports.router = function(options) {
 					return getBranchRemotes(theRepo, [branch], fileDir);
 				})
 				.then(function(){
-					writeResponse(200, res, null, branch);
+					writeResponse(200, res, null, branch, true);
 				});
 			})
 			.catch(function(err) {
@@ -196,7 +196,7 @@ module.exports.router = function(options) {
 					writeResponse(200, res, null, {
 							"Children": branches,
 							"Type": "Branch"
-					});
+					}, true);
 				});
 			});
 		})
@@ -235,7 +235,7 @@ module.exports.router = function(options) {
 			var branch = branchJSON(theRepo, ref, fileDir);
 			return getBranchRemotes(theRepo, [branch], fileDir)
 			.then(function(){
-				writeResponse(201, res, null, branch);
+				writeResponse(201, res, null, branch, true);
 			});
 		})
 		.catch(function(err) {

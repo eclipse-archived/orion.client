@@ -34,6 +34,8 @@ define([
 	'orion/status',
 	'orion/progress',
 	'orion/operationsClient',
+	'orion/git/gitClient',
+	'orion/ssh/sshTools', 
 	'orion/outliner',
 	'orion/dialogs',
 	'orion/extensionCommands',
@@ -50,17 +52,20 @@ define([
 	'orion/projectClient',
 	'orion/webui/splitter',
 	'orion/webui/tooltip',
+	'orion/webui/contextmenu',
+	'orion/webui/menubar',
 	'orion/bidiUtils',
 	'orion/customGlobalCommands',
 	'orion/generalPreferences',
 	'orion/breadcrumbs',
-	'orion/keyBinding'
+	'orion/keyBinding',
+	'orion/urlModifier'
 ], function(
 	messages, Sidebar, mInputManager, mCommands, mGlobalCommands,
 	mTextModelFactory, mUndoStack,
 	mFolderView, mEditorView, mPluginEditorView , mMarkdownView, mMarkdownEditor,
-	mCommandRegistry, mContentTypes, mFileClient, mFileCommands, mEditorCommands, mSelection, mStatus, mProgress, mOperationsClient, mOutliner, mDialogs, mExtensionCommands, ProjectCommands, mSearchClient,
-	EventTarget, URITemplate, i18nUtil, PageUtil, util, objects, lib, Deferred, mProjectClient, mSplitter, mTooltip, bidiUtils, mCustomGlobalCommands, mGeneralPrefs, mBreadcrumbs, mKeyBinding
+	mCommandRegistry, mContentTypes, mFileClient, mFileCommands, mEditorCommands, mSelection, mStatus, mProgress, mOperationsClient, mGitClient, mSshTools, mOutliner, mDialogs, mExtensionCommands, ProjectCommands, mSearchClient,
+	EventTarget, URITemplate, i18nUtil, PageUtil, util, objects, lib, Deferred, mProjectClient, mSplitter, mTooltip, mContextMenu, mMenuBar, bidiUtils, mCustomGlobalCommands, mGeneralPrefs, mBreadcrumbs, mKeyBinding, urlModifier
 ) {
 
 var exports = {};
@@ -82,10 +87,8 @@ function MenuBar(options) {
 	this.fileClient = options.fileClient;
 	this.editorCommands = options.editorCommands;
 	this.parentNode = options.parentNode;
-	this.fileActionsScope = "fileActions"; //$NON-NLS-0$
-	this.editActionsScope = "editActions"; //$NON-NLS-0$
-	this.viewActionsScope = "viewActions"; //$NON-NLS-0$
-	this.toolsActionsScope = "toolsActions"; //$NON-NLS-0$
+	this.menuBarActionScope = "menuBarActions";
+	this.toolsActionsScope = "menuBarActions"; //$NON-NLS-0$
 	this.additionalActionsScope = "extraActions"; //$NON-NLS-0$
 	this.createActionSections();
 	
@@ -95,7 +98,7 @@ MenuBar.prototype = {};
 objects.mixin(MenuBar.prototype, {
 	createActionSections: function() {
 		var _self = this;
-		[this.fileActionsScope, this.editActionsScope, this.viewActionsScope, this.toolsActionsScope, this.additionalActionsScope].reverse().forEach(function(id) {
+		[this.additionalActionsScope].reverse().forEach(function(id) {
 			if (!_self[id]) {
 				var elem = document.createElement("ul"); //$NON-NLS-0$
 				elem.id = id;
@@ -110,20 +113,31 @@ objects.mixin(MenuBar.prototype, {
 			}
 		});
 
+		// Create the main menu bar
+		var editMenuBar = document.createElement("ul"); //$NON-NLS-0$
+		var menuBarScope = editMenuBar.id = this.menuBarActionScope;
+		editMenuBar.setAttribute("role", "menubar");
+		var menuBar = new mMenuBar.MenuBar({
+			dropdown: editMenuBar,
+		});
+		
+		
+		editMenuBar.classList.add("layoutLeft"); //$NON-NLS-0$
+		editMenuBar.classList.add("commandList"); //$NON-NLS-0$
+		editMenuBar.classList.add("pageActions"); //$NON-NLS-0$
+		_self.parentNode.insertBefore(editMenuBar, _self.parentNode.firstChild);
+
 		var commandRegistry = this.commandRegistry;
-		var fileActionsScope = this.fileActionsScope;
-		var editActionsScope = this.editActionsScope;
-		var viewActionsScope = this.viewActionsScope;
 		var toolsActionsScope = this.toolsActionsScope;
 		
-		commandRegistry.addCommandGroup(fileActionsScope, "orion.menuBarFileGroup", 1000, messages["File"], null, messages["noActions"], null, null, "dropdownSelection"); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-		commandRegistry.addCommandGroup(editActionsScope, "orion.menuBarEditGroup", 100, messages["Edit"], null, messages["noActions"], null, null, "dropdownSelection"); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-		commandRegistry.addCommandGroup(viewActionsScope, "orion.menuBarViewGroup", 100, messages["View"], null, messages["noActions"], null, null, "dropdownSelection"); //$NON-NLS-1$ //$NON-NLS-2$
-		commandRegistry.addCommandGroup(toolsActionsScope, "orion.menuBarToolsGroup", 100, messages["Tools"], null, null, null, null, "dropdownSelection"); //$NON-NLS-1$ //$NON-NLS-2$
+		commandRegistry.addCommandGroup(menuBarScope, "orion.menuBarFileGroup", 1, messages["File"], null, messages["noActions"], null, null, "dropdownSelection"); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		commandRegistry.addCommandGroup(menuBarScope, "orion.menuBarEditGroup", 2, messages["Edit"], null, messages["noActions"], null, null, "dropdownSelection"); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		commandRegistry.addCommandGroup(menuBarScope, "orion.menuBarViewGroup", 3, messages["View"], null, messages["noActions"], null, null, "dropdownSelection"); //$NON-NLS-1$ //$NON-NLS-2$
+		commandRegistry.addCommandGroup(menuBarScope, "orion.menuBarToolsGroup", 4, messages["Tools"], null, null, null, null, "dropdownSelection"); //$NON-NLS-1$ //$NON-NLS-2$
 		
-		commandRegistry.addCommandGroup(fileActionsScope, "orion.newContentGroup", 0, messages["New"], "orion.menuBarFileGroup", null, null, null, "dropdownSelection"); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-		commandRegistry.addCommandGroup(fileActionsScope, "orion.importGroup", 100, messages["Import"], "orion.menuBarFileGroup", null, null, null, "dropdownSelection"); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-		commandRegistry.addCommandGroup(fileActionsScope, "orion.exportGroup", 1001, messages["Export"], "orion.menuBarFileGroup", null, null, null, "dropdownSelection"); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		commandRegistry.addCommandGroup(menuBarScope, "orion.newContentGroup", 0, messages["New"], "orion.menuBarFileGroup", null, null, null, "dropdownSelection"); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		commandRegistry.addCommandGroup(menuBarScope, "orion.importGroup", 100, messages["Import"], "orion.menuBarFileGroup", null, null, null, "dropdownSelection"); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		commandRegistry.addCommandGroup(menuBarScope, "orion.exportGroup", 1001, messages["Export"], "orion.menuBarFileGroup", null, null, null, "dropdownSelection"); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 	},
 	createCommands: function() {
 		var serviceRegistry = this.serviceRegistry;
@@ -168,14 +182,10 @@ objects.mixin(MenuBar.prototype, {
 			this.editorCommands.updateCommands(editorViewer.getCurrentEditorView());
 		}
 		var commandRegistry = this.commandRegistry, serviceRegistry = this.serviceRegistry;
-		commandRegistry.registerSelectionService(this.fileActionsScope, visible ? selection : null);
-		commandRegistry.registerSelectionService(this.editActionsScope, visible ? selection : null);
-		commandRegistry.registerSelectionService(this.viewActionsScope, visible ? selection : null);
+		commandRegistry.registerSelectionService(this.menuBarActionScope, visible ? selection : null);
 		mFileCommands.setExplorer(explorer);
 		ProjectCommands.setExplorer(explorer);
-		mFileCommands.updateNavTools(serviceRegistry, commandRegistry, explorer, null, [this.fileActionsScope, this.editActionsScope, this.viewActionsScope], treeRoot, true);
-		commandRegistry.destroy(this.toolsActionsScope);
-		commandRegistry.renderCommands(this.toolsActionsScope, this.toolsActionsScope, metadata, explorer, "tool"); //$NON-NLS-0$
+		mFileCommands.updateNavTools(serviceRegistry, commandRegistry, explorer, null, [this.menuBarActionScope], treeRoot, true);
 		commandRegistry.destroy(this.additionalActionsScope);
 		commandRegistry.renderCommands(this.additionalActionsScope, this.additionalActionsScope, treeRoot, explorer, "button"); //$NON-NLS-0$
 	}
@@ -244,13 +254,14 @@ function TabWidget(options) {
 	EventTarget.attach(this);
 	objects.mixin(this, options);
 	this.selectedFile = null;
+	this.tabWidgetContextItemindex = 1;
 	this.commandRegistry = options.commandRegistry;
 	
 	this.fileList = [];
 	this.editorTabs = {};
 	this.breadcrumbUniquifier = "_editor_" + this.id;
 	var generalPrefs = this.generalPreferences || {};
-	this.enableEditorTabs = generalPrefs.hasOwnProperty("enableEditorTabs") ? generalPrefs.enableEditorTabs : false;
+	this.enableEditorTabs = util.isElectron ? true : generalPrefs.hasOwnProperty("enableEditorTabs") ? generalPrefs.enableEditorTabs : false;
 	this.maximumEditorTabs = generalPrefs.hasOwnProperty("maximumEditorTabs") ? generalPrefs.maximumEditorTabs : 0;
 	this.beingDragged = null;
 	
@@ -278,11 +289,12 @@ function TabWidget(options) {
 	tabWidgetDropdownNode.setAttribute("aria-haspopup", "true");
 
 	this.parent.appendChild(tabWidgetDropdownNode);
-	this.restoreTabsFromStorage();
 
 	if (this.enableEditorTabs) {
 		this.createDropdown_();
 	}
+	
+	this.restoreTabsFromStorage(); // have to be after createDropdown_ call.
 }
 
 TabWidget.prototype = {};
@@ -296,7 +308,7 @@ objects.mixin(TabWidget.prototype, {
 
 		var tabCommand = new mCommands.Command({
 			selectionClass: "dropdownSelection",
-			name: messages["AllTabsDropDown"],
+			name: util.isMac ? messages["AllTabsDropDownMac"] : messages["AllTabsDropDown"],
 			imageClass: "core-sprite-list",
 			id: "orion.edit.selectEditor",
 			visableWhen: function() {
@@ -353,7 +365,7 @@ objects.mixin(TabWidget.prototype, {
 		this.dispatchEvent(closingEvent);
 	},
 	setWindowLocation: function(href) {
-		window.location = href;
+		window.location = urlModifier(href);
 	},
 	dragenterListener_: function(e) {
 		e.preventDefault();
@@ -429,7 +441,15 @@ objects.mixin(TabWidget.prototype, {
 	setTabStorage: function() {
 		var mappedFiles = this.fileList.map(function(f) {
 			if (!f.metadata.Directory) {
-				return {metadata: f.metadata, href: f.href};
+				var parents = f.metadata.Parents.map(function(each){
+					return {
+						Name: each.Name,
+						Location: each.Location,
+						ChildrenLocation: each.ChildrenLocation,
+						WorkspaceLocation: each.WorkspaceLocation
+					};
+				});
+				return {metadata: {Location: f.metadata.Location, Name: f.metadata.Name, WorkspaceLocation: f.metadata.WorkspaceLocation, Directory: f.metadata.Directory, Parents: parents}, href: f.href, isTransient: f.isTransient};
 			}
 		});
 		sessionStorage["editorTabs_" + this.id] = JSON.stringify(mappedFiles);
@@ -440,7 +460,7 @@ objects.mixin(TabWidget.prototype, {
 				var cachedTabs = JSON.parse(sessionStorage["editorTabs_" + this.id]);
 				cachedTabs.reverse().forEach(function(cachedTab) {
 					if (cachedTab) {
-						this.addTab(cachedTab.metadata, cachedTab.href);
+						this.addTab(cachedTab.metadata, cachedTab.href, true, cachedTab.isTransient);
 					}
 				}.bind(this));
 			} catch (e) {
@@ -449,26 +469,6 @@ objects.mixin(TabWidget.prototype, {
 		}
 	},
 	registerAdditionalCommands: function() {
-		var nextTab = new mCommands.Command({
-			name: messages["selectNextTab"],
-			id: "orion.edit.selectNextTab",
-			visibleWhen: function() {
-				return true;
-			},
-			callback: this.selectNextTab.bind(this)
-		});
-		this.commandRegistry.addCommand(nextTab);
-
-		var previousTab = new mCommands.Command({
-			name: messages["selectPreviousTab"],
-			id: "orion.edit.selectPreviousTab",
-			visibleWhen: function() {
-				return true;
-			},
-			callback: this.selectPreviousTab.bind(this)
-		});
-		this.commandRegistry.addCommand(previousTab);
-
 		var showTabDropdown = new mCommands.Command({
 			name: messages["showTabDropdown"],
 			id: "orion.edit.showTabDropdown",
@@ -481,29 +481,12 @@ objects.mixin(TabWidget.prototype, {
 		});
 		this.commandRegistry.addCommand(showTabDropdown);
 
-		this.commandRegistry.registerCommandContribution(this.editorTabContainer.id , "orion.edit.selectNextTab", 0, null, true, new mKeyBinding.KeyBinding(117, true), null, this);
-		this.commandRegistry.registerCommandContribution(this.editorTabContainer.id , "orion.edit.selectPreviousTab", 0, null, true, new mKeyBinding.KeyBinding(117, true, true), null, this);
 		this.commandRegistry.registerCommandContribution(this.editorTabContainer.id , "orion.edit.showTabDropdown", 0, null, true, new mKeyBinding.KeyBinding('e', true, true), null, this);
 
 		this.commandRegistry.renderCommands(this.editorTabContainer.id, this.editorTabContainer.id, this, this, "button");
 	},
-	selectPreviousTab: function() {
-		var selectedTab = this.getCurrentEditorTabNode();
-		if (selectedTab.previousSibling !== null) {
-			selectedTab.previousSibling.click();
-		} else {
-			selectedTab.parentNode.lastChild.click();
-		}
-	},
-	selectNextTab: function() {
-		var selectedTab = this.getCurrentEditorTabNode();
-		if (selectedTab.nextSibling !== null) {
-			selectedTab.nextSibling.click();
-		} else {
-			selectedTab.parentNode.firstChild.click();
-		}
-	},
 	createTab_ : function(metadata, href) {
+		var that = this;
 		var editorTab = document.createElement("div");
 		editorTab.className = "editorTab";
 		if (!this.enableEditorTabs) {
@@ -513,7 +496,6 @@ objects.mixin(TabWidget.prototype, {
 		editorTab.setAttribute("role", "tab");
 		editorTab.setAttribute("aria-controls", "editorViewerContent_Panel" + this.id);
 
-		
 		this.editorTabContainer.appendChild(editorTab);
 		
 		var dirtyIndicator = document.createElement("span");
@@ -532,16 +514,17 @@ objects.mixin(TabWidget.prototype, {
 		curFileNode.textContent = curFileNodeName;
 
 		var closeButton = document.createElement("div");
-		closeButton.className = "editorTabCloseButton";
+		closeButton.className = "editorTabCloseButton core-sprite-close imageSprite ";
 		// Unicode multiplication sign
-		closeButton.textContent = "\u2715";
+		closeButton.metadata = metadata;
 		closeButton.addEventListener("click", function(e) {
 			e.stopPropagation();
 			var isDirty = dirtyIndicator.style.display !== "none";
-			this.closeTab(metadata, isDirty);
-		}.bind(this));
-
+			that.closeTab(this.metadata, isDirty);
+		});
 		editorTab.appendChild(closeButton);
+		editorTab.metadata = metadata;
+		editorTab.href = href;
 		
 		var fileNodeTooltip = new mTooltip.Tooltip({
 			node: curFileNode,
@@ -553,6 +536,106 @@ objects.mixin(TabWidget.prototype, {
 		var tipContainer = fileNodeTooltip.contentContainer();
 		tipContainer.appendChild(localBreadcrumbNode);
 		
+		var makeHref = function(segment, folderLocation, folder) {
+			var resource = folder ? folder.Location : folderLocation;
+			segment.href = uriTemplate.expand({resource: resource});
+			if (folder) {
+				if (metadata && metadata.Location === folder.Location) {
+					segment.addEventListener("click", function() { //$NON-NLS-0$
+						if (this.sidebarNavInputManager){
+							this.sidebarNavInputManager.reveal(folder);
+						}
+					}.bind(this));
+				}
+			}
+		}.bind(this);
+		
+		var breadcrumbOptions = {
+			container: localBreadcrumbNode,
+			resource: metadata,
+			workspaceRootSegmentName: this.fileClient.fileServiceName(metadata.Location),
+			workspaceRootURL: metadata.WorkspaceLocation || this.fileClient.fileServiceRootURL(metadata.Location),
+			makeFinalHref: true,
+			makeHref: makeHref,
+			// This id should be unique regardless of editor views open.
+			id: "breadcrumb" + metadata.Location + this.breadcrumbUniquifier
+		};
+		
+		var breadcrumb = new mBreadcrumbs.BreadCrumbs(breadcrumbOptions);
+		
+		var editorTabClickHandler = function(evt){
+			if (evt.type === "click") {
+				that.setWindowLocation(this.href);
+			} else if (evt.type === "dblclick") {
+				that.transientToPermenant(this.href);
+			}
+		};
+		editorTab.addEventListener("click", editorTabClickHandler);
+		editorTab.addEventListener("dblclick", editorTabClickHandler);
+
+		editorTab.addEventListener("mouseup", function(e) {
+			var button = e.which;
+			if (button === 2) {
+				e.preventDefault();
+				var isDirty = dirtyIndicator.style.display !== "none";
+				that.closeTab(this.metadata, isDirty);
+			}
+		});
+
+		editorTab.addEventListener("dragstart", function(e) {
+			if (that.fileList.length === 1) {
+				e.preventDefault();
+				return false;
+			}
+			that.beingDragged = {node: e.target, metadata: this.metadata, href: this.href, parent: that};
+			setTimeout(function() {
+				tipContainer.parentNode.classList.add('hideOnDrag');
+				e.target.classList.add('hideOnDrag');
+			});
+		});
+		
+		editorTab.addEventListener("dragend", function(e) {
+			if (that.afterDragActions) {
+				setTimeout(function() {
+					that.afterDragActions.dragCleanup();
+					that.afterDragActions = null;
+				}.bind(that));
+			}
+			that.beingDragged = null;
+			tipContainer.parentNode.classList.remove('hideOnDrag');
+			e.target.classList.remove('hideOnDrag');
+		});
+		return {
+			editorTabNode: editorTab,
+			dirtyIndicatorNode: dirtyIndicator,
+			fileNameNode: curFileNode,
+			breadcrumb: breadcrumb,
+			closeButtonNode: closeButton,
+			fileNodeToolTip: fileNodeTooltip,
+			href: href,
+			tabWidgetContextItemindex: 1
+		};
+	},
+	getDraggedNode: function() {
+		return this.beingDragged;
+	},
+	transientToPermenant: function(href){
+		var hrefHash = href && href.split("#")[1];
+		if(this.transientTab && hrefHash && hrefHash.indexOf(this.transientTab.location) === 0){
+			this.fileList.find(function(file){
+				if(hrefHash.indexOf(file.metadata.Location) === 0){
+					file.isTransient = false;
+					return true;
+				}
+			})
+			this.transientTab && this.transientTab.editorTabNode.classList.remove("transient");
+			this.transientTab = null;
+		}
+	},
+	createNewBreadCrumb: function(tab, metadata){
+		var localBreadcrumbNode = document.createElement("div");
+		var tipContainer = tab.fileNodeToolTip.contentContainer();
+		tipContainer.appendChild(localBreadcrumbNode);
 		var makeHref = function(segment, folderLocation, folder) {
 			var resource = folder ? folder.Location : this.fileClient.fileServiceRootURL(folderLocation);
 			segment.href = uriTemplate.expand({resource: resource});
@@ -578,59 +661,9 @@ objects.mixin(TabWidget.prototype, {
 			id: "breadcrumb" + metadata.Location + this.breadcrumbUniquifier
 		};
 		
-		var breadcrumb = new mBreadcrumbs.BreadCrumbs(breadcrumbOptions);
-		
-		editorTab.addEventListener("click", function() {
-			this.setWindowLocation(href);
-		}.bind(this));
-
-		editorTab.addEventListener("mouseup", function(e) {
-			var button = e.which;
-			if (button === 2) {
-				e.preventDefault();
-				var isDirty = dirtyIndicator.style.display !== "none";
-				this.closeTab(metadata, isDirty);
-			}
-		}.bind(this));
-
-		editorTab.addEventListener("dragstart", function(e) {
-			if (this.fileList.length === 1) {
-				e.preventDefault();
-				return false;
-			}
-			this.beingDragged = {node: e.target, metadata: metadata, href: href, parent: this};
-			setTimeout(function() {
-				tipContainer.parentNode.classList.add('hideOnDrag');
-				e.target.classList.add('hideOnDrag');
-			});
-		}.bind(this));
-		
-		editorTab.addEventListener("dragend", function(e) {
-			if (this.afterDragActions) {
-				setTimeout(function() {
-					this.afterDragActions.dragCleanup();
-					this.afterDragActions = null;
-				}.bind(this));
-			}
-			this.beingDragged = null;
-			tipContainer.parentNode.classList.remove('hideOnDrag');
-			e.target.classList.remove('hideOnDrag');
-		}.bind(this));
-
-		return {
-			editorTabNode: editorTab,
-			dirtyIndicatorNode: dirtyIndicator,
-			fileNameNode: curFileNode,
-			breadcrumb: breadcrumb,
-			closeButtonNode: closeButton,
-			fileNodeToolTip: fileNodeTooltip,
-			href: href
-		};
+		tab.breadcrumb = new mBreadcrumbs.BreadCrumbs(breadcrumbOptions);
 	},
-	getDraggedNode: function() {
-		return this.beingDragged;
-	},
-	addTab: function(metadata, href) {
+	addTab: function(metadata, href, isRestoreTabsFromStorage, isTransientFromStorage) {
 		var fileList = this.fileList;
 		var fileToAdd = null;
 		var curEditorTabNode = null;
@@ -644,7 +677,6 @@ objects.mixin(TabWidget.prototype, {
 			curEditorTabNode.classList.remove("focusedEditorTab");
 			curEditorTabNode.setAttribute("aria-selected", "false");
 		}
-
 		// If the editor tab exists, reuse it.
 		if (this.editorTabs.hasOwnProperty(metadata.Location)) {
 			// Remove the item from the file list if it is present.
@@ -656,29 +688,73 @@ objects.mixin(TabWidget.prototype, {
 					break;
 				}
 			}
-		} else {
-			// Store file information
+			// Add the file to our dropdown menu
+			this.fileList.unshift(fileToAdd);
+		} else if (!isRestoreTabsFromStorage && this.transientTab){
+			this.transientTab.fileNameNode.textContent = metadata.Name;
 			fileToAdd = {
 				callback: this.widgetClick,
-				checked:true, 
+				checked:true,
 				href: href,
 				metadata: metadata,
 				name: metadata.Name,
+				isTransient: true
+			};
+			for (var i = 0; i < this.fileList.length; i++) {
+				if (this.fileList[i].isTransient) {
+					this.fileList.splice(i, 1)
+					this.fileList.unshift(fileToAdd);
+					var transientTab = this.editorTabs[this.transientTab.location];
+					delete this.editorTabs[this.transientTab.location];
+					transientTab.editorTabNode.metadata = metadata;
+					transientTab.editorTabNode.href = href;
+					transientTab.closeButtonNode.metadata = metadata;
+					transientTab.location = metadata.Location
+					transientTab.href = href;
+					transientTab.breadcrumb.destroy();
+					this.createNewBreadCrumb(transientTab, metadata);
+					// Remove old breadcrum and add new, change the propertis of this editorTabs object, so that callbacks use new value.
+					editorTab  = this.editorTabs[metadata.Location] = transientTab;
+					break;
+				}
+			}
+		} else {
+			// Store file information
+			var isTransient = true;
+			if(isRestoreTabsFromStorage){
+				isTransient = isTransientFromStorage;
+			}else if(this.potentialTransientHref && new URL(this.potentialTransientHref).hash === new URL(href).hash){
+				isTransient = false;
+			}
+			fileToAdd = {
+				callback: this.widgetClick,
+				checked:true,
+				href: href,
+				metadata: metadata,
+				name: metadata.Name,
+				isTransient: isTransient
 			};
 			// Create and store a new editorTab
 			editorTab = this.editorTabs[metadata.Location] = this.createTab_(metadata, href);
+			if(this.enableEditorTabs && isTransient){
+				editorTab.editorTabNode.classList.add("transient");
+				this.transientTab = editorTab;
+				this.transientTab.location = metadata.Location;
+			}
+			// Add the file to our dropdown menu
+			this.fileList.unshift(fileToAdd);
+		}
+		if(this.potentialTransientHref){
+			// In the case doubleclick event reveived before the transient tab is created, 
+			this.transientToPermenant(this.potentialTransientHref);
+			this.potentialTransientHref = null;
 		}
 
-		// Add the file to our dropdown menu
-		this.fileList.unshift(fileToAdd);
-		
 		// Style the editor tab
 		editorTab.editorTabNode.classList.add("focusedEditorTab");
 		editorTab.editorTabNode.setAttribute("aria-selected", "true");
-
 		// Update the selected file
 		this.selectedFile = this.fileList[0];
-
 		// Enforce maximum editor tabs
 		if (this.maximumEditorTabs > 0 && fileList.length > this.maximumEditorTabs) {
 			var resourceClosing = fileList[fileList.length-1].metadata;
@@ -736,7 +812,7 @@ objects.mixin(TabWidget.prototype, {
 
 		if (lastHref !== this.selectedFile.href) {
 			this.activateEditorViewer();
-			this.setWindowLocation(this.selectedFile.href)
+			this.setWindowLocation(this.selectedFile.href);
 		}
 		this.setTabStorage();
 	},
@@ -821,6 +897,7 @@ objects.mixin(EditorViewer.prototype, {
 		this.createInputManager();
 		this.createTabWidget();
 		this.createEditorView();
+		this.createTabWidgetContextMenu();
 	},
 	
 	createTextModel: function() {
@@ -829,6 +906,136 @@ objects.mixin(EditorViewer.prototype, {
 	
 	createEditorView: function() {
 		this.editorView = new mEditorView.EditorView(this.defaultOptions());
+	},
+	createTabWidgetContextMenu: function(){
+		var tabWidgetContextMenuNode = document.createElement("ul"); //$NON-NLS-0$
+		tabWidgetContextMenuNode.className = "dropdownMenu"; //$NON-NLS-0$
+		tabWidgetContextMenuNode.setAttribute("role", "menu"); //$NON-NLS-1$ //$NON-NLS-2$
+		tabWidgetContextMenuNode.style.zIndex = "201";  // Need to be greater than tooltipcontainer's zindex which is 200
+		this.tabWidget.editorTabContainer.parentElement.appendChild(tabWidgetContextMenuNode);
+		// Hook the context menu to the tabWidget's editorTabNode node
+		var contextMenu = new mContextMenu.ContextMenu({
+			dropdown: tabWidgetContextMenuNode,
+			triggerNode: this.tabWidget.editorTabContainer
+		});
+		//function called when the context menu is triggered to set the nav selection properly
+		var contextMenuTriggered = function(wrapper) {
+			var re = wrapper.event;
+			if (re.target) {
+				this.commandRegistry.destroy(tabWidgetContextMenuNode); // remove previous content
+				var target = re.target || re.srcElement;
+				this.commandRegistry.renderCommands("tabWidgetContextMenuActions", tabWidgetContextMenuNode, target.metadata || target.parentElement.metadata, this, "menu", target.parentElement.href || ""); //$NON-NLS-1$ //$NON-NLS-2$
+			}
+		}.bind(this);
+		contextMenu.addEventListener("triggered", contextMenuTriggered);
+		this.registerTabWidgetContextMenu();
+	},
+	registerTabWidgetContextMenu: function(){
+		var closeSelfTabWidgetCommand = new mCommands.Command({
+			name: messages.closeSelf,
+			id: "orion.tabWidget.closeself", //$NON-NLS-0$
+			visibleWhen: /** @callback */ function(items, data) {
+				return data.userData && Object.keys(this.tabWidget.editorTabs).length > 1;
+			}.bind(this),
+			callback: function(commandInvocation) {
+				var targetEditorTab = this.tabWidget.editorTabs[commandInvocation.items.Location] || this.tabWidget.editorTabs[this.tabWidget.selectedFile.metadata.Location]; // the targetEditorTab is the activetab when user use keybinds to close, otherwise is the selected one.
+				targetEditorTab.closeButtonNode.click();
+			}.bind(this)
+		});
+		var closeOtherTabWidgetCommand = new mCommands.Command({
+			name: messages.closeOthers,
+			id: "orion.tabWidget.closeothers", //$NON-NLS-0$
+			visibleWhen: /** @callback */ function(items, data) {
+				return data.userData && Object.keys(this.tabWidget.editorTabs).length > 1;
+			}.bind(this),
+			callback: function(commandInvocation) {
+				Object.keys(this.tabWidget.editorTabs).forEach(function(tab){
+					if(commandInvocation.items.Location !== tab){
+						this.tabWidget.editorTabs[tab].closeButtonNode.click();
+					}
+				}.bind(this));
+			}.bind(this)
+		});
+		var closeToRight = new mCommands.Command({
+			name: messages.closeTotheRight,
+			id: "orion.tabWidget.closetoright", //$NON-NLS-0$
+			visibleWhen: /** @callback */ function(items, data) {
+				return data.userData && Object.keys(this.tabWidget.editorTabs).length > 1;
+			}.bind(this),
+			callback: function(commandInvocation) {
+				// Get the right hand tabs from this.editorTab parent.
+				var firstNodeIndexToRemove;
+				Array.prototype.find.call(this.tabWidget.editorTabContainer.childNodes, function(node, index){
+					if(node.metadata.Location === commandInvocation.items.Location){
+						firstNodeIndexToRemove = index + 1;
+						return true;
+					}
+				})
+				var closingButtons = [];
+				for(var j = firstNodeIndexToRemove; j < this.tabWidget.editorTabContainer.childNodes.length; j++){
+					var closeButton = this.tabWidget.editorTabContainer.childNodes[j].querySelector(".editorTabCloseButton");
+					closingButtons.push(closeButton);
+				}
+				closingButtons.forEach(function(closeButton){
+					closeButton.click();
+				});
+			}.bind(this)
+		});
+		var keepOpen = new mCommands.Command({
+			name: messages.keepOpen,
+			id: "orion.tabWidget.keepOpen", //$NON-NLS-0$
+			visibleWhen: /** @callback */ function(items, data) {
+				return data.userData && this.tabWidget.transientTab && data.items.Location === this.tabWidget.transientTab.location;
+			}.bind(this),
+			callback: function(commandInvocation) {
+				this.tabWidget.transientToPermenant(commandInvocation.userData);
+			}.bind(this)
+		});
+		var nextTab = new mCommands.Command({
+			name: messages["selectNextTab"],
+			id: "orion.tabWidget.selectNextTab",
+			visibleWhen: function(items, data) {
+				return Object.keys(data.handler.tabWidget.editorTabs).length > 1;
+			},
+			callback: function(){
+				var selectedTab = this.tabWidget.getCurrentEditorTabNode();
+				if (selectedTab.nextSibling !== null) {
+					selectedTab.nextSibling.click();
+				} else {
+					selectedTab.parentNode.firstChild.click();
+				}
+			}
+		});
+		var previousTab = new mCommands.Command({
+			name: messages["selectPreviousTab"],
+			id: "orion.tabWidget.selectPreviousTab",
+			visibleWhen: function(items, data) {
+				return Object.keys(data.handler.tabWidget.editorTabs).length > 1;
+			},
+			callback: function(){
+				var selectedTab = this.tabWidget.getCurrentEditorTabNode();
+				if (selectedTab.previousSibling !== null) {
+					selectedTab.previousSibling.click();
+				} else {
+					selectedTab.parentNode.lastChild.click();
+				}
+			}
+		});
+		this.commandRegistry.addCommand(closeSelfTabWidgetCommand);
+		this.commandRegistry.addCommand(closeOtherTabWidgetCommand);
+		this.commandRegistry.addCommand(closeToRight);
+		this.commandRegistry.addCommand(keepOpen);
+		this.commandRegistry.addCommand(nextTab);
+		this.commandRegistry.addCommand(previousTab);
+		
+		// tabWidget context menu
+		this.commandRegistry.addCommandGroup("tabWidgetContextMenuActions", "orion.tabWidgetContextMenuGroup", 100, null, null, null, null, null, "dropdownSelection"); //$NON-NLS-1$ //$NON-NLS-2$
+		this.commandRegistry.registerCommandContribution("tabWidgetContextMenuActions", "orion.tabWidget.closeself", this.tabWidget.tabWidgetContextItemindex++,"orion.tabWidgetContextMenuActions/orion.tabWidget.closeGroup",false, new mKeyBinding.KeyBinding(118, true)); //$NON-NLS-1$ //$NON-NLS-2$
+		this.commandRegistry.registerCommandContribution("tabWidgetContextMenuActions", "orion.tabWidget.closeothers", this.tabWidget.tabWidgetContextItemindex++,"orion.tabWidgetContextMenuActions/orion.tabWidget.closeGroup",false, new mKeyBinding.KeyBinding(119, true)); //$NON-NLS-1$ //$NON-NLS-2$
+		this.commandRegistry.registerCommandContribution("tabWidgetContextMenuActions", "orion.tabWidget.closetoright", this.tabWidget.tabWidgetContextItemindex++,"orion.tabWidgetContextMenuActions/orion.tabWidget.closeGroup"); //$NON-NLS-1$ //$NON-NLS-2$
+		this.commandRegistry.registerCommandContribution("tabWidgetContextMenuActions", "orion.tabWidget.keepOpen", this.tabWidget.tabWidgetContextItemindex++,"orion.tabWidgetContextMenuActions/orion.tabWidget.others", false, new mKeyBinding.KeyBinding('K', true, true)); //$NON-NLS-1$ //$NON-NLS-2$
+		this.commandRegistry.registerCommandContribution("tabWidgetContextMenuActions" , "orion.tabWidget.selectNextTab", this.tabWidget.tabWidgetContextItemindex++, "orion.tabWidgetContextMenuActions/orion.tabWidget.traverse", false, new mKeyBinding.KeyBinding(117, true), null, this);
+		this.commandRegistry.registerCommandContribution("tabWidgetContextMenuActions" , "orion.tabWidget.selectPreviousTab", this.tabWidget.tabWidgetContextItemindex++, "orion.tabWidgetContextMenuActions/orion.tabWidget.traverse", false, new mKeyBinding.KeyBinding(117, true, true), null, this);
 	},
 	
 	createTabWidget: function() {
@@ -839,6 +1046,7 @@ objects.mixin(EditorViewer.prototype, {
 			fileClient: this.fileClient,
 			generalPreferences: this.generalPreferences,
 			inputManager: this.inputManager,
+			tabWidgetContextItemindex: 1,
 			activateEditorViewer: function() {
 				this.activateContext.setActiveEditorViewer(this);
 			}.bind(this)
@@ -863,6 +1071,9 @@ objects.mixin(EditorViewer.prototype, {
 
 		this.tabWidget.addEventListener("TabClosed", function(evt) {
 			this.modelPool.release(evt.resource, this.id);
+			if(this.tabWidget.transientTab && evt.resource === this.tabWidget.transientTab.location){
+				 this.tabWidget.transientTab = null;
+			}
 		}.bind(this));
 
 		this.tabWidget.addEventListener("EditorTabTransfer", function(evt) {
@@ -883,6 +1094,7 @@ objects.mixin(EditorViewer.prototype, {
 			selection: this.selection,
 			contentTypeRegistry: this.contentTypeRegistry,
 			generalPreferences: this.generalPreferences,
+			isEditorTabsEnabled: util.isElectron ? true : this.generalPreferences && this.generalPreferences.hasOwnProperty("enableEditorTabs") ? this.generalPreferences.enableEditorTabs : false,
 			confirm: function(message, buttonCallbackList, targetNode){
 				targetNode = targetNode || this.tabWidget.getCurrentEditorTabNode();
 				this.commandRegistry.confirmWithButtons(targetNode, message, buttonCallbackList);
@@ -897,12 +1109,8 @@ objects.mixin(EditorViewer.prototype, {
 		inputManager.addEventListener("InputChanged", function(evt) { //$NON-NLS-0$
 			var metadata = evt.metadata;
 			if (metadata) {
-				var tabHref = evt.location.href;
+				var tabHref = this.activateContext.computeNavigationHref(evt.metadata);
 				var lastFile = PageUtil.hash();
-				if (sessionStorage.lastFile === lastFile || lastFile.length === 0) {
-					tabHref = uriTemplate.expand({resource: metadata.Location});
-					lastFile = tabHref;
-				}
 				sessionStorage.lastFile = lastFile;
 				this.tabWidget.addTab(metadata, tabHref);
 			} else {
@@ -913,6 +1121,13 @@ objects.mixin(EditorViewer.prototype, {
 			this.updateDirtyIndicator();
 			evt.editor = this.editor;
 			this.pool.metadata = metadata;
+			this.pool.model.addEventListener("postChanged", function(evt){
+				if(this.pool.undoStack._unsavedChanges && this.pool.undoStack._unsavedChanges.length > 0){
+					if(this.tabWidget.transientTab && this.tabWidget.transientTab.location === this.pool.metadata.Location){
+						this.tabWidget.transientToPermenant(this.tabWidget.transientTab.href);
+					}
+				}
+			}.bind(this));
 			if (this.shown) {
 				var href = window.location.href;
 				this.activateContext.setActiveEditorViewer(this);
@@ -972,7 +1187,7 @@ objects.mixin(EditorViewer.prototype, {
 								inputManager.removeEventListener("InputChanged", this.loadComplete);
 								that.tabWidget.closeTab(metadata, false);
 							}.bind(this));
-							inputManager.setInput(newLocation || fileClient.fileServiceRootURL(metadata.Location));
+							inputManager.setInput(newLocation || metadata.WorkspaceLocation || fileClient.fileServiceRootURL(metadata.Location));
 						} else {
 							that.tabWidget.closeTab(metadata, false);
 						}
@@ -982,12 +1197,12 @@ objects.mixin(EditorViewer.prototype, {
 				evt.moved.forEach(function(item) {
 					var sourceLocation = item.source;
 					var metadata = that.tabWidget.getMetadataByLocation_(sourceLocation) || selectedMetadata;
-					if (selectedMetadata.Location.indexOf(sourceLocation) === 0) {
+					if (selectedMetadata && selectedMetadata.Location.indexOf(sourceLocation) === 0) {
 						inputManager.addEventListener("InputChanged", this.loadComplete = function() {
 							inputManager.removeEventListener("InputChanged", this.loadComplete);
 							that.tabWidget.closeTab(metadata, false);
 						}.bind(this));
-						inputManager.setInput(item.result && item.result.Location || fileClient.fileServiceRootURL(selectedMetadata.Location));
+						inputManager.setInput(item.result && item.result.Location || metadata.WorkspaceLocation || fileClient.fileServiceRootURL(selectedMetadata.Location));
 					} else if (that.tabWidget.editorTabs.hasOwnProperty(sourceLocation)) {
 						that.tabWidget.closeTab(metadata, false);
 					}
@@ -1174,6 +1389,8 @@ objects.mixin(EditorSetup.prototype, {
 		this.dialogService = new mDialogs.DialogService(serviceRegistry);
 		this.commandRegistry = new mCommandRegistry.CommandRegistry({selection: this.selection});
 		this.progressService = new mProgress.ProgressService(serviceRegistry, this.operationsClient, this.commandRegistry);
+		this.sshService = new mSshTools.SshService(serviceRegistry);
+		this.gitClient = new mGitClient.GitService(serviceRegistry);
 		
 		// Editor needs additional services
 		this.outlineService = new mOutliner.OutlineService({serviceRegistry: serviceRegistry, preferences: this.preferences});
@@ -1189,9 +1406,9 @@ objects.mixin(EditorSetup.prototype, {
 			renderToolbars: this.renderToolbars.bind(this),
 			searcher: this.searcher,
 			readonly: this.readonly,
-			toolbarId: "toolsActions", //$NON-NLS-0$
-			saveToolbarId: "fileActions", //$NON-NLS-0$
-			editToolbarId: "editActions", //$NON-NLS-0$
+			toolbarId: "menuBarActions", //$NON-NLS-0$
+			saveToolbarId: "menuBarActions", //$NON-NLS-0$
+			editToolbarId: "menuBarActions", //$NON-NLS-0$
 			navToolbarId: "pageNavigationActions", //$NON-NLS-0$
 			editorContextMenuId: "editorContextMenuActions", //$NON-NLS-0$
 		});
@@ -1295,9 +1512,9 @@ objects.mixin(EditorSetup.prototype, {
 			selection: this.selection,
 			serviceRegistry: this.serviceRegistry,
 			sidebarNavInputManager: this.sidebarNavInputManager,
-			switcherScope: "viewActions", //$NON-NLS-0$
-			editScope: "editActions", //$NON-NLS-0$
-			toolsScope: "toolsActions", //$NON-NLS-0$
+			switcherScope: "menuBarActions", //$NON-NLS-0$
+			editScope: "menuBarActions", //$NON-NLS-0$
+			toolsScope: "menuBarActions", //$NON-NLS-0$
 			menuBar: this.menuBar,
 			toolbar: this.sidebarToolbar
 		});
@@ -1312,14 +1529,28 @@ objects.mixin(EditorSetup.prototype, {
 		this.sidebarNavInputManager.addEventListener("rootChanged", function(evt) { //$NON-NLS-0$
 			this.lastRoot = evt.root;
 		}.bind(this));
-		var gotoInput = function(evt) {
-			var newInput = evt.newInput || evt.parent || "";
-			window.location = uriTemplate.expand({resource: newInput.resource || newInput, params: newInput.params || []});
-		};
-		this.sidebarNavInputManager.addEventListener("filesystemChanged", gotoInput); //$NON-NLS-0$
+		this.sidebarNavInputManager.addEventListener("filesystemChanged", function(evt) { //$NON-NLS-0$
+			this.fileClient.loadWorkspaces(evt.newInput).then(function(workspaces) {
+				var resource = PageUtil.matchResourceParameters().resource;
+				this.fileClient.getWorkspace(resource).then(function(workspace) {
+					if (!workspaces.some(function(w) {
+						if (w.Id === workspace.Id) {
+							window.location = uriTemplate.expand({resource: w.Location});
+							return true;
+						}
+					})) {
+						window.location = uriTemplate.expand({resource: evt.newInput});
+					}
+				});
+			}.bind(this));
+		}.bind(this));
+		this.sidebarNavInputManager.addEventListener("fileDoubleClicked", function(evt) { //$NON-NLS-0$
+			this.activeEditorViewer.tabWidget.potentialTransientHref = evt.href;
+			this.activeEditorViewer.tabWidget.transientToPermenant(evt.href);
+		}.bind(this));
 		this.sidebarNavInputManager.addEventListener("create", function(evt) { //$NON-NLS-0$
 			if (evt.newValue && !evt.ignoreRedirect) {
-				window.location = this.computeNavigationHref(evt.newValue);
+				window.location = urlModifier(this.computeNavigationHref(evt.newValue));
 			}
 		}.bind(this));
 	},
@@ -1380,11 +1611,11 @@ objects.mixin(EditorSetup.prototype, {
 				if (hash === window.location.hash.substring(1)) {
 					this.activeEditorViewer.inputManager.setInput(hash);
 				} else {
-					window.location = href;
+					window.location = urlModifier(href);
 				}
 				break;
 			case 'tab':
-				window.open(href);
+				window.open(urlModifier(href));
 				break;
 			case 'split':
 				var locWithParams = href.split('#')[1];
@@ -1677,8 +1908,8 @@ objects.mixin(EditorSetup.prototype, {
 				this.editorViewers[1].inputManager.setInput(PageUtil.hash());
 			}
 		} else if (oldSplitterMode !== undefined && oldSplitterMode !== MODE_SINGLE && mode === MODE_SINGLE) {
-			var currentLocation = this.editorViewers[1].inputManager.getFileMetadata().Location;
-			var rootLocation = this.fileClient.fileServiceRootURL(currentLocation);
+			var metadata = this.editorViewers[1].inputManager.getFileMetadata();
+			var rootLocation = metadata.WorkspaceLocation || this.fileClient.fileServiceRootURL(metadata.Location);
 			this.editorViewers[1].shown = false;
 			var editorTabsEnabled = this.generalPreferences && this.generalPreferences.enableEditorTabs;
 			if (!editorTabsEnabled) {
@@ -1749,10 +1980,11 @@ exports.setUpEditor = function(serviceRegistry, pluginRegistry, preferences, rea
 					setup.editorViewers.push(setup.createEditorViewer());
 					setup.setActiveEditorViewer(setup.editorViewers[0]);
 					if (enableSplitEditor) {
-						var mode = Number(sessionStorage.splitterSelection) || MODE_SINGLE;
 						setup.createSplitMenu();
-						setup.splitterMode = MODE_SINGLE;
-						setup.splitMenuChoices[mode].callback();
+//						var mode = Number(sessionStorage.splitterSelection) || MODE_SINGLE;
+//						setup.splitterMode = MODE_SINGLE;
+//						setup.splitMenuChoices[mode].callback();
+						setup.setSplitterMode(MODE_SINGLE);
 					}
 					setup.load();
 				});

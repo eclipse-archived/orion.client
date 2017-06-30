@@ -92,11 +92,15 @@ define([
 		isVisible: function() {
 			return this._slideout.isVisible() && (this === this._slideout.getCurrentViewMode());
 		},
-				
+		
+		focusOnTextInput: function() {
+			window.setTimeout(this._focusOnTextInput, 100);
+		},
+		
 		show: function() {
 			this.previousDocumentTitle = window.document.title;
 			SlideoutViewMode.prototype.show.call(this);
-			window.setTimeout(this._focusOnTextInput, 100);
+			this.focusOnTextInput();
 		},
 		
 		hide: function() {
@@ -114,6 +118,7 @@ define([
 				lib.empty(lib.node("searchPageActions"));
 				lib.empty(lib.node("searchPageActionsRight"));
 				lib.empty(this._searchResultsWrapperDiv);
+				this._searchResultExplorer._replaceRenderer.cleanBreadCrumbs();
 			//}
 			this.hideReplacePreview();
 		},
@@ -161,7 +166,7 @@ define([
 			this._submitSearch();
 		},
 		
-		updateSearchScopeFromSelection(meta){
+		updateSearchScopeFromSelection: function(meta){
 			if(meta){
 				this._searcher._setLocationbyURL(meta);
 			}
@@ -199,6 +204,7 @@ define([
 		},
 				
 		_submitSearch: function(){
+			this._searchResultExplorer._replaceRenderer.cleanBreadCrumbs();
 			var deferredOptions = this.getOptions();
 			deferredOptions.then(function(options){
 				options.replace = null;
@@ -503,7 +509,6 @@ define([
 			this._searcher.setLocationOther(otherLocationString);
 			localStorage.setItem("/inlineSearchScopeOption", "other");
 			localStorage.setItem("/inlineSearchOtherScope", otherLocationString);
-			this._targetFolder = otherLocationString;
 			this._displaySelectedSearchScope([otherLocationString]);
 			this._searcher.addDisplaycallback(this._displaySelectedSearchScope.bind(this),"other");
 		},
@@ -563,7 +568,7 @@ define([
 		},
 		
 		_getOtherScope: function(){
-			return localStorage.getItem("/inlineSearchOtherScope") || "/file";
+			return localStorage.getItem("/inlineSearchOtherScope") || this._fileClient.fileServiceRootURL();
 		},
 		
 		_initSearchScope: function() {

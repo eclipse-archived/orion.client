@@ -377,7 +377,7 @@ exports.TwoWayCompareView = (function() {
 		//Create editor on the left side
 		this._editors.push(this._createEditor(initString, this._uiFactory.getEditorParentDiv(true), this._uiFactory.getStatusDiv(true), this.options.newFile, true));
 		//Create the overview ruler
-		this._overviewRuler  = new mCompareRulers.CompareOverviewRuler("right", {styleClass: "ruler overview"} , null, //$NON-NLS-1$ //$NON-NLS-0$
+		this._overviewRuler  = new mCompareRulers.CompareOverviewRuler(this._editors[0].getAnnotationModel(), "right", {styleClass: "ruler overview"} , null, //$NON-NLS-1$ //$NON-NLS-0$
                 function(lineIndex, ruler){this._diffNavigator.matchPositionFromOverview(lineIndex);}.bind(this));
 		//If either editor is dirty, popup the warning message.
 		if(this.options.postCreate) {
@@ -583,8 +583,8 @@ exports.TwoWayCompareView = (function() {
 
 	TwoWayCompareView.prototype.addRulers = function(){
 		if(this._editors && !this._hasRuler){
-			var lRuler = new mCompareRulers.LineNumberCompareRuler(this._diffNavigator, 0, "left", {styleClass: "ruler lines"}, {styleClass: "rulerLines odd"}, {styleClass: "rulerLines even"}); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-			var rRuler = new mCompareRulers.LineNumberCompareRuler(this._diffNavigator, 0, "left", {styleClass: "ruler lines"}, {styleClass: "rulerLines odd"}, {styleClass: "rulerLines even"}); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			var lRuler = new mCompareRulers.LineNumberCompareRuler(this._diffNavigator, 0, this._editors[1].getAnnotationModel(), "left", {styleClass: "ruler lines"}, {styleClass: "rulerLines odd"}, {styleClass: "rulerLines even"}); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			var rRuler = new mCompareRulers.LineNumberCompareRuler(this._diffNavigator, 0, this._editors[0].getAnnotationModel(), "left", {styleClass: "ruler lines"}, {styleClass: "rulerLines odd"}, {styleClass: "rulerLines even"}); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			this._editors[1].getTextView().addRuler(lRuler);
 			this._editors[0].getTextView().addRuler(rRuler);
 			this._editors[0].getTextView().addRuler(this._overviewRuler);
@@ -823,9 +823,9 @@ exports.InlineCompareView = (function() {
 			
 		this._textView = this._editor.getTextView();
 			
-		this._rulerOrigin = new mCompareRulers.LineNumberCompareRuler(this._diffNavigator, 1,"left", {styleClass: "ruler lines inlineRulerLeft"}, {styleClass: "rulerLines odd"}, {styleClass: "rulerLines even"}); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-		this._rulerNew = new mCompareRulers.LineNumberCompareRuler(this._diffNavigator, 0,"left", {styleClass: "ruler lines"}, {styleClass: "rulerLines odd"}, {styleClass: "rulerLines even"}); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-		this._overviewRuler  = new mCompareRulers.CompareOverviewRuler("right", {styleClass: "ruler overview"} , null, //$NON-NLS-1$ //$NON-NLS-0$
+		this._rulerOrigin = new mCompareRulers.LineNumberCompareRuler(this._diffNavigator, 1, this._editor.getAnnotationModel(), "left", {styleClass: "ruler lines inlineRulerLeft"}, {styleClass: "rulerLines odd"}, {styleClass: "rulerLines even"}); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		this._rulerNew = new mCompareRulers.LineNumberCompareRuler(this._diffNavigator, 0, this._editor.getAnnotationModel(), "left", {styleClass: "ruler lines"}, {styleClass: "rulerLines odd"}, {styleClass: "rulerLines even"}); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		this._overviewRuler  = new mCompareRulers.CompareOverviewRuler(this._editor.getAnnotationModel(), "right", {styleClass: "ruler overview"} , null, //$NON-NLS-1$ //$NON-NLS-0$
                 function(lineIndex, ruler){this._diffNavigator.matchPositionFromOverview(lineIndex);}.bind(this));
 		
 		this._textView.addEventListener("Selection", function(evt){ //$NON-NLS-0$

@@ -168,5 +168,7 @@ define({//Default message bundle
 	"minutes": "${0} minutes",
 	"timeAgo": "${0} ago", //${0} represent the time elapsed
 	"justNow": "just now", //Represent that the time elapsed is less than 1 minute
-	"fixAll": "Fix all"
+	"fixAll": "Fix all",
+	"nextSplitter" : "Next Splitter",
+	"nextSplitterTooltip": "Move focus through the available splitters" 
 });

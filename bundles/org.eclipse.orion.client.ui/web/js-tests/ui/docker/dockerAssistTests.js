@@ -280,6 +280,19 @@ define([
 		assert.equal(proposal.escapePosition, offset - prefix.length + 13);
 	}
 
+	function assertDirectiveEscape(proposals, offset, prefix) {
+		assert.equal(proposals.length, 1);
+		assert.equal(proposals[0].proposal, "escape=`");
+		assert.equal(proposals[0].name, "escape");
+		assert.equal(proposals[0].description, "=`");
+		assert.equal(proposals[0].prefix, prefix);
+		assert.equal(proposals[0].overwrite, true);
+		assert.equal(proposals[0].positions.length, 1);
+		assert.equal(proposals[0].positions[0].offset, offset - prefix.length + 7);
+		assert.equal(proposals[0].positions[0].length, 1);
+		assert.equal(proposals[0].escapePosition, offset - prefix.length + 8);
+	}
+
 	function assertProposals(proposals, offset, prefix) {
 		for (var i = 0; i < proposals.length; i++) {
 			switch (proposals[i].name) {
@@ -695,7 +708,28 @@ define([
 					testEscape("", "VOLUME", "\\");
 					testEscape("", "WORKDIR", "\\");
 				});
-				
+
+				it("#escape=\\n", function() {
+					testEscape("#escape=\n", "ADD", "\\");
+					testEscape("#escape=\n", "ARG", "\\");
+					testEscape("#escape=\n", "CMD", "\\");
+					testEscape("#escape=\n", "COPY", "\\");
+					testEscape("#escape=\n", "ENTRYPOINT", "\\");
+					testEscape("#escape=\n", "ENV", "\\");
+					testEscape("#escape=\n", "EXPOSE", "\\");
+					testEscape("#escape=\n", "FROM", "\\");
+					testEscape("#escape=\n", "HEALTHCHECK", "\\");
+					testEscape("#escape=\n", "LABEL", "\\");
+					testEscape("#escape=\n", "MAINTAINER", "\\");
+					testEscape("#escape=\n", "ONBUILD", "\\");
+					testEscape("#escape=\n", "RUN", "\\");
+					testEscape("#escape=\n", "SHELL", "\\");
+					testEscape("#escape=\n", "STOPSIGNAL", "\\");
+					testEscape("#escape=\n", "USER", "\\");
+					testEscape("#escape=\n", "VOLUME", "\\");
+					testEscape("#escape=\n", "WORKDIR", "\\");
+				});
+
 				it("#escape=`\\n", function() {
 					testEscape("#escape=`\n", "ADD", "`");
 					testEscape("#escape=`\n", "ARG", "`");
@@ -1094,8 +1128,117 @@ define([
 					testEscape("#\r\nescape=`", "VOLUME", "\\");
 					testEscape("#\r\nescape=`", "WORKDIR", "\\");
 				});
+
+				it("#escape=x", function() {
+					var content = "#escape=x\nFROM x\n";
+					var proposals = compute(content, content.length, {
+						prefix: "",
+						line: ""
+					});
+					assertAllProposals(proposals, content.length, "");
+				});
 			});
 		});
+
+		describe("directives", function() {
+			describe("escape", function() {
+				it("#", function() {
+					var proposals = compute("#", 1, {
+						prefix: "",
+						line: "#"
+					});
+					assertDirectiveEscape(proposals, 1, "");
+				});
+
+				it("# ", function() {
+					var proposals = compute("# ", 2, {
+						prefix: "",
+						line: "# "
+					});
+					assertDirectiveEscape(proposals, 2, "");
+				});
+
+				it("##", function() {
+					var proposals = compute("##", 1, {
+						prefix: "",
+						line: "##"
+					});
+					assertDirectiveEscape(proposals, 1, "");
+				});
+
+				it("# #", function() {
+					var proposals = compute("# #", 1, {
+						prefix: "",
+						line: "# #"
+					});
+					assertDirectiveEscape(proposals, 1, "");
+				});
+
+				it("# #", function() {
+					var proposals = compute("# #", 2, {
+						prefix: "",
+						line: "# #"
+					});
+					assertDirectiveEscape(proposals, 2, "");
+				});
+
+				it("#e", function() {
+					var proposals = compute("#e", 2, {
+						prefix: "e",
+						line: "#e"
+					});
+					assertDirectiveEscape(proposals, 2, "e");
+				});
+
+				it("# e", function() {
+					var proposals = compute("# e", 3, {
+						prefix: "e",
+						line: "# e"
+					});
+					assertDirectiveEscape(proposals, 3, "e");
+				});
+
+				it("#E", function() {
+					var proposals = compute("#E", 2, {
+						prefix: "E",
+						line: "#E"
+					});
+					assertDirectiveEscape(proposals, 2, "E");
+				});
+
+				it("#eS", function() {
+					var proposals = compute("#eS", 3, {
+						prefix: "eS",
+						line: "#eS"
+					});
+					assertDirectiveEscape(proposals, 3, "eS");
+				});
+
+				it("#e ", function() {
+					var proposals = compute("#e ", 3, {
+						prefix: "",
+						line: "#e "
+					});
+					assert.equal(proposals.length, 0);
+				});
+
+				it("#\n#", function() {
+					var proposals = compute("#\n#", 3, {
+						prefix: "",
+						line: "#"
+					});
+					assert.equal(proposals.length, 0);
+				});
+
+				it("#\n#e", function() {
+					var proposals = compute("#\n#e", 4, {
+						prefix: "e",
+						line: "#e"
+					});
+					assert.equal(proposals.length, 0);
+				});
+			});
+		})
 
 		describe('ONBUILD nesting', function() {
 			describe('prefix', function() {

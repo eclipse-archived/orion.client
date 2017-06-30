@@ -30,11 +30,13 @@ define([
 
 	Objects.mixin(DockerContentAssist.prototype, {
 		computeProposals: function (buffer, offset, context) {
+			var firstCommentIdx = -1;
 			var escapeCharacter = "\\";
 			directiveCheck: for (var i = 0; i < buffer.length; i++) {
 				switch (buffer.charAt(i)) {
 					case '#':
-						// in a comment, no proposals to suggest
+						firstCommentIdx = i;
+						// in the first comment of the file, look for directives
 						var directive = "";
 						var capture = false;
 						escapeCheck: for (var j = i + 1; j < buffer.length; j++) {
@@ -49,17 +51,20 @@ define([
 									continue;
 								case '=':
 									if (directive === "escape") {
+										// '=' found and the directive that has been declared is the escape directive,
+										// record its value so we know what the escape character of this Dockerfile is
 										capture = true;
 									} else {
-										// not a proper directive, stop
+										// unknown directive found, stop searching
 										break escapeCheck;
 									}
 									break;
 								default:
 									if (capture) {
-										// the escape directive should be a single character,
-										// so it should be followed by whitespace
-										if (j + 1 === buffer.length || isWhitespace(buffer.charAt(j + 1))) {
+										// the escape directive should be a single character and followed by whitespace,
+										// it should also either be a backslash or a backtick
+										if ((j + 1 === buffer.length || isWhitespace(buffer.charAt(j + 1)))
+												&& (char === '\\' || char === '`')) {
 											escapeCharacter = char;
 										}
 										break escapeCheck;
@@ -68,7 +73,7 @@ define([
 									break;
 							}
 						}
-						break;
+						break directiveCheck;
 					case ' ':
 					case '\t':
 						// ignore whitespace
@@ -86,6 +91,14 @@ define([
 			commentCheck: for (i = offset - 1; i >= 0; i--) {
 				switch (buffer.charAt(i)) {
 					case '#':
+						if (i === firstCommentIdx) {
+							// we're in the first comment, might need to suggest
+							// the escape directive as a proposal
+							var directivePrefix = buffer.substring(i + 1, offset).trimLeft().toLowerCase();
+							if ("escape".indexOf(directivePrefix) === 0) {
+								return [ createEscape(context.prefix, offset - context.prefix.length, this.markdowns["escape"]) ];
+							}
+						}
 						// in a comment, no proposals to suggest
 						return [];
 					case ' ':
@@ -759,6 +772,25 @@ define([
 				}
 			],
 			escapePosition: offset + 13,
+			hover: markdown
+		};
+	}
+
+	function createEscape(prefix, offset, markdown) {
+		return {
+			name: "escape",
+			description: "=`",
+			proposal: "escape=`",
+			prefix: prefix,
+			overwrite: true,
+			positions: [
+				// linked mode for '`'
+				{
+					offset: offset + 7,
+					length: 1
+				}
+			],
+			escapePosition: offset + 8,
 			hover: markdown
 		};
 	}

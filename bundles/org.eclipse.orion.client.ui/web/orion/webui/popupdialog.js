@@ -104,6 +104,7 @@ define(['i18n!orion/widgets/nls/messages', 'orion/webui/littlelib', 'orion/webui
 					var focusField = lib.firstTabbable(this.$parent);
 					if (focusField) {
 						focusField.focus();
+						lib.trapTabs(this.$parent);
 					}
 				}
 			};

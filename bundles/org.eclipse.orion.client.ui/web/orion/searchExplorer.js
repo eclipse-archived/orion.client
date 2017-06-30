@@ -13,11 +13,11 @@
 define(['i18n!orion/search/nls/messages', 'require', 'orion/Deferred', 'orion/webui/littlelib', 'orion/contentTypes', 'orion/i18nUtil', 'orion/explorers/explorer', 
 	'orion/fileClient', 'orion/commands', 'orion/searchUtils', 'orion/globalSearch/search-features', 'orion/compare/compareUIFactory', 'orion/compare/compareView', 
 	'orion/highlight', 'orion/explorers/navigationUtils', 'orion/webui/tooltip', 'orion/explorers/navigatorRenderer', 'orion/extensionCommands',
-	'orion/searchModel', 'orion/crawler/searchCrawler'
+	'orion/searchModel', 'orion/crawler/searchCrawler', 'orion/urlModifier'
 ],
 function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, mFileClient, mCommands, 
 	mSearchUtils, mSearchFeatures, mCompareUIFactory, mCompareView, mHighlight, mNavUtils, mTooltip, 
-	navigatorRenderer, extensionCommands, mSearchModel, mSearchCrawler
+	navigatorRenderer, extensionCommands, mSearchModel, mSearchCrawler, urlModifier
 ) {
     /* Internal wrapper functions*/
     function _empty(nodeToEmpty) {
@@ -551,7 +551,7 @@ function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, m
 
                 _place(document.createTextNode(item.model.fullPathName + "/" + this.explorer.resultModel.getFileName(item.model)), span, "only"); //$NON-NLS-1$ //$NON-NLS-0$
                 _connect(span, "click", function() { //$NON-NLS-0$
-                    window.open(item.model.linkLocation);
+                    window.open(urlModifier(item.model.linkLocation));
                 });
                 _connect(span, "mouseover", function() { //$NON-NLS-0$
                     span.style.cursor = "pointer"; //$NON-NLS-0$
@@ -836,7 +836,7 @@ function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, m
 
     SearchResultExplorer.prototype._checkStale = function(model) {
         return this.registry.getService("orion.page.progress") //$NON-NLS-0$
-            .progress(this.fileClient.read(model.location), "Checing file " + model.location + " for stale") //$NON-NLS-1$ //$NON-NLS-0$
+            .progress(this.fileClient.read(model.location), "Checking file " + model.location + " for stale") //$NON-NLS-1$ //$NON-NLS-0$
             .then(function(contents) {
             if (this.model.staleCheck(contents)) {
                 model.stale = false;

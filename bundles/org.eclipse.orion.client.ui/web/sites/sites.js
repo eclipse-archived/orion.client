@@ -12,8 +12,8 @@
 /*eslint-env browser, amd*/
 define(['orion/browserCompatibility', 'orion/bootstrap', 'orion/status', 'orion/progress', 'orion/commandRegistry', 'orion/fileClient', 'orion/operationsClient',
 		'orion/searchClient', 'orion/selection', 'orion/dialogs', 'orion/globalCommands', 'orion/sites/siteUtils', 'orion/sites/siteCommands', 
-		'orion/sites/sitesExplorer', 'i18n!orion/sites/nls/messages'], 
-	function(mBrowserCompatibility, mBootstrap, mStatus, mProgress, mCommandRegistry, mFileClient, mOperationsClient, mSearchClient, mSelection, mDialogs, mGlobalCommands, mSiteUtils, mSiteCommands, SitesExplorer, messages) {
+		'orion/sites/sitesExplorer', 'i18n!orion/sites/nls/messages', 'orion/urlModifier'], 
+	function(mBrowserCompatibility, mBootstrap, mStatus, mProgress, mCommandRegistry, mFileClient, mOperationsClient, mSearchClient, mSelection, mDialogs, mGlobalCommands, mSiteUtils, mSiteCommands, SitesExplorer, messages, urlModifier) {
 		mBootstrap.startup().then(function(core) {
 			var serviceRegistry = core.serviceRegistry;
 			var preferences = core.preferences;
@@ -32,7 +32,7 @@ define(['orion/browserCompatibility', 'orion/bootstrap', 'orion/status', 'orion/
 			function createCommands() {
 				var errorHandler = statusService.setProgressResult.bind(statusService);
 				var goToUrl = function(url) {
-					window.location = url;
+					window.location = urlModifier(url);
 				};
 				mSiteCommands.createSiteServiceCommands(serviceRegistry, commandRegistry, {
 					createCallback: goToUrl,

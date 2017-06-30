@@ -1063,6 +1063,7 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 					if (styler) {
 						styler.addAnnotationType(AT.ANNOTATION_CURRENT_SEARCH);
 						styler.addAnnotationType(AT.ANNOTATION_MATCHING_SEARCH);
+						styler.addAnnotationType(AT.ANNOTATION_SEARCH_RANGE);
 						styler.addAnnotationType(AT.ANNOTATION_ERROR);
 						styler.addAnnotationType(AT.ANNOTATION_WARNING);
 						styler.addAnnotationType(AT.ANNOTATION_INFO);
@@ -1332,6 +1333,9 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 				if (index === -1) { index = this.blame.Message.length; }
 				var commitLink = util.createElement(doc, "a"); //$NON-NLS-0$
 				commitLink.href = this.blame.CommitLink;
+				if(util.isElectron){
+					commitLink.target = "_blank";
+				}
 				commitLink.appendChild(doc.createTextNode(this.blame.Message.substring(0, index)));
 				titleDiv.appendChild(commitLink);
 				titleDiv.appendChild(util.createElement(doc, "br")); //$NON-NLS-0$

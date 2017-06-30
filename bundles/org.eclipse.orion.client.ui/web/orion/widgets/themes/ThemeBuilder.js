@@ -186,14 +186,25 @@ function(messages, i18nUtil, mCommands, mCommandRegistry, lib, mTooltip, colors,
 	function updateScopeValue(id, val){
 		val = namedToHex(val);
 		var isHexColor = /(^#[0-9A-F]{6}$)|(^#[0-9A-F]{3}$)/i.test(val);
-
 		if (isHexColor || id === "editorThemeFontSize") {
+			var imageDataUrl;
+			if(id.substr(11,4) === "Wave"){  //cases for underline wavies, instead of saving Hex to css, use dataUrl for background-images. So the id for wavies has to be editorThemeWave...
+				imageDataUrl = composeImageData("Wave", val);
+			}else if(id.substr(26, 6) === "AMDiff"){ // case for DiffAdded and DiffModifed images
+				imageDataUrl = composeImageData("AMDiff", val);
+			}else if(id.substr(26, 5) === "DDiff"){ // case for DiffDeleted image
+				imageDataUrl = composeImageData("DDiff", val);
+			}
 			for (var i = 0; i < scopeList.length; i++){
 				if (scopeList[i].id === id){
 					scopeList[i].value = val;
 					document.getElementById(scopeList[i].id).value = val; /* in case a color name was entered change it to hex */
 					for (var l = 0; l < scopeList[i].objPath.length; l++){
-						setValueToPath(currentTheme, scopeList[i].objPath[l], scopeList[i].value);
+						if(scopeList[i].objPath[l].lastIndexOf("backgroundImage") !== -1){
+							setValueToPath(currentTheme, scopeList[i].objPath[l], imageDataUrl);
+						}else{
+							setValueToPath(currentTheme, scopeList[i].objPath[l], scopeList[i].value);
+						}
 					}
 					setup.processTheme("editorTheme", currentTheme);
 				}
@@ -208,6 +219,55 @@ function(messages, i18nUtil, mCommands, mCommandRegistry, lib, mTooltip, colors,
 		}
 	}
 	ThemeBuilder.prototype.updateScopeValue = updateScopeValue;
+	
+	function composeImageData(purpose, background){
+		var canvas = document.createElement("canvas");
+		canvas.width = 4;
+		canvas.height = 3;
+		canvas.style.style = "visibility:hidden";
+		document.body.appendChild(canvas);
+		canvas.style.backgroundColor = background;
+		function RGBToInt(rgbStr) {
+			var rgb = rgbStr.match(/\d+/g);
+			var r = parseInt(rgb[0]);
+			var g = parseInt(rgb[1]);
+			var b = parseInt(rgb[2]);
+			return r + (g << 8) + (b << 16);
+		}
+		var color = 0xFF000000 + RGBToInt(window.getComputedStyle(canvas, null).getPropertyValue("background-color"));
+		var indexArray,width,height;
+		switch(purpose){
+			case "Wave":
+				width = 4;
+				height = 3;
+				indexArray = [8, 20, 28, 32];
+				break;
+			case "AMDiff":
+				width = 2;
+				height = 3;
+				indexArray = [0, 4, 8, 12, 16, 20];
+				break;
+			case "DDiff":
+				width = 4;
+				height = 1;
+				indexArray = [0, 4, 8, 12];
+				break;
+		}
+		canvas.style.width = width + "px";
+		canvas.style.height = height + "px";
+		var ctx = canvas.getContext("2d");
+		var myImage = ctx.getImageData(0, 0, width, height);
+		indexArray.forEach(function(index){
+			myImage.data[index + 0] = (color >> 0) & 0xFF;
+			myImage.data[index + 1] = (color >> 8) & 0xFF;
+			myImage.data[index + 2] = (color >> 16) & 0xFF;
+			myImage.data[index + 3] = (color >> 24) & 0xFF;
+		});
+		ctx.putImageData(myImage, 0, 0);
+		var result = canvas.toDataURL();
+		document.body.removeChild(canvas);
+		return "url(" + result + ")";
+	}
 	
 	function getValueFromPath(obj, keys) {
 		var nodes = keys.split(' ');
@@ -241,6 +301,7 @@ function(messages, i18nUtil, mCommands, mCommandRegistry, lib, mTooltip, colors,
 				var temp = getValueFromPath(currentTheme,scopeList[i].objPath[l]);
 				if (temp){
 					scopeList[i].value = temp;
+					break;
 				}
 			}
 		}

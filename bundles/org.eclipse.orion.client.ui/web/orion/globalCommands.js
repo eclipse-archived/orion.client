@@ -58,7 +58,7 @@ define([
 			var dropdownTrigger = lib.node("userTrigger"); //$NON-NLS-0$
 			dropdownTrigger.setAttribute("aria-label", optionsLabel);
 
-			new mTooltip.Tooltip({
+			dropdownTrigger.tooltip = new mTooltip.Tooltip({
 				node: dropdownTrigger,
 				text: optionsLabel,
 				position: ["below", "left"] //$NON-NLS-1$ //$NON-NLS-0$
@@ -775,6 +775,78 @@ define([
 
 			commandRegistry.addCommand(operationsCommand);
 			commandRegistry.registerCommandContribution("globalActions", "orion.backgroundOperations", 100, null, true, new KeyBinding.KeyBinding('o', true, true)); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+
+			var showTooltipCommand = new mCommands.Command({
+				name: messages.showTooltip,
+				tooltip: messages.showTooltipTooltip,
+				id: "orion.edit.showTooltip", //$NON-NLS-0$
+				visibleWhen: /** @callback */ function(items, data) {
+					return true;
+				},
+				callback: function() {
+					var domFocus = document.activeElement;
+					if (this.editor && this.editor._domNode.contains(domFocus)) {
+						var editor = this.editor;
+						var tooltip = editor.getTooltip();
+						var tv = editor.getTextView();
+						var offset = tv.getCaretOffset();
+						var pos = tv.getLocationAtOffset(offset);
+						tooltip.show({
+							x: pos.x,
+							y: pos.y,
+							getTooltipInfo: function() {
+								return editor._getTooltipInfo(this.x, this.y);
+							}
+						}, false, true);
+					} else if (domFocus.commandTooltip || domFocus.tooltip) {
+						var tooltip = domFocus.commandTooltip ? domFocus.commandTooltip : domFocus.tooltip;
+						tooltip._showByKB = true;
+						tooltip.show();
+					}
+				}
+			});
+			commandRegistry.addCommand(showTooltipCommand);
+			commandRegistry.registerCommandContribution("globalActions" , "orion.edit.showTooltip", 1, null, true, new KeyBinding.KeyBinding(113), null, this);//$NON-NLS-1$
+
+			var focusNextSplitter = new mCommands.Command({
+				name: messages.nextSplitter,
+				tooltip: messages.nextSplitterTooltip,
+				id: "orion.focusSplitter", //$NON-NLS-0$
+				visibleWhen: /** @callback */ function(items, data) {
+					return true;
+				},
+				callback: function() {
+					var curFocus = document.activeElement;
+					
+					var items = lib.$$array(".split", document.body, true); //$NON-NLS-0$
+					if (items.length > 0) {
+						var theSplitter = items[0];
+						
+						// Filter out invisible splitters
+						for (var j = 0; j < items.length; j++) {
+							if (!items[j].offsetParent) {
+								items.slice(items[j], 1);
+							}
+						}
+							
+						for (var i = 0; i < items.length; i++) {
+							var splitter = items[i];
+							// If a splitter is the current focus then we choose the next one..
+							if (splitter === curFocus) {
+								if (i < items.length-1) {
+									theSplitter = items[i+1];
+									break;
+								}
+							}
+						}
+						
+						theSplitter.tabIndex = "0"; // Allow the splitter to take focus
+						theSplitter.focus();
+					}
+				}
+			});
+			commandRegistry.addCommand(focusNextSplitter);
+			commandRegistry.registerCommandContribution("globalActions" , "orion.focusSplitter", 1, null, true, new KeyBinding.KeyBinding(190, true, true), null, this);//$NON-NLS-1$
 
 			// Key assist
 			keyAssist = new mKeyAssist.KeyAssistPanel({

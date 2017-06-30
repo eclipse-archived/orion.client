@@ -70,7 +70,7 @@ function getStash(req, res) {
 			"Location" : gitRoot + "/stash" + fileDir,
 			"CloneLocation" : gitRoot + "/clone" + fileDir,
 			"Type" : "StashCommit"
-		});
+		}, true);
 	})
 	.catch(function(err) {
 		writeError(500, res, err.message);
@@ -84,20 +84,37 @@ function putStash(req, res) {
 	.then(function(_repo) {
 		repo = _repo;
 		if (stashRev) {
-			var index;
+			var empty = true;
+			var index = -1;
 			return git.Stash.foreach(repo, /* @callback */ function(i, message, oid) {
+				empty = false;
 				if (oid.toString() === stashRev) {
 					index = i;
 				}
 			})
 			.then(function() {
-				return git.Stash.apply(repo, index, git.Stash.APPLY_FLAGS.APPLY_REINSTATE_INDEX);
+				if (empty) {
+					return "Failed to apply stashed changes due to an empty stash.";
+				} else if (index === -1) {
+					return "Invalid stash reference " + stashRev + ".";
+				}
+				return git.Stash.apply(repo, index, git.Stash.APPLY_FLAGS.APPLY_REINSTATE_INDEX)
+				.then(function() {
+					return null;
+				});
 			});
 		}
-		return git.Stash.pop(repo, 0, git.Stash.APPLY_FLAGS.APPLY_REINSTATE_INDEX);
+		return git.Stash.pop(repo, 0, git.Stash.APPLY_FLAGS.APPLY_REINSTATE_INDEX)
+		.then(function() {
+			return null;
+		});
 	})
-	.then(function() {
-		res.status(200).end();
+	.then(function(message) {
+		if (message === null) {
+			res.status(200).end();
+		} else {
+			writeError(400, res, message);
+		}
 	})
 	.catch(function(err) {
 		if (err.message === "Reference 'refs/stash' not found"){
@@ -113,23 +130,42 @@ function deleteStash(req, res) {
 	return clone.getRepo(req)
 	.then(function(_repo) {
 		repo = _repo;
-		var index, all = [];
+		var index = -1, all = [];
+		var empty = true;
 		return git.Stash.foreach(repo, /* @callback */ function(i, message, oid) {
+			empty = false;
 			if (stashRev) {
 				if (oid.toString() === stashRev) {
 					index = i;
 				}
 			} else {
-				all.push(git.Stash.drop(repo, index));				
+				all.push(git.Stash.drop(repo, i));
 			} 
 		})
 		.then(function() {
-			if (all.length) return Promise.all(all);
-			return git.Stash.drop(repo, index);
+			if (empty) {
+				return "Failed to drop stashed changes due to an empty stash.";
+			} else if (stashRev) {
+				if (index === -1) {
+					return "Invalid stash reference " + stashRev + ".";
+				} else {
+					return git.Stash.drop(repo, index).then(function() {
+						return null;
+					});
+				}
+			} else {
+				return Promise.all(all).then(function() {
+					return null;
+				});
+			}
 		});
 	})
-	.then(function() {
-		res.status(200).end();
+	.then(function(message) {
+		if (message === null) {
+			res.status(200).end();
+		} else {
+			writeError(400, res, message);
+		}
 	})
 	.catch(function(err) {
 		writeError(404, res, err.message);

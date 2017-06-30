@@ -210,6 +210,9 @@ define([
 			return new Deferred().resolve(null);
 		}
 		var _project = this.projectMeta ? this.projectMeta.Location : projectPath;
+		if (_project.lastIndexOf('/') !== _project.length-1){
+			_project += '/';
+		}
 		var filePath = _project+childName;
 		if(this.map[filePath]) {
 			return new Deferred().resolve(this.map[filePath]);
@@ -239,6 +242,9 @@ define([
 			return new Deferred().resolve(null);
 		}
 		var _project = this.projectMeta ? this.projectMeta.Location : projectPath;
+		if (_project.lastIndexOf('/') !== _project.length-1){
+			_project += '/';
+		}
 		var folderPath = _project+childName;
 		return this.getFileClient().fetchChildren(folderPath, {readIfExists: true}).then(function(children) {
             return children;

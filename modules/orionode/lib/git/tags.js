@@ -107,13 +107,13 @@ function getTags(req, res) {
 			return isAnnotated(theRepo, ref);
 		})
 		.then(function(annotated) {
-			if (typeof annotated === 'String') {
+			if (typeof annotated === 'string') {
 				return writeError(400, res, annotated);
 			}
 
 			return getTagCommit(theRepo, theRef)
 			.then(function(commit) {
-				writeResponse(200, res, null, tagJSON(theRef.name(), theRef.shorthand(), commit.sha(), commit.timeMs(), fileDir, annotated));
+				writeResponse(200, res, null, tagJSON(theRef.name(), theRef.shorthand(), commit.sha(), commit.timeMs(), fileDir, annotated), true);
 			});
 		})
 		.catch(function(err) {
@@ -146,7 +146,7 @@ function getTags(req, res) {
 			async.each(referenceList, function(ref,callback) {
 				isAnnotated(theRepo, ref)
 				.then(function(annotated) {
-					if (typeof annotated === 'String') {
+					if (typeof annotated === 'string') {
 						return writeError(400, res, annotated);
 					}
 					getTagCommit(theRepo, ref)
@@ -185,7 +185,7 @@ function getTags(req, res) {
 					resp['PreviousLocation'] = prevLocation;
 				}
 	
-				writeResponse(200, res, null, resp);
+				writeResponse(200, res, null, resp, true);
 			});
 		});
 	})

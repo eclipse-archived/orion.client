@@ -11,7 +11,7 @@
 /*eslint-env browser, amd*/
 define([
 	'orion/EventTarget', 
-	'orion/webui/littlelib', 
+	'orion/webui/littlelib',
 	'orion/commonHTMLFragments', 
 	'orion/objects', 	
 	'orion/selection',
@@ -109,6 +109,7 @@ define([
 				if (evt.target === that.domNode || evt.target === that.titleNode || evt.target === that.twistie) {
 					if(evt.keyCode === lib.KEY.ENTER) {
 						that._changeExpandedState();
+						evt.preventDefault();
 					} else if(evt.keyCode === lib.KEY.DOWN && that.dropdown) {
 						that.setHidden(false);
 					} else if(evt.keyCode === lib.KEY.UP && that.dropdown) {
@@ -542,8 +543,16 @@ define([
 		_changeExpandedState: function() {
 			if (this.hidden){
 				this._expand();
-				var nextTabbable = lib.firstTabbable(this.domNode.nextElementSibling);
-				if (nextTabbable && (nextTabbable.tagName === "INPUT" || nextTabbable.tabIndex >= 0)) nextTabbable.focus(); //$NON-NLS-0$
+				
+				if (this.dropdown) {
+					var firstTabbable = lib.firstTabbable(this.domNode.nextElementSibling);					
+					if (firstTabbable) {
+						if (firstTabbable.tagName === "INPUT" || firstTabbable.tabIndex >= 0) {
+							firstTabbable.focus(); //$NON-NLS-0$
+						}
+						lib.trapTabs(this.domNode.nextElementSibling);
+					}
+				}
 			} else {
 				this._collapse();
 			}

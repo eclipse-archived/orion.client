@@ -14,8 +14,9 @@
 
 define([
 	'orion/objects',
-	'orion/commonPreferences'
-], function(objects, mCommonPreferences) {
+	'orion/commonPreferences',
+	'orion/util'
+], function(objects, mCommonPreferences, util) {
 	var CommonPreferences = mCommonPreferences.CommonPreferences;
 
 	var GENERAL_SECTION = "/general/settings"; //$NON-NLS-0$
@@ -24,7 +25,7 @@ define([
 	var defaults = {
 		desktopSelectionPolicy: true,
 		filteredResources: '.git, .DS_Store',
-		enableEditorTabs: false,
+		enableEditorTabs: util.isElectron ? true: false,
 		maximumEditorTabs: 0,
 		enableFileCreationAtRoot: false,
 		enableFolderCreationAtRoot: false,

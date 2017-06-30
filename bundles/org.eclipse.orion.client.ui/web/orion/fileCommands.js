@@ -16,8 +16,8 @@
 define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/i18nUtil', 'orion/uiUtils', 'orion/fileUtils', 'orion/commands', 'orion/fileDownloader',
 	'orion/commandRegistry', 'orion/contentTypes', 'orion/compare/compareUtils', 
 	'orion/Deferred', 'orion/webui/dialogs/DirectoryPrompterDialog',
-	'orion/EventTarget', 'orion/form', 'orion/xsrfUtils', 'orion/bidiUtils', 'orion/util'],
-	function(messages, lib, i18nUtil, mUIUtils, mFileUtils, mCommands, mFileDownloader, mCommandRegistry, mContentTypes, mCompareUtils, Deferred, DirPrompter, EventTarget, form, xsrfUtils, bidiUtils, util){
+	'orion/EventTarget', 'orion/form', 'orion/xhr', 'orion/bidiUtils', 'orion/util', 'orion/urlModifier'],
+	function(messages, lib, i18nUtil, mUIUtils, mFileUtils, mCommands, mFileDownloader, mCommandRegistry, mContentTypes, mCompareUtils, Deferred, DirPrompter, EventTarget, form, xhr, bidiUtils, util, urlModifier) {
 
 	/**
 	 * Utility methods
@@ -72,85 +72,88 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/i18n
 	 * events describing the file upload.
 	 * @param {Boolean} unzip
 	 * @param {Boolean} force
-	 * @param {Object} handlers Optional. An object which contains handlers for the different events that the upload can fire.
-	 * 			handlers.progress The handler function that should be called when progress occurs.
-	 * 			handlers.load The handler function that should be called when the transfer completes successfully.
-	 * 			handlers.error The handler function that should be called if the transfer fails.
-	 * 			handlers.abort The handler function that should be called if the transfer is cancelled by the user.
-	 * 			handlers.loadend The handler function that should be called when the transfer completes (regardless of success or failure).
 	 * @param {Boolean} preventNotification Optional. true if a model event should not be dispatched after the file is uploaded, false otherwise
 	 * @returns {XMLHttpRequest} The XMLHttpRequest object that was created and used for the upload.
 	 */
-	fileCommandUtils.uploadFile = function(targetFolder, file, explorer, unzip, force, handlers, preventNotification) { 
-		var req = new XMLHttpRequest();
-		
-		if (handlers) {
-			if (handlers.progress) {
-				//transfer in progress
-				req.upload.addEventListener("progress", handlers.progress, false);
-			}
-			if (handlers.load) {
-				//transfer finished successfully
-				req.upload.addEventListener("load", handlers.load, false);	
-			}
-			if (handlers.error) {
-				//transfer failed
-				req.upload.addEventListener("error", handlers.error, false);	
-			}
-			if (handlers.abort) {
-				//transfer cancelled
-				req.upload.addEventListener("abort", handlers.abort, false);
-			}
-			if (handlers.loadend) {
-				//transfer finished, status unknown
-				req.addEventListener("loadend", handlers.loadend, false);
-			}
-		}
-
-		req.open('post', targetFolder.ImportLocation, true);
-		req.setRequestHeader("X-Requested-With", "XMLHttpRequest"); //$NON-NLS-1$ //$NON-NLS-0$
-		req.setRequestHeader("Slug", form.encodeSlug(file.name)); //$NON-NLS-0$
-		xsrfUtils.addCSRFNonce(req);
-
+	fileCommandUtils.uploadFile = function(targetFolder, file, explorer, unzip, force, preventNotification) {
 		var xferOptions = force ? "overwrite-older": "no-overwrite";
 		// TODO if we want to unzip zip files, don't use this...
 		if (!unzip) {
 			 xferOptions += "," + "raw";
 		}
-		req.setRequestHeader("X-Xfer-Options", xferOptions); //$NON-NLS-1$
-		req.setRequestHeader("Content-Type", "application/octet-stream"); //$NON-NLS-0$
-		req.onreadystatechange = function(state) {
-			if(req.readyState === 4) {
-				if (req.status === 400){
-					var result = {};
-					try{
-						result = JSON.parse(req.responseText);
-					}catch(e){
-					}
-					if(result.JsonData && result.JsonData.ExistingFiles){
-						var confirmFunction = (explorer && explorer.serviceRegistry) ? explorer.serviceRegistry.getService("orion.page.dialog").confirm : confirm; //$NON-NLS-0$
-						if(confirmFunction(result.Message + "\nWould you like to retry the import with force overwriting?")){
-							fileCommandUtils.uploadFile(targetFolder, file, explorer, unzip, true, handlers);
-							return;
-						}
-					}
-					if (result.Severity === "Error") {
-						if (handlers && handlers.error) {
-							handlers.error(result);
-							return;
-						}
-						errorHandler(result);
-					}
-				}
+
+		var opts = {
+			headers: {
+				"Slug": form.encodeSlug(file.name), //$NON-NLS-0$
+				"Orion-Version": "1", //$NON-NLS-1$ //$NON-NLS-0$
+				"X-Xfer-Options": xferOptions, //$NON-NLS-0$
+				"Content-Type": "application/octet-stream" //$NON-NLS-1$ //$NON-NLS-0$
+			},
+			data: file,
+			upload: true
+		};
+
+		var ignoreError = false;
+		var promise = new Deferred();
+		var xhrPromise = xhr("POST", targetFolder.ImportLocation, opts).then(
+			function(result) {
 				if (!preventNotification) {
 					//TODO Not sure if we should send out event from file Client here
 					dispatchModelEventOn({ type: "create", parent: targetFolder, newValue: null /* haven't fetched the new file in Orion yet */ }); //$NON-NLS-0$	
 				}
+				promise.resolve(result);
+			},
+			function(error) {
+				if (ignoreError) {
+					return;
+				}
+
+				var result = {};
+				try {
+					result = JSON.parse(error.responseText);
+				} catch(e) {
+				}
+				if (error.status === 400) {
+				 	if (result.JsonData && result.JsonData.ExistingFiles) {
+				 		var retry = function() {
+							fileCommandUtils.uploadFile(targetFolder, file, explorer, unzip, true, preventNotification).then(
+								promise.resolve,
+								promise.reject,
+								promise.progress);
+				 		};
+				 		var retryMessage = result.Message + "\nWould you like to retry the import with forced overwrite?";
+
+				 		if (explorer && explorer.serviceRegistry) {
+				 			explorer.serviceRegistry.getService("orion.page.dialog").confirm(retryMessage, function(response) {
+			 					if (response) {
+			 						retry();
+		 						} else {
+		 							result.userCanceled = true;
+		 							promise.reject(result);
+		 						}
+							});
+			 				return;
+				 		}
+			 			if (confirm(retryMessage)) {
+			 				retry();
+			 				return;
+		 				}
+					}
+				}
+				promise.reject(result);
+			},
+			function(progress) {
+				promise.progress(progress);
 			}
-		}.bind(this);
-		req.send(file);
+		);
+		promise.then(null, function(error) {
+			if (error instanceof Error && error.name === "Cancel") {
+				ignoreError = true;
+				xhrPromise.cancel();
+			}
+		});
 		
-		return req;
+		return promise;
 	};
 
 	/**
@@ -184,9 +187,9 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/i18n
 							commandRegistry.destroy(selectionTools);
 							var isNoSelection = !selections || (Array.isArray(selections) && !selections.length);
 							if (rootSelection && isNoSelection) {
-								commandRegistry.renderCommands(selectionTools.id, selectionTools, item, explorer, "button");  //$NON-NLS-0$
+								commandRegistry.renderCommands(selectionTools.id, selectionTools, item, explorer, "menubar");  //$NON-NLS-0$
 							} else {
-								commandRegistry.renderCommands(selectionTools.id, selectionTools, null, explorer, "button"); //$NON-NLS-1$ //$NON-NLS-0$
+								commandRegistry.renderCommands(selectionTools.id, selectionTools, null, explorer, "menubar"); //$NON-NLS-1$ //$NON-NLS-0$
 							}
 						});
 					}
@@ -533,7 +536,7 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/i18n
 		}
 
 		var oneOrMoreFilesOrFolders = function(item) {
-			if (!explorer || !explorer.isCommandsVisible()) {
+			if (explorer && !explorer.isCommandsVisible()) {
 				return false;
 			}
 			var items = Array.isArray(item) ? item : [item];
@@ -542,7 +545,7 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/i18n
 			}
 			for (var i=0; i < items.length; i++) {
 				item = items[i];
-				if (!item.Location || item.Projects /*Workspace root, not a file or folder*/) {
+				if (!item.Location) {
 					return false;
 				}
 			}
@@ -562,7 +565,7 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/i18n
 				return { item: item, parent: item.Parents[0] };
 			}
 			// item is a top-level folder (ie. project). Find the workspace (which is the parent for rename purposes)
-			return fileClient.loadWorkspace(fileClient.fileServiceRootURL(item.Location)).then(function(workspace) {
+			return fileClient.getWorkspace(item.Location).then(function(workspace) {
 				return Deferred.when(workspace.Children || fileClient.fetchChildren(workspace)).then(function(children) {
 					workspace.Children = children;
 					var itemIsProject = workspace.Children.some(function(child) {
@@ -582,8 +585,10 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/i18n
 		* Iterate over an array of items and return the target folder. The target
 		* folder of an item is either itself (if it is a dir) or its parent. If there
 		* are multiple target folders, return the first.
+		* 
+		* If the root folder is allowed, all items need to be directories
 		*/
-		function getTargetFolder(items) {
+		function getTargetFolder(items, allowRoot) {
 			var folder;
 			if (!Array.isArray(items)) {
 				items = [items];
@@ -601,17 +606,17 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/i18n
 				}
 				return false;
 			});
-			if (folder && mFileUtils.isAtRoot(folder.Location)) {
+			if (!allowRoot && folder && mFileUtils.isAtRoot(folder.Location)) {
 				return null;
 			}
 			return folder;
 		}
 		
-		function checkFolderSelection(item) {
+		function checkFolderSelection(item, allowRoot) {
 			if (!explorer || !explorer.isCommandsVisible()) {
 				return false;
 			}
-			return getTargetFolder(item);
+			return getTargetFolder(item, allowRoot);
 		}
 		
 		function doMove(item, newText) {
@@ -619,16 +624,6 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/i18n
 			Deferred.when(getLogicalModelItems(item), function(logicalItems) {
 				item = logicalItems.item;
 				var parent = logicalItems.parent;
-				if (parent && parent.Projects) {
-					//special case for moving a project. We want to move the project rather than move the project's content
-					parent.Projects.some(function(project) {
-						if (project.Id === item.Id) {
-							moveLocation = project.Location;
-							return true;
-						}
-						return false;
-					});
-				}
 				var parentLocation = parent.Location || parent.WorkspaceLocation;
 				var deferred = fileClient.moveFile(moveLocation, parentLocation, newText);
 				progressService.showWhile(deferred, i18nUtil.formatMessage(messages["Renaming ${0}"], moveLocation)).then(
@@ -763,7 +758,7 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/i18n
 					func: function(targetFolder) { 
 						if (targetFolder && targetFolder.Location) {
 							var compareURL = mCompareUtils.generateCompareTreeHref(data.items[0].Location, {compareTo: targetFolder.Location, readonly: true});
-							window.open(compareURL);
+							window.open(urlModifier(compareURL));
 						}
 					}
 				});
@@ -799,7 +794,7 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/i18n
 		
 		var deleteCommand = new mCommands.Command({
 			name: messages["Delete"],
-			imageClass: "core-sprite-delete", //$NON-NLS-0$
+			imageClass: "core-sprite-trashcan", //$NON-NLS-0$
 			id: "eclipse.deleteFile", //$NON-NLS-0$
 			visibleWhen: oneOrMoreFilesOrFolders,
 			callback: function(data) {
@@ -819,25 +814,6 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/i18n
 							var deleteLocation = item.Location;
 							return Deferred.when(getLogicalModelItems(item), function(logicalItems) {
 								item = logicalItems.item;
-								var parent = logicalItems.parent;
-								if (parent && parent.Projects) {
-									//special case for deleting a project. We want to remove the project rather than delete the project's content
-									deleteLocation = null;
-									parent.Projects.some(function(project) {
-										if (project.Id === item.Id) {
-											deleteLocation = project.Location;
-											return true;
-										}
-										return false;
-									});
-								}
-								// special case for deleting a project displayed in the project nav
-								if (item.type === "ProjectRoot" && parent.ProjectLocation) {
-									deleteLocation = parent.ProjectLocation;
-								}
-								if (!deleteLocation) {
-									return new Deferred().resolve();
-								}
 								var _delete = fileClient.deleteFile(deleteLocation, {itemLocation: item.Location});
 								return progressService.showWhile(_delete, i18nUtil.formatMessage(messages["Deleting ${0}"], deleteLocation)).then(
 									function() {
@@ -1061,35 +1037,6 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/i18n
 		});
 		commandService.addCommand(newProjectCommand);
 		
-		var linkProjectCommand = new mCommands.Command({
-			name: messages["Link to Server"],
-			tooltip: messages["LinkContent"],
-			description: messages["CreateLinkedFolder"],
-			imageClass: "core-sprite-link", //$NON-NLS-0$
-			id: "orion.new.linkProject", //$NON-NLS-0$
-			parameters: new mCommandRegistry.ParametersDescription([new mCommandRegistry.CommandParameter('name', 'text', messages['Name:'], messages['New Folder']), new mCommandRegistry.CommandParameter('url', 'url', messages['Server path:'], '')]), //$NON-NLS-5$ //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-			callback: function(data) {
-				var createFunction = function(name, url) {
-					if (name && url) {
-						var deferred = fileClient.createProject(explorer.treeRoot.ChildrenLocation, name, url, true);
-						progressService.showWhile(deferred, i18nUtil.formatMessage(messages["Linking to ${0}"], url)).then(function(newFolder) {
-						}, errorHandler);
-					}
-				};
-				if (data.parameters && data.parameters.valueFor('name') && data.parameters.valueFor('url')) { //$NON-NLS-1$ //$NON-NLS-0$
-					createFunction(data.parameters.valueFor('name'), data.parameters.valueFor('url')); //$NON-NLS-1$ //$NON-NLS-0$
-				} else {
-					errorHandler(messages["NameLocationNotClear"]);
-				}
-			},
-			visibleWhen: function(item) {
-				var createLinkProjectEnabled = getGeneralPreferenceValue("enableLinkProjectCreation", true);
-				return canCreateProject(item) && createLinkProjectEnabled;
-			}
-		});
-		commandService.addCommand(linkProjectCommand);
-
-		
 		var goUpCommand = new mCommands.Command({
 			name: messages["Go Up"],
 			tooltip: messages["GoUpToParent"],
@@ -1232,7 +1179,15 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/i18n
 			if (!explorer || !explorer.isCommandsVisible()) {
 				return false;
 			}
-			return checkFolderSelection(items);
+			var folder = checkFolderSelection(items, true);
+			if (folder && mFileUtils.isAtRoot(folder.Location)) {
+				if (bufferedSelection && bufferedSelection.some(function(currentItem) {
+					if (!currentItem.Directory) return true;
+				})) {
+					return false;
+				}
+			}
+			return true;
 		};
 		
 		var pasteFromBufferCommand = new mCommands.Command({
@@ -1240,10 +1195,10 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/i18n
 				id: "eclipse.pasteSelections", //$NON-NLS-0$
 				visibleWhen: canPaste,
 				callback: function(data) {
-					var item = getTargetFolder(data.items);
+					var item = getTargetFolder(data.items, true);
 					if (bufferedSelection.length > 0 && item) {
 						// Do not allow pasting into the Root of the Workspace
-						if (mFileUtils.isAtRoot(item.Location)) {
+						if (mFileUtils.isAtRoot(item.Location) && !item.Directory) {
 							errorHandler(messages["Cannot paste into the root"]);
 							return;
 						}
@@ -1329,7 +1284,7 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/i18n
 			id: id,
 			callback: function(data) {
 				if (href) {
-					window.open(href);
+					window.open(urlModifier(href));
 				} else {
 					if (data.parameters && data.parameters.valueFor('folderName')) { //$NON-NLS-0$
 						var newFolderName = data.parameters.valueFor('folderName'); //$NON-NLS-0$

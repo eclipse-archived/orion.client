@@ -69,7 +69,7 @@ module.exports.router = function() {
 		if (arguments.length === 5) {
 			var domainName = arguments[3];
 			var host = arguments[4];
-		} else if (arguments.length === 5) {
+		} else if (arguments.length === 4) {
 			var orphaned = arguments[3];
 		}
 		var waitfor;

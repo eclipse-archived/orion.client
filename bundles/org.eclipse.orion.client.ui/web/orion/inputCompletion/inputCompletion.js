@@ -9,7 +9,7 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 /*eslint-env browser, amd*/
-define(['orion/EventTarget','orion/bidiUtils',], function( EventTarget, bidiUtils){
+define(['orion/EventTarget', 'orion/bidiUtils', 'orion/urlModifier'], function( EventTarget, bidiUtils, urlModifier ) {
 
 	/**
 	 * InputCompletion is an alternative to datalist support in html5.
@@ -431,9 +431,9 @@ define(['orion/EventTarget','orion/bidiUtils',], function( EventTarget, bidiUtil
 			this._inputField.focus();
 		} else if(valueToInputField && valueToInputField.name && valueToInputField.type === "link"){ //$NON-NLS-0$
 			if(ctrlKey){
-				window.open(valueToInputField.value);
+				window.open(urlModifier(valueToInputField.value));
 			} else {
-				window.location.href = valueToInputField.value;
+				window.location.href = urlModifier(valueToInputField.value);
 			}
 		}
 		this._completionUIContainer.style.display = "none"; //$NON-NLS-0$

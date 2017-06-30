@@ -393,6 +393,15 @@ define([
 		};
 		var fileClient = serviceRegistry.getService("orion.core.file.client"); //$NON-NLS-1$
 		if (typeof request.args.file === 'object') {
+			if(request.args.file.tourl) {
+				var f = request.args.file.file;
+				response.args.file = request.args.file;
+				response.args.file.url = f;
+				if(/^[/]?file/.test(f)) {
+					response.args.file.url = new URL(f, self.location.origin).href;
+				}
+				return ternWorker.postMessage(response);
+			}
 			var _l = request.args.file.logical;
 			response.args.logical = _l;
 			if (request.args.file.env === 'node') {
@@ -417,7 +426,7 @@ define([
 				}
 			}
 		} else {
-			_normalRead(response, request.args.file, fileClient);
+			_normalRead(response, request.args.file, fileClient);	
 		}
 	}
 	/**

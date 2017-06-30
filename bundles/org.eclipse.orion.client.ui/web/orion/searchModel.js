@@ -248,6 +248,7 @@ define([
 	                contents: result.contents,
 	                location: result.location,
 	                totalMatches: result.totalMatches,
+	                workspace: result.workspace,
 	                parentLocation: mUiUtils.path2FolderName(result.location, true),
 	                fullPathName: mUiUtils.path2FolderName(result.path)
 	            };

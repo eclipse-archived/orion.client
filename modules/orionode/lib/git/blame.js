@@ -55,7 +55,7 @@ function getBlame(req, res) {
 				"Location": gitRoot + "/blame/"+ req.params.refName + fileDir + fileRelativePath,
 				"Type" : "Blame"
 			};
-			writeResponse(200, res, null, sendingBlamejason);
+			writeResponse(200, res, null, sendingBlamejason, true);
 		});
 	}).catch(function(err){
 		writeError(403, res, err);

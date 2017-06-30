@@ -9,17 +9,11 @@
  *		 IBM Corporation - initial API and implementation
  *******************************************************************************/
 /*eslint-env node */
-var api = require('../api'), writeError = api.writeError;
-var git = require('nodegit');
 var clone = require('./clone');
-var path = require('path');
 var express = require('express');
-var util = require('./util');
 var request = require('request');
-var https = require('https');
 var bodyParser = require('body-parser');
 var url = require("url");
-var fs = require('fs');
 var tasks = require('../tasks');
 
 module.exports = {};
@@ -71,13 +65,18 @@ function getPullRequest(req, res) {
     
 	var task = new tasks.Task(res, false, true, 0, false);
 	if(gitUrl){
+		var isSsh = false;
+		if (gitUrl.indexOf("@") < gitUrl.indexOf(":")){
+			gitUrl = "ssh://" + gitUrl;
+			isSsh = true;
+		}
 		var parsedURL = url.parse(gitUrl);
 		var pathnames = parsedURL["pathname"].split("/");   
-		var username = pathnames[1];
+		var username = isSsh ? pathnames[1].substr(1) : pathnames[1];
 		var projectname = pathnames[2].replace(/\.git$/g, "");
 		var pullrequestUrl = "https://api.github.com/repos/" + username +"/" + projectname + "/pulls";
 		if(clientID && clientSecret){
-			pullrequestUrl += "?client_id="+clientID+"&client_secret="+clientSecret+"";
+			pullrequestUrl += "?client_id="+clientID+"&client_secret="+clientSecret;
 		}
 	}
 	var userAgentHeader = {
@@ -115,7 +114,17 @@ function getPullRequest(req, res) {
 						Message: message,
 						Severity: "Error"
 					});
-				} else {
+				} else if (!error && response.statusCode === 403 && body.indexOf("API rate limit exceeded") !== -1) {
+					task.done({
+						HttpCode: 403,
+						Code: 0,
+						JsonData: {},
+						DetailedMessage: "Pull requests for this repository will not be displayed because you have reached the GitHUB API limit while requesting your pull request list." 
+							+ isSsh ? "Please consider cloning the repo with HTTPS protocol instead of SSH. This will increase our API limit." : "",
+						Message: "Unable to fetch pull request info.",
+						Severity: "Warning"
+					});
+				}else {
 					task.done({
 						HttpCode: 403,
 						Code: 0,
@@ -126,6 +135,8 @@ function getPullRequest(req, res) {
 					});
 				}
 			});
+	}).catch(function(err){
+		clone.handleRemoteError(task, err, gitRoot + "/clone" + fileDir);
 	});
 	function toBase64 (str) {
 		return (new Buffer(str || '', 'utf8')).toString('base64');

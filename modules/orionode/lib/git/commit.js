@@ -51,7 +51,7 @@ function commitJSON(commit, fileDir, diffs, parents) {
 		"Children":[],
 		"CommitterEmail": commit.committer().email(),
 		"CommitterName": commit.committer().name(),
-		"ContentLocation": gitRoot + "/commit/" + commit.sha() + fileDir + "?parts=body",
+		"ContentLocation": {pathname: gitRoot + "/commit/" + commit.sha() + fileDir, query: {parts: "body"}},
 		"DiffLocation": gitRoot + "/diff/" + commit.sha() + fileDir,
 		"Location": gitRoot + "/commit/" + commit.sha() + fileDir,
 		"CloneLocation": gitRoot + "/clone" + fileDir,
@@ -169,13 +169,17 @@ function getCommitLog(req, res) {
 								if (entries[i] !== null && entries[i].id().equal(entryId)) {
 									// if the entry id is the same as a parent, that means
 									// the content from the other branches should be ignored
+									// as they have been discarded in favour of the changes
+									// of this particular branch of history
 									for (var j = 0; j < entries.length; j++) {
-										if (i !== j) {
+										if (i !== j && (base === null || !parents[j].id().equal(base))) {
 											ignore.push(parents[j].id());
 										}
 									}
 									// mark the common ancestor as not to be skipped over
-									keep.push(base);
+									if (base !== null) {
+										keep.push(base);
+									}
 									return true;
 								}
 							}
@@ -217,6 +221,13 @@ function getCommitLog(req, res) {
 				parents.push(base);
 				return resolveAncestor(parents);
 			}
+		})
+		.catch(function(err) {
+			if (err.message === "No merge base found") {
+				// two commits in unrelated histories
+				return null;
+			}
+			throw err;
 		});
 	}
 	var commits = []	, repo;
@@ -520,19 +531,29 @@ function getCommitLog(req, res) {
 			})
 			.then(function(commit) {
 				commit1 = commit;
-				return git.Merge.base(repo, commit0, commit1).then(function(oid){
-					return oid;
+				// find the common ancestor for calculating incoming/outgoing changes
+				return git.Merge.base(repo, commit0, commit1)
+				.catch(function(err) {
+					if (err.message === "No merge base found") {
+						return null;
+					}
+					throw err;
 				});
 			})
 			.then(function(oid) {
-				mergeBaseCommitOid = oid;
 				var revWalkForCounting1 = repo.createRevWalk();
-				revWalkForCounting1.sorting(git.Revwalk.SORT.TOPOLOGICAL);
-				revWalkForCounting1.pushRange(mergeBaseCommitOid.tostrS() + ".." + commit0.id().tostrS());	//count for incomings
-				
 				var revWalkForCounting2 = repo.createRevWalk();
+				revWalkForCounting1.sorting(git.Revwalk.SORT.TOPOLOGICAL);
 				revWalkForCounting2.sorting(git.Revwalk.SORT.TOPOLOGICAL);
-				revWalkForCounting2.pushRange(mergeBaseCommitOid.tostrS() + ".." + commit1.id().tostrS()); // count for outgoing
+				if (oid === null) {
+					// no common ancestor, just count everything
+					revWalkForCounting1.push(commit0.id().tostrS()); // incoming changes
+					revWalkForCounting2.push(commit1.id().tostrS()); // outgoing changes
+				} else {
+					mergeBaseCommitOid = oid;
+					revWalkForCounting1.pushRange(mergeBaseCommitOid.tostrS() + ".." + commit0.id().tostrS()); // incoming changes
+					revWalkForCounting2.pushRange(mergeBaseCommitOid.tostrS() + ".." + commit1.id().tostrS()); // outgoing changes
+				}
 				
 				return Promise.all([countCommit(revWalkForCounting1),countCommit(revWalkForCounting2)]);	
 			}).then(function(results){
@@ -568,11 +589,8 @@ function countCommit(revWalk){
 }
 
 function getCommitParents(repo, commit, fileDir) {
-	return commit.getParents()
-	.then(function(parents) {
-		return parents.map(function(parent) {
-			return createParentJSON(parent.sha(), fileDir);
-		});
+	return commit.parents().map(function(parent) {
+		return createParentJSON(parent.toString(), fileDir);
 	});
 }
 
@@ -686,7 +704,7 @@ function getDiff(repo, commit, fileDir) {
 			"Children": diffs
 		};
 		if (patches.length > 100) {
-			result.NextLocation = gitRoot + "/diff/" + range + fileDir + "?pageSize=" + pageSize + "&page=" + (page + 1);
+			result.NextLocation = {pathname: gitRoot + "/diff/" + range + fileDir, query: {pageSize: pageSize, page: page + 1}};
 		}
 		return result;
 	});
@@ -713,7 +731,7 @@ function getCommitBody(req, res) {
 	})
 	.then(function(blob) {
 		var resp = blob.toString();
-		writeResponse(200, res, {'Content-Type':'application/octect-stream','Content-Length': resp.length}, resp, null, true);
+		writeResponse(200, res, {'Content-Type':'application/octect-stream','Content-Length': resp.length}, resp, false, true);
 	}).catch(function(err) {
 		writeError(404, res, err.message);
 	});
@@ -727,7 +745,7 @@ function identifyNewCommitResource(req, res, newCommit) {
 	var location = url.format({pathname: segments.join("/"), query: originalUrl.query});
 	writeResponse(200, res, null, {
 		"Location": location
-	});
+	}, false); // Avoid double encoding
 }
 
 function revert(req, res, commitToRevert) {
@@ -983,26 +1001,29 @@ function merge(req, res, branchToMerge, squash) {
 			});
 		}
 
-		return repo.mergeBranches("HEAD", branchToMerge)
-		.then(function(_oid) {
-			oid = _oid;
-		})
-		.catch(function(index) {
-			// the merge failed due to conflicts
-			conflicting = true;
-			return git.AnnotatedCommit.lookup(repo, commit.id())
-			.then(function(annotated) {
-				var retCode = git.Merge.merge(repo, annotated, null, null);
-				if (retCode === git.Error.CODE.ECONFLICT) {
-					// checkout failed due to a conflict
-					return getConflictingPaths(repo, head, commit)
-					.then(function(conflictingPaths) {
-						paths = conflictingPaths;
-					});
-				} else if (retCode !== git.Error.CODE.OK) {
-					throw new Error("Internal merge failure (error code " + retCode + ")");
-				}
+		// try to find a common ancestor before merging
+		return git.Merge.base(repo, head, commit.id())
+		.then(function() {
+			return repo.mergeBranches("HEAD", branchToMerge)
+			.then(function(_oid) {
+				oid = _oid;
+			})
+			.catch(function(index) {
+				// the merge failed due to conflicts
+				conflicting = true;
+				return forceMerge(repo, head, commit, branchToMerge, false, function(conflictingPaths) {
+					paths = conflictingPaths;
+				});
 			});
+		})
+		.catch(function(err) {
+			if (err.message === "No merge base found") {
+				// no common ancestor between the two branches, force the merge
+				return forceMerge(repo, head, commit, branchToMerge, true, function(conflictingPaths) {
+					paths = conflictingPaths;
+				});
+			}
+			throw err;
 		});
 	})
 	.then(function() {
@@ -1023,6 +1044,42 @@ function merge(req, res, branchToMerge, squash) {
 	})
 	.catch(function(err) {
 		writeError(400, res, err.message);
+	});
+}
+
+/**
+ * Force a merge from the specified comment onto HEAD. This may leave
+ * the repository in a conflicted state. If there are no conflits, a
+ * merge commit will be created to complete the merge.
+ * 
+ * @param {Repository} repo the repository to perform the merge in
+ * @param {Commit} head the commit that HEAD is pointing at
+ * @param {Commit} commit the commit to merge in
+ * @param {String} branchToMerge the name of the other branch
+ * @param {boolean} createMergeCommit <tt>true</tt> if a merge commit should be created automatically,
+ *                                    <tt>false</tt> otherwise
+ * @param {Function} conflictingPathsCallback the callback to notify if the merge fails due to
+ *                                            conflicting paths in the working directory or the index
+ */
+function forceMerge(repo, head, commit, branchToMerge, createMergeCommit, conflictingPathsCallback) {
+	return git.AnnotatedCommit.lookup(repo, commit.id())
+	.then(function(annotated) {
+		var retCode = git.Merge.merge(repo, annotated, null, null);
+		if (retCode === git.Error.CODE.ECONFLICT) {
+			// checkout failed due to a conflict
+			return getConflictingPaths(repo, head, commit).then(conflictingPathsCallback);
+		} else if (retCode !== git.Error.CODE.OK) {
+			throw new Error("Internal merge failure (error code " + retCode + ")");
+		}
+
+		if (createMergeCommit) {
+			var signature = repo.defaultSignature();
+			var message = "Merged branch '" + branchToMerge + "'"; 
+			return createCommit(repo,
+				signature.name(), signature.email(),
+				signature.name(), signature.email(),
+				message, false, false);
+		}
 	});
 }
 
@@ -1172,13 +1229,10 @@ function tag(req, res, commitId, name, isAnnotated, message) {
 		return getCommitParents(theRepo, thisCommit, fileDir);
 	})
 	.then(function(parents){
-		theParents = parents;
+		writeResponse(200, res, null, commitJSON(thisCommit, fileDir, theDiffs, parents), true);
 	})
 	.catch(function(err) {
 		writeError(403, res, err.message);
-	})
-	.done(function() {
-		writeResponse(200, res, null, commitJSON(thisCommit, fileDir, theDiffs, theParents));
 	});
 }
 
@@ -1249,7 +1303,7 @@ function postCommit(req, res) {
 		return getCommitParents(theRepo, thisCommit, fileDir);
 	})
 	.then(function(parents){
-		writeResponse(200, res, null, commitJSON(thisCommit, fileDir, theDiffs, parents));
+		writeResponse(200, res, null, commitJSON(thisCommit, fileDir, theDiffs, parents), true);
 	})
 	.catch(function(err) {
 		writeError(403, res, err.message);

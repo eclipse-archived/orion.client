@@ -22,8 +22,9 @@ define([
 	'orion/EventTarget',
 	'orion/objects',
 	'orion/util',
-	'orion/generalPreferences'
-], function(messages, Deferred, lib, i18nUtil, mFileUtils, mExplorer, EventTarget, objects, util, mGeneralPrefs) {
+	'orion/generalPreferences',
+	'orion/urlModifier'
+], function(messages, Deferred, lib, i18nUtil, mFileUtils, mExplorer, EventTarget, objects, util, mGeneralPrefs, urlModifier) {
 
 	var generalPreferences;
 	
@@ -182,7 +183,7 @@ define([
 		},
 		_isExpression: function(fileFilter) {
 			if (fileFilter) {
-				return fileFilter.includes("*") || fileFilter.includes("?");
+				return (fileFilter.indexOf("*") > -1) || (fileFilter.indexOf("?") > -1);
 			}
 			return false;
 		},
@@ -302,10 +303,25 @@ define([
 						var link = lib.$("a", evt.target);
 						if (link) {
 							if (evt.type === "click") {
-								window.location.href = link.href;
+								window.location.href = urlModifier(link.href);
 								//_self._clickLink(link);
 							} else if (evt.type === "dblclick") {
-								this.handleLinkDoubleClick(link, evt);
+								this.isEditorTabsEnabled().then(function(editorTabsEnabled) {
+									if(editorTabsEnabled){
+										var target = evt.target || evt.srcElement;
+										var href = target.querySelector("a").href;
+										this.dispatchEvent({
+											type: "fileDoubleClicked",
+											href: href
+										});
+									}else{
+										this.isDesktopSelectionMode().then(function(desktopMode){
+											if(desktopMode){
+												this.handleLinkDoubleClick(link, evt);
+											}
+										}.bind(this));
+									}
+								}.bind(this));
 							}
 						}
 					}
@@ -626,6 +642,7 @@ define([
 		},
 
 		_makeDropTarget: function(item, node, persistAndReplace) {
+			var that = this;
 			if (this.dragAndDrop) {
 				var explorer = this;
 				var performDrop = this.dragAndDrop;
@@ -644,13 +661,22 @@ define([
 				}
 
 				var dragStart = function(evt) {
-					dragStartTarget = evt.target;
-					var source = findItemfromNode(dragStartTarget);
-					if (source) {
-						var exportName = source.Directory ? dragStartTarget.text + ".zip" : dragStartTarget.text;
-						var downloadUrl = new URL(source.Directory ? (source.ExportLocation || source.Location) : source.Location, self.location.href).href;
-						evt.dataTransfer.setData('DownloadURL', "application/zip,application/octet-stream:" + exportName + ":" + downloadUrl);
-					}
+					var currentSelections = that.selection.getSelections();
+					if(currentSelections.length > 1){
+						dragStartTarget = currentSelections;
+						var crt = this.cloneNode(true);
+						crt.style.display = "none";
+						evt.dataTransfer.setDragImage(crt, 0, 0);
+						// For Electron Orion, export multiple selections using Electron APIs
+					}else{
+						dragStartTarget = evt.target;
+						var source = findItemfromNode(dragStartTarget);
+						if (source) {
+							var exportName = source.Directory ? source.Name + ".zip" : source.Name;
+							var downloadUrl = new URL(source.Directory ? (source.ExportLocation || source.Location) : source.Location, self.location.href).href;
+							evt.dataTransfer.setData('DownloadURL', "application/zip,application/octet-stream:" + exportName + ":" + downloadUrl);
+						}
+ 					}
 				};
 
 				if (persistAndReplace) {
@@ -833,11 +859,13 @@ define([
 									// this is part of a folder upload, upload the file directly without showing
 									// progress for it but call decrementEntryCount when the upload finishes
 									var unzip = file.name.indexOf(".zip") === file.name.length - 4 && window.confirm(i18nUtil.formatMessage(messages["Unzip ${0}?"], file.name)); //$NON-NLS-1$ //$NON-NLS-0$
-									var handlers = {
-										error: function(event) {
+									performDrop(target, file, explorer, unzip, false, true).then(
+										decrementEntryCount,
+										function(error) {
+											decrementEntryCount();
 											var errorMessage = messages["UploadingFileErr"] + file.name;
-											if (event && event.Message) {
-												errorMessage += " [" + event.Message + "]";
+											if (error && error.Message) {
+												errorMessage += " [" + error.Message + "]";
 											}
 											if (statusService) {
 												statusService.setProgressResult({
@@ -847,10 +875,8 @@ define([
 											} else {
 												window.console.log(errorMessage);
 											}
-										},
-										loadend: decrementEntryCount
-									};
-									performDrop(target, file, explorer, unzip, false, handlers, true);
+										}
+									);
 								} else {
 									explorer._uploadFile(item, file, true);
 								}
@@ -895,14 +921,10 @@ define([
 				var drop = function(evt) {
 					var i, deferred;
 					node.classList.remove("dragOver"); //$NON-NLS-0$
-
-					if (dragStartTarget) {
+					var currentSelections = this.selection.getSelections();
+					
+					function finishDrop(source){
 						var fileClient = explorer.fileClient;
-						var source = findItemfromNode(dragStartTarget);
-						if (!source) {
-							return;
-						}
-
 						var isCopy = dropEffect === "copy";
 						var func = isCopy ? fileClient.copyFile : fileClient.moveFile;
 						deferred = func.apply(fileClient, [source.Location, item.Location, source.Name]);
@@ -931,7 +953,19 @@ define([
 							}
 							errorHandler(error);
 						});
-
+					}
+					if (dragStartTarget) {
+						if(Array.isArray(dragStartTarget)){
+							dragStartTarget.forEach(function(each){
+								finishDrop(each);
+							});	
+						}else{
+							var source = findItemfromNode(dragStartTarget);
+							if (!source) {
+								return;
+							}
+							finishDrop(source);
+						}
 						// webkit supports testing for and traversing directories
 						// http://wiki.whatwg.org/wiki/DragAndDropEntries
 					} else if (evt.dataTransfer.items && evt.dataTransfer.items.length > 0) {
@@ -970,7 +1004,7 @@ define([
 					}
 					this._oldDrop = drop;
 				}
-				node.addEventListener("drop", drop, false);
+				node.addEventListener("drop", drop.bind(this), false);
 			}
 		},
 
@@ -992,26 +1026,23 @@ define([
 					var progressBar = uploadNodeContainer.progressBar;
 					var cancelButton = uploadNodeContainer.cancelButton;
 					var destroy = uploadNodeContainer.destroyFunction;
+					var ignoreErrors = false;
 
 					var statusService = this.registry.getService("orion.page.message"); //$NON-NLS-0$
 
-					var handlers = {
-						progress: function(event) {
-							var percentageText = "";
-							if (event.lengthComputable) {
-								percentageText = Math.floor(event.loaded / event.total * 100) + "%";
-								progressBar.style.width = percentageText;
-								var loadedKB = Math.round(event.loaded / 1024);
-								var totalKB = Math.round(event.total / 1024);
-								progressBar.title = messages["Upload progress: "] + percentageText + ",  " + loadedKB + "/" + totalKB + " KB"; //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-								refNode.title = progressBar.title;
+					var unzip = file.name.indexOf(".zip") === file.name.length - 4 && window.confirm(i18nUtil.formatMessage(messages["Unzip ${0}?"], file.name)); //$NON-NLS-1$ //$NON-NLS-0$
+					var promise = this.dragAndDrop(targetItem, file, this, unzip, false, true);
+					var done = function() {
+						destroy();
+						this.changedItem(targetItem, true);
+					}.bind(this);
+					promise.then(
+						done,
+						function(error) {
+							done();
+							if (ignoreErrors || error.userCanceled) {
+								return;
 							}
-						},
-						loadend: function(event) {
-							destroy();
-							this.changedItem(targetItem, true);
-						}.bind(this),
-						error: function(event) {
 							var errorMessage = messages["UploadingFileErr"] + file.name;
 							if (event && event.Message) {
 								errorMessage += " [" + event.Message + "]";
@@ -1024,14 +1055,23 @@ define([
 							} else {
 								window.console.log(errorMessage);
 							}
+						},
+						function(event) {
+							var percentageText = "";
+							if (event.lengthComputable) {
+								percentageText = Math.floor(event.loaded / event.total * 100) + "%";
+								progressBar.style.width = percentageText;
+								var loadedKB = Math.round(event.loaded / 1024);
+								var totalKB = Math.round(event.total / 1024);
+								progressBar.title = messages["Upload progress: "] + percentageText + ",  " + loadedKB + "/" + totalKB + " KB"; //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+								refNode.title = progressBar.title;
+							}
 						}
-					};
-
-					var unzip = file.name.indexOf(".zip") === file.name.length - 4 && window.confirm(i18nUtil.formatMessage(messages["Unzip ${0}?"], file.name)); //$NON-NLS-1$ //$NON-NLS-0$
-					var req = this.dragAndDrop(targetItem, file, this, unzip, false, handlers, true);
+					);
 
 					cancelButton.addEventListener("click", function() {
-						req.abort();
+						ignoreErrors = true;
+						promise.cancel();
 					});
 				}.bind(this));
 			}.bind(this);
@@ -1167,7 +1207,7 @@ define([
 			if (!item || !this.model || !this.myTree) {
 				return deferred.reject();
 			}
-			if (!this.myTree.showRoot && item.Location === this.treeRoot.Location) {
+			if (!this.myTree.showRoot && (item.Location === this.treeRoot.Location || item.Location === this.treeRoot.ContentLocation)) {
 				return deferred.resolve(this.treeRoot);
 			}
 			var row = this.getRow(item);
@@ -1312,15 +1352,12 @@ define([
 				path = path.ChildrenLocation || path.ContentLocation;
 			}
 			path = mFileUtils.makeRelative(path);
-			if (!force && path === this._lastPath) {
-				return new Deferred().resolve(this.treeRoot);
-			}
-			this._lastPath = path;
 			var self = this;
-			if (force || path !== this.treeRoot.Path) {
-				return this.load(this.fileClient.loadWorkspace(path), messages["Loading "] + path, postLoad).then(function(p) {
+			if (force || path !== this.treeRoot.Path || path !== this._lastPath) {
+				this._lastPath = path;
+				return this.load(this.fileClient.read(path, true), messages["Loading "] + path, postLoad).then(function() {
 					self.treeRoot.Path = path;
-					return new Deferred().resolve(self.treeRoot);
+					return self.treeRoot;
 				}, function(err) {
 					self.treeRoot.Path = null;
 					return new Deferred().reject(err);

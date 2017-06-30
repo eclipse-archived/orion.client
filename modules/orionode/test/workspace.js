@@ -17,21 +17,30 @@ var testData = require('./support/test_data');
 
 var CONTEXT_PATH = '';
 var PREFIX = CONTEXT_PATH + '/workspace', PREFIX_FILE = CONTEXT_PATH + '/file';
+var WORKSPACE_ID = 'orionode';
 var TEST_WORKSPACE_NAME = '.test_workspace';
 var WORKSPACE = path.join(__dirname, TEST_WORKSPACE_NAME);
 
+var options = {
+	configParams: {
+		"orion.single.user": true
+	},
+	workspaceDir: WORKSPACE
+};
 var app = express();
-app.use(/* @callback */ function(req, res, next) {
-	req.user = { workspaceDir: WORKSPACE };
-	next();
-}).use(PREFIX, require('../lib/workspace')({
+app.locals.metastore = require('../lib/metastore/fs/store')(options);
+app.locals.metastore.setup(app);
+app.use(PREFIX, require('../lib/workspace')({
 	workspaceRoot: CONTEXT_PATH + '/workspace', 
 	fileRoot: CONTEXT_PATH + '/file', 
-	gitRoot: CONTEXT_PATH + '/gitapi'
+	gitRoot: CONTEXT_PATH + '/gitapi',
+	options: options
 }));
 app.use(PREFIX_FILE, require('../lib/file')({
+	workspaceRoot: CONTEXT_PATH + '/workspace', 
 	gitRoot: CONTEXT_PATH + '/gitapi', 
-	fileRoot: CONTEXT_PATH + '/file'
+	fileRoot: CONTEXT_PATH + '/file',
+	options: options
 }));
 
 var request = supertest.bind(null, app);
@@ -152,7 +161,7 @@ describe('Workspace API', function() {
 		 * Rename Project. The Orion UI requires this operation to support rename of top-level folders.
 		 */
 		it('rename a project should succeed', function(done) {
-			var oldProjectLocation = PREFIX_FILE + '/project';
+			var oldProjectLocation = PREFIX_FILE + '/' + WORKSPACE_ID + '/project';
 			withDefaultWorkspace(function(workspace) {
 				request()
 				.post(workspace.Location)

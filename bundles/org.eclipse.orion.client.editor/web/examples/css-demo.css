@@ -8,10 +8,13 @@
     border-radius: 2px;
     font-size: 0.9em;
     padding: 1px;
+    display: inline;
+    display: inline;
 }
 
 .className {
 	background: papayawhip;
+	error property: none;
 }
 
 .className * {
@@ -19,5 +22,6 @@
 }
 
 .className > .right {
+	text-a:right;
 	text-align: right;
 }

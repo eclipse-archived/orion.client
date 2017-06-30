@@ -15,12 +15,12 @@ define(['i18n!orion/search/nls/messages', 'orion/Deferred', 'orion/webui/littlel
 	'orion/searchModel', 'orion/explorers/fileDetailRenderer',
 	'orion/extensionCommands',
 	'orion/objects',
-	'orion/bidiUtils'
+	'orion/bidiUtils', 'orion/urlModifier'
 ],
 function(messages, Deferred, lib, mContentTypes, i18nUtil, mExplorer, mCommands, 
 	mSearchUtils, mCompareView, mHighlight, mTooltip, 
 	navigatorRenderer, extensionCommands, mSearchModel, mFileDetailRenderer,
-	mExtensionCommands, objects, bidiUtils
+	mExtensionCommands, objects, bidiUtils, urlModifier
 ) {
 	var isMac = window.navigator.platform.indexOf("Mac") !== -1; //$NON-NLS-0$
     /* Internal wrapper functions*/
@@ -200,9 +200,9 @@ function(messages, Deferred, lib, mContentTypes, i18nUtil, mExplorer, mCommands,
 				navHandler.setSelection(modelItem);
 			}
 			if(this._ctrlKeyOn(evt)){
-				window.open(href);
+				window.open(urlModifier(href));
 			} else {
-				window.location.href = href;
+				window.location.href = urlModifier(href);
 			}
 		}.bind(this), false);
 		return link;

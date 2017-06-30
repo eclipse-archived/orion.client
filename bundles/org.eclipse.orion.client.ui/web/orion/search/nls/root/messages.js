@@ -53,6 +53,7 @@ define({
 	"Show Compare": "Show Compare",
 	"Show compare view of changes": "Show compare view of changes",
 	"Show All": "Show All",
+	"Selected Lines": "Selected Lines",
 	"Show all the results in one page": "Show all the results in one page",
 	"< Previous Page": "< Previous Page",
 	"Show previous page of search result": "Show previous page of search result",

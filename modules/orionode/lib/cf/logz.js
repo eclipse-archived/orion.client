@@ -41,7 +41,7 @@ module.exports.router = function() {
 			};
 			return target.cfRequest(null, req.user.username, infoURL, null, null, infoHeader, null, targetRequest);
 		}).then(function(infoData) {
-			return target.getAccessToken(req.user.username)
+			return target.getAccessToken(req.user.username, targetRequest)
 			.then(function(cloudAccessToken){
 				loggingEndpoint = infoData.logging_endpoint;
 

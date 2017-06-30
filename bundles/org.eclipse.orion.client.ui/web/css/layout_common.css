@@ -373,7 +373,6 @@ hard-coded numbers elsewhere.
 .editorTabContainer {
 	align-items: flex-start;
 	display: flex;
-	flex: 1;
 	flex-direction: row;
 	list-style: none;
 	margin: 0;
@@ -389,7 +388,8 @@ hard-coded numbers elsewhere.
 	border-top: 1px solid black;
 	border-right: 1px solid black;
 	display: flex;
-	flex: 0 0 auto;
+	flex: 0 1 auto;
+    overflow-x: hidden;
 }
 
 .editorTabsDisabled {
@@ -399,13 +399,14 @@ hard-coded numbers elsewhere.
 
 .editorTabCloseButton {
 	border-radius: 50%;
-	margin: auto 5px auto 5px;
-	font-size: 12px;
-	height: 10px;
-	line-height: 10px;
-	padding: 1px;
-	text-align: center;
-	width: 10px;
+    margin: auto 5px auto 5px !important;
+    font-size: 12px !important;
+    height: 10px;
+    line-height: 10px !important;
+    padding: 0 1.5px 1.5px 0px !important;
+    text-align: center;
+    width: 10px;
+    font-style: normal;
 }
 
 .editorTabCloseButton:hover {
@@ -421,6 +422,12 @@ hard-coded numbers elsewhere.
 	padding-left: 5px;
 	margin-left: 5px;
 	margin-right: 5px;
+	overflow: hidden;
+    white-space: nowrap;
+    flex: 1 1 auto;
+}
+.transient {
+	font-style: italic;
 }
 
 .editorViewerTabDropdown {
@@ -717,31 +724,20 @@ and (max-device-width : 1024px)  {
 }
 
 .menuScrollButton {
-	background-color: rgba(0,0,0,0) !important;
-	color: #3B4B54 !important;
+	background: linear-gradient(rgba(1,1,1,.2), white) !important;
+	color: black !important;
 	display: none;
 	cursor: pointer;
-	height: 24px;
-	opacity: 0.5;
+	height: 20px;
 	position: absolute;
+	outline: none; /* these button must not take focus*/
 	width: 100%;
-	max-width: 125px;
 	z-index: 200;
 }
 
 .menuTopScrollButton {
 	-webkit-transform: rotate(180deg);		/* Safari */
 	transform: rotate(180deg);
-}
-
-button.menuScrollButton.menuTopScrollButton.core-sprite-openarrow::before {
-	font-size: larger;
-	padding-right: 90px;
-}
-
-button.menuScrollButton.menuBottomScrollButton.core-sprite-openarrow::before {
-	font-size: larger;
-	padding-left: 90px;
 }
 /* End of dropdown menu scroll buttons */
 

@@ -34,12 +34,11 @@ define([
 		filterDiv.appendChild(filter);
 		
 		var createTooltip = function(button) {
-			var tooltip = new Tooltip.Tooltip({
+			return button.tooltip = new Tooltip.Tooltip({
 				node: button,
 				text: msg,
 				position: ["above", "below", "right", "left"] //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$
 			});
-			return tooltip;
 		};
 		
 		var button = document.createElement("button"); //$NON-NLS-0$
