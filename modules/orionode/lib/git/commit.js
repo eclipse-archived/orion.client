@@ -223,7 +223,7 @@ function getCommitLog(req, res) {
 			}
 		})
 		.catch(function(err) {
-			if (err.message === "No merge base found") {
+			if (err.message === "no merge base found") {
 				// two commits in unrelated histories
 				return null;
 			}
@@ -534,7 +534,7 @@ function getCommitLog(req, res) {
 				// find the common ancestor for calculating incoming/outgoing changes
 				return git.Merge.base(repo, commit0, commit1)
 				.catch(function(err) {
-					if (err.message === "No merge base found") {
+					if (err.message === "no merge base found") {
 						return null;
 					}
 					throw err;
@@ -1017,7 +1017,7 @@ function merge(req, res, branchToMerge, squash) {
 			});
 		})
 		.catch(function(err) {
-			if (err.message === "No merge base found") {
+			if (err.message === "no merge base found") {
 				// no common ancestor between the two branches, force the merge
 				return forceMerge(repo, head, commit, branchToMerge, true, function(conflictingPaths) {
 					paths = conflictingPaths;
@@ -1201,6 +1201,8 @@ function createCommit(repo, committerName, committerEmail, authorName, authorEma
 			}
 		}
 		return git.Commit.lookup(repo, id);
+	}).catch(function(err){
+		console.log(err)
 	});
 }
 
