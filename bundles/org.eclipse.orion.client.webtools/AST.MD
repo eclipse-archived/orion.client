@@ -186,4 +186,4 @@ This is a [Selector](#selector) node that is used in an expression like `h1:afte
     "right": Selector,
     "operator": Operator
     "range": [Number, Number]
-```
+``

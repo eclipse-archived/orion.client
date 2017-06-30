@@ -28,4 +28,4 @@ If the issues get fixed, there will be no editing required (no step 3).
 
 * [Drop using assert](https://github.com/estools/escope/issues/115)
 * [Drop es6-map and es6-weak-map](https://github.com/estools/escope/issues/113)
-* [Stop require'ing package.json](https://github.com/estools/escope/issues/116)
+* [Stop require'ing package.json](https://github.com/estools/escope/issues/116
