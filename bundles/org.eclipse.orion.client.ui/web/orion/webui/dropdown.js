@@ -122,6 +122,8 @@ define(['orion/webui/littlelib', 'orion/EventTarget'], function(lib, EventTarget
 				var isMenuBarItem = item.parentNode.getAttribute("role") === "menubar";
 				item = item.childNodes[0]; // the 'trigger'
 				
+				if (!item) return;
+				
 				if (isMenuBarItem) {
 					var openMBItem = null;
 					var menuBar = item.parentNode.parentNode;
