@@ -496,6 +496,7 @@ define(['i18n!cfui/nls/messages', 'orion/selection', 'orion/widgets/input/ComboT
 						self._manifestInput = document.createElement("input"); //$NON-NLS-0$
 						self._manifestInput.value = (self._initManifestPath == "") ? "manifest.yml" : self._initManifestPath;
 						self._manifestInput.readOnly = false; // TODO should be editable
+						self._manifestInput.setAttribute("spellcheck", "false");
 						self._manifestInputWrapper = document.getElementById("manifest"); //$NON-NLS-0$
 						self._manifestInputWrapper.appendChild(self._manifestInput);
 						
