@@ -125,7 +125,7 @@ function postImportXfer(req, res) {
 //	busboy.on('finish', function() {
 //		console.log('Done parsing form!');
 //		res.writeHead(303, { Connection: 'close', Location: '/' });
-//		res.end();
+//		writeResponse(null, res);
 //	});
 //	req.pipe(busboy);
 }
@@ -213,7 +213,7 @@ function completeTransfer(req, res, tempFile, file, fileName, xferOptions, shoul
 					return overrideError(failed);
 				}
 				res.setHeader("Location", api.join(fileRoot, file.workspaceId, file.path.substring(file.workspaceDir.length)));
-				res.status(201).end();
+				writeResponse(201, res);
 				res = null;
 			}
 		});
@@ -227,7 +227,7 @@ function completeTransfer(req, res, tempFile, file, fileName, xferOptions, shoul
 				return writeError(400, res, "Transfer failed");
 			}
 			res.setHeader("Location", api.join(fileRoot, file.workspaceId, file.path.substring(file.workspaceDir.length)));
-			res.status(201).end();
+			writeResponse(201, res);
 		});
 	}
 }

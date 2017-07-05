@@ -44,10 +44,10 @@ module.exports = function(options) {
 			writeError(500, res, "Expected a file not a directory");
 		} else {
 			var stream = fs.createReadStream(filepath);
-			res.setHeader("Cache-Control", "no-cache");
 			res.setHeader('Content-Length', stats.size);
 			res.setHeader('ETag', etag);
 			res.setHeader('Accept-Patch', 'application/json-patch; charset=UTF-8');
+			api.setResponseNoCache(res);
 			stream.pipe(res);
 			stream.on('error', function(e) {
 				// FIXME this is wrong, headers have likely been committed at this point
@@ -217,7 +217,7 @@ module.exports = function(options) {
 				ws.on('finish', function() {
 					fileUtil.withStatsAndETag(file.path, function(error, stats, etag) {
 						if (error && error.code === 'ENOENT') {
-							res.status(404).end();
+							api.writeResponse(404, res);
 							return;
 						}
 						fileUtil.writeFileMetadata(req, res, api.join(fileRoot, file.workspaceId), api.join(workspaceRoot, file.workspaceId), file, stats, etag);
@@ -235,9 +235,9 @@ module.exports = function(options) {
 		}
 		fileUtil.withETag(file.path, function(error, etag) {
 			if (error && error.code === 'ENOENT') {
-				res.status(404).end();
+				api.writeResponse(404, res);
 			} else if (ifMatchHeader && ifMatchHeader !== etag) {
-				res.status(412).end();
+				api.writeResponse(412, res);
 			} else {
 				write();
 			}

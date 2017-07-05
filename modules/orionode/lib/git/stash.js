@@ -111,7 +111,7 @@ function putStash(req, res) {
 	})
 	.then(function(message) {
 		if (message === null) {
-			res.status(200).end();
+			writeResponse(200, res);
 		} else {
 			writeError(400, res, message);
 		}
@@ -162,7 +162,7 @@ function deleteStash(req, res) {
 	})
 	.then(function(message) {
 		if (message === null) {
-			res.status(200).end();
+			writeResponse(200, res);
 		} else {
 			writeError(400, res, message);
 		}
@@ -184,7 +184,7 @@ function postStash(req, res) {
 		return git.Stash.save(repo, clone.getSignature(repo), message, flags);
 	})
 	.then(function() {
-		res.status(200).end();
+		writeResponse(200, res);
 	})
 	.catch(function(err) {
 		writeError(404, res, err.message);

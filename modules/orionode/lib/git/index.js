@@ -9,7 +9,7 @@
  *		 IBM Corporation - initial API and implementation
  *******************************************************************************/
 /*eslint-env node */
-var api = require('../api'), writeError = api.writeError;
+var api = require('../api'), writeError = api.writeError, writeResponse = api.writeResponse;
 var git = require('nodegit');
 var clone = require('./clone');
 var path = require('path');
@@ -65,7 +65,7 @@ function getIndex(req, res) {
 			}
 		} else {
 			res.write(blob.toString());
-			res.status(200).end();
+			writeResponse(200, res);
 		}
 	})
 	.catch(function(err) {
@@ -101,7 +101,7 @@ function putIndex(req, res) {
 		return index.write();
 	})
 	.then(function() {
-		res.status(200).end();
+		writeResponse(200, res);
 	}).catch(function(err) {
 		writeError(404, res, err.message);
 	});
@@ -146,7 +146,7 @@ function postIndex(req, res) {
 		return git.Reset.default(repo, commit, [filePath]);
 	})
 	.then(function() {
-		res.status(200).end();
+		writeResponse(200, res);
 	}).catch(function(err) {
 		writeError(404, res, err.message);
 	});

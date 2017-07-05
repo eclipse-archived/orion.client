@@ -10,7 +10,7 @@
  *******************************************************************************/
 /*eslint-env node */
 var git = require('nodegit');
-var api = require('../api'), writeError = api.writeError;
+var api = require('../api'), writeError = api.writeError, writeResponse = api.writeResponse;
 var args = require('../args');
 var express = require('express');
 var bodyParser = require('body-parser');
@@ -35,7 +35,7 @@ function putSubmodule(req, res) {
 		return clone.foreachSubmodule(repo, req.body.Operation, false);
 	})
 	.then(function() {
-		res.status(200).end();
+		writeResponse(200, res);
 	})
 	.catch(function(err) {
 		return writeError(400, res, err.message);
@@ -87,7 +87,7 @@ function postSubmodule(req, res) {
 			return submodule.addFinalize();
 		})
 		.then(function() {
-			res.status(200).end();
+			writeResponse(200, res);
 		});
 	}).catch(function(err) {
 		writeError(400, res, err.message);
@@ -156,7 +156,7 @@ function deleteSubmodule(req, res) {
 		});
 	})
 	.then(function() {
-		res.status(200).end();
+		writeResponse(200, res);
 	})
 	.catch(function(err) {
 		return writeError(400, res, err.message);

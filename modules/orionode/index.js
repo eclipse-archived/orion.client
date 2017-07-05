@@ -13,6 +13,7 @@ var express = require('express'),
 	path = require('path'),
 	fs = require('fs'),
 	log4js = require('log4js'),
+	api = require('./lib/api'),
 	logger = log4js.getLogger("server");
 
 var LIBS = path.normalize(path.join(__dirname, 'lib/')),
@@ -46,7 +47,7 @@ function startServer(options) {
 		function checkAuthenticated(req, res, next) {
 			if (!req.user) {
 				res.writeHead(401, "Not authenticated");
-				res.end();
+				api.writeResponse(null, res);
 			} else {
 				req.user.workspaceDir = options.workspaceDir + (req.user.workspace ? "/" + req.user.workspace : "");
 				next();

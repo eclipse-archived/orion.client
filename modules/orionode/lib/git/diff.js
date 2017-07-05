@@ -97,7 +97,7 @@ function getDiff(req, res) {
 				body += JSON.stringify(api.encodeLocation(URIs));
 				res.setHeader('Content-Type', 'application/json');
 			}
-			return res.status(200).end(body);
+			return writeResponse(200, res, null, body);
 		}
 		if (includeDiff || includeDiffs) {
 			var diffOptions = getOptions(ignoreWS, filePath, paths);
