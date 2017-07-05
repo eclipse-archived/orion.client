@@ -93,7 +93,7 @@ define([
         },
         
 		getProject: function (metadata) {
-			if (!metadata || metadata.Projects) {
+			if (!metadata || metadata.Projects || !metadata.Parents) {
 				return new Deferred().resolve(null);
 			}
 			while (metadata.parent && metadata.parent.parent && metadata.parent.parent.type !== "ProjectRoot") {
