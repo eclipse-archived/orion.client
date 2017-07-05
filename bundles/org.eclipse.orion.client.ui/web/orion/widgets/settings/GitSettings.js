@@ -167,7 +167,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/commands', 'orion/
 					}else{
 						this.gitCredentialsFields[0].setChecked(false);
 					}			
-				}.bind(this),this.gitCredentialsFields[0].node);
+				}.bind(this),this.gitCredentialsFields[0].checkbox);
 			} else {
 				gitPreferenceStorage.disable().then(
 					function(){
