@@ -136,50 +136,32 @@ var getParents = exports.getParents = function(fileRoot, relativePath, includeFo
  * @since 14.0
  */
 exports.getProject = function getProject(fileRoot, workspaceRoot, file, options) {
-	var relativePath = file.path;
-	var parents = getParents(fileRoot, relativePath, true),
-		names = options && typeof options.names === "object" ? options.names : {};
+	var names = options && typeof options.names === "object" ? options.names : {};
 	names['.git'] = {isDirectory: true};
 	names['project.json'] = Object.create(null);
-	if(Array.isArray(parents) && parents.length > 0) {
-		var promises = [];
-		for(var i = 0, len = parents.length; i < len; i++) {
-			var parentFile = parents[i],
-				filepath = parentFile.Location.slice(fileRoot.length);
-			if(filepath.indexOf(file.workspaceDir) !== 0) {
-				break;
-			}
-			promises.push(findProject(fileRoot, workspaceRoot, file.workspaceDir, filepath, names));
-		}
-		return Promise.any(promises);
-	}
-	return Promise.resolve(null);
-};
-/**
- * @description Finds the project from the given file context
- * @param {string} fileRoot The root file context
- * @param {string} workspaceDir The root workspace location
- * @param {string} filepath The absolute path to the file context we are starting from
- * @param {?} names The map of names to check against to determine project-ness
- * @since 14.0
- * @returns {Promise} Returns a promise to try and resolve the project from the context
- */
-function findProject(fileRoot, workspaceRoot, workspaceDir, filepath, names) {
-	return new Promise(function(resolve, reject) {
-		return getChildren(fileRoot, workspaceRoot, workspaceDir, filepath, 1).then(function(children) {
-			if(Array.isArray(children) && children.length > 0) {
-				for(var i = 0, len = children.length; i < len; i++) {
-					var c = children[i],
-						n = names[c.Name];
-					if(n && (c.Directory && n.isDirectory || !c.Directory && !n.isDirectory)) {
-						return resolve(filepath);
+	return new Promise(function (resolve, reject) {
+		function findProject(filepath) {
+			if (filepath.length >= file.workspaceDir.length) {
+				getChildren(fileRoot, workspaceRoot, file.workspaceDir, filepath, 1).then(function(children) {
+					if(Array.isArray(children) && children.length > 0) {
+						for(var i = 0, len = children.length; i < len; i++) {
+							var c = children[i],
+								n = names[c.Name];
+							if(n && (c.Directory && n.isDirectory || !c.Directory && !n.isDirectory)) {
+								return resolve(filepath);
+							}
+						}
 					}
-				}
+					findProject(path.dirname(filepath));
+				});
+			} else {
+				reject();
 			}
-			return reject(new Error('not a project'));
-		});
+		}
+		findProject(file.path);
 	});
-}
+};
+
 /**
  * Performs the equivalent of rm -rf on a directory.
  * @param {Function} callback Invoked as callback(error)
