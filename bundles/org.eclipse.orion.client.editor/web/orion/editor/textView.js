@@ -8017,6 +8017,7 @@ define("orion/editor/textView", [  //$NON-NLS-1$
     //   destroy
     //
 
+
     /**
      * Reference to parent 'textView' instance
      */
