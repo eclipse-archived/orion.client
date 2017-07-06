@@ -634,13 +634,22 @@ define([
 		},
 		_createSwitchWorkspaceCommand: function() {
 			var that = this;
-			this.fileClient.loadWorkspaces().then(function(workspaces) {
+			var fileSystem = "";
+			this.fileClient.loadWorkspaces(fileSystem).then(function(workspaces) {
+				if (this.sideBar) {
+					this.sideBar.sidebarNavInputManager.addEventListener("filesystemChanged", function(evt) {
+						fileSystem = evt.newInput;
+						this.fileClient.loadWorkspaces(fileSystem).then(function(newWorkspaces) {
+							workspaces = newWorkspaces;
+						});
+					}.bind(this));
+				}
 				this.fileClient.addEventListener("Changed", function(evt) {
 					if (evt.deleted) {
 						if (evt.deleted.some(function(item) {
 							return fileUtil.isAtRoot(item.deleteLocation);
 						})) {
-							this.fileClient.loadWorkspaces().then(function(newWorkspaces) {
+							this.fileClient.loadWorkspaces(fileSystem).then(function(newWorkspaces) {
 								workspaces = newWorkspaces;
 							});
 						}
