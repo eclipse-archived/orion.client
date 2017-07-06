@@ -131,6 +131,7 @@ select {
 
 .listCell select {
 	height: inherit;
+	width: 100%;
 }
 
 #servicesAddRemoveButtonsCol {
@@ -340,3 +341,12 @@ td#host::before{
 span.tooltipContainer{
 	left: 145px !important;
 }
+
+input::-webkit-contacts-auto-fill-button {
+  visibility: hidden;
+  display: none !important;
+  pointer-events: none;
+  position: absolute;
+  right: 0;
+}
+
