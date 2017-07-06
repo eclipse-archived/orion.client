@@ -1121,22 +1121,26 @@ objects.mixin(EditorViewer.prototype, {
 			this.updateDirtyIndicator();
 			evt.editor = this.editor;
 			this.pool.metadata = metadata;
-			this.editor.isFileInitiallyLoaded = false; 
-			var textView = this.editor._textView || this.editor._undoStack.view;
-			textView.addEventListener("ModelChanged", function(){
-				if(this.editor.isFileInitiallyLoaded){
-					if(this.tabWidget.transientTab && this.tabWidget.transientTab.location === this.pool.metadata.Location){
-						this.tabWidget.transientToPermenant(this.tabWidget.transientTab.href);
+			
+			var editorView = this.getCurrentEditorView();
+			if (editorView && editorView.editor) {
+				this.editor.isFileInitiallyLoaded = false;
+				var textView = editorView.editor.getTextView();
+				textView.addEventListener("ModelChanged", function(){
+					if(this.editor.isFileInitiallyLoaded){
+						if(this.tabWidget.transientTab && this.tabWidget.transientTab.location === this.pool.metadata.Location){
+							this.tabWidget.transientToPermenant(this.tabWidget.transientTab.href);
+						}
 					}
-				}
-			}.bind(this));
-			var flagInitialLoad = function(evt){
-					if(typeof evt.contentsSaved === "undefined"){
-						this.editor.isFileInitiallyLoaded = true; 
-					}
-					this.editor.removeEventListener("InputChanged", flagInitialLoad);
-				}.bind(this);
-			this.editor.addEventListener("InputChanged", flagInitialLoad);
+				}.bind(this));
+				var flagInitialLoad = function(evt){
+						if(typeof evt.contentsSaved === "undefined"){
+							this.editor.isFileInitiallyLoaded = true; 
+						}
+						this.editor.removeEventListener("InputChanged", flagInitialLoad);
+					}.bind(this);
+				this.editor.addEventListener("InputChanged", flagInitialLoad);
+			}
 			
 			if (this.shown) {
 				var href = window.location.href;
