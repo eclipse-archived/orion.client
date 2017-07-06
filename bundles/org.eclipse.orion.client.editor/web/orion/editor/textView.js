@@ -8056,6 +8056,7 @@ define("orion/editor/textView", [  //$NON-NLS-1$
      *   },
      *   ...
      * ]
+     *
      */
     this._highlights = [];
 
