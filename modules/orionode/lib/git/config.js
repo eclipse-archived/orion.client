@@ -17,6 +17,8 @@ var express = require('express');
 var bodyParser = require('body-parser');
 var util = require('./util');
 var git = require('nodegit');
+var log4js = require('log4js');
+var logger = log4js.getLogger("git");
 
 module.exports = {};
 
@@ -127,6 +129,9 @@ function getConfig(req, res) {
 						}
 					}
 				}
+			}).catch(function(err) {
+				logger.error(err);
+				writeError(404, res, err.message);
 			});
 		//TODO read user prefs if no username/email is specified -> git/config/userInfo (GitName && GitEmail)
 		});
