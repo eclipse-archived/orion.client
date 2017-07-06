@@ -1,19 +1,15 @@
 {
-  "/plugins": {
-    "plugins/orionSharedWorker.js": true,
-    "shell/plugins/shellPagePlugin.html": true,
-    "plugins/site/sitePlugin.html": true,
-    "plugins/languages/json/jsonPlugin.html": true,
-    "git/plugins/gitPlugin.html": true,
-    "webtools/plugins/webToolsPlugin.html": true,
-    "javascript/plugins/javascriptPlugin.html": true,
-    "edit/content/imageViewerPlugin.html": true,
-    "edit/content/jsonEditorPlugin.html": true,
-    "cfui/plugins/cFPlugin.html": true,
-    "cfui/plugins/cFDeployPlugin.html": true,
-    "collab/plugins/collabPlugin.html": true
-  },
-  "/collab": {
-    "hubUrl": "http://localhost:8082/"
-  }
+	"/plugins":{
+		"plugins/orionSharedWorker.js": true,
+		"shell/plugins/shellPagePlugin.html": true,
+		"plugins/site/sitePlugin.html": true,
+		"plugins/languages/json/jsonPlugin.html": true,
+		"git/plugins/gitPlugin.html":true,
+		"webtools/plugins/webToolsPlugin.html":true,
+		"javascript/plugins/javascriptPlugin.html":true,
+		"edit/content/imageViewerPlugin.html":true,
+		"edit/content/jsonEditorPlugin.html":true,
+		"cfui/plugins/cFPlugin.html":true,
+		"cfui/plugins/cFDeployPlugin.html":true
+	}
 }
