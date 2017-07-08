@@ -539,6 +539,7 @@ describe('File API', function() {
 			});
 		});
 		it('copy a directory', function(done) {
+					debugger;
 			request()
 			.post(PREFIX + '/project/')
 			.set('Slug', 'copy_of_my_folder')

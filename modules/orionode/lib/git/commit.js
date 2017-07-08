@@ -1175,19 +1175,16 @@ function createCommit(repo, committerName, committerEmail, authorName, authorEma
 			if (amend) {
 				return parent.amend("HEAD",  author, committer, null, message, oid);
 			} else if (mergeRequired) {
+				var promises = [ Promise.resolve(parent) ];
 				// get merge heads
-				var oids = [];
 				return repo.mergeheadForeach(function(oid) {
-					oids.push(oid.tostrS());
+					promises.push(repo.getCommit(oid));
 				})
 				.then(function() {
 					// wait for all parents to be resolved
-					return Promise.all(oids.map(function(oid) {
-						return repo.getCommit(oid);
-					}));
+					return Promise.all(promises);
 				})
 				.then(function(parentCommits) {
-					parentCommits.unshift(parent);
 					// create the merge commit on top of the MERGE_HEAD parents
 					return repo.createCommit("HEAD", author, committer, message, oid, parentCommits);
 				});
