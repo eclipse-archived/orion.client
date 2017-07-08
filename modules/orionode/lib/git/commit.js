@@ -821,7 +821,7 @@ function cherryPick(req, res, commitToCherrypick) {
 		});
 	})
 	.catch(function(err) {
-		if(err.message.indexOf("cannot create a tree") !== -1){
+		if(err.message.indexOf("Cannot create a tree") !== -1){
 			writeResponse(200, res, null, {
 				"HeadUpdated": true,
 				"Result": "CONFLICTING"
@@ -1201,6 +1201,8 @@ function createCommit(repo, committerName, committerEmail, authorName, authorEma
 			}
 		}
 		return git.Commit.lookup(repo, id);
+	}).catch(function(err){
+		console.log(err)
 	});
 }
 
