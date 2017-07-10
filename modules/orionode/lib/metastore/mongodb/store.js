@@ -18,6 +18,7 @@ var expressSession = require('express-session'),
 	args = require('../../args'),
 	passport = require('passport'),
 	log4js = require('log4js'),
+	mkdirp = require('mkdirp'),
 	logger = log4js.getLogger("mongo-store");
 
 mongoose.Promise = Promise;
@@ -30,6 +31,7 @@ var workspaceSchema = new mongoose.Schema({
 	id: {
 		type: String,
 		unique: true,
+		sparse: true,
 		required: true
 	},
 	properties: {
@@ -122,7 +124,27 @@ var SEPARATOR = "-";
 
 function MongoDbMetastore(options) {
 	this.options = options;
-	mongoose.connect('mongodb://localhost/orion_multitenant');
+	if (options.configParams["orion.mongodb.cf"]) {
+		var cfenv = require('cfenv');
+		var appenv = cfenv.getAppEnv();
+		var services = appenv.services;
+		var mongodb_services = services["compose-for-mongodb"];
+			if(mongodb_services){
+				var credentials = mongodb_services[0].credentials;
+				var ca = [new Buffer(credentials.ca_certificate_base64, 'base64')];
+				mongoose.connect(credentials.uri, {
+					mongos: {
+						ssl: true,
+						sslValidate: true,
+						sslCA: ca,
+						poolSize: 1,
+						reconnectTries: 1
+					}
+				});
+			}
+	} else {
+		mongoose.connect(options.configParams["orion.mongodb.url"]);
+	}
 	api.getOrionEE().on("close-server", function() {
 		logger.info("Closing MongoDB");
 		if (mongoose && (mongoose.connection.readyState === 1 || mongoose.connection.readyState === 2)) {
@@ -218,7 +240,9 @@ Object.assign(MongoDbMetastore.prototype, {
 	},
 	getWorkspaceDir: function(workspaceId) {
 		var userId = decodeUserIdFromWorkspaceId(workspaceId);
-		return path.join(this.options.workspaceDir, userId.substring(0,2), userId, decodeWorkspaceNameFromWorkspaceId(workspaceId));
+		var workspacePath = path.join(this.options.workspaceDir, userId.substring(0,2), userId, decodeWorkspaceNameFromWorkspaceId(workspaceId));
+		mkdirp.sync(workspacePath); // TODO make it async
+		return workspacePath;
 	},
 	readUserPreferences: function(userId, callback) {
 		findUser(userId, userId, function(err, user) {
