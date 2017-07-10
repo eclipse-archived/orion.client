@@ -622,12 +622,12 @@ objects.mixin(TabWidget.prototype, {
 	transientToPermenant: function(href){
 		var hrefHash = href && href.split("#")[1];
 		if(this.transientTab && hrefHash && hrefHash.indexOf(this.transientTab.location) === 0){
-			this.fileList.find(function(file){
-				if(hrefHash.indexOf(file.metadata.Location) === 0){
+			this.fileList.some(function(file) {
+				if (hrefHash.indexOf(file.metadata.Location) === 0) {
 					file.isTransient = false;
 					return true;
 				}
-			})
+			});
 			this.transientTab && this.transientTab.editorTabNode.classList.remove("transient");
 			this.transientTab = null;
 		}
@@ -965,12 +965,12 @@ objects.mixin(EditorViewer.prototype, {
 			callback: function(commandInvocation) {
 				// Get the right hand tabs from this.editorTab parent.
 				var firstNodeIndexToRemove;
-				Array.prototype.find.call(this.tabWidget.editorTabContainer.childNodes, function(node, index){
+				Array.prototype.some.call(this.tabWidget.editorTabContainer.childNodes, function(node, index){
 					if(node.metadata.Location === commandInvocation.items.Location){
 						firstNodeIndexToRemove = index + 1;
 						return true;
 					}
-				})
+				});
 				var closingButtons = [];
 				for(var j = firstNodeIndexToRemove; j < this.tabWidget.editorTabContainer.childNodes.length; j++){
 					var closeButton = this.tabWidget.editorTabContainer.childNodes[j].querySelector(".editorTabCloseButton");
