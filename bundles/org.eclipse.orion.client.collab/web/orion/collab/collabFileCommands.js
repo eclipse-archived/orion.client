@@ -29,7 +29,7 @@ define(['orion/collab/shareProjectClient'], function(shareProjectClient) {
 
     CollabFileCommands.createFileCommands = function(serviceRegistry, commandService, fileClient) {
 		var shareProjectCommand = new mCommands.Command({
-			name: "Share Project",
+			name: "Share",
 			tooltip: "Share project with a friend",
 			description: "Add a user so that they can collaborate with you on the project.",
 			imageClass: "core-sprite-link", //$NON-NLS-0$
@@ -52,7 +52,7 @@ define(['orion/collab/shareProjectClient'], function(shareProjectClient) {
 		commandService.addCommand(shareProjectCommand);
 
 		var unshareProjectCommand = new mCommands.Command({
-			name: "Unshare Project",
+			name: "Unshare",
 			tooltip: "Unshare a project",
 			description: "Remove a user from the sharing list of this project.",
 			imageClass: "core-sprite-link", //$NON-NLS-0$

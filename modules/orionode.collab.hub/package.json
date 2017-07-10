@@ -15,8 +15,7 @@
     "jsonwebtoken": "^7.2.0",
     "ot": "^0.0.15",
     "request": "^2.69.0",
-    "socket.io": "~1.4.8",
-    "hsl-to-rgb-for-reals": "^1.1.0"
+    "socket.io": "~1.4.8"
   },
   "devDependencies": {},
   "engines": {
