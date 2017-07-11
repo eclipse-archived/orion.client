@@ -1126,8 +1126,8 @@ objects.mixin(EditorViewer.prototype, {
 			if (editorView && editorView.editor) {
 				this.editor.isFileInitiallyLoaded = false;
 				var textView = editorView.editor.getTextView();
-				textView.addEventListener("ModelChanged", function(){
-					if(this.editor.isFileInitiallyLoaded){
+				textView.addEventListener("ModelChanged", function(e){
+					if(this.editor.isFileInitiallyLoaded && !e.collabHandShake){
 						if(this.tabWidget.transientTab && this.tabWidget.transientTab.location === this.pool.metadata.Location){
 							this.tabWidget.transientToPermenant(this.tabWidget.transientTab.href);
 						}

@@ -342,7 +342,7 @@ define(['orion/collab/ot', 'orion/collab/collabFileAnnotation', 'orion/collab/ot
 				this.otOrionAdapter.detach();
 			}
 			var selection = this.textView.getSelection();
-			this.textView.getModel().setText(operation[0], 0);
+			this.textView.getModel().setText(operation[0], 0, undefined, true);
 			this.textView.setSelection(selection.start, selection.end);
 			this.otOrionAdapter = new OrionEditorAdapter(this.editor, this, AT);
 			this.ot = new ot.EditorClient(revision, clients, this.otSocketAdapter, this.otOrionAdapter, this.getClientId());
@@ -506,7 +506,7 @@ define(['orion/collab/ot', 'orion/collab/collabFileAnnotation', 'orion/collab/ot
 						'operation': operation,
 						'data': evt[operation],
 						'clientId': this.getClientId(),
-						'guid': this.fileClient.guid
+						'guid': this.fileClient.guid || this.guid
 				    };
 					this.otSocketAdapter.send(JSON.stringify(msg));
 				}

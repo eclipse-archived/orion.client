@@ -25,7 +25,7 @@ define([
 	var defaults = {
 		desktopSelectionPolicy: true,
 		filteredResources: '.git, .DS_Store',
-		enableEditorTabs: util.isElectron ? true: false,
+		enableEditorTabs: true,
 		maximumEditorTabs: 0,
 		enableFileCreationAtRoot: false,
 		enableFolderCreationAtRoot: false,

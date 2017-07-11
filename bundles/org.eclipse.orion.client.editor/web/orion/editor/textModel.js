@@ -503,7 +503,7 @@ define("orion/editor/textModel", ['orion/editor/eventTarget', 'orion/regex', 'or
 		 *
 		 * @see orion.editor.TextModel#getText
 		 */
-		setText: function(text, start, end) {
+		setText: function(text, start, end ,collabHandShake) {
 			if (text === undefined) { text = ""; }
 			if (start === undefined) { start = 0; }
 			if (end === undefined) { end = this.getCharCount(); }
@@ -629,7 +629,8 @@ define("orion/editor/textModel", ['orion/editor/eventTarget', 'orion/regex', 'or
 				removedCharCount: removedCharCount,
 				addedCharCount: addedCharCount,
 				removedLineCount: removedLineCount,
-				addedLineCount: addedLineCount
+				addedLineCount: addedLineCount,
+				collabHandShake:collabHandShake
 			};
 			this.onChanged(modelChangedEvent);
 		}
