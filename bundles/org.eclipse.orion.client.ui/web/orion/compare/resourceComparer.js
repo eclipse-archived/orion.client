@@ -486,7 +486,7 @@ exports.ResourceComparer = (function() {
 					return file;
 		        }.bind(this),
 		        function(error, ioArgs) {
-					if (error.status === 404) {
+					if (error.status === 404 || error.status === 410) {
 						file.Content = "";
 					} else {
 						//TODO: show file loading error in the appropriate editor(error, ioArgs);
