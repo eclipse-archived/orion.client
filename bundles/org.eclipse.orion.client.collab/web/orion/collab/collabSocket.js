@@ -15,7 +15,7 @@
 define(['orion/EventTarget','socket.io/socket.io'], function(EventTarget, io) {
     'use strict;'
 
-    var DEBUG = false;
+    var DEBUG = true;
 
     /**
      * Collab socket client

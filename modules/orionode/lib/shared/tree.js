@@ -54,7 +54,7 @@ module.exports.router = function(options) {
 						workspaces.push({
 							Id: projectBelongingWorkspaceId,
 							Location: api.join(sharedWorkspaceFileRoot, projectBelongingWorkspaceId),
-							Name: projectSegs[3]
+							Name: projectSegs[2] + "'s " + projectSegs[3]
 						});
 					}
 				});

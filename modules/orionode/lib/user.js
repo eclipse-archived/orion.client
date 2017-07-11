@@ -407,10 +407,16 @@ module.exports.router = function(options) {
 			}
 			if (options.configParams["orion.auth.user.creation.force.email"]) {
 				sendMail({user: user, options: options, template: CONFIRM_MAIL, auth: CONFIRM_MAIL_AUTH, req: req});
+				return api.writeResponse(201, res, null, {error: "Created"});
 			} else {
-				user.isAuthenticated = true;	
+				user.isAuthenticated = true;
+				store.updateUser(user.username, user, function(err, user) {
+					if (err) {
+						return logError(err);
+					}
+					return api.writeResponse(201, res, null, {error: "Created"});
+				});
 			}
-			return api.writeResponse(201, res, null, {error: "Created"});
 		});
 	});
 

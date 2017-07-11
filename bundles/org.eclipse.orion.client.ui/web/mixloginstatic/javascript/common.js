@@ -238,7 +238,7 @@ define(['orion/PageUtil', 'orion/xsrfUtils', 'orion/PageLinks', './jquery'],func
             var username = usernameField.value.length > 0 ? usernameField.value : getParam("username");
             var userError = "User " + username + " already exists.";
 
-            var userCreated = "All good to go! Please follow the instructions in the e-mail sent to you to login into Orion.";
+            var userCreated = "All good to go! Please go back and log in.";
             var linkedUserCreated = "Your account " + username + " has been successfully created. You have been sent an email address verification. Follow the instructions in this email to login to your Orion account."
 
             var resetMsg = "Username or email are required";
