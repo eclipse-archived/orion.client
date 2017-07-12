@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2015 IBM Corporation and others.
+ * Copyright (c) 2015, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License v1.0
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution
@@ -413,7 +413,6 @@ define([
 				var node = Util.findNodeAtOffset(ast, 4);
 				assert(node, 'we should have found a node');
 				assert.equal(node.type, 'attr', 'We should have found a tag node');
-				assert.equal(node.kind, 'id', 'We should have found an id attr');
 				assert.equal(node.value, 'a', 'We should have found the attr value of a');
 			});
 		});
@@ -427,7 +426,6 @@ define([
 				var node = Util.findNodeAtOffset(ast, 26);
 				assert(node, 'we should have found a node');
 				assert.equal(node.type, 'attr', 'We should have found a tag node');
-				assert.equal(node.kind, 'id', 'We should have found an id attr');
 				assert.equal(node.value, 'b', 'We should have found the attr value of b');
 			});
 		});
