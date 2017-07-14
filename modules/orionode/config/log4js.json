@@ -11,6 +11,7 @@
         "git": "ALL",
         "electron": "ALL",
         "response":"ERROR"
+        "livesync": "DEBUG"
     },
     "appenders": [
         {
