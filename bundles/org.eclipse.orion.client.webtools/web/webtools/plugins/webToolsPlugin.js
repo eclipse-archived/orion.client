@@ -30,8 +30,11 @@ define(['orion/plugin',
 'i18n!webtools/nls/messages',
 'webtools/htmlFormatter',
 'webtools/cssFormatter',
+'webtools/htmlRename',
+'orion/util'
 ], function(PluginProvider, mServiceRegistry, ScriptResolver, HtmlAstManager, htmlHover, htmlContentAssist, htmlOccurrences, htmlOutliner, htmlValidator,
-            mHTML, cssContentAssist, mCssValidator, mCssOutliner, cssHover, cssQuickFixes, cssResultManager, mCSS, messages, HtmlFormatter, CssFormatter) {
+            mHTML, cssContentAssist, mCssValidator, mCssOutliner, cssHover, cssQuickFixes, cssResultManager, mCSS, messages, HtmlFormatter, CssFormatter,
+            RenameCommand, Util) {
 
 	/**
 	 * Plug-in headers
@@ -136,16 +139,27 @@ define(['orion/plugin',
     		}
     	);
 
+		var occurrences = new htmlOccurrences.HTMLOccurrences(htmlAstManager);
 	  	/**
     	 * Register occurrence providers
     	 */
     	provider.registerService("orion.edit.occurrences", //$NON-NLS-1$
-    		new htmlOccurrences.HTMLOccurrences(htmlAstManager),
+    		occurrences,
     		{
     			contentType: ["text/html"] //$NON-NLS-1$
     		}
     	);
 
+		var renameCommand = new RenameCommand.RenameCommand(occurrences);
+		provider.registerServiceProvider("orion.edit.command", //$NON-NLS-1$
+			renameCommand, {
+				name: messages.htmlRenameCommand,
+				tooltip: messages.htmlRenameCommandDescription,
+				id: "rename.html.element", //$NON-NLS-1$
+				key: ['W', false, true, !Util.isMac, Util.isMac], //$NON-NLS-1$
+				contentType: ['text/html'] //$NON-NLS-1$
+			}
+		);
     	/**
     	* Register outliners
     	*/

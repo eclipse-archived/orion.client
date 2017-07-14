@@ -1,6 +1,6 @@
  /*******************************************************************************
  * @license
- * Copyright (c) 2016 IBM Corporation and others.
+ * Copyright (c) 2016, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -38,8 +38,7 @@ define([
 		 * @param {Object} ctxt The current selection context
 		 */
 		computeOccurrences: function(editorContext, ctxt) {
-			var that = this;
-	        return that.astManager.getAST(editorContext).then(function(ast) {
+	        return this.astManager.getAST(editorContext).then(function(ast) {
 				return findOccurrences(ast, ctxt);
 			});
 		}
@@ -69,11 +68,22 @@ define([
 			}
 			var node = util.findNodeAtOffset(ast, start);
 			if(node) {
-				if ((node.type === 'attr' || node.type === 'text') && node.parent){
-					node = node.parent;
+				var occurrences = [];
+				if (node.type === 'attr'){
+					var p = node.parent;
+					if(p && Array.isArray(p.attributes)) {
+						occurrences.push({start: node.range[0], end: node.range[0]+node.name.length, type: node.type});
+						p.attributes.forEach(function(attr) {
+							if(attr.name === node.name && node.range[0] !== attr.range[0]) {
+								occurrences.push({start: attr.range[0], end: attr.range[0]+attr.name.length, type: node.type});
+							}
+						});
+					}
+					return occurrences;
+				} else if(node.type === 'text') {
+					node = node.parent ? node.parent : node;
 				}
 				if (node.type === 'tag'){
-					var occurrences = [];
 					var tagName = node.name;
 					var openTagStart = node.range[0];
 					openTagStart++; // after the open bracket <
@@ -87,10 +97,12 @@ define([
 					}
 					
 					var char = source[closeTagStart];
+					var selfClose = false;
 					if (char === '>'){
 						closeTagStart--;
 						// Check for inline tag format <body/>
-						if ('/' !== source[closeTagStart]){
+						selfClose = '/' === source[closeTagStart];
+						if (!selfClose){
 							closeTagStart -= tagName.length;
 							if ('/' + tagName !== source.substring(closeTagStart,closeTagEnd)){
 								if (node.openrange && !node.endrange){
@@ -104,31 +116,18 @@ define([
 					} else {
 						return []; // Unexpected character, abort
 					}
-					
 					if (start >= node.range[0] && end <= node.range[1]){
-						occurrences.push({start: openTagStart, end: openTagEnd});
+						occurrences.push({start: openTagStart, end: openTagEnd, type: node.type});
 						if (closeTagStart >= 0){
-							occurrences.push({start: closeTagStart, end: closeTagEnd});
+							occurrences.push({start: closeTagStart, end: closeTagEnd, closeTag: true, selfClose: selfClose, type: node.type});
 						}
-
 					}
-					// The following marks tags when caret is in the name
-//					if(start <= openTagEnd && start >= openTagStart) {
-//						occurrences.push({start: openTagStart, end: openTagEnd});
-//						occurrences.push({start: closeTagStart, end: closeTagEnd});
-//					}
-//					if(start >= closeTagStart && start <= closeTagEnd) {
-//						occurrences.push({start: openTagStart, end: openTagEnd});
-//						occurrences.push({start: closeTagStart, end: closeTagEnd});
-//					}
-						
 					return occurrences;
 				}
 			}
 		}
 		return [];
 	}
-	
 	return {
 			HTMLOccurrences: HTMLOccurrences
 		};

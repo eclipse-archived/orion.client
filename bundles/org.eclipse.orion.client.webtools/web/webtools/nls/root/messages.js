@@ -26,6 +26,8 @@ define({//Default message bundle
 	"pluginName": "Orion Web Tools Support",   
 	"pluginDescription": "This plug-in provides web language tools support for Orion, including HTML and CSS.",   
 	"fontHoverExampleText": "Lorem ipsum dolor...",
+	"htmlRenameCommand": "Rename HTML Element",
+	"htmlRenameCommandDescription": "Renames the selected HTML element",
 
 	// CSS and HTML formatting options names
 	"indentation_space" : "space",

@@ -108,7 +108,7 @@ define({
 	'unnecessaryNls': 'Unnecessary $NON-NLS$ tags:',
 	'generateDocName' : 'Generate Element Comment',
 	'generateDocTooltip' : 'Generate a JSDoc-like comment for the selected JavaScript element',
-	'renameElement' : 'Rename Element',
+	'renameElement' : 'Rename JavaScript Element',
 	'renameElementTooltip' : 'Rename the selected JavaScript element',
 	'renameFailedTimedOut': 'Could not rename element - operation timed out',
 	'openDeclName' : 'Open Declaration',
