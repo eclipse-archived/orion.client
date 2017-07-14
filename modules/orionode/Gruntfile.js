@@ -1,5 +1,6 @@
 /*eslint-env node*/
 var _path = require("path"),
+	fingerPrintRegistry = require("./build/fingerPrint"),
     utilFactory = require("./build/utils");
 module.exports = function(grunt) {
 	var util = utilFactory(grunt),
@@ -21,14 +22,18 @@ module.exports = function(grunt) {
 			buildDirectory: staging,
 			orionClient: clientPath,
 			psClient: grunt.option("psClient")
-		});
-		
+		}),
+		modules =util.parseModules(orionBuildConfig, staging);
+	
+	fingerPrintRegistry(grunt);
+	
 	grunt.initConfig({
 		pkg: grunt.file.readJSON("package.json"),
 		clientPath: clientPath,
 		configPath: configPath,
 		staging: staging,
 		optimized: optimized,
+		fingerPrintString:"",
 		nodeBuildConfig: util.filterBuildConfig(orionBuildConfig, "<% requirejsExcludeModules %>", [
 			{
 				name: "plugins/consolePlugin"
@@ -98,6 +103,12 @@ module.exports = function(grunt) {
 		requirejs: {
 			compile: {} // .options is set later
 		},
+		fingerprint: {
+			orion: {
+				src: modules,
+				path: optimized
+			}
+		},
 		"string-replace": {
 			// Ensure optimized files use the minified copy of requirejs
 			requiremin: {
@@ -112,6 +123,28 @@ module.exports = function(grunt) {
 						pattern: "requirejs/require.js",
 						replacement: "requirejs/require.min.js"
 					}]
+				}
+			},
+			replaceFingerPrint: {
+				files: [{
+					expand: true,
+					cwd: optimized,
+					dest: optimized,
+					src: ["**/*.html","!**/embeddedEditor/**"]
+				}],
+				options: {
+					replacements: modules.map(function(replace){
+						return {
+							pattern: replace,
+							replacement: replace+"-" + '<%= fingerPrintString %>'
+						};
+					}).concat(modules.map(function(replace){
+						var fileName = replace.split("/").slice(-1)[0];
+						return {
+							pattern: fileName + ".css",
+							replacement: fileName + "-" + '<%= fingerPrintString %>' + ".css"
+						};
+					}))
 				}
 			}
 		},
@@ -153,7 +186,7 @@ module.exports = function(grunt) {
 	});
 
 	grunt.registerTask("test", ["simplemocha"]);
-	grunt.registerTask("optimize", ["printBuild", "copy:stage", "requirejs", "string-replace", "copy:unstage"]);
+	grunt.registerTask("optimize", ["printBuild", "copy:stage", "requirejs", "fingerprint" ,"string-replace", "copy:unstage"]);
 	grunt.registerTask("default", ["checkDirs", "clean", "copy:orionserver", "optimize", "test"]);
 	grunt.registerTask("notest", ["checkDirs", "clean", "copy:orionserver", "optimize"]);
 	grunt.registerTask("nomin",   ["checkDirs", "clean", "copy:orionserver", "string-replace:orionclient", "test"]);
