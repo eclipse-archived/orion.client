@@ -26,7 +26,7 @@ cd ..
 if [ ! -d "lib/orion.client" ]; then
 	rm -rf node_modules
 	npm install
-	./node_modules/.bin/grunt notest
+	./node_modules/.bin/grunt --skipTest
 fi
 
 # update orion.conf and package.json

@@ -11,7 +11,10 @@ module.exports = function(grunt) {
 	    extraModules = grunt.option("extraModules") ? grunt.option("extraModules").split(",") : [],
 	    clientPath = "../../",
 	    staging = "target/staging/",
-	    optimized = "target/optimized/";
+	    optimized = "target/optimized/",
+	    fingerPrint = grunt.option("fp") || false,
+	    skipTest = grunt.option("skipTest") || false,
+	    skipMinify = grunt.option("skipMinify") || false;
 	    
 	var socketioPath =  grunt.file.exists('./node_modules/socket.io/node_modules/socket.io-client') ?
 			'../../node_modules/socket.io/node_modules/socket.io-client/socket.io' :
@@ -25,6 +28,7 @@ module.exports = function(grunt) {
 		}),
 		modules =util.parseModules(orionBuildConfig, staging);
 	
+	// Register fingerprint multi task
 	fingerPrintRegistry(grunt);
 	
 	grunt.initConfig({
@@ -33,7 +37,11 @@ module.exports = function(grunt) {
 		configPath: configPath,
 		staging: staging,
 		optimized: optimized,
-		fingerPrintString:"",
+		fingerPrints:{
+			fingerprintModules:[],
+			allMaps:[],
+			jsMaps:[]
+		},
 		nodeBuildConfig: util.filterBuildConfig(orionBuildConfig, "<% requirejsExcludeModules %>", [
 			{
 				name: "plugins/consolePlugin"
@@ -125,7 +133,8 @@ module.exports = function(grunt) {
 					}]
 				}
 			},
-			replaceFingerPrint: {
+			// Replace file dependancies with fingerprint name throughout all the HTML files, this task will be excuted within finger print task, no need to call explicitely.
+			"replacefp-inHTMLs": {
 				files: [{
 					expand: true,
 					cwd: optimized,
@@ -133,18 +142,19 @@ module.exports = function(grunt) {
 					src: ["**/*.html","!**/embeddedEditor/**"]
 				}],
 				options: {
-					replacements: modules.map(function(replace){
-						return {
-							pattern: replace,
-							replacement: replace+"-" + '<%= fingerPrintString %>'
-						};
-					}).concat(modules.map(function(replace){
-						var fileName = replace.split("/").slice(-1)[0];
-						return {
-							pattern: fileName + ".css",
-							replacement: fileName + "-" + '<%= fingerPrintString %>' + ".css"
-						};
-					}))
+					replacements: '<%= fingerPrints.allMaps %>'
+				}
+			},
+			// Replace file dependancies with fingerprint name throughout all the JS files, this task will be excuted within finger print task, no need to call explicitely.
+			"replacefp-inJSs": {
+				files: [{
+					expand: true,
+					cwd: optimized,
+					dest: optimized,
+					src: '<%= fingerPrints.fingerprintModules %>'
+				}],
+				options: {
+					replacements: '<%= fingerPrints.jsMaps %>'
 				}
 			}
 		},
@@ -162,7 +172,7 @@ module.exports = function(grunt) {
 		generateSourceMaps: false, // Turn off source maps to reduce download size
 		appDir: staging,
 		baseUrl: "./",
-		dir: optimized // TODO <% optimized %> ?
+		dir: optimized
 	}));
 
 	// Task definitions
@@ -175,7 +185,7 @@ module.exports = function(grunt) {
 	grunt.registerTask("printBuild", function() {
 		grunt.log.writeln("Using build file", JSON.stringify(grunt.config("requirejs.compile.options"), null, 2));
 	});
-
+	
 	grunt.registerMultiTask("checkDirs", "Check files/dirs exist", function() {
 		this.filesSrc.forEach(function(filepath) {
 			grunt.verbose.write("Checking existence of " + filepath + "...");
@@ -186,8 +196,18 @@ module.exports = function(grunt) {
 	});
 
 	grunt.registerTask("test", ["simplemocha"]);
-	grunt.registerTask("optimize", ["printBuild", "copy:stage", "requirejs", "fingerprint" ,"string-replace", "copy:unstage"]);
-	grunt.registerTask("default", ["checkDirs", "clean", "copy:orionserver", "optimize", "test"]);
-	grunt.registerTask("notest", ["checkDirs", "clean", "copy:orionserver", "optimize"]);
-	grunt.registerTask("nomin",   ["checkDirs", "clean", "copy:orionserver", "string-replace:orionclient", "test"]);
+	grunt.registerTask("replaceFp", ["string-replace:replacefp-inHTMLs", "string-replace:replacefp-inJSs"]);
+	grunt.registerTask("optimize", fingerPrint ?
+		["printBuild", "copy:stage", "requirejs", "fingerprint", "string-replace:requiremin", "copy:unstage"]: 
+		["printBuild", "copy:stage", "requirejs", "string-replace:requiremin", "copy:unstage"]);
+	var tasksArray = ["checkDirs", "clean", "copy:orionserver"];
+	if(!skipMinify){
+		tasksArray.push("optimize");
+	}
+	if(!skipTest){
+		tasksArray.push("test");
+	}
+	grunt.registerTask("default", tasksArray);
+//	grunt.registerTask("notest", ["checkDirs", "clean", "copy:orionserver", "optimize"]);
+//	grunt.registerTask("nomin",   ["checkDirs", "clean", "copy:orionserver", "string-replace:orionclient", "test"]);
 };
