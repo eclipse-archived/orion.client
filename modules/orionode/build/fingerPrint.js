@@ -104,7 +104,7 @@ module.exports = function(grunt) {
 
 				try {
 					var tempFileCnt = grunt.file.read(filePathRef);
-					grunt.file.delete(filePathRef);
+//					grunt.file.delete(filePathRef);  // keep the original file
 					grunt.file.write(newFilePath, tempFileCnt);
 					count++;
 				} catch (e) {}
