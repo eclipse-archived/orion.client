@@ -704,7 +704,11 @@ function getDiff(repo, commit, fileDir) {
 			"Children": diffs
 		};
 		if (patches.length > 100) {
-			result.NextLocation = {pathname: gitRoot + "/diff/" + range + fileDir, query: {pageSize: pageSize, page: page + 1}};
+			var nextLocation = url.parse(gitRoot + "/diff/" + range + fileDir, true);
+			nextLocation.query.page = page + 1 + "";
+			nextLocation.query.pageSize = pageSize + "";
+			nextLocation = url.format(nextLocation);
+			result.NextLocation = nextLocation;
 		}
 		return result;
 	});
