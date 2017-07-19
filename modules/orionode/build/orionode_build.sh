@@ -25,8 +25,8 @@ rm -rf ../target
 cd ../..
 
 # Update build ID
-sed -i "s/orion\.buildId\=/orion\.buildId\=${1}/" orionode/orion.conf
-sed -i "s/var BUILD_ID \= \"unknown\"\;/var BUILD_ID \= \"${1}\"\;/" orionode/lib/version.js
+sed -i .bak "s/orion\.buildId\=/orion\.buildId\=${1}/" orionode/orion.conf
+sed -i .bak "s/var BUILD_ID \= \"unknown\"\;/var BUILD_ID \= \"${1}\"\;/" orionode/lib/version.js
 
 tar -czf "orionode_$1.tar.gz" orionode/
 cp "orionode_$1.tar.gz" ${DOWNLOADS}/orion/orionode/
