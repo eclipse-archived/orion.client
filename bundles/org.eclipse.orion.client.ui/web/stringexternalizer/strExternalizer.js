@@ -45,10 +45,10 @@ mSearchClient, mFileClient, mOperationsClient, mSearchResults, mGlobalCommands, 
 		var serviceRegistry = core.serviceRegistry;
 		var preferences = core.preferences;
 
-		new mDialogs.DialogService(serviceRegistry); //yes we're bad
 		var operationsClient = new mOperationsClient.OperationsClient(serviceRegistry);
 		new mStatus.StatusReportingService(serviceRegistry, operationsClient, "statusPane", "notifications", "notificationArea"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		var commandRegistry = new mCommandRegistry.CommandRegistry({ });
+		new mDialogs.DialogService(serviceRegistry, commandRegistry); //yes we're bad
 		var progress = new mProgress.ProgressService(serviceRegistry, operationsClient, commandRegistry);
 		
 		var themePreferences = new mThemePreferences.ThemePreferences(preferences, new mThemeData.ThemeData());
