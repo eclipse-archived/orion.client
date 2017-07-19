@@ -170,5 +170,6 @@ define({//Default message bundle
 	"justNow": "just now", //Represent that the time elapsed is less than 1 minute
 	"fixAll": "Fix all",
 	"nextSplitter" : "Next Splitter",
-	"nextSplitterTooltip": "Move focus through the available splitters" 
+	"nextSplitterTooltip": "Move focus through the available splitters",
+	"Confirm": "Confirm"
 });

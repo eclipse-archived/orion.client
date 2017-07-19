@@ -858,25 +858,38 @@ define([
 								if (deferredWrapper) {
 									// this is part of a folder upload, upload the file directly without showing
 									// progress for it but call decrementEntryCount when the upload finishes
-									var unzip = file.name.indexOf(".zip") === file.name.length - 4 && window.confirm(i18nUtil.formatMessage(messages["Unzip ${0}?"], file.name)); //$NON-NLS-1$ //$NON-NLS-0$
-									performDrop(target, file, explorer, unzip, false, true).then(
-										decrementEntryCount,
-										function(error) {
-											decrementEntryCount();
-											var errorMessage = messages["UploadingFileErr"] + file.name;
-											if (error && error.Message) {
-												errorMessage += " [" + error.Message + "]";
+									var d = new Deferred();
+									if(file.name.indexOf(".zip") === file.name.length - 4){
+										var dialog = explorer.serviceRegistry.getService("orion.page.dialog");								
+										dialog.confirm(i18nUtil.formatMessage(messages["Unzip ${0}?"], file.name), function(result){
+											if(!result){
+												result = false;
 											}
-											if (statusService) {
-												statusService.setProgressResult({
-													Severity: "Error",
-													Message: errorMessage
-												});
-											} else {
-												window.console.log(errorMessage);
+											d.resolve(result);
+										});	
+									}else{
+										d.resolve(false);
+									}
+									Deferred.when(d, function(unzip){
+										performDrop(target, file, explorer, unzip, false, true).then(
+											decrementEntryCount,
+											function(error) {
+												decrementEntryCount();
+												var errorMessage = messages["UploadingFileErr"] + file.name;
+												if (error && error.Message) {
+													errorMessage += " [" + error.Message + "]";
+												}
+												if (statusService) {
+													statusService.setProgressResult({
+														Severity: "Error",
+														Message: errorMessage
+													});
+												} else {
+													window.console.log(errorMessage);
+												}
 											}
-										}
-									);
+										);
+									});
 								} else {
 									explorer._uploadFile(item, file, true);
 								}
@@ -1029,50 +1042,62 @@ define([
 					var ignoreErrors = false;
 
 					var statusService = this.registry.getService("orion.page.message"); //$NON-NLS-0$
-
-					var unzip = file.name.indexOf(".zip") === file.name.length - 4 && window.confirm(i18nUtil.formatMessage(messages["Unzip ${0}?"], file.name)); //$NON-NLS-1$ //$NON-NLS-0$
-					var promise = this.dragAndDrop(targetItem, file, this, unzip, false, true);
-					var done = function() {
-						destroy();
-						this.changedItem(targetItem, true);
-					}.bind(this);
-					promise.then(
-						done,
-						function(error) {
-							done();
-							if (ignoreErrors || error.userCanceled) {
-								return;
+					var d = new Deferred();
+					if(file.name.indexOf(".zip") === file.name.length - 4){
+						var dialog = this.serviceRegistry.getService("orion.page.dialog");								
+						dialog.confirm(i18nUtil.formatMessage(messages["Unzip ${0}?"], file.name), function(result){
+							if(!result){
+								result = false;
 							}
-							var errorMessage = messages["UploadingFileErr"] + file.name;
-							if (event && event.Message) {
-								errorMessage += " [" + event.Message + "]";
+							d.resolve(result);
+						});	
+					}else{
+						d.resolve(false);
+					}
+					Deferred.when(d, function(unzip){
+						var promise = this.dragAndDrop(targetItem, file, this, unzip, false, true);
+						var done = function() {
+							destroy();
+							this.changedItem(targetItem, true);
+						}.bind(this);
+						promise.then(
+							done,
+							function(error) {
+								done();
+								if (ignoreErrors || error.userCanceled) {
+									return;
+								}
+								var errorMessage = messages["UploadingFileErr"] + file.name;
+								if (event && event.Message) {
+									errorMessage += " [" + event.Message + "]";
+								}
+								if (statusService) {
+									statusService.setProgressResult({
+										Severity: "Error",
+										Message: errorMessage
+									});
+								} else {
+									window.console.log(errorMessage);
+								}
+							},
+							function(event) {
+								var percentageText = "";
+								if (event.lengthComputable) {
+									percentageText = Math.floor(event.loaded / event.total * 100) + "%";
+									progressBar.style.width = percentageText;
+									var loadedKB = Math.round(event.loaded / 1024);
+									var totalKB = Math.round(event.total / 1024);
+									progressBar.title = messages["Upload progress: "] + percentageText + ",  " + loadedKB + "/" + totalKB + " KB"; //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+									refNode.title = progressBar.title;
+								}
 							}
-							if (statusService) {
-								statusService.setProgressResult({
-									Severity: "Error",
-									Message: errorMessage
-								});
-							} else {
-								window.console.log(errorMessage);
-							}
-						},
-						function(event) {
-							var percentageText = "";
-							if (event.lengthComputable) {
-								percentageText = Math.floor(event.loaded / event.total * 100) + "%";
-								progressBar.style.width = percentageText;
-								var loadedKB = Math.round(event.loaded / 1024);
-								var totalKB = Math.round(event.total / 1024);
-								progressBar.title = messages["Upload progress: "] + percentageText + ",  " + loadedKB + "/" + totalKB + " KB"; //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-								refNode.title = progressBar.title;
-							}
-						}
-					);
-
-					cancelButton.addEventListener("click", function() {
-						ignoreErrors = true;
-						promise.cancel();
-					});
+						);
+	
+						cancelButton.addEventListener("click", function() {
+							ignoreErrors = true;
+							promise.cancel();
+						});
+					}.bind(this));
 				}.bind(this));
 			}.bind(this);
 

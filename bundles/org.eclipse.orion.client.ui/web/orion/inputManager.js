@@ -224,11 +224,21 @@ define([
 					progress(fileClient.read(resource, true), messages.ReadingMetadata, fileURI).then(function(data) {
 						if (this._fileMetadata && !this._fileMetadata._saving && this._fileMetadata.Location === data.Location && this._fileMetadata.ETag !== data.ETag) {
 							this._fileMetadata = objects.mixin(this._fileMetadata, data);
-							if (!editor.isDirty() || window.confirm(messages.loadOutOfSync)) {
+							var doSync = function(){
 								progress(fileClient.read(resource), messages.Reading, fileURI).then(function(contents) {
 									editor.setInput(fileURI, null, contents, null, nofocus);
 									this._clearUnsavedChanges();
 								}.bind(this));
+							};
+							if (!editor.isDirty()){
+								doSync();
+							}else{
+								var dialog = this.serviceRegistry.getService("orion.page.dialog");
+								dialog.confirm(messages.loadOutOfSync,function(result){
+									if(result){
+										doSync();
+									}
+								});
 							}
 						}
 					}.bind(this));
@@ -455,17 +465,18 @@ define([
 					// expected error - HTTP 412 Precondition Failed
 					// occurs when file is out of sync with the server
 					if (error.status === 412) {
-						var forceSave = window.confirm(messages.saveOutOfSync);
-						if (forceSave) {
-							// repeat save operation, but without ETag
-							var redef = that.fileClient.write(resource, contents);
-							if (progress) {
-								redef = progress.progress(redef, i18nUtil.formatMessage(messages.savingFile, input));
+						var dialog = that.serviceRegistry.getService("orion.page.dialog");	
+						dialog.confirm(messages.saveOutOfSync,function(result){
+							if(result){
+								var redef = that.fileClient.write(resource, contents);
+								if (progress) {
+									redef = progress.progress(redef, i18nUtil.formatMessage(messages.savingFile, input));
+								}
+								redef.then(successHandler, errorHandler);
+							}else{
+								return done();
 							}
-							redef.then(successHandler, errorHandler);
-						} else {
-							return done();
-						}
+						});
 					} else {
 						// unknown error
 						errorHandler(error);

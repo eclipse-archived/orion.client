@@ -20,10 +20,10 @@ define(['require', 'i18n!orion/sites/nls/messages', 'orion/i18nUtil', 'orion/boo
 			var serviceRegistry = core.serviceRegistry;
 			var preferences = core.preferences;
 			
-			var dialogService = new mDialogs.DialogService(serviceRegistry);
 			var operationsClient = new mOperationsClient.OperationsClient(serviceRegistry);
 			var statusService = new mStatus.StatusReportingService(serviceRegistry, operationsClient, "statusPane", "notifications", "notificationArea"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			var commandRegistry = new mCommandRegistry.CommandRegistry({ });
+			var dialogService = new mDialogs.DialogService(serviceRegistry, commandRegistry);
 			var progressService = new mProgress.ProgressService(serviceRegistry, operationsClient, commandRegistry);
 		
 			var siteLocation = PageUtil.matchResourceParameters().resource;

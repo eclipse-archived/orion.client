@@ -482,9 +482,11 @@ define(['i18n!orion/settings/nls/messages', 'orion/i18nUtil', 'require', 'orion/
 			// TODO: Should be internationalized
 				
 			var confirmMessage = i18nUtil.formatMessage(messages["UninstallCfrm"],url); //$NON-NLS-1$
-			if (window.confirm(confirmMessage)) {
-				this.forceRemove(url);
-			}
+			this.dialogService.confirm(confirmMessage, function(result){
+				if(result){
+					this.forceRemove(url);
+				}
+			}.bind(this));
 		}
 	});
 	return PluginList;

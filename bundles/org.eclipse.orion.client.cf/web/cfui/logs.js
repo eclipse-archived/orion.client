@@ -23,9 +23,9 @@ define(['i18n!cfui/nls/messages', 'orion/webui/littlelib', 'orion/bootstrap', 'o
 			var preferences = core.preferences;
 			var pluginRegistry = core.pluginRegistry;
 		
-			new mDialogs.DialogService(serviceRegistry);
 			var selection = new mSelection.Selection(serviceRegistry);
 			var commandRegistry = new CommandRegistry.CommandRegistry({selection: selection});
+			new mDialogs.DialogService(serviceRegistry, commandRegistry);
 			var operationsClient = new mOperationsClient.OperationsClient(serviceRegistry);
 			var statusService = new mStatus.StatusReportingService(serviceRegistry, operationsClient, "statusPane", "notifications", "notificationArea"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			var progressService = new mProgress.ProgressService(serviceRegistry, operationsClient, commandRegistry);
