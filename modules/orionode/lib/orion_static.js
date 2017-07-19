@@ -60,7 +60,6 @@ exports = module.exports = function(options) {
 		}else if(EXT_CACHE_MAPPING[ext]){
 			res.setHeader("Cache-Control", EXT_CACHE_MAPPING[ext] );
 		}else{
-			console.log(path)
 			res.setHeader("Cache-Control", _24_HOURS);
 		}
 	};
