@@ -38,7 +38,7 @@ module.exports = function(grunt) {
 		staging: staging,
 		optimized: optimized,
 		fingerPrints:{
-			fingerprintModules:[],
+			fingerprintModules:['javascript/plugins/ternWorker.js'],
 			allMaps:[],
 			jsMaps:[]
 		},
