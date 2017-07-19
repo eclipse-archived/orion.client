@@ -22,7 +22,6 @@ module.exports = function(grunt) {
 		};
 		this.requiresConfig(configPrefix + '.' + 'src');
 		var done = this.async();
-
 		fpArr[target] = {};
 		fpArr[target]['fileInputList'] = [];
 		var wholeFilesTofingerPrint = [];
@@ -31,56 +30,52 @@ module.exports = function(grunt) {
 			wholeFilesTofingerPrint.push(each+ ".js");
 			wholeFilesTofingerPrint.push(each+ ".css");
 		});
-		
+		var fingerprintModules = grunt.config.get('fingerPrints.fingerprintModules');
+		// Need to save the whole map, which including js and css file, needed for HTML file;
+		var allMaps = grunt.config.get('fingerPrints.allMaps');
+		// Need to save the js map, which including js files only, needed for js file of the modules;
+		var jsMaps = grunt.config.get('fingerPrints.jsMaps');
 		async.forEach(wholeFilesTofingerPrint, function(file, next) {
 			var filePath = _path.join(getOption('path'), file);
 			if(grunt.file.exists(filePath)){
 				var sha1 = crypto.createHash('sha1');
 				sha1.update(grunt.file.read(filePath));
-				var baseVal = getOption('baseVal') || 'hex';
-				baseVal = baseVal === "base16" ? "hex" : baseVal;
-				var cryptoVal = sha1.digest(baseVal).replace(/\//g, '-');
+				var cryptoVal = sha1.digest('hex');
 				fpArr[target]['fileInputList'].push({
 					filePath:filePath,
 					fp:cryptoVal
 				});
-				// Need to save the whole map, which including js and css file, needed for HTML file;
-				var allMaps = grunt.config.get('fingerPrints.allMaps');
-				
-				// Need to save the js map, which including js files only, needed for js file of the modules;
-				var jsMaps = grunt.config.get('fingerPrints.jsMaps');
 				var fpFile = "";
 				var patternReg;
 				if(file.indexOf(".js") !== -1){
-					var fingerprintModules = grunt.config.get('fingerPrints.fingerprintModules');
 					file = file.slice(0, -3);
-					fpFile = file + "-" + cryptoVal;
-					// Need to save the finger printed js modules files, with in which, dependencies of other js files will be replaced with fingerprinted ones.
-					fingerprintModules.push(fpFile + ".js");
+					fpFile = file + "." + cryptoVal;
 					// pattern and replacement object are for string-replace grunt task, this can't be changed to others
 					patternReg = new RegExp('"' + file + '"', "g"); // should not replace the "index" of tabindex, should not replace "edit/edit" of 'edit/edit.html'
+					// Need to save the finger printed js modules files, with in which, dependencies of other js files will be replaced with fingerprinted ones.
+					fingerprintModules.push(fpFile + ".js");
 					jsMaps.push({
 						pattern: patternReg,
 						replacement: '"' + fpFile + '"'
 					});
-					grunt.config.set('fingerPrints.fingerprintModules', fingerprintModules);
-					grunt.config.set('fingerPrints.jsMaps', jsMaps);
 				}else{
 					var segs = file.split("/");
 					file = segs[segs.length - 1];
 					patternReg = new RegExp('"' + file + '"', "g");
-					fpFile = file.slice(0, -4) + "-" + cryptoVal + ".css";
+					fpFile = file.slice(0, -4) + "." + cryptoVal + ".css";
 				}
 				allMaps.push({
 					pattern: patternReg,
 					replacement: '"' + fpFile + '"'
 				});
-				grunt.config.set('fingerPrints.allMaps', allMaps);
 			}
 			next();
 		}, function() {
 			done();
 		});
+		grunt.config.set('fingerPrints.fingerprintModules', fingerprintModules);
+		grunt.config.set('fingerPrints.jsMaps', jsMaps);
+		grunt.config.set('fingerPrints.allMaps', allMaps);
 		creteFingerPrint();
 		grunt.task.run("replaceFp");
 	});
@@ -96,15 +91,14 @@ module.exports = function(grunt) {
 				var fp = ipFileList[j].fp;
 				filePath = filePath.split('.'); // Used to split name and ext
 				var fileExt = filePath.length > 1 ? '.' + filePath.pop() : "";
-				var newFilePath = filePath.join('.') + '-' + fp + fileExt;
+				var newFilePath = filePath.join('.') + '.' + fp + fileExt;
 
 				//avoid multiple fingerprint value on file name
-				var regex = new RegExp('-' + fp + '-' + fp, "g");
-				newFilePath = newFilePath.replace(regex, '-' + fp);
+				var regex = new RegExp('.' + fp + '.' + fp, "g");
+				newFilePath = newFilePath.replace(regex, '.' + fp);
 
 				try {
 					var tempFileCnt = grunt.file.read(filePathRef);
-					grunt.file.delete(filePathRef);  // keep the original file
 					grunt.file.write(newFilePath, tempFileCnt);
 					count++;
 				} catch (e) {}
