@@ -743,6 +743,12 @@ define([
 					scopeString = this._fileClient.fileServiceName(scopeString);
 				} else {
 					scopeString = scopeString.replace(rootName, "");
+					if(scopeString === "/workspace/orionode"){
+						scopeString = messages["Scope All"];
+					}else{
+						// Remove the workspace name portion from the scopeString, which will remove 'orionode' from '/orionode/Foldername'
+						scopeString = "/" + scopeString.split("/").slice(2).join("/");
+					}
 				}
 				var locationElementWrapper = document.createElement("div");
 				locationElementWrapper.classList.add("locationElementWrapper");
