@@ -502,7 +502,7 @@ function(messages, i18nUtil, mCommands, mCommandRegistry, lib, mTooltip, colors,
 			//if default theme
 			var node = document.getElementById("editorTheme");
 			if (protectedThemes.indexOf(currentTheme.name) !== -1){
-				this.commandService.alarm(node, currentTheme.name + messages["cannotDeleteMsg"], messages['Ok']);
+				this.commandService.alert(node, currentTheme.name + messages["cannotDeleteMsg"], messages['Ok']);
 			}else{
 				this.commandService.confirm(node, messages["confirmDeleteMsg"], messages['Ok'], messages['Cancel'], false, function() {
 					this.preferences.getTheme(function(themeStyles) {

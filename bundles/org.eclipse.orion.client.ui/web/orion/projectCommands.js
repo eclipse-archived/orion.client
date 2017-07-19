@@ -1296,6 +1296,7 @@ define(['require', 'i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 
 							}
 							if(nonZipFiles.length == 0) {
 								projectNameDialog.show();
+								fileInput.removeEventListener("change", changeListener);
 							}else{
 								var dialog = this.serviceRegistry.getService("orion.page.dialog");								
 								dialog.confirm(message, function(result){
@@ -1305,8 +1306,9 @@ define(['require', 'i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 
 									fileInput.removeEventListener("change", changeListener);
 								});	
 							}
+						}else{
+							fileInput.removeEventListener("change", changeListener);
 						}
-						fileInput.removeEventListener("change", changeListener);
 					}.bind(this);
 					fileInput.addEventListener("change", changeListener);
 
