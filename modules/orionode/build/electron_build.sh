@@ -12,10 +12,10 @@
 #  For multi platform build: https://github.com/electron-userland/electron-builder/wiki/Multi-Platform-Build
 #
 
-# Need node 4.4.1
-if [ "v4.4.1" != `node --version` ]; then
+# Need node 6.11.1
+if [ "v6.11.1" != `node --version` ]; then
 	echo -----------------------------------
-	echo Warning: node version is not v4.4.1
+	echo Warning: node version is not v6.11.1
 	echo -----------------------------------
 	exit 1
 fi

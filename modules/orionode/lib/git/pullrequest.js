@@ -114,7 +114,7 @@ function getPullRequest(req, res) {
 						Message: message,
 						Severity: "Error"
 					});
-				} else if (!error && response.statusCode === 403 && body.indexOf("API rate limit exceeded") !== -1) {
+				} else if (!error && response.statusCode === 403 && body.indexOf(" rate limit exceeded") !== -1) {
 					task.done({
 						HttpCode: 403,
 						Code: 0,
