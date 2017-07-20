@@ -64,8 +64,7 @@ function getIndex(req, res) {
 				writeError(404, res, filePath + " not found in index");
 			}
 		} else {
-			res.write(blob.toString());
-			writeResponse(200, res);
+			writeResponse(200, res, null, blob.toString(), null, true);
 		}
 	})
 	.catch(function(err) {
