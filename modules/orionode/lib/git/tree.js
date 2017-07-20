@@ -194,7 +194,7 @@ function getTree(req, res) {
 	})
 	.catch(function(err) {
 		if (typeof readIfExists === 'boolean' && readIfExists) {
-			res.sendStatus(204);
+			api.sendStatus(204, res);
 		}else{
 			writeError(404, res, err.message);
 		}

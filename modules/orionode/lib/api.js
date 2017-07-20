@@ -57,6 +57,16 @@ function toURLPath(p) {
 }
 
 /**
+ * Helper for send a status response
+ * @param {Number} code
+ * @param {HttpResponse} res
+ */
+function sendStatus(code, res){
+	setResponseNoCache(res);
+	res.sendStatus(code);
+}
+
+/**
  * Helper for writing a JSON response.
  * @param {Number} code
  * @param {HttpResponse} res
@@ -186,4 +196,5 @@ exports.writeError = writeError;
 exports.writeResponse = writeResponse;
 exports.encodeLocation = encodeLocation;
 exports.setResponseNoCache = setResponseNoCache;
+exports.sendStatus = sendStatus;
 exports.getOrionEE = getOrionEE;

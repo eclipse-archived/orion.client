@@ -59,7 +59,7 @@ function getIndex(req, res) {
 	.then(function(blob) {
 		if (typeof blob === 'number') {
 			if (blob === 204) {
-				res.sendStatus(204);
+				api.sendStatus(204, res);
 			} else {
 				writeError(404, res, filePath + " not found in index");
 			}
