@@ -57,6 +57,16 @@ function toURLPath(p) {
 }
 
 /**
+ * Helper for send a status response
+ * @param {Number} code
+ * @param {HttpResponse} res
+ */
+function sendStatus(code, res){
+	setResponseNoCache(res);
+	res.sendStatus(code);
+}
+
+/**
  * Helper for writing a JSON response.
  * @param {Number} code
  * @param {HttpResponse} res
@@ -77,22 +87,27 @@ function writeResponse(code, res, headers, body, needEncodeLocation, noCachedStr
 	if (typeof body !== 'undefined') {
 		if (typeof body === 'object') {
 			needEncodeLocation && encodeLocation(body);
-			setResponseNoCache();			
+			setResponseNoCache(res);			
 			return res.json(body);
 		}
 		if(noCachedStringRes){
-			setResponseNoCache();
+			setResponseNoCache(res);
 		}
 		res.send(body);
 	} else {
+		setResponseNoCache(res);
 		res.end();
 	}
-	function setResponseNoCache(){
-		res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate"); // HTTP 1.1.
-		res.setHeader("Pragma", "no-cache"); // HTTP 1.1.
-		res.setHeader("Expires", "0"); // HTTP 1.1.		
-	}
+	
 }
+
+function setResponseNoCache(res){
+	res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate"); // HTTP 1.1.
+	res.setHeader("Pragma", "no-cache"); // HTTP 1.1.
+	res.setHeader("Expires", "0"); // HTTP 1.1.		
+}
+
+
 
 var LocationRegex = /Location$/;
 var PercentReplaceRegex = /\%/g;
@@ -126,6 +141,7 @@ function encodeLocation(obj) {
  */
 function writeError(code, res, msg) {
 	msg = msg instanceof Error ? msg.message : msg;
+	setResponseNoCache(res);
 	if (typeof msg === 'string') {
 		var err = JSON.stringify({Severity: "Error", Message: msg});
 		res.setHeader('Content-Type', 'application/json');
@@ -179,4 +195,6 @@ exports.join = join;
 exports.writeError = writeError;
 exports.writeResponse = writeResponse;
 exports.encodeLocation = encodeLocation;
+exports.setResponseNoCache = setResponseNoCache;
+exports.sendStatus = sendStatus;
 exports.getOrionEE = getOrionEE;

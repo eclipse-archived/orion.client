@@ -127,7 +127,7 @@ function handleGet(req, res) { //eslint-disable-line consistent-return
 	// Sending a single property
 	var value = node[key];
 	if (typeof value === 'undefined') {
-		return res.sendStatus(404);
+		return api.sendStatus(404, res);
 	}
 	var result = {};
 	result[key] = value;
@@ -140,12 +140,12 @@ function handlePut(req, res) {
 	if (req.is('json')) {
 		// Replace entire pref node
 		prefs.set(prefPath, body);
-		return res.sendStatus(204);
+		return api.sendStatus(204, res);
 	} else if (req.is('urlencoded')) {
 		// Replace a single property
 		var key = body.key, value = body.value;
 		if (typeof key === 'undefined') {
-			return res.sendStatus(400);
+			return api.sendStatus(400, res);
 		}
 
 		var node = req.prefNode === NOT_EXIST ? {} : req.prefNode;
@@ -155,16 +155,16 @@ function handlePut(req, res) {
 			node[key] = value; // FIXME watch out for __proto__ hacks
 		}
 		prefs.set(prefPath, node);
-		return res.sendStatus(204);
+		return api.sendStatus(204, res);
 	}
-	return res.sendStatus(400); // unknown content type
+	return api.sendStatus(400, res);// unknown content type
 }
 
 function handleDelete(req, res) { //eslint-disable-line consistent-return
 	var prefs = req.prefs, prefPath = req.prefPath, node = req.prefNode;
 	if (node === NOT_EXIST) {
 		// Deleting a nonexistent node (or some key therein), noop
-		return res.sendStatus(204);
+		return api.sendStatus(204, res);
 	}
 	var key = req.params.key;
 	if (typeof key === 'string') {
@@ -175,7 +175,7 @@ function handleDelete(req, res) { //eslint-disable-line consistent-return
 		// Delete entire node
 		prefs.delete(prefPath);
 	}
-	res.sendStatus(204);
+	return api.sendStatus(204, res);
 }
 
 function getElectronPrefsFileName(){

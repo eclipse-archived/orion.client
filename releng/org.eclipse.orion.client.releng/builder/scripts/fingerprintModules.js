@@ -38,7 +38,7 @@ if (!bundles.length)
 	self.log("No bundles found in build file " + buildFile, Project.MSG_WARN);
 
 self.log("Generate fingerprint for JS files");
-var fingerprintModules = [], jsMaps = [];
+var fingerprintModules = [new Packages.java.io.File(todir, "javascript/plugins/ternWorker.js")], jsMaps = [];
 buildConfigModules.forEach(function(optimizedModule, i) {
 	var srcFile = new Packages.java.io.File(todir, optimizedModule.name + ".js");
 	var checksum = project.createTask("checksum");

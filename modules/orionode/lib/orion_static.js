@@ -12,14 +12,39 @@
 var express = require('express');
 var nodePath = require('path');
 var mime = require('mime');
-//var mime = connect.mime;
 
-//not sure what mime is for
+//Add custom mime/extension mappings for files with costomized extension, like : pref
 mime.define({
 	'application/json': ['pref', 'json']
 });
 
-var _24_HOURS = 1440 * 60000;
+var _24_HOURS = "public, max-age=86400, must-revalidate";
+var _12_HOURS = "max-age=43200, must-revalidate";
+var _15_MINUTE = "max-age=900, must-revalidate";
+var _NO_CACHE = "max-age=0, no-cache, no-store";
+var EXT_CACHE_MAPPING = {
+	// 24 Hours:
+	".gif": _24_HOURS, 
+	".jpg": _24_HOURS,
+	".png": _24_HOURS, 
+	".bmp": _24_HOURS, 
+	".tif": _24_HOURS,
+	".ico": _24_HOURS,
+	
+	// 12 Hours:
+	".js": _12_HOURS, 
+	".css": _12_HOURS,
+	
+	// 15 Minutes:
+	".json": _15_MINUTE, 
+	".pref": _15_MINUTE, 
+	".woff": _15_MINUTE,
+	".ttf": _15_MINUTE,
+	
+	// No Cache:
+	".html": _NO_CACHE, 
+};
+
 
 /**
  * @param {Object} options Options to be passed to static middleware
@@ -28,7 +53,16 @@ var _24_HOURS = 1440 * 60000;
 exports = module.exports = function(options) {
 	options = options || {};
 	options.dotfiles = 'allow';
-	options.maxAge = typeof options.maxAge === "number" ? options.maxAge : _24_HOURS;
+	options.setHeaders = function setMaxAgeAccordingly(res, path, stat){
+		var ext = nodePath.extname(path);
+		if(nodePath.basename(nodePath.dirname(path)) === "requirejs"){
+			res.setHeader("Cache-Control",_24_HOURS);
+		}else if(EXT_CACHE_MAPPING[ext]){
+			res.setHeader("Cache-Control", EXT_CACHE_MAPPING[ext] );
+		}else{
+			res.setHeader("Cache-Control", _24_HOURS);
+		}
+	};
 	var orionClientRoot = options.orionClientRoot;
 	if (!orionClientRoot) { throw new Error('orion-static root path required'); }
 

@@ -380,7 +380,7 @@ function deleteRemote(req, res) {
 					if (err) {
 						return writeError(403, res, err.message);
 					}
-					res.status(200).end();
+					writeResponse(200, res);
 				});
 			}
 		});

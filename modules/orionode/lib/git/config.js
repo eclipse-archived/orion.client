@@ -172,7 +172,7 @@ function updateConfig(req, res, key, value, callback) {
 						var resp = configJSON(key, result.value, fileDir);
 						writeResponse(result.status, res, {"Location":resp.Location}, resp, true);
 					} else {
-						res.status(result.status).end();
+						writeResponse(result.status, res);
 					}
 				});
 			} else {

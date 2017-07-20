@@ -165,7 +165,7 @@ function getSite(req, res) {
 			writeResponse(200, res, null, siteJSON(site, req));
 		} else {
 			res.writeHead(400, "Site not found:" + req.params.id);
-			res.end();
+			writeResponse(null, res);
 		}
 	});
 }
@@ -196,7 +196,7 @@ function updateSite(req, res, callback, okStatus) {
 			site = callback(site, sites);
 			if (site && site.error) {
 				res.writeHead(site.status, site.error);
-				return res.end();
+				return writeResponse(null, res);
 			}
 			saveSites(req, prefs, function() {
 				if (err) res.writeHead(400, "Failed to update site:" + req.params.id);
@@ -204,7 +204,7 @@ function updateSite(req, res, callback, okStatus) {
 			});
 		} else {
 			res.writeHead(400, "Site not found:" + req.params.id);
-			res.end();
+			writeResponse(null, res);
 		}
 	});
 }

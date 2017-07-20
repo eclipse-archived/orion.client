@@ -202,7 +202,7 @@ function deleteTag(req, res) {
 	})
 	.then(function(resp) {
 		if (!resp) {
-			res.status(200).end();
+			writeResponse(200, res)
 		} else {
 			writeError(403, res);
 		} 

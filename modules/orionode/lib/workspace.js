@@ -11,9 +11,8 @@
 /*eslint-env node*/
 var express = require('express');
 var bodyParser = require('body-parser');
-var api = require('./api');
+var api = require('./api'), writeError = api.writeError, writeResponse = api.writeResponse;
 var fileUtil = require('./fileUtil');
-var writeError = api.writeError;
 
 module.exports = function(options) {
 	var fileRoot = options.fileRoot;
@@ -151,9 +150,9 @@ module.exports = function(options) {
 			var originalLocation = options.options.workspaceDir;
 			options.options.workspaceDir = req.body.Location;
 			api.getOrionEE().emit("workspace-changed",[req.body.Location,originalLocation]);
-			return res.status(200).end();
+			return writeResponse(200, res);
 		}
-		writeError(403, res);
+		return writeError(403, res);
 	}
 
 	function deleteWorkspace(req, res) {
@@ -168,7 +167,7 @@ module.exports = function(options) {
 				if (err) {
 					return writeError(400, res, err);
 				}
-				return res.status(200).end();
+				return writeResponse(200, res);
 			});
 		});
 	}
