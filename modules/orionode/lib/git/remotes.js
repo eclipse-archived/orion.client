@@ -327,7 +327,7 @@ function pushRemote(req, res, remote, branch, pushSrcRef, tags, force) {
 		if(tags){
 			return repo.getRemote(remote)
 			.then(function(remote){
-				return Promise.all([remote,remote.connect(git.Enums.DIRECTION.FETCH)]);				
+				return Promise.all([remote,remote.connect(git.Enums.DIRECTION.FETCH, clone.getRemoteCallbacks(req, task))]);			
 			})
 			.then(function(results){
 				var remote = results[0];
