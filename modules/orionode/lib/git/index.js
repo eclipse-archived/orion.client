@@ -64,7 +64,7 @@ function getIndex(req, res) {
 				writeError(404, res, filePath + " not found in index");
 			}
 		} else {
-			 writeResponse(200, res, {"Content-Type":"application/octect-stream"}, blob.toString(), false, true);
+			writeResponse(200, res, {"Content-Type":"application/octect-stream"}, blob.toString(), false, true);
 		}
 	})
 	.catch(function(err) {

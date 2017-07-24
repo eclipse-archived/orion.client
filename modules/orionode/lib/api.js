@@ -11,6 +11,8 @@
 /*eslint-env node*/
 var url = require('url');
 var events = require('events');
+var log4js = require('log4js');
+var logger = log4js.getLogger("response");
 var orionEE;
 
 /*
@@ -62,8 +64,13 @@ function toURLPath(p) {
  * @param {HttpResponse} res
  */
 function sendStatus(code, res){
-	setResponseNoCache(res);
-	res.sendStatus(code);
+	try{
+		setResponseNoCache(res);
+		res.sendStatus(code);
+	}catch(err){
+		logger.error(res.req.originalUrl , err.message);
+		throw err;
+	}
 }
 
 /**
@@ -76,29 +83,33 @@ function sendStatus(code, res){
  * @param {Boolean} noCachedStringRes,set to true in case if the response is text/plain, but still need nocache cache-control
  */
 function writeResponse(code, res, headers, body, needEncodeLocation, noCachedStringRes) {
-	if (typeof code === 'number') {
-		res.status(code);
-	}
-	if (headers && typeof headers === 'object') {
-		Object.keys(headers).forEach(function(header) {
-			res.setHeader(header, headers[header]);
-		});
-	}
-	if (typeof body !== 'undefined') {
-		if (typeof body === 'object') {
-			needEncodeLocation && encodeLocation(body);
-			setResponseNoCache(res);			
-			return res.json(body);
+	try{
+		if (typeof code === 'number') {
+			res.status(code);
 		}
-		if(noCachedStringRes){
+		if (headers && typeof headers === 'object') {
+			Object.keys(headers).forEach(function(header) {
+				res.setHeader(header, headers[header]);
+			});
+		}
+		if (typeof body !== 'undefined') {
+			if (typeof body === 'object') {
+				needEncodeLocation && encodeLocation(body);
+				setResponseNoCache(res);			
+				return res.json(body);
+			}
+			if(noCachedStringRes){
+				setResponseNoCache(res);
+			}
+			res.send(body);
+		} else {
 			setResponseNoCache(res);
+			res.end();
 		}
-		res.send(body);
-	} else {
-		setResponseNoCache(res);
-		res.end();
+	}catch(err){
+		logger.error(res.req.originalUrl , err.message);
+		throw err;
 	}
-	
 }
 
 function setResponseNoCache(res){
@@ -140,17 +151,22 @@ function encodeLocation(obj) {
  * @param {String|Error} [msg]
  */
 function writeError(code, res, msg) {
-	msg = msg instanceof Error ? msg.message : msg;
-	setResponseNoCache(res);
-	if (typeof msg === 'string') {
-		var err = JSON.stringify({Severity: "Error", Message: msg});
-		res.setHeader('Content-Type', 'application/json');
-		res.setHeader('Content-Length', err.length);
-		res.writeHead(code, msg);
-		res.end(err);
-	} else {
-		res.writeHead(code, msg);
-		res.end();
+	try{
+		msg = msg instanceof Error ? msg.message : msg;
+		setResponseNoCache(res);
+		if (typeof msg === 'string') {
+			var err = JSON.stringify({Severity: "Error", Message: msg});
+			res.setHeader('Content-Type', 'application/json');
+			res.setHeader('Content-Length', err.length);
+			res.writeHead(code, msg);
+			res.end(err);
+		} else {
+			res.writeHead(code, msg);
+			res.end();
+		}
+	}catch(err){
+		logger.error(res.req.originalUrl , err.message);
+		throw err;
 	}
 }
 
