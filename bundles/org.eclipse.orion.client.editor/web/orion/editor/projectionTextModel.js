@@ -467,8 +467,7 @@ define("orion/editor/projectionTextModel", ['orion/editor/textModel', 'orion/edi
 				removedCharCount: change.removedCharCount,
 				addedCharCount: change.addedCharCount,
 				removedLineCount: change.removedLineCount,
-				addedLineCount: change.addedLineCount,
-				collabHandShake:modelChangedEvent.collabHandShake
+				addedLineCount: change.addedLineCount
 			};
 			this.onChanged(modelChangedEvent1);
 			this._change = undefined;
@@ -542,7 +541,7 @@ define("orion/editor/projectionTextModel", ['orion/editor/textModel', 'orion/edi
 		/**
 		 * @see orion.editor.TextModel#setText
 		 */
-		setText: function(text, start, end, collabHandShake) {
+		setText: function(text, start, end) {
 			this._change = {
 				text: text || "",
 				start: start || 0,
@@ -582,7 +581,7 @@ define("orion/editor/projectionTextModel", ['orion/editor/textModel', 'orion/edi
 				//TODO events - special case - change is completely inside of a projection
 				projection._model.setText(this._change.text, startProjection.start, endProjection.end);
 			} else {
-				this._model.setText(this._change.text, mapStart, mapEnd, collabHandShake);
+				this._model.setText(this._change.text, mapStart, mapEnd);
 				if (startProjection) {
 					projection = startProjection.projection;
 					projection._model.setText("", startProjection.start);
