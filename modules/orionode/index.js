@@ -39,17 +39,8 @@ function startServer(options) {
 	}
 	
 	try {
-		var httpProxy = require('http-proxy'),
-		    app = express();
-		var proxy = httpProxy.createProxyServer({});
-		app.use('/proxy/:port/', function(req, res, next) {
-			if (!isFinite(req.params.port) || Math.floor(req.params.port) != req.params.port) { next(); return; }
-			proxy.web(req, res, { target: 'http://127.0.0.1:' + req.params.port }, function(ex) { next(ex); } );
-		});
-		app.use('/proxy/', function(req, res, next) {
-			proxy.web(req, res, { target: 'http://127.0.0.1:3000' }, function(ex) { next(ex); } );
-		});
-		
+		var app = express();
+
 		options.app = app;
 
 		function checkAuthenticated(req, res, next) {

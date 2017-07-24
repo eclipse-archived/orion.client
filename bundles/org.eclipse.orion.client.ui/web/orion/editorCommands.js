@@ -628,7 +628,7 @@ define([
 		},
 		_createSwitchWorkspaceCommand: function() {
 			var that = this;
-			var fileSystem = this.fileClient.fileServiceRootURL(window.location.hash.substring(1));
+			var fileSystem = "";
 			this.fileClient.loadWorkspaces(fileSystem).then(function(workspaces) {
 				if (this.sideBar) {
 					this.sideBar.sidebarNavInputManager.addEventListener("filesystemChanged", function(evt) {

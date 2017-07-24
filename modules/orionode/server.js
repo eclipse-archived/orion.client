@@ -114,20 +114,6 @@ function startServer(cb) {
 				next();
 			}, orion);
 			
-			var httpProxy = require('http-proxy');
-			var proxy = httpProxy.createProxyServer({});
-			app.use('/:port/', function(req, res, next) {
-				if (!isFinite(req.params.port) || Math.floor(req.params.port) != req.params.port) { next(); return; }
-				proxy.web(req, res, { target: 'http://127.0.0.1:' + req.params.port }, function(ex) { next(ex); } );
-			});
-			app.use('/port/:port/', function(req, res, next) {
-				if (!isFinite(req.params.port) || Math.floor(req.params.port) != req.params.port) { next(); return; }
-				proxy.web(req, res, { target: 'http://127.0.0.1:' + req.params.port }, function(ex) { next(ex); } );
-			});
-			app.use('/', function(req, res, next) {
-				proxy.web(req, res, { target: 'http://127.0.0.1:3000' }, function(ex) { next(ex); } );
-			});
-			
 			server = require('http-shutdown')(server);
 			var io = socketio.listen(server, { 'log level': 1, path: (listenContextPath ? contextPath : '' ) + '/socket.io' });
 			ttyShell.install({ io: io, app: orion, fileRoot: contextPath + '/file', workspaceDir: workspaceDir });

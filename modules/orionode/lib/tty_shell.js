@@ -40,18 +40,8 @@ exports.install = function(options) {
 		var rest = api.rest(fileRoot, wwwPath || "");
 		// Check if the cwd passed in exists. If not, fall back to the user's
 		// workspace dir
-		if(!rest){
-			rest = api.rest("/orion/sharedWorkspace/tree/file", wwwPath || "");
-		}
-		if(!rest) {
-			callback(userWorkspaceDir);
-			return;
-		}
+		
 		var file = fileUtil.getFile(req, rest);
-		if(!file) {
-			callback(userWorkspaceDir);
-			return;
-		}
 		var cwd = file.path;
 		fs.stat(cwd, function(err, stats) {
 			if (err || !stats.isDirectory()) {
@@ -119,7 +109,7 @@ exports.install = function(options) {
 				var buff = [];
 				// Open Terminal Connection
 				var shell = process.platform === 'win32' ? 'powershell.exe' : (process.env.SHELL || 'sh');
-				var terminal = pty.spawn(shell, ['--norc'], {
+				var terminal = pty.spawn(shell, [], {
 					name: require('fs').existsSync('/usr/share/terminfo/x/xterm-256color')
 					? 'xterm-256color'
 					: 'xterm',

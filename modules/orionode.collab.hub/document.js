@@ -32,7 +32,7 @@ class Document {
      * @param id - the doc id.
      * @param sessionId - the id of the session
      */
-    constructor(id, sessionId, session) {
+    constructor(id, sessionId) {
         /** @type {Map.<WebSocket, Client>} */
         this.clients = new Map();
         /** @type {ot.Server} */
@@ -42,7 +42,6 @@ class Document {
         this.awaitingDoc = false;
         this.waitingConnections = new Set();
         this.discard = false;
-        this.session = session;
         this.saveTimeout = 0;
     }
 
@@ -89,7 +88,7 @@ class Document {
     joinDocument(connection, clientId, client) {
         if (!this.clients.has(connection) && client) {
             this.clients.set(connection, client);
-            client.selection = null;
+            client.selection = new ot.Selection.createCursor(0);
         }
 
         var message = {
@@ -325,7 +324,7 @@ class Document {
     notifyOthers(connection, message, includeSender) {
         includeSender = !!includeSender;
         var msgStr = JSON.stringify(message);
-        this.session.clients.forEach(function(client, conn) {
+        this.clients.forEach(function(client, conn) {
             if (conn === connection && !includeSender) {
                 return;
             }

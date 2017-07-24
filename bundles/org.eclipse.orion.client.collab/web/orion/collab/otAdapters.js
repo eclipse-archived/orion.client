@@ -83,17 +83,8 @@ define(['orion/collab/collabPeer', 'orion/collab/ot', 'orion/uiUtils'], function
      * @param {Object} msg
      */
     OrionSocketAdapter.prototype._onDocMessage = function(msg) {
-         if (!this.collabClient.textView) {
+        if (msg.doc !== this.collabClient.currentDoc() || !this.collabClient.textView) {
             return;
-        }
-        if (msg.type === "selection" && msg.selection !== null) {
-            this.collabClient.otOrionAdapter.destroyCollabAnnotations(msg.clientId);
-            if (msg.clientId === this.collabClient.getClientId() && msg.doc !== this.collabClient.currentDoc()) {
-                this.sendSelection(null);
-            }
-        }
-        if (msg.doc !== this.collabClient.currentDoc()) {
-                return;
         }
         switch(msg.type) {
             case "init-document":
@@ -104,9 +95,6 @@ define(['orion/collab/collabPeer', 'orion/collab/ot', 'orion/uiUtils'], function
                 this.trigger('ack');
                 break;
             case "operation":
-            	if (msg.guid === this.collabClient.guid) {
-                    break;
-                }
                 this.ignoreNextOperation = true;
                 try {
                     this.trigger('operation', msg.operation);
@@ -170,8 +158,7 @@ define(['orion/collab/collabPeer', 'orion/collab/ot', 'orion/uiUtils'], function
             'operation': operation,
             'selection': selection,
             'doc': myDoc,
-            'clientId': this.collabClient.getClientId(),
-            'guid': this.collabClient.guid
+            'clientId': this.collabClient.getClientId()
         };
         this.send(JSON.stringify(msg));
         this.collabClient.editor.markClean();
@@ -299,9 +286,9 @@ define(['orion/collab/collabPeer', 'orion/collab/ot', 'orion/uiUtils'], function
             case 'client-updated':
                 this.collabClient.addOrUpdatePeer(new CollabPeer(msg.clientId, msg.name, msg.color));
                 if (msg.location) {
-                    this.collabClient.addOrUpdateCollabFileAnnotation(msg.clientId, contextPath, msg.location, msg.editing);
+                    this.collabClient.addOrUpdateCollabFileAnnotation(msg.clientId, contextPath + '/file/' + msg.location, msg.editing);
                 } else {
-                    this.collabClient.addOrUpdateCollabFileAnnotation(msg.clientId, contextPath ,'', msg.editing);
+                    this.collabClient.addOrUpdateCollabFileAnnotation(msg.clientId, '', msg.editing);
                 }
                 break;
 
@@ -367,7 +354,7 @@ define(['orion/collab/collabPeer', 'orion/collab/ot', 'orion/uiUtils'], function
         this.model.addEventListener('Changing', this._onChanging);
         this.model.addEventListener('Changed', this._onChanged);
         this.orion.addEventListener('cursorActivity', this._onCursorActivity);
-        this.orion.addEventListener('Focus', this._onFocus);
+        this.orion.addEventListener('focus', this._onFocus);
         this.orion.addEventListener('blur', this._onBlur);
         this.orion.addEventListener('Selection', this._selectionListener);
     }
@@ -377,7 +364,7 @@ define(['orion/collab/collabPeer', 'orion/collab/ot', 'orion/uiUtils'], function
         this.model.removeEventListener('Changing', this._onChanging);
         this.model.removeEventListener('Changed', this._onChanged);
         this.orion.removeEventListener('cursorActivity', this._onCursorActivity);
-        this.orion.removeEventListener('Focus', this._onFocus);
+        this.orion.removeEventListener('focus', this._onFocus);
         this.orion.removeEventListener('blur', this._onBlur);
         this.orion.removeEventListener('Selection', this._selectionListener);
     };
@@ -548,24 +535,14 @@ define(['orion/collab/collabPeer', 'orion/collab/ot', 'orion/uiUtils'], function
         this.requestInputChangedEvent();
     };
 
-    OrionEditorAdapter.prototype.onCursorActivity = function () {
+    OrionEditorAdapter.prototype.onCursorActivity =
+    OrionEditorAdapter.prototype.onFocus = function () {
         if (this.changeInProgress) {
             this.selectionChanged = true;
         } else {
             this.trigger('selectionChange');
         }
     };
-     OrionEditorAdapter.prototype.onFocus = function () {
-        var clientId = this.collabClient.getClientId();
-        var peer = this.collabClient.getPeer(clientId);
-        var name = peer ? peer.name : undefined;
-        var color = peer ? peer.color : color;
-        var selection = this.getSelection();
-        this.updateLineAnnotation(clientId, selection, name, color);
-        this.collabClient.otSocketAdapter.sendSelection(selection);
-    };
-    
-       
 
     OrionEditorAdapter.prototype.onBlur = function () {
         if (!this.orion.somethingSelected()) { this.trigger('blur'); }
