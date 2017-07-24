@@ -69,7 +69,7 @@
     "supertest": "^3.0.0"
   },
   "engines": {
-    "node": "^6.0.0"
+    "node": "^6.11.1"
   },
   "main": "server.js",
   "scripts": {
@@ -84,28 +84,40 @@
     "appId": "org.eclipse.orion",
     "asar": true,
     "electronVersion": "1.4.10",
+    "productName": "Orion",
+    "nodeGypRebuild": "false",
+    "npmRebuild": "false",
     "compression": "maximum",
-    "osx": {
-      "title": "Orion",
-      "icon": "build/icon.icns",
-      "contents": [
+    "mac": {
+		"category": "public.app-category.developer-tools",
+		"target": ["dmg","zip"],
+		"icon": "build/icon.icns"
+    },
+    "dmg": {
+		"title": "Orion",
+		"icon": "build/icon.icns",
+		"contents": [
         {
-          "x": 410,
-          "y": 220,
-          "type": "link",
-          "path": "/Applications"
+			"x": 410,
+			"y": 220,
+			"type": "link",
+			"path": "/Applications"
         },
         {
-          "x": 130,
-          "y": 220,
-          "type": "file"
+			"x": 130,
+			"y": 220,
+			"type": "file"
         }
       ]
     },
     "win": {
-      "loadingGif": "build/orionLogo.gif",
-      "iconUrl": "http://git.eclipse.org/c/orion/org.eclipse.orion.client.git/plain/modules/orionode/build/orion.ico",
-      "remoteReleases": ""
+		"icon": "build/icon",
+		"target":["nsis"]
+    },
+    "nsis":{
+		"allowToChangeInstallationDirectory": "true",
+		"createDesktopShortcut": "true",
+		"runAfterFinish": "true"
     },
     "linux": {
       "target": [
@@ -113,6 +125,11 @@
         "rpm",
         "tar.gz"
       ]
+    },
+    "squirrelWindows": {
+		"loadingGif": "build/orionLogo.gif",
+		"iconUrl": "http://git.eclipse.org/c/orion/org.eclipse.orion.client.git/plain/modules/orionode/build/orion.ico",
+		"remoteReleases": ""
     }
   },
   "repository": {

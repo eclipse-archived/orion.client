@@ -90,7 +90,7 @@ find node_modules/nodegit/build/Release/ -mindepth 1 ! -name '*.node' -exec rm -
 rm -rf target
 
 # Install electron builder
-npm install -g electron-builder@5.5.0
+npm install -g electron-builder@19.16.1
 
 # Build mac dmg, etc
 nodegit_lib=${NODEGIT_DIR}/v${nodegit_version}/electron/v${electron_version}/mac/nodegit.node
@@ -108,7 +108,7 @@ if [ -f "$nodegit_lib" ]; then
 	cp $nodegit_lib ./node_modules/nodegit/build/Release
 fi
 npm run dist:win
-mv "dist/win/${name} Setup ${pkg_version}.exe" "dist/win/${name}-${pkg_version}-setup.exe"
+mv "dist/win-unpacked/${name}.exe" "dist/${name}-${pkg_version}-setup.exe"
 
 # Build linux packages, etc
 nodegit_lib=${NODEGIT_DIR}/v${nodegit_version}/electron/v${electron_version}/linux/nodegit.node
