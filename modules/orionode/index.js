@@ -14,7 +14,7 @@ var express = require('express'),
 	fs = require('fs'),
 	log4js = require('log4js'),
 	api = require('./lib/api'),
-	logger = log4js.getLogger("server");
+	logger = log4js.getLogger("response");
 
 var LIBS = path.normalize(path.join(__dirname, 'lib/')),
 	MINIFIED_ORION_CLIENT = path.normalize(path.join(__dirname, "lib/orion.client")),
@@ -107,7 +107,7 @@ function startServer(options) {
 
 		//error handling
 		app.use(function(err, req, res, next){
-			logger.error(err);
+			logger.error(req.originalUrl, err);
 			res.status(404);
 			// respond with html page
 //			if (req.accepts('html')) {

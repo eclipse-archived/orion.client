@@ -9,7 +9,8 @@
         "tasks": "INFO",
         "search-worker": "ERROR",
         "git": "ALL",
-        "electron": "ALL"
+        "electron": "ALL",
+        "response":"ERROR"
     },
     "appenders": [
         {
