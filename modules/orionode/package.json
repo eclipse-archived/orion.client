@@ -112,10 +112,9 @@
     },
     "win": {
 		"icon": "build/icon",
-		"target":["nsis"]
+		"target":["nsis","squirrel"]
     },
     "nsis":{
-		"allowToChangeInstallationDirectory": "true",
 		"createDesktopShortcut": "true",
 		"runAfterFinish": "true"
     },
