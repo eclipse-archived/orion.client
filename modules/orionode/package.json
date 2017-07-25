@@ -84,7 +84,7 @@
     "appId": "org.eclipse.orion",
     "asar": true,
     "electronVersion": "1.4.10",
-    "productName": "Orion",
+    "productName": "orion",
     "nodeGypRebuild": "false",
     "npmRebuild": "false",
     "compression": "maximum",
@@ -94,7 +94,7 @@
 		"icon": "build/icon.icns"
     },
     "dmg": {
-		"title": "Orion",
+		"title": "orion",
 		"icon": "build/icon.icns",
 		"contents": [
         {

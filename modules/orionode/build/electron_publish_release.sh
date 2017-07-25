@@ -51,8 +51,8 @@ checkfile "dist/${name}-${pkg_version}.x86 64.rpm"
 checkfile "dist/${name}-${pkg_version}.tar.gz"
 checkfile "dist/${name}-${pkg_version}.dmg"
 checkfile "dist/${name}-${pkg_version}-mac.zip"
-checkfile "dist/win/${name}-${pkg_version}-full.nupkg"
-checkfile "dist/win/${name}-${pkg_version}-setup.exe"
+checkfile "dist/${name}-${pkg_version}-full.nupkg"
+checkfile "dist/${name}-${pkg_version}-setup.exe"
 
 new_release
 
@@ -73,5 +73,4 @@ if [ -e "${name}-${pkg_version}-delta.nupkg" ]; then
 	upload "${name}-${pkg_version}-delta.nupkg"
 fi
 upload "${name}-${pkg_version}-setup.exe"
-
 popd
