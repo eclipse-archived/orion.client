@@ -107,6 +107,7 @@ nodegit_lib=${NODEGIT_DIR}/v${nodegit_version}/electron/v${electron_version}/win
 if [ -f "$nodegit_lib" ]; then
 	cp $nodegit_lib ./node_modules/nodegit/build/Release
 fi
+npm install electron-builder-squirrel-windows
 npm run dist:win
 mv "dist/win-unpacked/${name}.exe" "dist/${name}-${pkg_version}-setup.exe"
 
@@ -116,4 +117,3 @@ if [ -f "$nodegit_lib" ]; then
 	cp $nodegit_lib ./node_modules/nodegit/build/Release
 fi
 npm run dist:linux
-mv "dist/${name}-${pkg_version}.deb" "dist/${name}-${pkg_version}.rpm" "dist/${name}-${pkg_version}.tar.gz" dist/linux/
