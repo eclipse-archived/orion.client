@@ -1241,7 +1241,7 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/i18n
 									}
 								}
 								if (prompt) {
-									var node = document.getElementById("pageSidebar" + item.Location.split('/').slice(1).join("") + "MainCol");
+									var node = document.getElementById(explorer.model.getId(item) + "MainCol");
 									commandService.prompt(node, i18nUtil.formatMessage(messages['EnterName'], bidiUtils.enforceTextDirWithUcc(selectedItem.Name)), messages['Ok'], messages['Cancel'], 
 										i18nUtil.formatMessage(messages['Copy of ${0}'], selectedItem.Name), false, function(newname) {
 											// user cancelled?  don't copy this one
