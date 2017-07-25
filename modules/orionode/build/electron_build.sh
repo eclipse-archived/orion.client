@@ -118,3 +118,5 @@ if [ -f "$nodegit_lib" ]; then
 	cp $nodegit_lib ./node_modules/nodegit/build/Release
 fi
 npm run dist:linux
+mv "dist/${name} ${pkg_version} amd64.deb" "dist/${name}-${pkg_version}.deb"
+mv "dist/${name}-${pkg_version}.x86 64.rpm" "dist/${name}-${pkg_version}.rpm"
