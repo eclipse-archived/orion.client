@@ -89,8 +89,8 @@ rm -rf node_modules/nodegit/vendor
 find node_modules/nodegit/build/Release/ -mindepth 1 ! -name '*.node' -exec rm -rf {} \;
 rm -rf target
 
-# Install electron builder
-npm install -g electron-builder@~19.16.0
+# Install electron builder and electron-builder-squirrel-windows for Squirrel.Window app
+npm install electron-builder@~19.16.0
 npm install electron-builder-squirrel-windows@19.16.0
 
 # Build mac dmg, etc
@@ -109,7 +109,8 @@ if [ -f "$nodegit_lib" ]; then
 	cp $nodegit_lib ./node_modules/nodegit/build/Release
 fi
 npm run dist:win
-mv "dist/win-unpacked/${name}.exe" "dist/${name}-${pkg_version}-setup.exe"
+mv "dist/${name} Setup ${pkg_version}.exe" "dist/${name}-${pkg_version}-nsis-setup.exe"
+mv "dist/win/${name} Setup ${pkg_version}.exe" "dist/win/${name}-${pkg_version}-setup.exe"
 
 # Build linux packages, etc
 nodegit_lib=${NODEGIT_DIR}/v${nodegit_version}/electron/v${electron_version}/linux/nodegit.node

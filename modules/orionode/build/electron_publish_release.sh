@@ -51,8 +51,9 @@ checkfile "dist/${name}-${pkg_version}.x86 64.rpm"
 checkfile "dist/${name}-${pkg_version}.tar.gz"
 checkfile "dist/${name}-${pkg_version}.dmg"
 checkfile "dist/${name}-${pkg_version}-mac.zip"
-checkfile "dist/${name}-${pkg_version}-full.nupkg"
-checkfile "dist/${name}-${pkg_version}-setup.exe"
+checkfile "dist/${name}-${pkg_version}-nsis-setup.exe"
+checkfile "dist/win/${name}-${pkg_version}-full.nupkg"
+checkfile "dist/win/${name}-${pkg_version}-setup.exe"
 
 new_release
 
@@ -66,7 +67,12 @@ upload "${name}-${pkg_version}.tar.gz"
 upload "${name}-${pkg_version}.dmg"
 upload "${name}-${pkg_version}-mac.zip"
 
-# upload windows artifacts to new release
+# upload windows nsis artifacts to new release
+upload "${name}-${pkg_version}-nsis-setup.exe"
+popd
+
+# upload windows Squirrel artifacts to new release
+pushd dist/win
 upload "RELEASES"
 upload "${name}-${pkg_version}-full.nupkg"
 if [ -e "${name}-${pkg_version}-delta.nupkg" ]; then
