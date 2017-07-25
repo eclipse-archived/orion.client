@@ -46,8 +46,8 @@ popd () {
     command popd "$@" > /dev/null
 }
 
-checkfile "dist/${name}-${pkg_version}.deb"
-checkfile "dist/${name}-${pkg_version}.rpm"
+checkfile "dist/${name}_${pkg_version}_amd64.deb"
+checkfile "dist/${name}-${pkg_version}.x86_64.rpm"
 checkfile "dist/${name}-${pkg_version}.tar.gz"
 checkfile "dist/${name}-${pkg_version}.dmg"
 checkfile "dist/${name}-${pkg_version}-mac.zip"
@@ -59,8 +59,8 @@ new_release
 
 pushd dist
 # upload linux artifacts to new release
-upload "${name}-${pkg_version}.deb"
-upload "${name}-${pkg_version}.rpm"
+upload "${name}_${pkg_version}_amd64.deb"
+upload "${name}-${pkg_version}.x86_64.rpm"
 upload "${name}-${pkg_version}.tar.gz"
 
 # upload osx artifacts to new release
