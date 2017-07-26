@@ -109,7 +109,7 @@ if [ -f "$nodegit_lib" ]; then
 	cp $nodegit_lib ./node_modules/nodegit/build/Release
 fi
 npm run dist:win
-mv "dist/${name} Setup ${pkg_version}.exe" "dist/${name}-${pkg_version}-nsis-setup.exe"
+#mv "dist/${name} Setup ${pkg_version}.exe" "dist/${name}-${pkg_version}-nsis-setup.exe" /this is for nsis package
 mv "dist/win/${name} Setup ${pkg_version}.exe" "dist/win/${name}-${pkg_version}-setup.exe"
 
 # Build linux packages, etc

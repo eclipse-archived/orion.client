@@ -51,7 +51,7 @@ checkfile "dist/${name}-${pkg_version}.x86_64.rpm"
 checkfile "dist/${name}-${pkg_version}.tar.gz"
 checkfile "dist/${name}-${pkg_version}.dmg"
 checkfile "dist/${name}-${pkg_version}-mac.zip"
-checkfile "dist/${name}-${pkg_version}-nsis-setup.exe"
+#checkfile "dist/${name}-${pkg_version}-nsis-setup.exe"
 checkfile "dist/win/${name}-${pkg_version}-full.nupkg"
 checkfile "dist/win/${name}-${pkg_version}-setup.exe"
 
@@ -68,7 +68,7 @@ upload "${name}-${pkg_version}.dmg"
 upload "${name}-${pkg_version}-mac.zip"
 
 # upload windows nsis artifacts to new release
-upload "${name}-${pkg_version}-nsis-setup.exe"
+#upload "${name}-${pkg_version}-nsis-setup.exe"
 popd
 
 # upload windows Squirrel artifacts to new release
