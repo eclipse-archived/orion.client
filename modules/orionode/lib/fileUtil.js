@@ -412,13 +412,13 @@ exports.handleFilePOST = function(workspaceRoot, fileRoot, req, res, destFile, m
 			}
 			var sourceFile = getFile(req, sourceUrl.replace(new RegExp("^"+fileRoot), ""));
 			return fs.statAsync(sourceFile.path)
-			.then(function(/*stats*/) {
+			.then(function(stats) {
 				if (isCopy) {
 					return copy(sourceFile.path, destFile.path);
 				} else {
 					return fs.renameAsync(sourceFile.path, destFile.path)
 					.then(function(result) {
-						var eventData = { type: "rename", file: destFile, sourceFile: sourceFile };
+						var eventData = { type: "rename", isDir: stats.isDirectory(), file: destFile, sourceFile: sourceFile };
 						exports.fireFileModificationEvent(eventData);
 						return result;
 					});
@@ -441,7 +441,6 @@ exports.handleFilePOST = function(workspaceRoot, fileRoot, req, res, destFile, m
 			if (isDirectory) {
 				return fs.mkdirAsync(destFile.path);
 			} else {
-				
 				var eventData = { type: "write", file: destFile };
 				exports.fireFileModificationEvent(eventData);
 				

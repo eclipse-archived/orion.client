@@ -130,7 +130,6 @@ function _getAppwithAppName(userId, encodeName, appTarget){
 	
 	var cacheKey = appTarget.Url + appTarget.Org + appTarget.Space + encodeName;
 	if (appCache.get(cacheKey)) {
-		console.log("Used the App cache !");
 		return Promise.resolve(appCache.get(cacheKey));
 	}
 	return target.cfRequest("GET", userId, appTarget.Url + appTarget.Space.entity.apps_url, {"q": "name:"+util.encodeURIComponent(encodeName),"inline-relations-depth":"1"}, null, null, null, appTarget)

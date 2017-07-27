@@ -113,7 +113,6 @@ function computeTarget(userId, targetRequest){
 		if (userId && targetRequest.Url && targetRequest.Org && targetRequest.Space) {
 			var getKey = userId + targetRequest.Url + targetRequest.Org + targetRequest.Space;
 			if (targetCache.get(getKey)) {
-				console.log("Used the Target cache !");
 				return Promise.resolve(targetCache.get(getKey));
 			}
 		}

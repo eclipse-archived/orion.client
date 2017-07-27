@@ -288,6 +288,9 @@ module.exports = function(options) {
 			}
 			if (stats.isDirectory()) {
 				fileUtil.rumRuff(file.path, checkWorkspace);
+				
+				var eventData = { type: "delete", file: file, req: req };
+				fileUtil.fireFileModificationEvent(eventData);
 			} else {
 				fs.unlink(file.path, checkWorkspace);
 				
