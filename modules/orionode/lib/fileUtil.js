@@ -414,7 +414,12 @@ exports.handleFilePOST = function(workspaceRoot, fileRoot, req, res, destFile, m
 			return fs.statAsync(sourceFile.path)
 			.then(function(stats) {
 				if (isCopy) {
-					return copy(sourceFile.path, destFile.path);
+					return copy(sourceFile.path, destFile.path)
+					.then(function(result) {
+						var eventData = { type: "rename", isDir: stats.isDirectory(), file: destFile, sourceFile: sourceFile };
+						exports.fireFileModificationEvent(eventData);
+						return result;
+					});
 				} else {
 					return fs.renameAsync(sourceFile.path, destFile.path)
 					.then(function(result) {
