@@ -99,6 +99,10 @@ function getConfig(req, res) {
 						return Promise.all([fillUserName,fillUserEmail]);
 					}).then(function(){
 						args.writeConfigFile(configFile, config, function(err) {});
+					}).catch(function(err){
+						if(err.message.indexOf("was not found") !== -1){
+							return Promise.resolve();
+						}
 					});
 				}
 			}
