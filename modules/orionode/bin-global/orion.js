@@ -7,6 +7,7 @@ var express = require('express');
 var http = require('http');
 var log4js = require('log4js');
 log4js.configure(path.join(__dirname, '../config/log4js.json'));
+var logger = log4js.getLogger('server');
 
 // get the current working directory (where "orion" invoked from)
 var cwd = process.cwd();
@@ -58,7 +59,7 @@ var params = {
 };
 
 // Show workspace to the user
-console.log("Using workspace: " + params.workspaceDir);
+logger.info("Using workspace: " + params.workspaceDir);
 var app = express();
 var server = http.createServer(app);
 app.use(function(req, res, next){
@@ -68,6 +69,6 @@ app.use(function(req, res, next){
 // Try to start the server (any errors thrown will show on console)
 server.on('listening', function() {
 	// If successfully start server, show listening message
-	console.log("Listening on port " + params.port + "...");
+	logger.info("Listening on port " + params.port + "...");
 });
 server.listen(port);
