@@ -49,6 +49,9 @@ module.exports = function(grunt) {
 			{
 				name: "tty/ttyShell"
 			},
+			{
+				name: "orion/collab/collabClient"
+			}
 		], {
 			"socket.io/socket.io": socketioPath,
         	"xterm/xterm": '../../node_modules/xterm/dist/xterm',
