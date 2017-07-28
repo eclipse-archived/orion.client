@@ -140,7 +140,7 @@ define(['orion/collab/ot', 'orion/collab/collabFileAnnotation', 'orion/collab/ot
 					self.clientDisplayedName = accountData.FullName || username;
 					var MASK = 0xFFFFFF + 1;
 					var MAGIC = 161803398 / 2 % MASK;
-					self.clientId = username + '.' + (Date.now() % MASK * MAGIC % MASK).toString(16);
+					self.clientId = username + '.' + guid.substr(0, 4);
 					callback();
 				}, function(err) {
 					console.error(err);
@@ -341,7 +341,9 @@ define(['orion/collab/ot', 'orion/collab/collabFileAnnotation', 'orion/collab/ot
 			if (this.ot) {
 				this.otOrionAdapter.detach();
 			}
+			var selection = this.textView.getSelection();
 			this.textView.getModel().setText(operation[0], 0);
+			this.textView.setSelection(selection.start, selection.end);
 			this.otOrionAdapter = new OrionEditorAdapter(this.editor, this, AT);
 			this.ot = new ot.EditorClient(revision, clients, this.otSocketAdapter, this.otOrionAdapter, this.getClientId());
 			// Give initial cursor position
@@ -386,12 +388,24 @@ define(['orion/collab/ot', 'orion/collab/collabFileAnnotation', 'orion/collab/ot
 			ruler = this.editor._overviewRuler;
 			ruler.addAnnotationType(AT.ANNOTATION_COLLAB_LINE_CHANGED, 1);
 			this.textView = this.editor.getTextView();
+			if (this.viewFocusHandlerTarget) {
+				this.viewFocusHandlerTarget.removeEventListener('Focus', this.viewFocusHandler);
+				this.viewFocusHandlerTarget = this.viewFocusHandler = null;
+			}
+			this.textView.addEventListener('Focus', this.viewFocusHandler = function() {
+				self.sendCurrentLocation();
+			});
+			this.viewFocusHandlerTarget = this.textView;
 			if (this.otSocketAdapter) {
 				this.otSocketAdapter.sendInit();
 			}
 		},
 
 		viewUninstalled: function(event) {
+			if (this.viewFocusHandlerTarget) {
+				this.viewFocusHandlerTarget.removeEventListener('Focus', this.viewFocusHandler);
+				this.viewFocusHandlerTarget = this.viewFocusHandler = null;
+			}
 			this.textView = null;
 			this.destroyOT();
 		},
@@ -492,7 +506,7 @@ define(['orion/collab/ot', 'orion/collab/collabFileAnnotation', 'orion/collab/ot
 						'operation': operation,
 						'data': evt[operation],
 						'clientId': this.getClientId(),
-						'guid': guid
+						'guid': this.fileClient.guid || this.guid
 				    };
 					this.otSocketAdapter.send(JSON.stringify(msg));
 				}
