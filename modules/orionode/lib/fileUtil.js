@@ -459,11 +459,8 @@ exports.handleFilePOST = function(workspaceRoot, fileRoot, req, res, destFile, m
 
 };
 
-var _fileModListeners;
+var _fileModListeners = [];
 exports.addFileModificationListener = function(theListener) {
-	if (!_fileModListeners) {
-		_fileModListeners = [];
-	}
 	_fileModListeners.push(theListener);
 };
 
