@@ -26,6 +26,7 @@
     "js-yaml": "^3.6.1",
     "lockfile": "^1.0.1",
     "log4js": "^1.1.1",
+    "lru-cache": "^4.1.1",
     "mime": "^1.3.4",
     "mkdirp": "^0.5.1",
     "mongodb": "^2.1.7",
@@ -89,30 +90,35 @@
     "npmRebuild": "false",
     "compression": "maximum",
     "mac": {
-		"category": "public.app-category.developer-tools",
-		"target": ["dmg","zip"],
-		"icon": "build/icon.icns"
+      "category": "public.app-category.developer-tools",
+      "target": [
+        "dmg",
+        "zip"
+      ],
+      "icon": "build/icon.icns"
     },
     "dmg": {
-		"title": "orion",
-		"icon": "build/icon.icns",
-		"contents": [
+      "title": "orion",
+      "icon": "build/icon.icns",
+      "contents": [
         {
-			"x": 410,
-			"y": 220,
-			"type": "link",
-			"path": "/Applications"
+          "x": 410,
+          "y": 220,
+          "type": "link",
+          "path": "/Applications"
         },
         {
-			"x": 130,
-			"y": 220,
-			"type": "file"
+          "x": 130,
+          "y": 220,
+          "type": "file"
         }
       ]
     },
     "win": {
-		"icon": "build/icon",
-		"target":["squirrel"]
+      "icon": "build/icon",
+      "target": [
+        "squirrel"
+      ]
     },
     "linux": {
       "target": [
@@ -122,9 +128,9 @@
       ]
     },
     "squirrelWindows": {
-		"loadingGif": "build/orionLogo.gif",
-		"iconUrl": "http://git.eclipse.org/c/orion/org.eclipse.orion.client.git/plain/modules/orionode/build/orion.ico",
-		"remoteReleases": ""
+      "loadingGif": "build/orionLogo.gif",
+      "iconUrl": "http://git.eclipse.org/c/orion/org.eclipse.orion.client.git/plain/modules/orionode/build/orion.ico",
+      "remoteReleases": ""
     }
   },
   "repository": {
