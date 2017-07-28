@@ -52,7 +52,6 @@ function getOrgs(req, res){
 function getOrgsRequest(userId, targetRequest){
 	var cacheKey = userId + targetRequest.Url;
 	if (orgsCache.get(cacheKey)) {
-		console.log("Used the Orgs cache !");
 		return Promise.resolve(orgsCache.get(cacheKey));
 	}
 	
