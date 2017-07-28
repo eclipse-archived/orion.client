@@ -248,7 +248,7 @@ class Session {
         // if we don't have the document, let's start it up.
         if (!this.docs[doc]) {
             var self = this;
-            this.docs[doc] = new Document(doc, this.sessionId);
+            this.docs[doc] = new Document(doc, this.sessionId, this);
             this.docs[doc].startOT()
             .then(function() {
                 self.docs[doc].onmessage(io, msg, client);
