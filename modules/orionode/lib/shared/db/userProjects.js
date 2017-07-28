@@ -136,7 +136,7 @@ module.exports = function(options) {
 	 */
 	app.post('/:project/:user', function(req, res) {
 		//TODO make sure project has been shared first.
-		var project = fileUtil.getFile(req, decodeURIComponent(req.params.project).substring(5));
+		var project = fileUtil.getFile(req, decodeURIComponent(req.params.project).substring(5 + req.contextPath.length));
 		var user = req.params.user;
 
 		if (!sharedUtil.projectExists(project.path)) {
@@ -164,7 +164,7 @@ module.exports = function(options) {
 	 * Project might have been deleted or just user removed from shared list.
 	 */
 	app.delete('/:project/:user', function(req, res) {
-		var project = fileUtil.getFile(req, decodeURIComponent(req.params.project).substring(5));
+		var project = fileUtil.getFile(req, decodeURIComponent(req.params.project).substring(5 + req.contextPath.length));
 		var user = req.params.user;
 		project = sharedUtil.getProjectRoot(project.path);
 

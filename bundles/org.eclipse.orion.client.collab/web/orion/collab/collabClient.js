@@ -189,14 +189,14 @@ define(['orion/collab/ot', 'orion/collab/collabFileAnnotation', 'orion/collab/ot
 		 * @param {string} url
 		 * @param {boolean} editing
 		 */
-		addOrUpdateCollabFileAnnotation: function(clientId, url, editing) {
+		addOrUpdateCollabFileAnnotation: function(clientId, contextP, url, editing) {
 			var peer = this.getPeer(clientId);
 			// Peer might be loading. Once it is loaded, this annotation will be automatically updated,
 			// so we can safely leave it blank.
 			var name = (peer && peer.name) ? peer.name : 'Unknown';
 			var color = (peer && peer.color) ? peer.color : '#000000';
 			if (url) {
-				url = this.getFileSystemPrefix() + url;
+				url = contextP + this.getFileSystemPrefix() + url;
 			}
 			this.collabFileAnnotations[clientId] = new CollabFileAnnotation(name, color, url, this.projectRelativeLocation(url), editing);
 			this._requestFileAnnotationUpdate();
@@ -276,7 +276,7 @@ define(['orion/collab/ot', 'orion/collab/collabFileAnnotation', 'orion/collab/ot
 		 */
 		updateSelfFileAnnotation: function() {
 			if (this.collabMode) {
-				this.addOrUpdateCollabFileAnnotation(this.getClientId(), contextPath + this.currentDoc(), this.editing);
+				this.addOrUpdateCollabFileAnnotation(this.getClientId(), contextPath, this.currentDoc(), this.editing);
 			}
 		},
 
@@ -295,7 +295,7 @@ define(['orion/collab/ot', 'orion/collab/collabFileAnnotation', 'orion/collab/ot
 			}
 			if (this.collabHasFileAnnotation(peer.id)) {
 				var annotation = this.getCollabFileAnnotation(peer.id);
-				this.addOrUpdateCollabFileAnnotation(peer.id, annotation.location);
+				this.addOrUpdateCollabFileAnnotation(peer.id, contextPath, annotation.location);
 			}
 			if (this.otOrionAdapter && this.textView) {
 				// Make sure we have view installed
@@ -572,7 +572,7 @@ define(['orion/collab/ot', 'orion/collab/collabFileAnnotation', 'orion/collab/ot
 		transformLocation: function(location) { //Location = "/file/orders-api-uselessTesting_X/app.js"
 			var filePath = location.replace(/^.*\/file/, "");
 			var loc = this.getFileSystemPrefix();
-			return loc + filePath;
+			return contextPath + loc + filePath;
 		},
 
 		/*
