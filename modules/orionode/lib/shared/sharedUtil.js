@@ -49,8 +49,7 @@ module.exports = function(options) {
         stream.pipe(res);
         stream.on('error', function(e) {
             // FIXME this is wrong, headers have likely been committed at this point
-            res.writeHead(500, e.toString());
-            res.end();
+            writeError(500, res, e.toString());
         });
         stream.on('end', res.end.bind(res));
     }

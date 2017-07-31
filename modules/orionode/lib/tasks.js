@@ -145,8 +145,7 @@ Task.prototype = {
 							'Content-Length': resp.length
 						}, resp, null, true);
 					} else if (this.type === "error") {
-						res.writeHead(this.result.HttpCode, this.result.Message || "");
-						api.writeResponse(null, res);
+						api.writeError(this.result.HttpCode, res, this.result.Message || "");
 					}
 				}
 			}.bind(this));

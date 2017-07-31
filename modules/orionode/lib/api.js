@@ -66,7 +66,7 @@ function toURLPath(p) {
 function sendStatus(code, res){
 	try{
 		setResponseNoCache(res);
-		res.sendStatus(code);
+		return res.sendStatus(code);
 	}catch(err){
 		logger.error(res.req.originalUrl , err.message);
 		throw err;

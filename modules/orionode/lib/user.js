@@ -171,8 +171,7 @@ module.exports.router = function(options) {
 	function createNewUser(req, res, err, user, info) {
 		if (err) {
 			logError(req.url, err);
-			res.status(500).send("An internal error occurred");
-			return;
+			return api.writeError(500, res, "An internal error has occured");
 		}
 		if (user) {
 			if (user.__newUser) {
@@ -192,7 +191,7 @@ module.exports.router = function(options) {
 		}
 		doLogin(req, user, function(err) {
 			if (err) {
-				return api.writeResponse(500, res, null, { Severity: "Error", Message: "Problem logging in" });
+				return api.writeError(500, res, "Problem logging in");
 			}
 			return res.redirect("/");
 		});
@@ -296,8 +295,7 @@ module.exports.router = function(options) {
 		metastore(req).getUser(req.params.id, function(err, user) {
 			if (err) return api.writeResponse(404, res);
 			if (!user) {
-				res.writeHead(400, "User not fount: " + req.params.id);
-				return api.writeResponse(null, res);
+				return api.writeError(400, res, "User not fount: " + req.params.id);
 			}
 			return api.writeResponse(200, res, null, userJSON(user));
 		});
@@ -309,8 +307,7 @@ module.exports.router = function(options) {
 		store.getUser(id, function(err, user) {
 			if (err) return api.writeResponse(404, res);
 			if (!user) {
-				res.writeHead(400, "User not found: " + req.params.id);
-				return api.writeResponse(null, res);
+				return api.writeError(400, res, "User not fount: " + req.params.id);
 			}
 			var hasNewPassword = typeof req.body.Password !== "undefined";
 			var promiseChain = Promise.resolve();
@@ -331,8 +328,7 @@ module.exports.router = function(options) {
 								return;
 							}
 							if (existing && existing.length) {
-								res.writeHead(409, "This account is already linked to someone else");
-								api.writeResponse(null, res);
+								api.writeError(409, res, "This account is already linked to someone else");
 								reject();
 								return;
 							}
@@ -345,15 +341,14 @@ module.exports.router = function(options) {
 			promiseChain.then(function() {
 				store.updateUser(id, user, function(err) {
 					if (err) {
-						return res.writeHead(400, "Failed to update: " + id);
+						return api.writeError(400, res, "Failed to update: " + id);
 					}
 					return api.writeResponse(200, res);
 				});
 			}).catch(function(err) {
 				if (err) {
 					// Indicated unhandled error
-					res.writeHead(500, "An internal error has occured");
-					res.send();
+					return api.writeError(500, res, "An internal error has occured");
 				}
 			});
 		});
@@ -376,12 +371,11 @@ module.exports.router = function(options) {
 		store.getUser(id, function(err, user) {
 			if (err) return api.writeResponse(404, res);
 			if (!user) {
-				res.writeHead(400, "User not found: " + req.params.id);
-				return api.writeResponse(null, res);
+				return api.writeError(400, res, "User not found: " + req.params.id);
 			}
 			store.updateUser(id, { password: newPassword }, function(err, user) {
 				if (err) {
-					return res.writeHead(400, "Failed to update: " + req.params.id);
+					return api.writeError(400, res, "Failed to update: " + req.params.id);
 				}
 				return api.writeResponse(200, res);
 			});
@@ -465,19 +459,16 @@ module.exports.router = function(options) {
 		var store = metastore(req);
 		var resetPwd = function(err, user) {
 			if (err || !user) {
-				res.writeHead(404, "User " +  (req.body.UserName || req.body.Email) + " not found");
-				return api.writeResponse(null, res);
+				return api.writeError(404, res, "User " +  (req.body.UserName || req.body.Email) + " not found");
 			}
 			if (!user.isAuthenticated){
-				res.writeHead(400, "Email confirmation has not completed. Please follow the instructions from the confirmation email in your inbox and then request a password reset again.");
-				return api.writeResponse(null, res);
+				return api.writeError(400, res, "Email confirmation has not completed. Please follow the instructions from the confirmation email in your inbox and then request a password reset again.");
 			}
 			crypto.randomBytes(AUTH_TOKEN_BYTES, function(randomBytes) {
 				store.updateUser(user.username, { authToken: randomBytes }, function(err, user) {
 					if (err) {
 						logError(err);
-						api.writeResponse(500, res, null, { Severity: "Error", Message: "Error updating user" });
-						return;
+						return api.writeError(500, res,  "Error updating user");
 					}
 					sendMail({user: user, options: options, template: PWD_CONFIRM_RESET_MAIL, auth: RESET_PWD_AUTH, req: req});
 					return api.writeResponse(200, res, null, {"Severity":"Info","Message":"Confirmation email has been sent.","HttpCode":200,"BundleId":"org.eclipse.orion.server.core","Code":0});

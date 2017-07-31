@@ -12,6 +12,7 @@
 var fileUtil = require('./fileUtil');
 var express = require('express');
 var tree = require('./shared/tree');
+var api = require('./api');
 var sharedUtil = require('./shared/sharedUtil');
 var SharedFileDecorator = require('./shared/sharedDecorator').SharedFileDecorator;
 var jwt = require('jsonwebtoken');
@@ -31,8 +32,7 @@ module.exports.router = function(options) {
 		} else if (req.headers['authorization'] && checkCollabServerToken(req.headers['authorization'])){
 			next();
 		} else {
-			res.writeHead(401, "Not authenticated");
-			res.end();
+			api.writeError(401, res, "Not authenticated");
 		}
 	}
 
