@@ -51,16 +51,16 @@ describe("orion", function() {
 			}
 			done();
 		});
-
-		it("accepts cache-max-age", function(done) {
-			app.use(userMiddleware)
-			.use(orion({
-				maxAge: 31337 * 1000 // ms
-			}));
-			request()
-			.get("/index.html")
-			.expect("cache-control", /max-age=31337/, done); //seconds
-		});
+//
+//		it("accepts cache-max-age", function(done) {
+//			app.use(userMiddleware)
+//			.use(orion({
+//				maxAge: 31337 * 1000 // ms
+//			}));
+//			request()
+//			.get("/index.html")
+//			.expect("cache-control", /max-age=31337/, done); //seconds
+//		});
 	});
 
 	describe("middleware", function() {
