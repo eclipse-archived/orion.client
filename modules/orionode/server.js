@@ -116,7 +116,7 @@ function startServer(cb) {
 			
 			server = require('http-shutdown')(server);
 			var io = socketio.listen(server, { 'log level': 1, path: (listenContextPath ? contextPath : '' ) + '/socket.io' });
-			ttyShell.install({ io: io, app: orion, fileRoot: contextPath + '/file', workspaceDir: workspaceDir });
+			ttyShell.install({ io: io, app: orion, fileRoot: contextPath + '/file', workspaceDir: workspaceDir, sharedWorkspaceFileRoot: contextPath + '/sharedWorkspace/tree/file'});
 
 			server.on('listening', function() {
 				configParams.port = port;
