@@ -118,7 +118,7 @@ function putStash(req, res) {
 	})
 	.catch(function(err) {
 		if (err.message === "reference 'refs/stash' not found"){
-			writeError(400, res, "Failed to apply stashed changes due to an empty stash.");
+			return writeError(400, res, "Failed to apply stashed changes due to an empty stash.");
 		}
 		writeError(404, res, err.message);
 	});
