@@ -46,8 +46,7 @@ function startServer(options) {
 
 		function checkAuthenticated(req, res, next) {
 			if (!req.user) {
-				res.writeHead(401, "Not authenticated");
-				api.writeResponse(null, res);
+				api.writeError(401, res, "Not authenticated");
 			} else {
 				req.user.workspaceDir = options.workspaceDir + (req.user.workspace ? "/" + req.user.workspace : "");
 				next();

@@ -134,8 +134,9 @@ function postImportXferTo(req, res, file) {
 //	});
 //	busboy.on('finish', function() {
 //		console.log('Done parsing form!');
+// 		api.setResponseNoCache(res);
 //		res.writeHead(303, { Connection: 'close', Location: '/' });
-//		writeResponse(null, res);
+//		res.end();
 //	});
 //	req.pipe(busboy);
 }
