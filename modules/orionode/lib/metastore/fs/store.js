@@ -14,15 +14,27 @@ var
     fs = Promise.promisifyAll(require('fs')),
     lockFile = Promise.promisifyAll(require('lockfile')),
     mkdirpAsync = Promise.promisify(require('mkdirp')),
+    metaUtil = require('../util/metaUtil'),
     os = require('os');
-    
+
 // Helper functions
-var PREF_FILENAME = 'prefs.json';
+var USERPREF_FILENAME = 'user.json';
 var USER_NAME = "anonymous";
 var WORKSPACE_ID = "orionode";
-function getPrefsFileName(options, user) {
-	var prefFolder = options.configParams['orion.single.user'] ? os.homedir() : user.workspaceDir;
-	return nodePath.join(prefFolder, '.orion', PREF_FILENAME);
+var METASTORE_FILENAME = "metastore.json";
+var DESCRIPTION = "This JSON file is at the root of the Orion metadata store responsible for persisting user, workspace and project files and metadata.";
+
+// The current version of the Simple Meta Store.
+var VERSION = 8;
+function getUserPrefsFileName(options, user) {
+	var userId = typeof user === "string" ? user : user.username;
+	var prefFolder = options.configParams['orion.single.user'] ? nodePath.join(os.homedir(), '.orion') : nodePath.join.apply(null, metaUtil.readMetaUserFolder(options.workspaceDir, userId));
+	return nodePath.join(prefFolder, USERPREF_FILENAME);
+}
+
+function getWorkspacePrefsFileName(options, workspaceId) {
+	var prefFolder = options.configParams['orion.single.user'] ? nodePath.join(os.homedir(), '.orion') : nodePath.join.apply(null, metaUtil.readMetaUserFolder(options.workspaceDir, metaUtil.decodeUserIdFromWorkspaceId(workspaceId)));
+	return nodePath.join(prefFolder, workspaceId + ".json");
 }
 
 function getLockfileName(prefFileName) {
@@ -50,11 +62,38 @@ function FsMetastore(options) {
 	this._taskList = {};
 }
 FsMetastore.prototype.setup = function(app) {
-	app.use(/* @callback */ function(req, res, next){
-		this.getUser("anonymous", function(err, user) {
-			req.user = user;
-			next();
+	//  Initialize the simple meta store.
+	if(!this.options.configParams['orion.single.user'] && !this.options.configParams['orion.metastore.useMongo']){
+		// check if the root metastore.json file does not exist, create a new root metastore.json file if not
+		fs.readFileAsync(nodePath.join(this.options.workspaceDir, METASTORE_FILENAME),'utf8')
+		.then(function(content){
+			if(content.version < VERSION){
+				fs.writeFileAsync(nodePath.join(this.options.workspaceDir, METASTORE_FILENAME),JSON.stringify({
+					"OrionVersion": VERSION,
+					"OrionDescription": DESCRIPTION
+				}, null, 2));
+			}else if(content.version > VERSION) {
+				throw new Error("cannot run an old server (version " + VERSION + ") on metadata that is at a newer version (version " + content.version + ")");
+			}
+		}).catch(function(err){
+			// TODO use err.message to make sure the error is file not exsit
+			fs.writeFileAsync(nodePath.join(this.options.workspaceDir, METASTORE_FILENAME),JSON.stringify({
+				"OrionVersion": VERSION,
+				"OrionDescription": DESCRIPTION
+			}, null, 2));
 		});
+	}
+	
+	// Used to only for single user case (Electron or local debug)
+	app.use(/* @callback */ function(req, res, next){
+		if(this.options.configParams['orion.single.user']){
+			this.getUser("anonymous", function(err, user) {
+				req.user = user;
+				next();
+			});
+		}else{
+			next();
+		}
 	}.bind(this));
 };
 Object.assign(FsMetastore.prototype, {
@@ -62,16 +101,51 @@ Object.assign(FsMetastore.prototype, {
 	 * @callback
 	 */
 	createWorkspace: function(userId, workspaceData, callback) {
-		callback(new Error("Not implemented"));
+		if (!userId) {callback(new Error('createWorkspace.userId is null'));}
+		if (!workspaceData.name) {callback(new Error('createWorkspace.workspaceData.name is null'));}
+		this.readUser(userId, function(err, user){
+			var workspaceId = metaUtil.encodeWorkspaceId(userId, workspaceData.id||workspaceData.name);
+			// TODO Need to lock the user when creating the workspace and updating the user.
+			var w = {
+				"name": workspaceData.name,
+				"id": workspaceId
+			};
+			var wPref = {
+				"FullName": workspaceData.name,
+				"OrionVersion": VERSION,
+				"ProjectNames":[],
+				"Properties":{},
+				"UniqueId":workspaceId,
+				"UserId":userId
+			};
+			this.updateWorkspacePreferences(user.UniqueId, workspaceId, wPref, function(error){
+				callback(error, w);
+			});
+		});
 	},
 	getWorkspace: function(workspaceId, callback) {
 		if (workspaceId !== WORKSPACE_ID) {
-			return callback(new Error("Not implemented"));
+			this.readWorkspacePreferences(workspaceId, function(err, prefs){
+				var workspacePrefs = JSON.parse(prefs);
+				var workspace = {
+					"id": workspacePrefs.UniqueId,
+					"name": workspacePrefs.FullName,
+				};
+				// TODO Workspace properties is where tabs info goes, implement later
+				var propertyKeys = Object.keys(workspacePrefs.Properties);
+				propertyKeys.forEach(function(propertyKey){
+					workspace.Properties[propertyKey] = workspacePrefs.Properties[propertyKey];
+					// TODO password needs to be handled specifically since it needs to be decrypted. (referrence setProperties line 967)
+					// TODO handle userPropertyCache (referrence setProperties line 972)
+				});
+				callback(null, workspace);
+			});
+		}else{
+			callback(null, {
+				name: nodePath.basename(this.options.workspaceDir),
+				id: WORKSPACE_ID
+			});
 		}
-		callback(null, {
-			name: nodePath.basename(this.options.workspaceDir),
-			id: WORKSPACE_ID
-		});
 	},
 	/**
 	 * @callback
@@ -81,20 +155,42 @@ Object.assign(FsMetastore.prototype, {
 	},
 	getWorkspaceDir: function(workspaceId) {
 		if (workspaceId !== WORKSPACE_ID) {
-			throw new Error("Not implemented");
+			var userId = metaUtil.decodeUserIdFromWorkspaceId(workspaceId);
+			return nodePath.join.apply(null, metaUtil.getWorkspacePath(this.options.workspaceDir, workspaceId, userId));	
 		}
 		return this.options.workspaceDir;
 	},
-	readUserPreferences: function(userId, callback) {
-		var prefFile = getPrefsFileName(this.options, userId);
+	readWorkspacePreferences: function(workspaceId, callback) {
+		var prefFile = getWorkspacePrefsFileName(this.options, workspaceId);
 		return fs.readFileAsync(prefFile, 'utf8')
 		.catchReturn({ code: 'ENOENT' }, null) // New prefs file: suppress error
 		.then(function(prefs) {
 			callback(null, prefs);
 		});
 	},
-	updateUserPreferences: function(userId, prefs, callback) {
-		var prefFile = getPrefsFileName(this.options, userId);
+	updateWorkspacePreferences: function(workspaceId, prefs, callback) {
+		var prefFile = getWorkspacePrefsFileName(this.options, workspaceId);
+		return mkdirpAsync(nodePath.dirname(prefFile)) // create parent folder(s) if necessary
+		.then(function() {
+			return Promise.using(lock(prefFile), function() {
+				// We have the lock until the promise returned by this function fulfills.
+				return fs.writeFileAsync(prefFile, prefs);
+			})
+			.then(function() {
+				callback(null, null);
+			});
+		});
+	},
+	readUserPreferences: function(user, callback) {
+		var prefFile = getUserPrefsFileName(this.options, user);
+		return fs.readFileAsync(prefFile, 'utf8')
+		.catchReturn({ code: 'ENOENT' }, null) // New prefs file: suppress error
+		.then(function(prefs) {
+			callback(null, prefs);
+		});
+	},
+	updateUserPreferences: function(user, prefs, callback) {
+		var prefFile = getUserPrefsFileName(this.options, user);
 		return mkdirpAsync(nodePath.dirname(prefFile)) // create parent folder(s) if necessary
 		.then(function() {
 			return Promise.using(lock(prefFile), function() {
@@ -120,20 +216,52 @@ Object.assign(FsMetastore.prototype, {
 			callback(err, user ? [user] : user);
 		});
 	},
+	readUser: function(userId, callback){
+		this.readUserPreferences(userId, function(err, prefs){
+			var userPrefs = JSON.parse(prefs);
+			var userInfo;
+			// TODO Check if migration is needed and migrate if so
+			if(false /** Migragion needed */){
+//				userPrefs = migratedUserPrefs
+			}
+			userInfo = {
+				"UniqueId": userPrefs.UniqueId,
+				"username": userPrefs.UserName,
+				"FullName": userPrefs.FullName || "Unnamed User",
+				"Properties": {}
+			}; // TODO Translation between Java user.json is needed
+			userPrefs.WorkspaceIds && (userInfo.workspaces = userPrefs.WorkspaceIds.map(function(workspaceId){
+				return {
+					name: metaUtil.decodeWorkspaceNameFromWorkspaceId(workspaceId),
+					id: workspaceId
+				};
+			}));
+			var propertieKeys = Object.keys(userPrefs.Properties);
+			propertieKeys.forEach(function(propertyKey){
+				userInfo.Properties[propertyKey] = userPrefs.Properties[propertyKey];
+				// TODO password needs to be handled specifically since it needs to be decrypted. (referrence setProperties line 967)
+				// TODO handle userPropertyCache (referrence setProperties line 972)
+			});
+			callback(null, userInfo);
+		});
+	},
 	getUser: function(id, callback) {
 		if (id !== USER_NAME) {
-			return callback(new Error("Not implemented"));
+			this.readUser(id, function(err, user){
+				return callback(null, user);
+			});
+		}else{
+			callback(null, {
+				username: USER_NAME, 
+				workspaces: [
+					{
+						name: nodePath.basename(this.options.workspaceDir),
+						id: WORKSPACE_ID
+					}
+				],
+				workspaceDir: this.options.workspaceDir
+			});
 		}
-		callback(null, {
-			username: USER_NAME, 
-			workspaces: [
-				{
-					name: nodePath.basename(this.options.workspaceDir),
-					id: WORKSPACE_ID
-				}
-			],
-			workspaceDir: this.options.workspaceDir
-		});
 	},
 	/**
 	 * @callback
@@ -187,6 +315,34 @@ Object.assign(FsMetastore.prototype, {
 	},
 	updateTask: function(taskObj, callback) {
 		callback(null);
+	},
+	readPreferences: function(req, callback){
+		var scope = req.url.split("/")[1];
+		if(scope === "user"){
+			this.readUserPreferences(req.user,function(err, prefs){
+				callback(err, prefs);
+			});
+		}else if(scope === "workspace"){
+			this.readWorkspacePreferences(req.user.workspaceId,function(err, prefs){
+				callback(err, prefs);
+			});
+		}else if(scope === "project"){
+			// TODO implement read project prefs
+		}
+	},
+	updatePreferences: function(req, prefs, callback){
+		var scope = req.url.split("/")[1];
+		if(scope === "user"){
+			this.updateUserPreferences(req.user, prefs, function(err, prefs){
+				callback(err, prefs);
+			});
+		}else if(scope === "workspace"){
+			this.updateWorkspacePreferences(req.user.workspaceId, prefs, function(err, prefs){
+				callback(err, prefs);
+			});
+		}else if(scope === "project"){
+			// TODO implement update project prefs
+		}
 	}
 });
 

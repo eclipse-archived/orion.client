@@ -18,7 +18,7 @@ var api = require('../api'),
     nodePath = require('path'),
     nodeUrl = require('url'),
     os = require('os'),
-    Preference = require('../model/pref'),
+    UserPreference = require('../model/commonPref'),
     Promise = require('bluebird');
 
     var fs = Promise.promisifyAll(require('fs'));
@@ -29,7 +29,7 @@ module.exports.readPrefs = readPrefs;
 module.exports.writePrefs = writePrefs;
 module.exports.router = PrefsController;
 
-var NOT_EXIST = Preference.NOT_EXIST;
+var NOT_EXIST = UserPreference.NOT_EXIST;
 var PREF_FILENAME = PrefsController.PREF_FILENAME = 'prefs.json';
 
 // Middleware that serves prefs requests.
@@ -74,14 +74,14 @@ function PrefsController(options) {
 	function acquirePrefs(req) {
 		var store = fileUtil.getMetastore(req);
 		return new Promise(function(fulfill) {
-			store.readUserPreferences(req.user, function(err, prefs) {
-				fulfill(new Preference(prefs || null));
+			store.readPreferences(req, function(err, prefs) {
+				fulfill(new UserPreference(prefs || null));
 			});
 		})
 		.then(function(prefs) {
 			var urlObj = req._parsedUrl || nodeUrl.parse(req.url);
 			req.prefs = prefs;
-			req.prefPath = urlObj.pathname;
+			req.prefPath = urlObj.pathname.split("/").slice(2).join("/");
 			req.prefNode = req.prefs.get(req.prefPath);
 		});
 	}
@@ -94,7 +94,7 @@ function PrefsController(options) {
 		}
 		var store = fileUtil.getMetastore(req);
 		return new Promise(function(fulfill, reject) {
-			store.updateUserPreferences(req.user, prefs.toJSON(), function(err) {
+			store.updatePreferences(req, prefs.toJSON(), function(err) {
 				if (err) {
 					return reject(err);
 				}

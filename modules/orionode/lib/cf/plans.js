@@ -48,7 +48,7 @@ function getplans(req, res){
 	var filePath = manifests.retrieveProjectFilePath(req);
 	fs.lstat(filePath, function(err, state){
 		if(err){
-			writeError(404, res, err.message);
+			return writeError(404, res, err.message);
 		}
 		if(state.isFile()){
 			filePath = path.dirname(filePath);
@@ -95,7 +95,7 @@ function getplans(req, res){
 			var result =  {"Children": children};
 			writeResponse(200, res, null, result);
 		}).catch(function(err){
-			writeError(404, res, err.message);
+			return writeError(404, res, err.message);
 		});
 	});
 }
