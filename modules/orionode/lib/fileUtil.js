@@ -412,8 +412,22 @@ exports.handleFilePOST = function(workspaceRoot, fileRoot, req, res, destFile, m
 			}
 			var sourceFile = getFile(req, sourceUrl.replace(new RegExp("^"+fileRoot), ""));
 			return fs.statAsync(sourceFile.path)
-			.then(function(/*stats*/) {
-				return isCopy ? copy(sourceFile.path, destFile.path) : fs.renameAsync(sourceFile.path, destFile.path);
+			.then(function(stats) {
+				if (isCopy) {
+					return copy(sourceFile.path, destFile.path)
+					.then(function(result) {
+						var eventData = { type: "rename", isDir: stats.isDirectory(), file: destFile, sourceFile: sourceFile };
+						exports.fireFileModificationEvent(eventData);
+						return result;
+					});
+				} else {
+					return fs.renameAsync(sourceFile.path, destFile.path)
+					.then(function(result) {
+						var eventData = { type: "rename", isDir: stats.isDirectory(), file: destFile, sourceFile: sourceFile };
+						exports.fireFileModificationEvent(eventData);
+						return result;
+					});
+				}
 			})
 			.then(writeResponse.bind(null, destExists))
 			.catch(function(err) {
@@ -429,9 +443,29 @@ exports.handleFilePOST = function(workspaceRoot, fileRoot, req, res, destFile, m
 			return destExists ? fs.unlinkAsync(destFile.path) : null;
 		})
 		.then(function() {
-			return isDirectory ? fs.mkdirAsync(destFile.path) : fs.writeFileAsync(destFile.path, '');
+			if (isDirectory) {
+				return fs.mkdirAsync(destFile.path);
+			} else {
+				var eventData = { type: "write", file: destFile };
+				exports.fireFileModificationEvent(eventData);
+				
+				return fs.writeFileAsync(destFile.path, '');
+			}
+
 		})
 		.then(writeResponse.bind(null, destExists))
 		.catch(api.writeError.bind(null, 500, res));
 	});
+
+};
+
+var _fileModListeners = [];
+exports.addFileModificationListener = function(theListener) {
+	_fileModListeners.push(theListener);
+};
+
+exports.fireFileModificationEvent = function(eventData) {
+	for (var i = 0; i < _fileModListeners.length; i++) {
+		_fileModListeners[i].handleFileModficationEvent(eventData);
+	}
 };

@@ -14,6 +14,10 @@ var bodyParser = require("body-parser");
 var tasks = require("../tasks");
 var target = require("./target");
 var async = require("async");
+var LRU = require("lru-cache");
+
+// Caching for already located targets
+var orgsCache = LRU({max: 1000, maxAge: 300000 });
 
 module.exports.router = function() {
 	
@@ -46,6 +50,11 @@ function getOrgs(req, res){
 }
 
 function getOrgsRequest(userId, targetRequest){
+	var cacheKey = userId + targetRequest.Url;
+	if (orgsCache.get(cacheKey)) {
+		return Promise.resolve(orgsCache.get(cacheKey));
+	}
+	
 	var completeOrgsArray = [];
 	var simpleorgsArray = [];
 	return target.cfRequest("GET", userId, targetRequest.Url + "/v2/organizations", {"inline-relations-depth":"1"}, null, null, null, targetRequest)
@@ -78,8 +87,10 @@ function getOrgsRequest(userId, targetRequest){
 				}, function(err) {
 					if(err){
 						return reject(err);
-					}			
-					fulfill({"simpleorgsArray":simpleorgsArray,"completeOrgsArray":completeOrgsArray});
+					}
+					var theOrgs = {"simpleorgsArray":simpleorgsArray,"completeOrgsArray":completeOrgsArray};
+					orgsCache.set(cacheKey, theOrgs);
+					fulfill(theOrgs);
 				});
 			}
 		});

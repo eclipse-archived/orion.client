@@ -10,7 +10,8 @@
         "search-worker": "ERROR",
         "git": "ALL",
         "electron": "ALL",
-        "response":"ERROR"
+        "response":"ERROR",
+        "livesync": "DEBUG"
     },
     "appenders": [
         {

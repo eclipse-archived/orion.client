@@ -144,6 +144,7 @@ module.exports = function(options) {
 								return;
 							}
 							fileUtil.writeFileMetadata(req, res, api.join(fileRoot, file.workspaceId), api.join(workspaceRoot, file.workspaceId), file, stats, ETag.fromString(newContents) /*the new ETag*/);
+							fileUtil.fireFileModificationEvent({ type: "write", file: file, contents: newContents});
 						});
 					});
 					
@@ -221,6 +222,7 @@ module.exports = function(options) {
 							return;
 						}
 						fileUtil.writeFileMetadata(req, res, api.join(fileRoot, file.workspaceId), api.join(workspaceRoot, file.workspaceId), file, stats, etag);
+						fileUtil.fireFileModificationEvent({ type: "write", file: file });
 					});
 				});
 				ws.on('error', function(err) {
@@ -286,8 +288,14 @@ module.exports = function(options) {
 			}
 			if (stats.isDirectory()) {
 				fileUtil.rumRuff(file.path, checkWorkspace);
+				
+				var eventData = { type: "delete", file: file, req: req };
+				fileUtil.fireFileModificationEvent(eventData);
 			} else {
 				fs.unlink(file.path, checkWorkspace);
+				
+				var eventData = { type: "delete", file: file, req: req };
+				fileUtil.fireFileModificationEvent(eventData);
 			}
 		});
 	}
