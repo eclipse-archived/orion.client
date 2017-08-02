@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016 IBM Corporation and others.
+ * Copyright (c) 2016, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -9,7 +9,7 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 /*eslint-env node*/
-'use strict'
+'use strict';
 var api = require('../api'),
 	fileUtil = require('../fileUtil'),
  	writeResponse = api.writeResponse,
@@ -22,8 +22,7 @@ var api = require('../api'),
     Preference = require('../model/pref'),
     Promise = require('bluebird');
 
-var debug = Debug('orion:prefs'),
-    fs = Promise.promisifyAll(require('fs'));
+    var fs = Promise.promisifyAll(require('fs'));
 
 module.exports = {};
 
@@ -62,7 +61,6 @@ function PrefsController(options) {
 	// Wraps a promise-returning handler, that needs access to prefs, into an Express middleware.
 	function wrapAsMiddleware(handler) {
 		return function(req, res, next) {
-			debug('%s %s', req.method, req.url);
 			return Promise.resolve()
 			.then(acquirePrefs.bind(null, req, res))
 			.then(handler.bind(null, req, res))
@@ -93,7 +91,6 @@ function PrefsController(options) {
 	function savePrefs(req, prefs) {
 		/*eslint-disable consistent-return*/
 		if (!prefs.modified()) {
-			debug("savePrefs(): not modified, skip writing");
 			return Promise.resolve();
 		}
 		var store = fileUtil.getMetastore(req);
@@ -106,7 +103,6 @@ function PrefsController(options) {
 			});
 		})
 		.catch(function(err) {
-			debug('savePrefs(): error writing prefs.json', err);
 			throw err;
 		});
 		/*eslint-enable*/
