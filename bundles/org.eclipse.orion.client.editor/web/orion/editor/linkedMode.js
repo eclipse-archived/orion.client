@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2013, 2016 IBM Corporation and others.
+ * Copyright (c) 2013, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -18,8 +18,6 @@ define("orion/editor/linkedMode", [
 	'orion/objects',
 	'orion/util'
 ], function(messages, mKeyBinding, mKeyModes, mAnnotations, objects) {
-
-	var exports = {};
 
 	/**
 	 * @name LinkedContentAssist
@@ -238,7 +236,11 @@ define("orion/editor/linkedMode", [
 				for (i = sortedPositions.length - 1; i >= 0; i--) {
 					pos = sortedPositions[i];
 					if (pos.model === model && pos.group === changed.group) {
-						this.editor.setText(evnt.text, pos.oldOffset + deltaStart , pos.oldOffset + deltaEnd, false);
+						var text = evnt.text;
+						if(Array.isArray(text)) {
+							text = evnt.text[i];
+						}
+						this.editor.setText(text, pos.oldOffset + deltaStart , pos.oldOffset + deltaEnd, false);
 					}
 				}
 				this.ignoreVerify = false;
@@ -384,7 +386,7 @@ define("orion/editor/linkedMode", [
 		 * @returns {Boolean} If linked mode is active
 		 */
 		isActive: function() {
-			return !!this.linkedModeModel;
+			return Boolean(this.linkedModeModel);
 		},
 		/**
 		 * @description Returns if linked mode status is active in the current editor
@@ -392,7 +394,7 @@ define("orion/editor/linkedMode", [
 		 * @returns {Boolean} If linked mode status is active
 		 */
 		isStatusActive: function() {
-			return !!this.linkedModeModel;
+			return Boolean(this.linkedModeModel);
 		},
 		/**
 		 * @description Selects the group of the given index from the currently active model
@@ -569,7 +571,8 @@ define("orion/editor/linkedMode", [
 			annotationModel.replaceAnnotations(remove, add);
 		}
 	});
-	exports.LinkedMode = LinkedMode;
 
-	return exports;
+	return {
+		LinkedMode: LinkedMode
+	};
 });
