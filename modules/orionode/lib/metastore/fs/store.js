@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016 IBM Corporation and others.
+ * Copyright (c) 2016, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -11,14 +11,11 @@
 var
     nodePath = require('path'),
     Promise = require('bluebird'),
-    Debug = require('debug'),
     fs = Promise.promisifyAll(require('fs')),
     lockFile = Promise.promisifyAll(require('lockfile')),
     mkdirpAsync = Promise.promisify(require('mkdirp')),
     os = require('os');
     
- var debug = Debug('orion:prefs')
-
 // Helper functions
 var PREF_FILENAME = 'prefs.json';
 var USER_NAME = "anonymous";
@@ -44,7 +41,6 @@ function lock(prefFile) {
 		return lockFile.unlockAsync(getLockfileName(prefFile))
 		.catch(function(error) {
 			// Rejecting here will crash the process; just warn
-			debug("Error unlocking pref file:", error);
 		});
 	});
 }
@@ -62,6 +58,9 @@ FsMetastore.prototype.setup = function(app) {
 	}.bind(this));
 };
 Object.assign(FsMetastore.prototype, {
+	/**
+	 * @callback
+	 */
 	createWorkspace: function(userId, workspaceData, callback) {
 		callback(new Error("Not implemented"));
 	},
@@ -74,6 +73,9 @@ Object.assign(FsMetastore.prototype, {
 			id: WORKSPACE_ID
 		});
 	},
+	/**
+	 * @callback
+	 */
 	deleteWorkspace: function(workspaceId, callback) {
 		callback(new Error("Not implemented"));
 	},
