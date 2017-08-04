@@ -5531,7 +5531,8 @@ define("orion/editor/textView", [  //$NON-NLS-1$
 				_parent.appendChild(div1);
 				div1.innerHTML = newArray(2).join("a"); //$NON-NLS-1$
 				rect1 = div1.getBoundingClientRect();
-				charWidth = Math.ceil(rect1.right - rect1.left);
+				charWidth_float = rect1.right - rect1.left;
+				charWidth = Math.ceil(charWidth_float);
 				if (this._wrapOffset || this._marginOffset) {
 					div1.innerHTML = newArray(this._wrapOffset + 1 + (util.isWebkit ? 0 : 1)).join(" "); //$NON-NLS-1$
 					rect1 = div1.getBoundingClientRect();
@@ -5550,6 +5551,7 @@ define("orion/editor/textView", [  //$NON-NLS-1$
 				scrollWidth: scrollWidth,
 				wrapWidth: wrapWidth,
 				marginWidth: marginWidth,
+				charWidth_float: charWidth_float,
 				charWidth: charWidth,
 				invalid: invalid
 			};
@@ -8125,7 +8127,7 @@ define("orion/editor/textView", [  //$NON-NLS-1$
 
     // Dimension constants
     var lineHeight = this._view._getLineHeight();
-    var charWidth = 7.2246;
+    var charWidth = this._view._calculateMetrics().charWidth_float;
     /**
      * Relative position in the document
      * that is currently at the top edge of the view
