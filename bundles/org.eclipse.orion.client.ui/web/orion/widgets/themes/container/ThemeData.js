@@ -42,7 +42,7 @@ define([
 		function getStyles(){
 			var d = new Deferred();
 			var defaultStyles = this.styles;
-			if (this.provider) {
+			if (this.provider && typeof this.provider.getStyles === "function") {
 				this.provider.getStyles().then(function(providedStyles) {
 					d.resolve(providedStyles);
 				}, function() { 
@@ -56,7 +56,7 @@ define([
 		
 		function getThemeVersion() {
 			var d = new Deferred();
-			if (this.provider) {
+			if (this.provider && typeof this.provider.getStyles === "function") {
 				this.provider.getThemeVersion().then(function(version) {
 					d.resolve(version);
 				}, function() {
@@ -76,7 +76,7 @@ define([
 		function getProtectedThemes() {
 			var d = new Deferred();
 			var defaultProtectedThemes = this.protectedThemes;
-			if (this.provider) {
+			if (this.provider && typeof this.provider.getStyles === "function") {
 				this.provider.getProtectedThemes().then(function(providedProtectedThemes) {
 					d.resolve(providedProtectedThemes);
 				}, function() {
@@ -94,7 +94,7 @@ define([
 			var d = new Deferred();
 			var useLightTheme = document.body.classList.contains("lightPage");
 			var defaultTheme = useLightTheme ? 'Light' : 'Dark';
-			if (this.provider) {
+			if (this.provider && typeof this.provider.getStyles === "function") {
 				this.provider.getDefaultTheme().then(function(defaultTheme) {
 					d.resolve(defaultTheme);
 				}, function() {
