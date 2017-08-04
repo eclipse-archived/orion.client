@@ -651,8 +651,9 @@ define("orion/editor/textView", [  //$NON-NLS-1$
 	}
 	TextLine.prototype = /** @lends orion.editor.TextLine.prototype */ {
 		/** @private */
-		create: function(_parent, div) {
+		create: function(_parent, div, drawing) {
 			if (this._lineDiv) { return; }
+			this.drawing = drawing;
 			var child = this._lineDiv = this._createLine(_parent, div, this.lineIndex);
 			child._line = this;
 			return child;
@@ -889,7 +890,11 @@ define("orion/editor/textView", [  //$NON-NLS-1$
 				child.innerHTML = style.html;
 				child.ignore = true;
 			} else if (style && style.node) {
-				child.appendChild(style.node);
+				if (this.drawing) {
+					child.appendChild(style.node);
+				} else {
+					child.appendChild(style.node.cloneNode(true));
+				}
 				child.ignore = true;
 			} else if (style && style.bidi) {				
 				child.ignore = true;
@@ -7490,14 +7495,14 @@ define("orion/editor/textView", [  //$NON-NLS-1$
 				var frag = doc.createDocumentFragment();
 				for (lineIndex=lineStart; lineIndex<=lineEnd; lineIndex++) {
 					if (!child || child.lineIndex > lineIndex) {
-						new TextLine(this, lineIndex).create(frag, null);
+						new TextLine(this, lineIndex).create(frag, null, true);
 					} else {
 						if (frag.firstChild) {
 							clientDiv.insertBefore(frag, child);
 							frag = doc.createDocumentFragment();
 						}
 						if (child && child.lineChanged) {
-							child = new TextLine(this, lineIndex).create(frag, child);
+							child = new TextLine(this, lineIndex).create(frag, child, true);
 							child.lineChanged = false;
 						}
 						child = this._getLineNext(child);

@@ -286,7 +286,7 @@ define(['orion/collab/collabPeer', 'orion/collab/ot', 'orion/uiUtils'], function
             case 'client-updated':
                 this.collabClient.addOrUpdatePeer(new CollabPeer(msg.clientId, msg.name, msg.color));
                 if (msg.location) {
-                    this.collabClient.addOrUpdateCollabFileAnnotation(msg.clientId, contextPath + '/file/' + msg.location, msg.editing);
+                    this.collabClient.addOrUpdateCollabFileAnnotation(msg.clientId, contextPath + msg.location, msg.editing);
                 } else {
                     this.collabClient.addOrUpdateCollabFileAnnotation(msg.clientId, '', msg.editing);
                 }
