@@ -124,9 +124,18 @@ Object.assign(FsMetastore.prototype, {
 				"UniqueId":workspaceId,
 				"UserId":userId
 			};
-			this.updateWorkspacePreferences(user.UniqueId, workspaceId, wPref, function(error){
-				callback(error, w);
-			});
+			this.updateWorkspacePreferences(workspaceId, wPref, function(error){
+				if(error){
+					callback(error, w);
+				}else{
+					metaUtil.createWorkspaceDir(this.options.workspaceDir, userId, w.id, function(err) {
+						if (err) {
+							return callback(err, w);
+						}
+						callback(null, w);
+					});
+				}
+			}.bind(this));
 		}.bind(this));
 	},
 	getWorkspace: function(workspaceId, callback) {
@@ -180,7 +189,7 @@ Object.assign(FsMetastore.prototype, {
 		.then(function() {
 			return Promise.using(lock(prefFile), function() {
 				// We have the lock until the promise returned by this function fulfills.
-				return fs.writeFileAsync(prefFile, prefs);
+				return fs.writeFileAsync(prefFile, JSON.stringify(prefs, null, 2));
 			})
 			.then(function() {
 				callback(null, null);
