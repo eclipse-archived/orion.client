@@ -26,14 +26,20 @@ var DESCRIPTION = "This JSON file is at the root of the Orion metadata store res
 
 // The current version of the Simple Meta Store.
 var VERSION = 8;
+function getUserRootLocation(options, userId){
+	var rootLocation = options.configParams['orion.single.user'] ? nodePath.join(os.homedir(), '.orion') : nodePath.join.apply(null, metaUtil.readMetaUserFolder(options.workspaceDir, userId));
+	return rootLocation;
+}
+
 function getUserPrefsFileName(options, user) {
 	var userId = typeof user === "string" ? user : user.username;
-	var prefFolder = options.configParams['orion.single.user'] ? nodePath.join(os.homedir(), '.orion') : nodePath.join.apply(null, metaUtil.readMetaUserFolder(options.workspaceDir, userId));
+	var prefFolder = getUserRootLocation(options, userId);
 	return nodePath.join(prefFolder, USERPREF_FILENAME);
 }
 
 function getWorkspacePrefsFileName(options, workspaceId) {
-	var prefFolder = options.configParams['orion.single.user'] ? nodePath.join(os.homedir(), '.orion') : nodePath.join.apply(null, metaUtil.readMetaUserFolder(options.workspaceDir, metaUtil.decodeUserIdFromWorkspaceId(workspaceId)));
+	var userId = metaUtil.decodeUserIdFromWorkspaceId(workspaceId);
+	var prefFolder = getUserRootLocation(options, userId);
 	return nodePath.join(prefFolder, workspaceId + ".json");
 }
 
@@ -75,13 +81,13 @@ FsMetastore.prototype.setup = function(app) {
 			}else if(content.version > VERSION) {
 				throw new Error("cannot run an old server (version " + VERSION + ") on metadata that is at a newer version (version " + content.version + ")");
 			}
-		}).catch(function(err){
+		}.bind(this)).catch(function(err){
 			// TODO use err.message to make sure the error is file not exsit
 			fs.writeFileAsync(nodePath.join(this.options.workspaceDir, METASTORE_FILENAME),JSON.stringify({
 				"OrionVersion": VERSION,
 				"OrionDescription": DESCRIPTION
 			}, null, 2));
-		});
+		}.bind(this));
 	}
 	
 	// Used to only for single user case (Electron or local debug)
@@ -121,7 +127,7 @@ Object.assign(FsMetastore.prototype, {
 			this.updateWorkspacePreferences(user.UniqueId, workspaceId, wPref, function(error){
 				callback(error, w);
 			});
-		});
+		}.bind(this));
 	},
 	getWorkspace: function(workspaceId, callback) {
 		if (workspaceId !== WORKSPACE_ID) {
@@ -184,7 +190,7 @@ Object.assign(FsMetastore.prototype, {
 	readUserPreferences: function(user, callback) {
 		var prefFile = getUserPrefsFileName(this.options, user);
 		return fs.readFileAsync(prefFile, 'utf8')
-		.catchReturn({ code: 'ENOENT' }, null) // New prefs file: suppress error
+		.catchReturn({ code: 'ENOENT' }, null) // New prefs file: suppress error, use ENOENT to pattern match the error then return null instead
 		.then(function(prefs) {
 			callback(null, prefs);
 		});
@@ -206,7 +212,30 @@ Object.assign(FsMetastore.prototype, {
 	 * @callback
 	 */
 	createUser: function(userData, callback) {
-		callback(new Error("Not implemented"));
+		var prefFile = getUserPrefsFileName(this.options, userData.username);
+		return mkdirpAsync(nodePath.dirname(prefFile))
+		.then(function() {
+			var userProperty = {};
+			userData.password && (userProperty.Password = userData.password);
+			userData.oauth && (userProperty.OAuth = userData.oauth);
+			userData.email && (userProperty.Email = userData.email);
+			userProperty["AccountCreationTimestamp"] = Date.now();
+			userProperty["UniqueId"] = userData.username;
+			var userJson = {
+				"OrionVersion": VERSION,
+				"UniqueId": userData.username,
+				"UserName": userData.username,
+				"FullName": userData.fullname,
+				"WorkspaceIds":[],
+				"Properties": userProperty
+			};
+			return fs.writeFileAsync(prefFile, JSON.stringify(userJson, null, 2));
+			// TODO Save User info in cache for quick referrence
+		}).catch(function(err){
+			if(err){
+				throw new Error("could not create user: " + userData.username + ", user already exists");
+			}
+		});
 	},
 	/**
 	 * @callback
@@ -218,31 +247,35 @@ Object.assign(FsMetastore.prototype, {
 	},
 	readUser: function(userId, callback){
 		this.readUserPreferences(userId, function(err, prefs){
-			var userPrefs = JSON.parse(prefs);
-			var userInfo;
-			// TODO Check if migration is needed and migrate if so
-			if(false /** Migragion needed */){
-//				userPrefs = migratedUserPrefs
+			if(prefs){
+				var userPrefs = JSON.parse(prefs);
+				var userInfo;
+				// TODO Check if migration is needed and migrate if so
+				if(false /** Migragion needed */){
+	//				userPrefs = migratedUserPrefs
+				}
+				userInfo = {
+					"UniqueId": userPrefs.UniqueId,
+					"username": userPrefs.UserName,
+					"FullName": userPrefs.FullName || "Unnamed User",
+					"Properties": {}
+				}; // TODO Translation between Java user.json is needed
+				userPrefs.WorkspaceIds && (userInfo.workspaces = userPrefs.WorkspaceIds.map(function(workspaceId){
+					return {
+						name: metaUtil.decodeWorkspaceNameFromWorkspaceId(workspaceId),
+						id: workspaceId
+					};
+				}));
+				var propertieKeys = Object.keys(userPrefs.Properties);
+				propertieKeys.forEach(function(propertyKey){
+					userInfo.Properties[propertyKey] = userPrefs.Properties[propertyKey];
+					// TODO password needs to be handled specifically since it needs to be decrypted. (referrence setProperties line 967)
+					// TODO handle userPropertyCache (referrence setProperties line 972)
+				});
+				callback(null, userInfo);
+			}else{
+				callback(null, null);
 			}
-			userInfo = {
-				"UniqueId": userPrefs.UniqueId,
-				"username": userPrefs.UserName,
-				"FullName": userPrefs.FullName || "Unnamed User",
-				"Properties": {}
-			}; // TODO Translation between Java user.json is needed
-			userPrefs.WorkspaceIds && (userInfo.workspaces = userPrefs.WorkspaceIds.map(function(workspaceId){
-				return {
-					name: metaUtil.decodeWorkspaceNameFromWorkspaceId(workspaceId),
-					id: workspaceId
-				};
-			}));
-			var propertieKeys = Object.keys(userPrefs.Properties);
-			propertieKeys.forEach(function(propertyKey){
-				userInfo.Properties[propertyKey] = userPrefs.Properties[propertyKey];
-				// TODO password needs to be handled specifically since it needs to be decrypted. (referrence setProperties line 967)
-				// TODO handle userPropertyCache (referrence setProperties line 972)
-			});
-			callback(null, userInfo);
 		});
 	},
 	getUser: function(id, callback) {
