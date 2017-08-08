@@ -56,7 +56,7 @@ define([
 		
 		function getThemeVersion() {
 			var d = new Deferred();
-			if (this.provider && typeof this.provider.getStyles === "function") {
+			if (this.provider && typeof this.provider.getThemeVersion === "function") {
 				this.provider.getThemeVersion().then(function(version) {
 					d.resolve(version);
 				}, function() {
@@ -76,7 +76,7 @@ define([
 		function getProtectedThemes() {
 			var d = new Deferred();
 			var defaultProtectedThemes = this.protectedThemes;
-			if (this.provider && typeof this.provider.getStyles === "function") {
+			if (this.provider && typeof this.provider.getProtectedThemes === "function") {
 				this.provider.getProtectedThemes().then(function(providedProtectedThemes) {
 					d.resolve(providedProtectedThemes);
 				}, function() {
@@ -94,7 +94,7 @@ define([
 			var d = new Deferred();
 			var useLightTheme = document.body.classList.contains("lightPage");
 			var defaultTheme = useLightTheme ? 'Light' : 'Dark';
-			if (this.provider && typeof this.provider.getStyles === "function") {
+			if (this.provider && typeof this.provider.getDefaultTheme === "function") {
 				this.provider.getDefaultTheme().then(function(defaultTheme) {
 					d.resolve(defaultTheme);
 				}, function() {
@@ -131,4 +131,4 @@ define([
 			getStyles:getStyles
 		};
 	}
-);
+);
