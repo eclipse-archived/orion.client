@@ -56,9 +56,9 @@ mBootstrap.startup().then(function(core) {
 	var serviceRegistry = core.serviceRegistry;
 	var preferences = core.preferences;
 	
+	var selection = new mSelection.Selection(serviceRegistry);
 	var commandRegistry = new mCommandRegistry.CommandRegistry({selection: selection});
 	new mDialogs.DialogService(serviceRegistry, commandRegistry);
-	var selection = new mSelection.Selection(serviceRegistry);
 	new mSshTools.SshService(serviceRegistry);
 	var operationsClient = new mOperationsClient.OperationsClient(serviceRegistry);
 	var progress = new mProgress.ProgressService(serviceRegistry, operationsClient, commandRegistry);
