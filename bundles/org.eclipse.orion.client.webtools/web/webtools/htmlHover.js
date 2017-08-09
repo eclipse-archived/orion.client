@@ -1,6 +1,6 @@
  /*******************************************************************************
  * @license
- * Copyright (c) 2015 IBM Corporation and others.
+ * Copyright (c) 2015, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -60,7 +60,7 @@ define([
 			                }
 			                case 'attr': {
 			                    var path = node.value;
-			                    switch(node.kind) {
+			                    switch(node.name) {
 			                        case 'href': {
 			                            if(/\.(?:png|jpg|jpeg|bmp|gif)$/.test(path)) {
                             	            return that._getImageHover(editorContext, path);

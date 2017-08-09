@@ -53,6 +53,16 @@ module.exports.router = function(options) {
 				Severity: "Ok"
 			});
 		});
+		autoUpdater.on("update-error", function(error) {
+			logger.error(error);
+			task.done({
+				HttpCode: 204,
+				Code: 0,
+				DetailedMessage: "update-error",
+				Message: "OK",
+				Severity: "Ok"
+			});
+		});
 	})
 	.get("/resolveNewVersion", function (req, res) {
 		var task = new tasks.Task(res, false, true, 0, true);

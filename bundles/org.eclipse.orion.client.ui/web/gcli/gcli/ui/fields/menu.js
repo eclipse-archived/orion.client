@@ -20,6 +20,7 @@ define(function(require, exports, module) {
 
 var util = require('util/util');
 var l10n = require('util/l10n');
+var bidiUtils = require('orion/bidiUtils');
 var domtemplate = require('util/domtemplate');
 
 var Argument = require('gcli/argument').Argument;
@@ -124,6 +125,10 @@ Menu.prototype.show = function(items, match) {
     this.items.splice(-1);
     this.items.hasMore = true;
   }
+  
+  for (var i = 0; i < this.items.length; i++) {
+	  this.items[i].dir = bidiUtils.getTextDirection(this.items[i].name);  
+  }
 
   var options = this.template.cloneNode(true);
   domtemplate.template(options, this, this.templateOptions);
@@ -160,6 +165,7 @@ function getHighlightingProxy(item, match, document) {
       var highlight = document.createElement('span');
       highlight.classList.add('gcli-menu-typed');
       highlight.appendChild(document.createTextNode(match));
+      highlight.dir = bidiUtils.getTextDirection(match);
       parent.appendChild(highlight);
       parent.appendChild(document.createTextNode(after));
       return parent;

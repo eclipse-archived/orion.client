@@ -12,13 +12,14 @@
 
 /*eslint-env browser, amd*/
 /*global URL*/
-define(["require", "i18n!orion/shell/nls/messages", "orion/bootstrap", "orion/commandRegistry", "orion/fileClient", "orion/searchClient", "orion/globalCommands",
+define(["require", "i18n!orion/shell/nls/messages", "orion/bootstrap", "orion/commandRegistry", "orion/fileClient", "orion/dialogs", "orion/searchClient", "orion/globalCommands",
 		"orion/shell/Shell", "orion/webui/treetable", "shell/shellPageFileService", "shell/paramType-file", "shell/paramType-plugin", "shell/paramType-service",
-		"orion/i18nUtil", "orion/extensionCommands", "orion/contentTypes", "orion/PageUtil", "orion/URITemplate", "orion/Deferred",
+		"orion/i18nUtil", "orion/extensionCommands", "orion/contentTypes", "orion/bidiUtils", "orion/PageUtil", "orion/URITemplate", "orion/Deferred",
 		"orion/status", "orion/progress", "orion/operationsClient", "shell/resultWriters", "orion/metrics", "orion/URL-shim", "orion/urlModifier"],
-	function(require, messages, mBootstrap, mCommandRegistry, mFileClient, mSearchClient, mGlobalCommands, mShell, mTreeTable, mShellPageFileService, mFileParamType,
-		mPluginParamType, mServiceParamType, i18nUtil, mExtensionCommands, mContentTypes, PageUtil, URITemplate, Deferred, mStatus, mProgress,
+	function(require, messages, mBootstrap, mCommandRegistry, mFileClient, mDialogs, mSearchClient, mGlobalCommands, mShell, mTreeTable, mShellPageFileService, mFileParamType,
+		mPluginParamType, mServiceParamType, i18nUtil, mExtensionCommands, mContentTypes, bidiUtils, PageUtil, URITemplate, Deferred, mStatus, mProgress,
 		mOperationsClient, mResultWriters, mMetrics, _, urlModifier) {
+
 
 	var shellPageFileService, fileClient, commandRegistry, output, fileType;
 	var hashUpdated = false;
@@ -257,11 +258,13 @@ define(["require", "i18n!orion/shell/nls/messages", "orion/bootstrap", "orion/co
 			link.href = "#" + node.Location; //$NON-NLS-0$
 			link.className = "shellPageDirectory"; //$NON-NLS-0$
 			link.textContent = node.Name;
+			link.dir = bidiUtils.getTextDirection(link.textContent);
 			return link;
 		}
 		link.href = computeEditURL(node);
 		link.target = "_blank";  //$NON-NLS-0$
 		link.textContent = node.Name;
+		link.dir = bidiUtils.getTextDirection(link.textContent);
 		return link;
 	}
 
@@ -271,7 +274,7 @@ define(["require", "i18n!orion/shell/nls/messages", "orion/bootstrap", "orion/co
 		var span = document.createElement("span"); //$NON-NLS-0$
 		span.appendChild(document.createTextNode(isInitial ? messages["Initial directory: "] : messages["Changed to: "]));
 		var bold = document.createElement("b"); //$NON-NLS-0$
-		bold.appendChild(document.createTextNode(dirName));
+		bold.appendChild(document.createTextNode(bidiUtils.enforceSTT(dirName, 'filepath')));
 		span.appendChild(bold);
 		return span;
 	}
@@ -485,18 +488,23 @@ define(["require", "i18n!orion/shell/nls/messages", "orion/bootstrap", "orion/co
 		var result = context.createPromise();
 		if (args.plugin.isAllPlugin) {
 			var msg = messages["UninstallAllPlugsMsg"];
-			if (!window.confirm(msg)) {
-				return messages.Aborted;
-			}
-			args.plugin.uninstall().then(
-				function() {
-					preferences.remove("/plugins", args.plugin.getPluginLocations()); //$NON-NLS-1$
-					result.resolve(messages.Succeeded);
-				},
-				function(error) {
-					result.resolve(error);
+			
+			var dialog = serviceRegistry.getService("orion.page.dialog");
+			dialog.confirm(msg, function(result){
+				if(result){
+					args.plugin.uninstall().then(
+						function() {
+							preferences.remove("/plugins", args.plugin.getPluginLocations()); //$NON-NLS-1$
+							result.resolve(messages.Succeeded);
+						},
+						function(error) {
+							result.resolve(error);
+						}
+					);
+				}else{
+					return messages.Aborted;
 				}
-			);
+			});
 		} else {
 			var location = args.plugin.getLocation();
 			var plugin = pluginRegistry.getPlugin(location);
@@ -822,6 +830,7 @@ define(["require", "i18n!orion/shell/nls/messages", "orion/bootstrap", "orion/co
 		preferences = core.preferences;
 
 		commandRegistry = new mCommandRegistry.CommandRegistry({});
+		new mDialogs.DialogService(serviceRegistry, commandRegistry);
 		fileClient = new mFileClient.FileClient(serviceRegistry);
 		var searcher = new mSearchClient.Searcher({serviceRegistry: serviceRegistry, commandService: commandRegistry, fileService: fileClient});
 		var operationsClient = new mOperationsClient.OperationsClient(serviceRegistry);

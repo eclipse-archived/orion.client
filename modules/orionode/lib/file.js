@@ -44,10 +44,10 @@ module.exports = function(options) {
 			writeError(500, res, "Expected a file not a directory");
 		} else {
 			var stream = fs.createReadStream(filepath);
-			res.setHeader("Cache-Control", "no-cache");
 			res.setHeader('Content-Length', stats.size);
 			res.setHeader('ETag', etag);
 			res.setHeader('Accept-Patch', 'application/json-patch; charset=UTF-8');
+			api.setResponseNoCache(res);
 			stream.pipe(res);
 			stream.on('error', function(e) {
 				// FIXME this is wrong, headers have likely been committed at this point
@@ -144,6 +144,7 @@ module.exports = function(options) {
 								return;
 							}
 							fileUtil.writeFileMetadata(req, res, api.join(fileRoot, file.workspaceId), api.join(workspaceRoot, file.workspaceId), file, stats, ETag.fromString(newContents) /*the new ETag*/);
+							fileUtil.fireFileModificationEvent({ type: "write", file: file, contents: newContents});
 						});
 					});
 					
@@ -169,7 +170,7 @@ module.exports = function(options) {
 			return fileUtil.getProject(parentFileRoot, parentWorkspaceRoot, file, {names: names}).then(function(project) {
 				return fileUtil.withStatsAndETag(project, function(error, stats, etag) {
 					if (error && error.code === 'ENOENT') {
-						res.sendStatus(204);
+						api.sendStatus(204, res);
 					} else if(error) {
 						writeError(500, res, error);
 					} else {
@@ -178,13 +179,13 @@ module.exports = function(options) {
 				});
 			}, function reject() {
 				//don't send back 404, this API asks a question, it does not ask to actually get a resource
-				res.sendStatus(204);
+				api.sendStatus(204, res);
 			});
 		}
 		return fileUtil.withStatsAndETag(file.path, function(error, stats, etag) {
 			if (error && error.code === 'ENOENT') {
 				if(typeof readIfExists === 'boolean' && readIfExists) {
-					res.sendStatus(204);
+					api.sendStatus(204, res);
 				} else {
 					writeError(404, res, 'File not found: ' + rest);
 				}
@@ -205,7 +206,7 @@ module.exports = function(options) {
 		var file = fileUtil.getFile(req, rest);
 		if (getParam(req, 'parts') === 'meta') {
 			// TODO implement put of file attributes
-			res.sendStatus(501);
+			api.sendStatus(501, res);
 			return;
 		}
 		function write() {
@@ -217,10 +218,11 @@ module.exports = function(options) {
 				ws.on('finish', function() {
 					fileUtil.withStatsAndETag(file.path, function(error, stats, etag) {
 						if (error && error.code === 'ENOENT') {
-							res.status(404).end();
+							api.writeResponse(404, res);
 							return;
 						}
 						fileUtil.writeFileMetadata(req, res, api.join(fileRoot, file.workspaceId), api.join(workspaceRoot, file.workspaceId), file, stats, etag);
+						fileUtil.fireFileModificationEvent({ type: "write", file: file });
 					});
 				});
 				ws.on('error', function(err) {
@@ -235,9 +237,9 @@ module.exports = function(options) {
 		}
 		fileUtil.withETag(file.path, function(error, etag) {
 			if (error && error.code === 'ENOENT') {
-				res.status(404).end();
+				api.writeResponse(404, res);
 			} else if (ifMatchHeader && ifMatchHeader !== etag) {
-				res.status(412).end();
+				api.writeResponse(412, res);
 			} else {
 				write();
 			}
@@ -270,7 +272,7 @@ module.exports = function(options) {
 					writeError(500, res, error);
 					return;
 				}
-				res.sendStatus(204);
+				api.sendStatus(204, res);
 			}
 			function checkWorkspace(error) {
 				if (!error && file.path === file.workspaceDir) {
@@ -282,12 +284,18 @@ module.exports = function(options) {
 			if (error && error.code === 'ENOENT') {
 				return checkWorkspace();
 			} else if (ifMatchHeader && ifMatchHeader !== etag) {
-				return res.sendStatus(412);
+				return api.sendStatus(412, res);
 			}
 			if (stats.isDirectory()) {
 				fileUtil.rumRuff(file.path, checkWorkspace);
+				
+				var eventData = { type: "delete", file: file, req: req };
+				fileUtil.fireFileModificationEvent(eventData);
 			} else {
 				fs.unlink(file.path, checkWorkspace);
+				
+				var eventData = { type: "delete", file: file, req: req };
+				fileUtil.fireFileModificationEvent(eventData);
 			}
 		});
 	}

@@ -9,7 +9,7 @@
  *		 IBM Corporation - initial API and implementation
  *******************************************************************************/
 /*eslint-env node */
-var api = require('../api'), writeError = api.writeError;
+var api = require('../api'), writeError = api.writeError, writeResponse = api.writeResponse, sendStatus = api.sendStatus;
 var path = require('path');
 var express = require('express');
 var sharedUtil = require('./sharedUtil');
@@ -54,11 +54,11 @@ module.exports.router = function(options) {
 						workspaces.push({
 							Id: projectBelongingWorkspaceId,
 							Location: api.join(sharedWorkspaceFileRoot, projectBelongingWorkspaceId),
-							Name: projectSegs[3]
+							Name: projectSegs[2] + "'s " + projectSegs[3]
 						});
 					}
 				});
-				api.writeResponse(null, res, null, {
+				writeResponse(null, res, null, {
 					Id: req.user.username,
 					Name: req.user.username,
 					UserName: req.user.fullname || req.user.username,
@@ -74,8 +74,7 @@ module.exports.router = function(options) {
 		sharedProjects.getUsersInProject(project)
 		.then(function(users) {
 			if (!project || !users || !users.some(function(user) {return user === username;})) {
-				res.writeHead(401, "Not authenticated");
-				res.end();
+				writeError(401, res, "Not authenticated");
 			} else {
 				next();
 			}
@@ -97,7 +96,7 @@ module.exports.router = function(options) {
 			fileUtil.withStatsAndETag(filePath, function(err, stats, etag) {
 				if (err && err.code === 'ENOENT') {
 					if(typeof readIfExists === 'boolean' && readIfExists) {
-						res.sendStatus(204);
+						sendStatus(204, res);
 					} else {
 						writeError(404, res, 'File not found: ' + filePath);
 					}
@@ -123,9 +122,9 @@ module.exports.router = function(options) {
 							tree.Attributes = {};
 							tree["Attributes"].hubID = hub;
 						}
-						return res.status(200).json(tree);
+						return writeResponse(200, res, null, tree);
 					})
-					.catch(api.writeError.bind(null, 500, res));
+					.catch(writeError.bind(null, 500, res));
 				} else if (stats.isFile()) {
 					if (req.query.parts === "meta") {
 						var name = path.win32.basename(filePath);
@@ -136,7 +135,7 @@ module.exports.router = function(options) {
 							if (hub) {
 								result["Attributes"].hubID = hub;
 							}
-							return res.status(200).json(result);
+							return writeResponse(200, res, null, result);
 						});
 					} else {
 						sharedUtil.getFile(res, filePath, stats, etag);
@@ -164,7 +163,7 @@ module.exports.router = function(options) {
 						Location:  c.Location,
 					};
 				});
-				res.status(200).json(tree);
+				writeResponse(200, res, null, tree);
 			});
 		}
 
@@ -179,16 +178,14 @@ module.exports.router = function(options) {
 		var fileRoot = options.fileRoot;
 		if (req.params['parts'] === 'meta') {
 			// TODO implement put of file attributes
-			res.sendStatus(501);
-			return;
+			return sendStatus(501, res);
 		}
 		function write() {
 			var ws = fs.createWriteStream(file.path);
 			ws.on('finish', function() {
 				fileUtil.withStatsAndETag(file.path, function(error, stats, etag) {
 					if (error && error.code === 'ENOENT') {
-						res.status(404).end();
-						return;
+						return writeResponse(404, res);
 					}
 					writeFileMetadata(fileRoot, req, res, file.path, stats, etag);
 				});
@@ -201,10 +198,10 @@ module.exports.router = function(options) {
 		var ifMatchHeader = req.headers['if-match'];
 		fileUtil.withETag(file.path, function(error, etag) {
 			if (error && error.code === 'ENOENT') {
-				res.status(404).end();
+				writeResponse(404, res);
 			}
 			else if (ifMatchHeader && ifMatchHeader !== etag) {
-				res.status(412).end();
+				writeResponse(412, res);
 			}
 			else {
 				write();
@@ -224,8 +221,7 @@ module.exports.router = function(options) {
 		}
 		var name = fileUtil.decodeSlug(req.headers.slug) || req.body && req.body.Name;
 		if (!name) {
-			writeError(400, res, new Error('Missing Slug header or Name property'));
-			return;
+			return writeError(400, res, new Error('Missing Slug header or Name property'));
 		}
 		
 		req.user.workspaceDir = workspaceDir;
@@ -242,18 +238,17 @@ module.exports.router = function(options) {
 		fileUtil.withStatsAndETag(file.path, function(error, stats, etag) {
 			var callback = function(error) {
 				if (error) {
-					writeError(500, res, error);
-					return;
+					return writeError(500, res, error);
 				}
-				res.sendStatus(204);
+				sendStatus(204, res);
 			};
 			var ifMatchHeader = req.headers['if-match'];
 			if (error && error.code === 'ENOENT') {
-				return res.sendStatus(204);
+				return sendStatus(204, res);
 			} else if (error) {
 				writeError(500, res, error);
 			} else if (ifMatchHeader && ifMatchHeader !== etag) {
-				return res.sendStatus(412);
+				return sendStatus(412, res);
 			} else if (stats.isDirectory()) {
 				fileUtil.rumRuff(file.path, callback);
 			} else {
@@ -271,10 +266,9 @@ module.exports.router = function(options) {
 				result.ETag = etag;
 				res.setHeader('ETag', etag);
 			}
-			res.setHeader("Cache-Control", "no-cache");
-			api.writeResponse(null, res, null, result, true, true);
+			writeResponse(null, res, null, result, true, true);
 		})
-		.catch(api.writeError.bind(null, 500, res));
+		.catch(writeError.bind(null, 500, res));
 	};
 
 	function fileJSON(fileRoot, workspaceDir, filepath, stats) {
@@ -349,9 +343,7 @@ module.exports.router = function(options) {
 				writeError(404, res, 'Session not found: ' + hubid);
 				return;
 			} 
-			res.write('{}');
-			res.end();
-			return;
+			return writeResponse(null, res, null, '{}');
 		});
 	}
 

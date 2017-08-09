@@ -207,6 +207,46 @@ define([
 		return false;
 	}
 	
+	/**
+	 * @name doReset
+	 * @description Perform any reset actions
+	 * @since 15.0
+	 */
+	function doReset() {
+		_resolved.clear();
+	    _files.clear();
+	}
+	
+	/**
+	 * @name doPreParse
+	 * @description Perform any pre-parse actions
+	 * @param {string} text The text of the file about to be parsed
+	 * @param {?} options The map of options for the parse
+	 * @since 15.0
+	 */
+	function doPreParse(text, options) {
+		var file = options.directSourceFile;
+    	if(file && file.name) {
+    		//update the cached source for this file if it exists
+    		var f = _files.get(file.name);
+			if(f) {
+				f.contents = text;
+			}
+    		//if a file is parsed and is cached in an error state, it means the file has been created
+			//in the editor - remove it from the cache so it will be re-fetched the next time it is 
+			//requested as a dependency
+			_resolved.keys().forEach(function(key) {
+				var val = _resolved.get(key);
+				if(val && val.err) {
+					if(possibleMatch(file.name, val.logical)) {
+						_resolved.remove(key);
+						console.log("removed: "+file.name+" from resolver cache");
+					}
+				}
+			});
+    	}
+	}
+	
 	tern.registerPlugin("resolver", /* @callback */ function resolverPluginHandler(server, options) {
 	    server.loadPlugin("modules"); //$NON-NLS-1$
 	    server.mod.modules.resolvers.push(moduleResolve);
@@ -217,41 +257,18 @@ define([
 	    	doPreInfer(server);
 	    });
 	    server.on("preParse", function preParseHandler(text, options) {
-	    	var file = options.directSourceFile;
-	    	if(file && file.name) {
-	    		//update the cached source for this file if it exists
-	    		var f = _files.get(file.name);
-    			if(f) {
-    				f.contents = text;
-    			}
-	    		//if a file is parsed and is cached in an error state, it means the file has been created
-				//in the editor - remove it from the cache so it will be re-fetched the next time it is 
-				//requested as a dependency
-				_resolved.keys().forEach(function(key) {
-					var val = _resolved.get(key);
-					if(val && val.err) {
-						if(possibleMatch(file.name, val.logical)) {
-							_resolved.remove(key);
-							console.log("removed: "+file.name+" from resolver cache");
-						}
-					}
-				});
-	    	}
-	    });
-	    server.on("beforeLoad", /* @callback */ function beforeLoadHandler(file) {
-			if(file && typeof file.name === "string") {
-				
-			}
+	    	doPreParse(text, options);
 	    });
 	    server.on("reset", function resetHandler() {
-	    	_resolved.clear();
-	    	_files.clear();
+	    	doReset();
 	    });
   });
   
   return {
 			doPostParse: doPostParse,
 			doPreInfer: doPreInfer,
-			getResolved: getResolved
+			getResolved: getResolved,
+			doReset: doReset,
+			doPreParse: doPreParse
 		};
 });

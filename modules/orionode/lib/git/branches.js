@@ -251,7 +251,7 @@ module.exports.router = function(options) {
 		})
 		.then(function(ref) {
 			if (git.Branch.delete(ref) === 0) {
-				res.status(200).end();
+				writeResponse(200, res);
 			} else {
 				writeError(403, res);
 			}

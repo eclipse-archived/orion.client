@@ -22,10 +22,10 @@ define(['orion/bootstrap', 'orion/webui/littlelib', 'orion/commandRegistry', 'or
 		var pluginRegistry = core.pluginRegistry;
 		var operationsClient = new mOperationsClient.OperationsClient(serviceRegistry);
 		new mStatus.StatusReportingService(serviceRegistry, operationsClient, "statusPane", "notifications", "notificationArea"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-		new mDialogs.DialogService(serviceRegistry);
 		var selection = new mSelection.Selection(serviceRegistry);
 		new mSshTools.SshService(serviceRegistry);
 		var commandRegistry = new mCommandRegistry.CommandRegistry({selection: selection});
+		new mDialogs.DialogService(serviceRegistry, commandRegistry);
 		new mProgress.ProgressService(serviceRegistry, operationsClient, commandRegistry);
 		var usersClient = new mUsersClient.UsersClient(serviceRegistry, pluginRegistry);
 	

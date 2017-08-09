@@ -516,7 +516,7 @@ define([
 		setSearchScope: function(searchScopeOption) {	
 			var searchLocation = this._searcher.getSearchLocation(searchScopeOption);
 			this._targetFolder = searchLocation;
-			this._displaySelectedSearchScope([searchLocation]);
+			this._displaySelectedSearchScope([searchLocation], searchScopeOption);
 			this._searcher.addDisplaycallback(this._displaySelectedSearchScope.bind(this),searchScopeOption);
 		},
 		
@@ -730,7 +730,7 @@ define([
 			this._replaceCompareDiv.classList.remove("replaceCompareDivVisible"); //$NON-NLS-0$
 		},
 		
-		_displaySelectedSearchScope: function(searchLocations) {
+		_displaySelectedSearchScope: function(searchLocations, searchScopeOption) {
 			var scopeElementWrapper = this._searchScopeElementWrapper;
 			lib.empty(scopeElementWrapper);
 			
@@ -743,6 +743,12 @@ define([
 					scopeString = this._fileClient.fileServiceName(scopeString);
 				} else {
 					scopeString = scopeString.replace(rootName, "");
+					if(searchScopeOption === "workspace"){
+						scopeString = messages["Scope All"];
+					}else{
+						// Remove the workspace name portion from the scopeString, which will remove 'orionode' from '/orionode/Foldername'
+						scopeString = "/" + scopeString.split("/").slice(2).join("/");
+					}
 				}
 				var locationElementWrapper = document.createElement("div");
 				locationElementWrapper.classList.add("locationElementWrapper");

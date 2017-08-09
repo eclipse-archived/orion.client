@@ -17,6 +17,8 @@ var express = require('express');
 var bodyParser = require('body-parser');
 var util = require('./util');
 var git = require('nodegit');
+var log4js = require('log4js');
+var logger = log4js.getLogger("git");
 
 module.exports = {};
 
@@ -99,6 +101,10 @@ function getConfig(req, res) {
 						return Promise.all([fillUserName,fillUserEmail]);
 					}).then(function(){
 						args.writeConfigFile(configFile, config, function(err) {});
+					}).catch(function(err){
+						if(err.message.indexOf("was not found") !== -1){
+							return Promise.resolve();
+						}
 					});
 				}
 			}
@@ -127,6 +133,9 @@ function getConfig(req, res) {
 						}
 					}
 				}
+			}).catch(function(err) {
+				logger.error(err);
+				writeError(404, res, err.message);
 			});
 		//TODO read user prefs if no username/email is specified -> git/config/userInfo (GitName && GitEmail)
 		});
@@ -163,7 +172,7 @@ function updateConfig(req, res, key, value, callback) {
 						var resp = configJSON(key, result.value, fileDir);
 						writeResponse(result.status, res, {"Location":resp.Location}, resp, true);
 					} else {
-						res.status(result.status).end();
+						writeResponse(result.status, res);
 					}
 				});
 			} else {

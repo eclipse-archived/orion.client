@@ -435,7 +435,7 @@ GitClient.prototype = {
 			.end(function(err, res) {
 				assert.ifError(err);
 				if (statusCode === 404) {
-					assert.equal(res.body.Message, "Cannot stash changes - There is nothing to stash.");
+					assert.equal(res.body.Message, "cannot stash changes - there is nothing to stash.");
 				}
 				client.next(resolve, res.body);
 			});
@@ -462,6 +462,9 @@ GitClient.prototype = {
 		if (revision === undefined) {
 			revision = "";
 		}
+		if(revision !== ""){
+			revision = "/" + revision;
+		}
 
 		if (typeof statusCode !== 'number') {
 			statusCode = 200;
@@ -470,7 +473,7 @@ GitClient.prototype = {
 		var client = this;
 		this.tasks.push(function(resolve) {
 			request()
-			.put(CONTEXT_PATH + "/gitapi/stash/" + revision + FILE_ROOT + client.getName())
+			.put(CONTEXT_PATH + "/gitapi/stash" + revision + FILE_ROOT + client.getName())
 			.expect(statusCode)
 			.end(function(err, res) {
 				assert.ifError(err);

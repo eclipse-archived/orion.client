@@ -129,8 +129,8 @@ define([
 			    var val = setup({buffer: '<html><body><p align="left" align="right"></p></body></html>', rule: {id:null, severity:1}});
 				return validator.computeProblems(val.editorContext).then(function(result) {
 					assertProblems(result, [
-					    {start: 15,
-					     end: 27,
+					    {start: 28,
+					     end: 41,
 					     severity: 'info',
 					     description: "The 'align' attribute is duplicated."
 					    }
@@ -141,8 +141,8 @@ define([
 			    var val = setup({buffer: '<html lang="en" lang=\'fr\' lang=jp></html>', rule: {id:null, severity:1}});
 				return validator.computeProblems(val.editorContext).then(function(result) {
 					assertProblems(result, [
-					    {start: 6, end: 15, severity: "info", description: "The 'lang' attribute is duplicated."},
-						{start: 16, end: 25, severity: "info", description: "The 'lang' attribute is duplicated."}		
+					    {start: 16, end: 25, severity: "info", description: "The 'lang' attribute is duplicated."},
+						{start: 26, end: 33, severity: "info", description: "The 'lang' attribute is duplicated."}		
 					]);
 				});
 			});
@@ -150,8 +150,8 @@ define([
 			    var val = setup({buffer: '<html><body><p align="left" align="right" align="center"></p></body></html>', rule: {id:null, severity:1}});
 				return validator.computeProblems(val.editorContext).then(function(result) {
 					assertProblems(result, [
-						{start: 15, end: 27, severity: "info", description: "The 'align' attribute is duplicated."},
-						{start: 28, end: 41, severity: "info", description: "The 'align' attribute is duplicated."}
+						{start: 28, end: 41, severity: "info", description: "The 'align' attribute is duplicated."},
+						{start: 42, end: 56, severity: "info", description: "The 'align' attribute is duplicated."}
 					]);
 				});
 			});

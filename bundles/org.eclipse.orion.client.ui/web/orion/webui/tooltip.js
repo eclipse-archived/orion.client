@@ -122,13 +122,13 @@ define(['orion/webui/littlelib'], function(lib) {
 
 				if (this._showByKB) {
 					this._tip.tabIndex = "0";
-					this._tip.addEventListener("keydown", function (e) {
-						if (e.keyCode === lib.KEY.ESCAPE) {
-							self._node.focus();
-							self.hide();
-						}
-					}, false);
 				}
+				this._tip.addEventListener("keydown", function (e) {
+					if (e.keyCode === lib.KEY.ESCAPE) {
+						self._node.focus();
+						self.hide();
+					}
+				}, false);
 
 				if (this._trigger === "mouseover") { //$NON-NLS-0$
 					this._tipInner.setAttribute("role", "tooltip"); //$NON-NLS-2$ //$NON-NLS-1$

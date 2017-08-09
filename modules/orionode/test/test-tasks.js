@@ -37,6 +37,23 @@ describe("Tasks API", function() {
 	beforeEach(function() {
 	});
 
+	/**
+	 * From: org.eclipse.orion.server.tests.tasks.TaskInfoTest.java
+	 */
+	describe("task info tests", function() {
+		it("testBadJSON");
+		it("testJSONRoundTrip");
+	});
+	/**
+	 * From: org.eclipse.orion.server.tests.tasks.TaskStoreTest.java
+	 */
+	describe("task store tests", function() {
+		it("testRead");
+		it("testRoundTrip");
+		it("testDeleteTask");
+		it("readAllTasksTest");
+		it("testUniqueTaskInfo");
+	});
 	describe('delete all completed tasks', function(done) {
 		it('no tasks at all', function(finished) {
 			// delete all the tasks

@@ -15,6 +15,10 @@ var tasks = require("../tasks");
 var request = require("request");
 var orgs = require("./orgs_spaces");
 var bearerTokenStore = require("./accessTokenStore");
+var LRU = require("lru-cache");
+
+// Caching for already located targets
+var targetCache = LRU({max: 10000, maxAge: 1800000 });
 
 module.exports.router = function(options) {
 	if(options.options.configParams["cf.bearer.token.store"]){
@@ -106,6 +110,12 @@ function tryLogin(url, Username, Password, userId){
 }
 function computeTarget(userId, targetRequest){
 	if(targetRequest){
+		if (userId && targetRequest.Url && targetRequest.Org && targetRequest.Space) {
+			var getKey = userId + targetRequest.Url + targetRequest.Org + targetRequest.Space;
+			if (targetCache.get(getKey)) {
+				return Promise.resolve(targetCache.get(getKey));
+			}
+		}
 		return orgs.getOrgsRequest(userId, targetRequest)
 		.then(function(OrgsArray){	
 			if(!targetRequest.Org){
@@ -125,12 +135,18 @@ function computeTarget(userId, targetRequest){
 				space = aimedSpace;
 			}
 			delete org.Spaces;
-			return  {
+			
+			var target = {
 				"Type": "Target",
 				"Url": targetRequest.Url,
 				"Org": org,
 				"Space":space
 			};
+			
+			var putKey = userId + targetRequest.Url + org.entity.name + space.entity.name;
+			targetCache.set(putKey, target);
+			
+			return  target;
 		});
 	}
 	if(!targetRequest){

@@ -13,7 +13,8 @@ var express = require('express'),
 	path = require('path'),
 	fs = require('fs'),
 	log4js = require('log4js'),
-	logger = log4js.getLogger("server");
+	api = require('./lib/api'),
+	logger = log4js.getLogger("response");
 
 var LIBS = path.normalize(path.join(__dirname, 'lib/')),
 	MINIFIED_ORION_CLIENT = path.normalize(path.join(__dirname, "lib/orion.client")),
@@ -45,8 +46,7 @@ function startServer(options) {
 
 		function checkAuthenticated(req, res, next) {
 			if (!req.user) {
-				res.writeHead(401, "Not authenticated");
-				res.end();
+				api.writeError(401, res, "Not authenticated");
 			} else {
 				req.user.workspaceDir = options.workspaceDir + (req.user.workspace ? "/" + req.user.workspace : "");
 				next();
@@ -112,7 +112,7 @@ function startServer(options) {
 
 		//error handling
 		app.use(function(err, req, res, next){
-			logger.error(err);
+			logger.error(req.originalUrl, err);
 			res.status(404);
 			// respond with html page
 //			if (req.accepts('html')) {

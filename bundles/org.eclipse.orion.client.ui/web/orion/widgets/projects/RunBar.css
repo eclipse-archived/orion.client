@@ -48,6 +48,12 @@
 	width: 270px;
 }
 
+.launchConfigurationsButton {
+	align-items: center;
+	display: flex !important;
+	flex-direction: row;
+}
+
 .launchConfigurationsButton > .dropdownTriggerButtonLabel {
 	-webkit-align-items: center;		 		 /* Safari */
 	align-items: center;
@@ -90,6 +96,7 @@
 .addNewMenuItem > .orionButton {
 	font-size: 16px;
 	font-weight: bold;
+	padding-bottom: 6px;
 }
 
 .launchConfigurationDeleteButton.orionButton {

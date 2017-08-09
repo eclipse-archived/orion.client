@@ -622,12 +622,12 @@ objects.mixin(TabWidget.prototype, {
 	transientToPermenant: function(href){
 		var hrefHash = href && href.split("#")[1];
 		if(this.transientTab && hrefHash && hrefHash.indexOf(this.transientTab.location) === 0){
-			this.fileList.find(function(file){
-				if(hrefHash.indexOf(file.metadata.Location) === 0){
+			this.fileList.some(function(file) {
+				if (hrefHash.indexOf(file.metadata.Location) === 0) {
 					file.isTransient = false;
 					return true;
 				}
-			})
+			});
 			this.transientTab && this.transientTab.editorTabNode.classList.remove("transient");
 			this.transientTab = null;
 		}
@@ -965,12 +965,12 @@ objects.mixin(EditorViewer.prototype, {
 			callback: function(commandInvocation) {
 				// Get the right hand tabs from this.editorTab parent.
 				var firstNodeIndexToRemove;
-				Array.prototype.find.call(this.tabWidget.editorTabContainer.childNodes, function(node, index){
+				Array.prototype.some.call(this.tabWidget.editorTabContainer.childNodes, function(node, index){
 					if(node.metadata.Location === commandInvocation.items.Location){
 						firstNodeIndexToRemove = index + 1;
 						return true;
 					}
-				})
+				});
 				var closingButtons = [];
 				for(var j = firstNodeIndexToRemove; j < this.tabWidget.editorTabContainer.childNodes.length; j++){
 					var closeButton = this.tabWidget.editorTabContainer.childNodes[j].querySelector(".editorTabCloseButton");
@@ -1084,7 +1084,7 @@ objects.mixin(EditorViewer.prototype, {
 			});
 		}.bind(this));
 	},
-
+	
 	createInputManager: function() {
 		var inputManager = this.inputManager = new mInputManager.InputManager({
 			serviceRegistry: this.serviceRegistry,
@@ -1105,13 +1105,15 @@ objects.mixin(EditorViewer.prototype, {
 			isUnsavedWarningNeeed:function(){
 				return this.getOpenEditorCount(this.inputManager.getFileMetadata()) === 1;
 			}.bind(this)
-		});
+		});	
 		inputManager.addEventListener("InputChanged", function(evt) { //$NON-NLS-0$
 			var metadata = evt.metadata;
 			if (metadata) {
 				var tabHref = this.activateContext.computeNavigationHref(evt.metadata);
 				var lastFile = PageUtil.hash();
-				sessionStorage.lastFile = lastFile;
+				if (lastFile  === "#" + metadata.Location){
+					sessionStorage.lastFile = lastFile;
+				}
 				this.tabWidget.addTab(metadata, tabHref);
 			} else {
 				delete sessionStorage.lastFile;
@@ -1121,13 +1123,27 @@ objects.mixin(EditorViewer.prototype, {
 			this.updateDirtyIndicator();
 			evt.editor = this.editor;
 			this.pool.metadata = metadata;
-			this.pool.model.addEventListener("postChanged", function(evt){
-				if(this.pool.undoStack._unsavedChanges && this.pool.undoStack._unsavedChanges.length > 0){
-					if(this.tabWidget.transientTab && this.tabWidget.transientTab.location === this.pool.metadata.Location){
-						this.tabWidget.transientToPermenant(this.tabWidget.transientTab.href);
+			
+			var editorView = this.getCurrentEditorView();
+			if (editorView && editorView.editor) {
+				this.editor.isFileInitiallyLoaded = false;
+				var textView = editorView.editor.getTextView();
+				textView.addEventListener("ModelChanged", function(){
+					if(this.editor.isFileInitiallyLoaded){
+						if(this.tabWidget.transientTab && this.tabWidget.transientTab.location === this.pool.metadata.Location){
+							this.tabWidget.transientToPermenant(this.tabWidget.transientTab.href);
+						}
 					}
-				}
-			}.bind(this));
+				}.bind(this));
+				var flagInitialLoad = function(evt){
+						if(typeof evt.contentsSaved === "undefined"){
+							this.editor.isFileInitiallyLoaded = true; 
+						}
+						this.editor.removeEventListener("InputChanged", flagInitialLoad);
+					}.bind(this);
+				this.editor.addEventListener("InputChanged", flagInitialLoad);
+			}
+			
 			if (this.shown) {
 				var href = window.location.href;
 				this.activateContext.setActiveEditorViewer(this);
@@ -1386,8 +1402,8 @@ objects.mixin(EditorSetup.prototype, {
 		this.selection = new mSelection.Selection(serviceRegistry);
 		this.operationsClient = new mOperationsClient.OperationsClient(serviceRegistry);
 		this.statusService = new mStatus.StatusReportingService(serviceRegistry, this.operationsClient, "statusPane", "notifications", "notificationArea"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$ //$NON-NLS-3$
-		this.dialogService = new mDialogs.DialogService(serviceRegistry);
 		this.commandRegistry = new mCommandRegistry.CommandRegistry({selection: this.selection});
+		this.dialogService = new mDialogs.DialogService(serviceRegistry, this.commandRegistry);
 		this.progressService = new mProgress.ProgressService(serviceRegistry, this.operationsClient, this.commandRegistry);
 		this.sshService = new mSshTools.SshService(serviceRegistry);
 		this.gitClient = new mGitClient.GitService(serviceRegistry);

@@ -12,10 +12,10 @@
 #  For multi platform build: https://github.com/electron-userland/electron-builder/wiki/Multi-Platform-Build
 #
 
-# Need node 4.4.1
-if [ "v4.4.1" != `node --version` ]; then
+# Need node 6.11.1
+if [ "v6.11.1" != `node --version` ]; then
 	echo -----------------------------------
-	echo Warning: node version is not v4.4.1
+	echo Warning: node version is not v6.11.1
 	echo -----------------------------------
 	exit 1
 fi
@@ -26,7 +26,7 @@ cd ..
 if [ ! -d "lib/orion.client" ]; then
 	rm -rf node_modules
 	npm install
-	./node_modules/.bin/grunt notest
+	./node_modules/.bin/grunt --skipTest
 fi
 
 # update orion.conf and package.json
@@ -89,8 +89,9 @@ rm -rf node_modules/nodegit/vendor
 find node_modules/nodegit/build/Release/ -mindepth 1 ! -name '*.node' -exec rm -rf {} \;
 rm -rf target
 
-# Install electron builder
-npm install -g electron-builder@5.5.0
+# Install electron builder and electron-builder-squirrel-windows for Squirrel.Window app
+npm install -g electron-builder@~19.16.0
+npm install -g electron-builder-squirrel-windows@19.16.0
 
 # Build mac dmg, etc
 nodegit_lib=${NODEGIT_DIR}/v${nodegit_version}/electron/v${electron_version}/mac/nodegit.node
@@ -108,6 +109,7 @@ if [ -f "$nodegit_lib" ]; then
 	cp $nodegit_lib ./node_modules/nodegit/build/Release
 fi
 npm run dist:win
+#mv "dist/${name} Setup ${pkg_version}.exe" "dist/${name}-${pkg_version}-nsis-setup.exe" /this is for nsis package
 mv "dist/win/${name} Setup ${pkg_version}.exe" "dist/win/${name}-${pkg_version}-setup.exe"
 
 # Build linux packages, etc
@@ -116,4 +118,3 @@ if [ -f "$nodegit_lib" ]; then
 	cp $nodegit_lib ./node_modules/nodegit/build/Release
 fi
 npm run dist:linux
-mv "dist/${name}-${pkg_version}.deb" "dist/${name}-${pkg_version}.rpm" "dist/${name}-${pkg_version}.tar.gz" dist/linux/

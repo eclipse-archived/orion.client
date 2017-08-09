@@ -49,8 +49,7 @@ module.exports = function(options) {
         stream.pipe(res);
         stream.on('error', function(e) {
             // FIXME this is wrong, headers have likely been committed at this point
-            res.writeHead(500, e.toString());
-            res.end();
+            writeError(500, res, e.toString());
         });
         stream.on('end', res.end.bind(res));
     }
@@ -84,7 +83,7 @@ module.exports = function(options) {
             Length: length,
             Location: location ? contextPath +"/sharedWorkspace/tree/file" + location : contextPath +"/sharedWorkspace/tree",
             ChildrenLocation: dir ? (location ? contextPath +"/sharedWorkspace/tree/file" + location + "?depth=1": contextPath +"/sharedWorkspace/tree" + "?depth=1") : undefined,
-            Parents: fileUtil.getParents(contextPath +'/sharedWorkspace/tree/file' + location.split('/').splice(0, 4).join('/'), location.split('/').splice(4).join('/')),
+            Parents: fileUtil.getParents(contextPath +'/sharedWorkspace/tree/file' + location.split('/').splice(0, 2).join('/'), location.split('/').splice(2).join('/')),
             Attributes: {
                 ReadOnly: false
             }

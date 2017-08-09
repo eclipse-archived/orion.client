@@ -319,14 +319,3 @@ Given that you have a Gerrit patch number, you are able to inspect the patch wit
 6. To get rid ot the patch, you can just reset your branch to the previous entry in the history, by selecting it and clicking on the Reset button in the Changes detail section.
 	
 	<pic>
-
-
-
-
-
-
-		
-		     
-
-
-

@@ -106,14 +106,15 @@ define([
 				return [];
 			}
 
-			if (!element.duplicateAttributes) {
-				return [];
-			}
-			
 			var issues = [];
-			var attrs = element.duplicateAttributes;
-			for (var i = 0; i < attrs.length; i++) {
-				issues.push(createProblem(attrs[i], 'attr-no-dup', i18nUtil.formatMessage(Messages['attr-no-dup'], attrs[i].name), opts['attr-no-dup']));
+			if(Array.isArray(element.attributes)) {
+				var seen = Object.create(null);
+				element.attributes.forEach(function(attrib) {
+					if(seen[attrib.name]) {
+						issues.push(createProblem(attrib, 'attr-no-dup', i18nUtil.formatMessage(Messages['attr-no-dup'], attrib.name), opts['attr-no-dup']));
+					}
+					seen[attrib.name] = true;
+				});
 			}
 			return issues;
 		});
@@ -122,13 +123,12 @@ define([
 			if (!opts['img-req-alt']) {
 				return [];
 			}
-
-			var a = element.attributes;
-
-			if (a && a.alt && a.alt !== '') {
+			
+			if(Array.isArray(element.attributes) && element.attributes.some(function(attrib) {
+				return attrib.name === 'alt' && attrib.value;
+			})) {
 				return [];
 			}
-
 			return createProblem(element.openrange, 'img-req-alt', Messages['img-req-alt'], opts['img-req-alt']); //$NON-NLS-1$
 		});
 		// Require figcaption

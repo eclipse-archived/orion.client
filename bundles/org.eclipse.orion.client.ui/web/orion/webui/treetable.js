@@ -502,7 +502,7 @@ define(['i18n!orion/nls/messages', 'orion/webui/littlelib', 'orion/Deferred'], f
 					return;
 				}
 				if(byToggle && this._preCollapse){
-					this._preCollapse(row._item).then(function(result) {
+					this._preCollapse(row._item, row).then(function(result) {
 						if(result) {
 							this._collapse(id, row);
 						} else {

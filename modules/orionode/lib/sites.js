@@ -164,8 +164,7 @@ function getSite(req, res) {
 		if (site) {
 			writeResponse(200, res, null, siteJSON(site, req));
 		} else {
-			res.writeHead(400, "Site not found:" + req.params.id);
-			res.end();
+			writeError(400, res, "Site not found:" + req.params.id);
 		}
 	});
 }
@@ -195,16 +194,16 @@ function updateSite(req, res, callback, okStatus) {
 		if (site || !req.params.site) {
 			site = callback(site, sites);
 			if (site && site.error) {
-				res.writeHead(site.status, site.error);
-				return res.end();
+				return writeError(site.status, res, site.error);
 			}
 			saveSites(req, prefs, function() {
-				if (err) res.writeHead(400, "Failed to update site:" + req.params.id);
-				site ? writeResponse(okStatus || 200, res, null, siteJSON(site, req)) : writeResponse(okStatus || 200, res, null);
+				if (err) {
+					return writeError(400, res, "Failed to update site:" + req.params.id);
+				}
+				return site ? writeResponse(okStatus || 200, res, null, siteJSON(site, req)) : writeResponse(okStatus || 200, res, null);
 			});
 		} else {
-			res.writeHead(400, "Site not found:" + req.params.id);
-			res.end();
+			return writeError(400, res,  "Site not found:" + req.params.id);
 		}
 	});
 }

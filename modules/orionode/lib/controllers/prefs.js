@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016 IBM Corporation and others.
+ * Copyright (c) 2016, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -9,21 +9,19 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 /*eslint-env node*/
-'use strict'
+'use strict';
 var api = require('../api'),
 	fileUtil = require('../fileUtil'),
  	writeResponse = api.writeResponse,
     bodyParser = require('body-parser'),
     express = require('express'),
-    Debug = require('debug'),
     nodePath = require('path'),
     nodeUrl = require('url'),
     os = require('os'),
     Preference = require('../model/pref'),
     Promise = require('bluebird');
 
-var debug = Debug('orion:prefs'),
-    fs = Promise.promisifyAll(require('fs'));
+    var fs = Promise.promisifyAll(require('fs'));
 
 module.exports = {};
 
@@ -62,7 +60,6 @@ function PrefsController(options) {
 	// Wraps a promise-returning handler, that needs access to prefs, into an Express middleware.
 	function wrapAsMiddleware(handler) {
 		return function(req, res, next) {
-			debug('%s %s', req.method, req.url);
 			return Promise.resolve()
 			.then(acquirePrefs.bind(null, req, res))
 			.then(handler.bind(null, req, res))
@@ -93,7 +90,6 @@ function PrefsController(options) {
 	function savePrefs(req, prefs) {
 		/*eslint-disable consistent-return*/
 		if (!prefs.modified()) {
-			debug("savePrefs(): not modified, skip writing");
 			return Promise.resolve();
 		}
 		var store = fileUtil.getMetastore(req);
@@ -106,7 +102,6 @@ function PrefsController(options) {
 			});
 		})
 		.catch(function(err) {
-			debug('savePrefs(): error writing prefs.json', err);
 			throw err;
 		});
 		/*eslint-enable*/
@@ -127,7 +122,7 @@ function handleGet(req, res) { //eslint-disable-line consistent-return
 	// Sending a single property
 	var value = node[key];
 	if (typeof value === 'undefined') {
-		return res.sendStatus(404);
+		return api.sendStatus(404, res);
 	}
 	var result = {};
 	result[key] = value;
@@ -140,12 +135,12 @@ function handlePut(req, res) {
 	if (req.is('json')) {
 		// Replace entire pref node
 		prefs.set(prefPath, body);
-		return res.sendStatus(204);
+		return api.sendStatus(204, res);
 	} else if (req.is('urlencoded')) {
 		// Replace a single property
 		var key = body.key, value = body.value;
 		if (typeof key === 'undefined') {
-			return res.sendStatus(400);
+			return api.sendStatus(400, res);
 		}
 
 		var node = req.prefNode === NOT_EXIST ? {} : req.prefNode;
@@ -155,16 +150,16 @@ function handlePut(req, res) {
 			node[key] = value; // FIXME watch out for __proto__ hacks
 		}
 		prefs.set(prefPath, node);
-		return res.sendStatus(204);
+		return api.sendStatus(204, res);
 	}
-	return res.sendStatus(400); // unknown content type
+	return api.sendStatus(400, res);// unknown content type
 }
 
 function handleDelete(req, res) { //eslint-disable-line consistent-return
 	var prefs = req.prefs, prefPath = req.prefPath, node = req.prefNode;
 	if (node === NOT_EXIST) {
 		// Deleting a nonexistent node (or some key therein), noop
-		return res.sendStatus(204);
+		return api.sendStatus(204, res);
 	}
 	var key = req.params.key;
 	if (typeof key === 'string') {
@@ -175,7 +170,7 @@ function handleDelete(req, res) { //eslint-disable-line consistent-return
 		// Delete entire node
 		prefs.delete(prefPath);
 	}
-	res.sendStatus(204);
+	return api.sendStatus(204, res);
 }
 
 function getElectronPrefsFileName(){

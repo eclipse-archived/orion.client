@@ -11,6 +11,8 @@
 /*eslint-env node*/
 var url = require('url');
 var events = require('events');
+var log4js = require('log4js');
+var logger = log4js.getLogger("response");
 var orionEE;
 
 /*
@@ -57,6 +59,21 @@ function toURLPath(p) {
 }
 
 /**
+ * Helper for send a status response
+ * @param {Number} code
+ * @param {HttpResponse} res
+ */
+function sendStatus(code, res){
+	try{
+		setResponseNoCache(res);
+		return res.sendStatus(code);
+	}catch(err){
+		logger.error(res.req.originalUrl , err.message);
+		throw err;
+	}
+}
+
+/**
  * Helper for writing a JSON response.
  * @param {Number} code
  * @param {HttpResponse} res
@@ -66,33 +83,42 @@ function toURLPath(p) {
  * @param {Boolean} noCachedStringRes,set to true in case if the response is text/plain, but still need nocache cache-control
  */
 function writeResponse(code, res, headers, body, needEncodeLocation, noCachedStringRes) {
-	if (typeof code === 'number') {
-		res.status(code);
-	}
-	if (headers && typeof headers === 'object') {
-		Object.keys(headers).forEach(function(header) {
-			res.setHeader(header, headers[header]);
-		});
-	}
-	if (typeof body !== 'undefined') {
-		if (typeof body === 'object') {
-			needEncodeLocation && encodeLocation(body);
-			setResponseNoCache();			
-			return res.json(body);
+	try{
+		if (typeof code === 'number') {
+			res.status(code);
 		}
-		if(noCachedStringRes){
-			setResponseNoCache();
+		if (headers && typeof headers === 'object') {
+			Object.keys(headers).forEach(function(header) {
+				res.setHeader(header, headers[header]);
+			});
 		}
-		res.send(body);
-	} else {
-		res.end();
-	}
-	function setResponseNoCache(){
-		res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate"); // HTTP 1.1.
-		res.setHeader("Pragma", "no-cache"); // HTTP 1.1.
-		res.setHeader("Expires", "0"); // HTTP 1.1.		
+		if (typeof body !== 'undefined') {
+			if (typeof body === 'object') {
+				needEncodeLocation && encodeLocation(body);
+				setResponseNoCache(res);			
+				return res.json(body);
+			}
+			if(noCachedStringRes){
+				setResponseNoCache(res);
+			}
+			res.send(body);
+		} else {
+			setResponseNoCache(res);
+			res.end();
+		}
+	}catch(err){
+		logger.error(res.req.originalUrl , err.message);
+		throw err;
 	}
 }
+
+function setResponseNoCache(res){
+	res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate"); // HTTP 1.1.
+	res.setHeader("Pragma", "no-cache"); // HTTP 1.1.
+	res.setHeader("Expires", "0"); // HTTP 1.1.		
+}
+
+
 
 var LocationRegex = /Location$/;
 var PercentReplaceRegex = /\%/g;
@@ -125,16 +151,22 @@ function encodeLocation(obj) {
  * @param {String|Error} [msg]
  */
 function writeError(code, res, msg) {
-	msg = msg instanceof Error ? msg.message : msg;
-	if (typeof msg === 'string') {
-		var err = JSON.stringify({Severity: "Error", Message: msg});
-		res.setHeader('Content-Type', 'application/json');
-		res.setHeader('Content-Length', err.length);
-		res.writeHead(code, msg);
-		res.end(err);
-	} else {
-		res.writeHead(code, msg);
-		res.end();
+	try{
+		msg = msg instanceof Error ? msg.message : msg;
+		setResponseNoCache(res);
+		if (typeof msg === 'string') {
+			var err = JSON.stringify({Severity: "Error", Message: msg});
+			res.setHeader('Content-Type', 'application/json');
+			res.setHeader('Content-Length', err.length);
+			res.writeHead(code, msg);
+			res.end(err);
+		} else {
+			res.writeHead(code, msg);
+			res.end();
+		}
+	}catch(err){
+		logger.error(res.req.originalUrl , err.message);
+		throw err;
 	}
 }
 
@@ -179,4 +211,6 @@ exports.join = join;
 exports.writeError = writeError;
 exports.writeResponse = writeResponse;
 exports.encodeLocation = encodeLocation;
+exports.setResponseNoCache = setResponseNoCache;
+exports.sendStatus = sendStatus;
 exports.getOrionEE = getOrionEE;

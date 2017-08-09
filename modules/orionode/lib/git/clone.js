@@ -473,7 +473,7 @@ function putClone(req, res) {
 		return theRepo.checkoutBranch("refs/heads/" + branch, checkOptions);
 	})
 	.then(function(){
-		res.status(200).end();
+		writeResponse(200, res);
 	})
 	.catch(function(err){
 		writeError(403, res, err.message);
@@ -485,7 +485,7 @@ function deleteClone(req, res) {
 	var file = fileUtil.getFile(req, rest);
 	rmdir(file.path, function(err) {
 		if (err) return writeError(500, res, err);
-		res.status(200).end();
+		writeResponse(200, res);
 	});
 }
 

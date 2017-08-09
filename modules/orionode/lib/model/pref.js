@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016 IBM Corporation and others.
+ * Copyright (c) 2016, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -9,8 +9,7 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 /*eslint-env node*/
-'use strict'
-var debug = require('debug')('orion:prefs');
+'use strict';
 
 module.exports = Prefs;
 
@@ -20,7 +19,7 @@ var NOT_EXIST = Prefs.NOT_EXIST = function notExist() {};
 // Represents a preferences tree
 // @param {string?} s JSON string
 function Prefs(s) {
-	this.json = (typeof s === 'string' ? JSON.parse(s) : {})
+	this.json = typeof s === 'string' ? JSON.parse(s) : {};
 	this.isModified = false;
 }
 // @param path - eg. /user/editor/settings
@@ -40,11 +39,7 @@ Prefs.prototype.get = function(path) {
 	}
 
 	if (result === NOT_EXIST || typeof result === 'undefined') {
-		debug('Pref.get(%s) == NOT_EXIST', path);
 		return NOT_EXIST;
-	}
-	if (debug.enabled) {
-		debug('Pref.get(%s) == %s', path, JSON.stringify(result).substr(0, 200));
 	}
 	return naiveClone(result);
 };
@@ -53,7 +48,6 @@ Prefs.prototype.set = function(path, node) {
 	var segs = path.substr(1).split('/'); // substr(1) to strip leading slash
 	if (segs[0] === '') {
 		this.json = node;
-		debug('Prefs.set(%s) := %s', path, JSON.stringify(node));
 		return;
 	}
 
@@ -71,7 +65,6 @@ Prefs.prototype.set = function(path, node) {
 	} else {
 		obj[finalSeg] = node;
 	}
-	debug('Prefs.set(%s) := %s', path, JSON.stringify(node));
 	this.isModified = true;
 };
 Prefs.prototype.delete = function(path) {

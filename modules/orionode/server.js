@@ -33,6 +33,9 @@ var configFile = args.config || args.c || path.join(__dirname, 'orion.conf');
 
 var configParams = argslib.readConfigFileSync(configFile) || {};
 
+// Patches the fs module to use graceful-fs instead
+require('graceful-fs').gracefulify(fs)
+
 function startServer(cb) {
 	
 	var workspaceArg = args.workspace || args.w;
@@ -116,7 +119,7 @@ function startServer(cb) {
 			
 			server = require('http-shutdown')(server);
 			var io = socketio.listen(server, { 'log level': 1, path: (listenContextPath ? contextPath : '' ) + '/socket.io' });
-			ttyShell.install({ io: io, app: orion, fileRoot: contextPath + '/file', workspaceDir: workspaceDir });
+			ttyShell.install({ io: io, app: orion, fileRoot: contextPath + '/file', workspaceDir: workspaceDir, sharedWorkspaceFileRoot: contextPath + '/sharedWorkspace/tree/file'});
 
 			server.on('listening', function() {
 				configParams.port = port;

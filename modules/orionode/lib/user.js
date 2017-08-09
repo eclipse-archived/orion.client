@@ -171,8 +171,7 @@ module.exports.router = function(options) {
 	function createNewUser(req, res, err, user, info) {
 		if (err) {
 			logError(req.url, err);
-			res.status(500).send("An internal error occurred");
-			return;
+			return api.writeError(500, res, "An internal error has occured");
 		}
 		if (user) {
 			if (user.__newUser) {
@@ -192,7 +191,7 @@ module.exports.router = function(options) {
 		}
 		doLogin(req, user, function(err) {
 			if (err) {
-				return res.status(500).json({ Severity: "Error", Message: "Problem logging in" });
+				return api.writeError(500, res, "Problem logging in");
 			}
 			return res.redirect("/");
 		});
@@ -242,7 +241,7 @@ module.exports.router = function(options) {
 
 	app.post('/logout', function(req, res){
 		req.logout();
-		res.end();
+		api.writeResponse(null, res);
 	});
 	
 	app.post('/login/form', function(req, res, next) {
@@ -257,14 +256,14 @@ module.exports.router = function(options) {
 				if (err) {
 					return next(err);
 				}
-				return res.status(200).end();
+				return api.writeResponse(200, res);
 			});
 		})(req, res, next);
 	});
 
 	function checkUserAccess(req, res, next) {
 		if (!req.user || !(req.params.id === req.user.username || isAdmin(req.user.username))) {
-			return res.status(403).end();
+			return api.writeResponse(403, res);
 		}
 		next();
 	}
@@ -274,7 +273,7 @@ module.exports.router = function(options) {
 		var rows = Math.max(0, Number(req.query.rows)) || 20;
 		metastore(req).getAllUsers(start, rows, function(err, users) {
 			if (err) {
-				return res.status(404).end();
+				return api.writeResponse(404, res);
 			}
 			start = Math.min(users.length, start);
 			rows = Math.min(users.length, rows);
@@ -294,10 +293,9 @@ module.exports.router = function(options) {
 
 	app.get("/users/:id", checkUserAccess, function(req,res){
 		metastore(req).getUser(req.params.id, function(err, user) {
-			if (err) return res.status(404).end();
+			if (err) return api.writeResponse(404, res);
 			if (!user) {
-				res.writeHead(400, "User not fount: " + req.params.id);
-				return res.end();
+				return api.writeError(400, res, "User not fount: " + req.params.id);
 			}
 			return api.writeResponse(200, res, null, userJSON(user));
 		});
@@ -307,10 +305,9 @@ module.exports.router = function(options) {
 		var id = req.params.id;
 		var store = metastore(req);
 		store.getUser(id, function(err, user) {
-			if (err) return res.status(404).end();
+			if (err) return api.writeResponse(404, res);
 			if (!user) {
-				res.writeHead(400, "User not found: " + req.params.id);
-				return res.end();
+				return api.writeError(400, res, "User not fount: " + req.params.id);
 			}
 			var hasNewPassword = typeof req.body.Password !== "undefined";
 			var promiseChain = Promise.resolve();
@@ -331,8 +328,7 @@ module.exports.router = function(options) {
 								return;
 							}
 							if (existing && existing.length) {
-								res.writeHead(409, "This account is already linked to someone else");
-								res.end();
+								api.writeError(409, res, "This account is already linked to someone else");
 								reject();
 								return;
 							}
@@ -345,15 +341,14 @@ module.exports.router = function(options) {
 			promiseChain.then(function() {
 				store.updateUser(id, user, function(err) {
 					if (err) {
-						return res.writeHead(400, "Failed to update: " + id);
+						return api.writeError(400, res, "Failed to update: " + id);
 					}
-					return res.status(200).end();
+					return api.writeResponse(200, res);
 				});
 			}).catch(function(err) {
 				if (err) {
 					// Indicated unhandled error
-					res.writeHead(500, "An internal error has occured");
-					res.send();
+					return api.writeError(500, res, "An internal error has occured");
 				}
 			});
 		});
@@ -361,8 +356,8 @@ module.exports.router = function(options) {
 
 	app.delete("/users/:id", checkUserAccess, function(req,res){
 		metastore(req).deleteUser(req.params.id, function(err) {
-			if (err) return res.status(400).end();
-			return res.status(200).end();
+			if (err) return api.writeResponse(400, res);
+			return api.writeResponse(200, res);
 		});
 	});
 
@@ -370,20 +365,19 @@ module.exports.router = function(options) {
 		var id = req.params.id;
 		var newPassword = req.body.Password;
 		if (!newPassword) {
-			return res.status(400).json({Message: "Password is required"});
+			return api.writeResponse(400, res, null, {Message: "Password is required"});
 		}
 		var store = metastore(req);
 		store.getUser(id, function(err, user) {
-			if (err) return res.status(404).end();
+			if (err) return api.writeResponse(404, res);
 			if (!user) {
-				res.writeHead(400, "User not found: " + req.params.id);
-				return res.end();
+				return api.writeError(400, res, "User not found: " + req.params.id);
 			}
 			store.updateUser(id, { password: newPassword }, function(err, user) {
 				if (err) {
-					return res.writeHead(400, "Failed to update: " + req.params.id);
+					return api.writeError(400, res, "Failed to update: " + req.params.id);
 				}
-				return res.status(200).end();
+				return api.writeResponse(200, res);
 			});
 		});
 	});
@@ -391,7 +385,7 @@ module.exports.router = function(options) {
 	app.post('/users', function(req, res){
 		// If there are admin accounts, only admin accounts can create users
 		if (options.configParams["orion.auth.user.creation"] && !isAdmin(req.user && req.user.username)) {
-			return res.status(403).end();
+			return api.writeResponse(403, res);
 		}
 		var userData = {
 			username: req.body.UserName,
@@ -407,10 +401,16 @@ module.exports.router = function(options) {
 			}
 			if (options.configParams["orion.auth.user.creation.force.email"]) {
 				sendMail({user: user, options: options, template: CONFIRM_MAIL, auth: CONFIRM_MAIL_AUTH, req: req});
+				return api.writeResponse(201, res, null, {error: "Created"});
 			} else {
-				user.isAuthenticated = true;	
+				user.isAuthenticated = true;
+				store.updateUser(user.username, user, function(err, user) {
+					if (err) {
+						return logError(err);
+					}
+					return api.writeResponse(201, res, null, {error: "Created"});
+				});
 			}
-			return api.writeResponse(201, res, null, {error: "Created"});
 		});
 	});
 
@@ -452,29 +452,26 @@ module.exports.router = function(options) {
 	});
 
 	app.post("/useremailconfirmation/cansendemails", /* @callback */ function(req, res){
-		res.status(200).json({EmailConfigured: !!options.configParams["mail.smtp.host"]});
+		api.writeResponse(200, res, null, {EmailConfigured: Boolean(options.configParams["mail.smtp.host"])});
 	});
 
 	app.post('/useremailconfirmation', function(req, res){
 		var store = metastore(req);
 		var resetPwd = function(err, user) {
 			if (err || !user) {
-				res.writeHead(404, "User " +  (req.body.UserName || req.body.Email) + " not found");
-				return res.end();
+				return api.writeError(404, res, "User " +  (req.body.UserName || req.body.Email) + " not found");
 			}
 			if (!user.isAuthenticated){
-				res.writeHead(400, "Email confirmation has not completed. Please follow the instructions from the confirmation email in your inbox and then request a password reset again.");
-				return res.end();
+				return api.writeError(400, res, "Email confirmation has not completed. Please follow the instructions from the confirmation email in your inbox and then request a password reset again.");
 			}
 			crypto.randomBytes(AUTH_TOKEN_BYTES, function(randomBytes) {
 				store.updateUser(user.username, { authToken: randomBytes }, function(err, user) {
 					if (err) {
 						logError(err);
-						res.status(500).json({ Severity: "Error", Message: "Error updating user" });
-						return;
+						return api.writeError(500, res,  "Error updating user");
 					}
 					sendMail({user: user, options: options, template: PWD_CONFIRM_RESET_MAIL, auth: RESET_PWD_AUTH, req: req});
-					return res.status(200).json({"Severity":"Info","Message":"Confirmation email has been sent.","HttpCode":200,"BundleId":"org.eclipse.orion.server.core","Code":0});
+					return api.writeResponse(200, res, null, {"Severity":"Info","Message":"Confirmation email has been sent.","HttpCode":200,"BundleId":"org.eclipse.orion.server.core","Code":0});
 				});
 			});
 		};
@@ -486,22 +483,21 @@ module.exports.router = function(options) {
 	});
 
 	app.post('/login/canaddusers', /* @callback */ function(req, res) {
-		return res.status(200).json({
+		return api.writeResponse(200, res, null, {
 			CanAddUsers: canAddUsers(), 
-			ForceEmail: !!options.configParams["orion.auth.user.creation.force.email"], 
+			ForceEmail: Boolean(options.configParams["orion.auth.user.creation.force.email"]), 
 			RegistrationURI:options.configParams["orion.auth.registration.uri"] || undefined});
 	});
 	
 	app.post('/login', function(req, res) {
 		if (!req.user) {
-			return res.status(200).end();
+			return api.writeResponse(200, res);
 		}
 		//add the web token with the response
 		if (options.configParams["orion.jwt.secret"]) {
 			req.user.jwt = jwt.sign({'username': req.user.username}, options.configParams["orion.jwt.secret"]);
 		}
-		var user = userJSON(req.user)
-		return res.status(200).json(user);
+		return api.writeResponse(200, res, null, userJSON(req.user));
 	});
 	
 	return app;

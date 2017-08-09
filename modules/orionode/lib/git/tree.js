@@ -172,6 +172,7 @@ function getTree(req, res) {
 								var contentType = mime.lookup(entry.path());
 								res.setHeader('Content-Type', contentType);
 								res.setHeader('Content-Length', buffer.length);
+								api.setResponseNoCache(res);
                 				res.status(200).end(buffer, 'binary');
 							}else{
 								var resp = blob.toString();
@@ -193,7 +194,7 @@ function getTree(req, res) {
 	})
 	.catch(function(err) {
 		if (typeof readIfExists === 'boolean' && readIfExists) {
-			res.sendStatus(204);
+			api.sendStatus(204, res);
 		}else{
 			writeError(404, res, err.message);
 		}

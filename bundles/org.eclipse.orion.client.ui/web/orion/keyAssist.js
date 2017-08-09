@@ -441,7 +441,7 @@ define([
 			}
 		});
 		commandRegistry.addCommand(keyAssistCommand);
-		commandRegistry.registerCommandContribution(scopeId, "orion.keyAssist", 100, null, true, new keyBinding.KeyBinding(191, false, true)); //$NON-NLS-1$ //$NON-NLS-0$
+		commandRegistry.registerCommandContribution(scopeId, "orion.keyAssist", 100, null, true, new keyBinding.KeyBinding(191, false, true, !util.isMac, util.isMac)); //$NON-NLS-1$ //$NON-NLS-0$
 		
 		return keyAssistCommand;
 	}

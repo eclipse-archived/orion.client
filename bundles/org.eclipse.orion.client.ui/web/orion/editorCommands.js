@@ -251,7 +251,7 @@ define([
 			commandRegistry.registerCommandContribution(this.editToolbarId || this.pageNavId, "orion.edit.gotoLine", 3, this.editToolbarId ? "orion.menuBarEditGroup/orion.findGroup" : null, !this.editToolbarId, new mKeyBinding.KeyBinding('l', !util.isMac, false, false, util.isMac), new mCommandRegistry.URLBinding("gotoLine", "line"), this); //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-5$
 			commandRegistry.registerCommandContribution(this.editToolbarId || this.pageNavId, "orion.edit.find", 0, this.editToolbarId ? "orion.menuBarEditGroup/orion.findGroup" : null, !this.editToolbarId, new mKeyBinding.KeyBinding('f', true), new mCommandRegistry.URLBinding("find", "find"), this); //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-5$
 			commandRegistry.registerCommandContribution(this.editToolbarId || this.pageNavId , "orion.edit.format", 2, this.editToolbarId ? "orion.menuBarEditGroup/orion.edit.formatGroup" : null, !this.editToolbarId, new mKeyBinding.KeyBinding('f', false, true, true), new mCommandRegistry.URLBinding("format", "format"), this); //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-5$
-			commandRegistry.registerCommandContribution(this.toolbarId, "orion.keyAssist", 0, "orion.menuBarToolsGroup", false, new mKeyBinding.KeyBinding(191, false, true, true)); //$NON-NLS-1$ //$NON-NLS-0$ //$NON-NLS-2$
+			commandRegistry.registerCommandContribution(this.toolbarId, "orion.keyAssist", 0, "orion.menuBarToolsGroup", false, new mKeyBinding.KeyBinding(191, false, true, !util.isMac, util.isMac)); //$NON-NLS-1$ //$NON-NLS-0$ //$NON-NLS-2$
 			commandRegistry.registerCommandContribution(this.toolbarId , "orion.edit.showTooltip", 1, "orion.menuBarToolsGroup", false, null, null, this);//$NON-NLS-1$ //$NON-NLS-2$ 
 			commandRegistry.registerCommandContribution(this.toolbarId , "orion.edit.blame", 2, "orion.menuBarToolsGroup", false, new mKeyBinding.KeyBinding('b', true, true), new mCommandRegistry.URLBinding("blame", "blame"), this); //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-5$
 			commandRegistry.registerCommandContribution(this.toolbarId , "orion.edit.diff", 3, "orion.menuBarToolsGroup", false, new mKeyBinding.KeyBinding('d', true, true), new mCommandRegistry.URLBinding("diff", "diff"), this); //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-5$
@@ -363,12 +363,6 @@ define([
 						that.commandService.runCommand("orion.edit.find"); //$NON-NLS-0$
 						return true;
 					}, that.commandService.findCommand("orion.edit.find")); //$NON-NLS-0$
-				}
-				
-				var keyAssistCommand = that.commandService.findCommand("orion.keyAssist"); //$NON-NLS-0$
-				if (keyAssistCommand) {
-					textView.setKeyBinding(new mKeyBinding.KeyStroke(191, false, true, !util.isMac, util.isMac), keyAssistCommand.id);
-					textView.setAction(keyAssistCommand.id, keyAssistCommand.callback, keyAssistCommand);
 				}
 				
 				// Support future key binding changes
@@ -634,13 +628,22 @@ define([
 		},
 		_createSwitchWorkspaceCommand: function() {
 			var that = this;
-			this.fileClient.loadWorkspaces().then(function(workspaces) {
+			var fileSystem = this.fileClient.fileServiceRootURL(window.location.hash.substring(1));
+			this.fileClient.loadWorkspaces(fileSystem).then(function(workspaces) {
+				if (this.sideBar) {
+					this.sideBar.sidebarNavInputManager.addEventListener("filesystemChanged", function(evt) {
+						fileSystem = evt.newInput;
+						this.fileClient.loadWorkspaces(fileSystem).then(function(newWorkspaces) {
+							workspaces = newWorkspaces;
+						});
+					}.bind(this));
+				}
 				this.fileClient.addEventListener("Changed", function(evt) {
 					if (evt.deleted) {
 						if (evt.deleted.some(function(item) {
 							return fileUtil.isAtRoot(item.deleteLocation);
 						})) {
-							this.fileClient.loadWorkspaces().then(function(newWorkspaces) {
+							this.fileClient.loadWorkspaces(fileSystem).then(function(newWorkspaces) {
 								workspaces = newWorkspaces;
 							});
 						}

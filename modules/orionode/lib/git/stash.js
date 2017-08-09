@@ -111,14 +111,14 @@ function putStash(req, res) {
 	})
 	.then(function(message) {
 		if (message === null) {
-			res.status(200).end();
+			writeResponse(200, res);
 		} else {
 			writeError(400, res, message);
 		}
 	})
 	.catch(function(err) {
-		if (err.message === "Reference 'refs/stash' not found"){
-			writeError(400, res, "Failed to apply stashed changes due to an empty stash.");
+		if (err.message === "reference 'refs/stash' not found"){
+			return writeError(400, res, "Failed to apply stashed changes due to an empty stash.");
 		}
 		writeError(404, res, err.message);
 	});
@@ -162,7 +162,7 @@ function deleteStash(req, res) {
 	})
 	.then(function(message) {
 		if (message === null) {
-			res.status(200).end();
+			writeResponse(200, res);
 		} else {
 			writeError(400, res, message);
 		}
@@ -184,7 +184,7 @@ function postStash(req, res) {
 		return git.Stash.save(repo, clone.getSignature(repo), message, flags);
 	})
 	.then(function() {
-		res.status(200).end();
+		writeResponse(200, res);
 	})
 	.catch(function(err) {
 		writeError(404, res, err.message);

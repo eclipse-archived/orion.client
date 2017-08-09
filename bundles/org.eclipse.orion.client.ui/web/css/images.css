@@ -18,8 +18,8 @@
 }
 
 .core-sprite-progress {
-	height:14px;
-	width:14px;
+	height:12px;
+	width:12px;
 	-webkit-animation: progressAnimation .7s infinite linear;
 	-moz-animation: progressAnimation .7s infinite linear;
 	animation: progressAnimation .7s infinite linear;
@@ -27,6 +27,10 @@
 	background-image: none;
 	padding: 0px;
 	padding-top:2px;
+	margin-bottom: 1px;
+	margin-top: 2px;
+	margin-left: 0;
+	margin-right: 0;
 	border:2px solid rgba(1,1,1,0.7);
 	border-top:0px solid rgba(1,1,1,0);
 	outline: none;

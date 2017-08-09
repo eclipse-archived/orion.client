@@ -97,7 +97,7 @@ function getDiff(req, res) {
 				body += JSON.stringify(api.encodeLocation(URIs));
 				res.setHeader('Content-Type', 'application/json');
 			}
-			return res.status(200).end(body);
+			return writeResponse(200, res, null, body);
 		}
 		if (includeDiff || includeDiffs) {
 			var diffOptions = getOptions(ignoreWS, filePath, paths);
@@ -255,8 +255,8 @@ function processDiff(diff, filePath, paths, fileDir, includeDiff, includeDiffs, 
 		});
 		if (includeDiffs) {
 			diffs.Length = patches.length;
-			if (i < patches.length) {
-				diffs.NextLocation = "";
+			if (i < patches.length - 1) {
+				diffs.NextLocation  = {pathname: gitRoot + "/diff/" + scope + fileDir, query: {page: page + 1, pageSize:pageSize}}
 			}
 		}
 		return Promise.all(result);

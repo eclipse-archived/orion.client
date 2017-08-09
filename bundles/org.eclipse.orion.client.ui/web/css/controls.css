@@ -769,7 +769,7 @@ html[dir="rtl"] .keyAssistFloat { /* ACGC */
 }
 
 .inputCompletionLISelected {
-	background : #ffeecc;/*#0080ff;*/
+	background : rgba(60, 113, 179, 0.25);
 }
 
 .inputCompletionLICategory {

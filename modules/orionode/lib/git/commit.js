@@ -223,7 +223,7 @@ function getCommitLog(req, res) {
 			}
 		})
 		.catch(function(err) {
-			if (err.message === "No merge base found") {
+			if (err.message === "no merge base found") {
 				// two commits in unrelated histories
 				return null;
 			}
@@ -534,7 +534,7 @@ function getCommitLog(req, res) {
 				// find the common ancestor for calculating incoming/outgoing changes
 				return git.Merge.base(repo, commit0, commit1)
 				.catch(function(err) {
-					if (err.message === "No merge base found") {
+					if (err.message === "no merge base found") {
 						return null;
 					}
 					throw err;
@@ -704,7 +704,11 @@ function getDiff(repo, commit, fileDir) {
 			"Children": diffs
 		};
 		if (patches.length > 100) {
-			result.NextLocation = {pathname: gitRoot + "/diff/" + range + fileDir, query: {pageSize: pageSize, page: page + 1}};
+			var nextLocation = url.parse(gitRoot + "/diff/" + range + fileDir, true);
+			nextLocation.query.page = page + 1 + "";
+			nextLocation.query.pageSize = pageSize + "";
+			nextLocation = url.format(nextLocation);
+			result.NextLocation = nextLocation;
 		}
 		return result;
 	});
@@ -821,7 +825,7 @@ function cherryPick(req, res, commitToCherrypick) {
 		});
 	})
 	.catch(function(err) {
-		if(err.message.indexOf("Cannot create a tree") !== -1){
+		if(err.message.indexOf("cannot create a tree") !== -1){
 			writeResponse(200, res, null, {
 				"HeadUpdated": true,
 				"Result": "CONFLICTING"
@@ -1017,7 +1021,7 @@ function merge(req, res, branchToMerge, squash) {
 			});
 		})
 		.catch(function(err) {
-			if (err.message === "No merge base found") {
+			if (err.message === "no merge base found") {
 				// no common ancestor between the two branches, force the merge
 				return forceMerge(repo, head, commit, branchToMerge, true, function(conflictingPaths) {
 					paths = conflictingPaths;
@@ -1175,16 +1179,19 @@ function createCommit(repo, committerName, committerEmail, authorName, authorEma
 			if (amend) {
 				return parent.amend("HEAD",  author, committer, null, message, oid);
 			} else if (mergeRequired) {
-				var promises = [ Promise.resolve(parent) ];
 				// get merge heads
+				var oids = [];
 				return repo.mergeheadForeach(function(oid) {
-					promises.push(repo.getCommit(oid));
+					oids.push(oid.tostrS());
 				})
 				.then(function() {
 					// wait for all parents to be resolved
-					return Promise.all(promises);
+					return Promise.all(oids.map(function(oid) {
+						return repo.getCommit(oid);
+					}));
 				})
 				.then(function(parentCommits) {
+					parentCommits.unshift(parent);
 					// create the merge commit on top of the MERGE_HEAD parents
 					return repo.createCommit("HEAD", author, committer, message, oid, parentCommits);
 				});

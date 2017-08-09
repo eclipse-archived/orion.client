@@ -38,7 +38,7 @@ if (!bundles.length)
 	self.log("No bundles found in build file " + buildFile, Project.MSG_WARN);
 
 self.log("Generate fingerprint for JS files");
-var fingerprintModules = [], jsMaps = [];
+var fingerprintModules = [new Packages.java.io.File(todir, "javascript/plugins/ternWorker.js")], jsMaps = [];
 buildConfigModules.forEach(function(optimizedModule, i) {
 	var srcFile = new Packages.java.io.File(todir, optimizedModule.name + ".js");
 	var checksum = project.createTask("checksum");
@@ -102,6 +102,7 @@ bundles.forEach(function(bundle) {
 		task.setValue('"' + map.mappedName + '"');
 		task.setDir(bundle.web);
 		task.setIncludes("**/*.html");
+		task.setExcludes("**/embeddedEditor/**");
 		task.perform();	
 	});
 	cssMaps.forEach(function(map) {
@@ -110,6 +111,7 @@ bundles.forEach(function(bundle) {
 		task.setValue('"' + map.mappedName + '"');
 		task.setDir(bundle.web);
 		task.setIncludes("**/*.html");
+		task.setExcludes("**/embeddedEditor/**");
 		task.perform();	
 	});
 });

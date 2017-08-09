@@ -100,10 +100,10 @@ Task.prototype = {
 				writeError(500, res, err.toString());
 			} else {
 				var resp = JSON.stringify(toJSON(this, true));
-				res.statusCode = 202;
-				res.setHeader('Content-Type', 'application/json');
-				res.setHeader('Content-Length', resp.length);
-				res.end(resp);
+				api.writeResponse(202, res, {
+					'Content-Type': 'application/json',
+					'Content-Length': resp.length
+				}, resp, null, true);
 			}
 		}.bind(this));
 	},
@@ -140,12 +140,12 @@ Task.prototype = {
 					if (this.result.JsonData) {
 						res.statusCode = this.result.HttpCode;
 						var resp = JSON.stringify(api.encodeLocation(this.result.JsonData));
-						res.setHeader('Content-Type', 'application/json');
-						res.setHeader('Content-Length', resp.length);
-						res.end(resp);
+						api.writeResponse(this.result.HttpCode, res, {
+							'Content-Type': 'application/json',
+							'Content-Length': resp.length
+						}, resp, null, true);
 					} else if (this.type === "error") {
-						res.writeHead(this.result.HttpCode, this.result.Message || "");
-						res.end();
+						api.writeError(this.result.HttpCode, res, this.result.Message || "");
 					}
 				}
 			}.bind(this));

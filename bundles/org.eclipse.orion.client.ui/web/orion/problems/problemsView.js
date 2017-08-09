@@ -14,8 +14,9 @@ define([
 	'orion/objects',
 	'orion/webui/littlelib',
 	'orion/problems/problemsExplorer',
-	'orion/webui/Slideout'
-], function(messages, objects, lib, mProblemsExplorer, mSlideout) {
+	'orion/webui/Slideout',
+	'orion/bidiUtils'
+], function(messages, objects, lib, mProblemsExplorer, mSlideout, bidiUtils) {
 	var SlideoutViewMode = mSlideout.SlideoutViewMode;
 	/** 
 	 * Constructs a new ProblemView object.
@@ -79,6 +80,7 @@ define([
 			input.classList.add("problemsFilter"); //$NON-NLS-0$
 			input.placeholder = messages["ProblemsFilter"]; //$NON-NLS-0$
 			input.type="text"; //$NON-NLS-0$
+			bidiUtils.initInputField(input);
 			input.addEventListener("input", function (e) { //$NON-NLS-0$
 				if (this._filterInputTimeout) {
 					window.clearTimeout(this._filterInputTimeout);

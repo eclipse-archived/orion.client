@@ -188,6 +188,7 @@ define([ 'i18n!git/nls/gitmessages', 'orion/bidiUtils',
 			var link = document.createElement("a"); //$NON-NLS-0$
 			link.href = require.toUrl(editTemplate.expand({resource: folder.ChildrenLocation}));
 			link.textContent = folder.Name;
+			link.dir = bidiUtils.getTextDirection(folder.Name);
 			return link;
 		}
 

@@ -19,6 +19,8 @@ var clone = require('./clone');
 var mConfig = require('./config');
 var express = require('express');
 var bodyParser = require('body-parser');
+var log4js = require('log4js');
+var logger = log4js.getLogger("git");
 var util = require('./util');
 
 module.exports = {};
@@ -274,7 +276,7 @@ function fetchRemote(req, res, remote, branch, force) {
 			refSpec = "refs/heads/" + remoteBranch + ":refs/remotes/" + remoteObj.name() + "/" + branch;
 			if (force) refSpec = "+" + refSpec;
 		}
-		
+		logger.debug("fetchRemote ", remote," Starting");
 		return remoteObj.fetch(
 			refSpec ? [refSpec] : null,
 			{
@@ -285,6 +287,7 @@ function fetchRemote(req, res, remote, branch, force) {
 		);
 	})
 	.then(function(err) {
+		logger.debug("err in fetchRemote is", err);
 		if (!err) {
 			task.done({
 				HttpCode: 200,
@@ -306,9 +309,6 @@ function pushRemote(req, res, remote, branch, pushSrcRef, tags, force) {
 	var repo;
 	var remoteObj;
 	
-	//TODO disable pushing tags
-	tags = false;
-	
 	var task = new tasks.Task(res, false, true, 0 ,true);	
 	return clone.getRepo(req)
 	.then(function(r) {
@@ -325,12 +325,32 @@ function pushRemote(req, res, remote, branch, pushSrcRef, tags, force) {
 		var refSpecs = [];
 		refSpecs.push(refSpec);
 		if(tags){
-			r[1].forEach(function(ref) {
-				if (ref.indexOf("refs/tags/") === 0) {
-					refSpecs.push(ref + ":" + ref);
-				}			
+			return repo.getRemote(remote)
+			.then(function(remote){
+				return Promise.all([remote,remote.connect(git.Enums.DIRECTION.FETCH, clone.getRemoteCallbacks(req, task))]);			
+			})
+			.then(function(results){
+				var remote = results[0];
+       			return Promise.all([remote, remote.referenceList()]);
+			}).then(function(results){
+				var headNames = results[1].map(function(remoteHead){
+					return remoteHead.name();
+				});
+				return headNames;
+			})
+			.then(function(headNames){
+				r[1].forEach(function(ref){
+					if(ref.indexOf("refs/tags/") === 0 && headNames.indexOf(ref) === -1){
+						refSpecs.push(ref + ":" + ref);
+					}
+				});
+				return refSpecs;
 			});
+		}else{
+			return refSpecs;
 		}
+	})
+	.then(function(refSpecs){
 		return remoteObj.push(
 			refSpecs, {callbacks: clone.getRemoteCallbacks(req, task)}
 		);
@@ -377,7 +397,7 @@ function deleteRemote(req, res) {
 					if (err) {
 						return writeError(403, res, err.message);
 					}
-					res.status(200).end();
+					writeResponse(200, res);
 				});
 			}
 		});

@@ -10,7 +10,7 @@
  *******************************************************************************/
 /*eslint-env browser, amd*/
 /*global URL*/
-define(['orion/PageUtil', "orion/URL-shim"], function(PageUtil) {
+define(['orion/PageUtil', "orion/bidiUtils", "orion/URL-shim"], function(PageUtil, bidiUtils) {
 	/**
 	 * @name orion.urlUtils.Segment
 	 * @class
@@ -66,10 +66,12 @@ define(['orion/PageUtil', "orion/URL-shim"], function(PageUtil) {
 				var link = document.createElement("a"); //$NON-NLS-0$
 		        link.href = segment.urlStr;
 		        link.appendChild(document.createTextNode(segment.segmentStr));
+		        link.dir = bidiUtils.getTextDirection(segment.segmentStr);
 				parentNode.appendChild(link);
 			} else {
 				var plainText = document.createElement("span"); //$NON-NLS-0$
 				plainText.textContent = segment.segmentStr;
+				plainText.dir = bidiUtils.getTextDirection(segment.segmentStr);
 				parentNode.appendChild(plainText);
 			}
 		});

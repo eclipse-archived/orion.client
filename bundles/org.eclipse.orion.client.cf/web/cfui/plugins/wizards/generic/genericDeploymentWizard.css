@@ -49,13 +49,12 @@ html, body {
 
 select {
 	height: 24px;
-	width: 290px;
 	border: 1px solid #bbb;
 }
 
 .selectCell input {
 	height: 24px;
-	width: 290px;
+	width:  100%;
 	margin-left: 0;
 }
 
@@ -64,7 +63,7 @@ select {
 	color: #333;
 }
 .selectCell>select {
-	width: 292px;
+	width: 100%;
 }
 /*hacko: push simple text span over to align with inputs and selects*/
 .selectCell>span {
@@ -72,9 +71,7 @@ select {
 }
 .selectCell .core-sprite-openarrow {
 	color: inherit;
-	font-size: 13px !important;
-	padding-left: 5px;
-	-webkit-padding-start: 3px !important;
+	font-size: 14px !important;
 }
 
 .modifiedCell {
@@ -82,28 +79,38 @@ select {
 }
 
 .comboTextInputWrapper {
-	height: 24px;
-	width: 289px;
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	width: calc(100% - 2px); /* -2 for the border */
 	border: 1px solid #bbb;
 }
 
 .comboTextInputWrapperFocussed {
-	outline: -webkit-focus-ring-color auto 5px;
+	outline-color: -webkit-focus-ring-color;
+	outline-style: auto;
+	outline-offset: -2px;
+	margin: 0;
+	outline-width: 5px;
 }
 
 .comboTextInputField {
-	width: 260px !important;
-	height: 24px;
+	width: calc(100% - 18px);
 	text-align: left;
 	margin-right: 0;
+	outline: none; /* needed to avoid double focus ring */
 	border: 0px !important;
 }
 
 .recentEntryButton {
-	margin-left: 0;
-	height: 22px;
+	margin: 0;
+	margin-top: -1px;
+	padding: 0;
+	border: none;
+	height: 16px;
 	background: none repeat scroll 0 0 #fff;
-	width: 25px;
+	width: 16px;
+	outline: none; /* needed to avoid double focus ring */
 }
 
 .formTable {
@@ -124,7 +131,7 @@ select {
 
 .listCell select {
 	height: inherit;
-	width: 190px;
+	width: 100%;
 }
 
 #servicesAddRemoveButtonsCol {
@@ -292,8 +299,8 @@ input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer
 td#host::before,
 td#manifest::before{
 	position: absolute;
-	left: 32%;
-	margin-top: 3px;
+	left: 36%;
+	margin-top: 5px;
 	content: "";
 	height: 16px;
 	width: 16px;
@@ -334,3 +341,12 @@ td#host::before{
 span.tooltipContainer{
 	left: 145px !important;
 }
+
+input::-webkit-contacts-auto-fill-button {
+  visibility: hidden;
+  display: none !important;
+  pointer-events: none;
+  position: absolute;
+  right: 0;
+}
+

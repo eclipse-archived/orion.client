@@ -9,7 +9,7 @@
  *		 IBM Corporation - initial API and implementation
  *******************************************************************************/
 /*eslint-env node */
-var api = require('../api'), writeError = api.writeError;
+var api = require('../api'), writeError = api.writeError, writeResponse = api.writeResponse;
 var git = require('nodegit');
 var clone = require('./clone');
 var path = require('path');
@@ -59,13 +59,12 @@ function getIndex(req, res) {
 	.then(function(blob) {
 		if (typeof blob === 'number') {
 			if (blob === 204) {
-				res.sendStatus(204);
+				api.sendStatus(204, res);
 			} else {
 				writeError(404, res, filePath + " not found in index");
 			}
 		} else {
-			res.write(blob.toString());
-			res.status(200).end();
+			writeResponse(200, res, {"Content-Type":"application/octect-stream"}, blob.toString(), false, true);
 		}
 	})
 	.catch(function(err) {
@@ -101,7 +100,7 @@ function putIndex(req, res) {
 		return index.write();
 	})
 	.then(function() {
-		res.status(200).end();
+		writeResponse(200, res);
 	}).catch(function(err) {
 		writeError(404, res, err.message);
 	});
@@ -146,7 +145,7 @@ function postIndex(req, res) {
 		return git.Reset.default(repo, commit, [filePath]);
 	})
 	.then(function() {
-		res.status(200).end();
+		writeResponse(200, res);
 	}).catch(function(err) {
 		writeError(404, res, err.message);
 	});
