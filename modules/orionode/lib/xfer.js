@@ -58,8 +58,12 @@ module.exports.router = function(options) {
 module.exports.getXferFrom = getXferFrom;
 module.exports.postImportXferTo = postImportXferTo;
 
-function getOptions(req) {
-	return req.get("X-Xfer-Options").split(",");
+function getOptions(req, res) {
+	var opts = req.get("X-Xfer-Options");
+	if(typeof opts !== 'string') {
+		return writeError(500, res, "Transfer options have not been set in the original request");
+	}
+	return opts.split(",");
 }
 	
 function reportTransferFailure(res, err) {
@@ -83,7 +87,7 @@ function postImportXfer(req, res) {
 }
 
 function postImportXferTo(req, res, file) {
-	var xferOptions = getOptions(req);
+	var xferOptions = getOptions(req, res);
 	if (xferOptions.indexOf("sftp") !== -1) {
 		return writeError(500, res, "Not implemented yet.");
 	}
