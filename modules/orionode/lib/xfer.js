@@ -61,7 +61,7 @@ module.exports.postImportXferTo = postImportXferTo;
 function getOptions(req, res) {
 	var opts = req.get("X-Xfer-Options");
 	if(typeof opts !== 'string') {
-		return null;
+		return [];
 	}
 	return opts.split(",");
 }
@@ -88,9 +88,6 @@ function postImportXfer(req, res) {
 
 function postImportXferTo(req, res, file) {
 	var xferOptions = getOptions(req, res);
-	if(xferOptions === null) {
-		return writeError(500, res, "Transfer options have not been set in the original request");
-	}
 	if (xferOptions.indexOf("sftp") !== -1) {
 		return writeError(500, res, "Not implemented yet.");
 	}
@@ -215,13 +212,7 @@ function completeTransfer(req, res, tempFile, file, fileName, xferOptions, shoul
 		})
 		.on('error', function(error) {
 			if (res) {
-				writeResponse(200, res, null, {
-					Severity: "Error",
-					HttpCode:400,
-					Code: 0,
-					Message: "Failed during file unzip: " + error.message
-				});
-				res = null;
+				return writeError(400, res, "Failed during file unzip: " + error.message);
 			}
 		})
 		.on('close', function() {
@@ -230,7 +221,7 @@ function completeTransfer(req, res, tempFile, file, fileName, xferOptions, shoul
 				if (failed.length) {
 					return overrideError(failed);
 				}
-				res.setHeader("Location", api.join(fileRoot, file.workspaceId, file.path.substring(file.workspaceDir.length)));
+				res.setHeader("Location", api.join(fileRoot, file.workspaceId, file.path.substring(file.workspaceDir.length+1)));
 				writeResponse(201, res);
 				res = null;
 			}
@@ -244,7 +235,7 @@ function completeTransfer(req, res, tempFile, file, fileName, xferOptions, shoul
 			if (err) {
 				return writeError(400, res, "Transfer failed");
 			}
-			res.setHeader("Location", api.join(fileRoot, file.workspaceId, file.path.substring(file.workspaceDir.length)));
+			res.setHeader("Location", api.join(fileRoot, file.workspaceId, file.path.substring(file.workspaceDir.length+1)));
 			writeResponse(201, res);
 		});
 	}
