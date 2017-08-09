@@ -26,7 +26,7 @@ function Prefs(s) {
 // @param path - eg. /user/editor/settings
 // @returns The node, or NOT_EXIST if the path did not exist.
 Prefs.prototype.get = function(path) {
-	var root = this.json.Properties;
+	var root = this.json;
 	var segs = path.split('/');
 	var key = path; // substr(1) to strip the leading slash
 	var result;
@@ -57,11 +57,11 @@ Prefs.prototype.get = function(path) {
 // Replaces the node at the given path. If node === NOT_EXIST then the node is removed.
 Prefs.prototype.set = function(path, node) {
 	if (path === '') {
-		this.json.Properties = node;
+		this.json = node;
 		debug('Prefs.set(%s) := %s', path, JSON.stringify(node));
 		return;
 	}
-	var obj = this.json.Properties;
+	var obj = this.json;
 	if (node === NOT_EXIST) {
 		delete obj[path];
 	} else {
@@ -76,7 +76,7 @@ Prefs.prototype.set = function(path, node) {
 Prefs.prototype.delete = function(path) {
 	this.set(path, NOT_EXIST);
 };
-Prefs.prototype.toJSON = function() {
+Prefs.prototype.toString = function() {
 	return JSON.stringify(this.json, null, 2); //pretty-print
 };
 Prefs.prototype.modified = function() {

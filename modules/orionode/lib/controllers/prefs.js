@@ -72,10 +72,12 @@ function PrefsController(options) {
 
 	// Promised middleware that acquires prefs from the metastore and stores in `req`.
 	function acquirePrefs(req) {
-		var store = fileUtil.getMetastore(req);
 		return new Promise(function(fulfill) {
-			store.readPreferences(req, function(err, prefs) {
-				fulfill(new UserPreference(prefs || null));
+			readPreferences(req, function(err, scope, prefs){
+				if(scope === "user"){
+					fulfill(new UserPreference(prefs || null));
+				}
+				// TODO wrap workspace preference
 			});
 		})
 		.then(function(prefs) {
@@ -92,9 +94,8 @@ function PrefsController(options) {
 		if (!prefs.modified()) {
 			return Promise.resolve();
 		}
-		var store = fileUtil.getMetastore(req);
 		return new Promise(function(fulfill, reject) {
-			store.updatePreferences(req, prefs.toJSON(), function(err) {
+			updatePreferences(req, prefs, function(err){
 				if (err) {
 					return reject(err);
 				}
@@ -105,6 +106,38 @@ function PrefsController(options) {
 			throw err;
 		});
 		/*eslint-enable*/
+	}
+	
+	function readPreferences(req, callback){
+		var scope = req.url.split("/")[1];
+		var store = fileUtil.getMetastore(req);
+		if(scope === "user"){
+			store.readUserPreferences(req.user, function(err, prefs){
+				callback(err, scope, prefs);
+			});
+		}else if(scope === "workspace"){
+			store.readWorkspaceMetadata(req.user.workspaceId, function(err, prefs){
+				callback(err, scope, prefs);
+			});
+		}else if(scope === "project"){
+			// TODO implement read project prefs
+		}
+	}
+	
+	function updatePreferences(req, prefs, callback){
+		var scope = req.url.split("/")[1];
+		var store = fileUtil.getMetastore(req);
+		if(scope === "user"){
+			store.updateUserPreferences(req.user, prefs, function(err){
+				callback(err);
+			});
+		}else if(scope === "workspace"){
+			store.updateWorkspaceMetadata(req.user.workspaceId, prefs, function(err){
+				callback(err);
+			});
+		}else if(scope === "project"){
+			// TODO implement update project prefs
+		}
 	}
 
 } // PrefsController

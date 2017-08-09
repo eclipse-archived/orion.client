@@ -264,7 +264,7 @@ Object.assign(MongoDbMetastore.prototype, {
 			if (err) {
 				return callback(err);
 			}
-			user.properties = prefs;
+			user.properties = JSON.stringify(prefs, null, 2);
 			user.save(callback);
 		});
 	},
