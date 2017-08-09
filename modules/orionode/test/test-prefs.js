@@ -9,6 +9,7 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 /*eslint-env node, mocha*/
+/*eslint-disable no-undef-expression */
 var chai = require('chai'),
     assert = require('assert'),
     express = require('express'),
@@ -59,9 +60,209 @@ function setupPrefs(done) {
 	.asCallback(done);
 }
 
-describe('prefs', function() {
+describe('Orion preferences tests', function() {
 	beforeEach(setupWorkspace);
 
+	/**
+	 * Port of Java-specific tests to ensure parity
+	 * @since 16.0
+	 */
+	describe('Core pref tests', function() {
+		it('testBug409792', function() {
+			return request().put(PREFS_PREFIX + '/testBug409792')
+				.type('json')
+				.send({ "http://127.0.0.2:8080/plugins/samplePlugin.html": true })
+				.expect(204);
+		});
+		it('testGetSingle', function() {
+			return request().get(PREFS_PREFIX + '/user/java?key=Name')
+					.expect(404)
+					.then(/* @callback */ function(res) {
+						return request().put(PREFS_PREFIX + '/user/java')
+								.type('json')
+								.send({"Name": "Frodo"})
+								.expect(204)
+								.then(/* @callback */ function(res) {
+									return request().get(PREFS_PREFIX + '/user/java?key=Name')
+											.expect(200);
+								});
+					});
+		});
+		it('testPutSingleString', function() {
+			return request().put(PREFS_PREFIX + '/user/java')
+					.type('json')
+					.send({"Name": "Frodo"})
+					.expect(204)
+					.then(/* @callback */ function(res) {
+						return request().get(PREFS_PREFIX + '/user/java?key=Name')
+							.expect(200);
+					});
+		});
+		it('testPutSingleEmpty', function() {
+			return request().put(PREFS_PREFIX + '/user/java')
+					.type('json')
+					.send({"Name": ""})
+					.expect(204)
+					.then(/* @callback */ function(res) {
+						return request().get(PREFS_PREFIX + '/user/java?key=Name')
+								.expect(200);
+					});
+		});
+		it('testPutSingleIllegalEncodingChars', function() {
+			return request().put(PREFS_PREFIX + '/user/java')
+					.type('json')
+					.send({"Na=me" : "Fr&do"})
+					.expect(204)
+					.then(/* @callback */ function(res) {
+						return request().get(PREFS_PREFIX + '/user/java?key=Na%3Dme')
+								.expect(200)
+								.then(function(res) {
+									assert(res.text, "There was no text returned in the response");
+									var o = JSON.parse(res.text);
+									assert(o, "The JSON parse resulted in nothing");
+									assert(o["Na=me"], "There is no Na=me entry from the prefs");
+									assert.equal(o["Na=me"], "Fr&do", "Na=me did not match Fr&do");
+								});
+					});
+		});
+		it('testPutJSON', function() {
+			return request().put(PREFS_PREFIX + '/user/java')
+					.type('json')
+					.send({"properties" : {"foo": true, "bar": false}})
+					.expect(204)
+					.then(/* @callback */ function(res) {
+						return request().get(PREFS_PREFIX + '/user/java?key=properties')
+								.expect(200)
+								.then(function(res) {
+									assert(res.text, "There was no text returned in the response");
+									var o = JSON.parse(res.text);
+									assert(o, "The JSON parse resulted in nothing");
+									assert(o.properties, "There is no property entry from the prefs");
+									assert.equal(o.properties.foo, true, "properties.foo did not match what was set");
+									assert.equal(o.properties.bar, false, "properties.bar did not match what was set");
+								});
+					});
+		});
+		it('testPutNode', function() {
+			return request().put(PREFS_PREFIX + '/user/java')
+					.type('json')
+					.send({"Name" : "Frodo", "Address": "Bag End"})
+					.expect(204)
+					.then(function() {
+						return request().get(PREFS_PREFIX + '/user/java?key=Address')
+								.expect(200)
+								.then(function(res) {
+									assert(res.text, "There was no text in the response");
+									var o = JSON.parse(res.text);
+									assert(o, "The JSON parse resulted in nothing");
+									assert.equal(o["Address"], "Bag End", "The returned address does not match what was set");
+									return request().put(PREFS_PREFIX + '/user/java')
+											.type('json')
+											.send({"Name" : "Barliman", "Occupation": "Barkeep"})
+											.expect(204)
+											.then(function() {
+												return request().get(PREFS_PREFIX + '/user/java')
+														.expect(200)
+														.then(function(res) {
+															assert(res.text, "There was no text returned in the response");
+															o = JSON.parse(res.text);
+															assert(o, "The JSON parse resulted in nothing");
+															assert.equal(o["Name"], "Barliman", "Name should have been updated to Barliman");
+															assert(!o["Address"], "Address should have been erased with the disjoint put");
+															assert.equal(o["Occupation"], "Barkeep", "Barkeep was not set as Occupation in disjoint put");
+														});
+											});
+								});
+					});
+		});
+		it.skip('testDeleteSingle', function() {
+			//skipped in Java tests as well
+		});
+		it.skip('testDeleteNode', function() {
+			//skipped in Java tests as well
+		});
+		it('testValueWithSpaces', function() {
+			return request().put(PREFS_PREFIX + '/user/java')
+					.type('json')
+					.send({"Name" : "Frodo Baggins"})
+					.expect(204)
+					.then(function() {
+						return request().get(PREFS_PREFIX + '/user/java?key=Name')
+								.expect(200)
+								.then(function(res) {
+									assert(res.text, "There was no text returned in the response");
+									var o = JSON.parse(res.text);
+									assert(o, "The JSON parse resulted in nothing");
+									assert.equal(o["Name"], "Frodo Baggins", "Name should be Frodo Baggins");
+								});
+				});
+
+		});
+		it('testAccessingMetadata - prefs/Users', function() {
+			return request().get(PREFS_PREFIX + '/Users')
+						.expect(405)
+						.then(function() {
+							return request().put(PREFS_PREFIX + '/Users')
+									.type('json')
+									.send({"Name" : "Frodo Baggins"})
+									.expect(403);
+						});
+		});
+		it('testAccessingMetadata - prefs/user', function() {
+			return request().get(PREFS_PREFIX + '/user')
+						.expect(405)
+						.then(function() {
+							return request().put(PREFS_PREFIX + '/user')
+									.type('json')
+									.send({"Name" : "Frodo Baggins"})
+									.expect(403);
+						});
+			
+		});
+		it('testAccessingMetadata - prefs/Workspaces', function() {
+			return request().get(PREFS_PREFIX + '/Workspaces')
+						.expect(405)
+						.then(function() {
+							return request().put(PREFS_PREFIX + '/Workspaces')
+									.type('json')
+									.send({"Name" : "Frodo Baggins"})
+									.expect(403);
+						});
+		});
+		it('testAccessingMetadata - prefs/workspace', function() {
+			return request().get(PREFS_PREFIX + '/workspace')
+						.expect(405)
+						.then(function() {
+							return request().put(PREFS_PREFIX + '/workspace')
+									.type('json')
+									.send({"Name" : "Frodo Baggins"})
+									.expect(403);
+						});
+		});
+		it('testAccessingMetadata - prefs/Projects', function() {
+			return request().get(PREFS_PREFIX + '/Projects')
+						.expect(405)
+						.then(function() {
+							return request().put(PREFS_PREFIX + '/Projects')
+									.type('json')
+									.send({"Name" : "Frodo Baggins"})
+									.expect(403);
+						});
+		});
+		it('testAccessingMetadata - prefs/project', function() {
+			return request().get(PREFS_PREFIX + '/project')
+						.expect(405)
+						.then(function() {
+							return request().put(PREFS_PREFIX + '/project')
+									.type('json')
+									.send({"Name" : "Frodo Baggins"})
+									.expect(403);
+						});
+		});
+		it('testGetNode - /prefs/user/<userid>/testprefs');
+		it('testGetNode - /prefs/workspace/<workspaceid>/testprefs');
+		it('testGetNode - /prefs/project/<workspaceid>/<projectname>/testprefs');
+	});
 	describe('when NO prefs.json exists', function() {
 		describe('and we GET a nonexistent single key', function() {
 			it('should receive 404', function() {
@@ -163,7 +364,7 @@ describe('prefs', function() {
 			it('should not have the deleted key', function(finished) {
 				setTimeout(function() {
 					request().get(PREFS_PREFIX + '/user/foo?key=bar')
-					.expect(404).end(function(err, res) {
+					.expect(404).end(/* @callback */ function(err, res) {
 						assert.ifError(err);
 						finished();
 					});
