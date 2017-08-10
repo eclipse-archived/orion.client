@@ -19,7 +19,7 @@ var NOT_EXIST = Prefs.NOT_EXIST = function notExist() {};
 // Represents a preferences tree
 // @param {string?} s JSON string
 function Prefs(s) {
-	this.json = typeof s === 'string' ? JSON.parse(s) : {};
+	this.json = s || {};
 	this.isModified = false;
 }
 // @param path - eg. /user/editor/settings

@@ -95,7 +95,7 @@ function PrefsController(options) {
 			return Promise.resolve();
 		}
 		return new Promise(function(fulfill, reject) {
-			updatePreferences(req, prefs, function(err){
+			updatePreferences(req, prefs.getJson(), function(err){
 				if (err) {
 					return reject(err);
 				}

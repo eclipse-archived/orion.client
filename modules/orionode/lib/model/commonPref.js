@@ -10,8 +10,6 @@
  *******************************************************************************/
 /*eslint-env node*/
 'use strict'
-var debug = require('debug')('orion:prefs');
-
 module.exports = Prefs;
 
 // Sentinel value for nonexistent properties
@@ -20,7 +18,7 @@ var NOT_EXIST = Prefs.NOT_EXIST = function notExist() {};
 // Represents a preferences tree
 // @param {string?} s JSON string
 function Prefs(s) {
-	this.json = (typeof s === 'string' ? JSON.parse(s) : {})
+	this.json = s || {};
 	this.isModified = false;
 }
 // @param path - eg. /user/editor/settings
@@ -46,11 +44,7 @@ Prefs.prototype.get = function(path) {
 		}
 	}
 	if (result === NOT_EXIST || typeof result === 'undefined'){
-		debug('Pref.get(%s) == NOT_EXIST in Java version Prefs either', key);
 		return NOT_EXIST;
-	}
-	if (debug.enabled) {
-		debug('Pref.get(%s) == %s', key, JSON.stringify(result).substr(0, 100));
 	}
 	return naiveClone(result);
 };
@@ -58,7 +52,6 @@ Prefs.prototype.get = function(path) {
 Prefs.prototype.set = function(path, node) {
 	if (path === '') {
 		this.json = node;
-		debug('Prefs.set(%s) := %s', path, JSON.stringify(node));
 		return;
 	}
 	var obj = this.json;
@@ -68,7 +61,6 @@ Prefs.prototype.set = function(path, node) {
 		var keys = Object.keys(node);
 		keys.forEach(function(key){
 			obj[path + "/" + key] = typeof node[key] === "string" ? node[key] : JSON.stringify(node[key]);
-			debug('Prefs.set(%s) := %s', path + "/" + key, typeof node[key] === "string" ? node[key] : JSON.stringify(node[key]));
 		});
 	}
 	this.isModified = true;
@@ -76,8 +68,8 @@ Prefs.prototype.set = function(path, node) {
 Prefs.prototype.delete = function(path) {
 	this.set(path, NOT_EXIST);
 };
-Prefs.prototype.toString = function() {
-	return JSON.stringify(this.json, null, 2); //pretty-print
+Prefs.prototype.getJson = function() {
+	return this.json;
 };
 Prefs.prototype.modified = function() {
 	return this.isModified;
