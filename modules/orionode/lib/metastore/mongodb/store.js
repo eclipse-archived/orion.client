@@ -133,6 +133,7 @@ function MongoDbMetastore(options) {
 				var credentials = mongodb_services[0].credentials;
 				var ca = [new Buffer(credentials.ca_certificate_base64, 'base64')];
 				mongoose.connect(credentials.uri, {
+					useMongoClient: true,
 					mongos: {
 						ssl: true,
 						sslValidate: true,
@@ -143,7 +144,9 @@ function MongoDbMetastore(options) {
 				});
 			}
 	} else {
-		mongoose.connect(options.configParams["orion.mongodb.url"]);
+		mongoose.connect(options.configParams["orion.mongodb.url"], {
+			useMongoClient: true
+		});
 	}
 	api.getOrionEE().on("close-server", function() {
 		logger.info("Closing MongoDB");
