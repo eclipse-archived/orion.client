@@ -38,3 +38,7 @@ module.exports.createWorkspaceDir = function (workspaceDir, userId, workspaceId,
 module.exports.readMetaUserFolder = function (workspaceDir, userId){
 	return [workspaceDir, userId.substring(0,2), userId];
 };
+
+module.exports.getSeparator = function (){
+	return SEPARATOR;
+};

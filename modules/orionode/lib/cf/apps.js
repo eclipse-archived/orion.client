@@ -58,7 +58,7 @@ function getapps(req, res){
 		}else if(encodedContentLocation) {
 			var manifestLocation = toOrionLocation(req, util.decodeURIComponent(encodedContentLocation));
 			if(manifestLocation){
-				return manifests.retrieveManifestFile(req, manifestLocation)
+				return manifests.retrieveManifestFile(req, res, manifestLocation)
 				.then(function(manifest){
 					if(manifest && manifest.applications &&  manifest.applications[0]){
 						return getAppwithAppName(req.user.username, task, manifest.applications[0].name, appTarget);
@@ -215,7 +215,7 @@ function putapps(req, res){
 				/* check for non-manifest deployment */
 				waitFor = Promise.resolve(manifestJSON);
 			}else{
-				waitFor = manifests.retrieveManifestFile(req, contentLocation);
+				waitFor = manifests.retrieveManifestFile(req, res, contentLocation);
 			}
 			return waitFor.then(function(result){
 				if(result){

@@ -28,8 +28,22 @@ module.exports.router = function(options) {
 	if (!fileRoot) { throw new Error('options.fileRoot is required'); }
 	if (!gitRoot) { throw new Error('options.gitRoot is required'); }
 	
+	function checkUserAccess(req, res, next){
+		var uri = req.originalUrl.substring(req.baseUrl.length);
+		var uriSegs = uri.split("/");
+		if (uriSegs[1] === "clone" && "/" + uriSegs[2] === fileRoot){
+			uriSegs.splice(1, 1);
+			uri = uriSegs.join("/");
+		}else if (uriSegs[2] === "clone" && "/" + uriSegs[3] === fileRoot){
+			uriSegs.splice(1, 2);
+			uri = uriSegs.join("/");
+		}
+		req.user.checkRights(req.user.username, uri, req, res, next);
+	}
+	
 	return express.Router()
 	.use(bodyParser.json())
+	.use(checkUserAccess) // Use specified checkUserAceess implementation instead of the common one from options
 	.get('/clone'+ fileRoot + '*', getConfig)
 	.get('/:key/clone'+ fileRoot + '*', getAConfig)
 	.delete('/:key/clone'+ fileRoot + '*', deleteConfig)

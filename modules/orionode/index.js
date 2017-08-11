@@ -12,14 +12,99 @@
 var express = require('express'),
 	path = require('path'),
 	fs = require('fs'),
-	log4js = require('log4js'),
 	api = require('./lib/api'),
+	fileUtil = require('./lib/fileUtil'),
+	log4js = require('log4js'),
 	logger = log4js.getLogger("response");
 
 var LIBS = path.normalize(path.join(__dirname, 'lib/')),
 	MINIFIED_ORION_CLIENT = path.normalize(path.join(__dirname, "lib/orion.client")),
 	ORION_CLIENT = path.normalize(path.join(__dirname, '../../'));
 
+var POST = 1;
+var PUT = 2;
+var GET = 4;
+var DELETE = 8;
+/**
+ * uri is req.wholeUri stubstring from req.contextpath
+ * methodMask is either POST=1,PUT=2,GET=4,DELETE=8
+ */
+var checkRights = function (userId, uri, req, res, next, method){
+	var	methodMask = getMethod(method || req.method);
+	if (uri === "/workspace"){
+		return done(true);
+	}
+	
+	// any user can access their site configurations
+	if (uri.startsWith("/site")){
+		return done(true);
+	}
+	
+	// any user can access their own profile
+	if (uri === "/users/" + userId){
+		return done(true);
+	}
+	
+	// any user can access tasks
+	if (uri.startsWith("/task")){
+		return done(true);
+	}
+	
+	// import/export rights depend on access to the file content
+	if (uri.startsWith("/xfer/export/") && uri.endsWith(".zip")){
+		uri = "/file/" + uri.substring("/xfer/export/".length, uri.length - 4) + '/';
+	} else if (uri.startsWith("/xfer/import/")) {
+		uri = "/file/" + uri.substring("/xfer/import/".length); //$NON-NLS-1$
+		if (!uri.endsWith("/")) //$NON-NLS-1$
+			uri += '/';
+	}
+	
+	var store = fileUtil.getMetastore(req);
+	store.readUserPreferences(userId, function(err, prefs){
+		var userRightArray = prefs.UserRights || [];
+		var hasAccess = userRightArray.some(function(userRight){
+			if(wildCardMatch(uri, userRight.Uri) && ((methodMask & userRight.Method) === methodMask)){
+				return true;
+			}
+		});
+		return done(hasAccess);
+	});	
+	function done(hasAccess){
+		if(hasAccess) {
+			next();
+		}else {
+			api.writeError(403, res, "You are not authorized to access" + uri);
+		}
+	}
+	function wildCardMatch(text, pattern){
+		var cards = pattern.split("*");
+		if (!pattern.startsWith("*") && !text.startsWith(cards[0])) { //$NON-NLS-1$
+			return false;
+		}
+		if (!pattern.endsWith("*") && !text.endsWith(cards[cards.length - 1])) { //$NON-NLS-1$
+			return false;
+		}
+		return !cards.some(function(card){
+			var idx = text.indexOf(card);
+			if (idx === -1){
+				return true;
+			}
+			text = text.substring(idx + card.length);
+		});
+	}
+	function getMethod(methodName){
+		if(methodName === "POST"){
+			return POST;
+		}else if(methodName === "PUT"){
+			return PUT;
+		}else if(methodName === "GET"){
+			return GET;
+		}else if(methodName === "DELETE"){
+			return DELETE;
+		}
+		return 0;
+	}
+}
 function handleError(err) {
 	throw err;
 }
@@ -49,8 +134,15 @@ function startServer(options) {
 				api.writeError(401, res, "Not authenticated");
 			} else {
 				req.user.workspaceDir = options.workspaceDir + (req.user.workspace ? "/" + req.user.workspace : "");
+				req.user.checkRights = checkRights;
 				next();
 			}
+		}
+		
+		function checkAccessRights(req, res, next) {
+			var uri;
+			uri = req.baseUrl.substring(req.contextPath.length);
+			req.user.checkRights(req.user.username, uri, req, res, next);
 		}
 
 		// Configure metastore
@@ -82,11 +174,11 @@ function startServer(options) {
 			app.use('/sharedWorkspace', require('./lib/sharedWorkspace').router({sharedWorkspaceFileRoot: contextPath + '/sharedWorkspace/tree/file', fileRoot: contextPath + '/file', options: options  }));
 		}
 		app.use(require('./lib/user').router(options));
-		app.use('/site', checkAuthenticated, require('./lib/sites')(options));
+		app.use('/site', checkAuthenticated, checkAccessRights, require('./lib/sites')(options));
 		app.use('/task', checkAuthenticated, require('./lib/tasks').router({ taskRoot: contextPath + '/task', options: options}));
 		app.use('/filesearch', checkAuthenticated, require('./lib/search')(options));
 		app.use('/file*', checkAuthenticated, require('./lib/file')({ workspaceRoot: contextPath + '/workspace', fileRoot: contextPath + '/file', options: options }));
-		app.use('/workspace*', checkAuthenticated, require('./lib/workspace')({ workspaceRoot: contextPath + '/workspace', fileRoot: contextPath + '/file', gitRoot: contextPath + '/gitapi', options: options }));
+		app.use('/workspace*', checkAuthenticated, checkAccessRights, require('./lib/workspace')({ workspaceRoot: contextPath + '/workspace', fileRoot: contextPath + '/file', gitRoot: contextPath + '/gitapi', options: options }));
 		/* Note that the file and workspace root for the git middleware should not include the context path to match java implementation */
 		app.use('/gitapi', checkAuthenticated, require('./lib/git')({ gitRoot: contextPath + '/gitapi', fileRoot: /*contextPath + */'/file', workspaceRoot: /*contextPath + */'/workspace', options: options}));
 		app.use('/cfapi', checkAuthenticated, require('./lib/cf')({ fileRoot: contextPath + '/file', options: options}));

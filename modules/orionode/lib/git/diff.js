@@ -36,6 +36,7 @@ module.exports.router = function(options) {
 
 	return express.Router()
 	.use(bodyParser.json())
+	.use(options.checkUserAccess)
 	.get(fileRoot + '*', getDiff)
 	.get('/:scope'+ fileRoot + '*', getDiff)
 	.post('/:scope'+ fileRoot + '*', postDiff);

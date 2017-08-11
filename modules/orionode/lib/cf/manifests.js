@@ -34,7 +34,7 @@ module.exports.router = function(options) {
 	.get("*", getManifests);
 	
 function getManifests(req, res){
-	retrieveManifestFile(req)
+	retrieveManifestFile(req, res)
 	.then(function(manifest){
 		var respond = {
 			"Contents": manifest,
@@ -51,20 +51,23 @@ function getManifests(req, res){
  * res is needed because following Java server's patten, /plan and /manifest endpoins don't use task
  * task is needed for situation where there was a task created. So that we cannot use res in these cases.
  */
-function retrieveManifestFile(req, manifestAbsoluteLocation){
+function retrieveManifestFile(req, res, manifestAbsoluteLocation){
 	return new Promise(function(fulfill,reject) {
-		var filePath = manifestAbsoluteLocation ? manifestAbsoluteLocation : retrieveProjectFilePath(req);
-		if(filePath.indexOf("manifest.yml") === -1){
-			filePath += "manifest.yml";
-		}
-		fs.readFile(filePath, "utf8", function(err, fileContent){
-			if(err && err.code !== "ENOENT") {
-				var errorStatus = new Error(err.message);
-				errorStatus.code = "404";
-				return reject(errorStatus);
+		var uri = req.originalUrl.substring(req.baseUrl.length + req.contextPath.length);
+		req.user.checkRights(req.user.username, uri, req, res, function(){
+			var filePath = manifestAbsoluteLocation ? manifestAbsoluteLocation : retrieveProjectFilePath(req);
+			if(filePath.indexOf("manifest.yml") === -1){
+				filePath += "manifest.yml";
 			}
-			fulfill(fileContent);
-		});
+			fs.readFile(filePath, "utf8", function(err, fileContent){
+				if(err && err.code !== "ENOENT") {
+					var errorStatus = new Error(err.message);
+					errorStatus.code = "404";
+					return reject(errorStatus);
+				}
+				fulfill(fileContent);
+			});
+		},"GET");
 	}).then(function(fileContent){
 		if (!fileContent) { // if the project doesn't have a manifest.yml
 			return setDefaultManifestProperties(req);

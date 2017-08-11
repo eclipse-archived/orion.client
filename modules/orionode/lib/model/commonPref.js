@@ -31,17 +31,19 @@ Prefs.prototype.get = function(path) {
 	if (segs[0] === '') {
 		result = root;
 	} else {
-		try{
+		
 			var rootKeys = Object.keys(root);
 			rootKeys.forEach(function(rootKey){
 				if(rootKey.startsWith(key) && !rootKey.startsWith("User")){
 					if(typeof result === 'undefined') result = {};
-					return result[rootKey.substr(key.length + 1)] = JSON.parse(root[rootKey]);
+					try{
+						return result[rootKey.substr(key.length + 1)] = JSON.parse(root[rootKey]);
+					}catch(err){
+						return result[rootKey.substr(key.length + 1)] = root[rootKey]
+					}
 				}
 			});
-		}catch(err){
-			console.log(err)
-		}
+		
 	}
 	if (result === NOT_EXIST || typeof result === 'undefined'){
 		return NOT_EXIST;

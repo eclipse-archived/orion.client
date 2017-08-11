@@ -33,9 +33,23 @@ module.exports.router = function(options) {
 	
 	module.exports.remoteBranchJSON = remoteBranchJSON;
 	module.exports.remoteJSON = remoteJSON;
+	
+	function checkUserAccess(req, res, next){
+		var uri = req.originalUrl.substring(req.baseUrl.length);
+		var uriSegs = uri.split("/");
+		if ("/" + uriSegs[2] === fileRoot){
+			uriSegs.splice(1, 1);
+			uri = uriSegs.join("/");
+		}else if ("/" + uriSegs[3] === fileRoot){
+			uriSegs.splice(1, 2);
+			uri = uriSegs.join("/");
+		}
+		req.user.checkRights(req.user.username, uri, req, res, next);
+	}
 
 	return express.Router()
 	.use(bodyParser.json())
+	.use(checkUserAccess) // Use specified checkUserAceess implementation instead of the common one from options
 	.get(fileRoot + '*', getRemotes)
 	.get('/:remoteName'+ fileRoot + '*', getRemotes)
 	.get('/:remoteName/:branchName'+ fileRoot + '*', getRemotes)

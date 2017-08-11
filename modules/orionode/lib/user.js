@@ -265,7 +265,8 @@ module.exports.router = function(options) {
 		if (!req.user || !(req.params.id === req.user.username || isAdmin(req.user.username))) {
 			return api.writeResponse(403, res);
 		}
-		next();
+		var uri = req.originalUrl.substring(req.baseUrl.length + req.contextPath.length);
+		req.user.checkRights(req.user.username, uri, req, res, next);
 	}
 
 	app.get("/users", checkUserAccess, function(req,res) {

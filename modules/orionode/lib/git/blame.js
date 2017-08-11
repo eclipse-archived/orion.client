@@ -27,6 +27,7 @@ module.exports.router = function(options) {
 
 	return express.Router()
 	.use(bodyParser.json())
+	.use(options.checkUserAccess)
 	.get('/:refName'+ fileRoot + "/*", getBlame);
 	
 function getBlame(req, res) {

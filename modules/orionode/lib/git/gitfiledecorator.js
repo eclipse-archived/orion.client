@@ -31,7 +31,7 @@ Object.assign(GitFileDecorator.prototype, {
 		if (isWorkspace && req.method === "GET") {
 			var children = json.Children;
 			return Promise.all(children.map(function(child) {
-				return addWorkSpaceGitLinks(gitRoot, child, {workspaceDir: file.workspaceDir, workspaceId: file.workspaceId, path: api.join(file.workspaceDir,child.Name)});		
+				return addWorkSpaceGitLinks(gitRoot, child, {workspaceDir: file.workspaceDir, workspaceId: file.workspaceId, path: api.join(file.workspaceDir,child.Name), contextPath: contextPath});		
 			}));
 		}
 		if (!isWorkspace && req.method === "GET") {
@@ -39,14 +39,14 @@ Object.assign(GitFileDecorator.prototype, {
 				if(repo){
 					var fileDir = api.join(clone.getfileDir(repo, file), "/");
 					return getBranch(repo).then(function(branchname){
-						addGitLinks(gitRoot, json, branchname, fileDir);
+						addGitLinks(gitRoot, json, branchname, fileDir, contextPath);
 						var fileChildren = json.Children;
 						if(fileChildren){
-							calcGitLinks(gitRoot, fileChildren, branchname, fileDir);
+							calcGitLinks(gitRoot, fileChildren, branchname, fileDir, contextPath);
 						}
-					});
+					}.bind(this));
 				}
-			})
+			}.bind(this))
 			.catch(function(){});
 		}			
 	}
@@ -58,14 +58,14 @@ function getBranch(repo) {
 	});
 }
 	
-function calcGitLinks(gitRoot, fileChildren, branchname, fileDir) {
+function calcGitLinks(gitRoot, fileChildren, branchname, fileDir, contextPath) {
 	if (fileChildren) {
 		for (var j = 0; j < fileChildren.length; j++) {
 			var fileChild = fileChildren[j];
-			addGitLinks(gitRoot, fileChild, branchname, fileDir);
+			addGitLinks(gitRoot, fileChild, branchname, fileDir, contextPath);
 			var childItems = fileChild.Children;
 			if (childItems) {
-				calcGitLinks(gitRoot, childItems, branchname, fileDir);
+				calcGitLinks(gitRoot, childItems, branchname, fileDir, contextPath);
 			}
 		}
 	}
@@ -76,14 +76,14 @@ function addWorkSpaceGitLinks(gitRoot, workspaceChild, file){
 		if (repo) {
 			return Promise.resolve(getBranch(repo)).then(function(branchname){
 				var workDir = api.join(clone.getfileDir(repo, file) , "/");
-				addGitLinks(gitRoot, workspaceChild, branchname, workDir);
+				addGitLinks(gitRoot, workspaceChild, branchname, workDir, file.contextPath);
 			});
 		}
 	}).catch(function(){});
 }
 	
-function addGitLinks(gitRoot, json, branchname, fileDir){
-	var fileTarget = json.Location.substr(fileDir.length);
+function addGitLinks(gitRoot, json, branchname, fileDir, contextPath){
+	var fileTarget = json.Location.substr(contextPath.length + fileDir.length);
 	if(fileTarget === "/") fileTarget = "";
 	json.Git = {
 		"BlameLocation": gitRoot + "/blame/HEAD" + fileDir + fileTarget,

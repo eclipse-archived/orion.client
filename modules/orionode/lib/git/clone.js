@@ -52,9 +52,20 @@ module.exports.router = function(options) {
 	module.exports.getSignature = getSignature;
 	module.exports.getCommit = getCommit;
 	module.exports.postClone = postClone;
+	
+	function checkUserAccess(req, res, next){
+		var uri = req.originalUrl.substring(req.baseUrl.length);
+		var uriSegs = uri.split("/");
+		if(uriSegs.length > 0 && "/" + uriSegs[1] === fileRoot){
+			req.user.checkRights(req.user.username, uri, req, res, next);
+		}else{
+			next();
+		}
+	}
 
 	return express.Router()
 	.use(bodyParser.json())
+	.use(checkUserAccess) // Use specified checkUserAceess implementation instead of the common one from options
 	.get(workspaceRoot + '*', getClone)
 	.get(fileRoot + '*', getClone)
 	.put(fileRoot + '*', putClone)
