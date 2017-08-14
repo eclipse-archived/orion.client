@@ -324,6 +324,18 @@ function configRepo(repo, username, email) {
 	});
 }
 
+function getCloneName(req) {
+	var cloneName = req.body.Name;
+	var cloneUrl = req.body.GitUrl;
+	if (!cloneName && cloneUrl) {
+		if (cloneUrl.charAt(cloneUrl.length - 1) === "/") {
+			cloneUrl = cloneUrl.slice(0, -1);
+		}	
+		cloneName = cloneUrl.substring(cloneUrl.lastIndexOf("/") + 1).replace(".git", "");
+	}
+	return cloneName;
+}
+
 function getClonePath(req) {
 	var workspacePath = req.body.Location;
 	var filePath = req.body.Path;
@@ -339,14 +351,7 @@ function getClonePath(req) {
 		rest = workspacePath.split("/").slice(2).join("/");
 		file = fileUtil.getFile(req, rest);
 		if (file) {
-			var cloneName = req.body.Name;
-			var cloneUrl = req.body.GitUrl;
-			if (!cloneName && cloneUrl) {
-				if (cloneUrl.charAt(cloneUrl.length - 1) === "/") {
-					cloneUrl = cloneUrl.slice(0, -1);
-				}	
-				cloneName = cloneUrl.substring(cloneUrl.lastIndexOf("/") + 1).replace(".git", "");
-			}
+			var cloneName = getCloneName(req);
 			if (!cloneName) return null;
 			file.path = getUniqueFileName(file.path, cloneName);
 		}
@@ -394,6 +399,8 @@ function postInit(req, res) {
 				writeResponse(201, res, null, {
 					"Location": gitRoot + "/clone" + fileRoot + "/" + file.workspaceId + api.toURLPath(file.path.substring(file.workspaceDir.length))
 				}, true);
+				var store = fileUtil.getMetastore(req);
+				store.updataProject(file.workspaceId, {projectName: getCloneName(req), contentLocation:file.path});
 			})
 			.catch(function(err){
 				writeError(403, res);
@@ -677,6 +684,8 @@ function postClone(req, res) {
 			Message: "OK",
 			Severity: "Ok"
 		});
+		var store = fileUtil.getMetastore(req);
+		store.updataProject(file.workspaceId, {projectName: getCloneName(req), contentLocation:file.path});
 	})
 	.catch(function(err) {
 		handleRemoteError(task, err, cloneUrl);

@@ -116,7 +116,7 @@ function PrefsController(options) {
 				callback(err, scope, prefs);
 			});
 		}else if(scope === "workspace"){
-			store.readWorkspaceMetadata(req.user.workspaceId, function(err, prefs){
+			store.readWorkspacePreferences(req.user.workspaceId, function(err, prefs){
 				callback(err, scope, prefs);
 			});
 		}else if(scope === "project"){
@@ -132,7 +132,7 @@ function PrefsController(options) {
 				callback(err);
 			});
 		}else if(scope === "workspace"){
-			store.updateWorkspaceMetadata(req.user.workspaceId, prefs, function(err){
+			store.updateWorkspacePreferences(req.user.workspaceId, prefs, function(err){
 				callback(err);
 			});
 		}else if(scope === "project"){

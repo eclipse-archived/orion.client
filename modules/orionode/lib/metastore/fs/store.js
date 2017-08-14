@@ -25,6 +25,7 @@ var METASTORE_FILENAME = "metastore.json";
 var DEFAULT_WORKSPACE_NAME = "Orion Content";
 var SERVERWORKSPACE = "${SERVERWORKSPACE}";
 var DESCRIPTION = "This JSON file is at the root of the Orion metadata store responsible for persisting user, workspace and project files and metadata.";
+var ACCESSRIGHT = 15; // 15 is POST | PUT | GET | DELETE
 
 // The current version of the Simple Meta Store.
 var VERSION = 8;
@@ -149,6 +150,25 @@ Object.assign(FsMetastore.prototype, {
 							}
 							// TASK: to update workspaceIds in user's metadata
 							metadata["WorkspaceIds"].indexOf(workspaceId) === -1 && metadata["WorkspaceIds"].push(workspaceId);
+							var workspaceUserRights = [
+								{
+									"Method": ACCESSRIGHT,
+									"Uri": "/workspace/" + workspaceId
+								},
+								{
+									"Method": ACCESSRIGHT,
+									"Uri": "/workspace/" + workspaceId + "/*"
+								},
+								{
+									"Method": ACCESSRIGHT,
+									"Uri": "/file/" + workspaceId
+								},
+								{
+									"Method": ACCESSRIGHT,
+									"Uri": "/file/" + workspaceId + "/*"
+								}
+							];
+							metadata["Properties"]["UserRights"] = metadata["Properties"]["UserRights"].concat(workspaceUserRights);
 							this._updateUserMetadata(userId,  metadata, function(){
 								callback(null, w);
 							});						
@@ -158,9 +178,6 @@ Object.assign(FsMetastore.prototype, {
 			}else{
 				callback(new Error('createWorkspace could not find user with id' + userId + ", user does not exist."));
 			}
-			
-			
-			
 		}.bind(this));
 	},
 	getWorkspace: function(workspaceId, callback) {
@@ -266,6 +283,14 @@ Object.assign(FsMetastore.prototype, {
 			userData.email && (userProperty.Email = userData.email);
 			userProperty["AccountCreationTimestamp"] = Date.now();
 			userProperty["UniqueId"] = userData.username;
+			
+			// give the user access to their own user profile
+			userProperty["UserRights"] = [
+				{
+					"Method" : ACCESSRIGHT,
+					"Uri": "/user/" + userData.username
+				}
+			];
 			var userJson = {
 				"OrionVersion": VERSION,
 				"UniqueId": userData.username,
@@ -362,11 +387,11 @@ Object.assign(FsMetastore.prototype, {
 		return fs.readFileAsync(metadataFile, 'utf8')
 		.catchReturn({ code: 'ENOENT' }, null) // New prefs file: suppress error, use ENOENT to pattern match the error then return null instead
 		.then(function(metadata) {
-			var parsedJson
+			var parsedJson;
 			try{
-				parsedJson = JSON.parse(metadata)
+				parsedJson = JSON.parse(metadata);
 			}catch(err){
-				parsedJson = metadata
+				parsedJson = metadata;
 			}
 			callback(null,parsedJson);
 		});
@@ -429,31 +454,33 @@ Object.assign(FsMetastore.prototype, {
 	// Project related
 	updataProject: function(workspaceId, projectInfo){
 		this.readWorkspaceMetadata(workspaceId, function(err, metadata){
-			if(projectInfo.originalPath){
+			if(projectInfo.originalPath){ // originalPath is in the format of "[ContextPath] + /file + [workspaceId] + /[originalName]/"
 				var segs = projectInfo.originalPath.split("/");
-				var oldProjectName = segs[segs.length - 2];
+				var oldProjectName = projectInfo.originalPath.endsWith("/") ? segs[segs.length - 2] : segs[segs.length - 1];
 				var index = metadata.ProjectNames.indexOf(oldProjectName);
 				index !== -1 && metadata.ProjectNames.splice(index, 1);
 				this.deleteProject(workspaceId, oldProjectName);
 			}
-			var projectJson = {
-				"OrionVersion": metadata.OrionVersion,
-				"UniqueId": projectInfo.projectName,
-				"WorkspaceId": workspaceId,
-				"FullName": projectInfo.projectName,
-				"Properties": {}
-			};
-
-			if(projectInfo.contentLocation.startsWith(this.options.workspaceDir)){
-				projectJson["ContentLocation"] = SERVERWORKSPACE + projectInfo.contentLocation.substr(this.options.workspaceDir.length);
-			}else{
-				projectJson["ContentLocation"] = projectInfo.contentLocation;
+			if(projectInfo.projectName){
+				var projectJson = {
+					"OrionVersion": metadata.OrionVersion,
+					"UniqueId": projectInfo.projectName,
+					"WorkspaceId": workspaceId,
+					"FullName": projectInfo.projectName,
+					"Properties": {}
+				};
+	
+				if(projectInfo.contentLocation.startsWith(this.options.workspaceDir)){
+					projectJson["ContentLocation"] = SERVERWORKSPACE + projectInfo.contentLocation.substr(this.options.workspaceDir.length);
+				}else{
+					projectJson["ContentLocation"] = projectInfo.contentLocation;
+				}
+				metadata.ProjectNames.indexOf(projectInfo.projectName) === -1 && metadata.ProjectNames.push(projectInfo.projectName);
 			}
-			metadata.ProjectNames.indexOf(projectInfo.projectName) === -1 && metadata.ProjectNames.push(projectInfo.projectName);
 			this.updateWorkspaceMetadata(workspaceId, metadata, function(){
-				this.updateProjectMetadata(workspaceId, projectInfo.projectName, projectJson, function(){
-					
-				});
+				if(projectInfo.projectName){
+					this.updateProjectMetadata(workspaceId, projectInfo.projectName, projectJson, function(){});
+				}
 			}.bind(this));
 		}.bind(this));
 	},	
