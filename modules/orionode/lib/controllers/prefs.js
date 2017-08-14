@@ -18,7 +18,7 @@ var api = require('../api'),
     nodePath = require('path'),
     nodeUrl = require('url'),
     os = require('os'),
-    UserPreference = require('../model/commonPref'),
+    UserPreference = require('../model/pref'),
     Promise = require('bluebird');
 
     var fs = Promise.promisifyAll(require('fs'));
