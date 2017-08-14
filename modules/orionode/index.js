@@ -147,7 +147,7 @@ function startServer(options) {
 
 		// Configure metastore
 		var metastoreFactory;
-		if (options.configParams['orion.metastore.useMongo']) {
+		if (!options.configParams['orion.single.user'] && options.configParams['orion.metastore.useMongo']) {
 			metastoreFactory = require('./lib/metastore/mongodb/store');
 		} else {
 			metastoreFactory = require('./lib/metastore/fs/store');
