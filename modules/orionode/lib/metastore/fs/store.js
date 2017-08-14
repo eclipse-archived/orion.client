@@ -454,7 +454,7 @@ Object.assign(FsMetastore.prototype, {
 	// Project related
 	updataProject: function(workspaceId, projectInfo){
 		this.readWorkspaceMetadata(workspaceId, function(err, metadata){
-			if(projectInfo.originalPath){ // originalPath is in the format of "[ContextPath] + /file + [workspaceId] + /[originalName]/"
+			if(projectInfo.originalPath){ // originalPath is in the format of "[ContextPath] (optional) + /file + [workspaceId] + /[originalName]/"
 				var segs = projectInfo.originalPath.split("/");
 				var oldProjectName = projectInfo.originalPath.endsWith("/") ? segs[segs.length - 2] : segs[segs.length - 1];
 				var index = metadata.ProjectNames.indexOf(oldProjectName);

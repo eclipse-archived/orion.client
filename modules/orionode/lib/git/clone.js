@@ -503,6 +503,8 @@ function deleteClone(req, res) {
 	var file = fileUtil.getFile(req, rest);
 	rmdir(file.path, function(err) {
 		if (err) return writeError(500, res, err);
+		var store = fileUtil.getMetastore(req);
+		store.updataProject && store.updataProject(file.workspaceId, {originalPath: rest});
 		writeResponse(200, res);
 	});
 }
