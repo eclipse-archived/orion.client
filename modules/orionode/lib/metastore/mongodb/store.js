@@ -15,10 +15,10 @@ var expressSession = require('express-session'),
 	MongoStore = require('connect-mongo')(expressSession),
 	api = require('../../api'),
 	path = require('path'),
-	args = require('../../args'),
 	passport = require('passport'),
 	log4js = require('log4js'),
 	mkdirp = require('mkdirp'),
+	metaUtil = require('../util/metaUtil'),
 	logger = log4js.getLogger("mongo-store");
 
 mongoose.Promise = Promise;
@@ -120,8 +120,6 @@ function findUser(id, user, callback) {
 	}
 }
 
-var SEPARATOR = "-";
-
 function MongoDbMetastore(options) {
 	this.options = options;
 	if (options.configParams["orion.mongodb.cf"]) {
@@ -173,28 +171,6 @@ MongoDbMetastore.prototype.setup = function(app) {
 	passport.deserializeUser(orionAccount.deserializeUser());
 };
 
-function encodeWorkspaceId(userId, workspaceName) {
-	var workspaceId = workspaceName.replace(/ /g, "").replace(/\#/g, "").replace(/\-/g, "");
-	return userId + SEPARATOR + workspaceId;
-}
-
-function decodeUserIdFromWorkspaceId(workspaceId) {
-	var index = workspaceId.lastIndexOf(SEPARATOR);
-	if (index === -1) return null;
-	return workspaceId.substring(0, index);
-}
-
-function decodeWorkspaceNameFromWorkspaceId(workspaceId) {
-	var index = workspaceId.lastIndexOf(SEPARATOR);
-	if (index === -1) return null;
-	return workspaceId.substring(index + 1);
-}
-
-function createWorkspaceDir(workspaceDir, userId, workspaceId, callback) {
-	var workspacePath = [workspaceDir, userId.substring(0,2), userId, decodeWorkspaceNameFromWorkspaceId(workspaceId)];
-	args.createDirs(workspacePath, callback);
-}
-
 Object.assign(MongoDbMetastore.prototype, {
 	createWorkspace: function(userId, workspaceData, callback) {
 		this.getUser(userId, function(err, user) {
@@ -203,14 +179,35 @@ Object.assign(MongoDbMetastore.prototype, {
 			}
 			var w = {
 				name: workspaceData.name,
-				id: encodeWorkspaceId(userId, workspaceData.id || workspaceData.name)
+				id: metaUtil.encodeWorkspaceId(userId, workspaceData.id || workspaceData.name)
 			};
 			user.workspaces.push(w);
+			var workspaceUserRights = [
+				{
+					"Method": metaUtil.getAccessRight(),
+					"Uri": "/workspace/" + w.id
+				},
+				{
+					"Method": metaUtil.getAccessRight(),
+					"Uri": "/workspace/" + w.id + "/*"
+				},
+				{
+					"Method": metaUtil.getAccessRight(),
+					"Uri": "/file/" + w.id
+				},
+				{
+					"Method": metaUtil.getAccessRight(),
+					"Uri": "/file/" + w.id + "/*"
+				}
+			];
+			var parsedProperties = JSON.parse(user.properties);
+			parsedProperties["UserRights"] = parsedProperties["UserRights"].concat(workspaceUserRights)
+			user.properties = JSON.stringify(parsedProperties)
 			user.save(function(err) {
 				if (err) {
 					return callback(err, null);
 				}
-				createWorkspaceDir(this.options.workspaceDir, userId, w.id, function(err) {
+				metaUtil.createWorkspaceDir(this.options.workspaceDir, userId, w.id, function(err) {
 					if (err) {
 						return callback(err, null);
 					}
@@ -220,7 +217,7 @@ Object.assign(MongoDbMetastore.prototype, {
 		}.bind(this));
 	},
 	getWorkspace: function(workspaceId, callback) {
-		var userId = decodeUserIdFromWorkspaceId(workspaceId);
+		var userId = metaUtil.decodeUserIdFromWorkspaceId(workspaceId);
 		this.getUser(userId, function(err, user) {
 			if (err) {
 				return callback(err, null);
@@ -238,7 +235,7 @@ Object.assign(MongoDbMetastore.prototype, {
 		});
 	},
 	deleteWorkspace: function(workspaceId, callback) {
-		var userId = decodeUserIdFromWorkspaceId(workspaceId);
+		var userId = metaUtil.decodeUserIdFromWorkspaceId(workspaceId);
 		orionAccount.update(
 		  {username: userId},
 		  { $pull: {'workspaces': {id: workspaceId}}},
@@ -246,8 +243,8 @@ Object.assign(MongoDbMetastore.prototype, {
 		);
 	},
 	getWorkspaceDir: function(workspaceId) {
-		var userId = decodeUserIdFromWorkspaceId(workspaceId);
-		var workspacePath = path.join(this.options.workspaceDir, userId.substring(0,2), userId, decodeWorkspaceNameFromWorkspaceId(workspaceId));
+		var userId = metaUtil.decodeUserIdFromWorkspaceId(workspaceId);
+		var workspacePath = path.join(this.options.workspaceDir, userId.substring(0,2), userId, metaUtil.decodeWorkspaceNameFromWorkspaceId(workspaceId));
 		mkdirp.sync(workspacePath); // TODO make it async
 		return workspacePath;
 	},
@@ -269,6 +266,12 @@ Object.assign(MongoDbMetastore.prototype, {
 		});
 	},
 	createUser: function(userData, callback) {
+		userData.properties["UserRights"] = [
+			{
+				"Method" : metaUtil.getAccessRight(),
+				"Uri": "/user/" + userData.username
+			}
+		];
 		var password = userData.password;
 		delete userData.password;
 		orionAccount.register(new orionAccount(userData), password, function(err, user){

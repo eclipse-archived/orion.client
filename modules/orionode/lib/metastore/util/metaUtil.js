@@ -10,6 +10,7 @@
  *******************************************************************************/
 var args = require('../../args');
 var SEPARATOR = "-";
+var ACCESSRIGHT = 15; // 15 is POST | PUT | GET | DELETE
 module.exports.encodeWorkspaceId = function (userId, workspaceName) {
 	var workspaceId = workspaceName.replace(/ /g, "").replace(/\#/g, "").replace(/\-/g, "");
 	return userId + SEPARATOR + workspaceId;
@@ -41,4 +42,7 @@ module.exports.readMetaUserFolder = function (workspaceDir, userId){
 
 module.exports.getSeparator = function (){
 	return SEPARATOR;
+};
+module.exports.getAccessRight = function (){
+	return ACCESSRIGHT;
 };

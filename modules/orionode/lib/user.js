@@ -393,7 +393,8 @@ module.exports.router = function(options) {
 			email: req.body.Email,
 			fullname: req.body.FullName,
 			oauth: req.body.identifier,
-			password: req.body.Password
+			password: req.body.Password,
+			properties:{}
 		};
 		var store = metastore(req);
 		store.createUser(userData, function(err, user) {

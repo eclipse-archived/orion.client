@@ -25,7 +25,6 @@ var METASTORE_FILENAME = "metastore.json";
 var DEFAULT_WORKSPACE_NAME = "Orion Content";
 var SERVERWORKSPACE = "${SERVERWORKSPACE}";
 var DESCRIPTION = "This JSON file is at the root of the Orion metadata store responsible for persisting user, workspace and project files and metadata.";
-var ACCESSRIGHT = 15; // 15 is POST | PUT | GET | DELETE
 
 // The current version of the Simple Meta Store.
 var VERSION = 8;
@@ -152,19 +151,19 @@ Object.assign(FsMetastore.prototype, {
 							metadata["WorkspaceIds"].indexOf(workspaceId) === -1 && metadata["WorkspaceIds"].push(workspaceId);
 							var workspaceUserRights = [
 								{
-									"Method": ACCESSRIGHT,
+									"Method": metaUtil.getAccessRight(),
 									"Uri": "/workspace/" + workspaceId
 								},
 								{
-									"Method": ACCESSRIGHT,
+									"Method": metaUtil.getAccessRight(),
 									"Uri": "/workspace/" + workspaceId + "/*"
 								},
 								{
-									"Method": ACCESSRIGHT,
+									"Method": metaUtil.getAccessRight(),
 									"Uri": "/file/" + workspaceId
 								},
 								{
-									"Method": ACCESSRIGHT,
+									"Method": metaUtil.getAccessRight(),
 									"Uri": "/file/" + workspaceId + "/*"
 								}
 							];
@@ -287,7 +286,7 @@ Object.assign(FsMetastore.prototype, {
 			// give the user access to their own user profile
 			userProperty["UserRights"] = [
 				{
-					"Method" : ACCESSRIGHT,
+					"Method" : metaUtil.getAccessRight(),
 					"Uri": "/user/" + userData.username
 				}
 			];

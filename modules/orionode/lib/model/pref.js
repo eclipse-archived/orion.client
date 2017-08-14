@@ -9,7 +9,6 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 /*eslint-env node*/
-'use strict'
 module.exports = Prefs;
 
 // Sentinel value for nonexistent properties
@@ -31,19 +30,17 @@ Prefs.prototype.get = function(path) {
 	if (segs[0] === '') {
 		result = root;
 	} else {
-		
-			var rootKeys = Object.keys(root);
-			rootKeys.forEach(function(rootKey){
-				if(rootKey.startsWith(key) && !rootKey.startsWith("User")){
-					if(typeof result === 'undefined') result = {};
-					try{
-						return result[rootKey.substr(key.length + 1)] = JSON.parse(root[rootKey]);
-					}catch(err){
-						return result[rootKey.substr(key.length + 1)] = root[rootKey]
-					}
+		var rootKeys = Object.keys(root);
+		rootKeys.forEach(function(rootKey){
+			if(rootKey.startsWith(key) && !rootKey.startsWith("User")){
+				if(typeof result === 'undefined') result = {};
+				try{
+					return result[rootKey.substr(key.length + 1)] = JSON.parse(root[rootKey]);
+				}catch(err){
+					return result[rootKey.substr(key.length + 1)] = root[rootKey];
 				}
-			});
-		
+			}
+		});
 	}
 	if (result === NOT_EXIST || typeof result === 'undefined'){
 		return NOT_EXIST;
