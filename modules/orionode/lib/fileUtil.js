@@ -324,7 +324,7 @@ var writeFileMetadata = exports.writeFileMetadata = function(req, res, fileRoot,
 function fileJSON(fileRoot, workspaceRoot, file, stats, depth, metadataMixins) {
 	depth = depth || 0;
 	var isDir = stats.isDirectory();
-	var wwwpath = api.toURLPath(file.path.substring(file.workspaceDir.length + 1));
+	var wwwpath = api.toURLPath(file.path.substring(file.workspaceDir.length));
 	var result = {
 		Name: path.basename(file.path),
 		Location: getFileLocation(fileRoot, wwwpath, isDir),
