@@ -54,7 +54,7 @@ define([
 	/**
 	 * Validation
 	 */
-	pluginProvider.registerService(["orion.edit.validator"], new mValidator(), { //$NON-NLS-1$
+	pluginProvider.registerService(["orion.edit.validator"], new mValidator(serviceRegistry), { //$NON-NLS-1$
 		contentType: ["application/json"] //$NON-NLS-1$
 	});
 	/**
@@ -73,7 +73,7 @@ define([
 	pluginProvider.registerService("orion.cm.managedservice", jsonFormatter, {
 		pid: 'json.config.format'
 	});
-
+	
 	var space = ' ',
 		tab = '\t',
 		indentation_characters = [{
