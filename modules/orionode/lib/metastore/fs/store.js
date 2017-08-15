@@ -461,7 +461,7 @@ Object.assign(FsMetastore.prototype, {
 			}
 			this._updateWorkspaceMetadata(workspaceId, metadata, function(){
 				if(projectInfo.projectName){
-					this.updateProjectMetadata(workspaceId, projectInfo.projectName, projectJson, function(){});
+					this._updateProjectMetadata(workspaceId, projectInfo.projectName, projectJson, function(){});
 				}
 			}.bind(this));
 		}.bind(this));
@@ -473,9 +473,10 @@ Object.assign(FsMetastore.prototype, {
 		.catchReturn({ code: 'ENOENT' }, null); // New prefs file: suppress error
 	},
 	/**
+	 * @private
 	 * Helper method to update the whole workspace metadata, use updataWorkspacePreference to update metadata.Properties
 	 */
-	updateProjectMetadata: function(workspaceId, projectName, metadata, callback) {
+	_updateProjectMetadata: function(workspaceId, projectName, metadata, callback) {
 		var metaFile = getProjectMetadataFileName(this.options, workspaceId, projectName);
 		return mkdirpAsync(nodePath.dirname(metaFile)) // create parent folder(s) if necessary
 		.then(function() {

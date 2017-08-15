@@ -200,6 +200,7 @@ Object.assign(MongoDbMetastore.prototype, {
 					"Uri": "/file/" + w.id + "/*"
 				}
 			];
+			user.markModified('properties.UserRights');
 			user.properties["UserRights"] = user.properties["UserRights"].concat(workspaceUserRights);
 			user.save(function(err) {
 				if (err) {

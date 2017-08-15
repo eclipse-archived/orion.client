@@ -687,7 +687,7 @@ function postClone(req, res) {
 			Severity: "Ok"
 		});
 		var store = fileUtil.getMetastore(req);
-		store.updataProject(file.workspaceId, {projectName: getCloneName(req), contentLocation:file.path});
+		store.updataProject && store.updataProject(file.workspaceId, {projectName: getCloneName(req), contentLocation:file.path});
 	})
 	.catch(function(err) {
 		handleRemoteError(task, err, cloneUrl);
