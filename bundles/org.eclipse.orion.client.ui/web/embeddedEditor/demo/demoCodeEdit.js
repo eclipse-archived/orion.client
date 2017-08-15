@@ -18,7 +18,8 @@ Deferred) {
 	var defaultPluginURLs = [
 		"../../javascript/plugins/javascriptPlugin_embed_dev.html",
 		"../../webtools/plugins/webToolsPlugin_embed_dev.html",
-		"../../plugins/embeddedToolingPlugin.html"
+		"../../plugins/embeddedToolingPlugin.html",
+		"../../../plugins/languages/json/jsonPlugin.html"
 	];
 	var contents = 'var foo = "bar";\n' +
 						 "var bar = foo;\n" + 
@@ -30,10 +31,11 @@ Deferred) {
 						 "}\n" + 
 						"//Keep editing in this demo and try the content assist, problem validations and hover service!\n" +
 						 "var foo2 = foo."; 
-	var contents1 = 
-						 '<div class="embeddedEditorParentOuter" id="embeddedEditor1">\n' + 
-						 "</div>\n" + 
-						 "<span>var foo2</span>"; 
+	var contents1 = '{foo: 123, bar: 234}';
+//	var contents1 = 
+//						 '<div class="embeddedEditorParentOuter" id="embeddedEditor1">\n' + 
+//						 "</div>\n" + 
+//						 "<span>var foo2</span>"; 
 						 
 	var contents2 = '<server description="new server">\n' +
 					 '</server>';
@@ -179,6 +181,9 @@ Deferred) {
 			}
 		});
 		embeddedEditor.create({parent: "embeddedEditor1",
+							   contentType: "application/json",
+							   contents: contents1});
+		embeddedEditor.create({parent: "embeddedEditor2",
 							   contentType: "foo/bar",
 							   contents: contents2}).then(function(editorViewer){
 			editorViewer.inputManager.setAutoSaveTimeout(-1);
