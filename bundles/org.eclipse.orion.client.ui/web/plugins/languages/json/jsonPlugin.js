@@ -38,6 +38,13 @@ define([
 			name: "JSON", //$NON-NLS-1$
 			extension: ["json"], //$NON-NLS-1$
 			imageClass: "file-sprite-javascript modelDecorationSprite" //$NON-NLS-1$
+		},
+		{
+			id: "jslint/config", //$NON-NLS-1$
+			"extends": "application/json", //$NON-NLS-1$ //$NON-NLS-1$
+			name: "JSLint Configuration Files", //$NON-NLS-1$
+			extension: ["jslintrc"], //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			imageClass: "file-sprite-json modelDecorationSprite" //$NON-NLS-1$
 		}]
 	});
 	
