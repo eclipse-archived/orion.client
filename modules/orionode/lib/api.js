@@ -48,8 +48,9 @@ function join(/*varags*/) {
 		var segment = segs[i];
 		// This is kind of cheesy: avoid double-slashes
 		var last = segment.length-1;
-		path.push(segment[last] === '/' ? segment.substring(0, last) : segment);
-//		path.push(segment);
+		if (i > 0 && segment[0] === '/') segment = segment.substring(1);
+		if (segment[last] === '/') segment = segment.substring(0, last);
+		path.push(segment);
 	}
 	return path.join('/');
 }
