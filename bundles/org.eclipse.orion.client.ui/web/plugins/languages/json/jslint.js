@@ -820,7 +820,8 @@ var JSLINT = (function () {
             strict     : true, // require the "use strict"; pragma
             sub        : true, // if all forms of subscript notation are tolerated
             white      : true, // if strict whitespace rules apply
-            widget     : true  // if the Yahoo Widgets globals should be predefined
+            widget     : true,  // if the Yahoo Widgets globals should be predefined
+            mixed_spaces_tabs : true //ORION - be able to turn on/off reporting mixed spaces and tabs
         },
 
 // browser contains a set of global names which are commonly provided by a
@@ -1615,7 +1616,7 @@ var JSLINT = (function () {
             s = lines[line];
             line += 1;
             at = s.search(/ \t/);
-            if (at >= 0) {
+            if (at >= 0 && option.mixed_spaces_tabs) {
                 warningAt("Mixed spaces and tabs.", line, at + 1);
             }
             s = s.replace(/\t/g, tab);
