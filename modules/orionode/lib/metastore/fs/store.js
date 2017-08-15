@@ -139,7 +139,7 @@ Object.assign(FsMetastore.prototype, {
 					"UniqueId":workspaceId,
 					"UserId":userId
 				};
-				this.updateWorkspaceMetadata(workspaceId, wPref, function(error){
+				this._updateWorkspaceMetadata(workspaceId, wPref, function(error){
 					if(error){
 						callback(error, w);
 					}else{
@@ -181,21 +181,23 @@ Object.assign(FsMetastore.prototype, {
 	},
 	getWorkspace: function(workspaceId, callback) {
 		if (workspaceId !== WORKSPACE_ID) {
-			this.readWorkspaceMetadata(workspaceId, function(err, metadata){
+			this._readWorkspaceMetadata(workspaceId, function(err, metadata){
 				var workspace = {
 					"id": metadata.UniqueId,
 					"name": metadata.FullName,
+					"properties": {}
 				};
 				// TODO Workspace properties is where tabs info goes, implement later
 				var propertyKeys = Object.keys(metadata.Properties);
 				propertyKeys.forEach(function(propertyKey){
-					workspace.Properties[propertyKey] = metadata.Properties[propertyKey];
+					workspace.properties[propertyKey] = metadata.Properties[propertyKey];
 					// TODO password needs to be handled specifically since it needs to be decrypted. (referrence setProperties line 967)
 					// TODO handle userPropertyCache (referrence setProperties line 972)
 				});
-				callback(null, workspace, metadata);
+				callback(null, workspace);
 			});
 		}else{
+			// TODO this should be merged into upper logic
 			callback(null, {
 				name: nodePath.basename(this.options.workspaceDir),
 				id: WORKSPACE_ID
@@ -217,47 +219,40 @@ Object.assign(FsMetastore.prototype, {
 	},
 	
 	/**
-	 * Read workspace preference, which is the properties of workspace metadata
-	 */
-	readWorkspacePreferences: function(workspaceId, callback) {
-		this.readWorkspaceMetadata(workspaceId, function(err, metadata){
-			callback(err, metadata && metadata.Properties);			
-		});
-	},
-	
-	/**
 	 * update workspace preference, which is the properties of workspace metadata
 	 */
-	updateWorkspacePreferences: function(workspaceId, prefs, callback) {
-		this.readWorkspaceMetadata(workspaceId, function(err, metadata){
-			metadata.Properties = prefs;
-			this.updateWorkspaceMetadata(workspaceId, metadata, function(){
+	updateWorkspace: function(workspaceId, workspacedata, callback) {
+		this._readWorkspaceMetadata(workspaceId, function(err, metadata){
+			metadata.Properties = workspacedata.properties;
+			this._updateWorkspaceMetadata(workspaceId, metadata, function(){
 				callback(null, null);
 			});
 		}.bind(this));
 	},
 	
 	/**
+	 * @private
 	 * Helper method to read the whole workspace metadata
 	 */
-	readWorkspaceMetadata: function(workspaceId, callback) {
+	_readWorkspaceMetadata: function(workspaceId, callback) {
 		var metadataFile = getWorkspaceMetadataFileName(this.options, workspaceId);
 		return fs.readFileAsync(metadataFile, 'utf8')
 		.catchReturn({ code: 'ENOENT' }, null) // New prefs file: suppress error
 		.then(function(metadata) {
-			var parsedJson
+			var parsedJson;
 			try{
-				parsedJson = JSON.parse(metadata)
+				parsedJson = JSON.parse(metadata);
 			}catch(err){
-				parsedJson = metadata
+				parsedJson = metadata;
 			}
-			callback(null,parsedJson);
+			callback(null, parsedJson);
 		});
 	},
 	/**
+	 * @private
 	 * Helper method to update the whole workspace metadata, use updataWorkspacePreference to update metadata.Properties
 	 */
-	updateWorkspaceMetadata: function(workspaceId, metadata, callback) {
+	_updateWorkspaceMetadata: function(workspaceId, metadata, callback) {
 		var prefFile = getWorkspaceMetadataFileName(this.options, workspaceId);
 		return mkdirpAsync(nodePath.dirname(prefFile)) // create parent folder(s) if necessary
 		.then(function() {
@@ -309,72 +304,66 @@ Object.assign(FsMetastore.prototype, {
 		});
 	},
 	getUser: function(id, callback) {
-		if (id !== USER_NAME) {
-			this._readUserMetadata(id, function(err, metadata){
-				if(metadata){
-					var userInfo;
-					// TODO Check if migration is needed and migrate if so
-					if(false /** Migragion needed */){
-		//				userPrefs = migratedUserPrefs
-					}
-					userInfo = {
-						"username": metadata.UserName,
-					};
-					metadata.WorkspaceIds && (userInfo.workspaces = metadata.WorkspaceIds.map(function(workspaceId){
-						return {
-							name: metaUtil.decodeWorkspaceNameFromWorkspaceId(workspaceId),
-							id: workspaceId
-						};
-					}));
-	//				var propertieKeys = Object.keys(userPrefs.Properties);
-	//				propertieKeys.forEach(function(propertyKey){
-	//					userInfo.Properties[propertyKey] = userPrefs.Properties[propertyKey];
-	//					// TODO password needs to be handled specifically since it needs to be decrypted. (referrence setProperties line 967)
-	//					// TODO handle userPropertyCache (referrence setProperties line 972)
-	//				});
-					callback(null, userInfo);
-				}else{
-					callback(null, null);
+		this._readUserMetadata(id, function(err, metadata){
+			if(err){
+				callback(err, null);
+			}
+			// TODO Check if migration is needed and migrate if so
+			if(metadata){
+				if(false /** Migragion needed */){
+	//				userPrefs = migratedUserPrefs
 				}
+				var metadataToServe = {
+					username: metadata.UserName,
+					email: metadata.Properties.Email,
+					fullname: metadata.FullName,
+					oauth: metadata.Properties.OAuth,
+					properties: metadata.Properties,
+					login_timestamp: metadata.Properties.LastLoginTimestamp,
+					disk_usage: metadata.Properties.DiskUsage,
+					disk_usage_timestamp: metadata.Properties.DiskUsageTimestamp,
+					created_at:  metadata.Properties.AccountCreationTimestamp
+				};
+				metadata.WorkspaceIds && (metadataToServe.workspaces = metadata.WorkspaceIds.map(function(workspaceId){
+					return {
+						name: metaUtil.decodeWorkspaceNameFromWorkspaceId(workspaceId),
+						id: workspaceId
+					};
+				}));
+				// TODO password needs to be handled specifically since it needs to be decrypted. (referrence setProperties line 967)				
+				// TODO handle userPropertyCache (referrence setProperties line 972)
+				callback(err,  metadataToServe);
+			}else{
+				callback(null, null);
+			}
+		});
+	},
+	/**
+	 * @callback
+	 */
+	updateUser: function(id, userData, callback) {
+		this._readUserMetadata(id, function(err, metadata){
+			metadata.Properties = userData.properties;
+			// update other userData 
+			userData.fullname && (metadata.FullName = userData.fullname);
+			userData.password && (metadata.Properties.Password = userData.password);  // TODO need to encrept password
+			userData.email && (metadata.Properties.Email = userData.email);
+			userData.login_timestamp && (metadata.Properties.LastLoginTimestamp = userData.login_timestamp);
+			userData.username && (metadata.UserName = userData.username);
+			
+			// TODO update isAuthenticated
+			
+			
+			this._updateUserMetadata(id, metadata, function(){
+				callback(null, null);
 			});
-		}else{
-			callback(null, {
-				username: USER_NAME, 
-				workspaces: [
-					{
-						name: nodePath.basename(this.options.workspaceDir),
-						id: WORKSPACE_ID
-					}
-				],
-				workspaceDir: this.options.workspaceDir
-			});
-		}
+		}.bind(this));
 	},
 	/**
 	 * @callback
 	 */
 	deleteUser: function(id, callback) {
 		callback(new Error("Not implemented"));
-	},
-	/**
-	 * Read user preference, which is the properties of user metadata
-	 */
-	readUserPreferences: function(user, callback) {
-		this._readUserMetadata(user, function(err, metadata){
-			callback(null, metadata.Properties);
-		});
-	},
-	
-	/**
-	 * update user's preference
-	 */
-	updateUserPreferences: function(user, prefs, callback) {
-		this._readUserMetadata(user, function(err, metadata){
-			metadata.Properties = prefs;
-			this._updateUserMetadata(user, metadata, function(){
-				callback(null, null);
-			});
-		}.bind(this));
 	},
 	
 	/**
@@ -392,7 +381,7 @@ Object.assign(FsMetastore.prototype, {
 			}catch(err){
 				parsedJson = metadata;
 			}
-			callback(null,parsedJson);
+			callback(null, parsedJson);
 		});
 	},
 	
@@ -435,12 +424,6 @@ Object.assign(FsMetastore.prototype, {
 	getUserByOAuth: function(oauth, callback) {
 		callback(new Error("Not implemented"));
 	},
-	/**
-	 * @callback
-	 */
-	updateUser: function(id, userData, callback) {
-		callback(null, userData);
-	},
 	
 	/**
 	 * @callback
@@ -452,7 +435,7 @@ Object.assign(FsMetastore.prototype, {
 	
 	// Project related
 	updataProject: function(workspaceId, projectInfo){
-		this.readWorkspaceMetadata(workspaceId, function(err, metadata){
+		this._readWorkspaceMetadata(workspaceId, function(err, metadata){
 			if(projectInfo.originalPath){ // originalPath is in the format of "[ContextPath] (optional) + /file + [workspaceId] + /[originalName]/"
 				var segs = projectInfo.originalPath.split("/");
 				var oldProjectName = projectInfo.originalPath.endsWith("/") ? segs[segs.length - 2] : segs[segs.length - 1];
@@ -476,7 +459,7 @@ Object.assign(FsMetastore.prototype, {
 				}
 				metadata.ProjectNames.indexOf(projectInfo.projectName) === -1 && metadata.ProjectNames.push(projectInfo.projectName);
 			}
-			this.updateWorkspaceMetadata(workspaceId, metadata, function(){
+			this._updateWorkspaceMetadata(workspaceId, metadata, function(){
 				if(projectInfo.projectName){
 					this.updateProjectMetadata(workspaceId, projectInfo.projectName, projectJson, function(){});
 				}
@@ -505,7 +488,6 @@ Object.assign(FsMetastore.prototype, {
 			});
 		});
 	},
-	
 	
 	createTask: function(taskObj, callback) {
 		this._taskList[taskObj.id] = taskObj;

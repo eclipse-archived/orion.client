@@ -136,14 +136,14 @@ function saveRunningSites() {
 
 function loadSites(req, callback) {
 	var store = fileUtil.getMetastore(req);
-	store.readUserPreferences(req.user, function(err, data) {
+	store.getUser(req.user, function(err, data) {
 		if (err) {
 			// assume that the file does not exits
 			return callback(null, {});
 		}
 		var prefs = {};
 		try {
-			prefs = JSON.parse(data);
+			prefs = JSON.parse(data.properties);
 		} catch (e) {}
 		return callback(null, prefs);
 	});
@@ -151,7 +151,7 @@ function loadSites(req, callback) {
 
 function saveSites(req, prefs, callback) {
 	var store = fileUtil.getMetastore(req);
-	store.updateUserPreferences(req.user, JSON.stringify(prefs, null, "\t"), callback);
+	store.updateUser(req.user, {properties: JSON.stringify(prefs, null, "\t") }, callback);
 }
 
 function getSite(req, res) {

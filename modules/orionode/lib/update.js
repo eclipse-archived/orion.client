@@ -31,7 +31,7 @@ module.exports.router = function(options) {
 	return express.Router()
 	.use(bodyParser.json())
 	.post('/downloadUpdates', function (req, res) {
-		var allPrefs = prefs.readPrefs();
+		var allPrefs = prefs.readElectronPrefs();
 		var updateChannel = allPrefs.user && allPrefs.user.updateChannel && allPrefs.user.updateChannel.name ? allPrefs.user.updateChannel.name : configParams["orion.autoUpdater.defaultChannel"];
 		var task = new tasks.Task(res, false, true, 0, true);
 		if (platform === "linux") {

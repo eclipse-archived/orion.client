@@ -200,9 +200,7 @@ Object.assign(MongoDbMetastore.prototype, {
 					"Uri": "/file/" + w.id + "/*"
 				}
 			];
-			var parsedProperties = JSON.parse(user.properties);
-			parsedProperties["UserRights"] = parsedProperties["UserRights"].concat(workspaceUserRights)
-			user.properties = JSON.stringify(parsedProperties)
+			user.properties["UserRights"] = user.properties["UserRights"].concat(workspaceUserRights);
 			user.save(function(err) {
 				if (err) {
 					return callback(err, null);
@@ -248,23 +246,7 @@ Object.assign(MongoDbMetastore.prototype, {
 		mkdirp.sync(workspacePath); // TODO make it async
 		return workspacePath;
 	},
-	readUserPreferences: function(userId, callback) {
-		findUser(userId, userId, function(err, user) {
-			if (err) {
-				return callback(err);
-			}
-			callback(null, user.properties);
-		});
-	},
-	updateUserPreferences: function(userId, prefs, callback) {
-		findUser(userId, userId, function(err, user) {
-			if (err) {
-				return callback(err);
-			}
-			user.properties = JSON.stringify(prefs, null, 2);
-			user.save(callback);
-		});
-	},
+	
 	createUser: function(userData, callback) {
 		userData.properties["UserRights"] = [
 			{
@@ -319,6 +301,7 @@ Object.assign(MongoDbMetastore.prototype, {
 				return callback(err);
 			}
 			// mixin new properties
+			user.properties = userData.properties;  // TODO Make sure this is right thing to do.
 			Object.assign(user, userData);
 
 			// Setting password and authToken are special cases handled by specific methods
