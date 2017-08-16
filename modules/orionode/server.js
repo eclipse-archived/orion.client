@@ -123,7 +123,7 @@ function startServer(cb) {
 					httpProxy = require('http-proxy');
 					var proxy = httpProxy.createProxyServer({});
 					app.use('/', function(req, res, next) {
-						proxy.web(req, res, { target: 'http://127.0.0.1:' + configParams["orion.proxy.port"] }, function(ex) { next(ex); } );
+						proxy.web(req, res, { target: 'http://127.0.0.1:' + configParams["orion.proxy.port"], changeOrigin: true }, function(ex) { next(); } );
 					});
 				} catch (e) {
 					logger.info("WARNING: http-proxy is not installed. Some features will be unavailable. Reason: " + e.message);
