@@ -117,6 +117,19 @@ function startServer(cb) {
 				next();
 			}, orion);
 			
+			if(configParams["orion.proxy.port"] && listenContextPath){
+				var httpProxy;
+				try {
+					httpProxy = require('http-proxy');
+					var proxy = httpProxy.createProxyServer({});
+					app.use('/', function(req, res, next) {
+						proxy.web(req, res, { target: 'http://127.0.0.1:' + configParams["orion.proxy.port"] }, function(ex) { next(ex); } );
+					});
+				} catch (e) {
+					logger.info("WARNING: http-proxy is not installed. Some features will be unavailable. Reason: " + e.message);
+				}
+			}
+			
 			server = require('http-shutdown')(server);
 			var io = socketio.listen(server, { 'log level': 1, path: (listenContextPath ? contextPath : '' ) + '/socket.io' });
 			ttyShell.install({ io: io, app: orion, fileRoot: contextPath + '/file', workspaceDir: workspaceDir, sharedWorkspaceFileRoot: contextPath + '/sharedWorkspace/tree/file'});
