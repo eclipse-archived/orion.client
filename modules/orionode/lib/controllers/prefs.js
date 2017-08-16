@@ -138,7 +138,7 @@ function PrefsController(options) {
 		var scope = req.url.split("/")[1];
 		var store = fileUtil.getMetastore(req);
 		if(scope === "user"){
-			store.updateUser(req.user, {properties:prefs}, function(err){
+			store.updateUser(req.user.username, {properties:prefs}, function(err){
 				callback(err);
 			});
 		}else if(scope === "workspace"){

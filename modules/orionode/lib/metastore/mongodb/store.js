@@ -200,8 +200,9 @@ Object.assign(MongoDbMetastore.prototype, {
 					"Uri": "/file/" + w.id + "/*"
 				}
 			];
-			user.markModified('properties.UserRights');
-			user.properties["UserRights"] = user.properties["UserRights"].concat(workspaceUserRights);
+			var parsedProperties = JSON.parse(user.properties);
+			parsedProperties["UserRights"] = parsedProperties["UserRights"].concat(workspaceUserRights);
+			user.properties = JSON.stringify(parsedProperties, null, 2);
 			user.save(function(err) {
 				if (err) {
 					return callback(err, null);
@@ -249,12 +250,13 @@ Object.assign(MongoDbMetastore.prototype, {
 	},
 	
 	createUser: function(userData, callback) {
-		userData.properties["UserRights"] = [
-			{
+		userData.properties= JSON.stringify({
+			"UserRights": [
+				{
 				"Method" : metaUtil.getAccessRight(),
 				"Uri": "/user/" + userData.username
-			}
-		];
+				}
+			]}, null, 2);
 		var password = userData.password;
 		delete userData.password;
 		orionAccount.register(new orionAccount(userData), password, function(err, user){
@@ -302,7 +304,7 @@ Object.assign(MongoDbMetastore.prototype, {
 				return callback(err);
 			}
 			// mixin new properties
-			user.properties = userData.properties;  // TODO Make sure this is right thing to do.
+//			user.properties = userData.properties;  // TODO Make sure this is right thing to do.
 			Object.assign(user, userData);
 
 			// Setting password and authToken are special cases handled by specific methods

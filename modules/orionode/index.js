@@ -61,7 +61,13 @@ var checkRights = function (userId, uri, req, res, next, method){
 	
 	var store = fileUtil.getMetastore(req);
 	store.getUser(userId, function(err, metadata){
-		var userRightArray = metadata.properties.UserRights || [];
+		var properties;
+		if(typeof metadata.properties === "string"){
+			properties = JSON.parse(metadata.properties);
+		}else{
+			properties = metadata.properties;
+		}
+		var userRightArray = properties.UserRights || [];
 		var hasAccess = userRightArray.some(function(userRight){
 			if(wildCardMatch(uri, userRight.Uri) && ((methodMask & userRight.Method) === methodMask)){
 				return true;
