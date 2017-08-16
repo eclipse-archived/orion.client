@@ -19,7 +19,6 @@ var
 
 // Helper functions
 var USERPREF_FILENAME = 'user.json';
-var USER_NAME = "anonymous";
 var WORKSPACE_ID = "orionode";
 var METASTORE_FILENAME = "metastore.json";
 var DEFAULT_WORKSPACE_NAME = "Orion Content";
@@ -28,6 +27,7 @@ var DESCRIPTION = "This JSON file is at the root of the Orion metadata store res
 
 // The current version of the Simple Meta Store.
 var VERSION = 8;
+var USER_RIGHT_VERSION = 3;
 function getUserRootLocation(options, userId){
 	var rootLocation = options.configParams['orion.single.user'] ? nodePath.join(os.homedir(), '.orion') : nodePath.join.apply(null, metaUtil.readMetaUserFolder(options.workspaceDir, userId));
 	return rootLocation;
@@ -285,6 +285,7 @@ Object.assign(FsMetastore.prototype, {
 					"Uri": "/user/" + userData.username
 				}
 			];
+			userProperty["UserRightsVersion"] = USER_RIGHT_VERSION;
 			var userJson = {
 				"OrionVersion": VERSION,
 				"UniqueId": userData.username,
