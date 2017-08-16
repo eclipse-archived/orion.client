@@ -19,7 +19,7 @@ var
 
 // Helper functions
 var USERPREF_FILENAME = 'user.json';
-var WORKSPACE_ID = "orionode";
+var WORKSPACE_ID = "anonymous-OrionContent";
 var METASTORE_FILENAME = "metastore.json";
 var DEFAULT_WORKSPACE_NAME = "Orion Content";
 var SERVERWORKSPACE = "${SERVERWORKSPACE}";
