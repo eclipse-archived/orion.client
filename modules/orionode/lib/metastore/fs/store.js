@@ -319,10 +319,10 @@ Object.assign(FsMetastore.prototype, {
 					fullname: metadata.FullName,
 					oauth: metadata.Properties.OAuth,
 					properties: metadata.Properties,
-					login_timestamp: metadata.Properties.LastLoginTimestamp,
+					login_timestamp: new Date(metadata.Properties.LastLoginTimestamp),
 					disk_usage: metadata.Properties.DiskUsage,
-					disk_usage_timestamp: metadata.Properties.DiskUsageTimestamp,
-					created_at:  metadata.Properties.AccountCreationTimestamp
+					disk_usage_timestamp: new Date(metadata.Properties.DiskUsageTimestamp),
+					created_at:  new Date(metadata.Properties.AccountCreationTimestamp)
 				};
 				metadata.WorkspaceIds && (metadataToServe.workspaces = metadata.WorkspaceIds.map(function(workspaceId){
 					return {
@@ -348,7 +348,7 @@ Object.assign(FsMetastore.prototype, {
 			userData.fullname && (metadata.FullName = userData.fullname);
 			userData.password && (metadata.Properties.Password = userData.password);  // TODO need to encrept password
 			userData.email && (metadata.Properties.Email = userData.email);
-			userData.login_timestamp && (metadata.Properties.LastLoginTimestamp = userData.login_timestamp);
+			userData.login_timestamp && (metadata.Properties.LastLoginTimestamp = userData.login_timestamp.getTime());
 			userData.username && (metadata.UserName = userData.username);
 			
 			// TODO update isAuthenticated
