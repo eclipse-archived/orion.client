@@ -229,5 +229,5 @@ function readElectronPrefs(){
 }
 
 function writeElectronPrefs(contents){
-	fs.writeFileSync(getElectronPrefsFileName(), JSON.stringify(contents, null, 2), 'utf8');
+//	fs.writeFileSync(getElectronPrefsFileName(), JSON.stringify(contents, null, 2), 'utf8');
 }

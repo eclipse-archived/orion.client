@@ -105,9 +105,22 @@ FsMetastore.prototype.setup = function(app) {
 	app.use(/* @callback */ function(req, res, next){
 		if(this.options.configParams['orion.single.user']){
 			this.getUser("anonymous", function(err, user) {
-				req.user = user;
-				next();
-			});
+				if (!user) {
+					this.createUser({
+						username: "anonymous",
+						fullname: "anonymous",
+						email: "anonymous",
+						password: "default",
+						properties: {}
+					}, /** @callback */ function(err, user) {
+						req.user = user;
+						next();
+					});
+				} else {
+					req.user = user;
+					next();
+				}
+			}.bind(this));
 		}else{
 			next();
 		}

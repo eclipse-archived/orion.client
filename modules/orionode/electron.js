@@ -157,7 +157,7 @@ module.exports.start = function(startServer, configParams) {
 				}else if(stats.isDirectory()){
 					configParams.workspace = readyToOpenDir;
 				}
-				updateWorkspacePrefs(configParams.workspace, allPrefs);
+				// updateWorkspacePrefs(configParams.workspace, allPrefs);
 			}catch(e){}
 		}
 		if (process.platform === 'darwin') {
@@ -338,7 +338,7 @@ module.exports.start = function(startServer, configParams) {
 				newTargetWorkspace = workspaces[0];
 				originalWorkspace = workspaces[1];
 				// step1: update new pref's currentworkspace and recentworkspaces with newTargetWorkspace
-				updateWorkspacePrefs(newTargetWorkspace);
+				// updateWorkspacePrefs(newTargetWorkspace);
 				// step2: collect tabs info
 				nextWindow.webContents.send('collect-tabs-info','changeworkspace');
 			});
