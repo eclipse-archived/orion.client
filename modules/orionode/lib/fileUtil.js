@@ -158,7 +158,7 @@ exports.getProject = function getProject(fileRoot, workspaceRoot, file, options)
 					findProject(path.dirname(filepath));
 				});
 			} else {
-				reject();
+				return reject();
 			}
 		}
 		findProject(file.path);
