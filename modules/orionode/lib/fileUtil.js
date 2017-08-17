@@ -108,6 +108,9 @@ var getParents = exports.getParents = function(fileRoot, relativePath, includeFo
 	if(segs && segs.length > 0 && segs[segs.length-1] === ""){// pop the last segment if it is empty. In this case wwwpath ends with "/".
 		segs.pop();
 	}
+	if (relativePath[0] === '/') {
+		segs.shift();//Remove the empty segment from beginning
+	}
 	if(!includeFolder) {
 		segs.pop();//The last segment now is the directory itself. We do not need it in the parents array.
 	}
