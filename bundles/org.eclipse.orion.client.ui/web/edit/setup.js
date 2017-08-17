@@ -567,7 +567,7 @@ objects.mixin(TabWidget.prototype, {
 			if (evt.type === "click") {
 				that.setWindowLocation(this.href);
 			} else if (evt.type === "dblclick") {
-				that.transientToPermenant(this.href);
+				that.transientToPermanent(this.href);
 			}
 		};
 		editorTab.addEventListener("click", editorTabClickHandler);
@@ -619,8 +619,8 @@ objects.mixin(TabWidget.prototype, {
 	getDraggedNode: function() {
 		return this.beingDragged;
 	},
-	transientToPermenant: function(href){
-		var hrefHash = href && href.split("#")[1];
+	transientToPermanent: function(href){
+		var hrefHash = href && decodeURIComponent(href.split("#")[1]);
 		if(this.transientTab && hrefHash && hrefHash.indexOf(this.transientTab.location) === 0){
 			this.fileList.some(function(file) {
 				if (hrefHash.indexOf(file.metadata.Location) === 0) {
@@ -746,7 +746,7 @@ objects.mixin(TabWidget.prototype, {
 		}
 		if(this.potentialTransientHref){
 			// In the case doubleclick event reveived before the transient tab is created, 
-			this.transientToPermenant(this.potentialTransientHref);
+			this.transientToPermanent(this.potentialTransientHref);
 			this.potentialTransientHref = null;
 		}
 
@@ -988,7 +988,7 @@ objects.mixin(EditorViewer.prototype, {
 				return data.userData && this.tabWidget.transientTab && data.items.Location === this.tabWidget.transientTab.location;
 			}.bind(this),
 			callback: function(commandInvocation) {
-				this.tabWidget.transientToPermenant(commandInvocation.userData);
+				this.tabWidget.transientToPermanent(commandInvocation.userData);
 			}.bind(this)
 		});
 		var nextTab = new mCommands.Command({
@@ -1131,7 +1131,7 @@ objects.mixin(EditorViewer.prototype, {
 				textView.addEventListener("ModelChanged", function(){
 					if(this.editor.isFileInitiallyLoaded){
 						if(this.tabWidget.transientTab && this.tabWidget.transientTab.location === this.pool.metadata.Location){
-							this.tabWidget.transientToPermenant(this.tabWidget.transientTab.href);
+							this.tabWidget.transientToPermanent(this.tabWidget.transientTab.href);
 						}
 					}
 				}.bind(this));
@@ -1562,7 +1562,7 @@ objects.mixin(EditorSetup.prototype, {
 		}.bind(this));
 		this.sidebarNavInputManager.addEventListener("fileDoubleClicked", function(evt) { //$NON-NLS-0$
 			this.activeEditorViewer.tabWidget.potentialTransientHref = evt.href;
-			this.activeEditorViewer.tabWidget.transientToPermenant(evt.href);
+			this.activeEditorViewer.tabWidget.transientToPermanent(evt.href);
 		}.bind(this));
 		this.sidebarNavInputManager.addEventListener("create", function(evt) { //$NON-NLS-0$
 			if (evt.newValue && !evt.ignoreRedirect) {
