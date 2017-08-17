@@ -19,6 +19,7 @@ var expressSession = require('express-session'),
 	log4js = require('log4js'),
 	mkdirp = require('mkdirp'),
 	metaUtil = require('../util/metaUtil'),
+	accessRights = require('../../accessRights'),
 	logger = log4js.getLogger("mongo-store");
 
 mongoose.Promise = Promise;
@@ -182,24 +183,7 @@ Object.assign(MongoDbMetastore.prototype, {
 				id: metaUtil.encodeWorkspaceId(userId, workspaceData.id || workspaceData.name)
 			};
 			user.workspaces.push(w);
-			var workspaceUserRights = [
-				{
-					"Method": metaUtil.getAccessRight(),
-					"Uri": "/workspace/" + w.id
-				},
-				{
-					"Method": metaUtil.getAccessRight(),
-					"Uri": "/workspace/" + w.id + "/*"
-				},
-				{
-					"Method": metaUtil.getAccessRight(),
-					"Uri": "/file/" + w.id
-				},
-				{
-					"Method": metaUtil.getAccessRight(),
-					"Uri": "/file/" + w.id + "/*"
-				}
-			];
+			var workspaceUserRights = accessRights.createWorkspaceAccess(w.id);
 			var parsedProperties = JSON.parse(user.properties);
 			parsedProperties["UserRights"] = parsedProperties["UserRights"].concat(workspaceUserRights);
 			user.properties = JSON.stringify(parsedProperties, null, 2);
@@ -251,12 +235,9 @@ Object.assign(MongoDbMetastore.prototype, {
 	
 	createUser: function(userData, callback) {
 		userData.properties= JSON.stringify({
-			"UserRights": [
-				{
-				"Method" : metaUtil.getAccessRight(),
-				"Uri": "/user/" + userData.username
-				}
-			]}, null, 2);
+			"UserRights": accessRights.createUserAccess(userData.username),
+			"UserRightsVersion": accessRights.getCurrentVersion()
+		}, null, 2);
 		var password = userData.password;
 		delete userData.password;
 		orionAccount.register(new orionAccount(userData), password, function(err, user){

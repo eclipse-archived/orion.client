@@ -15,6 +15,7 @@ var
     lockFile = Promise.promisifyAll(require('lockfile')),
     mkdirpAsync = Promise.promisify(require('mkdirp')),
     metaUtil = require('../util/metaUtil'),
+    accessRights = require('../../accessRights'),
     os = require('os');
 
 // Helper functions
@@ -27,7 +28,6 @@ var DESCRIPTION = "This JSON file is at the root of the Orion metadata store res
 
 // The current version of the Simple Meta Store.
 var VERSION = 8;
-var USER_RIGHT_VERSION = 3;
 function getUserRootLocation(options, userId){
 	var rootLocation = options.configParams['orion.single.user'] ? nodePath.join(os.homedir(), '.orion') : nodePath.join.apply(null, metaUtil.readMetaUserFolder(options.workspaceDir, userId));
 	return rootLocation;
@@ -162,24 +162,7 @@ Object.assign(FsMetastore.prototype, {
 							}
 							// TASK: to update workspaceIds in user's metadata
 							metadata["WorkspaceIds"].indexOf(workspaceId) === -1 && metadata["WorkspaceIds"].push(workspaceId);
-							var workspaceUserRights = [
-								{
-									"Method": metaUtil.getAccessRight(),
-									"Uri": "/workspace/" + workspaceId
-								},
-								{
-									"Method": metaUtil.getAccessRight(),
-									"Uri": "/workspace/" + workspaceId + "/*"
-								},
-								{
-									"Method": metaUtil.getAccessRight(),
-									"Uri": "/file/" + workspaceId
-								},
-								{
-									"Method": metaUtil.getAccessRight(),
-									"Uri": "/file/" + workspaceId + "/*"
-								}
-							];
+							var workspaceUserRights = accessRights.createWorkspaceAccess(workspaceId);
 							metadata["Properties"]["UserRights"] = metadata["Properties"]["UserRights"].concat(workspaceUserRights);
 							this._updateUserMetadata(userId,  metadata, function(){
 								callback(null, w);
@@ -292,13 +275,8 @@ Object.assign(FsMetastore.prototype, {
 			userProperty["UniqueId"] = userData.username;
 			
 			// give the user access to their own user profile
-			userProperty["UserRights"] = [
-				{
-					"Method" : metaUtil.getAccessRight(),
-					"Uri": "/user/" + userData.username
-				}
-			];
-			userProperty["UserRightsVersion"] = USER_RIGHT_VERSION;
+			userProperty["UserRights"] = accessRights.createUserAccess(userData.username);
+			userProperty["UserRightsVersion"] = accessRights.getCurrentVersion();
 			var userJson = {
 				"OrionVersion": VERSION,
 				"UniqueId": userData.username,
@@ -324,26 +302,7 @@ Object.assign(FsMetastore.prototype, {
 			}
 			// TODO Check if migration is needed and migrate if so
 			if(metadata){
-				if(false /** Migragion needed */){
-	//				userPrefs = migratedUserPrefs
-				}
-				var metadataToServe = {
-					username: metadata.UserName,
-					email: metadata.Properties.Email,
-					fullname: metadata.FullName,
-					oauth: metadata.Properties.OAuth,
-					properties: metadata.Properties,
-					login_timestamp: new Date(metadata.Properties.LastLoginTimestamp),
-					disk_usage: metadata.Properties.DiskUsage,
-					disk_usage_timestamp: new Date(metadata.Properties.DiskUsageTimestamp),
-					created_at:  new Date(metadata.Properties.AccountCreationTimestamp)
-				};
-				metadata.WorkspaceIds && (metadataToServe.workspaces = metadata.WorkspaceIds.map(function(workspaceId){
-					return {
-						name: metaUtil.decodeWorkspaceNameFromWorkspaceId(workspaceId),
-						id: workspaceId
-					};
-				}));
+				var metadataToServe = serverUserMetadata(metadata);
 				// TODO password needs to be handled specifically since it needs to be decrypted. (referrence setProperties line 967)				
 				// TODO handle userPropertyCache (referrence setProperties line 972)
 				callback(err,  metadataToServe);
@@ -351,6 +310,26 @@ Object.assign(FsMetastore.prototype, {
 				callback(null, null);
 			}
 		});
+		function serverUserMetadata(metadata){
+			var metadataToServe = {
+				username: metadata.UserName,
+				email: metadata.Properties.Email,
+				fullname: metadata.FullName,
+				oauth: metadata.Properties.OAuth,
+				properties: metadata.Properties,
+				login_timestamp: new Date(metadata.Properties.LastLoginTimestamp),
+				disk_usage: metadata.Properties.DiskUsage,
+				disk_usage_timestamp: new Date(metadata.Properties.DiskUsageTimestamp),
+				created_at:  new Date(metadata.Properties.AccountCreationTimestamp)
+			};
+			metadata.WorkspaceIds && (metadataToServe.workspaces = metadata.WorkspaceIds.map(function(workspaceId){
+				return {
+					name: metaUtil.decodeWorkspaceNameFromWorkspaceId(workspaceId),
+					id: workspaceId
+				};
+			}));
+			return metadataToServe;
+		}
 	},
 	/**
 	 * @callback
@@ -366,7 +345,6 @@ Object.assign(FsMetastore.prototype, {
 			userData.username && (metadata.UserName = userData.username);
 			
 			// TODO update isAuthenticated
-			
 			
 			this._updateUserMetadata(id, metadata, function(){
 				callback(null, null);
