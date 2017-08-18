@@ -15,6 +15,7 @@ var ETag = require('./util/etag');
 var fs = require('fs');
 var mkdirp = require('mkdirp');
 var nodePath = require('path');
+var request = require('request');
 var api = require('./api');
 var fileUtil = require('./fileUtil');
 var writeError = api.writeError;
@@ -228,7 +229,11 @@ module.exports = function(options) {
 				ws.on('error', function(err) {
 					writeError(500, res, err);
 				});
-				req.pipe(ws);
+				if (req.query.source) {
+					request(req.query.source).pipe(ws);
+				} else {
+					req.pipe(ws);
+				}
 			});
 		}
 		var ifMatchHeader = req.headers['if-match'];
