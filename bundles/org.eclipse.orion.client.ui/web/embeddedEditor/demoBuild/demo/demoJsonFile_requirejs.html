@@ -40,8 +40,10 @@
 		<script src="editorBuild/requirejs/require.min.js"></script>
 		<script>
     	/*eslint-env browser, amd*/
+    	
 			require.config({
 			    waitSeconds: 60,
+			    /*
 			    path:{
 			    	'orion/editor/nls/messages': 'yourFolder/orion/editor/nls/messages'
 			    },
@@ -50,18 +52,60 @@
 			        i18n: {
 			            locale: 'ja'//'ja' can be a variable assigned by your web app.
 			        },
-			    },
+			    },*/
 			    bundles: {
 			        "editorBuild/code_edit/built-codeEdit-amd": ["orion/codeEdit"],
 			    }
 			});
+			var files2import = [
+				{
+					name: ".jslintrc",
+					contents:''
+				}
+			];
+			var ruleData = {				
+//				adsafe     : true, // if ADsafe should be enforced
+//	            bitwise    : true, // if bitwise operators should not be allowed
+//	            browser    : true, // if the standard browser globals should be predefined
+//	            cap        : true, // if upper case HTML should be allowed
+//	            css        : true, // if CSS workarounds should be tolerated
+//	            debug      : true, // if debugger statements should be allowed
+//	            devel      : true, // if logging should be allowed (console, alert, etc.)
+//	            eqeqeq     : true, // if === should be required
+//	            es5        : true, // if ES5 syntax should be allowed
+//	            evil       : true, // if eval should be allowed
+//	            forin      : true, // if for in statements must filter
+//	            fragment   : true, // if HTML fragments should be allowed
+//	            immed      : true, // if immediate invocations must be wrapped in parens
+//	            laxbreak   : true, // if line breaks should not be checked
+//	            newcap     : true, // if constructor names must be capitalized
+//	            node       : true, // if Node.js globals should be predefined
+//	            nomen      : true, // if names should be checked
+//	            on         : true, // if HTML event handlers should be allowed
+//	            onevar     : true, // if only one var statement per function should be allowed
+//	            passfail   : true, // if the scan should stop on first error
+//	            plusplus   : true, // if increment/decrement should not be allowed
+//	            regexp     : true, // if the . should not be allowed in regexp literals
+//	            rhino      : true, // if the Rhino environment globals should be predefined
+//	            undef      : true, // if variables should be declared before used
+//	            safe       : true, // if use of some browser features should be restricted
+//	            windows    : true, // if MS Windows-specigic globals should be predefined
+//	            strict     : true, // require the "use strict"; pragma
+//	            sub        : true, // if all forms of subscript notation are tolerated
+//	            white      : true, // if strict whitespace rules apply
+//	            widget     : true,  // if the Yahoo Widgets globals should be predefined
+	            mixed_spaces_tabs : true //ORION - be able to turn on/off reporting mixed spaces and tabs
+			};
 			require(["orion/codeEdit"], function(mCodeEdit) {
 				var defaultPluginURLs = [];
-				var codeEdit = new mCodeEdit({ _defaultPlugins: defaultPluginURLs, userPlugins:[/*"editorBuild/others/plugins/jslintPlugin.html",*/ "editorBuild/others/plugins/languages/json/jsonPlugin.html"] });
-				var contents = '{foo: 123, bar: 234}'
-				codeEdit.create({parent: "embeddedEditor", contentType: "application/json", contents: contents, noFocus: true}).then(function(editorViewer) {
+				var codeEdit = new mCodeEdit({ _defaultPlugins: defaultPluginURLs, userPlugins:[ "editorBuild/others/plugins/languages/json/jsonPlugin.html"] });
+				var contents = '{"foo": 123, "bar": 234}';
+				codeEdit.startup().then(function() {
 					document.getElementById("progressMessageDiv").textContent = "Plugins loaded!";
-					//You can call APIs from editorViewer.editor  for further actions.
+					files2import[0].contents = JSON.stringify(ruleData, undefined, 4);
+					codeEdit.importFiles(files2import).then(function(/*results*/) {
+						codeEdit.create({parent: "embeddedEditor", contentType: "application/json", contents: contents, noFocus: true});
+					});
 				});
 			});
 		</script>
