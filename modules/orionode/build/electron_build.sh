@@ -90,7 +90,7 @@ find node_modules/nodegit/build/Release/ -mindepth 1 ! -name '*.node' -exec rm -
 rm -rf target
 
 # Install electron builder and electron-builder-squirrel-windows for Squirrel.Window app
-npm install -g electron-builder@~19.16.0
+npm install -g electron-builder@19.16.0
 npm install -g electron-builder-squirrel-windows@19.16.0
 
 # Build mac dmg, etc
