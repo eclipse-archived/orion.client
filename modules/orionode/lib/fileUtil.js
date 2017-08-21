@@ -19,6 +19,37 @@ var api = require('./api');
 
 var fs = Promise.promisifyAll(require('fs'));
 
+/**
+ * Copy of a file/folder to a new location.
+ * @since 16.0
+ */
+exports.COPY_INTO = "copy_into";
+/**
+ * Deletion of an item.
+ * @since 16.0
+ */
+exports.DELETE = "delete";
+/**
+ * Creation of a directory.
+ * @since 16.0
+ */
+exports.MKDIR = "mkdir";
+/**
+ * Move of an item from one location to another.
+ * @since 16.0
+ */
+exports.MOVE = "move";
+/**
+ * Attributes of a file/folder changed.
+ * @since 16.0
+ */
+exports.PUTINFO = "putinfo";
+/**
+ * Content written to a file.
+ * @since 16.0
+ */
+exports.WRITE = "write";
+
 /*
  * Utils for representing files as objects in the Orion File API
  * http://wiki.eclipse.org/Orion/Server_API/File_API
@@ -447,6 +478,7 @@ exports.handleFilePOST = function(workspaceRoot, fileRoot, req, res, destFile, m
 		})
 		.then(function() {
 			if (isDirectory) {
+				exports.fireFileModificationEvent({type: exports.MKDIR, file: destFile});
 				return fs.mkdirAsync(destFile.path);
 			} else {
 				var eventData = { type: "write", file: destFile };
@@ -466,6 +498,11 @@ var _fileModListeners = [];
 exports.addFileModificationListener = function(theListener) {
 	_fileModListeners.push(theListener);
 };
+
+//TODO HACK for the tests
+exports.removeFileModificationListener = function() {
+	_fileModListeners.pop();
+}
 
 exports.fireFileModificationEvent = function(eventData) {
 	for (var i = 0; i < _fileModListeners.length; i++) {
