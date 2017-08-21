@@ -1,0 +1,26 @@
+{
+  "context-menu": {
+    "atom-text-editor": [
+      {
+        "label": "Toggle orion",
+        "command": "orion:toggle"
+      }
+    ]
+  },
+  "menu": [
+    {
+      "label": "Packages",
+      "submenu": [
+        {
+          "label": "Orion",
+          "submenu": [
+            {
+              "label": "Toggle",
+              "command": "orion:toggle"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
