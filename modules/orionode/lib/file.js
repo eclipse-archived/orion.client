@@ -241,13 +241,12 @@ module.exports = function(options) {
 			return write();
 		}
 		fileUtil.withETag(file.path, function(error, etag) {
-			if (error && error.code === 'ENOENT') {
-				api.writeResponse(404, res);
-			} else if (ifMatchHeader && ifMatchHeader !== etag) {
-				api.writeResponse(412, res);
-			} else {
-				write();
+			if (ifMatchHeader && ifMatchHeader !== etag) {
+				return api.writeResponse(412, res);
+			} else if (error && error.code === 'ENOENT') {
+				return api.writeResponse(404, res);
 			}
+			write();
 		});
 	}
 
