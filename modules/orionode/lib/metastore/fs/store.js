@@ -81,7 +81,7 @@ function FsMetastore(options) {
 	this._taskList = {};
 }
 FsMetastore.prototype.setup = function(app) {
-	if (!this.options.configParams['orion.single.user'] && !this.options.configParams['orion.metastore.useMongo']) {
+	if (!this.options.configParams['orion.single.user']) {
 		/* verify that existing metadata in this workspace will be usable by this server */
 		var path = nodePath.join(this.options.workspaceDir, FILENAME_METASTORE);
 		fs.readFileAsync(path, 'utf8').then(

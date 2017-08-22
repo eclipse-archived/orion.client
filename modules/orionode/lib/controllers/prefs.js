@@ -30,7 +30,6 @@ module.exports.readElectronPrefs = readElectronPrefs;
 module.exports.writeElectronPrefs = writeElectronPrefs;
 module.exports.router = PrefsController;
 
-var isMongo;  // determines if what acquire by thie controller is java version prefs(fs prefs storage) or property expanded preferrence(mongo prefs storage). 
 var NOT_EXIST;
 var MODEL;
 var PREF_FILENAME = PrefsController.PREF_FILENAME = 'user.json';
@@ -40,12 +39,12 @@ var PREF_FILENAME = PrefsController.PREF_FILENAME = 'user.json';
 // https://wiki.eclipse.org/Orion/Server_API/Preference_API
 function PrefsController(options) {
 	options.configParams = options.configParams || {};
-	isMongo = options.configParams["orion.metastore.useMongo"];
-	if(isMongo){
+	if (options.configParams["orion.metastore.useMongo"] !== false) {
 		MODEL = Preference;
-	}else{
+	} else {
 		MODEL = Horizontal_Prefs;
-	}
+	}	
+
 	NOT_EXIST = MODEL.NOT_EXIST;
 
 	var router = express.Router()
