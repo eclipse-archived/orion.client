@@ -953,7 +953,21 @@ function Tooltip (view, editor) {
 								start = model.mapOffset(start, true);
 								end = model.mapOffset(end, true);
 							}
-							view.setSelection(start, end, 1 / 3, function() { self.hide(); });
+							var evt = {
+								type: "AnnotationClicked",
+								target: self,
+								targetType: "Tooltip",
+								annotation: annotation,
+								selection: {
+									start: start,
+									end: end,
+									viewportOffset: 1 / 3
+								}
+							};
+							view.dispatchEvent(evt);
+							if (evt.selection) {
+								view.setSelection(evt.selection.start, evt.selection.end, evt.selection.viewportOffset, function() { self.hide(); });
+							}
 						}, false);
 					}
 					result.appendChild(htmlHolder);
