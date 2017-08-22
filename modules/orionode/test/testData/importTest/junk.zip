@@ -1,0 +1,17 @@
+
+osgi> 10:32:03,035 |-INFO in ch.qos.logback.classic.LoggerContext[default] - Could NOT find resource [logback-test.xml]
+10:32:03,035 |-INFO in ch.qos.logback.classic.LoggerContext[default] - Found resource [logback.xml] at [bundleresource://2.fwk1835195318:1/logback.xml]
+10:32:03,071 |-INFO in ch.qos.logback.classic.joran.action.ConfigurationAction - debug attribute not set
+10:32:03,072 |-INFO in ch.qos.logback.core.joran.action.AppenderAction - About to instantiate appender of type [ch.qos.logback.core.ConsoleAppender]
+10:32:03,075 |-INFO in ch.qos.logback.core.joran.action.AppenderAction - Naming appender as [STDOUT]
+10:32:03,101 |-INFO in ch.qos.logback.core.joran.action.NestedComplexPropertyIA - Pushing component [layout] on top of the object stack.
+10:32:03,116 |-WARN in ch.qos.logback.core.ConsoleAppender[STDOUT] - This appender no longer admits a layout as a sub-component, set an encoder instead.
+10:32:03,116 |-WARN in ch.qos.logback.core.ConsoleAppender[STDOUT] - To ensure compatibility, wrapping your layout in LayoutWrappingEncoder.
+10:32:03,116 |-WARN in ch.qos.logback.core.ConsoleAppender[STDOUT] - See also http://logback.qos.ch/codes.html#layoutInsteadOfEncoder for details
+10:32:03,117 |-INFO in ch.qos.logback.classic.joran.action.LoggerAction - Setting level of logger [org.eclipse.orion.server.login] to INFO
+10:32:03,117 |-INFO in ch.qos.logback.classic.joran.action.LoggerAction - Setting additivity of logger [org.eclipse.orion.server.login] to true
+10:32:03,117 |-INFO in ch.qos.logback.classic.joran.action.RootLoggerAction - Setting level of ROOT logger to WARN
+10:32:03,117 |-INFO in ch.qos.logback.core.joran.action.AppenderRefAction - Attaching appender named [STDOUT] to Logger[ROOT]
+
+10:32:04.366 [Start Level Event Dispatcher] WARN  o.a.s.h.c.SpellCheckComponent - No queryConverter defined, using default converter
+10:32:14.493 [425421485@qtp-1980322208-2] INFO  org.eclipse.orion.server.login - Login success: johna
