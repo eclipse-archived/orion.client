@@ -23,7 +23,7 @@ var assert = require("assert"),
 
 var CONTEXT_PATH = '',
 	WORKSPACE = path.join(__dirname, '.test_workspace'),
-	WORKSPACE_ID = "orionode",
+	WORKSPACE_ID = "anonymous-OrionContent",
 	XFER_PATH = CONTEXT_PATH + '/xfer',
 	IMPORT_PATH = CONTEXT_PATH + '/xfer/import',
 	EXPORT_PATH = CONTEXT_PATH + '/xfer/export',

@@ -21,7 +21,7 @@ var assert = require('assert'),
 	fileUtil = require('../../lib/fileUtil');
 
 var CONTEXT_PATH = '';
-var WORKSPACE_ID = "orionode";
+var WORKSPACE_ID = "anonymous-OrionContent";
 var PREFIX = CONTEXT_PATH + '/file/' + WORKSPACE_ID;
 var WORKSPACE = path.join(__dirname, '.test_workspace');
 

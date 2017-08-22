@@ -18,6 +18,7 @@ var testData = require('./support/test_data');
 var util = require("../lib/git/util");
 var fs = require('fs');
 var storeFactory = require('../lib/metastore/fs/store');
+var checkRights = require('../lib/accessRights').checkRights;
 var git;
 try {
 	git = require('nodegit');
@@ -26,13 +27,19 @@ try {
 
 var CONTEXT_PATH = '';
 var WORKSPACE = path.join(__dirname, '.test_workspace');
-var WORKSPACE_ID = "orionode";
+var WORKSPACE_ID = "anonymous-OrionContent";
+var configParams = { "orion.single.user": true };
 var FILE_ROOT = "/file/" + WORKSPACE_ID + "/";
+var userMiddleware = function(req, res, next) {
+	req.user.checkRights = checkRights;
+	next();
+};
 
 var app = express();
-app.locals.metastore = require('../lib/metastore/fs/store')({workspaceDir: WORKSPACE});
+app.locals.metastore = require('../lib/metastore/fs/store')({workspaceDir: WORKSPACE, configParams: configParams});
 app.locals.metastore.setup(app);
-app.use(CONTEXT_PATH + '/task', require('../lib/tasks').router({
+app.use(userMiddleware)
+.use(CONTEXT_PATH + '/task', require('../lib/tasks').router({
 	taskRoot: CONTEXT_PATH + '/task',
 	options: {metastore: storeFactory({})}
 }))

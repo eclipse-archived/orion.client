@@ -18,12 +18,13 @@ var supertest = require('supertest');
 var testData = require('./support/test_data');
 
 var CONTEXT_PATH = '';
-var WORKSPACE_ID = "orionode";
+var WORKSPACE_ID = "anonymous-OrionContent";
+var configParams = { "orion.single.user": true };
 var PREFIX = CONTEXT_PATH + '/file/' + WORKSPACE_ID;
 var WORKSPACE = path.join(__dirname, '.test_workspace');
 
 var app = express();
-app.locals.metastore = require('../lib/metastore/fs/store')({workspaceDir: WORKSPACE});
+app.locals.metastore = require('../lib/metastore/fs/store')({workspaceDir: WORKSPACE, configParams:configParams});
 app.locals.metastore.setup(app);
 app.use(CONTEXT_PATH + '/file' + "*", require('../lib/file')({gitRoot: CONTEXT_PATH + '/gitapi', fileRoot: CONTEXT_PATH + '/file', workspaceRoot: CONTEXT_PATH + '/workspace'}));
 var request = supertest.bind(null, app);
