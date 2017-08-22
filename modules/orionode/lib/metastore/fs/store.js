@@ -16,9 +16,7 @@ var
     mkdirpAsync = Promise.promisify(require('mkdirp')),
     metaUtil = require('../util/metaUtil'),
     accessRights = require('../../accessRights'),
-    os = require('os'),
-    log4js = require('log4js'),
-    logger = log4js.getLogger("fs-store");
+    os = require('os');
 
 // Helper functions
 var FILENAME_USER_METADATA = "user.json";
@@ -304,9 +302,7 @@ Object.assign(FsMetastore.prototype, {
 					// We have the lock until the promise returned by this function fulfills.
 					return fs.writeFileAsync(metadataPath, JSON.stringify(metadata, null, 2));
 				}).then(
-					function() {
-						callback();
-					},
+					callback,
 					callback /* error case */
 				);
 			},
@@ -450,9 +446,7 @@ Object.assign(FsMetastore.prototype, {
 				return Promise.using(lock(metadataFile), function() {
 					// We have the lock until the promise returned by this function fulfills.
 					return fs.writeFileAsync(metadataFile, JSON.stringify(metadata, null, 2));
-				}).then(function() {
-					callback();
-				});
+				}).then(callback);
 			},
 			callback /* error case */
 		);
@@ -536,9 +530,7 @@ Object.assign(FsMetastore.prototype, {
 				return Promise.using(lock(metaFile), function() {
 					// We have the lock until the promise returned by this function fulfills.
 					return fs.writeFileAsync(metaFile, JSON.stringify(metadata, null, 2));
-				}).then(function() {
-					callback();
-				});
+				}).then(callback);
 			},
 			callback /* error case */
 		);
