@@ -82,9 +82,12 @@ function PrefsController(options) {
 
 	// Promised middleware that acquires prefs from the metastore and stores in `req`.
 	function acquire(req) {
-		return new Promise(function(fulfill) {
+		return new Promise(function(fulfill, reject) {
 			read(req, function(err, scope, prefs){
-				if(scope === "user"){
+				if (err) {
+					return reject(err);
+				}
+				if (scope === "user") {
 					fulfill(new MODEL(prefs || null));
 				}
 				// TODO wrap workspace preference
@@ -121,15 +124,15 @@ function PrefsController(options) {
 	function read(req, callback){
 		var scope = req.url.split("/")[1];
 		var store = fileUtil.getMetastore(req);
-		if(scope === "user"){
-			store.getUser(req.user.username, function(err, data){
-				callback(err, scope, data.properties);
+		if (scope === "user"){
+			store.getUser(req.user.username, function(err, data) {
+				callback(err, scope, data ? data.properties : null);
 			});
-		}else if(scope === "workspace"){
-			store.getWorkspace(req.user.workspaceId, function(err, data){
-				callback(err, scope, data.properties);
+		} else if (scope === "workspace") {
+			store.getWorkspace(req.user.workspaceId, function(err, data) {
+				callback(err, scope, data ? data.properties : null);
 			});
-		}else if(scope === "project"){
+		} else if (scope === "project") {
 			// TODO implement read project prefs
 		}
 	}

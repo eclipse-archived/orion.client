@@ -141,7 +141,7 @@ module.exports = function(options) {
 					ContentLocation: projectLocation,
 					Location: projectLocation
 				}, 200);
-				store.updataProject && store.updataProject(workspace.id, {projectName:projectName, contentLocation:file.path, originalPath: req.body.Location});
+				store.updateProject && store.updateProject(workspace.id, {projectName:projectName, contentLocation:file.path, originalPath: req.body.Location});
 			});
 		}
 	}

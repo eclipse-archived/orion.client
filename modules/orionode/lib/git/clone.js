@@ -400,7 +400,7 @@ function postInit(req, res) {
 					"Location": gitRoot + "/clone" + fileRoot + "/" + file.workspaceId + api.toURLPath(file.path.substring(file.workspaceDir.length))
 				}, true);
 				var store = fileUtil.getMetastore(req);
-				store.updataProject(file.workspaceId, {projectName: getCloneName(req), contentLocation:file.path});
+				store.updateProject(file.workspaceId, {projectName: getCloneName(req), contentLocation:file.path});
 			})
 			.catch(function(err){
 				writeError(403, res);
@@ -504,7 +504,7 @@ function deleteClone(req, res) {
 	rmdir(file.path, function(err) {
 		if (err) return writeError(500, res, err);
 		var store = fileUtil.getMetastore(req);
-		store.updataProject && store.updataProject(file.workspaceId, {originalPath: rest});
+		store.updateProject && store.updateProject(file.workspaceId, {originalPath: rest});
 		writeResponse(200, res);
 	});
 }
@@ -687,7 +687,7 @@ function postClone(req, res) {
 			Severity: "Ok"
 		});
 		var store = fileUtil.getMetastore(req);
-		store.updataProject && store.updataProject(file.workspaceId, {projectName: getCloneName(req), contentLocation:file.path});
+		store.updateProject && store.updateProject(file.workspaceId, {projectName: getCloneName(req), contentLocation:file.path});
 	})
 	.catch(function(err) {
 		handleRemoteError(task, err, cloneUrl);

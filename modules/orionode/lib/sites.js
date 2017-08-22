@@ -188,6 +188,7 @@ function updateSite(req, res, callback, okStatus) {
 			return writeError(404, res, err.message);
 		}
 		if (!req.params.site) {
+			// TODO
 		}
 		var sites = prefs.sites || (prefs.sites = {});
 		var site = sites[req.params.site];
@@ -196,7 +197,7 @@ function updateSite(req, res, callback, okStatus) {
 			if (site && site.error) {
 				return writeError(site.status, res, site.error);
 			}
-			saveSites(req, prefs, function() {
+			saveSites(req, prefs, function(err) {
 				if (err) {
 					return writeError(400, res, "Failed to update site:" + req.params.id);
 				}

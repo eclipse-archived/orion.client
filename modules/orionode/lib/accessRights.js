@@ -89,6 +89,7 @@ var checkRights = function (userId, uri, req, res, next, method){
 	
 	var store = fileUtil.getMetastore(req);
 	store.getUser(userId, function(err, metadata){
+		// TODO handle err case and err === metadata === undefined case
 		var userRightArray = getAuthorizationData(metadata);
 		var hasAccess = userRightArray.some(function(userRight){
 			if(wildCardMatch(uri, userRight.Uri) && ((methodMask & userRight.Method) === methodMask)){
@@ -101,7 +102,7 @@ var checkRights = function (userId, uri, req, res, next, method){
 		if(hasAccess) {
 			next();
 		}else {
-			api.writeError(403, res, "You are not authorized to access" + uri);
+			api.writeError(403, res, "You are not authorized to access " + uri);
 		}
 	}
 	function wildCardMatch(text, pattern){
