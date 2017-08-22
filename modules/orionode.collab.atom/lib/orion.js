@@ -68,15 +68,16 @@ export default {
       path: "/socket.io/"
     });
 
-    if (!mySocket.connected) {
-      console.error('Socket connection failed');
-      /*
-       * Check:
-       *   - Servers are running
-       *   - `sessionId` above (attined from Collab Hub server) is correct
-       *   - Port number for the Collab Hub server above is correct
-       */
-    }
+    setTimeout(function() {
+      if (!mySocket.connected) {
+        console.error('Socket connection failed');
+        /* Check:
+         *   - if servers are running
+         *   - `sessionId` above (attined from Collab Hub server) is correct
+         *   - Port number for the Collab Hub server above is correct
+         */
+      }
+    }, 2000);
 
     mySocket.on('connect', function() {
       console.info('Socket connection successful');
@@ -91,17 +92,37 @@ export default {
     });
 
     mySocket.on('message', function(data) {
-      console.info('Server sent a message');
+
+      var msgObj = JSON.parse(data);
+      console.log(msgObj);
+
+      if (msgObj.type === 'init-document') {
+        console.info('Successfully joined document')
+      }
+
+      if (msgObj.type === 'operation') {
+        // Insert recieved text from Orion
+        // to where the cursor is in Atom
+        atom.workspace.getActiveTextEditor().insertText(msgObj.operation[1]);
+      }
+
     });
 
   },
 
   join_session() {
-    console.info('join_session not implemented');
+    mySocket.emit('message', JSON.stringify({
+      'clientId': 'arshi3.12345',
+      'token_bypass': 'arshi3'
+    }));
   },
 
   join_document() {
-    console.info('join_document not implemented');
+    mySocket.emit('message', JSON.stringify({
+      type: 'join-document',
+      doc: '/arshi-OrionContent/Test/demo.txt',
+      clientId: 'arshi3.12345'
+    }));
   },
 
 };

@@ -28,6 +28,7 @@ var sessions = new SessionManager();
 io.on('connection', function(sock) {
     // Get session ID
     var sessionId = sock.conn.request._query.sessionId;
+    console.log('[Info] sessionId: ' + sessionId);
 
     /**
      * Handle the initial message (authentication)
@@ -35,16 +36,42 @@ io.on('connection', function(sock) {
      */
     sock.on('message', function initMsgHandler(msg) {
         try {
-            var msgObj = JSON.parse(msg);
-            if (msgObj.type !== 'authenticate') {
-                throw new Error('Not authenticated.');
-            }
 
-            // Authenticate
+            var msgObj = JSON.parse(msg);
+
+            // Commenting out the following code
+            // to skip authentication
+            //
+            // TODO:
+            // - Restore the following code
+            //   when Atom is capable of authentication
+            //
+            //
+            // // Original Code:
+            //
+            // if (msgObj.type !== 'authenticate') {
+            //     throw new Error('Not authenticated.');
+            // }
+            //
+            // if (!msgObj.token) {
+            //     throw new Error('No token is specified.');
+            // }
+            //
+            // // End of Original Code
+            //
+            //
+            // // New code to skip auth ////////////////////////////////////////
+            console.log('[Info] Skipping authentication for atom plugin dev.')
+
             if (!msgObj.token) {
-                throw new Error('No token is specified.');
+                var user = {
+                  'username': msgObj.token_bypass
+                }
+            } else {
+                var user = jwt.verify(msgObj.token, JWT_SECRET);
             }
-            var user = jwt.verify(msgObj.token, JWT_SECRET);
+            // // End of new code //////////////////////////////////////////////
+            //
 
             // Give the control to a session
             sessions.addConnection(sessionId, sock, msgObj.clientId, user.username).then(function() {
@@ -53,7 +80,11 @@ io.on('connection', function(sock) {
             }).catch(function(err) {
                 sock.send(JSON.stringify({ type: 'error', error: err }));
             });
+
         } catch (ex) {
+
+            console.log(ex);
+
             sock.send(JSON.stringify({
                 type: 'error',
                 message: ex.message
