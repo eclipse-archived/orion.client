@@ -128,6 +128,9 @@ FsMetastore.prototype.setup = function(app) {
 	app.use(/* @callback */ function(req, res, next) {
 		if (this.options.configParams['orion.single.user']) {
 			this.getUser("anonymous", function(err, user) {
+				if (err) {
+					throw new Error("Failed to get 'anonymous' user's metadata");
+				}
 				if (!user) {
 					this.createUser({
 						username: "anonymous",
@@ -333,7 +336,7 @@ Object.assign(FsMetastore.prototype, {
 					"Properties": userProperty
 				};
 			 	return this._updateUserMetadata(userData.username, userJson, function(error) {
-					error ? callback(error) : callback(); // TODO successful case needs to return user data
+					error ? callback(error) : callback(); // TODO successful case needs to return user data including isAuthenticated, username, email, authToken for user.js
 				});
 				// TODO Save User info in cache for quick referrence
 			}.bind(this),
@@ -403,7 +406,7 @@ Object.assign(FsMetastore.prototype, {
 				if (error) {
 					return callback(error);
 				}
-				callback(); // TODO needs to return user data
+				callback(); // TODO needs to return user data with name, email and authToken for user.sendEmail method.
 			});
 		}.bind(this));
 	},

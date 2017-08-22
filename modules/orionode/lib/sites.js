@@ -143,7 +143,11 @@ function loadSites(req, callback) {
 		}
 		var prefs = {};
 		try {
-			prefs = JSON.parse(data.properties);
+			if (typeof data.properties === "string") {
+				prefs = JSON.parse(data.properties); // metadata.properties need to be parse when using MongoDB
+			} else {
+				prefs = data.properties; // metadata.properties don't need to be parse when using FS
+			}
 		} catch (e) {}
 		return callback(null, prefs);
 	});

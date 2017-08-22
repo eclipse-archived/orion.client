@@ -89,7 +89,12 @@ var checkRights = function (userId, uri, req, res, next, method){
 	
 	var store = fileUtil.getMetastore(req);
 	store.getUser(userId, function(err, metadata){
-		// TODO handle err case and err === metadata === undefined case
+		if (err) {
+			return done(null, err);
+		}
+		if (typeof metadata === "undefined") {
+			return done(false);
+		}
 		var userRightArray = getAuthorizationData(metadata);
 		var hasAccess = userRightArray.some(function(userRight){
 			if(wildCardMatch(uri, userRight.Uri) && ((methodMask & userRight.Method) === methodMask)){
@@ -98,7 +103,10 @@ var checkRights = function (userId, uri, req, res, next, method){
 		});
 		return done(hasAccess);
 	});	
-	function done(hasAccess){
+	function done(hasAccess, err){
+		if (err) {
+			api.writeError(404, res, err);
+		} 
 		if(hasAccess) {
 			next();
 		}else {
@@ -136,19 +144,19 @@ var checkRights = function (userId, uri, req, res, next, method){
 	function getAuthorizationData(metadata){
 		var properties;
 		var workspaceIDs;
-		if(typeof metadata.properties === "string"){
+		if (typeof metadata.properties === "string") {
 			properties = JSON.parse(metadata.properties); // metadata.properties need to be parse when using MongoDB
-		}else{
+		} else {
 			properties = metadata.properties; // metadata.properties don't need to be parse when using FS
 			workspaceIDs = metadata.WorkspaceIds; // This is only needed for Java server's metadata migration from old Java code
 		}
 		var version = properties["UserRightsVersion"];
 		var userRightArray = [];
-		if(version === 1 || version === 2) { // This only for Java server's metadata migration 
+		if (version === 1 || version === 2) { // This only for Java server's metadata migration 
 			workspaceIDs.forEach(function(workspaceId){
 				userRightArray = userRightArray.concat(createUserAccess(metadata["UniqueId"]).concat(createWorkspaceAccess(workspaceId)));
 			});
-		}else{
+		} else {
 			userRightArray = properties.UserRights;
 		}
 		return userRightArray;
