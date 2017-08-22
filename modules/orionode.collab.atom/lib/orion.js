@@ -1,7 +1,9 @@
 'use babel';
 
 import OrionView from './orion-view';
-import { CompositeDisposable } from 'atom';
+import {
+  CompositeDisposable
+} from 'atom';
 
 export default {
 
@@ -22,6 +24,18 @@ export default {
     // Register command that toggles this view
     this.subscriptions.add(atom.commands.add('atom-workspace', {
       'orion:toggle': () => this.toggle()
+    }));
+
+    this.subscriptions.add(atom.commands.add('atom-workspace', {
+      'orion:start_collab': () => this.start_collab()
+    }));
+
+    this.subscriptions.add(atom.commands.add('atom-workspace', {
+      'orion:join_session': () => this.join_session()
+    }));
+
+    this.subscriptions.add(atom.commands.add('atom-workspace', {
+      'orion:join_document': () => this.join_document()
     }));
   },
 
@@ -44,6 +58,18 @@ export default {
       this.modalPanel.hide() :
       this.modalPanel.show()
     );
-  }
+  },
+
+  start_collab() {
+    console.info('start_collab not implemented');
+  },
+
+  join_session() {
+    console.info('join_session not implemented');
+  },
+
+  join_document() {
+    console.info('join_document not implemented');
+  },
 
 };
