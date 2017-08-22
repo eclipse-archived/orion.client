@@ -30,9 +30,10 @@ module.exports.router = function(options) {
 	module.exports.branchJSON = branchJSON;
 	module.exports.getBranchCommit = getBranchCommit;
 	module.exports.getBranchRemotes = getBranchRemotes;
-
+	
 	return express.Router()
 	.use(bodyParser.json())
+	.use(options.checkUserAccess)
 	.get(fileRoot + '*', getBranches)
 	.get('/:branchName*', getBranches)
 	.delete('/:branchName*', deleteBranch)

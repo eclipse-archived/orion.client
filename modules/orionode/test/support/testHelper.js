@@ -26,7 +26,7 @@ exports.WORKSPACE = WORKSPACE = path.join(__dirname, '.test_workspace');
  * The id of the test workspace. Value is orionode
  * @since 16.0
  */
-exports.WORKSPACE_ID = WORKSPACE_ID = "orionode";
+exports.WORKSPACE_ID = WORKSPACE_ID = "anonymous-OrionContent";
 /**
  * The path of the file endpoint, including the CONTEXT_PATH. Default value is /file
  * @since 16.0

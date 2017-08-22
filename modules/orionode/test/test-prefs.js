@@ -40,7 +40,8 @@ var samplePrefData = {
 
 var app = express();
 var options = {
-	workspaceDir: WORKSPACE_DIR
+	workspaceDir: WORKSPACE_DIR,
+	configParams: { "orion.single.user": true }
 };
 app.locals.metastore = require('../lib/metastore/fs/store')(options);
 app.locals.metastore.setup(app);

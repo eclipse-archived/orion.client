@@ -18,10 +18,11 @@ var xfer = require('../lib/xfer');
 
 var CONTEXT_PATH = '';
 var WORKSPACE = path.join(__dirname, '.test_workspace');
-var WORKSPACE_ID = "orionode";
+var WORKSPACE_ID = "anonymous-OrionContent";
+var configParams = { "orion.single.user": true };
 
 var app = express();
-app.locals.metastore = require('../lib/metastore/fs/store')({workspaceDir: WORKSPACE});
+app.locals.metastore = require('../lib/metastore/fs/store')({workspaceDir: WORKSPACE, configParams: configParams});
 app.locals.metastore.setup(app);
 app.use(CONTEXT_PATH + '/xfer', require("../lib/xfer").router({ fileRoot: CONTEXT_PATH + "/xfer" }));
 

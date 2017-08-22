@@ -17,7 +17,7 @@ var testData = require('./support/test_data');
 
 var CONTEXT_PATH = '';
 var PREFIX = CONTEXT_PATH + '/workspace', PREFIX_FILE = CONTEXT_PATH + '/file';
-var WORKSPACE_ID = 'orionode';
+var WORKSPACE_ID = 'anonymous-OrionContent';
 var TEST_WORKSPACE_NAME = '.test_workspace';
 var WORKSPACE = path.join(__dirname, TEST_WORKSPACE_NAME);
 

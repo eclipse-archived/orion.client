@@ -17,10 +17,11 @@ var tasks = require('../lib/tasks');
 var CONTEXT_PATH = '';
 var username = "testUser" + Date.now();
 var taskIds = [];
+var configParams = { "orion.single.user": true };
 
 var app = express();
 var options = {};
-options.metastore = app.locals.metastore = require('../lib/metastore/fs/store')({workspaceDir: ""});
+options.metastore = app.locals.metastore = require('../lib/metastore/fs/store')({workspaceDir: "", configParams: configParams});
 app.locals.metastore.setup(app);
 app.use(CONTEXT_PATH + '/taskHelper', require('./support/task_helper').router({
 	root: '/taskHelper',

@@ -13,6 +13,7 @@ var assert = require("assert");
 var express = require("express");
 var supertest = require("supertest");
 var orionMiddleware = require("../index");
+var checkRights = require('../lib/accessRights').checkRights;
 var path = require("path");
 var testData = require("./support/test_data");
 
@@ -31,6 +32,7 @@ var orion = function(options) {
  */
 var userMiddleware = function(req, res, next) {
 	req.user = {workspaceDir: WORKSPACE};
+	req.user.checkRights = checkRights;
 	next();
 };
 

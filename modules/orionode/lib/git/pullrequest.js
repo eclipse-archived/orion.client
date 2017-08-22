@@ -26,6 +26,7 @@ module.exports.router = function(options) {
 	
 	return express.Router()
 	.use(bodyParser.json())
+	.use(options.checkUserAccess)
 	.post(fileRoot + '*', getPullRequest);
 	
 function pullRequestJSON(cloneDir,remoteDir,bodyJson) {

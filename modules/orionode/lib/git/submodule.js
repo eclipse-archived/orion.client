@@ -25,6 +25,7 @@ module.exports.router = function(options) {
 	
 	return express.Router()
 	.use(bodyParser.json())
+	.use(options.checkUserAccess)
 	.put(fileRoot + '*', putSubmodule)
 	.post(fileRoot + '*', postSubmodule)
 	.delete(fileRoot + '*', deleteSubmodule);

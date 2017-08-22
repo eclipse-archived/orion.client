@@ -136,14 +136,18 @@ function saveRunningSites() {
 
 function loadSites(req, callback) {
 	var store = fileUtil.getMetastore(req);
-	store.readUserPreferences(req.user, function(err, data) {
+	store.getUser(req.user, function(err, data) {
 		if (err) {
 			// assume that the file does not exits
 			return callback(null, {});
 		}
 		var prefs = {};
 		try {
-			prefs = JSON.parse(data);
+			if (typeof data.properties === "string") {
+				prefs = JSON.parse(data.properties); // metadata.properties need to be parse when using MongoDB
+			} else {
+				prefs = data.properties; // metadata.properties don't need to be parse when using FS
+			}
 		} catch (e) {}
 		return callback(null, prefs);
 	});
@@ -151,7 +155,7 @@ function loadSites(req, callback) {
 
 function saveSites(req, prefs, callback) {
 	var store = fileUtil.getMetastore(req);
-	store.updateUserPreferences(req.user, JSON.stringify(prefs, null, "\t"), callback);
+	store.updateUser(req.user, {properties: JSON.stringify(prefs, null, "\t") }, callback);
 }
 
 function getSite(req, res) {
@@ -188,6 +192,7 @@ function updateSite(req, res, callback, okStatus) {
 			return writeError(404, res, err.message);
 		}
 		if (!req.params.site) {
+			// TODO
 		}
 		var sites = prefs.sites || (prefs.sites = {});
 		var site = sites[req.params.site];
@@ -196,7 +201,7 @@ function updateSite(req, res, callback, okStatus) {
 			if (site && site.error) {
 				return writeError(site.status, res, site.error);
 			}
-			saveSites(req, prefs, function() {
+			saveSites(req, prefs, function(err) {
 				if (err) {
 					return writeError(400, res, "Failed to update site:" + req.params.id);
 				}

@@ -293,6 +293,12 @@ module.exports = function(options) {
 			if (stats.isDirectory()) {
 				fileUtil.rumRuff(file.path, checkWorkspace);
 				
+				if(file.path.substr(file.workspaceDir.length).split("/").length === 3){
+					// Meaning this folder is a project level folder
+					var store = fileUtil.getMetastore(req);
+					store.updateProject && store.updateProject(file.workspaceId, {originalPath: req.baseUrl});
+				}
+				
 				var eventData = { type: "delete", file: file, req: req };
 				fileUtil.fireFileModificationEvent(eventData);
 			} else {

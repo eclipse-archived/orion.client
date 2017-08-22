@@ -265,7 +265,8 @@ module.exports.router = function(options) {
 		if (!req.user || !(req.params.id === req.user.username || isAdmin(req.user.username))) {
 			return api.writeResponse(403, res);
 		}
-		next();
+		var uri = req.originalUrl.substring(req.baseUrl.length + req.contextPath.length);
+		req.user.checkRights(req.user.username, uri, req, res, next);
 	}
 
 	app.get("/users", checkUserAccess, function(req,res) {
@@ -293,9 +294,11 @@ module.exports.router = function(options) {
 
 	app.get("/users/:id", checkUserAccess, function(req,res){
 		metastore(req).getUser(req.params.id, function(err, user) {
-			if (err) return api.writeResponse(404, res);
+			if (err) {
+				return api.writeResponse(404, res);
+			}
 			if (!user) {
-				return api.writeError(400, res, "User not fount: " + req.params.id);
+				return api.writeError(400, res, "User not found: " + req.params.id);
 			}
 			return api.writeResponse(200, res, null, userJSON(user));
 		});
@@ -305,9 +308,11 @@ module.exports.router = function(options) {
 		var id = req.params.id;
 		var store = metastore(req);
 		store.getUser(id, function(err, user) {
-			if (err) return api.writeResponse(404, res);
+			if (err) {
+				return api.writeResponse(404, res);
+			}
 			if (!user) {
-				return api.writeError(400, res, "User not fount: " + req.params.id);
+				return api.writeError(400, res, "User not found: " + req.params.id);
 			}
 			var hasNewPassword = typeof req.body.Password !== "undefined";
 			var promiseChain = Promise.resolve();
@@ -369,7 +374,9 @@ module.exports.router = function(options) {
 		}
 		var store = metastore(req);
 		store.getUser(id, function(err, user) {
-			if (err) return api.writeResponse(404, res);
+			if (err) {
+				return api.writeResponse(404, res);
+			}
 			if (!user) {
 				return api.writeError(400, res, "User not found: " + req.params.id);
 			}
@@ -392,7 +399,8 @@ module.exports.router = function(options) {
 			email: req.body.Email,
 			fullname: req.body.FullName,
 			oauth: req.body.identifier,
-			password: req.body.Password
+			password: req.body.Password,
+			properties:{}
 		};
 		var store = metastore(req);
 		store.createUser(userData, function(err, user) {
@@ -402,15 +410,14 @@ module.exports.router = function(options) {
 			if (options.configParams["orion.auth.user.creation.force.email"]) {
 				sendMail({user: user, options: options, template: CONFIRM_MAIL, auth: CONFIRM_MAIL_AUTH, req: req});
 				return api.writeResponse(201, res, null, {error: "Created"});
-			} else {
-				user.isAuthenticated = true;
-				store.updateUser(user.username, user, function(err, user) {
-					if (err) {
-						return logError(err);
-					}
-					return api.writeResponse(201, res, null, {error: "Created"});
-				});
 			}
+			user.isAuthenticated = true;
+			store.updateUser(user.username, user, function(err, user) {
+				if (err) {
+					return logError(err);
+				}
+				return api.writeResponse(201, res, null, {error: "Created"});
+			});
 		});
 	});
 
@@ -494,7 +501,7 @@ module.exports.router = function(options) {
 			return api.writeResponse(200, res);
 		}
 		//add the web token with the response
-		if (options.configParams["orion.jwt.secret"]) {
+		if (options.configParams["orion.collab.enabled"] && options.configParams["orion.jwt.secret"]) {
 			req.user.jwt = jwt.sign({'username': req.user.username}, options.configParams["orion.jwt.secret"]);
 		}
 		return api.writeResponse(200, res, null, userJSON(req.user));

@@ -23,6 +23,7 @@ function router(options) {
 	
 	return express.Router()
 	.use(bodyParser.json())
+	.use(options.checkUserAccess)
 	.get('*', getStatus);
 	
 	function getStatus(req, res) {

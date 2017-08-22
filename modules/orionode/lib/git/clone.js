@@ -52,9 +52,20 @@ module.exports.router = function(options) {
 	module.exports.getSignature = getSignature;
 	module.exports.getCommit = getCommit;
 	module.exports.postClone = postClone;
+	
+	function checkUserAccess(req, res, next){
+		var uri = req.originalUrl.substring(req.baseUrl.length);
+		var uriSegs = uri.split("/");
+		if(uriSegs.length > 0 && "/" + uriSegs[1] === fileRoot){
+			req.user.checkRights(req.user.username, uri, req, res, next);
+		}else{
+			next();
+		}
+	}
 
 	return express.Router()
 	.use(bodyParser.json())
+	.use(checkUserAccess) // Use specified checkUserAceess implementation instead of the common one from options
 	.get(workspaceRoot + '*', getClone)
 	.get(fileRoot + '*', getClone)
 	.put(fileRoot + '*', putClone)
@@ -313,6 +324,18 @@ function configRepo(repo, username, email) {
 	});
 }
 
+function getCloneName(req) {
+	var cloneName = req.body.Name;
+	var cloneUrl = req.body.GitUrl;
+	if (!cloneName && cloneUrl) {
+		if (cloneUrl.charAt(cloneUrl.length - 1) === "/") {
+			cloneUrl = cloneUrl.slice(0, -1);
+		}	
+		cloneName = cloneUrl.substring(cloneUrl.lastIndexOf("/") + 1).replace(".git", "");
+	}
+	return cloneName;
+}
+
 function getClonePath(req) {
 	var workspacePath = req.body.Location;
 	var filePath = req.body.Path;
@@ -328,14 +351,7 @@ function getClonePath(req) {
 		rest = workspacePath.split("/").slice(2).join("/");
 		file = fileUtil.getFile(req, rest);
 		if (file) {
-			var cloneName = req.body.Name;
-			var cloneUrl = req.body.GitUrl;
-			if (!cloneName && cloneUrl) {
-				if (cloneUrl.charAt(cloneUrl.length - 1) === "/") {
-					cloneUrl = cloneUrl.slice(0, -1);
-				}	
-				cloneName = cloneUrl.substring(cloneUrl.lastIndexOf("/") + 1).replace(".git", "");
-			}
+			var cloneName = getCloneName(req);
 			if (!cloneName) return null;
 			file.path = getUniqueFileName(file.path, cloneName);
 		}
@@ -383,6 +399,8 @@ function postInit(req, res) {
 				writeResponse(201, res, null, {
 					"Location": gitRoot + "/clone" + fileRoot + "/" + file.workspaceId + api.toURLPath(file.path.substring(file.workspaceDir.length))
 				}, true);
+				var store = fileUtil.getMetastore(req);
+				store.updateProject(file.workspaceId, {projectName: getCloneName(req), contentLocation:file.path});
 			})
 			.catch(function(err){
 				writeError(403, res);
@@ -485,6 +503,8 @@ function deleteClone(req, res) {
 	var file = fileUtil.getFile(req, rest);
 	rmdir(file.path, function(err) {
 		if (err) return writeError(500, res, err);
+		var store = fileUtil.getMetastore(req);
+		store.updateProject && store.updateProject(file.workspaceId, {originalPath: rest});
 		writeResponse(200, res);
 	});
 }
@@ -666,6 +686,8 @@ function postClone(req, res) {
 			Message: "OK",
 			Severity: "Ok"
 		});
+		var store = fileUtil.getMetastore(req);
+		store.updateProject && store.updateProject(file.workspaceId, {projectName: getCloneName(req), contentLocation:file.path});
 	})
 	.catch(function(err) {
 		handleRemoteError(task, err, cloneUrl);

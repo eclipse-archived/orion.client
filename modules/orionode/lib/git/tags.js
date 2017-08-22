@@ -30,6 +30,7 @@ module.exports.router = function(options) {
 
 	return express.Router()
 	.use(bodyParser.json())
+	.use(options.checkUserAccess)
 	.get(fileRoot + '*', getTags)
 	.get('/:tagName*', getTags)
 	.delete('/:tagName*', deleteTag);

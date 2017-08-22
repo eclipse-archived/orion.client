@@ -18,6 +18,7 @@ var api = require('../api'),
     nodePath = require('path'),
     nodeUrl = require('url'),
     os = require('os'),
+    Horizontal_Prefs = require('../model/hirizontal_pref'),
     Preference = require('../model/pref'),
     Promise = require('bluebird');
 
@@ -25,26 +26,35 @@ var api = require('../api'),
 
 module.exports = {};
 
-module.exports.readPrefs = readPrefs;
-module.exports.writePrefs = writePrefs;
+module.exports.readElectronPrefs = readElectronPrefs;
+module.exports.writeElectronPrefs = writeElectronPrefs;
 module.exports.router = PrefsController;
 
-var NOT_EXIST = Preference.NOT_EXIST;
-var PREF_FILENAME = PrefsController.PREF_FILENAME = 'prefs.json';
+var isMongo;  // determines if what acquire by thie controller is java version prefs(fs prefs storage) or property expanded preferrence(mongo prefs storage). 
+var NOT_EXIST;
+var MODEL;
+var PREF_FILENAME = PrefsController.PREF_FILENAME = 'user.json';
 
 // Middleware that serves prefs requests.
 //
 // https://wiki.eclipse.org/Orion/Server_API/Preference_API
 function PrefsController(options) {
 	options.configParams = options.configParams || {};
+	isMongo = options.configParams["orion.metastore.useMongo"];
+	if(isMongo){
+		MODEL = Preference;
+	}else{
+		MODEL = Horizontal_Prefs;
+	}
+	NOT_EXIST = MODEL.NOT_EXIST;
 
 	var router = express.Router()
 	.use(bodyParser.json())
 	.use(bodyParser.urlencoded({ extended: false }));
 
-	router.get('*',    wrapAsMiddleware(handleGet));
-	router.put('*',    wrapAsMiddleware(handlePut));
-	router.delete('*', wrapAsMiddleware(handleDelete));
+	router.get('*',    wrapAsMiddleware(handleGet, true));
+	router.put('*',    wrapAsMiddleware(handlePut, false));
+	router.delete('*', wrapAsMiddleware(handleDelete, false));
 	router.use(function(err, req, res, next) {
 		if (!err) {
 			return next();
@@ -61,40 +71,44 @@ function PrefsController(options) {
 	function wrapAsMiddleware(handler) {
 		return function(req, res, next) {
 			return Promise.resolve()
-			.then(acquirePrefs.bind(null, req, res))
+			.then(acquire.bind(null, req, res))
 			.then(handler.bind(null, req, res))
 			.then(function() { //eslint-disable-line consistent-return
-				return savePrefs(req, req.prefs);
+				return save(req, req.prefs);
 			})
 			.catch(next); // next(err)
 		};
 	}
 
 	// Promised middleware that acquires prefs from the metastore and stores in `req`.
-	function acquirePrefs(req) {
-		var store = fileUtil.getMetastore(req);
-		return new Promise(function(fulfill) {
-			store.readUserPreferences(req.user, function(err, prefs) {
-				fulfill(new Preference(prefs || null));
+	function acquire(req) {
+		return new Promise(function(fulfill, reject) {
+			read(req, function(err, scope, prefs){
+				if (err) {
+					return reject(err);
+				}
+				if (scope === "user") {
+					fulfill(new MODEL(prefs || null));
+				}
+				// TODO wrap workspace preference
 			});
 		})
 		.then(function(prefs) {
 			var urlObj = req._parsedUrl || nodeUrl.parse(req.url);
 			req.prefs = prefs;
-			req.prefPath = urlObj.pathname;
+			req.prefPath = urlObj.pathname.split("/").slice(2).join("/");
 			req.prefNode = req.prefs.get(req.prefPath);
 		});
 	}
 
 	// @returns Promise that resolves if prefs were written to the metastore ok, rejects if a problem happened.
-	function savePrefs(req, prefs) {
+	function save(req, prefs) {
 		/*eslint-disable consistent-return*/
 		if (!prefs.modified()) {
 			return Promise.resolve();
 		}
-		var store = fileUtil.getMetastore(req);
 		return new Promise(function(fulfill, reject) {
-			store.updateUserPreferences(req.user, prefs.toJSON(), function(err) {
+			update(req, prefs.getJson(), function(err){
 				if (err) {
 					return reject(err);
 				}
@@ -105,6 +119,38 @@ function PrefsController(options) {
 			throw err;
 		});
 		/*eslint-enable*/
+	}
+	
+	function read(req, callback){
+		var scope = req.url.split("/")[1];
+		var store = fileUtil.getMetastore(req);
+		if (scope === "user"){
+			store.getUser(req.user.username, function(err, data) {
+				callback(err, scope, data ? data.properties : null);
+			});
+		} else if (scope === "workspace") {
+			store.getWorkspace(req.user.workspaceId, function(err, data) {
+				callback(err, scope, data ? data.properties : null);
+			});
+		} else if (scope === "project") {
+			// TODO implement read project prefs
+		}
+	}
+	
+	function update(req, prefs, callback){
+		var scope = req.url.split("/")[1];
+		var store = fileUtil.getMetastore(req);
+		if(scope === "user"){
+			store.updateUser(req.user.username, {properties:prefs}, function(err){
+				callback(err);
+			});
+		}else if(scope === "workspace"){
+			store.updateWorkspace(req.user.workspaceId, {properties:prefs}, function(err){
+				callback(err);
+			});
+		}else if(scope === "project"){
+			// TODO implement update project prefs
+		}
 	}
 
 } // PrefsController
@@ -177,7 +223,7 @@ function getElectronPrefsFileName(){
 	return nodePath.join(os.homedir(), '.orion', PREF_FILENAME);
 }
 
-function readPrefs(){
+function readElectronPrefs(){
 	try {
 		var content = fs.readFileSync(getElectronPrefsFileName(),'utf8');
 		return JSON.parse(content);
@@ -185,6 +231,6 @@ function readPrefs(){
 	return {};
 }
 
-function writePrefs(contents){
-	fs.writeFileSync(getElectronPrefsFileName(), JSON.stringify(contents, null, 2), 'utf8');
+function writeElectronPrefs(contents){
+//	fs.writeFileSync(getElectronPrefsFileName(), JSON.stringify(contents, null, 2), 'utf8');
 }
