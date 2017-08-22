@@ -61,7 +61,39 @@ export default {
   },
 
   start_collab() {
-    console.info('start_collab not implemented');
+
+    const io = require('socket.io-client');
+
+    mySocket = io.connect('http://localhost:8082/' + "?sessionId=" + 'jnpO0CBn8n', {
+      path: "/socket.io/"
+    });
+
+    if (!mySocket.connected) {
+      console.error('Socket connection failed');
+      /*
+       * Check:
+       *   - Servers are running
+       *   - `sessionId` above (attined from Collab Hub server) is correct
+       *   - Port number for the Collab Hub server above is correct
+       */
+    }
+
+    mySocket.on('connect', function() {
+      console.info('Socket connection successful');
+    });
+
+    mySocket.on('disconnect', function() {
+      console.info('Socket disconnected');
+    });
+
+    mySocket.on('error', function(e) {
+      console.info('Server sent an error message');
+    });
+
+    mySocket.on('message', function(data) {
+      console.info('Server sent a message');
+    });
+
   },
 
   join_session() {
