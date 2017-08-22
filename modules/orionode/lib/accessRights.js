@@ -96,7 +96,7 @@ var checkRights = function (userId, uri, req, res, next, method){
 			return done(false);
 		}
 		var userRightArray = getAuthorizationData(metadata);
-		var hasAccess = userRightArray.some(function(userRight){
+		var hasAccess = userRightArray && userRightArray.some(function(userRight){
 			if(wildCardMatch(uri, userRight.Uri) && ((methodMask & userRight.Method) === methodMask)){
 				return true;
 			}
