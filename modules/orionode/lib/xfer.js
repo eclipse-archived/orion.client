@@ -118,8 +118,14 @@ function postImportXferTo(req, res, file) {
 		var lengthStr = req.get("X-Xfer-Content-Length") || req.get("Content-Length");
 		if (lengthStr) length = Number(lengthStr);
 	} else {
-		upload(request(sourceURL));
-		return;
+		var rerr,
+			newreq = request(sourceURL, {}, function(err, res) {
+				rerr = err;
+		})
+		if(rerr) {
+			return writeError(400, res, rerr.message);
+		}
+		return upload(newreq);
 	}
 	if (req.get("Content-Type") === "application/octet-stream") {
 		upload(req);
@@ -179,7 +185,9 @@ function completeTransfer(req, res, tempFile, file, fileName, xferOptions, shoul
 			lazyEntries: true,
 			validateEntrySizes: true
 		}, function(err, zipfile) {
-			if (err) throw err;
+			if (err) {
+				return writeError(400, res, err.message);
+			}
 			zipfile.readEntry();
 			zipfile.on("close", function() {
 				fs.unlink(tempFile, function(exp){});
