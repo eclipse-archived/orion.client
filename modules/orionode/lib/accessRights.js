@@ -144,18 +144,30 @@ var checkRights = function (userId, uri, req, res, next, method){
 	function getAuthorizationData(metadata){
 		var properties;
 		var workspaceIDs;
+		var isPropertyString;
 		if (typeof metadata.properties === "string") {
+			isPropertyString = true;
 			properties = JSON.parse(metadata.properties); // metadata.properties need to be parse when using MongoDB
+			workspaceIDs = metadata.workspaces.map(function(workspace){
+				return workspace.id;
+			});
 		} else {
+			isPropertyString = false;
 			properties = metadata.properties; // metadata.properties don't need to be parse when using FS
 			workspaceIDs = metadata.WorkspaceIds; // This is only needed for Java server's metadata migration from old Java code
 		}
-		var version = properties["UserRightsVersion"];
+		var version = properties["UserRightsVersion"] || 1; //assume version 1 if not specified
 		var userRightArray = [];
 		if (version === 1 || version === 2) { // This only for Java server's metadata migration 
 			workspaceIDs.forEach(function(workspaceId){
 				userRightArray = userRightArray.concat(createUserAccess(metadata["UniqueId"]).concat(createWorkspaceAccess(workspaceId)));
 			});
+			properties["UserRights"] = userRightArray;
+			properties["UserRightsVersion"] = CURRENT_VERSION;
+			if (isPropertyString) {
+				metadata.properties = JSON.stringify(properties, null, 2);
+			}
+			store.updateUser(metadata["UniqueId"], metadata, function(){});
 		} else {
 			userRightArray = properties.UserRights;
 		}
