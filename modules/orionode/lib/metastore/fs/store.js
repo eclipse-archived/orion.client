@@ -391,7 +391,9 @@ Object.assign(FsMetastore.prototype, {
 			if (error) {
 				return callback(error);
 			}
-
+			
+			// userData.properties contains all the properties, not only the ones that are changed, 
+			// because of locking, it's safe to say the properties hasn't been changed by other operations
 			metadata.Properties = userData.properties;
 			// update other userData 
 			userData.fullname && (metadata.FullName = userData.fullname);

@@ -136,7 +136,7 @@ function saveRunningSites() {
 
 function loadSites(req, callback) {
 	var store = fileUtil.getMetastore(req);
-	store.getUser(req.user, function(err, data) {
+	store.getUser(req.user.username, function(err, data) {
 		if (err) {
 			// assume that the file does not exits
 			return callback(null, {});
@@ -155,7 +155,7 @@ function loadSites(req, callback) {
 
 function saveSites(req, prefs, callback) {
 	var store = fileUtil.getMetastore(req);
-	store.updateUser(req.user, {properties: JSON.stringify(prefs, null, "\t") }, callback);
+	store.updateUser(req.user.username, {properties: JSON.stringify(prefs, null, 2) }, callback);
 }
 
 function getSite(req, res) {

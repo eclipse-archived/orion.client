@@ -285,7 +285,8 @@ Object.assign(MongoDbMetastore.prototype, {
 				return callback(err);
 			}
 			// mixin new properties
-//			user.properties = userData.properties;  // TODO Make sure this is right thing to do.
+			// userData.properties contains all the properties, not only the ones that are changed, 
+			// because of locking, it's safe to say the properties hasn't been changed by other operations
 			Object.assign(user, userData);
 
 			// Setting password and authToken are special cases handled by specific methods

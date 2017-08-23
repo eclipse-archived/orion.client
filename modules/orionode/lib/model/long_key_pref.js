@@ -20,8 +20,11 @@ function Prefs(s) {
 	this.json = s || {};
 	this.isModified = false;
 }
-// @param path - eg. /user/editor/settings
-// @returns The node, or NOT_EXIST if the path did not exist.
+/**
+ * Use the path in whole as part of the key name, so the key is a long key
+ * @param path - eg. /user/editor/settings
+ * @returns The node, or NOT_EXIST if the path did not exist.
+ */
 Prefs.prototype.get = function(path) {
 	var root = this.json;
 	var segs = path.split('/');
@@ -47,7 +50,10 @@ Prefs.prototype.get = function(path) {
 	}
 	return naiveClone(result);
 };
-// Replaces the node at the given path. If node === NOT_EXIST then the node is removed.
+/**
+ * Use the path in whole as part of the key name, so the key is a long key
+ * Replaces the node at the given path. If node === NOT_EXIST then the node is removed.
+ */
 Prefs.prototype.set = function(path, node) {
 	if (path === '') {
 		this.json = node;
