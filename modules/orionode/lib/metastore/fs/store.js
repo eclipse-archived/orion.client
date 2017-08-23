@@ -564,7 +564,7 @@ Object.assign(FsMetastore.prototype, {
 			return mkdirpAsync(taskDir).then( // create parent folder(s) if necessary
 				function() {
 					var taskFile = nodePath.join(taskDir, taskObj.id);
-					return fs.writeFileAsync(taskFile, JSON.stringify(taskObj.toJSON(true), null, 2))
+					return fs.writeFileAsync(taskFile, JSON.stringify(taskObj.toJSON(taskObj, true), null, 2))
 					.then(function(){
 						callback(null);
 					}, callback);

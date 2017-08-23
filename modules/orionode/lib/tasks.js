@@ -39,10 +39,10 @@ function orionTasksAPI(options) {
 			if (err) {
 				return writeError(500, res, err.toString());
 			}
-			if (!task || task.username !== req.user.username) {
+			if (!task || (task.username && task.username !== req.user.username)) {
 				return writeError(404, res);
 			}
-			writeResponse(200, res, null, task.toJSON(true));
+			writeResponse(200, res, null, toJSON(task, true));
 		});
 	})
 	.delete('', deleteAllOperations)
@@ -52,10 +52,10 @@ function orionTasksAPI(options) {
 			if (err) {
 				return writeError(500, res, err.toString());
 			}
-			if (!task || task.username !== req.user.username) {
+			if (!task || (task.username && task.username !== req.user.username)) {
 				return writeError(404, res);
 			}
-			writeResponse(200, res, null, task.toJSON(false));
+			writeResponse(200, res, null, toJSON(task, false));
 		});
 	})
 	.delete('/temp/:id', deleteOperation)
@@ -66,7 +66,7 @@ function orionTasksAPI(options) {
 
 function getTaskMeta(req) {
 	return {
-		keep: req.path.startWith("/id"),
+		keep: req.url.startsWith("/id"),
 		username: req.user.username,
 		id: req.id
 	};
@@ -99,6 +99,7 @@ Task.prototype = {
 		if (!this.isRunning()) return;
 		taskCount++;
 		this.started = true;
+		this.toJSON = toJSON;
 		taskStore.createTask(this, function(err) {
 			var res = this.res;
 			if (res.finished) {
@@ -107,7 +108,7 @@ Task.prototype = {
 			if (err) {
 				writeError(500, res, err.toString());
 			} else {
-				var resp = JSON.stringify(this.toJSON(true));
+				var resp = JSON.stringify(toJSON(this, true));
 				api.writeResponse(202, res, {
 					'Content-Type': 'application/json',
 					'Content-Length': resp.length
@@ -180,30 +181,6 @@ Task.prototype = {
 			}
 		});
 	},
-	toJSON: function(isWriteLocation) {
-		var result = {
-			lengthComputable: this.lengthComputable,
-			cancelable: this.cancelable,
-			expires: this.expires,
-			timestamp: this.timestamp,
-			type: this.type
-		};
-		if (this.lengthComputable) {
-			result.loaded = this.loaded;
-			result.total = this.total;
-			result.message = this.message;
-		}
-		if (this.result) {
-			result.Result = this.result;
-		}
-		if (this.keep && isWriteLocation) {
-			// Do not set location so that this is deleted
-			result.Location = taskRoot + "/id/" + this.id;
-		} else if (isWriteLocation) {
-			result.Location = taskRoot + "/temp/" + this.id;
-		}
-		return result;
-	}
 };
 
 function deleteOperation(req, res/*, next*/) {
@@ -246,11 +223,37 @@ function deleteAllOperations(req, res) {
 			if (task.result) {
 				taskStore.deleteTask(task, done); /* task is completed */
 			} else {
-				locations.push(task.toJSON(true).Location);
+				locations.push(toJSON(task, true).Location);
 				done();
 			}
 		});
 	});
+}
+
+
+function toJSON(task, isWriteLocation) {
+	var result = {
+		lengthComputable: task.lengthComputable,
+		cancelable: task.cancelable,
+		expires: task.expires,
+		timestamp: task.timestamp,
+		type: task.type
+	};
+	if (task.lengthComputable) {
+		result.loaded = task.loaded;
+		result.total = task.total;
+		result.message = task.message;
+	}
+	if (task.result) {
+		result.Result = task.result;
+	}
+	if (task.keep && isWriteLocation) {
+		// Do not set location so that tasks is deleted
+		result.Location = taskRoot + "/id/" + task.id;
+	} else if (isWriteLocation) {
+		result.Location = taskRoot + "/temp/" + task.id;
+	}
+	return result;
 }
 	
 module.exports = {
