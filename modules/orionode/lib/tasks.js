@@ -35,33 +35,41 @@ function orionTasksAPI(options) {
 		next();
 	})
 	.get('/id/:id', function(req, res/*, next*/) {
-		taskStore.getTask(req.id, function(err, task) {
+		taskStore.getTask(getTaskMeta(req), function(err, task) {
 			if (err) {
 				return writeError(500, res, err.toString());
 			}
 			if (!task || task.username !== req.user.username) {
 				return writeError(404, res);
 			}
-			writeResponse(200, res, null, toJSON(task, true));
+			writeResponse(200, res, null, task.toJSON(true));
 		});
 	})
 	.delete('', deleteAllOperations)
 	.delete('/id/:id', deleteOperation)
 	.get('/temp/:id', function(req, res/*, next*/) {
-		taskStore.getTask(req.id, function(err, task) {
+		taskStore.getTask(getTaskMeta(req), function(err, task) {
 			if (err) {
 				return writeError(500, res, err.toString());
 			}
 			if (!task || task.username !== req.user.username) {
 				return writeError(404, res);
 			}
-			writeResponse(200, res, null, toJSON(task, false));
+			writeResponse(200, res, null, task.toJSON(false));
 		});
 	})
 	.delete('/temp/:id', deleteOperation)
 	.get('/count', function(req, res/*, next*/) {
 		writeResponse(200, res, null, {"count": taskCount});
 	});
+}
+
+function getTaskMeta(req) {
+	return {
+		keep: req.path.startWith("/id"),
+		username: req.user.username,
+		id: req.id
+	};
 }
 
 function Task(res, cancelable, lengthComputable, wait, keep) {
@@ -99,7 +107,7 @@ Task.prototype = {
 			if (err) {
 				writeError(500, res, err.toString());
 			} else {
-				var resp = JSON.stringify(toJSON(this, true));
+				var resp = JSON.stringify(this.toJSON(true));
 				api.writeResponse(202, res, {
 					'Content-Type': 'application/json',
 					'Content-Length': resp.length
@@ -172,17 +180,41 @@ Task.prototype = {
 			}
 		});
 	},
+	toJSON: function(isWriteLocation) {
+		var result = {
+			lengthComputable: this.lengthComputable,
+			cancelable: this.cancelable,
+			expires: this.expires,
+			timestamp: this.timestamp,
+			type: this.type
+		};
+		if (this.lengthComputable) {
+			result.loaded = this.loaded;
+			result.total = this.total;
+			result.message = this.message;
+		}
+		if (this.result) {
+			result.Result = this.result;
+		}
+		if (this.keep && isWriteLocation) {
+			// Do not set location so that this is deleted
+			result.Location = taskRoot + "/id/" + this.id;
+		} else if (isWriteLocation) {
+			result.Location = taskRoot + "/temp/" + this.id;
+		}
+		return result;
+	}
 };
 
 function deleteOperation(req, res/*, next*/) {
-	taskStore.getTask(req.id, function(err, task) {
+	taskStore.getTask(getTaskMeta(req), function(err, task) {
 		if (err) {
 			return writeError(500, res, err.toString());
 		}
 		if (!task || task.username !== req.user.username) {
 			return writeError(404, res, "Task does not exist: " + req.id);
 		}
-		taskStore.deleteTask(req.id, function(err) {
+		taskStore.deleteTask(task, function(err) {
 			if (err) {
 				return writeError(500, res, err.toString());
 			}
@@ -212,38 +244,13 @@ function deleteAllOperations(req, res) {
 		}
 		tasks.forEach(function(task) {
 			if (task.result) {
-				taskStore.deleteTask(task.id, done); /* task is completed */
+				taskStore.deleteTask(task, done); /* task is completed */
 			} else {
-				locations.push(toJSON(task, true).Location);
+				locations.push(task.toJSON(true).Location);
 				done();
 			}
 		});
 	});
-}
-
-function toJSON(task, isWriteLocation) {
-	var result = {
-		lengthComputable: task.lengthComputable,
-		cancelable: task.cancelable,
-		expires: task.expires,
-		timestamp: task.timestamp,
-		type: task.type
-	};
-	if (task.lengthComputable) {
-		result.loaded = task.loaded;
-		result.total = task.total;
-		result.message = task.message;
-	}
-	if (task.result) {
-		result.Result = task.result;
-	}
-	if (task.keep && isWriteLocation) {
-		// Do not set location so that tasks is deleted
-		result.Location = taskRoot + "/id/" + task.id;
-	} else if (isWriteLocation) {
-		result.Location = taskRoot + "/temp/" + task.id;
-	}
-	return result;
 }
 	
 module.exports = {

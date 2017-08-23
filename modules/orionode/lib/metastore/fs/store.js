@@ -27,6 +27,7 @@ var WORKSPACE_ID = "anonymous-OrionContent";
 var DEFAULT_WORKSPACE_NAME = "Orion Content";
 var SERVERWORKSPACE = "${SERVERWORKSPACE}";
 var DESCRIPTION_METASTORE = "This JSON file is at the root of the Orion metadata store responsible for persisting user, workspace and project files and metadata.";
+var TEMP_TASK_DIRECTORY_NAME = "temp";
 
 // The current version of the Simple Meta Store.
 var VERSION = 8;
@@ -54,6 +55,10 @@ function getProjectMetadataFileName(options, workspaceId, projectName) {
 		projectName = workspaceId + metaUtil.getSeparator() + projectName;
 	}
 	return nodePath.join(metadataFolder, projectName + ".json");
+}
+
+function getTaskRootLocation(options) {
+	return  options.configParams['orion.file.tasks.location'] ? options.configParams['orion.file.tasks.location'] : nodePath.join(options.workspaceDir, '.metadata', '.tasks');
 }
 
 function getLockfileName(filename) {
@@ -540,26 +545,121 @@ Object.assign(FsMetastore.prototype, {
 			callback /* error case */
 		);
 	},
+	
+	getUserTasksDirectory: function(username){
+		return new Buffer(username).toString('base64');
+	},
+	
+	getUserName: function(userTaskDirName){
+		return new Buffer(userTaskDirName,'base64').toString('utf8');
+	},
 
 	createTask: function(taskObj, callback) {
-		this._taskList[taskObj.id] = taskObj;
-		callback(null);
+		if (this.options.configParams['orion.single.user']) {
+			this._taskList[taskObj.id] = taskObj;
+			callback(null);
+		} else {
+			var taskRoot = nodePath.join(getTaskRootLocation(this.options), this.getUserTasksDirectory(taskObj.username));
+			var taskDir = taskObj.keep ? taskRoot : nodePath.join(taskRoot, TEMP_TASK_DIRECTORY_NAME);
+			return mkdirpAsync(taskDir).then( // create parent folder(s) if necessary
+				function() {
+					var taskFile = nodePath.join(taskDir, taskObj.id);
+					return fs.writeFileAsync(taskFile, JSON.stringify(taskObj.toJSON(true), null, 2))
+					.then(function(){
+						callback(null);
+					}, callback);
+				},
+				callback /* error case */
+			);
+		}
 	},
-	deleteTask: function(id, callback) {
-		delete this._taskList[id];
-		callback(null);
+	deleteTask: function(taskObj, callback) {
+		if (this.options.configParams['orion.single.user']) {
+			delete this._taskList[taskObj.id];
+			callback(null);
+		} else {
+			var taskRoot = nodePath.join(getTaskRootLocation(this.options), this.getUserTasksDirectory(taskObj.username));
+			var taskDir = taskObj.keep ? taskRoot : nodePath.join(taskRoot, TEMP_TASK_DIRECTORY_NAME);
+			return fs.statAsync(taskDir).then( // create parent folder(s) if necessary
+				function(err, stat) {
+					if(err === null) {
+						// path does not exist
+				        var taskFile = nodePath.join(taskDir, taskObj.id);
+				        return fs.unlinkAsync(taskFile)
+				        .then(function(err){
+				        	callback(err);
+				        });
+				    } else if(err.code === 'ENOENT') {
+				        // file does not exist
+				        callback(null);
+				    } else {
+				        callback(err);
+				    }
+				},
+				callback /* error case */
+			);
+		}
 	},
-	getTask: function(id, callback) {
-		callback(null, this._taskList[id]);
+	getTask: function(taskMeta, callback) {
+		if (this.options.configParams['orion.single.user']) {
+			callback(null, this._taskList[taskMeta.id]);
+		} else {
+			var taskRoot = nodePath.join(getTaskRootLocation(this.options), this.getUserTasksDirectory(taskMeta.username));
+			var taskDir = taskMeta.keep ? taskRoot : nodePath.join(taskRoot, TEMP_TASK_DIRECTORY_NAME);
+			var taskFile = nodePath.join(taskDir, taskMeta.id);
+			return fs.readFileAsync(taskFile, 'utf8')
+			.catchReturn({ code: 'ENOENT' }, null) // New file: suppress error
+			.then(
+				function(metadata) {
+					var parsedJson;
+					try {
+						parsedJson = JSON.parse(metadata);
+					} catch(err) {
+						parsedJson = metadata;
+					}
+					callback(null, parsedJson);
+				},
+				callback /* error case */
+			);
+		}
 	},
 	getTasksForUser: function(username, callback) {
-		var result = [];
-		Object.keys(this._taskList).forEach(function(id) {
-			if (this._taskList[id].username === username) {
-				result.push(this._taskList[id]);
-			}
-		}.bind(this));
-		callback(null, result);
+		if (this.options.configParams['orion.single.user']) {
+			var result = [];
+			Object.keys(this._taskList).forEach(function(id) {
+				if (this._taskList[id].username === username) {
+					result.push(this._taskList[id]);
+				}
+			}.bind(this));
+			callback(null, result);
+		} else {
+			// won't return temp tasks
+			var taskRoot = nodePath.join(getTaskRootLocation(this.options), this.getUserTasksDirectory(username));
+			return fs.readdirAsync(taskRoot)
+			.then(function(err, files){
+				if (err) {
+					callback(err);
+				}
+				var fileReadPromises;
+				files.forEach(function(filename){
+					if(filename !== TEMP_TASK_DIRECTORY_NAME){
+						fileReadPromises.push(fs.readFileAsync(nodePath.join(taskRoot, filename)).then(function(metadata){
+							var parsedJson;
+							try {
+								parsedJson = JSON.parse(metadata);
+							} catch(err) {
+								parsedJson = metadata;
+							}
+							return parsedJson;
+						}));					
+					}
+				});
+				return Promise.all(fileReadPromises)
+				.then(function(fileContents){
+					callback(null, fileContents);
+				});
+			});
+		}
 	},
 	updateTask: function(taskObj, callback) {
 		callback(null);
