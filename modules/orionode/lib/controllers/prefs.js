@@ -18,7 +18,7 @@ var api = require('../api'),
     nodePath = require('path'),
     nodeUrl = require('url'),
     os = require('os'),
-    Horizontal_Prefs = require('../model/hirizontal_pref'),
+    Long_Key_Prefs = require('../model/long_key_pref'),
     Preference = require('../model/pref'),
     Promise = require('bluebird');
 
@@ -39,10 +39,10 @@ var PREF_FILENAME = PrefsController.PREF_FILENAME = 'user.json';
 // https://wiki.eclipse.org/Orion/Server_API/Preference_API
 function PrefsController(options) {
 	options.configParams = options.configParams || {};
-	if (options.configParams["orion.metastore.useMongo"] !== false) {
+	if (!options.configParams["orion.single.user"] && options.configParams["orion.metastore.useMongo"] !== false) {
 		MODEL = Preference;
 	} else {
-		MODEL = Horizontal_Prefs;
+		MODEL = Long_Key_Prefs;
 	}	
 
 	NOT_EXIST = MODEL.NOT_EXIST;
