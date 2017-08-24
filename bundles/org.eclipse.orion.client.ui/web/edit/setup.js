@@ -59,7 +59,7 @@ define([
 	'orion/generalPreferences',
 	'orion/breadcrumbs',
 	'orion/keyBinding',
-	'orion/urlModifier'
+	'orion/urlModifier',
 	'orion/debug/breakpoint',
 	'orion/editor/annotations',
 	'orion/debug/debugService'

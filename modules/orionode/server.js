@@ -138,9 +138,9 @@ function startServer(cb) {
 			server = require('http-shutdown')(server);
 			var io = socketio.listen(server, { 'log level': 1, path: (listenContextPath ? contextPath : '' ) + '/socket.io' });
 			ttyShell.install({ io: io, app: orion, fileRoot: contextPath + '/file', workspaceDir: workspaceDir, sharedWorkspaceFileRoot: contextPath + '/sharedWorkspace/tree/file'});
-			if (configParams["debug.server.module"]) {
+			if (configParams["orion.debug.enabled"]) {
 				var debugServer = require(configParams["debug.server.module"]);
-				debugServer.install({ io: io, app: orion, fileRoot: contextPath + '/file', workspaceDir: workspaceDir, listenPath: (listenContextPath ? contextPath : '') });
+				debugServer.install({ io: io, app: orion, fileRoot: contextPath + '/file', workspaceDir: workspaceDir, listenPath: listenContextPath ? contextPath : '' });
 			}
 
 			//error handling
