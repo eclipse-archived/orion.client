@@ -103,7 +103,7 @@ function startServer(cb) {
 				app.use(express.logger('tiny'));
 			}
 			if (password || configParams.pwd) {
-				app.use(auth(password || configParams.pwd));
+				app.use(listenContextPath ? contextPath : "/", auth(password || configParams.pwd));
 			}
 			
 			app.use(compression());
