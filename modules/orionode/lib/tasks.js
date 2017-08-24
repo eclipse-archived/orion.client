@@ -42,7 +42,7 @@ function orionTasksAPI(options) {
 			if (!task || (task.username && task.username !== req.user.username)) {
 				return writeError(404, res);
 			}
-			writeResponse(200, res, null, toJSON(task, true)); // task might be Task or saved good vertion
+			writeResponse(200, res, null, toJSON(task, true));
 		});
 	})
 	.delete('', deleteAllOperations)
@@ -65,11 +65,18 @@ function orionTasksAPI(options) {
 	});
 }
 
-function getTaskMeta(req) {
+function getTaskMeta(req, taskLocation, taskId) {
+	var keep, id;
+	if (taskLocation) {
+		// This is when req doesn't have enough information needed
+		keep = taskLocation.startsWith("/id");
+	} else {
+		keep = req.url.startsWith("/id")
+	}
 	return {
-		keep: req.url.startsWith("/id"),
+		keep: keep,
 		username: req.user.username,
-		id: req.id
+		id: taskId || req.id
 	};
 }
 
@@ -192,7 +199,7 @@ function deleteOperation(req, res/*, next*/) {
 		if (!task || (task.username && task.username !== req.user.username)) {
 			return writeError(404, res, "Task does not exist: " + req.id);
 		}
-		taskStore.deleteTask(task, getTaskMeta(req), function(err) {
+		taskStore.deleteTask(getTaskMeta(req), function(err) {
 			if (err) {
 				return writeError(500, res, err.toString());
 			}
@@ -221,8 +228,8 @@ function deleteAllOperations(req, res) {
 			return;
 		}
 		tasks.forEach(function(task) {
-			if (task.result) {
-				taskStore.deleteTask(task, getTaskMeta(req), done); /* task is completed */
+			if (task.result || task.Result) {
+				taskStore.deleteTask(getTaskMeta(req, task.Location.substring(req.baseUrl.length),task.id), done); /* task is completed */
 			} else {
 				locations.push(toJSON(task, true).Location);
 				done();

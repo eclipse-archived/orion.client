@@ -562,25 +562,24 @@ Object.assign(FsMetastore.prototype, {
 			this.updateTask(taskObj, callback);
 		}
 	},
-	deleteTask: function(taskObj, taskMeta, callback) {
+	deleteTask: function(taskMeta, callback) {
 		if (this.options.configParams['orion.single.user']) {
-			delete this._taskList[taskObj.id];
+			delete this._taskList[taskMeta.id];
 			callback(null);
 		} else {
 			var taskRoot = nodePath.join(getTaskRootLocation(this.options), this.getUserTasksDirectory(taskMeta.username));
 			var taskDir = taskMeta.keep ? taskRoot : nodePath.join(taskRoot, TEMP_TASK_DIRECTORY_NAME);
 			return fs.statAsync(taskDir).then(
 				function(stat) {
-					if(stat.isDirectory()) {
+					if (stat.isDirectory()) {
 						// path does not exist
 				        var taskFile = nodePath.join(taskDir, taskMeta.id);
 				        return fs.unlinkAsync(taskFile)
 				        .then(function(err){
 				        	callback(err);
 				        });
-				    }else{
-						callback(null)
-					}
+				    } 
+					callback(null);
 				},
 				callback /* error case */
 			);
@@ -622,13 +621,10 @@ Object.assign(FsMetastore.prototype, {
 			// won't return temp tasks
 			var taskRoot = nodePath.join(getTaskRootLocation(this.options), this.getUserTasksDirectory(username));
 			return fs.readdirAsync(taskRoot)
-			.then(function(err, files){
-				if (err) {
-					callback(err);
-				}
-				var fileReadPromises;
+			.then(function(files){
+				var fileReadPromises = [];
 				files.forEach(function(filename){
-					if(filename !== TEMP_TASK_DIRECTORY_NAME){
+					if(filename !== TEMP_TASK_DIRECTORY_NAME && !filename.startsWith(".")){
 						fileReadPromises.push(fs.readFileAsync(nodePath.join(taskRoot, filename)).then(function(metadata){
 							var parsedJson;
 							try {
@@ -645,7 +641,7 @@ Object.assign(FsMetastore.prototype, {
 				.then(function(fileContents){
 					callback(null, fileContents);
 				});
-			});
+			}, callback);
 		}
 	},
 	updateTask: function(taskObj, callback) {
