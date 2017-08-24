@@ -40,6 +40,7 @@ function orionTasksAPI(options) {
 				return writeError(500, res, err.toString());
 			}
 			if (!task || (task.username && task.username !== req.user.username)) {
+				// task meta saved in fs doesn't have username, while task saved in RAM and mongo does.
 				return writeError(404, res);
 			}
 			writeResponse(200, res, null, toJSON(task, true));
@@ -53,9 +54,9 @@ function orionTasksAPI(options) {
 				return writeError(500, res, err.toString());
 			}
 			if (!task || (task.username && task.username !== req.user.username)) {
+				// task meta saved in fs doesn't have username, while task saved in RAM and mongo does.
 				return writeError(404, res);
 			}
-			delete task.Location;
 			writeResponse(200, res, null, toJSON(task, false));
 		});
 	})
@@ -197,6 +198,7 @@ function deleteOperation(req, res/*, next*/) {
 			return writeError(500, res, err.toString());
 		}
 		if (!task || (task.username && task.username !== req.user.username)) {
+			// task meta saved in fs doesn't have username, while task saved in RAM and mongo does.
 			return writeError(404, res, "Task does not exist: " + req.id);
 		}
 		taskStore.deleteTask(getTaskMeta(req), function(err) {
@@ -241,7 +243,8 @@ function deleteAllOperations(req, res) {
 
 function toJSON(task, isWriteLocation) {
 	var result;
-	if (task.res) { // This means this task object is the original Task object
+	// task meta saved in fs doesn't have username, while task saved in RAM and mongo does.
+	if (typeof task.username === 'string') { // This means this task object is the original Task object
 		result = {
 			lengthComputable: task.lengthComputable,
 			cancelable: task.cancelable,
