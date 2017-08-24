@@ -632,7 +632,7 @@ Object.assign(FsMetastore.prototype, {
 							} catch(err) {
 								parsedJson = metadata;
 							}
-							parsedJson.id = filename; // TODO remove this hack maybe
+							parsedJson.id = filename; // id is needed for taskDelete operation
 							return parsedJson;
 						}));					
 					}
