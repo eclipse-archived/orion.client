@@ -64,6 +64,7 @@ export default {
 
     const io = require('socket.io-client');
 
+    // HACK hardcoded value: sessionId
     mySocket = io.connect('http://localhost:8082/' + "?sessionId=" + 'jnpO0CBn8n', {
       path: "/socket.io/"
     });
@@ -134,18 +135,22 @@ export default {
 
         // ############################################################### demo
 
-        // editor.setTextInBufferRange() // TODO ideal function to use
-
-        let _demo_basic = false;
-        let _demo_insert_at_position = true;
+        let _demo_basic = true;
+        let _demo_insert_at_position = false;
 
         //
 
+        /*
+         * This code will insert text where the cursor is on Atom
+         * regardless of where the Orion user is typing
+         */
         if (_demo_basic) {
           if (Number.isInteger(text) && text < 0) {
             let backspaceCount = -text;
             for (let count = 0; count < backspaceCount; count++) {
               editor.delete();
+              // TODO handle backspace separately
+              // editor.backspace();
             }
           } else {
             // Insert received text from Orion
@@ -155,16 +160,32 @@ export default {
 
         //
 
+        /*
+         * This code will insert text at a given position in Atom
+         * regardless of where the cursor is
+         *
+         * Currently inserting text on row: 2 and col: 2 for demo.
+         * TODO: Send row-col value from Orion and use that data here
+         */
         if (_demo_insert_at_position) {
           if (Number.isInteger(text) && text < 0) {
             let backspaceCount = -text;
             for (let count = 0; count < backspaceCount; count++) {
-              // Simulating backspace without moving the cursor
-              editor.setTextInBufferRange([[2,2],[2,3]], '');
+              // Simulating backspace:
+              // Replacing from [2,2] to [2,3] (one char) with empty string
+              // HACK hardcoded value: range array
+              editor.setTextInBufferRange([
+                [2, 2],
+                [2, 3]
+              ], '');
             }
           } else {
             // Insert received text from Orion
-            editor.setTextInBufferRange([[2,2],[2,2]], text);
+            // HACK hardcoded value: range array
+            editor.setTextInBufferRange([
+              [2, 2],
+              [2, 2]
+            ], text);
           }
         } // end of '_demo_insert_at_position'
 
@@ -180,6 +201,7 @@ export default {
     mySocket.emit('message', JSON.stringify({
       'clientId': 'arshi3.12345',
       'token_bypass': 'arshi3'
+      // HACK hardcoded values: 'clientId' and 'token_bypass'
     }));
   },
 
@@ -188,11 +210,18 @@ export default {
       type: 'join-document',
       doc: '/arshi-OrionContent/Test/demo.txt',
       clientId: 'arshi3.12345'
+      // HACK hardcoded values: 'doc' and 'clientId'
     }));
 
     var request = require('request');
     // Requesting content of 'demo.txt' file
     request('http://localhost:8081/file/arshi-OrionContent/Test/demo.txt', function(error, response, body) {
+      // TODO add authentication with this request
+      // HACK hardcoded value: URL
+      //
+      // The authentication to fetch content of the file
+      // on 'modules/orionode/index.js' ~ line 90
+      // is disabled
 
       if (error) {
         console.log('error:', error);
