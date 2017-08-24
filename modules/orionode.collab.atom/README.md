@@ -42,8 +42,10 @@ Running the Atom - Orion package consists of three consecutive commands:
 3. Join_Document
 
 These three commands can be executed in Atom using the Command Palette
-```MAC: Command + Shift + P```
-```PC and Linux: Control + Shift + P```
+
+`MAC: Command + Shift + P`
+
+`PC and Linux: Control + Shift + P`
 
 ### Orion: Start_Collab
 
@@ -93,8 +95,8 @@ if (msgObj.type === 'operation') {
 Upon execution, function join_session within *orion.js* is called. Join_session handles the connection of users to a specific Orion session.
 
 At the moment there are two attributes that must be entered manually in respect to their Orion values:
-- ClientID     ```In the form of: username.12345```
-- Token  ```In the form: username``` 
+- ClientID `In the form of: username.12345`
+- Token `In the form: username`
 
 
 **Temporary Alert: *Both Authentication and Token usage were removed (commented out) to enable Atom connections to Orion. This avoids the need for JWT_SECRET within each user object.***
@@ -156,7 +158,7 @@ Please read [CONTRIBUTING.md](https://github.com/eclipse/orion.client/blob/maste
 
 ## Versioning
 
-We use Github for versioning. For the versions available, see the commits on [this repository](https://github.com/eclipse/orion.client).
+We use GitHub for versioning. For the versions available, see the commits on [this repository](https://github.com/eclipse/orion.client).
 
 ## License
 
