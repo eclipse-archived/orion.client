@@ -42,7 +42,7 @@ function orionTasksAPI(options) {
 			if (!task || (task.username && task.username !== req.user.username)) {
 				return writeError(404, res);
 			}
-			writeResponse(200, res, null, toJSON(task, true));
+			writeResponse(200, res, null, toJSON(task, true)); // task might be Task or saved good vertion
 		});
 	})
 	.delete('', deleteAllOperations)
@@ -55,6 +55,7 @@ function orionTasksAPI(options) {
 			if (!task || (task.username && task.username !== req.user.username)) {
 				return writeError(404, res);
 			}
+			delete task.Location;
 			writeResponse(200, res, null, toJSON(task, false));
 		});
 	})
@@ -188,10 +189,10 @@ function deleteOperation(req, res/*, next*/) {
 		if (err) {
 			return writeError(500, res, err.toString());
 		}
-		if (!task || task.username !== req.user.username) {
+		if (!task || (task.username && task.username !== req.user.username)) {
 			return writeError(404, res, "Task does not exist: " + req.id);
 		}
-		taskStore.deleteTask(task, function(err) {
+		taskStore.deleteTask(task, getTaskMeta(req), function(err) {
 			if (err) {
 				return writeError(500, res, err.toString());
 			}
@@ -221,7 +222,7 @@ function deleteAllOperations(req, res) {
 		}
 		tasks.forEach(function(task) {
 			if (task.result) {
-				taskStore.deleteTask(task, done); /* task is completed */
+				taskStore.deleteTask(task, getTaskMeta(req), done); /* task is completed */
 			} else {
 				locations.push(toJSON(task, true).Location);
 				done();
@@ -232,26 +233,36 @@ function deleteAllOperations(req, res) {
 
 
 function toJSON(task, isWriteLocation) {
-	var result = {
-		lengthComputable: task.lengthComputable,
-		cancelable: task.cancelable,
-		expires: task.expires,
-		timestamp: task.timestamp,
-		type: task.type
-	};
-	if (task.lengthComputable) {
-		result.loaded = task.loaded;
-		result.total = task.total;
-		result.message = task.message;
-	}
-	if (task.result) {
-		result.Result = task.result;
-	}
-	if (task.keep && isWriteLocation) {
-		// Do not set location so that tasks is deleted
-		result.Location = taskRoot + "/id/" + task.id;
-	} else if (isWriteLocation) {
-		result.Location = taskRoot + "/temp/" + task.id;
+	var result;
+	if (task.res) { // This means this task object is the original Task object
+		result = {
+			lengthComputable: task.lengthComputable,
+			cancelable: task.cancelable,
+			expires: task.expires,
+			timestamp: task.timestamp,
+			type: task.type
+		};
+		if (task.lengthComputable) {
+			result.loaded = task.loaded;
+			result.total = task.total;
+			result.message = task.message;
+		}
+		if (task.result) {
+			result.Result = task.result;
+		}
+		if (task.keep && isWriteLocation) {
+			// Do not set location so that tasks is deleted
+			result.Location = taskRoot + "/id/" + task.id;
+		} else if (isWriteLocation) {
+			result.Location = taskRoot + "/temp/" + task.id;
+		}
+		
+	} else {
+		// When task object is task description not the Task object
+		if(!isWriteLocation){
+			task.Location && delete task.Location;
+		}
+		result = task;
 	}
 	return result;
 }

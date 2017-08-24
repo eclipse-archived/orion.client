@@ -559,42 +559,28 @@ Object.assign(FsMetastore.prototype, {
 			this._taskList[taskObj.id] = taskObj;
 			callback(null);
 		} else {
-			var taskRoot = nodePath.join(getTaskRootLocation(this.options), this.getUserTasksDirectory(taskObj.username));
-			var taskDir = taskObj.keep ? taskRoot : nodePath.join(taskRoot, TEMP_TASK_DIRECTORY_NAME);
-			return mkdirpAsync(taskDir).then( // create parent folder(s) if necessary
-				function() {
-					var taskFile = nodePath.join(taskDir, taskObj.id);
-					return fs.writeFileAsync(taskFile, JSON.stringify(taskObj.toJSON(taskObj, true), null, 2))
-					.then(function(){
-						callback(null);
-					}, callback);
-				},
-				callback /* error case */
-			);
+			this.updateTask(taskObj, callback);
 		}
 	},
-	deleteTask: function(taskObj, callback) {
+	deleteTask: function(taskObj, taskMeta, callback) {
 		if (this.options.configParams['orion.single.user']) {
 			delete this._taskList[taskObj.id];
 			callback(null);
 		} else {
-			var taskRoot = nodePath.join(getTaskRootLocation(this.options), this.getUserTasksDirectory(taskObj.username));
-			var taskDir = taskObj.keep ? taskRoot : nodePath.join(taskRoot, TEMP_TASK_DIRECTORY_NAME);
-			return fs.statAsync(taskDir).then( // create parent folder(s) if necessary
-				function(err, stat) {
-					if(err === null) {
+			var taskRoot = nodePath.join(getTaskRootLocation(this.options), this.getUserTasksDirectory(taskMeta.username));
+			var taskDir = taskMeta.keep ? taskRoot : nodePath.join(taskRoot, TEMP_TASK_DIRECTORY_NAME);
+			return fs.statAsync(taskDir).then(
+				function(stat) {
+					if(stat.isDirectory()) {
 						// path does not exist
-				        var taskFile = nodePath.join(taskDir, taskObj.id);
+				        var taskFile = nodePath.join(taskDir, taskMeta.id);
 				        return fs.unlinkAsync(taskFile)
 				        .then(function(err){
 				        	callback(err);
 				        });
-				    } else if(err.code === 'ENOENT') {
-				        // file does not exist
-				        callback(null);
-				    } else {
-				        callback(err);
-				    }
+				    }else{
+						callback(null)
+					}
 				},
 				callback /* error case */
 			);
@@ -650,6 +636,7 @@ Object.assign(FsMetastore.prototype, {
 							} catch(err) {
 								parsedJson = metadata;
 							}
+							parsedJson.id = filename; // TODO remove this hack maybe
 							return parsedJson;
 						}));					
 					}
@@ -662,7 +649,22 @@ Object.assign(FsMetastore.prototype, {
 		}
 	},
 	updateTask: function(taskObj, callback) {
-		callback(null);
+		if (this.options.configParams['orion.single.user']) {
+			callback(null);
+		} else {
+			var taskRoot = nodePath.join(getTaskRootLocation(this.options), this.getUserTasksDirectory(taskObj.username));
+			var taskDir = taskObj.keep ? taskRoot : nodePath.join(taskRoot, TEMP_TASK_DIRECTORY_NAME);
+			return mkdirpAsync(taskDir).then( // create parent folder(s) if necessary
+				function() {
+					var taskFile = nodePath.join(taskDir, taskObj.id);
+					return fs.writeFileAsync(taskFile, JSON.stringify(taskObj.toJSON(taskObj, true), null, 2))
+					.then(function(){
+						callback(null);
+					}, callback);
+				},
+				callback /* error case */
+			);
+		}
 	}
 });
 
