@@ -24,6 +24,7 @@ var assert = require("assert"),
 var CONTEXT_PATH = '',
 	WORKSPACE = path.join(__dirname, '.test_workspace'),
 	WORKSPACE_ID = "anonymous-OrionContent",
+	configParams = { "orion.single.user": true },
 	XFER_PATH = CONTEXT_PATH + '/xfer',
 	IMPORT_PATH = CONTEXT_PATH + '/xfer/import',
 	EXPORT_PATH = CONTEXT_PATH + '/xfer/export',
@@ -31,7 +32,7 @@ var CONTEXT_PATH = '',
 	PREFIX = FILE_PATH + '/' + WORKSPACE_ID;
 
 var app = express();
-app.locals.metastore = metastore({workspaceDir: WORKSPACE});
+app.locals.metastore = metastore({workspaceDir: WORKSPACE, configParams:configParams});
 app.locals.metastore.setup(app);
 app.use(XFER_PATH, xfer.router({ fileRoot: FILE_PATH }));
 app.use(FILE_PATH + '*', file({fileRoot: FILE_PATH, workspaceRoot: CONTEXT_PATH + '/workspace'}));
