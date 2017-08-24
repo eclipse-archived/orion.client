@@ -110,7 +110,7 @@ function getRepoByPath(filePath, workspaceDir) {
 	filePath = util.decodeURIComponent(filePath);
 	while (!fs.existsSync(filePath)) {
 		filePath = path.dirname(filePath);
-		if (filePath.length <= workspaceDir.length) return Promise.reject(new Error("Forbidden"));
+		if (filePath.length < workspaceDir.length) return Promise.reject(new Error("Forbidden"));
 	}
  	var ceiling = path.dirname(workspaceDir);
 	if (!fs.statSync(filePath).isDirectory()) {
@@ -136,7 +136,7 @@ function getfileDir(repo, req) {
 	if (repo.workdir().slice(0, -1).length === file.workspaceDir.length) {
 		fileDir = api.join(fileRoot, file.workspaceId);
 	} else {
-		fileDir = api.join(fileRoot, file.workspaceId, repo.workdir().substring(file.workspaceDir.length + 1));
+		fileDir = api.join(fileRoot, file.workspaceId, repo.workdir().substring(file.workspaceDir.length + (file.workspaceDir === "/" ? 0 : 1)));
 	}
 	return fileDir;
 }
@@ -147,7 +147,7 @@ function getfileDirPath(repo, req) {
 	if(repo.workdir().slice(0, -1).length === file.workspaceDir.length){
 		fileDirpath = path.join(fileRoot, path.sep);
 	}else{
-		fileDirpath = path.join(fileRoot, file.workspaceId, repo.workdir().substring(file.workspaceDir.length + 1));
+		fileDirpath = path.join(fileRoot, file.workspaceId, repo.workdir().substring(file.workspaceDir.length + (file.workspaceDir === "/" ? 0 : 1)));
 	}
 	return fileDirpath;
 }
@@ -277,7 +277,7 @@ function getClones(req, res, callback) {
 	function checkDirectory(dir, cb) {
 		//Check if the dir is a directory
 		fs.lstat(dir, function(err, stat) {
-			if (err || !stat.isDirectory()) return cb(err);
+			if (err || !stat.isDirectory()) return cb();
 			git.Repository.open(dir)
 			.then(function(repo) {
 				var base = path.basename(dir);
@@ -287,7 +287,7 @@ function getClones(req, res, callback) {
 			.catch(function() {
 				fs.readdir(dir, function(err, files) {
 					if (err) {
-						return cb(err);
+						return cb();
 					}
 					files = files.map(function(file) {
 						return path.join(dir, file);
