@@ -101,9 +101,75 @@ export default {
       }
 
       if (msgObj.type === 'operation') {
-        // Insert recieved text from Orion
-        // to where the cursor is in Atom
-        atom.workspace.getActiveTextEditor().insertText(msgObj.operation[1]);
+
+        let editor = atom.workspace.getActiveTextEditor();
+
+        let operation = msgObj.operation;
+        let startPosition = 0;
+        let text = '';
+
+        // First char in empty doc
+        if (operation.length === 1) {
+          startPosition = 0;
+          text = operation[0];
+        }
+
+        // First char in non-empty doc
+        if (operation.length === 2 && Number.isInteger(operation[1])) {
+          startPosition = 0;
+          text = operation[0];
+        }
+
+        // Char in the middle
+        if (operation.length === 3) {
+          startPosition = operation[0];
+          text = operation[1];
+        }
+
+        // Char at the end
+        if (operation.length === 2 && Number.isInteger(operation[0])) {
+          startPosition = operation[0];
+          text = operation[1];
+        }
+
+        // ############################################################### demo
+
+        // editor.setTextInBufferRange() // TODO ideal function to use
+
+        let _demo_basic = false;
+        let _demo_insert_at_position = true;
+
+        //
+
+        if (_demo_basic) {
+          if (Number.isInteger(text) && text < 0) {
+            let backspaceCount = -text;
+            for (let count = 0; count < backspaceCount; count++) {
+              editor.delete();
+            }
+          } else {
+            // Insert received text from Orion
+            editor.insertText(text);
+          }
+        } // end of '_demo_basic'
+
+        //
+
+        if (_demo_insert_at_position) {
+          if (Number.isInteger(text) && text < 0) {
+            let backspaceCount = -text;
+            for (let count = 0; count < backspaceCount; count++) {
+              // Simulating backspace without moving the cursor
+              editor.setTextInBufferRange([[2,2],[2,3]], '');
+            }
+          } else {
+            // Insert received text from Orion
+            editor.setTextInBufferRange([[2,2],[2,2]], text);
+          }
+        } // end of '_demo_insert_at_position'
+
+        // ################################################### end of demo code
+
       }
 
     });
@@ -123,6 +189,24 @@ export default {
       doc: '/arshi-OrionContent/Test/demo.txt',
       clientId: 'arshi3.12345'
     }));
+
+    var request = require('request');
+    // Requesting content of 'demo.txt' file
+    request('http://localhost:8081/file/arshi-OrionContent/Test/demo.txt', function(error, response, body) {
+
+      if (error) {
+        console.log('error:', error);
+        console.log('statusCode:', response && response.statusCode);
+      }
+
+      let editor = atom.workspace.getActiveTextEditor();
+      // Clear all content of the open Atom file
+      editor.selectAll();
+      editor.backspace();
+      // Insert received content into the open Atom file
+      editor.insertText(body);
+
+    });
   },
 
 };

@@ -85,7 +85,20 @@ function startServer(options) {
 		app.use('/site', checkAuthenticated, require('./lib/sites')(options));
 		app.use('/task', checkAuthenticated, require('./lib/tasks').router({ taskRoot: contextPath + '/task', options: options}));
 		app.use('/filesearch', checkAuthenticated, require('./lib/search')(options));
-		app.use('/file*', checkAuthenticated, require('./lib/file')({ workspaceRoot: contextPath + '/workspace', fileRoot: contextPath + '/file', options: options }));
+
+		//
+		// Bypassing authentication for Atom plugin development
+		//
+		// TODO restore authentication when Atom plugin is capable of auth
+		//
+		// Old code:
+		// app.use('/file*', checkAuthenticated, require('./lib/file')({ workspaceRoot: contextPath + '/workspace', fileRoot: contextPath + '/file', options: options }));
+		//
+		// New Code:
+		app.use('/file*', require('./lib/file')({ workspaceRoot: contextPath + '/workspace', fileRoot: contextPath + '/file', options: options }));
+    // End of auth bypass
+		//
+
 		app.use('/workspace*', checkAuthenticated, require('./lib/workspace')({ workspaceRoot: contextPath + '/workspace', fileRoot: contextPath + '/file', gitRoot: contextPath + '/gitapi', options: options }));
 		/* Note that the file and workspace root for the git middleware should not include the context path to match java implementation */
 		app.use('/gitapi', checkAuthenticated, require('./lib/git')({ gitRoot: contextPath + '/gitapi', fileRoot: /*contextPath + */'/file', workspaceRoot: /*contextPath + */'/workspace', options: options}));
