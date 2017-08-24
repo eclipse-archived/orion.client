@@ -19,8 +19,6 @@ var clone = require('./clone');
 var mConfig = require('./config');
 var express = require('express');
 var bodyParser = require('body-parser');
-var log4js = require('log4js');
-var logger = log4js.getLogger("git");
 var util = require('./util');
 
 module.exports = {};
@@ -290,7 +288,7 @@ function fetchRemote(req, res, remote, branch, force) {
 			refSpec = "refs/heads/" + remoteBranch + ":refs/remotes/" + remoteObj.name() + "/" + branch;
 			if (force) refSpec = "+" + refSpec;
 		}
-		logger.debug("fetchRemote ", remote," Starting");
+		
 		return remoteObj.fetch(
 			refSpec ? [refSpec] : null,
 			{
@@ -301,7 +299,6 @@ function fetchRemote(req, res, remote, branch, force) {
 		);
 	})
 	.then(function(err) {
-		logger.debug("err in fetchRemote is", err);
 		if (!err) {
 			task.done({
 				HttpCode: 200,
