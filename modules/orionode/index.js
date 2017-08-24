@@ -136,6 +136,9 @@ function startServer(options) {
 			if(options.configParams["orion.collab.enabled"]){
 				appendStaticAssets.push('./bundles/org.eclipse.orion.client.collab/web');
 			}
+			if(options.configParams["orion.debug.enabled"]){
+				appendStaticAssets.push('./bundles/org.eclipse.orion.client.debug/web');
+			}
 			app.use(require('./lib/orion_static')({ orionClientRoot: ORION_CLIENT, maxAge: options.maxAge, orionode_static: orionode_static, prependStaticAssets: prependStaticAssets, appendStaticAssets: appendStaticAssets}));
 		}
 

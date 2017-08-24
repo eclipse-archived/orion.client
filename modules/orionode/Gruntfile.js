@@ -51,6 +51,12 @@ module.exports = function(grunt) {
 			},
 			{
 				name: "orion/collab/collabClient"
+			},
+			{
+				name: "orion/debug/debugPackage"
+			},
+			{
+				name: "orion/debug/debugDeploymentWizard"
 			}
 		], {
 			"socket.io/socket.io": socketioPath,
