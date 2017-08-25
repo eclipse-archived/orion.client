@@ -195,7 +195,7 @@ function start(electron) {
 if (configParams["orion.cluster"]) {
 	var cluster = require('cluster');
 	if (cluster.isMaster) {
-		var numCPUs = os.cpus().length;
+		var numCPUs = typeof configParams["orion.cluster"] === "boolean" ? os.cpus().length : configParams["orion.cluster"] >> 0;
 		for (var i = 0; i < numCPUs; i++) {
 			cluster.fork();
 		}
