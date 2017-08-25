@@ -15,6 +15,7 @@ var auth = require('./lib/middleware/auth'),
 	https = require('https'),
 	fs = require('fs'),
 	os = require('os'),
+	log4js = require('log4js'),
 	compression = require('compression'),
 	path = require('path'),
 	socketio = require('socket.io'),
@@ -22,6 +23,8 @@ var auth = require('./lib/middleware/auth'),
 	argslib = require('./lib/args'),
 	ttyShell = require('./lib/tty_shell'),
 	api = require('./lib/api');
+
+var logger = log4js.getLogger('server');
 
 // Get the arguments, the workspace directory, and the password file (if configured), then launch the server
 var args = argslib.parseArgs(process.argv);
@@ -34,7 +37,7 @@ var configFile = args.config || args.c || path.join(__dirname, 'orion.conf');
 var configParams = argslib.readConfigFileSync(configFile) || {};
 
 // Patches the fs module to use graceful-fs instead
-require('graceful-fs').gracefulify(fs)
+require('graceful-fs').gracefulify(fs);
 
 function startServer(cb) {
 	
@@ -62,7 +65,6 @@ function startServer(cb) {
 		var dev = Object.prototype.hasOwnProperty.call(args, 'dev');
 		var log = Object.prototype.hasOwnProperty.call(args, 'log');
 		// init logging
-		var log4js = require('log4js');
 		log4js.configure(path.join(__dirname, 'config/log4js.json'));
 		if(configParams.isElectron){
 			log4js.loadAppender('file');
@@ -76,7 +78,6 @@ function startServer(cb) {
 			}
 			log4js.addAppender(log4js.appenders.file(logPath, null, 5000000));
 		}
-		var logger = log4js.getLogger('server');
 		if (dev) {
 			logger.info('Development mode: client code will not be cached.');
 		}
@@ -183,8 +184,29 @@ function startServer(cb) {
 	});
 }
 
-if (process.versions.electron) {
-	require("./electron").start(startServer, configParams);
+function start(electron) {
+	if (electron) {
+		require("./electron").start(startServer, configParams);
+	} else {
+		startServer();
+	}
+}
+
+if (configParams["orion.cluster"]) {
+	var cluster = require('cluster');
+	if (cluster.isMaster) {
+		var numCPUs = os.cpus().length;
+		for (var i = 0; i < numCPUs; i++) {
+			cluster.fork();
+		}
+		cluster.on('exit', /** @callback */ function(worker, code, signal) {
+			logger.info("Worker " + worker.process.pid + " exited");
+		});
+		logger.info("Master " + process.pid + " started");
+	} else {
+		logger.info("Worker " + process.pid + " started");
+		start(false); //TODO electron with cluster?
+	}
 } else {
-	startServer();
+	start(process.versions.electron);
 }
