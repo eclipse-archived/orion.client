@@ -144,8 +144,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/commands', 'orion/
 					postChange: this.updateSniffDir.bind(this)
 				} 
 			)];
-			var gitSection4 = new Subsection( {sectionName:messages["GitSniffDir"], parentNode: this.sections, children: this.gitSniffDir, additionalCssClass: 'git-setting-header'} );
-			gitSection4.show();
+			this.gitSection4 = new Subsection( {sectionName:messages["GitSniffDir"], parentNode: this.sections, children: this.gitSniffDir, additionalCssClass: 'git-setting-header'} );
 			
 		},
 		
@@ -212,6 +211,10 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/commands', 'orion/
 						}
 						if ( userInfo.GitSelectAll ) {
 							this.gitAlwaysSelect[0].setChecked(userInfo.GitSelectAll);
+						}
+						if (userInfo.GitSniffDirEnabled) {
+							this.gitSection4.show();
+							this.gitSniffDir[0].show();
 						}
 						if ( userInfo.GitSniffDir ) {
 							this.gitSniffDir[0].setValue(userInfo.GitSniffDir);
