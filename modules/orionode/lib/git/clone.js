@@ -23,6 +23,7 @@ var tasks = require('../tasks');
 var express = require('express');
 var bodyParser = require('body-parser');
 var rmdir = require('rimraf');
+var prefs = require('../controllers/prefs');
 var credentialsProvider = require('./credentials');
 
 module.exports = {};
@@ -190,15 +191,32 @@ function getClone(req, res) {
 
 function getClones(req, res, callback) {
 	var repos = [];
+	var done = function(err) {
+		if (err) return writeError(403, res, err.message);
+		callback(repos);
+	}
 	
 	var rest = req.params["0"].substring(1);
 	var file = fileUtil.getFile(req, rest);
 	var rootDir = file.path;
-		
-	checkDirectory(rootDir, function(err) {
-		if (err) return writeError(403, res, err.message);
-		callback(repos);
-	});
+	if(rest === file.workspaceId) {
+		// get clones from workspace, then need to check GitSniffDir in git user prefs
+		var store = fileUtil.getMetastore(req);
+		store.getUser(req.user.username, function(err, metadata){
+			var gitUserInfo = prefs.readPrefNode(options.options, 'git/config', metadata.properties);
+			var dirtoriesToSniff = gitUserInfo &&  gitUserInfo.userInfo && gitUserInfo.userInfo.GitSniffDir.split(",");
+			if (!dirtoriesToSniff) {
+				checkDirectory(rootDir, done);
+			} else {
+				var pathsToCheck = dirtoriesToSniff.map(function(dirName){
+					return 	path.join(rootDir,dirName);	
+				});
+				async.each(pathsToCheck, checkDirectory, done);
+			}
+		});
+	} else {
+		checkDirectory(rootDir, done);
+	}
 	
 	function pushRepo(repos, repo, base, location, url, parents, cb) {
 		Promise.all([url || getURL(repo), getSubmodules(repo, location, parents.slice(0).concat([gitRoot + "/clone" + location]))]).then(function(results) {

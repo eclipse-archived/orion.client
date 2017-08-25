@@ -136,6 +136,17 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/commands', 'orion/
 					gitCredentialsSection.show();		
 				}
 			);
+			
+			/* - git niff dir -------------------------------------------------- */
+			this.gitSniffDir = [ new SettingsTextfield( 
+				{	fieldlabel: messages["DirsToSniffGitRepos"], 
+					fieldTitle: messages["DirsToSniffTitle"],
+					postChange: this.updateSniffDir.bind(this)
+				} 
+			)];
+			var gitSection4 = new Subsection( {sectionName:messages["GitSniffDir"], parentNode: this.sections, children: this.gitSniffDir, additionalCssClass: 'git-setting-header'} );
+			gitSection4.show();
+			
 		},
 		
 		update: function(){
@@ -144,6 +155,16 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/commands', 'orion/
 			gitConfigPreference.setConfig({GitMail: this.gitFields[0].getValue(),	
 										GitName: this.gitFields[1].getValue(),
 										GitSelectAll: this.gitAlwaysSelect[0].isChecked()}).then(
+				function(){
+					messageService.setProgressResult( messages['GitUsrUpdateSuccess'] );
+				}
+			);
+		},
+		
+		updateSniffDir: function(){
+			var gitConfigPreference = new GitConfigPreference(this.registry);
+			var messageService = this.registry.getService("orion.page.message"); //$NON-NLS-0$
+			gitConfigPreference.setConfig({GitSniffDir: this.gitSniffDir[0].getValue()}).then(
 				function(){
 					messageService.setProgressResult( messages['GitUsrUpdateSuccess'] );
 				}
@@ -190,7 +211,10 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/commands', 'orion/
 							this.gitFields[1].setValue( userInfo.GitName );	
 						}
 						if ( userInfo.GitSelectAll ) {
-							this.gitAlwaysSelect[0].setChecked (userInfo.GitSelectAll);
+							this.gitAlwaysSelect[0].setChecked(userInfo.GitSelectAll);
+						}
+						if ( userInfo.GitSniffDir ) {
+							this.gitSniffDir[0].setValue(userInfo.GitSniffDir);
 						}
 					}
 				}.bind(this));
