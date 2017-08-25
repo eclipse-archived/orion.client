@@ -51,6 +51,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/commands', 'orion/
 			var gitPreferenceStorage = new GitPreferenceStorage(this.registry);
 			gitPreferenceStorage.isEnabled().then(
 				function(isEnabled){
+					this.gitCredentialsSection.show();
 					that.gitCredentialsFields[0].setChecked(isEnabled);
 				}
 			);
@@ -96,7 +97,6 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/commands', 'orion/
 			}else{
 				gitCredentialsFieldsDefaultLength= 0;
 			}
-			var gitCredentialsSection;
 			var that = this;
 			
 			// erase credentials command
@@ -132,19 +132,18 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/commands', 'orion/
 						that.gitCredentialsFields.push(settingsCommand);
 					}
 					
-					gitCredentialsSection = new Subsection( {sectionName: messages["Git Credentials Storage"], parentNode: that.sections, children: that.gitCredentialsFields, additionalCssClass: 'git-setting-header'} ); //$NON-NLS-0$
-					gitCredentialsSection.show();		
+					this.gitCredentialsSection = new Subsection( {sectionName: messages["Git Credentials Storage"], parentNode: that.sections, children: that.gitCredentialsFields, additionalCssClass: 'git-setting-header'} ); //$NON-NLS-0$
 				}
 			);
 			
 			/* - git niff dir -------------------------------------------------- */
 			this.gitSniffDir = [ new SettingsTextfield( 
-				{	fieldlabel: messages["DirsToSniffGitRepos"], 
-					fieldTitle: messages["DirsToSniffTitle"],
+				{	fieldlabel: messages["GitRepoSearchDirs"], 
+					fieldTitle: messages["GitRepoSearchDirsTooltip"],
 					postChange: this.updateSniffDir.bind(this)
 				} 
 			)];
-			this.gitSection4 = new Subsection( {sectionName:messages["GitSniffDir"], parentNode: this.sections, children: this.gitSniffDir, additionalCssClass: 'git-setting-header'} );
+			this.gitSection4 = new Subsection( {sectionName:messages["GitRepoDir"], parentNode: this.sections, children: this.gitSniffDir, additionalCssClass: 'git-setting-header'} );
 			
 		},
 		
