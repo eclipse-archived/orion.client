@@ -13,8 +13,7 @@
   "dependencies": {
     "express": "^4.14.1",
     "socket.io": "^1.7.2",
-    "vscode-debugadapter": "^1.16.0",
-    "vscode-debugprotocol": "^1.16.0"
+    "vscode-debugadapter": "^1.16.0"
   },
   "devDependencies": {},
   "engines": {
