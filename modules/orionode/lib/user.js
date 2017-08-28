@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016 IBM Corporation and others.
+ * Copyright (c) 2016, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -265,7 +265,7 @@ module.exports.router = function(options) {
 		if (!req.user || !(req.params.id === req.user.username || isAdmin(req.user.username))) {
 			return api.writeResponse(403, res);
 		}
-		var uri = req.originalUrl.substring(req.baseUrl.length + req.contextPath.length);
+		var uri = req.originalUrl.substring(req.baseUrl.length + (typeof req.contextPath === 'string' ? req.contextPath.length : 0));
 		req.user.checkRights(req.user.username, uri, req, res, next);
 	}
 
