@@ -19,7 +19,7 @@ var EXCLUSIVE = "ex";
 var SHARED = "sh";
 var UNLOCK = "un";
 
-var TIMEOUT_STALE = 60 * 1000; /* 1 min */
+var TIMEOUT_INACTIVE = 60 * 1000; /* 1 min */
 
 var ReentrantLock = function() {
 	this._queue = [];
@@ -86,7 +86,7 @@ var FileLocker = function(pathname) {
 	this._lock = new ReentrantLock();
 	this._locking = true;
 	this._pathame = pathname;
-	this._stalenessTimer;
+	this._inactivityTimer;
 };
 
 FileLocker.prototype.lock = function(shared) {
@@ -124,9 +124,9 @@ FileLocker.prototype._acquireLock = function(shared) {
 		}
 
 		var lock = function() {
-			if (this._stalenessTimer) {
-				clearTimeout(this._stalenessTimer);
-				this._stalenessTimer = null;
+			if (this._inactivityTimer) {
+				clearTimeout(this._inactivityTimer);
+				this._inactivityTimer = null;
 			}
 
 			fs.flock(this._fd, shared ? SHARED : EXCLUSIVE, function(error) {
@@ -175,22 +175,22 @@ FileLocker.prototype._releaseLock = function() {
 		}
 
 		fs.flock(this._fd, UNLOCK, function(error) {
-			if (this._stalenessTimer) {
-				clearTimeout(this._stalenessTimer);
+			if (this._inactivityTimer) {
+				clearTimeout(this._inactivityTimer);
 			}
-			this._stalenessTimer = setTimeout(
+			this._inactivityTimer = setTimeout(
 				function() {
 					fs.close(this._fd, function(error) {
 						if (error) {
 // console.log("error 5");
 							/* no functional impact beyond possibly leaking a fd */
-							logger.warn("Failed to close a stale lock file: " + this._fd, error);
+							logger.warn("Failed to close an inactive lock file: " + this._fd, error);
 						}
 						this._fd = null;
 // console.log("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<closed, fd set to null");
 					}.bind(this));
 				}.bind(this),
-				TIMEOUT_STALE
+				TIMEOUT_INACTIVE
 			);
 
 			if (error) {
