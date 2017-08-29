@@ -93,8 +93,8 @@ define([
 													report(problems, i18nUtil.formatMessage(Messages['notObject'], key), obj.range);
 												} else if(obj.properties) {
 													obj.properties.forEach(function(prop) {
-														if(prop.value === null || prop.value.type !== 'ObjectExpression') {
-															report(problems, i18nUtil.formatMessage(Messages['notObject'], prop.key.value), prop.value.range);
+														if(prop.value === null || !(prop.value.type === 'ObjectExpression' || (prop.value.type === 'Literal' && typeof prop.value.value === 'boolean'))) {
+															report(problems, i18nUtil.formatMessage(Messages['pluginNotObject'], prop.key.value), prop.value.range);
 														}
 													});
 												}
@@ -162,7 +162,7 @@ define([
 				var keys = Object.keys(json.plugins);
 				for(var i = 0, len = keys.length; i < len; i++) {
 					var p = json.plugins[keys[i]];
-					if(p === null || typeof p !== 'object') {
+					if(p === null || !(typeof p === 'object' || typeof p === 'boolean')) {
 						problems.push(i18nUtil.formatMessage(Messages['pluginNotObject'], keys[i]));
 					}
 				}
