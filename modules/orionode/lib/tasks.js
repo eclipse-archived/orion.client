@@ -35,11 +35,12 @@ function orionTasksAPI(options) {
 		next();
 	})
 	.get('/id/:id', function(req, res/*, next*/) {
-		taskStore.getTask(req.id, function(err, task) {
+		taskStore.getTask(getTaskMeta(req), function(err, task) {
 			if (err) {
 				return writeError(500, res, err.toString());
 			}
-			if (!task || task.username !== req.user.username) {
+			if (!task || (task.username && task.username !== req.user.username)) {
+				// task meta saved in fs doesn't have username, while task saved in RAM and mongo does.
 				return writeError(404, res);
 			}
 			writeResponse(200, res, null, toJSON(task, true));
@@ -48,11 +49,12 @@ function orionTasksAPI(options) {
 	.delete('', deleteAllOperations)
 	.delete('/id/:id', deleteOperation)
 	.get('/temp/:id', function(req, res/*, next*/) {
-		taskStore.getTask(req.id, function(err, task) {
+		taskStore.getTask(getTaskMeta(req), function(err, task) {
 			if (err) {
 				return writeError(500, res, err.toString());
 			}
-			if (!task || task.username !== req.user.username) {
+			if (!task || (task.username && task.username !== req.user.username)) {
+				// task meta saved in fs doesn't have username, while task saved in RAM and mongo does.
 				return writeError(404, res);
 			}
 			writeResponse(200, res, null, toJSON(task, false));
@@ -62,6 +64,21 @@ function orionTasksAPI(options) {
 	.get('/count', function(req, res/*, next*/) {
 		writeResponse(200, res, null, {"count": taskCount});
 	});
+}
+
+function getTaskMeta(req, taskLocation, taskId) {
+	var keep, id;
+	if (taskLocation) {
+		// This is when req doesn't have enough information needed
+		keep = taskLocation.startsWith("/id");
+	} else {
+		keep = req.url.startsWith("/id")
+	}
+	return {
+		keep: keep,
+		username: req.user.username,
+		id: taskId || req.id
+	};
 }
 
 function Task(res, cancelable, lengthComputable, wait, keep) {
@@ -91,6 +108,7 @@ Task.prototype = {
 		if (!this.isRunning()) return;
 		taskCount++;
 		this.started = true;
+		this.toJSON = toJSON;
 		taskStore.createTask(this, function(err) {
 			var res = this.res;
 			if (res.finished) {
@@ -175,14 +193,15 @@ Task.prototype = {
 };
 
 function deleteOperation(req, res/*, next*/) {
-	taskStore.getTask(req.id, function(err, task) {
+	taskStore.getTask(getTaskMeta(req), function(err, task) {
 		if (err) {
 			return writeError(500, res, err.toString());
 		}
-		if (!task || task.username !== req.user.username) {
+		if (!task || (task.username && task.username !== req.user.username)) {
+			// task meta saved in fs doesn't have username, while task saved in RAM and mongo does.
 			return writeError(404, res, "Task does not exist: " + req.id);
 		}
-		taskStore.deleteTask(req.id, function(err) {
+		taskStore.deleteTask(getTaskMeta(req), function(err) {
 			if (err) {
 				return writeError(500, res, err.toString());
 			}
@@ -211,8 +230,8 @@ function deleteAllOperations(req, res) {
 			return;
 		}
 		tasks.forEach(function(task) {
-			if (task.result) {
-				taskStore.deleteTask(task.id, done); /* task is completed */
+			if (task.result || task.Result) {
+				taskStore.deleteTask(getTaskMeta(req, task.Location.substring(req.baseUrl.length),task.id), done); /* task is completed */
 			} else {
 				locations.push(toJSON(task, true).Location);
 				done();
@@ -221,27 +240,39 @@ function deleteAllOperations(req, res) {
 	});
 }
 
+
 function toJSON(task, isWriteLocation) {
-	var result = {
-		lengthComputable: task.lengthComputable,
-		cancelable: task.cancelable,
-		expires: task.expires,
-		timestamp: task.timestamp,
-		type: task.type
-	};
-	if (task.lengthComputable) {
-		result.loaded = task.loaded;
-		result.total = task.total;
-		result.message = task.message;
-	}
-	if (task.result) {
-		result.Result = task.result;
-	}
-	if (task.keep && isWriteLocation) {
-		// Do not set location so that tasks is deleted
-		result.Location = taskRoot + "/id/" + task.id;
-	} else if (isWriteLocation) {
-		result.Location = taskRoot + "/temp/" + task.id;
+	var result;
+	// task meta saved in fs doesn't have username, while task saved in RAM and mongo does.
+	if (typeof task.username === 'string') { // This means this task object is the original Task object
+		result = {
+			lengthComputable: task.lengthComputable,
+			cancelable: task.cancelable,
+			expires: task.expires,
+			timestamp: task.timestamp,
+			type: task.type
+		};
+		if (task.lengthComputable) {
+			result.loaded = task.loaded;
+			result.total = task.total;
+			result.message = task.message;
+		}
+		if (task.result) {
+			result.Result = task.result;
+		}
+		if (task.keep && isWriteLocation) {
+			// Do not set location so that tasks is deleted
+			result.Location = taskRoot + "/id/" + task.id;
+		} else if (isWriteLocation) {
+			result.Location = taskRoot + "/temp/" + task.id;
+		}
+		
+	} else {
+		// When task object is task description not the Task object
+		if(!isWriteLocation){
+			task.Location && delete task.Location;
+		}
+		result = task;
 	}
 	return result;
 }

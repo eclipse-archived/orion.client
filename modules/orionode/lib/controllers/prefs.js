@@ -28,6 +28,7 @@ module.exports = {};
 
 module.exports.readElectronPrefs = readElectronPrefs;
 module.exports.writeElectronPrefs = writeElectronPrefs;
+module.exports.readPrefNode = readPrefNode;
 module.exports.router = PrefsController;
 
 var NOT_EXIST;
@@ -220,6 +221,17 @@ function handleDelete(req, res) { //eslint-disable-line consistent-return
 
 function getElectronPrefsFileName(){
 	return nodePath.join(os.homedir(), '.orion', PREF_FILENAME);
+}
+
+function readPrefNode(options, path, properties) {
+	options.configParams = options.configParams || {};
+	if (!options.configParams["orion.single.user"] && options.configParams["orion.metastore.useMongo"] !== false) {
+		MODEL = Preference;
+	} else {
+		MODEL = Long_Key_Prefs;
+	}
+	var prefsModel = new MODEL(properties);
+	return prefsModel.get(path);
 }
 
 function readElectronPrefs(){

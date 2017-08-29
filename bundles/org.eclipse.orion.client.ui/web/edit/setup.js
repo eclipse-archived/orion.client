@@ -1218,7 +1218,7 @@ objects.mixin(EditorViewer.prototype, {
 							inputManager.removeEventListener("InputChanged", this.loadComplete);
 							that.tabWidget.closeTab(metadata, false);
 						}.bind(this));
-						inputManager.setInput(item.result && item.result.Location && encodeURIComponent(item.result.Location) || metadata.WorkspaceLocation || fileClient.fileServiceRootURL(selectedMetadata.Location));
+						inputManager.setInput(item.result && item.result.Location || metadata.WorkspaceLocation || fileClient.fileServiceRootURL(selectedMetadata.Location));
 					} else if (that.tabWidget.editorTabs.hasOwnProperty(sourceLocation)) {
 						that.tabWidget.closeTab(metadata, false);
 					}

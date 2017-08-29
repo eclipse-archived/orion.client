@@ -51,6 +51,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/commands', 'orion/
 			var gitPreferenceStorage = new GitPreferenceStorage(this.registry);
 			gitPreferenceStorage.isEnabled().then(
 				function(isEnabled){
+					this.gitCredentialsSection.show();
 					that.gitCredentialsFields[0].setChecked(isEnabled);
 				}
 			);
@@ -96,7 +97,6 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/commands', 'orion/
 			}else{
 				gitCredentialsFieldsDefaultLength= 0;
 			}
-			var gitCredentialsSection;
 			var that = this;
 			
 			// erase credentials command
@@ -132,10 +132,19 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/commands', 'orion/
 						that.gitCredentialsFields.push(settingsCommand);
 					}
 					
-					gitCredentialsSection = new Subsection( {sectionName: messages["Git Credentials Storage"], parentNode: that.sections, children: that.gitCredentialsFields, additionalCssClass: 'git-setting-header'} ); //$NON-NLS-0$
-					gitCredentialsSection.show();		
+					this.gitCredentialsSection = new Subsection( {sectionName: messages["Git Credentials Storage"], parentNode: that.sections, children: that.gitCredentialsFields, additionalCssClass: 'git-setting-header'} ); //$NON-NLS-0$
 				}
 			);
+			
+			/* - git niff dir -------------------------------------------------- */
+			this.gitRepoDir = [ new SettingsTextfield( 
+				{	fieldlabel: messages["GitRepoSearchDirs"], 
+					fieldTitle: messages["GitRepoSearchDirsTooltip"],
+					postChange: this.updateGitRepoDir.bind(this)
+				} 
+			)];
+			this.gitSection4 = new Subsection( {sectionName:messages["GitRepoDir"], parentNode: this.sections, children: this.gitRepoDir, additionalCssClass: 'git-setting-header'} );
+			
 		},
 		
 		update: function(){
@@ -144,6 +153,16 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/commands', 'orion/
 			gitConfigPreference.setConfig({GitMail: this.gitFields[0].getValue(),	
 										GitName: this.gitFields[1].getValue(),
 										GitSelectAll: this.gitAlwaysSelect[0].isChecked()}).then(
+				function(){
+					messageService.setProgressResult( messages['GitUsrUpdateSuccess'] );
+				}
+			);
+		},
+		
+		updateGitRepoDir: function(){
+			var gitConfigPreference = new GitConfigPreference(this.registry);
+			var messageService = this.registry.getService("orion.page.message"); //$NON-NLS-0$
+			gitConfigPreference.setConfig({GitRepoDir: this.gitRepoDir[0].getValue()}).then(
 				function(){
 					messageService.setProgressResult( messages['GitUsrUpdateSuccess'] );
 				}
@@ -190,7 +209,14 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/commands', 'orion/
 							this.gitFields[1].setValue( userInfo.GitName );	
 						}
 						if ( userInfo.GitSelectAll ) {
-							this.gitAlwaysSelect[0].setChecked (userInfo.GitSelectAll);
+							this.gitAlwaysSelect[0].setChecked(userInfo.GitSelectAll);
+						}
+						if ( userInfo.GitRepoDirEnabled ) {
+							this.gitSection4.show();
+							this.gitRepoDir[0].show();
+						}
+						if ( userInfo.GitRepoDir ) {
+							this.gitRepoDir[0].setValue(userInfo.GitRepoDir);
 						}
 					}
 				}.bind(this));
