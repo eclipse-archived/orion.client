@@ -17,6 +17,7 @@
     "diff": "^3.1.0",
     "express": "^4.13.3",
     "express-session": "^1.13.0",
+    "fs-ext": "0.6.0",
     "fs-extra": "^0.26.7",
     "generate-password": "^1.1.1",
     "google-protobuf": "^3.0.0-alpha.6.2",
