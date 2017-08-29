@@ -382,7 +382,10 @@ define([
 					]);
 				});
 			});
-			describe('RequireJS', function() {
+			/**
+			 * Skip for now - we had to roll back modules suport for requirejs
+			 */
+			describe.skip('RequireJS', function() {
 				beforeEach('Restart with the requirejs plugin', function(done) {
 					worker.start(done, {options: {plugins: {requirejs: {}}, libs: []}});
 				});

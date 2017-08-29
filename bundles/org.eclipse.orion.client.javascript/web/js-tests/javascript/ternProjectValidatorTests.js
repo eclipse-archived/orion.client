@@ -12,12 +12,16 @@
 /*eslint-env amd, mocha, browser, chai*/
 /* eslint-disable missing-nls */
 define([
-'javascript/ternProjectValidator',
+'javascript/support/ternproject/ternProjectValidator',
+'javascript/jsonAstManager',
+'orion/Deferred',
 'chai/chai',
 'mocha/mocha' //must stay at the end, not a module
-], function(Validator, chai) {
-	var assert = chai.assert;
-
+], function(Validator, JsonAstManager, Deferred, chai) {
+	var assert = chai.assert,
+		astmanager = new JsonAstManager.JsonAstManager(),
+		validator = new Validator.TernProjectValidator(astmanager);
+	
 	return /* @callback */ function(worker) {
 		/**
 		 * @description Compares the computed vs. the expected problem arrays
@@ -47,337 +51,303 @@ define([
 			return pb;
 		}
 	
+		/**
+		 * @description Run the validator that uses the JSON AST manager
+		 * @param {string} testText The text to get the AST from to validate
+		 * @param {[?]} expected The expected result of running the validator on the text
+		 * @since 16.0
+		 */
+		function validate(testText, expected) {
+			astmanager.onModelChanging({file: '.tern-project', location: '.tern-project', name: '.tern-project'});
+			var editorContext = {
+				getText: function getText() {
+					return new Deferred().resolve(testText);
+				},
+				getFileMetadata: function getFileMetadata() {
+					var o = Object.create(null);
+				    o.contentType = Object.create(null);
+				    o.contentType.id = "application/json";
+				    o.location = '.tern-project';
+				    o.name = '.tern-project';
+				    return new Deferred().resolve(o);
+				}
+			};
+			return validator.computeProblems(editorContext, null, null).then(function(problems) {
+				assertProblems(problems, expected);
+			});
+		}
+	
 		describe(".tern-project validator tests", function() {
 			it("test empty", function() {
-				var problems = Validator.validateAST('');
-				assertProblems(problems, []);
+				return validate('', []);
 			});
 			it("test empty object", function() {
-				var problems = Validator.validateAST('{}');
-				assertProblems(problems, []);
+				return validate('{}', []);
 			});
 			it("test invalid root JSON 1", function() {
-				var problems = Validator.validateAST('!');
-				assertProblems(problems, []);
+				return validate('!', []);
 			});
 			it("test invalid root JSON 2", function() {
-				var problems = Validator.validateAST('function f() {}');
-				assertProblems(problems, []);
+				return validate('function f() {}', []);
 			});
 			it("test invalid root JSON 3", function() {
-				var problems = Validator.validateAST('undefined');
-				assertProblems(problems, []);
+				return validate('undefined', []);
 			});
 			it("test libs", function() {
-				var problems = Validator.validateAST('{"libs": ["one"]}');		
-				assertProblems(problems, []);
+				return validate('{"libs": ["one"]}', []);
 			});
 			it("test libs - null", function() {
-				var problems = Validator.validateAST('{"libs": null}');		
-				assertProblems(problems, [
+				return validate('{"libs": null}', [
 					problem(9, 13, "'libs' must be an array of strings")
 				]);
 			});
 			it("test libs - undefined", function() {
-				var problems = Validator.validateAST('{"libs": undefined}');		
-				assertProblems(problems, [
-					problem(9, 18, "'libs' must be an array of strings")
+				return validate('{"libs": undefined}', [
+					problem(1, 19, "'libs' must be an array of strings")
 				]);
 			});
 			it("test libs - number", function() {
-				var problems = Validator.validateAST('{"libs": 1}');		
-				assertProblems(problems, [
+				return validate('{"libs": 1}', [
 					problem(9, 10, "'libs' must be an array of strings")
 				]);
 			});
 			it("test libs - boolean", function() {
-				var problems = Validator.validateAST('{"libs": true}');		
-				assertProblems(problems, [
+				return validate('{"libs": true}', [
 					problem(9, 13, "'libs' must be an array of strings")
 				]);
 			});
 			it("test libs - string", function() {
-				var problems = Validator.validateAST('{"libs": "hi"}');		
-				assertProblems(problems, [
+				return validate('{"libs": "hi"}', [
 					problem(9, 13, "'libs' must be an array of strings")
 				]);
 			});
 			it("test libs - empty", function() {
-				var problems = Validator.validateAST('{"libs": []}');		
-				assertProblems(problems, [
+				return validate('{"libs": []}', [
 					problem(9, 11, "'libs' should not be empty")
 				]);			
 			});
 			it("test libs - all string values", function() {
-				var problems = Validator.validateAST('{"libs": ["one", "two", "three"]}');		
-				assertProblems(problems, []);
+				return validate('{"libs": ["one", "two", "three"]}', []);
 			});
 			it("test libs - mixed values", function() {
-				var problems = Validator.validateAST('{"libs": ["one", null, 1]}');		
-				assertProblems(problems, [
+				return validate('{"libs": ["one", null, 1]}', [
 						problem(17, 21, "'libs' entries can only be strings"),
 						problem(23, 24, "'libs' entries can only be strings")
 					]
 				);
 			});
 			it("test loadEagerly", function() {
-				var problems = Validator.validateAST('{"loadEagerly": ["one"]}');		
-				assertProblems(problems, []);
+				return validate('{"loadEagerly": ["one"]}', []);
 			});
 			it("test loadEagerly - null", function() {
-				var problems = Validator.validateAST('{"loadEagerly": null}');		
-				assertProblems(problems, [
+				return validate('{"loadEagerly": null}', [
 					problem(16, 20, "'loadEagerly' must be an array of strings")
 				]);
 			});
 			it("test loadEagerly - undefined", function() {
-				var problems = Validator.validateAST('{"loadEagerly": undefined}');		
-				assertProblems(problems, [
-					problem(16, 25, "'loadEagerly' must be an array of strings")
+				return validate('{"loadEagerly": undefined}', [
+					problem(1, 26, "'loadEagerly' must be an array of strings")
 				]);
 			});
 			it("test loadEagerly - number", function() {
-				var problems = Validator.validateAST('{"loadEagerly": 1}');		
-				assertProblems(problems, [
+				return validate('{"loadEagerly": 1}', [
 					problem(16, 17, "'loadEagerly' must be an array of strings")
 				]);
 			});
 			it("test loadEagerly - boolean", function() {
-				var problems = Validator.validateAST('{"loadEagerly": true}');		
-				assertProblems(problems, [
+				return validate('{"loadEagerly": true}', [
 					problem(16, 20, "'loadEagerly' must be an array of strings")
 				]);
 			});
 			it("test loadEagerly - string", function() {
-				var problems = Validator.validateAST('{"loadEagerly": "hi"}');		
-				assertProblems(problems, [
+				return validate('{"loadEagerly": "hi"}', [
 					problem(16, 20, "'loadEagerly' must be an array of strings")
 				]);
 			});
 			it("test loadEagerly - empty", function() {
-				var problems = Validator.validateAST('{"loadEagerly": []}');		
-				assertProblems(problems, []);			
+				return validate('{"loadEagerly": []}', []);			
 			});
 			it("test loadEagerly - all string values", function() {
-				var problems = Validator.validateAST('{"loadEagerly": ["one", "two", "three"]}');		
-				assertProblems(problems, []);
+				return validate('{"loadEagerly": ["one", "two", "three"]}', []);
 			});
 			it("test loadEagerly - mixed values", function() {
-				var problems = Validator.validateAST('{"loadEagerly": ["one", null, 1]}');		
-				assertProblems(problems, [
+				return validate('{"loadEagerly": ["one", null, 1]}', [
 						problem(24, 28, "'loadEagerly' entries can only be strings"),
 						problem(30, 31, "'loadEagerly' entries can only be strings")
 					]
 				);
 			});
 			it("test dontLoad", function() {
-				var problems = Validator.validateAST('{"dontLoad": ["one"]}');		
-				assertProblems(problems, []);
+				return validate('{"dontLoad": ["one"]}', []);
 			});
 			it("test dontLoad - null", function() {
-				var problems = Validator.validateAST('{"dontLoad": null}');		
-				assertProblems(problems, [
+				return validate('{"dontLoad": null}', [
 					problem(13, 17, "'dontLoad' must be an array of strings")
 				]);
 			});
 			it("test dontLoad - number", function() {
-				var problems = Validator.validateAST('{"dontLoad": 1}');		
-				assertProblems(problems, [
+				return validate('{"dontLoad": 1}', [
 					problem(13, 14, "'dontLoad' must be an array of strings")
 				]);
 			});
 			it("test dontLoad - boolean", function() {
-				var problems = Validator.validateAST('{"dontLoad": true}');		
-				assertProblems(problems, [
+				return validate('{"dontLoad": true}', [
 					problem(13, 17, "'dontLoad' must be an array of strings")
 				]);
 			});
 			it("test dontLoad - string", function() {
-				var problems = Validator.validateAST('{"dontLoad": "hi"}');		
-				assertProblems(problems, [
+				return validate('{"dontLoad": "hi"}', [
 					problem(13, 17, "'dontLoad' must be an array of strings")
 				]);
 			});
 			it("test dontLoad - undefined", function() {
-				var problems = Validator.validateAST('{"dontLoad": undefined}');		
-				assertProblems(problems, [
-					problem(13, 22, "'dontLoad' must be an array of strings")
+				return validate('{"dontLoad": undefined}', [
+					problem(1, 23, "'dontLoad' must be an array of strings")
 				]);
 			});
 			it("test dontLoad - empty", function() {
-				var problems = Validator.validateAST('{"dontLoad": []}');		
-				assertProblems(problems, [
+				return validate('{"dontLoad": []}', [
 					problem(13, 15, "'dontLoad' should not be empty")
 				]);			
 			});
 			it("test dontLoad - all string values", function() {
-				var problems = Validator.validateAST('{"dontLoad": ["one", "two", "three"]}');		
-				assertProblems(problems, []);
+				return validate('{"dontLoad": ["one", "two", "three"]}', []);
 			});
 			it("test dontLoad - mixed values", function() {
-				var problems = Validator.validateAST('{"dontLoad": ["one", null, 1]}');		
-				assertProblems(problems, [
+				return validate('{"dontLoad": ["one", null, 1]}', [
 						problem(21, 25, "'dontLoad' entries can only be strings"),
 						problem(27, 28, "'dontLoad' entries can only be strings")
 					]
 				);
 			});
 			it("test ecmaVersion", function() {
-				var problems = Validator.validateAST('{"ecmaVersion": 4}');		
-				assertProblems(problems, []);
+				return validate('{"ecmaVersion": 4}', []);
 			});
 			
 			it("test ecmaVersion - undefined", function() {
-				var problems = Validator.validateAST('{"ecmaVersion": undefined}');		
-				assertProblems(problems, [
-					problem(16, 25, "'ecmaVersion' must be a number")
+				return validate('{"ecmaVersion": undefined}', [
+					problem(1, 26, "'ecmaVersion' must be a number")
 				]);
 			});
 			it("test ecmaVersion - null", function() {
-				var problems = Validator.validateAST('{"ecmaVersion": null}');		
-				assertProblems(problems, [
+				return validate('{"ecmaVersion": null}', [
 					problem(16, 20, "'ecmaVersion' must be a number")
 				]);
 			});
 			it("test ecmaVersion - boolean", function() {
-				var problems = Validator.validateAST('{"ecmaVersion": true}');		
-				assertProblems(problems, [
+				return validate('{"ecmaVersion": true}', [
 					problem(16, 20, "'ecmaVersion' must be a number")
 				]);
 			});
 			it("test ecmaVersion - []", function() {
-				var problems = Validator.validateAST('{"ecmaVersion": []}');		
-				assertProblems(problems, [
+				return validate('{"ecmaVersion": []}', [
 					problem(16, 18, "'ecmaVersion' must be a number")
 				]);
 			});
 			it("test ecmaVersion - string", function() {
-				var problems = Validator.validateAST('{"ecmaVersion": "foo"}');		
-				assertProblems(problems, [
+				return validate('{"ecmaVersion": "foo"}', [
 					problem(16, 21, "'ecmaVersion' must be a number")
 				]);
 			});
 			it("test dependencyBudget", function() {
-				var problems = Validator.validateAST('{"dependencyBudget": 4}');		
-				assertProblems(problems, []);
+				return validate('{"dependencyBudget": 4}', []);
 			});
 			it("test dependencyBudget - undefined", function() {
-				var problems = Validator.validateAST('{"dependencyBudget": undefined}');		
-				assertProblems(problems, [
-					problem(21, 30, "'dependencyBudget' must be a number")
+				return validate('{"dependencyBudget": undefined}', [
+					problem(1, 31, "'dependencyBudget' must be a number")
 				]);
 			});
 			it("test dependencyBudget - null", function() {
-				var problems = Validator.validateAST('{"dependencyBudget": null}');		
-				assertProblems(problems, [
+				return validate('{"dependencyBudget": null}', [
 					problem(21, 25, "'dependencyBudget' must be a number")
 				]);
 			});
 			it("test dependencyBudget - boolean", function() {
-				var problems = Validator.validateAST('{"dependencyBudget": true}');		
-				assertProblems(problems, [
+				return validate('{"dependencyBudget": true}', [
 					problem(21, 25, "'dependencyBudget' must be a number")
 				]);
 			});
 			it("test dependencyBudget - []", function() {
-				var problems = Validator.validateAST('{"dependencyBudget": []}');		
-				assertProblems(problems, [
+				return validate('{"dependencyBudget": []}', [
 					problem(21, 23, "'dependencyBudget' must be a number")
 				]);
 			});
 			it("test dependencyBudget - string", function() {
-				var problems = Validator.validateAST('{"dependencyBudget": "foo"}');		
-				assertProblems(problems, [
+				return validate('{"dependencyBudget": "foo"}', [
 					problem(21, 26, "'dependencyBudget' must be a number")
 				]);
 			});
 			it("test plugins", function() {
-				var problems = Validator.validateAST('{"plugins": {"a": {}}}');
-				assertProblems(problems, []);
+				return validate('{"plugins": {"a": {}}}', []);
 			});
 			it("test plugins - empty", function() {
-				var problems = Validator.validateAST('{"plugins": {}}');
-				assertProblems(problems, []);
+				return validate('{"plugins": {}}', []);
 			});
 			it("test plugins - null", function() {
-				var problems = Validator.validateAST('{"plugins": null}');
-				assertProblems(problems, [
+				return validate('{"plugins": null}', [
 					problem(12, 16, "'plugins' must be an object")
 				]);
 			});
 			it("test plugins - undefined", function() {
-				var problems = Validator.validateAST('{"plugins": undefined}');
-				assertProblems(problems, [
-					problem(12, 21, "'plugins' must be an object")
+				return validate('{"plugins": undefined}', [
+					problem(1, 22, "'plugins' must be an object")
 				]);
 			});
 			it("test plugins - boolean", function() {
-				var problems = Validator.validateAST('{"plugins": true}');
-				assertProblems(problems, [
+				return validate('{"plugins": true}', [
 					problem(12, 16, "'plugins' must be an object")
 				]);
 			});
 			it("test plugins - number", function() {
-				var problems = Validator.validateAST('{"plugins": 1337}');
-				assertProblems(problems, [
+				return validate('{"plugins": 1337}', [
 					problem(12, 16, "'plugins' must be an object")
 				]);
 			});
 			it("test plugins - string", function() {
-				var problems = Validator.validateAST('{"plugins": "hi"}');
-				assertProblems(problems, [
+				return validate('{"plugins": "hi"}', [
 					problem(12, 16, "'plugins' must be an object")
 				]);
 			});
 			it("test plugins - array", function() {
-				var problems = Validator.validateAST('{"plugins": []}');
-				assertProblems(problems, [
+				return validate('{"plugins": []}', [
 					problem(12, 14, "'plugins' must be an object")
 				]);
 			});
 			it("test plugins value", function() {
-				var problems = Validator.validateAST('{"plugins": {"a": {}}}');
-				assertProblems(problems, []);
+				return validate('{"plugins": {"a": {}}}', []);
 			});
 			it("test plugins value - null", function() {
-				var problems = Validator.validateAST('{"plugins": {"a": null}}');
-				assertProblems(problems, [
-					problem(18, 22, "'a' must be an object or boolean")
+				return validate('{"plugins": {"a": null}}', [
+					problem(18, 22, "plugin 'a' must be an object or boolean")
 				]);
 			});
 			it("test plugins value - undefined", function() {
-				var problems = Validator.validateAST('{"plugins": {"a": undefined}}');
-				assertProblems(problems, [
-					problem(18, 27, "'a' must be an object or boolean")
+				return validate('{"plugins": {"a": undefined}}', [
+					problem(13, 28, "plugin 'a' must be an object or boolean")
 				]);
 			});
 			it("test plugins value - boolean", function() {
-				var problems = Validator.validateAST('{"plugins": {"a": true}}');
-				assertProblems(problems, [
-					problem(18, 22, "'a' must be an object or boolean")
+				return validate('{"plugins": {"a": true}}', [
+					//problem(18, 22, "plugin 'a' must be an object or boolean")
 				]);
 			});
 			it("test plugins value - string", function() {
-				var problems = Validator.validateAST('{"plugins": {"a": "hi"}}');
-				assertProblems(problems, [
-					problem(18, 22, "'a' must be an object or boolean")
+				return validate('{"plugins": {"a": "hi"}}', [
+					problem(18, 22, "plugin 'a' must be an object or boolean")
 				]);
 			});
 			it("test plugins value - array", function() {
-				var problems = Validator.validateAST('{"plugins": {"a": []}}');
-				assertProblems(problems, [
-					problem(18, 20, "'a' must be an object or boolean")
+				return validate('{"plugins": {"a": []}}', [
+					problem(18, 20, "plugin 'a' must be an object or boolean")
 				]);
 			});
 			it("test dupe entries - root", function() {
-				var problems = Validator.validateAST('{"plugins": {}, "plugins": {}}');
-				assertProblems(problems, [
+				return validate('{"plugins": {}, "plugins": {}}', [
 					problem(16, 25, "Duplicate entries are not allowed")
 				]);
 			});
 			it("test dupe entries - plugins", function() {
-				var problems = Validator.validateAST('{"plugins": {"a": {}, "b": {}, "a":{}}}');
-				assertProblems(problems, [
+				return validate('{"plugins": {"a": {}, "b": {}, "a":{}}}', [
 					problem(31, 34, "Duplicate entries are not allowed")
 				]);
 			});
