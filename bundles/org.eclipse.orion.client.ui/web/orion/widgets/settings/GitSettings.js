@@ -137,13 +137,13 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/commands', 'orion/
 			);
 			
 			/* - git niff dir -------------------------------------------------- */
-			this.gitSniffDir = [ new SettingsTextfield( 
+			this.gitRepoDir = [ new SettingsTextfield( 
 				{	fieldlabel: messages["GitRepoSearchDirs"], 
 					fieldTitle: messages["GitRepoSearchDirsTooltip"],
-					postChange: this.updateSniffDir.bind(this)
+					postChange: this.updateGitRepoDir.bind(this)
 				} 
 			)];
-			this.gitSection4 = new Subsection( {sectionName:messages["GitRepoDir"], parentNode: this.sections, children: this.gitSniffDir, additionalCssClass: 'git-setting-header'} );
+			this.gitSection4 = new Subsection( {sectionName:messages["GitRepoDir"], parentNode: this.sections, children: this.gitRepoDir, additionalCssClass: 'git-setting-header'} );
 			
 		},
 		
@@ -159,10 +159,10 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/commands', 'orion/
 			);
 		},
 		
-		updateSniffDir: function(){
+		updateGitRepoDir: function(){
 			var gitConfigPreference = new GitConfigPreference(this.registry);
 			var messageService = this.registry.getService("orion.page.message"); //$NON-NLS-0$
-			gitConfigPreference.setConfig({GitSniffDir: this.gitSniffDir[0].getValue()}).then(
+			gitConfigPreference.setConfig({GitRepoDir: this.gitRepoDir[0].getValue()}).then(
 				function(){
 					messageService.setProgressResult( messages['GitUsrUpdateSuccess'] );
 				}
@@ -211,12 +211,12 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/commands', 'orion/
 						if ( userInfo.GitSelectAll ) {
 							this.gitAlwaysSelect[0].setChecked(userInfo.GitSelectAll);
 						}
-						if (userInfo.GitSniffDirEnabled) {
+						if ( userInfo.GitRepoDirEnabled ) {
 							this.gitSection4.show();
-							this.gitSniffDir[0].show();
+							this.gitRepoDir[0].show();
 						}
-						if ( userInfo.GitSniffDir ) {
-							this.gitSniffDir[0].setValue(userInfo.GitSniffDir);
+						if ( userInfo.GitRepoDir ) {
+							this.gitRepoDir[0].setValue(userInfo.GitRepoDir);
 						}
 					}
 				}.bind(this));

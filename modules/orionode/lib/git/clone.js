@@ -204,11 +204,12 @@ function getClones(req, res, callback) {
 		var store = fileUtil.getMetastore(req);
 		store.getUser(req.user.username, function(err, metadata){
 			var gitUserInfo = prefs.readPrefNode(options.options, 'git/config', metadata.properties);
-			var dirtoriesToSniff = gitUserInfo &&  gitUserInfo.userInfo && gitUserInfo.userInfo.GitSniffDir.split(",");
-			if (!dirtoriesToSniff) {
+			var gitRepoDirs = gitUserInfo &&  gitUserInfo.userInfo && gitUserInfo.userInfo.GitRepoDir.split(",");
+			if (!gitRepoDirs) {
 				checkDirectory(rootDir, done);
 			} else {
-				var pathsToCheck = dirtoriesToSniff.map(function(dirName){
+				var pathsToCheck = gitRepoDirs.map(function(dirName){
+					dirName = dirName.trim();
 					return 	path.join(rootDir,dirName);	
 				});
 				async.each(pathsToCheck, checkDirectory, done);
