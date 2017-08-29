@@ -598,6 +598,8 @@ Object.assign(FsMetastore.prototype, {
 									}
 									resolve(result);
 								});
+							} else {
+								resolve();
 							}
 						}.bind(this));
 					}
