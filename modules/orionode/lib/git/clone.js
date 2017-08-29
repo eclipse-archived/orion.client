@@ -204,7 +204,7 @@ function getClones(req, res, callback) {
 		var store = fileUtil.getMetastore(req);
 		store.getUser(req.user.username, function(err, metadata){
 			var gitUserInfo = prefs.readPrefNode(options.options, 'git/config', metadata.properties);
-			var gitRepoDirs = gitUserInfo &&  gitUserInfo.userInfo && gitUserInfo.userInfo.GitRepoDir.split(",");
+			var gitRepoDirs = gitUserInfo &&  gitUserInfo.userInfo && gitUserInfo.userInfo.GitRepoDir && gitUserInfo.userInfo.GitRepoDir.split(",");
 			if (!gitRepoDirs) {
 				checkDirectory(rootDir, done);
 			} else {

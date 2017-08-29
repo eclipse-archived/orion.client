@@ -650,7 +650,7 @@ Object.assign(FsMetastore.prototype, {
 			return callback(null);
 		}
 
-		var taskRoot = nodePath.join(getTaskRootLocation(this.options), this.getUserTasksDirectory(taskMeta.username));
+		var taskRoot = nodePath.join(getTaskRootLocation(this._options), this.getUserTasksDirectory(taskMeta.username));
 		var taskDir = taskMeta.keep ? taskRoot : nodePath.join(taskRoot, FILENAME_TASKS_TEMP_DIR);
 		return fs.statAsync(taskDir).then(
 			function(stat) {
@@ -670,7 +670,7 @@ Object.assign(FsMetastore.prototype, {
 			return callback(null, this._taskList[taskMeta.id]);
 		}
 
-		var taskRoot = nodePath.join(getTaskRootLocation(this.options), this.getUserTasksDirectory(taskMeta.username));
+		var taskRoot = nodePath.join(getTaskRootLocation(this._options), this.getUserTasksDirectory(taskMeta.username));
 		var taskDir = taskMeta.keep ? taskRoot : nodePath.join(taskRoot, FILENAME_TASKS_TEMP_DIR);
 		var taskFile = nodePath.join(taskDir, taskMeta.id);
 		return fs.readFileAsync(taskFile, 'utf8')
@@ -701,7 +701,7 @@ Object.assign(FsMetastore.prototype, {
 		}
 
 		// won't return temp tasks
-		var taskRoot = nodePath.join(getTaskRootLocation(this.options), this.getUserTasksDirectory(username));
+		var taskRoot = nodePath.join(getTaskRootLocation(this._options), this.getUserTasksDirectory(username));
 		return fs.readdirAsync(taskRoot).then(
 			function(files) {
 				var fileReadPromises = [];
@@ -734,7 +734,7 @@ Object.assign(FsMetastore.prototype, {
 			return callback(null);
 		}
 
-		var taskRoot = nodePath.join(getTaskRootLocation(this.options), this.getUserTasksDirectory(taskObj.username));
+		var taskRoot = nodePath.join(getTaskRootLocation(this._options), this.getUserTasksDirectory(taskObj.username));
 		var taskDir = taskObj.keep ? taskRoot : nodePath.join(taskRoot, FILENAME_TASKS_TEMP_DIR);
 		return mkdirpAsync(taskDir).then( // create parent folder(s) if necessary
 			function() {
