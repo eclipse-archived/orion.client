@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2015 IBM Corporation, Inc. and others.
+ * Copyright (c) 2015, 2017 IBM Corporation, Inc. and others.
  * All rights reserved. This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License v1.0
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution
@@ -342,31 +342,31 @@ define([
 			it("test plugins value - null", function() {
 				var problems = Validator.validateAST('{"plugins": {"a": null}}');
 				assertProblems(problems, [
-					problem(18, 22, "'a' must be an object")
+					problem(18, 22, "'a' must be an object or boolean")
 				]);
 			});
 			it("test plugins value - undefined", function() {
 				var problems = Validator.validateAST('{"plugins": {"a": undefined}}');
 				assertProblems(problems, [
-					problem(18, 27, "'a' must be an object")
+					problem(18, 27, "'a' must be an object or boolean")
 				]);
 			});
 			it("test plugins value - boolean", function() {
 				var problems = Validator.validateAST('{"plugins": {"a": true}}');
 				assertProblems(problems, [
-					problem(18, 22, "'a' must be an object")
+					problem(18, 22, "'a' must be an object or boolean")
 				]);
 			});
 			it("test plugins value - string", function() {
 				var problems = Validator.validateAST('{"plugins": {"a": "hi"}}');
 				assertProblems(problems, [
-					problem(18, 22, "'a' must be an object")
+					problem(18, 22, "'a' must be an object or boolean")
 				]);
 			});
 			it("test plugins value - array", function() {
 				var problems = Validator.validateAST('{"plugins": {"a": []}}');
 				assertProblems(problems, [
-					problem(18, 20, "'a' must be an object")
+					problem(18, 20, "'a' must be an object or boolean")
 				]);
 			});
 			it("test dupe entries - root", function() {
