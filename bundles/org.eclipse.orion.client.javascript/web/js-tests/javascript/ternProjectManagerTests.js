@@ -12,7 +12,7 @@
 /*eslint-env amd, mocha, browser, chai*/
 /* eslint-disable missing-nls */
 define([
-'javascript/ternProjectManager',
+'javascript/support/ternproject/ternProjectManager',
 'javascript/scriptResolver',
 'orion/Deferred',
 'orion/serviceregistry',
