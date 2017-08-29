@@ -19,7 +19,7 @@ var EXCLUSIVE = "ex";
 var SHARED = "sh";
 var UNLOCK = "un";
 
-var TIMEOUT_INACTIVE = 60 * 1000; /* 1 min */
+var TIMEOUT_INACTIVE = 3 * 1000; /* 3s */
 
 var ReentrantLock = function() {
 	this._queue = [];
