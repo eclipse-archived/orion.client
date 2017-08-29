@@ -11,6 +11,8 @@
 /*eslint-env node*/
 var express = require('express');
 var bodyParser = require('body-parser');
+var log4js = require('log4js');
+var logger = log4js.getLogger('workspace');
 var api = require('./api'), writeError = api.writeError, writeResponse = api.writeResponse;
 var fileUtil = require('./fileUtil');
 
@@ -65,15 +67,23 @@ module.exports = function(options) {
 			return workspaceJson;
 		});
 	}
+	
+	function logAccess(userId) {
+		if (userId) {
+			logger.info("WorkspaceAccess: " + userId);
+		}
+	}
 
 	function getWorkspace(req, res) {
 		var rest = req.params["0"].substring(1);
 		var store = fileUtil.getMetastore(req);
 		if (rest === '') {
+			var userId = req.user.username;
+			logAccess(userId);
 			api.writeResponse(null, res, null, {
-				Id: req.user.username,
-				Name: req.user.username,
-				UserName: req.user.fullname || req.user.username,
+				Id: userId,
+				Name: userId,
+				UserName: req.user.fullname || userId,
 				Workspaces: req.user.workspaces.map(function(w) {
 					return {
 						Id: w.id,
@@ -103,6 +113,7 @@ module.exports = function(options) {
 		var store = fileUtil.getMetastore(req), workspaceId;
 		if (rest === '') {
 			var userId = req.user.username;
+			logAccess(userId);
 			var workspaceName = req.body && req.body.Name || fileUtil.decodeSlug(req.headers.slug);
 			workspaceId = req.body && req.body.Id;
 			store.createWorkspace(userId, {name: workspaceName, id: workspaceId}, function(err, workspace) {
