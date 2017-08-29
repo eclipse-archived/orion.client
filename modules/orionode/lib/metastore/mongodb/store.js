@@ -321,12 +321,12 @@ Object.assign(MongoDbMetastore.prototype, {
 		taskObj._mongooseTask = new orionTask();
 		this.updateTask(taskObj, callback);
 	},
-	deleteTask: function(id, callback) {
-		orionTask.remove({id: id}, callback);
+	deleteTask: function(taskMeta, callback) {
+		orionTask.remove({id: taskMeta.id}, callback);
 	},
-	getTask: function(id, callback) {
+	getTask: function(taskMeta, callback) {
 		orionTask.find(
-			{id: id},
+			{id: taskMeta.id},
 			function(err, mongooseTasks) {
 				if (err) {
 					callback(err);
