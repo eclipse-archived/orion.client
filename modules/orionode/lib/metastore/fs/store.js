@@ -12,11 +12,11 @@ var
     nodePath = require('path'),
     Promise = require('bluebird'),
     fs = Promise.promisifyAll(require('fs')),
-    lockFile = Promise.promisifyAll(require('lockfile')),
     mkdirpAsync = Promise.promisify(require('mkdirp')),
     metaUtil = require('../util/metaUtil'),
     accessRights = require('../../accessRights'),
-    os = require('os');
+    os = require('os'),
+    fileLocker = require('../../util/fileLocker');
 
 // Helper functions
 var FILENAME_METASTORE = "metastore.json";
@@ -61,35 +61,51 @@ function getTaskRootLocation(options) {
 	return options.configParams['orion.file.tasks.location'] || nodePath.join(options.workspaceDir, '.metadata', '.tasks');
 }
 
-function getLockfileName(filename) {
-	return filename + '.lock';
-}
-
-// Returns a promise that can be used with Promise.using() to guarantee exclusive
-// access to the file.
-function lock(filename) {
-	return lockFile.lockAsync(getLockfileName(filename), {
-		retries: 3,
-		retryWait: 25,
-		stale: 5000
-	})
-	.disposer(function() {
-		return lockFile.unlockAsync(getLockfileName(filename))
-		.catch(function(error) {
-			// Rejecting here will crash the process; just warn
-		});
-	});
-}
-
 function FsMetastore(options) {
-	this.options = options;
+	this._options = options;
 	this._taskList = {};
-	this._isSingleUser = options.configParams['orion.single.user'];
+	this._lockMap = {};
+  this._isSingleUser = options.configParams['orion.single.user'];
 }
+
+FsMetastore.prototype.lock = function(userId, shared) {
+	var promise = new Promise(function(resolve, reject) {
+		var doit = function(userLock) {
+			userLock.lock(shared).then(resolve, reject);
+		};
+	
+		var locker = this._lockMap[userId];
+		if (locker) {
+			doit(locker);
+		} else {
+			var userPrefix = userId.substring(0, Math.min(2, userId.length));
+			var filePath = nodePath.join(this._options.workspaceDir, userPrefix);
+			filePath = nodePath.join(filePath, userId);
+			mkdirpAsync(filePath).then(
+				function() {
+					/*
+					 * Check for fileLocker existence again in case there were multiple
+					 * fileLocker init's happening concurrently for the same user.
+					 */
+					if (!this._lockMap[userId]) {
+						var file = nodePath.join(filePath, ".lock");
+						this._lockMap[userId] = new fileLocker(file);
+					}
+					doit(this._lockMap[userId]);
+				}.bind(this),
+				reject
+			);
+		}
+	}.bind(this));
+	return promise.disposer(function(releaser) {
+		return releaser();
+	});
+};
+
 FsMetastore.prototype.setup = function(app) {
 	if (!this._isSingleUser) {
 		/* verify that existing metadata in this workspace will be usable by this server */
-		var path = nodePath.join(this.options.workspaceDir, FILENAME_METASTORE);
+		var path = nodePath.join(this._options.workspaceDir, FILENAME_METASTORE);
 		fs.readFileAsync(path, 'utf8').then(
 			function(content) {
 				var json = JSON.parse(content);
@@ -170,75 +186,97 @@ Object.assign(FsMetastore.prototype, {
 			return callback(new Error('createWorkspace.workspaceData.name is null'));
 		}
 
-		this._readUserMetadata(userId, function(error, metadata) {
-			if (error) {
-				return callback(error);
-			}
-
-			if (metadata) {
-				var workspaceId = metaUtil.encodeWorkspaceId(userId, workspaceData.id || workspaceData.name);
-				var workspaceObj = {
-					"name": workspaceData.name,
-					"id": workspaceId
-				};
-				var data = {
-					"FullName": workspaceData.name,
-					"OrionVersion": VERSION,
-					"ProjectNames": [],
-					"Properties": {},
-					"UniqueId": workspaceId,
-					"UserId": userId
-				};
-				this._updateWorkspaceMetadata(workspaceId, data, function(error) {
+		Promise.using(this.lock(userId, false), function() {
+			return new Promise(function(resolve, reject) {
+				this._readUserMetadata(userId, function(error, metadata) {
 					if (error) {
-						return callback(error);
+						return reject(error);
 					}
-	
-					metaUtil.createWorkspaceDir(this.options.workspaceDir, userId, workspaceObj.id, function(error) {
-						if (error) {
-							return callback(error);
-						}
-	
-						// TASK: to update workspaceIds in user's metadata
-						metadata["WorkspaceIds"].indexOf(workspaceId) === -1 && metadata["WorkspaceIds"].push(workspaceId);
-						var workspaceUserRights = accessRights.createWorkspaceAccess(workspaceId);
-						metadata["Properties"]["UserRights"] = metadata["Properties"]["UserRights"].concat(workspaceUserRights);
-						this._updateUserMetadata(userId,  metadata, function(error) {
-							error ? callback(error) : callback(null, workspaceObj);
-						});						
-					}.bind(this));
+		
+					if (metadata) {
+						var workspaceId = metaUtil.encodeWorkspaceId(userId, workspaceData.id || workspaceData.name);
+						var workspaceObj = {
+							"name": workspaceData.name,
+							"id": workspaceId
+						};
+						var data = {
+							"FullName": workspaceData.name,
+							"OrionVersion": VERSION,
+							"ProjectNames": [],
+							"Properties": {},
+							"UniqueId": workspaceId,
+							"UserId": userId
+						};
+						this._updateWorkspaceMetadata(workspaceId, data, function(error) {
+							if (error) {
+								return reject(error);
+							}
+			
+							metaUtil.createWorkspaceDir(this._options.workspaceDir, userId, workspaceObj.id, function(error) {
+								if (error) {
+									return reject(error);
+								}
+			
+								// TASK: to update workspaceIds in user's metadata
+								metadata["WorkspaceIds"].indexOf(workspaceId) === -1 && metadata["WorkspaceIds"].push(workspaceId);
+								var workspaceUserRights = accessRights.createWorkspaceAccess(workspaceId);
+								metadata["Properties"]["UserRights"] = metadata["Properties"]["UserRights"].concat(workspaceUserRights);
+								this._updateUserMetadata(userId,  metadata, function(error) {
+									if (error) {
+										return reject(error);
+									}
+									resolve(workspaceObj);
+								});						
+							}.bind(this));
+						}.bind(this));
+					} else {
+						reject(new Error("createWorkspace could not find user with id '" + userId + "'."));
+					}
 				}.bind(this));
-			} else {
-				callback(new Error("createWorkspace could not find user with id '" + userId + "'."));
-			}
-		}.bind(this));
+			}.bind(this));
+		}.bind(this)).then(
+			function(result) {
+				callback(null, result);
+			},
+			callback /* error case */
+		);
 	},
 
 	getWorkspace: function(workspaceId, callback) {
 		if (workspaceId !== WORKSPACE_ID) {
-			this._readWorkspaceMetadata(workspaceId, function(error, metadata) {
-				if (error) {
-					return callback(error);
-				}
+			var userId = metaUtil.decodeUserIdFromWorkspaceId(workspaceId);
+			Promise.using(this.lock(userId, true), function() {
+				return new Promise(function(resolve, reject) {
+					this._readWorkspaceMetadata(workspaceId, function(error, metadata) {
+						if (error) {
+							return reject(error);
+						}
 
-				var workspace = {
-					"id": metadata.UniqueId,
-					"name": metadata.FullName,
-					"properties": {}
-				};
-				// TODO Workspace properties is where tabs info goes, implement later
-				var propertyKeys = Object.keys(metadata.Properties);
-				propertyKeys.forEach(function(propertyKey) {
-					workspace.properties[propertyKey] = metadata.Properties[propertyKey];
-					// TODO password needs to be handled specifically since it needs to be decrypted. (referrence setProperties line 967)
-					// TODO handle userPropertyCache (referrence setProperties line 972)
-				});
-				callback(null, workspace);
-			});
+						var workspace = {
+							"id": metadata.UniqueId,
+							"name": metadata.FullName,
+							"properties": {}
+						};
+						// TODO Workspace properties is where tabs info goes, implement later
+						var propertyKeys = Object.keys(metadata.Properties);
+						propertyKeys.forEach(function(propertyKey) {
+							workspace.properties[propertyKey] = metadata.Properties[propertyKey];
+							// TODO password needs to be handled specifically since it needs to be decrypted. (referrence setProperties line 967)
+							// TODO handle userPropertyCache (referrence setProperties line 972)
+						});
+						resolve(workspace);
+					});
+				}.bind(this));
+			}.bind(this)).then(
+				function(result) {
+					callback(null, result);
+				},
+				callback /* error case */
+			);
 		} else {
 			// TODO this should be merged into upper logic
 			callback(null, {
-				name: nodePath.basename(this.options.workspaceDir),
+				name: nodePath.basename(this._options.workspaceDir),
 				id: WORKSPACE_ID
 			});
 		}
@@ -252,29 +290,38 @@ Object.assign(FsMetastore.prototype, {
 	getWorkspaceDir: function(workspaceId) {
 		if (workspaceId !== WORKSPACE_ID) {
 			var userId = metaUtil.decodeUserIdFromWorkspaceId(workspaceId);
-			return nodePath.join.apply(null, metaUtil.getWorkspacePath(this.options.workspaceDir, workspaceId, userId));	
+			return nodePath.join.apply(null, metaUtil.getWorkspacePath(this._options.workspaceDir, workspaceId, userId));	
 		}
-		return this.options.workspaceDir;
+		return this._options.workspaceDir;
 	},
 	
 	/**
 	 * update workspace data, which is the properties of workspace metadata
 	 */
 	updateWorkspace: function(workspaceId, workspacedata, callback) {
-		this._readWorkspaceMetadata(workspaceId, function(error, metadata) {
-			if (error) {
-				return callback(error);
-			}
-
-			metadata.Properties = workspacedata.properties;
-			this._updateWorkspaceMetadata(workspaceId, metadata, function(error) {
-				if (error) {
-					return callback(error);
-				}
-
-				callback();
-			});
-		}.bind(this));
+		var userId = metaUtil.decodeUserIdFromWorkspaceId(workspaceId);
+		Promise.using(this.lock(userId, false), function() {
+			return new Promise(function(resolve, reject) {
+				this._readWorkspaceMetadata(workspaceId, function(error, metadata) {
+					if (error) {
+						return reject(error);
+					}
+		
+					metadata.Properties = workspacedata.properties;
+					this._updateWorkspaceMetadata(workspaceId, metadata, function(error) {
+						if (error) {
+							return reject(error);
+						}
+						resolve();
+					});
+				}.bind(this));
+			}.bind(this));
+		}.bind(this)).then(
+			function(result) {
+				callback(null, result);
+			},
+			callback /* error case */
+		);
 	},
 	
 	/**
@@ -282,7 +329,7 @@ Object.assign(FsMetastore.prototype, {
 	 * Helper method to read the whole workspace metadata
 	 */
 	_readWorkspaceMetadata: function(workspaceId, callback) {
-		var metadataFile = getWorkspaceMetadataFileName(this.options, workspaceId);
+		var metadataFile = getWorkspaceMetadataFileName(this._options, workspaceId);
 		return fs.readFileAsync(metadataFile, 'utf8')
 			.catchReturn({ code: 'ENOENT' }, null) // New file: suppress error
 			.then(
@@ -304,48 +351,54 @@ Object.assign(FsMetastore.prototype, {
 	 * Helper method to update the whole workspace metadata
 	 */
 	_updateWorkspaceMetadata: function(workspaceId, metadata, callback) {
-		var metadataPath = getWorkspaceMetadataFileName(this.options, workspaceId);
+		var metadataPath = getWorkspaceMetadataFileName(this._options, workspaceId);
 		return mkdirpAsync(nodePath.dirname(metadataPath)).then( // create parent folder(s) if necessary
 			function() {
-				return Promise.using(lock(metadataPath), function() {
-					// We have the lock until the promise returned by this function fulfills.
-					return fs.writeFileAsync(metadataPath, JSON.stringify(metadata, null, 2));
-				}).then(
-					callback,
-					callback /* error case */
-				);
+				fs.writeFileAsync(metadataPath, JSON.stringify(metadata, null, 2)).then(callback, callback);
 			},
 			callback /* error case */
 		);
 	},
 
 	createUser: function(userData, callback) {
-		var metadataPath = getUserMetadataFileName(this.options, userData.username);
-		return mkdirpAsync(nodePath.dirname(metadataPath)).then(
-			function() {
-				var userProperty = {};
-	//			userData.password && (userProperty.Password = userData.password); //TODO password need to be pbewithmd5anddes encrypted
-				userData.oauth && (userProperty.OAuth = userData.oauth);
-				userData.email && (userProperty.Email = userData.email);
-				userProperty["AccountCreationTimestamp"] = Date.now();
-				userProperty["UniqueId"] = userData.username;
-				
-				// give the user access to their own user profile
-				userProperty["UserRights"] = accessRights.createUserAccess(userData.username);
-				userProperty["UserRightsVersion"] = accessRights.getCurrentVersion();
-				var userJson = {
-					"OrionVersion": VERSION,
-					"UniqueId": userData.username,
-					"UserName": userData.username,
-					"FullName": userData.fullname,
-					"WorkspaceIds":[],
-					"Properties": userProperty
-				};
-			 	return this._updateUserMetadata(userData.username, userJson, function(error) {
-					error ? callback(error) : callback(); // TODO successful case needs to return user data including isAuthenticated, username, email, authToken for user.js
-				});
-				// TODO Save User info in cache for quick referrence
-			}.bind(this),
+		var metadataPath = getUserMetadataFileName(this._options, userData.username);
+		Promise.using(this.lock(userData.username, false), function() {
+			return new Promise(function(resolve, reject) {
+				mkdirpAsync(nodePath.dirname(metadataPath)).then(
+					function() {
+						var userProperty = {};
+			//			userData.password && (userProperty.Password = userData.password); //TODO password need to be pbewithmd5anddes encrypted
+						userData.oauth && (userProperty.OAuth = userData.oauth);
+						userData.email && (userProperty.Email = userData.email);
+						userProperty["AccountCreationTimestamp"] = Date.now();
+						userProperty["UniqueId"] = userData.username;
+						
+						// give the user access to their own user profile
+						userProperty["UserRights"] = accessRights.createUserAccess(userData.username);
+						userProperty["UserRightsVersion"] = accessRights.getCurrentVersion();
+						var userJson = {
+							"OrionVersion": VERSION,
+							"UniqueId": userData.username,
+							"UserName": userData.username,
+							"FullName": userData.fullname,
+							"WorkspaceIds":[],
+							"Properties": userProperty
+						};
+					 	this._updateUserMetadata(userData.username, userJson, function(error) {
+							if (error) {
+								return reject(error);
+							}
+							resolve(); // TODO successful case needs to return user data including isAuthenticated, username, email, authToken for user.js
+						});
+						// TODO Save User info in cache for quick referrence
+					}.bind(this),
+					reject /* error case */
+				);
+			}.bind(this));
+		}.bind(this)).then(
+			function(result) {
+				callback(null, result);
+			},
 			callback /* error case */
 		);
 	},
@@ -374,49 +427,66 @@ Object.assign(FsMetastore.prototype, {
 			return metadataToServe;
 		}
 
-		this._readUserMetadata(id, function(error, metadata) {
-			if (error) {
-				return callback(error);
-			}
-
-			// TODO Check if migration is needed and migrate if so
-			if (metadata) {
-				var metadataToServe = serverUserMetadata(metadata);
-				// TODO password needs to be handled specifically since it needs to be decrypted. (referrence setProperties line 967)				
-				// TODO handle userPropertyCache (referrence setProperties line 972)
-				callback(null,  metadataToServe);
-			} else {
-				callback(); /* indicates that there was not an error and the user does not exist */
-			}
-		});
+		Promise.using(this.lock(id, true), function() {
+			return new Promise(function(resolve, reject) {
+				this._readUserMetadata(id, function(error, metadata) {
+					if (error) {
+						return reject(error);
+					}
+		
+					// TODO Check if migration is needed and migrate if so
+					if (metadata) {
+						var metadataToServe = serverUserMetadata(metadata);
+						// TODO password needs to be handled specifically since it needs to be decrypted. (referrence setProperties line 967)				
+						// TODO handle userPropertyCache (referrence setProperties line 972)
+						return resolve(metadataToServe);
+					}
+					resolve(); /* indicates that there was not an error and the user does not exist */
+				});
+			}.bind(this));
+		}.bind(this)).then(
+			function(result) {
+				callback(null, result);
+			},
+			callback /* error case */
+		);
 	},
-	
+
 	/** @callback */
 	updateUser: function(id, userData, callback) {
-		this._readUserMetadata(id, function(error, metadata) {
-			if (error) {
-				return callback(error);
-			}
-			
-			// userData.properties contains all the properties, not only the ones that are changed, 
-			// because of locking, it's safe to say the properties hasn't been changed by other operations
-			metadata.Properties = userData.properties;
-			// update other userData 
-			userData.fullname && (metadata.FullName = userData.fullname);
-			userData.password && (metadata.Properties.Password = userData.password);  // TODO need to encrypt password
-			userData.email && (metadata.Properties.Email = userData.email);
-			userData.login_timestamp && (metadata.Properties.LastLoginTimestamp = userData.login_timestamp.getTime());
-			userData.username && (metadata.UserName = userData.username);
-
-			// TODO update isAuthenticated
-
-			this._updateUserMetadata(id, metadata, function(error) {
-				if (error) {
-					return callback(error);
-				}
-				callback(); // TODO needs to return user data with name, email and authToken for user.sendEmail method.
-			});
-		}.bind(this));
+		Promise.using(this.lock(id, false), function() {
+			return new Promise(function(resolve, reject) {
+				this._readUserMetadata(id, function(error, metadata) {
+					if (error) {
+						return reject(error);
+					}
+					
+					// userData.properties contains all the properties, not only the ones that are changed, 
+					// because of locking, it's safe to say the properties hasn't been changed by other operations
+					metadata.Properties = userData.properties;
+					// update other userData 
+					userData.fullname && (metadata.FullName = userData.fullname);
+					userData.password && (metadata.Properties.Password = userData.password);  // TODO need to encrypt password
+					userData.email && (metadata.Properties.Email = userData.email);
+					userData.login_timestamp && (metadata.Properties.LastLoginTimestamp = userData.login_timestamp.getTime());
+					userData.username && (metadata.UserName = userData.username);
+		
+					// TODO update isAuthenticated
+		
+					this._updateUserMetadata(id, metadata, function(error) {
+						if (error) {
+							return reject(error);
+						}
+						resolve(); // TODO needs to return user data with name, email and authToken for user.sendEmail method.
+					});
+				}.bind(this));
+			}.bind(this));
+		}.bind(this)).then(
+			function(result) {
+				callback(null, result);
+			},
+			callback /* error case */
+		);
 	},
 
 	/** @callback */
@@ -429,7 +499,7 @@ Object.assign(FsMetastore.prototype, {
 	 * Helper method to read the whole user metadata
 	 */
 	_readUserMetadata: function(user, callback) {
-		var metadataFile = getUserMetadataFileName(this.options, user);
+		var metadataFile = getUserMetadataFileName(this._options, user);
 		return fs.readFileAsync(metadataFile, 'utf8')
 			.catchReturn({ code: 'ENOENT' }, null) // New file: suppress error, use ENOENT to pattern match the error then return null instead
 			.then(
@@ -445,19 +515,16 @@ Object.assign(FsMetastore.prototype, {
 				callback /* error case */
 			);
 	},
-	
+
 	/**
 	 * @private
 	 * Helper method to read the whole user metadata
 	 */
 	_updateUserMetadata: function(user, metadata, callback) {
-		var metadataFile = getUserMetadataFileName(this.options, user);
+		var metadataFile = getUserMetadataFileName(this._options, user);
 		return mkdirpAsync(nodePath.dirname(metadataFile)).then( // create parent folder(s) if necessary
 			function() {
-				return Promise.using(lock(metadataFile), function() {
-					// We have the lock until the promise returned by this function fulfills.
-					return fs.writeFileAsync(metadataFile, JSON.stringify(metadata, null, 2));
-				}).then(callback);
+				fs.writeFileAsync(metadataFile, JSON.stringify(metadata, null, 2)).then(callback);
 			},
 			callback /* error case */
 		);
@@ -486,49 +553,64 @@ Object.assign(FsMetastore.prototype, {
 	},
 	
 	updateProject: function(workspaceId, projectInfo) {
-		this._readWorkspaceMetadata(workspaceId, function(error, metadata) {
-			if (error) {
-				throw new Error("updateProject failed to read workspace metadata for: " + workspaceId, error);
-			}
-			
-			if (projectInfo.originalPath) { // originalPath is in the format of "[ContextPath] (optional) + /file + [workspaceId] + /[originalName]/"
-				var segs = projectInfo.originalPath.split("/");
-				var oldProjectName = projectInfo.originalPath.endsWith("/") ? segs[segs.length - 2] : segs[segs.length - 1];
-				var index = metadata.ProjectNames.indexOf(oldProjectName);
-				index !== -1 && metadata.ProjectNames.splice(index, 1);
-				this.deleteProject(workspaceId, oldProjectName);
-			}
-			if (projectInfo.projectName) {
-				var projectJson = {
-					"OrionVersion": metadata.OrionVersion,
-					"UniqueId": projectInfo.projectName,
-					"WorkspaceId": workspaceId,
-					"FullName": projectInfo.projectName,
-					"Properties": {}
-				};
+		var userId = metaUtil.decodeUserIdFromWorkspaceId(workspaceId);
+		Promise.using(this.lock(userId, false), function() {
+			return new Promise(function(resolve, reject) {
+				this._readWorkspaceMetadata(workspaceId, function(error, metadata) {
+					if (error) {
+						reject(new Error("updateProject failed to read workspace metadata for: " + workspaceId, error));
+					}
+					
+					if (projectInfo.originalPath) { // originalPath is in the format of "[ContextPath] (optional) + /file + [workspaceId] + /[originalName]/"
+						var segs = projectInfo.originalPath.split("/");
+						var oldProjectName = projectInfo.originalPath.endsWith("/") ? segs[segs.length - 2] : segs[segs.length - 1];
+						var index = metadata.ProjectNames.indexOf(oldProjectName);
+						index !== -1 && metadata.ProjectNames.splice(index, 1);
+						this.deleteProject(workspaceId, oldProjectName);
+					}
+					if (projectInfo.projectName) {
+						var projectJson = {
+							"OrionVersion": metadata.OrionVersion,
+							"UniqueId": projectInfo.projectName,
+							"WorkspaceId": workspaceId,
+							"FullName": projectInfo.projectName,
+							"Properties": {}
+						};
 
-				if (projectInfo.contentLocation.startsWith(this.options.workspaceDir)) {
-					projectJson["ContentLocation"] = SERVERWORKSPACE + projectInfo.contentLocation.substr(this.options.workspaceDir.length);
-				} else {
-					projectJson["ContentLocation"] = projectInfo.contentLocation;
-				}
-				metadata.ProjectNames.indexOf(projectInfo.projectName) === -1 && metadata.ProjectNames.push(projectInfo.projectName);
-			}
-			this._updateWorkspaceMetadata(workspaceId, metadata, function(error) {
-				if (error) {
-					throw new Error("updateProject failed to write workspace metadata for: " + workspaceId, error);
-				}
-
-				if (projectInfo.projectName) {
-					this._updateProjectMetadata(workspaceId, projectInfo.projectName, projectJson, function(){});
-				}
+						if (projectInfo.contentLocation.startsWith(this._options.workspaceDir)) {
+							projectJson["ContentLocation"] = SERVERWORKSPACE + projectInfo.contentLocation.substr(this._options.workspaceDir.length);
+						} else {
+							projectJson["ContentLocation"] = projectInfo.contentLocation;
+						}
+						metadata.ProjectNames.indexOf(projectInfo.projectName) === -1 && metadata.ProjectNames.push(projectInfo.projectName);
+					}
+					this._updateWorkspaceMetadata(workspaceId, metadata, function(error) {
+						if (error) {
+							reject(new Error("updateProject failed to write workspace metadata for: " + workspaceId, error));
+						}
+		
+						if (projectInfo.projectName) {
+							this._updateProjectMetadata(workspaceId, projectInfo.projectName, projectJson, function(error, result) {
+								if (error) {
+									return reject(error);
+								}
+								resolve(result);
+							});
+						}
+					}.bind(this));
+				}.bind(this));
 			}.bind(this));
 		}.bind(this));
 	},	
 
 	deleteProject: function(workspaceId, projectName) {
-		var metaFile = getProjectMetadataFileName(this.options, workspaceId, projectName);
-		return fs.unlinkAsync(metaFile).catchReturn({ code: 'ENOENT' }, null); // New file: suppress error
+		var metaFile = getProjectMetadataFileName(this._options, workspaceId, projectName);
+		var userId = metaUtil.decodeUserIdFromWorkspaceId(workspaceId);
+		return Promise.using(this.lock(userId, false), function() {
+			return new Promise(function(resolve, reject) {
+				fs.unlinkAsync(metaFile).catchReturn({ code: 'ENOENT' }, null).then(resolve, reject);
+			});
+		});
 	},
 
 	/**
@@ -536,13 +618,10 @@ Object.assign(FsMetastore.prototype, {
 	 * Helper method to update the whole workspace metadata
 	 */
 	_updateProjectMetadata: function(workspaceId, projectName, metadata, callback) {
-		var metaFile = getProjectMetadataFileName(this.options, workspaceId, projectName);
+		var metaFile = getProjectMetadataFileName(this._options, workspaceId, projectName);
 		return mkdirpAsync(nodePath.dirname(metaFile)).then( // create parent folder(s) if necessary
 			function() {
-				return Promise.using(lock(metaFile), function() {
-					// We have the lock until the promise returned by this function fulfills.
-					return fs.writeFileAsync(metaFile, JSON.stringify(metadata, null, 2));
-				}).then(callback);
+				fs.writeFileAsync(metaFile, JSON.stringify(metadata, null, 2)).then(callback, callback);
 			},
 			callback /* error case */
 		);
