@@ -217,16 +217,20 @@ Object.assign(FsMetastore.prototype, {
 									return reject(error);
 								}
 			
-								// TASK: to update workspaceIds in user's metadata
-								metadata["WorkspaceIds"].indexOf(workspaceId) === -1 && metadata["WorkspaceIds"].push(workspaceId);
-								var workspaceUserRights = accessRights.createWorkspaceAccess(workspaceId);
-								metadata["Properties"]["UserRights"] = metadata["Properties"]["UserRights"].concat(workspaceUserRights);
-								this._updateUserMetadata(userId,  metadata, function(error) {
-									if (error) {
-										return reject(error);
-									}
+								// Update workspaceIds in user's metadata only if it's new
+								if(metadata["WorkspaceIds"].indexOf(workspaceId) === -1){
+									metadata["WorkspaceIds"].push(workspaceId);
+									var workspaceUserRights = accessRights.createWorkspaceAccess(workspaceId);
+									metadata["Properties"]["UserRights"] = metadata["Properties"]["UserRights"].concat(workspaceUserRights);
+									this._updateUserMetadata(userId,  metadata, function(error) {
+										if (error) {
+											return reject(error);
+										}
+										resolve(workspaceObj);
+									});						
+								} else {
 									resolve(workspaceObj);
-								});						
+								}
 							}.bind(this));
 						}.bind(this));
 					} else {
