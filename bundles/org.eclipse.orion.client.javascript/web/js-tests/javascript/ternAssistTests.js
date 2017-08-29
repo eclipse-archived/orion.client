@@ -4552,7 +4552,24 @@ define([
 					     ['c', 'c - Function parameter']
 					]);
 				});
-	
+				/**
+				 * Tests function parameter name completion with the any type
+				 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=521320
+				 * @since 16.0
+				 */
+				it("test param name completion with any type", function(done) {
+					var options = {
+						buffer: "/**\n* @param {?} \n*/ function a(a, b, c){}",
+						line: '* @param {?} ',
+						prefix: "",
+						offset: 13,
+						callback: done};
+					testProposals(options, [
+					     ['a', 'a - Function parameter'],
+					     ['b', 'b - Function parameter'],
+					     ['c', 'c - Function parameter']
+					]);
+				});
 				/**
 				 * Tests func decl param name proposals no prefix, no type
 				 * @since 10.0
