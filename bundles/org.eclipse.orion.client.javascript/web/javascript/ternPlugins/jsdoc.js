@@ -354,7 +354,7 @@ define([
 					proposals.push(createProposal(_name, Messages['funcProposalDescription'], prefix));
 				}
 			}
-		} else if((val = /\s*\*\s*\@param\s*(?:\{[\w.]*\})?\s*(\w*)/ig.exec(line.line)) !== null) {
+		} else if((val = /\s*\*\s*\@param\s*(?:\{.*\})?\s*(\w*)/ig.exec(line.line)) !== null) {
 			if(val[1] === prefix) {
 				node = Finder.findNodeAfterComment(comment, file.ast);
 				if(node) {
