@@ -65,7 +65,7 @@ function FsMetastore(options) {
 	this._options = options;
 	this._taskList = {};
 	this._lockMap = {};
-  this._isSingleUser = options.configParams['orion.single.user'];
+	this._isSingleUser = options.configParams['orion.single.user'];
 }
 
 FsMetastore.prototype.lock = function(userId, shared) {
@@ -566,7 +566,8 @@ Object.assign(FsMetastore.prototype, {
 						var oldProjectName = projectInfo.originalPath.endsWith("/") ? segs[segs.length - 2] : segs[segs.length - 1];
 						var index = metadata.ProjectNames.indexOf(oldProjectName);
 						index !== -1 && metadata.ProjectNames.splice(index, 1);
-						this.deleteProject(workspaceId, oldProjectName);
+						var metaFile = getProjectMetadataFileName(this._options, workspaceId, oldProjectName);
+						fs.unlinkAsync(metaFile).catchReturn({ code: 'ENOENT' }, null);
 					}
 					if (projectInfo.projectName) {
 						var projectJson = {
@@ -596,21 +597,13 @@ Object.assign(FsMetastore.prototype, {
 								}
 								resolve(result);
 							});
+						} else {
+							resolve();
 						}
 					}.bind(this));
 				}.bind(this));
 			}.bind(this));
 		}.bind(this));
-	},	
-
-	deleteProject: function(workspaceId, projectName) {
-		var metaFile = getProjectMetadataFileName(this._options, workspaceId, projectName);
-		var userId = metaUtil.decodeUserIdFromWorkspaceId(workspaceId);
-		return Promise.using(this.lock(userId, false), function() {
-			return new Promise(function(resolve, reject) {
-				fs.unlinkAsync(metaFile).catchReturn({ code: 'ENOENT' }, null).then(resolve, reject);
-			});
-		});
 	},
 
 	/**
@@ -652,17 +645,23 @@ Object.assign(FsMetastore.prototype, {
 
 		var taskRoot = nodePath.join(getTaskRootLocation(this._options), this.getUserTasksDirectory(taskMeta.username));
 		var taskDir = taskMeta.keep ? taskRoot : nodePath.join(taskRoot, FILENAME_TASKS_TEMP_DIR);
-		return fs.statAsync(taskDir).then(
-			function(stat) {
-				if (stat.isDirectory()) {
-			        var taskFile = nodePath.join(taskDir, taskMeta.id);
-			        fs.unlinkAsync(taskFile).then(callback);
-			    } else {
-					callback(null); // path does not exist
-				}
-			},
-			callback /* error case */
-		);
+
+		Promise.using(this.lock(taskMeta.username, false), function() {
+			return new Promise(function(resolve, reject) {
+				fs.statAsync(taskDir).then(
+					function(stat) {
+						if (stat.isDirectory()) {
+					        var taskFile = nodePath.join(taskDir, taskMeta.id);
+					        fs.unlinkAsync(taskFile).then(resolve, reject);
+					    } else {
+							resolve(); // path does not exist
+						}
+					},
+					reject /* error case */
+				);	
+			});
+		}).then(callback, callback /* error case */ );
+
 	},
 
 	getTask: function(taskMeta, callback) {
@@ -673,20 +672,30 @@ Object.assign(FsMetastore.prototype, {
 		var taskRoot = nodePath.join(getTaskRootLocation(this._options), this.getUserTasksDirectory(taskMeta.username));
 		var taskDir = taskMeta.keep ? taskRoot : nodePath.join(taskRoot, FILENAME_TASKS_TEMP_DIR);
 		var taskFile = nodePath.join(taskDir, taskMeta.id);
-		return fs.readFileAsync(taskFile, 'utf8')
-			.catchReturn({ code: 'ENOENT' }, null) // New file: suppress error
-			.then(
-				function(metadata) {
-					var parsedJson;
-					try {
-						parsedJson = JSON.parse(metadata);
-					} catch(err) {
-						parsedJson = metadata;
-					}
-					callback(null, parsedJson);
-				},
-				callback /* error case */
-			);
+
+		Promise.using(this.lock(taskMeta.username, true), function() {
+			return new Promise(function(resolve, reject) {
+				fs.readFileAsync(taskFile, 'utf8')
+					.catchReturn({ code: 'ENOENT' }, null) // New file: suppress error
+					.then(
+						function(metadata) {
+							var parsedJson;
+							try {
+								parsedJson = JSON.parse(metadata);
+							} catch (err) {
+								parsedJson = metadata;
+							}
+							resolve(parsedJson);
+						},
+						reject /* error case */
+					);
+			});
+		}).then(
+			function(result) {
+				callback(null, result);
+			},
+			callback /* error case */
+		);
 	},
 
 	getTasksForUser: function(username, callback) {
@@ -702,30 +711,36 @@ Object.assign(FsMetastore.prototype, {
 
 		// won't return temp tasks
 		var taskRoot = nodePath.join(getTaskRootLocation(this._options), this.getUserTasksDirectory(username));
-		return fs.readdirAsync(taskRoot).then(
-			function(files) {
-				var fileReadPromises = [];
-				files.forEach(function(filename) {
-					if (filename !== FILENAME_TASKS_TEMP_DIR && !filename.startsWith(".")) {
-						fileReadPromises.push(fs.readFileAsync(nodePath.join(taskRoot, filename)).then(function(metadata) {
-							var parsedJson;
-							try {
-								parsedJson = JSON.parse(metadata);
-							} catch (err) {
-								parsedJson = metadata;
+		
+		Promise.using(this.lock(username, true), function() {
+			return new Promise(function(resolve, reject) {
+				return fs.readdirAsync(taskRoot).then(
+					function(files) {
+						var fileReadPromises = [];
+						files.forEach(function(filename) {
+							if (filename !== FILENAME_TASKS_TEMP_DIR && !filename.startsWith(".")) {
+								fileReadPromises.push(fs.readFileAsync(nodePath.join(taskRoot, filename)).then(function(metadata) {
+									var parsedJson;
+									try {
+										parsedJson = JSON.parse(metadata);
+									} catch (err) {
+										parsedJson = metadata;
+									}
+									parsedJson.id = filename; // id is needed for taskDelete operation
+									return parsedJson;
+								}));					
 							}
-							parsedJson.id = filename; // id is needed for taskDelete operation
-							return parsedJson;
-						}));					
-					}
-				});
-				return Promise.all(fileReadPromises).then(
-					function(fileContents) {
-						callback(null, fileContents);
-					}
+						});
+						return Promise.all(fileReadPromises).then(resolve);
+					},
+					reject
 				);
+			});
+		}).then(
+			function(result) {
+				callback(null, result);
 			},
-			callback
+			callback /* error case */
 		);
 	},
 
@@ -736,10 +751,20 @@ Object.assign(FsMetastore.prototype, {
 
 		var taskRoot = nodePath.join(getTaskRootLocation(this._options), this.getUserTasksDirectory(taskObj.username));
 		var taskDir = taskObj.keep ? taskRoot : nodePath.join(taskRoot, FILENAME_TASKS_TEMP_DIR);
-		return mkdirpAsync(taskDir).then( // create parent folder(s) if necessary
-			function() {
-				var taskFile = nodePath.join(taskDir, taskObj.id);
-				return fs.writeFileAsync(taskFile, JSON.stringify(taskObj.toJSON(taskObj, true), null, 2)).then(callback, callback);
+
+		Promise.using(this.lock(taskObj.username, false), function() {
+			return new Promise(function(resolve, reject) {
+				mkdirpAsync(taskDir).then( // create parent folder(s) if necessary
+					function() {
+						var taskFile = nodePath.join(taskDir, taskObj.id);
+						return fs.writeFileAsync(taskFile, JSON.stringify(taskObj.toJSON(taskObj, true), null, 2)).then(resolve, reject);
+					},
+					reject /* error case */
+				);
+			});
+		}).then(
+			function(result) {
+				callback(null, result);
 			},
 			callback /* error case */
 		);
