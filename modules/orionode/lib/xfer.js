@@ -35,6 +35,19 @@ function getUploadsFolder(options) {
 var UPLOADS_FOLDER;
 var fileRoot;
 
+function checkUserAccess(req, res, next){
+	var uri = req.originalUrl.substring(req.contextPath.length);
+	// import/export rights depend on access to the file content
+	if (uri.startsWith("/xfer/export/") && uri.endsWith(".zip")){
+		uri = "/file/" + uri.substring("/xfer/export/".length, uri.length - 4) + '/';
+	} else if (uri.startsWith("/xfer/import/")) {
+		uri = "/file/" + uri.substring("/xfer/import/".length); //$NON-NLS-1$
+		if (!uri.endsWith("/")) //$NON-NLS-1$
+			uri += '/';
+	}	
+	req.user.checkRights(req.user.username, uri, req, res, next);
+}
+
 /**
  * @callback
  */
@@ -51,6 +64,7 @@ module.exports.router = function(options) {
 	});
 
 	return express.Router()
+	.use(checkUserAccess)
 	.get('/export*', getXfer)
 	.post('/import*', postImportXfer);
 }

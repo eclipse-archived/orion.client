@@ -77,16 +77,7 @@ var checkRights = function (userId, uri, req, res, next, method){
 	if (uri.startsWith("/task")){
 		return done(true);
 	}
-	
-	// import/export rights depend on access to the file content
-	if (uri.startsWith("/xfer/export/") && uri.endsWith(".zip")){
-		uri = "/file/" + uri.substring("/xfer/export/".length, uri.length - 4) + '/';
-	} else if (uri.startsWith("/xfer/import/")) {
-		uri = "/file/" + uri.substring("/xfer/import/".length); //$NON-NLS-1$
-		if (!uri.endsWith("/")) //$NON-NLS-1$
-			uri += '/';
-	}
-	
+		
 	var store = fileUtil.getMetastore(req);
 	store.getUser(userId, function(err, metadata){
 		if (err) {
