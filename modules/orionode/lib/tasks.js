@@ -66,11 +66,13 @@ function orionTasksAPI(options) {
 	});
 }
 
-function getTaskMeta(req, taskLocation, taskId) {
+function getTaskMeta(req, taskLocationOrKeep, taskId) {
 	var keep, id;
-	if (taskLocation) {
+	if (typeof taskLocationOrKeep === "string") {
 		// This is when req doesn't have enough information needed
-		keep = taskLocation.startsWith("/id");
+		keep = taskLocationOrKeep.startsWith("/id");
+	} else if (typeof taskLocationOrKeep === "boolean") {
+		keep = taskLocationOrKeep
 	} else {
 		keep = req.url.startsWith("/id")
 	}
@@ -231,7 +233,8 @@ function deleteAllOperations(req, res) {
 		}
 		tasks.forEach(function(task) {
 			if (task.result || task.Result) {
-				taskStore.deleteTask(getTaskMeta(req, task.Location.substring(req.baseUrl.length),task.id), done); /* task is completed */
+				// task in single user case doesn't have Location, it has keep instead
+				taskStore.deleteTask(getTaskMeta(req, (task.Location && task.Location.substring(req.baseUrl.length)) || task.keep, task.id), done); /* task is completed */
 			} else {
 				locations.push(toJSON(task, true).Location);
 				done();
