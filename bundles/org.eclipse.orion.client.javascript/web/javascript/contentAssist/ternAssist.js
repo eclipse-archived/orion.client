@@ -176,6 +176,8 @@ define([
 	});
 
 	var operators = {
+		'async': true,
+		'await': true,
     	'delete': true,
     	'new': true,
     	'instanceof': true,
@@ -194,6 +196,10 @@ define([
     function getKeywordLink(keyword) {
     	var key = keyword;
     	switch(keyword) {
+    		case 'async': {
+    			key = 'async_function';
+    			break;
+    		}
     		case 'do': {
     			key = 'do...while'; //$NON-NLS-1$
     			break;
