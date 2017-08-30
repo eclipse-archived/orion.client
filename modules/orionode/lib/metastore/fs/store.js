@@ -26,7 +26,7 @@ var FILENAME_USER_METADATA = "user.json";
 var KEY_ORION_DESCRIPTION = "OrionDescription";
 var KEY_ORION_VERSION = "OrionVersion";
 var WORKSPACE_ID = "anonymous-OrionContent";
-var DEFAULT_WORKSPACE_NAME = "Orion Content";
+var DEFAULT_WORKSPACE_NAME = "OrionContent";
 var SERVERWORKSPACE = "${SERVERWORKSPACE}";
 var DESCRIPTION_METASTORE = "This JSON file is at the root of the Orion metadata store responsible for persisting user, workspace and project files and metadata.";
 
@@ -52,7 +52,7 @@ function getWorkspaceMetadataFileName(options, workspaceId) {
 function getProjectMetadataFileName(options, workspaceId, projectName) {
 	var userId = metaUtil.decodeUserIdFromWorkspaceId(workspaceId);
 	var metadataFolder = getUserRootLocation(options, userId);
-	if (!metaUtil.decodeWorkspaceNameFromWorkspaceId(workspaceId) === DEFAULT_WORKSPACE_NAME) {
+	if (metaUtil.decodeWorkspaceNameFromWorkspaceId(workspaceId) !== DEFAULT_WORKSPACE_NAME) {
 		projectName = workspaceId + metaUtil.getSeparator() + projectName;
 	}
 	return nodePath.join(metadataFolder, projectName + ".json");
