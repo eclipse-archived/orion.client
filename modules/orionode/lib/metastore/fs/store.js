@@ -16,6 +16,7 @@ var
     metaUtil = require('../util/metaUtil'),
     accessRights = require('../../accessRights'),
     os = require('os'),
+    async = require("async"),
     fileLocker = require('../../util/fileLocker');
 
 // Helper functions
@@ -408,45 +409,63 @@ Object.assign(FsMetastore.prototype, {
 	},
 
 	getUser: function(id, callback) {
-		function serverUserMetadata(metadata) {
-			var metadataToServe = {
-				username: metadata.UserName,
-				email: metadata.Properties.Email,
-				fullname: metadata.FullName,
-				oauth: metadata.Properties.OAuth,
-				properties: metadata.Properties,
-				login_timestamp: new Date(parseInt(metadata.Properties.LastLoginTimestamp, 10)),
-				disk_usage: metadata.Properties.DiskUsage,
-				disk_usage_timestamp: new Date(parseInt(metadata.Properties.DiskUsageTimestamp, 10)),
-				created_at:  new Date(parseInt(metadata.Properties.AccountCreationTimestamp, 10))
-			};
-			metadata.WorkspaceIds && (metadataToServe.workspaces = metadata.WorkspaceIds.map(
-				function(workspaceId) {
-					return {
-						name: metaUtil.decodeWorkspaceNameFromWorkspaceId(workspaceId),
-						id: workspaceId
-					};
-				}
-			));
-			return metadataToServe;
-		}
-
 		Promise.using(this.lock(id, true), function() {
 			return new Promise(function(resolve, reject) {
 				this._readUserMetadata(id, function(error, metadata) {
 					if (error) {
 						return reject(error);
 					}
-		
 					// TODO Check if migration is needed and migrate if so
 					if (metadata) {
-						var metadataToServe = serverUserMetadata(metadata);
+						var metadataToServe = {
+							username: metadata.UserName,
+							email: metadata.Properties.Email,
+							fullname: metadata.FullName,
+							oauth: metadata.Properties.OAuth,
+							properties: metadata.Properties,
+							login_timestamp: new Date(parseInt(metadata.Properties.LastLoginTimestamp, 10)),
+							disk_usage: metadata.Properties.DiskUsage,
+							disk_usage_timestamp: new Date(parseInt(metadata.Properties.DiskUsageTimestamp, 10)),
+							created_at:  new Date(parseInt(metadata.Properties.AccountCreationTimestamp, 10))
+						};
 						// TODO password needs to be handled specifically since it needs to be decrypted. (referrence setProperties line 967)				
 						// TODO handle userPropertyCache (referrence setProperties line 972)
-						return resolve(metadataToServe);
+						if (metadata.WorkspaceIds) {
+							var workspaceInfos = [];
+							return new Promise(function(fulfill, reject){
+								async.each(metadata.WorkspaceIds, 
+									function(workspaceId, cb){
+										this.getWorkspace(workspaceId, function(err, workspaceMeta){
+											if (err) {
+												cb(err);
+											}
+											workspaceInfos.push({
+												name: workspaceMeta.name,
+												id: workspaceMeta.id
+											});
+											cb();
+										});
+									}.bind(this), 
+									function(err) {
+										if(err){
+											return reject(err);
+										}
+										return fulfill();
+									});
+							}.bind(this))
+							.then(function(){
+								return metadataToServe.workspaces = workspaceInfos;
+							})
+							.then(function(){
+								return resolve(metadataToServe);
+							});
+						} else {
+							return resolve(metadataToServe);
+						}
+					} else {
+						resolve(); /* indicates that there was not an error and the user does not exist */
 					}
-					resolve(); /* indicates that there was not an error and the user does not exist */
-				});
+				}.bind(this));
 			}.bind(this));
 		}.bind(this)).then(
 			function(result) {
