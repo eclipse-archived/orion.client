@@ -435,13 +435,13 @@ Object.assign(FsMetastore.prototype, {
 							return new Promise(function(fulfill, reject){
 								async.each(metadata.WorkspaceIds, 
 									function(workspaceId, cb){
-										this.getWorkspace(workspaceId, function(err, workspaceMeta){
+										this._readWorkspaceMetadata(workspaceId, function(err, workspaceMeta){
 											if (err) {
 												cb(err);
 											}
 											workspaceInfos.push({
-												name: workspaceMeta.name,
-												id: workspaceMeta.id
+												name: workspaceMeta.FullName,
+												id: workspaceMeta.UniqueId
 											});
 											cb();
 										});
