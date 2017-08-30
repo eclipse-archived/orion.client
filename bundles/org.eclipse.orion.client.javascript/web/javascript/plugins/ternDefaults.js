@@ -47,6 +47,7 @@ define([
 	"javascript/ternPlugins/quickfixes",
 	"javascript/ternPlugins/beautifier",
 	"javascript/ternPlugins/resolver",
+	"javascript/ternPlugins/async_await" //TODO remove once Tern provides built-in support
 ], function(TernMetadata, ecma5, ecma6, ecma7, browser, chai) {
 	var defs = [ecma5, ecma6, ecma7, browser, chai];
 	

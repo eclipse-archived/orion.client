@@ -296,6 +296,8 @@ define({
 	'plugins': 'The plugins field may hold object used to load and configure Tern plugins.',
 	'commonjsPluginName': 'CommonJS',
 	'commonjsPluginDescription': 'Plug-in that handles CommonJS-style dependency resolution.',
+	'asyncAwaitPluginName': 'Early-access async / await support in Tern',
+	'asyncAwaitPluginDescription': 'Provides early-access support for async / await in Tern prior to an official implementation.',
 	'ternDocPluginName': 'Doc Comments',
 	'ternDocPluginDescription': 'Tern plug-in to parse and use JSDoc-like comments for inferencing',
 	'ternCompleteStringsPluginName': 'String Completion',
