@@ -685,7 +685,7 @@ GitClient.prototype = {
 		var client = this;
 		this.tasks.push(function(resolve) {
 			request()
-			.get(CONTEXT_PATH + "/gitapi/config/clone/file/orionode/" + util.encodeURIComponent(client.getName()))
+			.get(CONTEXT_PATH + "/gitapi/config/clone" + FILE_ROOT + util.encodeURIComponent(client.getName()))
 			.expect(200)
 			.end(function(err, res) {
 				assert.ifError(err);

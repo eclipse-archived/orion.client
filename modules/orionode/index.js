@@ -56,8 +56,7 @@ function startServer(options) {
 		}
 		
 		function checkAccessRights(req, res, next) {
-			var uri;
-			uri = req.baseUrl.substring(req.contextPath.length);
+			var uri = (req.contextPath && req.baseUrl.substring(req.contextPath.length)) || req.baseUrl;
 			req.user.checkRights(req.user.username, uri, req, res, next);
 		}
 
