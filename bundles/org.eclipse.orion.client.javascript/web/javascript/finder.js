@@ -578,6 +578,28 @@ define([
 		},
 		
 		/**
+		 * @description Returns if the given node is within an async function declaration or expression
+		 * @param {?} node The AST node
+		 * @since 16.0
+		 * @returns {boolean} Returns true if the node or one of its direct parents is an async function. False otherwise
+		 */
+		inAsync: function inAsync(node) {
+			if(node) {
+				if(node.async) {
+					return true;
+				}
+				if(Array.isArray(node.parents)) {
+					for(var i = 0, len = node.parents.length; i < len; i++) {
+						if(node.parents[i].async) {
+							return true;
+						}					
+					}
+				}
+			}
+			return false;
+		},
+		
+		/**
 		 * @description Computes the kind of context to complete in
 		 * @param {Object} ast The backing AST to visit
 		 * @param {Number} offset The offset into the source
@@ -587,24 +609,26 @@ define([
 		findCompletionKind: function findCompletionKind(ast, offset) {
 	    	var node = this.findNode(offset, ast, {parents:true});
 	    	if(node) {
+	    		var isasync = this.inAsync(node);
+	    		var k = {kind: 'top', isasync: isasync};
 	    		if(node.type === 'Literal') {
 	    			switch(typeof node.value) {
 	    				case 'boolean':
 	    				case 'number': {
 	    					if(offset > node.range[0] && offset <= node.range[1]) {
-		    					return {kind: 'unknown'};
+		    					k.kind = 'unknown';
 	    					}
 	    					break;
 	    				}
 	    				case 'string': {
 	    					if(offset > node.range[0] && offset < node.range[1]) {
-		    					return {kind: 'string'};
+	    						k.kind = 'string';
 	    					}
 	    					break;
 	    				}
 	    				case 'object': {
 	    					if(node.regex && offset > node.range[0] && offset <= node.range[1]) {
-		    					return {kind: 'regex'};
+	    						k.kind = 'regex';
 							}
 							break;
 	    				}
@@ -614,36 +638,39 @@ define([
 		    		var prent = node.parents.pop();
 		    		switch(prent.type) {
 							case 'MemberExpression':
-								return { kind : 'member'}; //$NON-NLS-1$
+								k.kind = 'member';
+								break;
 							case 'Program':
 							case 'BlockStatement':
 								break;
 							case 'VariableDeclarator':
-								if(!prent.init || offset < prent.init.range[0]) {
-									return {kind: 'unknown'};
+								if(!prent.init || prent.init.name === '✖' || offset < prent.init.range[0]) {
+									k.kind = 'assign';
 								}
 								break;
 							case 'FunctionDeclaration':
 							case 'FunctionExpression':
 								if(offset < prent.body.range[0]) {
-									return {kind: 'unknown'};
+									k.kind = 'unknown';
 								}
 								break;
 							case 'Property':
+								k.kind = 'unknown';
 								if(offset-1 >= prent.value.range[0] && offset-1 <= prent.value.range[1]) {
-									return { kind : 'prop'}; //$NON-NLS-1$
+									k.kind = 'prop';
 								}
-								return {kind: 'unknown'};
+								break;
 							case 'SwitchStatement':
-								return {kind: 'swtch'}; //$NON-NLS-1$
+								k.kind = 'swtch';
 						}
 				}
 	    	}
 	    	node = Finder.findComment(offset, ast);
 	    	if(node) {
-	    		return {kind: 'doc', node: node}; //$NON-NLS-1$
+	    		k.kind = 'doc';
+	    		k.node = node;
 	    	}
-			return {kind:'top'}; //$NON-NLS-1$
+			return k;
 		},
 		/**
 		 * @description Returns the templates that apply to the given completion kind

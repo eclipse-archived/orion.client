@@ -228,8 +228,8 @@ define([
 			return null;
 		});
 	};
-	
-	/**
+	 
+	/** 
 	 * @description Fetch the children of the named child folder of the current project context
 	 * @function
 	 * @param {String} childName The short name of the project child to get
@@ -489,7 +489,7 @@ define([
 			return project.getESlintOptions().then(function(options) {
 				processEslintOptions(project, options);
 				if(typeof project.map.env.ecmaVersion !== 'number') {
-					project.map.env.ecmaVersion = 6;
+					project.map.env.ecmaVersion = 7;
 				}
 				return project.getFile(project.NODE_MODULES).then(function(file) {
 					if(file && typeof file.contents === "string") {
@@ -563,12 +563,15 @@ define([
 					}
 				} 
 				if(typeof vals.ecmaVersion === 'number') {
-					if(vals.ecmaVersion > 4 && vals.ecmaVersion < 8) {
+					if(vals.ecmaVersion > 4 && vals.ecmaVersion <= 9) {
 						project.map.env.envs.es6 = vals.ecmaVersion >= 6;
+						project.map.env.envs.es7 = vals.ecmaVersion >= 7;
+						project.map.env.envs.es8 = vals.ecmaVersion >= 8;
 						project.map.env.ecmaVersion = vals.ecmaVersion;
 					} else {
-						project.map.env.ecmaVersion = 6;
+						project.map.env.ecmaVersion = 7;
 						project.map.env.envs.es6 = true;
+						project.map.env.envs.es7 = true;
 					}
 				} 
 				if(vals.sourceType === 'modules') {
