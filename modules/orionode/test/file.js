@@ -62,6 +62,9 @@ BufStream.prototype.data = function() {
  * see http://wiki.eclipse.org/Orion/Server_API/File_API
  */
 describe('File API', function() {
+	before(function() {
+	   testData.setUpWorkspace();
+	});
 	beforeEach(function(done) { // testData.setUp.bind(null, parentDir)
 		testData.setUp(WORKSPACE, done);
 	});

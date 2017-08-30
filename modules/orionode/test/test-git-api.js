@@ -41,7 +41,7 @@ app.locals.metastore.setup(app);
 app.use(userMiddleware)
 .use(CONTEXT_PATH + '/task', require('../lib/tasks').router({
 	taskRoot: CONTEXT_PATH + '/task',
-	options: {metastore: storeFactory({})}
+	options: {metastore: storeFactory({workspaceDir: WORKSPACE, configParams: configParams})}
 }))
 .use(CONTEXT_PATH + "/workspace*", require('../lib/workspace')({
 	workspaceRoot: CONTEXT_PATH + '/workspace', 
@@ -685,7 +685,7 @@ GitClient.prototype = {
 		var client = this;
 		this.tasks.push(function(resolve) {
 			request()
-			.get(CONTEXT_PATH + "/gitapi/config/clone/file/orionode/" + util.encodeURIComponent(client.getName()))
+			.get(CONTEXT_PATH + "/gitapi/config/clone" + FILE_ROOT + util.encodeURIComponent(client.getName()))
 			.expect(200)
 			.end(function(err, res) {
 				assert.ifError(err);

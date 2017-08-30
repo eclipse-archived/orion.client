@@ -217,16 +217,20 @@ Object.assign(FsMetastore.prototype, {
 									return reject(error);
 								}
 			
-								// TASK: to update workspaceIds in user's metadata
-								metadata["WorkspaceIds"].indexOf(workspaceId) === -1 && metadata["WorkspaceIds"].push(workspaceId);
-								var workspaceUserRights = accessRights.createWorkspaceAccess(workspaceId);
-								metadata["Properties"]["UserRights"] = metadata["Properties"]["UserRights"].concat(workspaceUserRights);
-								this._updateUserMetadata(userId,  metadata, function(error) {
-									if (error) {
-										return reject(error);
-									}
+								// Update workspaceIds in user's metadata only if it's new
+								if(metadata["WorkspaceIds"].indexOf(workspaceId) === -1){
+									metadata["WorkspaceIds"].push(workspaceId);
+									var workspaceUserRights = accessRights.createWorkspaceAccess(workspaceId);
+									metadata["Properties"]["UserRights"] = metadata["Properties"]["UserRights"].concat(workspaceUserRights);
+									this._updateUserMetadata(userId,  metadata, function(error) {
+										if (error) {
+											return reject(error);
+										}
+										resolve(workspaceObj);
+									});						
+								} else {
 									resolve(workspaceObj);
-								});						
+								}
 							}.bind(this));
 						}.bind(this));
 					} else {
@@ -564,7 +568,7 @@ Object.assign(FsMetastore.prototype, {
 					if (projectInfo.originalPath) { // originalPath is in the format of "[ContextPath] (optional) + /file + [workspaceId] + /[originalName]/"
 						var segs = projectInfo.originalPath.split("/");
 						var oldProjectName = projectInfo.originalPath.endsWith("/") ? segs[segs.length - 2] : segs[segs.length - 1];
-						var index = metadata.ProjectNames.indexOf(oldProjectName);
+						var index = metadata && metadata.ProjectNames.indexOf(oldProjectName) || -1;
 						index !== -1 && metadata.ProjectNames.splice(index, 1);
 						var metaFile = getProjectMetadataFileName(this._options, workspaceId, oldProjectName);
 						fs.unlinkAsync(metaFile).catchReturn({ code: 'ENOENT' }, null);
@@ -585,22 +589,24 @@ Object.assign(FsMetastore.prototype, {
 						}
 						metadata.ProjectNames.indexOf(projectInfo.projectName) === -1 && metadata.ProjectNames.push(projectInfo.projectName);
 					}
-					this._updateWorkspaceMetadata(workspaceId, metadata, function(error) {
-						if (error) {
-							reject(new Error("updateProject failed to write workspace metadata for: " + workspaceId, error));
-						}
-		
-						if (projectInfo.projectName) {
-							this._updateProjectMetadata(workspaceId, projectInfo.projectName, projectJson, function(error, result) {
-								if (error) {
-									return reject(error);
-								}
-								resolve(result);
-							});
-						} else {
-							resolve();
-						}
-					}.bind(this));
+					if(metadata) {
+						this._updateWorkspaceMetadata(workspaceId, metadata, function(error) {
+							if (error) {
+								reject(new Error("updateProject failed to write workspace metadata for: " + workspaceId, error));
+							}
+			
+							if (projectInfo.projectName) {
+								this._updateProjectMetadata(workspaceId, projectInfo.projectName, projectJson, function(error, result) {
+									if (error) {
+										return reject(error);
+									}
+									resolve(result);
+								});
+							} else {
+								resolve();
+							}
+						}.bind(this));
+					}
 				}.bind(this));
 			}.bind(this));
 		}.bind(this));
