@@ -15,6 +15,7 @@ var assert = require('assert'),
 	supertest = require('supertest'),
 	testData = require('../support/test_data'),
 	store = require('../../lib/metastore/fs/store'),
+	testHelper = require('../support/testHelper'),
 	workspace = require('../../lib/workspace'),
 	file = require('../../lib/file');
 
@@ -51,13 +52,17 @@ var app = express();
 
 var request = supertest.bind(null, app);
 
+function byName(a, b) {
+	return String.prototype.localeCompare.call(a.Name, b.Name);
+}
+
 // Retrieves the 0th Workspace in the list and invoke the callback
 function withDefaultWorkspace(callback) {
 	request()
 		.get(PREFIX + '/' + WORKSPACE_ID)
 		.end(function(err, res) {
 			throwIfError(err);
-			callback(res.body.Workspaces[0]);
+			callback(res.body);
 		});
 }
 
@@ -72,12 +77,18 @@ function throwIfError(cause, message) {
 }
 
 describe("Workspace endpoint", function() {
+
 	beforeEach(function(done) { // testData.setUp.bind(null, parentDir)
-		testData.setUp(WORKSPACE, done, false);
+		testData.setUp(WORKSPACE, function(){
+			testData.setUpWorkspace(WORKSPACE, MEATASTORE, done);
+		}, false);
 	});
-	before(function() {
-		testData.setUpWorkspace(WORKSPACE, MEATASTORE);
+	afterEach("Remove .test_workspace", function(done) {
+		testData.tearDown(testHelper.WORKSPACE, function(){
+			testData.tearDown(MEATASTORE, done)
+		});
 	});
+
 	/**
 	 * From: org.eclipse.orion.server.tests.servlets.workspace.WorkspaceServiceTests.java
 	 */
@@ -99,7 +110,7 @@ describe("Workspace endpoint", function() {
 				.post(workspace.Location)
 					.set('X-Create-Options', 'move')
 					.send({Location: oldProjectLocation, Name: 'project_renamed'})
-					.expect(200)
+					.expect(201)
 					.end(function(e, res) {
 						throwIfError(e, "Failed to rename project at " + oldProjectLocation);
 						assert.equal(res.body.Name, 'project_renamed');
@@ -135,6 +146,7 @@ describe("Workspace endpoint", function() {
 	it("testCreateProjectBadName");
 	it("testCreateProjectNonDefaultLocation");
 	it("testCreateWorkspace", function(done) {
+			// This test should only run against multiuser case, and assuming the user is not authenticated, otherwise used is allowed to create workspace
 		request()
 			.post(PREFIX)
 			.set('Slug', 'whatever')
@@ -202,7 +214,7 @@ describe("Workspace endpoint", function() {
 				assert.equal(res.body.Workspaces.length, 1);
 				assert.ok(res.body.Workspaces[0].Id);
 				assert.ok(res.body.Workspaces[0].Location);
-				assert.equal(res.body.Workspaces[0].Location, PREFIX + "/orionode");
+				assert.equal(res.body.Workspaces[0].Location, PREFIX + "/anonymous-OrionContent");
 				assert.equal(res.body.Workspaces[0].Name, TEST_WORKSPACE_NAME);
 				done();
 			});

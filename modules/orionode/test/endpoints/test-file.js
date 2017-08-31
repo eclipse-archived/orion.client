@@ -69,10 +69,14 @@ BufStream.prototype.data = function() {
  */
 describe('File API', function() {
 	beforeEach(function(done) { // testData.setUp.bind(null, parentDir)
-		testData.setUp(WORKSPACE, done);
+		testData.setUp(WORKSPACE, function(){
+			testData.setUpWorkspace(WORKSPACE, MEATASTORE, done);
+		});
 	});
-	after("Remove .test_workspace", function(done) {
-		testData.tearDown(testHelper.WORKSPACE, done);
+	afterEach("Remove .test_workspace", function(done) {
+		testData.tearDown(testHelper.WORKSPACE, function(){
+			testData.tearDown(MEATASTORE, done)
+		});
 	});
 	/**
 	 * http://wiki.eclipse.org/Orion/Server_API/File_API#Actions_on_files

@@ -35,7 +35,7 @@ function tearDown(dir, callback) {
 	rimraf(dir, callback);
 }
 
-function setUpWorkspace(workspace, metastore) {
+function setUpWorkspace(workspace, metastore, done) {
 	var configParams = { "orion.single.user": true, "orion.single.user.metaLocation": metastore};
 	var options = {workspaceDir: workspace, configParams: configParams};
 	app.locals.metastore = require('../../lib/metastore/fs/store')(options);
@@ -45,13 +45,10 @@ function setUpWorkspace(workspace, metastore) {
 	var WORKSPACE = CONTEXT_PATH + '/workspace';
 	
 	request()
-	.get('/users/')
-	.end(function(){
-		request()
-		.post(WORKSPACE)
-		.set('Slug', 'Orion Content')
-		.end(function(){});
-	});
+	.post(WORKSPACE)
+	.set('Slug', 'Orion Content')
+	.expect(200)
+	.end(done);
 }
 
 /**
@@ -86,7 +83,7 @@ function setUp(dir, callback, wsjson) {
 		fs.mkdirSync(myFolder);
 		fs.mkdirSync(subfolder);
 		if(wsjson || wsjson === undefined) {
-			//fs.writeFileSync(path.join(dir, 'workspace.json'), '{}');
+			fs.writeFileSync(path.join(dir, 'workspace.json'), '{}');
 		}
 		fs.writeFileSync(path.join(projectFolder, "fizz.txt"), "hello world");
 		fs.writeFileSync(path.join(myFolder, "buzz.txt"), "buzzzz");
@@ -108,7 +105,6 @@ function setUp(dir, callback, wsjson) {
 		}
 	});
 }
-
 
 exports.DEBUG = process.env.DEBUG_TESTS || false;
 exports.setUp = setUp;
