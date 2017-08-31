@@ -66,7 +66,7 @@ function setUpWorkspace() {
    |-------my subfolder/
  </pre>
  */
-function setUp(dir, callback) {
+function setUp(dir, callback, wsjson) {
 	debug('Using directory: ' + dir);
 	function generateContent() {
 		debug('\nCreating content...');
@@ -85,7 +85,9 @@ function setUp(dir, callback) {
 		fs.mkdirSync(projectFolder);
 		fs.mkdirSync(myFolder);
 		fs.mkdirSync(subfolder);
-		fs.writeFileSync(path.join(dir, 'workspace.json'), '{}');
+		if(wsjson || wsjson === undefined) {
+			//fs.writeFileSync(path.join(dir, 'workspace.json'), '{}');
+		}
 		fs.writeFileSync(path.join(projectFolder, "fizz.txt"), "hello world");
 		fs.writeFileSync(path.join(myFolder, "buzz.txt"), "buzzzz");
 		fs.writeFileSync(path.join(subfolder, "quux.txt"), "whoa");
