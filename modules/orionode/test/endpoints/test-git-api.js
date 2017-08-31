@@ -717,12 +717,12 @@ maybeDescribe("git", function() {
 	if (!git) {
 		it("*** nodegit is not installed -- git tests skipped", Function.prototype);
 	}
-	beforeEach(function(done) { // testData.setUp.bind(null, parentDir)
+	before(function(done) { // testData.setUp.bind(null, parentDir)
 		testData.setUp(WORKSPACE, function(){
 			testData.setUpWorkspace(WORKSPACE, MEATASTORE, done);
 		});
 	});
-	afterEach("Remove .test_workspace", function(done) {
+	after("Remove .test_workspace", function(done) {
 		testData.tearDown(WORKSPACE, function(){
 			testData.tearDown(path.join(MEATASTORE, '.orion'), function(){
 				testData.tearDown(MEATASTORE, done)
