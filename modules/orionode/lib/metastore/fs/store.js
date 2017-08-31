@@ -34,7 +34,7 @@ var DESCRIPTION_METASTORE = "This JSON file is at the root of the Orion metadata
 var VERSION = 8;
 
 function getUserRootLocation(options, userId) {
-	return options.configParams['orion.single.user'] ? nodePath.join(os.homedir(), '.orion') : nodePath.join.apply(null, metaUtil.readMetaUserFolder(options.workspaceDir, userId));
+	return options.configParams['orion.single.user'] ? nodePath.join(options.configParams['orion.single.user.metaLocation'] || os.homedir(), '.orion') : nodePath.join.apply(null, metaUtil.readMetaUserFolder(options.workspaceDir, userId));
 }
 
 function getUserMetadataFileName(options, user) {
@@ -79,9 +79,14 @@ FsMetastore.prototype.lock = function(userId, shared) {
 		if (locker) {
 			doit(locker);
 		} else {
-			var userPrefix = userId.substring(0, Math.min(2, userId.length));
-			var filePath = nodePath.join(this._options.workspaceDir, userPrefix);
-			filePath = nodePath.join(filePath, userId);
+			var filePath;
+			if(this._isSingleUser) {
+				filePath = nodePath.join(this._options.configParams['orion.single.user.metaLocation'] || os.homedir(), '.orion');
+			} else {
+				var userPrefix = userId.substring(0, Math.min(2, userId.length));
+				filePath = nodePath.join(this._options.workspaceDir, userPrefix);
+				filePath = nodePath.join(filePath, userId);
+			}
 			mkdirpAsync(filePath).then(
 				function() {
 					/*
@@ -134,12 +139,14 @@ FsMetastore.prototype.setup = function(app) {
 					var obj = {};
 					obj[KEY_ORION_VERSION] = VERSION;
 					obj[KEY_ORION_DESCRIPTION] = DESCRIPTION_METASTORE;
-					fs.writeFileAsync(path, JSON.stringify(obj, null, 2)).then(
-						null,
-						function(error) {
-							throw new Error("Failed to write the metadata file for the new workspace at: " + path, error);
-						}
-					);
+					mkdirpAsync(nodePath.dirname(path)).then(function(){
+						fs.writeFileAsync(path, JSON.stringify(obj, null, 2)).then(
+							null,
+							function(error) {
+								throw new Error("Failed to write the metadata file for the new workspace at: " + path, error);
+							}
+						);
+					});
 				} else {
 					throw new Error("Failed to access the workspace metadata at: " + path, error);
 				}

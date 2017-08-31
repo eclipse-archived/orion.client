@@ -18,12 +18,13 @@ var path = require("path");
 var testData = require("./support/test_data");
 
 var WORKSPACE = path.join(__dirname, ".test_workspace");
+var MEATASTORE =  path.join(__dirname, '.test_metadata');
 
 var orion = function(options) {
 	// Ensure tests run in 'single user' mode
 	options = options || {};
 	options.workspaceDir = WORKSPACE;
-	options.configParams = { "orion.single.user": true };
+	options.configParams = { "orion.single.user": true, "orion.single.user.metaLocation": MEATASTORE };
 	return orionMiddleware(options);
 }
 
@@ -37,6 +38,14 @@ var userMiddleware = function(req, res, next) {
 };
 
 describe("orion", function() {
+	before(function() {
+		testData.setUpWorkspace(WORKSPACE, MEATASTORE);
+	});
+	after("Remove Workspace and Metastore", function(done) {
+		 testData.tearDown(WORKSPACE, function(){
+			 testData.tearDown(MEATASTORE, done);
+		 });
+	});
 	var app, request;
 	beforeEach(function(done) {
 		app = express();

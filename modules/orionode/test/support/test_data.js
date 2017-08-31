@@ -17,16 +17,10 @@ var express = require('express');
 
 var supertest = require('supertest');
 var CONTEXT_PATH = '';
-var configParams = { "orion.single.user": true };
-var WORKSPACEDIR = path.join(__dirname, '.test_workspace');
+
+
 
 var app = express();
-var options = {workspaceDir: WORKSPACEDIR, configParams:configParams};
-app.locals.metastore = require('../../lib/metastore/fs/store')(options);
-app.locals.metastore.setup(app);
-app.use(CONTEXT_PATH + '/workspace*', require('../../lib/workspace')({ workspaceRoot: CONTEXT_PATH + '/workspace', fileRoot: CONTEXT_PATH + '/file', gitRoot: CONTEXT_PATH + '/gitapi', options: options }));
-var request = supertest.bind(null, app);
-var WORKSPACE = CONTEXT_PATH + '/workspace';
 
 function debug(msg) {
 	if (exports.DEBUG) {
@@ -41,16 +35,22 @@ function tearDown(dir, callback) {
 	rimraf(dir, callback);
 }
 
-function setUpWorkspace() {
-	 request()
-	.get('/user')
+function setUpWorkspace(workspace, metastore) {
+	var configParams = { "orion.single.user": true, "orion.single.user.metaLocation": metastore};
+	var options = {workspaceDir: workspace, configParams: configParams};
+	app.locals.metastore = require('../../lib/metastore/fs/store')(options);
+	app.locals.metastore.setup(app);
+	app.use(CONTEXT_PATH + '/workspace*', require('../../lib/workspace')({ workspaceRoot: CONTEXT_PATH + '/workspace', fileRoot: CONTEXT_PATH + '/file', gitRoot: CONTEXT_PATH + '/gitapi', options: options }));
+	var request = supertest.bind(null, app);
+	var WORKSPACE = CONTEXT_PATH + '/workspace';
+	
+	request()
+	.get('/users/')
 	.end(function(){
 		request()
 		.post(WORKSPACE)
 		.set('Slug', 'Orion Content')
-		.end(function(){
-			console.log("Done Creating workspace")
-		});
+		.end(function(){});
 	});
 }
 

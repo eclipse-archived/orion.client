@@ -17,16 +17,25 @@ var assert = require("assert"),
 	middleware = require("../index.js");
 
 var WORKSPACE = path.join(__dirname, ".test_workspace");
+var MEATASTORE =  path.join(__dirname, '.test_metadata');
 
 var orion = function(options) {
 	// Ensure tests run in 'single user' mode
 	var opts = options || {};
 	opts.workspaceDir = WORKSPACE;
-	opts.configParams = { "orion.single.user": true };
+	opts.configParams = { "orion.single.user": true, "orion.single.user.metaLocation": MEATASTORE};
 	return middleware(opts);
 };
 
 describe("Orion performance", function() {
+	// before(function() {
+	// 	testData.setUpWorkspace(WORKSPACE, MEATASTORE);
+	// });
+	// after("Remove Workspace and Metastore", function(done) {
+	// 	 testData.tearDown(WORKSPACE, function(){
+	// 		 testData.tearDown(MEATASTORE, done);
+	// 	 });
+	// });
 	/**
 	 * From: org.eclipse.orion.server.tests.performance.SimpleServerStressTest.java
 	 */

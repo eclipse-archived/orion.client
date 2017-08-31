@@ -36,7 +36,7 @@ var UPLOADS_FOLDER;
 var fileRoot;
 
 function checkUserAccess(req, res, next){
-	var uri = req.originalUrl.substring(req.contextPath.length);
+	var uri = (typeof req.contextPath === "string" && req.originalUrl.substring(req.contextPath.length)) || req.originalUrl;
 	// import/export rights depend on access to the file content
 	if (uri.startsWith("/xfer/export/") && uri.endsWith(".zip")){
 		uri = "/file/" + uri.substring("/xfer/export/".length, uri.length - 4) + '/';
