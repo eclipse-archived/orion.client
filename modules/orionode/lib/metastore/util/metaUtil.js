@@ -9,6 +9,8 @@
  *	 IBM Corporation - initial API and implementation
  *******************************************************************************/
 var args = require('../../args');
+var async = require("async");
+var api = require('../../api');
 var SEPARATOR = "-";
 module.exports.encodeWorkspaceId = function (userId, workspaceName) {
 	var workspaceId = workspaceName.replace(/ /g, "").replace(/\#/g, "").replace(/\-/g, "");
@@ -41,4 +43,34 @@ module.exports.readMetaUserFolder = function (workspaceDir, userId){
 
 module.exports.getSeparator = function (){
 	return SEPARATOR;
+};
+
+module.exports.getWorkspaceMeta = function (workspaceIds, store, workspaceRoot){
+	var workspaceInfos = [];
+	return new Promise(function(fulfill, reject){
+		async.each(workspaceIds, 
+			function(workspaceId, cb){
+				if(typeof workspaceId !== "string"){
+					workspaceId = workspaceId.id; // workspaceId is mongo object.
+				}
+				store.getWorkspace(workspaceId, function(err, workspaceMeta){
+					if (err) {
+						cb(err);
+					}
+					workspaceInfos.push({
+						Id: workspaceId,
+						Location: api.join(workspaceRoot, workspaceId),
+						Name: workspaceMeta.name
+					});
+					cb();
+				});
+			}, 
+			function(err) {
+				if(err){
+					return reject(err);
+				}
+				return fulfill();
+			});
+		return fulfill(workspaceInfos);
+	});
 };

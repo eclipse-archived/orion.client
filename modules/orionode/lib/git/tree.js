@@ -17,6 +17,7 @@ var express = require('express');
 var util = require('./util');
 var fileUtil = require('../fileUtil');
 var mime = require('mime');
+var metaUtil = require('../metastore/util/metaUtil');
 
 module.exports = {};
 
@@ -51,22 +52,20 @@ function treeJSON(location, name, timestamp, dir, length) {
 function getTree(req, res) {
 	var readIfExists = req.headers ? Boolean(req.headers['read-if-exists']).valueOf() : false;
 	var repo;
-	
+	var store = fileUtil.getMetastore(req);
 	if (!req.params[0]) {
 		var workspaceRoot = gitRoot + "/tree" + fileRoot;
-		api.writeResponse(null, res, null, {
-				Id: req.user.username,
-				Name: req.user.username,
-				UserName: req.user.fullname || req.user.username,
-				Workspaces: req.user.workspaces.map(function(w) {
-					return {
-						Id: w.id,
-						Location: api.join(workspaceRoot, w.id),
-						Name: w.name
-					};
-				})
-			}, true);
-		return;
+		
+		var workspaceJson = {
+			Id: req.user.username,
+			Name: req.user.username,
+			UserName: req.user.fullname || req.user.username
+		};
+		return metaUtil.getWorkspaceMeta(req.user.workspaces, store, workspaceRoot)
+		.then(function(workspaceInfos){
+			workspaceJson.Workspaces = workspaceInfos || [];
+			return api.writeResponse(null, res, null, workspaceJson, true);
+		});
 	}
 	
 	var segmentCount = req.params["0"].split("/").length;
@@ -77,7 +76,7 @@ function getTree(req, res) {
 	
 	if (segmentCount === 2) {
 		var file = fileUtil.getFile(req, req.params["0"]);
-		fileUtil.getMetastore(req).getWorkspace(file.workspaceId, function(err, workspace) {
+		store.getWorkspace(file.workspaceId, function(err, workspace) {
 			if (err) {
 				return writeError(400, res, err);
 			}

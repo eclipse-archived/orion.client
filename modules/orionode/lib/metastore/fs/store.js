@@ -16,7 +16,6 @@ var
     metaUtil = require('../util/metaUtil'),
     accessRights = require('../../accessRights'),
     os = require('os'),
-    async = require("async"),
     fileLocker = require('../../util/fileLocker');
 
 // Helper functions
@@ -400,7 +399,14 @@ Object.assign(FsMetastore.prototype, {
 							if (error) {
 								return reject(error);
 							}
-							resolve(); // TODO successful case needs to return user data including isAuthenticated, username, email, authToken for user.js
+							resolve({
+								username: userData.username,
+								email: userData.email,
+								fullname: userData.username,
+								oauth: userData.oauth,
+								properties: userProperty,
+								workspaces:[]
+							}); // TODO successful case needs to return user data including isAuthenticated, username, email, authToken for user.js
 						});
 						// TODO Save User info in cache for quick referrence
 					}.bind(this),
@@ -437,42 +443,11 @@ Object.assign(FsMetastore.prototype, {
 						};
 						// TODO password needs to be handled specifically since it needs to be decrypted. (referrence setProperties line 967)				
 						// TODO handle userPropertyCache (referrence setProperties line 972)
-						if (metadata.WorkspaceIds) {
-							var workspaceInfos = [];
-							return new Promise(function(fulfill, reject){
-								async.each(metadata.WorkspaceIds, 
-									function(workspaceId, cb){
-										this._readWorkspaceMetadata(workspaceId, function(err, workspaceMeta){
-											if (err) {
-												cb(err);
-											}
-											workspaceInfos.push({
-												name: workspaceMeta.FullName,
-												id: workspaceMeta.UniqueId
-											});
-											cb();
-										});
-									}.bind(this), 
-									function(err) {
-										if(err){
-											return reject(err);
-										}
-										return fulfill();
-									});
-							}.bind(this))
-							.then(function(){
-								return metadataToServe.workspaces = workspaceInfos;
-							})
-							.then(function(){
-								return resolve(metadataToServe);
-							});
-						} else {
-							return resolve(metadataToServe);
-						}
-					} else {
-						resolve(); /* indicates that there was not an error and the user does not exist */
+						metadataToServe.workspaces = metadata.WorkspaceIds || [];
+						return resolve(metadataToServe);
 					}
-				}.bind(this));
+					resolve(); /* indicates that there was not an error and the user does not exist */
+				});
 			}.bind(this));
 		}.bind(this)).then(
 			function(result) {
