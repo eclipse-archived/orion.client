@@ -218,12 +218,7 @@ Object.assign(FsMetastore.prototype, {
 							if (error) {
 								return reject(error);
 							}
-			
-							metaUtil.createWorkspaceDir(this._options.workspaceDir, userId, workspaceObj.id, function(error) {
-								if (error) {
-									return reject(error);
-								}
-			
+							function updateUserWorkspaceAccessRight(){
 								// Update workspaceIds in user's metadata only if it's new
 								if(metadata["WorkspaceIds"].indexOf(workspaceId) === -1){
 									metadata["WorkspaceIds"].push(workspaceId);
@@ -238,7 +233,17 @@ Object.assign(FsMetastore.prototype, {
 								} else {
 									resolve(workspaceObj);
 								}
-							}.bind(this));
+							}
+							if (this._isSingleUser) {
+								updateUserWorkspaceAccessRight.call(this);
+							} else {
+								metaUtil.createWorkspaceDir(this._options.workspaceDir, userId, workspaceObj.id, function(error) {
+									if (error) {
+										return reject(error);
+									}
+									updateUserWorkspaceAccessRight.call(this);
+								}.bind(this));
+							}
 						}.bind(this));
 					} else {
 						reject(new Error("createWorkspace could not find user with id '" + userId + "'."));
