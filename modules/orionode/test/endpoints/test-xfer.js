@@ -47,12 +47,16 @@ app.use(FILE_PATH + '*', file({fileRoot: FILE_PATH, workspaceRoot: CONTEXT_PATH 
 var request = supertest.bind(null, app);
 
 describe("XFER", function() {
-	before(function() {
-		testData.setUpWorkspace(WORKSPACE, MEATASTORE);
+	beforeEach(function(done) { // testData.setUp.bind(null, parentDir)
+		testData.setUp(WORKSPACE, function(){
+			testData.setUpWorkspace(WORKSPACE, MEATASTORE, done);
+		});
 	});
-	after("Remove Workspace and Metastore", function(done) {
-		testData.tearDown(WORKSPACE, function(){
-			testData.tearDown(MEATASTORE, done);
+	afterEach("Remove .test_workspace", function(done) {
+		testData.tearDown(testHelper.WORKSPACE, function(){
+			testData.tearDown(path.join(MEATASTORE, '.orion'), function(){
+				testData.tearDown(MEATASTORE, done)
+			})
 		});
 	});
 	/**
@@ -60,12 +64,6 @@ describe("XFER", function() {
 	 */
 	describe("Transfer tests", function() {
 		this.timeout(20000);
-		beforeEach("set up the test workspace", function(done) {
-			testData.setUp(WORKSPACE, done);
-		});
-		afterEach('Tear down the testworkspace', function(done) {
-			testData.tearDown(WORKSPACE, done);
-		});
 		// Bug 511513 - Export non-existing folder leaks server path
 		it('testExport - bug 511513', function(finished) {
 			// make sure the folder doesn't actually exist
@@ -103,7 +101,7 @@ describe("XFER", function() {
 								.expect(201)
 								.then(function(res) {
 									assert(res.header.location, "There was no location in the response");
-									assert.equal(res.header.location, '/file/orionode/project/importFromUrlRaw', "The file location is not correct");
+									assert.equal(res.header.location, PREFIX + '/project/importFromUrlRaw', "The file location is not correct");
 								});
 					});
 		});
@@ -119,7 +117,7 @@ describe("XFER", function() {
 								.expect(201)
 								.then(function(res) {
 									assert(res.header.location, "There was no location in the response");
-									assert.equal(res.header.location, '/file/orionode/project/importFromUrlNoHeader', "The file location is not correct");
+									assert.equal(res.header.location, PREFIX + '/project/importFromUrlNoHeader', "The file location is not correct");
 								});
 					});
 		});
@@ -133,7 +131,7 @@ describe("XFER", function() {
 								.expect(201)
 								.then(function(res) {
 									assert(res.header.location, "There was no location in the response");
-									assert.equal(res.header.location, '/file/orionode/project/importFromUrlAutoExtracted', "The file location is not correct");
+									assert.equal(res.header.location, PREFIX + '/project/importFromUrlAutoExtracted', "The file location is not correct");
 								});
 					});
 		});

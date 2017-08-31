@@ -55,13 +55,16 @@ function throwIfError(cause, message) {
  */
 describe.skip("Users endpoint", function() {
 	beforeEach(function(done) { // testData.setUp.bind(null, parentDir)
-		testData.setUp(WORKSPACE, done);
+		testData.setUp(WORKSPACE, function(){
+			testData.setUpWorkspace(WORKSPACE, MEATASTORE, done);
+		});
 	});
-	before(function() {
-		testData.setUpWorkspace(WORKSPACE, MEATASTORE);
-	});
-	after("Remove .test_workspace", function(done) {
-		testData.tearDown(testHelper.WORKSPACE, done);
+	afterEach("Remove .test_workspace", function(done) {
+		testData.tearDown(testHelper.WORKSPACE, function(){
+			testData.tearDown(path.join(MEATASTORE, '.orion'), function(){
+				testData.tearDown(MEATASTORE, done)
+			})
+		});
 	});
 	/**
 	 * From: org.eclipse.orion.server.tests.servlets.users.BasicUsersTest.java
