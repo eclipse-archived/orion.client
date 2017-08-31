@@ -13,11 +13,16 @@ var assert = require('assert');
 var express = require('express');
 var supertest = require('supertest');
 var tasks = require('../lib/tasks');
+var path = require("path");
+var testData = require("./support/test_data");
 
 var CONTEXT_PATH = '';
 var username = "testUser" + Date.now();
+
+var MEATASTORE =  path.join(__dirname, '.test_metadata');
+var WORKSPACE = path.join(__dirname, '.test_workspace');
 var taskIds = [];
-var configParams = { "orion.single.user": true };
+var configParams = { "orion.single.user": true, "orion.single.user.metaLocation": MEATASTORE };
 
 var app = express();
 var options = {};
@@ -35,6 +40,14 @@ app.use(CONTEXT_PATH + '/taskHelper', require('./support/task_helper').router({
 var request = supertest.bind(null, app);
 
 describe("Tasks API", function() {
+	before(function() {
+		testData.setUpWorkspace(WORKSPACE, MEATASTORE);
+	});
+	after("Remove Workspace and Metastore", function(done) {
+		 testData.tearDown(WORKSPACE, function(){
+			 testData.tearDown(MEATASTORE, done);
+		 });
+	});
 	beforeEach(function() {
 	});
 

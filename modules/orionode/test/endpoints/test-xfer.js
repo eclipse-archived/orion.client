@@ -19,10 +19,12 @@ var assert = require("assert"),
 	file = require('../../lib/file'),
 	xfer = require("../../lib/xfer.js"),
 	testData = require('../support/test_data'),
-	testHelper = require('../support/testHelper');
+	testHelper = require('../support/testHelper'),
+	checkRights = require('../../lib/accessRights').checkRights;
 
 var CONTEXT_PATH = '',
 	WORKSPACE = path.join(__dirname, '.test_workspace'),
+	MEATASTORE =  path.join(__dirname, '.test_metadata'),
 	WORKSPACE_ID = "anonymous-OrionContent",
 	configParams = { "orion.single.user": true },
 	XFER_PATH = CONTEXT_PATH + '/xfer',
@@ -31,15 +33,28 @@ var CONTEXT_PATH = '',
 	FILE_PATH = CONTEXT_PATH + '/file',
 	PREFIX = FILE_PATH + '/' + WORKSPACE_ID;
 
+var userMiddleware = function(req, res, next) {
+	req.user.checkRights = checkRights;
+	next();
+};
 var app = express();
 app.locals.metastore = metastore({workspaceDir: WORKSPACE, configParams:configParams});
 app.locals.metastore.setup(app);
+app.use(userMiddleware)
 app.use(XFER_PATH, xfer.router({ fileRoot: FILE_PATH }));
 app.use(FILE_PATH + '*', file({fileRoot: FILE_PATH, workspaceRoot: CONTEXT_PATH + '/workspace'}));
 
 var request = supertest.bind(null, app);
 
 describe("XFER", function() {
+	before(function() {
+		testData.setUpWorkspace(WORKSPACE, MEATASTORE);
+	});
+	after("Remove Workspace and Metastore", function(done) {
+		testData.tearDown(WORKSPACE, function(){
+			testData.tearDown(MEATASTORE, done);
+		});
+	});
 	/**
 	 * From: org.eclipse.orion.server.tests.servlets.xfer.TransferTest.java
 	 */

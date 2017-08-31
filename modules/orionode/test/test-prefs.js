@@ -25,7 +25,9 @@ var expect = chai.expect,
 
 var CONTEXT_PATH = '';
 var PREFS_PREFIX = CONTEXT_PATH + '/prefs';
+var USERID = "anonymous";
 var WORKSPACE_DIR = nodePath.join(__dirname, '.test_workspace');
+var MEATASTORE =  nodePath.join(__dirname, '.test_metadata');
 
 var samplePrefData = {
 	user: {
@@ -41,7 +43,7 @@ var samplePrefData = {
 var app = express();
 var options = {
 	workspaceDir: WORKSPACE_DIR,
-	configParams: { "orion.single.user": true }
+	configParams: { "orion.single.user": true , "orion.single.user.metaLocation": MEATASTORE}
 };
 app.locals.metastore = require('../lib/metastore/fs/store')(options);
 app.locals.metastore.setup(app);
@@ -49,7 +51,7 @@ app.use(PREFS_PREFIX, PrefsController(options));
 
 var request = supertest.bind(null, app);
 
-function setupWorkspace(done) {
+function setup(done) {
 	Promise.fromCallback(testData.setUp.bind(null, WORKSPACE_DIR))
 	.asCallback(done);
 }
@@ -62,7 +64,15 @@ function setupPrefs(done) {
 }
 
 describe('Orion preferences tests', function() {
-	beforeEach(setupWorkspace);
+	before(function() {
+		testData.setUpWorkspace(WORKSPACE_DIR, MEATASTORE);
+	});
+	after("Remove Workspace and Metastore", function(done) {
+		 testData.tearDown(WORKSPACE_DIR, function(){
+			 testData.tearDown(MEATASTORE, done);
+		 });
+	});
+	beforeEach(setup);
 
 	/**
 	 * Port of Java-specific tests to ensure parity
@@ -70,7 +80,7 @@ describe('Orion preferences tests', function() {
 	 */
 	describe('Core pref tests', function() {
 		it('testBug409792', function() {
-			return request().put(PREFS_PREFIX + '/testBug409792')
+			return request().put(PREFS_PREFIX + "/user/" + USERID + '/testBug409792')
 				.type('json')
 				.send({ "http://127.0.0.2:8080/plugins/samplePlugin.html": true })
 				.expect(204);

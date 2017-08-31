@@ -19,9 +19,10 @@ var testData = require('./support/test_data');
 
 var CONTEXT_PATH = '';
 var WORKSPACE_ID = "anonymous-OrionContent";
-var configParams = { "orion.single.user": true };
 var PREFIX = CONTEXT_PATH + '/file/' + WORKSPACE_ID;
 var WORKSPACE = path.join(__dirname, '.test_workspace');
+var MEATASTORE =  path.join(__dirname, '.test_metadata');
+var configParams = { "orion.single.user": true, "orion.single.user.metaLocation": MEATASTORE};
 
 var app = express();
 app.locals.metastore = require('../lib/metastore/fs/store')({workspaceDir: WORKSPACE, configParams:configParams});
@@ -63,10 +64,15 @@ BufStream.prototype.data = function() {
  */
 describe('File API', function() {
 	before(function() {
-	   testData.setUpWorkspace();
+	   testData.setUpWorkspace(WORKSPACE, MEATASTORE);
 	});
 	beforeEach(function(done) { // testData.setUp.bind(null, parentDir)
 		testData.setUp(WORKSPACE, done);
+	});
+	after("Remove Workspace and Metastore", function(done) {
+		testData.tearDown(WORKSPACE, function(){
+			testData.tearDown(MEATASTORE, done);
+		});
 	});
 
 	/**

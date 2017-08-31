@@ -14,22 +14,31 @@ var express = require('express');
 var path = require('path');
 var supertest = require('supertest');
 var testData = require('./support/test_data');
+var checkRights = require('../lib/accessRights').checkRights;
 
 var CONTEXT_PATH = '';
 var PREFIX = CONTEXT_PATH + '/workspace', PREFIX_FILE = CONTEXT_PATH + '/file';
 var WORKSPACE_ID = 'anonymous-OrionContent';
 var TEST_WORKSPACE_NAME = '.test_workspace';
 var WORKSPACE = path.join(__dirname, TEST_WORKSPACE_NAME);
+var MEATASTORE =  path.join(__dirname, '.test_metadata');
 
 var options = {
 	configParams: {
-		"orion.single.user": true
+		"orion.single.user": true,
+		"orion.single.user.metaLocation": MEATASTORE 
 	},
 	workspaceDir: WORKSPACE
+};
+var userMiddleware = function(req, res, next) {
+	req.user = {workspaceDir: WORKSPACE};
+	req.user.checkRights = checkRights;
+	next();
 };
 var app = express();
 app.locals.metastore = require('../lib/metastore/fs/store')(options);
 app.locals.metastore.setup(app);
+app.use(userMiddleware)
 app.use(PREFIX, require('../lib/workspace')({
 	workspaceRoot: CONTEXT_PATH + '/workspace', 
 	fileRoot: CONTEXT_PATH + '/file', 
@@ -73,6 +82,14 @@ function throwIfError(cause, message) {
  * see http://wiki.eclipse.org/Orion/Server_API/Workspace_API
  */
 describe('Workspace API', function() {
+	before(function() {
+		testData.setUpWorkspace(WORKSPACE, MEATASTORE);
+	});
+	after("Remove Workspace and Metastore", function(done) {
+		 testData.tearDown(WORKSPACE, function(){
+			 testData.tearDown(MEATASTORE, done);
+		 });
+	});
 	beforeEach(function(done) { // testData.setUp.bind(null, parentDir)
 		testData.setUp(WORKSPACE, done);
 	});

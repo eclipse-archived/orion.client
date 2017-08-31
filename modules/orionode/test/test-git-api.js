@@ -27,8 +27,9 @@ try {
 
 var CONTEXT_PATH = '';
 var WORKSPACE = path.join(__dirname, '.test_workspace');
+var MEATASTORE =  path.join(__dirname, '.test_metadata');
 var WORKSPACE_ID = "anonymous-OrionContent";
-var configParams = { "orion.single.user": true };
+var configParams = { "orion.single.user": true, "orion.single.user.metaLocation": MEATASTORE};
 var FILE_ROOT = "/file/" + WORKSPACE_ID + "/";
 var userMiddleware = function(req, res, next) {
 	req.user.checkRights = checkRights;
@@ -706,7 +707,14 @@ maybeDescribe("git", function() {
 	if (!git) {
 		it("*** nodegit is not installed -- git tests skipped", Function.prototype);
 	}
-
+	before(function() {
+		testData.setUpWorkspace(WORKSPACE, MEATASTORE);
+	});
+	after("Remove Workspace and Metastore", function(done) {
+		testData.tearDown(WORKSPACE, function(){
+			testData.tearDown(MEATASTORE, done);
+		});
+	});
 	/**
 	 * init repo, add file, commit file, add remote, get list of remotes, fetch from remote, delete repo
 	 */
@@ -4122,8 +4130,7 @@ maybeDescribe("git", function() {
 	}); // describe("Stash")
 
 	describe("config", function() {
-		this.timeout(10000);
-
+		//this.timeout(10000);
 		function repoConfig() {
 			return request()
 			.get(CONTEXT_PATH + "/gitapi/config/clone" + FILE_ROOT + TEST_REPO_NAME);
