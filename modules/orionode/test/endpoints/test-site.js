@@ -18,8 +18,9 @@ var assert = require('assert'),
 	sites = require('../../lib/sites');
 
 var CONTEXT_PATH = '',
+	MEATASTORE =  path.join(__dirname, '.test_metadata'),
 	WORKSPACE_ID = "anonymous-OrionContent",
-	configParams = { "orion.single.user": true, "orion.sites.save.running": false },
+	configParams = { "orion.single.user": true, "orion.sites.save.running": false, "orion.single.user.metaLocation": MEATASTORE},
 	PREFIX = CONTEXT_PATH + '/site/' + WORKSPACE_ID,
 	WORKSPACE = path.join(__dirname, '.test_workspace');
 
@@ -163,6 +164,9 @@ describe("Site endpoint", function() {
 	beforeEach("Before each test", function(done) {
 		done();
 	});
+	before(function() {
+		testData.setUpWorkspace(WORKSPACE, MEATASTORE);
+	});
 	after("Clean up", function(done) {
 		//stop and remove all sites
 		getAllSites()
@@ -193,9 +197,9 @@ describe("Site endpoint", function() {
 							});
 						}
 					});
-					done();
 				}
 			});
+			testData.tearDown(testHelper.WORKSPACE, done);
 	});
 	/**
 	 * From: org.eclipse.orion.server.tests.servlets.site.SiteHostingService.java

@@ -23,11 +23,13 @@ var CONTEXT_PATH = '',
 	PREFIX_FILE = CONTEXT_PATH + '/file',
 	WORKSPACE_ID = 'anonymous-OrionContent',
 	TEST_WORKSPACE_NAME = '.test_workspace',
-	WORKSPACE = path.join(__dirname, TEST_WORKSPACE_NAME);
+	WORKSPACE = path.join(__dirname, TEST_WORKSPACE_NAME),
+	MEATASTORE =  path.join(__dirname, '.test_metadata');
 
 var options = {
 	configParams: {
-		"orion.single.user": true
+		"orion.single.user": true,
+		"orion.single.user.metaLocation": MEATASTORE
 	},
 	workspaceDir: WORKSPACE
 };
@@ -72,6 +74,9 @@ function throwIfError(cause, message) {
 describe("Workspace endpoint", function() {
 	beforeEach(function(done) { // testData.setUp.bind(null, parentDir)
 		testData.setUp(WORKSPACE, done, false);
+	});
+	before(function() {
+		testData.setUpWorkspace(WORKSPACE, MEATASTORE);
 	});
 	/**
 	 * From: org.eclipse.orion.server.tests.servlets.workspace.WorkspaceServiceTests.java

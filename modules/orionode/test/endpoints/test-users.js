@@ -20,8 +20,9 @@ var assert = require('assert'),
 	checkRights = require('../../lib/accessRights').checkRights;
 
 var CONTEXT_PATH = '',
+	MEATASTORE =  path.join(__dirname, '.test_metadata'),
 	WORKSPACE_ID = "anonymous-OrionContent",
-	configParams = { "orion.single.user": false, "orion.sites.save.running": false, "orion.auth.user.creation": 'anonymous' },
+	configParams = { "orion.single.user": false, "orion.sites.save.running": false, "orion.auth.user.creation": 'anonymous', "orion.single.user.metaLocation": MEATASTORE},
 	PREFIX = CONTEXT_PATH + '/users/' + WORKSPACE_ID,
 	WORKSPACE = path.join(__dirname, '.test_workspace');
 
@@ -55,6 +56,9 @@ function throwIfError(cause, message) {
 describe.skip("Users endpoint", function() {
 	beforeEach(function(done) { // testData.setUp.bind(null, parentDir)
 		testData.setUp(WORKSPACE, done);
+	});
+	before(function() {
+		testData.setUpWorkspace(WORKSPACE, MEATASTORE);
 	});
 	after("Remove .test_workspace", function(done) {
 		testData.tearDown(testHelper.WORKSPACE, done);

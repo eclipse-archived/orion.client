@@ -10,51 +10,61 @@
  *******************************************************************************/
 /*eslint-env node, mocha*/
 /*eslint-disable no-shadow, no-sync*/
-var assert = require('assert');
-var express = require('express');
-var path = require('path');
-var supertest = require('supertest');
-var testData = require('./support/test_data');
-var util = require("../lib/git/util");
-var fs = require('fs');
-var storeFactory = require('../lib/metastore/fs/store');
-var checkRights = require('../lib/accessRights').checkRights;
+var assert = require('assert'),
+	express = require('express'),
+	path = require('path'),
+	supertest = require('supertest'),
+	testData = require('../support/test_data'),
+	util = require("../../lib/git/util"),
+	fs = require('fs'),
+	storeFactory = require('../../lib/metastore/fs/store'),
+	checkRights = require('../../lib/accessRights').checkRights,
+	store = require('../../lib/metastore/fs/store'),
+	tasks = require('../../lib/tasks'),
+	workspace = require('../../lib/workspace'),
+	file = require('../../lib/file'),
+	gitapi = require('../../lib/git');
+
 var git;
 try {
 	git = require('nodegit');
 } catch (e) {
 }
 
-var CONTEXT_PATH = '';
-var WORKSPACE = path.join(__dirname, '.test_workspace');
-var MEATASTORE =  path.join(__dirname, '.test_metadata');
-var WORKSPACE_ID = "anonymous-OrionContent";
-var configParams = { "orion.single.user": true, "orion.single.user.metaLocation": MEATASTORE};
-var FILE_ROOT = "/file/" + WORKSPACE_ID + "/";
-var userMiddleware = function(req, res, next) {
+var CONTEXT_PATH = '',
+	WORKSPACE = path.join(__dirname, '.test_workspace'),
+	MEATASTORE =  path.join(__dirname, '.test_metadata'),
+	WORKSPACE_ID = "anonymous-OrionContent",
+	configParams = { 
+		"orion.single.user": true, 
+		"orion.single.user.metaLocation": MEATASTORE
+	},
+	FILE_ROOT = "/file/" + WORKSPACE_ID + "/";
+
+	var userMiddleware = function(req, res, next) {
 	req.user.checkRights = checkRights;
 	next();
 };
 
 var app = express();
-app.locals.metastore = require('../lib/metastore/fs/store')({workspaceDir: WORKSPACE, configParams: configParams});
+app.locals.metastore = store({workspaceDir: WORKSPACE, configParams: configParams});
 app.locals.metastore.setup(app);
 app.use(userMiddleware)
-.use(CONTEXT_PATH + '/task', require('../lib/tasks').router({
+.use(CONTEXT_PATH + '/task', tasks.router({
 	taskRoot: CONTEXT_PATH + '/task',
 	options: {metastore: storeFactory({workspaceDir: WORKSPACE, configParams: configParams})}
 }))
-.use(CONTEXT_PATH + "/workspace*", require('../lib/workspace')({
+.use(CONTEXT_PATH + "/workspace*", workspace({
 	workspaceRoot: CONTEXT_PATH + '/workspace', 
 	fileRoot: CONTEXT_PATH + '/file', 
 	gitRoot: CONTEXT_PATH + '/gitapi'
 }))
-.use(CONTEXT_PATH + "/file*", require('../lib/file')({
+.use(CONTEXT_PATH + "/file*", file({
 	workspaceRoot: CONTEXT_PATH + '/workspace', 
 	gitRoot: CONTEXT_PATH + '/gitapi', 
 	fileRoot: CONTEXT_PATH + '/file'
 }))
-.use(CONTEXT_PATH + "/gitapi", require('../lib/git')({
+.use(CONTEXT_PATH + "/gitapi", gitapi({
 	gitRoot: CONTEXT_PATH + '/gitapi', 
 	fileRoot: CONTEXT_PATH + '/file', 
 	workspaceRoot: CONTEXT_PATH + '/workspace'

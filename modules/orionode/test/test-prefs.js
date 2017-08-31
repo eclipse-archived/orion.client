@@ -23,11 +23,11 @@ var expect = chai.expect,
     fs = Promise.promisifyAll(require('fs')),
     mkdirpAsync = Promise.promisify(require('mkdirp'));
 
-var CONTEXT_PATH = '';
-var PREFS_PREFIX = CONTEXT_PATH + '/prefs';
-var USERID = "anonymous";
-var WORKSPACE_DIR = nodePath.join(__dirname, '.test_workspace');
-var MEATASTORE =  nodePath.join(__dirname, '.test_metadata');
+var CONTEXT_PATH = '',
+	PREFS_PREFIX = CONTEXT_PATH + '/prefs',
+	USERID = "anonymous",
+	WORKSPACE_DIR = nodePath.join(__dirname, '.test_workspace'),
+	MEATASTORE =  nodePath.join(__dirname, '.test_metadata');
 
 var samplePrefData = {
 	user: {
@@ -51,11 +51,6 @@ app.use(PREFS_PREFIX, PrefsController(options));
 
 var request = supertest.bind(null, app);
 
-function setup(done) {
-	Promise.fromCallback(testData.setUp.bind(null, WORKSPACE_DIR))
-	.asCallback(done);
-}
-
 function setupPrefs(done) {
 	var path = nodePath.join(WORKSPACE_DIR, '.orion', PrefsController.PREF_FILENAME);
 	mkdirpAsync(nodePath.dirname(path))
@@ -72,7 +67,9 @@ describe('Orion preferences tests', function() {
 			 testData.tearDown(MEATASTORE, done);
 		 });
 	});
-	beforeEach(setup);
+	beforeEach("Set up the workspace", function(done) {
+		testData.setUp(WORKSPACE_DIR, done);
+	});
 
 	/**
 	 * Port of Java-specific tests to ensure parity
@@ -192,32 +189,34 @@ describe('Orion preferences tests', function() {
 		it.skip('testDeleteNode', function() {
 			//skipped in Java tests as well
 		});
-		it('testValueWithSpaces', function() {
-			return request().put(PREFS_PREFIX + '/user/java')
-					.type('json')
-					.send({"Name" : "Frodo Baggins"})
-					.expect(204)
-					.then(function() {
-						return request().get(PREFS_PREFIX + '/user/java?key=Name')
-								.expect(200)
-								.then(function(res) {
-									assert(res.text, "There was no text returned in the response");
-									var o = JSON.parse(res.text);
-									assert(o, "The JSON parse resulted in nothing");
-									assert.equal(o["Name"], "Frodo Baggins", "Name should be Frodo Baggins");
-								});
+		it('testValueWithSpaces', function(done) {
+			request().put(PREFS_PREFIX + '/user/java')
+				.type('json')
+				.send({"Name" : "Frodo Baggins"})
+				.expect(204)
+				.end(function(err, res) {
+					request().get(PREFS_PREFIX + '/user/java?key=Name')
+						.expect(200)
+						.end(function(err, res) {
+							assert(res.text, "There was no text returned in the response");
+							var o = JSON.parse(res.text);
+							assert(o, "The JSON parse resulted in nothing");
+							assert.equal(o["Name"], "Frodo Baggins", "Name should be Frodo Baggins");
+							done();
+						});
 				});
 
 		});
-		it('testAccessingMetadata - prefs/Users', function() {
-			return request().get(PREFS_PREFIX + '/Users')
-						.expect(405)
-						.then(function() {
-							return request().put(PREFS_PREFIX + '/Users')
-									.type('json')
-									.send({"Name" : "Frodo Baggins"})
-									.expect(403);
-						});
+		it('testAccessingMetadata - prefs/Users', function(done) {
+			request().get(PREFS_PREFIX + '/Users')
+				.expect(405)
+				.end(function(err, res) {
+					request().put(PREFS_PREFIX + '/Users')
+						.type('json')
+						.send({"Name" : "Frodo Baggins"})
+						.expect(403)
+						.end(done);
+				});
 		});
 		it('testAccessingMetadata - prefs/user', function() {
 			return request().get(PREFS_PREFIX + '/user')
