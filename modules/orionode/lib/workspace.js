@@ -15,6 +15,7 @@ var log4js = require('log4js');
 var logger = log4js.getLogger('workspace');
 var api = require('./api'), writeError = api.writeError, writeResponse = api.writeResponse;
 var fileUtil = require('./fileUtil');
+var metaUtil = require('./metastore/util/metaUtil');
 
 module.exports = function(options) {
 	var fileRoot = options.fileRoot;
@@ -80,32 +81,31 @@ module.exports = function(options) {
 		if (rest === '') {
 			var userId = req.user.username;
 			logAccess(userId);
-			api.writeResponse(null, res, null, {
+			var workspaceJson = {
 				Id: userId,
 				Name: userId,
-				UserName: req.user.fullname || userId,
-				Workspaces: req.user.workspaces.map(function(w) {
-					return {
-						Id: w.id,
-						Location: api.join(workspaceRoot, w.id),
-						Name: w.name
-					};
-				})
-			}, true);
-		} else {
-			var workspaceId = rest;
-			store.getWorkspace(workspaceId, function(err, workspace) {
-				if (err) {
-					return writeError(400, res, err);
-				}
-				if (!workspace) {
-					return writeError(404, res, "Workspace not found: " + rest);
-				}
-				getWorkspaceJson(req, workspace).then(function(workspaceJson){
-					api.writeResponse(null, res, null, workspaceJson, true);
-				});
+				UserName: req.user.fullname || userId
+			};
+			
+			return metaUtil.getWorkspaceMeta(req.user.workspaces, store, workspaceRoot)
+			.then(function(workspaceInfos){
+				workspaceJson.Workspaces = workspaceInfos || [];
+				return api.writeResponse(null, res, null, workspaceJson, true);
 			});
 		}
+		var workspaceId = rest;
+		store.getWorkspace(workspaceId, function(err, workspace) {
+			if (err) {
+				return writeError(400, res, err);
+			}
+			if (!workspace) {
+				return writeError(404, res, "Workspace not found: " + rest);
+			}
+			getWorkspaceJson(req, workspace).then(function(workspaceJson){
+				api.writeResponse(null, res, null, workspaceJson, true);
+			});
+		});
+		
 	}
 
 	function postWorkspace(req, res) {
