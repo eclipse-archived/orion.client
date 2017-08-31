@@ -212,7 +212,7 @@ GitClient.prototype = {
 				getGitResponse(res).then(function(res2) {
 					assert.equal(res2.HttpCode, 200);
 					assert.equal(res2.Message, "OK");
-					assert.equal(res2.JsonData.Location, "/gitapi/clone/file/orionode/" + name);
+					assert.equal(res2.JsonData.Location, "/gitapi/clone"+ FILE_ROOT + name);
 					client.next(resolve, res2.JsonData);
 				})
 				.catch(function(err) {
@@ -226,7 +226,7 @@ GitClient.prototype = {
 		var client = this;
 		this.tasks.push(function(resolve) {
 			request()
-			.get(CONTEXT_PATH + "/gitapi/clone/workspace/orionode")
+			.get(CONTEXT_PATH + "/gitapi/clone/workspace/" + WORKSPACE_ID)
 			// .send({
 			// 	GitUrl: url,
 			// 	Location: FILE_ROOT,
@@ -717,12 +717,16 @@ maybeDescribe("git", function() {
 	if (!git) {
 		it("*** nodegit is not installed -- git tests skipped", Function.prototype);
 	}
-	before(function() {
-		testData.setUpWorkspace(WORKSPACE, MEATASTORE);
+	beforeEach(function(done) { // testData.setUp.bind(null, parentDir)
+		testData.setUp(WORKSPACE, function(){
+			testData.setUpWorkspace(WORKSPACE, MEATASTORE, done);
+		});
 	});
-	after("Remove Workspace and Metastore", function(done) {
+	afterEach("Remove .test_workspace", function(done) {
 		testData.tearDown(WORKSPACE, function(){
-			testData.tearDown(MEATASTORE, done);
+			testData.tearDown(path.join(MEATASTORE, '.orion'), function(){
+				testData.tearDown(MEATASTORE, done)
+			})
 		});
 	});
 	/**

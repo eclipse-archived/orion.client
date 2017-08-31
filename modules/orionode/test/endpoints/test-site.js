@@ -161,12 +161,19 @@ function throwIfError(cause, message) {
 	throw err;
 }
 describe("Site endpoint", function() {
-	beforeEach("Before each test", function(done) {
-		done();
+	beforeEach(function(done) { // testData.setUp.bind(null, parentDir)
+		testData.setUp(WORKSPACE, function(){
+			testData.setUpWorkspace(WORKSPACE, MEATASTORE, done);
+		});
 	});
-	before(function() {
-		testData.setUpWorkspace(WORKSPACE, MEATASTORE);
+	afterEach("Remove .test_workspace", function(done) {
+		testData.tearDown(testHelper.WORKSPACE, function(){
+			testData.tearDown(path.join(MEATASTORE, '.orion'), function(){
+				testData.tearDown(MEATASTORE, done)
+			})
+		});
 	});
+
 	after("Clean up", function(done) {
 		//stop and remove all sites
 		getAllSites()

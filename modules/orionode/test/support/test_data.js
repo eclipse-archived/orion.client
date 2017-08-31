@@ -32,7 +32,7 @@ function debug(msg) {
  * Deletes dir and everything in it.
  */
 function tearDown(dir, callback) {
-	rimraf(dir, callback);
+	rimraf(dir, fs, callback);
 }
 
 function setUpWorkspace(workspace, metastore, done) {
