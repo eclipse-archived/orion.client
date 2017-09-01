@@ -18,4 +18,5 @@ dist/
 
 # Ignore per-user Orionode data
 .workspace*/
-test/.test_workspace/
+.test_workspace
+.test_metadata
