@@ -77,37 +77,21 @@ function FsMetastore(options) {
 
 FsMetastore.prototype.lock = function(userId, shared) {
 	var promise = new Promise(function(resolve, reject) {
-		var doit = function(userLock) {
-			userLock.lock(shared).then(resolve, reject);
-		};
-	
 		var locker = this._lockMap[userId];
-		if (locker) {
-			doit(locker);
-		} else {
+		if (!locker) {
 			var filePath;
-			if(this._isSingleUser) {
+			if (this._isSingleUser) {
 				filePath = nodePath.join(this._options.configParams['orion.single.user.metaLocation'] || os.homedir(), '.orion');
 			} else {
 				var userPrefix = userId.substring(0, Math.min(2, userId.length));
 				filePath = nodePath.join(this._options.workspaceDir, userPrefix);
 				filePath = nodePath.join(filePath, userId);
 			}
-			mkdirpAsync(filePath).then(
-				function() {
-					/*
-					 * Check for fileLocker existence again in case there were multiple
-					 * fileLocker init's happening concurrently for the same user.
-					 */
-					if (!this._lockMap[userId]) {
-						var file = nodePath.join(filePath, ".lock");
-						this._lockMap[userId] = new fileLocker(file);
-					}
-					doit(this._lockMap[userId]);
-				}.bind(this),
-				reject
-			);
+			filePath = nodePath.join(filePath, ".lock");
+			locker = new fileLocker(filePath);
+			this._lockMap[userId] = locker;
 		}
+		locker.lock(shared).then(resolve, reject);
 	}.bind(this));
 	return promise.disposer(function(releaser) {
 		return releaser();

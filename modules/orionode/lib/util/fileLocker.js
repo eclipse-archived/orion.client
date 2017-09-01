@@ -12,7 +12,9 @@
 var fs = require("fs-ext");
 var log4js = require("log4js");
 var logger = log4js.getLogger("server");
+var nodePath = require("path");
 var Promise = require("bluebird");
+var mkdirpAsync = Promise.promisify(require("mkdirp"));
 
 var APPEND = "a+";
 var EXCLUSIVE = "ex";
@@ -141,26 +143,38 @@ FileLocker.prototype._acquireLock = function(shared) {
 		}.bind(this);
 
 		if (!this._fd) {
-			fs.open(this._pathame, APPEND, function(error, fd) {
-				if (error) {
+			var openLockFile = function() {
+				fs.open(this._pathame, APPEND, function(error, fd) {
+					if (error) {
 // console.log("error 2");
-					return reject(error);
-				}
-				
-				/* verify that there were not multiple concurrent opens occurring */
-				if (!this._fd) {
-					this._fd = fd; /* typical case */
+	 					if (error.code === "ENOENT") {
+	 						var dirPath = nodePath.dirname(this._pathame);
+							return mkdirpAsync(dirPath).then(
+								function() {
+									openLockFile();
+								},
+								reject
+							);
+	 					}
+						return reject(error);
+					}
+					
+					/* verify that there were not multiple concurrent opens occurring */
+					if (!this._fd) {
+						this._fd = fd; /* typical case */
 // console.log(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>opened, fd set to: " + fd);
-				} else {
+					} else {
 // console.log("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++redundant!");
-					/* this is a redundant fd so close it */
-					fs.close(fd, function(error) {
-						/* no functional impact beyond possibly leaking a fd */
-						logger.warn("Failed to close a redundant fd: " + fd, error);
-					});
-				}
-				lock();
-			}.bind(this));
+						/* this is a redundant fd so close it */
+						fs.close(fd, function(error) {
+							/* no functional impact beyond possibly leaking a fd */
+							logger.warn("Failed to close a redundant fd: " + fd, error);
+						});
+					}
+					lock();
+				}.bind(this));
+			}.bind(this);
+			openLockFile();
 		} else {
 			lock();
 		}
