@@ -74,16 +74,16 @@ exports.createFile = function createFile(request, prefix, fileNameOrJson, conten
 			.type('json')
 			.send(json)
 			.expect(201);
-	if(typeof contents === 'string') {
-		return p.then(/* @callback */ function(res) {
-			return request()
-				.put(PREFIX + prefix + fileName)
-				.send(contents)
-				.expect(200);
-		});
-	}
+	
 	return p;
-}
+};
+
+exports.setFileContents = function setFileContents(fileLoc, contents) {
+	return request()
+		.put(fileLoc)
+		.send(contents)
+		.expect(200);
+};
 
 /**
  * @description Creates a directory or directories directly under the WORKSPACE full path.
@@ -105,4 +105,21 @@ exports.mkdirp = function mkdirp(root, directoryPath) {
 			}
 		})
 	}
+}
+
+/**
+ * Throws the cause like `assert.ifError` but allows the message to be overridden
+ * 
+ * @param {?} cause The cause of the error
+ * @param {?} message The message
+ * @throws {Error}
+ * @since 16.0
+ */
+exports.throwIfError = function throwIfError(cause, message) {
+	if (!cause || !cause instanceof Error && Object.prototype.toString.call(cause) !== '[object Error]' && cause !== 'error') {
+		return;
+	}
+	var err = new Error(message + ": " + cause.message);
+	err.cause = cause;
+	throw err;
 }

@@ -144,14 +144,66 @@ describe("Workspace endpoint", function() {
 	it("testMoveProjectToFolder");
 	it("testCopyProjectNonDefaultLocation");
 	it("testCopyFolderToProject");
-	it("testCopyProject");
-	it("testCreateProjectBadName");
-	it("testCreateProjectNonDefaultLocation");
+	it("testCopyProject", function(done) {
+		withDefaultWorkspace(function(ws) {
+			request()
+				.post(ws.Location)
+				.set('Slug', 'testCopyProject')
+				.expect(201)
+				.end(function(err, res) {
+					throwIfError(err);
+					//TODO
+				});
+		});
+	});
+	it("testCreateProjectBadName - space", function(done) {
+		withDefaultWorkspace(function(ws) {
+			request()
+				.post(ws.Location)
+				.set('Slug', ' ')
+				.expect(400)
+				.end(done);
+		});
+	});
+	it("testCreateProjectBadName - empty string", function(done) {
+		withDefaultWorkspace(function(ws) {
+			request()
+				.post(ws.Location)
+				.set('Slug', '')
+				.expect(400)
+				.end(done);
+		});
+	});
+	it("testCreateProjectBadName - slash", function(done) {
+		withDefaultWorkspace(function(ws) {
+			request()
+				.post(ws.Location)
+				.set('Slug', '/')
+				.expect(400)
+				.end(done);
+		});
+	});
+	it("testCreateProjectNonDefaultLocation", function(done) {
+		withDefaultWorkspace(function(ws) {
+			request()
+				.post(ws.Location)
+				.set('Slug', 'testCreateProjectNonDefaultLocation')
+				.set('ContentLocation', MEATASTORE)
+				.expect(403)
+				.end(done);
+		});
+	});
 	it("testCreateWorkspace", function(done) {
-			// This test should only run against multiuser case, and assuming the user is not authenticated, otherwise used is allowed to create workspace
+		// This test should only run against multiuser case, and assuming the user is not authenticated, 
+		//otherwise used is allowed to create workspace
 		request()
 			.post(PREFIX)
 			.set('Slug', 'whatever')
+			.expect(403, done);
+	});
+	it("testCreateWorkspaceNullName", function(done) {
+		request()
+			.post(PREFIX)
 			.expect(403, done);
 	});
 	it("testGetWorkspaceMetadata", function(done) {
@@ -195,9 +247,48 @@ describe("Workspace endpoint", function() {
 				.expect(403, done);
 		});
 	});
-	it("testGetProjectMetadata");
-	it("testCreateWorkspaceNullName");
-	it("testDeleteProject");
+	it("testGetProjectMetadata", function(done) {
+		withDefaultWorkspace(function(ws) {
+			request()
+				.post(ws.Location)
+				.set('Slug', 'testGetProjectMetadata')
+				.expect(201)
+				.end(function(err, res) {
+					throwIfError(err);
+					request()
+						.get(res.body.Location)
+						.expect(200)
+						.end(function(err, res) {
+							throwIfError(err);
+							assert.equal('testGetProjectMetadata', res.body.Name, "The project name is not the same");
+							done();
+						})
+				});
+		});
+	});
+	it("testDeleteProject", function(done) {
+		withDefaultWorkspace(function(ws) {
+			request()
+				.post(ws.Location)
+				.set('Slug', 'testDeleteProject')
+				.expect(201)
+				.end(function(err, res) {
+					throwIfError(err);
+					var _loc = res.body.Location;
+					request()
+						.delete(_loc)
+						.expect(200)
+						.end(function(err, res) {
+							throwIfError(err);
+							//now try to fetch it, should 404
+							request()
+								.get(_loc)
+								.expect(404)
+								.end(done);
+						});
+				});
+		});
+	});
 	it("testDeleteWorkspace", function(done) {
 		withDefaultWorkspace(function(workspace) {
 			request()

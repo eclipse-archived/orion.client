@@ -46,7 +46,11 @@ app.use(FILE_PATH + '*', file({fileRoot: FILE_PATH, workspaceRoot: CONTEXT_PATH 
 
 var request = supertest.bind(null, app);
 
-describe("XFER", function() {
+describe("XFER endpoint", function() {
+	/**
+	 * From: org.eclipse.orion.server.tests.servlets.xfer.TransferTest.java
+	 */
+	this.timeout(20000);
 	beforeEach(function(done) { // testData.setUp.bind(null, parentDir)
 		testData.setUp(WORKSPACE, function(){
 			testData.setUpWorkspace(WORKSPACE, MEATASTORE, done);
@@ -59,198 +63,218 @@ describe("XFER", function() {
 			})
 		});
 	});
-	/**
-	 * From: org.eclipse.orion.server.tests.servlets.xfer.TransferTest.java
-	 */
-	describe("Transfer tests", function() {
-		this.timeout(20000);
-		// Bug 511513 - Export non-existing folder leaks server path
-		it('testExport - bug 511513', function(finished) {
-			// make sure the folder doesn't actually exist
-			assert.equal(fs.existsSync(WORKSPACE + "/donotexist"), false);
-			// ask the server to export the non-existent folder
-			request()
-			.get(EXPORT_PATH + '/' + WORKSPACE_ID + "/donotexist.zip")
-			.expect(404)
-			.end(function(err, res) {
-				assert.ifError(err);
-				// message body doesn't include the path
-				assert.equal(res.body.Message.indexOf(WORKSPACE), -1);
-				finished();
-			});
+	// Bug 511513 - Export non-existing folder leaks server path
+	it('testExport - bug 511513', function(finished) {
+		// make sure the folder doesn't actually exist
+		assert.equal(fs.existsSync(WORKSPACE + "/donotexist"), false);
+		// ask the server to export the non-existent folder
+		request()
+		.get(EXPORT_PATH + '/' + WORKSPACE_ID + "/donotexist.zip")
+		.expect(404)
+		.end(function(err, res) {
+			testHelper.throwIfError(err)
+			// message body doesn't include the path
+			assert.equal(res.body.Message.indexOf(WORKSPACE), -1);
+			finished();
 		});
-		it("testExportProject", function() {
-			return testHelper.createDir(request, '/project', "exportSample")
-					.then(/* @callback */ function(res) {
-						return testHelper.createFile(request, "/project/exportSample/", "exportTestFile.txt", "This is some contents for initialization")
-								.then(/* @callback */ function(res) {
-									return request()
-										.get(EXPORT_PATH + '/' + WORKSPACE_ID + '/project/exportSample.zip')
-										.expect(200);
-										//TODO extract and confirm zip?
-								});
-					});
-		});
-		it("testImportFromURL", function() {
-			var url = 'https://storage.googleapis.com/google-code-archive-downloads/v2/code.google.com/jsdoc-toolkit/jsdoc_toolkit-2.4.0.zip';
-			return testHelper.createDir(request, '/project', 'importFromUrlRaw')
-					.then(function() {
-						return request()
-								.post(IMPORT_PATH + '/' + WORKSPACE_ID + '/project/importFromUrlRaw?source=' + encodeURIComponent(url))
-								.set('X-Xfer-Options', 'raw')
-								.expect(201)
-								.then(function(res) {
-									assert(res.header.location, "There was no location in the response");
-									assert.equal(res.header.location, PREFIX + '/project/importFromUrlRaw', "The file location is not correct");
-								});
-					});
-		});
-		/**
-		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=520782
-		 */
-		it("testImportFromURLNoHeader", function() {
-			var url = 'https://storage.googleapis.com/google-code-archive-downloads/v2/code.google.com/jsdoc-toolkit/jsdoc_toolkit-2.4.0.zip';
-			return testHelper.createDir(request, '/project', 'importFromUrlNoHeader')
-					.then(function() {
-						return request()
-								.post(IMPORT_PATH + '/' + WORKSPACE_ID + '/project/importFromUrlNoHeader?source=' + encodeURIComponent(url))
-								.expect(201)
-								.then(function(res) {
-									assert(res.header.location, "There was no location in the response");
-									assert.equal(res.header.location, PREFIX + '/project/importFromUrlNoHeader', "The file location is not correct");
-								});
-					});
-		});
-		it("testImportAndUnzipFromURL", function() {
-			var url = 'https://storage.googleapis.com/google-code-archive-downloads/v2/code.google.com/jsdoc-toolkit/jsdoc_toolkit-2.4.0.zip';
-			return testHelper.createDir(request, '/project', 'importFromUrlAutoExtracted')
-					.then(function() {
-						return request()
-								.post(IMPORT_PATH + '/' + WORKSPACE_ID + '/project/importFromUrlAutoExtracted?source=' + encodeURIComponent(url))
-								.set('X-Xfer-Options', 'unzip')
-								.expect(201)
-								.then(function(res) {
-									assert(res.header.location, "There was no location in the response");
-									assert.equal(res.header.location, PREFIX + '/project/importFromUrlAutoExtracted', "The file location is not correct");
-								});
-					});
-		});
-		it("testImportAndUnzipFromNonArchiveURL", function() {
-			var url = 'https://wiki.eclipse.org/Orion';
-			return testHelper.createDir(request, '/project', 'importFromUrlAutoExtractedNonArchive')
-					.then(function() {
-						return request()
-								.post(IMPORT_PATH + '/' + WORKSPACE_ID + '/project/importFromUrlAutoExtractedNonArchive?source=' + encodeURIComponent(url))
-								.set('X-Xfer-Options', 'unzip')
-								.expect(400);
-					});
-		});
-		it("testImportFromURLMalformed", function() {
-		return testHelper.createDir(request, '/project', 'importMalformedUrl')
-					.then(function() {
-						return request()
-								.post(IMPORT_PATH + '/' + WORKSPACE_ID + '/project/importMalformedUrl?source=pumpkins')
-								.set('X-Xfer-Options', 'unzip')
-								.expect(400);
-					});
-		});
-		/**
-		 * TODO SSQ and MR need to review what is expected here
-		 */
-		it.skip("testImportAndUnzip", function(done) {
-			return testHelper.createDir(request, '/project', 'testImportFile')
-				.then(function() {
-					var fname = path.dirname(__dirname) + '/testData/importTest/client.zip',
-						lngth = -1,
-						stats = fs.statSync(fname);
-					assert(stats, "Could not get the file information for: "+fname);
-					lngth = stats.size;
-					request()
-							.post(IMPORT_PATH + '/' + WORKSPACE_ID + '/project/testImportFile')
-							.set('Content-Type', 'application/octet-stream')
-							.set('Content-Length', lngth)
-							.set('Slug', 'client.zip')
-							.expect(201)
-							.then(function(res) {
-								var stream = fs.createReadStream(fname);
-								stream.pipe(res);
-								stream.on('error', function(e) {
-									res.end();
-								});
-								stream.on('end', function() {
-									done();
-								});
-							});
-				});
-		});
-		it.skip("testImportFile", function(done) {
-			return testHelper.createDir(request, '/project', 'testImportFile')
-					.then(function() {
-						var fname = path.dirname(__dirname) + '/testData/importTest/client.zip',
-						lngth = -1,
-						stats = fs.statSync(fname);
-						return request()
-								.post(IMPORT_PATH + '/' + WORKSPACE_ID + '/project/testImportFile')
-								.set('X-Xfer-Options', 'raw,no-overwrite')
-								.set('Content-Type', 'application/octet-stream')
-								.set('Slug', 'client.zip')
-								.expect(201)
-								.then(function(res, req) {
-									var stream = fs.createReadStream(fname);
-									res.pipe(stream);
-									stream.on('error', function(e) {
-										res.end();
-									});
-									stream.on('end', function() {
-										done();
-									});
-								});
-					});
-		});
-		it("testImportEmojiFilenameBad", function() {
-			var tempdir = fs.mkdtempSync(WORKSPACE + '/temp'),
-				fileName = encodeURIComponent('\ud83d\ude0a\ud83d\udc31\ud83d\udc35.txt'),
-				fileContents = 'Emoji characters: \ud83d\ude0a\ud83d\udc31\ud83d\udc35';
-			fs.writeFileSync(tempdir+'/'+fileName, fileContents);
-			return request()
-					.post(IMPORT_PATH + '/' + WORKSPACE_ID + tempdir)
-					.set('X-Xfer-Content-Length', fileContents.length)
-					.set('X-Xfer-Options', 'raw')
-					.set('Slug', fileName)
-					.expect(500);
-		});
-		/**
-		 * TODO This test fails 
-		 */
-		it.skip("testImportEmojiFilename", function() {
-			var tempdir = fs.mkdtempSync(WORKSPACE + '/temp'),
-				fileName = encodeURIComponent('\ud83d\ude0a\ud83d\udc31\ud83d\udc35.txt'),
-				fileContents = 'Emoji characters: \ud83d\ude0a\ud83d\udc31\ud83d\udc35';
-			fs.writeFileSync(tempdir+'/'+fileName, fileContents);
-			return testHelper.createDir(request, '/project', 'testImportEmojiFilename')
-				.then(function() {
-					var lgth = -1,
-						fname = tempdir+'/'+fileName,
-						stats = fs.statSync(fname);
-						if(stats) {
-							lgth = stats.size;
-						}
-				return request()
-						.post(IMPORT_PATH + '/' + WORKSPACE_ID + '/project/testImportEmojiFilename')
-						.set('X-Xfer-Content-Length', lgth)
-						.set('X-Xfer-Options', 'raw')
-						.set('Slug', fileName)
-						.expect(200);
-			});
-		});
-		it.skip("testImportDBCSFilename");
-		it.skip("testImportFileMultiPart");
-		it.skip("testImportUnzipNonZipFile");
-		it.skip("testImportWithPostZeroByteFile");
-		it.skip("testImportWithPost");
-		it.skip("testImportFilesWithoutOverride");
-		it.skip("testImportFilesWithOverride");
-		it.skip("testImportAndUnzipWithoutOverride");
-		it.skip("testImportAndUnzipWithOverride");
 	});
+	it("testExportProject", function(done) {
+		testHelper.createDir(request, '/project', "exportSample")
+			.end(function(err, res) {
+				testHelper.throwIfError(err);
+				testHelper.createFile(request, "/project/exportSample/", "exportTestFile.txt")
+					.end(function(err, res) {
+						testHelper.throwIfError(err);
+						testHelper.setFileContents(res.body.Location, "This is some contents for initialization")
+							.end(function(err, res) {
+								testHelper.throwIfError(err);
+								request()
+									.get(EXPORT_PATH + '/' + WORKSPACE_ID + '/project/exportSample.zip')
+									.expect(200)
+									.end(done)
+								//TODO extract and confirm zip?
+							})
+					});
+			});
+	});
+	it("testImportFromURL", function(done) {
+		var url = 'https://storage.googleapis.com/google-code-archive-downloads/v2/code.google.com/jsdoc-toolkit/jsdoc_toolkit-2.4.0.zip';
+		testHelper.createDir(request, '/project', 'importFromUrlRaw')
+			.end(function(err, res) {
+				testHelper.throwIfError(err);
+				request()
+					.post(IMPORT_PATH + '/' + WORKSPACE_ID + '/project/importFromUrlRaw?source=' + encodeURIComponent(url))
+					.set('X-Xfer-Options', 'raw')
+					.expect(201)
+					.end(function(err, res) {
+						testHelper.throwIfError(err);
+						assert(res.header.location, "There was no location in the response");
+						assert.equal(res.header.location, PREFIX + '/project/importFromUrlRaw', "The file location is not correct");
+						done();
+					});
+			});
+	});
+	/**
+	 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=520782
+	 */
+	it("testImportFromURLNoHeader", function(done) {
+		var url = 'https://storage.googleapis.com/google-code-archive-downloads/v2/code.google.com/jsdoc-toolkit/jsdoc_toolkit-2.4.0.zip';
+		testHelper.createDir(request, '/project', 'importFromUrlNoHeader')
+			.end(function(err, res) {
+				testHelper.throwIfError(err);
+				request()
+					.post(IMPORT_PATH + '/' + WORKSPACE_ID + '/project/importFromUrlNoHeader?source=' + encodeURIComponent(url))
+					.expect(201)
+					.end(function(err, res) {
+						testHelper.throwIfError(err);
+						assert(res.header.location, "There was no location in the response");
+						assert.equal(res.header.location, PREFIX + '/project/importFromUrlNoHeader', "The file location is not correct");
+						done();
+					});
+			});
+	});
+	it("testImportAndUnzipFromURL", function(done) {
+		var url = 'https://storage.googleapis.com/google-code-archive-downloads/v2/code.google.com/jsdoc-toolkit/jsdoc_toolkit-2.4.0.zip';
+		testHelper.createDir(request, '/project', 'importFromUrlAutoExtracted')
+			.end(function(err, res) {
+				testHelper.throwIfError(err);
+				request()
+					.post(IMPORT_PATH + '/' + WORKSPACE_ID + '/project/importFromUrlAutoExtracted?source=' + encodeURIComponent(url))
+					.set('X-Xfer-Options', 'unzip')
+					.expect(201)
+					.end(function(err, res) {
+						testHelper.throwIfError(err);
+						assert(res.header.location, "There was no location in the response");
+						assert.equal(res.header.location, PREFIX + '/project/importFromUrlAutoExtracted', "The file location is not correct");
+						done();
+					});
+			});
+	});
+	it("testImportAndUnzipFromNonArchiveURL", function(done) {
+		var url = 'https://wiki.eclipse.org/Orion';
+		testHelper.createDir(request, '/project', 'importFromUrlAutoExtractedNonArchive')
+			.end(function(err, res) {
+				testHelper.throwIfError(err);
+				request()
+					.post(IMPORT_PATH + '/' + WORKSPACE_ID + '/project/importFromUrlAutoExtractedNonArchive?source=' + encodeURIComponent(url))
+					.set('X-Xfer-Options', 'unzip')
+					.expect(400)
+					.end(done);
+			});
+	});
+	it("testImportFromURLMalformed", function(done) {
+		testHelper.createDir(request, '/project', 'importMalformedUrl')
+			.end(function(err, res) {
+				testHelper.throwIfError(err);
+				request()
+					.post(IMPORT_PATH + '/' + WORKSPACE_ID + '/project/importMalformedUrl?source=pumpkins')
+					.set('X-Xfer-Options', 'unzip')
+					.expect(400)
+					.end(done);
+			});
+	});
+	/**
+	 * TODO SSQ and MR need to review what is expected here
+	 */
+	it.skip("testImportAndUnzip", function(done) {
+		testHelper.createDir(request, '/project', 'testImportFile')
+			.end(function(err, res) {
+				testHelper.throwIfError(err);
+				var fname = path.dirname(__dirname) + '/testData/importTest/client.zip',
+					lngth = -1,
+					stats = fs.statSync(fname);
+				assert(stats, "Could not get the file information for: "+fname);
+				lngth = stats.size;
+				request()
+					.post(IMPORT_PATH + '/' + WORKSPACE_ID + '/project/testImportFile')
+					.set('Content-Type', 'application/octet-stream')
+					.set('Content-Length', lngth)
+					.set('Slug', 'client.zip')
+					.expect(201)
+					.end(function(err, res) {
+						testHelper.throwIfError(err);
+						var stream = fs.createReadStream(fname);
+						stream.pipe(res);
+						stream.on('error', function(e) {
+							res.end();
+						});
+						stream.on('end', function() {
+							done();
+						});
+					});
+			});
+	});
+	it.skip("testImportFile", function(done) {
+		testHelper.createDir(request, '/project', 'testImportFile')
+			.end(function(err, res) {
+				testHelper.throwIfError(err);
+				var fname = path.dirname(__dirname) + '/testData/importTest/client.zip',
+				lngth = -1,
+				stats = fs.statSync(fname);
+				request()
+					.post(IMPORT_PATH + '/' + WORKSPACE_ID + '/project/testImportFile')
+					.set('X-Xfer-Options', 'raw,no-overwrite')
+					.set('Content-Type', 'application/octet-stream')
+					.set('Slug', 'client.zip')
+					.expect(201)
+					.end(function(err, res) {
+						var stream = fs.createReadStream(fname);
+						res.pipe(stream);
+						stream.on('error', function(e) {
+							res.end();
+						});
+						stream.on('end', function() {
+							done();
+						});
+					});
+			});
+	});
+	it("testImportEmojiFilenameBad", function(done) {
+		var tempdir = fs.mkdtempSync(WORKSPACE + '/temp'),
+			fileName = encodeURIComponent('\ud83d\ude0a\ud83d\udc31\ud83d\udc35.txt'),
+			fileContents = 'Emoji characters: \ud83d\ude0a\ud83d\udc31\ud83d\udc35';
+		fs.writeFileSync(tempdir+'/'+fileName, fileContents);
+		request()
+			.post(IMPORT_PATH + '/' + WORKSPACE_ID + tempdir)
+			.set('X-Xfer-Content-Length', fileContents.length)
+			.set('X-Xfer-Options', 'raw')
+			.set('Slug', fileName)
+			.expect(500)
+			end(done);
+	});
+	/**
+	 * TODO This test fails 
+	 */
+	it.skip("testImportEmojiFilename", function(done) {
+		var tempdir = fs.mkdtempSync(WORKSPACE + '/temp'),
+			fileName = encodeURIComponent('\ud83d\ude0a\ud83d\udc31\ud83d\udc35.txt'),
+			fileContents = 'Emoji characters: \ud83d\ude0a\ud83d\udc31\ud83d\udc35';
+		fs.writeFileSync(tempdir+'/'+fileName, fileContents);
+		testHelper.createDir(request, '/project', 'testImportEmojiFilename')
+			.end(function(err, res) {
+				testHelper.throwIfError(err);
+				var lgth = -1,
+					fname = tempdir+'/'+fileName,
+					stats = fs.statSync(fname);
+					if(stats) {
+						lgth = stats.size;
+					}
+			request()
+				.post(IMPORT_PATH + '/' + WORKSPACE_ID + '/project/testImportEmojiFilename')
+				.set('X-Xfer-Content-Length', lgth)
+				.set('X-Xfer-Options', 'raw')
+				.set('Slug', fileName)
+				.expect(200)
+				.end(done);
+		});
+	});
+	it.skip("testImportDBCSFilename");
+	it.skip("testImportFileMultiPart");
+	it.skip("testImportUnzipNonZipFile");
+	it.skip("testImportWithPostZeroByteFile");
+	it.skip("testImportWithPost");
+	it.skip("testImportFilesWithoutOverride");
+	it.skip("testImportFilesWithOverride");
+	it.skip("testImportAndUnzipWithoutOverride");
+	it.skip("testImportAndUnzipWithOverride");
 });
