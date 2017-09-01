@@ -120,10 +120,20 @@ var getMetastore = exports.getMetastore = function(req) {
 	return ms;
 };
 
+/**
+ * Get the file from the workspace
+ * @param {?} req The request
+ * @param {string} rest The rets of the path
+ * @returns {?} 
+ */
 var getFile = exports.getFile = function(req, rest) {
-	if (!rest) return null;
+	if (!rest) {
+		return null;
+	}
 	var store = getMetastore(req);
-	if (rest[0] === "/") rest = rest.substring(1);
+	if (rest[0] === "/") {
+		rest = rest.substring(1);
+	}
 	var segments = rest.split("/");
 	var workspaceId = segments.shift();
 	var workspaceDir = store.getWorkspaceDir(workspaceId);
@@ -134,6 +144,12 @@ var getFile = exports.getFile = function(req, rest) {
 	};
 };
 
+/**
+ * Collects the parents for thr given file path
+ * @param {string} fileRoot The root file path
+ * @param {string} relativePath The relative path for the file
+ * @param {boolean} includeFolder If the folder itself should be included
+ */
 var getParents = exports.getParents = function(fileRoot, relativePath, includeFolder) {
 	var segs = relativePath.split('/');
 	if(segs && segs.length > 0 && segs[segs.length-1] === ""){// pop the last segment if it is empty. In this case wwwpath ends with "/".
