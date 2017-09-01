@@ -49,9 +49,10 @@ function getWorkspaceMetadataFileName(options, workspaceId) {
 }
 
 function getWorkspaceFolderName(options, workspaceId) {
+	var workspaceName = metaUtil.decodeWorkspaceNameFromWorkspaceId(workspaceId);
 	var userId = metaUtil.decodeUserIdFromWorkspaceId(workspaceId);
 	var metadataFolder = getUserRootLocation(options, userId);
-	return nodePath.join(metadataFolder, workspaceId);
+	return nodePath.join(metadataFolder, workspaceName);
 }
 
 function getProjectMetadataFileName(options, workspaceId, projectName) {
@@ -317,7 +318,7 @@ Object.assign(FsMetastore.prototype, {
 					projectsToDelete.forEach(function(projectname){
 						var metaFile = getProjectMetadataFileName(this._options, workspaceId, projectname);
 						fs.unlinkAsync(metaFile).catchReturn({ code: 'ENOENT' }, null);
-					});
+					}.bind(this));
 					this._readUserMetadata(userId, function(error, metadata) {
 						if (error) {
 							return reject(error);
@@ -331,9 +332,8 @@ Object.assign(FsMetastore.prototype, {
 								return reject(error);
 							}
 							fs.unlinkAsync(getWorkspaceMetadataFileName(this._options, workspaceId)).catchReturn({ code: 'ENOENT' }, null);
-							fs.unlinkAsync(getWorkspaceFolderName(this._options, workspaceId)).catchReturn({ code: 'ENOENT' }, null);
 							resolve();
-						});				
+						}.bind(this));				
 					}.bind(this));
 				}.bind(this));
 			}.bind(this));

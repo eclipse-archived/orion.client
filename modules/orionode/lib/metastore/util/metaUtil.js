@@ -71,7 +71,6 @@ module.exports.getWorkspaceMeta = function (workspaceIds, store, workspaceRoot){
 				}
 				return fulfill();
 			});
-		return fulfill();
 	}).then(function(){
 		return workspaceInfos;
 	})

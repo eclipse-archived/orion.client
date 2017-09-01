@@ -48,7 +48,7 @@ var createWorkspaceAccess = function(workspaceId){
 var removeWorkspaceAccess = function(userAccessRights, workspaceId){
 	var newAccessRights = [];
 	userAccessRights.forEach(function(accessRight){
-		if(accessRight.Uri.indexOf("/"+workspaceId+"/") === -1){
+		if(!new RegExp("/" + workspaceId + "(\/|$)").test(accessRight.Uri)){
 			newAccessRights.push(accessRight);
 		}
 	});
