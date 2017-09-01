@@ -61,19 +61,9 @@ function withDefaultWorkspace(callback) {
 	request()
 		.get(PREFIX + '/' + WORKSPACE_ID)
 		.end(function(err, res) {
-			throwIfError(err);
+			testHelper.throwIfError(err);
 			callback(res.body);
 		});
-}
-
-// Like `assert.ifError` but allows the message to be overridden
-function throwIfError(cause, message) {
-	if (!cause || !cause instanceof Error && Object.prototype.toString.call(cause) !== '[object Error]' && cause !== 'error') {
-		return;
-	}
-	var err = new Error(message + ": " + cause.message);
-	err.cause = cause;
-	throw err;
 }
 
 describe("Workspace endpoint", function() {
@@ -103,8 +93,54 @@ describe("Workspace endpoint", function() {
 				.end(done);
 		});
 	});
-	it("testMoveBadRequest");
-	it("testMoveFolderToProject");
+	it("testMoveBadRequest", function(done) {
+		withDefaultWorkspace(function(ws) {
+			request()
+				.post(ws.Location)
+				.set('Slug', 'testMoveBadRequest')
+				.expect(201)
+				.end(function(err, res) {
+					testHelper.throwIfError(err);
+					request()
+						.post(ws.Location)
+						.type('json')
+						.set('Slug', 'testMoveBadRequest23')
+						.set('Orion-Version', 1)
+						.set('X-Create-Options', "move")
+						.send({Location: 'badSourceProject'})
+						.expect(403)
+						.end(done);
+				});
+		});
+	});
+	it("testMoveFolderToProject", function(done) {
+		withDefaultWorkspace(function(ws) {
+			request()
+				.post(ws.Location)
+				.set('Slug', 'testMoveFolderToProjectSrc')
+				.expect(201)
+				.end(function(err, res) {
+					testHelper.throwIfError(err);
+					testHelper.createDir(request, '/testMoveFolderToProjectSrc', 'testFolder')
+						.end(function(err, res) {
+							testHelper.throwIfError(err);
+							var fLoc = res.body.Location;
+							request()
+								.post(ws.Location)
+								.type('json')
+								.set('Slug', 'testMoveFolderToProjectDest')
+								.set('Orion-Version', 1)
+								.set('X-Create-Options', "move")
+								.send({Location: fLoc})
+								.expect(201)
+								.end(function(err, res) {
+									testHelper.throwIfError(err);
+									done();
+								});
+						})
+				});
+		});
+	});
 	it("testRenameProject", function(done) {
 		var oldProjectLocation = PREFIX_FILE + '/' + WORKSPACE_ID + '/project';
 		withDefaultWorkspace(function(workspace) {
@@ -114,7 +150,7 @@ describe("Workspace endpoint", function() {
 					.send({Location: oldProjectLocation, Name: 'project_renamed'})
 					.expect(201)
 					.end(function(e, res) {
-						throwIfError(e, "Failed to rename project at " + oldProjectLocation);
+						testHelper.throwIfError(e, "Failed to rename project at " + oldProjectLocation);
 						assert.equal(res.body.Name, 'project_renamed');
 
 						// GETting the new ContentLocation should return the project metadata
@@ -122,7 +158,7 @@ describe("Workspace endpoint", function() {
 							.get(res.body.ContentLocation)
 							.expect(200)
 							.end(function(err, res) {
-								throwIfError(err, "Failed to get ContentLocation");
+								testHelper.throwIfError(err, "Failed to get ContentLocation");
 
 								// and GETting the ChildrenLocation should return the children
 								request()
@@ -140,10 +176,97 @@ describe("Workspace endpoint", function() {
 					});
 		});
 	});
-	it("testMoveProject");
-	it("testMoveProjectToFolder");
-	it("testCopyProjectNonDefaultLocation");
-	it("testCopyFolderToProject");
+	it("testMoveProject", function(done) {
+		withDefaultWorkspace(function(ws) {
+			request()
+				.post(ws.Location)
+				.set('Slug', 'testMoveProject')
+				.expect(201)
+				.end(function(err, res) {
+					testHelper.throwIfError(err);
+					var pLoc = res.body.Location;
+					request()
+						.post(ws.Location)
+						.type('json')
+						.set('X-Create-Options', "move")
+						.set('Slug', 'testMOVEDProject')
+						.send({Location: pLoc})
+						.expect(201)
+						.end(function(err, res) {
+							done();
+						});
+				});
+		});
+	});
+	it("testMoveProjectToFolder", function(done) {
+		withDefaultWorkspace(function(ws) {
+			request()
+				.post(ws.Location)
+				.set('Slug', 'testMoveProjectToFolderSrc')
+				.expect(201)
+				.end(function(err, res) {
+					testHelper.throwIfError(err);
+					var pLoc = res.body.Location;
+					request()
+						.post(ws.Location)
+						.set('Slug', 'testMoveProjectToFolderDest')
+						.expect(201)
+						.end(function(err, res) {
+							testHelper.throwIfError(err);
+							request()
+								.post(ws.Location)
+								.type('json')
+								.set('X-Create-Options', "move")
+								.set('Slug', 'testMoveProjectToFolderSrc')
+								.send({Location: pLoc, Name: 'testMoveProjectToFolderSrc'})
+								.expect(201)
+								.end(function(err, res) {
+									testHelper.throwIfError(err);
+									//check the project is removed from the projects
+									withDefaultWorkspace(function(ws) {
+										assert(Array.isArray(ws.Projects));
+										assert(!ws.Projects.some(function(p) {
+											return p.Name === 'testMoveProjectToFolderSrc';
+										}));
+										done();
+									});
+								});
+						});
+				});
+		});
+	});
+	it("testCopyProjectNonDefaultLocation", function(done) {
+		done();
+	});
+	it.skip("testCopyFolderToProject", function(done) {
+		withDefaultWorkspace(function(ws) {
+			request()
+				.post(ws.Location)
+				.set('Slug', 'testCopyFolderToProject')
+				.expect(201)
+				.end(function(err, res) {
+					testHelper.throwIfError(err);
+					testHelper.createDir(request, '/testCopyFolderToProject', 'testDir')
+						.end(function(err, res) {
+							testHelper.throwIfError(err);
+							var fLoc = res.body.Location;
+							request()
+								.post(ws.Location)
+								.type('json')
+								.set('Slug', 'destinationProject')
+								.set('X-Create-Options', "copy")
+								.set('Orion-Version', 1)
+								.send({Location: fLoc})
+								.expect(201)
+								.end(function(err, res) {
+									testHelper.throwIfError(err);
+									done();
+								});
+						});
+				});
+		});
+		done();
+	});
 	it("testCopyProject", function(done) {
 		withDefaultWorkspace(function(ws) {
 			request()
@@ -151,7 +274,8 @@ describe("Workspace endpoint", function() {
 				.set('Slug', 'testCopyProject')
 				.expect(201)
 				.end(function(err, res) {
-					throwIfError(err);
+					testHelper.throwIfError(err);
+					done();
 					//TODO
 				});
 		});
@@ -178,6 +302,7 @@ describe("Workspace endpoint", function() {
 		withDefaultWorkspace(function(ws) {
 			request()
 				.post(ws.Location)
+				.set('Orion-Version', 1)
 				.set('Slug', '/')
 				.expect(400)
 				.end(done);
@@ -199,7 +324,7 @@ describe("Workspace endpoint", function() {
 		request()
 			.post(PREFIX)
 			.set('Slug', 'whatever')
-			.expect(403, done);
+			.expect(201, done);
 	});
 	it("testCreateWorkspaceNullName", function(done) {
 		request()
@@ -212,7 +337,7 @@ describe("Workspace endpoint", function() {
 				.get(workspace.Location)
 				.expect(200)
 				.end(function(e, res) {
-					throwIfError(e, "Failed to get metadata from " + workspace.Location);
+					testHelper.throwIfError(e, "Failed to get metadata from " + workspace.Location);
 					assert.ok(res.body.Id);
 					assert.equal(res.body.Name, TEST_WORKSPACE_NAME);
 					// Orionode doesn't have "projects" so don't check res.body.Projects
@@ -228,7 +353,7 @@ describe("Workspace endpoint", function() {
 						.get(childrenLoc)
 						.expect(200)
 						.end(function(err, res) {
-							throwIfError(err, "Failed to get ChildrenLocation: " + childrenLoc);
+							testHelper.throwIfError(err, "Failed to get ChildrenLocation: " + childrenLoc);
 							assert.ok(Array.isArray(res.body.Children));
 							res.body.Children.sort(byName);
 							assert.equal(res.body.Children.length, 2);
@@ -254,12 +379,12 @@ describe("Workspace endpoint", function() {
 				.set('Slug', 'testGetProjectMetadata')
 				.expect(201)
 				.end(function(err, res) {
-					throwIfError(err);
+					testHelper.throwIfError(err);
 					request()
 						.get(res.body.Location)
 						.expect(200)
 						.end(function(err, res) {
-							throwIfError(err);
+							testHelper.throwIfError(err);
 							assert.equal('testGetProjectMetadata', res.body.Name, "The project name is not the same");
 							done();
 						})
@@ -273,13 +398,13 @@ describe("Workspace endpoint", function() {
 				.set('Slug', 'testDeleteProject')
 				.expect(201)
 				.end(function(err, res) {
-					throwIfError(err);
+					testHelper.throwIfError(err);
 					var _loc = res.body.Location;
 					request()
 						.delete(_loc)
 						.expect(200)
 						.end(function(err, res) {
-							throwIfError(err);
+							testHelper.throwIfError(err);
 							//now try to fetch it, should 404
 							request()
 								.get(_loc)
@@ -301,7 +426,7 @@ describe("Workspace endpoint", function() {
 			.get(PREFIX)
 			.expect(200)
 			.end(function(e, res) {
-				throwIfError(e, "Failed to get workspace");
+				testHelper.throwIfError(e, "Failed to get workspace");
 				assert.ok(Array.isArray(res.body.Workspaces));
 				// In Orionode, we have just a single workspace.
 				assert.equal(res.body.Workspaces.length, 1);

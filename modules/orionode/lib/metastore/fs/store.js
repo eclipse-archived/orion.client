@@ -348,7 +348,6 @@ Object.assign(FsMetastore.prototype, {
 					if (error) {
 						return reject(error);
 					}
-		
 					metadata.Properties = workspacedata.properties;
 					this._updateWorkspaceMetadata(workspaceId, metadata, function(error) {
 						if (error) {

@@ -9,16 +9,15 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 /*eslint-env node*/
-var child_process = require('child_process');
-var path = require('path');
-var fs = require('fs');
-var rimraf = require('rimraf');
-var express = require('express');
-
-var supertest = require('supertest');
-var CONTEXT_PATH = '';
-
-
+var child_process = require('child_process'),
+	path = require('path'),
+	fs = require('fs'),
+	rimraf = require('rimraf'),
+	express = require('express'),
+	workspace = require('../../lib/workspace');
+	supertest = require('supertest'),
+	store = require('../../lib/metastore/fs/store');
+	CONTEXT_PATH = '';
 
 var app = express();
 
@@ -30,29 +29,41 @@ function debug(msg) {
 
 /**
  * Deletes dir and everything in it.
+ * @param {string} dir The directory to delete
+ * @param {fn} callback The function to call when the deletion is done
  */
-function tearDown(dir, callback) {
-	rimraf(dir, fs, callback);
-}
-
-function setUpWorkspace(workspace, metastore, done) {
-	var configParams = { "orion.single.user": true, "orion.single.user.metaLocation": metastore};
-	var options = {workspaceDir: workspace, configParams: configParams};
-	app.locals.metastore = require('../../lib/metastore/fs/store')(options);
-	app.locals.metastore.setup(app);
-	app.use(CONTEXT_PATH + '/workspace*', require('../../lib/workspace')({ workspaceRoot: CONTEXT_PATH + '/workspace', fileRoot: CONTEXT_PATH + '/file', gitRoot: CONTEXT_PATH + '/gitapi', options: options }));
-	var request = supertest.bind(null, app);
-	var WORKSPACE = CONTEXT_PATH + '/workspace';
-	
-	request()
-	.post(WORKSPACE)
-	.set('Slug', 'Orion Content')
-	.expect(200)
-	.end(done);
+exports.tearDown = tearDown = function tearDown(dir, callback) {
+	rimraf(dir, callback);
 }
 
 /**
- * Creates a workspace directory with a few files and folders.
+ * Sets up the workspace metadata 
+ * @param {string} workspace The workspace path
+ * @param {?} metastore The backing metastore
+ * @param {?} params The params to use
+ */
+exports.setUpWorkspace = function setUpWorkspace(wsDir, metastore, done) {
+	var options = {
+		workspaceDir: wsDir, 
+		configParams: { 
+			"orion.single.user": true, 
+			"orion.single.user.metaLocation": metastore
+		}
+	};
+	app.locals.metastore = store(options);
+	app.locals.metastore.setup(app);
+	app.use(CONTEXT_PATH + '/workspace*', workspace({ workspaceRoot: CONTEXT_PATH + '/workspace', fileRoot: CONTEXT_PATH + '/file', gitRoot: CONTEXT_PATH + '/gitapi', options: options }));
+	var request = supertest.bind(null, app);
+	
+	request()
+		.post(CONTEXT_PATH + '/workspace')
+		.set('Slug', 'Orion Content')
+		.expect(200)
+		.end(done);
+}
+
+/**
+ * Synchronously creates a workspace directory with a few files and folders.
  * Uses POSIX shell commands, so on Windows this must be run from within a Cygwin or MinGW shell. CMD.EXE will not work.
  <pre>
    dir
@@ -63,18 +74,10 @@ function setUpWorkspace(workspace, metastore, done) {
    |-------my subfolder/
  </pre>
  */
-function setUp(dir, callback, wsjson) {
+exports.setUp = function setUp(dir, callback, wsjson) {
 	debug('Using directory: ' + dir);
 	function generateContent() {
 		debug('\nCreating content...');
-		/*
-		mkdir project
-		mkdir "project/my folder"
-		mkdir "project/my folder/my subfolder"
-		echo -n "hello world" > "project/fizz.txt"
-		echo -n "buzzzz" > "project/my folder/buzz.txt"
-		echo -n "whoa" > "project/my folder/my subfolder/quux.txt"
-		*/
 		var projectFolder = path.join(dir, "project");
 		var myFolder = path.join(projectFolder, "my folder");
 		var subfolder = path.join(myFolder, "my subfolder");
@@ -90,23 +93,20 @@ function setUp(dir, callback, wsjson) {
 		fs.writeFileSync(path.join(subfolder, "quux.txt"), "whoa");
 		callback();
 	}
-	fs.exists(dir, function(exists) {
-		if (exists) {
-			debug('\nDirectory exists; cleaning...');
-			tearDown(dir, function(err) {
-				if (err) {
-					debug(err);
-					return;
-				}
-				fs.mkdir(dir, generateContent);
-			});
-		} else {
-			fs.mkdir(dir, generateContent);
-		}
-	});
+	if(fs.existsSync(dir)) {
+		debug('\nDirectory exists; cleaning...');
+		tearDown(dir, function(err) {
+			if (err) {
+				debug(err);
+				return;
+			}
+			fs.mkdirSync(dir);
+			generateContent();
+		});
+	} else {
+		fs.mkdirSync(dir);
+		generateContent();
+	}
 }
 
 exports.DEBUG = process.env.DEBUG_TESTS || false;
-exports.setUp = setUp;
-exports.setUpWorkspace = setUpWorkspace;
-exports.tearDown = tearDown;
