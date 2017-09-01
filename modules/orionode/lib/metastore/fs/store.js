@@ -48,6 +48,12 @@ function getWorkspaceMetadataFileName(options, workspaceId) {
 	return nodePath.join(metadataFolder, workspaceId + ".json");
 }
 
+function getWorkspaceFolderName(options, workspaceId) {
+	var userId = metaUtil.decodeUserIdFromWorkspaceId(workspaceId);
+	var metadataFolder = getUserRootLocation(options, userId);
+	return nodePath.join(metadataFolder, workspaceId);
+}
+
 function getProjectMetadataFileName(options, workspaceId, projectName) {
 	var userId = metaUtil.decodeUserIdFromWorkspaceId(workspaceId);
 	var metadataFolder = getUserRootLocation(options, userId);
@@ -300,7 +306,43 @@ Object.assign(FsMetastore.prototype, {
 
 	/** @callback */
 	deleteWorkspace: function(workspaceId, callback) {
-		callback(new Error("Not implemented"));
+		var userId = metaUtil.decodeUserIdFromWorkspaceId(workspaceId);
+		Promise.using(this.lock(userId, false), function() {
+			return new Promise(function(resolve, reject) {
+				this._readWorkspaceMetadata(workspaceId, function(error, metadata) {
+					if (error) {
+						return reject(error);
+					}
+					var projectsToDelete = metadata.ProjectNames;
+					projectsToDelete.forEach(function(projectname){
+						var metaFile = getProjectMetadataFileName(this._options, workspaceId, projectname);
+						fs.unlinkAsync(metaFile).catchReturn({ code: 'ENOENT' }, null);
+					});
+					this._readUserMetadata(userId, function(error, metadata) {
+						if (error) {
+							return reject(error);
+						}
+						
+						var index = metadata && metadata.WorkspaceIds.indexOf(workspaceId) || -1;
+						index !== -1 && metadata.WorkspaceIds.splice(index, 1);
+						metadata.Properties["UserRights"] = accessRights.removeWorkspaceAccess(metadata.Properties["UserRights"],workspaceId);
+						this._updateUserMetadata(userId,  metadata, function(error) {
+							if (error) {
+								return reject(error);
+							}
+							fs.unlinkAsync(getWorkspaceMetadataFileName(this._options, workspaceId)).catchReturn({ code: 'ENOENT' }, null);
+							fs.unlinkAsync(getWorkspaceFolderName(this._options, workspaceId)).catchReturn({ code: 'ENOENT' }, null);
+							resolve();
+						});				
+					}.bind(this));
+				}.bind(this));
+			}.bind(this));
+		}.bind(this)).then(
+			function(result) {
+				callback(null, result);
+			},
+			callback /* error case */
+		);
 	},
 
 	getWorkspaceDir: function(workspaceId) {
