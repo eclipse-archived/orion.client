@@ -45,6 +45,15 @@ var createWorkspaceAccess = function(workspaceId){
 		"Uri": "/file/" + workspaceId + "/*"
 	}];
 };
+var removeWorkspaceAccess = function(userAccessRights, workspaceId){
+	var newAccessRights = [];
+	userAccessRights.forEach(function(accessRight){
+		if(!new RegExp("/" + workspaceId + "(\/|$)").test(accessRight.Uri)){
+			newAccessRights.push(accessRight);
+		}
+	});
+	return newAccessRights;
+};
 
 var createUserAccess = function(UserId){
 	return [{
@@ -168,5 +177,6 @@ var checkRights = function (userId, uri, req, res, next, method){
 
 module.exports.checkRights = checkRights;
 module.exports.createWorkspaceAccess = createWorkspaceAccess;
+module.exports.removeWorkspaceAccess = removeWorkspaceAccess;
 module.exports.createUserAccess = createUserAccess;
 module.exports.getCurrentVersion = getCurrentVersion;
