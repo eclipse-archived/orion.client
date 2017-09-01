@@ -64,19 +64,19 @@ describe("XFER endpoint", function() {
 		});
 	});
 	// Bug 511513 - Export non-existing folder leaks server path
-	it('testExport - bug 511513', function(finished) {
+	it('testExport - bug 511513', function(done) {
 		// make sure the folder doesn't actually exist
 		assert.equal(fs.existsSync(WORKSPACE + "/donotexist"), false);
 		// ask the server to export the non-existent folder
 		request()
-		.get(EXPORT_PATH + '/' + WORKSPACE_ID + "/donotexist.zip")
-		.expect(404)
-		.end(function(err, res) {
-			testHelper.throwIfError(err)
-			// message body doesn't include the path
-			assert.equal(res.body.Message.indexOf(WORKSPACE), -1);
-			finished();
-		});
+			.get(EXPORT_PATH + '/' + WORKSPACE_ID + "/donotexist.zip")
+			.expect(404)
+			.end(function(err, res) {
+				testHelper.throwIfError(err)
+				// message body doesn't include the path
+				assert.equal(res.body.Message.indexOf(WORKSPACE), -1);
+				done();
+			});
 	});
 	it("testExportProject", function(done) {
 		testHelper.createDir(request, '/project', "exportSample")
@@ -85,7 +85,7 @@ describe("XFER endpoint", function() {
 				testHelper.createFile(request, "/project/exportSample/", "exportTestFile.txt")
 					.end(function(err, res) {
 						testHelper.throwIfError(err);
-						testHelper.setFileContents(res.body.Location, "This is some contents for initialization")
+						testHelper.setFileContents(request, res.body.Location, "This is some contents for initialization")
 							.end(function(err, res) {
 								testHelper.throwIfError(err);
 								request()

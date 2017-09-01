@@ -78,7 +78,14 @@ exports.createFile = function createFile(request, prefix, fileNameOrJson, conten
 	return p;
 };
 
-exports.setFileContents = function setFileContents(fileLoc, contents) {
+/**
+ * Set the contents of the file
+ * @param {?} request The backing request to use
+ * @param {string} The full file location to send to
+ * @param {string} contents The contents to set
+ * @since 16.0
+ */
+exports.setFileContents = function setFileContents(request, fileLoc, contents) {
 	return request()
 		.put(fileLoc)
 		.send(contents)
