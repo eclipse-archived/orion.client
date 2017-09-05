@@ -20,6 +20,12 @@ var child_process = require('child_process'),
 	CONTEXT_PATH = '';
 
 var app = express();
+var options = {workspaceDir: WORKSPACEDIR, configParams:configParams, workspaceRoot: CONTEXT_PATH + '/workspace', fileRoot: CONTEXT_PATH + '/file', gitRoot: CONTEXT_PATH + '/gitapi'};
+app.locals.metastore = require('../../lib/metastore/fs/store')(options);
+app.locals.metastore.setup(app);
+app.use(CONTEXT_PATH + '/workspace*', require('../../lib/workspace')(options));
+var request = supertest.bind(null, app);
+var WORKSPACE = CONTEXT_PATH + '/workspace';
 
 function debug(msg) {
 	if (exports.DEBUG) {

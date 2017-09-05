@@ -52,7 +52,7 @@ app.locals.metastore.setup(app);
 app.use(userMiddleware)
 .use(CONTEXT_PATH + '/task', tasks.router({
 	taskRoot: CONTEXT_PATH + '/task',
-	options: {metastore: storeFactory({workspaceDir: WORKSPACE, configParams: configParams})}
+	metastore: storeFactory({workspaceDir: WORKSPACE, configParams: configParams})
 }))
 .use(CONTEXT_PATH + "/workspace*", workspace({
 	workspaceRoot: CONTEXT_PATH + '/workspace', 

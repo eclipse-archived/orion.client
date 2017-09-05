@@ -22,8 +22,8 @@ var bodyParser = require('body-parser');
 module.exports = {};
 
 module.exports.router = function(options) {
-	var workspaceDir = options.options.workspaceDir;
-	if (!workspaceDir) { throw new Error('options.options.workspaceDir required'); }
+	var workspaceDir = options.workspaceDir;
+	if (!workspaceDir) { throw new Error('options.workspaceDir required'); }
 	var sharedWorkspaceFileRoot = options.sharedWorkspaceFileRoot;
 
 	return express.Router()

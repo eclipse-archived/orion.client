@@ -23,7 +23,7 @@ module.exports = function(options) {
 	if (!fileRoot) { throw new Error('options.fileRoot is required'); }
 	if (!workspaceRoot) { throw new Error('options.workspaceRoot is required'); }
 	
-	var singleUser = options.options && options.options.configParams["orion.single.user"];
+	var singleUser = options.configParams["orion.single.user"];
 	
 	var router = express.Router({mergeParams: true});
 	router.use(bodyParser.json());
@@ -161,8 +161,8 @@ module.exports = function(options) {
 
 	function putWorkspace(req, res) {
 		if (req.body.Location && singleUser) {
-			var originalLocation = options.options.workspaceDir;
-			options.options.workspaceDir = req.body.Location;
+			var originalLocation = options.workspaceDir;
+			options.workspaceDir = req.body.Location;
 			api.getOrionEE().emit("workspace-changed",[req.body.Location,originalLocation]);
 			return writeResponse(200, res);
 		}

@@ -10,6 +10,8 @@
  *******************************************************************************/
 /*eslint-env node */
 var express = require('express'),
+	expressSession = require('express-session'),
+	passport = require('passport'),
 	path = require('path'),
 	fs = require('fs'),
 	api = require('./lib/api'),
@@ -44,6 +46,14 @@ function startServer(options) {
 		var app = express();
 
 		options.app = app;
+		
+		Object.assign(options, {
+			sharedWorkspaceFileRoot: contextPath + '/sharedWorkspace/tree/file',
+			taskRoot: contextPath + '/task',
+			workspaceRoot: contextPath + '/workspace',
+			fileRoot: contextPath + '/file',
+			gitRoot: contextPath + '/gitapi'
+		});
 
 		function checkAuthenticated(req, res, next) {
 			if (!req.user) {
@@ -59,6 +69,22 @@ function startServer(options) {
 			var uri = (typeof req.contextPath === "string" && req.baseUrl.substring(req.contextPath.length)) || req.baseUrl;
 			req.user.checkRights(req.user.username, uri, req, res, next);
 		}
+		
+		var additionalEndpoints = options.configParams["additional.endpoint"] ? require(options.configParams["additional.endpoint"]) : [];
+		function loadEndpoints(authenticated) {
+			additionalEndpoints.forEach(function(additionalEndpoint) {
+				if (authenticated !== Boolean(additionalEndpoint.authenticated)) return;
+				if (additionalEndpoint.endpoint){
+					additionalEndpoint.authenticated ? 
+						app.use(additionalEndpoint.endpoint, options.authenticate, checkAuthenticated, require(additionalEndpoint.module).router(options))	 : 
+						app.use(additionalEndpoint.endpoint, require(additionalEndpoint.module).router(options));
+				} else {
+					var extraModule = require(additionalEndpoint.module);
+					var middleware = extraModule.router ? extraModule.router(options) : extraModule(options);
+					if (middleware)	app.use(middleware); // use this module as a middleware 
+				}
+			});
+		}
 
 		// Configure metastore
 		var metastoreFactory;
@@ -69,40 +95,36 @@ function startServer(options) {
 		}
 		options.metastore = app.locals.metastore = metastoreFactory(options);
 		app.locals.metastore.setup(app);
-
-		// Add API routes
-		if(options.configParams["additional.endpoint"]){
-			var additionalEndpoints = require(options.configParams["additional.endpoint"]);
-			additionalEndpoints.forEach(function(additionalEndpoint){
-				if(additionalEndpoint.endpoint){
-					additionalEndpoint.authenticated ? 
-						app.use(additionalEndpoint.endpoint, checkAuthenticated, require(additionalEndpoint.module).router(options))	 : 
-						app.use(additionalEndpoint.endpoint, require(additionalEndpoint.module).router(options));
-				}else{
-					var extraModule = require(additionalEndpoint.module);
-					var middleware = extraModule.router ? extraModule.router(options) : extraModule(options);
-					if (middleware)	app.use(middleware); // use this module as a middleware 
-				}
-			});
-		}
-		if(options.configParams["orion.collab.enabled"]){
-			app.use('/sharedWorkspace', require('./lib/sharedWorkspace').router({sharedWorkspaceFileRoot: contextPath + '/sharedWorkspace/tree/file', fileRoot: contextPath + '/file', options: options  }));
-		}
-		app.use(require('./lib/user').router(options));
-		app.use('/site', checkAuthenticated, checkAccessRights, require('./lib/sites')(options));
-		app.use('/task', checkAuthenticated, require('./lib/tasks').router({ taskRoot: contextPath + '/task', options: options}));
-		app.use('/filesearch', checkAuthenticated, require('./lib/search')(options));
-		app.use('/file*', checkAuthenticated, checkAccessRights, require('./lib/file')({ workspaceRoot: contextPath + '/workspace', fileRoot: contextPath + '/file', options: options }));
-		app.use('/workspace*', checkAuthenticated, checkAccessRights, require('./lib/workspace')({ workspaceRoot: contextPath + '/workspace', fileRoot: contextPath + '/file', gitRoot: contextPath + '/gitapi', options: options }));
-		/* Note that the file and workspace root for the git middleware should not include the context path to match java implementation */
-		app.use('/gitapi', checkAuthenticated, require('./lib/git')({ gitRoot: contextPath + '/gitapi', fileRoot: /*contextPath + */'/file', workspaceRoot: /*contextPath + */'/workspace', options: options}));
-		app.use('/cfapi', checkAuthenticated, require('./lib/cf')({ fileRoot: contextPath + '/file', options: options}));
-		app.use('/prefs', checkAuthenticated, require('./lib/controllers/prefs').router(options));
-		app.use('/xfer', checkAuthenticated, require('./lib/xfer').router({fileRoot: contextPath + '/file', options:options}));
+		options.authenticate = [
+			expressSession({
+				resave: false,
+				saveUninitialized: false,
+				secret: 'keyboard cat',
+				store: app.locals.sessionStore
+			}),
+			passport.initialize(),
+			passport.session()
+		];
+		
+		loadEndpoints(false);
 		app.use('/metrics', require('./lib/metrics').router(options));
 		app.use('/version', require('./lib/version').router(options));
 		if (options.configParams.isElectron) app.use('/update', require('./lib/update').router(options));
-
+		loadEndpoints(true);
+		app.use(require('./lib/user').router(options));
+		app.use('/site', options.authenticate, checkAuthenticated, checkAccessRights, require('./lib/sites')(options));
+		app.use('/task', options.authenticate, checkAuthenticated, require('./lib/tasks').router(options));
+		app.use('/filesearch', options.authenticate, checkAuthenticated, require('./lib/search')(options));
+		app.use('/file*', options.authenticate, checkAuthenticated, checkAccessRights, require('./lib/file')(options));
+		app.use('/workspace*', options.authenticate, checkAuthenticated, checkAccessRights, require('./lib/workspace')(options));
+		app.use('/gitapi', options.authenticate, checkAuthenticated, require('./lib/git')(options));
+		app.use('/cfapi', options.authenticate, checkAuthenticated, require('./lib/cf')(options));
+		app.use('/prefs', options.authenticate, checkAuthenticated, require('./lib/controllers/prefs').router(options));
+		app.use('/xfer', options.authenticate, checkAuthenticated, require('./lib/xfer').router(options));
+		if(options.configParams["orion.collab.enabled"]){
+			app.use('/sharedWorkspace', options.authenticate, checkAuthenticated, require('./lib/sharedWorkspace').router(options));
+		}
+		
 		// Static files
 		app.use('/xterm', express.static(path.join(__dirname, 'node_modules', 'xterm', 'dist')));
 		if (fs.existsSync(MINIFIED_ORION_CLIENT)) {
@@ -121,11 +143,6 @@ function startServer(options) {
 		app.use(function(err, req, res, next){
 			logger.error(req.originalUrl, err);
 			res.status(404);
-			// respond with html page
-//			if (req.accepts('html')) {
-//				res.render('404', { url: req.url });
-//				return;
-//			}
 
 			// respond with json
 			if (req.accepts('json')) {

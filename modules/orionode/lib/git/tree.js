@@ -27,8 +27,8 @@ module.exports.router = function(options) {
 	if (!fileRoot) { throw new Error('options.fileRoot is required'); }
 	if (!gitRoot) { throw new Error('options.gitRoot is required'); }
 	
-	/* Note that context path was not included in file and workspace root. */
-	var contextPath = options && options.options && options.options.configParams["orion.context.path"] || "";
+	var contextPath = options && options.configParams["orion.context.path"] || "";
+	fileRoot = fileRoot.substring(contextPath.length);
 	
 	return express.Router()
 	.get('/', getTree)

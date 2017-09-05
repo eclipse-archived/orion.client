@@ -36,8 +36,9 @@ module.exports.router = function(options) {
 	if (!gitRoot) { throw new Error('options.gitRoot is required'); }
 	if (!workspaceRoot) { throw new Error('options.workspaceRoot is required'); }
 	
-	/* Note that context path was not included in file and workspace root. */
-	var contextPath = options && options.options && options.options.configParams["orion.context.path"] || "";
+	var contextPath = options && options.configParams["orion.context.path"] || "";
+	fileRoot = fileRoot.substring(contextPath.length);
+	workspaceRoot = workspaceRoot.substring(contextPath.length);
 	
 	module.exports.getRepo = getRepo;
 	module.exports.getClones = getClones;
@@ -203,7 +204,7 @@ function getClones(req, res, callback) {
 		// get clones from workspace, then need to check GitSniffDir in git user prefs
 		var store = fileUtil.getMetastore(req);
 		store.getUser(req.user.username, function(err, metadata){
-			var gitUserInfo = prefs.readPrefNode(options.options, 'git/config', metadata.properties);
+			var gitUserInfo = prefs.readPrefNode(options, 'git/config', metadata.properties);
 			var gitRepoDirs = gitUserInfo &&  gitUserInfo.userInfo && gitUserInfo.userInfo.GitRepoDir && gitUserInfo.userInfo.GitRepoDir.split(",");
 			if (!gitRepoDirs) {
 				checkDirectory(rootDir, done);

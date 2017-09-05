@@ -29,8 +29,8 @@ function userProjectJSON(username) {
 mongoose.Promise = Promise;
 
 module.exports = function(options) {
-    var workspaceRoot = options.options.workspaceDir;
-    if (!workspaceRoot) { throw new Error('options.options.workspaceDir path required'); }
+    var workspaceRoot = options.workspaceDir;
+    if (!workspaceRoot) { throw new Error('options.workspaceDir path required'); }
 
 	var sharedUtil = require('../sharedUtil');
 	var projectsCollection = require('./sharedProjects');

@@ -25,9 +25,9 @@ var logger = log4js.getLogger("xfer");
 var yauzl = require("yauzl");
 
 function getUploadsFolder(options) {
-	if (options.options) {
-		return path.join(options.options.configParams['orion.single.user'] ? 
-			path.join(os.homedir(), ".orion") : options.options.workspaceDir, ".uploads");
+	if (options) {
+		return path.join(options.configParams['orion.single.user'] ? 
+			path.join(os.homedir(), ".orion") : options.workspaceDir, ".uploads");
 	}
 	return path.join(os.homedir(), ".orion");
 }

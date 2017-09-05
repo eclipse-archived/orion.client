@@ -27,7 +27,7 @@ module.exports.router = function(options) {
 	 */
 	function checkCollabAuthenticated(req, res, next) {
 		if (req.user) {
-			req.user.workspaceDir = options.options.workspaceDir + (req.user.workspace ? "/" + req.user.workspace : "");
+			req.user.workspaceDir = options.workspaceDir + (req.user.workspace ? "/" + req.user.workspace : "");
 			next();
 		} else if (req.headers['authorization'] && checkCollabServerToken(req.headers['authorization'])){
 			next();
@@ -44,7 +44,7 @@ module.exports.router = function(options) {
 			return false;
 		}
 		try {
-			var decoded = jwt.verify(authorization.substr(7), options.options.configParams["orion.jwt.secret"]);
+			var decoded = jwt.verify(authorization.substr(7), options.configParams["orion.jwt.secret"]);
 			return true;
 		} catch (ex) {
 			return false;
@@ -56,7 +56,7 @@ module.exports.router = function(options) {
 	router.use("/tree", tree.router(options));
 	router.use("/project", require('./shared/db/sharedProjects')(options));
 	router.use("/user", require('./shared/db/userProjects')(options));
-	fileUtil.addDecorator(new SharedFileDecorator(options.options));
+	fileUtil.addDecorator(new SharedFileDecorator(options));
 	sharedUtil(options);
 	return [checkCollabAuthenticated, router];
 };

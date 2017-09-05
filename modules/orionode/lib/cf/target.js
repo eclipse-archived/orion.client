@@ -21,8 +21,8 @@ var LRU = require("lru-cache");
 var targetCache = LRU({max: 10000, maxAge: 1800000 });
 
 module.exports.router = function(options) {
-	if(options.options.configParams["cf.bearer.token.store"]){
-		var getBearerToken = require(options.options.configParams["cf.bearer.token.store"]).getBearerTokenfromUserId;
+	if(options.configParams["cf.bearer.token.store"]){
+		var getBearerToken = require(options.configParams["cf.bearer.token.store"]).getBearerTokenfromUserId;
 	}
 	
 	module.exports.getAccessToken = getAccessToken;

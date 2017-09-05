@@ -13,8 +13,6 @@ var fileUtil = require('./fileUtil');
 var express = require('express');
 var log4js = require('log4js');
 var logger = log4js.getLogger("git");
-var checkRights = require('../index').checkRights;
-var api = require('./api');
 
 // Handle optional nodegit dependency
 var hasNodegit = true;
@@ -68,13 +66,16 @@ function Git(options) {
 	if (!gitRoot) { throw new Error('options.gitRoot is required'); }
 	if (!workspaceRoot) { throw new Error('options.workspaceRoot is required'); }
 	
+	var contextPath = options && options.configParams["orion.context.path"] || "";
+	fileRoot = fileRoot.substring(contextPath.length);
+
 	var router = express.Router();
 	
 	// General access check logic, which applies to mose of git endpoints, execpt clone, remote and config and also expect tree, which doesn't check at all
 	options.checkUserAccess = function(req, res, next){
 		var uri = req.url.split("?")[0];
 		var uriSegs = uri.split("/");
-		if(("/" + uriSegs[2]) === options.fileRoot){
+		if(("/" + uriSegs[2]) === fileRoot){
 			uriSegs.splice(1, 1);
 			uri = uriSegs.join("/");
 		}

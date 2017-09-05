@@ -25,8 +25,8 @@ var taskRoot = "/task";
 function orionTasksAPI(options) {
 	taskRoot = options.taskRoot;
 	if (!taskRoot) { throw new Error('options.taskRoot is required'); }
-	taskStore = options.options && options.options.metastore;
-	if (!taskStore) { throw new Error('options.options.metastore is required'); }
+	taskStore = options && options.metastore;
+	if (!taskStore) { throw new Error('options.metastore is required'); }
 
 	return express.Router()
 	.use(bodyParser.json())

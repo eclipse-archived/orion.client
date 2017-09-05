@@ -19,10 +19,10 @@ var userProjects = require('./db/userProjects');
 
 module.exports = function(options) {
 	var SEPARATOR = "-";
-    var workspaceDir = options.options.workspaceDir;
-    if (!workspaceDir) { throw new Error('options.options.workspaceDir path required'); }
+    var workspaceDir = options.workspaceDir;
+    if (!workspaceDir) { throw new Error('options.workspaceDir path required'); }
 
-    var contextPath = options.options.configParams['orion.context.path'];
+    var contextPath = options.configParams['orion.context.path'];
 
     module.exports.getFile = getFile;
     module.exports.treeJSON = treeJSON;

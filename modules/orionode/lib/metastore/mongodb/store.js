@@ -159,14 +159,7 @@ function MongoDbMetastore(options) {
 	});
 }
 MongoDbMetastore.prototype.setup = function(app) {
-	app.use(expressSession({
-		resave: false,
-		saveUninitialized: false,
-		secret: 'keyboard cat',
-		store: new MongoStore({ mongooseConnection: mongoose.connection })
-	}));
-	app.use(passport.initialize());
-	app.use(passport.session());
+	app.locals.sessionStore = new MongoStore({ mongooseConnection: mongoose.connection });
 	passport.use(orionAccount.createStrategy());
 	passport.serializeUser(orionAccount.serializeUser());
 	passport.deserializeUser(orionAccount.deserializeUser());
