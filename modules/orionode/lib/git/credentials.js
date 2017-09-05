@@ -10,8 +10,12 @@
  *******************************************************************************/
 /*eslint-env node */
 var git = require('nodegit');
+var url = require('url');
 
 module.exports = {};
+
+var GITLAB = "gitlab.com";
+var OAUTH2 = "oauth2";
 
 var tokenProviders = [];
 
@@ -46,7 +50,8 @@ module.exports.getCredentials = function(uri, user) {
 				function(result) {
 					if (++doneCount <= tokenProviders.length) {
 						doneCount = tokenProviders.length;
-						fulfill(git.Cred.userpassPlaintextNew(result, result));
+						var username = url.parse(uri).host.toLowerCase() === GITLAB ? OAUTH2 : result;
+						fulfill(git.Cred.userpassPlaintextNew(username, result));
 					}
 				},
 				function(error) {
