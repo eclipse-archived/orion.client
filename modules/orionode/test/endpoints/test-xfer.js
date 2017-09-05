@@ -41,7 +41,7 @@ var app = express();
 app.locals.metastore = metastore({workspaceDir: WORKSPACE, configParams:configParams});
 app.locals.metastore.setup(app);
 app.use(userMiddleware)
-app.use(XFER_PATH, xfer.router({ fileRoot: FILE_PATH }));
+app.use(XFER_PATH, xfer.router({ fileRoot: FILE_PATH, configParams: { "orion.single.user": true, "orion.single.user.metaLocation": MEATASTORE} }));
 app.use(FILE_PATH + '*', file({fileRoot: FILE_PATH, workspaceRoot: CONTEXT_PATH + '/workspace'}));
 
 var request = supertest.bind(null, app);
@@ -240,7 +240,7 @@ describe("XFER endpoint", function() {
 			.set('X-Xfer-Options', 'raw')
 			.set('Slug', fileName)
 			.expect(500)
-			end(done);
+			.end(done);
 	});
 	/**
 	 * TODO This test fails 

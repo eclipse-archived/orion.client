@@ -9,23 +9,14 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 /*eslint-env node*/
-var child_process = require('child_process'),
-	path = require('path'),
+var path = require('path'),
 	fs = require('fs'),
 	rimraf = require('rimraf'),
 	express = require('express'),
-	workspace = require('../../lib/workspace');
+	workspace = require('../../lib/workspace'),
 	supertest = require('supertest'),
-	store = require('../../lib/metastore/fs/store');
+	store = require('../../lib/metastore/fs/store'),
 	CONTEXT_PATH = '';
-
-var app = express();
-var options = {workspaceDir: WORKSPACEDIR, configParams:configParams, workspaceRoot: CONTEXT_PATH + '/workspace', fileRoot: CONTEXT_PATH + '/file', gitRoot: CONTEXT_PATH + '/gitapi'};
-app.locals.metastore = require('../../lib/metastore/fs/store')(options);
-app.locals.metastore.setup(app);
-app.use(CONTEXT_PATH + '/workspace*', require('../../lib/workspace')(options));
-var request = supertest.bind(null, app);
-var WORKSPACE = CONTEXT_PATH + '/workspace';
 
 function debug(msg) {
 	if (exports.DEBUG) {
@@ -40,7 +31,7 @@ function debug(msg) {
  */
 exports.tearDown = tearDown = function tearDown(dir, callback) {
 	rimraf(dir, callback);
-}
+};
 
 /**
  * Sets up the workspace metadata 
@@ -49,16 +40,19 @@ exports.tearDown = tearDown = function tearDown(dir, callback) {
  * @param {?} params The params to use
  */
 exports.setUpWorkspace = function setUpWorkspace(wsDir, metastore, done) {
-	var options = {
-		workspaceDir: wsDir, 
-		configParams: { 
-			"orion.single.user": true, 
-			"orion.single.user.metaLocation": metastore
-		}
-	};
+	var app = express();
+	var options = { workspaceDir: wsDir,
+					configParams: { 
+						"orion.single.user": true, 
+						"orion.single.user.metaLocation": metastore
+					} , 
+					workspaceRoot: CONTEXT_PATH + '/workspace', 
+					fileRoot: CONTEXT_PATH + '/file', 
+					gitRoot: CONTEXT_PATH + '/gitapi'
+				 };
 	app.locals.metastore = store(options);
 	app.locals.metastore.setup(app);
-	app.use(CONTEXT_PATH + '/workspace*', workspace({ workspaceRoot: CONTEXT_PATH + '/workspace', fileRoot: CONTEXT_PATH + '/file', gitRoot: CONTEXT_PATH + '/gitapi', options: options }));
+	app.use(CONTEXT_PATH + '/workspace*', workspace(options));
 	var request = supertest.bind(null, app);
 	
 	request()
@@ -66,7 +60,7 @@ exports.setUpWorkspace = function setUpWorkspace(wsDir, metastore, done) {
 		.set('Slug', 'Orion Content')
 		.expect(200)
 		.end(done);
-}
+};
 
 /**
  * Synchronously creates a workspace directory with a few files and folders.

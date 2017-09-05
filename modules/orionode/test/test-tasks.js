@@ -26,15 +26,15 @@ var configParams = { "orion.single.user": true, "orion.single.user.metaLocation"
 
 var app = express();
 var options = {};
-options.metastore = app.locals.metastore = require('../lib/metastore/fs/store')({workspaceDir: "", configParams: configParams});
+app.locals.metastore = require('../lib/metastore/fs/store')({workspaceDir: "", configParams: configParams});
 app.locals.metastore.setup(app);
 app.use(CONTEXT_PATH + '/taskHelper', require('./support/task_helper').router({
 	root: '/taskHelper',
-	options: options
+	metastore: app.locals.metastore
 }))
 .use(CONTEXT_PATH + '/task', tasks.router({
 	taskRoot: CONTEXT_PATH + '/task',
-	options: options
+	metastore: app.locals.metastore
 }));
 
 var request = supertest.bind(null, app);

@@ -28,6 +28,9 @@ var CONTEXT_PATH = '',
 	MEATASTORE =  path.join(__dirname, '.test_metadata');
 
 var options = {
+	workspaceRoot: CONTEXT_PATH + '/workspace', 
+	fileRoot: CONTEXT_PATH + '/file', 
+	gitRoot: CONTEXT_PATH + '/gitapi',
 	configParams: {
 		"orion.single.user": true,
 		"orion.single.user.metaLocation": MEATASTORE
@@ -37,18 +40,8 @@ var options = {
 var app = express();
 	app.locals.metastore = store(options);
 	app.locals.metastore.setup(app);
-	app.use(PREFIX, workspace({
-		workspaceRoot: CONTEXT_PATH + '/workspace', 
-		fileRoot: CONTEXT_PATH + '/file', 
-		gitRoot: CONTEXT_PATH + '/gitapi',
-		options: options
-	}));
-	app.use(PREFIX_FILE, file({
-		workspaceRoot: CONTEXT_PATH + '/workspace', 
-		gitRoot: CONTEXT_PATH + '/gitapi', 
-		fileRoot: CONTEXT_PATH + '/file',
-		options: options
-	}));
+	app.use(PREFIX, workspace(options));
+	app.use(PREFIX_FILE, file(options));
 
 var request = supertest.bind(null, app);
 

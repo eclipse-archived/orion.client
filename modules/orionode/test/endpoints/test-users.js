@@ -36,7 +36,7 @@ var app = express();
 	app.locals.metastore = store({workspaceDir: WORKSPACE, configParams: configParams});
 	app.locals.metastore.setup(app);
 	app.use(userMiddleware)
-	app.use(CONTEXT_PATH, users.router({configParams: configParams, workspaceRoot: CONTEXT_PATH + '/workspace'}))
+	app.use(CONTEXT_PATH, users.router({authenticate: function(req,res,next){next()}, configParams: configParams, workspaceRoot: CONTEXT_PATH + '/workspace'}))
 var request = supertest.bind(null, app);
 
 // Like `assert.ifError` but allows the message to be overridden

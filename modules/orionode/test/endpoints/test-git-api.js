@@ -57,17 +57,20 @@ app.use(userMiddleware)
 .use(CONTEXT_PATH + "/workspace*", workspace({
 	workspaceRoot: CONTEXT_PATH + '/workspace', 
 	fileRoot: CONTEXT_PATH + '/file', 
-	gitRoot: CONTEXT_PATH + '/gitapi'
+	gitRoot: CONTEXT_PATH + '/gitapi',
+	configParams: configParams
 }))
 .use(CONTEXT_PATH + "/file*", file({
 	workspaceRoot: CONTEXT_PATH + '/workspace', 
 	gitRoot: CONTEXT_PATH + '/gitapi', 
-	fileRoot: CONTEXT_PATH + '/file'
+	fileRoot: CONTEXT_PATH + '/file',
+	configParams: configParams
 }))
 .use(CONTEXT_PATH + "/gitapi", gitapi({
 	gitRoot: CONTEXT_PATH + '/gitapi', 
 	fileRoot: CONTEXT_PATH + '/file', 
-	workspaceRoot: CONTEXT_PATH + '/workspace'
+	workspaceRoot: CONTEXT_PATH + '/workspace',
+	configParams: configParams
 }));
 
 var request = supertest.bind(null, app);
