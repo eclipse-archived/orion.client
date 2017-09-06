@@ -101,6 +101,26 @@ describe.skip("Users endpoint", function() {
 					done();
 				});
 		});
+		it.skip("testMoveUser");
+		it.skip("testReadAllUsers");
+		it.skip("testGetUserHomeWithNullArgument");
+		it.skip("testGetUserHome");
+		it.skip("testReadUser");
+		it.skip("testUpdateUser");
+		it.skip("testAddUserProperty");
+		it.skip("testDeleteUserProperty");
+		it.skip("testNoUserProperty");
+		it.skip("testUpdateUserProperty");
+		it.skip("testReadUserByEmailConfirmationProperty");
+		it.skip("testReadUserByPasswordResetIdProperty");
+		it.skip("testReadUserByDiskUsageAndTimestampProperty");
+		it.skip("testReadUserByBlockedProperty");
+		it.skip("testReadUserByEmailProperty");
+		it.skip("testReadUserByOauthProperty");
+		it.skip("testReadUserByOpenidProperty");
+		it.skip("testReadUserByPasswordProperty");
+		it.skip("testReadUserByUserNameProperty");
+		it.skip("testReadUserThatDoesNotExist");
 		it("testCreateDuplicateUser", function(done) {
 			var json = {UserName: "testCreateDuplicateUser", Email: 'testCreateDuplicateUser@bar.org', FullName: "testCreateDuplicateUser Bar", Password: "1234"};
 			request()
@@ -117,6 +137,24 @@ describe.skip("Users endpoint", function() {
 						.expect(400)
 						.end(done);
 				});
+		});
+		it("testCreateUserWithNoUserName", function(done) {
+			var json = {Email: 'testCreateDuplicateUser@bar.org', FullName: "testCreateDuplicateUser Bar", Password: "1234"};
+			request()
+				.post('/users')
+				.type('json')
+				.send(json)
+				.expect(400)
+				.end(done);
+		});
+		it("testCreateUserWithNoEmail", function(done) {
+			var json = {UserName: 'testCreateUserWithNoEmail', FullName: "testCreateDuplicateUser Bar", Password: "1234"};
+			request()
+				.post('/users')
+				.type('json')
+				.send(json)
+				.expect(400)
+				.end(done);
 		});
 		it("testCreateUserDuplicateEmail", function(done) {
 			var json = {UserName: "testCreateUserDuplicateEmail", Email: 'testCreateUserDuplicateEmail@bar.org', FullName: "testCreateUserDuplicateEmail Bar", Password: "1234"};
@@ -192,6 +230,26 @@ describe.skip("Users endpoint", function() {
 						.end(done);
 				});
 		});
+		/**
+		 * TODO we currently don't have a unique ID implementation in the node server
+		 */
+		it.skip("testDeleteUserByUniqueIdProperty", function(done) {
+			var json = {UserName: "testDeleteUserByUniqueIdProperty", Email: 'testDeleteUserByUniqueIdProperty@bar.org', FullName: "testDeleteUserByUniqueIdProperty Bar", Password: "1234"};
+			request()
+				.post('/users')
+				.type('json')
+				.send(json)
+				.expect(201)
+				.end(function(err, res) {
+					throwIfError(err);
+					assert(res.body, "There should have been a body");
+					assert(res.body.Location, "There should have been a location for the user");
+					request()
+						.delete(res.body.Location) //This would be the unique ID, not the location
+						.expect(200)
+						.end(done);
+				});
+		});
 		it("testUpdateUsers", function(done) {
 			var json = {UserName: "testUpdateUsers", Email: 'testUpdateUsers@bar.org', FullName: "testUpdateUsers Bar", Password: "1234"};
 			request()
@@ -258,6 +316,6 @@ describe.skip("Users endpoint", function() {
 							.end(done)
 					});
 		});
-		it("testCreateDeleteRights");
+		it.skip("testCreateDeleteRights");
 	});
 });
