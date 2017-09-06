@@ -29,15 +29,20 @@ var orion = function(options) {
 describe("Orion metadata utils", function() {
 	/**
 	 * From: org.eclipse.orion.server.tests.metastore.SimpleUserPasswordUtilTests.java
+	 * 
+	 * TODO we currently don't have extra hooks to do these operations directly. We might add them 
+	 * in the future
 	 */
-	describe("Simple user password util tests", function() {
+	describe.skip("Simple user password util tests", function() {
 		it("testEncryptPassword");
 		it("testDecryptPassword");
 	});
 	/**
 	 * From: org.eclipse.orion.server.tests.metastore.SimpleMetaStoreUtilTests.java
+	 * TODO we currently don't have extra hooks to do these operations directly. We might add them 
+	 * in the future
 	 */
-	describe("Simple metastore util tests", function() {
+	describe.skip("Simple metastore util tests", function() {
 		it("testCreateMetaFile");
 		it("testCreateMetaFileWithBadName");
 		it("testCreateMetaFolder");

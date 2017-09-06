@@ -9,108 +9,413 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 /*eslint-env mocha */
-var assert = require("assert"),
-	express = require("express"),
-	supertest = require("supertest"),
-	path = require("path"),
-	testdata = require("../support/test_data"),
-	middleware = require("../../index.js");
+var assert = require('assert'),
+	express = require('express'),
+	path = require('path'),
+	supertest = require('supertest'),
+	testData = require('../support/test_data'),
+	store = require('../../lib/metastore/fs/store'),
+	testHelper = require('../support/testHelper'),
+	workspace = require('../../lib/workspace'),
+	file = require('../../lib/file');
 
-var WORKSPACE = path.join(__dirname, ".test_workspace");
+var CONTEXT_PATH = '',
+	PREFIX = CONTEXT_PATH + '/workspace', 
+	PREFIX_FILE = CONTEXT_PATH + '/file',
+	WORKSPACE_ID = 'anonymous-OrionContent',
+	TEST_WORKSPACE_NAME = '.test_workspace',
+	WORKSPACE = path.join(__dirname, TEST_WORKSPACE_NAME),
+	MEATASTORE =  path.join(__dirname, '.test_metadata');
 
-var orion = function(options) {
-	// Ensure tests run in 'single user' mode
-	var opts = options || {};
-	opts.workspaceDir = WORKSPACE;
-	opts.configParams = { "orion.single.user": true };
-	return middleware(opts);
-};
+var options = {
+	workspaceRoot: CONTEXT_PATH + '/workspace', 
+	fileRoot: CONTEXT_PATH + '/file', 
+	gitRoot: CONTEXT_PATH + '/gitapi',
+	configParams: {
+		"orion.single.user": true,
+		"orion.single.user.metaLocation": MEATASTORE
+	},
+	workspaceDir: WORKSPACE
+	};
 
-describe("Orion simple metastore", function() {
-	var app, request;
-	beforeEach(function(done) {
-		app = express();
-		request = supertest.bind(null, app);
-		testdata.setUp(WORKSPACE, done);
+var app = express();
+	app.locals.metastore = store(options);
+	app.locals.metastore.setup(app);
+	app.use(PREFIX, workspace(options));
+	app.use(PREFIX_FILE, file(options));
+
+testHelper.handleErrors(app);
+
+var request = supertest.bind(null, app);
+
+describe("Orion metastore", function() {
+	beforeEach("Create the default workspace and create metadata", function(done) { // testData.setUp.bind(null, parentDir)
+		testData.setUp(WORKSPACE, function(){
+			testData.setUpWorkspace(WORKSPACE, MEATASTORE, done);
+		}, false);
+	});
+	afterEach("Remove .test_workspace", function(done) {
+		testData.tearDown(testHelper.WORKSPACE, function(){
+			testData.tearDown(path.join(MEATASTORE, '.orion'), function(){
+				testData.tearDown(MEATASTORE, done)
+			})
+		});
 	});
 	
-	/**
-	 * From: org.eclipse.orion.server.tests.metastore.SimpleMetaStoreTests.java
-	 */
-	describe("Simple metastore tests", function() {
-		it("testArchiveEmptyOrganizationalFolder");
-		it("testArchiveInvalidMetaDataFileInOrganizationalFolder");
-		it("testArchiveInvalidMetaDataFileInServerWorkspaceRoot");
-		it("testArchiveInvalidMetaDataFolderInOrganizationalFolder");
-		it("testArchiveInvalidMetaDataFileInServerWorkspaceRoot");
-		it("testArchiveInvalidMetaDataFolderInOrganizationalFolder");
-		it("testArchiveInvalidMetaDataFolderInServerWorkspaceRoot");
-		it("testCreateProjectNamedOrionContent");
-		it("testCreateProjectNamedUser");
-		it("testCreateProjectNamedUserDashOrionContent");
-		it("testCreateProjectNamedWorkspace");
-		it("testCreateProjectUsingFileAPI");
-		it("testCreateProjectWithAnInvalidWorkspaceId");
-		it("testCreateProjectWithBarInName");
-		it("testCreateProjectWithDuplicateProjectName");
-		it("testCreateProjectWithEmojiChactersInName");
-		it("testCreateProjectWithNoWorkspaceId");
-		it("testCreateProjectWithURLAsName");
-		it("testCreateSecondWorkspace");
-		it("testCreateSimpleProject");
-		it("testCreateSimpleUser");
-		it("testCreateSimpleWorkspace");
-		it("testCreateTwoWorkspacesWithSameName");
-		it("testCreateUserWithNoUserName");
-		it("testCreateWorkspaceWithAnInvalidUserId");
-		it("testCreateWorkspaceWithNoUserId");
-		it("testCreateWorkspaceWithNoWorkspaceName");
-		it("testDeleteSimpleProject");
-		it("testDeleteSimpleUser");
-		it("testDeleteSimpleWorkspace");
-		it("testDeleteUserByUniqueIdProperty");
-		it("testEncodedProjectContentLocation");
-		it("testGetDefaultContentLocation");
-		it("testGetUserHome");
-		it("testGetUserHomeWithNullArgument");
-		it("testGetWorkspaceContentLocation");
-		it("testMoveProjectLinked");
-		it("testMoveProjectWithBarInProjectName");
-		it("testMoveSimpleProject");
-		it("testMoveUser");
-		it("testReadAllUsers");
-		it("testReadCorruptedProjectJson");
-		it("testReadCorruptedUserJson");
-		it("testReadCorruptedWorkspaceJson");
-		it("testReadProject");
-		it("testReadProjectThatDoesNotExist");
-		it("testReadProjectWithWorkspaceThatDoesNotExist");
-		it("testReadUser");
-		it("testReadUserByEmailConfirmationProperty");
-		it("testReadUserByPasswordResetIdProperty");
-		it("testReadUserByDiskUsageAndTimestampProperty");
-		it("testReadUserByBlockedProperty");
-		it("testReadUserByEmailProperty");
-		it("testReadUserByOauthProperty");
-		it("testReadUserByOpenidProperty");
-		it("testReadUserByPasswordProperty");
-		it("testReadUserByUserNameProperty");
-		it("testReadUserThatDoesNotExist");
-		it("testReadWorkspace");
-		it("testReadWorkspaceSpecifyNullWorkspaceId");
-		it("testReadWorkspaceThatDoesNotExist");
-		it("testUpdateProject");
-		it("testUpdateUser");
-		it("testUpdateWorkspace");
+	it.skip("testArchiveEmptyOrganizationalFolder");
+	it.skip("testArchiveInvalidMetaDataFileInOrganizationalFolder");
+	it.skip("testArchiveInvalidMetaDataFileInServerWorkspaceRoot");
+	it.skip("testArchiveInvalidMetaDataFolderInOrganizationalFolder");
+	it.skip("testArchiveInvalidMetaDataFileInServerWorkspaceRoot");
+	it.skip("testArchiveInvalidMetaDataFolderInOrganizationalFolder");
+	it.skip("testArchiveInvalidMetaDataFolderInServerWorkspaceRoot");
+	it.skip("testCreateProjectNamed - anonymous-OrionContent", function(done) {
+		testHelper.withWorkspace(request, PREFIX, WORKSPACE_ID)
+			.end(function(err, res) {
+				testHelper.throwIfError(err);
+				assert(res.body, "There must be a workspace");
+				request()
+					.post(res.body.Location)
+					.set('Slug', 'anonymous-OrionContent')
+					.expect(400)
+					.end(done);
+			});
 	});
-	/**
-	 * From: org.eclipse.orion.server.tests.metastore.SimpleMetaStoreUserPropertyCacheTests.java
-	 */
-	describe("Simple metastore user property cache tests", function() {
-		it("testAddUserProperty");
-		it("testDeleteUser");
-		it("testDeleteUserProperty");
-		it("testNoUserProperty");
-		it("testUpdateUserProperty");
+	it("testCreateProjectNamed - OrionContent", function(done) {
+		testHelper.withWorkspace(request, PREFIX, WORKSPACE_ID)
+			.end(function(err, res) {
+				testHelper.throwIfError(err);
+				assert(res.body, "There must be a workspace");
+				request()
+					.post(res.body.Location)
+					.set('Slug', 'OrionContent')
+					.expect(400)
+					.end(done);
+			});
 	});
+	it("testCreateProjectNamed - user", function(done) {
+		testHelper.withWorkspace(request, PREFIX, WORKSPACE_ID)
+			.end(function(err, res) {
+				testHelper.throwIfError(err);
+				assert(res.body, "There must be a workspace");
+				request()
+					.post(res.body.Location)
+					.set('Slug', 'user')
+					.expect(400)
+					.end(done);
+			});
+	});
+	it("testCreateProjectNamed - Orion Content", function(done) {
+		testHelper.withWorkspace(request, PREFIX, WORKSPACE_ID)
+			.end(function(err, res) {
+				testHelper.throwIfError(err);
+				assert(res.body, "There must be a workspace");
+				request()
+					.post(res.body.Location)
+					.set('Slug', 'Orion Content')
+					.expect(400)
+					.end(done);
+			});
+	});
+	it("testCreateProjectUsingFileAPI", function(done) {
+		testHelper.withWorkspace(request, PREFIX, WORKSPACE_ID)
+			.end(function(err, res) {
+				testHelper.throwIfError(err);
+				assert(res.body, "There must be a workspace");
+				request()
+					.post(res.body.Location)
+					.set('Slug', 'testCreateProjectUsingFileAPI')
+					.expect(201)
+					.end(done);
+			});
+	});
+	it("testCreateProjectWithAnInvalidWorkspaceId", function(done) {
+		testHelper.withWorkspace(request, PREFIX, WORKSPACE_ID)
+			.end(function(err, res) {
+				testHelper.throwIfError(err);
+				assert(res.body, "There must be a workspace");
+				request()
+					.post(PREFIX + '/77')
+					.set('Slug', 'testCreateProjectWithAnInvalidWorkspaceId')
+					.expect(400)
+					.end(done);
+			});
+	});
+	it("testCreateProjectWithBarInName", function(done) {
+		testHelper.withWorkspace(request, PREFIX, WORKSPACE_ID)
+			.end(function(err, res) {
+				testHelper.throwIfError(err);
+				assert(res.body, "There must be a workspace");
+				request()
+					.post(res.body.Location)
+					.set('Slug', 'testCreateProjectWith|InName')
+					.expect(201)
+					.end(done);
+			});
+	});
+	it("testCreateProjectWithDuplicateProjectName", function(done) {
+		testHelper.withWorkspace(request, PREFIX, WORKSPACE_ID)
+			.end(function(err, res) {
+				testHelper.throwIfError(err);
+				assert(res.body, "There must be a workspace");
+				var ws = res.body.Location;
+				request()
+					.post(ws)
+					.set('Slug', 'testCreateProjectWithDuplicateProjectName')
+					.expect(201)
+					.end(function(err, res) {
+						testHelper.throwIfError(err);
+						request()
+							.post(ws)
+							.set('Slug', 'testCreateProjectWithDuplicateProjectName')
+							.expect(400)
+							.end(done);
+					});
+			});
+	});
+	it("testCreateProjectWithEmojiChactersInName", function(done) {
+		testHelper.withWorkspace(request, PREFIX, WORKSPACE_ID)
+			.end(function(err, res) {
+				testHelper.throwIfError(err);
+				assert(res.body, "There must be a workspace");
+				request()
+					.post(res.body.Location)
+					.set('Slug', 'Project \ud83d\ude0a\ud83d\udc31\ud83d\udc35')
+					.expect(201)
+					.end(done);
+			});
+	});
+	it("testCreateProjectWithNoWorkspaceId", function(done) {
+		request()
+			.post(PREFIX)
+			.set('Slug', 'testCreateProjectWithNoWorkspaceId')
+			.expect(400)
+			.end(done);
+	});
+	it("testCreateProjectWithURLAsName", function(done) {
+		testHelper.withWorkspace(request, PREFIX, WORKSPACE_ID)
+			.end(function(err, res) {
+				testHelper.throwIfError(err);
+				assert(res.body, "There must be a workspace");
+				request()
+					.post(res.body.Location)
+					.set('Slug', 'http://orion.eclipse.org/')
+					.expect(400)
+					.end(done);
+			});
+	});
+	it("testCreateSecondWorkspace", function(done) {
+		request()
+			.post(PREFIX)
+			.set('Slug', 'Orion sandbox')
+			.expect(201)
+			.end(function(err, res) {
+				testHelper.throwIfError(err);
+				testHelper.withWorkspace(request, PREFIX, res.body.Name)
+					.end(done);
+			});
+	});
+	it("testCreateTwoWorkspacesWithSameName", function(done) {
+		testHelper.withWorkspace(request, PREFIX, WORKSPACE_ID)
+			.end(function(err, res) {
+				testHelper.throwIfError(err);
+				request()
+					.post(PREFIX)
+					.set('Slug', 'Orion ws')
+					.expect(201)
+					.end(function(err, res) {
+						testHelper.throwIfError(err);
+						request()
+							.post(PREFIX)
+							.set('Slug', 'Orion ws')
+							.expect(400)
+							.end(done);
+					});
+			});
+	});
+	it.skip("testCreateWorkspaceWithAnInvalidUserId");
+	it.skip("testCreateWorkspaceWithNoUserId");
+	it("testCreateWorkspaceWithNoWorkspaceName", function(done) {
+		request()
+			.post(PREFIX)
+			//.set('Slug', 'Orion workspace test')
+			.expect(400)
+			.end(done);
+	});
+	it("testDeleteSimpleProject", function(done) {
+		testHelper.withWorkspace(request, PREFIX, WORKSPACE_ID)
+			.end(function(err, res) {
+				testHelper.throwIfError(err);
+				request()
+					.post(res.body.Location)
+					.type('json')
+					.send({Name: 'testDeleteSimpleProject'})
+					.expect(201)
+					.end(function(err, res) {
+						testHelper.throwIfError(err);
+						var pLoc = res.body.Location;
+						request()
+							.delete(pLoc)
+							.expect(200)
+							.end(function(err, res) {
+								testHelper.throwIfError(err);
+								request()
+									.get(pLoc)
+									.expect(404)
+									.end(done);
+							});
+					});
+			});
+	});
+	it("testDeleteSimpleWorkspace", function(done) {
+		request()
+			.post(PREFIX)
+			.set('Slug', 'Orion sandbox')
+			.expect(201)
+			.end(function(err, res) {
+				testHelper.throwIfError(err);
+				testHelper.withWorkspace(request, PREFIX, res.body.Name)
+					.end(function(err, res) {
+						var wLoc = res.body.Location;
+						request()
+							.delete(wLoc)
+							.expect(200)
+							.end(function(err, res) {
+								testHelper.throwIfError(err);
+								request()
+									.get(wLoc)
+									.expect(404)
+									.end(done);
+							});
+					});
+			});
+	});
+	it("testGetWorkspaces", function(done) {
+		request()
+			.get(PREFIX)
+			.expect(200)
+			.end(function(err, res) {
+				testHelper.throwIfError(err);
+				assert(Array.isArray(res.body.Workspaces), "There must be a Workspaces array");
+				done();
+			});
+	});
+	it("testMoveProjectWithBarInProjectName", function(done) {
+		testHelper.withWorkspace(request, PREFIX, WORKSPACE_ID)
+			.end(function(err, res) {
+				testHelper.throwIfError(err);
+				request()
+					.post(res.body.Location)
+					.type('json')
+					.send({Name: 'testMoveProjectWith|InProjectName'})
+					.expect(201)
+					.end(function(err, res) {
+						testHelper.throwIfError(err);
+						var pLoc = res.body.Location;
+						request()
+							.post(ws.Location)
+							.type('json')
+							.set('X-Create-Options', "move")
+							.set('Slug', 'testMoveProjectWith|InProjectNameMOVED')
+							.send({Location: pLoc})
+							.expect(201)
+							.end(function(err, res) {
+								testHelper.throwIfError(err);
+								request()
+									.get(res.body.Location)
+									.expect(200)
+									.end(done);
+							});
+					});
+			});
+	});
+	it("testMoveSimpleProject", function(done) {
+		testHelper.withWorkspace(request, PREFIX, WORKSPACE_ID)
+			.end(function(err, res) {
+				testHelper.throwIfError(err);
+				request()
+					.post(res.body.Location)
+					.type('json')
+					.send({Name: 'testMoveSimpleProject'})
+					.expect(201)
+					.end(function(err, res) {
+						testHelper.throwIfError(err);
+						var pLoc = res.body.Location;
+						request()
+							.post(ws.Location)
+							.type('json')
+							.set('X-Create-Options', "move")
+							.set('Slug', 'testMoveSimpleProjectMOVED')
+							.send({Location: pLoc})
+							.expect(201)
+							.end(function(err, res) {
+								request()
+									.get(res.body.Location)
+									.expect(200)
+									.end(done);
+							});
+					});
+			});
+	});
+	it.skip("testMoveProjectLinked");
+	it.skip("testReadCorruptedProjectJson");
+	it.skip("testReadCorruptedUserJson");
+	it.skip("testReadCorruptedWorkspaceJson");
+	it("testReadProject", function(done) {
+		testHelper.withWorkspace(request, PREFIX, WORKSPACE_ID)
+			.end(function(err, res) {
+				testHelper.throwIfError(err);
+				request()
+					.post(res.body.Location)
+					.type('json')
+					.send({Name: 'testReadProject'})
+					.expect(201)
+					.end(function(err, res) {
+						testHelper.throwIfError(err);
+						request()
+							.get(res.body.Location)
+							.expect(200)
+							.end(function(err, res) {
+								assert(res.body && res.body.Name === 'testReadProject', "The new project was not found after creation")
+								done();
+							});
+					});
+			})
+	});
+	it("testReadProjectThatDoesNotExist", function(done) {
+		testHelper.withWorkspace(request, PREFIX, WORKSPACE_ID)
+			.end(function(err, res) {
+				testHelper.throwIfError(err);
+				request()
+					.get(path.join(res.body.Location, '/projectThatDoesNotExist'))
+					.expect(404)
+					.end(done);
+			});
+	});
+	it("testReadProjectWithWorkspaceThatDoesNotExist", function(done) {
+		testHelper.withWorkspace(request, PREFIX, WORKSPACE_ID)
+			.end(function(err, res) {
+				testHelper.throwIfError(err);
+				request()
+					.get(path.join(path.dirname(res.body.Location), '/77', '/someProject'))
+					.expect(404)
+					.end(done);
+			});
+	});
+	it("testReadWorkspace", function(done) {
+		testHelper.withWorkspace(request, PREFIX, WORKSPACE_ID)
+			.end(function(err, res) {
+				testHelper.throwIfError(err);
+				assert(res.body && res.body.Location, "There should be a body in the response with a Location");
+				done();
+			});
+	});
+	it("testReadWorkspaceThatDoesNotExist", function(done) {
+		request()
+			.get(PREFIX + '/wsThatDoesNotExist')
+			.expect(404)
+			.end(done);
+	});
+	it.skip("testUpdateProject");
+	it.skip("testUpdateWorkspace");
 });

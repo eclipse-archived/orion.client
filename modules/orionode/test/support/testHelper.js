@@ -9,8 +9,8 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 
-var path = require('path');
-var fs = require('fs');
+var path = require('path'),
+	fs = require('fs');
 
  /**
   * The server context path, default value is the empty string
@@ -43,7 +43,7 @@ exports.PREFIX = PREFIX = FILE_PATH + '/' + WORKSPACE_ID;
  * @description Create a directory with the given name
  * @param {Request} request The request to use to create the directory
  * @param {string} dirName The name of the directory to create
- * @returns {Promise) A promise from the #expect callback
+ * @returns {Promise} A promise from the #expect callback
  * @since 16.0
  */
 exports.createDir = function createDir(request, prefix, dirName) {
@@ -52,7 +52,7 @@ exports.createDir = function createDir(request, prefix, dirName) {
 			.type('json')
 			.send({ Name: dirName, Directory: true})
 			.expect(201);
-}
+};
 
 /**
  * @name createFile
@@ -112,21 +112,59 @@ exports.mkdirp = function mkdirp(root, directoryPath) {
 			}
 		})
 	}
-}
+};
 
 /**
- * Throws the cause like `assert.ifError` but allows the message to be overridden
+ * @description Requests the default workspace. Callers must handle calling <code>.end(function(err, res){})</code>
+ * on the result
+ * @returns {?} Request result promise
+ * @since 16.0
+ */
+exports.withWorkspace = function withWorkspace(request, prefix, workspaceId) {
+	return request().get(prefix + '/' + workspaceId);
+};
+
+/**
+ * @description Throws the cause like `assert.ifError` but allows the message to be overridden
  * 
  * @param {?} cause The cause of the error
  * @param {?} message The message
  * @throws {Error}
  * @since 16.0
  */
-exports.throwIfError = function throwIfError(cause, message) {
+exports.throwIfError = throwIfError = function throwIfError(cause, message) {
 	if (!cause || !cause instanceof Error && Object.prototype.toString.call(cause) !== '[object Error]' && cause !== 'error') {
 		return;
 	}
 	var err = new Error(message + ": " + cause.message);
 	err.cause = cause;
 	throw err;
-}
+};
+
+/**
+ * @description Default error handling for endpoints
+ * @param {Express.app} app The app the attach to
+ * @param {?} logger The optional logger
+ * @since 16.0
+ */
+exports.handleErrors = handleErrors = function handleErrors(app, logger) {
+	app.use(function(err, req, res) {
+		if(logger) {
+			logger.error(req.originalUrl, err);
+		}
+		if (res.finished) {
+			return;
+		}
+		if (err) {
+			res.status(err.status || 500);
+		} else {
+			res.status(404);
+		}
+		// respond with json
+		if (req.accepts('json')) {
+			return res.send({ error: err ? err.message : 'Not found' });
+		}
+		// default to plain-text. send()
+		res.type('txt').send(err ? err.message : 'Not found');
+	});
+};

@@ -86,6 +86,9 @@ describe("Workspace endpoint", function() {
 				.end(done);
 		});
 	});
+	it.skip("testEncodedProjectContentLocation");
+	it.skip("testGetWorkspaceContentLocation");
+	it.skip("testGetDefaultContentLocation");
 	it("testMoveBadRequest", function(done) {
 		withDefaultWorkspace(function(ws) {
 			request()
@@ -228,9 +231,7 @@ describe("Workspace endpoint", function() {
 				});
 		});
 	});
-	it("testCopyProjectNonDefaultLocation", function(done) {
-		done();
-	});
+	it.skip("testCopyProjectNonDefaultLocation");
 	it.skip("testCopyFolderToProject", function(done) {
 		withDefaultWorkspace(function(ws) {
 			request()
