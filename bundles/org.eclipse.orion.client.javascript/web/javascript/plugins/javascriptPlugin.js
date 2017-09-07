@@ -2298,7 +2298,7 @@ define([
 				{
 					id: "no-shadow-global", //$NON-NLS-1$
 					name: javascriptMessages["noShadowGlobals"],
-					defaultValue: info,
+					defaultValue: ignore,
 					type: "number", //$NON-NLS-1$
 					options: severities
 				},
