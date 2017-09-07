@@ -248,7 +248,7 @@ module.exports.router = function(options) {
 	}
 	
 	function deleteBranch(req, res) {
-		var branchName = decodeURIComponent(req.params.branchName);
+		var branchName = decodeURIComponent(decodeURIComponent(req.params.branchName));
 		clone.getRepo(req)
 		.then(function(repo) {
 			return git.Branch.lookup(repo, branchName, git.Branch.BRANCH.LOCAL);
@@ -260,8 +260,8 @@ module.exports.router = function(options) {
 				writeError(403, res);
 			}
 		})
-		.catch(function() {
-			writeError(403, res);
+		.catch(function(err) {
+			writeError(403, res, err.message);
 		});
 	}
 };
