@@ -100,7 +100,7 @@ function startServer(options) {
 				resave: false,
 				saveUninitialized: false,
 				secret: 'keyboard cat',
-				store: app.locals.sessionStore
+				store: app.locals.sessionStore // TODO by default MemoryStore is not designed for a production environment, as it will leak memory, and will not scale past a single process.
 			}),
 			passport.initialize(),
 			passport.session()

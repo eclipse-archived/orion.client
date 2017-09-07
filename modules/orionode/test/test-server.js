@@ -38,19 +38,20 @@ var userMiddleware = function(req, res, next) {
 };
 
 describe("orion", function() {
-	before(function() {
-		testData.setUpWorkspace(WORKSPACE, MEATASTORE);
-	});
 	after("Remove Workspace and Metastore", function(done) {
-		 testData.tearDown(WORKSPACE, function(){
-			 testData.tearDown(MEATASTORE, done);
-		 });
+		testData.tearDown(WORKSPACE, function(){
+			testData.tearDown(path.join(MEATASTORE, '.orion'), function(){
+				testData.tearDown(MEATASTORE, done)
+			})
+		});
 	});
 	var app, request;
 	beforeEach(function(done) {
 		app = express();
 		request = supertest.bind(null, app);
-		testData.setUp(WORKSPACE, done);
+		testData.setUp(WORKSPACE, function(){
+			testData.setUpWorkspace(WORKSPACE, MEATASTORE, done);
+		});
 	});
 
 	describe("options", function() {
@@ -75,24 +76,25 @@ describe("orion", function() {
 	});
 
 	describe("middleware", function() {
-		beforeEach(function() {
+		beforeEach(function(done) {
 			app.use(userMiddleware);
+			done()
 		});
 
 		// Make sure that we can .use() the orion server as an Express middleware
-		it("exports #createServer", function(done) {
+		it("exports #createServer", function() {
 			app.use(orion({ }));
 			request()
 			.get("/workspace")
-			.expect(200, done);
+			.expect(200);
 		});
 
 		// Sanity check to ensure the orion client code is being mounted correctly
-		it("finds the orion.client code", function(done) {
+		it("finds the orion.client code", function() {
 			app.use(orion({ }));
 			request()
 			.get("/index.html")
-			.expect(200, done);
+			.expect(200);
 		});
 
 		it("works at a non-server-root route", function(done) {
