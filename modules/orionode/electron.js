@@ -13,7 +13,7 @@ var fs = require('fs'),
 	os = require('os'),
 	api = require('./lib/api'),
 	path = require('path'),
-	prefs = require('./lib/controllers/prefs');
+	prefs = require('./lib/prefs');
 
 module.exports.start = function(startServer, configParams) {
 	var electron = require('electron'),

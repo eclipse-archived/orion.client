@@ -28,7 +28,7 @@ function Prefs(s) {
  * @returns The node, or NOT_EXIST if the path did not exist.
  */
 Prefs.prototype.get = function(path) {
-	var root = this.json, segs = path.substr(1).split('/'); // substr(1) to strip the leading slash
+	var root = this.json, segs = path.split('/');
 	var result;
 	if (segs[0] === '') {
 		result = root;
@@ -51,7 +51,7 @@ Prefs.prototype.get = function(path) {
  * Replaces the node at the given path. If node === NOT_EXIST then the node is removed.
  */
 Prefs.prototype.set = function(path, node) {
-	var segs = path.substr(1).split('/'); // substr(1) to strip leading slash
+	var segs = path.split('/');
 	if (segs[0] === '') {
 		this.json = node;
 		return;

@@ -71,7 +71,14 @@ Prefs.prototype.set = function(path, node) {
 	this.isModified = true;
 };
 Prefs.prototype.delete = function(path) {
-	this.set(path, NOT_EXIST);
+	var keys = Object.keys(this.json);
+	var obj = this.json;
+	keys.forEach(function(key){
+		if(key.startsWith(path)){
+			delete obj[key];
+		}
+	});
+	this.isModified = true;
 };
 Prefs.prototype.getJson = function() {
 	return this.json;
