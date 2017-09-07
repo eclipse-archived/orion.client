@@ -23,7 +23,7 @@ var tasks = require('../tasks');
 var express = require('express');
 var bodyParser = require('body-parser');
 var rmdir = require('rimraf');
-var prefs = require('../controllers/prefs');
+var prefs = require('../prefs');
 var credentialsProvider = require('./credentials');
 
 module.exports = {};
