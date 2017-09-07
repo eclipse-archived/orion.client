@@ -68,7 +68,13 @@
 //				}
 
 	/*eslint-env browser, amd*/
-    require(["built-compare-amd.js"], function(Compare) {
+    
+	require.config({
+	    bundles: {
+	        "built-compare-amd": ["orion/compare", "orion/compare/jsdiffAdapter"]
+	    }	    
+	});
+    require(["orion/compare", "orion/compare/jsdiffAdapter"], function(Compare, mJSDiffAdapter) {
 	var document = window.document;
 
 	/** Buttons */	
@@ -230,6 +236,7 @@
 
 	function onLoadSample() {
 		if(sampleLeft && sampleRight) {
+			
 			bCompareType.selectedIndex = 0;
 			compareType = bCompareType.options[bCompareType.selectedIndex].value;
 			bContentType.selectedIndex = 0;
@@ -246,7 +253,37 @@
 			widget.options.mapper = null;
 			compare.refresh(true);
 			hookUp();
-		}
+			var diffAdapter = new mJSDiffAdapter.JSDiffAdapter(true/*ignore white space*/);
+			var maps = diffAdapter.adapt(sampleRight/*A string representing the old File contents, including line delimeters*/, 
+										 sampleLeft/*A string representing the new File contents, including line delimeters*/, 
+										 "\n"/*line delimeter*/);
+			var totalLinesInNew = 0, totalLinesInOld = 0, changedLines = 0, removedLines = 0, addedLines = 0;
+			maps.mapper.forEach(function(singleDiffBlock){
+				/*
+				 * A singleDiffBock is a simple array of 3 numbers
+				 * [0]: how many lines are there in the new file in this diff block
+				 * [1]: how many lines are there in the old file in this diff block
+				 * [3]: a number(0 or none zero). 0 means both new and old files are the same in this diff block. Just ignore the 0 case
+				 */
+				
+				totalLinesInNew = totalLinesInNew + singleDiffBlock[0];
+				totalLinesInOld = totalLinesInOld + singleDiffBlock[1];
+				if(singleDiffBlock[2] !== 0) {
+					if(singleDiffBlock[0] === singleDiffBlock[1]) {//New and old files have the same lines in this diff block
+						changedLines = changedLines + singleDiffBlock[0];
+					} else if(singleDiffBlock[0] === 0) {// The new file side has no lines in this diff block
+						removedLines = removedLines + singleDiffBlock[1];
+					} else if (singleDiffBlock[1] === 0) {// The old file side has no lines in this diff block
+						addedLines = addedLines + singleDiffBlock[0];
+					} else {//New and old files have the diffrent lines(non zero) in this diff block
+						//E.g. If old file has 5 lines and new file has 2 lines, we should say it is a changedLine
+						changedLines = changedLines + singleDiffBlock[1];
+					}
+				}
+			});
+			alert("total lines in the old file: " + totalLinesInOld + "\n" + "total lines in the new file: " + totalLinesInNew + "\n" +
+				  "changed lines: " + changedLines + "\n" + "removed lines: " + removedLines + "\n" + "added lines: " + addedLines);
+			}
 	}
 	function animateDiffs() {
 		var widget = compare.getCompareView().getWidget();
@@ -513,6 +550,9 @@
 				"		widget.options.oldFile.Name = \"right.\" + contentType;\n" + 
 				"		widget.options.newFile.Name = \"left.\" + contentType;\n" + 
 				"		\n" + 
+				"		//Added some new stuff here\n" + 
+				"		//Added some new stuff here\n" + 
+				"		//Added some new stuff here\n" + 
 				"		//Added some new stuff here\n" + 
 				"	}\n" + 
 				"	\n" + 
