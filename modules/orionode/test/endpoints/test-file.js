@@ -90,7 +90,7 @@ describe('File API', function() {
 					.then(function(res) {
 						request()
 							.get(PREFIX + '/project/genericFileHandler.txt')
-							.expect(200, 'Tests the generic file handler', done)
+							.expect(200, '', done); // Creating a file and providing contents is not currently supported in a single request. The client must first create a file with a POST as in the previous section, and then perform a PUT on the location specified in the POST response to provide file contents.
 					});
 			});
 			/**
@@ -107,11 +107,11 @@ describe('File API', function() {
 					.expect(200, done);
 			});
 			it("testGzippedResponseCharset", function(done) {
-				var fileName = encodeURIComponent('\u4f60\u597d\u4e16\u754c.txt');
-				testHelper.createFile(request, '/project', '/'+fileName, 'Odd contents')
+				var fileName = '\u4f60\u597d\u4e16\u754c.txt';
+				testHelper.createFile(request, '/project', fileName, 'Odd contents')
 					.then(function(res) {
 						request()
-							.get(PREFIX + '/project/'+fileName+'?parts=meta')
+							.get(PREFIX + '/project/'+encodeURIComponent(fileName)+'?parts=meta')
 							.set('Charset', 'UTF-8')
 							.set('Content-Type', 'text/plain')
 							.end(function(err, res) {
