@@ -69,7 +69,7 @@ describe("Workspace endpoint", function() {
 	afterEach("Remove .test_workspace", function(done) {
 		testData.tearDown(testHelper.WORKSPACE, function(){
 			testData.tearDown(path.join(MEATASTORE, '.orion'), function(){
-				testData.tearDown(MEATASTORE, done)
+				testData.tearDown(MEATASTORE, done);
 			})
 		});
 	});
@@ -396,7 +396,7 @@ describe("Workspace endpoint", function() {
 					var _loc = res.body.Location;
 					request()
 						.delete(_loc)
-						.expect(200)
+						.expect(204)
 						.end(function(err, res) {
 							testHelper.throwIfError(err);
 							//now try to fetch it, should 404
@@ -412,7 +412,7 @@ describe("Workspace endpoint", function() {
 		withDefaultWorkspace(function(workspace) {
 			request()
 				.del(workspace.Location)
-				.expect(403, done);
+				.expect(204, done);
 		});
 	});
 	it("testGetWorkspaces", function(done) {
