@@ -271,6 +271,7 @@ module.exports = function(options) {
 		var rest = req.params["0"].substring(1);
 		var file = fileUtil.getFile(req, rest);
 		fileUtil.withStatsAndETag(file.path, function(error, stats, etag) {
+			var store = fileUtil.getMetastore(req);
 			function done(error) {
 				if (error) {
 					writeError(500, res, error);
@@ -284,7 +285,6 @@ module.exports = function(options) {
 				}
 				done(error);
 			}
-			var store = fileUtil.getMetastore(req);
 			var ifMatchHeader = req.headers['if-match'];
 			if (error && error.code === 'ENOENT') {
 				return checkWorkspace();
@@ -294,12 +294,18 @@ module.exports = function(options) {
 			if (stats.isDirectory()) {
 				fileUtil.rumRuff(file.path, function(err){
 					if (err) {
-						return done(err)
+						return done(err);
 					}
-					if (store.createRenameDeleteProject && file.path.substr(file.workspaceDir.length).split("/").length === 3 ) {
-						// Meaning this folder is a project level folder
-						return store.createRenameDeleteProject(file.workspaceId, {originalPath: req.baseUrl})
-						.then(done, done);
+					if (store.createRenameDeleteProject) {
+						var relativePath = file.path.substr(file.workspaceDir.length);
+						if(relativePath.lastIndexOf("/") === relativePath.length - 1){
+							relativePath = relativePath.substr(0, relativePath.length - 1);
+						}
+						if(relativePath.split("/").length === 2){
+							// Meaning this folder is a project level folder
+							return store.createRenameDeleteProject(file.workspaceId, {originalPath: req.baseUrl})
+							.then(done, done);
+						}
 					}
 					checkWorkspace();
 				});

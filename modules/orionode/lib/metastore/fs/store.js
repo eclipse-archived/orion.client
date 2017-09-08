@@ -595,58 +595,56 @@ Object.assign(FsMetastore.prototype, {
 					if (error) {
 						reject(new Error("createRenameDeleteProject failed to read workspace metadata for: " + workspaceId, error));
 					}
-					if (projectInfo.projectName) {
-						var projectJson = {
-							"OrionVersion": metadata.OrionVersion,
-							"UniqueId": projectInfo.projectName,
-							"WorkspaceId": workspaceId,
-							"FullName": projectInfo.projectName,
-							"Properties": {}
-						};
-						if (projectInfo.contentLocation.startsWith(this._options.workspaceDir)) {
-							projectJson["ContentLocation"] = SERVERWORKSPACE + projectInfo.contentLocation.substr(this._options.workspaceDir.length);
-						} else {
-							projectJson["ContentLocation"] = projectInfo.contentLocation;
+				var projectJson = {
+					"OrionVersion": metadata.OrionVersion,
+					"UniqueId": projectInfo.projectName,
+					"WorkspaceId": workspaceId,
+					"FullName": projectInfo.projectName,
+					"Properties": {}
+				};
+				if (projectInfo.projectName){
+					if (projectInfo.contentLocation.startsWith(this._options.workspaceDir)) {
+						projectJson["ContentLocation"] = SERVERWORKSPACE + projectInfo.contentLocation.substr(this._options.workspaceDir.length);
+					} else {
+						projectJson["ContentLocation"] = projectInfo.contentLocation;
+					}
+					this._createProjectMetadata(workspaceId, projectInfo.projectName, projectJson, function(error) {
+						if (error) {
+							return reject(error);
 						}
-						if (projectInfo.projectName){
-							this._createProjectMetadata(workspaceId, projectInfo.projectName, projectJson, function(error) {
-								if (error) {
-									return reject(error);
-								}
-								if (projectInfo.originalPath) { // originalPath is in the format of "[ContextPath] (optional) + /file + [workspaceId] + /[originalName]/"
-									deleteProjectMetafile();
-								}
-								if(metadata) {
-									metadata.ProjectNames.indexOf(projectInfo.projectName) === -1 && metadata.ProjectNames.push(projectInfo.projectName);
-									this._updateWorkspaceMetadata(workspaceId, metadata, function(error) {
-										if (error) {
-											reject(new Error("createRenameDeleteProject failed to write workspace metadata for: " + workspaceId, error));
-										}
-										resolve();
-									});
-								}
-							}.bind(this));
-						} else if (projectInfo.originalPath) {
-							deleteProjectMetafile();
+						if (projectInfo.originalPath) { // originalPath is in the format of "[ContextPath] (optional) + /file + [workspaceId] + /[originalName]/"
+							deleteProjectMetafile.call(this);
+						}
+						if(metadata) {
+							metadata.ProjectNames.indexOf(projectInfo.projectName) === -1 && metadata.ProjectNames.push(projectInfo.projectName);
 							this._updateWorkspaceMetadata(workspaceId, metadata, function(error) {
 								if (error) {
 									reject(new Error("createRenameDeleteProject failed to write workspace metadata for: " + workspaceId, error));
 								}
 								resolve();
 							});
-						} else {
-							resolve(); // This shouldn't happen
 						}
-						function deleteProjectMetafile(){
-							// Delete the old project metadata json file, and update workspace metadata Projectnames
-							var segs = projectInfo.originalPath.split("/");
-							var oldProjectName = projectInfo.originalPath.endsWith("/") ? segs[segs.length - 2] : segs[segs.length - 1];
-							var index = metadata && metadata.ProjectNames.indexOf(oldProjectName) || -1;
-							index !== -1 && metadata.ProjectNames.splice(index, 1);
-							var metaFile = getProjectMetadataFileName(this._options, workspaceId, oldProjectName);
-							fs.unlinkAsync(metaFile).catchReturn({ code: 'ENOENT' }, null);
+					}.bind(this));
+				} else if (projectInfo.originalPath) {
+					deleteProjectMetafile.call(this);
+					this._updateWorkspaceMetadata(workspaceId, metadata, function(error) {
+						if (error) {
+							reject(new Error("createRenameDeleteProject failed to write workspace metadata for: " + workspaceId, error));
 						}
-					}
+						resolve();
+					});
+				} else {
+					resolve(); // This shouldn't happen
+				}
+				function deleteProjectMetafile(){
+					// Delete the old project metadata json file, and update workspace metadata Projectnames
+					var segs = projectInfo.originalPath.split("/");
+					var oldProjectName = projectInfo.originalPath.endsWith("/") ? segs[segs.length - 2] : segs[segs.length - 1];
+					var index = metadata && metadata.ProjectNames.indexOf(oldProjectName) || -1;
+					index !== -1 && metadata.ProjectNames.splice(index, 1);
+					var metaFile = getProjectMetadataFileName(this._options, workspaceId, oldProjectName);
+					fs.unlinkAsync(metaFile).catchReturn({ code: 'ENOENT' }, null);
+				}
 				}.bind(this));
 			}.bind(this));
 		}.bind(this));
