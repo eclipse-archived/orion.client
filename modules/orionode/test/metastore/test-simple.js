@@ -89,7 +89,7 @@ describe("Orion metastore", function() {
 				request()
 					.post(res.body.Location)
 					.set('Slug', 'OrionContent')
-					.expect(400)
+					.expect(201)
 					.end(done);
 			});
 	});
@@ -101,7 +101,7 @@ describe("Orion metastore", function() {
 				request()
 					.post(res.body.Location)
 					.set('Slug', 'user')
-					.expect(400)
+					.expect(500)
 					.end(done);
 			});
 	});
@@ -113,7 +113,7 @@ describe("Orion metastore", function() {
 				request()
 					.post(res.body.Location)
 					.set('Slug', 'Orion Content')
-					.expect(400)
+					.expect(201)
 					.end(done);
 			});
 	});

@@ -280,10 +280,11 @@ module.exports = function(options) {
 			}
 			function checkWorkspace(error) {
 				if (!error && file.path === file.workspaceDir) {
-					fileUtil.getMetastore(req).deleteWorkspace(file.workspaceId, done);
+					return store.deleteWorkspace(file.workspaceId, done);
 				}
 				done(error);
 			}
+			var store = fileUtil.getMetastore(req);
 			var ifMatchHeader = req.headers['if-match'];
 			if (error && error.code === 'ENOENT') {
 				return checkWorkspace();
@@ -291,19 +292,21 @@ module.exports = function(options) {
 				return api.sendStatus(412, res);
 			}
 			if (stats.isDirectory()) {
-				fileUtil.rumRuff(file.path, checkWorkspace);
-				
-				if(file.path.substr(file.workspaceDir.length).split("/").length === 3){
-					// Meaning this folder is a project level folder
-					var store = fileUtil.getMetastore(req);
-					store.updateProject && store.updateProject(file.workspaceId, {originalPath: req.baseUrl});
-				}
-				
+				fileUtil.rumRuff(file.path, function(err){
+					if (err) {
+						return done(err)
+					}
+					if (store.createRenameDeleteProject && file.path.substr(file.workspaceDir.length).split("/").length === 3 ) {
+						// Meaning this folder is a project level folder
+						return store.createRenameDeleteProject(file.workspaceId, {originalPath: req.baseUrl})
+						.then(done, done);
+					}
+					checkWorkspace();
+				});
 				var eventData = { type: "delete", file: file, req: req };
 				fileUtil.fireFileModificationEvent(eventData);
 			} else {
 				fs.unlink(file.path, checkWorkspace);
-				
 				var eventData = { type: "delete", file: file, req: req };
 				fileUtil.fireFileModificationEvent(eventData);
 			}

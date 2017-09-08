@@ -416,14 +416,19 @@ function postInit(req, res) {
 				return theRepo.createCommit("HEAD", author, committer, "Initial commit", oid, []);
 			})
 			.then(function() {
-				writeResponse(201, res, null, {
-					"Location": gitRoot + "/clone" + fileRoot + "/" + file.workspaceId + api.toURLPath(file.path.substring(file.workspaceDir.length))
-				}, true);
 				var store = fileUtil.getMetastore(req);
-				store.updateProject(file.workspaceId, {projectName: getCloneName(req), contentLocation:file.path});
+				if(store.createRenameDeleteProject) {
+					return store.createRenameDeleteProject(file.workspaceId, {projectName: getCloneName(req), contentLocation:file.path})
+					.then(function(){
+						writeResponse(201, res, null, {"Location": gitRoot + "/clone" + fileRoot + "/" + file.workspaceId + api.toURLPath(file.path.substring(file.workspaceDir.length))}, true);
+					}).catch(function(err){
+						writeError(err.code || 500, res, err);
+					});
+				}
+				writeResponse(201, res, null, {"Location": gitRoot + "/clone" + fileRoot + "/" + file.workspaceId + api.toURLPath(file.path.substring(file.workspaceDir.length))}, true);
 			})
 			.catch(function(err){
-				writeError(403, res);
+				writeError(403, res, err);
 			});
 
 		});
@@ -524,7 +529,14 @@ function deleteClone(req, res) {
 	rmdir(file.path, function(err) {
 		if (err) return writeError(500, res, err);
 		var store = fileUtil.getMetastore(req);
-		store.updateProject && store.updateProject(file.workspaceId, {originalPath: rest});
+		if(store.createRenameDeleteProject) {
+			return store.createRenameDeleteProject(file.workspaceId, {originalPath: rest})
+			.then(function(){
+				writeResponse(200, res);
+			}).catch(function(err){
+				writeError(err.code || 500, res, err);
+			});
+		}
 		writeResponse(200, res);
 	});
 }
@@ -695,6 +707,13 @@ function postClone(req, res) {
 			return foreachSubmodule(repo, "update", true);
 		}
 	})
+	.then(function(){
+		var store = fileUtil.getMetastore(req);
+		if (store.createRenameDeleteProject) {
+			return store.createRenameDeleteProject(file.workspaceId, {projectName: getCloneName(req), contentLocation:file.path});
+		}
+		return Promise.resolve();
+	})
 	.then(function() {
 		task.done({
 			HttpCode: 200,
@@ -706,8 +725,6 @@ function postClone(req, res) {
 			Message: "OK",
 			Severity: "Ok"
 		});
-		var store = fileUtil.getMetastore(req);
-		store.updateProject && store.updateProject(file.workspaceId, {projectName: getCloneName(req), contentLocation:file.path});
 	})
 	.catch(function(err) {
 		handleRemoteError(task, err, cloneUrl);

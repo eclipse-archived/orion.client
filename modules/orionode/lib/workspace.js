@@ -147,14 +147,24 @@ module.exports = function(options) {
 				var projectLocation = api.join(fileRoot, workspace.id, projectName);
 				var file = fileUtil.getFile(req, api.join(workspace.id, projectName));
 				req.body.Directory = true;
-				// Call the File POST helper to handle the filesystem operation. We inject the Project-specific metadata
-				// into the resulting File object.
-				fileUtil.handleFilePOST(workspaceRoot, fileRoot, req, res, file, {
+				
+				if(store.createRenameDeleteProject) {
+					return store.createRenameDeleteProject(workspace.id, {projectName:projectName, contentLocation:file.path, originalPath: req.body.Location})
+					.then(function(){
+						return fileUtil.handleFilePOST(workspaceRoot, fileRoot, req, res, file, {
+							Id: projectName,
+							ContentLocation: projectLocation,
+							Location: projectLocation
+						});
+					}).catch(function(err){
+						writeError(err.code || 500, res, err);
+					});
+				}
+				return fileUtil.handleFilePOST(workspaceRoot, fileRoot, req, res, file, {
 					Id: projectName,
 					ContentLocation: projectLocation,
 					Location: projectLocation
 				});
-				store.updateProject && store.updateProject(workspace.id, {projectName:projectName, contentLocation:file.path, originalPath: req.body.Location});
 			});
 		}
 	}
