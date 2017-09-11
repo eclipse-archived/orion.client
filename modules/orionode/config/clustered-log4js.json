@@ -16,12 +16,7 @@
     "appenders": [{
         "type": "clustered",
         "appenders": [{
-            "type": "console",
-            "layout": {
-                "type": "pattern",
-                "pattern": "[%d] [%p] [%c] %m",
-                "tokens": {}
-            }
+            "type": "console"
         }]
     }]
 }
