@@ -13,29 +13,41 @@ var assert = require("assert"),
 	express = require("express"),
 	supertest = require("supertest"),
 	path = require("path"),
-	testdata = require("./support/test_data"),
-	middleware = require("../index.js");
+	testData = require("./support/test_data"),
+	middleware = require("../index.js"),
+	manifests = require('../lib/cf/manifests'),
+	store = require('../lib/metastore/fs/store'),
+	file = require('../lib/file');
 
-var WORKSPACE = path.join(__dirname, ".test_workspace");
-var MEATASTORE =  path.join(__dirname, '.test_metadata');
+var CONTEXT_PATH = "",
+	WORKSPACE = path.join(__dirname, ".test_workspace"),
+	MEATASTORE =  path.join(__dirname, '.test_metadata'),
+	CF = "/cfapi",
+	MANIFESTS = "/manifests",
+	PREFIX_FILE = CONTEXT_PATH + '/file';
 
-var orion = function(options) {
-	// Ensure tests run in 'single user' mode
-	var opts = options || {};
-	opts.workspaceDir = WORKSPACE;
-	opts.configParams = { "orion.single.user": true, "orion.single.user.metaLocation": MEATASTORE};
-	return middleware(opts);
+var configParams = {
+	"orion.single.user": true, 
+	"orion.single.user.metaLocation": MEATASTORE
 };
 
+var app = express();
+	app.locals.metastore = store({workspaceDir: WORKSPACE, configParams:configParams});
+	app.locals.metastore.setup(app);
+	app.use(CF+MANIFESTS, manifests.router({ fileRoot: PREFIX_FILE }));
+	app.use(PREFIX_FILE + '*', file({fileRoot: PREFIX_FILE, workspaceRoot: CONTEXT_PATH + '/workspace'}));
+
+var request = supertest.bind(null, app);
+
 describe("Orion cloud foundry", function() {
-	// before(function() {
-	// 	testData.setUpWorkspace(WORKSPACE, MEATASTORE);
-	// });
-	// after("Remove Workspace and Metastore", function(done) {
-	// 	 testData.tearDown(WORKSPACE, function(){
-	// 		 testData.tearDown(MEATASTORE, done);
-	// 	 });
-	// });
+	before(function() {
+		testData.setUpWorkspace(WORKSPACE, MEATASTORE);
+	});
+	after("Remove Workspace and Metastore", function(done) {
+		 testData.tearDown(WORKSPACE, function(){
+			 testData.tearDown(MEATASTORE, done);
+		 });
+	});
 	/**
 	 * From: org.eclipse.orion.server.tests.cf.ManifestParserTest.java
 	 */
