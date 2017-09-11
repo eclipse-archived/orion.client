@@ -16,6 +16,7 @@ var assert = require('assert'),
 	supertest = require('supertest'),
 	store = require('../../lib/metastore/fs/store'),
 	testData = require('../support/test_data'),
+	testHelper = require('../support/testHelper'),
 	sites = require('../../lib/sites');
 
 var CONTEXT_PATH = '',

@@ -307,8 +307,9 @@ describe("Orion metastore", function() {
 		testHelper.withWorkspace(request, PREFIX, WORKSPACE_ID)
 			.end(function(err, res) {
 				testHelper.throwIfError(err);
+				var ws = res.body.Location;
 				request()
-					.post(res.body.Location)
+					.post(ws)
 					.type('json')
 					.send({Name: 'testMoveProjectWith|InProjectName'})
 					.expect(201)
@@ -316,7 +317,7 @@ describe("Orion metastore", function() {
 						testHelper.throwIfError(err);
 						var pLoc = res.body.Location;
 						request()
-							.post(ws.Location)
+							.post(ws)
 							.type('json')
 							.set('X-Create-Options', "move")
 							.set('Slug', 'testMoveProjectWith|InProjectNameMOVED')
@@ -336,8 +337,9 @@ describe("Orion metastore", function() {
 		testHelper.withWorkspace(request, PREFIX, WORKSPACE_ID)
 			.end(function(err, res) {
 				testHelper.throwIfError(err);
+				var ws = res.body.Location;
 				request()
-					.post(res.body.Location)
+					.post(ws)
 					.type('json')
 					.send({Name: 'testMoveSimpleProject'})
 					.expect(201)
@@ -345,7 +347,7 @@ describe("Orion metastore", function() {
 						testHelper.throwIfError(err);
 						var pLoc = res.body.Location;
 						request()
-							.post(ws.Location)
+							.post(ws)
 							.type('json')
 							.set('X-Create-Options', "move")
 							.set('Slug', 'testMoveSimpleProjectMOVED')
