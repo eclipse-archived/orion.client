@@ -440,10 +440,10 @@ exports.handleFilePOST = function(workspaceRoot, fileRoot, req, res, destFile, m
 			api.writeError(500, res, err.message);
 		});
 	};
-	fs.statAsync(destFile.path)
+	return fs.statAsync(destFile.path)
 	.catchReturn({ code: 'ENOENT' }, null) // suppress reject when file does not exist
 	.then(function(stats) {
-		return !!stats; // just return whether the file existed
+		return Boolean(stats); // just return whether the file existed
 	})
 	.then(function(destExists) {
 		var xCreateOptions = (req.headers['x-create-options'] || "").split(",");

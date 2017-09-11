@@ -172,6 +172,24 @@ function writeError(code, res, msg) {
 }
 
 /**
+ * @name isValidFileName
+ * @description Helper for check file name is valid, doesn't allow slash, backslash inside filename, or empty string or white space as the filename
+ * @param {string} fileName
+ * @returns {boolean}
+ * @since 16.0
+ */
+function isValidProjectName(fileName) {
+	var result;
+	result = ['',' ','/'].some(function(value){
+		return value === fileName;
+	});
+	result |= ['/','\\'].some(function(value){
+		return fileName.indexOf(value) > -1;
+	});
+	return !result;
+}
+
+/**
  * Util for stripping host names from URLs on this server. If aUrl indicates a resource on this host (as given by the request's Host header),
  * returns the URL with this server's host removed. Otherwise, returns aUrl unmodified.
  * <p>
@@ -213,5 +231,6 @@ exports.writeError = writeError;
 exports.writeResponse = writeResponse;
 exports.encodeLocation = encodeLocation;
 exports.setResponseNoCache = setResponseNoCache;
+exports.isValidProjectName = isValidProjectName;
 exports.sendStatus = sendStatus;
 exports.getOrionEE = getOrionEE;
