@@ -58,7 +58,7 @@ exports.setUpWorkspace = function setUpWorkspace(wsDir, metastore, done) {
 	request()
 		.post(CONTEXT_PATH + '/workspace')
 		.set('Slug', 'Orion Content')
-		.expect(200)
+		.expect(201)
 		.end(done);
 };
 

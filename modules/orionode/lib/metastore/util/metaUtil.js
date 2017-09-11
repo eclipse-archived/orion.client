@@ -19,18 +19,39 @@ module.exports.encodeWorkspaceId = function (userId, workspaceName) {
 
 module.exports.decodeUserIdFromWorkspaceId = function (workspaceId) {
 	var index = workspaceId.lastIndexOf(SEPARATOR);
-	if (index === -1) return null;
+	if (index === -1) {
+		return null;
+	}
 	return workspaceId.substring(0, index);
 };
 
 var decodeWorkspaceNameFromWorkspaceId = module.exports.decodeWorkspaceNameFromWorkspaceId = function (workspaceId) {
 	var index = workspaceId.lastIndexOf(SEPARATOR);
-	if (index === -1) return null;
+	if (index === -1) {
+		return null;
+	}
 	return workspaceId.substring(index + 1);
 };
 
-var getWorkspacePath = module.exports.getWorkspacePath = function(workspaceDir, workspaceId, userId){
-	return [workspaceDir, userId.substring(0,2), userId, decodeWorkspaceNameFromWorkspaceId(workspaceId)];
+/**
+ * Tries to compose the workspace path from the workspace directory, the current workspaces ID, and the current 
+ * user.
+ * @param {string} workspaceDir The path to the workspace directory
+ * @param {string} workspaceId The identifier of the workspace
+ * @param {string} userId The ID of the current user
+ * @returns {string[]} The array of segments to join to make the workspace path
+ */
+var getWorkspacePath = module.exports.getWorkspacePath = function(workspaceDir, workspaceId, userId) {
+	var segments = [workspaceDir];
+	if(typeof userId === 'string' && userId.length > 0) {
+		segments.push(userId.substring(0,2));
+		segments.push(userId);
+	} 
+	var wid = decodeWorkspaceNameFromWorkspaceId(workspaceId);
+	if(wid) {
+		segments.push(wid);
+	}
+	return segments;
 };
 
 module.exports.createWorkspaceDir = function (workspaceDir, userId, workspaceId, callback) {

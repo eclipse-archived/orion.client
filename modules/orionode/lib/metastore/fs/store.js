@@ -259,7 +259,9 @@ Object.assign(FsMetastore.prototype, {
 							return reject(error);
 						}
 						if (!metadata) {
-							return reject(new Error(String("could not read workspace").concat(workspaceId)));
+							var err = new Error(String("could not read workspace: ").concat(workspaceId));
+							err.code = 404;
+							return reject(err);
 						}
 						var workspace = {
 							"id": metadata.UniqueId,

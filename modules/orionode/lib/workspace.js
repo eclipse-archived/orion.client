@@ -86,17 +86,18 @@ module.exports = function(options) {
 				Name: userId,
 				UserName: req.user.fullname || userId
 			};
-			
 			return metaUtil.getWorkspaceMeta(req.user.workspaces, store, workspaceRoot)
-			.then(function(workspaceInfos){
-				workspaceJson.Workspaces = workspaceInfos || [];
-				return api.writeResponse(null, res, null, workspaceJson, true);
-			});
+				.then(function(workspaceInfos) {
+					workspaceJson.Workspaces = Array.isArray(workspaceInfos) ? workspaceInfos : [];
+					return api.writeResponse(null, res, null, workspaceJson, true);
+				}, function reject(err) {
+					return api.writeError(err.code || 500, res, err.message);
+				});
 		}
 		var workspaceId = rest;
 		store.getWorkspace(workspaceId, function(err, workspace) {
 			if (err) {
-				return writeError(400, res, err);
+				return writeError(err.code || 400, res, err);
 			}
 			if (!workspace) {
 				return writeError(404, res, "Workspace not found: " + rest);
@@ -121,7 +122,7 @@ module.exports = function(options) {
 					return writeError(singleUser ? 403 : 400, res, err);
 				}
 				getWorkspaceJson(req, workspace).then(function(workspaceJson) {
-					return api.writeResponse(null, res, null, workspaceJson, true);
+					return api.writeResponse(201, res, null, workspaceJson, true);
 				}).catch(function(err) {
 					api.writeResponse(400, res, null, err);
 				});
@@ -191,7 +192,7 @@ module.exports = function(options) {
 				if (err) {
 					return writeError(400, res, err);
 				}
-				return writeResponse(200, res);
+				return writeResponse(204, res);
 			});
 		});
 	}

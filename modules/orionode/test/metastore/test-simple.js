@@ -210,6 +210,8 @@ describe("Orion metastore", function() {
 	it("testCreateSecondWorkspace", function(done) {
 		request()
 			.post(PREFIX)
+			.type('json')
+			.send({Name: 'Orion sandbox'})
 			.set('Slug', 'Orion sandbox')
 			.expect(201)
 			.end(function(err, res) {
@@ -259,7 +261,7 @@ describe("Orion metastore", function() {
 						var pLoc = res.body.Location;
 						request()
 							.delete(pLoc)
-							.expect(200)
+							.expect(204)
 							.end(function(err, res) {
 								testHelper.throwIfError(err);
 								request()
@@ -277,12 +279,13 @@ describe("Orion metastore", function() {
 			.expect(201)
 			.end(function(err, res) {
 				testHelper.throwIfError(err);
-				testHelper.withWorkspace(request, PREFIX, res.body.Name)
+				testHelper.withWorkspace(request, PREFIX, res.body.Id)
 					.end(function(err, res) {
+						testHelper.throwIfError(err);
 						var wLoc = res.body.Location;
 						request()
 							.delete(wLoc)
-							.expect(200)
+							.expect(204)
 							.end(function(err, res) {
 								testHelper.throwIfError(err);
 								request()
