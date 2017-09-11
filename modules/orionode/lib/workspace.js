@@ -132,8 +132,8 @@ module.exports = function(options) {
 				var err = {Message: 'Missing "Slug" header or "Name" parameter'};
 				api.writeResponse(400, res, null, err);
 				return;
-			} else if('' === projectName || ' ' === projectName || '/' === projectName) {
-				return api.writeError(400, res, null, {Message: "'"+projectName+"' is not a valid name for a project"})
+			} else if (!api.isValidProjectName(projectName)) {
+				return api.writeError(400, res, null, {Message: "'"+projectName+"' is not a valid name for a project"});
 			}
 			workspaceId = rest;
 			store.getWorkspace(workspaceId, function(err, workspace) {

@@ -258,7 +258,9 @@ Object.assign(FsMetastore.prototype, {
 						if (error) {
 							return reject(error);
 						}
-
+						if (!metadata) {
+							return reject(new Error(String("could not read workspace").concat(workspaceId)));
+						}
 						var workspace = {
 							"id": metadata.UniqueId,
 							"name": metadata.FullName,
@@ -588,6 +590,9 @@ Object.assign(FsMetastore.prototype, {
 	},
 	
 	createRenameDeleteProject: function(workspaceId, projectInfo) {
+		if (!workspaceId) {
+			return Promise.reject(new Error('workspace id is null'));
+		}
 		var userId = metaUtil.decodeUserIdFromWorkspaceId(workspaceId);
 		return Promise.using(this.lock(userId, false), function() {
 			return new Promise(function(resolve, reject) {
@@ -656,6 +661,9 @@ Object.assign(FsMetastore.prototype, {
 	 */
 	_createProjectMetadata: function(workspaceId, projectName, metadata, callback) {
 		var metaFile = getProjectMetadataFileName(this._options, workspaceId, projectName);
+
+		// TODO it's bad to create dir in all cases, some check need to have here
+		// Need to check if the projectName has / in it,
 		return mkdirpAsync(nodePath.dirname(metaFile)).then( // create parent folder(s) if necessary
 			function() {
 				fs.statAsync(metaFile)
