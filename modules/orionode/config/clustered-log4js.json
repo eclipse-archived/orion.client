@@ -22,11 +22,6 @@
                 "pattern": "[%d] [%p] [%c] %m",
                 "tokens": {}
             }
-        }, {
-            "type": "file",
-            "filename": "master.log",
-            "maxLogSize": 10000000,
-            "backups": 10
         }]
     }]
 }

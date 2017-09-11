@@ -35,6 +35,7 @@ var port = args.port || args.p || process.env.PORT || 8081;
 var configFile = args.config || args.c || path.join(__dirname, 'orion.conf');
 
 var configParams = argslib.readConfigFileSync(configFile) || {};
+var log4jsOptions = configParams["orion.logs.location"] ? {"cwd" : configParams["orion.logs.location"]} : null;
 
 // Patches the fs module to use graceful-fs instead
 require('graceful-fs').gracefulify(fs);
@@ -67,7 +68,7 @@ function startServer(cb) {
 		// init logging
 		if (!configParams["orion.cluster"]) {
 			// Use this configuration only in none-clustered server.
-			log4js.configure(path.join(__dirname, 'config/log4js.json'));
+			log4js.configure(path.join(__dirname, 'config/log4js.json'), log4jsOptions);
 		}
 		if(configParams.isElectron){
 			log4js.loadAppender('file');
@@ -197,8 +198,8 @@ function start(electron) {
 
 if (configParams["orion.cluster"]) {
 	var cluster = require('cluster');
-	if (cluster.isMaster) {
-		log4js.configure(path.join(__dirname, 'config/clustered-log4js.json'));
+	if (cluster.isMaster) {		
+		log4js.configure(path.join(__dirname, 'config/clustered-log4js.json'), log4jsOptions);
 		var numCPUs = typeof configParams["orion.cluster"] === "boolean" ? os.cpus().length : configParams["orion.cluster"] >> 0;
 		for (var i = 0; i < numCPUs; i++) {
 			cluster.fork();
