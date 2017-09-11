@@ -437,7 +437,7 @@ exports.handleFilePOST = function(workspaceRoot, fileRoot, req, res, destFile, m
 			return writeFileMetadata(req, res, api.join(fileRoot, destFile.workspaceId), api.join(workspaceRoot, destFile.workspaceId), destFile, stats, /*etag*/null, /*depth*/0, metadataMixins);
 		})
 		.catch(function(err) {
-			api.writeError(500, res, err.message);
+			return api.writeError(err.code || 500, res, err.message);
 		});
 	};
 	return fs.statAsync(destFile.path)
@@ -472,19 +472,24 @@ exports.handleFilePOST = function(workspaceRoot, fileRoot, req, res, destFile, m
 					});
 				} else {
 					return fs.renameAsync(sourceFile.path, destFile.path)
-					.then(function(result) {
-						var eventData = { type: "rename", isDir: stats.isDirectory(), file: destFile, sourceFile: sourceFile };
-						exports.fireFileModificationEvent(eventData);
-						return result;
-					});
+						.then(function(result) {
+							var eventData = { type: "rename", isDir: stats.isDirectory(), file: destFile, sourceFile: sourceFile };
+							exports.fireFileModificationEvent(eventData);
+							return result;
+						})
+						.catch(function rejectRename(err) {
+							var err = new Error("Failed to move project: "+sourceUrl)
+							err.code = 403;
+							throw err;
+						});
 				}
 			})
 			.then(writeResponse.bind(null, destExists))
 			.catch(function(err) {
 				if (err.code === 'ENOENT') {
-					return api.writeError(404, res, 'File not found:' + sourceUrl);
+					return api.writeError(err.code || 404, res, 'File not found:' + sourceUrl);
 				}
-				return api.writeError(500, res, err);
+				return api.writeError(err.code || 500, res, err);
 			});
 		}
 		// Just a regular file write

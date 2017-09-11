@@ -151,15 +151,15 @@ module.exports = function(options) {
 				
 				if(store.createRenameDeleteProject) {
 					return store.createRenameDeleteProject(workspace.id, {projectName:projectName, contentLocation:file.path, originalPath: req.body.Location})
-					.then(function(){
-						return fileUtil.handleFilePOST(workspaceRoot, fileRoot, req, res, file, {
-							Id: projectName,
-							ContentLocation: projectLocation,
-							Location: projectLocation
+						.then(function(){
+							return fileUtil.handleFilePOST(workspaceRoot, fileRoot, req, res, file, {
+								Id: projectName,
+								ContentLocation: projectLocation,
+								Location: projectLocation
+							});
+						}).catch(function(err){
+							writeError(err.code || 500, res, err);
 						});
-					}).catch(function(err){
-						writeError(err.code || 500, res, err);
-					});
 				}
 				return fileUtil.handleFilePOST(workspaceRoot, fileRoot, req, res, file, {
 					Id: projectName,
