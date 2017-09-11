@@ -40,13 +40,17 @@ var app = express();
 var request = supertest.bind(null, app);
 
 describe("Orion cloud foundry", function() {
-	before(function() {
-		testData.setUpWorkspace(WORKSPACE, MEATASTORE);
+	before(function(done) {
+		testData.setUp(WORKSPACE, function() {
+			testData.setUpWorkspace(WORKSPACE, MEATASTORE, done);
+		});
 	});
 	after("Remove Workspace and Metastore", function(done) {
-		 testData.tearDown(WORKSPACE, function(){
-			 testData.tearDown(MEATASTORE, done);
-		 });
+		testData.tearDown(WORKSPACE, function(){
+			testData.tearDown(path.join(MEATASTORE, '.orion'), function(){
+				testData.tearDown(MEATASTORE, done);
+			});
+		});
 	});
 	/**
 	 * From: org.eclipse.orion.server.tests.cf.ManifestParserTest.java

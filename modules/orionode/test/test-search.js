@@ -72,7 +72,7 @@ describe("Orion search", function() {
 	describe("search tests", function() {
 		it("testUnknownTerm", function(done) {
 			testHelper.withWorkspace(request, PREFIX_WORKSPACE, WORKSPACE_ID)
-				.end(function(done) {
+				.end(function(err, res) {
 					done() //TODO
 				});
 		});
