@@ -65,7 +65,10 @@ function startServer(cb) {
 		var dev = Object.prototype.hasOwnProperty.call(args, 'dev');
 		var log = Object.prototype.hasOwnProperty.call(args, 'log');
 		// init logging
-		log4js.configure(path.join(__dirname, 'config/log4js.json'));
+		if (!configParams["orion.cluster"]) {
+			// Use this configuration only in none-clustered server.
+			log4js.configure(path.join(__dirname, 'config/log4js.json'));
+		}
 		if(configParams.isElectron){
 			log4js.loadAppender('file');
 			var logPath = path.join(homeDir, '.orion', 'orion.log');
@@ -195,6 +198,7 @@ function start(electron) {
 if (configParams["orion.cluster"]) {
 	var cluster = require('cluster');
 	if (cluster.isMaster) {
+		log4js.configure(path.join(__dirname, 'config/clustered-log4js.json'));
 		var numCPUs = typeof configParams["orion.cluster"] === "boolean" ? os.cpus().length : configParams["orion.cluster"] >> 0;
 		for (var i = 0; i < numCPUs; i++) {
 			cluster.fork();
@@ -204,6 +208,7 @@ if (configParams["orion.cluster"]) {
 		});
 		logger.info("Master " + process.pid + " started");
 	} else {
+		log4js.configure({appenders: [{type: "clustered"}]});
 		logger.info("Worker " + process.pid + " started");
 		start(false); //TODO electron with cluster?
 	}

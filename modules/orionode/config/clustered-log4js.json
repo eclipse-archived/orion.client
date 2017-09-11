@@ -1,0 +1,32 @@
+{
+    "levels": {
+        "server": "INFO",
+        "audit-logs": "INFO",
+        "xfer": "ERROR",
+        "update": "DEBUG",
+        "user": "INFO",
+        "ttyshell": "INFO",
+        "tasks": "INFO",
+        "search-worker": "ERROR",
+        "git": "ALL",
+        "electron": "ALL",
+        "response": "ERROR",
+        "livesync": "DEBUG"
+    },
+    "appenders": [{
+        "type": "clustered",
+        "appenders": [{
+            "type": "console",
+            "layout": {
+                "type": "pattern",
+                "pattern": "[%d] [%p] [%c] %m",
+                "tokens": {}
+            }
+        }, {
+            "type": "file",
+            "filename": "master.log",
+            "maxLogSize": 10000000,
+            "backups": 10
+        }]
+    }]
+}

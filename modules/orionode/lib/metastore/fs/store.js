@@ -661,9 +661,6 @@ Object.assign(FsMetastore.prototype, {
 	 */
 	_createProjectMetadata: function(workspaceId, projectName, metadata, callback) {
 		var metaFile = getProjectMetadataFileName(this._options, workspaceId, projectName);
-
-		// TODO it's bad to create dir in all cases, some check need to have here
-		// Need to check if the projectName has / in it,
 		return mkdirpAsync(nodePath.dirname(metaFile)).then( // create parent folder(s) if necessary
 			function() {
 				fs.statAsync(metaFile)
