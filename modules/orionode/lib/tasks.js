@@ -63,18 +63,20 @@ function orionTasksAPI(options) {
 	.delete('/temp/:id', deleteOperation)
 	.get('/count', function(req, res/*, next*/) {
 		writeResponse(200, res, null, {"count": taskCount});
-	});
+	})
+	.put('/temp/:id', cancelOperation)
+	.put('/id/:id', cancelOperation);
 }
 
 function getTaskMeta(req, taskLocationOrKeep, taskId) {
-	var keep, id;
+	var keep;
 	if (typeof taskLocationOrKeep === "string") {
 		// This is when req doesn't have enough information needed
 		keep = taskLocationOrKeep.startsWith("/id");
 	} else if (typeof taskLocationOrKeep === "boolean") {
-		keep = taskLocationOrKeep
+		keep = taskLocationOrKeep;
 	} else {
-		keep = req.url.startsWith("/id")
+		keep = req.url.startsWith("/id");
 	}
 	return {
 		keep: keep,
@@ -201,7 +203,7 @@ function deleteOperation(req, res/*, next*/) {
 		}
 		if (!task || (task.username && task.username !== req.user.username)) {
 			// task meta saved in fs doesn't have username, while task saved in RAM and mongo does.
-			return writeError(404, res, "Task does not exist: " + req.id);
+			return writeError(404, res, "Could not delete task that does not exist: " + req.id);
 		}
 		taskStore.deleteTask(getTaskMeta(req), function(err) {
 			if (err) {
@@ -239,6 +241,34 @@ function deleteAllOperations(req, res) {
 				locations.push(toJSON(task, true).Location);
 				done();
 			}
+		});
+	});
+}
+
+/**
+ * @name cancelOperation
+ * @description Cancel task operation by marking abort in task status
+ */
+function cancelOperation(req, res){
+	if(!req.body.abort){
+		return writeError(400, res, "Invalid request parameters, try {'abort':true}" + req.id);
+	}
+	taskStore.getTask(getTaskMeta(req), function(err, task) {
+		if (err) {
+			return writeError(500, res, err.toString());
+		}
+		if (!task || (task.username && task.username !== req.user.username)) {
+			// task meta saved in fs doesn't have username, while task saved in RAM and mongo does.
+			return writeError(404, res, "Could not cancel task that does not exist: " + req.id);
+		}
+		if (task.cancelable) {
+			task.type = "abort";
+		}
+		taskStore.updateTask(task, function(err) {
+			if (err) {
+				writeError(500, res, err.toString());
+			}
+			writeResponse(200, res)
 		});
 	});
 }
