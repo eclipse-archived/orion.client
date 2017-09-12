@@ -424,7 +424,7 @@ define([
 			options.sourceType = "script"; //$NON-NLS-1$
 		}
 		options.allowHashBang = true;
-		if(typeof options.ecmaVersion !== 'number' || (options.ecmaVersion < 3 || options.ecmaVersion > 7)) {
+		if(typeof options.ecmaVersion !== 'number' || (options.ecmaVersion < 3 || options.ecmaVersion > 9)) {
 			options.ecmaVersion = 7; //don't stomp on the value set in Tern
 		}
 		if (!options.directSourceFile && file) {

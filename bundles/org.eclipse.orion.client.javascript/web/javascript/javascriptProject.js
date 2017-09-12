@@ -324,8 +324,8 @@ define([
 		switch(filename) {
 			case JavaScriptProject.prototype.TERN_PROJECT: {
 				var json = Object.create(null);
-				json.ecmaVersion = 6;
-				json.libs = ['ecma5', 'ecma6'];
+				json.ecmaVersion = 7;
+				json.libs = ['ecma5', 'ecma6', 'ecma7'];
 				json.plugins = Object.create(null);
 				json.loadEagerly = [];
 				return json;
@@ -515,6 +515,25 @@ define([
 	}
 	
 	/**
+	 * @description Translate the ecmaVersion from its year-form to simple number form
+	 * @param {number} ev The ecmaVersion to translate
+	 * @returns {number} The simple number to use for the ECMA version
+	 * @since 16.0
+	 */
+	function translateEcma(ev) {
+		var r = 7;
+		if(typeof ev === 'number') {
+			r = ev;
+			if(ev > 2014) {
+				r = ev - 2009;
+			} else if(r < 4) {
+				r = 7;
+			}
+		}
+		return r;
+	}
+	
+	/**
 	 * @description Examine the .tern-project file to configure the tools
 	 * @param {JavaScriptProject} project The backing project to configure
 	 * @param {?} file The .tern-project file contents
@@ -563,6 +582,7 @@ define([
 					}
 				} 
 				if(typeof vals.ecmaVersion === 'number') {
+					var ecma = translateEcma(vals.ecmaVersion);
 					if(vals.ecmaVersion > 4 && vals.ecmaVersion <= 9) {
 						project.map.env.envs.es6 = vals.ecmaVersion >= 6;
 						project.map.env.envs.es7 = vals.ecmaVersion >= 7;
