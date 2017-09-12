@@ -91,6 +91,9 @@ exports.setUp = function setUp(dir, callback, wsjson) {
 		fs.writeFileSync(path.join(projectFolder, "fizz.txt"), "hello world");
 		fs.writeFileSync(path.join(myFolder, "buzz.txt"), "buzzzz");
 		fs.writeFileSync(path.join(subfolder, "quux.txt"), "whoa");
+		fs.writeFileSync(path.join(subfolder, "foo.html"), "<html></html>");
+		fs.writeFileSync(path.join(subfolder, "bar.js"), "function myFunc(one) {}");
+		fs.writeFileSync(path.join(subfolder, "nonalpha.md"), "amber&sand");
 		callback();
 	}
 	if(fs.existsSync(dir)) {

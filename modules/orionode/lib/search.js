@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015 IBM Corporation and others.
+ * Copyright (c) 2015, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -142,7 +142,7 @@ module.exports = function(options) {
 		var file = fileUtil.getFile(req, loc);
 		
 		if (file) {
-			file.fileRoot = api.join(req.contextPath, "file", file.workspaceId);
+			file.fileRoot = api.join(typeof req.contextPath === 'string' ? req.contextPath : '', "file", file.workspaceId);
 			searchOpts.searchScope = [file];
 		} else {
 			var store = fileUtil.getMetastore(req);
