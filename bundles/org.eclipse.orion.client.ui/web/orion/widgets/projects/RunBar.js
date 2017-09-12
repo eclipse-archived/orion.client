@@ -20,8 +20,9 @@ define([
 	'orion/metrics',
 	'orion/webui/dialogs/ConfirmDialog',
 	'orion/URITemplate',
-	'orion/PageLinks'
-], function(objects, messages, RunBarTemplate, lib, i18nUtil, mRichDropdown, mTooltip, mMetrics, mConfirmDialog, URITemplate, PageLinks) {
+	'orion/PageLinks',
+	'orion/Deferred'
+], function(objects, messages, RunBarTemplate, lib, i18nUtil, mRichDropdown, mTooltip, mMetrics, mConfirmDialog, URITemplate, PageLinks, Deferred) {
 	
 	var METRICS_LABEL_PREFIX = "RunBar"; //$NON-NLS-0$
 	var REDEPLOY_RUNNING_APP_WITHOUT_CONFIRMING = "doNotConfirmRedeployRunningApp"; //$NON-NLS-0$
@@ -40,6 +41,7 @@ define([
 	 * @param options.preferencesService
 	 * @param options.statusService
 	 * @param options.actionScopeId
+	 * @param options.generalPreferences
 	 */
 	function RunBar(options) {
 		this._project = null;
@@ -55,6 +57,7 @@ define([
 		this._projectClient = options.projectClient;
 		this._preferences = options.preferences;
 		this._editorInputManager = options.editorInputManager;
+		this._generalPreferences = options.generalPreferences;
 		
 		this._initialize();
 		this._setLaunchConfigurationsLabel(null);
@@ -216,13 +219,24 @@ define([
 					var dropdownMenuItemSpan = lib.$(".dropdownMenuItem", createNewItem); //$NON-NLS-0$
 					dropdownMenuItemSpan.classList.add("addNewMenuItem"); //$NON-NLS-0$
 					
-					var defaultDeployCommand = this._projectCommands.getDeployProjectCommands(this._commandRegistry)[0];
-					if (defaultDeployCommand) {
-						this._commandRegistry.registerCommandContribution(createNewItem.id, defaultDeployCommand.id, 1); //$NON-NLS-0$
+					var defaultDeployCommands = this._projectCommands.getDeployProjectCommands(this._commandRegistry);
+					if (defaultDeployCommands) {
 						domNodeWrapperList = [];
-						this._commandRegistry.renderCommands(createNewItem.id, dropdownMenuItemSpan, this._project, this, "button", null, domNodeWrapperList); //$NON-NLS-0$
-						domNodeWrapperList[0].domNode.textContent = "+"; //$NON-NLS-0$
-						this._setNodeTooltip(domNodeWrapperList[0].domNode, messages["createNewTooltip"]); //$NON-NLS-0$
+						if (defaultDeployCommands.length === 1) {
+							this._commandRegistry.registerCommandContribution(createNewItem.id, defaultDeployCommands[0].id, 1);
+							this._commandRegistry.renderCommands(createNewItem.id, dropdownMenuItemSpan, this._project, this, "button", null, domNodeWrapperList);
+							domNodeWrapperList[0].domNode.textContent = "+";
+							this._setNodeTooltip(domNodeWrapperList[0].domNode, defaultDeployCommands[0].tooltip);
+						} else {
+							this._commandRegistry.addCommandGroup(createNewItem.id, "orion.deployServiceGroup", 1000, "+", null, null, null, "+", null, true);
+							for (var i = 0; i < defaultDeployCommands.length; i++) {
+								this._commandRegistry.registerCommandContribution(createNewItem.id, defaultDeployCommands[i].id, 1100 + i * 100, "orion.deployServiceGroup");
+							}
+							var menuWrapper = document.createElement('div');
+							menuWrapper.classList.add('dropdownSubMenu'); // Prevent auto dismiss
+							dropdownMenuItemSpan.appendChild(menuWrapper);
+							this._commandRegistry.renderCommands(createNewItem.id, menuWrapper, this._project, this, "tool", null, domNodeWrapperList);
+						}
 					}
 				}
 			}.bind(this);
@@ -508,6 +522,11 @@ define([
 						case "STOPPED": //$NON-NLS-0$
 							this._enableControl(this._playButton);
 							this._statusLight.classList.add("statusLightRed"); //$NON-NLS-0$
+							break;
+						case "PAUSED": //$NON-NLS-0$
+							this._enableControl(this._playButton);
+							this._enableControl(this._stopButton);
+							this._statusLight.classList.add("statusLightAmber"); //$NON-NLS-0$
 							break;
 						default:
 							break;
@@ -955,7 +974,7 @@ define([
 			}
 		}
 	});
-	
+
 	return {
 		RunBar: RunBar,
 		METRICS_LABEL_PREFIX: METRICS_LABEL_PREFIX

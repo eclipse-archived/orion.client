@@ -29,6 +29,7 @@ define(['orion/objects', 'orion/commands', 'orion/outliner', 'orion/webui/little
 	 * @param {Object} params
 	 * @param {orion.commandregistry.CommandRegistry} params.commandRegistry
 	 * @param {orion.preferences.PreferencesService} params.preferences
+	 * @param {edit.GeneralPreferences} params.generalPreferences
 	 * @param {orion.core.ContentTypeRegistry} params.contentTypeRegistry
 	 * @param {orion.fileClient.FileClient} params.fileClient
 	 * @param {orion.editor.InputManager} params.editorInputManager
@@ -44,6 +45,7 @@ define(['orion/objects', 'orion/commands', 'orion/outliner', 'orion/webui/little
 	function Sidebar(params) {
 		this.params = params;
 		this.preferences = params.preferences;
+		this.generalPreferences = params.generalPreferences;
 		this.commandRegistry = params.commandRegistry;
 		this.contentTypeRegistry = params.contentTypeRegistry;
 		this.fileClient = params.fileClient;
@@ -76,6 +78,9 @@ define(['orion/objects', 'orion/commands', 'orion/outliner', 'orion/webui/little
 			this._createOutliner();
 			this._createInlineSearchPane();
 			this._createProblemsPane();
+			if (this.generalPreferences.enableDebugger) {
+				this._createDebugPane();
+			}
 		},
 		showToolbar: function() {
 			this.toolbarNode.style.display = "block"; //$NON-NLS-0$
@@ -397,7 +402,37 @@ define(['orion/objects', 'orion/commands', 'orion/outliner', 'orion/webui/little
 			});
 			this.commandRegistry.addCommand(openSearchCommand);
 			this.commandRegistry.registerCommandContribution(this.editScope, "orion.openSearch", 101, "orion.menuBarEditGroup/orion.findGroup", false, new mKeyBinding.KeyBinding('h', true, true)); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-3$
- 		}
+		},
+
+		_createDebugPane: function() {
+			require(['orion/debug/debugSlideoutViewMode'], function(mDebugSlideoutViewMode) {
+				this._debugPanes = new mDebugSlideoutViewMode.DebugSlideoutViewMode(this._slideout, this.serviceRegistry, this.commandRegistry, this.preferences);
+				this.serviceRegistry.registerService("orion.debug.debugPanes", this._debugPanes);
+
+				var showDebugCommand = new mCommands.Command({
+					name: messages["Show Debug"],
+					id: "orion.showDebug",
+					visibleWhen: function() {
+						return true;
+					},
+					callback: function(data) {
+						if (this._debugPanes.isVisible()) {
+							this._debugPanes.hide();
+						} else {
+							var mainSplitter = mGlobalCommands.getMainSplitter();
+							if (mainSplitter.splitter.isClosed()) {
+								mainSplitter.splitter.toggleSidePanel();
+							}
+							this._debugPanes.show();
+						}
+					}.bind(this)
+				});
+
+				this.commandRegistry.addCommand(showDebugCommand);
+
+				this.commandRegistry.registerCommandContribution(this.switcherNode.id, "orion.showDebug", 2, "orion.menuBarViewGroup/orion.slideoutMenuGroup", false, new KeyBinding.KeyBinding('e', true, false, false));
+			}.bind(this));
+		}
 	});
 
 	/**

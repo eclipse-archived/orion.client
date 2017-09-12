@@ -24,7 +24,7 @@ define([
 	 * @name orion.widgets.Section
 	 * @class Generates a section
 	 * @param {DomNode} parent parent node
-	 * @param {DomNode} sibling if specified, the section will be inserted before the sibling
+	 * @param {DomNode} [options.sibling] if specified, the section will be inserted before the sibling
 	 * @param {String} options.id id of the section header
 	 * @param {String} options.title title (in HTML) of the section
 	 * @param {orion.preferences.PreferencesService} [options.preferenceService] used to store the hidden/shown state of the section if specified

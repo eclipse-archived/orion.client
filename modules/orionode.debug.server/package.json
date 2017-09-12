@@ -1,0 +1,27 @@
+{
+  "name": "orion-debugger-server",
+  "version": "0.1.0",
+  "main": "server.js",
+  "description": "A debugger server for orion using VS Code debugger protocol.",
+  "keywords": [],
+  "author": "Orion contributors <orionnode@gmail.com>",
+  "license": "Eclipse Public License + Eclipse Distribution License",
+  "repository": {
+    "type": "git",
+    "url": ""
+  },
+  "dependencies": {
+    "express": "^4.13.3",
+    "socket.io": "^1.4.8",
+    "vscode-debugadapter": "^1.15.0"
+  },
+  "devDependencies": {},
+  "engines": {
+    "node": "^4.0.0"
+  },
+  "scripts": {
+    "start": "node server.js",
+    "install": "node installAdapters.js",
+    "demo": "node demo/demoServer.js"
+  }
+}

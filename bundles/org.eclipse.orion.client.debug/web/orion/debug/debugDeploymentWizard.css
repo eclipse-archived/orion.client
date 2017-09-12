@@ -1,0 +1,385 @@
+@import "../../css/layout.css";
+
+@import "../../css/ide.css";
+
+@import "../../css/sections.css";
+
+@import "../../css/images.css";
+
+@import "../../css/theme.css";
+
+@import "../../css/progress.css";
+
+@import "../../css/wizard.css";
+
+@import "../editor/themes/default.css";
+
+html, body {
+	min-width: 350px;
+	overflow: hidden;
+}
+
+.dialogFrame {
+	background-color: #fdfdfd;
+}
+
+#messageArea {
+	display: table-cell;
+	width: calc(100% - 16px);
+}
+
+#messageRow {
+	background: none repeat scroll 0 0 #FFFFFF;
+	box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.098), 0 1px 0 0
+		rgba(0, 0, 0, 0.098);
+	height: 25px;
+	padding: 3px 5px 2px 9px;
+	display: table;
+	width: calc(100% - 15px);
+}
+
+#messageButton {
+	right: -7px;
+	margin-top: 1px;
+	position: absolute;
+	top: 0;
+}
+
+.Spaces {
+	width: 100%;
+}
+
+select {
+	height: 24px;
+	width: 290px;
+	border: 1px solid #bbb;
+}
+
+.selectCell input {
+	height: 24px;
+	width: 290px;
+	margin-left: 0;
+}
+
+.selectCell>input, .selectCell>select, .selectCell>.comboTextInputWrapper {
+	float:right;
+	color: #333;
+}
+.selectCell>input:disabled {
+	border-color: #ccc;
+	color: #ccc;
+}
+.selectCell>input.invalid {
+	color: #c33;
+	font-weight: normal;
+}
+.selectCell>select {
+	width: 292px;
+}
+/*hacko: push simple text span over to align with inputs and selects*/
+.selectCell>span {
+	padding-left: 9px;
+}
+.selectCell .core-sprite-openarrow {
+	color: inherit;
+	font-size: 13px !important;
+	padding-left: 5px;
+	-webkit-padding-start: 3px !important;
+}
+
+.modifiedCell {
+	background-color: #FFF6C5;
+}
+
+.comboTextInputWrapper {
+	height: 24px;
+	width: 289px;
+	border: 1px solid #bbb;
+}
+
+.comboTextInputWrapperFocussed {
+	outline: -webkit-focus-ring-color auto 5px;
+}
+
+.comboTextInputField {
+	width: 260px !important;
+	height: 24px;
+	text-align: left;
+	margin-right: 0;
+	border: 0px !important;
+}
+
+.recentEntryButton {
+	margin-left: 0;
+	height: 22px;
+	background: none repeat scroll 0 0 #fff;
+	width: 25px;
+}
+
+.formTable {
+	/*font-family: Arial, sans-serif;*/
+	font-size: 14px;
+	width: 100%;
+}
+
+.formTable input, .formTable select {
+	font-size: 14px;
+}
+
+.selectCell {
+	padding-top: 4px;
+	text-align: left;
+	height: 24px; /*since min-height has no effect on <td>*/
+}
+
+.listCell select {
+	height: inherit;
+	width: 190px;
+}
+
+#servicesAddRemoveButtonsCol {
+	text-align: center;
+	vertical-align: middle;
+}
+
+.messageContainer {
+	display: none;
+	padding-top: 2px;
+	position: absolute;
+	text-align: center;
+	box-shadow: 0 2px 0 rgba(0, 0, 0, 0.1);
+	background-color: #dff0d8;
+	border-bottom-left-radius: 5px;
+	border-bottom-right-radius: 5px;
+	margin-left: 5%;
+	margin-right: auto;
+	width: 90%;
+	padding-bottom: 5px;
+	padding-left: 5px;
+	padding-top: 5px;
+	z-index: 1000;
+}
+
+.messageContainer.showing {
+	display: block;
+	transition: top 0.7s ease 0s;
+}
+
+.retryFields {
+	margin-top: 5px;
+	text-align: right;
+}
+
+.retryFields label {
+	margin-left: 5px;
+}
+
+.errorMessage input {
+	border-color: #eed3d7 !important;
+}
+
+.errorMessage button {
+	color: #b94a48 !important;
+}
+
+.errorMessage button:hover {
+	color: #FFFFFF !important;
+}
+
+.messageContainer.errorMessage {
+	background-color: #f2dede !important;
+	border: 1px solid #eed3d7 !important;
+}
+
+.errorMessage, .errorMessage a {
+	color: #b94a48 !important;
+}
+
+.messageLabel a {
+	color: #b94a48;
+	text-decoration: underline;
+}
+
+.messageLabel button {
+	border: none;
+	border-radius: 5px;
+	background: none repeat scroll 0 0 rgba(0, 0, 0, 0);
+	color: #b94a48;
+	font-family: Arial, Helvetica, Myriad, Tahoma, clean, sans-serif,
+		Lucida Sans Unicode, Lucida Grande, Verdana;
+	font-size: 9pt;
+	cursor: pointer;
+}
+
+.messageLabel button:hover {
+	color: #FFFFFF;
+}
+
+.messageLabel {
+	color: #468847;
+	float: left;
+	max-height: 1000px;
+	overflow: hidden;
+	padding-left: 5px;
+	text-align: center;
+}
+
+.dialogTitle .closeDialog {
+	margin: 0;
+	cursor: pointer;
+}
+
+#memoryInput {
+	margin-right: 5px;
+	width: 235px;
+}
+
+#memoryUnit {
+	width: 50px;
+}
+
+
+input[type='number'] {
+	-moz-appearance: textfield;
+}
+
+input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer-spin-button
+	{
+	-webkit-appearance: none;
+	margin: 0;
+}
+
+.rowSeparator {
+	height: 20px;
+}
+
+.rowSeparator td {
+	padding: 15px 0 12px 0;
+}
+
+.wizardButtonRow {
+	-ms-user-select: none;
+	-moz-user-select: -moz-none;
+	-webkit-user-select: none;
+	user-select: none;
+}
+
+.wiz-hr {
+	display: block;
+	text-align: center;
+	overflow: hidden;
+	white-space: nowrap;
+}
+.wiz-hr > span {
+	position: relative;
+	display: inline-block;
+}
+.wiz-hr > span:before,
+.wiz-hr > span:after {
+	content: "";
+	position: absolute;
+	top: 50%;
+	width: 1000px;
+	height: 1px;
+	background: black;
+}
+.wiz-hr > span:before {
+	right: 100%;
+	margin-right: 10px;
+}
+.wiz-hr > span:after {
+	left: 100%;
+	margin-left: 10px;
+}
+
+.manifestOverride {
+	text-align: center;
+	font-size: 9pt;
+	position: absolute;
+	bottom: 75px;
+	width: calc(100% - 24px);
+}
+td#host::before,
+td#manifest::before{
+	position: absolute;
+	left: 32%;
+	margin-top: 3px;
+	content: "";
+	height: 16px;
+	width: 16px;
+}
+
+td#host::before{
+	margin-top: 5px;
+}
+
+.error::before{
+	background: url(../../../../images/error.png) scroll no-repeat;
+}
+
+.wrongPath::before{
+	background: url(../../../../images/warning.gif) scroll no-repeat; 
+}
+
+.correctPath::before{
+	background: url(../../../../images/success.png) scroll no-repeat;
+}
+
+.errorBorder{
+	border: red 2px solid;
+}
+.wrongPath input{
+	border: #FFA60C 2px solid;
+}
+.correctPath input{
+	border: #609B60 2px solid;
+}
+
+.errorBorder,
+.wrongPath input,
+.correctPath input{
+	border-radius: 2px;
+}
+
+#debug-adapter-type-select.disabled {
+	border-style: none;
+	appearance: none;
+    -moz-appearance:none;
+    -webkit-appearance:none;
+	background: inherit;
+}
+
+#debug-adapter-type-select::-ms-expand {
+	display: none;
+}
+
+span.tooltipContainer{
+	left: 145px !important;
+}
+
+#editor {
+	height: 215px;
+	border: solid 1px #eee;
+}
+
+#configTemplate {
+	position: relative;
+	float: right;
+	top: -30px;
+	right: 25px;
+	z-index: 1;
+}
+
+#template-button.hidden {
+	display: none;
+}
+
+#template-dropdown {
+	transition: width 0.25s, opacity 0.25s;
+	width: 125px;
+}
+
+#template-dropdown.collapsed {
+	width: 0px;
+	opacity: 0;
+}

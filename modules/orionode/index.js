@@ -136,24 +136,11 @@ function startServer(options) {
 			if(options.configParams["orion.collab.enabled"]){
 				appendStaticAssets.push('./bundles/org.eclipse.orion.client.collab/web');
 			}
+			if(options.configParams["orion.debug.enabled"]){
+				appendStaticAssets.push('./bundles/org.eclipse.orion.client.debug/web');
+			}
 			app.use(require('./lib/orion_static')({ orionClientRoot: ORION_CLIENT, maxAge: options.maxAge, orionode_static: orionode_static, prependStaticAssets: prependStaticAssets, appendStaticAssets: appendStaticAssets}));
 		}
-
-		//error handling
-		app.use(function(err, req, res, next){
-			logger.error(req.originalUrl, err);
-			res.status(404);
-
-			// respond with json
-			if (req.accepts('json')) {
-				res.send({ error: 'Not found' });
-				return;
-			}
-
-			// default to plain-text. send()
-			res.type('txt').send('Not found');
-		});
-
 		return app;
 	} catch (e) {
 		handleError(e);

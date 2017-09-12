@@ -1,0 +1,212 @@
+.debugPaneWrapper {
+    width: 100%;
+    height: 100%;
+}
+
+.debugPane {
+    padding: 5px;
+    white-space: normal;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.debugPane button {
+    margin: 2px;
+}
+
+.debugPane button.spriteButton {
+    font-family: "Orion Icon Font";
+}
+
+.debugPane .debug-sprite-pause:before {
+    content: '\E03E';
+    transform: rotateZ(90deg);
+    display: inline-block;
+}
+
+.debugPane .debugButtons button.autoHide.disabled {
+    display: none;
+}
+
+.debugPane .debugFrame {
+    overflow-y: auto;
+    height: auto;
+}
+
+.debugPane .sectionContainer.maximized {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 1;
+    background: whitesmoke;
+}
+
+.debugPane .sectionContainer.maximized .sectionTable {
+    height: calc(100% - 50px);
+}
+
+.debugPane .dataArea {
+    height: 150px;
+    overflow: auto;
+    padding: 4px;
+    background-color: #fff;
+    resize: vertical;
+}
+
+.debugPane .sectionContainer.maximized .dataArea {
+    resize: none;
+    height: 100%;
+}
+
+.debugPane .dataArea.collapsed {
+    display: none;
+}
+
+.debugPane .remove {
+    position: relative;
+    float: right;
+    line-height: 16px;
+    width: 16px;
+    text-align: center;
+    cursor: pointer;
+    user-select: none;
+    font-weight: bold;
+    transition: text-shadow 0.2s ease;
+}
+
+.debugPane .remove:hover {
+    text-shadow: 0 0 2px rgb(60, 113, 179);
+}
+
+.debugPane .more {
+    height: 16px;
+    line-height: 12px;
+    font-size: 16px;
+    cursor: pointer;
+    user-select: none;
+}
+
+.debugPane .variable {
+    white-space: normal;
+    word-break: break-all;
+}
+
+.debugPane .variable .type {
+    background-color: #333;
+    color: #ccc;
+}
+
+.debugPane .variable .more {
+    color: #555;
+}
+
+.debugPane .subvariable {
+    margin-left: 25px;
+}
+
+.debugPane .subvariable.collapsed {
+    display: none;
+}
+
+.debugPane .subvariable .name {
+    color: #555;
+}
+
+.debugPane .variableWrapper {
+    padding: 2px;
+    border-left: solid 1px #ccc;
+}
+
+.debugPane .stopReason {
+    min-height: 16px;
+    line-height: 16px;
+    margin: 5px;
+    margin-bottom: 0;
+}
+
+.debugPane .thread.collapsed {
+    color: #999;
+}
+
+.debugPane .threadDescription {
+    cursor: pointer;
+}
+
+.debugPane .stackFrame {
+    padding-left: 2em;
+    padding-top: 3px;
+    padding-bottom: 3px;
+    cursor: pointer;
+    word-break: break-all;
+}
+
+.debugPane .thread.collapsed .stackFrame {
+    display: none;
+}
+
+.debugPane .threadDescription:hover,
+.debugPane .stackFrame:hover {
+    background-color: rgba(23, 112, 235, 0.3);
+}
+
+.debugPane .debugOutput .stdout,
+.debugPane .debugOutput .stderr,
+.debugPane .debugOutput .telemetry,
+.debugPane .debugOutput .console,
+.debugPane .debugOutput .input {
+    margin: 2px 0;
+    word-break: break-all;
+}
+
+.debugPane .debugOutput .stdout {
+    color: #333;
+}
+
+.debugPane .debugOutput .stderr {
+    color: #c33
+}
+
+.debugPane .debugOutput .console {
+    color: #33c
+}
+
+.debugPane .replInput input {
+    width: 100%;
+    margin: 0;
+    box-sizing: border-box;
+    border-color: #ccc;
+}
+
+.debugPane .replInput.collapsed {
+    display: none;
+}
+
+.debugPane .watchList,
+.debugPane .variableList {
+    white-space: nowrap;
+}
+
+.debugPane .variableList .scope,
+.debugPane .watchList .watch {
+    min-height: 16px;
+}
+
+.debugPane .variableList .scope span,
+.debugPane .watchList .watch span {
+    vertical-align: top;
+}
+
+.debugPane .watchList .watch.invalid {
+    font-weight: normal;
+}
+
+.debugPane .breakpoints {
+    word-break: break-all;line-height: 16px;
+}
+
+.debugPane .breakpoints .name {
+    cursor: pointer;
+}

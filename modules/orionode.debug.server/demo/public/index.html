@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Debug Adapter Demo Page</title>
+        <script type="text/javascript" src="socket.io/socket.io.js"></script>
+        <script src="https://code.jquery.com/jquery-3.1.1.min.js" integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8=" crossorigin="anonymous"></script>
+        <script type="text/javascript" src="demo.js"></script>
+        <link rel="stylesheet" type="text/css" href="demo.css">
+    </head>
+    <body>
+        <div id="editor">
+            <div id="debugger-launcher">
+                <button id="debugger-config-node">Node.js</button>
+                <button id="debugger-config-lldb">lldb</button>
+                <button id="debugger-config-python">python</button>
+            </div>
+            <div id="debugger" disabled="disabled">
+                <div id="debugger-controller">
+                    <button id="debugger-continue">▶</button>
+                    <button id="debugger-pause">❚❚</button>
+                    <button id="debugger-stepover">↷</button>
+                    <button id="debugger-stepinto">⇟</button>
+                    <button id="debugger-stepout">⇞</button>
+                    <button id="debugger-stop">█</button>
+                    <button id="debugger-stack">Stack Trace</button>
+                    <button id="debugger-configDone">Config Done</button>
+                    <button id="debugger-cppBreak">C++ Breakpoint</button>
+                </div>
+                <table id="messenger">
+                    <tr>
+                        <td class="message-io">
+                            <div>
+                                <textarea readonly="readonly" id="message-in"></textarea>
+                            </div>
+                        </td>
+                        <td class="message-io">
+                            <div>
+                                <textarea id="message-out"></textarea>
+                                <button id="message-send" disabled="disabled">Request</button>
+                            </div>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </body>
+</html>

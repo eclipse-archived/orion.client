@@ -70,6 +70,13 @@ define(['i18n!orion/settings/nls/messages'
 			id: "editorThemeColorCurrentLineBackground", 
 			value: defaultColor
 		}, {
+			display: messages["editorTheme highlighted line background"],
+			objPath: [
+				"styles annotationLine highlightedLine backgroundImage"
+			],
+			id: "editorThemeColorHighlightedLineBackground",
+			value: defaultColor
+		}, {
 			display: messages["editorTheme comment"],
 			objPath: [
 				"styles comment color",

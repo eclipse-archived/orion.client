@@ -138,6 +138,25 @@ function startServer(cb) {
 			server = require('http-shutdown')(server);
 			var io = socketio.listen(server, { 'log level': 1, path: (listenContextPath ? contextPath : '' ) + '/socket.io' });
 			ttyShell.install({ io: io, app: orion, fileRoot: contextPath + '/file', workspaceDir: workspaceDir, sharedWorkspaceFileRoot: contextPath + '/sharedWorkspace/tree/file'});
+			if (configParams["orion.debug.enabled"]) {
+				var debugServer = require(configParams["debug.server.module"]);
+				debugServer.install({ io: io, app: orion, fileRoot: contextPath + '/file', workspaceDir: workspaceDir, listenPath: listenContextPath ? contextPath : '' });
+			}
+
+			//error handling
+			app.use(function(err, req, res, next) {
+				logger.error(req.originalUrl, err);
+				res.status(404);
+	
+				// respond with json
+				if (req.accepts('json')) {
+					res.send({ error: 'Not found' });
+					return;
+				}
+	
+				// default to plain-text. send()
+				res.type('txt').send('Not found');
+			});
 
 			server.on('listening', function() {
 				configParams.port = port;
