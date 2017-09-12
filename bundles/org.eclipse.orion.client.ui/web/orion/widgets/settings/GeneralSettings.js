@@ -74,12 +74,11 @@ define([
 				});
 				editorTabs.show();
 				
-				var debuggerSubsection = new Subsection({
+				this.debuggerSubsection = new Subsection({
 					sectionName: messages["Debugger"],
 					parentNode: settingsContentElement,
 					children: [this.enableDebuggerCheckbox]
 				});
-				debuggerSubsection.show();
 			},
 
 			setPreferences: function() {
@@ -133,8 +132,11 @@ define([
 					this.maximumEditorTabsTextfield.show();
 
 					// Enable debugger.
-					this.enableDebuggerCheckbox.setSelection(generalPrefs.enableDebugger);
-					this.enableDebuggerCheckbox.show();
+					if (generalPrefs.enableDebuggerVisible) {
+						this.debuggerSubsection.show();
+						this.enableDebuggerCheckbox.setSelection(generalPrefs.enableDebugger);
+						this.enableDebuggerCheckbox.show();
+					}
 
 					if (callback) {
 						callback();
