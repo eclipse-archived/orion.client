@@ -116,6 +116,9 @@ module.exports = function(options) {
 			var userId = req.user.username;
 			logAccess(userId);
 			var workspaceName = req.body && req.body.Name || fileUtil.decodeSlug(req.headers.slug);
+			if(typeof workspaceName !== 'string') {
+				return writeError(400, res, "No Name or Slug provided");
+			}
 			workspaceId = req.body && req.body.Id;
 			store.createWorkspace(userId, {name: workspaceName, id: workspaceId}, function(err, workspace) {
 				if (err) {

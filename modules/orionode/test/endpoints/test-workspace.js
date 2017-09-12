@@ -60,7 +60,6 @@ function withDefaultWorkspace(callback) {
 }
 
 describe("Workspace endpoint", function() {
-
 	beforeEach(function(done) { // testData.setUp.bind(null, parentDir)
 		testData.setUp(WORKSPACE, function(){
 			testData.setUpWorkspace(WORKSPACE, MEATASTORE, done);
@@ -87,7 +86,15 @@ describe("Workspace endpoint", function() {
 		});
 	});
 	it.skip("testEncodedProjectContentLocation");
-	it.skip("testGetWorkspaceContentLocation");
+	it("testGetWorkspaceContentLocation", function(done){
+		testHelper.withWorkspace(request, PREFIX, WORKSPACE_ID)
+			.end(function(err,  res) {
+				testHelper.throwIfError(err);
+				assert(res.body, "There must be a response body");
+				assert(typeof res.body.ContentLocation === 'string', "There must be a content location for the workspace");
+				done();
+			});
+	});
 	it.skip("testGetDefaultContentLocation");
 	it("testMoveBadRequest", function(done) {
 		withDefaultWorkspace(function(ws) {
@@ -194,7 +201,7 @@ describe("Workspace endpoint", function() {
 				});
 		});
 	});
-	it("testMoveProjectToFolder", function(done) {
+	it("testMoveProjectToProject", function(done) {
 		withDefaultWorkspace(function(ws) {
 			request()
 				.post(ws.Location)
@@ -205,7 +212,7 @@ describe("Workspace endpoint", function() {
 					var pLoc = res.body.Location;
 					request()
 						.post(ws.Location)
-						.set('Slug', 'testMoveProjectToFolderDest')
+						.set('Slug', 'someFolder')
 						.expect(201)
 						.end(function(err, res) {
 							testHelper.throwIfError(err);
@@ -213,22 +220,51 @@ describe("Workspace endpoint", function() {
 								.post(ws.Location)
 								.type('json')
 								.set('X-Create-Options', "move")
-								.set('Slug', 'testMoveProjectToFolderSrc')
-								.send({Location: pLoc, Name: 'testMoveProjectToFolderSrc'})
-								.expect(201)
-								.end(function(err, res) {
-									testHelper.throwIfError(err);
-									//check the project is removed from the projects
-									withDefaultWorkspace(function(ws) {
-										assert(Array.isArray(ws.Projects));
-										assert(!ws.Projects.some(function(p) {
-											return p.Name === 'testMoveProjectToFolderSrc';
-										}));
-										done();
-									});
-								});
+								.set('Slug', 'someFolder')
+								.send({Location: pLoc})
+								.expect(500)
+								.end(done);
 						});
 				});
+		});
+	});
+	it("testMoveProjectToFolder", function(done) {
+		testHelper.withWorkspace(request, PREFIX, WORKSPACE_ID)
+			.end(function(err, res) {
+				testHelper.throwIfError(err);
+				var wLoc = res.body.Location;
+				request()
+					.post(wLoc)
+					.set('Slug', 'testMoveProjectToFolderSrc') // create the project to move
+					.expect(201)
+					.end(function(err, res) {
+						testHelper.throwIfError(err);
+						var pLoc = res.body.Location;
+						request()
+							.post(wLoc)
+							.set('Slug', 'someOtherProject') //create the other project to move to 
+							.expect(201)
+							.end(function(err, res) {
+								testHelper.throwIfError(err);
+								var spLoc = res.body.Location;
+								request()
+									.post(spLoc)
+									.type('json')
+									.send({Name: 'someSubFolder', Directory: true})
+									.expect(201)
+									.end(function(err, res) {
+										testHelper.throwIfError(err);
+										request()
+											.post(res.body.Location)
+											.type('json')
+											.set('X-Create-Options', "move")
+											.set('Slug', 'someSubFolder')
+											.send({Location: pLoc, Name: 'testMoveProjectToFolderSrc'})
+											.expect(201)
+											.end(done);
+									});
+							});
+					});
 		});
 	});
 	it.skip("testCopyProjectNonDefaultLocation");
@@ -323,7 +359,7 @@ describe("Workspace endpoint", function() {
 	it("testCreateWorkspaceNullName", function(done) {
 		request()
 			.post(PREFIX)
-			.expect(403, done);
+			.expect(400, done);
 	});
 	it("testGetWorkspaceMetadata", function(done) {
 		withDefaultWorkspace(function(workspace) {

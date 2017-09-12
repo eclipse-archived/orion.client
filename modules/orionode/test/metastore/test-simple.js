@@ -233,7 +233,7 @@ describe("Orion metastore", function() {
 						request()
 							.post(PREFIX)
 							.set('Slug', 'Orion ws')
-							.expect(400)
+							.expect(201)
 							.end(done);
 					});
 			});

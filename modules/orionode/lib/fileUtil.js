@@ -465,11 +465,11 @@ exports.handleFilePOST = function(workspaceRoot, fileRoot, req, res, destFile, m
 			.then(function(stats) {
 				if (isCopy) {
 					return copy(sourceFile.path, destFile.path)
-					.then(function(result) {
-						var eventData = { type: "rename", isDir: stats.isDirectory(), file: destFile, sourceFile: sourceFile };
-						exports.fireFileModificationEvent(eventData);
-						return result;
-					});
+						.then(function(result) {
+							var eventData = { type: "rename", isDir: stats.isDirectory(), file: destFile, sourceFile: sourceFile };
+							exports.fireFileModificationEvent(eventData);
+							return result;
+						});
 				} else {
 					return fs.renameAsync(sourceFile.path, destFile.path)
 						.then(function(result) {
@@ -487,7 +487,7 @@ exports.handleFilePOST = function(workspaceRoot, fileRoot, req, res, destFile, m
 			.then(writeResponse.bind(null, destExists))
 			.catch(function(err) {
 				if (err.code === 'ENOENT') {
-					return api.writeError(err.code || 404, res, 'File not found:' + sourceUrl);
+					return api.writeError(typeof err.code === 'number' || 404, res, 'File not found:' + sourceUrl);
 				}
 				return api.writeError(err.code || 500, res, err);
 			});
@@ -504,7 +504,6 @@ exports.handleFilePOST = function(workspaceRoot, fileRoot, req, res, destFile, m
 			} else {
 				var eventData = { type: "write", file: destFile };
 				exports.fireFileModificationEvent(eventData);
-				
 				return fs.writeFileAsync(destFile.path, '');
 			}
 

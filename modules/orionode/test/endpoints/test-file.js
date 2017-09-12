@@ -67,7 +67,7 @@ BufStream.prototype.data = function() {
  * Unit test for the file REST API.
  * see http://wiki.eclipse.org/Orion/Server_API/File_API
  */
-describe('File API', function() {
+describe('File endpoint', function() {
 	beforeEach(function(done) { // testData.setUp.bind(null, parentDir)
 		testData.setUp(WORKSPACE, function(){
 			testData.setUpWorkspace(WORKSPACE, MEATASTORE, done);
@@ -1165,7 +1165,25 @@ describe('File API', function() {
 					});
 			});
 		});
-		it("testCopyFileOverwrite");
+		it("testCopyFileOverwrite", function(done) {
+			request()
+				.post(PREFIX + '/project/my%20folder') //create a file will will overwrite
+				.set('Slug', 'fizz2.txt')
+				.expect(201)
+				.end(function(err, res) {
+					testHelper.throwIfError(err);
+					request()
+						.post(PREFIX + '/project/my%20folder')
+						.set('Slug', 'fizz2.txt')
+						.set('X-Create-Options', 'copy,overwrite')
+						.send({ Location: PREFIX + '/project/fizz.txt' })
+						.expect(200) //spec'd to return 200 of over-writing move
+						.end(function(err, res) {
+							throwIfError(err);
+							done();
+						});
+				});
+		});
 		it('copy a file', function(done) {
 			request()
 			.post(PREFIX + '/project/my%20folder')
