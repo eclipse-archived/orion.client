@@ -19,3 +19,5 @@ node_modules/
 
 # Mac Development
 .DS_Store
+
+/modules/orionode.debug.server/adapters
