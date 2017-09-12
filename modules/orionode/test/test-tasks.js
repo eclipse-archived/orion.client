@@ -213,5 +213,46 @@ describe("Tasks API", function() {
 						});
 				});
 		});
+
+		it('one running task, one canceled', function(finished) {
+			// spawn a running task
+			request()
+				.put(CONTEXT_PATH + "/taskHelper")
+				.end(function(err, res) {
+					assert.ifError(err);
+					var location = res.body.Location;
+					taskIds.push(location);
+					// spawn a second running task
+					request()
+						.put(CONTEXT_PATH + "/taskHelper")
+						.end(function(err, res) {
+							assert.ifError(err);
+							var location2 = res.body.Location;
+							taskIds.push(location2);
+							// mark the first one as completed
+							request()
+								.post(CONTEXT_PATH + "/taskHelper/" + location.substr(5))
+								.expect(200)
+								.end(function(err, res) {
+									assert.ifError(err);
+									// check that the second running task is still there after deletion
+									request()
+										.put(CONTEXT_PATH + location2)
+										.send({"abort": true})
+										.expect(200)
+										.end(function(err, res) {
+											request()
+											.get(location2)
+											.expect(200)
+											.end(function(err, res) {
+												testHelper.throwIfError(err);
+												assert(res.body && res.body.type === "abort", "We should have been able to fetch the created task.")
+												finished();
+											});
+										});
+								});
+						});
+				});
+		});
 	});
 });
