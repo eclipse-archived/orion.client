@@ -22,6 +22,33 @@ var express = require('express'),
 var LIBS = path.normalize(path.join(__dirname, 'lib/')),
 	MINIFIED_ORION_CLIENT = path.normalize(path.join(__dirname, "lib/orion.client")),
 	ORION_CLIENT = path.normalize(path.join(__dirname, '../../'));
+	
+var _24_HOURS = "public, max-age=86400, must-revalidate",
+	_12_HOURS = "max-age=43200, must-revalidate",
+	_15_MINUTE = "max-age=900, must-revalidate",
+	_NO_CACHE = "max-age=0, no-cache, no-store",
+	EXT_CACHE_MAPPING = {
+		// 24 Hours:
+		".gif": _24_HOURS, 
+		".jpg": _24_HOURS,
+		".png": _24_HOURS, 
+		".bmp": _24_HOURS, 
+		".tif": _24_HOURS,
+		".ico": _24_HOURS,
+		
+		// 12 Hours:
+		".js": _12_HOURS, 
+		".css": _12_HOURS,
+		
+		// 15 Minutes:
+		".json": _15_MINUTE, 
+		".pref": _15_MINUTE, 
+		".woff": _15_MINUTE,
+		".ttf": _15_MINUTE,
+		
+		// No Cache:
+		".html": _NO_CACHE, 
+	};
 
 function handleError(err) {
 	throw err;
@@ -127,8 +154,29 @@ function startServer(options) {
 		
 		// Static files
 		app.use('/xterm', express.static(path.join(__dirname, 'node_modules', 'xterm', 'dist')));
+		
+		var staticCacheOption;
+		if(typeof options.maxAge !== "undefined" ) {
+			// It's dev time
+			staticCacheOption = {
+				maxAge: options.maxAge
+			}
+		} else {
+			staticCacheOption = {
+				setHeaders: function(res, urlPath, stat){
+					var ext = path.extname(urlPath);
+					if(path.basename(path.dirname(urlPath)) === "requirejs"){
+						res.setHeader("Cache-Control",_24_HOURS);
+					}else if(EXT_CACHE_MAPPING[ext]){
+						res.setHeader("Cache-Control", EXT_CACHE_MAPPING[ext] );
+					}else{
+						res.setHeader("Cache-Control", _24_HOURS);
+					}
+				}
+			}
+		}
 		if (fs.existsSync(MINIFIED_ORION_CLIENT)) {
-			app.use(express.static(MINIFIED_ORION_CLIENT, {maxAge: options.maxAge, dotfiles: 'allow'}));
+			app.use(express.static(MINIFIED_ORION_CLIENT, Object.assign({dotfiles: 'allow'}, staticCacheOption)));
 		} else {
 			var prependStaticAssets = options.configParams["prepend.static.assets"] && options.configParams["prepend.static.assets"].split(",") || [];
 			var appendStaticAssets = options.configParams["append.static.assets"] && options.configParams["append.static.assets"].split(",") || [];
@@ -136,7 +184,7 @@ function startServer(options) {
 			if(options.configParams["orion.collab.enabled"]){
 				appendStaticAssets.push('./bundles/org.eclipse.orion.client.collab/web');
 			}
-			app.use(require('./lib/orion_static')({ orionClientRoot: ORION_CLIENT, maxAge: options.maxAge, orionode_static: orionode_static, prependStaticAssets: prependStaticAssets, appendStaticAssets: appendStaticAssets}));
+			app.use(require('./lib/orion_static')(Object.assign({orionClientRoot: ORION_CLIENT, orionode_static: orionode_static, prependStaticAssets: prependStaticAssets, appendStaticAssets: appendStaticAssets}, staticCacheOption)));
 		}
 		return app;
 	} catch (e) {
