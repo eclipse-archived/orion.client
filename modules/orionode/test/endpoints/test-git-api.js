@@ -2432,7 +2432,7 @@ maybeDescribe("git", function() {
 				var name = "test.txt";
 				var unrelated = "unrelated.txt";
 
-				var client = new GitClient("merge-unrelated-identical-content");
+				var client = new GitClient("Log-Compare-bug 515428");
 				client.init();
 				// create a file with content "A" in it
 				client.setFileContents(name, "A");
@@ -2441,7 +2441,7 @@ maybeDescribe("git", function() {
 				client.start().then(function(commit) {
 					initial = commit.Id;
 					// open the repository using NodeGit
-					var testPath = path.join(WORKSPACE, "merge-unrelated-identical-content");
+					var testPath = path.join(WORKSPACE, "Log-Compare-bug 515428");
 					return git.Repository.open(testPath);
 				})
 				.then(function(repo) {
