@@ -67,6 +67,9 @@ function toURLPath(p) {
  */
 function sendStatus(code, res){
 	try{
+		if (httpCodeMapping) {
+			code = mapHttpStatusCode(code);
+		}
 		setResponseNoCache(res);
 		return res.sendStatus(code);
 	}catch(err){
@@ -86,10 +89,10 @@ function sendStatus(code, res){
  */
 function writeResponse(code, res, headers, body, needEncodeLocation, noCachedStringRes) {
 	try{
-		if (httpCodeMapping) {
-			code = mapHttpStatusCode(code);
-		}
 		if (typeof code === 'number') {
+			if (httpCodeMapping) {
+				code = mapHttpStatusCode(code);
+			}
 			res.status(code);
 		}
 		if (headers && typeof headers === 'object') {
