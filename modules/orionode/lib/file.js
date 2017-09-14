@@ -132,7 +132,7 @@ module.exports = function(options) {
 					}
 					fs.writeFile(file.path, newContents, function(err) {
 						if (err) {
-							writeError(500, res, error);
+							writeError(500, res, err);
 							return;
 						}
 						if (failed) {
@@ -140,7 +140,7 @@ module.exports = function(options) {
 							return;
 						}
 						fs.stat(file.path, function(error, stats) {
-							if (err) {
+							if (error) {
 								writeError(500, res, error);
 								return;
 							}
