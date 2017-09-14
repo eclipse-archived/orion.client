@@ -9,16 +9,18 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 /*eslint-env node*/
-var express = require('express');
-var bodyParser = require('body-parser');
-var ETag = require('./util/etag');
-var fs = require('fs');
-var mkdirp = require('mkdirp');
-var nodePath = require('path');
-var request = require('request');
-var api = require('./api');
-var fileUtil = require('./fileUtil');
-var writeError = api.writeError;
+var express = require('express'),
+	bodyParser = require('body-parser'),
+	ETag = require('./util/etag'),
+	fs = require('fs'),
+	mkdirp = require('mkdirp'),
+	nodePath = require('path'),
+	request = require('request'),
+	api = require('./api'),
+	writeError = api.writeError,
+	fileUtil = require('./fileUtil'),
+	log4js = require('log4js'),
+	logger = log4js.getLogger("file");
 
 module.exports = function(options) {
 	var fileRoot = options.fileRoot;
@@ -33,6 +35,11 @@ module.exports = function(options) {
 	router.post('*', jsonParser, postFile);
 	router.delete('*', deleteFile);
 
+	fileUtil.addFileModificationListener({handleFileModficationEvent: function(eventData){
+		if(typeof eventData.type === "string" && eventData.type !== "zipadd"){
+			api.logAccess(logger, eventData.req.user.username);
+		}
+	}});
 	return router;
 	
 	function getParam(req, paramName) {
@@ -110,7 +117,7 @@ module.exports = function(options) {
 								if (this._text.length === 0) { this._text = [""]; }
 							},
 							getText: function() {
-								return this._text.join("");									
+								return this._text.join("");
 							}
 						};
 						for (var i=0; i<diffs.length; i++) {
@@ -132,7 +139,7 @@ module.exports = function(options) {
 					}
 					fs.writeFile(file.path, newContents, function(err) {
 						if (err) {
-							writeError(500, res, error);
+							writeError(500, res, err);
 							return;
 						}
 						if (failed) {
@@ -140,12 +147,12 @@ module.exports = function(options) {
 							return;
 						}
 						fs.stat(file.path, function(error, stats) {
-							if (err) {
+							if (error) {
 								writeError(500, res, error);
 								return;
 							}
 							fileUtil.writeFileMetadata(req, res, api.join(fileRoot, file.workspaceId), api.join(workspaceRoot, file.workspaceId), file, stats, ETag.fromString(newContents) /*the new ETag*/);
-							fileUtil.fireFileModificationEvent({ type: "write", file: file, contents: newContents});
+							fileUtil.fireFileModificationEvent({ type: "write", file: file, contents: newContents, req: req});
 						});
 					});
 					
@@ -223,7 +230,7 @@ module.exports = function(options) {
 							return;
 						}
 						fileUtil.writeFileMetadata(req, res, api.join(fileRoot, file.workspaceId), api.join(workspaceRoot, file.workspaceId), file, stats, etag);
-						fileUtil.fireFileModificationEvent({ type: "write", file: file });
+						fileUtil.fireFileModificationEvent({ type: "write", file: file, req: req});
 					});
 				});
 				ws.on('error', function(err) {

@@ -4147,7 +4147,7 @@ maybeDescribe("git", function() {
 	}); // describe("Stash")
 
 	describe("config", function() {
-		//this.timeout(10000);
+		this.timeout(10000);
 		function repoConfig() {
 			return request()
 			.get(CONTEXT_PATH + "/gitapi/config/clone" + FILE_ROOT + TEST_REPO_NAME);

@@ -11,7 +11,8 @@
         "git": "ALL",
         "electron": "ALL",
         "response": "ERROR",
-        "livesync": "DEBUG"
+        "livesync": "DEBUG",
+        "file":"INFO"
     },
     "appenders": [{
         "type": "clustered",

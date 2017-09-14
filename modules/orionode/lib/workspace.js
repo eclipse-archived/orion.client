@@ -68,19 +68,13 @@ module.exports = function(options) {
 			return workspaceJson;
 		});
 	}
-	
-	function logAccess(userId) {
-		if (userId) {
-			logger.info("WorkspaceAccess: " + userId);
-		}
-	}
 
 	function getWorkspace(req, res) {
 		var rest = req.params["0"].substring(1);
 		var store = fileUtil.getMetastore(req);
 		if (rest === '') {
 			var userId = req.user.username;
-			logAccess(userId);
+			api.logAccess(logger, userId);
 			var workspaceJson = {
 				Id: userId,
 				Name: userId,
@@ -114,7 +108,7 @@ module.exports = function(options) {
 		var store = fileUtil.getMetastore(req), workspaceId;
 		if (rest === '') {
 			var userId = req.user.username;
-			logAccess(userId);
+			api.logAccess(logger, userId);
 			var workspaceName = req.body && req.body.Name || fileUtil.decodeSlug(req.headers.slug);
 			if(typeof workspaceName !== 'string') {
 				return writeError(400, res, "No Name or Slug provided");
