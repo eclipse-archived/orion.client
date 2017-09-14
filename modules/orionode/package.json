@@ -79,7 +79,7 @@
     "dist:osx": "build --o",
     "dist:win": "build --w",
     "dist:linux": "build --l",
-    "test": "mocha --reporter spec ./test ./test/metastore ./test/endpoints",
+    "test": "env showWSAccessLogs='false' mocha --reporter spec ./test ./test/metastore ./test/endpoints",
     "optimize": "grunt",
     "watch-server": "nodemon --debug server.js"
   },

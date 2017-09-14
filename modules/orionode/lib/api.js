@@ -196,7 +196,7 @@ function isValidProjectName(fileName) {
  * @param userId
  */
 function logAccess(logger, userId) {
-	if (userId) {
+	if (userId && process.env.showWSAccessLogs !== "false") {
 		logger.info("WorkspaceAccess: " + userId);
 	}
 }
