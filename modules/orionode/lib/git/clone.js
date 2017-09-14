@@ -418,7 +418,7 @@ function postInit(req, res) {
 			.then(function() {
 				var store = fileUtil.getMetastore(req);
 				if(store.createRenameDeleteProject) {
-					return store.createRenameDeleteProject(file.workspaceId, {projectName: getCloneName(req), contentLocation:file.path})
+					return store.createRenameDeleteProject(file.workspaceId, {projectName: path.basename(file.path), contentLocation:file.path})
 					.then(function(){
 						writeResponse(201, res, null, {"Location": gitRoot + "/clone" + fileRoot + "/" + file.workspaceId + api.toURLPath(file.path.substring(file.workspaceDir.length))}, true);
 					}).catch(function(err){
@@ -710,7 +710,7 @@ function postClone(req, res) {
 	.then(function(){
 		var store = fileUtil.getMetastore(req);
 		if (store.createRenameDeleteProject) {
-			return store.createRenameDeleteProject(file.workspaceId, {projectName: getCloneName(req), contentLocation:file.path});
+			return store.createRenameDeleteProject(file.workspaceId, {projectName: path.basename(file.path), contentLocation:file.path});
 		}
 		return Promise.resolve();
 	})
