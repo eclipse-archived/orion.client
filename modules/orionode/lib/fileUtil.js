@@ -10,14 +10,13 @@
  *******************************************************************************/
 /*eslint-env node*/
 /*eslint-disable consistent-return*/
-var ETag = require('./util/etag');
-var path = require('path');
-var Promise = require('bluebird');
-var rimraf = require('rimraf');
-var fse = require('fs-extra');
-var api = require('./api');
-
-var fs = Promise.promisifyAll(require('fs'));
+var ETag = require('./util/etag'),
+	path = require('path'),
+	Promise = require('bluebird'),
+	rimraf = require('rimraf'),
+	fse = require('fs-extra'),
+	api = require('./api'),
+	fs = Promise.promisifyAll(require('fs'));
 
 /**
  * Copy of a file/folder to a new location.
@@ -466,14 +465,14 @@ exports.handleFilePOST = function(workspaceRoot, fileRoot, req, res, destFile, m
 				if (isCopy) {
 					return copy(sourceFile.path, destFile.path)
 						.then(function(result) {
-							var eventData = { type: "rename", isDir: stats.isDirectory(), file: destFile, sourceFile: sourceFile };
+							var eventData = { type: "rename", isDir: stats.isDirectory(), file: destFile, sourceFile: sourceFile, req: req};
 							exports.fireFileModificationEvent(eventData);
 							return result;
 						});
 				} else {
 					return fs.renameAsync(sourceFile.path, destFile.path)
 						.then(function(result) {
-							var eventData = { type: "rename", isDir: stats.isDirectory(), file: destFile, sourceFile: sourceFile };
+							var eventData = { type: "rename", isDir: stats.isDirectory(), file: destFile, sourceFile: sourceFile, req: req};
 							exports.fireFileModificationEvent(eventData);
 							return result;
 						})
@@ -499,10 +498,10 @@ exports.handleFilePOST = function(workspaceRoot, fileRoot, req, res, destFile, m
 		})
 		.then(function() {
 			if (isDirectory) {
-				exports.fireFileModificationEvent({type: exports.MKDIR, file: destFile});
+				exports.fireFileModificationEvent({type: exports.MKDIR, file: destFile, req: req});
 				return fs.mkdirAsync(destFile.path);
 			} else {
-				var eventData = { type: "write", file: destFile };
+				var eventData = { type: "write", file: destFile, req: req};
 				exports.fireFileModificationEvent(eventData);
 				return fs.writeFileAsync(destFile.path, '');
 			}

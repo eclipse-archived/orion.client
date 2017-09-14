@@ -12,7 +12,7 @@
         "electron": "ALL",
         "response": "ERROR",
         "livesync": "DEBUG",
-        "file":"ERROR"
+        "file":"INFO"
     },
     "appenders": [{
         "type": "clustered",

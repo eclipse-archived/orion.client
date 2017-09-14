@@ -190,6 +190,18 @@ function isValidProjectName(fileName) {
 }
 
 /**
+ * @name logAccess
+ * @description Helper method to log WorkspaceAccess
+ * @param logger
+ * @param userId
+ */
+function logAccess(logger, userId) {
+	if (userId) {
+		logger.info("WorkspaceAccess: " + userId);
+	}
+}
+
+/**
  * Util for stripping host names from URLs on this server. If aUrl indicates a resource on this host (as given by the request's Host header),
  * returns the URL with this server's host removed. Otherwise, returns aUrl unmodified.
  * <p>
@@ -234,3 +246,4 @@ exports.setResponseNoCache = setResponseNoCache;
 exports.isValidProjectName = isValidProjectName;
 exports.sendStatus = sendStatus;
 exports.getOrionEE = getOrionEE;
+exports.logAccess = logAccess;

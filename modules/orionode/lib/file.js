@@ -35,6 +35,11 @@ module.exports = function(options) {
 	router.post('*', jsonParser, postFile);
 	router.delete('*', deleteFile);
 
+	fileUtil.addFileModificationListener({handleFileModficationEvent: function(eventData){
+		if(typeof eventData.type === "string" && eventData.type !== "zipadd"){
+			api.logAccess(logger, eventData.req.user.username);
+		}
+	}});
 	return router;
 	
 	function getParam(req, paramName) {
@@ -147,7 +152,7 @@ module.exports = function(options) {
 								return;
 							}
 							fileUtil.writeFileMetadata(req, res, api.join(fileRoot, file.workspaceId), api.join(workspaceRoot, file.workspaceId), file, stats, ETag.fromString(newContents) /*the new ETag*/);
-							fileUtil.fireFileModificationEvent({ type: "write", file: file, contents: newContents});
+							fileUtil.fireFileModificationEvent({ type: "write", file: file, contents: newContents, req: req});
 						});
 					});
 					
@@ -225,7 +230,7 @@ module.exports = function(options) {
 							return;
 						}
 						fileUtil.writeFileMetadata(req, res, api.join(fileRoot, file.workspaceId), api.join(workspaceRoot, file.workspaceId), file, stats, etag);
-						fileUtil.fireFileModificationEvent({ type: "write", file: file });
+						fileUtil.fireFileModificationEvent({ type: "write", file: file, req: req});
 					});
 				});
 				ws.on('error', function(err) {
