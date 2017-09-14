@@ -1049,7 +1049,7 @@ maybeDescribe("git", function() {
 	});
 
 	/**
-	 * Clone a repo, delete repo
+	 * Clone a repo, clone it again, delete repo
 	 */
 	describe('Use case 2', function() {
 		before(function(done) { // testData.setUp.bind(null, parentDir)
@@ -1101,6 +1101,36 @@ maybeDescribe("git", function() {
 					finished();
 				});
 			});
+		});
+		
+		describe('Cloning the same repo again', function() {
+			it('POST clone (creating a respository clone)', function(finished) {
+				var gitURL = "https://github.com/eclipse/sketch.git";
+				this.timeout(20000); // increase timeout for cloning from repo
+				request()
+				.post(CONTEXT_PATH + "/gitapi/clone/")
+				.send({
+					GitUrl: gitURL,
+					Location: FILE_ROOT
+				})
+				.end(function(err, res2) {
+					assert.ifError(err);
+					getGitResponse(res2).then(function(res) {
+						assert.equal(res.Message, "OK");
+						finished();
+					})
+					.catch(function(err) {
+						assert.ifError(err);
+						finished();
+					});
+				});
+			});
+
+			it('Check the directory "sketch-1" is exist', function() {
+				var stat = fs.statSync(WORKSPACE + "/sketch-1"); 
+				assert(stat.isDirectory());
+			});
+
 		});
 
 		describe('Removing a repository', function() {
