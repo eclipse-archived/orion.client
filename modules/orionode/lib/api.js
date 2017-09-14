@@ -9,11 +9,12 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 /*eslint-env node*/
-var url = require('url');
-var events = require('events');
-var log4js = require('log4js');
-var logger = log4js.getLogger("response");
-var orionEE;
+var url = require('url'),
+	events = require('events'),
+	log4js = require('log4js'),
+	logger = log4js.getLogger("response"),
+	orionEE,
+	httpCodeMapping;
 
 /*
  * Sadly, the Orion client code expects http://orionserver/file and http://orionserver/file/ 
@@ -66,6 +67,9 @@ function toURLPath(p) {
  */
 function sendStatus(code, res){
 	try{
+		if (httpCodeMapping) {
+			code = mapHttpStatusCode(code);
+		}
 		setResponseNoCache(res);
 		return res.sendStatus(code);
 	}catch(err){
@@ -86,6 +90,9 @@ function sendStatus(code, res){
 function writeResponse(code, res, headers, body, needEncodeLocation, noCachedStringRes) {
 	try{
 		if (typeof code === 'number') {
+			if (httpCodeMapping) {
+				code = mapHttpStatusCode(code);
+			}
 			res.status(code);
 		}
 		if (headers && typeof headers === 'object') {
@@ -113,13 +120,61 @@ function writeResponse(code, res, headers, body, needEncodeLocation, noCachedStr
 	}
 }
 
+/**
+ * Helper for writing an error JSON response.
+ * @param {Number} code
+ * @param {HttpResponse} res
+ * @param {String|Error} [msg]
+ */
+function writeError(code, res, msg) {
+	try{
+		if (httpCodeMapping) {
+			code = mapHttpStatusCode(code);
+		}
+		msg = msg instanceof Error ? msg.message : msg;
+		setResponseNoCache(res);
+		if (typeof msg === 'string') {
+			var err = JSON.stringify({Severity: "Error", Message: msg});
+			res.setHeader('Content-Type', 'application/json');
+			res.setHeader('Content-Length', err.length);
+			res.writeHead(code, msg);
+			res.end(err);
+		} else {
+			res.writeHead(code, msg);
+			res.end();
+		}
+	}catch(err){
+		logger.error(res.req.originalUrl , err.message);
+		throw err;
+	}
+}
+
 function setResponseNoCache(res){
 	res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate"); // HTTP 1.1.
 	res.setHeader("Pragma", "no-cache"); // HTTP 1.1.
 	res.setHeader("Expires", "0"); // HTTP 1.1.		
 }
 
-
+/**
+ * @name mapHttpStatusCode
+ * @description Helper method to change http status code
+ * @param {number} original code
+ * @returns {number} mapped code
+ */
+function mapHttpStatusCode(code){
+	if (typeof httpCodeMapping[code] === "number") {
+		return httpCodeMapping[code];
+	}
+	return code;
+}
+/**
+ * @name setHttpCodeMapping
+ * @description used to set or replace httpCodeMapping
+ * @param {Obejct} the code mapping object
+ */
+function setHttpCodeMapping(mapping) {
+	httpCodeMapping = mapping;
+}
 
 var LocationRegex = /Location$/;
 var PercentReplaceRegex = /\%/g;
@@ -143,32 +198,6 @@ function encodeLocation(obj) {
 		}
 	}
 	return obj;
-}
-
-/**
- * Helper for writing an error JSON response.
- * @param {Number} code
- * @param {HttpResponse} res
- * @param {String|Error} [msg]
- */
-function writeError(code, res, msg) {
-	try{
-		msg = msg instanceof Error ? msg.message : msg;
-		setResponseNoCache(res);
-		if (typeof msg === 'string') {
-			var err = JSON.stringify({Severity: "Error", Message: msg});
-			res.setHeader('Content-Type', 'application/json');
-			res.setHeader('Content-Length', err.length);
-			res.writeHead(code, msg);
-			res.end(err);
-		} else {
-			res.writeHead(code, msg);
-			res.end();
-		}
-	}catch(err){
-		logger.error(res.req.originalUrl , err.message);
-		throw err;
-	}
 }
 
 /**
@@ -247,3 +276,4 @@ exports.isValidProjectName = isValidProjectName;
 exports.sendStatus = sendStatus;
 exports.getOrionEE = getOrionEE;
 exports.logAccess = logAccess;
+exports.setHttpCodeMapping = setHttpCodeMapping;

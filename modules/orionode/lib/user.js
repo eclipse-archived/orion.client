@@ -186,7 +186,7 @@ module.exports.router = function(options) {
 				registerUrl += "&identifier=" + user.id;
 				return res.redirect(registerUrl);
 			} else if (user.__linkUser) {
-				return res.status(200).send("<html><head></head><body onload=\"window.opener.handleOAuthResponse('" + user.id + "');window.close();\"></body></html>");
+				return api.writeResponse(200, res, null, "<html><head></head><body onload=\"window.opener.handleOAuthResponse('" + user.id + "');window.close();\"></body></html>");
 			}
 		}
 		doLogin(req, user, function(err) {
@@ -429,7 +429,7 @@ module.exports.router = function(options) {
 			if (err) {
 				return logError(err);
 			}
-			return res.status(200).send("<html><body><p>Your email address has been confirmed. Thank you! <a href=\"" + ( req.protocol + '://' + req.get('host'))
+			return api.writeResponse(200, res, null, "<html><body><p>Your email address has been confirmed. Thank you! <a href=\"" + ( req.protocol + '://' + req.get('host'))
 			+ "\">Click here</a> to continue and login to your account.</p></body></html>");
 		});
 	});
@@ -453,7 +453,7 @@ module.exports.router = function(options) {
 					return logError(err);
 				}
 				sendMail({user: user, options: options, template: PWD_RESET_MAIL, auth: "", req: req, pwd: password});
-				return res.status(200).send("<html><body><p>Your password has been successfully reset. Your new password has been sent to the email address associated with your account.</p></body></html>");
+				return api.writeResponse(200, res, null, "<html><body><p>Your password has been successfully reset. Your new password has been sent to the email address associated with your account.</p></body></html>");
 			});
 		});
 	});

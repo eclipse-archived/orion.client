@@ -11,6 +11,7 @@
 /*eslint-env node*/
 var fileUtil = require('./fileUtil');
 var express = require('express');
+var api = require("./api");
 var log4js = require('log4js');
 var logger = log4js.getLogger("git");
 
@@ -50,10 +51,10 @@ if (hasNodegit) {
 function Nothing() {
 	var router = express.Router();
 	router.use(/* @callback */ function(req, res) {
-		res.status(404).json({
-			Severity: "Error",
-			Message: "Nodegit not installed."
-		});
+		api.writeResponse(404, res, null, {
+				Severity: "Error",
+				Message: "Nodegit not installed."
+			});
 	});
 	return router;
 }

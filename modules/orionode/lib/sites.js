@@ -83,7 +83,7 @@ function virtualHost(vhost, req, res, next) {
 			}
 		})) return;
 	}
-	res.status(404).send(host ? "Not found" : "Site stopped: " + vhost);
+	writeResponse(400, res, null, host ? "Not found" : "Site stopped: " + vhost);
 }
 
 function getHostedSiteURL(site) {
