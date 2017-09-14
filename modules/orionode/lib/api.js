@@ -14,7 +14,7 @@ var url = require('url'),
 	log4js = require('log4js'),
 	logger = log4js.getLogger("response"),
 	orionEE,
-	httpCodeMapping = {};
+	httpCodeMapping;
 
 /*
  * Sadly, the Orion client code expects http://orionserver/file and http://orionserver/file/ 
@@ -86,7 +86,9 @@ function sendStatus(code, res){
  */
 function writeResponse(code, res, headers, body, needEncodeLocation, noCachedStringRes) {
 	try{
-		code = mapHttpStatusCode(code);
+		if (httpCodeMapping) {
+			code = mapHttpStatusCode(code);
+		}
 		if (typeof code === 'number') {
 			res.status(code);
 		}
@@ -123,7 +125,9 @@ function writeResponse(code, res, headers, body, needEncodeLocation, noCachedStr
  */
 function writeError(code, res, msg) {
 	try{
-		code = mapHttpStatusCode(code);
+		if (httpCodeMapping) {
+			code = mapHttpStatusCode(code);
+		}
 		msg = msg instanceof Error ? msg.message : msg;
 		setResponseNoCache(res);
 		if (typeof msg === 'string') {
@@ -155,9 +159,10 @@ function setResponseNoCache(res){
  * @returns {number} mapped code
  */
 function mapHttpStatusCode(code){
-	if(typeof httpCodeMapping[code] === "number"){
+	if (typeof httpCodeMapping[code] === "number") {
 		return httpCodeMapping[code];
 	}
+	return code;
 }
 /**
  * @name setHttpCodeMapping
