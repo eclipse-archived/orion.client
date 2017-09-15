@@ -73,6 +73,7 @@ module.exports = function(options) {
 			if (destExists) {
 				fs.readFile(file.path, function (error, data) {
 					if (error) {
+						logger.error(error);
 						writeError(500, res, error);
 						return;
 					}
@@ -138,6 +139,7 @@ module.exports = function(options) {
 					}
 					fs.writeFile(file.path, newContents, function(err) {
 						if (err) {
+							logger.error(err);
 							writeError(500, res, err);
 							return;
 						}
@@ -147,6 +149,7 @@ module.exports = function(options) {
 						}
 						fs.stat(file.path, function(error, stats) {
 							if (error) {
+								logger.error(error);
 								writeError(500, res, error);
 								return;
 							}
@@ -219,6 +222,7 @@ module.exports = function(options) {
 		function write() {
 			mkdirp(nodePath.dirname(file.path), function(err) {
 				if (err) {
+					logger.error(err);
 					return writeError(500, res, err);
 				}
 				var ws = fs.createWriteStream(file.path);
@@ -233,6 +237,7 @@ module.exports = function(options) {
 					});
 				});
 				ws.on('error', function(err) {
+					logger.error(err);
 					writeError(500, res, err);
 				});
 				if (req.query.source) {
@@ -300,6 +305,7 @@ module.exports = function(options) {
 			if (stats.isDirectory()) {
 				fileUtil.rumRuff(file.path, function(err){
 					if (err) {
+						logger.error(err);
 						return done(err);
 					}
 					if (store.createRenameDeleteProject) {

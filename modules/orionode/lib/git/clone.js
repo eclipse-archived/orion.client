@@ -10,21 +10,21 @@
  *******************************************************************************/
 /*eslint-env node */
 /*eslint no-console:1*/
-var api = require('../api'), writeError = api.writeError, writeResponse = api.writeResponse;
-var git = require('nodegit');
-var url = require("url");
-var path = require("path");
-var fs = require('fs');
-var args = require('../args');
-var async = require('async');
-var fileUtil = require('../fileUtil');
-var util = require('./util');
-var tasks = require('../tasks');
-var express = require('express');
-var bodyParser = require('body-parser');
-var rmdir = require('rimraf');
-var prefs = require('../prefs');
-var credentialsProvider = require('./credentials');
+var api = require('../api'), writeError = api.writeError, writeResponse = api.writeResponse,
+	git = require('nodegit'),
+	url = require("url"),
+	path = require("path"),
+	fs = require('fs'),
+	args = require('../args'),
+	async = require('async'),
+	fileUtil = require('../fileUtil'),
+	util = require('./util'),
+	tasks = require('../tasks'),
+	express = require('express'),
+	bodyParser = require('body-parser'),
+	rmdir = require('rimraf'),
+	prefs = require('../prefs'),
+	credentialsProvider = require('./credentials');
 
 module.exports = {};
 
@@ -193,7 +193,9 @@ function getClone(req, res) {
 function getClones(req, res, callback) {
 	var repos = [];
 	var done = function(err) {
-		if (err) return writeError(403, res, err.message);
+		if (err) {
+			return writeError(403, res, err.message);
+		}
 		callback(repos);
 	}
 	
