@@ -9,17 +9,19 @@
  *	 IBM Corporation - initial API and implementation
  *******************************************************************************/
 /*eslint-env node */
-var api = require('../api'), writeError = api.writeError, writeResponse = api.writeResponse;
-var args = require('../args');
-var async = require('async');
-var git = require('nodegit');
-var url = require('url');
-var tasks = require('../tasks');
-var clone = require('./clone');
-var mConfig = require('./config');
-var express = require('express');
-var bodyParser = require('body-parser');
-var util = require('./util');
+var api = require('../api'), writeError = api.writeError, writeResponse = api.writeResponse,
+	args = require('../args'),
+	async = require('async'),
+	git = require('nodegit'),
+	url = require('url'),
+	tasks = require('../tasks'),
+	clone = require('./clone'),
+	mConfig = require('./config'),
+	express = require('express'),
+	bodyParser = require('body-parser'),
+	util = require('./util'),
+	log4js = require('log4js'),
+	logger = log4js.getLogger("git");
 
 module.exports = {};
 
@@ -315,6 +317,7 @@ function fetchRemote(req, res, remote, branch, force) {
 		}
 	})
 	.catch(function(err) {
+		logger.error(err);
 		clone.handleRemoteError(task, err, remoteObj.url());
 	});
 }

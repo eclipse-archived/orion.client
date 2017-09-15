@@ -16,6 +16,8 @@ var ETag = require('./util/etag'),
 	rimraf = require('rimraf'),
 	fse = require('fs-extra'),
 	api = require('./api'),
+	log4js = require('log4js'),
+	logger = log4js.getLogger("file"),
 	fs = Promise.promisifyAll(require('fs'));
 
 /**
@@ -230,6 +232,7 @@ var copy = exports.copy = function(srcPath, destPath, callback) {
 	return new Promise(function(fulfill, reject) {
 		return fse.copy(srcPath, destPath, {clobber: true, limit: 32}, function(err) {
 			if (err) {
+				logger.error(err);
 				if (callback) callback(err);
 				return reject(err);
 			}
@@ -245,7 +248,10 @@ var copy = exports.copy = function(srcPath, destPath, callback) {
  */
 exports.withStats = function(filepath, callback) {
 	fs.stat(filepath, function(error, stats) {
-		if (error) { callback(error); }
+		if (error) {
+			logger.error(error);
+			callback(error); 
+		}
 		else {
 			callback(null, stats);
 		}
@@ -436,6 +442,7 @@ exports.handleFilePOST = function(workspaceRoot, fileRoot, req, res, destFile, m
 			return writeFileMetadata(req, res, api.join(fileRoot, destFile.workspaceId), api.join(workspaceRoot, destFile.workspaceId), destFile, stats, /*etag*/null, /*depth*/0, metadataMixins);
 		})
 		.catch(function(err) {
+			logger.error(err);
 			return api.writeError(err.code || 500, res, err.message);
 		});
 	};

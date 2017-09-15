@@ -10,13 +10,11 @@
         "search-worker": "ERROR",
         "git": "ALL",
         "electron": "ALL",
-        "response":"ERROR",
+        "response": "ERROR",
         "livesync": "DEBUG",
-        "file":"INFO"
+        "file": "INFO"
     },
-    "appenders": [
-        {
-            "type": "console"
-        }
-    ]
+    "appenders": [{
+        "type": "console"
+    }]
 }
