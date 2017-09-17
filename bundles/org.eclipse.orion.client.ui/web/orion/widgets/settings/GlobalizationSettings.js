@@ -15,7 +15,8 @@ define([
 	
 	var CALENDAR_TYPES = [
 		         		{value: "gregorian", label: messages.Gregorian}, //$NON-NLS-0$
-		         		{value: "hebrew", label: messages.Hebrew} //$NON-NLS-0$
+		         		{value: "hebrew", label: messages.Hebrew}, //$NON-NLS-0$
+					{value: "islamic", label: messages.Islamic} //$NON-NLS-0$
 		         	];
 	
 	var bidiEnabled = "bidiEnabled"; //$NON-NLS-0$
