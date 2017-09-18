@@ -1435,8 +1435,8 @@ objects.mixin(EditorViewer.prototype, {
 				}.bind(this));
 			}.bind(this));
 			// Listen annotation changes
-			var annotationModel = this.editor.getAnnotationModel();
-			annotationModel.addEventListener("Changed", this.annotationModelChangedListener = function(e) {
+			var annotationModel = this.editor.getAnnotationModel && this.editor.getAnnotationModel();
+			annotationModel && annotationModel.addEventListener("Changed", this.annotationModelChangedListener = function(e) {
 				if (e.changed.length === 0) {
 					return;
 				}
@@ -1453,7 +1453,7 @@ objects.mixin(EditorViewer.prototype, {
 			}.bind(this));
 			this.editor.addEventListener("TextViewUninstalled", this.editorUninstalledListener = function(e) {
 				this.editor.removeEventListener("TextViewUninstalled", this.editorUninstalledListener);
-				annotationModel.removeEventListener("Changed", this.annotationModelChangedListener);
+				annotationModel && annotationModel.removeEventListener("Changed", this.annotationModelChangedListener);
 			}.bind(this));
 		}
 	},
