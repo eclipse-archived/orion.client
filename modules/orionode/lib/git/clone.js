@@ -651,7 +651,7 @@ function handleRemoteError(task, err, cloneUrl) {
 		fullCloneUrl = "ssh://" + cloneUrl;
 	}
 	var u = url.parse(fullCloneUrl, true);
-	var code = 403;
+	var code = err.code || 403;
 	var jsonData;
 	if (err.message && ["credentials", "authentication", "401"].some(function(s) { return err.message.indexOf(s) !== -1; })) {
 		code = 401;
