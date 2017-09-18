@@ -17,7 +17,8 @@ var express = require('express'),
 	api = require('./lib/api'),
 	checkRights = require('./lib/accessRights').checkRights,
 	log4js = require('log4js'),
-	logger = log4js.getLogger("response");
+	logger = log4js.getLogger("response"),
+	CloudFoundry = require('./lib/cf').CloudFoundry;
 
 var LIBS = path.normalize(path.join(__dirname, 'lib/')),
 	MINIFIED_ORION_CLIENT = path.normalize(path.join(__dirname, "lib/orion.client")),
@@ -145,7 +146,7 @@ function startServer(options) {
 		app.use('/file*', options.authenticate, checkAuthenticated, checkAccessRights, require('./lib/file')(options));
 		app.use('/workspace*', options.authenticate, checkAuthenticated, checkAccessRights, require('./lib/workspace')(options));
 		app.use('/gitapi', options.authenticate, checkAuthenticated, require('./lib/git')(options));
-		app.use('/cfapi', options.authenticate, checkAuthenticated, require('./lib/cf')(options));
+		app.use('/cfapi', options.authenticate, checkAuthenticated, new CloudFoundry().createRouter(options));
 		app.use('/prefs', options.authenticate, checkAuthenticated, require('./lib/prefs').router(options));
 		app.use('/xfer', options.authenticate, checkAuthenticated, require('./lib/xfer').router(options));
 		if(options.configParams["orion.collab.enabled"]){
