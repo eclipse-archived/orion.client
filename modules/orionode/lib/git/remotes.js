@@ -317,7 +317,10 @@ function fetchRemote(req, res, remote, branch, force) {
 		}
 	})
 	.catch(function(err) {
-		logger.error(err);
+		if (err.message && ["unexpected", "404"].some(function(s) { return err.message.indexOf(s) !== -1; })) {
+			err.message = "Error fetching git remote";
+			err.code = 404;
+		}
 		clone.handleRemoteError(task, err, remoteObj.url());
 	});
 }
