@@ -21,45 +21,69 @@ var target = require("./target");
 var tasks = require("../tasks");
 var crypto = require('crypto');
 
-module.exports.router = function(options) {
-	var fileRoot = options.fileRoot;
-	if (!fileRoot) { throw new Error('options.fileRoot is required'); }
-	module.exports.retrieveManifestFile = retrieveManifestFile;
-	module.exports.retrieveProjectFilePath = retrieveProjectFilePath;
-	module.exports.slugify = slugify;
+/**
+ * @description Class to handle manifests
+ * @since 16.0
+ */
+class ManifestRouter {
+	/**
+	 * @description Create a new instance of the class
+	 */
+	constructor() {}
+	/**
+	 * @description Create an express Router for handling /manifests
+	 * @param {?} options The map of options. The option 'fileRoot' must be specified. All other options are optional
+	 * @returns {Router} A new express router
+	 * @throws {Error} If options.filePath is not defined
+	 */
+	createRouter(options) {
+		if (!options.fileRoot) { 
+			throw new Error('options.fileRoot is required'); 
+		}
+		return express.Router()
+			.use(bodyParser.json())
+			.get(this.fileRoot + "*", getManifests)
+			.get("*", getManifests);
+	}
+}
 
-	return express.Router()
-	.use(bodyParser.json())
-	.get(fileRoot + "*", getManifests)
-	.get("*", getManifests);
-	
+module.exports.ManifestRouter = ManifestRouter;
+/**
+ * @description Fetch the manifest for the project
+ * @param {?} req The original request
+ * @param {?} res The response
+ */
 function getManifests(req, res){
-	retrieveManifestFile(req, res)
-	.then(function(manifest){
-		var respond = {
-			"Contents": manifest,
-			"Type": "Manifest"
-		};
-		writeResponse(200, res, null, respond);			
-	}).catch(function(err){
-		var task = new tasks.Task(res, false, false, 0, false);
-		target.caughtErrorHandler(task, err);
-	});
+	return retrieveManifestFile(req, res)
+		.then(function(manifest){
+			writeResponse(200, res, null, {
+				"Contents": manifest,
+				"Type": "Manifest"
+			});			
+		}).catch(function(err){
+			var task = new tasks.Task(res, false, false, 0, false);
+			target.caughtErrorHandler(task, err);
+		});
 }
 
 /**
  * res is needed because following Java server's patten, /plan and /manifest endpoins don't use task
  * task is needed for situation where there was a task created. So that we cannot use res in these cases.
  */
-function retrieveManifestFile(req, res, manifestAbsoluteLocation){
+module.exports.retrieveManifestFile = retrieveManifestFile = function retrieveManifestFile(req, res, manifestAbsoluteLocation){
 	return new Promise(function(fulfill,reject) {
-		var uri = req.originalUrl.substring(req.baseUrl.length + req.contextPath.length);
+		var uri = req.originalUrl.substring(req.baseUrl.length + (typeof req.contextPath === 'string' ? req.contextPath.length : 0));
 		req.user.checkRights(req.user.username, uri, req, res, function(){
 			var filePath = manifestAbsoluteLocation ? manifestAbsoluteLocation : retrieveProjectFilePath(req);
+			if(!filePath) {
+				var errorStatus = new Error("Could not find manifest.");
+				errorStatus.code = "404";
+				return reject(errorStatus);
+			}
 			if(filePath.indexOf("manifest.yml") === -1){
 				filePath += "manifest.yml";
 			}
-			fs.readFile(filePath, "utf8", function(err, fileContent){
+			fs.readFile(filePath, "utf8", function(err, fileContent) {
 				if(err && err.code !== "ENOENT") {
 					var errorStatus = new Error(err.message);
 					errorStatus.code = "404";
@@ -72,25 +96,74 @@ function retrieveManifestFile(req, res, manifestAbsoluteLocation){
 		if (!fileContent) { // if the project doesn't have a manifest.yml
 			return setDefaultManifestProperties(req);
 		}
-		var manifest = yaml.safeLoad(fileContent);
-		var manifestAST = yamlAstParser.load(fileContent);
+		var manifest = yaml.safeLoad(fileContent, {
+			onWarning: function(warning, foo, bar, baz, boo) {
+				//TODO we should collect these up and forward them
+			}
+		});
+		var manifestAST = yamlAstParser.safeLoad(fileContent, {
+			onWarning: function(warning, foo, bar, baz, boo) {
+				//TODO we should collect these up and forward them
+			}
+		});
 		transformManifest(manifest);
 		symbolResolve(manifest);
 		return analyzeManifest(manifest, manifestAST, fileContent)
-		.then(function(){
-			return setDefaultManifestProperties(req, manifest);
-		});
+			.then(function(){
+				return setDefaultManifestProperties(req, manifest);
+			});
 	});
+};
+
+/**
+ * @description Parses the project path out of the request
+ * @param {?} req The request to try and get the project path from 
+ * @returns {string} The file path
+ */
+module.exports.retrieveProjectFilePath = retrieveProjectFilePath = function retrieveProjectFilePath(req){
+	var projectPath = req.params[0],
+		file;
+	if(typeof projectPath === 'string') {
+		projectPath = projectPath.replace(/^\/file/, "");
+	}
+	file = fileUtil.getFile(req, projectPath);
+	if(file && file.path) {
+		return file.path;
+	}
+	return null;
+};
+
+/**
+ * @description Converts the given string to a form suitable to be used as a 'Slug' in a request.
+ * Conversion is as follows:
+ *   1. replace spaces with '-'
+ *   2. remove all non-word characters
+ *   3. replace multiple '-' with a single '-'
+ *   4. trim '-' from the start and end of the string
+ * @param {string} inputString The string to convert
+ * @returns {string} The converted string
+ */
+module.exports.slugify = slugify = function slugify(inputString) {
+	if(typeof inputString === 'string') { 
+		return inputString.toLowerCase()
+			.replace(/\s+/g, "-")		// Replace spaces with -
+			.replace(/[^\w\-]+/g, "")	// Remove all non-word chars
+			.replace(/\-\-+/g, "-")		// Replace multiple - with single -
+			.replace(/^-+/, "")			// Trim - from start of text
+			.replace(/-+$/, "");			// Trim - from end of text
+	}
 }
 
-function setDefaultManifestProperties(req, manifest){
-	function getDefaultName(rawProjectName){
-		var nameParts = rawProjectName.split(" --- ", 2);
-		return nameParts.length > 1 ? nameParts[1] : nameParts[0];
-	}
-	function getDefaultHost(rawProjectName){
-		return slugify(rawProjectName);
-	}
+function getDefaultName(rawProjectName){
+	var nameParts = rawProjectName.split(" --- ", 2);
+	return nameParts.length > 1 ? nameParts[1] : nameParts[0];
+}
+
+function getDefaultHost(rawProjectName){
+	return slugify(rawProjectName);
+}
+
+function setDefaultManifestProperties(req, manifest) {
 	var rawContentLocationData = req.params[0].split("/");
 	var rawDefaultProjectName = rawContentLocationData[rawContentLocationData.length - 2];
 	rawDefaultProjectName = rawDefaultProjectName.replace(/\|/, " --- ");
@@ -113,8 +186,9 @@ function setDefaultManifestProperties(req, manifest){
 	}
 	return manifest;
 }
-function transformManifest(manifest){
-	if(!manifest.applications){
+
+function transformManifest(manifest) {
+	if(!manifest || !manifest.applications){
 		return;  // Do nothing
 	}
 	var globals = [];
@@ -136,7 +210,11 @@ function transformManifest(manifest){
 		}
 	});
 }
-function symbolResolve(manifestNode){
+
+function symbolResolve(manifestNode) {
+	if(!manifestNode) {
+		return;
+	}
 	if(Array.isArray(manifestNode)){
 		manifestNode.forEach(function(subNode){
 			symbolResolve(subNode);
@@ -151,9 +229,9 @@ function symbolResolve(manifestNode){
 	});
 	// Java code also handles ${target-base} case, but it seems useless, will implement when necessary.
 }
-function analyzeManifest(manifest, manifestAST, fileContent){
-	if(!manifest.applications){
-		return Promise.resolve(); // Do nothing
+function analyzeManifest(manifest, manifestAST, fileContent) {
+	if(!manifestAST) {
+		Promise.resolve();
 	}
 	var lineNumbers = [];
 	var valueWithParent = [];
@@ -191,7 +269,7 @@ function analyzeManifest(manifest, manifestAST, fileContent){
 		}else if(manifestAST.hasOwnProperty("value")){
 			if(!manifestAST.value){   // null case
 				// find null
-				nullArray.push(makeInvalidateReject("Empty Propety",getLineNumber(manifestAST.startPosition, manifestAST.endPosition, lineNumbers)));	
+				nullArray.push(makeInvalidateReject("Empty Property",getLineNumber(manifestAST.startPosition, manifestAST.endPosition, lineNumbers)));	
 				return;
 			}
 			if(typeof manifestAST.value === "string"){
@@ -323,17 +401,3 @@ function analyzeManifest(manifest, manifestAST, fileContent){
 		return errorStatus;
 	}
 }
-function retrieveProjectFilePath(req){
-	var projectPath = req.params[0];
-	var file = fileUtil.getFile(req, projectPath);
-	return file.path;
-}
-function slugify(inputString){
-	return inputString.toLowerCase()
-	.replace(/\s+/g, "-")		// Replace spaces with -
-	.replace(/[^\w\-]+/g, "")	// Remove all non-word chars
-	.replace(/\-\-+/g, "-")		// Replace multiple - with single -
-	.replace(/^-+/, "")			// Trim - from start of text
-	.replace(/-+$/, "");			// Trim - from end of text
-}
-};
