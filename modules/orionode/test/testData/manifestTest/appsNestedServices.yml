@@ -1,0 +1,16 @@
+applications:
+- name: mysample
+  memory: 256M
+  instances: 1
+  host: tapp
+  domain: ctapps.io
+  path: .
+  services:
+    rediscloud-8cccc:
+      type: rediscloud
+      provider: garantiadata
+      plan: 20mb
+    mongolab-6d208:
+      type: mongolab
+      provider: mongolab
+      plan: sandbox

@@ -1,0 +1,13 @@
+applications:
+- name: spock
+  memory: 1G
+  instances: 1
+  services:
+  - volcan
+  - uss-enterprise
+- name: kirk
+  memory: 1G
+  instances: 1
+  services:
+  - earth
+  - spock

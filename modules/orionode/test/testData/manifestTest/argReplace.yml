@@ -1,0 +1,10 @@
+--- 
+applications: 
+- name: orionode
+  memory: 128M
+  instances: 1
+  path: .
+  url: orionode${random-word}.${target-base}
+  runtime: node08
+  command: node server.js
+  framework: node

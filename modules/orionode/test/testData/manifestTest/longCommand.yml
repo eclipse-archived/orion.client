@@ -1,0 +1,6 @@
+---
+applications:
+- name: quotetest
+  memory: 512M
+  command: node_modules/.bin/foo --foo "bar" --baz "" -- fizz buzz
+  test: hi

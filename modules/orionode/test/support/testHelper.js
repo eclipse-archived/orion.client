@@ -23,6 +23,11 @@ exports.CONTEXT_PATH = CONTEXT_PATH = '';
  */
 exports.WORKSPACE = WORKSPACE = path.join(__dirname, '.test_workspace');
 /**
+ * The absolute path to the test metadata. Default value is __dirname + .test_metadata
+ * @since 16.0
+ */
+exports.WORKSPACE = WORKSPACE = path.join(__dirname, '.test_metadata');
+/**
  * The id of the test workspace. Value is orionode
  * @since 16.0
  */
@@ -33,10 +38,10 @@ exports.WORKSPACE_ID = WORKSPACE_ID = "anonymous-OrionContent";
  */
 exports.FILE_PATH = FILE_PATH = CONTEXT_PATH + '/file';
 /**
- * The complete file enpoint prefix. Default value is FILE_PATH + / + WORKSPACE_ID
+ * The path to the workspace endpoint
  * @since 16.0
  */
-exports.PREFIX = PREFIX = FILE_PATH + '/' + WORKSPACE_ID;
+exports.WORKSPACE_PATH = WORKSPACE_PATH = CONTEXT_PATH + '/workspace';
 
 /**
  * @name createDir

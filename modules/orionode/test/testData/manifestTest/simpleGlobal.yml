@@ -1,0 +1,7 @@
+applications:
+- name: nodetestdh01
+  memory: 64M
+  instances: 2
+  host: crn
+  domain: csapps.io
+  path: .

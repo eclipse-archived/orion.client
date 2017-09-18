@@ -1,0 +1,9 @@
+---
+applications:
+- name: TargetBaseExampleApp
+  memory: 256M
+  instances: 1
+  url: App-${random-word}.${target-base}
+  host: App-${random-word}
+  domain: ${target-base}
+  path: .

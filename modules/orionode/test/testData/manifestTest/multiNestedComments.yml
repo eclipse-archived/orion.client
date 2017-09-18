@@ -1,0 +1,21 @@
+---
+applications: #Reference http://docs.cloudfoundry.com/docs/using/deploying-apps/manifest.html
+- name: TwitterSearchAnalyzerNode #Application Name. Unique to the user's Space
+  memory: 256M #The maximum memory to allocate to each application instance
+  instances: 1 #The number of instances of the application to start
+  url: TwitterSearchAnalyzerNode${random-word}.${target-base} #deprecated, kept for temporary compatibility
+  host: TwitterSearchAnalyzerNode-${random-word} #Hostname for app routing. Unique to domain
+  domain: ${target-base} #Bluemix Parent Domain Name
+  path: . #Path to the application to be pushed
+  command: node app.js #The command to use to start the application
+  services:
+     ctas-tsa-node: #Identifier for CompaniesTextAnalyticsService Bound Service instance
+      label: CompaniesTextAnalyticsService
+      provider: jStart
+      version: '0.1'
+      plan: 'free'
+     ntas-tsa-node: #Identifier for NamesTextAnalyticsService Bound Service instance
+      label: NamesTextAnalyticsService
+      provider: jStart
+      version: '0.1'
+      plan: 'free'

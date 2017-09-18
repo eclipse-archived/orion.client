@@ -1,0 +1,9 @@
+---
+applications:
+- name: quoted-path-application
+  memory: 64M
+  instances: 1
+  path: "."
+  host: 'quoted-path-application'
+  domain: cloud-foundry-domain.org
+  command: node app.js

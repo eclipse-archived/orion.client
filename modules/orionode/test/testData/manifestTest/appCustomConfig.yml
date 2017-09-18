@@ -1,0 +1,16 @@
+---
+path: .
+domain: example.com
+memory: 256M
+instances: 1
+services:
+- singular-backend
+
+# app-specific configuration
+applications:
+ - name: springtock
+   host: 765shower
+   path: ./april/build/libs/april-weather.war
+ - name: wintertick
+   subdomain: 321flurry
+   path: ./december/target/december-weather.war

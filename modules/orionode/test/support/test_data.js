@@ -112,4 +112,43 @@ exports.setUp = function setUp(dir, callback, wsjson) {
 	}
 }
 
+exports.setUpCF = function setUpCF(dir, callback) {
+	function createFiles() {
+		//copy in all the files
+		var test_data_path = path.join(__dirname, "../testData/manifestTest");
+		var files = fs.readdirSync(test_data_path);
+		if(Array.isArray(files)) {
+			files.forEach(function(file) {
+				if(!fs.statSync(path.join(test_data_path, file)).isFile()) {
+					return;
+				}
+				var rs = fs.createReadStream(path.join(test_data_path, file)),
+					ws = fs.createWriteStream(path.join(cf, file));
+				rs.on('error', (err) => {
+					console.log(err.message)
+				});
+				ws.on('error', (err) => {
+					console.log("error writing to: "+err.message)
+				});
+				rs.pipe(ws);
+			});
+		}
+		callback();
+	}
+	var cf = path.join(dir, "cftests");
+	if(fs.existsSync(cf)) {
+		debug('\nDirectory exists; cleaning...');
+		tearDown(cf, function(err) {
+			if (err) {
+				debug(err);
+				return;
+			}
+			fs.mkdirSync(cf);
+			createFiles();
+		});
+	} else {
+		fs.mkdirSync(cf);
+		createFiles();
+	}
+}
 exports.DEBUG = process.env.DEBUG_TESTS || false;

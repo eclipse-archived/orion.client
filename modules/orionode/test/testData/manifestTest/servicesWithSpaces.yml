@@ -1,0 +1,11 @@
+---
+applications:
+- name: cf-node-mb-TEST
+  host: cf-node-mb-TEST3
+  command: node server.js
+  path: .
+  instances: 1
+  memory: 256MB
+  services:
+  - Redis Cloud-fo service
+  - Redis-two

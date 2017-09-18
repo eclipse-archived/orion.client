@@ -66,7 +66,7 @@ describe("Workspace endpoint", function() {
 		}, false);
 	});
 	afterEach("Remove .test_workspace", function(done) {
-		testData.tearDown(testHelper.WORKSPACE, function(){
+		testData.tearDown(WORKSPACE, function(){
 			testData.tearDown(path.join(MEATASTORE, '.orion'), function(){
 				testData.tearDown(MEATASTORE, done);
 			})

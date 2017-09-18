@@ -1,0 +1,32 @@
+---
+properties:
+  app-host: ${name}
+
+path: .
+env:
+  RAILS_ENV: ${rails-env}
+  RACK_ENV: ${rails-env}
+  BUNDLE_WITHOUT: test:development
+services:
+  frontend-db:
+    type: cleardb
+    provider: cleardb
+    plan: shock
+mem: 512M
+disk: 1G
+instances: 1
+host: none
+domain: none
+
+# app-specific configuration
+applications:
+- name: frontend
+  host: ${app-host}
+  domain: ${target-base}
+  instances: 2
+  command: bundle exec rake server:start_command
+- name: app2-worker1
+  instances: 2
+  command: bundle exec rake VERBOSE=true QUEUE=*
+- name: app2-worker2
+  command: bundle exec rake VERBOSE=true

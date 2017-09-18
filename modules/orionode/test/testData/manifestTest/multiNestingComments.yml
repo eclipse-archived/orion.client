@@ -1,0 +1,23 @@
+---
+# this manifest deploys two applications
+# apps are in flame and spark directories
+# flame and spark are in fireplace
+# cf push should be run from fireplace
+applications:
+- name: spark
+  memory: 1G
+  buildpack: http://example.com#something
+  instances: 2
+  host: flint-99
+  domain: example.com
+  path: ./spark/
+  services:
+  - mysql-flint-99
+- name: flame
+  memory: 1G
+  instances: 2
+  host: burnin-77
+  domain: example.com
+  path: ./flame/
+  services:
+  - redis-burnin-77
