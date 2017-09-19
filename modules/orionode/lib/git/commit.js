@@ -20,7 +20,6 @@ var crypto = require('crypto');
 var async = require('async');
 var express = require('express');
 var bodyParser = require('body-parser');
-var util = require('./util');
 var remotes = require('./remotes');
 var branches = require('./branches');
 var tasks = require('../tasks');
@@ -79,7 +78,7 @@ function getCommit(req, res) {
 
 function getCommitLog(req, res) {
 	var task = new tasks.Task(res,false,false,0,false);
-	var scope = util.decodeURIComponent(req.params.scope);
+	var scope = api.decodeURIComponent(req.params.scope);
 	var fileDir;
 
 	var query = req.query;
@@ -249,7 +248,7 @@ function getCommitLog(req, res) {
 			"Children": commits,
 			"RepositoryPath": filterPath,
 			"Type": "Commit",
-			"Location":gitRoot + "/commit/" + util.encodeURIComponent(scope) + fileRoot + req.params[0],
+			"Location":gitRoot + "/commit/" + api.encodeURIComponent(scope) + fileRoot + req.params[0],
 			"CloneLocation": gitRoot + "/clone" + fileDir
 		};
 		if(mergeBase){
@@ -749,7 +748,7 @@ function identifyNewCommitResource(req, res, newCommit) {
 	var originalUrl = url.parse(req.originalUrl, true);
 	var segments = originalUrl.pathname.split("/");
 	var contextPathSegCount = req.contextPath.split("/").length - 1;
-	segments[3 + contextPathSegCount] = segments[3 + contextPathSegCount] + ".." + util.encodeURIComponent(newCommit);
+	segments[3 + contextPathSegCount] = segments[3 + contextPathSegCount] + ".." + api.encodeURIComponent(newCommit);
 	var location = url.format({pathname: segments.join("/"), query: originalUrl.query});
 	writeResponse(200, res, null, {
 		"Location": location
@@ -1248,7 +1247,7 @@ function tag(req, res, commitId, name, isAnnotated, message) {
 }
 
 function putCommit(req, res) {
-	var commit = util.decodeURIComponent(req.params.commit);
+	var commit = api.decodeURIComponent(req.params.commit);
 	var tagName = req.body.Name;
 	var isAnnotated = req.body.Annotated === undefined || req.body.Annotated;
 	var message = req.body.Message || "";
@@ -1280,7 +1279,7 @@ function postCommit(req, res) {
 		return;
 	}
 	
-	var commit = util.decodeURIComponent(req.params.commit);
+	var commit = api.decodeURIComponent(req.params.commit);
 	if (commit !== "HEAD") {
 		writeError(404, res, "Needs to be HEAD");
 		return;

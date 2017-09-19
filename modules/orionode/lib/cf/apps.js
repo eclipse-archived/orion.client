@@ -15,7 +15,6 @@ var fileUtil = require("../fileUtil");
 var bodyParser = require("body-parser");
 var target = require("./target");
 var tasks = require("../tasks");
-var util = require("../git/util");
 var manifests = require("./manifests");
 var domains = require("./domains");
 var xfer = require("../xfer");
@@ -56,7 +55,7 @@ function getapps(req, res){
 		if(encodeName){
 			return getAppwithAppName(req.user.username, task,encodeName,appTarget);
 		}else if(encodedContentLocation) {
-			var manifestLocation = toOrionLocation(req, util.decodeURIComponent(encodedContentLocation));
+			var manifestLocation = toOrionLocation(req, api.decodeURIComponent(encodedContentLocation));
 			if(manifestLocation){
 				return manifests.retrieveManifestFile(req, res, manifestLocation)
 				.then(function(manifest){
@@ -132,7 +131,7 @@ function _getAppwithAppName(userId, encodeName, appTarget){
 	if (appCache.get(cacheKey)) {
 		return Promise.resolve(appCache.get(cacheKey));
 	}
-	return target.cfRequest("GET", userId, appTarget.Url + appTarget.Space.entity.apps_url, {"q": "name:"+util.encodeURIComponent(encodeName),"inline-relations-depth":"1"}, null, null, null, appTarget)
+	return target.cfRequest("GET", userId, appTarget.Url + appTarget.Space.entity.apps_url, {"q": "name:"+api.encodeURIComponent(encodeName),"inline-relations-depth":"1"}, null, null, null, appTarget)
 	.then(function(result){
 		if(!result.resources || result.resources && result.resources.length === 0){
 			return null;
