@@ -187,6 +187,26 @@ function startServer(options) {
 			}
 			app.use(require('./lib/orion_static')(Object.assign({orionClientRoot: ORION_CLIENT, orionode_static: orionode_static, prependStaticAssets: prependStaticAssets, appendStaticAssets: appendStaticAssets}, staticCacheOption)));
 		}
+		//error handling
+		app.use(function(err, req, res) {
+			logger.error(req.originalUrl, err);
+			if (res.finished) {
+				return;
+			}
+			
+			if (err) {
+				res.status(err.status || 500);
+			} else {
+				res.status(404);
+			}
+			// respond with json
+			if (req.accepts('json')) {
+				res.send({ error: err ? err.message : 'Not found' });
+				return;
+			}
+			// default to plain-text. send()
+			res.type('txt').send(err ? err.message : 'Not found');
+		});
 		return app;
 	} catch (e) {
 		handleError(e);
