@@ -60,7 +60,7 @@ function getManifests(req, res){
 				"Contents": manifest,
 				"Type": "Manifest"
 			});			
-		}).catch(function(err){
+		}).catch(function(err) {
 			var task = new tasks.Task(res, false, false, 0, false);
 			target.caughtErrorHandler(task, err);
 		});
@@ -80,14 +80,27 @@ module.exports.retrieveManifestFile = retrieveManifestFile = function retrieveMa
 				errorStatus.code = "404";
 				return reject(errorStatus);
 			}
-			if(filePath.indexOf("manifest.yml") === -1){
-				filePath += "manifest.yml";
-			}
-			fs.readFile(filePath, "utf8", function(err, fileContent) {
-				if(err && err.code !== "ENOENT") {
-					var errorStatus = new Error(err.message);
-					errorStatus.code = "404";
-					return reject(errorStatus);
+			//if strict only try to parse the manifest given, if not, try to find a 'manifest.yml' in the parent dir if the file does not exist
+			var isStrict = req.query && Boolean(req.query.Strict);
+			return fs.readFile(filePath, "utf8", function(err, fileContent) {
+				if(err && err.code === "ENOENT") {
+					if(isStrict) {
+						var errorStatus = new Error(err.message);
+						errorStatus.code = 404;
+						return api.writeError(404, res, err);
+					}
+					var base = path.basename(filePath);
+					if(typeof base === 'string') {
+						filePath = path.join(base, 'manifest.yml');
+						return fs.readFile(filePath, "utf8", function(err, fileContent) {
+							if(err && err.code !== 'ENOENT') {
+								var errorStatus = new Error(err.message);
+								errorStatus.code = 404;
+								return reject(errorStatus);
+							}
+							return fulfill(fileContent);
+						});
+					}
 				}
 				fulfill(fileContent);
 			});
