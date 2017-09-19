@@ -107,19 +107,27 @@ function cloneJSON(base, location, giturl, parents, submodules) {
 	}
 	return result;
 }
-	
+
+/**
+ * @description Computes the root path to search in to try and find a git repository
+ * @param {String} filePath The full path to the file
+ * @param {String} workspaceDir The full path to the workspace root
+ * @returns {Promise} A promise to open a repository at the given location
+ */
 function getRepoByPath(filePath, workspaceDir) {
-	filePath = util.decodeURIComponent(filePath);
-	while (!fs.existsSync(filePath)) {
-		filePath = path.dirname(filePath);
-		if (filePath.length < workspaceDir.length) return Promise.reject(new Error("Forbidden"));
+	var fPath = util.decodeURIComponent(filePath);
+	while (!fs.existsSync(fPath)) {
+		fPath = path.dirname(fPath);
+		if (!fPath.startsWith(workspaceDir)) {
+			return Promise.reject(new Error("Forbidden - Access is denied to: "+fPath));
+		}
 	}
  	var ceiling = path.dirname(workspaceDir);
-	if (!fs.statSync(filePath).isDirectory()) {
+	if (!fs.statSync(fPath).isDirectory()) {
 		// get the parent folder if pointing at a file
-		filePath = path.dirname(filePath);
+		fPath = path.dirname(fPath);
 	}
-	return git.Repository.discover(filePath, 0, ceiling).then(function(buf) {
+	return git.Repository.discover(fPath, 0, ceiling).then(function(buf) {
 		return git.Repository.open(buf.toString());
 	});
 }	
