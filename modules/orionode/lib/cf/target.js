@@ -173,6 +173,12 @@ function caughtErrorHandler(task, err){
 		Message: err.message,
 		Severity: "Error"
 	};
+	//properly handle parse errors from the YAML parser
+	if(err.name && err.name === 'YAMLException') {
+		errorResponse.JsonData = err.mark;
+		errorResponse.JsonData.Line = err.mark.line + 1;
+		errorResponse.JsonData.Message = err.message;
+	}
 	if(err.bundleid){
 		errorResponse.BundleId = err.bundleid;
 	}

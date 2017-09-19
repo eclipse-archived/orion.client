@@ -683,9 +683,8 @@ describe("CloudFoundry endpoint", function() {
 							request()
 								.get(path.join(PREFIX_MANIFESTS, res.body.Location))
 								.query({Strict: true})
-								.expect(202)
+								.expect(400)
 								.end(function(err, res) {
-									testHelper.throwIfError(err);
 									assert(res.body.Location);
 									assert(res.body.Location.startsWith("/task"));
 									done();
@@ -778,6 +777,112 @@ describe("CloudFoundry endpoint", function() {
 									done();
 								});
 						});
+					})
+			});
+		});
+		/**
+		 * Even though this is asking the endpoint for a file that does not exist (using the /file endpoint)
+		 * we get back 200, due to the fact that we generate a default manifest for the user if there isn't one.
+		 */
+		it("testNonExistentFile", function(done) {
+			testHelper.withWorkspace(request, testHelper.WORKSPACE_PATH, testHelper.WORKSPACE_ID)
+			.end(function(err, res) {
+				testHelper.throwIfError(err);
+				var wLoc = res.body.Location;
+				request()
+					.get(path.join(res.body.ContentLocation, "cftests", "foo.yml"))
+					.expect(404)
+					.query({parts: 'meta'})
+					.end(function(err, res) {
+						testHelper.throwIfError(err);
+						var fLoc = res.body.Location;
+						request()
+							.get(path.join(PREFIX_MANIFESTS, '/cftests/foo.yml')) // no /file endpoint, 403 is returned
+							.query({Strict: true})
+							.expect(403)
+							.end(done);
+					})
+			});
+		});
+		it("testNonExistentFileWithFileRoute", function(done) {
+			testHelper.withWorkspace(request, testHelper.WORKSPACE_PATH, testHelper.WORKSPACE_ID)
+			.end(function(err, res) {
+				testHelper.throwIfError(err);
+				var wLoc = res.body.Location,
+					wCL = res.body.ContentLocation;
+				request()
+					.get(path.join(wCL, "cftests", "foo.yml"))
+					.expect(404)
+					.query({parts: 'meta'})
+					.end(function(err, res) {
+						testHelper.throwIfError(err);
+						var fLoc = res.body.Location;
+						request()
+							.get(path.join(PREFIX_MANIFESTS, wCL, 'cftests', 'foo.yml'))
+							.query({Strict: true})
+							.expect(404)
+							.end(done);
+					})
+			});
+		});
+		it("testNonExistentFileWithFileRouteNonStrict", function(done) {
+			testHelper.withWorkspace(request, testHelper.WORKSPACE_PATH, testHelper.WORKSPACE_ID)
+			.end(function(err, res) {
+				testHelper.throwIfError(err);
+				var wLoc = res.body.Location,
+					wCL = res.body.ContentLocation;
+				request()
+					.get(path.join(wCL, "cftests", "foo.yml"))
+					.expect(404)
+					.query({parts: 'meta'})
+					.end(function(err, res) {
+						testHelper.throwIfError(err);
+						var fLoc = res.body.Location;
+						request()
+							.get(path.join(PREFIX_MANIFESTS, wCL, 'cftests', 'foo.yml'))
+							//.query({Strict: true}) non-strict should look for a manifest.yml in the directory
+							.expect(200)
+							.end(done);
+					})
+			});
+		});
+		it("testEmptyFilePath", function(done) {
+			testHelper.withWorkspace(request, testHelper.WORKSPACE_PATH, testHelper.WORKSPACE_ID)
+			.end(function(err, res) {
+				testHelper.throwIfError(err);
+				var wLoc = res.body.Location;
+				request()
+					.get(path.join(res.body.ContentLocation, "cftests", "foo.yml"))
+					.expect(404)
+					.query({parts: 'meta'})
+					.end(function(err, res) {
+						testHelper.throwIfError(err);
+						var fLoc = res.body.Location;
+						request()
+							.get(path.join(PREFIX_MANIFESTS, ''))
+							.query({Strict: true})
+							.expect(403)
+							.end(done);
+					})
+			});
+		});
+		it("testUndefinedFilePath", function(done) {
+			testHelper.withWorkspace(request, testHelper.WORKSPACE_PATH, testHelper.WORKSPACE_ID)
+			.end(function(err, res) {
+				testHelper.throwIfError(err);
+				var wLoc = res.body.Location;
+				request()
+					.get(path.join(res.body.ContentLocation, "cftests", "foo.yml"))
+					.expect(404)
+					.query({parts: 'meta'})
+					.end(function(err, res) {
+						testHelper.throwIfError(err);
+						var fLoc = res.body.Location;
+						request()
+							.get(PREFIX_MANIFESTS)
+							.query({Strict: true})
+							.expect(403)
+							.end(done);
 					})
 			});
 		});
