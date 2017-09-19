@@ -1,7 +1,7 @@
 
 /*******************************************************************************
  * @license
- * Copyright (c) 2013 IBM Corporation and others.
+ * Copyright (c) 2013, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -31,6 +31,7 @@ define([
 		{ type: FILE, source: "/", targetPattern: "${0}/bundles/org.eclipse.orion.client.git/web" }, //$NON-NLS-1$
 		{ type: FILE, source: "/", targetPattern: "${0}/bundles/org.eclipse.orion.client.javascript/web" }, //$NON-NLS-1$
 		{ type: FILE, source: "/", targetPattern: "${0}/bundles/org.eclipse.orion.client.webtools/web" }, //$NON-NLS-1$
+		{ type: FILE, source: "/", targetPattern: "${0}/bundles/org.eclipse.orion.client.debug/web" }, //$NON-NLS-1$
 		{ type: API, source: "/file", targetPattern: "${0}file" }, //$NON-NLS-1$ //$NON-NLS-2$
 		{ type: API, source: "/prefs", targetPattern: "${0}prefs" }, //$NON-NLS-2$ //$NON-NLS-1$
 		{ type: API, source: "/workspace", targetPattern: "${0}workspace" }, //$NON-NLS-2$ //$NON-NLS-1$
