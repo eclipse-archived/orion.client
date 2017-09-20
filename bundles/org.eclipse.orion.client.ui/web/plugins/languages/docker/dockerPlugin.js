@@ -199,7 +199,8 @@ define([
 				{	id: "text/x-dockerfile",
 					"extends": "text/plain",
 					name: "dockerfile",
-					extension: ["dockerfile"]
+					extension: ["dockerfile"],
+					filenamePattern: "^dockerfile"
 				}
 			] 
 		});
