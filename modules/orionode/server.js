@@ -157,12 +157,12 @@ function startServer(cb) {
 	
 				// respond with json
 				if (req.accepts('json')) {
-					api.writeResponse(200, res, null, { error: err ? err.message : 'Not found' });
+					api.writeResponse(null, res, null, { error: err ? err.message : 'Not found' });
 					return;
 				}
 				
 				// default to plain-text. send()
-				api.writeResponse(200, res, {"Content-Type":'text/plain'}, err ? err.message : 'Not found');
+				api.writeResponse(null, res, {"Content-Type":'text/plain'}, err ? err.message : 'Not found');
 			});
 
 			server.on('listening', function() {
