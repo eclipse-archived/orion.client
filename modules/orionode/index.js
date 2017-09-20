@@ -17,8 +17,7 @@ var express = require('express'),
 	api = require('./lib/api'),
 	checkRights = require('./lib/accessRights').checkRights,
 	log4js = require('log4js'),
-	logger = log4js.getLogger("response"),
-	CloudFoundry = require('./lib/cf').CloudFoundry;
+	logger = log4js.getLogger("response");
 
 var LIBS = path.normalize(path.join(__dirname, 'lib/')),
 	MINIFIED_ORION_CLIENT = path.normalize(path.join(__dirname, "lib/orion.client")),
@@ -135,6 +134,7 @@ function startServer(options) {
 		];
 		
 		loadEndpoints(false);
+		let CloudFoundry = require('./lib/cf').CloudFoundry;
 		app.use('/metrics', require('./lib/metrics').router(options));
 		app.use('/version', require('./lib/version').router(options));
 		if (options.configParams.isElectron) app.use('/update', require('./lib/update').router(options));
