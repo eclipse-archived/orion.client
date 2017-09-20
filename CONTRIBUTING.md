@@ -21,7 +21,7 @@ be [found on the contributing wiki](http://wiki.eclipse.org/Orion/Contributing_C
 Preferably, code contributions should be made using a pull request against this repository. Contributions 
 can also be made by attaching a patch to the bug you want to work on.
 
-More information regarding source code management, builds, coding standards, and more.
+More information regarding source code management, builds, coding standards, and more. 
 
 - [https://projects.eclipse.org/projects/ecd.orion/developer](https://projects.eclipse.org/projects/ecd.orion/developer)
 
