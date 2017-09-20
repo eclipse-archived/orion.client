@@ -120,6 +120,7 @@ function getRepoByPath(filePath, workspaceDir) {
 		if (!fPath.startsWith(workspaceDir)) {
         	return Promise.reject(new Error("Forbidden - Access is denied to: " + fPath));
 		}
+	}
  	var ceiling = path.dirname(workspaceDir);
 	if (!fs.statSync(fPath).isDirectory()) {
 		// get the parent folder if pointing at a file
