@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2011, 2014 IBM Corporation and others.
+ * Copyright (c) 2011, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -81,6 +81,13 @@ define(["orion/serviceTracker"], function(ServiceTracker) {
 				best = current;
 				continue;
 			}
+			if(typeof current.filenamePattern === 'string') {
+				try {
+					if(new RegExp(current.filenamePattern, 'i').test(filename)) {
+						best = current;
+					}
+				} catch(err) {}
+			}
 		}
 		
 		// Check the less common case where the filename contains periods (foo.bar.a.b check 'bar.a.b' then 'a.b' then 'b')
@@ -120,7 +127,8 @@ define(["orion/serviceTracker"], function(ServiceTracker) {
 			imageClass: contentTypeData.imageClass,
 			"extends": contentTypeData["extends"], //$NON-NLS-1$ //$NON-NLS-0$
 			extension: arrayLowerCase(contentTypeData.extension),
-			filename: array(contentTypeData.filename)
+			filename: array(contentTypeData.filename),
+			filenamePattern: contentTypeData.filenamePattern
 		};
 	}
 	
