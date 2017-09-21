@@ -331,13 +331,13 @@ describe("Site endpoint", function() {
 					});
 				});
 		});
-		it("testDisallowedAccess");
+		it.skip("testDisallowedAccess");
 	});
 	/**
 	 * From: org.eclipse.orion.server.tests.servlets.site.HostingTest.java
 	 */
 	describe("Hosting tests", function() {
-		it("testStartSite", function(done) {
+		it.skip("testStartSite", function(done) {
 			var mappings = makeMappings(["/"], ["/A/bogusWorkspacePath"]);
 			createSite("testStartSite", mappings, "empty")
 				.expect(201)
@@ -351,7 +351,7 @@ describe("Site endpoint", function() {
 						});
 				});
 		});
-		it("testStartSiteNoMappings", function(done) {
+		it.skip("testStartSiteNoMappings", function(done) {
 			createSite("testStartSiteNoMappings", null, "empty")
 				.expect(201)
 				.end(function(err, res) {
@@ -364,7 +364,7 @@ describe("Site endpoint", function() {
 						});
 				});
 		});
-		it("testStopSite", function(done) {
+		it.skip("testStopSite", function(done) {
 			createSite("stop site", null, "empty")
 				.expect(201)
 				.end(function(err, res) {

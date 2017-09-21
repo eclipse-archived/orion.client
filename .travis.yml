@@ -9,8 +9,9 @@ sudo: false
 
 env:
   matrix:
-    - export NODE_VERSION="4"
     - export NODE_VERSION="6"
+    - export NODE_VERSION="7"
+    - export NODE_VERSION="8"
 
 matrix:
   fast_finish: true
@@ -32,7 +33,8 @@ before_install:
 install:
   - cd modules/orionode;
   - npm install;
-  - grunt;
-
+  - grunt;  
 script:
   - npm pack;
+after_success:
+  - npm test

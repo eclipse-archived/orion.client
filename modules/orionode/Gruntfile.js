@@ -15,7 +15,7 @@ module.exports = function(grunt) {
 	    fingerPrint = grunt.option("fp") || false,
 	    skipTest = grunt.option("skipTest") || false,
 	    skipMinify = grunt.option("skipMinify") || false;
-	    
+	   
 	var socketioPath =  grunt.file.exists('./node_modules/socket.io/node_modules/socket.io-client') ?
 			'../../node_modules/socket.io/node_modules/socket.io-client/socket.io' :
 			'../../node_modules/socket.io-client/socket.io';
@@ -30,7 +30,6 @@ module.exports = function(grunt) {
 	
 	// Register fingerprint multi task
 	fingerPrintRegistry(grunt);
-	
 	grunt.initConfig({
 		pkg: grunt.file.readJSON("package.json"),
 		clientPath: clientPath,
@@ -166,12 +165,6 @@ module.exports = function(grunt) {
 					replacements: '<%= fingerPrints.jsMaps %>'
 				}
 			}
-		},
-		simplemocha: {
-			options: {
-				reporter: "dot"
-			},
-			all: { src: "test/*.js" }
 		}
 	});
 
