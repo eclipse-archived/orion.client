@@ -147,12 +147,12 @@ module.exports = function(options) {
 		} else {
 			var store = fileUtil.getMetastore(req);
 			searchOpts.searchScope = req.user.workspaces.map(function(w) {
-				var path = store.getWorkspaceDir(w.id);
+				var path = store.getWorkspaceDir(w);
 				return {
 					path: path,
-					workspaceId: w.id,
+					workspaceId: w,
 					workspaceDir: path,
-					fileRoot: api.join(req.contextPath, "file", w.id)
+					fileRoot: api.join(typeof req.contextPath === 'string' ? req.contextPath : '', "file", w)
 				};
 			});
 		}
