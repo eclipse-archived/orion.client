@@ -124,6 +124,12 @@ define([
 						this.setProject (project);
 					}.bind(this));
 				}.bind(this));
+				
+				window.addEventListener("focus", function() {
+					if (this._authenticationFailed) {
+						this._checkStatus();
+					}
+				}.bind(this));
 			} else {
 				throw new Error("this._domNode is null"); //$NON-NLS-0$
 			}
@@ -471,6 +477,7 @@ define([
 		},
 		
 		setStatus: function(_status) {
+			this._authenticationFailed = false;
 			var longStatusText = null;
 			var tooltipText = "";
 			var uriTemplate = null;
@@ -537,6 +544,7 @@ define([
 				if (!_status.error && ("PROGRESS" !== _status.State)) {
 					this._startStatusPolling();
 				} else if (_status.error && _status.error.HttpCode === 401) {
+					this._authenticationFailed = true;
 					this._stopStatusPolling();
 				}
 			}
@@ -945,25 +953,27 @@ define([
 			this._launchConfigurationsDropdownTriggerButton.disabled = true;
 		},
 		
+		_checkStatus: function() {
+			var launchConfiguration = this._selectedLaunchConfiguration;
+			if (!launchConfiguration) {
+				this._stopStatusPolling();
+				return;
+			}
+			var startTime = Date.now();
+			this._checkLaunchConfigurationStatus(launchConfiguration).then(function(_status) {
+				var interval = Date.now() - startTime;
+				mMetrics.logTiming("deployment", "check status (poll)", interval, launchConfiguration.Type); //$NON-NLS-1$ //$NON-NLS-2$
+
+				if (_status) {
+					launchConfiguration.status = _status;
+				}
+				this._updateLaunchConfiguration(launchConfiguration);
+			}.bind(this));
+		},
+		
 		_startStatusPolling: function() {
 			if (!this._statusPollingIntervalID) {
-				this._statusPollingIntervalID = window.setInterval(function(){
-					var launchConfiguration = this._selectedLaunchConfiguration;
-					if (!launchConfiguration) {
-						this._stopStatusPolling();
-						return;
-					}
-					var startTime = Date.now();
-					this._checkLaunchConfigurationStatus(launchConfiguration).then(function(_status) {
-						var interval = Date.now() - startTime;
-						mMetrics.logTiming("deployment", "check status (poll)", interval, launchConfiguration.Type); //$NON-NLS-1$ //$NON-NLS-2$
-
-						if (_status) {
-							launchConfiguration.status = _status;
-						}
-						this._updateLaunchConfiguration(launchConfiguration);
-					}.bind(this));
-				}.bind(this), STATUS_POLL_INTERVAL_MS);
+				this._statusPollingIntervalID = window.setInterval(this._checkStatus.bind(this), STATUS_POLL_INTERVAL_MS);
 			}
 		},
 		
