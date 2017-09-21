@@ -102,6 +102,7 @@
 		<module>bundles/org.eclipse.orion.client.editor</module>
 		<module>bundles/org.eclipse.orion.client.webtools</module>
 		<module>bundles/org.eclipse.orion.client.javascript</module>
+		<module>bundles/org.eclipse.orion.client.debug</module>
 		<module>bundles/org.eclipse.orion.client.git</module>
 		<module>bundles/org.eclipse.orion.client.cf</module>
 		<module>bundles/org.eclipse.orion.client.ui</module>
