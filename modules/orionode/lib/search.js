@@ -152,7 +152,7 @@ module.exports = function(options) {
 					path: path,
 					workspaceId: w,
 					workspaceDir: path,
-					fileRoot: api.join(req.contextPath, "file", w)
+					fileRoot: api.join(typeof req.contextPath === 'string' ? req.contextPath : '', "file", w)
 				};
 			});
 		}

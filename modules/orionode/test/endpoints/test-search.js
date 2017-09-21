@@ -462,6 +462,27 @@ describe("Search endpoint", function() {
 				});
 		});
 	});
+	it("Bug522584", function(done){
+		testHelper.withWorkspace(request, PREFIX_WORKSPACE, WORKSPACE_ID)
+		.end(function(err, res) {
+			testHelper.throwIfError(err);
+			var sLoc = res.body.Location;
+			if(Array.isArray(res.body.Projects) && res.body.Projects[0]) {
+				sLoc = res.body.Projects[0].Location;
+			}
+			request()
+				.get(PREFIX)
+				.query('sort=NameLower%20asc&rows=100&start=0&q=NameLower:fizz.txt*+Location:/file*')
+				.expect(200)
+				.end(function(err, res) {
+					testHelper.throwIfError(err);
+					assert(res.body.response, "There must be a search response");
+					assert(Array.isArray(res.body.response.docs), "There must be a search response docs array");
+					assert.equal(res.body.response.docs.length, 1, "There should have been one hit");
+					done();
+				});
+		});
+	});
 	it("testSearchInProjectWithURLName");
 	it("testPathWithDBCS");
 	it("testFileWithDBCS");
