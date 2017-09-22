@@ -20,3 +20,5 @@ dist/
 .workspace*/
 .test_workspace
 .test_metadata
+.nyc_output/
+coverage/
