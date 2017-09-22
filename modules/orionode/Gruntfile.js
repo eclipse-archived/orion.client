@@ -13,7 +13,7 @@ module.exports = function(grunt) {
 	    staging = "target/staging/",
 	    optimized = "target/optimized/",
 	    fingerPrint = grunt.option("fp") || false,
-	    skipTest = grunt.option("skipTest") || false,
+	   // skipTest = grunt.option("skipTest") || false,
 	    skipMinify = grunt.option("skipMinify") || false;
 	   
 	var socketioPath =  grunt.file.exists('./node_modules/socket.io/node_modules/socket.io-client') ?
@@ -181,7 +181,7 @@ module.exports = function(grunt) {
 	grunt.loadNpmTasks("grunt-contrib-clean");
 	grunt.loadNpmTasks("grunt-contrib-copy");
 	grunt.loadNpmTasks("grunt-contrib-requirejs");
-	grunt.loadNpmTasks("grunt-simple-mocha");
+	//grunt.loadNpmTasks("grunt-simple-mocha");
 	grunt.loadNpmTasks("grunt-string-replace");
 
 	grunt.registerTask("printBuild", function() {
@@ -206,9 +206,9 @@ module.exports = function(grunt) {
 	if(!skipMinify){
 		tasksArray.push("optimize");
 	}
-	if(!skipTest){
-		tasksArray.push("test");
-	}
+//	if(!skipTest){
+//		tasksArray.push("test");
+//	}
 	grunt.registerTask("default", tasksArray);
 //	grunt.registerTask("notest", ["checkDirs", "clean", "copy:orionserver", "optimize"]);
 //	grunt.registerTask("nomin",   ["checkDirs", "clean", "copy:orionserver", "string-replace:orionclient", "test"]);
