@@ -1365,5 +1365,29 @@ describe('File endpoint', function() {
 					done();
 				});
 		});
+		it("Bug 521429", function(done) {
+			testHelper.createDir(request, '/project', '/moveTo,Folder')
+			   .then(function(res) {
+				   testHelper.createFile(request, "/project/moveTo,Folder", "fizz.txt")
+				   	.then(function(res) {
+						request()
+						.post(PREFIX + '/project/moveTo%2CFolder') //move it to
+						.set('X-Create-Options', 'move')
+						.set('Slug', 'fizz1.txt')
+						.send({Location: PREFIX + '/project/moveTo%2CFolder/fizz.txt'})
+						.expect(201)
+						.end(function(err, res) {
+							throwIfError(err);
+							request()
+							.get(res.body.Location)
+							.expect(200)
+							.end(function(err, res) {
+								throwIfError(err);
+								done();
+							})
+						});
+					})
+			   })
+	   });
 	});
 });
