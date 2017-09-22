@@ -197,7 +197,7 @@ module.exports = function(grunt) {
 		});
 	});
 
-	grunt.registerTask("test", ["simplemocha"]);
+	//grunt.registerTask("test", ["simplemocha"]);
 	grunt.registerTask("replaceFp", ["string-replace:replacefp-inHTMLs", "string-replace:replacefp-inJSs"]);
 	grunt.registerTask("optimize", fingerPrint ?
 		["printBuild", "copy:stage", "requirejs", "fingerprint", "string-replace:requiremin", "copy:unstage"]: 
