@@ -19,7 +19,6 @@ var api = require('../api'), writeError = api.writeError, writeResponse = api.wr
 	mConfig = require('./config'),
 	express = require('express'),
 	bodyParser = require('body-parser'),
-	util = require('./util'),
 	log4js = require('log4js'),
 	logger = log4js.getLogger("git");
 
@@ -67,16 +66,16 @@ function remoteBranchJSON(remoteBranch, commit, remote, fileDir, branch){
 		fullName = remoteBranch.name();
 		shortName = remoteBranch.shorthand();
 		var branchName = shortName.replace(remote.name() + "/", "");
-		remoteURL = api.join(util.encodeURIComponent(remote.name()), util.encodeURIComponent(branchName));
+		remoteURL = api.join(api.encodeURIComponent(remote.name()), api.encodeURIComponent(branchName));
 	} else {// remote branch does not exists
 		shortName = api.join(remote.name(), branch.Name);
 		fullName = "refs/remotes/" + shortName;
-		remoteURL = api.join(util.encodeURIComponent(remote.name()), util.encodeURIComponent(branch.Name));
+		remoteURL = api.join(api.encodeURIComponent(remote.name()), api.encodeURIComponent(branch.Name));
 	}
 	return {
 		"CloneLocation": gitRoot + "/clone" + fileDir,
-		"CommitLocation": gitRoot + "/commit/" + util.encodeURIComponent(fullName) + fileDir,
-		"DiffLocation": gitRoot + "/diff/" + util.encodeURIComponent(shortName) + fileDir,
+		"CommitLocation": gitRoot + "/commit/" + api.encodeURIComponent(fullName) + fileDir,
+		"DiffLocation": gitRoot + "/diff/" + api.encodeURIComponent(shortName) + fileDir,
 		"FullName": fullName,
 		"GitUrl": remote.url(),
 		"HeadLocation": gitRoot + "/commit/HEAD" + fileDir,
@@ -84,7 +83,7 @@ function remoteBranchJSON(remoteBranch, commit, remote, fileDir, branch){
 		"IndexLocation": gitRoot + "/index" + fileDir,
 		"Location": gitRoot + "/remote/" + remoteURL + fileDir,
 		"Name": shortName,
-		"TreeLocation": gitRoot + "/tree" + fileDir + "/" + util.encodeURIComponent(shortName),
+		"TreeLocation": gitRoot + "/tree" + fileDir + "/" + api.encodeURIComponent(shortName),
 		"Type": "RemoteTrackingBranch"
 	};
 }
@@ -96,15 +95,15 @@ function remoteJSON(remote, fileDir, branches) {
 		"IsGerrit": false, // should check 
 		"GitUrl": remote.url(),
 		"Name": name,
-		"Location": gitRoot + "/remote/" + util.encodeURIComponent(name) + fileDir,
+		"Location": gitRoot + "/remote/" + api.encodeURIComponent(name) + fileDir,
 		"Type": "Remote",
 		"Children": branches
 	};
 }
 
 function getRemotes(req, res) {
-	var remoteName = util.decodeURIComponent(req.params.remoteName || "");
-	var branchName = util.decodeURIComponent(req.params.branchName || "");
+	var remoteName = api.decodeURIComponent(req.params.remoteName || "");
+	var branchName = api.decodeURIComponent(req.params.branchName || "");
 	var filter = req.query.filter;
 
 	var fileDir, theRepo, theRemote;
@@ -221,7 +220,7 @@ function addRemote(req, res) {
 		var configFile = api.join(repo.path(), "config");
 		function done () {
 			writeResponse(201, res, null, {
-				"Location": gitRoot + "/remote/" + util.encodeURIComponent(remoteName) + fileDir
+				"Location": gitRoot + "/remote/" + api.encodeURIComponent(remoteName) + fileDir
 			}, true);
 		}
 		args.readConfigFile(configFile, function(err, config) {
@@ -265,9 +264,9 @@ function addRemote(req, res) {
 
 function postRemote(req, res) {
 	if (req.body.Fetch === "true") {
-		fetchRemote(req, res, util.decodeURIComponent(req.params.remoteName), util.decodeURIComponent(req.params.branchName || ""), req.body.Force);
+		fetchRemote(req, res, api.decodeURIComponent(req.params.remoteName), api.decodeURIComponent(req.params.branchName || ""), req.body.Force);
 	} else if (typeof req.body.PushSrcRef === "string") {
-		pushRemote(req, res, util.decodeURIComponent(req.params.remoteName), util.decodeURIComponent(req.params.branchName || ""), req.body.PushSrcRef, req.body.PushTags, req.body.Force);
+		pushRemote(req, res, api.decodeURIComponent(req.params.remoteName), api.decodeURIComponent(req.params.branchName || ""), req.body.PushSrcRef, req.body.PushTags, req.body.Force);
 	} else {
 		writeError(400, res);
 	}
@@ -403,7 +402,7 @@ function pushRemote(req, res, remote, branch, pushSrcRef, tags, force) {
 }
 
 function deleteRemote(req, res) {
-	var remoteName = util.decodeURIComponent(req.params.remoteName);
+	var remoteName = api.decodeURIComponent(req.params.remoteName);
 	clone.getRepo(req)
 	.then(function(repo) {
 		var configFile = api.join(repo.path(), "config");

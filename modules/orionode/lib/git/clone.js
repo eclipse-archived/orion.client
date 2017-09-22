@@ -18,7 +18,6 @@ var api = require('../api'), writeError = api.writeError, writeResponse = api.wr
 	args = require('../args'),
 	async = require('async'),
 	fileUtil = require('../fileUtil'),
-	util = require('./util'),
 	tasks = require('../tasks'),
 	express = require('express'),
 	bodyParser = require('body-parser'),
@@ -115,11 +114,11 @@ function cloneJSON(base, location, giturl, parents, submodules) {
  * @returns {Promise} A promise to open a repository at the given location
  */
 function getRepoByPath(filePath, workspaceDir) {
-	var fPath = util.decodeURIComponent(filePath);
+	var fPath = api.decodeURIComponent(filePath);
 	while (!fs.existsSync(fPath)) {
 		fPath = path.dirname(fPath);
 		if (!fPath.startsWith(workspaceDir)) {
-			return Promise.reject(new Error("Forbidden - Access is denied to: "+fPath));
+        	return Promise.reject(new Error("Forbidden - Access is denied to: " + fPath));
 		}
 	}
  	var ceiling = path.dirname(workspaceDir);

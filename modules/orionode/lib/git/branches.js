@@ -16,7 +16,6 @@ var mRemotes = require('./remotes');
 var clone = require('./clone');
 var express = require('express');
 var bodyParser = require('body-parser');
-var util = require('./util');
 var args = require('../args');
 
 module.exports = {};
@@ -45,17 +44,17 @@ module.exports.router = function(options) {
 	function branchJSON(repo, ref, fileDir) {
 		var fullName = ref.name();
 		var shortName = ref.shorthand();
-		var branchURL = util.encodeURIComponent(fullName);
+		var branchURL = api.encodeURIComponent(fullName);
 		var current = !!ref.isHead() || repo.headDetached() && ref.name() === "HEAD";
 		return {
 			"CloneLocation": gitRoot + "/clone"+ fileDir,
 			"CommitLocation": gitRoot + "/commit/" + branchURL + fileDir,
 			"Current": current,
 			"Detached": current && !!repo.headDetached(),
-			"DiffLocation": gitRoot + "/diff/" + util.encodeURIComponent(shortName) + fileDir,
+			"DiffLocation": gitRoot + "/diff/" + api.encodeURIComponent(shortName) + fileDir,
 			"FullName": fullName,
 			"HeadLocation": gitRoot + "/commit/HEAD" + fileDir,
-			"Location": gitRoot + "/branch/" + util.encodeURIComponent(shortName) + fileDir,
+			"Location": gitRoot + "/branch/" + api.encodeURIComponent(shortName) + fileDir,
 			"Name": shortName,
 			"RemoteLocation": [],
 			"TreeLocation": gitRoot + "/tree" + fileDir + "/" + branchURL,
@@ -130,7 +129,7 @@ module.exports.router = function(options) {
 	}
 	
 	function getBranches(req, res) {
-		var branchName = util.decodeURIComponent(req.params.branchName || "");
+		var branchName = api.decodeURIComponent(req.params.branchName || "");
 		var fileDir;
 		
 		var theRepo;
@@ -248,11 +247,7 @@ module.exports.router = function(options) {
 	}
 	
 	function deleteBranch(req, res) {
-		var branchName;
-		branchName = decodeURIComponent(req.params.branchName)
-		try{
-			branchName = decodeURIComponent(branchName)
-		} catch(err){};
+		var branchName = api.decodeURIComponent(req.params.branchName);
 		clone.getRepo(req)
 		.then(function(repo) {
 			return git.Branch.lookup(repo, branchName, git.Branch.BRANCH.LOCAL);

@@ -15,7 +15,6 @@ var args = require('../args');
 var clone = require('./clone');
 var express = require('express');
 var bodyParser = require('body-parser');
-var util = require('./util');
 var git = require('nodegit');
 var log4js = require('log4js');
 var logger = log4js.getLogger("git");
@@ -57,13 +56,13 @@ function configJSON(key, value, fileDir) {
 	return {
 		"Key": key,
 		"CloneLocation": gitRoot + "/clone" + fileDir,
-		"Location": gitRoot + "/config/" + util.encodeURIComponent(key) + "/clone" + fileDir,
+		"Location": gitRoot + "/config/" + api.encodeURIComponent(key) + "/clone" + fileDir,
 		"Value": Array.isArray(value) ? value : [value]
 	};
 }
 
 function getAConfig(req, res) {
-	var key = util.decodeURIComponent(req.params.key);
+	var key = api.decodeURIComponent(req.params.key);
 	clone.getRepo(req)
 	.then(function(repo) {
 		var fileDir = clone.getfileDir(repo,req);

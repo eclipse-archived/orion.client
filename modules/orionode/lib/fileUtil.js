@@ -132,6 +132,7 @@ var getFile = exports.getFile = function(req, rest) {
 		return null;
 	}
 	var store = getMetastore(req);
+	rest = api.decodeURIComponent(rest);
 	if (rest[0] === "/") {
 		rest = rest.substring(1);
 	}

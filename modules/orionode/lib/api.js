@@ -178,6 +178,7 @@ function setHttpCodeMapping(mapping) {
 
 var LocationRegex = /Location$/;
 var PercentReplaceRegex = /\%/g;
+var CommaReplaceRegex = /,/g;
 function encodeLocation(obj) {
 	for (var p in obj) {
 		if (p.match(LocationRegex)) {
@@ -187,11 +188,11 @@ function encodeLocation(obj) {
 				});
 			} else if (typeof obj[p] === "object") {
 				if(obj[p].pathname){
-					obj[p].pathname = obj[p].pathname.replace(PercentReplaceRegex, "%25");
+					obj[p].pathname = obj[p].pathname.replace(PercentReplaceRegex, "%25").replace(CommaReplaceRegex, "%2C");
 				}
 				obj[p] = url.format(obj[p]);
 			} else if (obj[p]) {
-				obj[p] = url.format({pathname: obj[p].replace(PercentReplaceRegex, "%25")});
+				obj[p] = url.format({pathname: obj[p].replace(PercentReplaceRegex, "%25").replace(CommaReplaceRegex, "%2C")});
 			}
 		} else if (typeof obj[p] === "object") {
 			encodeLocation(obj[p]);
@@ -229,6 +230,25 @@ function logAccess(logger, userId) {
 		logger.info("WorkspaceAccess: " + userId);
 	}
 }
+
+/**
+ * @name module.exports.decodeURIComponent
+ * @description Helper to properly decode a path.
+ * @function
+ * @param {string} path The path to decode
+ * @returns {string} The decoded path
+ */
+exports.decodeURIComponent = function(path) {
+	var result = path;
+	try {
+		result = decodeURIComponent(result);
+		result = decodeURIComponent(result);
+	} catch (e) {}
+	return result;
+};
+exports.encodeURIComponent = function(path) {
+	return encodeURIComponent(encodeURIComponent(path));
+};
 
 /**
  * Util for stripping host names from URLs on this server. If aUrl indicates a resource on this host (as given by the request's Host header),

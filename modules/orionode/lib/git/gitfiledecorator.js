@@ -11,7 +11,6 @@
 /*eslint-env node */
 var api = require('../api');
 var clone = require('./clone');
-var util = require('./util'); 
 
 module.exports = {};
 module.exports.GitFileDecorator = GitFileDecorator;
@@ -88,9 +87,9 @@ function addGitLinks(gitRoot, json, branchname, fileDir, contextPath){
 	json.Git = {
 		"BlameLocation": gitRoot + "/blame/HEAD" + fileDir + fileTarget,
 		"CloneLocation": gitRoot + "/clone" + fileDir,
-		"CommitLocation": gitRoot + "/commit/" + util.encodeURIComponent(branchname) + fileDir + fileTarget,
+		"CommitLocation": gitRoot + "/commit/" + api.encodeURIComponent(branchname) + fileDir + fileTarget,
 		"ConfigLocation": gitRoot + "/config/clone" + fileDir + fileTarget,
-		"DefaultRemoteBranchLocation": gitRoot + "/remote/origin/"+ util.encodeURIComponent(branchname) + fileDir,
+		"DefaultRemoteBranchLocation": gitRoot + "/remote/origin/"+ api.encodeURIComponent(branchname) + fileDir,
 		"DiffLocation": gitRoot + "/diff/Default" + fileDir + fileTarget,
 		"HeadLocation": gitRoot + "/commit/HEAD" + fileDir + fileTarget,
 		"IndexLocation": gitRoot + "/index" + fileDir + fileTarget,

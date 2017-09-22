@@ -13,8 +13,8 @@ var express = require("express");
 var bodyParser = require("body-parser");
 var domains = require("./domains");
 var target = require("./target");
+var api = require("../api");
 var tasks = require("../tasks");
-var util = require("../git/util");
 
 module.exports.router = function() {
 
@@ -78,7 +78,7 @@ module.exports.router = function() {
 			.then(function(domains) {
 				var domainGuid = domains[0].metadata.guid;
 				return target.cfRequest("GET", userId, targetRequest.Url + "/v2/routes",
-					{"inline-relations-depth": "1",	"q": util.encodeURIComponent("host:" + host + ";domain_guid" + domainGuid)},null, null, null, targetRequest)
+					{"inline-relations-depth": "1",	"q": api.encodeURIComponent("host:" + host + ";domain_guid" + domainGuid)},null, null, null, targetRequest)
 				.then(function(result){
 					return result;
 				});
