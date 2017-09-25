@@ -66,8 +66,8 @@ function getDiff(req, res) {
 			URIs = {
 				"BaseLocation": getBaseLocation(scope, p),
 				"CloneLocation": gitRoot + "/clone" + fileDir,
-				"Location": gitRoot + "/diff/" + api.encodeURIComponent(scope) + fileDir + filePath,
-				"NewLocation": getNewLocation(scope, p),
+				"Location": path.join(gitRoot, "/diff", api.encodeURIComponent(scope), fileDir, filePath),
+				"NewLocation": getNewLocation(scope, p, req.contextPath),
 				"OldLocation": getOldLocation(scope, p),
 				"Type": "Diff"
 			};
@@ -148,12 +148,15 @@ function getOldLocation(scope, path) {
 	return {pathname: gitRoot + "/commit/" + api.encodeURIComponent(scope) + path, query: {parts: "body"}};
 }
 
-function getNewLocation(scope, path) {
+function getNewLocation(scope, path ,contextPath) {
 	if (scope.indexOf("..") !== -1) {
 		var commits = scope.split("..");
 		return {pathname: gitRoot + "/commit/" + api.encodeURIComponent(commits[1]) + path, query: {parts: "body"}};
 	} else if (scope === "Cached") {
 		return gitRoot + "/index" + path;
+	}
+	if (path.startsWith(fileRoot)) {
+		path = contextPath + path; // Since git endpoint's fileRoot doesn't have contextPath part
 	}
 	return path;
 }
