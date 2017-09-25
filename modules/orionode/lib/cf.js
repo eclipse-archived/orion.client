@@ -17,7 +17,8 @@ var express = require('express'),
 	plans = require('./cf/plans'),
 	routes = require('./cf/routes'),
 	services = require('./cf/services'),
-	target = require('./cf/target');
+	target = require('./cf/target'),
+	responseTime = require('response-time');
 	
 /**
  * @description Class for setting up cloud foundry support
@@ -39,6 +40,7 @@ class CloudFoundry {
 			throw new Error('options.fileRoot is required'); 
 		}
 		let router = express.Router();
+		router.use(responseTime({digits: 2, header: "X-CFapi-Response-Time", suffix: true}))
 		router.use("/apps", apps.router(options));
 		router.use("/domains", domains.router(options));
 		router.use("/logz", logz.router(options));

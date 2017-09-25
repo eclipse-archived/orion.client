@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016 IBM Corporation and others.
+ * Copyright (c) 2016, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -21,7 +21,8 @@ var express = require('express'),
 	version = electron.app.getVersion(),
 	log4js = require('log4js'),
 	tasks = require('./tasks'),
-	logger = log4js.getLogger("update");
+	logger = log4js.getLogger("update"),
+	responseTime = require('response-time');
 
 module.exports = {};
 module.exports.router = function(options) {
@@ -30,6 +31,7 @@ module.exports.router = function(options) {
 	var feedURL = configParams["orion.autoUpdater.url"];
 	return express.Router()
 	.use(bodyParser.json())
+	.use(responseTime({digits: 2, header: "X-Update-Response-Time", suffix: true}))
 	.post('/downloadUpdates', function (req, res) {
 		var allPrefs = prefs.readElectronPrefs();
 		var updateChannel = allPrefs.user && allPrefs.user.updateChannel && allPrefs.user.updateChannel.name ? allPrefs.user.updateChannel.name : configParams["orion.autoUpdater.defaultChannel"];

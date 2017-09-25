@@ -20,7 +20,8 @@ var express = require('express'),
 	writeError = api.writeError,
 	fileUtil = require('./fileUtil'),
 	log4js = require('log4js'),
-	logger = log4js.getLogger("file");
+	logger = log4js.getLogger("file"),
+	responseTime = require('response-time');
 
 module.exports = function(options) {
 	var fileRoot = options.fileRoot;
@@ -30,6 +31,7 @@ module.exports = function(options) {
 	
 	var router = express.Router({mergeParams: true});
 	var jsonParser = bodyParser.json({"limit":"10mb"});
+	router.use(responseTime({digits: 2, header: "X-File-Response-Time", suffix: true}));
 	router.get('*', jsonParser, getFile);
 	router.put('*', putFile);
 	router.post('*', jsonParser, postFile);

@@ -9,13 +9,17 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 /*eslint-env node*/
-var express = require('express');
-var bodyParser = require('body-parser');
-var log4js = require('log4js');
-var logger = log4js.getLogger('workspace');
-var api = require('./api'), writeError = api.writeError, writeResponse = api.writeResponse;
-var fileUtil = require('./fileUtil');
-var metaUtil = require('./metastore/util/metaUtil');
+var express = require('express'),
+	bodyParser = require('body-parser'),
+	log4js = require('log4js'),
+	logger = log4js.getLogger('workspace'),
+	api = require('./api'),
+	fileUtil = require('./fileUtil'),
+	metaUtil = require('./metastore/util/metaUtil'),
+	responseTime = require('response-time');
+
+var writeError = api.writeError, 
+	writeResponse = api.writeRespons;
 
 module.exports = function(options) {
 	var fileRoot = options.fileRoot;
@@ -27,6 +31,7 @@ module.exports = function(options) {
 	
 	var router = express.Router({mergeParams: true});
 	router.use(bodyParser.json());
+	router.use(responseTime({digits: 2, header: "X-Workspace-Response-Time", suffix: true}))
 	router.get('*', getWorkspace);
 	router.post('*', postWorkspace);
 	router.put('*', putWorkspace);

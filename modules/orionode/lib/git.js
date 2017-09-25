@@ -9,11 +9,12 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 /*eslint-env node*/
-var fileUtil = require('./fileUtil');
-var express = require('express');
-var api = require("./api");
-var log4js = require('log4js');
-var logger = log4js.getLogger("git");
+var fileUtil = require('./fileUtil'),
+	express = require('express'),
+	api = require("./api"),
+	log4js = require('log4js'),
+	logger = log4js.getLogger("git"),
+	responseTime = require('response-time');
 
 // Handle optional nodegit dependency
 var hasNodegit = true;
@@ -82,7 +83,8 @@ function Git(options) {
 		}
 		req.user.checkRights(req.user.username, uri, req, res, next);
 	};
-	
+	//TODO should we propagate timing collection into sub-sub-git handlers?
+	router.use(responseTime({digits: 2, header: "X-Gitapi-Response-Time", suffix: true}));
 	router.use("/clone", clone.router(options));
 	router.use("/status", status.router(options));
 	router.use("/commit", commit.router(options));

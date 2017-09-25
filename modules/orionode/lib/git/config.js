@@ -10,14 +10,15 @@
  *******************************************************************************/
 /*eslint-env node */
 /*globals configs:true val:true*/
-var api = require('../api'), writeError = api.writeError, writeResponse = api.writeResponse;
-var args = require('../args');
-var clone = require('./clone');
-var express = require('express');
-var bodyParser = require('body-parser');
-var git = require('nodegit');
-var log4js = require('log4js');
-var logger = log4js.getLogger("git");
+var api = require('../api'), writeError = api.writeError, writeResponse = api.writeResponse,
+	args = require('../args'),
+	clone = require('./clone'),
+	express = require('express'),
+	bodyParser = require('body-parser'),
+	git = require('nodegit'),
+	log4js = require('log4js'),
+	logger = log4js.getLogger("git"),
+	responseTime = require('response-time');
 
 module.exports = {};
 
@@ -45,6 +46,7 @@ module.exports.router = function(options) {
 	
 	return express.Router()
 	.use(bodyParser.json())
+	.use(responseTime({digits: 2, header: "X-GitapiConfig-Response-Time", suffix: true}))
 	.use(checkUserAccess) // Use specified checkUserAceess implementation instead of the common one from options
 	.get('/clone'+ fileRoot + '*', getConfig)
 	.get('/:key/clone'+ fileRoot + '*', getAConfig)

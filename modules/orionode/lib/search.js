@@ -9,12 +9,13 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 /*eslint-env node*/
-var fileUtil = require('./fileUtil');
-var api = require('./api');
-var path = require('path');
-var url = require('url');
-var express = require('express');
-var Promise = require('bluebird');
+var fileUtil = require('./fileUtil'),
+	api = require('./api'),
+	path = require('path'),
+	url = require('url'),
+	express = require('express'),
+	Promise = require('bluebird'),
+	responseTime = require('response-time');
 
 var fieldList = "Name,NameLower,Length,Directory,LastModified,Location,Path,RegEx,WholeWord,CaseSensitive,Exclude".split(",");
 
@@ -130,6 +131,7 @@ module.exports = function(options) {
 		search = require('./searchWorker');
 	}
 	return express.Router()
+	.use(responseTime({digits: 2, header: "X-Filesearch-Response-Time", suffix: true}))
 	.get('*', function(req, res) {
 		var searchOpts = new SearchOptions(req.originalUrl, req.contextPath);
 		buildSearchOptions(searchOpts);

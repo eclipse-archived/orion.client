@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012 IBM Corporation and others.
+ * Copyright (c) 2012, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -9,13 +9,16 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 /*eslint-env node */
-var api = require('./api'), writeError = api.writeError, writeResponse = api.writeResponse;
-var fileUtil = require('./fileUtil');
-var express = require('express');
-var bodyParser = require('body-parser');
-var fs = require('fs');
-var url = require('url');
-var mPath = require('path');
+var api = require('./api'), 
+	writeError = api.writeError, 
+	writeResponse = api.writeResponse,
+	fileUtil = require('./fileUtil'),
+	express = require('express'),
+	bodyParser = require('body-parser'),
+	fs = require('fs'),
+	url = require('url'),
+	mPath = require('path'),
+	responseTime = require('response-time');
 
 var RUNNING_SITES_FILENAME = "runningSites.json";
 var hosts = {};
@@ -35,6 +38,7 @@ module.exports = function(options) {
 
 	return express.Router()
 	.use(bodyParser.json())
+	.use(responseTime({digits: 2, header: "X-Sites-Response-Time", suffix: true}))
 	.get('/:site', getSite)
 	.get('/', getSites)
 	.put('/:site', putSite)

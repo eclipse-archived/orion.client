@@ -9,20 +9,21 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 /*eslint-env node */
-var api = require('../api'), writeError = api.writeError, writeResponse = api.writeResponse;
-var path = require('path');
-var diff = require("./diff");
-var mTags = require("./tags");
-var clone = require("./clone");
-var git = require('nodegit');
-var url = require('url');
-var crypto = require('crypto');
-var async = require('async');
-var express = require('express');
-var bodyParser = require('body-parser');
-var remotes = require('./remotes');
-var branches = require('./branches');
-var tasks = require('../tasks');
+var api = require('../api'), writeError = api.writeError, writeResponse = api.writeResponse,
+	path = require('path'),
+	diff = require("./diff"),
+	mTags = require("./tags"),
+	clone = require("./clone"),
+	git = require('nodegit'),
+	url = require('url'),
+	crypto = require('crypto'),
+	async = require('async'),
+	express = require('express'),
+	bodyParser = require('body-parser'),
+	remotes = require('./remotes'),
+	branches = require('./branches'),
+	tasks = require('../tasks'),
+	responseTime = require('response-time');
 
 module.exports = {};
 
@@ -41,6 +42,7 @@ module.exports.router = function(options) {
 
 	return express.Router()
 	.use(bodyParser.json())
+	.use(responseTime({digits: 2, header: "X-GitapiCommit-Response-Time", suffix: true}))
 	.use(options.checkUserAccess)
 	.get('/:scope'+ fileRoot + '*', getCommit)
 	.put('/:commit'+ fileRoot + '*', putCommit)
