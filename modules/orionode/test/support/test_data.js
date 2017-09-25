@@ -16,6 +16,9 @@ var path = require('path'),
 	workspace = require('../../lib/workspace'),
 	supertest = require('supertest'),
 	store = require('../../lib/metastore/fs/store'),
+	orionServer = require("../../index"),
+	checkRights = require('../../lib/accessRights').checkRights,
+	testHelper = require('./testHelper'),
 	CONTEXT_PATH = '';
 
 function debug(msg) {
@@ -152,5 +155,27 @@ exports.setUpCF = function setUpCF(dir, callback) {
 		fs.mkdirSync(cf);
 		createFiles();
 	}
-}
+};
+
+exports.setupOrionServer = function setupOrionServer(){
+	app = express();
+	var orion = function(){
+		var options = {};
+		options.workspaceDir = testHelper.WORKSPACE;
+		options.configParams = { "orion.single.user": true, "orion.single.user.metaLocation": testHelper.MEATASTORE };
+		 if (CONTEXT_PATH) {
+		 	options.configParams["orion.context.listenPath"]=true;
+			options.configParams["orion.context.path"]=testHelper.CONTEXT_PATH;
+		 }
+		return orionServer(options);
+	}
+	var userMiddleware = function(req, res, next) {
+		req.user = {workspaceDir: testHelper.WORKSPACE};
+		req.user.checkRights = checkRights;
+		next();
+	};
+	app.use(orion, userMiddleware);
+	var request = supertest.bind(null, app);
+	return request;
+};
 exports.DEBUG = process.env.DEBUG_TESTS || false;
