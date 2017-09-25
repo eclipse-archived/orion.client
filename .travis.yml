@@ -9,9 +9,9 @@ sudo: false
 
 env:
   matrix:
-    - export NODE_VERSION="6"
-    - export NODE_VERSION="7"
-    - export NODE_VERSION="8"
+    - export NODE_VERSION="6.11.1"
+   # - export NODE_VERSION="7"
+   # - export NODE_VERSION="8"
 
 matrix:
   fast_finish: true
@@ -38,4 +38,4 @@ script:
   - npm pack;
 after_success:
   - npm test
-  - npm run coverage
+  #- npm run coverage
