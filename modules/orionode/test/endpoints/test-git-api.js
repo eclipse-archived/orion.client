@@ -31,7 +31,7 @@ try {
 } catch (e) {
 }
 
-var CONTEXT_PATH = '',
+var CONTEXT_PATH = '/devops/code',
 	WORKSPACE = path.join(__dirname, '.test_workspace'),
 	MEATASTORE =  path.join(__dirname, '.test_metadata'),
 	WORKSPACE_ID = "anonymous-OrionContent",
@@ -40,8 +40,14 @@ var CONTEXT_PATH = '',
 		"orion.single.user.metaLocation": MEATASTORE
 	},
 	FILE_ROOT = "/file/" + WORKSPACE_ID + "/";
+	
+if (CONTEXT_PATH) {
+	configParams["orion.context.listenPath"]=true;
+	configParams["orion.context.path"]=CONTEXT_PATH;
+}
 
-	var userMiddleware = function(req, res, next) {
+var userMiddleware = function(req, res, next) {
+	req.contextPath = CONTEXT_PATH;
 	req.user.checkRights = checkRights;
 	next();
 };
@@ -150,14 +156,14 @@ GitClient.prototype = {
 			.post(CONTEXT_PATH + "/gitapi/clone/")
 			.send({
 				"Name":  client.getName(),
-				"Location": CONTEXT_PATH + '/workspace/' + WORKSPACE_ID,
+				"Location": '/workspace/' + WORKSPACE_ID,
 				"GitName": "test",
 				"GitMail": "test@test.com"
 			})
 			.expect(201)
 			.end(function(err, res) {
 				assert.ifError(err);
-				assert.equal(res.body.Location, "/gitapi/clone" + FILE_ROOT + client.getName());
+				assert.equal(res.body.Location, CONTEXT_PATH + "/gitapi/clone" + FILE_ROOT + client.getName());
 				client.next(resolve, res.body);
 			});
 		});
@@ -219,7 +225,7 @@ GitClient.prototype = {
 				getGitResponse(res).then(function(res2) {
 					assert.equal(res2.HttpCode, 200);
 					assert.equal(res2.Message, "OK");
-					assert.equal(res2.JsonData.Location, "/gitapi/clone"+ FILE_ROOT + name);
+					assert.equal(res2.JsonData.Location, CONTEXT_PATH +"/gitapi/clone"+ FILE_ROOT + name);
 					client.next(resolve, res2.JsonData);
 				})
 				.catch(function(err) {
@@ -307,9 +313,9 @@ GitClient.prototype = {
 				assert.ifError(err);
 				var encodeBranch = api.encodeURIComponent(branchName).replace(/\%/g, "%25");
 				assert.equal(res.body.CommitLocation,
-					"/gitapi/commit/refs%25252Fheads%25252F" + encodeBranch + FILE_ROOT + client.getName());
+					CONTEXT_PATH + "/gitapi/commit/refs%25252Fheads%25252F" + encodeBranch + FILE_ROOT + client.getName());
 				assert.equal(res.body.Location,
-					"/gitapi/branch/" + encodeBranch + FILE_ROOT + client.getName());
+					CONTEXT_PATH + "/gitapi/branch/" + encodeBranch + FILE_ROOT + client.getName());
 				client.next(resolve, res.body);
 			});
 		});
@@ -422,9 +428,9 @@ GitClient.prototype = {
 				assert.equal(res.body.FullName, "refs/tags/" + tagName);
 				assert.equal(res.body.Type, "Tag");
 				assert.equal(res.body.TagType, annotated ? "ANNOTATED" : "LIGHTWEIGHT");
-				assert.equal(res.body.CloneLocation, "/gitapi/clone" + FILE_ROOT + client.getName());
-				assert.equal(res.body.CommitLocation, "/gitapi/commit/" + commitSHA + FILE_ROOT + client.getName());
-				assert.equal(res.body.TreeLocation, "/gitapi/tree" + FILE_ROOT + client.getName() + "/" + tagName);
+				assert.equal(res.body.CloneLocation, CONTEXT_PATH + "/gitapi/clone" + FILE_ROOT + client.getName());
+				assert.equal(res.body.CommitLocation, CONTEXT_PATH + "/gitapi/commit/" + commitSHA + FILE_ROOT + client.getName());
+				assert.equal(res.body.TreeLocation, CONTEXT_PATH + "/gitapi/tree" + FILE_ROOT + client.getName() + "/" + tagName);
 				client.next(resolve, res.body);
 			});
 		});
@@ -528,8 +534,8 @@ GitClient.prototype = {
 			.expect(200)
 			.end(function(err, res) {
 				assert.ifError(err);
-				assert.equal(res.body.CloneLocation, "/gitapi/clone" + FILE_ROOT + client.getName());
-				assert.equal(res.body.Location, "/gitapi/stash" + FILE_ROOT + client.getName());
+				assert.equal(res.body.CloneLocation, CONTEXT_PATH + "/gitapi/clone" + FILE_ROOT + client.getName());
+				assert.equal(res.body.Location, CONTEXT_PATH + "/gitapi/stash" + FILE_ROOT + client.getName());
 				assert.equal(res.body.Type, "StashCommit");
 				client.next(resolve, res.body);
 			});
@@ -678,8 +684,8 @@ GitClient.prototype = {
 				assert.ifError(err);
 				getGitResponse(res).then(function(res2) {
 					assert.equal(res2.JsonData.Type, "Commit");
-					assert.equal(res2.JsonData.Location, "/gitapi/commit/" + api.encodeURIComponent(branch) + FILE_ROOT + client.getName() + "/" + path);
-					assert.equal(res2.JsonData.CloneLocation, "/gitapi/clone" + FILE_ROOT + client.getName());
+					assert.equal(res2.JsonData.Location, CONTEXT_PATH + "/gitapi/commit/" + api.encodeURIComponent(branch) + FILE_ROOT + client.getName() + "/" + path);
+					assert.equal(res2.JsonData.CloneLocation, CONTEXT_PATH + "/gitapi/clone" + FILE_ROOT + client.getName());
 
 					assert.equal(res2.JsonData.toRef.Name, toRef);
 					assert.equal(res2.JsonData.toRef.FullName, "refs/heads/" + toRef);
@@ -714,6 +720,7 @@ GitClient.prototype = {
 		});
 	},
 
+<<<<<<< HEAD
 	getTree: function() {
 		var client = this;
 		this.tasks.push(function(resolve) {
@@ -731,6 +738,22 @@ GitClient.prototype = {
 					client.next(resolve, res.body);
 				})
 
+	getFileChangeDiff: function(fileName) {
+		var client = this;
+		this.tasks.push(function(resolve) {;
+			request()
+			.get(CONTEXT_PATH + "/gitapi/diff/Default" + FILE_ROOT + path.join(api.encodeURIComponent(client.getName()), fileName) + "?parts=uris")
+			.expect(200)
+			.end(function(err, res) {
+				assert.ifError(err);
+				var filePath = FILE_ROOT + client.getName() + "/" + fileName;
+				assert.ok(res.body.BaseLocation, CONTEXT_PATH + "/gitapi/index" +filePath);
+				assert.ok(res.body.CloneLocation, CONTEXT_PATH + "/gitapi/clone" + FILE_ROOT + client.getName());
+				assert.ok(res.body.Location, CONTEXT_PATH + "/gitapi/diff/Default" + filePath);
+				assert.ok(res.body.NewLocation, CONTEXT_PATH + filePath);
+				assert.ok(res.body.OldLocation, CONTEXT_PATH + "/gitapi/index" + filePath);
+				assert.ok(res.body.Type, "Diff");
+				client.next(resolve, res.body);
 			});
 		});
 	}
@@ -769,14 +792,14 @@ maybeDescribe("git", function() {
 				.post(CONTEXT_PATH + "/gitapi/clone/")
 				.send({
 					"Name":  TEST_REPO_NAME,
-					"Location": CONTEXT_PATH + '/workspace/' + WORKSPACE_ID,
+					"Location": '/workspace/' + WORKSPACE_ID,
 					"GitName": "test",
 					"GitMail": "test@test.com"
 				})
 				.expect(201)
 				.end(function(err, res) {
 					assert.ifError(err);
-					assert.equal(res.body.Location, "/gitapi/clone" + FILE_ROOT + TEST_REPO_NAME);
+					assert.equal(res.body.Location, CONTEXT_PATH + "/gitapi/clone" + FILE_ROOT + TEST_REPO_NAME);
 					finished();
 				});
 			});
@@ -911,7 +934,7 @@ maybeDescribe("git", function() {
 				.expect(201)
 				.end(function(err, res) {
 					assert.ifError(err);
-					assert.equal(res.body.Location, "/gitapi/remote/" + remoteName + FILE_ROOT + TEST_REPO_NAME);
+					assert.equal(res.body.Location, CONTEXT_PATH + "/gitapi/remote/" + remoteName + FILE_ROOT + TEST_REPO_NAME);
 					finished();
 				});
 			});
@@ -1017,7 +1040,7 @@ maybeDescribe("git", function() {
 				.expect(201)
 				.end(function(err, res) {
 					assert.ifError(err);
-					assert.equal(res.body.Location, "/gitapi/remote/" + remoteName + FILE_ROOT + TEST_REPO_NAME);
+					assert.equal(res.body.Location, CONTEXT_PATH + "/gitapi/remote/" + remoteName + FILE_ROOT + TEST_REPO_NAME);
 					finished();
 				});
 			});
@@ -1196,14 +1219,14 @@ maybeDescribe("git", function() {
 				.post(CONTEXT_PATH + "/gitapi/clone/")
 				.send({
 					"Name":  TEST_REPO_NAME,
-					"Location": CONTEXT_PATH + '/workspace/' + WORKSPACE_ID,
+					"Location": '/workspace/' + WORKSPACE_ID,
 					"GitName": "test",
 					"GitMail": "test@test.com"
 				})
 				.expect(201)
 				.end(function(err, res) {
 					assert.ifError(err);
-					assert.equal(res.body.Location, "/gitapi/clone" + FILE_ROOT + TEST_REPO_NAME);
+					assert.equal(res.body.Location, CONTEXT_PATH + "/gitapi/clone" + FILE_ROOT + TEST_REPO_NAME);
 					finished();
 				});
 			});
@@ -1245,7 +1268,7 @@ maybeDescribe("git", function() {
 				.expect(201)
 				.end(function(err, res) {
 					assert.ifError(err);
-					assert.equal(res.body.Location, "/gitapi/remote/" + remoteName + FILE_ROOT + TEST_REPO_NAME);
+					assert.equal(res.body.Location, CONTEXT_PATH + "/gitapi/remote/" + remoteName + FILE_ROOT + TEST_REPO_NAME);
 					finished();
 				});
 			});
@@ -1264,8 +1287,8 @@ maybeDescribe("git", function() {
 				.expect(201)
 				.end(function(err, res) {
 					assert.ifError(err);
-					assert.equal(res.body.CommitLocation, "/gitapi/commit/refs%25252Fheads%25252F" + branchName + FILE_ROOT + TEST_REPO_NAME);
-					assert.equal(res.body.Location, "/gitapi/branch/" + branchName + FILE_ROOT + TEST_REPO_NAME);
+					assert.equal(res.body.CommitLocation, CONTEXT_PATH + "/gitapi/commit/refs%25252Fheads%25252F" + branchName + FILE_ROOT + TEST_REPO_NAME);
+					assert.equal(res.body.Location, CONTEXT_PATH + "/gitapi/branch/" + branchName + FILE_ROOT + TEST_REPO_NAME);
 					finished();
 				});
 			});
@@ -3553,9 +3576,9 @@ maybeDescribe("git", function() {
 			assert.equal(tag.FullName, "refs/tags/" + tagName);
 			assert.equal(tag.Type, "Tag");
 			assert.equal(tag.TagType, annotated ? "ANNOTATED" : "LIGHTWEIGHT");
-			assert.equal(tag.CloneLocation, "/gitapi/clone" + FILE_ROOT + testName);
-			assert.equal(tag.CommitLocation, "/gitapi/commit/" + commitSHA + FILE_ROOT + testName);
-			assert.equal(tag.TreeLocation, "/gitapi/tree" + FILE_ROOT + testName + "/" + api.encodeURIComponent(tagName).replace(/%/g, "%25"));
+			assert.equal(tag.CloneLocation, CONTEXT_PATH + "/gitapi/clone" + FILE_ROOT + testName);
+			assert.equal(tag.CommitLocation, CONTEXT_PATH + "/gitapi/commit/" + commitSHA + FILE_ROOT + testName);
+			assert.equal(tag.TreeLocation, CONTEXT_PATH + "/gitapi/tree" + FILE_ROOT + testName + "/" + api.encodeURIComponent(tagName).replace(/%/g, "%25"));
 		}
 
 		describe("Create", function() {
@@ -3856,11 +3879,11 @@ maybeDescribe("git", function() {
 					var git = status.Untracked[0].Git;
 					var encodeName = "a%b.txt".replace(/\%/g, "%25");
 					assert.equal(git.CommitLocation,
-						"/gitapi/commit/HEAD" + FILE_ROOT + "bug512061/" + encodeName);
+						CONTEXT_PATH + "/gitapi/commit/HEAD" + FILE_ROOT + "bug512061/" + encodeName);
 					assert.equal(git.DiffLocation,
-						"/gitapi/diff/Default" + FILE_ROOT + "bug512061/" + encodeName);
+						CONTEXT_PATH + "/gitapi/diff/Default" + FILE_ROOT + "bug512061/" + encodeName);
 					assert.equal(git.IndexLocation,
-						"/gitapi/index" + FILE_ROOT + "bug512061/" + encodeName);
+						CONTEXT_PATH + "/gitapi/index" + FILE_ROOT + "bug512061/" + encodeName);
 
 					client.delete("/a%b.txt");
 					// tests > /a b/test.txt
@@ -3872,11 +3895,11 @@ maybeDescribe("git", function() {
 					var git = status.Untracked[0].Git;
 					var encodeName = "a b";
 					assert.equal(git.CommitLocation,
-						"/gitapi/commit/HEAD" + FILE_ROOT + "bug512061/" + encodeName + "/test.txt");
+						CONTEXT_PATH + "/gitapi/commit/HEAD" + FILE_ROOT + "bug512061/" + encodeName + "/test.txt");
 					assert.equal(git.DiffLocation,
-						"/gitapi/diff/Default" + FILE_ROOT + "bug512061/" + encodeName + "/test.txt");
+						CONTEXT_PATH + "/gitapi/diff/Default" + FILE_ROOT + "bug512061/" + encodeName + "/test.txt");
 					assert.equal(git.IndexLocation,
-						"/gitapi/index" + FILE_ROOT + "bug512061/" + encodeName + "/test.txt");
+						CONTEXT_PATH + "/gitapi/index" + FILE_ROOT + "bug512061/" + encodeName + "/test.txt");
 
 					client.delete("/a b/test.txt");
 					// tests > /modules/orionode/hello.js
@@ -3887,11 +3910,11 @@ maybeDescribe("git", function() {
 				.then(function(status) {
 					var git = status.Untracked[0].Git;
 					assert.equal(git.CommitLocation,
-						"/gitapi/commit/HEAD" + FILE_ROOT + "bug512061/modules/orionode/hello.js");
+						CONTEXT_PATH + "/gitapi/commit/HEAD" + FILE_ROOT + "bug512061/modules/orionode/hello.js");
 					assert.equal(git.DiffLocation,
-						"/gitapi/diff/Default" + FILE_ROOT + "bug512061/modules/orionode/hello.js");
+						CONTEXT_PATH + "/gitapi/diff/Default" + FILE_ROOT + "bug512061/modules/orionode/hello.js");
 					assert.equal(git.IndexLocation,
-						"/gitapi/index" + FILE_ROOT + "bug512061/modules/orionode/hello.js");
+						CONTEXT_PATH + "/gitapi/index" + FILE_ROOT + "bug512061/modules/orionode/hello.js");
 					finished();
 				})
 				.catch(function(err) {
@@ -4240,7 +4263,7 @@ maybeDescribe("git", function() {
 				var child = res.body.Children[0];
 
 				request()
-				.get(CONTEXT_PATH + child.Location)
+				.get(child.Location)
 				.expect(200)
 				.expect(function(res2) {
 					assert.equal(child.Key, res2.body.Key, "Got the correct key");
@@ -4257,7 +4280,7 @@ maybeDescribe("git", function() {
 				var newValue = String(!child.Value);
 
 				request()
-				.put(CONTEXT_PATH + child.Location)
+				.put(child.Location)
 				.send({ Value: [newValue] })
 				.expect(200)
 				.end(function(err/*, res*/) {
@@ -4306,5 +4329,22 @@ maybeDescribe("git", function() {
 			})
 		});
 	}) //describe("tree")
+	describe("fileDiff", function() {
+		it("bug 522665", function(finished) {
+			var client = new GitClient("bug 522665");
+			var file = "a.txt";
+			client.init();
+			// track this file
+			client.setFileContents(file, "abc");
+			client.commit();
+			
+			// modify the file
+			client.setFileContents(file, "abcx");
+			client.getFileChangeDiff(file);
+			client.start().then(function(res) {
+				finished();
+			})
+		});
+	}) // describe("fileDiff")
 
 }); // describe("Git")

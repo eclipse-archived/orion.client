@@ -20,11 +20,17 @@ var testData = require("./support/test_data");
 var WORKSPACE = path.join(__dirname, ".test_workspace");
 var MEATASTORE =  path.join(__dirname, '.test_metadata');
 
+ var CONTEXT_PATH = '/devops/code';
+
 var orion = function(options) {
 	// Ensure tests run in 'single user' mode
 	options = options || {};
 	options.workspaceDir = WORKSPACE;
 	options.configParams = { "orion.single.user": true, "orion.single.user.metaLocation": MEATASTORE };
+	 if (CONTEXT_PATH) {
+	 	options.configParams["orion.context.listenPath"]=true;
+		options.configParams["orion.context.path"]=CONTEXT_PATH;
+	 }
 	return orionMiddleware(options);
 }
 
