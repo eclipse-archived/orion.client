@@ -449,7 +449,18 @@ describe("Workspace endpoint", function() {
 		withDefaultWorkspace(function(workspace) {
 			request()
 				.del(workspace.Location)
-				.expect(204, done);
+				.expect(204, function(){
+					request()
+					.get(PREFIX)
+					.expect(200)
+					.end(function(e, res) {
+						testHelper.throwIfError(e, "Failed to get workspace");
+						assert.ok(Array.isArray(res.body.Workspaces));
+						// In Orionode, we have just a single workspace.
+						assert.equal(res.body.Workspaces.length, 0);
+						done();
+					});
+				});
 		});
 	});
 	it("testGetWorkspaces", function(done) {
