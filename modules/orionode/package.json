@@ -43,6 +43,7 @@
     "passport-local-mongoose": "^4.0.0",
     "passport-local-mongoose-email": "^0.1.2",
     "request": "^2.69.0",
+    "response-time": "^2.3.2",
     "rimraf": "~2.2.6",
     "semver": "^5.3.0",
     "socket.io": "~1.4.8",
