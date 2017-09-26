@@ -19,7 +19,7 @@ var express = require('express'),
 	responseTime = require('response-time');
 
 var writeError = api.writeError, 
-	writeResponse = api.writeRespons;
+	writeResponse = api.writeResponse;
 
 module.exports = function(options) {
 	var fileRoot = options.fileRoot;
