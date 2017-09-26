@@ -85,6 +85,7 @@ function respondAppGetRequest(resp,task){
 		Message: "Ok",
 		Severity: "Ok"
 	});
+	return Promise.resolve();
 }
 function getAppwithoutName(req, task, appTarget){
 	var appsArray = [];

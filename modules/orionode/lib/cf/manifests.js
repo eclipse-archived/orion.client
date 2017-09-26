@@ -42,35 +42,36 @@ class ManifestRouter {
 		}
 		return express.Router()
 			.use(bodyParser.json())
-			.get(this.fileRoot + "*", getManifests)
-			.get("*", getManifests);
+			.get(this.fileRoot + "*", this.getManifests)
+			.get("*", this.getManifests);
+	}
+	
+	/**
+	 * @description Fetch the manifest for the project
+	 * @param {?} req The original request
+	 * @param {?} res The response
+	 */
+	getManifests(req, res){
+		return retrieveManifestFile(req, res)
+			.then(function(manifest){
+				writeResponse(200, res, null, {
+					"Contents": manifest,
+					"Type": "Manifest"
+				});			
+			}).catch(function(err) {
+				var task = new tasks.Task(res, false, false, 0, false);
+				target.caughtErrorHandler(task, err);
+			});
 	}
 }
 
 module.exports.ManifestRouter = ManifestRouter;
-/**
- * @description Fetch the manifest for the project
- * @param {?} req The original request
- * @param {?} res The response
- */
-function getManifests(req, res){
-	return retrieveManifestFile(req, res)
-		.then(function(manifest){
-			writeResponse(200, res, null, {
-				"Contents": manifest,
-				"Type": "Manifest"
-			});			
-		}).catch(function(err) {
-			var task = new tasks.Task(res, false, false, 0, false);
-			target.caughtErrorHandler(task, err);
-		});
-}
 
 /**
  * res is needed because following Java server's patten, /plan and /manifest endpoins don't use task
  * task is needed for situation where there was a task created. So that we cannot use res in these cases.
  */
-module.exports.retrieveManifestFile = retrieveManifestFile = function retrieveManifestFile(req, res, manifestAbsoluteLocation){
+var retrieveManifestFile = module.exports.retrieveManifestFile = function retrieveManifestFile(req, res, manifestAbsoluteLocation){
 	return new Promise(function(fulfill,reject) {
 		var uri = req.originalUrl.substring(req.baseUrl.length + (typeof req.contextPath === 'string' ? req.contextPath.length : 0));
 		req.user.checkRights(req.user.username, uri, req, res, function(){
@@ -133,11 +134,12 @@ module.exports.retrieveManifestFile = retrieveManifestFile = function retrieveMa
  * @param {?} req The request to try and get the project path from 
  * @returns {string} The file path
  */
-module.exports.retrieveProjectFilePath = retrieveProjectFilePath = function retrieveProjectFilePath(req){
+var retrieveProjectFilePath = module.exports.retrieveProjectFilePath = function retrieveProjectFilePath(req){
 	var projectPath = req.params[0],
 		file;
 	if(typeof projectPath === 'string') {
-		projectPath = projectPath.replace(/^\/file/, "");
+		var fileRoot = (typeof req.contextPath === 'string' ? req.contextPath : "") + "/file";
+		projectPath = projectPath.replace(new RegExp("^" + fileRoot), "");
 	}
 	file = fileUtil.getFile(req, projectPath);
 	if(file && file.path) {
@@ -156,7 +158,7 @@ module.exports.retrieveProjectFilePath = retrieveProjectFilePath = function retr
  * @param {string} inputString The string to convert
  * @returns {string} The converted string
  */
-module.exports.slugify = slugify = function slugify(inputString) {
+var slugify = module.exports.slugify =  function slugify(inputString) {
 	if(typeof inputString === 'string') { 
 		return inputString.toLowerCase()
 			.replace(/\s+/g, "-")		// Replace spaces with -
@@ -165,7 +167,7 @@ module.exports.slugify = slugify = function slugify(inputString) {
 			.replace(/^-+/, "")			// Trim - from start of text
 			.replace(/-+$/, "");			// Trim - from end of text
 	}
-}
+};
 
 function getDefaultName(rawProjectName){
 	var nameParts = rawProjectName.split(" --- ", 2);
