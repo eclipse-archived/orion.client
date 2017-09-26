@@ -260,9 +260,6 @@ Object.assign(FsMetastore.prototype, {
 						}
 						if (!metadata) {
 							return resolve(null);
-							// var err = new Error(String("could not read workspace: ").concat(workspaceId));
-							// err.code = 404;
-							// return reject(err);
 						}
 						var workspace = {
 							"id": metadata.UniqueId,
@@ -274,7 +271,6 @@ Object.assign(FsMetastore.prototype, {
 						propertyKeys.forEach(function(propertyKey) {
 							workspace.properties[propertyKey] = metadata.Properties[propertyKey];
 							// TODO password needs to be handled specifically since it needs to be decrypted. (referrence setProperties line 967)
-							// TODO handle userPropertyCache (referrence setProperties line 972)
 						});
 						return resolve(workspace);
 					});
@@ -445,7 +441,6 @@ Object.assign(FsMetastore.prototype, {
 								workspaces:[]
 							}); // TODO successful case needs to return user data including isAuthenticated, username, email, authToken for user.js
 						});
-						// TODO Save User info in cache for quick referrence
 					}.bind(this),
 					reject /* error case */
 				);
@@ -479,7 +474,6 @@ Object.assign(FsMetastore.prototype, {
 							created_at:  new Date(parseInt(metadata.Properties.AccountCreationTimestamp, 10))
 						};
 						// TODO password needs to be handled specifically since it needs to be decrypted. (referrence setProperties line 967)				
-						// TODO handle userPropertyCache (referrence setProperties line 972)
 						metadataToServe.workspaces = metadata.WorkspaceIds || [];
 						return resolve(metadataToServe);
 					}
