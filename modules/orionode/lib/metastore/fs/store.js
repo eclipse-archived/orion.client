@@ -319,7 +319,7 @@ Object.assign(FsMetastore.prototype, {
 								return reject(error);
 							}
 							fs.unlinkAsync(getWorkspaceMetadataFileName(this._options, workspaceId)).catchReturn({ code: 'ENOENT' }, null)
-							.then(resolve);
+							.then(resolve, reject);
 						}.bind(this));				
 					}.bind(this));
 				}.bind(this));
