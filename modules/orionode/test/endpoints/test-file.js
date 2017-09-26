@@ -1374,7 +1374,7 @@ describe('File endpoint', function() {
 						.post(PREFIX + '/project/moveTo%2CFolder') //move it to
 						.set('X-Create-Options', 'move')
 						.set('Slug', 'fizz1.txt')
-						.send({Location: PREFIX + '/project/moveTo,Folder/fizz.txt'})
+						.send({Location: PREFIX + '/project/moveTo%2CFolder/fizz.txt'})
 						.expect(201)
 						.end(function(err, res) {
 							assert.equal(res.body.Location, "/file/anonymous-OrionContent/project/moveTo%2CFolder/fizz1.txt")
