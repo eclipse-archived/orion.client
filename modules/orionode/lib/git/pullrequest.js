@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012, 2016, 2017 IBM Corporation and others.
+ * Copyright (c) 2012, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -9,12 +9,13 @@
  *		 IBM Corporation - initial API and implementation
  *******************************************************************************/
 /*eslint-env node */
-var clone = require('./clone');
-var express = require('express');
-var request = require('request');
-var bodyParser = require('body-parser');
-var url = require("url");
-var tasks = require('../tasks');
+var clone = require('./clone'),
+	express = require('express'),
+	request = require('request'),
+	bodyParser = require('body-parser'),
+	url = require("url"),
+	tasks = require('../tasks'),
+	responseTime = require('response-time');
 
 module.exports = {};
 
@@ -29,6 +30,7 @@ module.exports.router = function(options) {
 
 	return express.Router()
 	.use(bodyParser.json())
+	.use(responseTime({digits: 2, header: "X-GitapiPullrequest-Response-Time", suffix: true}))
 	.use(options.checkUserAccess)
 	.post(fileRoot + '*', getPullRequest);
 	

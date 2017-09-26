@@ -9,14 +9,17 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 /*eslint-env node */
-var api = require('../api'), writeError = api.writeError, writeResponse = api.writeResponse;
-var git = require('nodegit');
-var async = require('async');
-var mRemotes = require('./remotes');
-var clone = require('./clone');
-var express = require('express');
-var bodyParser = require('body-parser');
-var args = require('../args');
+var api = require('../api'), 
+	writeError = api.writeError, 
+	writeResponse = api.writeResponse,
+	git = require('nodegit'),
+	async = require('async'),
+	mRemotes = require('./remotes'),
+	clone = require('./clone'),
+	express = require('express'),
+	bodyParser = require('body-parser'),
+	args = require('../args'),
+	responseTime = require('response-time');
 
 module.exports = {};
 
@@ -35,6 +38,7 @@ module.exports.router = function(options) {
 	
 	return express.Router()
 	.use(bodyParser.json())
+	.use(responseTime({digits: 2, header: "X-GitapiBranches-Response-Time", suffix: true}))
 	.use(options.checkUserAccess)
 	.get(fileRoot + '*', getBranches)
 	.get('/:branchName*', getBranches)

@@ -13,14 +13,12 @@ var api = require('../api'), writeError = api.writeError, writeResponse = api.wr
 	args = require('../args'),
 	async = require('async'),
 	git = require('nodegit'),
-	url = require('url'),
 	tasks = require('../tasks'),
 	clone = require('./clone'),
-	mConfig = require('./config'),
 	express = require('express'),
 	bodyParser = require('body-parser'),
 	log4js = require('log4js'),
-	logger = log4js.getLogger("git");
+	responseTime = require('response-time');
 
 module.exports = {};
 
@@ -51,6 +49,7 @@ module.exports.router = function(options) {
 
 	return express.Router()
 	.use(bodyParser.json())
+	.use(responseTime({digits: 2, header: "X-GitapiRemotes-Response-Time", suffix: true}))
 	.use(checkUserAccess) // Use specified checkUserAceess implementation instead of the common one from options
 	.get(fileRoot + '*', getRemotes)
 	.get('/:remoteName'+ fileRoot + '*', getRemotes)

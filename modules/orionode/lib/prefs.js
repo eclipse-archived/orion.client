@@ -20,7 +20,8 @@ var api = require('./api'),
     os = require('os'),
     Long_Key_Prefs = require('./model/long_key_pref'),
     Preference = require('./model/pref'),
-    Promise = require('bluebird');
+    Promise = require('bluebird'),
+    responseTime = require('response-time');
 
     var fs = Promise.promisifyAll(require('fs'));
 
@@ -47,6 +48,7 @@ module.exports.router = function(options) {
 	return express.Router()
 	.use(bodyParser.json())
 	.use(bodyParser.urlencoded({ extended: false }))
+	.use(responseTime({digits: 2, header: "X-Prefs-Response-Time", suffix: true}))
 	.get('*', handleGet)
 	.put('*', handlePut)
 	.delete('*',handleDelete);

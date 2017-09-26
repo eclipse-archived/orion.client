@@ -9,13 +9,14 @@
  *		 IBM Corporation - initial API and implementation
  *******************************************************************************/
 /*eslint-env node */
-var api = require('../api'), writeError = api.writeError, writeResponse = api.writeResponse;
-var git = require('nodegit');
-var clone = require('./clone');
-var path = require('path');
-var fs = require('fs');
-var express = require('express');
-var bodyParser = require('body-parser');
+var api = require('../api'), writeError = api.writeError, writeResponse = api.writeResponse,
+	git = require('nodegit'),
+	clone = require('./clone'),
+	path = require('path'),
+	fs = require('fs'),
+	express = require('express'),
+	bodyParser = require('body-parser'),
+	responseTime = require('response-time');
 
 module.exports = {};
 
@@ -28,6 +29,7 @@ module.exports.router = function(options) {
 	
 	return express.Router()
 	.use(bodyParser.json())
+	.use(responseTime({digits: 2, header: "X-GitapiIndex-Response-Time", suffix: true}))
 	.use(options.checkUserAccess)
 	.get(fileRoot + '*', getIndex)
 	.put(fileRoot + '*', putIndex)

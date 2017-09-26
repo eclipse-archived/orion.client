@@ -70,6 +70,7 @@
     "nodemon": "^1.11.0",
     "nyc": "^11.2.1",
     "requirejs": "^2.3.3",
+    "response-time": "^2.3.2",
     "superagent": "^3.5.1",
     "supertest": "^3.0.0"
   },

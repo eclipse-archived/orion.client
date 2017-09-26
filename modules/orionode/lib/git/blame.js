@@ -9,13 +9,13 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 /*eslint-env node */
-var api = require('../api'), writeError = api.writeError, writeResponse = api.writeResponse;
-var path = require('path');
-var git = require('nodegit');
-var express = require('express');
-var bodyParser = require('body-parser');
-var clone = require('./clone');
-var commitm = require('./commit');
+var api = require('../api'),
+	git = require('nodegit'),
+	express = require('express'),
+	bodyParser = require('body-parser'),
+	clone = require('./clone'),
+	commitm = require('./commit'),
+	responseTime = require('response-time');
 
 module.exports = {};
 
@@ -30,6 +30,7 @@ module.exports.router = function(options) {
 
 	return express.Router()
 	.use(bodyParser.json())
+	.use(responseTime({digits: 2, header: "X-GitapiBlame-Response-Time", suffix: true}))
 	.use(options.checkUserAccess)
 	.get('/:refName'+ fileRoot + "/*", getBlame);
 	
@@ -59,10 +60,10 @@ function getBlame(req, res) {
 				"Location": gitRoot + "/blame/"+ req.params.refName + fileDir + fileRelativePath,
 				"Type" : "Blame"
 			};
-			writeResponse(200, res, null, sendingBlamejason, true);
+			api.writeResponse(200, res, null, sendingBlamejason, true);
 		});
 	}).catch(function(err){
-		writeError(403, res, err);
+		api.writeError(403, res, err);
 	});
 }
 

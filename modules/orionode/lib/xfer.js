@@ -9,21 +9,25 @@
  * IBM Corporation - initial API and implementation
  *******************************************************************************/
 /*eslint-env node */
-var api = require('./api'), writeError = api.writeError, writeResponse = api.writeResponse;
-var archiver = require('archiver');
-var request = require('request');
-var express = require('express');
-var path = require('path');
-var os = require('os');
-//var Busboy = require('busboy');
-var Promise = require('bluebird');
-var mkdirp = require('mkdirp');
-var fs = Promise.promisifyAll(require('fs'));
-var fileUtil = require('./fileUtil');
-var log4js = require('log4js');
-var logger = log4js.getLogger("xfer");
-var yauzl = require("yauzl");
+var api = require('./api'),
+	archiver = require('archiver'),
+	request = require('request'),
+	express = require('express'),
+	path = require('path'),
+	os = require('os'),
+//Busboy = require('busboy'),
+	Promise = require('bluebird'),
+	mkdirp = require('mkdirp'),
+	fs = Promise.promisifyAll(require('fs')),
+	fileUtil = require('./fileUtil'),
+	log4js = require('log4js'),
+	logger = log4js.getLogger("xfer"),
+	yauzl = require("yauzl"),
+	responseTime = require('response-time');
 
+var writeError = api.writeError, 
+	writeResponse = api.writeResponse;
+	
 function getUploadsFolder(options) {
 	if (options) {
 		return path.join(options.configParams['orion.single.user'] ? 
@@ -64,10 +68,11 @@ module.exports.router = function(options) {
 	});
 
 	return express.Router()
+	.use(responseTime({digits: 2, header: "X-Xfer-Response-Time", suffix: true}))
 	.use(checkUserAccess)
 	.get('/export*', getXfer)
 	.post('/import*', postImportXfer);
-}
+};
 
 module.exports.getXferFrom = getXferFrom;
 module.exports.postImportXferTo = postImportXferTo;

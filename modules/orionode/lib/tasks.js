@@ -9,13 +9,17 @@
  *	 IBM Corporation - initial API and implementation
  *******************************************************************************/
 /*eslint-env node*/
-var express = require('express');
-var bodyParser = require('body-parser');
-var api = require('./api'), writeError = api.writeError, writeResponse = api.writeResponse;
-var crypto = require('crypto');
-var log4js = require('log4js');
-var logger = log4js.getLogger("tasks");
+var express = require('express'),
+	bodyParser = require('body-parser'),
+	api = require('./api'),
+	crypto = require('crypto'),
+	log4js = require('log4js'),
+	logger = log4js.getLogger("tasks"),
+	responseTime = require('response-time');
 
+var writeError = api.writeError, 
+	writeResponse = api.writeResponse;
+	
 var MS_EXPIRATION = 86400 * 1000 * 7; /* 7 days */  // TODO should be settable per task by client
 
 var taskCount = 0;
@@ -30,6 +34,7 @@ function orionTasksAPI(options) {
 
 	return express.Router()
 	.use(bodyParser.json())
+	.use(responseTime({digits: 2, header: "X-Tasks-Response-Time", suffix: true}))
 	.param('id', function(req, res, next, value) {
 		req.id = value;
 		next();
