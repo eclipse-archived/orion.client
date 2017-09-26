@@ -312,8 +312,10 @@ Object.assign(FsMetastore.prototype, {
 						if (error) {
 							return reject(error);
 						}
-						
-						var index = metadata && metadata.WorkspaceIds.indexOf(workspaceId) || -1;
+						var index = -1;
+						if (metadata && metadata.WorkspaceIds) {
+							index = metadata.WorkspaceIds.indexOf(workspaceId);
+						}
 						index !== -1 && metadata.WorkspaceIds.splice(index, 1);
 						metadata.Properties["UserRights"] = accessRights.removeWorkspaceAccess(metadata.Properties["UserRights"],workspaceId);
 						this._updateUserMetadata(userId,  metadata, function(error) {
