@@ -76,14 +76,16 @@ module.exports.getWorkspaceMeta = function (workspaceIds, store, workspaceRoot){
 				}
 				store.getWorkspace(workspaceId, function(err, workspaceMeta){
 					if (err) {
-						cb(err);
+						return cb(err);
 					}
-					workspaceInfos.push({
-						Id: workspaceId,
-						Location: api.join(workspaceRoot, workspaceId),
-						Name: workspaceMeta.name
-					});
-					cb();
+					if (workspaceMeta) {
+						workspaceInfos.push({
+							Id: workspaceId,
+							Location: api.join(workspaceRoot, workspaceId),
+							Name: workspaceMeta.name
+						});
+					}
+					return cb();
 				});
 			}, 
 			function(err) {

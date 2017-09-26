@@ -259,9 +259,10 @@ Object.assign(FsMetastore.prototype, {
 							return reject(error);
 						}
 						if (!metadata) {
-							var err = new Error(String("could not read workspace: ").concat(workspaceId));
-							err.code = 404;
-							return reject(err);
+							return resolve(null);
+							// var err = new Error(String("could not read workspace: ").concat(workspaceId));
+							// err.code = 404;
+							// return reject(err);
 						}
 						var workspace = {
 							"id": metadata.UniqueId,
@@ -275,7 +276,7 @@ Object.assign(FsMetastore.prototype, {
 							// TODO password needs to be handled specifically since it needs to be decrypted. (referrence setProperties line 967)
 							// TODO handle userPropertyCache (referrence setProperties line 972)
 						});
-						resolve(workspace);
+						return resolve(workspace);
 					});
 				}.bind(this));
 			}.bind(this)).then(
