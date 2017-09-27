@@ -10,33 +10,21 @@
  *******************************************************************************/
 /*eslint-env mocha */
 var assert = require('assert'),
-	express = require('express'),
 	nodeUtil = require('util'),
 	path = require('path'),
 	stream = require('stream'),
 	fs = require('fs'),
-	supertest = require('supertest'),
 	testData = require('../support/test_data'),
 	testHelper = require('../support/testHelper'),
-	fileUtil = require('../../lib/fileUtil'),
-	store = require('../../lib/metastore/fs/store'),
-	file = require('../../lib/file');
+	fileUtil = require('../../lib/fileUtil');
+	
+var CONTEXT_PATH = testHelper.CONTEXT_PATH,
+	WORKSPACE = testHelper.WORKSPACE,
+	MEATASTORE =  testHelper.METADATA,
+	WORKSPACE_ID = testHelper.WORKSPACE_ID,
+	PREFIX = CONTEXT_PATH + '/file/' + WORKSPACE_ID;
 
-var CONTEXT_PATH = '',
-	MEATASTORE =  path.join(__dirname, '.test_metadata'),
-	WORKSPACE_ID = "anonymous-OrionContent",
-	configParams = { "orion.single.user": true, "orion.single.user.metaLocation": MEATASTORE},
-	PREFIX = CONTEXT_PATH + '/file/' + WORKSPACE_ID,
-	WORKSPACE = path.join(__dirname, '.test_workspace');
-
-var app = express();
-var	options = {workspaceDir: WORKSPACE, configParams:configParams};
-	app.locals.metastore = store(options);
-	options.app = app;
-	app.locals.metastore.setup(options);
-	app.use(options.authenticate);
-	app.use(CONTEXT_PATH + '/file' + "*", file({gitRoot: CONTEXT_PATH + '/gitapi', fileRoot: CONTEXT_PATH + '/file', workspaceRoot: CONTEXT_PATH + '/workspace'}));
-var request = supertest.bind(null, app);
+var request = testData.setupOrionServer();
 
 function byName(a, b) {
 	return String.prototype.localeCompare.call(a.Name, b.Name);
@@ -73,14 +61,14 @@ BufStream.prototype.data = function() {
 describe('File endpoint', function() {
 	beforeEach(function(done) { // testData.setUp.bind(null, parentDir)
 		testData.setUp(WORKSPACE, function(){
-			testData.setUpWorkspace(WORKSPACE, MEATASTORE, done);
+			testData.setUpWorkspace(request, done);
 		});
 	});
 	afterEach("Remove .test_workspace", function(done) {
 		testData.tearDown(testHelper.WORKSPACE, function(){
 			testData.tearDown(path.join(MEATASTORE, '.orion'), function(){
-				testData.tearDown(MEATASTORE, done)
-			})
+				testData.tearDown(MEATASTORE, done);
+			});
 		});
 	});
 	/**
@@ -431,7 +419,6 @@ describe('File endpoint', function() {
 								request()
 									.put(url)
 									.set("If-Match", etag)
-									.type('json')
 									.send("new contents")
 									.expect(412)
 									.end(done)
@@ -1380,7 +1367,7 @@ describe('File endpoint', function() {
 						.send({Location: PREFIX + '/project/moveTo%2CFolder/fizz.txt'})
 						.expect(201)
 						.end(function(err, res) {
-							assert.equal(res.body.Location, "/file/anonymous-OrionContent/project/moveTo%2CFolder/fizz1.txt")
+							assert.equal(res.body.Location, CONTEXT_PATH + "/file/anonymous-OrionContent/project/moveTo%2CFolder/fizz1.txt")
 							done();
 						});
 					})
