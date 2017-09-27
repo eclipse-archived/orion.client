@@ -31,58 +31,13 @@ try {
 } catch (e) {
 }
 
-var CONTEXT_PATH = '/devops/code',
-	WORKSPACE = path.join(__dirname, '.test_workspace'),
-	MEATASTORE =  path.join(__dirname, '.test_metadata'),
-	WORKSPACE_ID = "anonymous-OrionContent",
-	configParams = { 
-		"orion.single.user": true, 
-		"orion.single.user.metaLocation": MEATASTORE
-	},
-	FILE_ROOT = "/file/" + WORKSPACE_ID + "/";
-	
-if (CONTEXT_PATH) {
-	configParams["orion.context.listenPath"]=true;
-	configParams["orion.context.path"]=CONTEXT_PATH;
-}
+var CONTEXT_PATH = testHelper.CONTEXT_PATH,
+	WORKSPACE = testHelper.WORKSPACE,
+	MEATASTORE =  testHelper.METADATA,
+	WORKSPACE_ID = testHelper.WORKSPACE_ID,
+	FILE_ROOT = testHelper.FILE_PATH+ "/";
 
-var userMiddleware = function(req, res, next) {
-	req.contextPath = CONTEXT_PATH;
-	req.user.checkRights = checkRights;
-	next();
-};
-
-var app = express();
-var options = {workspaceDir: WORKSPACE, configParams:configParams};
-app.locals.metastore = store(options);
-options.app = app;
-app.locals.metastore.setup(options);
-app.use(options.authenticate);
-app.use(userMiddleware)
-.use(CONTEXT_PATH + '/task', tasks.router({
-	taskRoot: CONTEXT_PATH + '/task',
-	metastore: storeFactory({workspaceDir: WORKSPACE, configParams: configParams})
-}))
-.use(CONTEXT_PATH + "/workspace*", workspace({
-	workspaceRoot: CONTEXT_PATH + '/workspace', 
-	fileRoot: CONTEXT_PATH + '/file', 
-	gitRoot: CONTEXT_PATH + '/gitapi',
-	configParams: configParams
-}))
-.use(CONTEXT_PATH + "/file*", file({
-	workspaceRoot: CONTEXT_PATH + '/workspace', 
-	gitRoot: CONTEXT_PATH + '/gitapi', 
-	fileRoot: CONTEXT_PATH + '/file',
-	configParams: configParams
-}))
-.use(CONTEXT_PATH + "/gitapi", gitapi({
-	gitRoot: CONTEXT_PATH + '/gitapi', 
-	fileRoot: CONTEXT_PATH + '/file', 
-	workspaceRoot: CONTEXT_PATH + '/workspace',
-	configParams: configParams
-}));
-
-var request = supertest.bind(null, app);
+var request = testData.setupOrionServer();
 
 var TEST_REPO_NAME, repoPath;
 

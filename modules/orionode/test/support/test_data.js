@@ -133,7 +133,7 @@ exports.setUpCF = function setUpCF(dir, callback) {
 					console.log(err.message)
 				});
 				ws.on('error', (err) => {
-					console.log("error writing to: "+err.message)
+					console.log("error writing to: "+err.message);
 				});
 				rs.pipe(ws);
 			});
@@ -162,19 +162,20 @@ exports.setupOrionServer = function setupOrionServer(){
 	var orion = function(){
 		var options = {};
 		options.workspaceDir = testHelper.WORKSPACE;
-		options.configParams = { "orion.single.user": true, "orion.single.user.metaLocation": testHelper.MEATASTORE };
-		 if (CONTEXT_PATH) {
+		options.configParams = { "orion.single.user": true, "orion.single.user.metaLocation": testHelper.METADATA };
+		 if (testHelper.CONTEXT_PATH) {
 		 	options.configParams["orion.context.listenPath"]=true;
 			options.configParams["orion.context.path"]=testHelper.CONTEXT_PATH;
 		 }
 		return orionServer(options);
-	}
+	};
 	var userMiddleware = function(req, res, next) {
 		req.user = {workspaceDir: testHelper.WORKSPACE};
 		req.user.checkRights = checkRights;
 		next();
 	};
-	app.use(orion, userMiddleware);
+	app.use(userMiddleware);
+	app.use(orion());
 	var request = supertest.bind(null, app);
 	return request;
 };
