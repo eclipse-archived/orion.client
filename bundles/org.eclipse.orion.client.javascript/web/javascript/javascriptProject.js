@@ -67,41 +67,35 @@ define([
 		 * @callback
 		 */
 		onCreated: function onCreated(project, qualifiedName, fileName) {
-			//We can read the new files and update here, but that could take longer than 
-			//would be ready for the next getComputedEnvironment call - just wipe the cache
-			//and recompute when asked for
-			if(project.importantChange(qualifiedName, fileName)) {
-				this._update(project);
-			}
+			this.setUpdateRequired(project, qualifiedName, fileName);
 		},
 		/**
 		 * @callback
 		 */
 		onDeleted: function onDeleted(project, qualifiedName, fileName) {
-			//We don't have access to the deleted contents - wipe the cache and recompute
-			if(project.importantChange(qualifiedName, fileName)) {
-				this._update(project);
-			}
+			this.setUpdateRequired(project, qualifiedName, fileName);
 		},
 		/**
 		 * @callback
 		 */
 		onModified: function onModified(project, qualifiedName, fileName) {
-			project.updateNeeded = project.importantChange(qualifiedName, fileName);
+			this.setUpdateRequired(project, qualifiedName, fileName);
 		},
 		/**
-		 * @name _wipeCache
-		 * @description Clears the 'env' cache if the file name is a project configuration-like file
+		 * @name setUpdateRequired
+		 * @description Sets the state of the computed environemnt to needing an update
 		 * @function
-		 * @private
-		 * @param {JavaScriptProject} project The backing project
+		 * @param {JavaScriptProject.prototype} project The backing project making the callback
+		 * @param {string} qualifiedName The fully qualified name of the file that has changed
+		 * @param {string} fileName The file name
+		 * @since 16.0
 		 */
-		_update: function _update(project) {
-			project.projectPromise = new Deferred();
-			return computeEnvironment(project, true).then(/* @callback */ function(env) {
-				project.projectPromise.resolve();
-			});
-		} 
+		setUpdateRequired: function setUpdateRequired(project, qualifiedName, fileName) {
+			var important = project.importantChange(qualifiedName, fileName);	
+			if(important) {
+				project.updateNeeded = true;
+			}
+		}
 	};
 	
 	var initialized = false;
