@@ -81,6 +81,9 @@ function getTree(req, res) {
 			if (err) {
 				return writeError(400, res, err);
 			}
+			if (!workspace) {
+				return writeError(404, res, "Workspace not found");
+			}
 			clone.getClones(req, res, function(repos) {
 				var tree = treeJSON(api.join(fileRoot, workspace.id), workspace.name, 0, true, 0);
 				tree.Id = workspace.id;

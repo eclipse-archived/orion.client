@@ -137,7 +137,7 @@ describe("Orion metastore", function() {
 				request()
 					.post(PREFIX + '/77')
 					.set('Slug', 'testCreateProjectWithAnInvalidWorkspaceId')
-					.expect(400)
+					.expect(404)
 					.end(done);
 			});
 	});
