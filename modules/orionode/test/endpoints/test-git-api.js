@@ -170,10 +170,11 @@ GitClient.prototype = {
 		});
 	},
 
-	setFileContents: function(name, contents) {
+	setFileContents: function(name, contents, folderName) {
 		var client = this;
 		this.tasks.push(function(resolve) {
-			var folder = path.join(WORKSPACE, client.getName());
+			!folderName && (folderName = "");
+			var folder = path.join(WORKSPACE, client.getName(), folderName);
 			var fullPath = path.join(folder, name);
 			fs.writeFileSync(fullPath, contents);
 			client.next(resolve, null);
@@ -706,6 +707,27 @@ GitClient.prototype = {
 				assert.ok(res.body.Children.length > 0);
 				assert.equal(res.body.Type, "Config");
 				client.next(resolve, res.body);
+			});
+		});
+	},
+
+	getTree: function() {
+		var client = this;
+		this.tasks.push(function(resolve) {
+			request()
+			.get(CONTEXT_PATH + "/gitapi/tree" + FILE_ROOT + api.encodeURIComponent(client.getName())+ "/" + "refs%25252Fheads%25252Fmaster?parts=meta")
+			.expect(200)
+			.end(function(err, res) {
+				assert.ifError(err);
+				assert.ok(res.body.Children.length === 1);
+				request()
+				.get(res.body.Children[0].Location)
+				.expect(200)
+				.end(function(err, res) {
+					assert.ifError(err);
+					client.next(resolve, res.body);
+				})
+
 			});
 		});
 	}
@@ -4260,5 +4282,26 @@ maybeDescribe("git", function() {
 			})
 		});
 	}); // describe("config")
+
+	describe("GIT TREE", function() {
+		before(setup);
+		it("get git tree", function(finished) {
+			var file = "a.txt";
+			var folder = "modules"; 
+			var client = new GitClient("get-git-tree");
+			client.init();
+			client.createFolder("modules");
+			client.setFileContents(file, "abc", folder);
+			client.stage(folder + "/" + file);
+			client.commit();
+			client.getTree();
+			client.start().then(function(res) {
+				assert.equal(res.Name, folder);
+				assert.equal(res.Children[0].Name, file);
+				assert.equal(res.Children.length, 1);
+				finished();
+			})
+		});
+	}) //describe("tree")
 
 }); // describe("Git")

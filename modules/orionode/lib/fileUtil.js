@@ -132,7 +132,6 @@ var getFile = exports.getFile = function(req, rest) {
 		return null;
 	}
 	var store = getMetastore(req);
-	rest = api.decodeURIComponent(rest);
 	if (rest[0] === "/") {
 		rest = rest.substring(1);
 	}
@@ -467,7 +466,7 @@ exports.handleFilePOST = function(workspaceRoot, fileRoot, req, res, destFile, m
 			if (!sourceUrl) {
 				return api.writeError(400, res, 'Missing Location property in request body');
 			}
-			var sourceFile = getFile(req, sourceUrl.replace(new RegExp("^"+fileRoot), ""));
+			var sourceFile = getFile(req, api.decodeURIComponent(sourceUrl.replace(new RegExp("^"+fileRoot), "")));
 			return fs.statAsync(sourceFile.path)
 			.then(function(stats) {
 				if (isCopy) {
