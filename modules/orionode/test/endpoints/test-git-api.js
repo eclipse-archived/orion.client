@@ -672,7 +672,7 @@ GitClient.prototype = {
 		var client = this;
 		this.tasks.push(function(resolve) {
 			request()
-			.get(CONTEXT_PATH + "/gitapi/tree" + FILE_ROOT + api.encodeURIComponent(client.getName())+ "/" + "refs%25252Fheads%25252Fmaster?parts=meta")
+			.get(GIT_ROOT + "/tree" + FILE_ROOT + api.encodeURIComponent(client.getName())+ "/" + "refs%25252Fheads%25252Fmaster?parts=meta")
 			.expect(200)
 			.end(function(err, res) {
 				assert.ifError(err);

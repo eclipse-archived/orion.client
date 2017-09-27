@@ -20,6 +20,7 @@ var CONTEXT_PATH = testHelper.CONTEXT_PATH,
 	PREFIX_CF = "/cfapi",
 	MANIFESTS = "/manifests",
 	PREFIX_MANIFESTS = CONTEXT_PATH + PREFIX_CF + MANIFESTS,
+	TASK_PREFIX = CONTEXT_PATH + '/task',
 	PREFIX_FILE = CONTEXT_PATH + '/file';
 
 var request = testData.setupOrionServer();
@@ -653,7 +654,7 @@ describe("CloudFoundry endpoint", function() {
 								.expect(400)
 								.end(function(err, res) {
 									assert(res.body.Location);
-									assert(res.body.Location.startsWith("/task"));
+									assert(res.body.Location.startsWith(TASK_PREFIX));
 									done();
 								});
 						});
@@ -682,7 +683,7 @@ describe("CloudFoundry endpoint", function() {
 								.end(function(err, res) {
 									testHelper.throwIfError(err);
 									assert(res.body.Location);
-									assert(res.body.Location.startsWith("/task"));
+									assert(res.body.Location.startsWith(TASK_PREFIX));
 									done();
 								});
 						});
@@ -711,7 +712,7 @@ describe("CloudFoundry endpoint", function() {
 								.end(function(err, res) {
 									testHelper.throwIfError(err);
 									assert(res.body.Location);
-									assert(res.body.Location.startsWith("/task"));
+									assert(res.body.Location.startsWith(TASK_PREFIX));
 									done();
 								});
 						});
@@ -740,7 +741,7 @@ describe("CloudFoundry endpoint", function() {
 								.end(function(err, res) {
 									testHelper.throwIfError(err);
 									assert(res.body.Location);
-									assert(res.body.Location.startsWith("/task"));
+									assert(res.body.Location.startsWith(TASK_PREFIX));
 									done();
 								});
 						});
