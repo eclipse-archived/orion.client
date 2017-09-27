@@ -10,54 +10,19 @@
  *******************************************************************************/
 /*eslint-env mocha */
 var assert = require("assert"),
-	fs = require('fs'),
-	express = require("express"),
-	supertest = require("supertest"),
 	path = require("path"),
 	testData = require("../support/test_data"),
-	middleware = require("../../index.js"),
-	cf = require('../../lib/cf').CloudFoundry,
-	store = require('../../lib/metastore/fs/store'),
-	file = require('../../lib/file'),
-	workspace = require('../../lib/workspace'),
-	testHelper = require('../support/testHelper'),
-	checkRights = require('../../lib/accessRights').checkRights;
+	testHelper = require('../support/testHelper');
 
-var CONTEXT_PATH = "",
-	WORKSPACE = path.join(__dirname, ".test_workspace"),
-	MEATASTORE =  path.join(__dirname, '.test_metadata'),
-	TEST_DATA_PATH = path.join(__dirname, "../testData"),
+var CONTEXT_PATH = testHelper.CONTEXT_PATH,
+	WORKSPACE = testHelper.WORKSPACE,
+	MEATASTORE =  testHelper.METADATA,
 	PREFIX_CF = "/cfapi",
 	MANIFESTS = "/manifests",
-	PREFIX_MANIFESTS = CONTEXT_PATH + PREFIX_CF + MANIFESTS; 
+	PREFIX_MANIFESTS = CONTEXT_PATH + PREFIX_CF + MANIFESTS,
 	PREFIX_FILE = CONTEXT_PATH + '/file';
 
-var options = {
-	workspaceRoot: CONTEXT_PATH + '/workspace', 
-	fileRoot: CONTEXT_PATH + '/file', 
-	gitRoot: CONTEXT_PATH + '/gitapi',
-	configParams: {
-		"orion.single.user": true,
-		"orion.single.user.metaLocation": MEATASTORE,
-	},
-	workspaceDir: WORKSPACE
-};
-
-var app = express();
-	options.app = app;
-	app.locals.metastore = store(options);
-	app.locals.metastore.setup(options);
-	app.use(options.authenticate);
-	app.use(function(req, res, next) {
-		//shim the expected function
-		req.user.checkRights = checkRights;
-		next();
-	});
-	app.use(PREFIX_CF, new cf().createRouter(options));
-	app.use(PREFIX_FILE + '*', file(options));
-	app.use("/workspace", workspace(options));
-
-var request = supertest.bind(null, app);
+var request = testData.setupOrionServer();
 
 /**
  * Renames the file with the given full /file path to 'manifest.yml' so the endpoint will read it
@@ -81,7 +46,7 @@ function getTestFile(request, filePath) {
 describe("CloudFoundry endpoint", function() {
 	beforeEach(function(done) {
 		testData.setUp(WORKSPACE, function() {
-			testData.setUpWorkspace(WORKSPACE, MEATASTORE, function() {
+			testData.setUpWorkspace(request, function() {
 				testData.setUpCF(WORKSPACE, done);
 			});
 		}, false);
