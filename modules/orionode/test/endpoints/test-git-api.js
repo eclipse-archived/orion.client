@@ -668,7 +668,6 @@ GitClient.prototype = {
 		});
 	},
 
-<<<<<<< HEAD
 	getTree: function() {
 		var client = this;
 		this.tasks.push(function(resolve) {
@@ -684,11 +683,14 @@ GitClient.prototype = {
 				.end(function(err, res) {
 					assert.ifError(err);
 					client.next(resolve, res.body);
-				})
+				});
+			});
+		});
+	},
 
 	getFileChangeDiff: function(fileName) {
 		var client = this;
-		this.tasks.push(function(resolve) {;
+		this.tasks.push(function(resolve) {
 			request()
 			.get(GIT_ROOT + "/diff/Default" + FILE_ROOT + path.join(api.encodeURIComponent(client.getName()), fileName) + "?parts=uris")
 			.expect(200)
@@ -705,7 +707,7 @@ GitClient.prototype = {
 			});
 		});
 	}
-}
+};
 
 // Skip tests if nodegit is not installed
 function maybeDescribe() {
@@ -4276,7 +4278,8 @@ maybeDescribe("git", function() {
 				finished();
 			})
 		});
-	}) //describe("tree")
+	}); //describe("tree")
+	
 	describe("fileDiff", function() {
 		it("bug 522665", function(finished) {
 			var client = new GitClient("bug 522665");
@@ -4291,8 +4294,7 @@ maybeDescribe("git", function() {
 			client.getFileChangeDiff(file);
 			client.start().then(function(res) {
 				finished();
-			})
+			});
 		});
-	}) // describe("fileDiff")
-
+	}); // describe("fileDiff")
 }); // describe("Git")
