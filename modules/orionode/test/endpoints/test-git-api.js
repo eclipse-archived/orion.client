@@ -997,7 +997,7 @@ maybeDescribe("git", function() {
 
 			it('POST remote (pushing to a new remote)', function(finished) {
 
-				this.timeout(5000);
+				this.timeout(7000);
 
 				request()
 				.post(GIT_ROOT + "/remote/" + remoteName + "/" + branchName + FILE_ROOT + TEST_REPO_NAME)

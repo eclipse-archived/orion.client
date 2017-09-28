@@ -9,24 +9,26 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 /*eslint-env node, mocha*/
-var assert = require("assert");
-var express = require("express");
-var supertest = require("supertest");
-var orionMiddleware = require("../index");
-var checkRights = require('../lib/accessRights').checkRights;
-var path = require("path");
-var testData = require("./support/test_data");
+var assert = require("assert"),
+	express = require("express"),
+	supertest = require("supertest"),
+	orionMiddleware = require("../index"),
+	checkRights = require('../lib/accessRights').checkRights,
+	path = require("path"),
+	testHelper = require('./support/testHelper'),
+ 	testData = require("./support/test_data");
 
-var WORKSPACE = path.join(__dirname, ".test_workspace");
-var MEATASTORE =  path.join(__dirname, '.test_metadata');
 
- var CONTEXT_PATH = '/devops/code';
+var WORKSPACE = testHelper.WORKSPACE,
+	METADATA =  testHelper.METADATA;
+
+var CONTEXT_PATH = testHelper.CONTEXT_PATH;
 
 var orion = function(options) {
 	// Ensure tests run in 'single user' mode
 	options = options || {};
 	options.workspaceDir = WORKSPACE;
-	options.configParams = { "orion.single.user": true, "orion.single.user.metaLocation": MEATASTORE };
+	options.configParams = { "orion.single.user": true, "orion.single.user.metaLocation": METADATA };
 	 if (CONTEXT_PATH) {
 	 	options.configParams["orion.context.listenPath"]=true;
 		options.configParams["orion.context.path"]=CONTEXT_PATH;
@@ -46,8 +48,8 @@ var userMiddleware = function(req, res, next) {
 describe("orion", function() {
 	after("Remove Workspace and Metastore", function(done) {
 		testData.tearDown(WORKSPACE, function(){
-			testData.tearDown(path.join(MEATASTORE, '.orion'), function(){
-				testData.tearDown(MEATASTORE, done)
+			testData.tearDown(path.join(METADATA, '.orion'), function(){
+				testData.tearDown(METADATA, done)
 			})
 		});
 	});
@@ -55,9 +57,7 @@ describe("orion", function() {
 	beforeEach(function(done) {
 		app = express();
 		request = supertest.bind(null, app);
-		testData.setUp(WORKSPACE, function(){
-			testData.setUpWorkspace(request, done);
-		});
+		testData.setUp(WORKSPACE, done);
 	});
 
 	describe("options", function() {
