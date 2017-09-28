@@ -9,46 +9,17 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 /*eslint-env mocha */
-var express = require("express"),
-	supertest = require("supertest"),
-	path = require("path"),
+var	path = require("path"),
 	testData = require("./support/test_data"),
-	store = require('../lib/metastore/fs/store'),
-	testHelper = require('./support/testHelper'),
-	workspace = require('../lib/workspace'),
-	file = require('../lib/file'),
-	search = require("../lib/search");
+	testHelper = require('./support/testHelper');
 
-var CONTEXT_PATH = '',
-	PREFIX_WORKSPACE = CONTEXT_PATH + '/workspace', 
-	PREFIX_FILE = CONTEXT_PATH + '/file',
-	PREFIX = CONTEXT_PATH + '/filesearch',
-	WORKSPACE_ID = 'anonymous-OrionContent',
-	TEST_WORKSPACE_NAME = '.test_workspace',
-	WORKSPACE = path.join(__dirname, TEST_WORKSPACE_NAME),
-	MEATASTORE =  path.join(__dirname, '.test_metadata');
-
-var options = {
-	workspaceRoot: CONTEXT_PATH + '/workspace', 
-	fileRoot: CONTEXT_PATH + '/file', 
-	gitRoot: CONTEXT_PATH + '/gitapi',
-	configParams: {
-		"orion.single.user": true,
-		"orion.single.user.metaLocation": MEATASTORE
-	},
-	workspaceDir: WORKSPACE
-	};
-
-var app = express();
-	app.locals.metastore = store(options);
-	options.app = app;
-	app.locals.metastore.setup(options);
-	app.use(options.authenticate);
-	app.use(PREFIX, search(options));
-	app.use(PREFIX_WORKSPACE, workspace(options));
-	app.use(PREFIX_FILE, file(options));
-
-var request = supertest.bind(null, app);
+var CONTEXT_PATH = testHelper.CONTEXT_PATH,
+	WORKSPACE = testHelper.WORKSPACE,
+	METADATA =  testHelper.METADATA,
+	WORKSPACE_ID = testHelper.WORKSPACE_ID,
+	PREFIX_WORKSPACE = CONTEXT_PATH + '/workspace';
+	
+var request = testData.setupOrionServer();
 
 describe("Orion search", function() {
 	beforeEach("Create the default workspace and create metadata", function(done) {
@@ -58,8 +29,8 @@ describe("Orion search", function() {
 	});
 	afterEach("Remove .test_workspace", function(done) {
 		testData.tearDown(testHelper.WORKSPACE, function(){
-			testData.tearDown(path.join(MEATASTORE, '.orion'), function() {
-				testData.tearDown(MEATASTORE, done)
+			testData.tearDown(path.join(METADATA, '.orion'), function() {
+				testData.tearDown(METADATA, done);
 			});
 		});
 	});

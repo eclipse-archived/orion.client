@@ -138,7 +138,7 @@ exports.setUpCF = function setUpCF(dir, callback) {
 	}
 };
 
-exports.setupOrionServer = function setupOrionServer(){
+exports.setupOrionServer = function setupOrionServer(helperMiddleware){
 	app = express();
 	var orion = function(){
 		var options = {};
@@ -160,6 +160,9 @@ exports.setupOrionServer = function setupOrionServer(){
 		req.contextPath =  testHelper.CONTEXT_PATH;
 		next();
 	}, orion());
+	if (helperMiddleware) {
+		app.use.bind(this, helperMiddleware[0], helperMiddleware[1]);
+	}
 	var request = supertest.bind(null, app);
 	return request;
 };

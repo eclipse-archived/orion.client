@@ -16,7 +16,7 @@ var path = require('path'),
   * The server context path, default value is the empty string
   * @since 16.0
   */
-exports.CONTEXT_PATH = CONTEXT_PATH = '/devops/code';
+exports.CONTEXT_PATH = CONTEXT_PATH = '';
 /**
  * The absolute path to the test workspace. Default value is __dirname + .test_workspace
  * @since 16.0
