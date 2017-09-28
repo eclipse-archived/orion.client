@@ -84,7 +84,7 @@ describe("Tasks API", function() {
 							var taskLoc2 = res.body.Location;
 									//ask for all of them
 							request()
-								.get('/task/count')
+								.get(CONTEXT_PATH + '/task/count')
 								.expect(200)
 								.end(function(err, res) {
 									testHelper.throwIfError(err);
@@ -139,7 +139,7 @@ describe("Tasks API", function() {
 
 							// mark test task as completed
 							request()
-								.post(CONTEXT_PATH + "/taskHelper/" + location.substr(5))
+								.post(CONTEXT_PATH + "/taskHelper" + location.substr(5 + CONTEXT_PATH.length))
 								.expect(200)
 								.end(function(err, res) {
 									assert.ifError(err);
@@ -176,7 +176,7 @@ describe("Tasks API", function() {
 							taskIds.push(location2);
 							// mark the first one as completed
 							request()
-								.post(CONTEXT_PATH + "/taskHelper/" + location.substr(5))
+								.post(CONTEXT_PATH + "/taskHelper" + location.substr(5 + CONTEXT_PATH.length))
 								.expect(200)
 								.end(function(err, res) {
 									assert.ifError(err);
@@ -212,13 +212,13 @@ describe("Tasks API", function() {
 							taskIds.push(location2);
 							// mark the first one as completed
 							request()
-								.post(CONTEXT_PATH + "/taskHelper/" + location.substr(5))
+								.post(CONTEXT_PATH + "/taskHelper" + location.substr(5 + CONTEXT_PATH.length))
 								.expect(200)
 								.end(function(err, res) {
 									assert.ifError(err);
 									// check that the second running task is still there after deletion
 									request()
-										.put(CONTEXT_PATH + location2)
+										.put(location2)
 										.send({"abort": true})
 										.expect(200)
 										.end(function(err, res) {
