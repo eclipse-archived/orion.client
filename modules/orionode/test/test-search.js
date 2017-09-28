@@ -48,14 +48,12 @@ var app = express();
 	app.use(PREFIX_WORKSPACE, workspace(options));
 	app.use(PREFIX_FILE, file(options));
 
-testHelper.handleErrors(app);
-
 var request = supertest.bind(null, app);
 
 describe("Orion search", function() {
 	beforeEach("Create the default workspace and create metadata", function(done) {
 		testData.setUp(WORKSPACE, function() {
-			testData.setUpWorkspace(WORKSPACE, MEATASTORE, done);
+			testData.setUpWorkspace(request, done);
 		}, false);
 	});
 	afterEach("Remove .test_workspace", function(done) {

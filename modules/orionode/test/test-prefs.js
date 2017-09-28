@@ -58,7 +58,7 @@ function setupPrefs(done) {
 describe('Orion preferences tests', function() {
 	before("Set up the workspace", function(done) {
 		testData.setUp(WORKSPACE_DIR, function(){
-			testData.setUpWorkspace(WORKSPACE_DIR, MEATASTORE, done);
+			testData.setUpWorkspace(request, done);
 		});
 	});
 	after("Remove Workspace and Metastore", function(done) {

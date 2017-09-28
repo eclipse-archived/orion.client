@@ -10,31 +10,16 @@
  *******************************************************************************/
 /*eslint-env mocha */
 var assert = require('assert'),
-	express = require('express'),
 	path = require('path'),
-	fs = require('fs'),
-	supertest = require('supertest'),
-	store = require('../../lib/metastore/fs/store'),
 	testData = require('../support/test_data'),
-	testHelper = require('../support/testHelper'),
-	sites = require('../../lib/sites');
+	testHelper = require('../support/testHelper');
 
-var CONTEXT_PATH = '',
-	MEATASTORE =  path.join(__dirname, '.test_metadata'),
-	WORKSPACE_ID = "anonymous-OrionContent",
-	configParams = { "orion.single.user": true, "orion.sites.save.running": false, "orion.single.user.metaLocation": MEATASTORE},
-	PREFIX = CONTEXT_PATH + '/site/' + WORKSPACE_ID,
-	WORKSPACE = path.join(__dirname, '.test_workspace');
-
-var app = express();
-var	options = {workspaceDir: WORKSPACE, configParams:configParams};
-	app.locals.metastore = store(options);
-	options.app = app;
-	app.locals.metastore.setup(options);
-	app.use(options.authenticate);
+var CONTEXT_PATH = testHelper.CONTEXT_PATH,
+	WORKSPACE = testHelper.WORKSPACE,
+	METADATA =  testHelper.METADATA,
+	WORKSPACE_ID = testHelper.WORKSPACE_ID;
 	
-	app.use(CONTEXT_PATH + '/site', sites({configParams: configParams, workspaceRoot: CONTEXT_PATH + '/workspace'}))
-var request = supertest.bind(null, app);
+var request = testData.setupOrionServer();
 
 /**
  * @description create a new mapping for a site configuration
@@ -70,11 +55,11 @@ function createSite(siteName, mappings, hostHint, workspace) {
 	var ws = workspace === undefined ? WORKSPACE_ID : workspace
 	var json = {Workspace: ws, HostHint: hostHint, Mappings: mappings};
 	return request()
-		.post('/site')
+		.post(CONTEXT_PATH + '/site')
 		.set('Orion-Version', 1)
 		.set('Slug', siteName)
 		.type('json')
-		.send(json)
+		.send(json);
 }
 
 /**
@@ -124,7 +109,7 @@ function stopSite(siteLocation, user, pw) {
  * @param {*} pw 
  */
 function deleteSite(siteLocation, user, pw) {
-	var req = request().delete(siteLocation);
+	var req = request().delete(CONTEXT_PATH + siteLocation);
 	if(user && pw) {
 		req.set('Authorization', 'Basic '+ String(user +':'+pw));
 	}
@@ -138,7 +123,7 @@ function deleteSite(siteLocation, user, pw) {
  * @param {*} pw 
  */
 function getSite(siteName, user, pw) {
-	var req = request().get('/site/'+siteName);
+	var req = request().get(CONTEXT_PATH + '/site/'+siteName);
 	if(user && password) {
 		req.set('Authorization', 'Basic '+ String(user +':'+pw));
 	}
@@ -151,7 +136,7 @@ function getSite(siteName, user, pw) {
  * @param {*} pw 
  */
 function getAllSites(user, pw) {
-	var req = request().get('/site/');
+	var req = request().get(CONTEXT_PATH + '/site/');
 	if(user && password) {
 		req.set('Authorization', 'Basic '+ String(user +':'+pw));
 	}
@@ -169,13 +154,13 @@ function throwIfError(cause, message) {
 describe("Site endpoint", function() {
 	beforeEach(function(done) { // testData.setUp.bind(null, parentDir)
 		testData.setUp(WORKSPACE, function(){
-			testData.setUpWorkspace(WORKSPACE, MEATASTORE, done);
+			testData.setUpWorkspace(request, done);
 		});
 	});
 	afterEach("Remove .test_workspace", function(done) {
 		testData.tearDown(testHelper.WORKSPACE, function(){
-			testData.tearDown(path.join(MEATASTORE, '.orion'), function(){
-				testData.tearDown(MEATASTORE, done)
+			testData.tearDown(path.join(METADATA, '.orion'), function(){
+				testData.tearDown(METADATA, done);
 			})
 		});
 	});
@@ -312,7 +297,7 @@ describe("Site endpoint", function() {
 				.end(function(err, res) {
 					throwIfError(err);
 					request()
-						.put(res.body.Location)
+						.put(CONTEXT_PATH + res.body.Location)
 						.type('json')
 						.send({Name: "renamedSiteName", Mappings: makeMappings(["/"], ["/somethingelse"]), Workspace: "someFakeWorkspace", HostingHint: "nolongerEmpty"})
 						.expect(200)

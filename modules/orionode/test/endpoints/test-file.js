@@ -20,7 +20,7 @@ var assert = require('assert'),
 	
 var CONTEXT_PATH = testHelper.CONTEXT_PATH,
 	WORKSPACE = testHelper.WORKSPACE,
-	MEATASTORE =  testHelper.METADATA,
+	METADATA =  testHelper.METADATA,
 	WORKSPACE_ID = testHelper.WORKSPACE_ID,
 	PREFIX = CONTEXT_PATH + '/file/' + WORKSPACE_ID;
 
@@ -66,8 +66,8 @@ describe('File endpoint', function() {
 	});
 	afterEach("Remove .test_workspace", function(done) {
 		testData.tearDown(testHelper.WORKSPACE, function(){
-			testData.tearDown(path.join(MEATASTORE, '.orion'), function(){
-				testData.tearDown(MEATASTORE, done);
+			testData.tearDown(path.join(METADATA, '.orion'), function(){
+				testData.tearDown(METADATA, done);
 			});
 		});
 	});
@@ -512,6 +512,7 @@ describe('File endpoint', function() {
 								request()
 									.put(url)
 									.set("If-Match", etag1)
+									.type("text/plain;charset=UTF-8")
 									.send("new contents for you")
 									.expect(200)
 									.end(function(err, res) {

@@ -54,7 +54,7 @@ describe("Tasks API", function() {
 			.expect(200)
 			.end(function(err, res) {
 				testData.setUp(WORKSPACE, function(){
-					testData.setUpWorkspace(WORKSPACE, MEATASTORE, done);
+					testData.setUpWorkspace(request, done);
 				}, false);
 		});
 	});

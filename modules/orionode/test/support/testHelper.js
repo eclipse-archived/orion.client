@@ -151,31 +151,3 @@ exports.throwIfError = throwIfError = function throwIfError(cause, message) {
 	err.cause = cause;
 	throw err;
 };
-
-/**
- * @description Default error handling for endpoints
- * @param {Express.app} app The app the attach to
- * @param {?} logger The optional logger
- * @since 16.0
- */
-exports.handleErrors = handleErrors = function handleErrors(app, logger) {
-	app.use(function(err, req, res) {
-		if(logger) {
-			logger.error(req.originalUrl, err);
-		}
-		if (res.finished) {
-			return;
-		}
-		if (err) {
-			res.status(err.status || 500);
-		} else {
-			res.status(404);
-		}
-		// respond with json
-		if (req.accepts('json')) {
-			return res.send({ error: err ? err.message : 'Not found' });
-		}
-		// default to plain-text. send()
-		res.type('txt').send(err ? err.message : 'Not found');
-	});
-};

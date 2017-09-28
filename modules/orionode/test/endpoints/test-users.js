@@ -10,37 +10,17 @@
  *******************************************************************************/
 /*eslint-env mocha */
 var assert = require('assert'),
-	express = require('express'),
 	path = require('path'),
-	fs = require('fs'),
-	supertest = require('supertest'),
-	store = require('../../lib/metastore/fs/store'),
-	users = require('../../lib/user'),
 	testData = require('../support/test_data'),
-	checkRights = require('../../lib/accessRights').checkRights;
+	testHelper = require('../support/testHelper');
 
-var CONTEXT_PATH = '',
-	MEATASTORE =  path.join(__dirname, '.test_metadata'),
-	WORKSPACE_ID = "anonymous-OrionContent",
-	configParams = { "orion.single.user": false, "orion.sites.save.running": false, "orion.auth.user.creation": 'anonymous', "orion.single.user.metaLocation": MEATASTORE},
-	PREFIX = CONTEXT_PATH + '/users/' + WORKSPACE_ID,
-	WORKSPACE = path.join(__dirname, '.test_workspace');
-
-var userMiddleware = function(req, res, next) {
-	if(req.user) {
-		req.user.checkRights = checkRights;
-	}
-	next();
-};
-var app = express();
-var	options = {workspaceDir: WORKSPACE, configParams:configParams};
-	app.locals.metastore = store(options);
-	options.app = app;
-	app.locals.metastore.setup(options);
-	app.use(options.authenticate);
-	app.use(userMiddleware)
-	app.use(CONTEXT_PATH, users.router({authenticate: function(req,res,next){next()}, configParams: configParams, workspaceRoot: CONTEXT_PATH + '/workspace'}))
-var request = supertest.bind(null, app);
+	
+var CONTEXT_PATH = testHelper.CONTEXT_PATH,
+	WORKSPACE = testHelper.WORKSPACE,
+	METADATA =  testHelper.METADATA,
+	WORKSPACE_ID = testHelper.WORKSPACE_ID;
+	
+var request = testData.setupOrionServer();
 
 // Like `assert.ifError` but allows the message to be overridden
 function throwIfError(cause, message) {
@@ -59,13 +39,13 @@ function throwIfError(cause, message) {
 describe.skip("Users endpoint", function() {
 	beforeEach(function(done) { // testData.setUp.bind(null, parentDir)
 		testData.setUp(WORKSPACE, function(){
-			testData.setUpWorkspace(WORKSPACE, MEATASTORE, done);
+			testData.setUpWorkspace(request, done);
 		});
 	});
 	afterEach("Remove .test_workspace", function(done) {
 		testData.tearDown(testHelper.WORKSPACE, function(){
-			testData.tearDown(path.join(MEATASTORE, '.orion'), function(){
-				testData.tearDown(MEATASTORE, done)
+			testData.tearDown(path.join(METADATA, '.orion'), function(){
+				testData.tearDown(METADATA, done)
 			})
 		});
 	});
@@ -75,7 +55,7 @@ describe.skip("Users endpoint", function() {
 	describe("Basic users tests", function() {
 		it("testGetUsersList", function(done) {
 			request()
-				.get('/users')
+				.get(CONTEXT_PATH + '/users')
 				.set('Orion-Version', 1)
 				.set('Authorization', 'Basic '+Buffer.from('admin:admin', "UTF8").toString('base64')) //in multi-tennant mode this will work
 				.expect(200)
@@ -86,7 +66,7 @@ describe.skip("Users endpoint", function() {
 		});
 		it("testGetUsersListNoAuth", function(done) {
 			request()
-				.get('/users')
+				.get(CONTEXT_PATH + '/users')
 				.expect(403)
 				.end(function(err, res) {
 					throwIfError(err);
@@ -95,7 +75,7 @@ describe.skip("Users endpoint", function() {
 		});
 		it("testGetUsersListNotAuthUser", function(done) {
 			request()
-				.get('/users')
+				.get(CONTEXT_PATH + '/users')
 				.set('Orion-Version', 1)
 				.set('Authorization', 'Basic '+Buffer.from('some:user', "UTF8").toString('base64')) //TODO in multi-tennant mode this will work
 				.expect(403)
@@ -127,7 +107,7 @@ describe.skip("Users endpoint", function() {
 		it("testCreateDuplicateUser", function(done) {
 			var json = {UserName: "testCreateDuplicateUser", Email: 'testCreateDuplicateUser@bar.org', FullName: "testCreateDuplicateUser Bar", Password: "1234"};
 			request()
-				.post('/users')
+				.post(CONTEXT_PATH + '/users')
 				.type('json')
 				.send(json)
 				.expect(201)
@@ -144,7 +124,7 @@ describe.skip("Users endpoint", function() {
 		it("testCreateUserWithNoUserName", function(done) {
 			var json = {Email: 'testCreateDuplicateUser@bar.org', FullName: "testCreateDuplicateUser Bar", Password: "1234"};
 			request()
-				.post('/users')
+				.post(CONTEXT_PATH + '/users')
 				.type('json')
 				.send(json)
 				.expect(400)
@@ -153,7 +133,7 @@ describe.skip("Users endpoint", function() {
 		it("testCreateUserWithNoEmail", function(done) {
 			var json = {UserName: 'testCreateUserWithNoEmail', FullName: "testCreateDuplicateUser Bar", Password: "1234"};
 			request()
-				.post('/users')
+				.post(CONTEXT_PATH + '/users')
 				.type('json')
 				.send(json)
 				.expect(400)
@@ -162,7 +142,7 @@ describe.skip("Users endpoint", function() {
 		it("testCreateUserDuplicateEmail", function(done) {
 			var json = {UserName: "testCreateUserDuplicateEmail", Email: 'testCreateUserDuplicateEmail@bar.org', FullName: "testCreateUserDuplicateEmail Bar", Password: "1234"};
 			request()
-				.post('/users')
+				.post(CONTEXT_PATH + '/users')
 				.type('json')
 				.send(json)
 				.expect(201)
@@ -181,7 +161,7 @@ describe.skip("Users endpoint", function() {
 		it("testCreateUserEmailDifferentCase", function(done) {
 			var json = {UserName: "testCreateUserEmailDifferentCase", Email: 'testCreateUserEmailDifferentCase@bar.org', FullName: "testCreateUserEmailDifferentCase Bar", Password: "1234"};
 			request()
-				.post('/users')
+				.post(CONTEXT_PATH + '/users')
 				.type('json')
 				.send(json)
 				.expect(201)
@@ -204,7 +184,7 @@ describe.skip("Users endpoint", function() {
 			for(var i = 0, len = badChars.length; i < len; i++) {
 				json.UserName = "bad" + badChars.charAt(i) + "name";
 				request()
-					.post('/users')
+					.post(CONTEXT_PATH + '/users')
 					.type('json')
 					.send(json)
 					.expect(400)
@@ -219,7 +199,7 @@ describe.skip("Users endpoint", function() {
 		it("testCreateDeleteUsers", function(done) {
 			var json = {UserName: "testCreateDeleteUsers", Email: 'testCreateDeleteUsers@bar.org', FullName: "testCreateDeleteUsers Bar", Password: "1234"};
 			request()
-				.post('/users')
+				.post(CONTEXT_PATH + '/users')
 				.type('json')
 				.send(json)
 				.expect(201)
@@ -239,7 +219,7 @@ describe.skip("Users endpoint", function() {
 		it.skip("testDeleteUserByUniqueIdProperty", function(done) {
 			var json = {UserName: "testDeleteUserByUniqueIdProperty", Email: 'testDeleteUserByUniqueIdProperty@bar.org', FullName: "testDeleteUserByUniqueIdProperty Bar", Password: "1234"};
 			request()
-				.post('/users')
+				.post(CONTEXT_PATH + '/users')
 				.type('json')
 				.send(json)
 				.expect(201)
@@ -256,7 +236,7 @@ describe.skip("Users endpoint", function() {
 		it("testUpdateUsers", function(done) {
 			var json = {UserName: "testUpdateUsers", Email: 'testUpdateUsers@bar.org', FullName: "testUpdateUsers Bar", Password: "1234"};
 			request()
-				.post('/users')
+				.post(CONTEXT_PATH + '/users')
 					.type('json')
 					.send(json)
 					.expect(201)
@@ -275,7 +255,7 @@ describe.skip("Users endpoint", function() {
 		it("testResetUser", function(done) {
 			var json = {roles: "admin", UserName: "testResetUser", Email: 'testResetUser@bar.org', FullName: "testResetUser Bar", Password: "1234"};
 			request()
-				.post('/users')
+				.post(CONTEXT_PATH + '/users')
 					.type('json')
 					.send(json)
 					.expect(201)
@@ -294,7 +274,7 @@ describe.skip("Users endpoint", function() {
 		it("testCreateUser", function(done) {
 			var json = {UserName: "testCreateUser", Email: 'testCreateUser@bar.org', FullName: "testCreateUser Bar", Password: "1234"};
 			request()
-				.post('/users')
+				.post(CONTEXT_PATH + '/users')
 				.type('json')
 				.send(json)
 				.expect(201)
@@ -303,7 +283,7 @@ describe.skip("Users endpoint", function() {
 		it("testChangeUserName", function(done) {
 			var json = {UserName: "testChangeUserName", Email: 'testChangeUserName@bar.org', FullName: "testChangeUserName Bar", Password: "1234"};
 			request()
-				.post('/users')
+				.post(CONTEXT_PATH + '/users')
 					.type('json')
 					.send(json)
 					.expect(201)

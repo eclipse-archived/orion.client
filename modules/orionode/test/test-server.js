@@ -56,7 +56,7 @@ describe("orion", function() {
 		app = express();
 		request = supertest.bind(null, app);
 		testData.setUp(WORKSPACE, function(){
-			testData.setUpWorkspace(WORKSPACE, MEATASTORE, done);
+			testData.setUpWorkspace(request, done);
 		});
 	});
 
