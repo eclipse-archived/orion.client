@@ -58,7 +58,7 @@ var removeWorkspaceAccess = function(userAccessRights, workspaceId){
 var createUserAccess = function(UserId){
 	return [{
 		"Method": getAccessRight(),
-		"Uri": "/user/" + UserId
+		"Uri": "/users/" + UserId
 	}];
 };
 
