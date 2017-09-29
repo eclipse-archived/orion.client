@@ -82,7 +82,7 @@
     "dist:osx": "build --o",
     "dist:win": "build --w",
     "dist:linux": "build --l",
-    "test": "nyc --reporter=html --reporter=text env showWSAccessLogs='false' mocha --reporter spec ./test ./test/metastore ./test/endpoints && nyc env showWSAccessLogs='false' CONTEXT_PATH='/wow/orion' mocha  --reporter spec ./test ./test/metastore ./test/endpoints",
+    "test": "nyc --reporter=html --reporter=text env showWSAccessLogs='false' mocha --reporter spec ./test ./test/metastore ./test/endpoints",
     "coverage": "nyc report --reporter=text-lcov | coveralls",
     "optimize": "grunt",
     "watch-server": "nodemon --debug server.js"
