@@ -458,9 +458,21 @@ exports.handleFilePOST = function(workspaceRoot, fileRoot, req, res, destFile, m
 			return api.writeResponse(400, res, null, 'Illegal combination of X-Create-Options.', true);
 		}
 		if (xCreateOptions.indexOf('no-overwrite') !== -1 && destExists) {
-			return api.writeError(412, res, new Error('A file or folder with the same name already exists at this location.'));
+			function isFSCaseInsensitive(){
+				var lowerCaseStat = fs.statSync(destFile.path.toLowerCase());
+				var upperCaseStat = fs.statSync(destFile.path.toUpperCase());
+				if(lowerCaseStat && upperCaseStat) {
+					return lowerCaseStat.dev === upperCaseStat.dev && lowerCaseStat.ino === upperCaseStat.ino;
+				}
+				return false;
+			}
+			function isRename(){
+				return path.dirname(getFile(req, req.body.Location.replace(new RegExp("^"+fileRoot), "")).path) === path.dirname(destFile.path)
+			}
+			if(!isMove || !isRename() ||!isFSCaseInsensitive()){
+				return api.writeError(412, res, new Error('A file or folder with the same name already exists at this location.'));
+			}
 		}
-
 		if (isCopy || isMove) {
 			var sourceUrl = req.body.Location;
 			if (!sourceUrl) {
@@ -517,7 +529,6 @@ exports.handleFilePOST = function(workspaceRoot, fileRoot, req, res, destFile, m
 		.then(writeResponse.bind(null, destExists))
 		.catch(api.writeError.bind(null, 500, res));
 	});
-
 };
 
 var _fileModListeners = [];
