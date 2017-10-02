@@ -62,6 +62,7 @@ var params = {
 logger.info("Using workspace: " + params.workspaceDir);
 var app = express();
 var server = http.createServer(app);
+params.server = server;
 app.use(function(req, res, next){
 	req.contextPath = "";
 	next();

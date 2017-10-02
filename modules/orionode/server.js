@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012, 2013, 2017 IBM Corporation and others.
+ * Copyright (c) 2012, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -18,10 +18,8 @@ var auth = require('./lib/middleware/auth'),
 	log4js = require('log4js'),
 	compression = require('compression'),
 	path = require('path'),
-	socketio = require('socket.io'),
 	util = require('util'),
 	argslib = require('./lib/args'),
-	ttyShell = require('./lib/tty_shell'),
 	api = require('./lib/api');
 
 var logger = log4js.getLogger('server');
@@ -110,12 +108,13 @@ function startServer(cb) {
 			if (password || configParams.pwd) {
 				app.use(listenContextPath ? contextPath : "/", auth(password || configParams.pwd));
 			}
-			
+			server = require('http-shutdown')(server);
 			app.use(compression());
 			var orion = require('./index.js')({
 				workspaceDir: workspaceDir,
 				configParams: configParams,
 				maxAge: dev ? 0 : undefined,
+				server: server
 			});
 			app.use(listenContextPath ? contextPath : "/", function(req, res, next){
 				req.contextPath = contextPath;
@@ -134,17 +133,9 @@ function startServer(cb) {
 					logger.info("WARNING: http-proxy is not installed. Some features will be unavailable. Reason: " + e.message);
 				}
 			}
-			
-			server = require('http-shutdown')(server);
-			var io = socketio.listen(server, { 'log level': 1, path: (listenContextPath ? contextPath : '' ) + '/socket.io' });
-			ttyShell.install({ io: io, app: orion, fileRoot: contextPath + '/file', workspaceDir: workspaceDir, sharedWorkspaceFileRoot: contextPath + '/sharedWorkspace/tree/file'});
-			if (configParams["orion.debug.enabled"]) {
-				var debugServer = require(configParams["debug.server.module"]);
-				debugServer.install({ io: io, app: orion, fileRoot: contextPath + '/file', workspaceDir: workspaceDir, listenPath: listenContextPath ? contextPath : '' });
-			}
 
 			//error handling
-			app.use(function(err, req, res, next) {
+			app.use(function(err, req, res, next) { // 'next' has to be here, so that this callback works as a final error handler instead of a normal middleware
 				logger.error(req.originalUrl, err);
 				if (res.finished) {
 					return;
