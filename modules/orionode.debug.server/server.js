@@ -20,8 +20,8 @@ var config = require('./config');
  * @param {Express} options.app
  * @param {SocketIO.Server} options.io
  */
-function install(options) {
-    if(!index.install(options)) {
+function install(options, io) {
+    if(!index.install(options, io)) {
         console.log('Debug server is not installed. Some features will be unavailable.');
     }
 }
@@ -50,7 +50,7 @@ if (require.main === module) {
 
     var server = http.createServer(app);
     var io = socketio.listen(server, { 'log level': 1, origins: config.socketioCorsDomain });
-    index.install({ app: app, io: io });
+    index.install({ app: app}, io);
     app.get('/', function(req, res) {
         res.sendStatus(200);
     });

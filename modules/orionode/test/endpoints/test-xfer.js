@@ -38,8 +38,11 @@ var userMiddleware = function(req, res, next) {
 	next();
 };
 var app = express();
-app.locals.metastore = metastore({workspaceDir: WORKSPACE, configParams:configParams});
-app.locals.metastore.setup(app);
+var options = {workspaceDir: WORKSPACE, configParams:configParams};
+app.locals.metastore = metastore(options);
+options.app = app;
+app.locals.metastore.setup(options);
+app.use(options.authenticate);
 app.use(userMiddleware)
 app.use(XFER_PATH, xfer.router({ fileRoot: FILE_PATH, configParams: { "orion.single.user": true, "orion.single.user.metaLocation": MEATASTORE} }));
 app.use(FILE_PATH + '*', file({fileRoot: FILE_PATH, workspaceRoot: CONTEXT_PATH + '/workspace'}));

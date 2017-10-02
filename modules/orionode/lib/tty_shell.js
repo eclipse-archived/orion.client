@@ -15,6 +15,7 @@ var api = require('./api'),
 	fs = require('fs'),
 	http = require('http'),
 	path = require('path'),
+	express = require('express'),
 	log4js = require('log4js'),
 	logger = log4js.getLogger("ttyshell");
 var pty;
@@ -24,8 +25,8 @@ try {
 	logger.info("WARNING: node-pty is not installed. Some features will be unavailable. Reason: " + e.message);
 }
 
-exports.install = function(options) {
-	var io = options.io, fileRoot = options.fileRoot, workspaceDir = options.workspaceDir, app = options.app;
+exports.install = function(options, io) {
+	var fileRoot = options.fileRoot, workspaceDir = options.workspaceDir, app = options.app;
 	if (!io) {
 		throw new Error('missing options.io');
 	}
@@ -61,6 +62,8 @@ exports.install = function(options) {
 		});
 	}
 
+	var authApp = express().use(options.authenticate);
+
 	io.of('/tty').on('connection', function(sock) {
 
 		// Get the user's workspace dir
@@ -75,7 +78,8 @@ exports.install = function(options) {
 		var passedCwd = "";
 		var req = sock.request;
 		var res = new http.ServerResponse(sock.request);
-		app.handle(req, res);
+		
+		authApp.handle(req, res);
 
 		res.end = function() {
 			userGot = true;

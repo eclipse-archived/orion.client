@@ -17,6 +17,8 @@ var express = require('express'),
 	api = require('./lib/api'),
 	checkRights = require('./lib/accessRights').checkRights,
 	log4js = require('log4js'),
+	socketio = require('socket.io'),
+	ttyShell = require('./lib/tty_shell'),
 	logger = log4js.getLogger("response"),
 	responseTime = require('response-time');
 
@@ -66,6 +68,7 @@ function startServer(options) {
 	options.configParams = options.configParams || {};
 	options.maxAge = typeof options.maxAge === "number" ? options.maxAge : undefined;
 	var contextPath = options && options.configParams["orion.context.path"] || "";
+	var listenContextPath = options && options.configParams["orion.context.listenPath"] || false;
 	if (typeof options.workspaceDir !== "string") {
 		throw new Error("workspaceDir is required");
 	}
@@ -124,17 +127,17 @@ function startServer(options) {
 			metastoreFactory = require('./lib/metastore/fs/store');
 		}
 		options.metastore = app.locals.metastore = metastoreFactory(options);
-		app.locals.metastore.setup(app);
+		app.locals.metastore.setup(options);
 		options.authenticate = [
 			expressSession({
 				resave: false,
 				saveUninitialized: false,
 				secret: 'keyboard cat',
-				store: app.locals.sessionStore // TODO by default MemoryStore is not designed for a production environment, as it will leak memory, and will not scale past a single process.
+				store: options.sessionStore // TODO by default MemoryStore is not designed for a production environment, as it will leak memory, and will not scale past a single process.
 			}),
 			passport.initialize(),
 			passport.session()
-		];
+		].concat(options.authenticate || []);
 		
 		loadEndpoints(false);
 		let CloudFoundry = require('./lib/cf').CloudFoundry;
@@ -154,6 +157,13 @@ function startServer(options) {
 		app.use('/xfer', options.authenticate, checkAuthenticated, require('./lib/xfer').router(options));
 		if(options.configParams["orion.collab.enabled"]){
 			app.use('/sharedWorkspace', options.authenticate, checkAuthenticated, require('./lib/sharedWorkspace').router(options));
+		}
+		
+		var io = socketio.listen(options.server, { 'log level': 1, path: (listenContextPath ? contextPath : '' ) + '/socket.io' });
+		ttyShell.install(options, io);
+		if (options.configParams["orion.debug.enabled"]) {
+			var debugServer = require(options.configParams["debug.server.module"]);
+			debugServer.install(options, io);
 		}
 		
 		// Static files
@@ -191,7 +201,7 @@ function startServer(options) {
 			app.use(require('./lib/orion_static')(Object.assign({orionClientRoot: ORION_CLIENT, orionode_static: orionode_static, prependStaticAssets: prependStaticAssets, appendStaticAssets: appendStaticAssets}, staticCacheOption)));
 		}
 		//error handling
-		app.use(function(err, req, res, next) {
+		app.use(function(err, req, res, next) { // 'next' has to be here, so that this callback works as a final error handler instead of a normal middleware
 			logger.error(req.originalUrl, err);
 			if (res.finished) {
 				return;

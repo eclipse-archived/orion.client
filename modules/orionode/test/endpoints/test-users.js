@@ -33,8 +33,11 @@ var userMiddleware = function(req, res, next) {
 	next();
 };
 var app = express();
-	app.locals.metastore = store({workspaceDir: WORKSPACE, configParams: configParams});
-	app.locals.metastore.setup(app);
+var	options = {workspaceDir: WORKSPACE, configParams:configParams};
+	app.locals.metastore = store(options);
+	options.app = app;
+	app.locals.metastore.setup(options);
+	app.use(options.authenticate);
 	app.use(userMiddleware)
 	app.use(CONTEXT_PATH, users.router({authenticate: function(req,res,next){next()}, configParams: configParams, workspaceRoot: CONTEXT_PATH + '/workspace'}))
 var request = supertest.bind(null, app);
