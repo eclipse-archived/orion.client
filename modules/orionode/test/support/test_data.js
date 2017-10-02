@@ -51,7 +51,9 @@ exports.setUpWorkspace = function setUpWorkspace(wsDir, metastore, done) {
 					gitRoot: CONTEXT_PATH + '/gitapi'
 				 };
 	app.locals.metastore = store(options);
-	app.locals.metastore.setup(app);
+	options.app = app;
+	app.locals.metastore.setup(options);
+	app.use(options.authenticate);
 	app.use(CONTEXT_PATH + '/workspace*', workspace(options));
 	var request = supertest.bind(null, app);
 	

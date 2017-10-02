@@ -44,8 +44,10 @@ var options = {
 };
 
 var app = express();
+	options.app = app;
 	app.locals.metastore = store(options);
-	app.locals.metastore.setup(app);
+	app.locals.metastore.setup(options);
+	app.use(options.authenticate);
 	app.use(function(req, res, next) {
 		//shim the expected function
 		req.user.checkRights = checkRights;

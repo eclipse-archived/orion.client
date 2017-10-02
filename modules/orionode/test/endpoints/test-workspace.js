@@ -39,7 +39,9 @@ var options = {
 };
 var app = express();
 	app.locals.metastore = store(options);
-	app.locals.metastore.setup(app);
+	options.app = app;
+	app.locals.metastore.setup(options);
+	app.use(options.authenticate);
 	app.use(PREFIX, workspace(options));
 	app.use(PREFIX_FILE, file(options));
 

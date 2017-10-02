@@ -16,7 +16,8 @@ var chai = require('chai'),
     nodePath = require('path'),
     prefs = require('../lib/prefs').router,
     Promise = require('bluebird'),
-    supertest = require('supertest'),
+	supertest = require('supertest'),
+	store = require('../lib/metastore/fs/store'),
     testData = require('./support/test_data');
 
 var expect = chai.expect,
@@ -34,8 +35,10 @@ var options = {
 	workspaceDir: WORKSPACE_DIR,
 	configParams: { "orion.single.user": true , "orion.single.user.metaLocation": MEATASTORE}
 };
-app.locals.metastore = require('../lib/metastore/fs/store')(options);
-app.locals.metastore.setup(app);
+app.locals.metastore = store(options);
+options.app = app;
+app.locals.metastore.setup(options);
+app.use(options.authenticate);
 app.use(PREFS_PREFIX, prefs(options));
 
 var request = supertest.bind(null, app);
