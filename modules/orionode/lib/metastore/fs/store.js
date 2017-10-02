@@ -98,7 +98,7 @@ FsMetastore.prototype.lock = function(userId, shared) {
 	});
 };
 
-FsMetastore.prototype.setup = function(app) {
+FsMetastore.prototype.setup = function(options) {
 	if (!this._isSingleUser) {
 		/* verify that existing metadata in this workspace will be usable by this server */
 		var path = nodePath.join(this._options.workspaceDir, FILENAME_METASTORE);
@@ -145,7 +145,7 @@ FsMetastore.prototype.setup = function(app) {
 	}
 
 	// Used only for single user case (Electron or local debug)
-	app.use(/* @callback */ function(req, res, next) {
+	options.authenticate = [function(req, res, next) {
 		if (this._isSingleUser) {
 			this.getUser("anonymous", function(err, user) {
 				if (err) {
@@ -171,7 +171,7 @@ FsMetastore.prototype.setup = function(app) {
 		} else {
 			next();
 		}
-	}.bind(this));
+	}.bind(this)];
 };
 
 Object.assign(FsMetastore.prototype, {

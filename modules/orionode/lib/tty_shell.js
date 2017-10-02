@@ -62,9 +62,7 @@ exports.install = function(options, io) {
 		});
 	}
 
-	var authApp = express();
-	app.locals.metastore.setup(authApp);
-	authApp.use(options.authenticate);
+	var authApp = express().use(options.authenticate);
 
 	io.of('/tty').on('connection', function(sock) {
 

@@ -158,8 +158,8 @@ function MongoDbMetastore(options) {
 		}
 	});
 }
-MongoDbMetastore.prototype.setup = function(app) {
-	app.locals.sessionStore = new MongoStore({ mongooseConnection: mongoose.connection });
+MongoDbMetastore.prototype.setup = function(options) {
+	options.sessionStore = new MongoStore({ mongooseConnection: mongoose.connection });
 	passport.use(orionAccount.createStrategy());
 	passport.serializeUser(orionAccount.serializeUser());
 	passport.deserializeUser(orionAccount.deserializeUser());

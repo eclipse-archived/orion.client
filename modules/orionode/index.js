@@ -127,17 +127,17 @@ function startServer(options) {
 			metastoreFactory = require('./lib/metastore/fs/store');
 		}
 		options.metastore = app.locals.metastore = metastoreFactory(options);
-		app.locals.metastore.setup(app);
+		app.locals.metastore.setup(options);
 		options.authenticate = [
 			expressSession({
 				resave: false,
 				saveUninitialized: false,
 				secret: 'keyboard cat',
-				store: app.locals.sessionStore // TODO by default MemoryStore is not designed for a production environment, as it will leak memory, and will not scale past a single process.
+				store: options.sessionStore // TODO by default MemoryStore is not designed for a production environment, as it will leak memory, and will not scale past a single process.
 			}),
 			passport.initialize(),
 			passport.session()
-		];
+		].concat(options.authenticate || []);
 		
 		loadEndpoints(false);
 		let CloudFoundry = require('./lib/cf').CloudFoundry;
