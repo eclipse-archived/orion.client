@@ -577,11 +577,11 @@ define([
 				} 
 				if(typeof vals.ecmaVersion === 'number') {
 					var ecma = translateEcma(vals.ecmaVersion);
-					if(vals.ecmaVersion > 4 && vals.ecmaVersion <= 9) {
-						project.map.env.envs.es6 = vals.ecmaVersion >= 6;
-						project.map.env.envs.es7 = vals.ecmaVersion >= 7;
-						project.map.env.envs.es8 = vals.ecmaVersion >= 8;
-						project.map.env.ecmaVersion = vals.ecmaVersion;
+					if(ecma > 4 && ecma <= 9) {
+						project.map.env.envs.es6 = ecma >= 6;
+						project.map.env.envs.es7 = ecma >= 7;
+						project.map.env.envs.es8 = ecma >= 8;
+						project.map.env.ecmaVersion = ecma;
 					} else {
 						project.map.env.ecmaVersion = 7;
 						project.map.env.envs.es6 = true;
