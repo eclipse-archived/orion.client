@@ -250,8 +250,9 @@ define([
 	tern.registerPlugin("resolver", /* @callback */ function resolverPluginHandler(server, options) {
 	    server.loadPlugin("modules"); //$NON-NLS-1$
 	    server.mod.modules.resolvers.push(moduleResolve);
-	    server.on("postParse", /* @callback */ function postParseHandler(ast, text){
-	    	doPostParse(server, ast, infer.cx().definitions, null);
+		server.on("postParse", /* @callback */ function postParseHandler(ast, text) {
+			var cx = infer.cx();
+			doPostParse(server, ast, cx ? cx.definitions : null, null);
 	    });
 	    server.on("preInfer", /* @callback */ function preInferHandler(ast, scope){
 	    	doPreInfer(server);
