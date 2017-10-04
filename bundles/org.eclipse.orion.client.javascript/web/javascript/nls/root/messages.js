@@ -250,7 +250,7 @@ define({
 	'noFileMeta': 'Could not compute references: failed to compute file metadata',
 	'cannotComputeRefs': 'Cannot compute references: ${0}',
 	'notAnIdentifier': 'Cannot compute references at the selected location: Location is not an identifier',
-	'notHtmlOffset': 'Not a valid offset in HTML',
+	'notHtmlOffset': 'The selection is not a valid JavaScript offset in HTML',
 	'allProjectRefs': 'Finding all project references...',
 	'allWorkspaceRefs': 'Finding all workspace references...',
 	'refsFoundIn': 'References found in file: \'${0}\' (${1}/${2})',
