@@ -11,7 +11,8 @@
 /*eslint-env node */
 var express = require('express'),
 	api = require('./api'),
-	responseTime = require('response-time');
+	responseTime = require('response-time'),
+	pjson = require('../package.json');
 
 module.exports = {};
 
@@ -25,6 +26,10 @@ module.exports.router = function(options) {
 		.use(responseTime({digits: 2, header: "X-Version-Response-Time", suffix: true}))
 		.get('*', /* @callback */ function (req, res) {
 			var buildID = configParams["orion.buildId"] || BUILD_ID;
+			if(buildID === "unknown" && pjson && typeof pjson.version === 'string') {
+				//for the NPM case we want to return the version published to NPM (from the package.json)
+				buildID = pjson.version;
+			}
 			return api.writeResponse(200, res, null, {
 				build: buildID
 			});
