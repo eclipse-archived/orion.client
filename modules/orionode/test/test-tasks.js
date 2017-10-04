@@ -11,40 +11,18 @@
  *****************************************************************************/
 /*eslint-env node, mocha, assert, express*/
 var assert = require('assert'),
-	express = require('express'),
-	supertest = require('supertest'),
-	tasks = require('../lib/tasks'),
 	path = require("path"),
 	testData = require("./support/test_data"),
 	testHelper = require("./support/testHelper"),
-	store = require('../lib/metastore/fs/store'),
 	taskHelper = require('./support/task_helper');
 
-var CONTEXT_PATH = '',
-	MEATASTORE =  path.join(__dirname, '.test_metadata'),
-	WORKSPACE = path.join(__dirname, '.test_workspace'),
-	taskIds = [],
-	configParams = {
-		"orion.single.user": true,
-		"orion.single.user.metaLocation": MEATASTORE
-	};
 
-var app = express();
-var	options = {workspaceDir: WORKSPACE, configParams: configParams};
-	app.locals.metastore = store(options);
-	options.app = app;
-	app.locals.metastore.setup(options);
-	app.use(options.authenticate);
-	app.use(CONTEXT_PATH + '/taskHelper', taskHelper.router({
-		root: '/taskHelper',
-		metastore: app.locals.metastore
-	}))
-	.use(CONTEXT_PATH + '/task', tasks.router({
-		taskRoot: CONTEXT_PATH + '/task',
-		metastore: app.locals.metastore
-	}));
-
-var request = supertest.bind(null, app);
+var CONTEXT_PATH = testHelper.CONTEXT_PATH,
+	WORKSPACE = testHelper.WORKSPACE,
+	METADATA =  testHelper.METADATA,
+	taskIds = [];
+	
+var request = testData.setupOrionServer([ CONTEXT_PATH + '/taskHelper', taskHelper.router({root: '/taskHelper', metastore: app.locals.metastore})]);
 
 describe("Tasks API", function() {
 	beforeEach(function(done) {
@@ -54,15 +32,15 @@ describe("Tasks API", function() {
 			.expect(200)
 			.end(function(err, res) {
 				testData.setUp(WORKSPACE, function(){
-					testData.setUpWorkspace(WORKSPACE, MEATASTORE, done);
+					testData.setUpWorkspace(request, done);
 				}, false);
 		});
 	});
 	afterEach("Remove Workspace and Metastore", function(done) {
 		testData.tearDown(WORKSPACE, function(){
-			testData.tearDown(path.join(MEATASTORE, '.orion'), function(){
-				testData.tearDown(MEATASTORE, done)
-			})
+			testData.tearDown(path.join(METADATA, '.orion'), function(){
+				testData.tearDown(METADATA, done);
+			});
 		});
 	});
 	/**
@@ -106,7 +84,7 @@ describe("Tasks API", function() {
 							var taskLoc2 = res.body.Location;
 									//ask for all of them
 							request()
-								.get('/task/count')
+								.get(CONTEXT_PATH + '/task/count')
 								.expect(200)
 								.end(function(err, res) {
 									testHelper.throwIfError(err);
@@ -161,7 +139,7 @@ describe("Tasks API", function() {
 
 							// mark test task as completed
 							request()
-								.post(CONTEXT_PATH + "/taskHelper/" + location.substr(5))
+								.post(CONTEXT_PATH + "/taskHelper" + location.substr(5 + CONTEXT_PATH.length))
 								.expect(200)
 								.end(function(err, res) {
 									assert.ifError(err);
@@ -198,7 +176,7 @@ describe("Tasks API", function() {
 							taskIds.push(location2);
 							// mark the first one as completed
 							request()
-								.post(CONTEXT_PATH + "/taskHelper/" + location.substr(5))
+								.post(CONTEXT_PATH + "/taskHelper" + location.substr(5 + CONTEXT_PATH.length))
 								.expect(200)
 								.end(function(err, res) {
 									assert.ifError(err);
@@ -234,13 +212,13 @@ describe("Tasks API", function() {
 							taskIds.push(location2);
 							// mark the first one as completed
 							request()
-								.post(CONTEXT_PATH + "/taskHelper/" + location.substr(5))
+								.post(CONTEXT_PATH + "/taskHelper" + location.substr(5 + CONTEXT_PATH.length))
 								.expect(200)
 								.end(function(err, res) {
 									assert.ifError(err);
 									// check that the second running task is still there after deletion
 									request()
-										.put(CONTEXT_PATH + location2)
+										.put(location2)
 										.send({"abort": true})
 										.expect(200)
 										.end(function(err, res) {

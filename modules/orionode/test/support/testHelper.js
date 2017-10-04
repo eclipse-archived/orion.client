@@ -16,7 +16,7 @@ var path = require('path'),
   * The server context path, default value is the empty string
   * @since 16.0
   */
-exports.CONTEXT_PATH = CONTEXT_PATH = '';
+exports.CONTEXT_PATH = CONTEXT_PATH = process.env.CONTEXT_PATH || '';
 /**
  * The absolute path to the test workspace. Default value is __dirname + .test_workspace
  * @since 16.0
@@ -32,6 +32,11 @@ exports.METADATA = METADATA = path.join(__dirname, '.test_metadata');
  * @since 16.0
  */
 exports.WORKSPACE_ID = WORKSPACE_ID = "anonymous-OrionContent";
+/**
+ * The user's name. Value is anonymous
+ * @since 16.0
+ */
+exports.USERNAME = USERNAME = "anonymous";
 /**
  * The path of the file endpoint, including the CONTEXT_PATH. Default value is /file
  * @since 16.0
@@ -150,32 +155,4 @@ exports.throwIfError = throwIfError = function throwIfError(cause, message) {
 	var err = new Error(message + ": " + cause.message);
 	err.cause = cause;
 	throw err;
-};
-
-/**
- * @description Default error handling for endpoints
- * @param {Express.app} app The app the attach to
- * @param {?} logger The optional logger
- * @since 16.0
- */
-exports.handleErrors = handleErrors = function handleErrors(app, logger) {
-	app.use(function(err, req, res) {
-		if(logger) {
-			logger.error(req.originalUrl, err);
-		}
-		if (res.finished) {
-			return;
-		}
-		if (err) {
-			res.status(err.status || 500);
-		} else {
-			res.status(404);
-		}
-		// respond with json
-		if (req.accepts('json')) {
-			return res.send({ error: err ? err.message : 'Not found' });
-		}
-		// default to plain-text. send()
-		res.type('txt').send(err ? err.message : 'Not found');
-	});
 };

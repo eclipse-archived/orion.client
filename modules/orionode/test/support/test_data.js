@@ -13,10 +13,11 @@ var path = require('path'),
 	fs = require('fs'),
 	rimraf = require('rimraf'),
 	express = require('express'),
-	workspace = require('../../lib/workspace'),
 	supertest = require('supertest'),
-	store = require('../../lib/metastore/fs/store'),
-	CONTEXT_PATH = '';
+	orionServer = require("../../index"),
+	checkRights = require('../../lib/accessRights').checkRights,
+	testHelper = require('./testHelper'),
+	CONTEXT_PATH = testHelper.CONTEXT_PATH;
 
 function debug(msg) {
 	if (exports.DEBUG) {
@@ -39,24 +40,7 @@ exports.tearDown = tearDown = function tearDown(dir, callback) {
  * @param {?} metastore The backing metastore
  * @param {?} params The params to use
  */
-exports.setUpWorkspace = function setUpWorkspace(wsDir, metastore, done) {
-	var app = express();
-	var options = { workspaceDir: wsDir,
-					configParams: { 
-						"orion.single.user": true, 
-						"orion.single.user.metaLocation": metastore
-					} , 
-					workspaceRoot: CONTEXT_PATH + '/workspace', 
-					fileRoot: CONTEXT_PATH + '/file', 
-					gitRoot: CONTEXT_PATH + '/gitapi'
-				 };
-	app.locals.metastore = store(options);
-	options.app = app;
-	app.locals.metastore.setup(options);
-	app.use(options.authenticate);
-	app.use(CONTEXT_PATH + '/workspace*', workspace(options));
-	var request = supertest.bind(null, app);
-	
+exports.setUpWorkspace = function setUpWorkspace(request, done) {
 	request()
 		.post(CONTEXT_PATH + '/workspace')
 		.set('Slug', 'Orion Content')
@@ -130,7 +114,7 @@ exports.setUpCF = function setUpCF(dir, callback) {
 					console.log(err.message)
 				});
 				ws.on('error', (err) => {
-					console.log("error writing to: "+err.message)
+					console.log("error writing to: "+err.message);
 				});
 				rs.pipe(ws);
 			});
@@ -152,5 +136,34 @@ exports.setUpCF = function setUpCF(dir, callback) {
 		fs.mkdirSync(cf);
 		createFiles();
 	}
-}
+};
+
+exports.setupOrionServer = function setupOrionServer(helperMiddleware){
+	app = express();
+	var orion = function(){
+		var options = {};
+		options.workspaceDir = testHelper.WORKSPACE;
+		options.configParams = { "orion.single.user": true, "orion.single.user.metaLocation": testHelper.METADATA };
+		 if (testHelper.CONTEXT_PATH) {
+		 	options.configParams["orion.context.listenPath"]=true;
+			options.configParams["orion.context.path"]=testHelper.CONTEXT_PATH;
+		 }
+		return orionServer(options);
+	};
+	var userMiddleware = function(req, res, next) {
+		req.user = {workspaceDir: testHelper.WORKSPACE, username: testHelper.USERNAME};
+		req.user.checkRights = checkRights;
+		next();
+	};
+	app.use(userMiddleware);
+	app.use(testHelper.CONTEXT_PATH ? testHelper.CONTEXT_PATH : "/", function(req, res, next){
+		req.contextPath =  testHelper.CONTEXT_PATH;
+		next();
+	}, orion());
+	if (helperMiddleware) {
+		app.use(helperMiddleware[0], helperMiddleware[1]);
+	}
+	var request = supertest.bind(null, app);
+	return request;
+};
 exports.DEBUG = process.env.DEBUG_TESTS || false;

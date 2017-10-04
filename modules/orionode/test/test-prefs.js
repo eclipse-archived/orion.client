@@ -12,39 +12,25 @@
 /*eslint-disable no-undef-expression */
 var chai = require('chai'),
     assert = require('assert'),
-    express = require('express'),
     nodePath = require('path'),
-    prefs = require('../lib/prefs').router,
     Promise = require('bluebird'),
-	supertest = require('supertest'),
-	store = require('../lib/metastore/fs/store'),
+    testHelper = require('./support/testHelper'),
     testData = require('./support/test_data');
 
 var expect = chai.expect,
-    fs = Promise.promisifyAll(require('fs')),
-    mkdirpAsync = Promise.promisify(require('mkdirp'));
+    fs = Promise.promisifyAll(require('fs'));
 
-var CONTEXT_PATH = '',
+
+var CONTEXT_PATH = testHelper.CONTEXT_PATH,
+	WORKSPACE = testHelper.WORKSPACE,
+	METADATA =  testHelper.METADATA,
 	PREFS_PREFIX = CONTEXT_PATH + '/prefs',
-	USERID = "anonymous",
-	WORKSPACE_DIR = nodePath.join(__dirname, '.test_workspace'),
-	MEATASTORE =  nodePath.join(__dirname, '.test_metadata');
+	USERID = "anonymous";
 
-var app = express();
-var options = {
-	workspaceDir: WORKSPACE_DIR,
-	configParams: { "orion.single.user": true , "orion.single.user.metaLocation": MEATASTORE}
-};
-app.locals.metastore = store(options);
-options.app = app;
-app.locals.metastore.setup(options);
-app.use(options.authenticate);
-app.use(PREFS_PREFIX, prefs(options));
-
-var request = supertest.bind(null, app);
+var request = testData.setupOrionServer();
 
 function setupPrefs(done) {
-	var path = nodePath.join(MEATASTORE, '.orion', 'user.json');
+	var path = nodePath.join(METADATA, '.orion', 'user.json');
 	fs.readFileAsync(path,'utf8')
 	.then(function(userMetadata){
 		userMetadata = JSON.parse(userMetadata);
@@ -57,14 +43,14 @@ function setupPrefs(done) {
 
 describe('Orion preferences tests', function() {
 	before("Set up the workspace", function(done) {
-		testData.setUp(WORKSPACE_DIR, function(){
-			testData.setUpWorkspace(WORKSPACE_DIR, MEATASTORE, done);
+		testData.setUp(WORKSPACE, function(){
+			testData.setUpWorkspace(request, done);
 		});
 	});
 	after("Remove Workspace and Metastore", function(done) {
-		testData.tearDown(WORKSPACE_DIR, function(){
-			testData.tearDown(nodePath.join(MEATASTORE, '.orion'), function(){
-				testData.tearDown(MEATASTORE, done)
+		testData.tearDown(WORKSPACE, function(){
+			testData.tearDown(nodePath.join(METADATA, '.orion'), function(){
+				testData.tearDown(METADATA, done)
 			})
 		});
 	});
@@ -283,8 +269,8 @@ describe('Orion preferences tests', function() {
 	});
 	describe('when NO user.json exists', function() {
 		before("remove user.json for the following test case", function(done){
-			testData.tearDown(nodePath.join(MEATASTORE, '.orion'), function(){
-				testData.tearDown(MEATASTORE, done)
+			testData.tearDown(nodePath.join(METADATA, '.orion'), function(){
+				testData.tearDown(METADATA, done)
 			});
 		});
 		describe('and we GET a nonexistent single key', function() {

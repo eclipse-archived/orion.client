@@ -10,22 +10,16 @@
  *******************************************************************************/
 /*eslint-env mocha */
 var assert = require("assert"),
-	express = require("express"),
-	supertest = require("supertest"),
 	path = require("path"),
-	testdata = require("./support/test_data"),
-	middleware = require("../index.js");
+	middleware = require("../index.js"),
+	testData = require('./support/test_data'),
+	testHelper = require('./support/testHelper');
 
-var WORKSPACE = path.join(__dirname, ".test_workspace");
-var MEATASTORE =  path.join(__dirname, '.test_metadata');
 
-var orion = function(options) {
-	// Ensure tests run in 'single user' mode
-	var opts = options || {};
-	opts.workspaceDir = WORKSPACE;
-	opts.configParams = { "orion.single.user": true, "orion.single.user.metaLocation": MEATASTORE};
-	return middleware(opts);
-};
+var WORKSPACE = testHelper.WORKSPACE;
+var MEATADATA =  testHelper.MEATADATA;
+
+var request = testData.setupOrionServer();
 
 describe("Orion performance", function() {
 	// before(function() {

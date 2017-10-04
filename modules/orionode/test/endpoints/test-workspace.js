@@ -10,42 +10,19 @@
  *******************************************************************************/
 /*eslint-env mocha */
 var assert = require('assert'),
-	express = require('express'),
 	path = require('path'),
-	supertest = require('supertest'),
 	testData = require('../support/test_data'),
-	store = require('../../lib/metastore/fs/store'),
-	testHelper = require('../support/testHelper'),
-	workspace = require('../../lib/workspace'),
-	file = require('../../lib/file');
+	testHelper = require('../support/testHelper');
 
-var CONTEXT_PATH = '',
-	PREFIX = CONTEXT_PATH + '/workspace', 
-	PREFIX_FILE = CONTEXT_PATH + '/file',
-	WORKSPACE_ID = 'anonymous-OrionContent',
+var CONTEXT_PATH = testHelper.CONTEXT_PATH,
+	WORKSPACE = testHelper.WORKSPACE,
+	METADATA =  testHelper.METADATA,
+	WORKSPACE_ID = testHelper.WORKSPACE_ID,
 	TEST_WORKSPACE_NAME = '.test_workspace',
-	WORKSPACE = path.join(__dirname, TEST_WORKSPACE_NAME),
-	MEATASTORE =  path.join(__dirname, '.test_metadata');
+	PREFIX_FILE = CONTEXT_PATH + '/file',
+	PREFIX = CONTEXT_PATH + '/workspace';
 
-var options = {
-	workspaceRoot: CONTEXT_PATH + '/workspace', 
-	fileRoot: CONTEXT_PATH + '/file', 
-	gitRoot: CONTEXT_PATH + '/gitapi',
-	configParams: {
-		"orion.single.user": true,
-		"orion.single.user.metaLocation": MEATASTORE
-	},
-	workspaceDir: WORKSPACE
-};
-var app = express();
-	app.locals.metastore = store(options);
-	options.app = app;
-	app.locals.metastore.setup(options);
-	app.use(options.authenticate);
-	app.use(PREFIX, workspace(options));
-	app.use(PREFIX_FILE, file(options));
-
-var request = supertest.bind(null, app);
+var request = testData.setupOrionServer();
 
 function byName(a, b) {
 	return String.prototype.localeCompare.call(a.Name, b.Name);
@@ -64,13 +41,13 @@ function withDefaultWorkspace(callback) {
 describe("Workspace endpoint", function() {
 	beforeEach(function(done) { // testData.setUp.bind(null, parentDir)
 		testData.setUp(WORKSPACE, function(){
-			testData.setUpWorkspace(WORKSPACE, MEATASTORE, done);
+			testData.setUpWorkspace(request, done);
 		}, false);
 	});
 	afterEach("Remove .test_workspace", function(done) {
 		testData.tearDown(WORKSPACE, function(){
-			testData.tearDown(path.join(MEATASTORE, '.orion'), function(){
-				testData.tearDown(MEATASTORE, done);
+			testData.tearDown(path.join(METADATA, '.orion'), function(){
+				testData.tearDown(METADATA, done);
 			})
 		});
 	});
@@ -346,7 +323,7 @@ describe("Workspace endpoint", function() {
 			request()
 				.post(ws.Location)
 				.set('Slug', 'testCrseateProjectNonDefaultLocation')
-				.send({"ContentLocation": MEATASTORE})
+				.send({"ContentLocation": METADATA})
 				.expect(403)
 				.end(done);
 		});

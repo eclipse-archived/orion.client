@@ -11,43 +11,22 @@
  *******************************************************************************/
 /*eslint-env mocha */
 var assert = require("assert"),
-	express = require("express"),
-	supertest = require("supertest"),
 	path = require("path"),
 	fs = require('fs'),
-	metastore = require('../../lib/metastore/fs/store'),
-	file = require('../../lib/file'),
-	xfer = require("../../lib/xfer.js"),
 	testData = require('../support/test_data'),
-	testHelper = require('../support/testHelper'),
-	checkRights = require('../../lib/accessRights').checkRights;
-
-var CONTEXT_PATH = '',
-	WORKSPACE = path.join(__dirname, '.test_workspace'),
-	MEATASTORE =  path.join(__dirname, '.test_metadata'),
-	WORKSPACE_ID = "anonymous-OrionContent",
-	configParams = { "orion.single.user": true, "orion.single.user.metaLocation": MEATASTORE},
-	XFER_PATH = CONTEXT_PATH + '/xfer',
+	testHelper = require('../support/testHelper');
+	
+	
+var CONTEXT_PATH = testHelper.CONTEXT_PATH,
+	WORKSPACE = testHelper.WORKSPACE,
+	METADATA =  testHelper.METADATA,
+	WORKSPACE_ID = testHelper.WORKSPACE_ID,
 	IMPORT_PATH = CONTEXT_PATH + '/xfer/import',
 	EXPORT_PATH = CONTEXT_PATH + '/xfer/export',
 	FILE_PATH = CONTEXT_PATH + '/file',
 	PREFIX = FILE_PATH + '/' + WORKSPACE_ID;
 
-var userMiddleware = function(req, res, next) {
-	req.user.checkRights = checkRights;
-	next();
-};
-var app = express();
-var options = {workspaceDir: WORKSPACE, configParams:configParams};
-app.locals.metastore = metastore(options);
-options.app = app;
-app.locals.metastore.setup(options);
-app.use(options.authenticate);
-app.use(userMiddleware)
-app.use(XFER_PATH, xfer.router({ fileRoot: FILE_PATH, configParams: { "orion.single.user": true, "orion.single.user.metaLocation": MEATASTORE} }));
-app.use(FILE_PATH + '*', file({fileRoot: FILE_PATH, workspaceRoot: CONTEXT_PATH + '/workspace'}));
-
-var request = supertest.bind(null, app);
+var request = testData.setupOrionServer();
 
 describe("XFER endpoint", function() {
 	/**
@@ -56,13 +35,13 @@ describe("XFER endpoint", function() {
 	this.timeout(20000);
 	beforeEach(function(done) { // testData.setUp.bind(null, parentDir)
 		testData.setUp(WORKSPACE, function(){
-			testData.setUpWorkspace(WORKSPACE, MEATASTORE, done);
+			testData.setUpWorkspace(request, done);
 		});
 	});
 	afterEach("Remove .test_workspace", function(done) {
 		testData.tearDown(testHelper.WORKSPACE, function(){
-			testData.tearDown(path.join(MEATASTORE, '.orion'), function(){
-				testData.tearDown(MEATASTORE, done)
+			testData.tearDown(path.join(METADATA, '.orion'), function(){
+				testData.tearDown(METADATA, done);
 			})
 		});
 	});
