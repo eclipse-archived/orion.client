@@ -151,7 +151,7 @@ exports.setupOrionServer = function setupOrionServer(helperMiddleware){
 		return orionServer(options);
 	};
 	var userMiddleware = function(req, res, next) {
-		req.user = {workspaceDir: testHelper.WORKSPACE};
+		req.user = {workspaceDir: testHelper.WORKSPACE, username: testHelper.USERNAME};
 		req.user.checkRights = checkRights;
 		next();
 	};

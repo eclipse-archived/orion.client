@@ -33,6 +33,11 @@ exports.METADATA = METADATA = path.join(__dirname, '.test_metadata');
  */
 exports.WORKSPACE_ID = WORKSPACE_ID = "anonymous-OrionContent";
 /**
+ * The user's name. Value is anonymous
+ * @since 16.0
+ */
+exports.USERNAME = USERNAME = "anonymous";
+/**
  * The path of the file endpoint, including the CONTEXT_PATH. Default value is /file
  * @since 16.0
  */
