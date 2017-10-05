@@ -17,8 +17,8 @@ module.exports = function(grunt) {
 	    skipMinify = grunt.option("skipMinify") || false;
 	   
 	var socketioPath =  grunt.file.exists('./node_modules/socket.io/node_modules/socket.io-client') ?
-			'../../node_modules/socket.io/node_modules/socket.io-client/socket.io' :
-			'../../node_modules/socket.io-client/socket.io';
+			'../../node_modules/socket.io/node_modules/socket.io-client/dist/socket.io' :
+			'../../node_modules/socket.io-client/dist/socket.io';
 	    
 	var orionBuildConfig = util.loadBuildConfig(configPath),
 	    bundles = util.parseBundles(orionBuildConfig, {
