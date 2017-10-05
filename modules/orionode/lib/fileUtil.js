@@ -19,6 +19,8 @@ var ETag = require('./util/etag'),
 	log4js = require('log4js'),
 	logger = log4js.getLogger("file"),
 	fs = Promise.promisifyAll(require('fs'));
+	
+var ISFS_CASE_INSENSITIVE;
 
 /**
  * Copy of a file/folder to a new location.
@@ -459,12 +461,15 @@ exports.handleFilePOST = function(workspaceRoot, fileRoot, req, res, destFile, m
 		}
 		if (xCreateOptions.indexOf('no-overwrite') !== -1 && destExists) {
 			function isFSCaseInsensitive(){
-				var lowerCaseStat = fs.statSync(destFile.path.toLowerCase());
-				var upperCaseStat = fs.statSync(destFile.path.toUpperCase());
-				if(lowerCaseStat && upperCaseStat) {
-					return lowerCaseStat.dev === upperCaseStat.dev && lowerCaseStat.ino === upperCaseStat.ino;
+				if(typeof ISFS_CASE_SENSITIVE === 'undefined'){
+					var lowerCaseStat = fs.statSync(destFile.path.toLowerCase());
+					var upperCaseStat = fs.statSync(destFile.path.toUpperCase());
+					if(lowerCaseStat && upperCaseStat) {
+						ISFS_CASE_INSENSITIVE = lowerCaseStat.dev === upperCaseStat.dev && lowerCaseStat.ino === upperCaseStat.ino;
+					}
+					ISFS_CASE_INSENSITIVE = false;
 				}
-				return false;
+				return ISFS_CASE_INSENSITIVE;
 			}
 			function isRename(){
 				return path.dirname(getFile(req, req.body.Location.replace(new RegExp("^"+fileRoot), "")).path) === path.dirname(destFile.path)
