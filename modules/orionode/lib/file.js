@@ -50,8 +50,8 @@ module.exports = function(options) {
 
 	function writeFileContents(res, filepath, stats, etag) {
 		if (stats.isDirectory()) {
-			//shouldn't happen
-			writeError(500, res, "Expected a file not a directory");
+			//can't set contents on a directory
+			writeError(400, res, "Cannot set file contents on a directory: "+filePath);
 		} else {
 			var stream = fs.createReadStream(filepath);
 			res.setHeader('Content-Length', stats.size);
@@ -249,12 +249,14 @@ module.exports = function(options) {
 				}
 			});
 		}
-		var ifMatchHeader = req.headers['if-match'];
-		if (!ifMatchHeader) {
-			return write();
-		}
-		fileUtil.withETag(file.path, function(error, etag) {
-			if (ifMatchHeader && ifMatchHeader !== etag) {
+		return fileUtil.withStatsAndETag(file.path, function(error, stats, etag) {
+			if(stats && stats.isDirectory()) {
+				return api.writeError(400, res, "Cannot write contents to a folder: "+file.path);
+			}
+			var ifMatchHeader = req.headers['if-match'];
+			if (!ifMatchHeader) {
+				return write();
+			} else if (ifMatchHeader !== etag) {
 				return api.writeResponse(412, res);
 			} else if (error && error.code === 'ENOENT') {
 				return api.writeResponse(404, res);
