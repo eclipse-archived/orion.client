@@ -8,16 +8,16 @@
   "license": "Eclipse Public License + Eclipse Distribution License",
   "repository": {
     "type": "git",
-    "url": ""
+    "url": "https://github.com/eclipse/orion.client/tree/master/modules/orionode.debug.server"
   },
   "dependencies": {
     "express": "^4.13.3",
-    "socket.io": "^1.4.8",
-    "vscode-debugadapter": "^1.15.0"
+    "socket.io": "^2.0.3",
+    "vscode-debugadapter": "^1.21.0"
   },
   "devDependencies": {},
   "engines": {
-    "node": "^4.0.0"
+    "node": "^6.11.1"
   },
   "scripts": {
     "start": "node server.js",
