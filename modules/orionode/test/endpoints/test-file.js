@@ -16,6 +16,7 @@ var assert = require('assert'),
 	fs = require('fs'),
 	testData = require('../support/test_data'),
 	testHelper = require('../support/testHelper'),
+	file = require('../../lib/file'),
 	fileUtil = require('../../lib/fileUtil');
 	
 var CONTEXT_PATH = testHelper.CONTEXT_PATH,
@@ -62,10 +63,67 @@ describe('File endpoint', function() {
 		});
 	});
 	/**
+	 * This group of tests simply try to pass all kinds of bad data and intentionally mis-use
+	 * the endpoint
+	 * @since 17.0
+	 */
+	describe('Bad usage', function() {
+		it("instantiate without fileRoot", function() {
+			try {
+				file({})
+			} catch(err) {
+				assert('options.fileRoot is required', err.message, 'The error message for leaving out fileRoot is wrong');
+			}
+		});
+		it("instantiate without workspaceRoot", function() {
+			try {
+				file({fileRoot: 'myroot'});
+			} catch(err) {
+				assert('options.workspaceRoot is required', err.message, 'The error message for leaving out workspaceRoot is wrong');
+			}
+		});
+		it('write file contents to directory', function(done) {
+			request()
+				.post(PREFIX + '/project')
+				.type('json')
+				.send({Name: 'testDir', Directory: true})
+				.expect(201)
+				.end(function(err, res) {
+					testHelper.throwIfError(err);
+					request()
+						.put(res.body.Location)
+						.send('directory contents')
+						.expect(400, done);
+				})
+		});
+		it("testPostFileNoName", function(done) {
+			request()
+				.post(path.join(PREFIX, '/project'))
+				.type('json')
+				.send({})
+				.expect(400, done);
+		});
+	})
+	/**
 	 * http://wiki.eclipse.org/Orion/Server_API/File_API#Actions_on_files
 	 */
 	describe('Actions on files', function() {
 		describe('contents', function() {
+			it("testGetProject", function(done) {
+				testHelper.createFile(request, '/project', '/fooFile.txt')
+				.then(function(res) {
+					request()
+						.get(PREFIX + '/project/fooFile.txt')
+						.expect(200)
+						.end(function(err, res) {
+							testHelper.throwIfError(err);
+							request()
+								.get(PREFIX)
+								.query({project: true, names: 'package.json%2C.tern-project'})
+								.expect(204, done)
+						});	
+				});
+			});
 			it("testGenericFileHandler", function(done) {
 				testHelper.createFile(request, '/project', '/genericFileHandler.txt', 'Tests the generic file handler')
 					.then(function(res) {
@@ -86,6 +144,18 @@ describe('File endpoint', function() {
 				request()
 					.get(PREFIX + '/workspace.json')
 					.expect(200, done);
+			});
+			it("testGetFile - readIfExists header", function(done) {
+				request()
+					.get(path.join(PREFIX, '/project', 'doesNotExist.txt'))
+					.set('read-if-exists', true)
+					.expect(204, done);
+			});
+			it("testGetFile - readIfExists query param", function(done) {
+				request()
+					.get(path.join(PREFIX, '/project', 'doesNotExist.txt'))
+					.query({readIfExists: true})
+					.expect(404, done);
 			});
 			it("testGzippedResponseCharset", function(done) {
 				var fileName = '\u4f60\u597d\u4e16\u754c.txt';
@@ -168,6 +238,20 @@ describe('File endpoint', function() {
 								});
 							});
 					})
+			});
+			it("testFileWriteBOM", function(done) {
+				request()
+					.post(PREFIX + '/project')
+					.type('json')
+					.send({"Name": "testBomFEFF.txt"})
+					.expect(201)
+					.end(function(err, res) {
+						testHelper.throwIfError(err);
+						request()
+							.put(res.body.Location)
+							.send(String.fromCharCode(0xFEFF) + 'content with BOM of 0xFEFF')
+							.expect(200, done);
+					});
 			});
 			it("testWriteFileFromURL", function(done) {
 				request()
