@@ -460,21 +460,21 @@ exports.handleFilePOST = function(workspaceRoot, fileRoot, req, res, destFile, m
 			return api.writeResponse(400, res, null, 'Illegal combination of X-Create-Options.', true);
 		}
 		if (xCreateOptions.indexOf('no-overwrite') !== -1 && destExists) {
-			function isFSCaseInsensitive(){
+			function isFSCaseInsensitive() {
 				if(typeof ISFS_CASE_SENSITIVE === 'undefined'){
 					var lowerCaseStat = fs.statSync(destFile.path.toLowerCase());
 					var upperCaseStat = fs.statSync(destFile.path.toUpperCase());
 					if(lowerCaseStat && upperCaseStat) {
-						ISFS_CASE_INSENSITIVE = lowerCaseStat.dev === upperCaseStat.dev && lowerCaseStat.ino === upperCaseStat.ino;
+						return ISFS_CASE_INSENSITIVE = lowerCaseStat.dev === upperCaseStat.dev && lowerCaseStat.ino === upperCaseStat.ino;
 					}
-					ISFS_CASE_INSENSITIVE = false;
+					return ISFS_CASE_INSENSITIVE = false;
 				}
-				return ISFS_CASE_INSENSITIVE;
 			}
-			function isRename(){
-				return path.dirname(getFile(req, req.body.Location.replace(new RegExp("^"+fileRoot), "")).path) === path.dirname(destFile.path)
+			function istheSameFile() {
+				var originalFile = getFile(req, req.body.Location.replace(new RegExp("^"+fileRoot), ""));
+				return path.dirname(originalFile.path).toLowerCase() === path.dirname(destFile.path).toLowerCase() && destFile.path.toLowerCase() === originalFile.path.toLowerCase()
 			}
-			if(!isMove || !isRename() ||!isFSCaseInsensitive()){
+			if(!isMove || !istheSameFile() || !isFSCaseInsensitive()){
 				return api.writeError(412, res, new Error('A file or folder with the same name already exists at this location.'));
 			}
 		}
