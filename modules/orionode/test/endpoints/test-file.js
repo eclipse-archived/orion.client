@@ -1340,7 +1340,7 @@ describe('File endpoint', function() {
 					request()
 					.post(PREFIX + '/project/')
 					.set('Slug', fileNameUpperCase)
-					.set('X-Create-Options', 'move')
+					.set('X-Create-Options', 'move,no-overwrite')
 					.send({ Location: PREFIX + '/project/' + fileNameLowerCase})
 					.expect(200)
 					.end(function(err, res) {
