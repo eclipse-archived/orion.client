@@ -137,10 +137,10 @@ define([
     			        if(cu.validOffset(offset)) {
     			        	that._findRefs(editorContext, options, metadata, deferred);
     			        } else {
-    			        	deferred.resolve(Messages['notHtmlOffset']);
+    			        	deferred.reject({Severity: 'Warning', Message: Messages['notHtmlOffset']});
     			        }
 			        }, /* @callback */ function(err) {
-			        	deferred.resolve(Messages['noFileContents']);
+			        	deferred.reject(Messages['noFileContents']);
 			        });
 			    }
 			}, /* @callback */ function(err) {
