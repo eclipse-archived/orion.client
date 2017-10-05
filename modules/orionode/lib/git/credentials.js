@@ -14,11 +14,6 @@ var url = require('url');
 
 module.exports = {};
 
-var BITBUCKET = "bitbucket.org";
-var GITLAB = "gitlab.com";
-var OAUTH2 = "oauth2";
-var XTOKENAUTH = "x-token-auth";
-
 var tokenProviders = [];
 
 module.exports.addTokenProvider = function(value) {
@@ -52,15 +47,7 @@ module.exports.getCredentials = function(uri, user) {
 				function(result) {
 					if (++doneCount <= tokenProviders.length) {
 						doneCount = tokenProviders.length;
-						var username = result; /* typical case */
-						var host = url.parse(uri).host.toLowerCase();
-						if (host === GITLAB) {
-							username = OAUTH2;
-						} else if (host === BITBUCKET) {
-							username = XTOKENAUTH;
-						}
-
-						fulfill(git.Cred.userpassPlaintextNew(username, result));
+						fulfill(git.Cred.userpassPlaintextNew(result.username, result.password));
 					}
 				},
 				function(error) {
