@@ -137,7 +137,8 @@ define([
 	 */
 	function WrappedWorker(script, onMessage, onError) {
 		var wUrl = new URL(script, window.location.href);
-		wUrl.query.set("worker-language", navigator.language); //$NON-NLS-1$
+		wUrl.query.set("worker-language",  ((navigator.languages && navigator.languages[0]) ||
+			navigator.language || navigator.userLanguage || 'root').toLowerCase()); //$NON-NLS-1$
 		this.worker = new Worker(wUrl.href);
 		this.worker.onmessage = onMessage.bind(this);
 		this.worker.onerror = onError.bind(this);
