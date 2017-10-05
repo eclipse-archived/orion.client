@@ -30,16 +30,6 @@ function byName(a, b) {
 	return String.prototype.localeCompare.call(a.Name, b.Name);
 }
 
-// Like `assert.ifError` but allows the message to be overridden
-function throwIfError(cause, message) {
-	if (!cause || !cause instanceof Error && Object.prototype.toString.call(cause) !== '[object Error]' && cause !== 'error') {
-		return;
-	}
-	var err = new Error(message + ": " + cause.message);
-	err.cause = cause;
-	throw err;
-}
-
 // Writeable stream that buffers everything sent to it
 function BufStream() {
 	this.bufs = [];
@@ -87,7 +77,7 @@ describe('File endpoint', function() {
 			/**
 			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=521132
 			 */
-			it.skip("get file/ root", function(done) {
+			it("get file/ root", function(done) {
 				request()
 					.get(CONTEXT_PATH + '/file/')
 					.expect(403, done);
@@ -106,7 +96,7 @@ describe('File endpoint', function() {
 							.set('Charset', 'UTF-8')
 							.set('Content-Type', 'text/plain')
 							.end(function(err, res) {
-								throwIfError(err);
+								testHelper.throwIfError(err);
 								assert(res.headers, "There are no headers in the response");
 								//assert(res.headers['content-encoding'], "Encoding header not set");
 								//assert.equal(res.headers['content-encoding'], 'UTF-8', 'The header content encoding does not match the expected encoding of UTF-8');
@@ -129,7 +119,7 @@ describe('File endpoint', function() {
 				request()
 				.get(PREFIX + '/project/fizz.txt')
 				.end(function(err, res) {
-					throwIfError(err);
+					testHelper.throwIfError(err);
 					assert.notEqual(res.headers.etag, null);
 					done();
 				});
@@ -151,7 +141,7 @@ describe('File endpoint', function() {
 							.send('Listen for me listener!')
 							.end(function(err, res) {
 								fileUtil.removeFileModificationListener();
-								throwIfError(err);
+								testHelper.throwIfError(err);
 							});
 					})
 			});
@@ -165,7 +155,7 @@ describe('File endpoint', function() {
 							.send(bytes)
 							.expect(200)
 							.end(function(err, res) {
-								throwIfError(err)
+								testHelper.throwIfError(err)
 								var bs = new BufStream();
 								var r = request()
 									.get(PREFIX + '/project/badutf8.binary')
@@ -186,19 +176,19 @@ describe('File endpoint', function() {
 					.send({"Name": "testWriteFileFromURL.txt"})
 					.expect(201)
 					.end(function(err, res) {
-						throwIfError(err);
+						testHelper.throwIfError(err);
 						request()
 							.put(PREFIX + '/project/testWriteFileFromURL.txt?source=http://eclipse.org/eclipse/project-info/home-page-one-liner.html')
 							.type('text')
 							.expect(200)
 							.end(function(err, res) {
-								throwIfError(err);
+								testHelper.throwIfError(err);
 								request()
 									.get(PREFIX + '/project/testWriteFileFromURL.txt')
 									.type('text')
 									.expect(200)
 									.end(function(err, res) {
-										throwIfError(err);
+										testHelper.throwIfError(err);
 										assert.equal(res.text, '<a href=\"/eclipse/\">Eclipse Project</a>', "The content of the created file does not match");
 										done();
 									});
@@ -212,19 +202,19 @@ describe('File endpoint', function() {
 					.send({"Name": "testWriteGif.gif"})
 					.expect(201)
 					.end(function(err, res) {
-						throwIfError(err);
+						testHelper.throwIfError(err);
 						request()
 							.put(PREFIX + '/project/testWriteGif.gif?source=http://eclipse.org/eclipse/development/images/Adarrow.gif')
 							.set("content-type", 'image/gif')
 							.expect(200)
 							.end(function(err, res) {
-								throwIfError(err);
+								testHelper.throwIfError(err);
 								request()
 									.get(PREFIX + '/project/testWriteGif.gif')
 									.set("content-type", 'image/gif')
 									.expect(200)
 									.end(function(err, res) {
-										throwIfError(err);
+										testHelper.throwIfError(err);
 										assert.equal(res.headers['content-length'], 857, "The content length is not the same");
 										done();
 									});
@@ -238,7 +228,7 @@ describe('File endpoint', function() {
 					.send(newContents)
 					.expect(200)
 					.end(function(err, res) {
-						throwIfError(err);
+						testHelper.throwIfError(err);
 						var body = res.body;
 						assert.equal(body.Directory, false);
 						assert.ok(body.ETag, 'has an ETag');
@@ -255,7 +245,7 @@ describe('File endpoint', function() {
 					.send(newContents)
 					.expect(200)
 					.end(function(err, res) {
-						throwIfError(err, "Failed to PUT");
+						testHelper.throwIfError(err, "Failed to PUT");
 						var body = res.body;
 						assert.ok(body.ETag, 'has an ETag');
 						assert.equal(body.Location, PREFIX + '/project/fizz.raw');
@@ -281,7 +271,7 @@ describe('File endpoint', function() {
 					.get(url)
 					.query({ parts: 'meta' })
 					.end(function(err, res) {
-						throwIfError(err);
+						testHelper.throwIfError(err);
 						var etag = res.body.ETag;
 						assert.notEqual(res.body.ETag, null);
 						request()
@@ -289,7 +279,7 @@ describe('File endpoint', function() {
 						.set('If-Match', etag + '_blort')
 						.expect(412)
 						.end(/* @callback */ function(err, res) {
-							throwIfError(err, "Failed to PUT " + url);
+							testHelper.throwIfError(err, "Failed to PUT " + url);
 							request(url)
 							.put(url)
 							.set('If-Match', etag)
@@ -311,7 +301,7 @@ describe('File endpoint', function() {
 							.send({ diff: [{ start: 0, end: 0, text: "Hi!" }] })
 							.expect(200)
 							.end(/* @callback */ function(err, res) {
-								throwIfError(err);
+								testHelper.throwIfError(err);
 								request()
 									.get(url)
 									.expect(200, 'Hi!', done);
@@ -340,7 +330,7 @@ describe('File endpoint', function() {
 					.send({ diff: [{ start: 0, end: 1, text: "j" }] })
 					.expect(200)
 					.end(/* @callback */ function(err, res) {
-						throwIfError(err);
+						testHelper.throwIfError(err);
 						request().get(url).expect(200, 'jello world', done);
 					});
 			});
@@ -353,7 +343,7 @@ describe('File endpoint', function() {
 				.send({ diff: [{ start: 0, end: 1, text: "j" }] })
 				.expect(200)
 				.end(/* @callback */ function(err, res) {
-					throwIfError(err);
+					testHelper.throwIfError(err);
 					request().get(url).expect(200, 'jello world', done);
 				});
 			});
@@ -366,7 +356,7 @@ describe('File endpoint', function() {
 				.send(JSON.stringify({}))
 				.expect(200)
 				.end(/* @callback */ function(err, res) {
-					throwIfError(err);
+					testHelper.throwIfError(err);
 					done();
 				});
 			});
@@ -386,14 +376,14 @@ describe('File endpoint', function() {
 				}))
 				.expect(200)
 				.end(function(err, res) {
-					throwIfError(err);
+					testHelper.throwIfError(err);
 					var etag = res.headers.etag;
 					request()
 					.get(url)
 					.query({ parts: 'meta' })
 					.expect(200)
 					.end(function(err, res) {
-						throwIfError(err);
+						testHelper.throwIfError(err);
 						assert.equal(etag, res.headers.etag, "Expect same ETag we got from the POST");
 						done();
 					});
@@ -410,7 +400,7 @@ describe('File endpoint', function() {
 							.query({parts: 'meta'})
 							.expect(200)
 							.end(function(err, res) {
-								throwIfError(err);
+								testHelper.throwIfError(err);
 								var etag = res.headers.etag;
 								assert(etag, "There should be an etag");
 								//change the file on disk
@@ -437,7 +427,7 @@ describe('File endpoint', function() {
 							.query({parts: 'meta'})
 							.expect(200)
 							.end(function(err, res) {
-								throwIfError(err);
+								testHelper.throwIfError(err);
 								request()
 									.put(url)
 									.query({parts: 'meta'})
@@ -445,13 +435,13 @@ describe('File endpoint', function() {
 									.send({Attributes: {ReadOnly: true, Executable: true}})
 									.expect(204)
 									.end(function(err, res) {
-										throwIfError(err);
+										testHelper.throwIfError(err);
 										request()
 											.get(url)
 											.query({parts: 'meta'})
 											.expect(200)
 											.end(function(err, res) {
-												throwIfError(err)
+												testHelper.throwIfError(err)
 												assert(res.text, "There should be text returned");
 												try {
 													var v = JSON.parse(res.text);
@@ -476,7 +466,7 @@ describe('File endpoint', function() {
 						.query({parts: 'meta'})
 						.expect(200)
 						.end(function(err, res) {
-							throwIfError(err);
+							testHelper.throwIfError(err);
 							var etag = res.headers.etag;
 							assert(etag, "There should be an etag");
 							//delete the file
@@ -504,7 +494,7 @@ describe('File endpoint', function() {
 							.query({parts: 'meta'})
 							.expect(200)
 							.end(function(err, res) {
-								throwIfError(err);
+								testHelper.throwIfError(err);
 								var etag1 = res.headers.etag;
 								assert(etag1, "There should have been an etag header entry");
 								assert.equal(etag1, res.body.ETag, "The body and header etags do not match");
@@ -516,7 +506,7 @@ describe('File endpoint', function() {
 									.send("new contents for you")
 									.expect(200)
 									.end(function(err, res) {
-										throwIfError(err);
+										testHelper.throwIfError(err);
 										var etag2 = res.headers.etag;
 										assert(etag2, "There should have been an etag header entry");
 										assert.equal(etag2, res.body.ETag, "The body and header etags do not match");
@@ -546,7 +536,7 @@ describe('File endpoint', function() {
 							.expect(204)
 							.end(function(err, res) {
 								fileUtil.removeFileModificationListener();
-								throwIfError(err);
+								testHelper.throwIfError(err);
 							})
 					})
 			});
@@ -556,7 +546,7 @@ describe('File endpoint', function() {
 				.query({ parts: 'meta' })
 				.expect(200)
 				.end(function(err, res) {
-					throwIfError(err);
+					testHelper.throwIfError(err);
 					var body = res.body;
 					assert.deepEqual(body.Attributes, {ReadOnly: false, Executable: false});
 					assert.equal(body.Directory, false);
@@ -578,7 +568,7 @@ describe('File endpoint', function() {
 				.get(PREFIX + '/project/fizz.txt')
 				.query({ parts: 'meta' })
 				.end(function(err, res) {
-					throwIfError(err);
+					testHelper.throwIfError(err);
 					assert.notEqual(res.headers.etag, null);
 					done();
 				});
@@ -589,7 +579,7 @@ describe('File endpoint', function() {
 				.query({ parts: 'meta' })
 				.expect(200)
 				.end(function(err, res) {
-					throwIfError(err);
+					testHelper.throwIfError(err);
 					assert.ok(res.body.Parents);
 					assert.equal(res.body.Parents.length, 3);
 					assert.equal(res.body.Parents[0].ChildrenLocation, PREFIX + '/project/my folder/my subfolder/?depth=1');
@@ -655,7 +645,7 @@ describe('File endpoint', function() {
 							.set('Slug', 'testCreateFileOverwrite.txt')
 							.expect(200)
 							.end(function(err, res) {
-								throwIfError(err);
+								testHelper.throwIfError(err);
 								request()
 									.post(PREFIX + '/project')
 									.set('X-Create-Options', 'no-overwrite')
@@ -665,14 +655,27 @@ describe('File endpoint', function() {
 							});
 					});
 			});
-			it("testCreateTopLevelFile");
+			it("testCreateTopLevelFile", function(done) {
+				request()
+				.post(PREFIX)
+				.type('json')
+				.set('Slug', 'topLevelFile.txt')
+				.send({Name: 'topLevelFile.txt', Directory: false})
+				.expect(201)
+				.end(function(err, res) {
+					testHelper.throwIfError(err);
+					assert.equal(res.body.Name, 'topLevelFile.txt');
+					assert.equal(res.body.Directory, false);
+					done();
+				});
+			});
 			it('works with Slug header', function(done) {
 				request()
 				.post(PREFIX + '/project')
 				.set('Slug', 'newfile.txt')
 				.expect(201)
 				.end(function(err, res) {
-					throwIfError(err);
+					testHelper.throwIfError(err);
 					assert.equal(res.body.Name, 'newfile.txt');
 					assert.equal(res.body.Directory, false);
 					done();
@@ -684,7 +687,7 @@ describe('File endpoint', function() {
 				.send({ Name: 'newfile.txt' })
 				.expect(201)
 				.end(function(err, res) {
-					throwIfError(err);
+					testHelper.throwIfError(err);
 					assert.equal(res.body.Name, 'newfile.txt');
 					assert.equal(res.body.Directory, false);
 					done();
@@ -707,7 +710,7 @@ describe('File endpoint', function() {
 				.get(PREFIX + '/project/my%20folder')
 				.expect(200)
 				.end(function(err, res) {
-					throwIfError(err);
+					testHelper.throwIfError(err);
 					var body = res.body;
 					assert.equal(body.Children, null, 'Children should be absent');
 					assert.equal(body.ChildrenLocation, PREFIX + '/project/my folder/?depth=1');
@@ -722,7 +725,7 @@ describe('File endpoint', function() {
 				.get(PREFIX + '/project/my%20folder/my%20subfolder')
 				.expect(200)
 				.end(function(err, res) {
-					throwIfError(err);
+					testHelper.throwIfError(err);
 					assert.ok(res.body.Parents);
 					assert.equal(res.body.Parents.length, 2);
 					assert.equal(res.body.Parents[0].ChildrenLocation, PREFIX + '/project/my folder/?depth=1');
@@ -742,7 +745,7 @@ describe('File endpoint', function() {
 					.query({depth: 1})
 					.expect(200)
 					.end(function(err, res) {
-						throwIfError(err);
+						testHelper.throwIfError(err);
 						assert(Array.isArray(res.body.Children), "We shoudl have gotten children back");
 						assert.equal(res.body.Children.length, 1, "We shold have only gotten one child");
 						assert.equal(res.body.Children[0].Name, "d1", "We got the wrong first child directory");
@@ -755,7 +758,7 @@ describe('File endpoint', function() {
 					.query({ depth: 0 })
 					.expect(200)
 					.end(function(err, res) {
-						throwIfError(err);
+						testHelper.throwIfError(err);
 						assert(res.body, "There should have been a body in the response");
 						assert(res.body.Directory, "Should have gotten a folder");
 						assert.equal(res.body.Name, 'my folder', "The folder name is not correct");
@@ -768,7 +771,7 @@ describe('File endpoint', function() {
 				.query({ depth: 1 })
 				.expect(200)
 				.end(function(err, res) {
-					throwIfError(err);
+					testHelper.throwIfError(err);
 					var body = res.body;
 					assert.equal(body.ChildrenLocation, PREFIX + '/project/my folder/?depth=1');
 					assert.equal(Array.isArray(body.Children), true);
@@ -808,7 +811,7 @@ describe('File endpoint', function() {
 					.send({Name: 'testListenerCreateDirectory', Directory: true})
 					.expect(201)
 					.end(function(err, res) {
-						throwIfError(err);
+						testHelper.throwIfError(err);
 						fileUtil.removeFileModificationListener();
 					})
 			});
@@ -824,14 +827,14 @@ describe('File endpoint', function() {
 					.send({Name: folderName})
 					.expect(201)
 					.end(function(err, res) {
-						throwIfError(err);
+						testHelper.throwIfError(err);
 						request()
 							.post(PREFIX + '/project/'+folderName)
 							.type('json')
 							.send({Name: 'test.txt'})
 							.expect(201)
 							.end(function(err, res) {
-								throwIfError(err);
+								testHelper.throwIfError(err);
 								request()
 									.get(PREFIX + '/project/'+folderName+'/test.text')
 									.query({parts: 'meta'})
@@ -848,7 +851,7 @@ describe('File endpoint', function() {
 				.send({ Directory: true })
 				.expect(201)
 				.end(function(err, res) {
-					throwIfError(err);
+					testHelper.throwIfError(err);
 					assert.equal(res.body.Directory, true);
 					assert.equal(res.body.Location, PREFIX + '/project/new directory/'); //FIXME
 					assert.equal(res.body.Name, 'new directory');
@@ -862,7 +865,7 @@ describe('File endpoint', function() {
 				.send({ Name: 'new directory', Directory: true })
 				.expect(201)
 				.end(function(err, res) {
-					throwIfError(err);
+					testHelper.throwIfError(err);
 					assert.equal(res.body.Directory, true);
 					assert.equal(res.body.Location, PREFIX + '/project/new directory/'); // FIXME
 					assert.equal(res.body.Name, 'new directory');
@@ -876,7 +879,7 @@ describe('File endpoint', function() {
 				.send({ Name: 'new directory', Directory: 'true' })
 				.expect(201)
 				.end(function(err, res) {
-					throwIfError(err);
+					testHelper.throwIfError(err);
 					assert.equal(res.body.Directory, true);
 					assert.equal(res.body.Location, PREFIX + '/project/new directory/'); // FIXME
 					assert.equal(res.body.Name, 'new directory');
@@ -891,7 +894,7 @@ describe('File endpoint', function() {
 				.send({ Directory: "false" })
 				.expect(201)
 				.end(function(err, res) {
-					throwIfError(err);
+					testHelper.throwIfError(err);
 					assert.equal(res.body.Directory, false);
 					assert.equal(res.body.Location, PREFIX + '/project/Not a directory'); //FIXME
 					assert.equal(res.body.Name, 'Not a directory');
@@ -914,7 +917,7 @@ describe('File endpoint', function() {
 						.del(PREFIX + '/project/testDeleteEmptyDir')
 						.expect(204)
 						.end(function(err, res) {
-							throwIfError(err);
+							testHelper.throwIfError(err);
 							request()
 								.get(PREFIX + '/project/testDeleteEmptyDir')
 								.expect(404)
@@ -935,7 +938,7 @@ describe('File endpoint', function() {
 					.del(PREFIX + '/project/testDeleteEmptyDir')
 					.expect(204)
 					.end(function(err, res) {
-						throwIfError(err);
+						testHelper.throwIfError(err);
 						request()
 							.get(PREFIX + '/project/testDeleteEmptyDir')
 							.expect(404)
@@ -953,7 +956,7 @@ describe('File endpoint', function() {
 					.del(PREFIX + '/project/testDeleteFile.bmp')
 					.expect(204)
 					.end(/* @callback */ function(err, res) {
-						throwIfError(err, "failed to DELETE file");
+						testHelper.throwIfError(err, "failed to DELETE file");
 						// subsequent requests should 404
 						request()
 							.get(PREFIX + '/project/testDeleteFile.bmp')
@@ -975,7 +978,7 @@ describe('File endpoint', function() {
 						.del(PREFIX + '/project/testDeleteFileListener.txt')
 						.expect(204)
 						.end(function(err, res) {
-							throwIfError(err);
+							testHelper.throwIfError(err);
 							request()
 								.get(PREFIX + '/project/testDeleteFileListener.txt')
 								.expect(404)
@@ -995,7 +998,7 @@ describe('File endpoint', function() {
 							.del(PREFIX + '/project/testDeleteNonEmptyDirectory')
 							.expect(204)
 							.end(function(err, res) {
-								throwIfError(err);
+								testHelper.throwIfError(err);
 								request()
 									.get(PREFIX + '/project/testDeleteNonEmptyDirectory')
 									.expect(404)
@@ -1019,7 +1022,7 @@ describe('File endpoint', function() {
 							.del(PREFIX + '/project/testListenerDeleteNonEmptyDirectory')
 							.expect(204)
 							.end(function(err, res) {
-								throwIfError(err);
+								testHelper.throwIfError(err);
 								request()
 									.get(PREFIX + '/project/testListenerDeleteNonEmptyDirectory')
 									.expect(404)
@@ -1036,7 +1039,7 @@ describe('File endpoint', function() {
 			.del(PREFIX + '/project/my%20folder/buzz.txt')
 			.expect(204)
 			.end(/* @callback */ function(err, res) {
-				throwIfError(err, "failed to DELETE file");
+				testHelper.throwIfError(err, "failed to DELETE file");
 				// subsequent requests should 404
 				request()
 				.get(PREFIX + '/project/my%20folder/buzz.txt')
@@ -1049,13 +1052,13 @@ describe('File endpoint', function() {
 			.del(PREFIX + '/project/my%20folder')
 			.expect(204)
 			.end(/* @callback */ function(err, res) {
-				throwIfError(err, "Failed to DELETE folder");
+				testHelper.throwIfError(err, "Failed to DELETE folder");
 				// the directory is gone:
 				request()
 				.get(PREFIX + '/project/my%20folder')
 				.expect(404)
 				.end(/* @callback */ function(err, res) {
-					throwIfError(err);
+					testHelper.throwIfError(err);
 					// and its contents are gone:
 					request()
 					.get(PREFIX + '/project/my%20folder/buzz.txt')
@@ -1070,7 +1073,7 @@ describe('File endpoint', function() {
 			.get(url)
 			.query({ parts: 'meta' })
 			.end(function(err, res) {
-				throwIfError(err, "Failed to get folder");
+				testHelper.throwIfError(err, "Failed to get folder");
 				var etag = res.body.ETag;
 				assert.notEqual(res.body.ETag, null);
 				request()
@@ -1078,7 +1081,7 @@ describe('File endpoint', function() {
 				.set('If-Match', etag + '_blort')
 				.expect(412)
 				.end(/* @callback */ function(err, res) {
-					throwIfError(err, "Expected precondition to fail");
+					testHelper.throwIfError(err, "Expected precondition to fail");
 					request(url)
 					.del(url)
 					.set('If-Match', etag)
@@ -1151,7 +1154,7 @@ describe('File endpoint', function() {
 							.expect(201)
 							.end(function(err, res) {
 								fileUtil.removeFileModificationListener();
-								throwIfError(err);
+								testHelper.throwIfError(err);
 							})
 					});
 			});
@@ -1170,7 +1173,7 @@ describe('File endpoint', function() {
 						.send({ Location: PREFIX + '/project/fizz.txt' })
 						.expect(200) //spec'd to return 200 of over-writing move
 						.end(function(err, res) {
-							throwIfError(err);
+							testHelper.throwIfError(err);
 							done();
 						});
 				});
@@ -1183,7 +1186,7 @@ describe('File endpoint', function() {
 			.send({ Location: PREFIX + '/project/fizz.txt' })
 			.expect(201)
 			.end(function(err, res) {
-				throwIfError(err);
+				testHelper.throwIfError(err);
 				assert.equal(res.body.Name, 'copy_of_fizz.txt');
 				done();
 			});
@@ -1197,7 +1200,7 @@ describe('File endpoint', function() {
 			.send({ Location: PREFIX + '/project/fizz.txt' })
 			.expect(200) // 200 means overwritten
 			.end(function(err, res) {
-				throwIfError(err, "Failed to overwrite");
+				testHelper.throwIfError(err, "Failed to overwrite");
 				// It's in the expected place:
 				assert.equal(res.body.Name, 'buzz.txt');
 				assert.equal(res.body.Parents[0].Name, 'my folder');
@@ -1215,14 +1218,14 @@ describe('File endpoint', function() {
 			.send({ Location: PREFIX + '/project/my folder' })
 			.expect(201)
 			.end(function(err, res) {
-				throwIfError(err);
+				testHelper.throwIfError(err);
 				// Ensure the copy has the expected children
 				assert.ok(res.body.ChildrenLocation);
 				request()
 				.get(res.body.ChildrenLocation)
 				.expect(200)
 				.end(function(err, res) {
-					throwIfError(err);
+					testHelper.throwIfError(err);
 					res.body.Children.sort(byName);
 					assert.equal(res.body.Children[0].Name, 'buzz.txt');
 					assert.equal(res.body.Children[1].Name, 'my subfolder');
@@ -1245,7 +1248,7 @@ describe('File endpoint', function() {
 						.send({Location: PREFIX + '/project/fizz.txt'})
 						.expect(201)
 						.end(function(err, res) {
-							throwIfError(err);
+							testHelper.throwIfError(err);
 							done();
 						});
 				})
@@ -1262,7 +1265,7 @@ describe('File endpoint', function() {
 						.send({Location: PREFIX + '/project/fizz.txt'})
 						.expect(200)
 						.end(function(err, res) {
-							throwIfError(err);
+							testHelper.throwIfError(err);
 							done();
 						});
 					})
@@ -1303,7 +1306,7 @@ describe('File endpoint', function() {
 						.expect(201)
 						.end(function(err, res) {
 							fileUtil.removeFileModificationListener();
-							throwIfError(err);
+							testHelper.throwIfError(err);
 						});
 				})
 		});
@@ -1325,7 +1328,7 @@ describe('File endpoint', function() {
 						.expect(201)
 						.end(function(err, res) {
 							fileUtil.removeFileModificationListener();
-							throwIfError(err);
+							testHelper.throwIfError(err);
 						});
 				})
 		});
@@ -1338,7 +1341,7 @@ describe('File endpoint', function() {
 				.send({ Location: PREFIX + '/project/fizz.txt' })
 				.expect(201)
 				.end(function(err, res) {
-					throwIfError(err);
+					testHelper.throwIfError(err);
 					assert.equal(res.body.Name, 'fizz_moved.txt');
 					done();
 				});
@@ -1351,7 +1354,7 @@ describe('File endpoint', function() {
 				.send({ Location: PREFIX + '/project/fizz.txt' })
 				.expect(201)
 				.end(function(err, res) {
-					throwIfError(err);
+					testHelper.throwIfError(err);
 					assert.equal(res.body.Name, 'fizz_moved.txt');
 					done();
 				});
