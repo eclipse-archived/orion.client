@@ -461,7 +461,7 @@ exports.handleFilePOST = function(workspaceRoot, fileRoot, req, res, destFile, m
 		}
 		if (xCreateOptions.indexOf('no-overwrite') !== -1 && destExists) {
 			function isFSCaseInsensitive() {
-				if(typeof ISFS_CASE_SENSITIVE === 'undefined'){
+				if(typeof ISFS_CASE_INSENSITIVE === 'undefined'){
 					var lowerCaseStat = fs.statSync(destFile.path.toLowerCase());
 					var upperCaseStat = fs.statSync(destFile.path.toUpperCase());
 					if(lowerCaseStat && upperCaseStat) {
