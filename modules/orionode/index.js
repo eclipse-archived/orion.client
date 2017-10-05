@@ -59,16 +59,16 @@ function handleError(err) {
 
 function startServer(options) {
 	options = options || {};
+	options.configParams = options.configParams || {};
 	if(options.configParams["additional.modules.path"]){
 		var addModulePath = require('app-module-path');
 		options.configParams["additional.modules.path"].split(",").forEach(function(modulePath){
 			addModulePath.addPath(path.join(__dirname, modulePath));
 		});
 	}
-	options.configParams = options.configParams || {};
 	options.maxAge = typeof options.maxAge === "number" ? options.maxAge : undefined;
-	var contextPath = options && options.configParams["orion.context.path"] || "";
-	var listenContextPath = options && options.configParams["orion.context.listenPath"] || false;
+	var contextPath = options.configParams["orion.context.path"] || "";
+	var listenContextPath = options.configParams["orion.context.listenPath"] || false;
 	if (typeof options.workspaceDir !== "string") {
 		throw new Error("workspaceDir is required");
 	}
@@ -174,9 +174,12 @@ function startServer(options) {
 			// It's dev time
 			staticCacheOption = {
 				maxAge: options.maxAge
-			}
+			};
 		} else {
 			staticCacheOption = {
+				/**
+				 * @callback
+				 */
 				setHeaders: function(res, urlPath, stat){
 					var ext = path.extname(urlPath);
 					if(path.basename(path.dirname(urlPath)) === "requirejs"){
@@ -187,13 +190,13 @@ function startServer(options) {
 						res.setHeader("Cache-Control", _24_HOURS);
 					}
 				}
-			}
+			};
 		}
 		if (fs.existsSync(MINIFIED_ORION_CLIENT)) {
 			app.use(express.static(MINIFIED_ORION_CLIENT, Object.assign({dotfiles: 'allow'}, staticCacheOption)));
 		} else {
-			var prependStaticAssets = options.configParams["prepend.static.assets"] && options.configParams["prepend.static.assets"].split(",") || [];
-			var appendStaticAssets = options.configParams["append.static.assets"] && options.configParams["append.static.assets"].split(",") || [];
+			var prependStaticAssets = (options.configParams["prepend.static.assets"] || "").split(",");
+			var appendStaticAssets = (options.configParams["append.static.assets"] || "").split(",");
 			var orionode_static = path.normalize(path.join(LIBS, 'orionode.client/'));
 			if(options.configParams["orion.collab.enabled"]){
 				appendStaticAssets.push('./bundles/org.eclipse.orion.client.collab/web');
@@ -201,7 +204,7 @@ function startServer(options) {
 			app.use(require('./lib/orion_static')(Object.assign({orionClientRoot: ORION_CLIENT, orionode_static: orionode_static, prependStaticAssets: prependStaticAssets, appendStaticAssets: appendStaticAssets}, staticCacheOption)));
 		}
 		//error handling
-		app.use(function(err, req, res, next) { // 'next' has to be here, so that this callback works as a final error handler instead of a normal middleware
+		app.use(/* @callback */ function(err, req, res, next) { // 'next' has to be here, so that this callback works as a final error handler instead of a normal middleware
 			logger.error(req.originalUrl, err);
 			if (res.finished) {
 				return;
