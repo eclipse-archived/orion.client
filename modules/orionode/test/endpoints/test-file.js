@@ -1332,7 +1332,24 @@ describe('File endpoint', function() {
 						});
 				})
 		});
-		it("testRenameFileChangeCase");
+		it("testRenameFileChangeCase", function(done) {
+			var fileNameLowerCase = "testrenamefilechangecase";
+			var fileNameUpperCase = "testRenameFileChangeCase";
+			testHelper.createFile(request, '/project', fileNameLowerCase, 'Odd contents')
+				.then(function(res) {
+					request()
+					.post(PREFIX + '/project/')
+					.set('Slug', fileNameUpperCase)
+					.set('X-Create-Options', 'move')
+					.send({ Location: PREFIX + '/project/' + fileNameLowerCase})
+					.expect(200)
+					.end(function(err, res) {
+						testHelper.throwIfError(err);
+						assert.equal(res.body.Name, fileNameUpperCase);
+						done();
+					});
+				});
+		});
 		it('move & rename a file', function(done) {
 			request()
 				.post(PREFIX + '/project/my%20folder')
