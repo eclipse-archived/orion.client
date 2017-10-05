@@ -1416,7 +1416,33 @@ describe('File endpoint', function() {
 						});
 				})
 		});
-		it("testRenameFileChangeCase");
+		it("testRenameFileChangeCase", function(done) {
+			var fileNameLowerCase = "testrenamefilechangecase";
+			var fileNameLowerCase2 = "testrenamefilechangecase2";
+			var fileNameUpperCase = "testRenameFileChangeCase";
+			testHelper.createFile(request, '/project', fileNameLowerCase, 'Odd contents')
+				.then(function(res) {
+					testHelper.createFile(request, '/project', fileNameLowerCase2, 'Odd contents2')
+						.then(function(res) {
+							request()
+							.post(PREFIX + '/project/')
+							.set('Slug', fileNameUpperCase)
+							.set('X-Create-Options', 'move,no-overwrite')
+							.send({ Location: PREFIX + '/project/' + fileNameLowerCase})
+							.expect(200)
+							.end(function(err, res) {
+								testHelper.throwIfError(err);
+								assert.equal(res.body.Name, fileNameUpperCase);
+								request()
+								.post(PREFIX + '/project/')
+								.set('Slug', fileNameLowerCase2)
+								.set('X-Create-Options', 'move,no-overwrite')
+								.send({ Location: PREFIX + '/project/' + fileNameUpperCase})
+								.expect(412, done);
+							});
+						})
+				});
+		});
 		it('move & rename a file', function(done) {
 			request()
 				.post(PREFIX + '/project/my%20folder')
