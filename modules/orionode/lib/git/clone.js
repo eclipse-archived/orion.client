@@ -661,7 +661,7 @@ function handleRemoteError(task, err, cloneUrl) {
 	}
 	var u = url.parse(fullCloneUrl, true);
 	var code = err.code || 403;
-	var jsonData;
+	var jsonData, message = err.message;
 	if (err.message && ["credentials", "authentication", "401"].some(function(s) { return err.message.indexOf(s) !== -1; })) {
 		code = 401;
 		jsonData = {
@@ -672,13 +672,16 @@ function handleRemoteError(task, err, cloneUrl) {
 			"Url": cloneUrl,
 			"User": u.auth
 		};
+	} else if (err.message && ["404"].some(function(s) { return err.message.indexOf(s) !== -1; })) {
+		code = 404;
+		message = "Remote repository does not exist";
 	}
 	task.done({
 		HttpCode: code,
 		Code: 0,
 		JsonData: jsonData,
-		DetailedMessage: err.message,
-		Message: err.message,
+		DetailedMessage: message,
+		Message: message,
 		Severity: "Error"
 	});
 }
