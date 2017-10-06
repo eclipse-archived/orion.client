@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012, 2016, 2017 IBM Corporation and others.
+ * Copyright (c) 2012, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -48,23 +48,26 @@ module.exports = function(options) {
 		return req.query[paramName];
 	}
 
+	/**
+	 * @name writeFileContents
+	 * @description Creates a read stream to the given file path and writes the file
+	 * @param {HttpResponse} res The backing response
+	 * @param {string} filepath The full path to the file
+	 * @param {?} stats The stats object for the file from FS
+	 * @param {ETag} etag The etag
+	 */
 	function writeFileContents(res, filepath, stats, etag) {
-		if (stats.isDirectory()) {
-			//can't set contents on a directory
-			writeError(400, res, "Cannot set file contents on a directory: "+filePath);
-		} else {
-			var stream = fs.createReadStream(filepath);
-			res.setHeader('Content-Length', stats.size);
-			res.setHeader('ETag', etag);
-			res.setHeader('Accept-Patch', 'application/json-patch; charset=UTF-8');
-			api.setResponseNoCache(res);
-			stream.pipe(res);
-			stream.on('error', function(e) {
-				// FIXME this is wrong, headers have likely been committed at this point
-				writeError(500, res, e.toString());
-			});
-			stream.on('end', res.end.bind(res));
-		}
+		var stream = fs.createReadStream(filepath);
+		res.setHeader('Content-Length', stats.size);
+		res.setHeader('ETag', etag);
+		res.setHeader('Accept-Patch', 'application/json-patch; charset=UTF-8');
+		api.setResponseNoCache(res);
+		stream.pipe(res);
+		stream.on('error', function(e) {
+			// FIXME this is wrong, headers have likely been committed at this point
+			writeError(500, res, e.toString());
+		});
+		stream.on('end', res.end.bind(res));
 	}
 
 	function handleDiff(req, res, rest, body) {
@@ -167,6 +170,12 @@ module.exports = function(options) {
 		});
 	}
 
+	/**
+	 * @name getFile
+	 * @description Fetches the requested file, folder or project depending on the parameters given in the request
+	 * @param {XMLHttpRequest} req The original request
+	 * @param {XMLHttpResponse} res The backing response
+	 */
 	function getFile(req, res) {
 		var rest = req.params["0"].substring(1),
 			readIfExists = req.headers ? Boolean(req.headers['read-if-exists']).valueOf() : false,
@@ -213,6 +222,12 @@ module.exports = function(options) {
 		});
 	}
 
+	/**
+	 * @name putFile
+	 * @description Handle the PUT operation for files / folders
+	 * @param {XMLHttpRequest} req The original request
+	 * @param {XMLHttpResponse} res The backing response
+	 */
 	function putFile(req, res) {
 		var rest = req.params["0"].substring(1);
 		var file = fileUtil.getFile(req, rest);
