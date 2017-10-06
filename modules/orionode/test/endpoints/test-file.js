@@ -109,7 +109,7 @@ describe('File endpoint', function() {
 	 */
 	describe('Actions on files', function() {
 		describe('contents', function() {
-			it("testGetProject", function(done) {
+			it("testGetProject - no file context", function(done) {
 				testHelper.createFile(request, '/project', '/fooFile.txt')
 				.then(function(res) {
 					request()
@@ -118,10 +118,135 @@ describe('File endpoint', function() {
 						.end(function(err, res) {
 							testHelper.throwIfError(err);
 							request()
-								.get(PREFIX)
-								.query({project: true, names: 'package.json%2C.tern-project'})
-								.expect(204, done)
+								.get(PREFIX) //no file context - expect null returned
+								.query({project: true, names: 'package.json,.tern-project'})
+								.expect(204)
+								.end(function(err, res) {
+									testHelper.throwIfError(err);
+									assert(!res.body.Project, "The project context should be null");
+									done();
+								});	
 						});	
+				});
+			});
+			it("testGetProject - file context, no 'project-like'", function(done) {
+				testHelper.createFile(request, '/project', '/foo2File.txt')
+				.then(function(res) {
+					var f = path.join(PREFIX, '/project', 'foo2File.txt');
+					request()
+						.get(f)
+						.expect(200)
+						.end(function(err, res) {
+							testHelper.throwIfError(err);
+							request()
+								.get(f) //file context with no matching "project-like" names - expect null returned
+								.query({project: true, names: 'package.json,.tern-project'})
+								.expect(204)
+								.end(function(err, res) {
+									testHelper.throwIfError(err);
+									assert(!res.body.Project, "The project context should be null");
+									done();
+								});	
+						});	
+				});
+			});
+			it("testGetProject - file context / pass project folder name", function(done) {
+				testHelper.createFile(request, '/project', '/foo3File.txt')
+				.then(function(res) {
+					var f = path.join(PREFIX, '/project', 'foo3File.txt');
+					request()
+						.get(f)
+						.expect(200)
+						.end(function(err, res) {
+							testHelper.throwIfError(err);
+							request()
+								.get(f) //file context with no matching "project-like" names - expect null returned
+								.query({project: true, names: 'project'}) // still null, only file names can be passed in
+								.expect(204)
+								.end(function(err, res) {
+									testHelper.throwIfError(err);
+									assert(!res.body.Project, "The project context should be null");
+									done();
+								});	
+						});	
+				});
+			});
+			it("testGetProject - file context / pass .tern-project name", function(done) {
+				testHelper.createDir(request, '/project', 'subDir')
+				.then(function(res) {
+					testHelper.createFile(request, '/project', '.tern-project')
+					.then(function(res) {
+						testHelper.createFile(request, '/project', '/subDir/foo4File.txt')
+						.then(function(res) {
+							var f = path.join(PREFIX, '/project', '/subDir', 'foo4File.txt');
+							request()
+								.get(f)
+								.expect(200)
+								.end(function(err, res) {
+									testHelper.throwIfError(err);
+									request()
+										.get(f)
+										.query({project: true, names: '.tern-project'})
+										.expect(200)
+										.end(function(err, res) {
+											testHelper.throwIfError(err);
+											assert(res.body, "The project context should not be null");
+											assert.equal(res.body.Name, "project", "The found project should have the name 'project'");
+											done();
+										});	
+								});	
+							});
+						});
+				});
+			});
+			it("testGetProject - file context / pass no name, has .git folder", function(done) {
+				testHelper.createDir(request, '/project', '.git')
+				.then(function(res) {
+						testHelper.createFile(request, '/project', 'foo5File.txt')
+						.then(function(res) {
+							var f = path.join(PREFIX, '/project', 'foo5File.txt');
+							request()
+								.get(f)
+								.expect(200)
+								.end(function(err, res) {
+									testHelper.throwIfError(err);
+									request()
+										.get(f)
+										.query({project: true})
+										.expect(200)
+										.end(function(err, res) {
+											testHelper.throwIfError(err);
+											assert(res.body, "The project context should not be null");
+											assert.equal(res.body.Name, "project", "The found project should have the name 'project'");
+											done();
+										});	
+								});	
+						});
+				});
+			});
+			it("testGetProject - file context / pass no name, has project.json file folder", function(done) {
+				testHelper.createFile(request, '/project', 'project.json')
+				.then(function(res) {
+						testHelper.createFile(request, '/project', 'foo5File.txt')
+						.then(function(res) {
+							var f = path.join(PREFIX, '/project', 'foo5File.txt');
+							request()
+								.get(f)
+								.expect(200)
+								.end(function(err, res) {
+									testHelper.throwIfError(err);
+									request()
+										.get(f)
+										.query({project: true})
+										.expect(200)
+										.end(function(err, res) {
+											testHelper.throwIfError(err);
+											assert(res.body, "The project context should not be null");
+											assert.equal(res.body.Name, "project", "The found project should have the name 'project'");
+											done();
+										});	
+								});
+						});
 				});
 			});
 			it("testGenericFileHandler", function(done) {
@@ -475,6 +600,15 @@ describe('File endpoint', function() {
 			});
 		});
 		describe('metadata', function() {
+			it('testGetMetadata', function(done) {
+				testHelper.createFile(request, '/project', 'someMetaFile.txt')
+				.then(function(res) {
+					request()
+						.put(res.body.Location)
+						.query({parts: 'meta'})
+						.expect(501, done);
+				});
+			});
 			it("testETagPutNotMatch", function(done) {
 				testHelper.createFile(request, '/project', 'testETagPutNotMatch.txt')
 					.then(function(res) {
