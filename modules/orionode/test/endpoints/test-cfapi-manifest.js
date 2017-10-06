@@ -44,7 +44,7 @@ function getTestFile(request, filePath) {
 		});
 }
 
-describe("CloudFoundry endpoint", function() {
+describe("CloudFoundry manifest", function() {
 	beforeEach(function(done) {
 		testData.setUp(WORKSPACE, function() {
 			testData.setUpWorkspace(request, function() {
@@ -59,20 +59,6 @@ describe("CloudFoundry endpoint", function() {
 			});
 		});
 	});
-	// afterEach("remove manifest.yml", function(done) {
-	// 	testHelper.withWorkspace(request, testHelper.WORKSPACE_PATH, testHelper.WORKSPACE_ID)
-	// 		.end(function(err, res) {
-	// 			testHelper.throwIfError(err);
-	// 			var wLoc = res.body.Location;
-	// 			request()
-	// 				.del(path.join(PREFIX_FILE, WORKSPACE_ID, "cftests", "manifest.yml"))
-	// 				.expect(204)
-	// 				.end(function(err, res) {
-	// 					testHelper.throwIfError(err);
-	// 					done();
-	// 				});
-	// 			});
-	// });
 	/**
 	 * From: org.eclipse.orion.server.tests.cf.ManifestParserTest.java
 	 */
