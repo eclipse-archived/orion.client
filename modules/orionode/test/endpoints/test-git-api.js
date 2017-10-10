@@ -28,7 +28,7 @@ var CONTEXT_PATH = testHelper.CONTEXT_PATH,
 	METADATA =  testHelper.METADATA,
 	WORKSPACE_ID = testHelper.WORKSPACE_ID,
 	FILE_ROOT = "/file/" + WORKSPACE_ID + "/",
-	WORKSPACE_ROOT = "/workspace/" + WORKSPACE_ID + "/",
+	WORKSPACE_ROOT = CONTEXT_PATH + "/workspace/" + WORKSPACE_ID,
 	GIT_ROOT = CONTEXT_PATH + "/gitapi";
 
 var request = testData.setupOrionServer();
@@ -1349,7 +1349,7 @@ maybeDescribe("git", function() {
 						"Location": '/workspace/' + WORKSPACE_ID,
 						"GitName": "test",
 						"GitMail": "test@test.com",
-						"Path": FILE_ROOT + ParentFolder
+						"Path": CONTEXT_PATH + FILE_ROOT + ParentFolder
 					})
 					.expect(201)
 					.end(function(err, res) {
@@ -1367,6 +1367,57 @@ maybeDescribe("git", function() {
 
 			it('Check nodegit that the repo was initialized', function(finished) {
 				git.Repository.open(ParentRepoPath)
+				.then(function(repo) {
+					return repo.getReferenceCommit("HEAD");
+				})
+				.then(function(commit) {
+					assert(commit.message(), "Initial commit");
+				})
+				.catch(function(err) {
+					assert.ifError(err);
+				})
+				.done(function() {
+					finished();
+				});
+			});
+		});
+		
+		describe('Creates child directory using orion file api and init repository of the existing sub folder', function() {
+			it('GET clone (initializes a git repo)', function(finished) {
+				var childFolderFileRoot = FILE_ROOT + ParentFolder + "/" + ChildFolder + "/";
+				request()
+				.post(CONTEXT_PATH + FILE_ROOT + ParentFolder)
+				.send({
+					"Name":  ChildFolder,
+					"Directory": true,
+					"LocalTimeStamp": "0"
+				})
+				.expect(201)
+				.end(function(err, res){
+					request()
+					.post(GIT_ROOT + "/clone/")
+					.send({
+						"Location": '/workspace/' + WORKSPACE_ID,
+						"GitName": "test",
+						"GitMail": "test@test.com",
+						"Path": CONTEXT_PATH + childFolderFileRoot
+					})
+					.expect(201)
+					.end(function(err, res) {
+						assert.ifError(err);
+						assert.equal(res.body.Location, GIT_ROOT + "/clone" + childFolderFileRoot);
+						finished();
+					});
+				});
+			});
+
+			it('Check the directory was made', function() {
+				var stat = fs.statSync(ChildRepoPath);
+				assert(stat.isDirectory());
+			});
+
+			it('Check nodegit that the repo was initialized', function(finished) {
+				git.Repository.open(ChildRepoPath)
 				.then(function(repo) {
 					return repo.getReferenceCommit("HEAD");
 				})

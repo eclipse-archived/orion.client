@@ -18,9 +18,9 @@ var assert = require("assert"),
 var CONTEXT_PATH = testHelper.CONTEXT_PATH,
 	WORKSPACE = testHelper.WORKSPACE,
 	MEATASTORE =  testHelper.METADATA,
-	PREFIX_CF = "/cfapi",
+	PREFIX_CF = CONTEXT_PATH + "/cfapi",
 	MANIFESTS = "/manifests",
-	PREFIX_MANIFESTS = CONTEXT_PATH + PREFIX_CF + MANIFESTS,
+	PREFIX_MANIFESTS = PREFIX_CF + MANIFESTS,
 	TASK_PREFIX = CONTEXT_PATH + '/task',
 	PREFIX_FILE = CONTEXT_PATH + '/file';
 
