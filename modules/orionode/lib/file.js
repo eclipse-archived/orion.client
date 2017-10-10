@@ -37,8 +37,8 @@ module.exports = function(options) {
 	router.post('*', jsonParser, postFile);
 	router.delete('*', deleteFile);
 
-	fileUtil.addFileModificationListener({handleFileModficationEvent: function(eventData){
-		if(typeof eventData.type === "string" && eventData.type !== "zipadd"){
+	fileUtil.addFileModificationListener("fileEndpoint", {handleFileModficationEvent: function(eventData){
+		if(typeof eventData.type === "string" && eventData.type !== fileUtil.ChangeType.ZIPADD){
 			api.logAccess(logger, eventData.req.user.username);
 		}
 	}});
@@ -159,7 +159,7 @@ module.exports = function(options) {
 								return;
 							}
 							fileUtil.writeFileMetadata(req, res, api.join(fileRoot, file.workspaceId), api.join(workspaceRoot, file.workspaceId), file, stats, ETag.fromString(newContents) /*the new ETag*/);
-							fileUtil.fireFileModificationEvent({ type: "write", file: file, contents: newContents, req: req});
+							fileUtil.fireFileModificationEvent({ type: fileUtil.ChangeType.WRITE, file: file, contents: newContents, req: req});
 						});
 					});
 					
@@ -250,7 +250,7 @@ module.exports = function(options) {
 							return;
 						}
 						fileUtil.writeFileMetadata(req, res, api.join(fileRoot, file.workspaceId), api.join(workspaceRoot, file.workspaceId), file, stats, etag);
-						fileUtil.fireFileModificationEvent({ type: "write", file: file, req: req});
+						fileUtil.fireFileModificationEvent({ type: fileUtil.ChangeType.WRITE, file: file, req: req});
 					});
 				});
 				ws.on('error', function(err) {
@@ -340,11 +340,11 @@ module.exports = function(options) {
 					}
 					checkWorkspace();
 				});
-				var eventData = { type: "delete", file: file, req: req };
+				var eventData = { type: fileUtil.ChangeType.DELETE, file: file, req: req };
 				fileUtil.fireFileModificationEvent(eventData);
 			} else {
 				fs.unlink(file.path, checkWorkspace);
-				var eventData = { type: "delete", file: file, req: req };
+				var eventData = { type: fileUtil.ChangeType.DELETE, file: file, req: req };
 				fileUtil.fireFileModificationEvent(eventData);
 			}
 		});

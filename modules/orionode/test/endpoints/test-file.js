@@ -323,6 +323,27 @@ describe('File endpoint', function() {
 				testHelper.createFile(request, '/project', '/fileWriteListener.txt')
 					.then(function(res) {
 						assert(res.statusCode === 201);
+						fileUtil.addFileModificationListener("testListenerWriteFile", {
+							handleFileModficationEvent: function handleFileModficationEvent(eventData) {
+								assert(eventData, "No event data was fired");
+								assert.equal(eventData.type, "write", "Event type is wrong");
+								assert(eventData.file.path.indexOf(PREFIX + '/project/fileWriteListener.txt'));
+								done();
+							}
+						});
+						request()
+							.put(PREFIX + '/project/fileWriteListener.txt')
+							.send('Listen for me listener!')
+							.end(function(err, res) {
+								fileUtil.removeFileModificationListener("testListenerWriteFile");
+								testHelper.throwIfError(err);
+							});
+					})
+			});
+			it("testListenerWriteFile - unnamed listener", function(done) {
+				testHelper.createFile(request, '/project', '/fileWriteListener.txt')
+					.then(function(res) {
+						assert(res.statusCode === 201);
 						fileUtil.addFileModificationListener({
 							handleFileModficationEvent: function handleFileModficationEvent(eventData) {
 								assert(eventData, "No event data was fired");
@@ -740,7 +761,7 @@ describe('File endpoint', function() {
 			it.skip("testListenerMetadataHandling", function(done) {
 				testHelper.createFile(request, '/project', 'testListenerMetadataHandling.txt')
 					.then(function(done) {
-						fileUtil.addFileModificationListener({
+						fileUtil.addFileModificationListener("testListenerMetadataHandling", {
 							handleFileModficationEvent: function handleFileModficationEvent(eventData) {
 								assert(eventData, "No event data was fired");
 								assert.equal(eventData.type, "put_info", "Event type is not put_info");
@@ -753,7 +774,7 @@ describe('File endpoint', function() {
 							.query({parts: 'meta'})
 							.expect(204)
 							.end(function(err, res) {
-								fileUtil.removeFileModificationListener();
+								fileUtil.removeFileModificationListener("testListenerMetadataHandling");
 								testHelper.throwIfError(err);
 							})
 					})
@@ -1016,10 +1037,31 @@ describe('File endpoint', function() {
 			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=521205
 			 */
 			it("testListenerCreateDirectory", function(done) {
+				fileUtil.addFileModificationListener("testListenerCreateDirectory", {
+					handleFileModficationEvent: function handleFileModficationEvent(eventData) {
+						assert(eventData, "No event data was fired");
+						assert.equal(eventData.type, fileUtil.ChangeType.MKDIR, "Event type is not mkdir");
+						done();
+					}
+				});
+				request()
+					.post(PREFIX + '/project')
+					.type('json')
+					.send({Name: 'testListenerCreateDirectory', Directory: true})
+					.expect(201)
+					.end(function(err, res) {
+						testHelper.throwIfError(err);
+						fileUtil.removeFileModificationListener("testListenerCreateDirectory");
+					})
+			});
+			/**
+			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=521205
+			 */
+			it("testListenerCreateDirectory - No listener name", function(done) {
 				fileUtil.addFileModificationListener({
 					handleFileModficationEvent: function handleFileModficationEvent(eventData) {
 						assert(eventData, "No event data was fired");
-						assert.equal(eventData.type, fileUtil.MKDIR, "Event type is not mkdir");
+						assert.equal(eventData.type, fileUtil.ChangeType.MKDIR, "Event type is not mkdir");
 						done();
 					}
 				});
@@ -1146,7 +1188,7 @@ describe('File endpoint', function() {
 		it("testListenerDeleteEmptyDir", function(done) {
 			testHelper.createDir(request, "/project", "testDeleteEmptyDir")
 			.then(function(res) {
-				fileUtil.addFileModificationListener({
+				fileUtil.addFileModificationListener("testListenerDeleteEmptyDir", {
 					handleFileModficationEvent: function handleFileModficationEvent(eventData) {
 						assert(eventData, "No event data was fired");
 						assert.equal(eventData.type, "delete", "Event type is not delete");
@@ -1161,7 +1203,7 @@ describe('File endpoint', function() {
 							.get(PREFIX + '/project/testDeleteEmptyDir')
 							.expect(404)
 							.end(function(err, res) {
-								fileUtil.removeFileModificationListener();
+								fileUtil.removeFileModificationListener("testListenerDeleteEmptyDir");
 								done();
 							});
 					});
@@ -1186,7 +1228,7 @@ describe('File endpoint', function() {
 		it("testListenerDeleteFile", function(done) {
 			testHelper.createFile(request, "/project", "testDeleteFileListener.txt")
 				.then(function(res) {
-					fileUtil.addFileModificationListener({
+					fileUtil.addFileModificationListener("testListenerDeleteFile", {
 						handleFileModficationEvent: function handleFileModficationEvent(eventData) {
 							assert(eventData, "No event data was fired");
 							assert.equal(eventData.type, "delete", "Event type is not delete");
@@ -1201,7 +1243,7 @@ describe('File endpoint', function() {
 								.get(PREFIX + '/project/testDeleteFileListener.txt')
 								.expect(404)
 								.end(function(err, res) {
-									fileUtil.removeFileModificationListener();
+									fileUtil.removeFileModificationListener("testListenerDeleteFile");
 									done();
 								});
 						});
@@ -1230,7 +1272,7 @@ describe('File endpoint', function() {
 				.then(function(res) {
 					testHelper.createFile(request, "/project/testListenerDeleteNonEmptyDirectory", "file.txt")
 						.then(function(res) {
-							fileUtil.addFileModificationListener({
+							fileUtil.addFileModificationListener("testListenerDeleteNonEmptyDirectory", {
 								handleFileModficationEvent: function handleFileModficationEvent(eventData) {
 									assert(eventData, "No event data was fired");
 									assert.equal(eventData.type, "delete", "Event type is not delete");
@@ -1245,7 +1287,7 @@ describe('File endpoint', function() {
 									.get(PREFIX + '/project/testListenerDeleteNonEmptyDirectory')
 									.expect(404)
 									.end(function(err, res) {
-										fileUtil.removeFileModificationListener();
+										fileUtil.removeFileModificationListener("testListenerDeleteNonEmptyDirectory");
 										done();
 									});
 							});
@@ -1356,10 +1398,10 @@ describe('File endpoint', function() {
 				testHelper.createFile(request, '/project', 'copyListener.txt')
 					.then(function(res) {
 						assert(res.statusCode === 201);
-						fileUtil.addFileModificationListener({
+						fileUtil.addFileModificationListener("testListenerCopyFile", {
 							handleFileModficationEvent: function handleFileModficationEvent(eventData) {
 								assert(eventData, "No event data was fired");
-								assert.equal(eventData.type, fileUtil.COPY_INTO, "Event type is not copy_into");
+								assert.equal(eventData.type, fileUtil.ChangeType.COPY_INTO, "Event type is not copy_into");
 								done();
 							}
 						});
@@ -1371,7 +1413,7 @@ describe('File endpoint', function() {
 							.send({Location: url})
 							.expect(201)
 							.end(function(err, res) {
-								fileUtil.removeFileModificationListener();
+								fileUtil.removeFileModificationListener("testListenerCopyFile");
 								testHelper.throwIfError(err);
 							})
 					});
@@ -1507,7 +1549,7 @@ describe('File endpoint', function() {
 		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=521138
 		 */
 		it.skip("testListenerMoveFileNoOverwrite", function(done) {
-			fileUtil.addFileModificationListener({
+			fileUtil.addFileModificationListener("testListenerMoveFileNoOverwrite", {
 				handleFileModficationEvent: function handleFileModficationEvent(eventData) {
 					assert(eventData, "No event data was fired");
 					assert.equal(eventData.type, "move", "Event type is not move");
@@ -1523,7 +1565,7 @@ describe('File endpoint', function() {
 						.send({Location: PREFIX + '/project/fizz.txt'})
 						.expect(201)
 						.end(function(err, res) {
-							fileUtil.removeFileModificationListener();
+							fileUtil.removeFileModificationListener("testListenerMoveFileNoOverwrite");
 							testHelper.throwIfError(err);
 						});
 				})
@@ -1531,7 +1573,7 @@ describe('File endpoint', function() {
 		it("testListenerRenameFile", function(done) {
 			testHelper.createDir(request, '/project', '/moveToFolder4')
 				.then(function(res) {
-					fileUtil.addFileModificationListener({
+					fileUtil.addFileModificationListener("testListenerRenameFile", {
 						handleFileModficationEvent: function handleFileModficationEvent(eventData) {
 							assert(eventData, "No event data was fired");
 							assert.equal(eventData.type, "rename", "Event type is not rename");
@@ -1545,7 +1587,7 @@ describe('File endpoint', function() {
 						.send({Location: PREFIX + '/project/fizz.txt'})
 						.expect(201)
 						.end(function(err, res) {
-							fileUtil.removeFileModificationListener();
+							fileUtil.removeFileModificationListener("testListenerRenameFile");
 							testHelper.throwIfError(err);
 						});
 				})

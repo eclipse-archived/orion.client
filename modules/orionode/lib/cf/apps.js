@@ -844,7 +844,7 @@ function archiveTarget (filePath, req){
 			zip.pipe(output);
 			return xfer.write(zip, filePath, filePath)
 			.then(function() {
-				var eventData = { type: "zipadd", req: req, zip: zip };
+				var eventData = { type: fileUtil.ChangeType.ZIPADD, req: req, zip: zip };
 				fileUtil.fireFileModificationEvent(eventData);
 			
 				zip.finalize();

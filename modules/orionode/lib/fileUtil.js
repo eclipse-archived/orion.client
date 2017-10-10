@@ -8,7 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-/*eslint-env node*/
+/*eslint-env node, es6*/
 /*eslint-disable consistent-return*/
 var ETag = require('./util/etag'),
 	path = require('path'),
@@ -22,36 +22,50 @@ var ETag = require('./util/etag'),
 	
 var ISFS_CASE_INSENSITIVE;
 
-/**
- * Copy of a file/folder to a new location.
- * @since 16.0
- */
-exports.COPY_INTO = "copy_into";
-/**
- * Deletion of an item.
- * @since 16.0
- */
-exports.DELETE = "delete";
-/**
- * Creation of a directory.
- * @since 16.0
- */
-exports.MKDIR = "mkdir";
-/**
- * Move of an item from one location to another.
- * @since 16.0
- */
-exports.MOVE = "move";
-/**
- * Attributes of a file/folder changed.
- * @since 16.0
- */
-exports.PUTINFO = "putinfo";
-/**
- * Content written to a file.
- * @since 16.0
- */
-exports.WRITE = "write";
+var ChangeType = module.exports.ChangeType = Object.freeze({
+	/**
+	 * Copy of a file/folder to a new location.
+	 * @since 16.0
+	 */
+	COPY_INTO: "copy_into",
+	/**
+	 * Deletion of an item.
+	 * @since 16.0
+	 */
+	DELETE: "delete",
+	/**
+	 * Creation of a directory.
+	 * @since 16.0
+	 */
+	MKDIR: "mkdir",
+	/**
+	 * Move of an item from one location to another.
+	 * @since 16.0
+	 */
+	MOVE: "move",
+	/**
+	 * Attributes of a file/folder changed.
+	 * @since 16.0
+	 */
+	PUTINFO: "putinfo",
+	/**
+	 * A resource has been renamed
+	 * @deprecated This is not a spec'd event type from the Java API
+	 * @since 17.0
+	 */
+	RENAME: "rename",
+	/**
+	 * Content written to a file.
+	 * @since 16.0
+	 */
+	WRITE: "write",
+	/**
+	 * Archive added
+	 * @deprecated This is not a spec'd event type from the Java API
+	 * @since 17.0
+	 */
+	ZIPADD: "zipadd"
+});
 
 /*
  * Utils for representing files as objects in the Orion File API
@@ -472,7 +486,7 @@ exports.handleFilePOST = function(workspaceRoot, fileRoot, req, res, destFile, m
 			}
 			function istheSameFile() {
 				var originalFile = getFile(req, req.body.Location.replace(new RegExp("^"+fileRoot), ""));
-				return path.dirname(originalFile.path).toLowerCase() === path.dirname(destFile.path).toLowerCase() && destFile.path.toLowerCase() === originalFile.path.toLowerCase()
+				return path.dirname(originalFile.path).toLowerCase() === path.dirname(destFile.path).toLowerCase() && destFile.path.toLowerCase() === originalFile.path.toLowerCase();
 			}
 			if(!isMove || !istheSameFile() || !isFSCaseInsensitive()){
 				return api.writeError(412, res, new Error('A file or folder with the same name already exists at this location.'));
@@ -489,23 +503,22 @@ exports.handleFilePOST = function(workspaceRoot, fileRoot, req, res, destFile, m
 				if (isCopy) {
 					return copy(sourceFile.path, destFile.path)
 						.then(function(result) {
-							var eventData = { type: "rename", isDir: stats.isDirectory(), file: destFile, sourceFile: sourceFile, req: req};
+							var eventData = { type: ChangeType.RENAME, isDir: stats.isDirectory(), file: destFile, sourceFile: sourceFile, req: req};
 							exports.fireFileModificationEvent(eventData);
 							return result;
-						});
-				} else {
-					return fs.renameAsync(sourceFile.path, destFile.path)
-						.then(function(result) {
-							var eventData = { type: "rename", isDir: stats.isDirectory(), file: destFile, sourceFile: sourceFile, req: req};
-							exports.fireFileModificationEvent(eventData);
-							return result;
-						})
-						.catch(function rejectRename(err) {
-							var err = new Error("Failed to move project: "+sourceUrl)
-							err.code = 403;
-							throw err;
 						});
 				}
+				return fs.renameAsync(sourceFile.path, destFile.path)
+					.then(function(result) {
+						var eventData = { type: ChangeType.RENAME, isDir: stats.isDirectory(), file: destFile, sourceFile: sourceFile, req: req};
+						exports.fireFileModificationEvent(eventData);
+						return result;
+					})
+					.catch(/* @callback */ function rejectRename(err) {
+						var newerr = new Error("Failed to move project: "+sourceUrl);
+						newerr.code = 403;
+						throw newerr;
+					});
 			})
 			.then(writeResponse.bind(null, destExists))
 			.catch(function(err) {
@@ -522,32 +535,68 @@ exports.handleFilePOST = function(workspaceRoot, fileRoot, req, res, destFile, m
 		})
 		.then(function() {
 			if (isDirectory) {
-				exports.fireFileModificationEvent({type: exports.MKDIR, file: destFile, req: req});
+				exports.fireFileModificationEvent({type: ChangeType.MKDIR, file: destFile, req: req});
 				return fs.mkdirAsync(destFile.path);
-			} else {
-				var eventData = { type: "write", file: destFile, req: req};
-				exports.fireFileModificationEvent(eventData);
-				return fs.writeFileAsync(destFile.path, '');
 			}
-
+			var eventData = { type: ChangeType.WRITE, file: destFile, req: req};
+			exports.fireFileModificationEvent(eventData);
+			return fs.writeFileAsync(destFile.path, '');
 		})
 		.then(writeResponse.bind(null, destExists))
 		.catch(api.writeError.bind(null, 500, res));
 	});
 };
 
-var _fileModListeners = [];
-exports.addFileModificationListener = function(theListener) {
-	_fileModListeners.push(theListener);
+var _listeners = new Map();
+exports.addFileModificationListener = function(listenerId, theListener) {
+	if(listenerId && typeof listenerId === 'object') {
+		//unnamed listener, the legacy way
+		var arr = _listeners.get('<legacy>');
+		if(!Array.isArray(arr)) {
+			arr = [];
+		}
+		arr.push(listenerId);
+		_listeners.set('<legacy>', arr);
+	} else {
+		_listeners.set(listenerId, theListener);
+	}
 };
 
-//TODO HACK for the tests
-exports.removeFileModificationListener = function() {
-	_fileModListeners.pop();
-}
-
-exports.fireFileModificationEvent = function(eventData) {
-	for (var i = 0; i < _fileModListeners.length; i++) {
-		_fileModListeners[i].handleFileModficationEvent(eventData);
+/**
+ * Removes the listener with the given identifier. If no identifier is given the last 
+ * legacy listener to be registered is removed
+ * @param {string} id The identifier of the listener to remove
+ * @since 17.0
+ */
+exports.removeFileModificationListener = function(id) {
+	if(id) {
+		_listeners.delete(id);
+	} else {
+		var arr = _listeners.get('<legacy>');
+		if(Array.isArray(arr)) {
+			arr.pop();
+			_listeners.set('<legacy>', arr);
+		}
 	}
+};
+
+/**
+ * Fire the given event to all regsitered listeners
+ * @param {?} eventData The event object
+ * @see {ChangeType} For a listing of available event types
+ */
+exports.fireFileModificationEvent = function(eventData) {
+	_listeners.forEach(function(val, key, map) {
+		if(typeof val.handleFileModficationEvent === 'function') {
+			//logger.debug('notifying "'+key+'" ('+eventData.type+'): '+JSON.stringify(eventData.file, null, '\t'));
+			val.handleFileModficationEvent(eventData);
+		} else if(Array.isArray(val)) {
+			val.forEach(function(listener) {
+				if(typeof listener.handleFileModficationEvent === 'function') {
+					//logger.debug('notifying legacy listener ('+eventData.type+'): '+JSON.stringify(eventData.file, null, '\t'));
+					listener.handleFileModficationEvent(eventData);
+				}
+			})
+		}
+	});
 };
