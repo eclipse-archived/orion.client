@@ -64,6 +64,8 @@ select {
 }
 .selectCell>select {
 	width: 100%;
+	min-width: 270px;
+	max-width: 270px;
 }
 /*hacko: push simple text span over to align with inputs and selects*/
 .selectCell>span {
@@ -124,6 +126,7 @@ select {
 }
 
 .selectCell {
+	padding-left: 32px;
 	padding-top: 4px;
 	text-align: left;
 	height: 24px; /*since min-height has no effect on <td>*/
