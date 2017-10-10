@@ -463,7 +463,7 @@ function createApp(req, appTarget){
 		var body = {
 			"space_guid": appTarget.Space.metadata.guid,
 			"name":theApp.appName,
-			"instances":theApp.manifest.applications[0].instances || 1,
+			"instances": Number(theApp.manifest.applications[0].instances) || 1,
 			"buildPack":theApp.manifest.applications[0].buildpack || null,
 			"command":theApp.manifest.applications[0].command,	
 			"memory": normalizeMemoryMeasure(theApp.manifest.applications[0].memory),
