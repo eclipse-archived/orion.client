@@ -74,99 +74,105 @@ module.exports = function(options) {
 		var diffs = body.diff || [];
 		var contents = body.contents;
 		var file = fileUtil.getFile(req, rest);
-		fs.exists(file.path, function(destExists) {
-			if (destExists) {
-				fs.readFile(file.path, function (error, data) {
-					if (error) {
-						logger.error(error);
-						writeError(500, res, error);
-						return;
-					}
-					try {
-						var newContents = data.toString();
-						if (newContents.length > 0) {
-							var code = newContents.charCodeAt(0);
-							if (code === 0xFEFF || code === 0xFFFE) {
-								newContents = newContents.substring(1);
-							}
-						}
-						var buffer = {
-							_text: [newContents], 
-							replaceText: function (text, start, end) {
-								var offset = 0, chunk = 0, _length;
-								while (chunk<this._text.length) {
-									_length = this._text[chunk].length; 
-									if (start <= offset + _length) { break; }
-									offset += _length;
-									chunk++;
-								}
-								var firstOffset = offset;
-								var firstChunk = chunk;
-								while (chunk<this._text.length) {
-									_length = this._text[chunk].length; 
-									if (end <= offset + _length) { break; }
-									offset += _length;
-									chunk++;
-								}
-								var lastOffset = offset;
-								var lastChunk = chunk;
-								var firstText = this._text[firstChunk];
-								var lastText = this._text[lastChunk];
-								var beforeText = firstText.substring(0, start - firstOffset);
-								var afterText = lastText.substring(end - lastOffset);
-								var params = [firstChunk, lastChunk - firstChunk + 1];
-								if (beforeText) { params.push(beforeText); }
-								if (text) { params.push(text); }
-								if (afterText) { params.push(afterText); }
-								Array.prototype.splice.apply(this._text, params);
-								if (this._text.length === 0) { this._text = [""]; }
-							},
-							getText: function() {
-								return this._text.join("");
-							}
-						};
-						for (var i=0; i<diffs.length; i++) {
-							var change = diffs[i];
-							buffer.replaceText(change.text, change.start, change.end);
-						}
-						newContents = buffer.getText();
-					} catch (ex) {
-						writeError(500, res, ex);
-						return;
-					}
-
-					var failed = false;
-					if (contents) {
-						if (newContents !== contents) {
-							failed = true;
-							newContents = contents;
-						}
-					}
-					fs.writeFile(file.path, newContents, function(err) {
-						if (err) {
-							logger.error(err);
-							writeError(500, res, err);
-							return;
-						}
-						if (failed) {
-							writeError(406, res, new Error('Bad file diffs. Please paste this content in a bug report: \u00A0\u00A0 \t' + JSON.stringify(body)));
-							return;
-						}
-						fs.stat(file.path, function(error, stats) {
-							if (error) {
-								logger.error(error);
-								writeError(500, res, error);
-								return;
-							}
-							fileUtil.writeFileMetadata(req, res, api.join(fileRoot, file.workspaceId), api.join(workspaceRoot, file.workspaceId), file, stats, ETag.fromString(newContents) /*the new ETag*/);
-							fileUtil.fireFileModificationEvent({ type: fileUtil.ChangeType.WRITE, file: file, contents: newContents, req: req});
-						});
-					});
-					
-				});
-			} else {
-				writeError(500, res, 'Destination does not exist.');
+		fileUtil.withStatsAndETag(file.path, function(error, stats, etag) {
+			if (error) {
+				logger.error(error);
+				writeError(500, res, error);
+				return;
 			}
+
+			var ifMatchHeader = req.headers['if-match'];
+			if (ifMatchHeader && ifMatchHeader !== etag) {
+				return api.sendStatus(412, res);
+			}
+
+			fs.readFile(file.path, function (error, data) {
+				if (error) {
+					logger.error(error);
+					writeError(500, res, error);
+					return;
+				}
+				try {
+					var newContents = data.toString();
+					if (newContents.length > 0) {
+						var code = newContents.charCodeAt(0);
+						if (code === 0xFEFF || code === 0xFFFE) {
+							newContents = newContents.substring(1);
+						}
+					}
+					var buffer = {
+						_text: [newContents], 
+						replaceText: function (text, start, end) {
+							var offset = 0, chunk = 0, _length;
+							while (chunk<this._text.length) {
+								_length = this._text[chunk].length; 
+								if (start <= offset + _length) { break; }
+								offset += _length;
+								chunk++;
+							}
+							var firstOffset = offset;
+							var firstChunk = chunk;
+							while (chunk<this._text.length) {
+								_length = this._text[chunk].length; 
+								if (end <= offset + _length) { break; }
+								offset += _length;
+								chunk++;
+							}
+							var lastOffset = offset;
+							var lastChunk = chunk;
+							var firstText = this._text[firstChunk];
+							var lastText = this._text[lastChunk];
+							var beforeText = firstText.substring(0, start - firstOffset);
+							var afterText = lastText.substring(end - lastOffset);
+							var params = [firstChunk, lastChunk - firstChunk + 1];
+							if (beforeText) { params.push(beforeText); }
+							if (text) { params.push(text); }
+							if (afterText) { params.push(afterText); }
+							Array.prototype.splice.apply(this._text, params);
+							if (this._text.length === 0) { this._text = [""]; }
+						},
+						getText: function() {
+							return this._text.join("");
+						}
+					};
+					for (var i=0; i<diffs.length; i++) {
+						var change = diffs[i];
+						buffer.replaceText(change.text, change.start, change.end);
+					}
+					newContents = buffer.getText();
+				} catch (ex) {
+					writeError(500, res, ex);
+					return;
+				}
+
+				var failed = false;
+				if (contents) {
+					if (newContents !== contents) {
+						failed = true;
+						newContents = contents;
+					}
+				}
+				fs.writeFile(file.path, newContents, function(err) {
+					if (err) {
+						logger.error(err);
+						writeError(500, res, err);
+						return;
+					}
+					if (failed) {
+						writeError(406, res, new Error('Bad file diffs. Please paste this content in a bug report: \u00A0\u00A0 \t' + JSON.stringify(body)));
+						return;
+					}
+					fs.stat(file.path, function(error, stats) {
+						if (error) {
+							logger.error(error);
+							writeError(500, res, error);
+							return;
+						}
+						fileUtil.writeFileMetadata(req, res, api.join(fileRoot, file.workspaceId), api.join(workspaceRoot, file.workspaceId), file, stats, ETag.fromString(newContents) /*the new ETag*/);
+						fileUtil.fireFileModificationEvent({ type: fileUtil.ChangeType.WRITE, file: file, contents: newContents, req: req});
+					});
+				});
+			});
 		});
 	}
 
