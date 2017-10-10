@@ -28,6 +28,7 @@ var CONTEXT_PATH = testHelper.CONTEXT_PATH,
 	METADATA =  testHelper.METADATA,
 	WORKSPACE_ID = testHelper.WORKSPACE_ID,
 	FILE_ROOT = "/file/" + WORKSPACE_ID + "/",
+	WORKSPACE_ROOT = "/workspace/" + WORKSPACE_ID + "/",
 	GIT_ROOT = CONTEXT_PATH + "/gitapi";
 
 var request = testData.setupOrionServer();
@@ -1321,6 +1322,67 @@ maybeDescribe("git", function() {
 
 		});
 	}); // describe("Use case 3")
+	
+	
+	/**
+	 * Create folder and sub-folder, Init a repo on existing folder or sub folder;
+	 * TODO add a another test case for child folder
+	 */
+	describe('Use case 4', function(/*done*/) {
+		var ParentFolder = "ParentFolder";
+		var ChildFolder = "ChildFolder";
+		var ParentRepoPath = path.join(WORKSPACE, ParentFolder);
+		var ChildRepoPath = path.join(WORKSPACE, ParentFolder, ChildFolder);
+		describe('Creates a new directory using orion file api and init repository of the existing folder', function() {
+			it('GET clone (initializes a git repo)', function(finished) {
+				request()
+				.post(WORKSPACE_ROOT)
+				.send({
+					"Name":  ParentFolder
+				})
+				.expect(201)
+				.end(function(err, res){
+					request()
+					.post(GIT_ROOT + "/clone/")
+					.send({
+						"Name":  ParentFolder,
+						"Location": '/workspace/' + WORKSPACE_ID,
+						"GitName": "test",
+						"GitMail": "test@test.com",
+						"Path": FILE_ROOT + ParentFolder
+					})
+					.expect(201)
+					.end(function(err, res) {
+						assert.ifError(err);
+						assert.equal(res.body.Location, GIT_ROOT + "/clone" + FILE_ROOT + ParentFolder);
+						finished();
+					});
+				});
+			});
+
+			it('Check the directory was made', function() {
+				var stat = fs.statSync(ParentRepoPath);
+				assert(stat.isDirectory());
+			});
+
+			it('Check nodegit that the repo was initialized', function(finished) {
+				git.Repository.open(ParentRepoPath)
+				.then(function(repo) {
+					return repo.getReferenceCommit("HEAD");
+				})
+				.then(function(commit) {
+					assert(commit.message(), "Initial commit");
+				})
+				.catch(function(err) {
+					assert.ifError(err);
+				})
+				.done(function() {
+					finished();
+				});
+			});
+		});
+	}); // describe("Use case 4")
+
 
 	describe("Rebase", function() {
 		before(setup);
