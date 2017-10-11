@@ -627,7 +627,7 @@ function getRemoteCallbacks(creds, user, task) {
 		/**
 		 * @callback
 		 */
-		credentials: function(gitUrl, urlUsername) {
+		credentials: function(creds, gitUrl, urlUsername) {
 			if (gitUrl.indexOf("@") !== -1 && gitUrl.indexOf("@") < gitUrl.indexOf(":") && creds.GitSshPrivateKey) {
 				var privateKey = creds.GitSshPrivateKey;
 				var passphrase = creds.GitSshPassphrase;
