@@ -588,7 +588,7 @@ function foreachSubmodule(repo, operation, recursive, fetchOpts) {
 							if (recursive) {
 								return submodule.open()
 								.then(function(subrepo) {
-									return foreachSubmodule(subrepo, operation, recursive);
+									return foreachSubmodule(subrepo, operation, recursive, fetchOpts);
 								});
 							}
 						});

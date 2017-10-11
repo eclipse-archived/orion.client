@@ -15,6 +15,7 @@ var git = require('nodegit'),
 	express = require('express'),
 	bodyParser = require('body-parser'),
 	clone = require('./clone'),
+	tasks = require('../tasks'),
 	fileUtil = require('../fileUtil'),
 	responseTime = require('response-time');
 
@@ -36,15 +37,33 @@ module.exports.router = function(options) {
 	.delete(fileRoot + '*', deleteSubmodule);
 
 function putSubmodule(req, res) {
+	var task = new tasks.Task(res, false, true, 0, true);
 	return clone.getRepo(req)
 	.then(function(repo) {
-		return clone.foreachSubmodule(repo, req.body.Operation, false);
+		return clone.foreachSubmodule(repo, req.body.Operation, false,{
+			fetchOpts: {
+				callbacks: clone.getRemoteCallbacks(req, task)
+			}
+		});
 	})
 	.then(function() {
-		writeResponse(200, res);
+		task.done({
+			HttpCode: 200,
+			Code: 0,
+			DetailedMessage: "OK",
+			Message: "OK",
+			Severity: "Ok"
+		});
 	})
 	.catch(function(err) {
-		return writeError(400, res, err.message);
+		task.done({
+			HttpCode: 400,
+			Code: 0,
+			DetailedMessage: err.message,
+			JsonData: {},
+			Message: err.message,
+			Severity: "Error"
+		});
 	});
 }
 function postSubmodule(req, res) {
