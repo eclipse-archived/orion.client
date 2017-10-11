@@ -574,7 +574,6 @@ function foreachSubmodule(repo, operation, recursive, fetchOpts) {
 				return function(cb) {
 					git.Submodule.lookup(repo, name)
 					.then(function(submodule) {
-						currentSubmodule = submodule;
 						var op;
 						if (operation === "sync") {
 							op = submodule.sync();
