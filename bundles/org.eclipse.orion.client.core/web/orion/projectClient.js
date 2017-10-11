@@ -608,13 +608,13 @@ define([
 								launchConf.Params.LogLocationTemplate = deployService.logLocationTemplate;
 							}
 							
-							if(deployService && deployService.getDevMode){
-								var confName = typeof launchConf.Path === 'string' ? launchConf.Path : launchConf.File.Name;
-								deployService.getDevMode(projectMetadata.ContentLocation + confName).then(function(devModeParam){
+							if(deployService && deployService.getDevMode) {
+								//copy Java - no path, assume manifest.yml
+								var confLoc = projectMetadata.ContentLocation + (typeof launchConf.Path === 'string' ? launchConf.Path : "manifest.yml");
+								deployService.getDevMode(confLoc).then(function(devModeParam){
 									if (devModeParam) {
 										launchConf.Params.DevMode = devModeParam;
 									}
-									
 									def.resolve(launchConf);
 								}, function(){
 									def.resolve(launchConf);
@@ -765,13 +765,13 @@ define([
 							launchConfigurationEntry.Params.LogLocationTemplate = deployService.logLocationTemplate;
 						}
 						
-						if(deployService && deployService.getDevMode){
-							var confName = typeof launchConfigurationEntry.Path === 'string' ? launchConfigurationEntry.Path : launchConfigurationEntry.File.Name;
-							deployService.getDevMode(projectMetadata.ContentLocation + confName).then(function(devModeParam){
+						if(deployService && deployService.getDevMode) {
+							//copy Java - if not path in launch config, assume manifest.yml
+							var confLoc = projectMetadata.ContentLocation + (typeof launchConfigurationEntry.Path === 'string' ? launchConfigurationEntry.Path : "manifest.yml");
+							deployService.getDevMode(confLoc).then(function(devModeParam){
 								if (devModeParam) {
 									launchConfigurationEntry.Params.DevMode = devModeParam;
 								}
-								
 								deferred.resolve(launchConfigurationEntry);
 							}, function(){
 								deferred.resolve(launchConfigurationEntry);
@@ -779,9 +779,6 @@ define([
 						} else {
 							deferred.resolve(launchConfigurationEntry);
 						}
-						
-						
-
 					}.bind(this), deferred.reject
 				);
 			}.bind(this), deferred.reject

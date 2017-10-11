@@ -123,7 +123,7 @@ define([
         var url = new URL('../orion/debug/debugDeploymentWizard.html', location.href);
         url.hash = '#' + encodeURIComponent(JSON.stringify({
             ContentLocation: project.ContentLocation,
-            AppPath: launchConf.Path,
+            AppPath: typeof launchConf.Path === 'string' ? launchConf.Path : 'manifest.yml',
             ConfParams: launchConf.Parameters,
             ConfName: launchConf.ConfigurationName,
             ProjName: project.Name,
