@@ -81,6 +81,7 @@ function startServer(cb) {
 			log4js.addAppender(log4js.appenders.file(logPath, null, 5000000));
 		}
 		if (dev) {
+			process.env.OrionDevMode = true;
 			logger.info('Development mode: client code will not be cached.');
 		}
 		if (passwordFile) {

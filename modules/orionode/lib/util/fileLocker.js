@@ -22,6 +22,9 @@ var SHARED = "sh";
 var UNLOCK = "un";
 
 var TIMEOUT_INACTIVE = 3 * 1000; /* 3s */
+if(process.env.OrionDevMode === true){
+	TIMEOUT_INACTIVE = 10000 * 1000;
+}
 
 var ReentrantLock = function() {
 	this._queue = [];
