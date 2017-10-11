@@ -611,7 +611,7 @@ function foreachSubmodule(repo, operation, recursive, fetchOpts) {
 	});
 }
 
-function getRemoteCallbacks(creds, user, task) {
+function getRemoteCallbacks(req, task, credsToStore) {
 	return {
 		certificateCheck: function() {
 			return 1; // Continues connection even if SSL certificate check fails. 
@@ -627,7 +627,8 @@ function getRemoteCallbacks(creds, user, task) {
 		/**
 		 * @callback
 		 */
-		credentials: function(creds, gitUrl, urlUsername) {
+		credentials: function(gitUrl, urlUsername) {
+			var creds = req.body;
 			if (gitUrl.indexOf("@") !== -1 && gitUrl.indexOf("@") < gitUrl.indexOf(":") && creds.GitSshPrivateKey) {
 				var privateKey = creds.GitSshPrivateKey;
 				var passphrase = creds.GitSshPassphrase;
@@ -636,6 +637,13 @@ function getRemoteCallbacks(creds, user, task) {
 					"",
 					privateKey,
 					passphrase || ""
+				);
+			}
+
+			if(credsToStore) {
+				return git.Cred.userpassPlaintextNew(
+					credsToStore.GitSshUsername || urlUsername,
+					credsToStore.GitSshPassword || ""
 				);
 			}
 
@@ -652,7 +660,7 @@ function getRemoteCallbacks(creds, user, task) {
 			}
 
 			return new Promise(function(resolve, reject) {
-				credentialsProvider.getCredentials(gitUrl, user).then(
+				credentialsProvider.getCredentials(gitUrl, req.user.username).then(
 					function(result) {
 						resolve(result);
 					},
@@ -718,11 +726,10 @@ function postClone(req, res) {
 	}
 	
 	var task = new tasks.Task(res, false, true, 0, true);
-	var creds = req.body;
-	var copyCreds = Object.assign({}, creds);
+	var copyCreds = Object.assign({}, req.body);
 	return git.Clone.clone(cloneUrl, file.path, {
 		fetchOpts: {
-			callbacks: getRemoteCallbacks(creds, req.user.username, task)
+			callbacks: getRemoteCallbacks(req, task)
 		}
 	})
 	.then(function(_repo) {
@@ -734,7 +741,7 @@ function postClone(req, res) {
 		if (req.body.cloneSubmodules === undefined || req.body.cloneSubmodules === null || req.body.cloneSubmodules) {
 			return foreachSubmodule(repo, "update", true, {
 				fetchOpts: {
-					callbacks: getRemoteCallbacks(copyCreds, req.user.username, task)
+					callbacks: getRemoteCallbacks(req, task, copyCreds)
 				}
 			});
 		}
