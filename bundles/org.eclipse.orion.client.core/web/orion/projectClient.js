@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2013, 2016 IBM Corporation and others.
+ * Copyright (c) 2013, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License v1.0
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution
@@ -609,7 +609,8 @@ define([
 							}
 							
 							if(deployService && deployService.getDevMode){
-								deployService.getDevMode(projectMetadata.ContentLocation + launchConf.Path).then(function(devModeParam){
+								var confName = typeof launchConf.Path === 'string' ? launchConf.Path : launchConf.File.Name;
+								deployService.getDevMode(projectMetadata.ContentLocation + confName).then(function(devModeParam){
 									if (devModeParam) {
 										launchConf.Params.DevMode = devModeParam;
 									}
@@ -765,7 +766,8 @@ define([
 						}
 						
 						if(deployService && deployService.getDevMode){
-							deployService.getDevMode(projectMetadata.ContentLocation + launchConfigurationEntry.Path).then(function(devModeParam){
+							var confName = typeof launchConfigurationEntry.Path === 'string' ? launchConfigurationEntry.Path : launchConfigurationEntry.File.Name;
+							deployService.getDevMode(projectMetadata.ContentLocation + confName).then(function(devModeParam){
 								if (devModeParam) {
 									launchConfigurationEntry.Params.DevMode = devModeParam;
 								}
