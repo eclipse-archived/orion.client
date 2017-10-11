@@ -611,7 +611,7 @@ function foreachSubmodule(repo, operation, recursive, fetchOpts) {
 	});
 }
 
-function getRemoteCallbacks(req, task) {
+function getRemoteCallbacks(creds, user, task) {
 	return {
 		certificateCheck: function() {
 			return 1; // Continues connection even if SSL certificate check fails. 
@@ -628,7 +628,6 @@ function getRemoteCallbacks(req, task) {
 		 * @callback
 		 */
 		credentials: function(gitUrl, urlUsername) {
-			var creds = req.body;
 			if (gitUrl.indexOf("@") !== -1 && gitUrl.indexOf("@") < gitUrl.indexOf(":") && creds.GitSshPrivateKey) {
 				var privateKey = creds.GitSshPrivateKey;
 				var passphrase = creds.GitSshPassphrase;
@@ -653,7 +652,7 @@ function getRemoteCallbacks(req, task) {
 			}
 
 			return new Promise(function(resolve, reject) {
-				credentialsProvider.getCredentials(gitUrl, req.user.username).then(
+				credentialsProvider.getCredentials(gitUrl, user).then(
 					function(result) {
 						resolve(result);
 					},
@@ -719,12 +718,13 @@ function postClone(req, res) {
 	}
 	
 	var task = new tasks.Task(res, false, true, 0, true);
-	var fetchOpts = {
+	var creds = req.body;
+	var copyCreds = Object.assign({}, creds);
+	return git.Clone.clone(cloneUrl, file.path, {
 		fetchOpts: {
-			callbacks: getRemoteCallbacks(req, task)
+			callbacks: getRemoteCallbacks(creds, req.user.username, task)
 		}
-	}
-	return git.Clone.clone(cloneUrl, file.path, fetchOpts)
+	})
 	.then(function(_repo) {
 		repo = _repo;
 		return configRepo(repo, req.body.GitName, req.body.GitMail);
@@ -732,7 +732,11 @@ function postClone(req, res) {
 	.then(function() {
 		// default to true if parameter not set
 		if (req.body.cloneSubmodules === undefined || req.body.cloneSubmodules === null || req.body.cloneSubmodules) {
-			return foreachSubmodule(repo, "update", true, fetchOpts);
+			return foreachSubmodule(repo, "update", true, {
+				fetchOpts: {
+					callbacks: getRemoteCallbacks(copyCreds, req.user.username, task)
+				}
+			});
 		}
 	})
 	.then(function(){

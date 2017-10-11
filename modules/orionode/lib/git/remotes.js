@@ -295,7 +295,7 @@ function fetchRemote(req, res, remote, branch, force) {
 		return remoteObj.fetch(
 			refSpec ? [refSpec] : null,
 			{
-				callbacks: clone.getRemoteCallbacks(req, task),
+				callbacks: clone.getRemoteCallbacks(req.body, req.user.username, task),
 				downloadTags: 3     // 3 = C.GIT_REMOTE_DOWNLOAD_TAGS_ALL (libgit2 const) 
 			},
 			"fetch"	
@@ -345,7 +345,7 @@ function pushRemote(req, res, remote, branch, pushSrcRef, tags, force) {
 		if(tags){
 			return repo.getRemote(remote)
 			.then(function(remote){
-				return Promise.all([remote,remote.connect(git.Enums.DIRECTION.FETCH, clone.getRemoteCallbacks(req, task))]);			
+				return Promise.all([remote,remote.connect(git.Enums.DIRECTION.FETCH, clone.getRemoteCallbacks(req.body, req.user.username, task))]);			
 			})
 			.then(function(results){
 				var remote = results[0];
@@ -370,7 +370,7 @@ function pushRemote(req, res, remote, branch, pushSrcRef, tags, force) {
 	})
 	.then(function(refSpecs){
 		return remoteObj.push(
-			refSpecs, {callbacks: clone.getRemoteCallbacks(req, task)}
+			refSpecs, {callbacks: clone.getRemoteCallbacks(req.body, req.user.username, task)}
 		);
 	})
 	.then(function(err) {
