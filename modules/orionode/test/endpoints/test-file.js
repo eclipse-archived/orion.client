@@ -1079,24 +1079,25 @@ describe('File endpoint', function() {
 			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=521257
 			 * This test passes on the Java server
 			 */
-			it.skip("testFolderWithIPv6Name", function(done) {
-				var folderName = encodeURIComponent("[bork]");
+			it("testFolderWithIPv6Name", function(done) {
+				var folderName = "[bork]";
 				request()
 					.post(PREFIX + '/project')
 					.type('json')
-					.send({Name: folderName})
+					.send({Name: folderName, Directory: true})
 					.expect(201)
 					.end(function(err, res) {
 						testHelper.throwIfError(err);
 						request()
-							.post(PREFIX + '/project/'+folderName)
-							.type('json')
-							.send({Name: 'test.txt'})
+						.post(res.body.Location)
+						.type('json')
+						.set('Slug', 'test.txt')
+						.send({"Name":"test.txt","Directory":false})
 							.expect(201)
 							.end(function(err, res) {
 								testHelper.throwIfError(err);
 								request()
-									.get(PREFIX + '/project/'+folderName+'/test.text')
+									.get(res.body.Location)
 									.query({parts: 'meta'})
 									.expect(200)
 									.end(done);
