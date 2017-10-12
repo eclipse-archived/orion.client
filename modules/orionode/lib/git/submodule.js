@@ -72,7 +72,6 @@ function postSubmodule(req, res) {
 	if (!url) {
 		return writeError(400, res, "Invalid parameters");
 	}
-	
 	var repo, submodule, subrepo, rest;
 	return clone.getRepo(req)
 	.then(function(_repo) {
@@ -122,7 +121,73 @@ function postSubmodule(req, res) {
 			});
 		});
 	}).catch(function(err) {
-		handleRemoteError(task, err, url);
+		return deleteSubmoduleFromRepo(subrepo, repo)
+		.then(function(){
+			clone.handleRemoteError(task, err, url);
+		}).catch(function(){
+			clone.handleRemoteError(task, err, url);
+		});
+	});
+}
+
+/**
+ * @name deleteSubmoduleFromRepo
+ * @description Helper method used to delete a subrepo from a repo
+ * @param {Repository} subrepo object
+ * @param {Repository} parent repo object
+ * @returns returns Promise
+ * @since 17.0
+ */
+function deleteSubmoduleFromRepo(subrepo, repo) {
+	var submodulePath = subrepo.workdir().substring(repo.workdir().length).slice(0, -1);
+	var configFile = api.join(repo.path(), "config");
+	return new Promise(function(fulfill, reject) {
+		args.readConfigFile(configFile, function(err, config) {
+			if (err) return reject(err);
+			delete config["submodule"][submodulePath];
+			args.writeConfigFile(configFile, config, function(err) {
+				if (err) return reject(err);
+				configFile = api.join(repo.workdir(), ".gitmodules");
+				args.readConfigFile(configFile, function(err, config) {
+					if (err) return reject(err);
+					delete config["submodule"][submodulePath];
+					args.writeConfigFile(configFile, config, function(err) {
+						if (err) return reject(err);
+						fileUtil.rumRuff(subrepo.path(), function(err) {
+							if (err) return reject(err);
+							fileUtil.rumRuff(subrepo.workdir(), function(err) {
+								if (err) return reject(err);
+								var index;
+								return repo.refreshIndex()
+								.then(function(indexResult) {
+									index = indexResult;
+									var work = [];
+									if (Object.keys(config).length) {
+										work.push(index.addByPath(".gitmodules"));
+									} else {
+										work.push(index.removeByPath(".gitmodules"));
+									}
+									work.push(index.removeByPath(submodulePath));
+									return Promise.all(work);
+								})
+								.then(function() {
+									return index.write();
+								})
+								.then(function() {
+									return index.writeTree();
+								})
+								.then(function() {
+									fulfill();
+								}).catch(function(err) {
+									reject(err);
+								});
+							});
+						});
+						
+					});
+				});
+			});
+		});
 	});
 }
 function deleteSubmodule(req, res) {
@@ -136,56 +201,7 @@ function deleteSubmodule(req, res) {
 		});
 	})
 	.then(function(repo) {
-		var submodulePath = subrepo.workdir().substring(repo.workdir().length).slice(0, -1);
-		var configFile = api.join(repo.path(), "config");
-		return new Promise(function(fulfill, reject) {
-			args.readConfigFile(configFile, function(err, config) {
-				if (err) return reject(err);
-				delete config["submodule"][submodulePath];
-				args.writeConfigFile(configFile, config, function(err) {
-					if (err) return reject(err);
-					configFile = api.join(repo.workdir(), ".gitmodules");
-					args.readConfigFile(configFile, function(err, config) {
-						if (err) return reject(err);
-						delete config["submodule"][submodulePath];
-						args.writeConfigFile(configFile, config, function(err) {
-							if (err) return reject(err);
-							fileUtil.rumRuff(subrepo.path(), function(err) {
-								if (err) return reject(err);
-								fileUtil.rumRuff(subrepo.workdir(), function(err) {
-									if (err) return reject(err);
-									var index;
-									return repo.refreshIndex()
-									.then(function(indexResult) {
-										index = indexResult;
-										var work = [];
-										if (Object.keys(config).length) {
-											work.push(index.addByPath(".gitmodules"));
-										} else {
-											work.push(index.removeByPath(".gitmodules"));
-										}
-										work.push(index.removeByPath(submodulePath));
-										return Promise.all(work);
-									})
-									.then(function() {
-										return index.write();
-									})
-									.then(function() {
-										return index.writeTree();
-									})
-									.then(function() {
-										fulfill();
-									}).catch(function(err) {
-										reject(err);
-									});
-								});
-							});
-							
-						});
-					});
-				});
-			});
-		});
+		return deleteSubmoduleFromRepo(subrepo, repo);
 	})
 	.then(function() {
 		writeResponse(200, res);

@@ -1173,7 +1173,7 @@ eclipse.GitService = (function() {
 			return clientDeferred;
 		},
 		
-		addSubmodule : function(gitName, submoduleLocation,targetPath, gitUrl, repoLocation){
+		addSubmodule : function(gitName, submoduleLocation,targetPath, gitUrl, repoLocation, gitSshUsername, gitSshPassword, gitSshKnownHost, privateKey, passphrase){
 			var service = this;
 			var postData = {};
 			if(gitName){
@@ -1184,6 +1184,21 @@ eclipse.GitService = (function() {
 			}
 			if(gitUrl){
 				postData.GitUrl=gitUrl;
+			}
+			if(gitSshUsername){
+				postData.GitSshUsername = gitSshUsername;
+			}
+			if(gitSshPassword){
+				postData.GitSshPassword = gitSshPassword;
+			}
+			if(gitSshKnownHost){
+				postData.GitSshKnownHost = gitSshKnownHost;
+			}
+			if(privateKey) {
+				postData.GitSshPrivateKey=privateKey;
+			}
+			if(passphrase) {
+				postData.GitSshPassphrase=passphrase;
 			}
 			postData.Location = repoLocation;
 			var clientDeferred = new Deferred();
