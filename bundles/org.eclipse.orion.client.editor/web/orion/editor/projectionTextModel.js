@@ -344,6 +344,18 @@ define("orion/editor/projectionTextModel", ['orion/editor/textModel', 'orion/edi
 			return this._model.getLineDelimiter();
 		},
 		/**
+		 * @see orion.editor.TextModel#getLineTextDir
+		 */
+		getLineTextDir: function(lineIndex) {
+			return this._model.getLineTextDir(lineIndex);
+		},
+		/**
+		 * @see orion.editor.TextModel#getTextForSave
+		 */
+		getTextForSave: function() {
+			return this._model.getTextForSave();
+		},	
+		/**
 		 * @see orion.editor.TextModel#getLineEnd
 		 */
 		getLineEnd: function(lineIndex, includeDelimiter) {

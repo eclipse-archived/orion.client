@@ -13,12 +13,6 @@ define ([
 ],
 function(util, bidiFormat) { /* BDL */
 	
-	var bidiEnabledStorage = "/orion/preferences/bidi/bidiEnabled"; //$NON-NLS-0$
-	var bidiLayoutStorage = "/orion/preferences/bidi/bidiLayout"; //$NON-NLS-0$	
-	var LRE = "\u202A";	//$NON-NLS-0$
-	var PDF = "\u202C"; //$NON-NLS-0$
-	var RLE = "\u202B"; //$NON-NLS-0$
-		
 	function setBrowserLangDirection() {
 		
 		var lang;
@@ -30,7 +24,7 @@ function(util, bidiFormat) { /* BDL */
 		}
 		var isBidi = lang && "ar iw he".indexOf(lang.substring(0, 2)) !== - 1;
 
-		if (isBidi && isBidiEnabled()) {
+		if (isBidi) {
 			var htmlElement = document.getElementsByTagName("html")[0];
 			if (htmlElement){ //should be always true
 				htmlElement.setAttribute ("dir", "rtl");
@@ -40,6 +34,12 @@ function(util, bidiFormat) { /* BDL */
 	
 	setBrowserLangDirection();
 	
+	var bidiEnabledStorage = "/orion/preferences/bidi/bidiEnabled"; //$NON-NLS-0$
+	var bidiLayoutStorage = "/orion/preferences/bidi/bidiLayout"; //$NON-NLS-0$	
+	var LRE = "\u202A";	//$NON-NLS-0$
+	var PDF = "\u202C"; //$NON-NLS-0$
+	var RLE = "\u202B"; //$NON-NLS-0$
+		
 	var bidiLayout = getBidiLayout();
 
 	/**
@@ -147,7 +147,16 @@ function(util, bidiFormat) { /* BDL */
 		}
 	}
 	
-	function enforceTextDir(range) {
+	function createNewStyle ( oldStyle, textDir ) {
+		var newStyle = oldStyle;
+		if (typeof newStyle.attributes === "undefined") {
+			newStyle.attributes = {};
+		}
+		newStyle.attributes.dir = textDir;
+		return newStyle;
+	}
+	
+	function enforceTextDir( range, textDir ) {
 		var comments = [{name:"comment block"}, 
 		                {name:"comment line double-slash"},
 		                {name:"comment block documentation"},
@@ -164,13 +173,17 @@ function(util, bidiFormat) { /* BDL */
 					var newStyle = style;
 					if (typeof newStyle.attributes === "undefined") {
 						newStyle.attributes = {};
-					}
-					newStyle.attributes.dir = getTextDirection(text);
-					range.style = newStyle;		
+					}							
+					range.style = createNewStyle( style, getTextDirection(text) );
 					return range;
 				}
 			}
 		}
+		else if (style && textDir && textDir.length > 0) {
+			range.style = createNewStyle( style, textDir );
+			return range;
+		}
+		
 		return range;
 	}
 	
