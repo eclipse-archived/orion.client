@@ -67,6 +67,7 @@ function putSubmodule(req, res) {
 	});
 }
 function postSubmodule(req, res) {
+	var task = new tasks.Task(res, false, true, 0, true);
 	var url = req.body.GitUrl;
 	if (!url) {
 		return writeError(400, res, "Invalid parameters");
@@ -97,7 +98,7 @@ function postSubmodule(req, res) {
 		})
 		.then(function(_subrepo) {
 			subrepo = _subrepo;
-			return subrepo.fetchAll({});
+			return subrepo.fetchAll({callbacks: clone.getRemoteCallbacks(req, task)});
 		})
 		.then(function() {
 			return subrepo.getReferenceCommit("origin/master");
@@ -112,10 +113,16 @@ function postSubmodule(req, res) {
 			return submodule.addFinalize();
 		})
 		.then(function() {
-			writeResponse(200, res);
+			task.done({
+				HttpCode: 200,
+				Code: 0,
+				DetailedMessage: "OK",
+				Message: "OK",
+				Severity: "Ok"
+			});
 		});
 	}).catch(function(err) {
-		writeError(400, res, err.message);
+		handleRemoteError(task, err, url);
 	});
 }
 function deleteSubmodule(req, res) {
