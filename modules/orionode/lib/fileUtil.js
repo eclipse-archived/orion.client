@@ -430,122 +430,172 @@ function fileJSON(fileRoot, workspaceRoot, file, stats, depth, metadataMixins) {
 		return result;
 	});
 }
-
+/**
+ * Returns if the underlying file system is case sensitive
+ * @param {?} file The file object
+ * @returns {bool} True if the underlying filesystem is case-sensitive, false otherwise
+ * @since 17.0
+ */
+var isFSCaseInsensitive = exports.isFSCaseInsensitive = function isFSCaseInsensitive(file) {
+	if(typeof ISFS_CASE_INSENSITIVE === 'undefined'){
+		var lowerCaseStat = fs.statSync(file.path.toLowerCase());
+		var upperCaseStat = fs.statSync(file.path.toUpperCase());
+		if(lowerCaseStat && upperCaseStat) {
+			return ISFS_CASE_INSENSITIVE = lowerCaseStat.dev === upperCaseStat.dev && lowerCaseStat.ino === upperCaseStat.ino;
+		}
+		return ISFS_CASE_INSENSITIVE = false;
+	}
+}
+/**
+ * Returns if the two files are referencing the same file, considering the case-sensitivity of the underlying file system
+ * @param {XMLHttpRequest} req The backing request
+ * @param {string} fileRoot The file root
+ * @param {?} dest The destination file object
+ */
+var istheSameFile = exports.istheSameFile = function istheSameFile(req, fileRoot, dest) {
+	var originalFile = getFile(req, req.body.Location.replace(new RegExp("^"+fileRoot), ""));
+	return path.dirname(originalFile.path).toLowerCase() === path.dirname(dest.path).toLowerCase() && dest.path.toLowerCase() === originalFile.path.toLowerCase();
+}
+/**
+ * Send the response to the file POST
+ * @param {XMLHttpRequest} req The backing request
+ * @param {XMLHttpResponse} res The response object
+ * @param {string} fileRoot The root of the file endpoint
+ * @param {string} workspaceRoot The root of the workspace endpoint
+ * @param {?} destFile The destination file
+ * @param {?} metadataMixins Properties to mix into the response
+ * @since 17.0
+ */
+function filePostResponse(req, res, fileRoot, workspaceRoot, destFile, isOverwrite, metadataMixins) {
+	// TODO: maybe set ReadOnly and Executable based on fileAtts
+	if (typeof statusCode === 'number') {
+		res.status(statusCode);
+	} else {
+		// Status code 200 indicates that an existing resource was replaced, or we're POSTing to a URL
+		res.status(isOverwrite ? 200 : 201);
+	}
+	return fs.stat(destFile.path, function(err, stats) {
+		if(err) {
+			logger.error(err);
+			return api.writeError(500, res, err.message);
+		}
+		return writeFileMetadata(req, res, api.join(fileRoot, destFile.workspaceId), api.join(workspaceRoot, destFile.workspaceId), destFile, stats, /*etag*/null, /*depth*/0, metadataMixins);
+	})
+};
 /**
  * Helper for fulfilling a file POST request (for example, copy, move, or create).
- * @param {String} workspaceRoot The route of the /workspace handler (not including context path)
- * @param {String} fileRoot The route of the /file handler (not including context path)
- * @param {Object} req
- * @parma {Object} res
- * @param {String} wwwpath
- * @param {String} destFile
- * @param {Object} [metadata] Additional metadata to be mixed in to the File response.
- * @param {Number} [statusCode] Status code to send on a successful response. By default, `201 Created` is sent if
+ * @param {string} workspaceRoot The route of the /workspace handler (not including context path)
+ * @param {string} fileRoot The route of the /file handler (not including context path)
+ * @param {XMLHttpRequest} req The backing request
+ * @param {XMLHttpResponse} res The response
+ * @param {?} destFile The destination file object
+ * @param {?} metadataMixins Additional metadata to be mixed in to the File response.
+ * @param {number} statusCode Status code to send on a successful response. By default, `201 Created` is sent if
  * a new resource was created, and and `200 OK` if an existing resource was overwritten.
  */
 exports.handleFilePOST = function(workspaceRoot, fileRoot, req, res, destFile, metadataMixins, statusCode) {
-	var isDirectory = req.body && getBoolean(req.body, 'Directory');
-	var writeResponse = function(isOverwrite) {
-		// TODO: maybe set ReadOnly and Executable based on fileAtts
-		if (typeof statusCode === 'number') {
-			res.status(statusCode);
-		} else {
-			// Status code 200 indicates that an existing resource was replaced, or we're POSTing to a URL
-			res.status(isOverwrite ? 200 : 201);
-		}
-		return fs.statAsync(destFile.path)
-		.then(function(stats) {
-			return writeFileMetadata(req, res, api.join(fileRoot, destFile.workspaceId), api.join(workspaceRoot, destFile.workspaceId), destFile, stats, /*etag*/null, /*depth*/0, metadataMixins);
-		})
-		.catch(function(err) {
-			logger.error(err);
-			return api.writeError(err.code || 500, res, err.message);
-		});
-	};
-	return fs.statAsync(destFile.path)
-	.catchReturn({ code: 'ENOENT' }, null) // suppress reject when file does not exist
-	.then(function(stats) {
-		return Boolean(stats); // just return whether the file existed
-	})
-	.then(function(destExists) {
-		var xCreateOptions = (req.headers['x-create-options'] || "").split(",");
-		var isCopy = xCreateOptions.indexOf('copy') !== -1, isMove = xCreateOptions.indexOf('move') !== -1;
-		if (isCopy && isMove) {
-			return api.writeResponse(400, res, null, 'Illegal combination of X-Create-Options.', true);
+	var isDirectory = req.body && getBoolean(req.body, 'Directory'),
+		xCreateOptions = (req.headers['x-create-options'] || "").split(","),
+		isCopy = xCreateOptions.indexOf('copy') !== -1, 
+		isMove = xCreateOptions.indexOf('move') !== -1,
+		isNonWrite = isCopy || isMove,
+		sourceUrl = req.body.Location;
+	if (isCopy && isMove) {
+		return api.writeResponse(400, res, null, 'Illegal combination of X-Create-Options.', true);
+	} else if (isNonWrite && !sourceUrl) {
+		return api.writeError(400, res, 'Missing Location property in request body');
+	}
+	return fs.stat(destFile.path, function(err, stats) {
+		var destExists = true;
+		if(err) {
+			destExists = false;
+			if(err.code !== 'ENOENT') {
+				var message = String("Failed to write file to: ").concat(destFile.path.slice(destFile.workspaceDir.length));
+				if(isMove) {
+					message = String("Failed to move file to: ").concat(destFile.path.slice(destFile.workspaceDir.length));
+				} else if(isCopy) {
+					message = String("Failed to copy file to: ").concat(destFile.path.slice(destFile.workspaceDir.length));
+				}
+				return api.writeError(500, res, new Error(message));
+			}
 		}
 		if (xCreateOptions.indexOf('no-overwrite') !== -1 && destExists) {
-			function isFSCaseInsensitive() {
-				if(typeof ISFS_CASE_INSENSITIVE === 'undefined'){
-					var lowerCaseStat = fs.statSync(destFile.path.toLowerCase());
-					var upperCaseStat = fs.statSync(destFile.path.toUpperCase());
-					if(lowerCaseStat && upperCaseStat) {
-						return ISFS_CASE_INSENSITIVE = lowerCaseStat.dev === upperCaseStat.dev && lowerCaseStat.ino === upperCaseStat.ino;
-					}
-					return ISFS_CASE_INSENSITIVE = false;
-				}
-			}
-			function istheSameFile() {
-				var originalFile = getFile(req, req.body.Location.replace(new RegExp("^"+fileRoot), ""));
-				return path.dirname(originalFile.path).toLowerCase() === path.dirname(destFile.path).toLowerCase() && destFile.path.toLowerCase() === originalFile.path.toLowerCase();
-			}
-			if(!isMove || !istheSameFile() || !isFSCaseInsensitive()){
+			if(!isMove || !istheSameFile(req, fileRoot, destFile) || !isFSCaseInsensitive(destFile)){
 				return api.writeError(412, res, new Error('A file or folder with the same name already exists at this location.'));
 			}
 		}
-		if (isCopy || isMove) {
-			var sourceUrl = req.body.Location;
-			if (!sourceUrl) {
-				return api.writeError(400, res, 'Missing Location property in request body');
-			}
+		if (isNonWrite) {
 			var sourceFile = getFile(req, api.decodeURIComponent(sourceUrl.replace(new RegExp("^"+fileRoot), "")));
-			return fs.statAsync(sourceFile.path)
-			.then(function(stats) {
+			return fs.stat(sourceFile.path, function(err, stats) {
+				if(err) {
+					if (err.code === 'ENOENT') {
+						return api.writeError(typeof err.code === 'number' || 404, res, 'File not found:' + sourceUrl);
+					}
+					return api.writeError(500, res, err);
+				}
 				if (isCopy) {
 					return copy(sourceFile.path, destFile.path)
 						.then(function(result) {
 							var eventData = { type: ChangeType.RENAME, isDir: stats.isDirectory(), file: destFile, sourceFile: sourceFile, req: req};
 							exports.fireFileModificationEvent(eventData);
-							return result;
+							return filePostResponse(req, res, fileRoot, workspaceRoot, destFile, destExists, metadataMixins);
 						});
 				}
-				return fs.renameAsync(sourceFile.path, destFile.path)
-					.then(function(result) {
-						var eventData = { type: ChangeType.RENAME, isDir: stats.isDirectory(), file: destFile, sourceFile: sourceFile, req: req};
-						exports.fireFileModificationEvent(eventData);
-						return result;
-					})
-					.catch(/* @callback */ function rejectRename(err) {
-						var newerr = new Error("Failed to move project: "+sourceUrl);
+				return fs.rename(sourceFile.path, destFile.path, function(err) {
+					if(err) {
+						var newerr = new Error("Failed to move project: " + sourceUrl);
 						newerr.code = 403;
-						throw newerr;
-					});
-			})
-			.then(writeResponse.bind(null, destExists))
-			.catch(function(err) {
-				if (err.code === 'ENOENT') {
-					return api.writeError(typeof err.code === 'number' || 404, res, 'File not found:' + sourceUrl);
-				}
-				return api.writeError(err.code || 500, res, err);
+						return api.writeError(403, res, newerr);
+					}
+					var eventData = { type: ChangeType.RENAME, isDir: stats.isDirectory(), file: destFile, sourceFile: sourceFile, req: req};
+					exports.fireFileModificationEvent(eventData);
+					return filePostResponse(req, res, fileRoot, workspaceRoot, destFile, destExists, metadataMixins);
+				});
 			});
 		}
-		// Just a regular file write
-		return Promise.resolve()
-		.then(function(){
-			return destExists ? fs.unlinkAsync(destFile.path) : null;
-		})
-		.then(function() {
-			if (isDirectory) {
-				exports.fireFileModificationEvent({type: ChangeType.MKDIR, file: destFile, req: req});
-				return fs.mkdirAsync(destFile.path);
-			}
-			var eventData = { type: ChangeType.WRITE, file: destFile, req: req};
-			exports.fireFileModificationEvent(eventData);
-			return fs.writeFileAsync(destFile.path, '');
-		})
-		.then(writeResponse.bind(null, destExists))
-		.catch(api.writeError.bind(null, 500, res));
+		if(destExists) {
+			return fs.unlink(destFile.path, function(err) {
+				if(err) {
+					return api.writeError(500, res, "Failed to unlink file: " + destFile.path);
+				}
+				writeNew(req, res, destFile, isDirectory, fileRoot, workspaceRoot, true, metadataMixins);
+			});
+		}
+		writeNew(req, res, destFile, isDirectory, fileRoot, workspaceRoot, false, metadataMixins);
 	});
 };
+
+/**
+ * Write a new file or directory to disk
+ * @param {XMLHttpRequest} req The backing request
+ * @param {XMLHttpResponse} res The response object
+ * @param {?} destFile The destination file
+ * @param {bool} isDirectory If we are writig a directory or not
+ * @param {string} fileRoot The file endpoint root
+ * @param {string} workspaceRoot The workspace endpoint root
+ * @param {bool} isOverwrite If the write operation is an overwrite
+ * @param {?} metadataMixins properties to mix in to the repsonse
+ * @since 17.0
+ */
+function writeNew(req, res, destFile, isDirectory, fileRoot, workspaceRoot, isOverwrite, metadataMixins) {
+	if (isDirectory) {
+		return fs.mkdir(destFile.path, function(err) {
+			if(err) {
+				return api.writeError(500, res, "Failed to create new folder: " + destFile.path);
+			}
+			exports.fireFileModificationEvent({type: ChangeType.MKDIR, file: destFile, req: req});
+			return filePostResponse(req, res, fileRoot, workspaceRoot, destFile, isOverwrite, metadataMixins);
+		});
+	}
+	var eventData = { type: ChangeType.WRITE, file: destFile, req: req};
+	return fs.writeFile(destFile.path, '', function(err) {
+		if(err) {
+			return api.writeError(500, res, "Failed to create new file: " + destFile.path);
+		}
+		exports.fireFileModificationEvent(eventData);
+		return filePostResponse(req, res, fileRoot, workspaceRoot, destFile, isOverwrite, metadataMixins);
+	});
+}
 
 var _listeners = new Map();
 exports.addFileModificationListener = function(listenerId, theListener) {
