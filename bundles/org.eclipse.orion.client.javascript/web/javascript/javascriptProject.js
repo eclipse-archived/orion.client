@@ -437,7 +437,9 @@ define([
 			return true;
 		}
 		var folderPath = this.getProjectPath()+this.DEFINITIONS;
-		return qualifiedName === folderPath || qualifiedName.indexOf(folderPath) === 0;
+		//check for valid names from events
+		//see https://bugs.eclipse.org/bugs/show_bug.cgi?id=525696
+		return qualifiedName === folderPath || (qualifiedName && qualifiedName.indexOf(folderPath) === 0);
 	};
 
 	/**
