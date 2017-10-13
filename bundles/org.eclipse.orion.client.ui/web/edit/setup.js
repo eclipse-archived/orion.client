@@ -1906,8 +1906,13 @@ objects.mixin(EditorSetup.prototype, {
 	 */
 	openEditor: function(loc, options) {
 		var href = this.computeNavigationHref({Location: loc}, {start: options.start, end: options.end});
-		if (!href)
-			return;
+		var openEditorPromise = new Deferred();
+
+		if (!href) {
+			openEditorPromise.resolve();
+			return openEditorPromise;
+		}
+
 			
 		var mode = typeof(options.mode) === 'string' ? options.mode : 'replace'; //$NON-NLS-1$
 		switch (mode) {
@@ -1919,6 +1924,14 @@ objects.mixin(EditorSetup.prototype, {
 					history.pushState({}, "", currentHref);
 					this.lastHash = PageUtil.hash(); // Pushing to the history stack changes the hash
 				}
+
+				var inputManager = this.activeEditorViewer.inputManager;
+				var inputChangeListener = function() {
+					inputManager.removeEventListener("InputChanged", inputChangeListener);
+					openEditorPromise.resolve();
+				};
+				inputManager.addEventListener("InputChanged", inputChangeListener);
+
 				var hash = href.split('#')[1];
 				if (hash === window.location.hash.substring(1)) {
 					this.activeEditorViewer.inputManager.setInput(hash);
@@ -1928,6 +1941,7 @@ objects.mixin(EditorSetup.prototype, {
 				break;
 			case 'tab':
 				window.open(urlModifier(href));
+				openEditorPromise.resolve();
 				break;
 			case 'split':
 				var locWithParams = href.split('#')[1];
@@ -1942,8 +1956,10 @@ objects.mixin(EditorSetup.prototype, {
 				} else {
 					this.editorViewers[1].inputManager.setInput(locWithParams);
 				}
+				openEditorPromise.resolve();
 				break;
 		}
+		return openEditorPromise;
 	},
 	
 	createEditorViewer: function(id) {
