@@ -625,7 +625,7 @@ define([
 			 * @since 9.0
 			 */
 			contextImpl.openEditor = function(fileurl, options) {
-				activateContext.openEditor(fileurl, options);
+				return activateContext.openEditor(fileurl, options);
 			};
 			
 			/**
