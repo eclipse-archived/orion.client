@@ -1449,7 +1449,6 @@ maybeDescribe("git", function() {
 		var CHILD3RepoPath = path.join(ParentRepoPath, CHILD3_REPO_NAME);
 		var CHILDCHILDRepoPath = path.join(CHILD1RepoPath, CHILD_CHILD_REPO_NAME);		
 		it('Clone parent repo with submodules', function(finished) {
-			this.timeout(5000);
 			request()
 			.post(GIT_ROOT + "/clone")
 			.send({

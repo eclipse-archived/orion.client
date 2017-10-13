@@ -566,7 +566,7 @@ function deleteClone(req, res) {
 	});
 }
 
-function foreachSubmodule(repo, operation, recursive, fetchOpts) {
+function foreachSubmodule(repo, operation, recursive, creds, username, task) {
 	return repo.getSubmoduleNames()
 	.then(function(names) {
 		return new Promise(function(fulfill, reject) {
@@ -580,7 +580,12 @@ function foreachSubmodule(repo, operation, recursive, fetchOpts) {
 						} else if (operation === "update") {
 							op = submodule.init(1)
 							.then(function() {
-								return submodule.update(1, fetchOpts);
+								var credsCopy = Object.assign({}, creds);
+								return submodule.update(1, {
+									fetchOpts: {
+										callbacks: getRemoteCallbacks(credsCopy, username, task)
+									}
+								});
 							});
 						}
 						return op
@@ -588,7 +593,7 @@ function foreachSubmodule(repo, operation, recursive, fetchOpts) {
 							if (recursive) {
 								return submodule.open()
 								.then(function(subrepo) {
-									return foreachSubmodule(subrepo, operation, recursive, fetchOpts);
+									return foreachSubmodule(subrepo, operation, recursive, creds, username, task);
 								});
 							}
 						});
@@ -611,7 +616,7 @@ function foreachSubmodule(repo, operation, recursive, fetchOpts) {
 	});
 }
 
-function getRemoteCallbacks(req, task, credsToStore) {
+function getRemoteCallbacks(creds, username, task) {
 	return {
 		certificateCheck: function() {
 			return 1; // Continues connection even if SSL certificate check fails. 
@@ -628,7 +633,6 @@ function getRemoteCallbacks(req, task, credsToStore) {
 		 * @callback
 		 */
 		credentials: function(gitUrl, urlUsername) {
-			var creds = req.body;
 			if (gitUrl.indexOf("@") !== -1 && gitUrl.indexOf("@") < gitUrl.indexOf(":") && creds.GitSshPrivateKey) {
 				var privateKey = creds.GitSshPrivateKey;
 				var passphrase = creds.GitSshPassphrase;
@@ -640,27 +644,20 @@ function getRemoteCallbacks(req, task, credsToStore) {
 				);
 			}
 
-			if(credsToStore) {
-				return git.Cred.userpassPlaintextNew(
-					credsToStore.GitSshUsername || urlUsername,
-					credsToStore.GitSshPassword || ""
-				);
-			}
-
-			var username = creds.GitSshUsername || urlUsername;
+			var gitusername = creds.GitSshUsername || urlUsername;
 			var password = creds.GitSshPassword;
-			if (username && password) {
+			if (gitusername && password) {
 				/* clear username/password to avoid inifinite loop in nodegit */
 				delete creds.GitSshUsername;
 				delete creds.GitSshPassword;
 				return git.Cred.userpassPlaintextNew(
-					username,
+					gitusername,
 					password || ""
 				);
 			}
 
 			return new Promise(function(resolve, reject) {
-				credentialsProvider.getCredentials(gitUrl, req.user.username).then(
+				credentialsProvider.getCredentials(gitUrl, username).then(
 					function(result) {
 						resolve(result);
 					},
@@ -725,11 +722,11 @@ function postClone(req, res) {
 		return writeError(400, res, "Invalid parameters");
 	}
 	
+	var credsCopy = Object.assign({}, req.body);
 	var task = new tasks.Task(res, false, true, 0, true);
-	var copyCreds = Object.assign({}, req.body);
 	return git.Clone.clone(cloneUrl, file.path, {
 		fetchOpts: {
-			callbacks: getRemoteCallbacks(req, task)
+			callbacks: getRemoteCallbacks(req.body, req.user.username, task)
 		}
 	})
 	.then(function(_repo) {
@@ -739,11 +736,7 @@ function postClone(req, res) {
 	.then(function() {
 		// default to true if parameter not set
 		if (req.body.cloneSubmodules === undefined || req.body.cloneSubmodules === null || req.body.cloneSubmodules) {
-			return foreachSubmodule(repo, "update", true, {
-				fetchOpts: {
-					callbacks: getRemoteCallbacks(req, task, copyCreds)
-				}
-			});
+			return foreachSubmodule(repo, "update", true, credsCopy, req.user.username, task);
 		}
 	})
 	.then(function(){

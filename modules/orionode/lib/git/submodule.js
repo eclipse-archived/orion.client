@@ -39,7 +39,7 @@ module.exports.router = function(options) {
 function putSubmodule(req, res) {
 	return clone.getRepo(req)
 	.then(function(repo) {
-		return clone.foreachSubmodule(repo, req.body.Operation, false);
+		return clone.foreachSubmodule(repo, req.body.Operation, false); // this foreachSubmodule doesn't need authentication, fix me if it's not right.
 	})
 	.then(function() {
 		writeResponse(200, res);
@@ -79,7 +79,7 @@ function postSubmodule(req, res) {
 		})
 		.then(function(_subrepo) {
 			subrepo = _subrepo;
-			return subrepo.fetchAll({callbacks: clone.getRemoteCallbacks(req, task)});
+			return subrepo.fetchAll({callbacks: clone.getRemoteCallbacks(req.body, req.user.username, task)});
 		})
 		.then(function() {
 			return subrepo.getReferenceCommit("origin/master");
