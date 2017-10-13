@@ -156,3 +156,9 @@ exports.throwIfError = throwIfError = function throwIfError(cause, message) {
 	err.cause = cause;
 	throw err;
 };
+
+ /**
+  * The oriongittester github account's RSA private key
+  * @since 17.0
+  */
+exports.oriongittesterRSAKey = oriongittesterRSAKey =  fs.readFileSync(path.join(__dirname, "./id_rsa"), "utf8")

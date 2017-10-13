@@ -37,33 +37,15 @@ module.exports.router = function(options) {
 	.delete(fileRoot + '*', deleteSubmodule);
 
 function putSubmodule(req, res) {
-	var task = new tasks.Task(res, false, true, 0, true);
 	return clone.getRepo(req)
 	.then(function(repo) {
-		return clone.foreachSubmodule(repo, req.body.Operation, false,{
-			fetchOpts: {
-				callbacks: clone.getRemoteCallbacks(req, task)
-			}
-		});
+		return clone.foreachSubmodule(repo, req.body.Operation, false);
 	})
 	.then(function() {
-		task.done({
-			HttpCode: 200,
-			Code: 0,
-			DetailedMessage: "OK",
-			Message: "OK",
-			Severity: "Ok"
-		});
+		writeResponse(200, res);
 	})
 	.catch(function(err) {
-		task.done({
-			HttpCode: 400,
-			Code: 0,
-			DetailedMessage: err.message,
-			JsonData: {},
-			Message: err.message,
-			Severity: "Error"
-		});
+		return writeError(400, res, err.message);
 	});
 }
 function postSubmodule(req, res) {
