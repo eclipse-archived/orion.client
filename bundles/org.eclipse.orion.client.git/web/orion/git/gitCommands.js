@@ -2617,7 +2617,8 @@ var exports = {};
 				item.GitUrl = gitUrl;
 				exports.getDefaultSshOptions(serviceRegistry, item).then(function func(options) {
 					var msg = i18nUtil.formatMessage(messages["AddSubmodule"], name, data.items.Name);
-					var deferred = progress.progress(gitService.addSubmodule(name, data.items.SubmoduleLocation, path, gitUrl, explorer.defaultPath), msg);
+					var deferred = progress.progress(gitService.addSubmodule(name, data.items.SubmoduleLocation, path, gitUrl, explorer.defaultPath,options.gitSshUsername, options.gitSshPassword, options.knownHosts, options.gitPrivateKey,
+								options.gitPassphrase), msg);
 					serviceRegistry.getService("orion.page.message").createProgressMonitor(deferred, //$NON-NLS-0$
 						   messages["Adding submodule: "]  + gitUrl);
 					deferred.then(function(jsonData) {
