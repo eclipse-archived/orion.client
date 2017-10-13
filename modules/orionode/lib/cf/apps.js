@@ -663,8 +663,10 @@ function uploadBits(req, appTarget){
 					return Promise.resolve("finished");
 				}
 			}
+		}).catch(function(err){
+			return Promise.reject(err);
 		});
-	})
+	});
 }
 function bindServices(req, appTarget){
 	if(theApp.manifest.applications[0].services){
@@ -849,12 +851,12 @@ function archiveTarget (filePath, req){
 			
 				zip.finalize();
 				zip.on("end", function(){
-			        return fulfill();
-			    });
-			    zip.on("error", function(){
-			    	var errorStatus = new Error("Zipping process went wrong");
-					return Promise.reject(errorStatus);
-			    });
+					return fulfill();
+				});
+				zip.on("error", function(){
+					var errorStatus = new Error("Zipping process went wrong");
+					return reject(errorStatus);
+				});
 			});
 		});
 	})
