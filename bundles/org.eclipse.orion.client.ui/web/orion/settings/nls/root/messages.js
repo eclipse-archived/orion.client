@@ -9,7 +9,7 @@
  ******************************************************************************/
 /*eslint-env browser, amd*/
 define({//Default message bundle
-	"Globalization": "Globalizatio",
+	"Globalization": "Globalization",
 	"Enable bidi support": "Enable bidi support",
 	"Base text direction": "Base text direction",
 	"Calendar type": "Calendar type",
