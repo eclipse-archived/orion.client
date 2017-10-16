@@ -1,5 +1,5 @@
 define([
-	'i18n!orion/settings/nls/messages', //$NON-NLS-0$
+	'i18n!orion/settings/nls/messages', //$NON-NLS-0$ 
 	'orion/section', //$NON-NLS-0$
 	'orion/webui/littlelib', //$NON-NLS-0$
 	'orion/objects', //$NON-NLS-0$
