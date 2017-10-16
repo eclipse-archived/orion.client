@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2010, 2016, 2017 IBM Corporation and others.
+ * Copyright (c) 2010, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License v1.0
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution
@@ -20,8 +20,9 @@ define([
 	'orion/objects',
 	'orion/PageUtil',
 	'orion/editor/textModelFactory',
+	'orion/formatter',
 	'orion/metrics'
-], function(messages, mNavigatorRenderer, i18nUtil, Deferred, EventTarget, objects, PageUtil, mTextModelFactory, mMetrics) {
+], function(messages, mNavigatorRenderer, i18nUtil, Deferred, EventTarget, objects, PageUtil, mTextModelFactory, mFormatter, mMetrics) {
 
 	function Idle(options){
 		this._document = options.document || document;
@@ -487,7 +488,9 @@ define([
 			}
 
 			if (this.getFormatOnSaveEnabled()) {
-				return new mFormatter.Formatter(this.serviceRegistry, this, editor).doFormat().then(function() {return _save(this);}.bind(this));
+				return this._formatter.doFormat().then(function() {
+					return _save(this);
+				}.bind(this));
 			}
 			return _save(this);
 		},
@@ -773,6 +776,7 @@ define([
 			this._logMetrics("open"); //$NON-NLS-0$
 			this.dispatchEvent(evt);
 			this.editor = editor = evt.editor;
+			this._formatter = new mFormatter.Formatter(this.serviceRegistry, this, editor);
 			if (!isDir) {
 				if (!noSetInput) {
 					editor.setInput(title, null, contents);
