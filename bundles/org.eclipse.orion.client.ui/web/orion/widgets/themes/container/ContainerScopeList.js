@@ -28,6 +28,7 @@ define(['i18n!orion/settings/nls/messages'
 				"styles .focusedEditorTab background-color",
 			],
 			id: "primaryBackgroundColor",
+			type: "color",
 			value: defaultColor
 		}, {
 			display: messages["containerTheme primary text"],
@@ -44,6 +45,7 @@ define(['i18n!orion/settings/nls/messages'
 				"styles .focusedEditorTab color",
 			],
 			id: "primaryTextColor",
+			type: "color",
 			value: defaultColor
 		}, {
 			display: messages["containerTheme secondary background"],
@@ -59,6 +61,7 @@ define(['i18n!orion/settings/nls/messages'
 				"styles .dropdownMenuItem color",
 			], 
 			id: "secondaryBackgroundColor", 
+			type: "color",
 			value: defaultColor
 		}, {
 			display: messages["containerTheme secondary text"],
@@ -93,6 +96,7 @@ define(['i18n!orion/settings/nls/messages'
 				"styles .editorTabCloseButton:hover color"
 			], 
 			id: "secondaryTextColor",
+			type: "color",
 			value: defaultColor
 		}, {
 			display: messages["containerTheme tertiary background"],
@@ -111,6 +115,7 @@ define(['i18n!orion/settings/nls/messages'
 				"styles .gitCommitListSection .commandButton.orionButton.dropdownTrigger:hover background-color" //.25 opcacity
 			],
 			id: "tertiaryBackgroundColor",
+			type: "color",
 			value: defaultColor
 		}, {
 			display: messages["containerTheme tertiary text"],
@@ -130,6 +135,7 @@ define(['i18n!orion/settings/nls/messages'
 				"styles .titleActionContainer color",
 			],
 			id: "tertiaryTextColor",
+			type: "color",
 			value: defaultColor
 		}, {
 			display: messages["containerTheme flavor color"],
@@ -196,7 +202,32 @@ define(['i18n!orion/settings/nls/messages'
 				"styles .textviewTooltip background-color"
 			],
 			id: "flavorColor",
+			type: "color",
 			value: defaultColor
+		}, {
+			display: messages["containerTheme display runBar"],
+			objPath: ["styles .runBarWrapper display"],
+			value: true,
+			type: "visibility",
+			id: "display_runBar"
+		}, {
+			display: messages["containerTheme display statusPane"],
+			objPath: ["styles #statusPane display"],
+			value: true,
+			type: "visibility",
+			id: "display_statusPane"
+		}, {
+			display: messages["containerTheme display progressPane"],
+			objPath: ["styles #progressPane display"],
+			value: true,
+			type: "visibility",
+			id: "display_progressPane"
+		}, {
+			display: messages["containerTheme display userMenu"],
+			objPath: ["styles #userTrigger display"],
+			value: true,
+			type: "visibility",
+			id: "display_userMenu"
 		}
 	];
 });

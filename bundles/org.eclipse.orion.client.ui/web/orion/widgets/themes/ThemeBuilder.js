@@ -23,7 +23,8 @@ function(messages, i18nUtil, mCommands, mCommandRegistry, lib, mTooltip, colors,
 	var editorTheme, originalTheme, currentTheme, revertBtn, deleteBtn, saveBtn, themeNameInput, setup;
 	var defaultColor = "#ff80c0";
 	var scopeList;
-	
+	var containerScopeCheckbox = ['display_runBar'];
+
 	var extractHexRegEx = /(#[0-9A-F]{6})|(#[0-9A-F]{3})/i;
 	var rgbaExtractRegEx = /(.*?rgba?[\s+]?\()[\s+]?(\d+)[\s+]?,[\s+]?(\d+)[\s+]?,[\s+]?(\d+)[\s+]?,?[\s+]?(0?\.?\d+)?[\s+]?(.*)/i;
 
@@ -183,10 +184,10 @@ function(messages, i18nUtil, mCommands, mCommandRegistry, lib, mTooltip, colors,
 		return val;
 	}
 
-	function updateScopeValue(id, val){
+	function updateScopeValue(id, val, scopeEntry){
 		val = namedToHex(val);
 		var isHexColor = /(^#[0-9A-F]{6}$)|(^#[0-9A-F]{3}$)/i.test(val);
-		if (isHexColor || id === "editorThemeFontSize") {
+		if (isHexColor || id === "editorThemeFontSize" || scopeEntry.type === 'visibility') {
 			var imageDataUrl;
 			if(id.substr(11,4) === "Wave"){  //cases for underline wavies, instead of saving Hex to css, use dataUrl for background-images. So the id for wavies has to be editorThemeWave...
 				imageDataUrl = composeImageData("Wave", val);
@@ -195,26 +196,24 @@ function(messages, i18nUtil, mCommands, mCommandRegistry, lib, mTooltip, colors,
 			}else if(id.substr(26, 5) === "DDiff"){ // case for DiffDeleted image
 				imageDataUrl = composeImageData("DDiff", val);
 			}
-			for (var i = 0; i < scopeList.length; i++){
-				if (scopeList[i].id === id){
-					scopeList[i].value = val;
-					document.getElementById(scopeList[i].id).value = val; /* in case a color name was entered change it to hex */
-					for (var l = 0; l < scopeList[i].objPath.length; l++){
-						if(scopeList[i].objPath[l].lastIndexOf("backgroundImage") !== -1){
-							setValueToPath(currentTheme, scopeList[i].objPath[l], imageDataUrl);
-						}else{
-							setValueToPath(currentTheme, scopeList[i].objPath[l], scopeList[i].value);
-						}
+			if (scopeEntry) {
+				scopeEntry.value = val;
+				document.getElementById(scopeEntry.id).value = val; /* in case a color name was entered change it to hex */
+				for (var l = 0; l < scopeEntry.objPath.length; l++) {
+					if(scopeEntry.objPath[l].lastIndexOf("backgroundImage") !== -1) {
+						setValueToPath(currentTheme, scopeList[i].objPath[l], imageDataUrl);
+					} else if (scopeEntry.type === 'visibility') {
+						setValueToPath(currentTheme, scopeEntry.objPath[l], document.getElementById(scopeEntry.id).checked ? '' : 'none');
+					} else {
+						setValueToPath(currentTheme, scopeEntry.objPath[l], scopeEntry.value);
 					}
-					setup.processTheme("editorTheme", currentTheme);
 				}
+				setup.processTheme("editorTheme", currentTheme);
 			}
 			checkForChanges();
 		} else {
-			for (i = 0; i < scopeList.length; i++){
-				if (scopeList[i].id === id) { //Resets the value back to its original value if the typed value was invalid
-					document.getElementById(scopeList[i].id).value = scopeList[i].value;
-				}
+			if (scopeEntry) {
+				document.getElementById(scopeEntry.id).value = scopeEntry.value;
 			}
 		}
 	}
@@ -269,13 +268,16 @@ function(messages, i18nUtil, mCommands, mCommandRegistry, lib, mTooltip, colors,
 		return "url(" + result + ")";
 	}
 	
-	function getValueFromPath(obj, keys) {
+	function getValueFromPath(obj, keys, type) {
 		var nodes = keys.split(' ');
 		for (var i = 0; i < nodes.length; i++) {
 			if (!obj[nodes[i]]) {
 				return "";
 			}
 			obj = obj[nodes[i]];
+		}
+		if (type === 'visibility') {
+			return obj !== 'none';
 		}
 		return getValue(obj);
 	}
@@ -298,8 +300,14 @@ function(messages, i18nUtil, mCommands, mCommandRegistry, lib, mTooltip, colors,
 		for (var i = 0; i < scopeList.length; i++){
 			scopeList[i].value = defaultColor; // scopes with no value will have defaultColor showing
 			for (var l = 0; l < scopeList[i].objPath.length; l++){
-				var temp = getValueFromPath(currentTheme,scopeList[i].objPath[l]);
-				if (temp){
+				var temp = getValueFromPath(currentTheme,scopeList[i].objPath[l], scopeList[i].type);
+				if (scopeList[i].type === 'visibility') {
+					if (temp === "") {
+						temp = true;
+					}
+					document.getElementById(scopeList[i].id).checked = !!temp;
+					scopeList[i].value = !!temp;
+				} else if (temp) {
 					scopeList[i].value = temp;
 					break;
 				}
@@ -311,7 +319,7 @@ function(messages, i18nUtil, mCommands, mCommandRegistry, lib, mTooltip, colors,
 		checkForChanges(); // checks if any value is changed
 	}
 	ThemeBuilder.prototype.apply = apply;
-	
+		
 	//generates the html structure for list of scopes
 	function generateScopeList(hiddenValues){
 		hiddenValues = hiddenValues || [];
@@ -328,6 +336,9 @@ function(messages, i18nUtil, mCommands, mCommandRegistry, lib, mTooltip, colors,
 					htmlString = htmlString + "<option value='" + l+"pt'>"+l+"pt</option>";
 				}
 				htmlString += "</select></li>";//$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			} else if (scopeList[i].type === 'visibility') {
+				htmlString = htmlString + "<li><label for='"+ scopeList[i].id +"'>" +  scopeList[i].display + 
+					"</label><input class='visibility-input' type='checkbox' id='" + scopeList[i].id + "' " + (scopeList[i].value ? "checked" : "")  + ">";
 			}
 			else {
 				var hideValueCSS = hiddenValues.indexOf(scopeList[i].id) >= 0 ? "style='display: none'" : ""; //$NON-NLS-0$
@@ -346,7 +357,7 @@ function(messages, i18nUtil, mCommands, mCommandRegistry, lib, mTooltip, colors,
 		this.previewWidget = args.previewWidget;
 		setup = args.setup;
 		scopeList = args.scopeList || [];
-		var exclusions = (this.previewWidget && this.previewWidget.getSelectedExclusions) ? this.previewWidget.getSelectedExclusions() : [];
+		var exclusions = this.previewWidget && this.previewWidget.getSelectedExclusions ? this.previewWidget.getSelectedExclusions() : [];
 
 		init(exclusions);
 
@@ -403,12 +414,12 @@ function(messages, i18nUtil, mCommands, mCommandRegistry, lib, mTooltip, colors,
 		
 		this.commandService.renderCommands('themeCommands', document.getElementById(this.toolbarId || "userCommands"), this, this, "button"); //$NON-NLS-1$ //$NON-NLS-0$
 		
-		for (var i = 0; i < scopeList.length; i++){ // 0th one is a select
-			document.getElementById(scopeList[i].id).onchange = function(e){
-				updateScopeValue(e.target.id, e.target.value);
+		scopeList.forEach(function(entry) {
+			document.getElementById(entry.id).onchange = function(e){
+				updateScopeValue(e.target.id, e.target.value, entry);
 			};
-		}
-		
+		});
+
 		this.populateThemes();
 		
 		editorTheme = document.getElementById("editorTheme");
