@@ -31,9 +31,10 @@ module.exports = function(options) {
 	
 	var router = express.Router({mergeParams: true});
 	var jsonParser = bodyParser.json({"limit":"10mb"});
+	var textParser = bodyParser.text();
 	router.use(responseTime({digits: 2, header: "X-File-Response-Time", suffix: true}));
 	router.get('*', jsonParser, getFile);
-	router.put('*', putFile);
+	router.put('*', textParser, putFile);
 	router.post('*', jsonParser, postFile);
 	router.delete('*', deleteFile);
 
@@ -248,25 +249,39 @@ module.exports = function(options) {
 					logger.error(err);
 					return writeError(500, res, err);
 				}
-				var ws = fs.createWriteStream(file.path);
-				ws.on('finish', function() {
-					fileUtil.withStatsAndETag(file.path, function(error, stats, etag) {
-						if (error && error.code === 'ENOENT') {
-							api.writeResponse(404, res);
-							return;
-						}
-						fileUtil.writeFileMetadata(req, res, api.join(fileRoot, file.workspaceId), api.join(workspaceRoot, file.workspaceId), file, stats, etag);
-						fileUtil.fireFileModificationEvent({ type: fileUtil.ChangeType.WRITE, file: file, req: req});
-					});
-				});
-				ws.on('error', function(err) {
-					logger.error(err);
-					writeError(500, res, err);
-				});
 				if (req.query.source) {
+					var ws = fs.createWriteStream(file.path);
+					ws.on('finish', function() {
+						fileUtil.withStatsAndETag(file.path, function(error, stats, etag) {
+							if (error && error.code === 'ENOENT') {
+								api.writeResponse(404, res);
+								return;
+							}
+							fileUtil.writeFileMetadata(req, res, api.join(fileRoot, file.workspaceId), api.join(workspaceRoot, file.workspaceId), file, stats, etag);
+							fileUtil.fireFileModificationEvent({ type: fileUtil.ChangeType.WRITE, file: file, req: req});
+						});
+					});
+					ws.on('error', function(err) {
+						logger.error(err);
+						writeError(500, res, err);
+					});
 					request(req.query.source).pipe(ws);
 				} else {
-					req.pipe(ws);
+					// If the req.body is an empty string, req.pipe(ws) can't save the empty content, so have to call writeFile
+					fs.writeFile(file.path, req.body, function(err) {
+						if (err) {
+							logger.error(err);
+							writeError(500, res, err);
+						}
+						fileUtil.withStatsAndETag(file.path, function(error, stats, etag) {
+							if (error && error.code === 'ENOENT') {
+								api.writeResponse(404, res);
+								return;
+							}
+							fileUtil.writeFileMetadata(req, res, api.join(fileRoot, file.workspaceId), api.join(workspaceRoot, file.workspaceId), file, stats, etag);
+							fileUtil.fireFileModificationEvent({ type: fileUtil.ChangeType.WRITE, file: file, req: req});
+						});
+					});
 				}
 			});
 		}
