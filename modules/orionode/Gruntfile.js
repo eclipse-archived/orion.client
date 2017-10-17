@@ -15,11 +15,11 @@ module.exports = function(grunt) {
 	    fingerPrint = grunt.option("fp") || false,
 	   // skipTest = grunt.option("skipTest") || false,
 	    skipMinify = grunt.option("skipMinify") || false;
-	   
+
 	var socketioPath =  grunt.file.exists('./node_modules/socket.io/node_modules/socket.io-client') ?
 			'../../node_modules/socket.io/node_modules/socket.io-client/dist/socket.io' :
 			'../../node_modules/socket.io-client/dist/socket.io';
-	    
+
 	var orionBuildConfig = util.loadBuildConfig(configPath),
 	    bundles = util.parseBundles(orionBuildConfig, {
 			buildDirectory: staging,
@@ -27,7 +27,7 @@ module.exports = function(grunt) {
 			psClient: grunt.option("psClient")
 		}),
 		modules =util.parseModules(orionBuildConfig, staging);
-	
+
 	// Register fingerprint multi task
 	fingerPrintRegistry(grunt);
 	grunt.initConfig({
@@ -40,6 +40,14 @@ module.exports = function(grunt) {
 			fingerprintModules:['javascript/plugins/ternWorker.js'],
 			allMaps:[],
 			jsMaps:[]
+		},
+		karma: {
+			options: {
+				configFile: 'test/client/karma.conf.js'
+			},
+			client_unit_tests: {
+				singleRun: true
+			},
 		},
 		nodeBuildConfig: util.filterBuildConfig(orionBuildConfig, "<% requirejsExcludeModules %>", [
 			{
@@ -183,11 +191,12 @@ module.exports = function(grunt) {
 	grunt.loadNpmTasks("grunt-contrib-requirejs");
 	//grunt.loadNpmTasks("grunt-simple-mocha");
 	grunt.loadNpmTasks("grunt-string-replace");
+  grunt.loadNpmTasks('grunt-karma');
 
 	grunt.registerTask("printBuild", function() {
 		grunt.log.writeln("Using build file", JSON.stringify(grunt.config("requirejs.compile.options"), null, 2));
 	});
-	
+
 	grunt.registerMultiTask("checkDirs", "Check files/dirs exist", function() {
 		this.filesSrc.forEach(function(filepath) {
 			grunt.verbose.write("Checking existence of " + filepath + "...");
@@ -200,7 +209,7 @@ module.exports = function(grunt) {
 	//grunt.registerTask("test", ["simplemocha"]);
 	grunt.registerTask("replaceFp", ["string-replace:replacefp-inHTMLs", "string-replace:replacefp-inJSs"]);
 	grunt.registerTask("optimize", fingerPrint ?
-		["printBuild", "copy:stage", "requirejs", "fingerprint", "string-replace:requiremin", "copy:unstage"]: 
+		["printBuild", "copy:stage", "requirejs", "fingerprint", "string-replace:requiremin", "copy:unstage"]:
 		["printBuild", "copy:stage", "requirejs", "string-replace:requiremin", "copy:unstage"]);
 	var tasksArray = ["checkDirs", "clean", "copy:orionserver"];
 	if(!skipMinify){
@@ -210,6 +219,7 @@ module.exports = function(grunt) {
 //		tasksArray.push("test");
 //	}
 	grunt.registerTask("default", tasksArray);
+  grunt.registerTask('client_unit_tests', ['karma:client_unit_tests:start']);
 //	grunt.registerTask("notest", ["checkDirs", "clean", "copy:orionserver", "optimize"]);
 //	grunt.registerTask("nomin",   ["checkDirs", "clean", "copy:orionserver", "string-replace:orionclient", "test"]);
 };

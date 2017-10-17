@@ -22,3 +22,4 @@ dist/
 .test_metadata
 .nyc_output/
 coverage/
+orion_client_coverage/
