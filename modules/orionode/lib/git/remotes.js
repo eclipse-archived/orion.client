@@ -17,7 +17,7 @@ var api = require('../api'), writeError = api.writeError, writeResponse = api.wr
 	clone = require('./clone'),
 	express = require('express'),
 	bodyParser = require('body-parser'),
-	log4js = require('log4js'),
+	gitUtil = require('./util'),
 	responseTime = require('response-time');
 
 module.exports = {};
@@ -248,6 +248,7 @@ function addRemote(req, res) {
 			if (req.body.PushRefSpec) {
 				remoteConfig.push.push(req.body.PushRefSpec);
 			}
+			gitUtil.verifyConfigRemoteUrl(config);
 			args.writeConfigFile(configFile, config, function(err) {
 				if (err) {
 					// ignore errors
