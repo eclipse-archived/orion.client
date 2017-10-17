@@ -67,7 +67,7 @@ describe("XFER endpoint", function() {
 				testHelper.createFile(request, "/project/exportSample/", "exportTestFile.txt")
 					.end(function(err, res) {
 						testHelper.throwIfError(err);
-						testHelper.setFileContents(request, res.body.Location, "This is some contents for initialization")
+						testHelper.setFileContents(request, res.body.Location, "This is some contents for initialization", "plain/text")
 							.end(function(err, res) {
 								testHelper.throwIfError(err);
 								request()

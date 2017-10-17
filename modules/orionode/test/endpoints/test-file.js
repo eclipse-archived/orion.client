@@ -334,6 +334,7 @@ describe('File endpoint', function() {
 						request()
 							.put(PREFIX + '/project/fileWriteListener.txt')
 							.send('Listen for me listener!')
+							.set('Content-Type', 'text/plain')
 							.end(function(err, res) {
 								fileUtil.removeFileModificationListener("testListenerWriteFile");
 								testHelper.throwIfError(err);
@@ -355,6 +356,7 @@ describe('File endpoint', function() {
 						request()
 							.put(PREFIX + '/project/fileWriteListener.txt')
 							.send('Listen for me listener!')
+							.set('Content-Type', 'text/plain')
 							.end(function(err, res) {
 								fileUtil.removeFileModificationListener();
 								testHelper.throwIfError(err);
@@ -369,6 +371,7 @@ describe('File endpoint', function() {
 						request()
 							.put(PREFIX + '/project/badutf8.binary')
 							.send(bytes)
+							.set("Content-Type","application/octet-stream")
 							.expect(200)
 							.end(function(err, res) {
 								testHelper.throwIfError(err)
@@ -396,6 +399,7 @@ describe('File endpoint', function() {
 						request()
 							.put(res.body.Location)
 							.send(String.fromCharCode(0xFEFF) + 'content with BOM of 0xFEFF')
+							.type("text/plain")
 							.expect(200, done);
 					});
 			});
@@ -456,6 +460,7 @@ describe('File endpoint', function() {
 				request()
 					.put(PREFIX + '/project/fizz.txt')
 					.send(newContents)
+					.set("Content-Type","text/plain")
 					.expect(200)
 					.end(function(err, res) {
 						testHelper.throwIfError(err);

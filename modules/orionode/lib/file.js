@@ -31,7 +31,7 @@ module.exports = function(options) {
 	
 	var router = express.Router({mergeParams: true});
 	var jsonParser = bodyParser.json({"limit":"10mb"});
-	var textParser = bodyParser.text();
+	var textParser = bodyParser.raw({type:["application/octet-stream","text/plain","application/json"]});
 	router.use(responseTime({digits: 2, header: "X-File-Response-Time", suffix: true}));
 	router.get('*', jsonParser, getFile);
 	router.put('*', textParser, putFile);

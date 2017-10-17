@@ -101,10 +101,11 @@ exports.createFile = function createFile(request, prefix, fileNameOrJson, conten
  * @param {string} contents The contents to set
  * @since 16.0
  */
-exports.setFileContents = function setFileContents(request, fileLoc, contents) {
+exports.setFileContents = function setFileContents(request, fileLoc, contents, type) {
 	return request()
 		.put(fileLoc)
 		.send(contents)
+		.type(type)
 		.expect(200);
 };
 
