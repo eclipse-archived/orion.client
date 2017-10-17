@@ -15,6 +15,7 @@ var api = require('../api'), writeError = api.writeError, writeResponse = api.wr
 	clone = require('./clone'),
 	express = require('express'),
 	bodyParser = require('body-parser'),
+	gitUtil = require('./util'),
 	git = require('nodegit'),
 	log4js = require('log4js'),
 	logger = log4js.getLogger("git"),
@@ -118,6 +119,7 @@ function getConfig(req, res) {
 						});
 						return Promise.all([fillUserName,fillUserEmail]);
 					}).then(function(){
+						gitUtil.verifyConfigRemoteUrl(config);
 						args.writeConfigFile(configFile, config, function(err) {});
 					}).catch(function(err){
 						if(err.message.indexOf("was not found") !== -1){
@@ -182,6 +184,7 @@ function updateConfig(req, res, key, value, callback) {
 			var name = segments[segments.length - 1];
 			var result = callback(config, section, subsection, name, value);
 			if (result.status === 200 || result.status === 201) {
+				gitUtil.verifyConfigRemoteUrl(config);
 				args.writeConfigFile(configFile, config, function(err) {
 					if (err) {
 						return writeError(400, res, err.message);

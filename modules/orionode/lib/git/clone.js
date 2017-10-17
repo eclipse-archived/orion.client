@@ -24,6 +24,7 @@ var api = require('../api'), writeError = api.writeError, writeResponse = api.wr
 	rmdir = require('rimraf'),
 	prefs = require('../prefs'),
 	credentialsProvider = require('./credentials'),
+	gitUtil = require('./util'),
 	responseTime = require('response-time');
 
 module.exports = {};
@@ -345,6 +346,7 @@ function configRepo(repo, username, email) {
 			if (email) {
 				user.email = email;
 			}
+			gitUtil.verifyConfigRemoteUrl(config);
 			args.writeConfigFile(configFile, config, function(err) {
 				if (err) {
 					return reject(err);

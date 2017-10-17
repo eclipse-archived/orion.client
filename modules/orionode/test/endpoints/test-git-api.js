@@ -4509,6 +4509,33 @@ maybeDescribe("git", function() {
 			});
 		});
 
+		it("Prevent Traling Slash for remote urls", function(done) {
+			var goodUrl = "https://github.com/octocat/Spoon-Knife.git";
+			var badUrl = "https://github.com/octocat/Spoon-Knife.git/"  // trailling slash is what we testing
+			repoConfig()
+			.end(function(err, res) {
+				assert.ifError(err);
+				request()
+				.put(GIT_ROOT + "/config/remote.origin.url/clone" + FILE_ROOT + TEST_REPO_NAME)
+				.send({ Value: [badUrl] })
+				.expect(200)
+				.end(function(err/*, res*/) {
+					assert.ifError(err);
+					// Ensure the value was actually changed in the repo
+					request()
+					.get(GIT_ROOT + "/config/clone" + FILE_ROOT + TEST_REPO_NAME)
+					.expect(200)
+					.end(function(err, res) {
+						assert.ifError(err);
+						assert.ok(res.body.Children.length > 0);
+						var remote = find(res.body.Children, function(c) { return c.Key === "remote.origin.url"; });
+						assert.equal(remote.Value[0], goodUrl);
+						done();
+					});
+				});
+			});
+		});
+
 		it("bug 516088", function(finished) {
 			var client = new GitClient("bug516088-config-あいうえお");
 			client.init();

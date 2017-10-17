@@ -31,3 +31,35 @@ module.exports.decodeURIComponent = function(path) {
 	} catch (e) {}
 	return result;
 };
+/**
+ * @name module.exports.verifyConfigRemoteUrl
+ * @description Verity url of remotes, remove redundant trailing slash if any
+ * @param config content of git configuration
+ * @version 17.0
+ */
+module.exports.verifyConfigRemoteUrl = function(config) {
+	var remote = config.remote;
+	if(remote){
+		Object.keys(remote).forEach(function(key){
+			if(Array.isArray(remote[key].url)){
+				remote[key].url = remote[key].url.map(function(each){
+					return removeTrailingSlash(each);
+				});
+			} else {
+				remote[key].url = removeTrailingSlash(remote[key].url);
+			}
+		});
+	}
+};
+/**
+ * @name removeTrailingSlash
+ * @description Helper method to remove trailing slash of url
+ * @param url to be checked
+ * @version 17.0
+ */
+function removeTrailingSlash(url) {
+	if(url.endsWith("/")){
+		url = url.slice(0 , -1);
+	}
+	return url;
+}
