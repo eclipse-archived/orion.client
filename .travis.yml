@@ -25,6 +25,7 @@ addons:
       - ubuntu-toolchain-r-test
     packages:
       - libstdc++-4.9-dev
+  chrome: stable
 
 before_install:
   - nvm install $NODE_VERSION
@@ -33,9 +34,9 @@ before_install:
 install:
   - cd modules/orionode;
   - npm install;
-  - grunt;  
+  - grunt;
 script:
   - npm pack;
 after_success:
   - npm test
-  - npm run coverage
+  - npm run report-coverage

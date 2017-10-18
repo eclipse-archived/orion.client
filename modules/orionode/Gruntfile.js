@@ -49,6 +49,23 @@ module.exports = function(grunt) {
 				singleRun: true
 			},
 		},
+		mocha_istanbul: {
+			coverage: {
+				src: ['./test', './test/metastore', './test/endpoints'],
+				options: {
+					coverageFolder: './coverage/server_coverage',
+					reportFormats: ['html', 'lcov']
+				},
+			},
+		},
+		makeReport: {
+			src: './coverage/**/*.json',
+			options: {
+				type: ['lcov', 'html', 'text-summary'],
+				dir: './coverage/combined/',
+				print: 'text-summary',
+			},
+		},
 		nodeBuildConfig: util.filterBuildConfig(orionBuildConfig, "<% requirejsExcludeModules %>", [
 			{
 				name: "plugins/consolePlugin"
@@ -189,9 +206,10 @@ module.exports = function(grunt) {
 	grunt.loadNpmTasks("grunt-contrib-clean");
 	grunt.loadNpmTasks("grunt-contrib-copy");
 	grunt.loadNpmTasks("grunt-contrib-requirejs");
-	//grunt.loadNpmTasks("grunt-simple-mocha");
 	grunt.loadNpmTasks("grunt-string-replace");
-  grunt.loadNpmTasks('grunt-karma');
+	grunt.loadNpmTasks('grunt-mocha-istanbul');
+	grunt.loadNpmTasks('grunt-istanbul');
+	grunt.loadNpmTasks('grunt-karma');
 
 	grunt.registerTask("printBuild", function() {
 		grunt.log.writeln("Using build file", JSON.stringify(grunt.config("requirejs.compile.options"), null, 2));
@@ -206,7 +224,6 @@ module.exports = function(grunt) {
 		});
 	});
 
-	//grunt.registerTask("test", ["simplemocha"]);
 	grunt.registerTask("replaceFp", ["string-replace:replacefp-inHTMLs", "string-replace:replacefp-inJSs"]);
 	grunt.registerTask("optimize", fingerPrint ?
 		["printBuild", "copy:stage", "requirejs", "fingerprint", "string-replace:requiremin", "copy:unstage"]:
@@ -215,11 +232,10 @@ module.exports = function(grunt) {
 	if(!skipMinify){
 		tasksArray.push("optimize");
 	}
-//	if(!skipTest){
-//		tasksArray.push("test");
-//	}
 	grunt.registerTask("default", tasksArray);
-  grunt.registerTask('client_unit_tests', ['karma:client_unit_tests:start']);
-//	grunt.registerTask("notest", ["checkDirs", "clean", "copy:orionserver", "optimize"]);
-//	grunt.registerTask("nomin",   ["checkDirs", "clean", "copy:orionserver", "string-replace:orionclient", "test"]);
+	grunt.registerTask("server_unit_tests", ["mocha_istanbul:coverage"]);
+  grunt.registerTask("client_unit_tests", ["karma:client_unit_tests:start"]);
+  grunt.registerTask("combine_reports", ["makeReport"]);
+  grunt.registerTask("test_all", ["karma:client_unit_tests:start",
+    "mocha_istanbul:coverage", "makeReport"]);
 };
