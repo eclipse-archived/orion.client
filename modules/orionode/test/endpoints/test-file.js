@@ -1658,7 +1658,7 @@ describe('File endpoint', function() {
 						.send({Location: PREFIX + '/project/moveTo%2CFolder/fizz.txt'})
 						.expect(201)
 						.end(function(err, res) {
-							assert.equal(res.body.Location, CONTEXT_PATH + "/file/anonymous-OrionContent/project/moveTo%2CFolder/fizz1.txt")
+							assert.equal(res.body.Location, PREFIX + "/project/moveTo%2CFolder/fizz1.txt");
 							done();
 						});
 					})
