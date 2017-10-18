@@ -65,7 +65,6 @@
     "grunt-contrib-clean": "^1.0.0",
     "grunt-contrib-copy": "^1.0.0",
     "grunt-contrib-requirejs": "^1.0.0",
-    "grunt-coveralls": "^1.0.1",
     "grunt-istanbul": "^0.8.0",
     "grunt-karma": "^2.0.0",
     "grunt-mocha-istanbul": "^5.0.2",
@@ -96,7 +95,7 @@
     "dist:win": "build --w",
     "dist:linux": "build --l",
     "test": "grunt test_all",
-    "coverage": "grunt coverage",
+    "report-coverage": "cat ./coverage/combined/lcov.info | coveralls",
     "optimize": "grunt",
     "watch-server": "nodemon --debug server.js"
   },

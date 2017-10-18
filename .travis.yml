@@ -34,9 +34,9 @@ before_install:
 install:
   - cd modules/orionode;
   - npm install;
-  - grunt;  
+  - grunt;
 script:
   - npm pack;
 after_success:
   - npm test
-  - npm run coverage
+  - npm run report-coverage

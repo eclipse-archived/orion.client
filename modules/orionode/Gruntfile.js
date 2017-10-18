@@ -66,15 +66,6 @@ module.exports = function(grunt) {
 				print: 'text-summary',
 			},
 		},
-		coveralls: {
-			options: {
-				force: false,
-			},
-			combined_coverage: {
-				src: './coverage/combined/lcov.info',
-				options: {},
-			},
-		},
 		nodeBuildConfig: util.filterBuildConfig(orionBuildConfig, "<% requirejsExcludeModules %>", [
 			{
 				name: "plugins/consolePlugin"
@@ -218,7 +209,6 @@ module.exports = function(grunt) {
 	grunt.loadNpmTasks("grunt-string-replace");
 	grunt.loadNpmTasks('grunt-mocha-istanbul');
 	grunt.loadNpmTasks('grunt-istanbul');
-	grunt.loadNpmTasks('grunt-coveralls');
 	grunt.loadNpmTasks('grunt-karma');
 
 	grunt.registerTask("printBuild", function() {
@@ -246,8 +236,6 @@ module.exports = function(grunt) {
 	grunt.registerTask("server_unit_tests", ["mocha_istanbul:coverage"]);
   grunt.registerTask("client_unit_tests", ["karma:client_unit_tests:start"]);
   grunt.registerTask("combine_reports", ["makeReport"]);
-  grunt.registerTask("coveralls", ["coveralls:combined_coverage"]);
   grunt.registerTask("test_all", ["karma:client_unit_tests:start",
-  	"mocha_istanbul:coverage"]);
-  grunt.registerTask("coverage", ["makeReport", "coveralls:combined_coverage"]);
+    "mocha_istanbul:coverage", "makeReport"]);
 };
