@@ -25,6 +25,7 @@ addons:
       - ubuntu-toolchain-r-test
     packages:
       - libstdc++-4.9-dev
+  chrome: stable
 
 before_install:
   - nvm install $NODE_VERSION
