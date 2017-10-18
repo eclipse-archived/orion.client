@@ -13,8 +13,7 @@
 var assert = require('assert'),
 	path = require("path"),
 	testData = require("./support/test_data"),
-	testHelper = require("./support/testHelper"),
-	taskHelper = require('./support/task_helper');
+	testHelper = require("./support/testHelper");
 
 
 var CONTEXT_PATH = testHelper.CONTEXT_PATH,
@@ -22,7 +21,7 @@ var CONTEXT_PATH = testHelper.CONTEXT_PATH,
 	METADATA =  testHelper.METADATA,
 	taskIds = [];
 	
-var request = testData.setupOrionServer([ CONTEXT_PATH + '/taskHelper', taskHelper.router({root: '/taskHelper', metastore: app.locals.metastore})]);
+var request = testData.setupOrionServer();
 
 describe("Tasks API", function() {
 	beforeEach(function(done) {
