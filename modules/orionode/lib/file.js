@@ -249,7 +249,7 @@ module.exports = function(options) {
 					return writeError(500, res, err);
 				}
 				var ws = fs.createWriteStream(file.path);
-				ws.on('finish', function() {
+				ws.on('close', function() {
 					fileUtil.withStatsAndETag(file.path, function(error, stats, etag) {
 						if (error && error.code === 'ENOENT') {
 							api.writeResponse(404, res);
