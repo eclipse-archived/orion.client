@@ -404,7 +404,7 @@ define([
 				var parentRect = lib.bounds(this.$splitter.parentNode);
 				pct = this._offset / parentRect[this._widthHeight];
 			}
-			this.$splitter.setAttribute("aria-valuenow", pct*100);
+			this.$splitter.setAttribute("aria-valuenow", Math.round(pct*100));
 		},
 
 		_resize: function() {
