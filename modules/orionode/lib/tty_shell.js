@@ -48,7 +48,7 @@ exports.install = function(options, io) {
 			callback(userWorkspaceDir);
 			return;
 		}
-		var file = fileUtil.getFile(req, rest);
+		var file = fileUtil.getFile(req, api.decodeURIComponent(rest));
 		if(!file) {
 			callback(userWorkspaceDir);
 			return;
@@ -80,6 +80,7 @@ exports.install = function(options, io) {
 		var res = new http.ServerResponse(sock.request);
 		
 		authApp.handle(req, res);
+		req.app.locals.metastore = options.metastore;
 
 		res.end = function() {
 			userGot = true;
@@ -118,6 +119,10 @@ exports.install = function(options, io) {
 			}
 			if (req.user.workspace) {
 				userWorkspaceDir = path.join(userWorkspaceDir, req.user.workspace);
+			}
+			if (!req.app.locals.metastore) {
+				sock.emit('fail', 'No metastore found.');
+				return
 			}
 			resolvePath(req, userWorkspaceDir, cwd, function(realCWD) {
 				var buff = [];
