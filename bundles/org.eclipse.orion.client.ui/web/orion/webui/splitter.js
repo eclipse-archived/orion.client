@@ -93,6 +93,7 @@ define([
 			}
 
 			this.$splitter.classList.add("split"); //$NON-NLS-0$
+			this.$splitter.setAttribute("role", "separator"); //$NON-NLS-1$ //$NON-NLS-0$
 			
 			// Initialize for the current orientation / collapse direction
 			var orientationStr = localStorage.getItem(this._prefix+"/orientation"); //$NON-NLS-0$
@@ -101,6 +102,7 @@ define([
 			} else {
 				orientation = options.vertical ? ORIENTATION_VERTICAL : ORIENTATION_HORIZONTAL;
 			}
+			this.$splitter.setAttribute("aria-orientation", orientationStr); //$NON-NLS-1$ //$NON-NLS-0$
 
 			this.setOrientation(orientation);
 			
@@ -354,14 +356,16 @@ define([
 			return newOffset;
 		},
 
-		_calcSplitterPercantage: function() {
+		_calcSplitterPercentage: function() {
 			var lRect = lib.bounds(this.$leading);
 			var tRect = lib.bounds(this.$trailing);
 			
 			if (this._vertical) {
-				return lRect.height / (lRect.height + tRect.height);
+				var height = lRect.height + tRect.height;
+				return height === 0 ? -1 : lRect.height / height;
 			}
-			return lRect.width / (lRect.width + tRect.width);
+			var width = lRect.width + tRect.width;
+			return width === 0 ? -1 : lRect.width / width;
 		},
 		
 		_adjustToOffset: function() {
@@ -395,7 +399,11 @@ define([
 				this.$trailing.style.visibility = this._offset === 0 ? "hidden" : "visible"; //$NON-NLS-1$ //$NON-NLS-2$
 			}
 			
-			var pct = this._calcSplitterPercantage();
+			var pct = this._calcSplitterPercentage();
+			if (pct === -1) {
+				var parentRect = lib.bounds(this.$splitter.parentNode);
+				pct = this._offset / parentRect[this._widthHeight];
+			}
 			this.$splitter.setAttribute("aria-valuenow", pct*100);
 		},
 
