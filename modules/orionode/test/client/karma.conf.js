@@ -22,7 +22,6 @@ module.exports = function(config) {
     exclude: [
     ],
 
-
     // preprocess matching files before serving them to the browser
     // available preprocessors: https://npmjs.org/browse/keyword/karma-preprocessor
     preprocessors: {
@@ -33,17 +32,29 @@ module.exports = function(config) {
 
 
     coverageReporter: {
-        dir : '../../orion_client_coverage/',
+        dir : '../../coverage/client_coverage/',
         reporters: [
             { type: 'html', subdir: 'report-html' },
             { type: 'lcov', subdir: 'report-lcov' },
         ],
     },
 
+    coverageIstanbulReporter: {
+        // reports can be any that are listed here: https://github.com/istanbuljs/istanbuljs/tree/aae256fb8b9a3d19414dcf069c592e88712c32c6/packages/istanbul-reports/lib
+        reports: ['json'],
+        // base output directory. If you include %browser% in the path it will be replaced with the karma browser name
+        dir: 'coverage/client_coverage',
+
+        // if using webpack and pre-loaders, work around webpack breaking the source path
+        fixWebpackSourcePaths: true,
+
+        // // stop istanbul outputting messages like `File [${filename}] ignored, nothing could be mapped`
+        skipFilesWithNoCoverage: true,
+    },
     // test results reporter to use
     // possible values: 'dots', 'progress'
     // available reporters: https://npmjs.org/browse/keyword/karma-reporter
-    reporters: ['progress', 'coverage'],
+    reporters: ['progress', 'coverage', 'coverage-istanbul'],
 
 
     // web server port

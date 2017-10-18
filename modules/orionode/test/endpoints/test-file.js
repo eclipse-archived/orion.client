@@ -1593,7 +1593,7 @@ describe('File endpoint', function() {
 						});
 				})
 		});
-		it("testRenameFileChangeCase", function(done) {
+		it.skip("testRenameFileChangeCase", function(done) {
 			var fileNameLowerCase = "testrenamefilechangecase";
 			var fileNameLowerCase2 = "testrenamefilechangecase2";
 			var fileNameUpperCase = "testRenameFileChangeCase";
