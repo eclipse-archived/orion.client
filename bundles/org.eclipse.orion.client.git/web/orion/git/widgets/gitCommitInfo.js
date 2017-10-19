@@ -89,6 +89,7 @@ define([
 			holderDiv.className = "commitInfoHolder"; //$NON-NLS-0$
 			var tableDiv = document.createElement("div"); //$NON-NLS-0$
 			var table = document.createElement("table"); //$NON-NLS-0$
+			table.setAttribute("role", "presentation"); // table element is only being used for row/column presentation
 			tableDiv.appendChild(table);
 			var tableBody = document.createElement("tbody"); //$NON-NLS-0$
 			var row = document.createElement("tr"); //$NON-NLS-0$

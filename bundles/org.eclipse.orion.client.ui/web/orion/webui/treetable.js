@@ -72,6 +72,7 @@ define(['i18n!orion/nls/messages', 'orion/webui/littlelib', 'orion/Deferred'], f
 			this._onCollapse = options.onCollapse;
 			this._labelColumnIndex = options.labelColumnIndex === undefined ? 0 : options.labelColumnIndex;
 			this._id = options.id === undefined ? "treetable" : options.id; //$NON-NLS-0$
+			this._role = options.role;
 			this._tableStyle = options.tableStyle;
 			this._tableElement = options.tableElement || "table"; //$NON-NLS-0$
 			this._tableBodyElement = options.tableBodyElement || "tbody"; //$NON-NLS-0$
@@ -110,6 +111,9 @@ define(['i18n!orion/nls/messages', 'orion/webui/littlelib', 'orion/Deferred'], f
 				this._renderer.tableCallback(table);
 			}
 			table.id = this._id;
+			if (this._role) {
+				table.setAttribute("role", this._role); //$NON-NLS-0$
+			}
 			if (this._tableStyle) {
 				table.classList.add(this._tableStyle);
 			}
