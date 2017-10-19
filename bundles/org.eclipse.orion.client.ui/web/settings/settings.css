@@ -712,6 +712,10 @@ html[dir="rtl"] .themeController { /* ACGC */
     top: 0px;
 }
 
+.visibility-input {
+	float: right;
+}
+
 html[dir="rtl"] .colorpicker-input { /* ACGC */
 	float: left;
 }
