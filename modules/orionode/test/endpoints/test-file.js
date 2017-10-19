@@ -1593,7 +1593,7 @@ describe('File endpoint', function() {
 						});
 				})
 		});
-		it.skip("testRenameFileChangeCase", function(done) {
+		it("testRenameFileChangeCase", function(done) {
 			var fileNameLowerCase = "testrenamefilechangecase";
 			var fileNameLowerCase2 = "testrenamefilechangecase2";
 			var fileNameUpperCase = "testRenameFileChangeCase";
@@ -1601,6 +1601,7 @@ describe('File endpoint', function() {
 				.then(function(res) {
 					testHelper.createFile(request, '/project', fileNameLowerCase2, 'Odd contents2')
 						.then(function(res) {
+							// Try rename testrenamefilechangecase to testRenameFileChangeCase
 							request()
 							.post(PREFIX + '/project/')
 							.set('Slug', fileNameUpperCase)
@@ -1610,6 +1611,7 @@ describe('File endpoint', function() {
 							.end(function(err, res) {
 								testHelper.throwIfError(err);
 								assert.equal(res.body.Name, fileNameUpperCase);
+								// Try rename testRenameFileChangeCase to testrenamefilechangecase2
 								request()
 								.post(PREFIX + '/project/')
 								.set('Slug', fileNameLowerCase2)
