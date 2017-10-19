@@ -1549,7 +1549,7 @@ describe('File endpoint', function() {
 		/**
 		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=521138
 		 */
-		it.skip("testListenerMoveFileNoOverwrite", function(done) {
+		it("testListenerMoveFileNoOverwrite", function(done) {
 			fileUtil.addFileModificationListener("testListenerMoveFileNoOverwrite", {
 				handleFileModficationEvent: function handleFileModficationEvent(eventData) {
 					assert(eventData, "No event data was fired");
