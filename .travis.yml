@@ -37,6 +37,6 @@ install:
   - grunt;
 script:
   - npm pack;
-after_success:
   - npm test
+after_success:
   - npm run report-coverage
