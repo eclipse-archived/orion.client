@@ -200,13 +200,14 @@ function cfRequest (method, userId, url, query, body, headers, requestHeader, ta
 	}
 	return Promise.resolve(waitFor).then(function(cloudAccessToken){
 		if(!requestHeader){
-			if (!cloudAccessToken) {
+			if (!cloudAccessToken || cloudAccessToken instanceof Error) {
 				var errorStatus = new Error("Not authenticated");
 				errorStatus.code = 401;
 				errorStatus.data = {
 					"description": "Not authenticated",
 					"error_code": "CF-NotAuthenticated"
 				};
+				errorStatus.data = Object.assign(errorStatus.data, cloudAccessToken)
 				return Promise.reject(errorStatus);
 			}
 			headers = headers || {};
