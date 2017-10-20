@@ -102,9 +102,10 @@ define([
 			} else {
 				orientation = options.vertical ? ORIENTATION_VERTICAL : ORIENTATION_HORIZONTAL;
 			}
-			this.$splitter.setAttribute("aria-orientation", orientationStr); //$NON-NLS-1$ //$NON-NLS-0$
-
 			this.setOrientation(orientation);
+			
+			// aria defines orientation as attribute of splitter itself (i.e. opposite of direction of movement)
+			this.$splitter.setAttribute("aria-orientation", orientation === ORIENTATION_VERTICAL ? "horizontal" : "vertical"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			
 			if (util.isIOS || util.isAndroid) {
 				this.$splitter.addEventListener("touchstart", this._touchStart.bind(this), false); //$NON-NLS-0$
