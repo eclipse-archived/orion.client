@@ -1607,8 +1607,8 @@ describe('File endpoint', function() {
 							.set('Slug', fileNameUpperCase)
 							.set('X-Create-Options', 'move,no-overwrite')
 							.send({ Location: PREFIX + '/project/' + fileNameLowerCase})
-							.expect(200)
 							.end(function(err, res) {
+								assert(res.statusCode === 200 || res.statusCode === 201); // The statusCode returned from rename, might be 200 or 201 depends on the filesystem.
 								testHelper.throwIfError(err);
 								assert.equal(res.body.Name, fileNameUpperCase);
 								// Try rename testRenameFileChangeCase to testrenamefilechangecase2

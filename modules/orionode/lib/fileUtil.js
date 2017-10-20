@@ -473,14 +473,9 @@ var istheSamePath = exports.istheSamePath = function istheSamePath(req, fileRoot
  * @param {?} metadataMixins Properties to mix into the response
  * @since 17.0
  */
-function filePostResponse(req, res, fileRoot, workspaceRoot, destFile, isOverwrite, metadataMixins, statusCode) {
+function filePostResponse(req, res, fileRoot, workspaceRoot, destFile, isOverwrite, metadataMixins) {
 	// TODO: maybe set ReadOnly and Executable based on fileAtts
-	if (typeof statusCode === 'number') {
-		res.status(statusCode);
-	} else {
-		// Status code 200 indicates that an existing resource was replaced, or we're POSTing to a URL
-		res.status(isOverwrite ? 200 : 201);
-	}
+	res.status(isOverwrite ? 200 : 201);
 	return fs.stat(destFile.path, function(err, stats) {
 		if(err) {
 			logger.error(err);
@@ -497,10 +492,8 @@ function filePostResponse(req, res, fileRoot, workspaceRoot, destFile, isOverwri
  * @param {XMLHttpResponse} res The response
  * @param {?} destFile The destination file object
  * @param {?} metadataMixins Additional metadata to be mixed in to the File response.
- * @param {number} statusCode Status code to send on a successful response. By default, `201 Created` is sent if
- * a new resource was created, and and `200 OK` if an existing resource was overwritten.
  */
-exports.handleFilePOST = function(workspaceRoot, fileRoot, req, res, destFile, metadataMixins, statusCode) {
+exports.handleFilePOST = function(workspaceRoot, fileRoot, req, res, destFile, metadataMixins) {
 	var isDirectory = req.body && getBoolean(req.body, 'Directory'),
 		xCreateOptions = (req.headers['x-create-options'] || "").split(","),
 		isCopy = xCreateOptions.indexOf('copy') !== -1, 
@@ -557,7 +550,7 @@ exports.handleFilePOST = function(workspaceRoot, fileRoot, req, res, destFile, m
 					var eventData = { type: ChangeType.RENAME, isDir: stats.isDirectory(), file: destFile, sourceFile: sourceFile, req: req};
 					exports.fireFileModificationEvent(eventData);
 					// Rename always returns 200 no matter the file system is realy rename or creating a new file.
-					return filePostResponse(req, res, fileRoot, workspaceRoot, destFile, destExists, metadataMixins, 200);
+					return filePostResponse(req, res, fileRoot, workspaceRoot, destFile, destExists, metadataMixins);
 				});
 			});
 		}
