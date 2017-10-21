@@ -453,7 +453,7 @@ describe("Workspace endpoint", function() {
 				assert.equal(res.body.Workspaces.length, 1);
 				assert.ok(res.body.Workspaces[0].Id);
 				assert.ok(res.body.Workspaces[0].Location);
-				assert.equal(res.body.Workspaces[0].Location, PREFIX + "/anonymous-OrionContent");
+				assert.equal(res.body.Workspaces[0].Location, PREFIX + '/' + WORKSPACE_ID);
 				assert.equal(res.body.Workspaces[0].Name, TEST_WORKSPACE_NAME);
 				done();
 			});

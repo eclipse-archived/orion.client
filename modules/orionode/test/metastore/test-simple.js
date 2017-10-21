@@ -50,7 +50,7 @@ describe("Orion metastore", function() {
 				assert(res.body, "There must be a workspace");
 				request()
 					.post(res.body.Location)
-					.set('Slug', 'anonymous-OrionContent')
+					.set('Slug', WORKSPACE_ID)
 					.expect(400)
 					.end(done);
 			});

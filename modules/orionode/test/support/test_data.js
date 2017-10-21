@@ -16,9 +16,12 @@ var path = require('path'),
 	supertest = require('supertest'),
 	orionServer = require("../../index"),
 	checkRights = require('../../lib/accessRights').checkRights,
+	argslib = require('../../lib/args'),
 	testHelper = require('./testHelper'),
+	taskHelper = require('./task_helper'),
 	CONTEXT_PATH = testHelper.CONTEXT_PATH;
 
+var request;
 function debug(msg) {
 	if (exports.DEBUG) {
 		console.log(msg);
@@ -139,31 +142,36 @@ exports.setUpCF = function setUpCF(dir, callback) {
 };
 
 exports.setupOrionServer = function setupOrionServer(helperMiddleware){
-	app = express();
-	var orion = function(){
-		var options = {};
-		options.workspaceDir = testHelper.WORKSPACE;
-		options.configParams = { "orion.single.user": true, "orion.single.user.metaLocation": testHelper.METADATA };
-		 if (testHelper.CONTEXT_PATH) {
-		 	options.configParams["orion.context.listenPath"]=true;
-			options.configParams["orion.context.path"]=testHelper.CONTEXT_PATH;
-		 }
-		return orionServer(options);
-	};
-	var userMiddleware = function(req, res, next) {
-		req.user = {workspaceDir: testHelper.WORKSPACE, username: testHelper.USERNAME};
-		req.user.checkRights = checkRights;
-		next();
-	};
-	app.use(userMiddleware);
-	app.use(testHelper.CONTEXT_PATH ? testHelper.CONTEXT_PATH : "/", function(req, res, next){
-		req.contextPath =  testHelper.CONTEXT_PATH;
-		next();
-	}, orion());
-	if (helperMiddleware) {
-		app.use(helperMiddleware[0], helperMiddleware[1]);
+	if(!request){
+		app = express();
+		var configFile = path.join(__dirname, '../../orion.conf');
+		var configParams = argslib.readConfigFileSync(configFile) || {};
+		var orion = function(){
+			var options = {};
+			options.workspaceDir = testHelper.WORKSPACE;
+			options.configParams = configParams;
+			options.configParams["orion.single.user.metaLocation"] = testHelper.METADATA;
+//			options.configParams = { "orion.single.user": true, "orion.single.user.metaLocation": testHelper.METADATA };
+			if (testHelper.CONTEXT_PATH) {
+				options.configParams["orion.context.listenPath"]=true;
+				options.configParams["orion.context.path"]=testHelper.CONTEXT_PATH;
+			}
+			return orionServer(options);
+		};
+		var userMiddleware = function(req, res, next) {
+			req.user = {workspaceDir: testHelper.WORKSPACE, username: testHelper.USERNAME};
+			req.user.checkRights = checkRights;
+			next();
+		};
+		app.use(userMiddleware);
+		app.use(testHelper.CONTEXT_PATH ? testHelper.CONTEXT_PATH : "/", function(req, res, next){
+			req.contextPath =  testHelper.CONTEXT_PATH;
+			next();
+		}, orion());
+		// Add a special taskHelper router
+		app.use(CONTEXT_PATH + '/taskHelper', taskHelper.router({root: '/taskHelper', metastore: app.locals.metastore}));
+		request = supertest.bind(null, app);
 	}
-	var request = supertest.bind(null, app);
 	return request;
 };
 exports.DEBUG = process.env.DEBUG_TESTS || false;
