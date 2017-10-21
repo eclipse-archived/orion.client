@@ -1437,6 +1437,7 @@ maybeDescribe("git", function() {
 	 * Using ssh url to clone a repo with submodules, and check if everyone's in good shape; then add another submodule and delete the one submodule.
 	 */
 	describe('Use case 5', function(/*done*/) {
+		this.timeout(10000);
 		var remoteURI = "git@github.com:oriongittester/orion-test-submodule-parent.git"; // small test repo
 		var PARENT_REPO_NAME = "orion-test-submodule-parent"; // parent of "orion-test-submodule-child1,2,3"
 		var CHILD1_REPO_NAME = "orion-test-submodule-child1"; // parent of "orion-test-submodule-child-child"

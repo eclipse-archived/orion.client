@@ -433,26 +433,32 @@ function fileJSON(fileRoot, workspaceRoot, file, stats, depth, metadataMixins) {
 /**
  * Returns if the underlying file system is case sensitive
  * @param {?} file The file object
- * @returns {bool} True if the underlying filesystem is case-sensitive, false otherwise
+ * @returns {bool} True if the underlying filesystem is case-sensitive, false otherwise; By default, window=true; Mac=false; Linux=false
  * @since 17.0
  */
 var isFSCaseInsensitive = exports.isFSCaseInsensitive = function isFSCaseInsensitive(file) {
 	if(typeof ISFS_CASE_INSENSITIVE === 'undefined'){
-		var lowerCaseStat = fs.statSync(file.path.toLowerCase());
-		var upperCaseStat = fs.statSync(file.path.toUpperCase());
-		if(lowerCaseStat && upperCaseStat) {
-			return ISFS_CASE_INSENSITIVE = lowerCaseStat.dev === upperCaseStat.dev && lowerCaseStat.ino === upperCaseStat.ino;
+		try {
+			var lowerCaseStat = fs.statSync(file.path.toLowerCase());
+			var upperCaseStat = fs.statSync(file.path.toUpperCase());
+			if(lowerCaseStat && upperCaseStat) {
+				return ISFS_CASE_INSENSITIVE = lowerCaseStat.dev === upperCaseStat.dev && lowerCaseStat.ino === upperCaseStat.ino;
+			}
+		}catch(err){
+			if(err.code === 'ENOENT'){
+				return ISFS_CASE_INSENSITIVE = false;
+			}
 		}
 		return ISFS_CASE_INSENSITIVE = false;
 	}
 }
 /**
- * Returns if the two files are referencing the same file, considering the case-sensitivity of the underlying file system
+ * Returns if the two files are referencing the same path, not considering the case-sensitivity of the underlying file system, only check if lower case path is same
  * @param {XMLHttpRequest} req The backing request
  * @param {string} fileRoot The file root
  * @param {?} dest The destination file object
  */
-var istheSameFile = exports.istheSameFile = function istheSameFile(req, fileRoot, dest) {
+var istheSamePath = exports.istheSamePath = function istheSamePath(req, fileRoot, dest) {
 	var originalFile = getFile(req, req.body.Location.replace(new RegExp("^"+fileRoot), ""));
 	return path.dirname(originalFile.path).toLowerCase() === path.dirname(dest.path).toLowerCase() && dest.path.toLowerCase() === originalFile.path.toLowerCase();
 }
@@ -463,17 +469,13 @@ var istheSameFile = exports.istheSameFile = function istheSameFile(req, fileRoot
  * @param {string} fileRoot The root of the file endpoint
  * @param {string} workspaceRoot The root of the workspace endpoint
  * @param {?} destFile The destination file
+ * @param {bool} isOverwrite If the write operation is an overwrite
  * @param {?} metadataMixins Properties to mix into the response
  * @since 17.0
  */
 function filePostResponse(req, res, fileRoot, workspaceRoot, destFile, isOverwrite, metadataMixins) {
 	// TODO: maybe set ReadOnly and Executable based on fileAtts
-	if (typeof statusCode === 'number') {
-		res.status(statusCode);
-	} else {
-		// Status code 200 indicates that an existing resource was replaced, or we're POSTing to a URL
-		res.status(isOverwrite ? 200 : 201);
-	}
+	res.status(isOverwrite ? 200 : 201);
 	return fs.stat(destFile.path, function(err, stats) {
 		if(err) {
 			logger.error(err);
@@ -490,10 +492,8 @@ function filePostResponse(req, res, fileRoot, workspaceRoot, destFile, isOverwri
  * @param {XMLHttpResponse} res The response
  * @param {?} destFile The destination file object
  * @param {?} metadataMixins Additional metadata to be mixed in to the File response.
- * @param {number} statusCode Status code to send on a successful response. By default, `201 Created` is sent if
- * a new resource was created, and and `200 OK` if an existing resource was overwritten.
  */
-exports.handleFilePOST = function(workspaceRoot, fileRoot, req, res, destFile, metadataMixins, statusCode) {
+exports.handleFilePOST = function(workspaceRoot, fileRoot, req, res, destFile, metadataMixins) {
 	var isDirectory = req.body && getBoolean(req.body, 'Directory'),
 		xCreateOptions = (req.headers['x-create-options'] || "").split(","),
 		isCopy = xCreateOptions.indexOf('copy') !== -1, 
@@ -520,7 +520,7 @@ exports.handleFilePOST = function(workspaceRoot, fileRoot, req, res, destFile, m
 			}
 		}
 		if (xCreateOptions.indexOf('no-overwrite') !== -1 && destExists) {
-			if(!isMove || !istheSameFile(req, fileRoot, destFile) || !isFSCaseInsensitive(destFile)){
+			if(!isMove || !istheSamePath(req, fileRoot, destFile) || !isFSCaseInsensitive(destFile)){
 				return api.writeError(412, res, new Error('A file or folder with the same name already exists at this location.'));
 			}
 		}
@@ -549,6 +549,7 @@ exports.handleFilePOST = function(workspaceRoot, fileRoot, req, res, destFile, m
 					}
 					var eventData = { type: ChangeType.RENAME, isDir: stats.isDirectory(), file: destFile, sourceFile: sourceFile, req: req};
 					exports.fireFileModificationEvent(eventData);
+					// Rename always returns 200 no matter the file system is realy rename or creating a new file.
 					return filePostResponse(req, res, fileRoot, workspaceRoot, destFile, destExists, metadataMixins);
 				});
 			});
