@@ -89,6 +89,9 @@ function sendStatus(code, res){
  */
 function writeResponse(code, res, headers, body, needEncodeLocation, noCachedStringRes) {
 	try{
+		if (res.headerSent) {
+			logger.error("header Sent:", res.req.method, res.req.originalUrl);
+		}
 		if (typeof code === 'number') {
 			if (httpCodeMapping) {
 				code = mapHttpStatusCode(code);
@@ -128,6 +131,9 @@ function writeResponse(code, res, headers, body, needEncodeLocation, noCachedStr
  */
 function writeError(code, res, msg) {
 	try{
+		if (res.headerSent) {
+			logger.error("header Sent:", res.req.method, res.req.originalUrl);
+		}
 		if (httpCodeMapping) {
 			code = mapHttpStatusCode(code);
 		}
