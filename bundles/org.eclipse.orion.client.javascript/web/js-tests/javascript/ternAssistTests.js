@@ -166,6 +166,12 @@ define([
 							assert.equal(offset, ep[3].offset, "Template proposal had different offset for selection group. Actual offset: " + offset + " Actual length: " + len);
 							assert.equal(len, ep[3].length, "Template proposal had different length for selection group. Actual offset: " + offset + " Actual length: " + len);						
 						}
+						if (ep.length >= 5) {
+							assert(ap.tags, "Expected proposal with tags");
+							assert(ap.tags[0], "Expected proposal to have at least one tag");
+							var cssClass = ep[4];
+							assert.equal(ap.tags[0].cssClass, cssClass, "Proposal had different cssClass. Actual cssClass: " + ap.tags[0].cssClass + "; Expected: " + cssClass);
+						}
 					}
 					worker.getTestState().callback();
 				}
@@ -5596,6 +5602,28 @@ define([
 					};
 					testProposals(options, [
 						['$_test', '$_test : number'],
+					]);
+				});
+			});
+			describe("PascalCase heuristic", function () {
+				it("Functions with PascalCase name get recognized as prototype/class", function(done) {
+					var options = {
+						buffer: "function Foo() {} Foo",
+						prefix: "Foo",
+						offset: 18,
+						callback: done};
+					return testProposals(options, [
+						["Foo()", "Foo()", "Foo()", undefined, "iconClass"]
+					]);
+				});
+				it("Functions with camelCase name get recognized as function", function(done) {
+					var options = {
+						buffer: "function foo() {} foo",
+						prefix: "foo",
+						offset: 18,
+						callback: done};
+					return testProposals(options, [
+						["foo()", "foo()", "foo()", undefined, "iconFunction"]
 					]);
 				});
 			});
