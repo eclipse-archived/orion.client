@@ -393,6 +393,7 @@ define([
 					return appState;
 				}, function(error) {
 					if (error && error.HttpCode === 401) {
+						error = mCfUtil.defaultDecorateError(error, params.Target);
 						throw error;
 					}
 					return this._getTargets().then(function(result){
