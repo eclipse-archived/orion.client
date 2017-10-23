@@ -373,6 +373,10 @@ function startApp(userId, userTimeout ,appTarget){
 								runningInstanceNo++;
 							}else if(result.data[key].state === "FLAPPING"){
 								flappingInstanceNo++;
+							}else if(result.data[key].state === "CRASHED"){
+								var errorStatus = new Error("Application crashed, please check Logs for more detail");
+								errorStatus.code = "400";
+								return Promise.reject(errorStatus);
 							}
 						}
 					}
