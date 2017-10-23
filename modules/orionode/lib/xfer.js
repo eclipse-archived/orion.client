@@ -42,7 +42,10 @@ var fileRoot;
 function checkUserAccess(req, res, next){
 	var uri = (typeof req.contextPath === "string" && req.originalUrl.substring(req.contextPath.length)) || req.originalUrl;
 	// import/export rights depend on access to the file content
-	if (uri.startsWith("/xfer/export/") && uri.endsWith(".zip")){
+	if (uri.startsWith("/xfer/export/")){
+		if (path.extname(uri) !== ".zip") {
+			return writeError(400, res, "Export is not a zip");
+		}
 		uri = "/file/" + uri.substring("/xfer/export/".length, uri.length - 4) + '/';
 	} else if (uri.startsWith("/xfer/import/")) {
 		uri = "/file/" + uri.substring("/xfer/import/".length); //$NON-NLS-1$
@@ -283,11 +286,6 @@ function completeTransfer(req, res, tempFile, file, fileName, xferOptions, shoul
 function getXfer(req, res) {
 	var rest = req.params["0"];
 	var file = fileUtil.getFile(req, rest);
-	
-	if (path.extname(file.path) !== ".zip") {
-		return writeError(400, res, "Export is not a zip");
-	}
-	
 	getXferFrom(req, res, file);
 }
 
