@@ -73,7 +73,17 @@ describe("XFER endpoint", function() {
 								request()
 									.get(EXPORT_PATH + '/' + WORKSPACE_ID + '/project/exportSample.zip')
 									.expect(200)
-									.end(done)
+									.end(function(err,res){
+										testHelper.throwIfError(err);
+										request()
+										.get(EXPORT_PATH + '/' + WORKSPACE_ID + '/project/exportSample/')
+										.expect(400)
+										.end(function(err, res){
+											testHelper.throwIfError(err);
+											assert.equal(JSON.parse(res.error.text).Message, "Export is not a zip")
+											done()
+										})
+									})
 								//TODO extract and confirm zip?
 							})
 					});
