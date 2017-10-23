@@ -52,6 +52,14 @@ define(['i18n!cfui/nls/messages', 'orion/Deferred', 'cfui/cfUtil',  'orion/urlUt
 		 * Parses the given message creating a decorated UI.
 		 */
 		defaultParseMessage : function(msg){
+			if (msg.HTML) {
+				// msg is HTML to be inserted directly
+				var span = document.createElement("span");
+				span.innerHTML = msg.Message;
+				return span;
+			}
+			msg = msg.Message || msg;
+			
 			var chunks, msgNode;
 			try {
 				chunks = URLUtil.detectValidURL(msg);
@@ -107,7 +115,7 @@ define(['i18n!cfui/nls/messages', 'orion/Deferred', 'cfui/cfUtil',  'orion/urlUt
 			lib.empty(document.getElementById('messageText')); //$NON-NLS-0$
 			
 			document.getElementById('messageText').style.width = "calc(100% - 10px)"; //$NON-NLS-0$ //$NON-NLS-1$
-			document.getElementById('messageText').appendChild(WizardUtils.defaultParseMessage(message.Message || message)); //$NON-NLS-0$
+			document.getElementById('messageText').appendChild(WizardUtils.defaultParseMessage(message)); //$NON-NLS-0$
 			lib.empty(document.getElementById('messageButton')); //$NON-NLS-0$
 			
 			document.getElementById('messageButton').className = "dismissButton core-sprite-close imageSprite"; //$NON-NLS-0$ //$NON-NLS-1$
