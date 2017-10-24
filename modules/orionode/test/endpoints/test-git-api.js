@@ -4585,4 +4585,70 @@ maybeDescribe("git", function() {
 			});
 		});
 	}); // describe("fileDiff")
+
+	describe("Bug515131", function() {
+		var cloneUrl1 = "https://github.com/oriongittester/nice.gitrepo.git";
+		var name1 = "nice.gitrepo";
+		var cloneUrl2 = "https://github.com/oriongittester/.gitted.git";
+		var name2 = ".gitted";
+		/**
+		 * Clone a repo name nice.gitrepo
+		 */
+		it("test clone special name case 1", function(finished) {
+			request()
+			.post(GIT_ROOT + "/clone/")
+			.send({
+				GitUrl: cloneUrl1,
+				Location: FILE_ROOT
+			})
+			.expect(202)
+			.end(function(err, res) {
+				assert.ifError(err);
+				getGitResponse(res).then(function(res2) {
+					assert.equal(res2.HttpCode, 200);
+					assert.equal(res2.Message, "OK");
+					assert.equal(res2.JsonData.Location, GIT_ROOT + "/clone"+ FILE_ROOT + name1);
+					finished();
+				})
+				.catch(function(err) {
+					assert.ifError(err);
+					finished();
+				});
+			});
+		}); // end of it("test clone special name case 1")
+
+		// Clone a repo with name ".gitted", first confirm the repo name is good then confirm this repo name will be ignored
+		it("test clone special name case 2", function(finished) {
+			request()
+			.post(GIT_ROOT + "/clone/")
+			.send({
+				GitUrl: cloneUrl2,
+				Location: FILE_ROOT
+			})
+			.expect(202)
+			.end(function(err, res) {
+				assert.ifError(err);
+				getGitResponse(res).then(function(res2) {
+					assert.equal(res2.HttpCode, 200);
+					assert.equal(res2.Message, "OK");
+					assert.equal(res2.JsonData.Location, GIT_ROOT + "/clone"+ FILE_ROOT + name2);
+					request()
+					.get(GIT_ROOT + "/clone/workspace/" + WORKSPACE_ID)
+					.expect(200)
+					.end(function(err, res){
+						if(res.body.Children.length > 0){
+							res.body.Children.forEach(function(repo){
+								assert.notEqual(repo.Name, name2); // ".gitted is a very special repo name, which we ignore any repo with that name."
+							})
+						}
+						finished();
+					})
+				})
+				.catch(function(err) {
+					assert.ifError(err);
+					finished();
+				});
+			});
+		}); // end of it("test clone special name case 2")
+	}) // end of it("Bug515131")
 }); // describe("Git")
