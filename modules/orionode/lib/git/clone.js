@@ -307,9 +307,15 @@ function getClones(req, res, callback) {
 	}
 
 	function checkDirectory(dir, cb) {
-		//Check if the dir is a directory
+		// Check if the dir is a directory
 		fs.lstat(dir, function(err, stat) {
 			if (err || !stat.isDirectory()) return cb();
+			if(path.basename(dir) === ".gitted") {
+				 // In nodegit/vender there are a bunch of directories named .gitted, 
+				 // nodegit "open" treat them as git repos, while "discover" doesn't like them. 
+				 // so we skip them anyways.(One potential problem is if a git repo's name is .gitted, it won't show in the git tree)
+				return cb();
+			}
 			git.Repository.open(dir)
 			.then(function(repo) {
 				var base = path.basename(dir);
@@ -364,7 +370,7 @@ function getCloneName(req) {
 		if (cloneUrl.charAt(cloneUrl.length - 1) === "/") {
 			cloneUrl = cloneUrl.slice(0, -1);
 		}	
-		cloneName = cloneUrl.substring(cloneUrl.lastIndexOf("/") + 1).replace(".git", "");
+		cloneName = cloneUrl.substring(cloneUrl.lastIndexOf("/") + 1).replace(/.git$/, "");
 	}
 	return cloneName;
 }
