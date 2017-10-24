@@ -27,8 +27,10 @@ define(['orion/objects', 'orion/webui/littlelib', 'orion/widgets/input/Checkbox'
 
 		if (params.local) {
 			newCheckbox.templateString =
-			'<span class="setting-label"></span>' + //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-			'<input class="setting-control settingsCheckbox" type="checkbox"/>'; //$NON-NLS-0$
+			'<label>' + //$NON-NLS-0$
+				'<span class="setting-label"></span>' + //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+				'<input class="setting-control settingsCheckbox" type="checkbox"/>' + //$NON-NLS-0$
+			'</label>';  //$NON-NLS-0$
 
 			objects.mixin(SettingsCheckbox.prototype, Checkbox.prototype, newCheckbox);
 		}
