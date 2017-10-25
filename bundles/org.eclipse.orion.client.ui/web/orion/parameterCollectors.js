@@ -11,8 +11,8 @@
  *******************************************************************************/
 /*eslint-env browser, amd*/
 
-define(['i18n!orion/nls/messages', 'orion/webui/littlelib', 'orion/bidiUtils', 'orion/bidiFormat'], 
-        function(messages, lib, bidiUtils, bidiFormat) {
+define(['i18n!orion/nls/messages', 'orion/webui/littlelib', 'orion/bidiUtils', 'orion/bidiFormat', 'orion/webui/tooltip'], 
+        function(messages, lib, bidiUtils, bidiFormat, mTooltip) {
 
 	
 	/**
@@ -92,7 +92,12 @@ define(['i18n!orion/nls/messages', 'orion/webui/littlelib', 'orion/bidiUtils', '
 					close = document.createElement("button"); //$NON-NLS-0$
 					close.id = "closebox"; //$NON-NLS-0$
 					close.className ="imageSprite core-sprite-close dismissButton"; //$NON-NLS-0$
-					close.title = messages['Close'];
+					close.setAttribute("aria-label", messages['Close']); //$NON-NLS-0$
+					close.commandTooltip = new mTooltip.Tooltip({
+							node: close,
+							text: messages['Close'],
+							position: ["above", "below", "right", "left"] //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+					});
 					dismiss.appendChild(close);
 					var self = this;
 					close.addEventListener("click", function(event) { //$NON-NLS-0$
@@ -352,8 +357,13 @@ define(['i18n!orion/nls/messages', 'orion/webui/littlelib', 'orion/bidiUtils', '
 				if (!name) {				
 					close.classList.add("imageSprite"); //$NON-NLS-0$
 					close.classList.add("core-sprite-close"); //$NON-NLS-0$
+					close.setAttribute("aria-label", messages['Close']); //$NON-NLS-0$
+					close.commandTooltip = new mTooltip.Tooltip({
+							node: close,
+							text: messages['Close'],
+							position: ["above", "below", "right", "left"] //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+					});
 				}
-				close.title = messages['Close'];
 				close.addEventListener("click", function(event) { //$NON-NLS-0$
 					localClose();
 					if (typeof(cancelFunction) === 'function') cancelFunction();
