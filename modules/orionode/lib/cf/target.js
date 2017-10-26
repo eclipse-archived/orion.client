@@ -227,17 +227,36 @@ function cfRequest (method, userId, url, query, body, headers, requestHeader, ta
 				if (error) {
 					return reject(error);
 				}
-	//			if (response.status) {
-	//				return reject();
-	//			}
+				var code = response.statusCode;
+				if (code === 204) {
+					return fullfill();
+				}
 				if (body instanceof Uint8Array) {
-					fullfill(response);
+					return fullfill(response);
 				}
-				else {
-					fullfill(parsebody(body));
+				var result = parsebody(body);
+				var err;
+				if (code !== 200 && code !== 201) {
+					var description = result.description;
+					if (!description) {
+						var defaultDesc = "Could not connect to host. Error: " + code;
+						description = result || defaultDesc;
+						if (description.length > 1000) description = defaultDesc;
+					}
+					err = new Error(description);
+					err.code = code;
+					err.data = result;
+					return reject(err);
 				}
+				if (result.error_code) {
+					err = new Error(result.description);
+					err.code = 500;
+					err.data = result;
+					return reject(err);
+				}
+				fullfill(result);
 			});
-		})
+		});
 	});
 }
 function fullTarget(req,target){
