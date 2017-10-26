@@ -142,16 +142,18 @@ function _getAppwithAppName(userId, encodeName, appTarget){
 		return target.cfRequest("GET", userId, appTarget.Url + app.appUrl +"/summary", null, null, null, null, appTarget)
 		.then(function(result){
 			app.summaryJson = result;
-			return target.cfRequest("GET", userId, appTarget.Url + app.appUrl +"/instances", null, null, null, null, appTarget);
-		}).then(function(result){
-			app.instanceJson = result;
 			var appJson;
 			appJson = app.summaryJson;
 			appJson.instances_details = app.instanceJson;
-			
 			var appInfo = {"appJson":appJson,"app":app};
 			appCache.set(cacheKey, appInfo);
-			return appInfo;
+			return target.cfRequest("GET", userId, appTarget.Url + app.appUrl +"/instances", null, null, null, null, appTarget)
+			.then(function(result){
+				app.instanceJson = result;
+				return appInfo;
+			}).catch(function() {
+				return appInfo;
+			});
 		});
 	});
 }
