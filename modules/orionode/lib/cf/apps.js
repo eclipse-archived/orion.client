@@ -350,21 +350,20 @@ function startApp(userId, userTimeout ,appTarget){
 	var MAX_TIMEOUT = 180;
 	var body = {"console":true, "state":"STARTED"};
 	return target.cfRequest("PUT", userId, appTarget.Url + theApp.appUrl, {"inline-relations-depth":"1"}, JSON.stringify(body), null, null, appTarget)
-	.then(function(parsedBody) {
-		if (parsedBody.error_code) {
-			return parsedBody;
-		}
-		if(userTimeout < 0 ){
+	.then(function() {
+		appCache.del(cacheKey);
+		
+		if (userTimeout < 0){
 			userTimeout = theApp.manifest.applications[0].timeout ? theApp.manifest.applications[0].timeout : DEFAULT_TIMEOUT;
 		}
-		var attemptsLeft = Math.min(userTimeout, MAX_TIMEOUT);
+		var attemptsLeft = Math.min(userTimeout, MAX_TIMEOUT) / 2;
 		
-		function promiseWhile(value) {
-			return Promise.resolve(value).then(function() {
-				return collectCFRespond()
+		function promiseWhile() {
+			return getInstances()
 			.then(function(result){
+				var errorStatus;
 				if(!result.data[0] && result.attemptsLeft > 0){
-					return promiseWhile(result.attemptsLeft);
+					return promiseWhile();
 				}else if(result.data[0] && result.attemptsLeft > 0){
 					var instancesNo = Object.keys(result.data).length;
 					var runningInstanceNo = 0;
@@ -376,7 +375,7 @@ function startApp(userId, userTimeout ,appTarget){
 							}else if(result.data[key].state === "FLAPPING"){
 								flappingInstanceNo++;
 							}else if(result.data[key].state === "CRASHED"){
-								var errorStatus = new Error("Application crashed, please check Logs for more detail");
+								errorStatus = new Error("Application crashed, please check Logs for more detail");
 								errorStatus.code = "400";
 								return Promise.reject(errorStatus);
 							}
@@ -386,33 +385,32 @@ function startApp(userId, userTimeout ,appTarget){
 						return "RUNNING";
 					}
 					if (flappingInstanceNo > 0 ) {
-						var errorStatus = new Error("An error occurred during application startup, please refresh page.");
+						errorStatus = new Error("An error occurred during application startup, please refresh page.");
 						errorStatus.code = "400";
 						return Promise.reject(errorStatus);
 					}
-					return promiseWhile(result.attemptsLeft);
+					return promiseWhile();
 				}else if(result.attemptsLeft === 0 ){
-					var errorStatus = new Error("Application startup process timeout, please refresh page.");
+					errorStatus = new Error("Application startup process timeout, please refresh page.");
 					errorStatus.code = "400";
 					return Promise.reject(errorStatus);
 				}
-				});
 			});
 		}
-		function collectCFRespond(){
-			return new Promise(function(fulfill, reject){
+		function getInstances(){
+			return new Promise(function(fulfill){
 				setTimeout(function(){
 					return target.cfRequest("GET", userId, appTarget.Url + theApp.appUrl + "/instances", null, null, null, null, appTarget)
 					.then(function(result){
 						fulfill({"data": result,"attemptsLeft": --attemptsLeft});
 					})
-					.catch(function(err){
-						return reject(err);
+					.catch(function(){
+						fulfill({"data": [],"attemptsLeft": --attemptsLeft});
 					});
 				}, 2000);
 			});
 		}
-		return promiseWhile(attemptsLeft);
+		return promiseWhile();
 	});
 }
 
@@ -478,9 +476,6 @@ function createApp(req, appTarget){
 		};
 		return target.cfRequest("POST", req.user.username, appTarget.Url + "/v2/apps", null, JSON.stringify(body), null, null, appTarget)
 		.then(function(result){
-			if(result.error_code){
-				return handleSimpleErrorStatus(result, "404");
-			}
 			theApp.appGuid = result.metadata.guid;
 			return result;
 		});
@@ -559,9 +554,6 @@ function bindRoute(req, appTarget){
 			}
 			/* attach route to application */
 			return waitForRoute.then(function(appRoute){
-				if(appRoute.error_code){
-					return handleSimpleErrorStatus(appRoute, "400");
-				}
 				theApp.appRoute = appRoute;
 				return target.cfRequest("PUT", req.user.username, appTarget.Url + "/v2/apps/" + theApp.appGuid + "/routes/" + appRoute.metadata.guid, null, null, null, null, appTarget);
 			});
@@ -772,9 +764,6 @@ function getAppbyGuid(userId, appGuid ,appTarget){
 	.then(function(appJSON){
 		return target.cfRequest("GET", userId, theApp.appTarget.Url + appJSON.metadata.url + "/summary", null, null, null, null, appTarget)
 		.then(function(result){
-			if(result.error_code){
-				return handleSimpleErrorStatus(result, "404");
-			}
 			theApp.summaryJson = result;
 			theApp.appGuid = appJSON.metadata.guid;
 			theApp.appName = result.name;			
@@ -784,9 +773,6 @@ function getAppbyGuid(userId, appGuid ,appTarget){
 function getRouteGuidbyGuid(userId, routeGuid, appTarget){
 	return target.cfRequest("GET", userId,appTarget.Url + "/v2/routes/" + routeGuid, null, null, null, null, appTarget)
 	.then(function(result){
-		if(result.error_code){
-			return handleSimpleErrorStatus(result, "404");
-		}
 		return result.metadata.guid; // TODO this need to test
 	});
 }
@@ -798,9 +784,6 @@ function getServiceGuid(userId, service, appTarget){
 	return target.cfRequest("GET", userId, appTarget.Url + "/v2/spaces/" + appTarget.Space.metadata.guid + "/service_instances"
 	, {"inline-relations-depth":"1","return_user_provided_service_instances":"true","q":"name:"+service}, null, null, null, appTarget)
 	.then(function(serviceJson){
-		if(serviceJson.error_code){
-			return handleSimpleErrorStatus(serviceJson, "404");
-		}
 		var serviceResources = serviceJson.resources;
 		var serviceInstanceGUID;
 		// Find service Guid from the response of getting service request.
@@ -819,9 +802,6 @@ function createService(userId, serviceName, servicePlanGuid, appTarget){
 	};
 	return target.cfRequest("POST", userId, appTarget.Url + "/v2/service_instances", null, JSON.stringify(body), null, null, appTarget)
 	.then(function(result){
-		if(result.error_code){
-			return handleSimpleErrorStatus(result, "404");
-		}
 		return result.metadata.guid;
 	});
 }
@@ -905,10 +885,5 @@ function archiveTarget (filePath, req){
 		return false; // false means no '.war' has been find
 		});
 	}
-}
-function handleSimpleErrorStatus(cfRequestResult, code){
-	var errorStatus = new Error(cfRequestResult.description);
-	errorStatus.code = code;
-	return Promise.reject(errorStatus);
 }
 };
