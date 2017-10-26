@@ -50,6 +50,10 @@ define(['i18n!orion/nls/messages', 'orion/webui/littlelib', 'orion/bidiUtils', '
 				if (this._activeElements.commandNode) {
 					this._activeElements.commandNode.classList.remove("activeCommand"); //$NON-NLS-0$
 				}
+				if (this._activeElements.closeTooltip) {
+		            this._activeElements.closeTooltip.destroy();
+		            this._activeElements.closeTooltip = null;
+		        }
 				this._toolbarLayoutFunction(this._activeElements);
 				if (this._activeElements.onClose) {
 					this._activeElements.onClose();
@@ -93,10 +97,10 @@ define(['i18n!orion/nls/messages', 'orion/webui/littlelib', 'orion/bidiUtils', '
 					close.id = "closebox"; //$NON-NLS-0$
 					close.className ="imageSprite core-sprite-close dismissButton"; //$NON-NLS-0$
 					close.setAttribute("aria-label", messages['Close']); //$NON-NLS-0$
-					close.commandTooltip = new mTooltip.Tooltip({
+					this._activeElements.closeTooltip = new mTooltip.Tooltip({
 							node: close,
 							text: messages['Close'],
-							position: ["above", "below", "right", "left"] //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+							position: ["right", "below", "above", "left"] //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 					});
 					dismiss.appendChild(close);
 					var self = this;
@@ -358,10 +362,10 @@ define(['i18n!orion/nls/messages', 'orion/webui/littlelib', 'orion/bidiUtils', '
 					close.classList.add("imageSprite"); //$NON-NLS-0$
 					close.classList.add("core-sprite-close"); //$NON-NLS-0$
 					close.setAttribute("aria-label", messages['Close']); //$NON-NLS-0$
-					close.commandTooltip = new mTooltip.Tooltip({
+					this._activeElements.closeTooltip = new mTooltip.Tooltip({
 							node: close,
 							text: messages['Close'],
-							position: ["above", "below", "right", "left"] //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+							position: ["right", "below", "above", "left"] //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 					});
 				}
 				close.addEventListener("click", function(event) { //$NON-NLS-0$
