@@ -99,7 +99,8 @@ define([
 				searchStringInput.name = messages["Find:"];
 				searchStringInput.className = "parameterInput"; //$NON-NLS-0$
 				searchStringInput.id = "localSearchFindWith"; //$NON-NLS-0$
-				searchStringInput.placeholder=messages["Find With"];
+				searchStringInput.placeholder = messages["Find With"];
+				searchStringInput.setAttribute("aria-label", messages["Find With"]); //$NON-NLS-0$
 				searchStringInput.oninput = function(evt){
 					return that._handleInput(evt);
 				};
@@ -125,7 +126,8 @@ define([
 					replaceStringInput.name = messages["ReplaceWith:"];
 					replaceStringInput.className = "parameterInput"; //$NON-NLS-0$
 					replaceStringInput.id = "localSearchReplaceWith"; //$NON-NLS-0$
-					replaceStringInput.placeholder=messages["Replace With"];
+					replaceStringInput.placeholder = messages["Replace With"];
+					replaceStringInput.setAttribute("aria-label", messages["Replace With"]); //$NON-NLS-0$
 					replaceStringInput.onkeydown = function(evt){
 						return that._handleKeyDown(evt);
 					};
