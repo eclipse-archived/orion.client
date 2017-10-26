@@ -18,6 +18,7 @@ define({//Default message bundle
 	"Auto direction": "Auto direction",
 	"Gregorian": "Gregorian",
 	"Hebrew": "Hebrew",
+	"Islamic": "Islamic",
 	"Plugin Description": "Plug-in Description",
 	"Create": "Create",
 	"Loading...": "Loading...",
