@@ -362,7 +362,7 @@ define(['i18n!orion/nls/messages', 'orion/webui/littlelib', 'orion/bidiUtils', '
 					close.classList.add("imageSprite"); //$NON-NLS-0$
 					close.classList.add("core-sprite-close"); //$NON-NLS-0$
 					close.setAttribute("aria-label", messages['Close']); //$NON-NLS-0$
-					this._activeElements.closeTooltip = new mTooltip.Tooltip({
+					self._activeElements.closeTooltip = new mTooltip.Tooltip({
 							node: close,
 							text: messages['Close'],
 							position: ["right", "below", "above", "left"] //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
