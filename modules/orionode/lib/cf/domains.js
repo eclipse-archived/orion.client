@@ -56,6 +56,9 @@ function getDomain(req, res) {
 				});
 			}
 		});
+	 })
+	 .catch(function(err){
+		 target.caughtErrorHandler(task, err);
 	 });
 }
 
