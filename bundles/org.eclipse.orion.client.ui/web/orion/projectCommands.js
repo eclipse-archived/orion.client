@@ -659,6 +659,8 @@ define(['require', 'i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 
 									data.oldParams = params;
 									commandService.collectParameters(data);
 								} else {
+									item.status = {CheckState: true};
+									sharedLaunchConfigurationDispatcher.dispatchEvent({type: "changeState", newValue: item });
 									errorHandler(error);
 								}
 							});
