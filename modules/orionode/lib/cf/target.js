@@ -237,7 +237,7 @@ function cfRequest (method, userId, url, query, body, headers, requestHeader, ta
 				var result = parsebody(body);
 				var err;
 				if (code !== 200 && code !== 201) {
-					var description = result.description;
+					var description = result.description || result.message;
 					if (!description) {
 						var defaultDesc = "Could not connect to host. Error: " + code;
 						description = result || defaultDesc;
