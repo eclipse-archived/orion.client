@@ -28,6 +28,8 @@ var bluebirdfs = Promise.promisifyAll(require("fs"));
 var crypto = require("crypto");
 var extService = require("./extService");
 var LRU = require("lru-cache");
+var log4js = require('log4js');
+var logger = log4js.getLogger("cf");
 
 // Caching for already located targets
 var appCache = LRU({max: 1000, maxAge: 30000 });
@@ -51,7 +53,7 @@ function getapps(req, res){
 	var encodedContentLocation =  req.query.ContentLocation;
 	var targetRequest = req.query.Target ? JSON.parse(req.query.Target) : null;
 	target.computeTarget(req.user.username, target.fullTarget(req,targetRequest))
-	 .then(function(appTarget){
+	.then(function(appTarget){
 		if(encodeName){
 			return getAppwithAppName(req.user.username, task,encodeName,appTarget);
 		}else if(encodedContentLocation) {
@@ -197,6 +199,7 @@ function putapps(req, res){
 //			return mapRoute(req.user.username, resultArray[0],appTarget);
 //		});
 //	}
+	logger.debug("Put application=" + theApp.appName);
 	var state = req.body.State;
 	var appName = req.body.Name;
 	var contentLocation = toOrionLocation(req, req.body.ContentLocation);
@@ -209,8 +212,8 @@ function putapps(req, res){
 	var restart;
 	var appTarget;
 	return target.computeTarget(req.user.username, target.fullTarget(req,targetRequest))
-	 .then(function(resultTarget){
-	 	appTarget = resultTarget;
+	.then(function(resultTarget){
+		appTarget = resultTarget;
 		if(contentLocation && !state){
 			var waitFor;
 			if(manifestJSON){
@@ -339,6 +342,7 @@ function respondAppPutRequest(task,status){
 		Message: "Ok",
 		Severity: "Ok"
 	});
+	logger.debug("Put application done=" + theApp.appName);
 	return Promise.resolve();
 }
 
@@ -349,6 +353,7 @@ function startApp(userId, userTimeout ,appTarget){
 	var DEFAULT_TIMEOUT = 60;
 	var MAX_TIMEOUT = 180;
 	var body = {"console":true, "state":"STARTED"};
+	logger.debug("Starting application=" + theApp.appName);
 	return target.cfRequest("PUT", userId, appTarget.Url + theApp.appUrl, {"inline-relations-depth":"1"}, JSON.stringify(body), null, null, appTarget)
 	.then(function() {
 		appCache.del(cacheKey);
@@ -418,19 +423,22 @@ function stopApp(userId, appTarget){
 	var cacheKey = appTarget.Url + appTarget.Org + appTarget.Space + theApp.appName;
 	appCache.del(cacheKey);
 	
+	logger.debug("Stopping application=" + theApp.appName);
 	var body = {"console":true,"state":"STOPPED"};
 	return target.cfRequest("PUT", userId, appTarget.Url + theApp.appUrl, {"inline-relations-depth":"1"}, JSON.stringify(body), null, null, appTarget)
-	.then(function(result){
+	.then(function(){
 		return "STOPPED";
 	});
 }
 function restartApp(userId, appTarget){
+	logger.debug("Restarting application=" + theApp.appName);
 	return stopApp(userId,appTarget) 
 	.then(function(){
 		return startApp(userId, -1, appTarget);
 	});
 }
 function pushApp(req, appTarget){
+	logger.debug("Pushing application=" + theApp.appName);
 	var cacheKey = appTarget.Url + appTarget.Org + appTarget.Space + theApp.appName;
 	appCache.del(cacheKey);
 	
@@ -464,6 +472,7 @@ function createApp(req, appTarget){
 	}
 	return Promise.resolve(waitForStackGuid)
 	.then(function(stackGuid){
+		logger.debug("Create application=" + theApp.appName);
 		var body = {
 			"space_guid": appTarget.Space.metadata.guid,
 			"name":theApp.appName,
@@ -492,6 +501,7 @@ function updateApp(req, appTarget){
 	}
 	return Promise.resolve(waitForStackGuid)
 	.then(function(stackGuid){
+		logger.debug("Update application=" + theApp.appName);
 		var body = {
 			"name":theApp.appName,
 			"instances":theApp.manifest.applications[0].instances || 1,
@@ -508,12 +518,14 @@ function updateApp(req, appTarget){
 	});
 }
 function getStackGuidByName(userId, stackname ,appTarget){
+	logger.debug("Getting stack guid=" + theApp.appName);
 	return target.cfRequest("GET", userId, appTarget.Url + "/v2/stacks", {"q":"name:"+ stackname,"inline-relations-depth":"1"})
 	.then(function(result){
 		return result.resources[0] && result.resources[0].metadata.guid || null;
 	});
 }
 function bindRoute(req, appTarget){
+	logger.debug("Binding Route=" + theApp.appName);
 	return domains.getCFdomains(appTarget, req.user.username, targetRequest.Url)
 	/* get available domains */
 	.then(function(domainArray){
@@ -561,6 +573,7 @@ function bindRoute(req, appTarget){
 	});
 }
 function uploadBits(req, appTarget){
+	logger.debug("Upload application content=" + theApp.appName);
 	var cloudAccessToken;
 	var archiveredFilePath;
 	return target.getAccessToken(req.user.username, appTarget)
@@ -667,6 +680,7 @@ function uploadBits(req, appTarget){
 	});
 }
 function bindServices(req, appTarget){
+	logger.debug("Binding services=" + theApp.appName);
 	if(theApp.manifest.applications[0].services){
 		return target.cfRequest("GET", req.user.username, appTarget.Url + "/v2/services", {"inline-relations-depth":"1"}, null, null, null, appTarget)
 		.then(function(result){
