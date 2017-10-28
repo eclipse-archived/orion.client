@@ -199,7 +199,6 @@ function putapps(req, res){
 //			return mapRoute(req.user.username, resultArray[0],appTarget);
 //		});
 //	}
-	logger.debug("Put application=" + theApp.appName);
 	var state = req.body.State;
 	var appName = req.body.Name;
 	var contentLocation = toOrionLocation(req, req.body.ContentLocation);
@@ -245,6 +244,7 @@ function putapps(req, res){
 	}).then(function(){
 		instrumentManifest(theApp.manifest,instrumentationJSON);
 		theApp.appName = appName ? appName : manifestAppName;
+		logger.debug("Put application=" + theApp.appName);
 		if(app){
 			var waitFor;
 			if(state === "Started"){
