@@ -579,8 +579,10 @@ function uploadBits(req, appTarget){
 	return target.getAccessToken(req.user.username, appTarget)
 	.then(function(token){
 		cloudAccessToken = token;
+		logger.debug("Upload application content(zip start)=" + theApp.appName);
 		return archiveTarget(theApp.appStore, req)
 		.then(function(filePath){
+			logger.debug("Upload application content(zip done)=" + theApp.appName);
 			theApp.appPackageType = path.extname(filePath).substring(1);
 			archiveredFilePath = filePath;
 			if(!archiveredFilePath){
@@ -615,8 +617,10 @@ function uploadBits(req, appTarget){
 				errorStatus.code = "500";
 				return Promise.reject(errorStatus);
 			});
+			logger.debug("Upload application content(upload start)=" + theApp.appName);
 			return target.cfRequest(null, null, null ,null, null, null,uploadBitsHeader);
 		}).then(function(requestResult){
+			logger.debug("Upload application content(upload done)=" + theApp.appName);
 			var ATTEMPTACCOUNT = 150;
 			var initialValue = {
 				"attemptsLeft":ATTEMPTACCOUNT,
@@ -630,9 +634,11 @@ function uploadBits(req, appTarget){
 			
 			function promiseWhile(value) {
 				return Promise.resolve(value).then(function(collectResult) {
+					logger.debug("Upload application content(checking finish)=" + theApp.appName);
 					return collectCFRespond(collectResult)
 					.then(function(result){
 						if(result.status === "finished"){
+							logger.debug("Upload application content(done)=" + theApp.appName);
 							// When it's 'finished', return from the whole recursive promise chain.
 							return;
 						}
