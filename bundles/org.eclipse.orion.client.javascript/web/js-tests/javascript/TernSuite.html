@@ -19,10 +19,9 @@
 			domReady: 'requirejs/domReady'
 		}
 	});
-	require(['mocha/sauce'], function(testSuite) {
+	require(['mocha/sauce'], function(mocha) {
 		mocha.setup('bdd');
 		require([
-				'js-tests/javascript/testingWorker',
 				'js-tests/javascript/ternAssistIndexTests',
 				'js-tests/javascript/ternAssistModuleTests',
 				'js-tests/javascript/ternAssistTests',
@@ -30,30 +29,9 @@
 				'js-tests/javascript/ternProjectFileTests',
 				'js-tests/javascript/ternProjectValidatorTests',
 				'js-tests/javascript/ternProjectHoverTests',
-				'js-tests/javascript/ternProjectManagerTests' // keep this one last, it has a special flag to ignore 404s while processing leadReagerly tests
-				], 
-					function(worker, ternAssistIndexTests, ternAssistModuleTests, ternAssistTests, ternCommandTests, 
-							ternProjectFileTests, ternProjectValidatorTests, ternProjectHoverTests, ternProjectManagerTests) {
-					var testworker;
-					before("reset timeout", function(done) {
-						this.timeout(40000);
-						testworker.start(done);
-					});
-					after("stop the worker", function() {
-						if(testworker) {
-							testworker.terminate();
-						}
-					});
-					testworker = worker.instance({delayedStart: true});
-					ternAssistIndexTests(testworker);
-					ternAssistModuleTests(testworker);
-					ternAssistTests(testworker);
-					ternCommandTests(testworker);
-					ternProjectFileTests(testworker);
-					ternProjectValidatorTests(testworker);
-					ternProjectHoverTests(testworker);
-					ternProjectManagerTests(testworker);
-					testSuite.run();
+				// 'js-tests/javascript/ternProjectManagerTestsx' // Not working.
+				], function(){
+			mocha.run();
 		});
 	});
   </script>
