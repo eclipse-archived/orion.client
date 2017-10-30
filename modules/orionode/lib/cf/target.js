@@ -207,7 +207,7 @@ function cfRequest (method, userId, url, query, body, headers, requestHeader, ta
 					"description": "Not authenticated",
 					"error_code": "CF-NotAuthenticated"
 				};
-				errorStatus.data = Object.assign(errorStatus.data, cloudAccessToken)
+				errorStatus.data = Object.assign(errorStatus.data, cloudAccessToken);
 				return Promise.reject(errorStatus);
 			}
 			headers = headers || {};

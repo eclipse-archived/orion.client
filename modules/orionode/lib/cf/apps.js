@@ -845,6 +845,7 @@ function archiveTarget (filePath, req){
 	return searchAndCopyNearestwarFile(resultFilePath, filePath,filePath)
 	.then(function(){
 		// If searchAndCopyNearestwarFile fulfill with 'false', it means no .war has been found. so Zip the folder.
+		logger.debug("Archive Target start to zip=" + filePath);
 		return new Promise(function(fulfill, reject){
 			var zip = archiver("zip");
 			resultFilePath = path.join(xfer.getUploadDir(), ramdomName + ".zip");
@@ -857,9 +858,11 @@ function archiveTarget (filePath, req){
 			
 				zip.finalize();
 				zip.on("end", function(){
+					logger.debug("Archive Target done zipping=" + filePath);
 					return fulfill();
 				});
-				zip.on("error", function(){
+				zip.on("error", function(err){
+					logger.debug("Archive Target failed to zip=" + filePath, err.message);
 					var errorStatus = new Error("Zipping process went wrong");
 					return reject(errorStatus);
 				});
@@ -875,6 +878,7 @@ function archiveTarget (filePath, req){
 	});
 	
 	function searchAndCopyNearestwarFile (targetWarPath, base, filePath) {
+		logger.debug("Searching war file=" + filePath);
 		return bluebirdfs.statAsync(filePath)
 		.then(function(stats) {
 		/*eslint consistent-return:0*/
@@ -899,6 +903,7 @@ function archiveTarget (filePath, req){
 				return readenWarfileStream.pipe(bluebirdfs.createWriteStream(targetWarPath));
 			}).then(function(){
 				// Using this promise to reject the promise chain.
+				logger.debug("Found war file=" + filePath);
 				return Promise.reject("warFound");
 			});
 		}

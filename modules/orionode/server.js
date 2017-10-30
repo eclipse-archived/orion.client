@@ -171,6 +171,10 @@ function startServer(cb) {
 				}
 			});
 			server.listen(port);
+			process.on('uncaughtException', err => {
+			 	logger.error(err);
+			 	process.exit(1);
+			});
 			
 			// this function is called when you want the server to die gracefully
 			// i.e. wait for existing connections
