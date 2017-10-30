@@ -25,7 +25,7 @@ define([
 	var worker;
 	before("reset timeout", function(done) {
 		worker = TestWorker.instance({delayedStart: true});
-		this.timeout(10000);
+		this.timeout(20000);
 		worker.start(done);
 	});
 	after("stop the worker", function() {
