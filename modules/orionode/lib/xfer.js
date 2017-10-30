@@ -13,6 +13,7 @@ var api = require('./api'),
 	archiver = require('archiver'),
 	request = require('request'),
 	express = require('express'),
+	crypto = require("crypto"),
 	path = require('path'),
 	os = require('os'),
 //Busboy = require('busboy'),
@@ -62,6 +63,8 @@ module.exports.router = function(options) {
 	fileRoot = options.fileRoot;
 	if (!fileRoot) { throw new Error('options.fileRoot is required'); }
 	module.exports.write = write;
+	module.exports.zipPath = zipPath;
+	module.exports.copyPath = copyPath;
 	module.exports.getUploadDir = getUploadDir;
 	
 	UPLOADS_FOLDER = getUploadsFolder(options);
@@ -322,6 +325,65 @@ function write (zip, base, filePath) {
 			});
 		}
 		zip.file(filePath, { name: filePath.substring(base.length).replace(/\\/g, "/") });
+	});
+}
+function zipPath(pathToZip, sendZipAddEvent, req){
+	var zipFileName = crypto.randomBytes(5).toString("hex") + Date.now();
+	return new Promise(function(fulfill, reject){
+		var zip = archiver("zip");
+		var resultFilePath = path.join(getUploadDir(), zipFileName + ".zip");
+		mkdirp(path.dirname(resultFilePath), function(err) {
+			if (err) {
+				logger.error(err);
+				return reject(err);
+			}
+			var output = fs.createWriteStream(resultFilePath);
+			output.on('error', function(err) {
+				logger.error(err);
+				return reject(err);
+			});
+			zip.pipe(output);
+			return write(zip, pathToZip, pathToZip)
+			.then(function() {
+				if(sendZipAddEvent){
+					var eventData = { type: fileUtil.ChangeType.ZIPADD, req: req, zip: zip };
+					fileUtil.fireFileModificationEvent(eventData);
+				}
+				zip.finalize();
+				zip.on("end", function(){
+					return fulfill(resultFilePath);
+				});
+				zip.on("error", function(err){
+					logger.error(err);
+					var errorStatus = new Error("Zipping process went wrong");
+					return reject(errorStatus);
+				});
+			});
+		});
+	});
+}
+function copyPath(filePath){
+	var ramdomName = crypto.randomBytes(5).toString("hex") + Date.now();
+	var resultFilePath = path.join(getUploadDir(), ramdomName + ".zip");
+	return new Promise(function(fulfill, reject){
+		mkdirp(path.dirname(resultFilePath), function(err) {
+			if (err) {
+				logger.error(err);
+				return reject(err);
+			}
+			var readenWarfileStream = fs.createReadStream(filePath);
+			readenWarfileStream.on("error", function(err) {
+				reject(err);
+			});
+			var output = fs.createWriteStream(resultFilePath);
+			output.on("error", function(err) {
+				reject(err);
+			});
+			readenWarfileStream.on('end', function() {
+				return fulfill(resultFilePath);
+			});
+			readenWarfileStream.pipe(output);
+		});
 	});
 }
 function getUploadDir(){

@@ -25,9 +25,9 @@ var archiver = require("archiver");
 var os = require("os");
 var Promise = require("bluebird");
 var bluebirdfs = Promise.promisifyAll(require("fs"));
-var crypto = require("crypto");
 var extService = require("./extService");
 var LRU = require("lru-cache");
+var mkdirp = require('mkdirp');
 var log4js = require('log4js');
 var logger = log4js.getLogger("cf");
 
@@ -840,74 +840,45 @@ function normalizeMemoryMeasure(memory){
 	return 1024;
 }
 function archiveTarget (filePath, req){
-	var ramdomName = crypto.randomBytes(5).toString("hex") + Date.now();
-	var resultFilePath = path.join(xfer.getUploadDir(), ramdomName + ".war");
-	return searchAndCopyNearestwarFile(resultFilePath, filePath,filePath)
+	logger.debug("archive Target, trying to find war file in=" + filePath);
+	return searchNearestWarFile(filePath, filePath)
 	.then(function(){
+		logger.debug("archive Target, no war file, try to zip");
 		// If searchAndCopyNearestwarFile fulfill with 'false', it means no .war has been found. so Zip the folder.
-		logger.debug("Archive Target start to zip=" + filePath);
-		return new Promise(function(fulfill, reject){
-			var zip = archiver("zip");
-			resultFilePath = path.join(xfer.getUploadDir(), ramdomName + ".zip");
-			var output = bluebirdfs.createWriteStream(resultFilePath);
-			zip.pipe(output);
-			return xfer.write(zip, filePath, filePath)
-			.then(function() {
-				var eventData = { type: fileUtil.ChangeType.ZIPADD, req: req, zip: zip };
-				fileUtil.fireFileModificationEvent(eventData);
-			
-				zip.finalize();
-				zip.on("end", function(){
-					logger.debug("Archive Target done zipping=" + filePath);
-					return fulfill();
-				});
-				zip.on("error", function(err){
-					logger.debug("Archive Target failed to zip=" + filePath, err.message);
-					var errorStatus = new Error("Zipping process went wrong");
-					return reject(errorStatus);
-				});
-			});
-		});
+		return xfer.zipPath(filePath, true, req);
 	})
 	.catch(function(result){
-		if(result === "warFound") return; // Assert the .war filed has been copied over.
+		if(result.message === "warFound") {
+			logger.debug("archive Target, war file found, try to copy war file");
+			return xfer.copyPath(result.filePath);
+		}// Assert the .war filed has been copied over.
 		return Promise.reject(result);  // keep escalating other rejections.
 	})
-	.then(function(){
-		return resultFilePath;
+	.then(function(zippedFilePath){
+		return zippedFilePath;
 	});
 	
-	function searchAndCopyNearestwarFile (targetWarPath, base, filePath) {
-		logger.debug("Searching war file=" + filePath);
+	function searchNearestWarFile (base, filePath) {
 		return bluebirdfs.statAsync(filePath)
 		.then(function(stats) {
-		/*eslint consistent-return:0*/
-		if (stats.isDirectory()) {
-			if (filePath.substring(filePath.length-1) !== "/") filePath = filePath + "/";
-			return bluebirdfs.readdirAsync(filePath)
-			.then(function(directoryFiles) {
-				var SUBDIR_SEARCH_CONCURRENCY = 1;
-				return Promise.map(directoryFiles, function(entry) {
-					return searchAndCopyNearestwarFile(targetWarPath ,base, filePath + entry);
-				},{ concurrency: SUBDIR_SEARCH_CONCURRENCY});
-			});
-		}
-		if(path.extname(filePath) === ".war"){
-			return new Promise(function(fulfill,reject){
-				var readenWarfileStream = bluebirdfs.createReadStream(filePath);
-				readenWarfileStream.on("error", function(err) {
-					reject(err);
+			/*eslint consistent-return:0*/
+			if (stats.isDirectory()) {
+				if (filePath.substring(filePath.length-1) !== "/") filePath = filePath + "/";
+				return bluebirdfs.readdirAsync(filePath)
+				.then(function(directoryFiles) {
+					var SUBDIR_SEARCH_CONCURRENCY = 1;
+					return Promise.map(directoryFiles, function(entry) {
+						return searchNearestWarFile(base, filePath + entry);
+					},{ concurrency: SUBDIR_SEARCH_CONCURRENCY});
 				});
-				fulfill(readenWarfileStream);
-			}).then(function(readenWarfileStream){
-				return readenWarfileStream.pipe(bluebirdfs.createWriteStream(targetWarPath));
-			}).then(function(){
+			}
+			if(path.extname(filePath) === ".war"){
 				// Using this promise to reject the promise chain.
-				logger.debug("Found war file=" + filePath);
-				return Promise.reject("warFound");
-			});
-		}
-		return false; // false means no '.war' has been find
+				var error = new Error("warFound");
+				error.filePath = filePath;
+				return Promise.reject(error);
+			}
+			return false; // false means no '.war' has been find
 		});
 	}
 }
