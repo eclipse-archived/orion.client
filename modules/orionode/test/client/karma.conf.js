@@ -4,6 +4,8 @@ module.exports = function(config) {
     // base path that will be used to resolve all patterns (eg. files, exclude)
     basePath: '../../lib/orion.client/',
 
+    // Increase timeout so this task will not fail on Travis.
+    browserNoActivityTimeout: 60000,
 
     // frameworks to use
     // available frameworks: https://npmjs.org/browse/keyword/karma-adapter
