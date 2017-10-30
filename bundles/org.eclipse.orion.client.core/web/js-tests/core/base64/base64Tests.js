@@ -37,11 +37,12 @@ define(["chai/chai", "orion/Base64", "mocha/mocha"], function(chai, Base64) {
 	testData += testData;
 
 	describe("base64", function() {
-		it("#decode, #encode", function() {
+		it("#decode, #encode", function(done) {
+			this.timeout(20000);
 			var decoded = Base64.decode(testData);
 			var result = Base64.encode(decoded);
-	
 			assert.equal(result, testData);
+			done();
 		});
 
 		it("whitespace", function() {
