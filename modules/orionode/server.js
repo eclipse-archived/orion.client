@@ -227,7 +227,10 @@ if (configParams["orion.cluster"]) {
 			cluster.fork();
 		}
 		cluster.on('exit', /** @callback */ function(worker, code, signal) {
-			logger.info("Worker " + worker.process.pid + " exited");
+			logger.info("Worker " + worker.process.pid + " exited - code=" + code + " signal=" + signal);
+			if (code && !signal) {
+				cluster.fork();
+			}
 		});
 		logger.info("Master " + process.pid + " started");
 	} else {
