@@ -12,9 +12,10 @@
 define([
 	'orion/objects',
 	'orion/webui/littlelib',
-	'text!orion/webui/Slideout.html'
+	'text!orion/webui/Slideout.html',
+	'i18n!orion/nls/messages'
 ], function(
-	objects, lib, SlideoutTemplate
+	objects, lib, SlideoutTemplate, messages
 ) {
 	var VISIBILITY_TRANSITION_MS = 200; /* this should be equivalent to the transition duration set on .slideoutWrapper in Slideout.css */
 	
@@ -36,6 +37,7 @@ define([
 			var range = document.createRange();
 			range.selectNode(this._parentNode);
 			var domNodeFragment = range.createContextualFragment(SlideoutTemplate);
+			lib.processTextNodes(domNodeFragment, messages);
 			this._parentNode.appendChild(domNodeFragment);
 			
 			this._wrapperNode = lib.$(".slideoutWrapper", this._parentNode); //$NON-NLS-0$

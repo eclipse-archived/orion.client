@@ -279,12 +279,27 @@ define(["orion/util"], function(util) {
 			if (matches && matches.length > 1) {
 				replace(node, matches);
 			}
+		} else if (node.nodeType === 1) { // ELEMENT_NODE
+			processElementNode(node, replace, "alt"); //$NON-NLS-0$
+			//processElementNode(node, replace, "title"); //$NON-NLS-0$
+			//processElementNode(node, replace, "placeholder"); //$NON-NLS-0$
+			processElementNode(node, replace, "aria-label"); //$NON-NLS-0$
 		}
 		if (node.hasChildNodes()) {
 			for (var i=0; i<node.childNodes.length; i++) {
 				processNodes(node.childNodes[i], replace);
 			}
 		}
+	}
+	
+	function processElementNode(node, replace, attribute) {
+		var value = node.getAttribute(attribute);
+		if (value) {
+			var matches = variableRegEx.exec(value);
+			if (matches && matches.length > 1) {
+				replace(node, matches, attribute);
+			}
+		}		
 	}
 
 	/**
@@ -329,9 +344,13 @@ define(["orion/util"], function(util) {
 	 * @param {String[]} messages The replacement strings.
 	 */
 	function processTextNodes(node, messages) {
-		processNodes(node, function(targetNode, matches) {
+		processNodes(node, function(targetNode, matches, attribute) {
 			var replaceText = messages[matches[1]] || matches[1];
-			targetNode.parentNode.replaceChild(document.createTextNode(replaceText), targetNode);
+			if (targetNode.nodeType === 3) { // TEXT_NODE
+				targetNode.parentNode.replaceChild(document.createTextNode(replaceText), targetNode);
+			} else if (targetNode.nodeType === 1 && attribute) { // ELEMENT_NODE
+				targetNode.setAttribute(attribute, replaceText); //$NON-NLS-0$
+			}
 		});
 	}
 

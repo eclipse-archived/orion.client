@@ -49,6 +49,7 @@
 .orionButton.recentEntryButton.isHidden {
 	cursor: default;
 	opacity: 0;
+	visibility: hidden;
 }
 
 .recentEntryButton:hover > .recentEntryArrow {
@@ -74,4 +75,5 @@
 	overflow: hidden;
 	padding-left: 0;
 	padding-right: 0;
+	visibility: hidden;
 }

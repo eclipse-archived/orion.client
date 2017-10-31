@@ -58,6 +58,7 @@ define([
 			range.selectNode(this._slideout.getContentNode());
 						
 			var domNodeFragment = range.createContextualFragment(InlineSearchPaneTemplate);
+			lib.processTextNodes(domNodeFragment, messages);
 			this._searchWrapper.appendChild(domNodeFragment);
 			this._searchWrapper.classList.add("searchWrapper"); //$NON-NLS-0$
 			
@@ -78,8 +79,7 @@ define([
 			this._searchResultExplorer = new InlineSearchResultExplorer(this._serviceRegistry, this._commandRegistry, this, this._preferences, this._fileClient, this._searcher);
 			
 			this._initControls();
-			this._initHTMLLabels();
-			this._initToolTips();
+			this._initHTMLLabelsAndTooltips();
 			
 			this._slideout.getContentNode().removeChild(this._searchWrapper); // detach wrapper now that initialization is done, see getContentNode().appendChild() call above
 			this._inputManager.addEventListener("InputChanged", function(evt) { //$NON-NLS-0$
@@ -305,12 +305,13 @@ define([
 			
 			this._searchButton = this._searchBox.getButton();
 			this._searchButton.classList.add("searchButton"); //$NON-NLS-0$
+			this._searchButton.setAttribute("aria-label", messages["Search"]); //$NON-NLS-1$ //$NON-NLS-0$
 			this._searchButton.appendChild(searchButtonSpan);
 			
 			this._searchTextInputBox = this._searchBox.getTextInputNode();
 			this._searchTextInputBox.placeholder = messages["Type a search term"]; //$NON-NLS-1$ //$NON-NLS-0$
 			
-			this._searchBox.setRecentEntryButtonTitle(messages["Show previous search terms"]); //$NON-NLS-0$
+			this._searchBox.getRecentEntryButton().setAttribute("aria-label", messages["Show previous search terms"]); //$NON-NLS-0$
 			
 			this._searchWrapper.addEventListener("keydown", function(e) { //$NON-NLS-0$
 				if(e.defaultPrevented){// If the key event was handled by other listeners and preventDefault was set on(e.g. input completion handled ENTER), we do not handle it here
@@ -349,14 +350,16 @@ define([
 			
 			this._replaceTextInputBox = this._replaceBox.getTextInputNode();
 			this._replaceTextInputBox.placeholder = messages["Replace With"]; //$NON-NLS-0$
+			this._replaceTextInputBox.setAttribute("aria-label", messages["Replace With"]); //$NON-NLS-1$ //$NON-NLS-0$
 
 			this._previewButtonSpan = document.createElement("span"); //$NON-NLS-0$
 			this._previewButtonSpan.classList.add("core-sprite-search");
 			this._replaceButton = this._replaceBox.getButton();
 			this._replaceButton.classList.add("searchButton"); //$NON-NLS-0$
+			this._replaceButton.setAttribute("aria-label", messages["Preview Replace"]); //$NON-NLS-1$ //$NON-NLS-0$
 			this._replaceButton.appendChild(this._previewButtonSpan);
 	
-			this._replaceBox.setRecentEntryButtonTitle(messages["Show previous replace terms"]); //$NON-NLS-0$
+			this._replaceBox.getRecentEntryButton().setAttribute("aria-label", messages["Show previous replace terms"]); //$NON-NLS-0$
 			
 			this._replaceTextInputBox.addEventListener("keydown", function(e) { //$NON-NLS-0$
 				var keyCode= e.charCode || e.keyCode;
@@ -386,6 +389,7 @@ define([
 			this._fileNamePatternsTextInput.placeholder = "*.*"; //$NON-NLS-0$
 			lib.empty(this._fileNamePatternsHint);
 			this._fileNamePatternsHint.appendChild(document.createTextNode(messages["(* = any string, ? = any character)"])); //$NON-NLS-0$
+			this._fileNamePatternsTextInput.setAttribute("aria-describedby", "fileNamePatternsHint");  //$NON-NLS-1$  //$NON-NLS-0$
 			
 			this._fileNamePatternsTextInput.addEventListener("focus", function(){ //$NON-NLS-0$
 				this._fileNamePatternsHint.classList.add("fileNamePatternsHintVisible"); //$NON-NLS-0$
@@ -431,6 +435,7 @@ define([
 						var excludeFilesFromSetting = prefs.filteredResources || "";
 					}
 					this._excludeFilesHint.textContent = messages["(* = any string, ? = any character)"] + "\n" + messages["The following files are excluded from general setting"] + "\n" + excludeFilesFromSetting; //$NON-NLS-0$
+					this._excludeFilesTextInput.setAttribute("aria-describedby", "excludeFilesHint");  //$NON-NLS-1$  //$NON-NLS-0$
 				}.bind(this));
 				this._excludeFilesHint.classList.add("fileNamePatternsHintVisible"); //$NON-NLS-0$
 			}.bind(this));
@@ -449,7 +454,7 @@ define([
 			this._wholeWordButton = lib.$("#advSearchWholeWord", this._searchWrapper); //$NON-NLS-0$
 			this._regExButton = lib.$("#advSearchRegEx", this._searchWrapper); //$NON-NLS-0$
 			this._toggleReplaceLink = lib.$("#toggleReplaceLink", this._searchWrapper); //$NON-NLS-0$
-			this._toRaplceModeToolTip = this._generateTooltips(this._toggleReplaceLink,messages["To Replace Mode Tooltip"]);
+			this._replaceModeToolTip = this._generateTooltips(this._toggleReplaceLink,messages["To Replace Mode Tooltip"]);
 			this._caseSensitiveButton.addEventListener("click", this._toggleCaseSensitive.bind(this)); 
 			this._wholeWordButton.addEventListener("click", this._toggleWholeWord.bind(this)); 
 			this._regExButton.addEventListener("click", this._toggleRegEx.bind(this)); 
@@ -458,41 +463,43 @@ define([
 			this._toggleSearchOptionsLink.addEventListener("click", this.showSearchOptions.bind(this)); //$NON-NLS-0$
 			this._toggleSearchOptionsLink.textContent = messages["^ Edit Search"]; //$NON-NLS-0$
 
-			this._toggleReplaceLink.textContent = messages["Show Replace"]; //$NON-NLS-0$
 			if (this._replaceBoxIsHidden()) {
 	        	this._toggleReplaceLink.classList.remove("checkedSearchOptionButton"); //$NON-NLS-0$	
 	        }
 	        this._toggleReplaceLink.addEventListener("click", this._toggleReplaceFieldVisibility.bind(this)); //$NON-NLS-0$
 	        
+			this._replaceCompareTitleDiv.textContent = messages["Preview: "]; //$NON-NLS-0$
 	        this._initSearchScope();
 		},
 		
-		_initHTMLLabels: function(){
-			this._replaceCompareTitleDiv.textContent = messages["Preview: "]; //$NON-NLS-0$
-			lib.$("#searchLabel", this._searchWrapper).appendChild(document.createTextNode(messages["Search Label"])); //$NON-NLS-1$ //$NON-NLS-0$
-			lib.$("#advSearchRegEx", this._searchWrapper).appendChild(document.createTextNode("."));
-			lib.$("#searchScopeLabel", this._searchWrapper).appendChild(document.createTextNode(messages["Scope"])); //$NON-NLS-1$ //$NON-NLS-0$
-			lib.$("#fileNamePatternsLabel", this._searchWrapper).appendChild(document.createTextNode(messages["File name patterns (comma-separated)"])); //$NON-NLS-1$ //$NON-NLS-0$
-			lib.$("#advSearchScopeAllProjectLabel", this._searchWrapper).appendChild(document.createTextNode(messages["Scope All"]));
-			lib.$("#advSearchScopeProjectLabel", this._searchWrapper).appendChild(document.createTextNode(messages["Scope Project"]));
-			lib.$("#advSearchScopeSelectedLabel", this._searchWrapper).appendChild(document.createTextNode(messages["Scope Selected"]));
-			lib.$("#advSearchScopeOtherLabel", this._searchWrapper).appendChild(document.createTextNode(messages["Scope Other"]));
-			lib.$("#excludeFilesLabel", this._searchWrapper).appendChild(document.createTextNode(messages["Exclude Files"]));
-		},
-		
-		_initToolTips: function(){
-			this._generateTooltips(lib.$("#advSearchCaseSensitive", this._searchWrapper),messages["Case sensitive"]);
-			this._generateTooltips(lib.$("#advSearchWholeWord", this._searchWrapper),messages["Whole Word"]);
-			this._generateTooltips(lib.$("#advSearchRegEx", this._searchWrapper),messages["Regular expression"]);
-			this._generateTooltips(lib.$("#searchScopeSelectButton", this._searchWrapper),messages["Choose a Folder"]);
-			this._generateTooltips(this._previewButtonSpan,messages["Preview Replace"]);
+		_initHTMLLabelsAndTooltips: function(){
+			var label = lib.$("#searchLabel", this._searchWrapper);
+			label.appendChild(document.createTextNode(messages["Search Label"])); //$NON-NLS-1$ //$NON-NLS-0$
+			label.setAttribute("for", "advSearchInputcomboTextInputField"); //$NON-NLS-1$ //$NON-NLS-0$
+			label = lib.$("#searchScopeLabel", this._searchWrapper);
+			label.appendChild(document.createTextNode(messages["Scope"])); //$NON-NLS-1$ //$NON-NLS-0$
+			label.setAttribute("for", "searchScopeInputcomboTextInputField"); //$NON-NLS-1$ //$NON-NLS-0$
+			label = lib.$("#fileNamePatternsLabel", this._searchWrapper);
+			label.appendChild(document.createTextNode(messages["File name patterns (comma-separated)"])); //$NON-NLS-1$ //$NON-NLS-0$
+			label.setAttribute("for", "fileNamePatternsInputcomboTextInputField"); //$NON-NLS-1$ //$NON-NLS-0$
+			this._generateTooltips(label,messages["File Patterns Box Tooltip"]);
+			label = lib.$("#excludeFilesLabel", this._searchWrapper);
+			label.appendChild(document.createTextNode(messages["Exclude Files"]));
+			label.setAttribute("for", "excludeFilesInputcomboTextInputField"); //$NON-NLS-1$ //$NON-NLS-0$
+			this._generateTooltips(label,messages["Exclude Files Box Tooltip"]);
+
+			this._generateTooltips(this._searchButton,messages["Search"]);
+			this._generateTooltips(this._searchBox.getRecentEntryButton(),messages["Show previous search terms"]);
+			this._generateTooltips(this._replaceButton,messages["Preview Replace"]);
+			this._generateTooltips(this._replaceBox.getRecentEntryButton(),messages["Show previous replace terms"]);
+			this._generateTooltips(this._caseSensitiveButton,messages["Case sensitive"]);
+			this._generateTooltips(this._wholeWordButton,messages["Whole Word"]);
+			this._generateTooltips(this._regExButton,messages["Regular expression"]);
+			this._generateTooltips(this._searchScopeSelectButton,messages["Choose a Folder"]);
 			this._generateTooltips(lib.$("#advSearchScopeSelectedLabel", this._searchWrapper),messages["Current Folder Tooltip"]);
 			this._generateTooltips(lib.$("#advSearchScopeProjectLabel", this._searchWrapper),messages["Root Folder Tooltip"]);
 			this._generateTooltips(lib.$("#advSearchScopeAllProjectLabel", this._searchWrapper),messages["All Folders Tooltip"]);
 			this._generateTooltips(lib.$("#advSearchScopeOtherLabel", this._searchWrapper),messages["Other Folder Tooltip"]);
-			this._generateTooltips(lib.$("#fileNamePatternsLabel", this._searchWrapper),messages["File Patterns Box Tooltip"]);
-			this._generateTooltips(lib.$("#excludeFilesLabel", this._searchWrapper),messages["Exclude Files Box Tooltip"]);
-			this._generateTooltips(lib.$("#advSearchInput .searchButton", this._searchWrapper),messages["Search"]);		
 		},
 
 		_generateTooltips: function(node,message){
@@ -654,9 +661,11 @@ define([
 			if(this._caseSensitive){
 				this._caseSensitive = false;
 				this._caseSensitiveButton.classList.remove("checkedSearchOptionButton");
+				this._caseSensitiveButton.setAttribute("aria-pressed", "false");  //$NON-NLS-1$  //$NON-NLS-0$
 			}else{
 				this._caseSensitive = true;
 				this._caseSensitiveButton.classList.add("checkedSearchOptionButton");
+				this._caseSensitiveButton.setAttribute("aria-pressed", "true");  //$NON-NLS-1$  //$NON-NLS-0$
 			}
 		},
 		
@@ -664,9 +673,11 @@ define([
 			if(this._wholeWord){
 				this._wholeWord = false;
 				this._wholeWordButton.classList.remove("checkedSearchOptionButton");
+				this._wholeWordButton.setAttribute("aria-pressed", "false");  //$NON-NLS-1$  //$NON-NLS-0$
 			}else{
 				this._wholeWord = true;
 				this._wholeWordButton.classList.add("checkedSearchOptionButton");
+				this._wholeWordButton.setAttribute("aria-pressed", "true");  //$NON-NLS-1$  //$NON-NLS-0$
 			}
 		},
 		
@@ -674,9 +685,11 @@ define([
 			if(this._regEx){
 				this._regEx = false;
 				this._regExButton.classList.remove("checkedSearchOptionButton");
+				this._regExButton.setAttribute("aria-pressed", "false");  //$NON-NLS-1$  //$NON-NLS-0$
 			}else{
 				this._regEx = true;
 				this._regExButton.classList.add("checkedSearchOptionButton");
+				this._regExButton.setAttribute("aria-pressed", "true");  //$NON-NLS-1$  //$NON-NLS-0$
 			}
 		},
 		
@@ -706,8 +719,9 @@ define([
 			this._replaceWrapper.classList.remove("replaceWrapperHidden"); //$NON-NLS-0$
 			this._searchWrapper.classList.add("replaceModeActive"); //$NON-NLS-0$
 			this._toggleReplaceLink.classList.add("checkedSearchOptionButton");
-			this._toRaplceModeToolTip && this._toRaplceModeToolTip.destroy();
-			this._toSearchModeToolTip = this._generateTooltips(this._toggleReplaceLink,messages["To Search Mode Tooltip"]);
+			this._toggleReplaceLink.setAttribute("aria-pressed", "true");  //$NON-NLS-1$  //$NON-NLS-0$
+			this._replaceModeToolTip && this._replaceModeToolTip.destroy();
+			this._replaceModeToolTip = this._generateTooltips(this._toggleReplaceLink,messages["To Search Mode Tooltip"]);
 		},
 		
 		_hideReplaceField: function() {
@@ -715,8 +729,9 @@ define([
 			this._replaceWrapper.classList.add("replaceWrapperHidden"); //$NON-NLS-0$
 			this._searchWrapper.classList.remove("replaceModeActive"); //$NON-NLS-0$
 			this._toggleReplaceLink.classList.remove("checkedSearchOptionButton");
-			this._toSearchModeToolTip && this._toSearchModeToolTip.destroy();
-			this._toRaplceModeToolTip = this._generateTooltips(this._toggleReplaceLink,messages["To Replace Mode Tooltip"]);
+			this._toggleReplaceLink.setAttribute("aria-pressed", "false");  //$NON-NLS-1$  //$NON-NLS-0$
+			this._replaceModeToolTip && this._replaceModeToolTip.destroy();
+			this._replaceModeToolTip = this._generateTooltips(this._toggleReplaceLink,messages["To Replace Mode Tooltip"]);
 			this.hideReplacePreview();
 		},
 		
