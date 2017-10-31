@@ -41,6 +41,7 @@ define([
 			var keyAssistInput = this._keyAssistInput = document.createElement("input"); //$NON-NLS-1$
 			keyAssistInput.classList.add("keyAssistInput"); //$NON-NLS-1$
 			keyAssistInput.type = "text"; //$NON-NLS-1$
+			keyAssistInput.setAttribute("aria-label", "Filter bindings:");
 			keyAssistInput.placeholder = messages["Filter bindings"]; //$NON-NLS-1$
 			keyAssistInput.setAttribute("aria-autocomplete", "list"); //$NON-NLS-1$ //$NON-NLS-0$
 			keyAssistDiv.appendChild(keyAssistInput);
@@ -389,17 +390,16 @@ define([
 			metrics.logEvent("KeyBinding", "Panel", "Opened"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		},
 		_keyDown: function (e) {
-			if (e.keyCode === 40) {
+			if (e.keyCode === lib.KEY.DOWN) {
 				this.select(true);
-			} else if (e.keyCode === 38) {
+			} else if (e.keyCode === lib.KEY.UP) {
 				this.select(false);
-			} else if (e.keyCode === 13) {
+			} else if (e.keyCode === lib.KEY.ENTER) {
 				this.execute();
-			} else if (e.keyCode === lib.KEY.SPACE) {
+			} else if (e.keyCode === lib.KEY.SPACE && this._selectedRow) {
 				if (!this._editingABinding) {
 					this.editBinding(this._selectedRow);
 				}
-
 			} else {
 				return;
 			}
