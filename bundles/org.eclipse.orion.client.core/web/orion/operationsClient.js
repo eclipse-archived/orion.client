@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2011, 2014 IBM Corporation and others.
+ * Copyright (c) 2011, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License v1.0
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution
@@ -120,7 +120,9 @@ define(['i18n!orion/operations/nls/messages', "orion/Deferred"], function(messag
                                     }
                                 }
                             }
-                            that._preferenceService.put(NAMESPACE, globalOperations).then(def.resolve, def.reject);
+                            // overriding the preference key's value completely so set it to clear
+                            var options = { clear: true };
+                            that._preferenceService.put(NAMESPACE, globalOperations, options).then(def.resolve, def.reject);
                         });
                     };
                 }(def), function(def) {
