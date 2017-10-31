@@ -234,7 +234,7 @@
 }
 
 .searchMainOptionBlock {
-	margin: 5px 10px 0 10px;
+	margin: 5px 10px 5px 10px;
 	display: flex;
 	flex-direction: column;
 	flex-wrap: nowrap;
@@ -646,7 +646,7 @@
     position: relative;
 }
 .searchOptionControlButton.advSearchRegEx:after{
-	content: "*";
+	content: ".*";
     font-size: 17px;
     line-height: 2px;
     position: relative;

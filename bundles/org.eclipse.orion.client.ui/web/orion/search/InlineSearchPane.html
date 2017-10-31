@@ -1,58 +1,58 @@
 <div class="searchOptWrapperDiv">
 	<div class="searchMainOptionBlock">
-		<span id="searchLabel" class="searchLabel"></span>
+		<label id="searchLabel" class="searchLabel"></label>
 		<!-- search box gets inserted here -->
 		<div id="replaceWrapper" class="replaceWrapper replaceWrapperHidden">
 		<!-- replace box gets inserted here -->
 		</div>
 		<div class="searchOptionControlBar">
-			<button id="toggleReplaceLink" class="searchOptionControlButton toggleDisplayLink"></button>
+			<button id="toggleReplaceLink" class="searchOptionControlButton toggleDisplayLink" aria-pressed="false">${Show Replace}</button>
 			<div class="searchGeneralOptionBlock">
 				<span class="searchOption">
-					<button id="advSearchCaseSensitive" class="searchOptionControlButton advSearchCaseSensitive"></button>
+					<button id="advSearchCaseSensitive" class="searchOptionControlButton advSearchCaseSensitive" aria-pressed="false" aria-label="${Case sensitive}"></button>
 				</span>
 				<span class="searchOption">
-					<button id="advSearchWholeWord" class="searchOptionControlButton advSearchWholeWord"></button>
+					<button id="advSearchWholeWord" class="searchOptionControlButton advSearchWholeWord" aria-pressed="false" aria-label="${Whole Word}"></button>
 				</span>
 				<span class="searchOption">
-					<button id="advSearchRegEx" class="searchOptionControlButton advSearchRegEx"></button>
+					<button id="advSearchRegEx" class="searchOptionControlButton advSearchRegEx" aria-pressed="false" aria-label="${Regular expression}"></button>
 				</span>
 			</div>
 		</div>
 	</div>
 	<div class="searchParamBlockDiv">
 				<div class="searchOptionBlock">
-					<div id="searchScopeLabel" class="searchLabel scopeLabel"></div>
+					<label id="searchScopeLabel" class="searchLabel scopeLabel"></label>
 					<div id="searchScopeInputWrapper" class="searchScopeInputWrapper">
 						<span id="searchScopeElementWrapper" class="searchScopeElementWrapper"></span>
-						<button id="searchScopeSelectButton" class="commandButton core-sprite-outline searchScopeSelectButton"></button>
+						<button id="searchScopeSelectButton" class="commandButton core-sprite-outline searchScopeSelectButton" aria-label="${Choose a Folder}"></button>
 					</div>
 					<div>
 						<span class="searchOption">
 							<input type="radio" id="advSearchScopeSelected" name="advSearchScope" value="selected" class="searchRadiobox">
-							<label id="advSearchScopeSelectedLabel" class="searchRadioboxLabel" for="advSearchScopeSelected"></label>
+							<label id="advSearchScopeSelectedLabel" class="searchRadioboxLabel" for="advSearchScopeSelected">${Scope Selected}</label>
 						</span>
 						<span class="searchOption">
 							<input type="radio" id="advSearchScopeProject" name="advSearchScope" value="project" class="searchRadiobox">
-							<label id="advSearchScopeProjectLabel" class="searchRadioboxLabel" for="advSearchScopeProject"></label>
+							<label id="advSearchScopeProjectLabel" class="searchRadioboxLabel" for="advSearchScopeProject">${Scope Project}</label>
 						</span>
 						<span class="searchOption">
 							<input type="radio" id="advSearchScopeAllProject" name="advSearchScope" value="allProject" class="searchRadiobox">
-							<label id="advSearchScopeAllProjectLabel" class="searchRadioboxLabel" for="advSearchScopeAllProject"></label>
+							<label id="advSearchScopeAllProjectLabel" class="searchRadioboxLabel" for="advSearchScopeAllProject">${Scope All}</label>
 						</span>
 						<span class="searchOption">
 							<input type="radio" id="advSearchScopeOther" name="advSearchScope" value="other" class="searchRadiobox">
-							<label id="advSearchScopeOtherLabel" class="searchRadioboxLabel" for="advSearchScopeOther"></label>
+							<label id="advSearchScopeOtherLabel" class="searchRadioboxLabel" for="advSearchScopeOther">${Scope Other}</label>
 						</span>
 					</div>
 				</div>
 			<div class="searchOptionBlock">
-				<div id="fileNamePatternsLabel" class="searchLabel"></div>
+				<label id="fileNamePatternsLabel" class="searchLabel"></label>
 				<!-- file name patterns box gets inserted here -->
 				<span id="fileNamePatternsHint" class="fileNamePatternsHint"></span>
 			</div>
 			<div class="searchOptionBlock">
-				<div id="excludeFilesLabel" class="searchLabel"></div>
+				<label id="excludeFilesLabel" class="searchLabel"></label>
 				<!-- exclude file names box gets inserted here -->
 				<span id="excludeFilesHint" class="fileNamePatternsHint"></span>
 			</div>
