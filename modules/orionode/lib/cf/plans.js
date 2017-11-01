@@ -14,11 +14,20 @@ var bodyParser = require("body-parser");
 var fs = require("fs");
 var path = require("path");
 var manifests = require("./manifests");
+var xfer = require("../xfer");
+var log4js = require('log4js');
+var logger = log4js.getLogger("cf-planner");
+var Promise = require("bluebird");
+var bluebirdfs = Promise.promisifyAll(require("fs"));
 var api = require("../api"), writeError = api.writeError, writeResponse = api.writeResponse;
+
+var deploymentPackager = {};
 
 module.exports.router = function(options) {
 	var fileRoot = options.fileRoot;
 	if (!fileRoot) { throw new Error('options.fileRoot is required'); }
+	
+	registerGenericDeploymentPackger();
 	return express.Router()
 	.use(bodyParser.json())
 	.get(fileRoot + "*", getplans);
@@ -103,3 +112,62 @@ function getplans(req, res){
 	});
 }
 };
+	/**
+ * @name registerGenericDeploymentPackger
+ * @description register Deployment Packager by following the work flow of try to find the closest war file and copy Or zip target file path
+ * @param packagerName
+ * @param additionalData, to stuff additional data to zip file, providing different value to register different deployment packager
+ */
+function registerGenericDeploymentPackger(){
+	deploymentPackager["Generic"] = function (filePath, command){
+		logger.debug("archive Target, trying to find war file in=" + filePath);
+		return searchNearestWarFile(filePath, filePath)
+		.then(function(){
+			logger.debug("archive Target, no war file, try to zip");
+			// If searchAndCopyNearestwarFile fulfill with 'false', it means no .war has been found. so Zip the folder.
+			return xfer.zipPath(filePath, {filter:xfer.loadIgnoreFile()});
+		})
+		.catch(function(result){
+			if(result.message === "warFound") {
+				logger.debug("archive Target, war file found, try to copy war file");
+				return xfer.copyPath(result.filePath);
+			}// Assert the .war filed has been copied over.
+			return Promise.reject(result);  // keep escalating other rejections.
+		})
+		.then(function(zippedFilePath){
+			return zippedFilePath;
+		});
+		
+		function searchNearestWarFile (base, filePath) {
+			return bluebirdfs.statAsync(filePath)
+			.then(function(stats) {
+				/*eslint consistent-return:0*/
+				if (stats.isDirectory()) {
+					if (filePath.substring(filePath.length-1) !== "/") filePath = filePath + "/";
+					return bluebirdfs.readdirAsync(filePath)
+					.then(function(directoryFiles) {
+						var SUBDIR_SEARCH_CONCURRENCY = 1;
+						return Promise.map(directoryFiles, function(entry) {
+							return searchNearestWarFile(base, filePath + entry);
+						},{ concurrency: SUBDIR_SEARCH_CONCURRENCY});
+					});
+				}
+				if(path.extname(filePath) === ".war"){
+					// Using this promise to reject the promise chain.
+					var error = new Error("warFound");
+					error.filePath = filePath;
+					return Promise.reject(error);
+				}
+				return false; // false means no '.war' has been find
+			});
+		}
+	};
+}
+function getDeploymentPackager(packagerName){
+	return deploymentPackager[packagerName] || deploymentPackager["Generic"];
+}
+function addDeploymentPackager(packagerName, deploymentPackagerHandler){
+	deploymentPackager[packagerName] = deploymentPackagerHandler;
+}
+module.exports.getDeploymentPackager = getDeploymentPackager;
+module.exports.addDeploymentPackager = addDeploymentPackager;
