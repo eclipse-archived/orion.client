@@ -48,6 +48,10 @@
 	width: 300px;
 }
 
+.launchConfigurationsWrapper > .dropdownMenuOpen {
+	min-width: 300px;
+}
+
 .launchConfigurationsButton {
 	align-items: center;
 	display: flex !important;
