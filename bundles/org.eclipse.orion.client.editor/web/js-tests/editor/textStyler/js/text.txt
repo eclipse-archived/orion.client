@@ -20,6 +20,7 @@
 	implements, import, in, instanceof, interface,
 	let,
 	new,
+	of,
 	package, private, protected, public,
 	static, super,
 	typeof,

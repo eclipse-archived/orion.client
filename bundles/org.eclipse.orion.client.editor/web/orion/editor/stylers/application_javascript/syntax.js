@@ -21,6 +21,7 @@ define("orion/editor/stylers/application_javascript/syntax", ["orion/editor/styl
 		"implements", "import", "in", "instanceof", "interface",
 		"let",
 		"new",
+		"of",
 		"package", "private", "protected", "public",
 		"static", "super",
 		"typeof",
