@@ -84,7 +84,7 @@ var retrieveManifestFile = module.exports.retrieveManifestFile = function retrie
 			//if strict only try to parse the manifest given, if not, try to find a 'manifest.yml' in the parent dir if the file does not exist
 			var isStrict = req.query && Boolean(req.query.Strict);
 			return fs.readFile(filePath, "utf8", function(err, fileContent) {
-				if(err && err.code === "ENOENT") {
+				if(err && (err.code === "ENOENT" || err.code === "EISDIR")) {
 					if(isStrict) {
 						var errorStatus = new Error(err.message);
 						errorStatus.code = 404;
@@ -92,7 +92,7 @@ var retrieveManifestFile = module.exports.retrieveManifestFile = function retrie
 					}
 					var base = path.basename(filePath);
 					if(typeof base === 'string') {
-						filePath = path.join(base, 'manifest.yml');
+						filePath = path.join(filePath, 'manifest.yml');
 						return fs.readFile(filePath, "utf8", function(err, fileContent) {
 							if(err && err.code !== 'ENOENT') {
 								var errorStatus = new Error(err.message);
@@ -196,7 +196,7 @@ function setDefaultManifestProperties(req, manifest) {
 		Object.keys(MUST_HAVE_PROPERTIES).forEach(function(key){
 			if(!manifest.applications[0].hasOwnProperty(key)){
 				manifest.applications[0][key] = MUST_HAVE_PROPERTIES[key];
-			}					
+			}
 		});
 	}
 	return manifest;
