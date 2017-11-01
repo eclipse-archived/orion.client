@@ -53,13 +53,14 @@
     "yauzl": "^2.8.0"
   },
   "experimentalDependencies": {
+    "electron": "1.4.10",
     "node-pty": "^0.6.2"
   },
   "devDependencies": {
+    "async": "^0.9.0",
     "chai": "^3.5.0",
     "chalk": "^1.0.0",
     "coveralls": "^2.13.1",
-    "electron": "1.4.10",
     "grunt": "^1.0.1",
     "grunt-cli": "^1.2.0",
     "grunt-contrib-clean": "^1.0.0",
@@ -84,7 +85,8 @@
     "nyc": "^11.2.1",
     "requirejs": "^2.3.3",
     "superagent": "^3.5.1",
-    "supertest": "^3.0.0"
+    "supertest": "^3.0.0",
+    "xterm": "^2.3.2"
   },
   "engines": {
     "node": "^6.11.1"
