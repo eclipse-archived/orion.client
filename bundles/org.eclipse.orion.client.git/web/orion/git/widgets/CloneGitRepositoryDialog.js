@@ -23,24 +23,31 @@ define([ 'i18n!git/nls/gitmessages', 'orion/bidiUtils',
 
 	CloneGitRepositoryDialog.prototype = new mDialog.Dialog();
 
-	CloneGitRepositoryDialog.prototype.TEMPLATE = '<span id="basicPane">' + '<div style="padding: 8px">' + '<label for="gitUrl">${Repository URL:}</label>'
-			+ '<input id="gitUrl" style="width: 50em" value=""/>' + '</div>'
+	CloneGitRepositoryDialog.prototype.TEMPLATE = 
+			'<span id="basicPane">' + '<div style="padding: 8px">'
+			+ '<label for="gitUrl">${Repository URL:}</label>' + '<input id="gitUrl" style="width: 50em" value=""/>'
+			+ '</div>'
 
-			+ '<div style="padding: 8px; text-align: right;">' + '<a id="advancedLink" href="javascript:">${Choose target location}</a>'
-			+ '<a id="advancedLinkHide" href="javascript:" style="display: none">${Default target location}</a>' + '</div>' + '</span>'
+			+ '<div style="padding: 8px; text-align: right;">'
+			+ '<a id="advancedLink" href="javascript:">${Choose target location}</a>'
+			+ '<a id="advancedLinkHide" href="javascript:" style="display: none">${Default target location}</a>'
+			+ '</div>' + '</span>'
 
 			+ '<span id="advancedPane" style="display: none;">' + '<div style="padding: 8px">'
 			+ '<input id="isNewProject" type="radio" name="isNewProject" checked value="new"/>'
-			+ '<label for="gitName" style="padding: 0 8px">${New folder:}</label>' + '<input id="gitName" value="">' + '</div>'
+			+ '<label for="isNewProject" id="isNewProjectLabel" style="padding: 0 8px">${New folder:}</label>'
+			+ '<input id="gitName" aria-labelledby="isNewProjectLabel" value="">' + '</div>'
 
-			+ '<div style="padding: 8px">' + '<input id="isExistingProject" type="radio" name="isNewProject" value="existing"/>'
-			+ '<label for="isExistingProject" style="padding: 0 8px">${Existing directory:}</label>' + '<input id="gitPath" type="hidden" value="">'
-			+ '<span id="shownGitPath" style="padding-right: 24px"></span>' + '<a id="changeGitPath" href="javascript:">${Change...}</a>' + '</div>'
+			+ '<div style="padding: 8px">'
+			+ '<input id="isExistingProject" type="radio" name="isNewProject" value="existing"/>'
+			+ '<label for="isExistingProject" id="isExistingProjectLabel" style="padding: 0 8px">${Existing folder:}</label>'
+			+ '<input id="gitPath" type="hidden" value="">'
+			+ '<span id="shownGitPath" style="padding-right: 24px"></span>'
+			+ '<button id="changeGitPath" aria-labelledby="isExistingProjectLabel changeGitPath">${Change...}</button>' + '</div>'
 			
 			+ '<div style="padding: 8px" id="cloneSubmoduleContainer">' 
-			+ '<label for="cloneSubmoduleCheckbox"><input type="checkbox" id="cloneSubmoduleCheckbox" checked>${Clone submodules automatically}</label>' + '</div>'
-			
-			+ '</span>';
+			+ '<label for="cloneSubmoduleCheckbox"><input type="checkbox" id="cloneSubmoduleCheckbox" checked>${Clone submodules automatically}</label>'
+			+ '</div>' + '</span>';
 
 	CloneGitRepositoryDialog.prototype._init = function(options) {
 		var that = this;
