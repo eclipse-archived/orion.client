@@ -9,7 +9,8 @@
  ******************************************************************************/
 /*eslint-env browser, amd*/
 define({//Default message bundle
-	"ProblemsFilter": "Filter on descriptions, file names and folders(* = any string, ? = any character)", //$NON-NLS-1$ //$NON-NLS-0$
+	"Filter problems:": "Filter problems:", //$NON-NLS-1$ //$NON-NLS-0$
+	"ProblemsFilter": "Type characters (* = any string, ? = any character)", //$NON-NLS-1$ //$NON-NLS-0$
 	"computeCancelled": "Problems computation cancelled by user", //$NON-NLS-1$ //$NON-NLS-0$
 	"computingProblems": "Computing problems...", //$NON-NLS-1$ //$NON-NLS-0$
 	"Errors": "Errors", //$NON-NLS-1$ //$NON-NLS-0$

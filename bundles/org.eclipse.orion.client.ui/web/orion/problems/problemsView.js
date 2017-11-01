@@ -76,7 +76,13 @@ define([
 			CommandsContainerNodeCore.appendChild(CommandsContainerNodeRight);
 		},
 		_createFilterInput: function() {
-			var input = document.createElement("input"); //$NON-NLS-0$
+			var label = document.createElement("label"); //$NON-NLS-0$
+ 			label.textContent = messages["Filter problems:"];
+ 			label.classList.add("problemsFilterLabel"); //$NON-NLS-0$
+ 			label.setAttribute("for", "problemsFilterText"); //$NON-NLS-0$
+ 
+ 			var input = document.createElement("input"); //$NON-NLS-0$
+ 			input.id = "problemsFilterText"; //$NON-NLS-0$
 			input.classList.add("problemsFilter"); //$NON-NLS-0$
 			input.placeholder = messages["ProblemsFilter"]; //$NON-NLS-0$
 			input.type="text"; //$NON-NLS-0$
@@ -126,6 +132,7 @@ define([
 				}
 			}.bind(this), false);
 			
+			this._inner_node.appendChild(label);
 			this._inner_node.appendChild(input);
 			this._filterInput = input;
 		},
@@ -134,9 +141,7 @@ define([
 		},
 		validate: function(location) {
 			this._filterInput.value = "";
-			this._filterInput.style.display = "none";
 			this._problemsExplorer.validate(location, function(){
-				this._filterInput.style.display = "";
 				this._filterInput.select();
 			}.bind(this));
 		}
