@@ -104,7 +104,10 @@ function startServer(cb) {
 
 			// Configure middleware
 			if (log) {
-				app.use(express.logger('tiny'));
+				var requestLogger = log4js.getLogger('request');
+				app.use(log4js.connectLogger(requestLogger, {
+				    format: ':method :url :status - :response-time ms'
+				}));
 			}
 			if (password || configParams.pwd) {
 				app.use(listenContextPath ? contextPath : "/", auth(password || configParams.pwd));
