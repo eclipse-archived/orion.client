@@ -22,14 +22,21 @@ class CFIgnoreManager {
 	 */
 	constructor() {		
 		// By default, all . start hidden files are ignored.
-		this.cfIgnoreRules = [new RegExp("(^|.*\/)\\..*")];
+		this.cfIgnoreRules = [new RegExp("(^|.*\/)\\..*")]; //start with "."  or  "somepath/."
 	}
 	
+	/**
+	 * @public
+	 * @description Load cf ignore file and parse it. Note cf ignore only respect the .cfignore file on the project root(doesn't like .gitignore)
+	 * @param {string} .cfignore file root directory path;
+	 * @return {Promise} which resolves nothing, but means the cfignore file is loaded and parsed if exist.
+	 */
 	loadCfIgnoreFile(rootPath){
 		var cfIgnorefile = path.join(rootPath,".cfignore");
 		return fs.readFileAsync(cfIgnorefile, 'utf-8')
 		.then(function(content){
 			this.parse(content);
+			return;
 		}.bind(this))
 		.catch(function(error){
 			// ignore error
@@ -37,6 +44,26 @@ class CFIgnoreManager {
 		});
 	}
 	
+	/**
+	 * @public
+	 * @description Used to get filter function
+	 * @return a filter function, which takes relative path to check if that path should be cf ignored
+	 */
+	generateFilter(){
+		var rules = this.cfIgnoreRules;
+		return function(pathRelativeToRoot){
+			var result = rules.some(function(rule){
+				return rule.test(pathRelativeToRoot);
+			});
+			return result;
+		};
+	}
+	
+	/**
+	 * @private
+	 * @description parse .cfignore file content, split file by line, and add rules for good lines
+	 * @param {string} .cfignore file content
+	 */
 	parse(content){
 		var lines = content.split(/\r\n|[\n\v\f\r\x85\u2028\u2029]/);
 		lines.forEach(function(line){
@@ -50,30 +77,36 @@ class CFIgnoreManager {
 		}.bind(this));
 	}
 	
-	generateFilter(){
-		var rules = this.cfIgnoreRules;
-		return function(pathRelativeToRoot){
-			var result = rules.some(function(rule){
-				return rule.test(pathRelativeToRoot);
-			});
-			return result;
-		};
-	}
-	
+	/**
+	 * @private
+	 * @description Add a rule to cfIgnoreRules list
+	 * @param {string} an un-empty string, used to convert into a regex as a single rule
+	 */
 	addRule(line){
-		var rule = null;
-		if(line.indexOf("**") === -1 && line.indexOf("*") !== -1){
-			if(line.startsWith("*")){
-				
-			} else if (line.endsWith("*")){
-				rule = RegExp("(^|.*\/)" + line.slice(0, -1) + ".*");
-			} else {
-				
-			}
+		var appender = "(\/|$)"; // always ends with a slash or completely ends
+		var prepender = "(^|.*\/)"; // Start from begining or "somepath/"
+		if (line.startsWith("\/")) {
+			line = line.substring(1);
+			prepender = "^"; // In case there is already a leading slash, then relativePath must start from begining
 		}
-		if(rule !== null){
-			this.cfIgnoreRules.push(rule)
+		if (line.startsWith("**")) {
+			line = line.substring(1); // Change ** to *, because they work same for cfignore when they are in the begining
 		}
+		if (line.endsWith("**")) {
+			line = slice(0, -1); // Change ** to *, because they work same for cfignore when they are in the end
+		}
+		if (line.endsWith("\/")) {
+			line = line.slice(0, -1); // end with "/" or not doesn't make any difference in cf ignore
+		}
+		if (line.indexOf("**") === -1 && line.indexOf("*") !== -1) {
+			line = line.replace("*","[^\/]*"); // Single * means every charecter but slashes
+		}
+		if (line.indexOf("**") !== -1 ) {
+			line = line.replace("**",".*"); // Dowblu * means every charecter
+		}
+		line = line + appender;
+		line = prepender + line;
+		this.cfIgnoreRules.push(new RegExp(line));
 	}
 }
 
