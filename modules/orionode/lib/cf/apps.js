@@ -127,10 +127,13 @@ function getAppwithAppName(userId, task,encodeName, appTarget){
 		return respondAppGetRequest(result && result.appJson,task);
 	});
 }
+function getAppCacheKey(appTarget, encodeName) {
+	return appTarget.Url + "-" + appTarget.Org.entity.name + "-" + appTarget.Space.entity.name + "-" + encodeName;
+}
 function _getAppwithAppName(userId, encodeName, appTarget){
 	var app = {};
 	
-	var cacheKey = appTarget.Url + appTarget.Org + appTarget.Space + encodeName;
+	var cacheKey = getAppCacheKey(appTarget, encodeName);
 	if (appCache.get(cacheKey)) {
 		return Promise.resolve(appCache.get(cacheKey));
 	}
@@ -347,7 +350,7 @@ function respondAppPutRequest(task,status){
 }
 
 function startApp(userId, userTimeout ,appTarget){
-	var cacheKey = appTarget.Url + appTarget.Org + appTarget.Space + theApp.appName;
+	var cacheKey = getAppCacheKey(appTarget, theApp.appName);
 	appCache.del(cacheKey);
 	
 	var DEFAULT_TIMEOUT = 60;
@@ -420,7 +423,7 @@ function startApp(userId, userTimeout ,appTarget){
 }
 
 function stopApp(userId, appTarget){
-	var cacheKey = appTarget.Url + appTarget.Org + appTarget.Space + theApp.appName;
+	var cacheKey = getAppCacheKey(appTarget, theApp.appName);
 	appCache.del(cacheKey);
 	
 	logger.debug("Stopping application=" + theApp.appName);
@@ -439,7 +442,7 @@ function restartApp(userId, appTarget){
 }
 function pushApp(req, appTarget){
 	logger.debug("Pushing application=" + theApp.appName);
-	var cacheKey = appTarget.Url + appTarget.Org + appTarget.Space + theApp.appName;
+	var cacheKey = getAppCacheKey(appTarget, theApp.appName);
 	appCache.del(cacheKey);
 	
 	var waitFor;
@@ -491,7 +494,7 @@ function createApp(req, appTarget){
 	});
 }
 function updateApp(req, appTarget){
-	var cacheKey = appTarget.Url + appTarget.Org + appTarget.Space + theApp.appName;
+	var cacheKey = getAppCacheKey(appTarget, theApp.appName);
 	appCache.del(cacheKey);
 	
 	var stack = theApp.manifest.applications[0].stack;
