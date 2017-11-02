@@ -13,8 +13,7 @@ NODEGIT_VERSION=v0.19.0
 rm -rf ../node_modules
 (npm install --no-optional) || die "Failed to install dependencies, consult the npm log to find out why."
 (../node_modules/.bin/grunt ${GRUNT_TASK}) || die "Failed to minify client code."
-rm -rf ../node_modules
-(npm install --production --no-optional) || die "Failed to install dependencies, consult the npm log to find out why."
+(npm prune --production) || die "Failed to install dependencies, consult the npm log to find out why."
 if [ -f "${DOWNLOADS}/orion/orionode/nodegit/${NODEGIT_VERSION}/linux/nodegit.node" ]; then
 	cp ${DOWNLOADS}/orion/orionode/nodegit/${NODEGIT_VERSION}/linux/nodegit.node ../node_modules/nodegit/build/Release
 fi
