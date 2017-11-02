@@ -54,7 +54,7 @@ class CFIgnoreManager {
 		var rules = this.cfIgnoreRules;
 		return function(pathRelativeToRoot){
 			var result = rules.some(function(rule){
-				return rule.test(pathRelativeToRoot)
+				return rule.test(pathRelativeToRoot);
 			});
 			return result;
 		};
