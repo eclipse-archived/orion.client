@@ -334,7 +334,7 @@ function write (zip, base, filePath, filter) {
  * @name zipPath
  * @description Used to zip a direcotry
  * @param pathToZip
- * @param options, options.additionalData is array of addition data, each one has a shape of {key:,value:};options.filter is a filter function to exclude files
+ * @param options, options.additionalData is array of addition data, each one has a shape of {content:,filename:};options.filter is a filter function to exclude files
  * @returns returns a Promise which resolves the zip file path
  */
 function zipPath(pathToZip, options){
@@ -357,7 +357,7 @@ function zipPath(pathToZip, options){
 			.then(function() {
 				if(options.additionalData && options.additionalData.length > 0){
 					options.additionalData.forEach(function(data){
-						zip.append(data.key, data.value);
+						zip.append(data.content, data.filename);
 					});
 				}
 				zip.finalize();
