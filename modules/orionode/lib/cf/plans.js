@@ -19,6 +19,7 @@ var log4js = require('log4js');
 var logger = log4js.getLogger("cf-planner");
 var Promise = require("bluebird");
 var bluebirdfs = Promise.promisifyAll(require("fs"));
+var cfignore = require('./cfIgnore');
 var api = require("../api"), writeError = api.writeError, writeResponse = api.writeResponse;
 
 var deploymentPackager = {};
@@ -125,7 +126,11 @@ function registerGenericDeploymentPackger(){
 		.then(function(){
 			logger.debug("archive Target, no war file, try to zip");
 			// If searchAndCopyNearestwarFile fulfill with 'false', it means no .war has been found. so Zip the folder.
-			return xfer.zipPath(filePath, {filter:xfer.loadIgnoreFile()});
+			var cFIgnoreManager = new cfignore.CFIgnoreManager();
+			return cFIgnoreManager.loadCfIgnoreFile(filePath)
+			.then(function(){
+				return xfer.zipPath(filePath, {filter:cFIgnoreManager.generateFilter()});
+			});
 		})
 		.catch(function(result){
 			if(result.message === "warFound") {

@@ -262,7 +262,7 @@ function putapps(req, res){
 				}
 			});
 	}).then(function(){
-		theApp.command = theApp.manifest.applications[0].command;
+		theApp.command = theApp.manifest && theApp.manifest.applications[0].command || "";
 		instrumentManifest(theApp.manifest,instrumentationJSON);
 		theApp.appName = appName ? appName : manifestAppName;
 		logger.debug("Put application=" + theApp.appName);

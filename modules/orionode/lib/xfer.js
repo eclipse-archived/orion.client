@@ -66,7 +66,6 @@ module.exports.router = function(options) {
 	module.exports.zipPath = zipPath;
 	module.exports.copyPath = copyPath;
 	module.exports.getUploadDir = getUploadDir;
-	module.exports.loadIgnoreFile = loadIgnoreFile;
 	
 	UPLOADS_FOLDER = getUploadsFolder(options);
 	
@@ -316,7 +315,6 @@ function write (zip, base, filePath, filter) {
 	.then(function(stats) {
 		/*eslint consistent-return:0*/
 		if (stats.isDirectory()) {
-			filter.create(filePath);
 			if (filePath.substring(filePath.length-1) !== "/") filePath = filePath + "/";
 			return fs.readdirAsync(filePath)
 			.then(function(directoryFiles) {
@@ -326,21 +324,9 @@ function write (zip, base, filePath, filter) {
 				},{ concurrency: SUBDIR_SEARCH_CONCURRENCY});
 			});
 		}
-		if(!filter || !filter(filePath)){
+		if(!filter || !filter(filePath.substring(base.length + 1))){
 			zip.file(filePath, { name: filePath.substring(base.length).replace(/\\/g, "/") });
 		}
-	});
-}
-
-function loadIgnoreFile(filePath) {
-	return fs.readFileAsync(filePath, 'utf-8')
-	.then(function(content){
-		var lines = content.split(/\r\n|[\n\v\f\r\x85\u2028\u2029]/);
-		return function(filePathToFilter){
-			return lines.some(function(line){
-				return filePathToFilter === line;
-			});	
-		};
 	});
 }
 
@@ -369,7 +355,7 @@ function zipPath(pathToZip, options){
 			zip.pipe(output);
 			return write(zip, pathToZip, pathToZip, options.filter)
 			.then(function() {
-				if(options.additionalData || options.additionalData.length > 0){
+				if(options.additionalData && options.additionalData.length > 0){
 					options.additionalData.forEach(function(data){
 						zip.append(data.key, data.value);
 					});
