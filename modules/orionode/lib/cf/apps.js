@@ -646,7 +646,7 @@ function uploadBits(req, appTarget){
 			return promiseWhile(initialValue)
 			.then(function(){
 				// TODO in java code this file was deleted in 'failure' case, not necessarily here.
-//				fs.unlinkSync(archiveredFilePath);
+				fs.unlinkSync(archiveredFilePath);
 			});
 			
 			function promiseWhile(value) {
