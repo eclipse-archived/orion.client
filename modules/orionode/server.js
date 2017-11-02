@@ -20,6 +20,7 @@ var auth = require('./lib/middleware/auth'),
 	path = require('path'),
 	util = require('util'),
 	argslib = require('./lib/args'),
+	graceful = require('graceful-cluster'),
 	api = require('./lib/api');
 
 var logger = log4js.getLogger('server');
@@ -112,7 +113,6 @@ function startServer(cb) {
 			if (password || configParams.pwd) {
 				app.use(listenContextPath ? contextPath : "/", auth(password || configParams.pwd));
 			}
-			server = require('http-shutdown')(server);
 			app.use(compression());
 			var orion = require('./index.js')({
 				workspaceDir: workspaceDir,
@@ -174,39 +174,28 @@ function startServer(cb) {
 				}
 			});
 			server.listen(port);
-			process.on('uncaughtException', err => {
-			 	logger.error(err);
-			 	process.exit(1);
-			});
-			
-			// this function is called when you want the server to die gracefully
-			// i.e. wait for existing connections
-			var gracefulShutdown = function() {
-				logger.info("Received kill signal, shutting down gracefully.");
-				api.getOrionEE().emit("close-socket");
-				server.shutdown(function() {
-					api.getOrionEE().emit("close-server");// Disconnect Mongoose // Close Search Workers
-					logger.info("Closed out remaining connections.");
-					log4js.shutdown(function(){
-						process.exit();
-					});
+			server.once("close", function() {
+				api.getOrionEE().emit("close-server");
+				log4js.shutdown(function() {
+					logger.info("Log4JS shutdown");
 				});
-				setTimeout(function() {
-					api.getOrionEE().emit("close-server");
-					logger.error("Could not close connections in time, forcefully shutting down");
-					log4js.shutdown(function(){
-						process.exit();
-					});
-				}, configParams["shutdown.timeout"]);
-			};
-			// listen for TERM signal .e.g. kill 
-			process.on('SIGTERM', gracefulShutdown);
-			var stdin = process.openStdin();
-			stdin.addListener("data", function(d) {
-				if(d.toString().trim() === "shutdown"){
-					gracefulShutdown();
-				}
 			});
+			var gracefulServer = new graceful.GracefulServer({
+				server: server,
+				log: logger.info.bind(logger),
+				shutdownTimeout: configParams["shutdown.timeout"],
+			});
+			gracefulServer.state.once("shutdown", function() {
+				api.getOrionEE().emit("close-socket");
+			});
+	        process.on('uncaughtException', function(err) {
+	            logger.error(err);
+	            if (configParams["orion.cluster"]) {
+			 		graceful.GracefulCluster.gracefullyRestartCurrentWorker();
+		 		} else {
+		 			process.exit(1);
+		 		}
+	        });
 		} catch (e) {
 			logger.error(e && e.stack);
 		}
@@ -225,22 +214,19 @@ if (configParams["orion.cluster"]) {
 	var cluster = require('cluster');
 	if (cluster.isMaster) {		
 		log4js.configure(path.join(__dirname, 'config/clustered-log4js.json'), log4jsOptions);
-		var numCPUs = typeof configParams["orion.cluster"] === "boolean" ? os.cpus().length : configParams["orion.cluster"] >> 0;
-		for (var i = 0; i < numCPUs; i++) {
-			cluster.fork();
-		}
-		cluster.on('exit', /** @callback */ function(worker, code, signal) {
-			logger.info("Worker " + worker.process.pid + " exited - code=" + code + " signal=" + signal);
-			if (code && !signal) {
-				cluster.fork();
-			}
-		});
 		logger.info("Master " + process.pid + " started");
 	} else {
 		log4js.configure({appenders: [{type: "clustered"}]});
-		logger.info("Worker " + process.pid + " started");
-		start(false); //TODO electron with cluster?
 	}
+	var numCPUs = typeof configParams["orion.cluster"] === "boolean" ? os.cpus().length : configParams["orion.cluster"] >> 0;
+	graceful.GracefulCluster.start({
+		serverFunction: function() {
+			start(false); //TODO electron with cluster?
+		},
+		log: logger.info.bind(logger),
+		shutdownTimeout: configParams["shutdown.timeout"],
+		workersCount: numCPUs
+	});
 } else {
 	start(process.versions.electron);
 }
