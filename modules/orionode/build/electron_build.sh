@@ -82,8 +82,7 @@ if [ ! -d "$NODEGIT_DIR" ]; then
 fi
 
 # Install production modules and clean up some unecessary files to reduce size
-rm -rf node_modules
-npm install --production
+npm prune --production
 rm -rf node_modules/node-pty
 rm -rf node_modules/nodegit/vendor
 find node_modules/nodegit/build/Release/ -mindepth 1 ! -name '*.node' -exec rm -rf {} \;
