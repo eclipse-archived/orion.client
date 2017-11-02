@@ -299,7 +299,7 @@ function fetchRemote(req, res, remote, branch, force) {
 				callbacks: clone.getRemoteCallbacks(req.body, req.user.username, task),
 				downloadTags: 3     // 3 = C.GIT_REMOTE_DOWNLOAD_TAGS_ALL (libgit2 const) 
 			},
-			"fetch"	
+			"fetch"
 		);
 	})
 	.then(function(err) {
@@ -327,7 +327,7 @@ function fetchRemote(req, res, remote, branch, force) {
 function pushRemote(req, res, remote, branch, pushSrcRef, tags, force) {
 	var repo;
 	var remoteObj;
-	
+	var credsCopy = Object.assign({}, req.body);
 	var task = new tasks.Task(res, false, true, 0 ,true);	
 	return clone.getRepo(req)
 	.then(function(r) {
@@ -371,7 +371,7 @@ function pushRemote(req, res, remote, branch, pushSrcRef, tags, force) {
 	})
 	.then(function(refSpecs){
 		return remoteObj.push(
-			refSpecs, {callbacks: clone.getRemoteCallbacks(req.body, req.user.username, task)}
+			refSpecs, {callbacks: clone.getRemoteCallbacks(credsCopy, req.user.username, task)}
 		);
 	})
 	.then(function(err) {
