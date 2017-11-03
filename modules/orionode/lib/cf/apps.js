@@ -26,13 +26,13 @@ var os = require("os");
 var Promise = require("bluebird");
 var bluebirdfs = Promise.promisifyAll(require("fs"));
 var extService = require("./extService");
-var LRU = require("lru-cache");
+var LRU = require("lru-cache-for-clusters-as-promised");
 var mkdirp = require('mkdirp');
 var log4js = require('log4js');
 var logger = log4js.getLogger("cf");
 
 // Caching for already located targets
-var appCache = LRU({max: 1000, maxAge: 30000 });
+var appCache = new LRU({max: 1000, maxAge: 30000, namespace: "apps"});
 
 module.exports.router = function(options) {
 	var fileRoot = options.fileRoot;
@@ -134,30 +134,38 @@ function _getAppwithAppName(userId, encodeName, appTarget){
 	var app = {};
 	
 	var cacheKey = getAppCacheKey(appTarget, encodeName);
-	if (appCache.get(cacheKey)) {
-		return Promise.resolve(appCache.get(cacheKey));
-	}
-	return target.cfRequest("GET", userId, appTarget.Url + appTarget.Space.entity.apps_url, {"q": "name:"+api.encodeURIComponent(encodeName),"inline-relations-depth":"1"}, null, null, null, appTarget)
-	.then(function(result){
-		if(!result.resources || result.resources && result.resources.length === 0){
-			return null;
+	return appCache.get(cacheKey)
+	.then(function(value) {
+		if (value) {
+			return value;
 		}
-		app.appUrl = result.resources[0].metadata.url;
-		app.appMetadata = result.resources[0].metadata;
-		return target.cfRequest("GET", userId, appTarget.Url + app.appUrl +"/summary", null, null, null, null, appTarget)
+		return target.cfRequest("GET", userId, appTarget.Url + appTarget.Space.entity.apps_url, {"q": "name:"+api.encodeURIComponent(encodeName),"inline-relations-depth":"1"}, null, null, null, appTarget)
 		.then(function(result){
-			app.summaryJson = result;
-			var appJson;
-			appJson = app.summaryJson;
-			appJson.instances_details = app.instanceJson;
-			var appInfo = {"appJson":appJson,"app":app};
-			appCache.set(cacheKey, appInfo);
-			return target.cfRequest("GET", userId, appTarget.Url + app.appUrl +"/instances", null, null, null, null, appTarget)
+			if(!result.resources || result.resources && result.resources.length === 0){
+				return null;
+			}
+			app.appUrl = result.resources[0].metadata.url;
+			app.appMetadata = result.resources[0].metadata;
+			return target.cfRequest("GET", userId, appTarget.Url + app.appUrl +"/summary", null, null, null, null, appTarget)
 			.then(function(result){
-				app.instanceJson = result;
-				return appInfo;
-			}).catch(function() {
-				return appInfo;
+				app.summaryJson = result;
+				var appJson;
+				appJson = app.summaryJson;
+				appJson.instances_details = app.instanceJson;
+				var appInfo = {"appJson":appJson,"app":app};
+				return target.cfRequest("GET", userId, appTarget.Url + app.appUrl +"/instances", null, null, null, null, appTarget)
+				.then(function(result){
+					app.instanceJson = result;
+				})
+				.catch(function() {
+					//ignore
+				})
+				.then(function() {
+					return appCache.set(cacheKey, appInfo)
+					.then(function() {
+						return appInfo;
+					});
+				});
 			});
 		});
 	});

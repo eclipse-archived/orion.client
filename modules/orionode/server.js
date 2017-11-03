@@ -212,7 +212,8 @@ function start(electron) {
 
 if (configParams["orion.cluster"]) {
 	var cluster = require('cluster');
-	if (cluster.isMaster) {		
+	if (cluster.isMaster) {
+		require("lru-cache-for-clusters-as-promised").init();
 		log4js.configure(path.join(__dirname, 'config/clustered-log4js.json'), log4jsOptions);
 		logger.info("Master " + process.pid + " started");
 	} else {

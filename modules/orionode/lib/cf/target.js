@@ -15,10 +15,10 @@ var tasks = require("../tasks");
 var request = require("request");
 var orgs = require("./orgs_spaces");
 var bearerTokenStore = require("./accessTokenStore");
-var LRU = require("lru-cache");
+var LRU = require("lru-cache-for-clusters-as-promised");
 
 // Caching for already located targets
-var targetCache = LRU({max: 10000, maxAge: 1800000 });
+var targetCache = new LRU({max: 10000, maxAge: 1800000, namespace: "target"});
 
 module.exports.router = function(options) {
 	if(options.configParams["cf.bearer.token.store"]){
@@ -110,43 +110,52 @@ function tryLogin(url, Username, Password, userId){
 }
 function computeTarget(userId, targetRequest){
 	if(targetRequest){
+		var cached;
 		if (userId && targetRequest.Url && targetRequest.Org && targetRequest.Space) {
 			var getKey = userId + targetRequest.Url + targetRequest.Org + targetRequest.Space;
-			if (targetCache.get(getKey)) {
-				return Promise.resolve(targetCache.get(getKey));
-			}
+			cached = targetCache.get(getKey);
+		} else {
+			cached = Promise.resolve(null);
 		}
-		return orgs.getOrgsRequest(userId, targetRequest)
-		.then(function(OrgsArray){	
-			if(!targetRequest.Org){
-				var org = OrgsArray.completeOrgsArray[0];
-			}else{
-				var aimedOrg = OrgsArray.completeOrgsArray.find(function(org){
-					return org.entity.name === targetRequest.Org || org.metadata.guid === targetRequest.Org;
-				});
-				org = aimedOrg;
+		return cached
+		.then(function(value) {
+			if (value) {
+				return value;
 			}
-			if(!targetRequest.Space){
-				var space = org.Spaces[0];
-			}else{
-				var aimedSpace = org.Spaces.find(function(space){
-					return space.entity.name === targetRequest.Space || space.metadata.guid === targetRequest.Space;
+			return orgs.getOrgsRequest(userId, targetRequest)
+			.then(function(OrgsArray){	
+				if(!targetRequest.Org){
+					var org = OrgsArray.completeOrgsArray[0];
+				}else{
+					var aimedOrg = OrgsArray.completeOrgsArray.find(function(org){
+						return org.entity.name === targetRequest.Org || org.metadata.guid === targetRequest.Org;
+					});
+					org = aimedOrg;
+				}
+				if(!targetRequest.Space){
+					var space = org.Spaces[0];
+				}else{
+					var aimedSpace = org.Spaces.find(function(space){
+						return space.entity.name === targetRequest.Space || space.metadata.guid === targetRequest.Space;
+					});
+					space = aimedSpace;
+				}
+				delete org.Spaces;
+				
+				var target = {
+					"Type": "Target",
+					"Url": targetRequest.Url,
+					"Org": org,
+					"Space":space
+				};
+				
+				var putKey = userId + targetRequest.Url + org.entity.name + space.entity.name;
+				return targetCache.set(putKey, target)
+				.then(function() {
+					return  target;
 				});
-				space = aimedSpace;
-			}
-			delete org.Spaces;
-			
-			var target = {
-				"Type": "Target",
-				"Url": targetRequest.Url,
-				"Org": org,
-				"Space":space
-			};
-			
-			var putKey = userId + targetRequest.Url + org.entity.name + space.entity.name;
-			targetCache.set(putKey, target);
-			
-			return  target;
+				
+			});
 		});
 	}
 	if(!targetRequest){
