@@ -41,6 +41,7 @@ module.exports.router = function(options) {
 	module.exports._getAppwithAppName = _getAppwithAppName;
 	module.exports.getServiceGuid = getServiceGuid;
 	module.exports.createService = createService;
+	module.exports.expireAppCache = expireAppCache;
 	
 	return express.Router()
 	.use(bodyParser.json())
@@ -129,6 +130,10 @@ function getAppwithAppName(userId, task,encodeName, appTarget){
 }
 function getAppCacheKey(appTarget, encodeName) {
 	return appTarget.Url + "-" + appTarget.Org.entity.name + "-" + appTarget.Space.entity.name + "-" + encodeName;
+}
+function expireAppCache(appTarget, appName) {
+	var cacheKey = getAppCacheKey(appTarget, appName);
+	return appCache.del(cacheKey);
 }
 function _getAppwithAppName(userId, encodeName, appTarget){
 	var app = {};
@@ -358,8 +363,7 @@ function respondAppPutRequest(task,status){
 }
 
 function startApp(userId, userTimeout ,appTarget){
-	var cacheKey = getAppCacheKey(appTarget, theApp.appName);
-	appCache.del(cacheKey);
+	expireAppCache(appTarget, theApp.appName);
 	
 	var DEFAULT_TIMEOUT = 60;
 	var MAX_TIMEOUT = 180;
@@ -367,7 +371,7 @@ function startApp(userId, userTimeout ,appTarget){
 	logger.debug("Starting application=" + theApp.appName);
 	return target.cfRequest("PUT", userId, appTarget.Url + theApp.appUrl, {"inline-relations-depth":"1"}, JSON.stringify(body), null, null, appTarget)
 	.then(function() {
-		appCache.del(cacheKey);
+		expireAppCache(appTarget, theApp.appName);
 		
 		if (userTimeout < 0){
 			userTimeout = theApp.manifest.applications[0].timeout ? theApp.manifest.applications[0].timeout : DEFAULT_TIMEOUT;
@@ -431,8 +435,7 @@ function startApp(userId, userTimeout ,appTarget){
 }
 
 function stopApp(userId, appTarget){
-	var cacheKey = getAppCacheKey(appTarget, theApp.appName);
-	appCache.del(cacheKey);
+	expireAppCache(appTarget, theApp.appName);
 	
 	logger.debug("Stopping application=" + theApp.appName);
 	var body = {"console":true,"state":"STOPPED"};
@@ -450,8 +453,7 @@ function restartApp(userId, appTarget){
 }
 function pushApp(req, appTarget){
 	logger.debug("Pushing application=" + theApp.appName);
-	var cacheKey = getAppCacheKey(appTarget, theApp.appName);
-	appCache.del(cacheKey);
+	expireAppCache(appTarget, theApp.appName);
 	
 	var waitFor;
 	if(theApp.summaryJson){
@@ -502,8 +504,7 @@ function createApp(req, appTarget){
 	});
 }
 function updateApp(req, appTarget){
-	var cacheKey = getAppCacheKey(appTarget, theApp.appName);
-	appCache.del(cacheKey);
+	expireAppCache(appTarget, theApp.appName);
 	
 	var stack = theApp.manifest.applications[0].stack;
 	var waitForStackGuid;
