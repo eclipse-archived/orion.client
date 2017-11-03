@@ -10,7 +10,7 @@
  *******************************************************************************/
 /*eslint-env node */
 var express = require("express");
-var api = require("../api"), writeError = api.writeError;
+var api = require("../api");
 var fileUtil = require("../fileUtil");
 var bodyParser = require("body-parser");
 var target = require("./target");
@@ -18,14 +18,10 @@ var tasks = require("../tasks");
 var manifests = require("./manifests");
 var domains = require("./domains");
 var plans = require("./plans");
-var xfer = require("../xfer");
 var fs = require("fs");
 var path = require("path");
 var async = require("async");
-var archiver = require("archiver");
-var os = require("os");
 var Promise = require("bluebird");
-var bluebirdfs = Promise.promisifyAll(require("fs"));
 var extService = require("./extService");
 var LRU = require("lru-cache-for-clusters-as-promised");
 var mkdirp = require('mkdirp');
@@ -65,7 +61,7 @@ function getapps(req, res){
 				.then(function(manifest){
 					if(manifest && manifest.applications &&  manifest.applications[0]){
 						return getAppwithAppName(req.user.username, task, manifest.applications[0].name, appTarget);
-					}			
+					}
 				});
 			}
 		}else{
@@ -803,7 +799,7 @@ function getAppbyGuid(userId, appGuid ,appTarget){
 		.then(function(result){
 			theApp.summaryJson = result;
 			theApp.appGuid = appJSON.metadata.guid;
-			theApp.appName = result.name;			
+			theApp.appName = result.name;
 		});
 	});
 }

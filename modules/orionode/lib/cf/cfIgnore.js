@@ -12,6 +12,18 @@
 var path = require('path'),
 	Promise = require('bluebird'),
 	fs = Promise.promisifyAll(require('fs'));
+	
+var defaultIgnoreLines = [
+	".cfignore",
+	"/manifest.yml",
+	".gitignore",
+	".git",
+	".hg",
+	".svn",
+	"_darcs",
+	".DS_Store"
+];
+var globRegex = new RegExp("^(([^\/]|[\\*\\?])+)?(\/([^\/]|[\\*\\?])*)*$");
 /**
  * @description Class to handle cf ignore file
  * @since 17.0
@@ -22,7 +34,7 @@ class CFIgnoreManager {
 	 */
 	constructor() {		
 		// By default, all . start hidden files are ignored.
-		this.cfIgnoreRules = [new RegExp("(^|.*\/)\\..*")]; //start with "."  or  "somepath/."
+		this.cfIgnoreRules = [];
 	}
 	
 	/**
@@ -53,7 +65,12 @@ class CFIgnoreManager {
 		var rules = this.cfIgnoreRules;
 		return function(pathRelativeToRoot){
 			var result = rules.some(function(rule){
-				return rule.test(pathRelativeToRoot);
+				if(rule.original.startsWith("\/") && !pathRelativeToRoot.startsWith("\/")){
+					pathRelativeToRoot = "/" + pathRelativeToRoot;
+				}
+				if(rule.regex.test(pathRelativeToRoot)){
+					return rule.exclude;
+				}
 			});
 			return result;
 		};
@@ -65,14 +82,30 @@ class CFIgnoreManager {
 	 * @param {string} .cfignore file content
 	 */
 	parse(content){
-		var lines = content.split(/\r\n|[\n\v\f\r\x85\u2028\u2029]/);
+		var lines = content.split(/\n/);
+		lines = lines.concat(defaultIgnoreLines);
 		lines.forEach(function(line){
+			line = line.trim();
 			if(line.startsWith("\\")){
 				throw new Error("invalid glob pattern ", line);
 			}
-			if(line && !line.startsWith("#") && !line.startsWith("!")){
-				// # is comment, ! is ignored in .cfignore file, not like what in .gitignore file
-				this.addRule(line.trim());
+			if(line && !line.startsWith("#")){
+				var ignore = true;
+				if(line.startsWith("!")){
+					ignore = false;
+				}
+				line = path.normalize(line);
+				if(line.endsWith("/")){
+					line = line.slice(0, -1);
+				}
+				this.addIgnorePattern(ignore, line);
+				this.addIgnorePattern(ignore, path.join(line,"*"));
+				this.addIgnorePattern(ignore, path.join(line,"**","*"));
+				if(!line.startsWith("\/")){
+					this.addIgnorePattern(ignore, path.join("**", line));
+					this.addIgnorePattern(ignore, path.join("**", line,"*"));
+					this.addIgnorePattern(ignore, path.join("**", line,"**","*"));
+				}
 			}
 		}.bind(this));
 	}
@@ -82,31 +115,49 @@ class CFIgnoreManager {
 	 * @description Add a rule to cfIgnoreRules list
 	 * @param {string} an un-empty string, used to convert into a regex as a single rule
 	 */
-	addRule(line){
-		var appender = "(\/|$)"; // always ends with a slash or completely ends
-		var prepender = "(^|.*\/)"; // Start from begining or "somepath/"
-		if (line.startsWith("\/")) {
-			line = line.substring(1);
-			prepender = "^"; // In case there is already a leading slash, then relativePath must start from begining
+	addIgnorePattern(exclude, line){
+		var original = line;
+		if (!globRegex.test(line)){
+			throw new Error("invalid glob pattern ", line);
 		}
-		if (line.startsWith("**")) {
-			line = line.substring(1); // Change ** to *, because they work same for cfignore when they are in the begining
-		}
-		if (line.endsWith("**")) {
-			line = slice(0, -1); // Change ** to *, because they work same for cfignore when they are in the end
-		}
-		if (line.endsWith("\/")) {
-			line = line.slice(0, -1); // end with "/" or not doesn't make any difference in cf ignore
-		}
-		if (line.indexOf("**") === -1 && line.indexOf("*") !== -1) {
-			line = line.replace("*","[^\/]*"); // Single * means every charecter but slashes
-		}
-		if (line.indexOf("**") !== -1 ) {
-			line = line.replace("**",".*"); // Dowblu * means every charecter
-		}
-		line = line + appender;
-		line = prepender + line;
-		this.cfIgnoreRules.push(new RegExp(line));
+		var charactors = line.split('');
+		var outs= [];
+		var double = false, i = 0;
+		charactors.forEach(function(charactor){
+			switch(charactor) {
+				default:
+					outs[i] = charactor;
+					double = false;
+					break;
+				case '.':
+				case '+':
+				case '-':
+				case '^':
+				case '$':
+				case '[':
+				case ']':
+				case '(':
+				case ')':
+					outs[i] = '\\' + charactor;
+					double = false;
+					break;
+				case '?':
+					outs[i] = '[^\/]';
+					double = false;
+					break;
+				case '*':
+					if (double) {
+						outs[i - 1] = '.*';
+					} else {
+						outs[i] = '[^\/]*';
+					}
+					double = !double;
+					break;
+			}
+			i++;
+		});
+		outs = outs.slice(0, i);
+		this.cfIgnoreRules.push({exclude:exclude, original:original, regex:new RegExp("^" + outs.join("") + "$")});
 	}
 }
 

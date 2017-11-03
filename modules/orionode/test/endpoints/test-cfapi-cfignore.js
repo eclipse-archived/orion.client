@@ -12,13 +12,12 @@
 var assert = require("assert"),
 	fs = require("fs"),
 	path = require("path"),
-	testHelper = require('../support/testHelper'),
 	cfIgnore = require("../../lib/cf/cfIgnore");
 	
 var relativePathList = []; // path(relative Path to test against), expect(true if it should be ignored)
 describe("Test CFIgnore API", function() {
 	before("prepare test data", function(done){
-		// for default rule: '.' files
+		// for default files
 		relativePathList = relativePathList.concat([{
 			path: ".git/123",
 			expect: true
@@ -33,6 +32,12 @@ describe("Test CFIgnore API", function() {
 			expect: false
 		}, {
 			path: "server.js",
+			expect: false
+		}, {
+			path: "manifest.yml",
+			expect: true
+		}, {
+			path: "public/assets/manifest.yml",
 			expect: false
 		}]);
 		
@@ -285,10 +290,162 @@ describe("Test CFIgnore API", function() {
 			expect: true
 		}]);
 		
+		// for rule: '**/jjj'
+		relativePathList = relativePathList.concat([{
+			path: "jjj",
+			expect: true
+		}, {
+			path: "123/jjj",
+			expect: true
+		}, {
+			path: "jjj/123",
+			expect: true
+		}, {
+			path: "123/kkk/jjj",
+			expect: true
+		}, {
+			path: "123/kkk/lll/jjj",
+			expect: true
+		}, {
+			path: "123rjjj",
+			expect: false
+		}, {
+			path: "123/jjj/123",
+			expect: true
+		}, {
+			path: "123/jjj123/123",
+			expect: false
+		},]);
+		
+		// for rule: '/**qqq'
+		relativePathList = relativePathList.concat([{
+			path: "qqq",
+			expect: true
+		},{
+			path: "123qqq",
+			expect: true
+		}, {
+			path: "123/qqq",
+			expect: true
+		}, {
+			path: "123/123qqq",
+			expect: true
+		}, {
+			path: "123/kkk/qqq",
+			expect: true
+		}, {
+			path: "123/kkk/lll/123qqq",
+			expect: true
+		}, {
+			path: "123/qqq/123",
+			expect: true
+		}, {
+			path: "123/asdqqq/123",
+			expect: true
+		}, {
+			path: "123/asdqqq123/123",
+			expect: false
+		}]);
+		
+		// for rule: '/*ooo'
+		relativePathList = relativePathList.concat([{
+			path: "ooo",
+			expect: true
+		},{
+			path: "123ooo",
+			expect: true
+		}, {
+			path: "123/ooo",
+			expect: false
+		}, {
+			path: "123/123ooo",
+			expect: false
+		}, {
+			path: "123/kkk/ooo",
+			expect: false
+		}, {
+			path: "123/kkk/lll/123ooo",
+			expect: false
+		}, {
+			path: "123/ooo/123",
+			expect: false
+		}, {
+			path: "123/asdooo/123",
+			expect: false
+		}, {
+			path: "123/asdooo123/123",
+			expect: false
+		}]);
+		
+		// for rule: 'si*qu*'
+		relativePathList = relativePathList.concat([{
+			path: "si123qu123",
+			expect: true
+		}, {
+			path: "siqu",
+			expect: true
+		}, {
+			path: "123sidqud",
+			expect: false
+		}, {
+			path: "sizxcqu/123",
+			expect: true
+		}, {
+			path: "sizxcqu123/123",
+			expect: true
+		}, {
+			path: "123/123sidqud",
+			expect: false
+		}, {
+			path: "si123qu/234/123",
+			expect: true
+		}]);
+		
+		// for rule: 'zx*90**/'
+		relativePathList = relativePathList.concat([{
+			path: "zx12390asd",
+			expect: true
+		}, {
+			path: "zx12390as1/123",
+			expect: true
+		}, {
+			path: "zx90",
+			expect: true
+		}, {
+			path: "zx12390/asd/123",
+			expect: true
+		}, {
+			path: "123/zx12390/asd/123",
+			expect: true
+		}, {
+			path: "123/zx12390asd",
+			expect: true
+		}]);
+		
+		// for rule: dir1/**/*.so
+		relativePathList = relativePathList.concat([{
+			path: "dir1/dir2/dir3/file1.so",
+			expect: true
+		}, {
+			path: "different-dir/dir2/file.so",
+			expect: false
+		}]);
+		
+		// for rule: stuff/*; !stuff/*.c ;stuff/exclude.c applies the patterns in order from top to bottom
+		relativePathList = relativePathList.concat([{
+			path: "stuff/something.txt",
+			expect: true
+		}, {
+			path: "stuff/exclude.c",
+			expect: true
+		}, {
+			path: "stuff/include.c",
+			expect: false
+		}]);
+		
 		// create a .cfignore file in support directory
 		var cfIngoreContent = [
 			"#This is cf Ignore file",
-			"!thisWillBeIgnored",
 			
 			"zxc*",
 			"poi",
@@ -300,7 +457,19 @@ describe("Test CFIgnore API", function() {
 			"b**n",
 			"r/**/i",
 			"d/*.html",
-			"/tmp"
+			"/tmp",
+			"**/jjj",
+			"/**qqq",
+			"/*ooo",
+			"si*qu*",
+			"zx*90**/",
+			
+			"dir1/**/*.so",
+			
+			"stuff/*",
+			"!stuff/*.c",
+			"stuff/exclude.c",
+
 		];
 		fs.writeFile(path.join(__dirname, "../support/.cfignore"), cfIngoreContent.join("\n"), "utf-8", function(err){
 			done();
@@ -316,15 +485,15 @@ describe("Test CFIgnore API", function() {
 		return cFIgnoreManager.loadCfIgnoreFile(path.join(__dirname, "../support/"))
 		.then(function(){
 			var filter = cFIgnoreManager.generateFilter();
-			relativePathList.forEach(function(relativePath){
+			for(var i = 0; i < relativePathList.length -1; i++){
 				try{
-					assert.equal(filter(relativePath.path), relativePath.expect, relativePath.path + " is not respected by cf ignore rules")
+					assert.equal(filter(relativePathList[i].path), relativePathList[i].expect, relativePathList[i].path + " is not respected by cf ignore rules");
 				}catch(err){
-					console.log(err.message)
-					return;
+					console.error(err.message);
+					continue;
 				}
-			});
+			}
 			return;
-		})
+		});
 	});
 });
