@@ -10,21 +10,18 @@
  *******************************************************************************/
 /*eslint-env node */
 var express = require("express");
-var api = require("../api"), writeError = api.writeError;
+var api = require("../api");
 var fileUtil = require("../fileUtil");
 var bodyParser = require("body-parser");
 var target = require("./target");
 var tasks = require("../tasks");
 var manifests = require("./manifests");
 var domains = require("./domains");
-var xfer = require("../xfer");
+var plans = require("./plans");
 var fs = require("fs");
 var path = require("path");
 var async = require("async");
-var archiver = require("archiver");
-var os = require("os");
 var Promise = require("bluebird");
-var bluebirdfs = Promise.promisifyAll(require("fs"));
 var extService = require("./extService");
 var LRU = require("lru-cache-for-clusters-as-promised");
 var mkdirp = require('mkdirp');
@@ -64,7 +61,7 @@ function getapps(req, res){
 				.then(function(manifest){
 					if(manifest && manifest.applications &&  manifest.applications[0]){
 						return getAppwithAppName(req.user.username, task, manifest.applications[0].name, appTarget);
-					}			
+					}
 				});
 			}
 		}else{
@@ -202,6 +199,8 @@ function putapps(req, res){
 		//appPackageType:
 		//appUrl:
 		//appMetadata:
+		//deploymentPackager:
+		//command
 	//}
 	var task = new tasks.Task(res,false,false,0,false);
 	var targetRequest = req.body.Target;
@@ -219,6 +218,7 @@ function putapps(req, res){
 	var appName = req.body.Name;
 	var contentLocation = toOrionLocation(req, req.body.ContentLocation);
 	theApp.appStore = toAppLocation(req, req.body.ContentLocation);
+	theApp.deploymentPackager = req.body.Packager;
 	var manifestJSON = req.body.Manifest;
 	var instrumentationJSON = req.body.Instrumentation;
 	var userTimeout = req.body.Timeout &&  req.body.Timeout > 0 ? req.body.Timeout:0;
@@ -258,6 +258,7 @@ function putapps(req, res){
 				}
 			});
 	}).then(function(){
+		theApp.command = theApp.manifest && theApp.manifest.applications[0].command || "";
 		instrumentManifest(theApp.manifest,instrumentationJSON);
 		theApp.appName = appName ? appName : manifestAppName;
 		logger.debug("Put application=" + theApp.appName);
@@ -491,7 +492,7 @@ function createApp(req, appTarget){
 			"name":theApp.appName,
 			"instances": Number(theApp.manifest.applications[0].instances) || 1,
 			"buildPack":theApp.manifest.applications[0].buildpack || null,
-			"command":theApp.manifest.applications[0].command,	
+			"command":theApp.manifest.applications[0].command,
 			"memory": normalizeMemoryMeasure(theApp.manifest.applications[0].memory),
 			"stack_guid":stackGuid,
 			"environment_json":theApp.manifest.applications[0].env || {}
@@ -518,7 +519,7 @@ function updateApp(req, appTarget){
 			"name":theApp.appName,
 			"instances":theApp.manifest.applications[0].instances || 1,
 			"buildPack":theApp.manifest.applications[0].buildpack || null,
-			"command":theApp.manifest.applications[0].command,	
+			"command":theApp.manifest.applications[0].command,
 			"memory": normalizeMemoryMeasure(theApp.manifest.applications[0].memory),
 			"stack_guid":stackGuid,
 			"environment_json":theApp.manifest.applications[0].env || {}
@@ -592,17 +593,17 @@ function uploadBits(req, appTarget){
 	.then(function(token){
 		cloudAccessToken = token;
 		logger.debug("Upload application content(zip start)=" + theApp.appName);
-		return archiveTarget(theApp.appStore, req)
+		var deploymentPackage = plans.getDeploymentPackager(theApp.deploymentPackager);
+		return deploymentPackage(theApp.appStore, theApp.command)
 		.then(function(filePath){
 			logger.debug("Upload application content(zip done)=" + theApp.appName);
-			theApp.appPackageType = path.extname(filePath).substring(1);
 			archiveredFilePath = filePath;
 			if(!archiveredFilePath){
 				var errorStatus = new Error("Failed to read application content");
 				errorStatus.code = "500";
 				return Promise.reject(errorStatus);
 			}
-			
+			theApp.appPackageType = path.extname(filePath).substring(1);
 			var uploadFileStream = fs.createReadStream(archiveredFilePath);
 			var uploadBitsHeader = {
 					method: "PUT",
@@ -798,7 +799,7 @@ function getAppbyGuid(userId, appGuid ,appTarget){
 		.then(function(result){
 			theApp.summaryJson = result;
 			theApp.appGuid = appJSON.metadata.guid;
-			theApp.appName = result.name;			
+			theApp.appName = result.name;
 		});
 	});
 }
@@ -850,48 +851,5 @@ function normalizeMemoryMeasure(memory){
 	}
 	/* return default memory value, i.e. 1024 MB */
 	return 1024;
-}
-function archiveTarget (filePath, req){
-	logger.debug("archive Target, trying to find war file in=" + filePath);
-	return searchNearestWarFile(filePath, filePath)
-	.then(function(){
-		logger.debug("archive Target, no war file, try to zip");
-		// If searchAndCopyNearestwarFile fulfill with 'false', it means no .war has been found. so Zip the folder.
-		return xfer.zipPath(filePath, true, req);
-	})
-	.catch(function(result){
-		if(result.message === "warFound") {
-			logger.debug("archive Target, war file found, try to copy war file");
-			return xfer.copyPath(result.filePath);
-		}// Assert the .war filed has been copied over.
-		return Promise.reject(result);  // keep escalating other rejections.
-	})
-	.then(function(zippedFilePath){
-		return zippedFilePath;
-	});
-	
-	function searchNearestWarFile (base, filePath) {
-		return bluebirdfs.statAsync(filePath)
-		.then(function(stats) {
-			/*eslint consistent-return:0*/
-			if (stats.isDirectory()) {
-				if (filePath.substring(filePath.length-1) !== "/") filePath = filePath + "/";
-				return bluebirdfs.readdirAsync(filePath)
-				.then(function(directoryFiles) {
-					var SUBDIR_SEARCH_CONCURRENCY = 1;
-					return Promise.map(directoryFiles, function(entry) {
-						return searchNearestWarFile(base, filePath + entry);
-					},{ concurrency: SUBDIR_SEARCH_CONCURRENCY});
-				});
-			}
-			if(path.extname(filePath) === ".war"){
-				// Using this promise to reject the promise chain.
-				var error = new Error("warFound");
-				error.filePath = filePath;
-				return Promise.reject(error);
-			}
-			return false; // false means no '.war' has been find
-		});
-	}
 }
 };

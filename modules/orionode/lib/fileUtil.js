@@ -58,13 +58,7 @@ var ChangeType = module.exports.ChangeType = Object.freeze({
 	 * Content written to a file.
 	 * @since 16.0
 	 */
-	WRITE: "write",
-	/**
-	 * Archive added
-	 * @deprecated This is not a spec'd event type from the Java API
-	 * @since 17.0
-	 */
-	ZIPADD: "zipadd"
+	WRITE: "write"
 });
 
 /*

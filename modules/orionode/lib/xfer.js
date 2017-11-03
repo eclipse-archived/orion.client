@@ -310,7 +310,7 @@ function getXferFrom(req, res, file) {
 	});
 }
 
-function write (zip, base, filePath) {
+function write (zip, base, filePath, filter) {
 	return fs.statAsync(filePath)
 	.then(function(stats) {
 		/*eslint consistent-return:0*/
@@ -320,14 +320,24 @@ function write (zip, base, filePath) {
 			.then(function(directoryFiles) {
 				var SUBDIR_SEARCH_CONCURRENCY = 10;
 				return Promise.map(directoryFiles, function(entry) {
-					return write(zip, base, filePath + entry);
+					return write(zip, base, filePath + entry, filter);
 				},{ concurrency: SUBDIR_SEARCH_CONCURRENCY});
 			});
 		}
-		zip.file(filePath, { name: filePath.substring(base.length).replace(/\\/g, "/") });
+		if(!filter || !filter(filePath.substring(base.length + 1))){
+			zip.file(filePath, { name: filePath.substring(base.length).replace(/\\/g, "/") });
+		}
 	});
 }
-function zipPath(pathToZip, sendZipAddEvent, req){
+
+/**
+ * @name zipPath
+ * @description Used to zip a direcotry
+ * @param pathToZip
+ * @param options, options.additionalData is array of addition data, each one has a shape of {content:,filename:};options.filter is a filter function to exclude files
+ * @returns returns a Promise which resolves the zip file path
+ */
+function zipPath(pathToZip, options){
 	var zipFileName = crypto.randomBytes(5).toString("hex") + Date.now();
 	return new Promise(function(fulfill, reject){
 		var zip = archiver("zip");
@@ -343,11 +353,12 @@ function zipPath(pathToZip, sendZipAddEvent, req){
 				return reject(err);
 			});
 			zip.pipe(output);
-			return write(zip, pathToZip, pathToZip)
+			return write(zip, pathToZip, pathToZip, options.filter)
 			.then(function() {
-				if(sendZipAddEvent){
-					var eventData = { type: fileUtil.ChangeType.ZIPADD, req: req, zip: zip };
-					fileUtil.fireFileModificationEvent(eventData);
+				if(options.additionalData && options.additionalData.length > 0){
+					options.additionalData.forEach(function(data){
+						zip.append(data.content, data.filename);
+					});
 				}
 				zip.finalize();
 				zip.on("end", function(){
@@ -362,6 +373,12 @@ function zipPath(pathToZip, sendZipAddEvent, req){
 		});
 	});
 }
+/**
+ * @name copyPath
+ * @description Used to copy a file to a zip file
+ * @param filePath
+ * @returns returns Promise, which resolves the zip file path
+ */
 function copyPath(filePath){
 	var ramdomName = crypto.randomBytes(5).toString("hex") + Date.now();
 	var resultFilePath = path.join(getUploadDir(), ramdomName + ".zip");
