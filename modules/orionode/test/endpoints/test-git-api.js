@@ -1437,7 +1437,7 @@ maybeDescribe("git", function() {
 	 * Using ssh url to clone a repo with submodules, and check if everyone's in good shape; then add another submodule and delete the one submodule.
 	 */
 	describe('Use case 5', function(/*done*/) {
-		this.timeout(10000);
+		this.timeout(15000);
 		var remoteURI = "git@github.com:oriongittester/orion-test-submodule-parent.git"; // small test repo
 		var PARENT_REPO_NAME = "orion-test-submodule-parent"; // parent of "orion-test-submodule-child1,2,3"
 		var CHILD1_REPO_NAME = "orion-test-submodule-child1"; // parent of "orion-test-submodule-child-child"
@@ -1476,12 +1476,93 @@ maybeDescribe("git", function() {
 						getGitResponse(res).then(function(result) {
 							assert.equal(result.HttpCode, 200);
 							assert.equal(result.Message, "OK");
-							finished();
+							// Check the submofules was all good
+							var stat1 = fs.statSync(CHILD1RepoPath);
+							assert(stat1.isDirectory());
+							var stat2 = fs.statSync(CHILD2RepoPath);
+							assert(stat2.isDirectory());
+							var statChild = fs.statSync(CHILDCHILDRepoPath);
+							assert(statChild.isDirectory());
+							var childchildPath = PARENT_REPO_NAME + "/" + CHILD1_REPO_NAME + "/" + CHILD_CHILD_REPO_NAME;
+							request()
+							.get(GIT_ROOT + "/branch" + FILE_ROOT + childchildPath)
+							.expect(200)
+							.end(function(err, res) {
+								assert.ifError(err);
+								var headBranch = res.body.Children.find(function(child){
+									return child.Name = "HEAD";
+								})
+								assert(headBranch.Detached,"HEAD is detached");
+								assert(headBranch.Current, "HEAD is current");
+								assert(headBranch.CloneLocation, GIT_ROOT + "/clone" + FILE_ROOT + childchildPath);
+								// Add another submodule child3 to parent
+								var childChildRemoteURI = "git@github.com:oriongittester/orion-test-submodule-child3.git";
+								request()
+								.post(GIT_ROOT + "/submodule" + FILE_ROOT + PARENT_REPO_NAME)
+								.send({
+									"GitUrl": childChildRemoteURI,	
+									"Location": '/workspace/' + WORKSPACE_ID,
+								})
+								.expect(202)
+								.end(function(err, res) {
+									assert.ifError(err);
+									getGitResponse(res).then(function(result) {
+										assert.equal(result.HttpCode, 401);
+										assert.equal(result.DetailedMessage, "callback returned unsupported credentials type");
+										request()
+										.post(GIT_ROOT + "/submodule" + FILE_ROOT + PARENT_REPO_NAME)
+										.send({
+											"GitUrl": childChildRemoteURI,	
+											"Location": '/workspace/' + WORKSPACE_ID,
+											"GitSshUsername": "git",
+											"GitSshPrivateKey": testHelper.oriongittesterRSAKey
+										})
+										.expect(202)
+										.end(function(err, res) {
+											assert.ifError(err);
+											getGitResponse(res).then(function(result) {
+												assert.equal(result.HttpCode, 200);
+												assert.equal(result.Message, "OK");
+												// Check the new child3 submodule is good and update and sync parent module
+												var stat = fs.statSync(CHILD3RepoPath);
+												assert(stat.isDirectory());
+												request()
+												.put(GIT_ROOT + "/submodule" + FILE_ROOT + PARENT_REPO_NAME)
+												.send({
+													"Operation": "sync",	
+												})
+												.expect(200)
+												.end(function(err, res) {
+													assert.ifError(err);
+													request()
+													.put(GIT_ROOT + "/submodule" + FILE_ROOT + PARENT_REPO_NAME)
+													.send({
+														"Operation": "update",	
+													})
+													.expect(200)
+													.end(function(err, res) {
+														assert.ifError(err);
+														finished();
+													});
+												});
+											})
+											.catch(function(err) {
+												assert.ifError(err);
+												finished();
+											});
+										});
+									})
+									.catch(function(err) {
+										assert.ifError(err);
+										finished();
+									});
+								});
+							});
 						})
 						.catch(function(err) {
 							assert.ifError(err);
 							finished();
-						});	
+						});
 					});
 				})
 				.catch(function(err) {
@@ -1489,96 +1570,6 @@ maybeDescribe("git", function() {
 					finished();
 				});
 			});
-		});
-		it('Check the submofules was all good', function(finished) {
-			var stat1 = fs.statSync(CHILD1RepoPath);
-			assert(stat1.isDirectory());
-			var stat2 = fs.statSync(CHILD2RepoPath);
-			assert(stat2.isDirectory());
-			var statChild = fs.statSync(CHILDCHILDRepoPath);
-			assert(statChild.isDirectory());
-			var childchildPath = PARENT_REPO_NAME + "/" + CHILD1_REPO_NAME + "/" + CHILD_CHILD_REPO_NAME;
-			request()
-			.get(GIT_ROOT + "/branch" + FILE_ROOT + childchildPath)
-			.expect(200)
-			.end(function(err, res) {
-				assert.ifError(err);
-				var headBranch = res.body.Children.find(function(child){
-					return child.Name = "HEAD";
-				})
-				assert(headBranch.Detached,"HEAD is detached");
-				assert(headBranch.Current, "HEAD is current");
-				assert(headBranch.CloneLocation, GIT_ROOT + "/clone" + FILE_ROOT + childchildPath)
-				finished();
-			})
-		});
-
-		it('Add another submodule child3 to parent', function(finished) {
-			var childchildPath = PARENT_REPO_NAME + "/" + CHILD3_REPO_NAME
-			var childChildRemoteURI = "git@github.com:oriongittester/orion-test-submodule-child3.git";
-			request()
-			.post(GIT_ROOT + "/submodule" + FILE_ROOT + PARENT_REPO_NAME)
-			.send({
-				"GitUrl": childChildRemoteURI,	
-				"Location": '/workspace/' + WORKSPACE_ID,
-			})
-			.expect(202)
-			.end(function(err, res) {
-				assert.ifError(err);
-				getGitResponse(res).then(function(result) {
-					assert.equal(result.HttpCode, 401);
-					assert.equal(result.DetailedMessage, "callback returned unsupported credentials type");
-					request()
-					.post(GIT_ROOT + "/submodule" + FILE_ROOT + PARENT_REPO_NAME)
-					.send({
-						"GitUrl": childChildRemoteURI,	
-						"Location": '/workspace/' + WORKSPACE_ID,
-						"GitSshUsername": "git",
-						"GitSshPrivateKey": testHelper.oriongittesterRSAKey
-					})
-					.expect(202)
-					.end(function(err, res) {
-						assert.ifError(err);
-						getGitResponse(res).then(function(result) {
-							assert.equal(result.HttpCode, 200);
-							assert.equal(result.Message, "OK");
-							finished();
-						})
-						.catch(function(err) {
-							assert.ifError(err);
-							finished();
-						});	
-					});
-				})
-				.catch(function(err) {
-					assert.ifError(err);
-					finished();
-				});
-			});
-		});
-
-		it('Check the new child3 submodule is good and update and sync parent module', function(finished) {
-			var stat = fs.statSync(CHILD3RepoPath);
-			assert(stat.isDirectory());;
-			request()
-			.put(GIT_ROOT + "/submodule" + FILE_ROOT + PARENT_REPO_NAME)
-			.send({
-				"Operation": "sync",	
-			})
-			.expect(200)
-			.end(function(err, res) {
-				assert.ifError(err);
-				request()
-				.put(GIT_ROOT + "/submodule" + FILE_ROOT + PARENT_REPO_NAME)
-				.send({
-					"Operation": "update",	
-				})
-				.expect(200)
-				.end(function(err, res) {
-					assert.ifError(err);
-					finished();
-				})
-			})
 		});
 	}); // describe("Use case 5")
 
