@@ -23,7 +23,7 @@ var defaultIgnoreLines = [
 	"_darcs",
 	".DS_Store"
 ];
-var globRegex = new RegExp("^(([^\/]|[\\*\\?])+)?(\/([^\/]|[\\*\\?])*)*$");
+var globRegex = new RegExp("^\/$|^(([^\/]|[\\*\\?])+)?(\/([^\/]|[\\*\\?])*)*$");
 /**
  * @description Class to handle cf ignore file
  * @since 17.0
