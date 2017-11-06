@@ -143,7 +143,6 @@ function startServer(options) {
 		let CloudFoundry = require('./lib/cf').CloudFoundry;
 		app.use('/metrics', require('./lib/metrics').router(options));
 		app.use('/version', require('./lib/version').router(options));
-		if (options.configParams.isElectron) app.use('/update', require('./lib/update').router(options));
 		loadEndpoints(true);
 		app.use(require('./lib/user').router(options));
 		app.use('/site', options.authenticate, checkAuthenticated, checkAccessRights, require('./lib/sites')(options));
@@ -155,6 +154,9 @@ function startServer(options) {
 		app.use('/cfapi', options.authenticate, checkAuthenticated, new CloudFoundry().createRouter(options));
 		app.use('/prefs', options.authenticate, checkAuthenticated, require('./lib/prefs').router(options));
 		app.use('/xfer', options.authenticate, checkAuthenticated, require('./lib/xfer').router(options));
+		if (options.configParams.isElectron) {
+			app.use('/update', options.authenticate, checkAuthenticated, require('./lib/update').router(options));
+		}
 		if(options.configParams["orion.collab.enabled"]){
 			app.use('/sharedWorkspace', options.authenticate, checkAuthenticated, require('./lib/sharedWorkspace').router(options));
 		}
