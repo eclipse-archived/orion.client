@@ -92,7 +92,7 @@
   },
   "main": "server.js",
   "scripts": {
-    "dist:osx": "build --o",
+    "dist:osx": "build --o --publish=never",
     "dist:win": "build --w",
     "dist:linux": "build --l",
     "test": "grunt test_all",
