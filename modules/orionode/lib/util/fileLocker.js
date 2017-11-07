@@ -9,7 +9,12 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 /*eslint-env node*/
-var fs = require("fs-ext");
+
+var isWin = /^win/.test(process.platform);
+var fs;
+if (!isWin) {
+	fs = require("fs-ext");
+}
 var log4js = require("log4js");
 var logger = log4js.getLogger("server");
 var nodePath = require("path");
@@ -89,7 +94,7 @@ var FileLocker = function(pathname) {
 	this._counter = 0;
 	this._fd;
 	this._lock = new ReentrantLock();
-	this._locking = true;
+	this._locking = !isWin;
 	this._pathame = pathname;
 	this._inactivityTimer;
 };
