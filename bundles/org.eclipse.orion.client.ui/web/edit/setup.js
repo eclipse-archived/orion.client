@@ -1905,7 +1905,7 @@ objects.mixin(EditorSetup.prototype, {
 	 * @since 9.0
 	 */
 	openEditor: function(loc, options) {
-		var href = this.computeNavigationHref({Location: loc}, {start: options.start, end: options.end});
+		var href = this.computeNavigationHref({Location: loc, Name: options.name}, {start: options.start, end: options.end});
 		var openEditorPromise = new Deferred();
 
 		if (!href) {
