@@ -178,7 +178,7 @@ Object.assign(MongoDbMetastore.prototype, {
 			user.workspaces.push(w);
 			var workspaceUserRights = accessRights.createWorkspaceAccess(w.id);
 			var parsedProperties = JSON.parse(user.properties);
-			parsedProperties["UserRights"] = parsedProperties["UserRights"].concat(workspaceUserRights);
+			parsedProperties.UserRights = (parsedProperties.UserRights || []).concat(workspaceUserRights);
 			user.properties = JSON.stringify(parsedProperties, null, 2);
 			user.save(function(err) {
 				if (err) {
