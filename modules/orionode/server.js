@@ -35,7 +35,6 @@ var port = args.port || args.p || process.env.PORT || 8081;
 var configFile = args.config || args.c || path.join(__dirname, 'orion.conf');
 
 var configParams = argslib.readConfigFileSync(configFile) || {};
-var log4jsOptions = configParams["orion.logs.location"] ? {"cwd" : configParams["orion.logs.location"]} : null;
 
 // Patches the fs module to use graceful-fs instead
 require('graceful-fs').gracefulify(fs);
@@ -65,13 +64,7 @@ function startServer(cb) {
 	var password = argslib.readPasswordFile(passwordFile);
 	var dev = Object.prototype.hasOwnProperty.call(args, 'dev');
 	var log = Object.prototype.hasOwnProperty.call(args, 'log');
-	// init logging
-	if (!configParams["orion.cluster"]) {
-		// Use this configuration only in none-clustered server.
-		log4js.configure(path.join(__dirname, 'config/log4js.json'), log4jsOptions);
-	}
 	if(configParams.isElectron){
-		log4js.loadAppender('file');
 		var logPath = path.join(homeDir, '.orion', 'orion.log');
 		if(process.platform === 'darwin'){
 			logPath = path.join(homeDir, '/Library/Logs/Orion', 'orion.log');
@@ -80,7 +73,14 @@ function startServer(cb) {
 		}else if(process.platform === 'win32'){
 			logPath = path.join(homeDir, '\AppData\Roaming\Orion', 'orion.log');
 		}
-		log4js.addAppender(log4js.appenders.file(logPath, null, 5000000));
+		var log4jsConfig = JSON.parse(fs.readFileSync(path.join(__dirname, 'config/log4js.json'), 'utf8'));
+		log4jsConfig.appenders["file"].filename = logPath;
+		// add file appender to default categories
+		log4jsConfig.categories["default"].appenders.push("file");
+		log4js.configure(log4jsConfig);
+	} else {
+		// init logging
+		log4js.configure(path.join(__dirname, 'config/log4js.json'));
 	}
 	if (dev) {
 		process.env.OrionDevMode = true;
@@ -210,10 +210,7 @@ if (configParams["orion.cluster"]) {
 	var cluster = require('cluster');
 	if (cluster.isMaster) {
 		require("lru-cache-for-clusters-as-promised").init();
-		log4js.configure(path.join(__dirname, 'config/clustered-log4js.json'), log4jsOptions);
 		logger.info("Master " + process.pid + " started");
-	} else {
-		log4js.configure({appenders: [{type: "clustered"}]});
 	}
 	var numCPUs = typeof configParams["orion.cluster"] === "boolean" ? os.cpus().length : configParams["orion.cluster"] >> 0;
 	graceful.GracefulCluster.start({
