@@ -22,7 +22,6 @@ var writeError = api.writeError,
 	
 var MS_EXPIRATION = 86400 * 1000 * 7; /* 7 days */  // TODO should be settable per task by client
 
-var taskCount = 0;
 var taskStore;
 var taskRoot = "/task";
 
@@ -66,9 +65,6 @@ function orionTasksAPI(options) {
 		});
 	})
 	.delete('/temp/:id', deleteOperation)
-	.get('/count', function(req, res/*, next*/) {
-		writeResponse(200, res, null, {"count": taskCount});
-	})
 	.put('/temp/:id', cancelOperation)
 	.put('/id/:id', cancelOperation);
 }
@@ -89,6 +85,18 @@ function getTaskMeta(req, taskLocationOrKeep, taskId) {
 		id: taskId || req.id
 	};
 }
+
+var allTasks = {};
+api.getOrionEE().on("close-server", function() {
+	var keys = Object.keys(allTasks);
+	keys.forEach(function(key) {
+		allTasks[key].done({
+			HttpCode: 500,
+			Code: 0,
+			Message: "Task was canceled"
+		});
+	});
+});
 
 function Task(res, cancelable, lengthComputable, wait, keep) {
 	this.timestamp = Date.now();
@@ -115,7 +123,7 @@ function Task(res, cancelable, lengthComputable, wait, keep) {
 Task.prototype = {
 	start: function() {
 		if (!this.isRunning()) return;
-		taskCount++;
+		allTasks[this.id] = this;
 		this.started = true;
 		this.toJSON = toJSON;
 		taskStore.createTask(this, function(err) {
@@ -137,7 +145,7 @@ Task.prototype = {
 	done: function(result) {
 		if (this.result) return;
 		this.result = result;
-		taskCount--;
+		delete allTasks[this.id];
 
 		switch (result.Severity) {
 			case "Ok":
