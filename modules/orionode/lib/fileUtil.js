@@ -289,7 +289,7 @@ exports.withStatsAndETag = function(filepath, callback) {
 			return;
 		}
 		var etag = ETag();
-		var stream = fs.createReadStream(filepath);
+		var stream = fs.createReadStream(filepath, {encoding:'utf8'});
 		stream.pipe(etag);
 		stream.on('error', callback);
 		stream.on('end', function() {
