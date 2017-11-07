@@ -1,20 +1,17 @@
 {
-    "levels": {
-        "server": "INFO",
-        "audit-logs": "INFO",
-        "xfer": "ERROR",
-        "update": "DEBUG",
-        "user": "INFO",
-        "ttyshell": "INFO",
-        "tasks": "INFO",
-        "search-worker": "ERROR",
-        "git": "ALL",
-        "electron": "ALL",
-        "response": "ERROR",
-        "livesync": "DEBUG",
-        "file": "INFO"
+    "appenders": {
+        "console": {
+            "type": "console"
+        },
+        "file": {
+            "type": "file",
+            "filename": "orion.log"
+        }
     },
-    "appenders": [{
-        "type": "console"
-    }]
+    "categories": {
+        "default": {
+            "appenders": ["console","file"],
+            "level": "all"
+        }
+    }
 }

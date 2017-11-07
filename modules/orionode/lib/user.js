@@ -95,7 +95,7 @@ function sendMail(opt){
 			};
 			transport.sendMail(mailOptions, function(error, info){
 				if (error){
-					return logger.info(error + " " + info);
+					return logger.error(error + " " + info);
 				}
 				//logger.info('Message sent: ' + info.response);
 			});
