@@ -75,6 +75,8 @@ function startServer(cb) {
 		}
 		var log4jsConfig = JSON.parse(fs.readFileSync(path.join(__dirname, 'config/log4js.json'), 'utf8'));
 		log4jsConfig.appenders["file"].filename = logPath;
+		// add file appender to default categories
+		log4jsConfig.categories["default"].appenders.push("file");
 		log4js.configure(log4jsConfig);
 	} else {
 		// init logging

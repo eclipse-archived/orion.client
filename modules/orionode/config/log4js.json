@@ -10,7 +10,7 @@
     },
     "categories": {
         "default": {
-            "appenders": ["console","file"],
+            "appenders": ["console"],
             "level": "all"
         }
     }
