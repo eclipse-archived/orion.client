@@ -73,7 +73,7 @@ function startServer(cb) {
 		}else if(process.platform === 'win32'){
 			logPath = path.join(homeDir, '\AppData\Roaming\Orion', 'orion.log');
 		}
-		var log4jsConfig = fs.readFileSync(path.join(__dirname, 'config/log4js.json'), 'utf8');
+		var log4jsConfig = JSON.parse(fs.readFileSync(path.join(__dirname, 'config/log4js.json'), 'utf8'));
 		log4jsConfig.appenders["file"].filename = logPath;
 		log4js.configure(log4jsConfig);
 	} else {
