@@ -1658,7 +1658,7 @@ objects.mixin(EditorSetup.prototype, {
 		this.statusService = new mStatus.StatusReportingService(serviceRegistry, this.operationsClient, "statusPane", "notifications", "notificationArea"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$ //$NON-NLS-3$
 		this.commandRegistry = new mCommandRegistry.CommandRegistry({selection: this.selection});
 		this.dialogService = new mDialogs.DialogService(serviceRegistry, this.commandRegistry);
-		this.progressService = new mProgress.ProgressService(serviceRegistry, this.operationsClient, this.commandRegistry);
+		this.progressService = new mProgress.ProgressService(serviceRegistry, this.operationsClient, this.commandRegistry, null, this.preferences);
 		this.getGeneralPreferences().then(function() {
 			if (this.generalPreferences.enableDebugger) {
 				this.nativeDeployService = new mNativeDeployService.NativeDeployService(serviceRegistry, this.commandRegistry);
@@ -1745,27 +1745,33 @@ objects.mixin(EditorSetup.prototype, {
 	createRunBar: function () {
 		var menuBar = this.menuBar;
 		var runBarParent = menuBar.runBarNode;
-		return mCustomGlobalCommands.createRunBar({
-			parentNode: runBarParent,
-			serviceRegistry: this.serviceRegistry,
-			commandRegistry: this.commandRegistry,
-			fileClient: this.fileClient,
-			projectCommands: ProjectCommands,
-			projectClient: this.serviceRegistry.getService("orion.project.client"),
-			progressService: this.progressService,
-			preferences: this.preferences,
-			editorInputManager: this.editorInputManager,
-			generalPreferences: this.generalPreferences
-		}).then(function(runBar){
-			if (runBar) {
-				this.preferences.get('/runBar').then(function(prefs){ //$NON-NLS-1$
+		return this.preferences.get('/runbar').then(function(prefs) {
+			if (Boolean(prefs) && prefs.disabled === true) {
+				console.log('returning resolved promise.')
+				var d = new Deferred();
+				d.resolve();
+				return d;
+			}
+			return mCustomGlobalCommands.createRunBar({
+				parentNode: runBarParent,
+				serviceRegistry: this.serviceRegistry,
+				commandRegistry: this.commandRegistry,
+				fileClient: this.fileClient,
+				projectCommands: ProjectCommands,
+				projectClient: this.serviceRegistry.getService("orion.project.client"),
+				progressService: this.progressService,
+				preferences: this.preferences,
+				editorInputManager: this.editorInputManager,
+				generalPreferences: this.generalPreferences
+			}).then(function(runBar){
+				if (runBar) {
 					this.runBar = runBar;
 					var displayRunBar = prefs.display === undefined  || prefs.display;
-					 if (!displayRunBar) {
-					 	lib.node("runBarWrapper").style.display = "none";
-					 }
-				}.bind(this));
-			}
+					if (!displayRunBar) {
+						lib.node("runBarWrapper").style.display = "none";
+					}
+				}
+			}.bind(this));
 		}.bind(this));
 	},
 	
