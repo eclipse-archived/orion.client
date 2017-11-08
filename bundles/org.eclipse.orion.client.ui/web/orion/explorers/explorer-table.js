@@ -404,7 +404,9 @@ define([
 			var elementNode;
 			// Special case in electron, or when create file at root enabled.
 			// Need to find the workspace element to create file at workspace level.
-			if (loc === "/file") {
+			if (this.treeRoot && loc === this.treeRoot.Location) {
+				elementNode = this.treeRoot;
+			} else if (loc === "/file") {
 				if (util.isElectron || this._isFileCreationAtRootEnabled()) {
 					elementNode = this.model.root;
 				}
@@ -570,7 +572,7 @@ define([
 					return false;
 				}
 				if (item.oldValue.Location === (treeRoot.Location || treeRoot.ContentLocation)) {
-					if (item.oldValue.Location !== (item.parent.Location || item.parent.ContentLocation)) {
+					if (item.parent && item.oldValue.Location !== (item.parent.Location || item.parent.ContentLocation)) {
 						newRoot = item.parent;
 					}
 					return true;
