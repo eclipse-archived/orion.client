@@ -131,41 +131,50 @@ define([
 	 * @function
 	 */
 
-	function generateUserInfo(serviceRegistry, keyAssistFunction) {
-		var authServices = serviceRegistry.getServiceReferences("orion.core.auth"); //$NON-NLS-0$
-		authenticationIds = [];
+	function generateUserInfo(serviceRegistry, keyAssistFunction, prefsService) {
+		prefsService.get("/userMenu").then(function(prefs) {
+			if (Boolean(prefs) && prefs.disabled === true) {
+				var menu = lib.node("userMenu");
+				if (Boolean(menu)) {
+					menu.parentElement.removeChild(menu);
+				}
+				return;
+			}
+			var authServices = serviceRegistry.getServiceReferences("orion.core.auth"); //$NON-NLS-0$
+			authenticationIds = [];
 
-		var menuGenerator = customGlobalCommands.createMenuGenerator.apply(this, arguments);
+			var menuGenerator = customGlobalCommands.createMenuGenerator.apply(this, arguments);
 
-		if (!menuGenerator) { return; }
+			if (!menuGenerator) { return; }
 
-		for (var i = 0; i < authServices.length; i++) {
-			var servicePtr = authServices[i];
-			var authService = serviceRegistry.getService(servicePtr);
-			getLabel(authService, servicePtr).then(function (label) {
-				authService.getKey().then(function (key) {
-					authenticationIds.push(key);
-					authService.getUser().then(function (jsonData) {
-						menuGenerator.addUserItem(key, authService, label, jsonData);
-					}, function (errorData, jsonData) {
-						menuGenerator.addUserItem(key, authService, label, jsonData);
-					});
-					window.addEventListener("storage", function (e) {
-						if (authRendered[key] === localStorage.getItem(key)) {
-							return;
-						}
-
-						authRendered[key] = localStorage.getItem(key);
-
+			for (var i = 0; i < authServices.length; i++) {
+				var servicePtr = authServices[i];
+				var authService = serviceRegistry.getService(servicePtr);
+				getLabel(authService, servicePtr).then(function (label) {
+					authService.getKey().then(function (key) {
+						authenticationIds.push(key);
 						authService.getUser().then(function (jsonData) {
 							menuGenerator.addUserItem(key, authService, label, jsonData);
-						}, function (errorData) {
-							menuGenerator.addUserItem(key, authService, label);
+						}, function (errorData, jsonData) {
+							menuGenerator.addUserItem(key, authService, label, jsonData);
 						});
-					}, false);
+						window.addEventListener("storage", function (e) {
+							if (authRendered[key] === localStorage.getItem(key)) {
+								return;
+							}
+
+							authRendered[key] = localStorage.getItem(key);
+
+							authService.getUser().then(function (jsonData) {
+								menuGenerator.addUserItem(key, authService, label, jsonData);
+							}, function (errorData) {
+								menuGenerator.addUserItem(key, authService, label);
+							});
+						}, false);
+					});
 				});
-			});
-		}
+			}
+		});
 	}
 
 	// Related links menu management. The related menu is reused as content changes. If the menu becomes empty, we hide the dropdown.
@@ -856,7 +865,7 @@ define([
 
 			renderGlobalCommands(commandRegistry);
 
-			generateUserInfo(serviceRegistry, keyAssistCommand.callback);
+			generateUserInfo(serviceRegistry, keyAssistCommand.callback, prefsService);
 		}
 
 
