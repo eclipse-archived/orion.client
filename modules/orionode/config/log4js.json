@@ -3,14 +3,17 @@
         "console": {
             "type": "console"
         },
-        "file": {
-            "type": "file",
-            "filename": "orion.log"
+        "datefile": {
+            "type": "dateFile",
+            "filename": "orion.log",
+            "pattern": ".yyyy-MM-dd",
+            "timezoneOffset": 0,
+            "daysToKeep": 30
         }
     },
     "categories": {
         "default": {
-            "appenders": ["console"],
+            "appenders": ["console", "datefile"],
             "level": "all"
         }
     }

@@ -24,7 +24,8 @@ var auth = require('./lib/middleware/auth'),
 	graceful = require('graceful-cluster'),
 	api = require('./lib/api');
 
-var logger = log4js.getLogger('server');
+// Patches the fs module to use graceful-fs instead
+require('graceful-fs').gracefulify(fs);
 
 // Get the arguments, the workspace directory, and the password file (if configured), then launch the server
 var args = argslib.parseArgs(process.argv);
@@ -36,8 +37,32 @@ var configFile = args.config || args.c || path.join(__dirname, 'orion.conf');
 
 var configParams = argslib.readConfigFileSync(configFile) || {};
 
-// Patches the fs module to use graceful-fs instead
-require('graceful-fs').gracefulify(fs);
+var cluster;
+if (configParams["orion.cluster"]) {
+	cluster = require('cluster');
+}
+
+var homeDir = os.homedir();
+if (process.versions.electron) {
+	var logPath = path.join(homeDir, '.orion', 'orion.log');
+	if(process.platform === 'darwin'){
+		logPath = path.join(homeDir, '/Library/Logs/Orion', 'orion.log');
+	}else if(process.platform === 'linux'){
+		logPath = path.join(homeDir, '/.config', 'orion.log');
+	}else if(process.platform === 'win32'){
+		logPath = path.join(homeDir, '\AppData\Roaming\Orion', 'orion.log');
+	}
+	var log4jsConfig = JSON.parse(fs.readFileSync(path.join(__dirname, 'config/log4js.json'), 'utf8'));
+	log4jsConfig.appenders["file"].filename = logPath;
+	// add file appender to default categories
+	log4jsConfig.categories["default"].appenders.push("file");
+	log4js.configure(log4jsConfig);
+} else {
+	// init logging
+	log4js.configure(path.join(__dirname, 'config/log4js.json'));
+}
+
+var logger = log4js.getLogger('server');
 
 function startServer(cb) {
 	
@@ -45,7 +70,6 @@ function startServer(cb) {
 	var workspaceConfigParam = configParams.workspace;
 	var contextPath = configParams["orion.context.path"] || "";
 	var listenContextPath = configParams["orion.context.listenPath"] || false;
-	var homeDir = os.homedir();
 	var workspaceDir;
 	if (workspaceArg) {
 		// -workspace passed in command line is relative to cwd
@@ -64,24 +88,6 @@ function startServer(cb) {
 	var password = argslib.readPasswordFile(passwordFile);
 	var dev = Object.prototype.hasOwnProperty.call(args, 'dev');
 	var log = Object.prototype.hasOwnProperty.call(args, 'log');
-	if(configParams.isElectron){
-		var logPath = path.join(homeDir, '.orion', 'orion.log');
-		if(process.platform === 'darwin'){
-			logPath = path.join(homeDir, '/Library/Logs/Orion', 'orion.log');
-		}else if(process.platform === 'linux'){
-			logPath = path.join(homeDir, '/.config', 'orion.log');
-		}else if(process.platform === 'win32'){
-			logPath = path.join(homeDir, '\AppData\Roaming\Orion', 'orion.log');
-		}
-		var log4jsConfig = JSON.parse(fs.readFileSync(path.join(__dirname, 'config/log4js.json'), 'utf8'));
-		log4jsConfig.appenders["file"].filename = logPath;
-		// add file appender to default categories
-		log4jsConfig.categories["default"].appenders.push("file");
-		log4js.configure(log4jsConfig);
-	} else {
-		// init logging
-		log4js.configure(path.join(__dirname, 'config/log4js.json'));
-	}
 	if (dev) {
 		process.env.OrionDevMode = true;
 		logger.info('Development mode: client code will not be cached.');
@@ -206,8 +212,7 @@ function start(electron) {
 	}
 }
 
-if (configParams["orion.cluster"]) {
-	var cluster = require('cluster');
+if (cluster) {
 	if (cluster.isMaster) {
 		require("lru-cache-for-clusters-as-promised").init();
 		logger.info("Master " + process.pid + " started");
