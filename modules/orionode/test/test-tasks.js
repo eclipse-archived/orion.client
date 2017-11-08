@@ -83,23 +83,14 @@ describe("Tasks API", function() {
 							var taskLoc2 = res.body.Location;
 									//ask for all of them
 							request()
-								.get(CONTEXT_PATH + '/task/count')
+								.post(path.join(CONTEXT_PATH, '/taskHelper', path.basename(taskLoc1)))
 								.expect(200)
 								.end(function(err, res) {
 									testHelper.throwIfError(err);
-									assert(res && res.body, "We should have gotten a response");
-									assert.equal(res.body.count, 2, "Got the wrong number of tasks back");
-									//mark the tasks done
 									request()
-										.post(path.join(CONTEXT_PATH, '/taskHelper', path.basename(taskLoc1)))
+										.post(path.join(CONTEXT_PATH, '/taskHelper', path.basename(taskLoc2)))
 										.expect(200)
-										.end(function(err, res) {
-											testHelper.throwIfError(err);
-											request()
-												.post(path.join(CONTEXT_PATH, '/taskHelper', path.basename(taskLoc2)))
-												.expect(200)
-												.end(done)
-										});
+										.end(done)
 								});
 						});
 				});
