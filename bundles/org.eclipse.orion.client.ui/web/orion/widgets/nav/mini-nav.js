@@ -46,6 +46,12 @@ define([
 					}.bind(this));
 				}
 			}.bind(this);
+			
+			this.lastRoot = null;
+			//store the last root just in case we switch between two view modes
+			sidebarNavInputManager.addEventListener("InputChanged", function(evnt) {
+				this.lastRoot = evnt.input;
+			}.bind(this));
 		}
 	}
 	MiniNavExplorer.prototype = Object.create(CommonNavExplorer.prototype);
@@ -62,6 +68,41 @@ define([
 					return this.showItem(item, false); // call with reroot=false to avoid recursion
 				}.bind(this));
 			}.bind(this));
+		},
+		loadResourceList: function(path, force, postLoad) {
+			if (!path) {
+				return this.openRoot(true);
+			}
+			return CommonNavExplorer.prototype.loadResourceList.call(this, path, force, postLoad);
+		},
+		openRoot: function(force) {
+			var params = PageUtil.matchResourceParameters();
+			var navigate = params.navigate,
+				resource = params.resource;
+			var input = this.editorInputManager.getFileMetadata();
+			return Deferred.when(navigate || this.lastRoot || (input && input.WorkspaceLocation) || (input && input.Projects && input.Location) || this.fileClient.getWorkspace(resource)).then(function(root) {
+				return this.display(root, force).then(function() {
+					if (sessionStorage.navSelection) {
+						try {
+							JSON.parse(sessionStorage.navSelection).forEach(function(sel) {
+								this.select(sel, true);
+							}.bind(this));
+						} catch (e) {} finally {
+							delete sessionStorage.navSelection;
+						}
+					}
+				}.bind(this));
+			}.bind(this));
+		},
+		onModelDelete: function(modelEvent) {
+			var items = modelEvent.items || [modelEvent];
+			items.some(function(item) {
+				if (this.lastRoot === item.oldValue.Location) {
+					this.lastRoot = null;
+					return true;
+				}
+			}.bind(this));
+			return CommonNavExplorer.prototype.onModelDelete.call(this, modelEvent);
 		},
 		onModelCreate: function(evt) {
 			return CommonNavExplorer.prototype.onModelCreate.call(this, evt).then(function() {
@@ -97,12 +138,6 @@ define([
 
 		this.fsToolbar = null;
 		this.explorer = null;
-		this.lastRoot = null;
-		var _self = this;
-		//store the last root just in case we switch between two view modes
-		this.sidebarNavInputManager.addEventListener("InputChanged", function(evnt) {
-			_self.lastRoot = evnt.input;
-		});
 		this.sidebar.addViewMode(this.id, this);
 	}
 	objects.mixin(MiniNavViewMode.prototype, {
@@ -145,23 +180,7 @@ define([
 					node: this.toolbarNode,
 					serviceRegistry: this.serviceRegistry
 				});
-				var params = PageUtil.matchResourceParameters();
-				var navigate = params.navigate,
-					resource = params.resource;
-				var input = this.editorInputManager.getFileMetadata();
-				Deferred.when(navigate || this.lastRoot || (input && input.WorkspaceLocation) || (input.Projects && input.Location) || this.fileClient.getWorkspace(resource)).then(function(root) {
-					this.explorer.display(root).then(function() {
-						if (sessionStorage.navSelection) {
-							try {
-								JSON.parse(sessionStorage.navSelection).forEach(function(sel) {
-									this.explorer.select(sel, true);
-								}.bind(this));
-							} catch (e) {} finally {
-								delete sessionStorage.navSelection;
-							}
-						}
-					}.bind(this));
-				}.bind(this));
+				this.explorer.openRoot();
 			}.bind(this));
 		},
 		destroy: function() {
