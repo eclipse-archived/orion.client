@@ -13,7 +13,7 @@
     },
     "categories": {
         "default": {
-            "appenders": ["console", "datefile"],
+            "appenders": ["console"],
             "level": "all"
         }
     }

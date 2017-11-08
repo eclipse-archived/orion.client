@@ -54,6 +54,8 @@ if (process.versions.electron) {
 	}
 	var log4jsConfig = JSON.parse(fs.readFileSync(path.join(__dirname, 'config/log4js.json'), 'utf8'));
 	log4jsConfig.appenders.datefile.filename = logPath;
+	// add datefile appender to default categories
+	log4jsConfig.categories["default"].appenders.push("datefile");
 	log4js.configure(log4jsConfig);
 } else {
 	// init logging
