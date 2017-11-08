@@ -87,6 +87,7 @@ function getTaskMeta(req, taskLocationOrKeep, taskId) {
 }
 
 var allTasks = {};
+/*
 api.getOrionEE().on("close-server", function() {
 	var keys = Object.keys(allTasks);
 	keys.forEach(function(key) {
@@ -97,6 +98,7 @@ api.getOrionEE().on("close-server", function() {
 		});
 	});
 });
+*/
 
 function Task(res, cancelable, lengthComputable, wait, keep) {
 	this.timestamp = Date.now();
