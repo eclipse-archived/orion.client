@@ -207,7 +207,7 @@ function startServer(options) {
 		}
 		//error handling
 		app.use(/* @callback */ function(err, req, res, next) { // 'next' has to be here, so that this callback works as a final error handler instead of a normal middleware
-			logger.error(req.originalUrl, err);
+			logger.error(req.method, req.originalUrl, err);
 			if (res.finished) {
 				return;
 			}
