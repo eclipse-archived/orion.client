@@ -594,7 +594,7 @@ define([
 			if (this.domNode) {
 				this.domNode.classList.remove("sectionClosed"); //$NON-NLS-0$
 				this.domNode.classList.add("sectionOpened"); //$NON-NLS-0$
-				this.domNode.setAttribute("aria-owns", this._contentParent.id);
+				if (this._contentParent) this.domNode.setAttribute("aria-owns", this._contentParent.id); //$NON-NLS-0$
 				if (this.dropdown) {
 					this.domNode.setAttribute("aria-expanded", "true"); //$NON-NLS-1$ //$NON-NLS-0$
 				}
@@ -637,7 +637,7 @@ define([
 			if (this.domNode) {
 				this.domNode.classList.add("sectionClosed"); //$NON-NLS-0$
 				this.domNode.classList.remove("sectionOpened"); //$NON-NLS-0$
-				this.domNode.removeAttribute("aria-owns");
+				this.domNode.removeAttribute("aria-owns"); //$NON-NLS-0$
 				if (this.dropdown) {
 					this.domNode.setAttribute("aria-expanded", "false"); //$NON-NLS-1$ //$NON-NLS-0$
 				}
