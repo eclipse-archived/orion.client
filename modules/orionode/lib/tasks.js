@@ -87,18 +87,32 @@ function getTaskMeta(req, taskLocationOrKeep, taskId) {
 }
 
 var allTasks = {};
-/*
-api.getOrionEE().on("close-server", function() {
-	var keys = Object.keys(allTasks);
-	keys.forEach(function(key) {
-		allTasks[key].done({
-			HttpCode: 500,
-			Code: 0,
-			Message: "Task was canceled"
+api.getOrionEE().on("close-server", function(data) {
+	if (data.code) {
+		logger.error("Cancelling all tasks in worker: " + process.pid);
+		var keys = Object.keys(allTasks);
+		keys.forEach(function(key) {
+			allTasks[key].done({
+				HttpCode: 500,
+				Code: 0,
+				Message: "Task was canceled"
+			});
 		});
-	});
+	}
+	data.promises.push(new Promise(function (fulfill) {
+		var promises = [];
+		var keys = Object.keys(allTasks);
+		logger.info("Waiting for " + keys.length + " tasks in worker: " + process.pid);
+		keys.forEach(function(key) {
+			promises.push(allTasks[key].donePromise);
+		});
+		function done() {
+			logger.info("Tasks completed for worker: " + process.pid);
+			fulfill();
+		}
+		Promise.all(promises).then(done, done);
+	}));
 });
-*/
 
 function Task(res, cancelable, lengthComputable, wait, keep) {
 	this.timestamp = Date.now();
@@ -111,6 +125,13 @@ function Task(res, cancelable, lengthComputable, wait, keep) {
 	this.type = "loadstart";
 	this.username = res.req.user.username;
 	this.res = res;
+	this.donePromise = new Promise(function(fulfill) {
+		this.doneFulfill = function(result) {
+			delete this.doneFulfill;
+			delete allTasks[this.id];
+			fulfill(result);
+		}.bind(this);
+	}.bind(this));
 
 	//TODO temporarily disabled timeout to work around client bug.
 	if (true || wait === 0) {
@@ -147,7 +168,6 @@ Task.prototype = {
 	done: function(result) {
 		if (this.result) return;
 		this.result = result;
-		delete allTasks[this.id];
 
 		switch (result.Severity) {
 			case "Ok":
@@ -167,6 +187,7 @@ Task.prototype = {
 				delete this.timeout;
 			}
 			taskStore.updateTask(this, function(err) {
+				this.doneFulfill();
 				var res = this.res;
 				if (res.finished) {
 					return;
@@ -188,10 +209,11 @@ Task.prototype = {
 			}.bind(this));
 		} else {
 			taskStore.updateTask(this, function(err) {
+				this.doneFulfill();
 				if (err) {
 					logger.error(err.toString());
 				}
-			});
+			}.bind(this));
 		}
 	},
 	isRunning: function() {

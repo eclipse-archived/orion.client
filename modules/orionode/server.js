@@ -21,7 +21,7 @@ var auth = require('./lib/middleware/auth'),
 	path = require('path'),
 	util = require('util'),
 	argslib = require('./lib/args'),
-	graceful = require('graceful-cluster'),
+	graceful = require('./graceful-cluster'),
 	api = require('./lib/api');
 
 // Patches the fs module to use graceful-fs instead
@@ -180,19 +180,26 @@ function startServer(cb) {
 		}
 	});
 	server.listen(port);
-	server.once("close", function() {
-		api.getOrionEE().emit("close-server");
-		log4js.shutdown(function() {
-			logger.info("Log4JS shutdown");
-		});
-	});
-	var gracefulServer = new graceful.GracefulServer({
+	new graceful.GracefulServer({
 		server: server,
 		log: logger.info.bind(logger),
 		shutdownTimeout: configParams["shutdown.timeout"],
-	});
-	gracefulServer.state.once("shutdown", function() {
-		api.getOrionEE().emit("close-socket");
+		exitFunction: function(code) {
+			logger.info("Exiting worker " + process.pid + " with code: " + code);
+			function done() {
+				log4js.shutdown(function() {
+					logger.info("log4js shutdown in worker: " + process.pid);
+					process.exit(code || 0);
+				});
+			}
+			var data = {
+				code: code,
+				promises: []
+			};
+			api.getOrionEE().emit("close-socket", data);
+			api.getOrionEE().emit("close-server", data);
+			return Promise.all(data.promises).then(done, done);
+		}
 	});
 	process.on('uncaughtException', function(err) {
 		logger.error(err);
