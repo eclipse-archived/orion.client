@@ -133,9 +133,10 @@ Deferred) {
 		}
 	};
 	
-	var startup = function() {
+	function createJSEditorInstance() {
 		embeddedEditor.create({parent: "embeddedEditor", statusReporter: statusReporter}).then(function(editorViewer) {
 			document.getElementById("progressMessageDiv").textContent = "Plugins loaded!";
+			jsEditor = editorViewer;
 			editorViewer.setContents(contents, "application/javascript");
 			//editorViewer.inputManager.setAutoSaveTimeout(-1);
 			editorViewer.editor.getTextView().addEventListener("Options",function(evt){
@@ -175,11 +176,24 @@ Deferred) {
 					if(evt.problems) {
 						evt.problems.forEach(function(problem) {
 							console.log(problem);
-						})
+						});
 					}
 				});
 			}
 		});
+	}
+	
+	document.getElementById("newEditor").addEventListener("click", function(){
+		jsEditor.destroy();
+		createJSEditorInstance();
+	});	
+
+	document.getElementById("setText").addEventListener("click", function(){
+		jsEditor.editor.getTextView().setText(contents);
+	});	
+
+	var startup = function() {
+		createJSEditorInstance();
 		embeddedEditor.create({parent: "embeddedEditor1",
 							   contentType: "application/json",
 							   contents: contents1});
