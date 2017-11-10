@@ -46,8 +46,8 @@ module.exports.router = function(options) {
 	NOT_EXIST = MODEL.NOT_EXIST;
 
 	return express.Router()
-	.use(bodyParser.json({"limit":"10mb"}))
-	.use(bodyParser.urlencoded({ extended: false }))
+	.use(bodyParser.json({limit:"10mb"}))
+	.use(bodyParser.urlencoded({ extended: false, limit:"10mb" }))
 	.use(responseTime({digits: 2, header: "X-Prefs-Response-Time", suffix: true}))
 	.get('*', handleGet)
 	.put('*', handlePut)
