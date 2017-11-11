@@ -123,6 +123,9 @@ function getTags(req, res) {
 		})
 		.catch(function(err) {
 			writeError(404, res, err.message);
+		})
+		.done(function() {
+			clone.freeRepo(theRepo);
 		});
 	}
 
@@ -196,13 +199,18 @@ function getTags(req, res) {
 	})
 	.catch(function(err) {
 		writeError(403, res, err.message);
+	})
+	.done(function() {
+		clone.freeRepo(theRepo);
 	});
 }
 
 function deleteTag(req, res) {
+	var theRepo;
 	var tagName = api.decodeURIComponent(req.params.tagName);
 	return clone.getRepo(req)
 	.then(function(repo) {
+		theRepo = repo;
 		return git.Tag.delete(repo, tagName);
 	})
 	.then(function(resp) {
@@ -214,6 +222,9 @@ function deleteTag(req, res) {
 	})
 	.catch(function(err) {
 		writeError(403, res, err.message);
+	})
+	.done(function() {
+		clone.freeRepo(theRepo);
 	});
 }
 };

@@ -34,19 +34,24 @@ Object.assign(GitFileDecorator.prototype, {
 			}));
 		}
 		if (!isWorkspace && req.method === "GET") {
-			return clone.getRepoByPath(file.path, file.workspaceDir).then(function(repo) {
-				if(repo){
-					var fileDir = api.join(clone.getfileDir(repo, file), "/");
-					return getBranch(repo).then(function(branchname){
-						addGitLinks(gitRoot, json, branchname, fileDir, contextPath);
-						var fileChildren = json.Children;
-						if(fileChildren){
-							calcGitLinks(gitRoot, fileChildren, branchname, fileDir, contextPath);
-						}
-					}.bind(this));
+			var theRepo;
+			return clone.getRepoByPath(file.path, file.workspaceDir)
+			.then(function(repo) {
+				theRepo = repo;
+				return getBranch(theRepo);
+			}).then(function(branchname){
+				var fileDir = api.join(clone.getfileDir(theRepo, file), "/");
+				addGitLinks(gitRoot, json, branchname, fileDir, contextPath);
+				var fileChildren = json.Children;
+				if(fileChildren){
+					calcGitLinks(gitRoot, fileChildren, branchname, fileDir, contextPath);
 				}
-			}.bind(this))
-			.catch(function(){});
+			})
+			.catch(function(){
+			})
+			.then(function() {
+				clone.freeRepo(theRepo);
+			});
 		}			
 	}
 });
@@ -71,14 +76,19 @@ function calcGitLinks(gitRoot, fileChildren, branchname, fileDir, contextPath) {
 }	
 	
 function addWorkSpaceGitLinks(gitRoot, workspaceChild, file){
-	return clone.getRepoByPath(file.path, file.workspaceDir).then(function(repo) {
-		if (repo) {
-			return Promise.resolve(getBranch(repo)).then(function(branchname){
-				var workDir = api.join(clone.getfileDir(repo, file) , "/");
-				addGitLinks(gitRoot, workspaceChild, branchname, workDir, file.contextPath);
-			});
-		}
-	}).catch(function(){});
+	var theRepo;
+	return clone.getRepoByPath(file.path, file.workspaceDir)
+	.then(function(repo) {
+		theRepo = repo;
+		return getBranch(theRepo);
+	}).then(function(branchname){
+		var workDir = api.join(clone.getfileDir(theRepo, file) , "/");
+		addGitLinks(gitRoot, workspaceChild, branchname, workDir, file.contextPath);
+	}).catch(function(){
+	})
+	.then(function() {
+		clone.freeRepo(theRepo);
+	});
 }
 	
 function addGitLinks(gitRoot, json, branchname, fileDir, contextPath){

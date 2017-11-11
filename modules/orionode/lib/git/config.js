@@ -65,9 +65,11 @@ function configJSON(key, value, fileDir) {
 }
 
 function getAConfig(req, res) {
+	var theRepo;
 	var key = api.decodeURIComponent(req.params.key);
 	clone.getRepo(req)
 	.then(function(repo) {
+		theRepo = repo;
 		var fileDir = clone.getfileDir(repo,req);
 		var configFile = api.join(repo.path(), "config");
 		args.readConfigFile(configFile, function(err, config) {
@@ -93,13 +95,18 @@ function getAConfig(req, res) {
 	})
 	.catch(function(err) {
 		writeError(404, res, err.message);
-	});	
+	})
+	.done(function() {
+		clone.freeRepo(theRepo);
+	});
 }
 
 function getConfig(req, res) {
+	var theRepo;
 	var filter = req.query.filter;
 	clone.getRepo(req)
 	.then(function(repo) {
+		theRepo = repo;
 		var fileDir = clone.getfileDir(repo,req);
 		var configFile = api.join(repo.path(), "config");
 		args.readConfigFile(configFile, function(err, config) {
@@ -162,13 +169,17 @@ function getConfig(req, res) {
 	})
 	.catch(function(err) {
 		writeError(404, res, err.message);
+	})
+	.done(function() {
+		clone.freeRepo(theRepo);
 	});
 }
 	
 function updateConfig(req, res, key, value, callback) {
-	var fileDir;
+	var fileDir, theRepo;
 	clone.getRepo(req)
 	.then(function(repo) {
+		theRepo = repo;
 		fileDir = clone.getfileDir(repo,req);
 		var configFile = api.join(repo.path(), "config");
 		args.readConfigFile(configFile, function(err, config) {
@@ -203,6 +214,9 @@ function updateConfig(req, res, key, value, callback) {
 	})
 	.catch(function(err) {
 		writeError(404, res, err.message);
+	})
+	.done(function() {
+		clone.freeRepo(theRepo);
 	});
 }
 

@@ -46,8 +46,10 @@ function getStash(req, res) {
 	var pageSize = Number(query.pageSize) || Number.MAX_SAFE_INTEGER;
 	var fileDir;
 	var stashesPromises = [];
+	var theRepo;
 	return clone.getRepo(req)
 	.then(function(repo) {
+		theRepo = repo;
 		fileDir = clone.getfileDir(repo,req);
 		return git.Stash.foreach(repo, function(index, message, oid) {
 			if (filter && message.indexOf(filter) === -1) return;
@@ -80,6 +82,9 @@ function getStash(req, res) {
 	})
 	.catch(function(err) {
 		writeError(500, res, err.message);
+	})
+	.done(function() {
+		clone.freeRepo(theRepo);
 	});
 }
 
@@ -127,6 +132,9 @@ function putStash(req, res) {
 			return writeError(400, res, "Failed to apply stashed changes due to an empty stash.");
 		}
 		writeError(404, res, err.message);
+	})
+	.done(function() {
+		clone.freeRepo(repo);
 	});
 }
 
@@ -175,6 +183,9 @@ function deleteStash(req, res) {
 	})
 	.catch(function(err) {
 		writeError(404, res, err.message);
+	})
+	.done(function() {
+		clone.freeRepo(repo);
 	});
 }
 
@@ -194,6 +205,9 @@ function postStash(req, res) {
 	})
 	.catch(function(err) {
 		writeError(404, res, err.message);
+	})
+	.done(function() {
+		clone.freeRepo(repo);
 	});
 }
 };

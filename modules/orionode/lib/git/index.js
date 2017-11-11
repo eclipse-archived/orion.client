@@ -75,6 +75,9 @@ function getIndex(req, res) {
 	})
 	.catch(function(err) {
 		writeError(404, res, err.message);
+	})
+	.done(function() {
+		clone.freeRepo(repo);
 	});
 }
 
@@ -109,6 +112,9 @@ function putIndex(req, res) {
 		writeResponse(200, res);
 	}).catch(function(err) {
 		writeError(404, res, err.message);
+	})
+	.done(function() {
+		clone.freeRepo(repo);
 	});
 }
 
@@ -154,6 +160,9 @@ function postIndex(req, res) {
 		writeResponse(200, res);
 	}).catch(function(err) {
 		writeError(404, res, err.message);
+	})
+	.done(function() {
+		clone.freeRepo(repo);
 	});
 }
 };

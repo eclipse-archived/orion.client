@@ -201,6 +201,9 @@ function getTree(req, res) {
 		}else{
 			writeError(404, res, err.message);
 		}
+	})
+	.done(function() {
+		clone.freeRepo(repo);
 	});
 }
 

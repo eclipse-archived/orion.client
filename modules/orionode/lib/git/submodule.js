@@ -37,8 +37,10 @@ module.exports.router = function(options) {
 	.delete(fileRoot + '*', deleteSubmodule);
 
 function putSubmodule(req, res) {
+	var theRepo;
 	return clone.getRepo(req)
 	.then(function(repo) {
+		theRepo = repo;
 		return clone.foreachSubmodule(repo, req.body.Operation, false); // this foreachSubmodule doesn't need authentication, fix me if it's not right.
 	})
 	.then(function() {
@@ -46,6 +48,9 @@ function putSubmodule(req, res) {
 	})
 	.catch(function(err) {
 		return writeError(400, res, err.message);
+	})
+	.done(function() {
+		clone.freeRepo(theRepo);
 	});
 }
 function postSubmodule(req, res) {
@@ -109,6 +114,9 @@ function postSubmodule(req, res) {
 		}).catch(function(){
 			clone.handleRemoteError(task, err, url);
 		});
+	})
+	.done(function() {
+		clone.freeRepo(repo);
 	});
 }
 
@@ -173,7 +181,7 @@ function deleteSubmoduleFromRepo(subrepo, repo) {
 	});
 }
 function deleteSubmodule(req, res) {
-	var subrepo;
+	var subrepo, theRepo;
 	return clone.getRepo(req)
 	.then(function(_subrepo) {
 		subrepo = _subrepo;
@@ -183,6 +191,7 @@ function deleteSubmodule(req, res) {
 		});
 	})
 	.then(function(repo) {
+		theRepo = repo;
 		return deleteSubmoduleFromRepo(subrepo, repo);
 	})
 	.then(function() {
@@ -190,6 +199,10 @@ function deleteSubmodule(req, res) {
 	})
 	.catch(function(err) {
 		return writeError(400, res, err.message);
+	})
+	.done(function() {
+		clone.freeRepo(subrepo);
+		clone.freeRepo(theRepo);
 	});
 }
 };

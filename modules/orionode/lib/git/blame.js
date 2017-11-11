@@ -64,6 +64,9 @@ function getBlame(req, res) {
 		});
 	}).catch(function(err){
 		api.writeError(403, res, err);
+	})
+	.done(function() {
+		clone.freeRepo(blamerepo);
 	});
 }
 

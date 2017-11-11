@@ -124,6 +124,7 @@ function getRemotes(req, res) {
 					cb();
 				});
 			}, function() {
+				clone.freeRepo(repo);
 				writeResponse(200, res, null, {
 					"Children": r,
 					"Type": "Remote"
@@ -166,6 +167,7 @@ function getRemotes(req, res) {
 						callback(err);
 					});
 				}, function(err) {
+					clone.freeRepo(repo);
 					if (err) {
 						return writeError(403, res);
 					}
@@ -196,6 +198,9 @@ function getRemotes(req, res) {
 		})
 		.catch(function() {
 			return writeError(403, res);
+		})
+		.done(function() {
+			clone.freeRepo(theRepo);
 		});
 	}
 	return writeError(404, res);
@@ -259,6 +264,9 @@ function addRemote(req, res) {
 	})
 	.catch(function(err) {
 		writeError(403, res, err.message);
+	})
+	.done(function() {
+		clone.freeRepo(repo);
 	});
 }
 
@@ -321,6 +329,9 @@ function fetchRemote(req, res, remote, branch, force) {
 			err.code = 404;
 		}
 		clone.handleRemoteError(task, err, remoteObj.url());
+	})
+	.done(function() {
+		clone.freeRepo(repo);
 	});
 }
 
@@ -398,13 +409,18 @@ function pushRemote(req, res, remote, branch, pushSrcRef, tags, force) {
 	})
 	.catch(function(err) {
 		clone.handleRemoteError(task, err, remoteObj.url());
+	})
+	.done(function() {
+		clone.freeRepo(repo);
 	});
 }
 
 function deleteRemote(req, res) {
+	var theRepo;
 	var remoteName = api.decodeURIComponent(req.params.remoteName);
 	clone.getRepo(req)
 	.then(function(repo) {
+		theRepo = repo;
 		var configFile = api.join(repo.path(), "config");
 		args.readConfigFile(configFile, function(err, config) {
 			if (err) {
@@ -423,6 +439,9 @@ function deleteRemote(req, res) {
 	})
 	.catch(function(err) {
 		return writeError(400, res, err.message);
+	})
+	.done(function() {
+		clone.freeRepo(theRepo);
 	});
 }
 };

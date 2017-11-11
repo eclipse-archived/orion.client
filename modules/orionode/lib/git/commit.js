@@ -94,7 +94,7 @@ function getCommitLog(req, res) {
 	var sha1Filter = query.sha1;
 	var fromDateFilter = query.fromDate ? parseInt(query.fromDate, 10) : 0;
 	var toDateFilter = query.toDate ? parseInt(query.toDate, 10) : 0;
-	var filterPath;
+	var filterPath, repo;
 	var behindCount = 0, aheadCount= 0;
 	function filterCommit(commit) {
 		if (sha1Filter && commit.sha() !== sha1Filter) return true;
@@ -235,7 +235,7 @@ function getCommitLog(req, res) {
 			throw err;
 		});
 	}
-	var commits = []	, repo;
+	var commits = [];
 	function sendResponse(over) {
 		var refs = scope.split("..");
 		var toRef, fromRef; 
@@ -330,6 +330,7 @@ function getCommitLog(req, res) {
 			}
 		})
 		.then(function() {
+			clone.freeRepo(repo);
 			task.done({
 				HttpCode: 200,
 				Code: 0,
@@ -450,6 +451,7 @@ function getCommitLog(req, res) {
 				if (error.errno === git.Error.CODE.ITEROVER) {
 					sendResponse(true);
 				} else {
+					clone.freeRepo(repo);
 					task.done({
 						HttpCode: 404,
 						Code: 0,
@@ -503,6 +505,7 @@ function getCommitLog(req, res) {
 				if (error.errno === git.Error.CODE.ITEROVER) {
 					sendResponse(true);
 				} else {
+					clone.freeRepo(repo);
 					task.done({
 						HttpCode: 404,
 						Code: 0,
@@ -574,6 +577,7 @@ function getCommitLog(req, res) {
 			log(repo, scope);
 		}
 	}).catch(function(err) {
+		clone.freeRepo(repo);
 		task.done({
 			HttpCode: 400,
 			Code: 0,
@@ -743,6 +747,9 @@ function getCommitBody(req, res) {
 		writeResponse(200, res, {'Content-Type':'application/octect-stream','Content-Length': resp.length}, resp, false, true);
 	}).catch(function(err) {
 		writeError(404, res, err.message);
+	})
+	.done(function() {
+		clone.freeRepo(theRepo);
 	});
 }
 
@@ -789,6 +796,9 @@ function revert(req, res, commitToRevert) {
 	})
 	.catch(function(err) {
 		writeError(404, res, err.message);
+	})
+	.done(function() {
+		clone.freeRepo(theRepo);
 	});
 }
 
@@ -838,6 +848,9 @@ function cherryPick(req, res, commitToCherrypick) {
 		}else{
 			writeError(400, res, err.message);
 		}
+	})
+	.done(function() {
+		clone.freeRepo(theRepo);
 	});
 }
 
@@ -944,6 +957,9 @@ function rebase(req, res, commitToRebase, rebaseOperation) {
 	})
 	.catch(function(err) {
 		writeError(400, res, err.message);
+	})
+	.done(function() {
+		clone.freeRepo(repo);
 	});
 
 }
@@ -1053,6 +1069,9 @@ function merge(req, res, branchToMerge, squash) {
 	})
 	.catch(function(err) {
 		writeError(400, res, err.message);
+	})
+	.done(function() {
+		clone.freeRepo(repo);
 	});
 }
 
@@ -1245,6 +1264,9 @@ function tag(req, res, commitId, name, isAnnotated, message) {
 	})
 	.catch(function(err) {
 		writeError(403, res, err.message);
+	})
+	.done(function() {
+		clone.freeRepo(theRepo);
 	});
 }
 
@@ -1319,6 +1341,9 @@ function postCommit(req, res) {
 	})
 	.catch(function(err) {
 		writeError(403, res, err.message);
+	})
+	.done(function() {
+		clone.freeRepo(theRepo);
 	});
 }
 

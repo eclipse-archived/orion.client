@@ -128,6 +128,9 @@ function getDiff(req, res) {
 	})
 	.catch(function(err) {
 		writeError(404, res, err.message);
+	})
+	.done(function() {
+		clone.freeRepo(repo);
 	});
 }
 
@@ -349,8 +352,10 @@ function getDiffBetweenTwoCommits(repo, commits, options) {
 }
 
 function applyPatch(req, res) {
+	var theRepo;
 	return clone.getRepo(req)
 	.then(function(repo) {
+		theRepo = repo;
 		var radio = "", patchUrl = "", file = "";
 		var form = new multiparty.Form();
 		form.on("part", function(part) {
@@ -372,6 +377,7 @@ function applyPatch(req, res) {
 			part.resume();
 		});
 		form.on("error", function(err) {
+			clone.freeRepo(theRepo);
 			writeError(404, res, err.message);
 		});
 		form.on('close', function() {
@@ -424,22 +430,28 @@ function applyPatch(req, res) {
 						return;
 					},
 					complete: function(err) {
-						if (err) return writeError(404, res, err.message);
+						if (err) {
+							clone.freeRepo(theRepo);
+							return writeError(404, res, err.message);
+						}
 						var jsonData = {
 							modifiedFiles: successed.map(function(index) {
 								return this.getUnprefixFile(index.oldFileName);
 							}.bind(this))
 						};
 						if (failed.length) {
-							return writeResponse(400, res, null, {
+							var result = {
 								Message: "Some files did not apply: " + failed.map(function(index) {
 									return this.getUnprefixFile(index.oldFileName);
 								}.bind(this)).join(","),
 								HttpCode: 400,
 								Code: 0,
 								JsonData: jsonData
-							});
+							};
+							clone.freeRepo(theRepo);
+							return writeResponse(400, res, null, result);
 						}
+						clone.freeRepo(theRepo);
 						writeResponse(200, res, null, {
 							Message: "Ok",
 							HttpCode: 200,
@@ -456,6 +468,7 @@ function applyPatch(req, res) {
 						file = body;
 						apply();
 					} else {
+						clone.freeRepo(theRepo);
 						writeError(404, res, "Fail to fetch url");
 					}
 				});
@@ -464,6 +477,7 @@ function applyPatch(req, res) {
 		form.parse(req);
 	})
 	.catch(function(err) {
+		clone.freeRepo(theRepo);
 		writeError(404, res, err.message);
 	});
 }

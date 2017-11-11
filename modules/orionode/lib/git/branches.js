@@ -158,6 +158,9 @@ module.exports.router = function(options) {
 			})
 			.catch(function(err) {
 				writeError(500, res, err.message);
+			})
+			.done(function() {
+				clone.freeRepo(theRepo);
 			});
 			return;
 		}
@@ -209,6 +212,9 @@ module.exports.router = function(options) {
 		})
 		.catch(function(err) {
 			writeError(500, res, err.message);
+		})
+		.done(function() {
+			clone.freeRepo(theRepo);
 		});
 	}
 	
@@ -247,13 +253,18 @@ module.exports.router = function(options) {
 		})
 		.catch(function(err) {
 			writeError(500, res, err.message);
+		})
+		.done(function() {
+			clone.freeRepo(theRepo);
 		});
 	}
 	
 	function deleteBranch(req, res) {
+		var theRepo;
 		var branchName = api.decodeURIComponent(req.params.branchName);
 		clone.getRepo(req)
 		.then(function(repo) {
+			theRepo = repo;
 			return git.Branch.lookup(repo, branchName, git.Branch.BRANCH.LOCAL);
 		})
 		.then(function(ref) {
@@ -265,6 +276,9 @@ module.exports.router = function(options) {
 		})
 		.catch(function(err) {
 			writeError(403, res, err.message);
+		})
+		.done(function() {
+			clone.freeRepo(theRepo);
 		});
 	}
 };

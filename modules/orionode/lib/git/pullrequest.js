@@ -72,7 +72,7 @@ function getPullRequest(req, res) {
 	var task = new tasks.Task(res, false, true, 0, false);
 	if(gitUrl){
 		var isSsh = false;
-		if (gitUrl.indexOf("@") < gitUrl.indexOf(":")){
+		if (gitUrl.indexOf("@") < gitUrl.indexOf(":") && gitUrl.indexOf("https://") === -1){
 			gitUrl = "ssh://" + gitUrl;
 			isSsh = true;
 		}
@@ -90,7 +90,7 @@ function getPullRequest(req, res) {
 		headers: authHeader ? {'User-Agent': 'request',	'Authorization': authHeader} : {'User-Agent': 'request'}
 	};
 	
-	var fileDir, cloneDir, remoteDir,bodyJson;
+	var fileDir, cloneDir, remoteDir,bodyJson, theRepo;
 	clone.getRepo(req)
 	.then(function(repo) {
 		fileDir = clone.getfileDir(repo,req); 
@@ -143,6 +143,9 @@ function getPullRequest(req, res) {
 			});
 	}).catch(function(err){
 		clone.handleRemoteError(task, err, gitRoot + "/clone" + fileDir);
+	})
+	.done(function() {
+		clone.freeRepo(theRepo);
 	});
 	function toBase64 (str) {
 		return (new Buffer(str || '', 'utf8')).toString('base64');

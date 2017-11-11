@@ -32,8 +32,10 @@ function router(options) {
 	.get('*', getStatus);
 	
 	function getStatus(req, res) {
+		var theRepo;
 		return clone.getRepo(req)
 		.then(function(repo) {
+			theRepo = repo;
 			var fileDir = clone.getfileDir(repo,req);
 			return repo.getStatusExt({
 				flags: 
@@ -131,6 +133,9 @@ function router(options) {
 		})
 		.catch(function(err) {
 			writeError(400, res, err);
+		})
+		.done(function() {
+			clone.freeRepo(theRepo);
 		});
 	}
 }
