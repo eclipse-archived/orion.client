@@ -92,6 +92,22 @@ define(['i18n!orion/operations/nls/messages', "orion/Deferred"], function(messag
     }
 
     OperationsClient.prototype = {
+        addOperation: function(operationLocation, data) {
+            var that = this;
+            return this._preferenceService.get(NAMESPACE).then(function(globalOperations) {
+                var operationLocations = Object.keys(globalOperations);
+                var now = Date.now();
+                for (var j = 0; j < operationLocations.length; j++) {
+                	var location = operationLocations[j];
+                    var expires = globalOperations[location].expires;
+                    if (expires < now) {
+                        delete globalOperations[location];
+                    }
+                }
+                globalOperations[operationLocation] = data;
+                return that._preferenceService.put(NAMESPACE, globalOperations, {clear: true});
+            });
+        },
         getOperations: function() {
             return this._preferenceService.get(NAMESPACE);
         },
@@ -120,7 +136,7 @@ define(['i18n!orion/operations/nls/messages', "orion/Deferred"], function(messag
                                     }
                                 }
                             }
-                            that._preferenceService.put(NAMESPACE, globalOperations).then(def.resolve, def.reject);
+                            that._preferenceService.put(NAMESPACE, globalOperations, {clear: true}).then(def.resolve, def.reject);
                         });
                     };
                 }(def), function(def) {

@@ -163,7 +163,6 @@ function(messages, lib, mOperationsDialog, Tooltip, Deferred) {
 		this._lastIconClass = null;
 		this._progressMonitorClass = progressMonitorClass;
 		this._preferenceService = preferenceService;
-		console.log(preferenceService)
 	}
 	
 	ProgressService.prototype = /** @lends orion.progress.ProgressService.prototype */ {
@@ -284,9 +283,7 @@ function(messages, lib, mOperationsDialog, Tooltip, Deferred) {
 				this._operations[operationIndex] = operation;
 				this._operationDeferrds[operationIndex] = deferred;
 				if(operation.Location){
-					var data = {};
-					data[operation.Location] = {Name: operation.Name, expires: operation.expires};
-					this._serviceRegistry.getService("orion.core.preference").put("/operations", data); //$NON-NLS-2$ //$NON-NLS-1$
+					this._operationsClient.addOperation(operation.Location, {Name: operation.Name, expires: operation.expires});
 				}
 				if(operation.progressMonitor){
 					operation.progressMonitor.progress(operation.Name);

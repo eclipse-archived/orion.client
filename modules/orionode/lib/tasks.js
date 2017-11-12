@@ -20,7 +20,8 @@ var express = require('express'),
 var writeError = api.writeError, 
 	writeResponse = api.writeResponse;
 	
-var MS_EXPIRATION = 86400 * 1000 * 7; /* 7 days */  // TODO should be settable per task by client
+var KEEP_MS_EXPIRATION = 86400 * 1000 * 2; /* 2 days */
+var TEMP_MS_EXPIRATION = 60 * 1000 * 15; /* 15 minutes */
 
 var taskStore;
 var taskRoot = "/task";
@@ -116,11 +117,11 @@ api.getOrionEE().on("close-server", function(data) {
 
 function Task(res, cancelable, lengthComputable, wait, keep) {
 	this.timestamp = Date.now();
-	this.expires = this.timestamp + MS_EXPIRATION;
 	this.id = crypto.randomBytes(5).toString('hex') + this.timestamp;
 	this.cancelable = Boolean(cancelable);
 	this.lengthComputable = Boolean(lengthComputable);
 	this.keep = Boolean(keep);
+	this.expires = this.timestamp + (this.keep ? KEEP_MS_EXPIRATION : TEMP_MS_EXPIRATION);
 	this.total = this.loaded = 0;
 	this.type = "loadstart";
 	this.username = res.req.user.username;

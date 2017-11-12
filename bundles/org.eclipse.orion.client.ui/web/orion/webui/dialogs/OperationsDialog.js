@@ -10,7 +10,7 @@
  ******************************************************************************/
 /*eslint-env browser, amd*/
 define(['i18n!orion/operations/nls/messages', 'require', 'orion/webui/littlelib', 'orion/webui/popupdialog', 'orion/operationsCommands'],
-function(messages, require, lib, popupdialog, mOperationsCommands) {
+function(messages, require, lib, popupdialog) {
 	
 	/**
 	 * Usage: <code>new OperationsDialog(options).show();</code>
@@ -41,7 +41,6 @@ function(messages, require, lib, popupdialog, mOperationsCommands) {
 		this._myOperations = [];
 		this._operationsDeferreds = [];
 		this._commandService = options.commandRegistry;
-		mOperationsCommands.createOperationsCommands(this._commandService);
 		this._commandService.registerCommandContribution("operationsDialogItems", "eclipse.cancelOperation", 1); //$NON-NLS-1$ //$NON-NLS-0$
 		this._initialize(options.triggerNode);
 	};
