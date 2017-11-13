@@ -481,7 +481,10 @@ function initRepo(file, req, res){
 
 				// Since we're creating an inital commit, it has no parents. Note that unlike
 				// normal we don't get the head either, because there isn't one yet.
-				return fulfill(theRepo.createCommit("HEAD", author, committer, "Initial commit", oid, []));
+				return theRepo.createCommit("HEAD", author, committer, "Initial commit", oid, []);
+			})
+			.then(function() {
+				fulfill();
 			}).catch(function(e){
 				return reject(e);
 			}).
@@ -634,7 +637,7 @@ function foreachSubmodule(repo, operation, recursive, creds, username, task) {
 									theRepo = subrepo;
 									return foreachSubmodule(subrepo, operation, recursive, creds, username, task);
 								})
-								.done(function() {
+								.then(function() {
 									freeRepo(theRepo);
 								});
 							}
