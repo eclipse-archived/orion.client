@@ -143,10 +143,10 @@ function writeError(code, res, msg) {
 			var err = JSON.stringify({Severity: "Error", Message: msg});
 			res.setHeader('Content-Type', 'application/json');
 			res.setHeader('Content-Length', err.length);
-			res.writeHead(code, msg);
+			res.writeHead(code);
 			res.end(err);
 		} else {
-			res.writeHead(code, msg);
+			res.writeHead(code);
 			res.end();
 		}
 	}catch(err){
