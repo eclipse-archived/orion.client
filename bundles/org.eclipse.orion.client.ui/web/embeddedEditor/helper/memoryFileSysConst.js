@@ -11,7 +11,7 @@
 /*eslint-env browser, amd*/
 define([
 ], function() {
-	var inMemoryFilePattern = "/in_memory_fs/";
+	var inMemoryFilePattern = "/in_memory_fs/project/";
 	var project = "/in_memory_fs/project/";
 	//return module exports
 	return {
