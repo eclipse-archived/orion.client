@@ -245,7 +245,7 @@ define([
 					var tagSpanAction = document.createElement("span"); //$NON-NLS-0$
 					tagSpanAction.className = "core-sprite-close gitCommitTagClose"; //$NON-NLS-0$
 					tagSpanAction.addEventListener("click", function(){ //$NON-NLS-0$
-						that.tagsCommandHandler.commandService.runCommand("eclipse.removeTag", tag, that.tagsCommandHandler); //$NON-NLS-0$
+						that.tagsCommandHandler.commandService.runCommand("eclipse.removeTag", tag, that.tagsCommandHandler, null, null, tagSpanAction); //$NON-NLS-0$
 					});
 					tagSpan.appendChild(tagSpanAction);
 				});

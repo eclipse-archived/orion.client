@@ -1195,13 +1195,15 @@ var exports = {};
 				if (bidiUtils.isBidiEnabled()) {
 					itemName = bidiUtils.enforceTextDirWithUcc(itemName);
 				}
-				if (confirm(i18nUtil.formatMessage(messages["Are you sure you want to delete tag ${0}?"], itemName))) {
-					var progress = serviceRegistry.getService("orion.page.progress"); //$NON-NLS-0$
-					var msg = i18nUtil.formatMessage(messages["Removing tag {$0}"], itemName);
-					progress.progress(serviceRegistry.getService("orion.git.provider").doRemoveTag(item.Location), msg).then(function() { //$NON-NLS-0$
-						dispatchModelEventOn({type: "modelChanged", action: "removeTag", tag: item}); //$NON-NLS-1$ //$NON-NLS-0$
-					}, displayErrorOnStatus);
-				}
+				commandService.confirm(data.domNode || data.domParent, i18nUtil.formatMessage(messages["Are you sure you want to delete tag ${0}?"], itemName), messages.OK, messages.Cancel, false, function(doit) {
+					if (doit) {
+						var progress = serviceRegistry.getService("orion.page.progress"); //$NON-NLS-0$
+						var msg = i18nUtil.formatMessage(messages["Removing tag {$0}"], itemName);
+						progress.progress(serviceRegistry.getService("orion.git.provider").doRemoveTag(item.Location), msg).then(function() { //$NON-NLS-0$
+							dispatchModelEventOn({type: "modelChanged", action: "removeTag", tag: item}); //$NON-NLS-1$ //$NON-NLS-0$
+						}, displayErrorOnStatus);
+					}
+				});
 			},
 			visibleWhen: function(item) {
 				return item.Type === "Tag"; //$NON-NLS-0$
