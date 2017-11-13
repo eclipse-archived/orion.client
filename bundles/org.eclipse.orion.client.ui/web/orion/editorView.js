@@ -98,6 +98,7 @@ define([
 		this.inputManager = options.inputManager;
 		this.preferences = options.preferences;
 		this.readonly = options.readonly;
+		this.singleMode = options.singleMode;
 		this.searcher = options.searcher;
 		this.statusReporter = options.statusReporter;
 		this.model = options.model;
@@ -208,6 +209,7 @@ define([
 			}
 			return {
 				readonly: this.readonly || this.inputManager.getReadOnly(),
+				singleMode: this.singleMode,
 				tabSize: prefs.tabSize || 4,
 				expandTab: prefs.expandTab,
 				wrapMode: prefs.wordWrap,
