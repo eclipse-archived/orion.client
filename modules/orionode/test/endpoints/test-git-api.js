@@ -2515,7 +2515,7 @@ maybeDescribe("git", function() {
 				var testName = "merge-squash-simple-index"
 				var name = "test.txt";
 				var fullPath = path.join(path.join(WORKSPACE, testName), name);
-				var initial;
+				var initial, current;
 
 				var client = new GitClient(testName);
 				client.init();
@@ -2567,10 +2567,10 @@ maybeDescribe("git", function() {
 			});
 
 			it("conflicts", function(finished) {
-				var testName = "merge-squash-conflicts"
+				var testName = "merge-squash-conflicts";
 				var name = "test.txt";
 				var fullPath = path.join(path.join(WORKSPACE, testName), name);
-				var initial;
+				var initial, current;
 
 				var client = new GitClient(testName);
 				client.init();
@@ -2586,7 +2586,7 @@ maybeDescribe("git", function() {
 					client.commit();
 					return client.start();
 				})
-				.then(function(commit) {
+				.then(function() {
 					client.createBranch("other");
 					// reset back to the initial state of ""
 					client.reset("HARD", initial);
