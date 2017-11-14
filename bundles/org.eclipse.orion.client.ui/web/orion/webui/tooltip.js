@@ -34,6 +34,8 @@ define(['orion/webui/littlelib'], function(lib) {
 	 * @param options.hideDelay Specifies the number of millisecond delay before the tooltip begins to disappear.
 	 * Optional.  Defaults to 200.  Valid only for "mouseover" trigger.
 	 * @param options.tailSize Specifies the number of pixels to allocate for the tail.  Optional.  Defaults to 10.
+	 * @param options.afterShowing Specifies a function to call after showing the tooltip.  Optional.
+	 * @param options.afterHiding Specifies a function to call after hiding the tooltip.  Optional.
 	 * @name orion.webui.tooltip.Tooltip
 	 *
 	 */

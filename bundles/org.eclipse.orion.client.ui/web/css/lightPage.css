@@ -1,4 +1,4 @@
-/* Stanard focus handling */
+/* Standard focus handling */
 :-moz-focusring {
    outline: none;
    box-shadow: 0 0 4px #5b9dd9;
@@ -201,9 +201,8 @@
 	border-radius: 0 !important;
 }
 
-.lightPage .primaryButton:hover, .primaryButton:focus {
-	background: rgb(60, 113, 179);
-	border-color: rgb(60, 113, 179);
+.lightPage .primaryButton:not(.disabled):hover, .primaryButton:not(.disabled):focus {
+	box-shadow: 0 1px 2px 0 #5b9dd9;
 }
 
 .lightPage .checkedRow .commandButton {

@@ -31,7 +31,9 @@ define(['orion/webui/littlelib', 'orion/uiUtils'],
 	 *        title - If the dialog should display a title, set the title field.
 	 *        buttons - If the dialog should show buttons along the bottom, set an array of button objects.  Each button should
 	 *            have a text property that labels the button and a callback property that is called when the button is pushed.
+	 *            Buttons may optionally have an id, and one button in the array may optionally have isDefault set to true.
 	 *        modal - Set this field to true if modal behavior is desired.
+	 *        firstFocus - Set this field to the id of the child element that should receive focus when the dialog is opened. Optional.
 	 * 
 	 *    2.  To hook event listeners to elements in the dialog, implement the _bindToDOM function.  DOM elements
 	 *        in the template will be bound to variable names prefixed by a '$' character.  For example, the
@@ -74,6 +76,7 @@ define(['orion/webui/littlelib', 'orion/uiUtils'],
 //			this.handle = lib.addAutoDismiss([this.$frame], this.hide.bind(this));
 			if (this.title) {
 				lib.$("#title", this.$frame).appendChild(document.createTextNode(this.title)); //$NON-NLS-0$
+				this.$frame.setAttribute("aria-labelledby", "title");
 			}
 			this.$close = lib.$("#closeDialog", this.$frame);//$NON-NLS-0$
 			var self = this;
@@ -182,6 +185,7 @@ define(['orion/webui/littlelib', 'orion/uiUtils'],
 			// When tabbing out of the dialog, using the above technique (restore to last focus) will put the focus on the last element, but
 			// we want it on the first element, so let's prevent the user from tabbing out of the dialog.
 			lib.trapTabs(this.$frame);
+			this.$frame.setAttribute("aria-modal", "true");
 		},
 		
 		_addChildDialog: function(dialog) {
@@ -299,7 +303,8 @@ define(['orion/webui/littlelib', 'orion/uiUtils'],
 		},
 		
 		_getFirstFocusField: function() {
-			return lib.firstTabbable(this.$parent) || 
+			return this.firstFocus && lib.$('#' + this.firstFocus, this.$parent) ||
+				lib.firstTabbable(this.$parent) ||
 				this._defaultButton ||
 				lib.firstTabbable(this.$buttonContainer) ||
 				this.$close;
