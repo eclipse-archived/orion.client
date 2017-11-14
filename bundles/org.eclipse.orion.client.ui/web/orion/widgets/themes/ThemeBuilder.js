@@ -547,11 +547,6 @@ function(messages, i18nUtil, mCommands, mCommandRegistry, lib, mTooltip, colors,
 	ThemeBuilder.prototype.saveTheme = saveTheme;
 	
 	function exportTheme(data) {
-    	//Remove focus so the element no longer appears to be hovered.
-		if (data && data.domNode) {
-			data.domNode.blur();
-		}
-		
 		var themeString = JSON.stringify(currentTheme);
 
 		if (window.navigator.msSaveOrOpenBlob) { // Save blob from IE

@@ -252,11 +252,9 @@ define({
 			"border-radius": "0 !important",
 			"color": "#FFFFFF !important"
 		},
-		".primaryButton:hover,": {
-			".primaryButton:focus": {
-				"background": "rgb(60, 113, 179)",
-				"border-color": "rgb(60, 113, 179)"
-			}
+		".primaryButton.disabled": {
+			"background-color": "rgba(16,106,91,0.25) !important",
+			"border-color": "white !important"
 		},
 		".projectNavColumn": {
 			"color": "#FFFFFF"
@@ -468,12 +466,6 @@ define({
 		".pageToolbar": {
 			".dropdownTrigger:not(.dropdownDefaultButton)": {
 				"color": "#3B4B54"
-			}
-		},
-		".primaryButton:hover": {
-			".primaryButton:focus": {
-				"background": "#106A5B",
-				"border-color": "#106A5B"
 			}
 		},
 		".editorTabCloseButton:hover": {

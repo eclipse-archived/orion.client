@@ -31,7 +31,7 @@
 		transition: background-color 250ms ease-in;
 	}
 
-	.error {
+	.importerror {
 		background-color: #f2dede;
 		border: 1px solid #ebccd1;
 		color: #a94442;
@@ -43,9 +43,17 @@
   		width: 100%;
 	}
 
-	input[type="file"] {
-		display: none;
+	input[type="file"] + label {
+		cursor: pointer;
 	}
+	
+	/* when file input gets focus, label sibling matches focus style for non-primary command buttons in lightPage.css */
+	.lightPage input[type="file"]:focus + label {
+		color: black;
+		background-color: rgba(60, 113, 179, 0.25);
+		box-shadow: 0 1px 2px 0 rgb(60, 113, 179);
+	}
+
 	</style>
 	<div id="importThemeContainer">
 		<div class="msg" id="importThemeMessage">${ImportThemeDialogMessage}</div>

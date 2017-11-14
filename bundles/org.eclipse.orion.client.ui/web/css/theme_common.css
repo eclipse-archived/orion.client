@@ -1082,12 +1082,6 @@ a.breadcrumb.currentLocation {
 	font-weight: bold;
 }
 
-.dialogDismiss {
-	display: block;
-	cursor: pointer;
-	padding: 2px;
-}
-
 .dialogContent {
 	padding: 8px;
 }

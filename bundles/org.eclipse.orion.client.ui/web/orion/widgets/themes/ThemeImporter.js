@@ -12,12 +12,13 @@
 
 define([
         'i18n!orion/settings/nls/messages',
+        'orion/webui/littlelib',
         'orion/webui/dialog',
         'text!orion/widgets/themes/templates/ImportThemeDialogTemplate.html',
         'orion/widgets/themes/dialogs/urlImportDialog',
         'orion/widgets/themes/editor/ThemeData',
         'orion/objects'
-], function(messages, dialog, ImportThemeDialogTemplate, urlImportDialog, themeData, objects) {
+], function(messages, lib, dialog, ImportThemeDialogTemplate, urlImportDialog, themeData, objects) {
         var luminanceDarkLimit = 70;
 
 
@@ -117,15 +118,17 @@ define([
                 this.title = messages["Import a theme"]; //$NON-NLS-1$
                 this.buttons = [
                     /*{ text: "Import from a URL", callback: this.urlButtonClicked.bind(this), id: "urlThemeImportBtn" }, Hidden for now*/
-                    { text: messages["Import"], callback: this.importFromTextarea.bind(this), id: "textAreaImportBtn" } //$NON-NLS-1$
+                    { text: messages["Import"], isDefault: true, callback: this.importFromTextarea.bind(this), id: "textAreaImportBtn" } //$NON-NLS-1$
                 ];
                 this.modal = true;
+                this.firstFocus = "fileInput"; //$NON-NLS-0$
 
                 this._initialize();
             },
             _bindToDom: function() {
                 this.$importButton = this.$buttonContainer.firstChild;
-                this.$importButton.classList.add('disabled'); //$NON-NLS-0$
+                this.$importButton.classList.add("disabled"); //$NON-NLS-0$
+                this.$importButton.setAttribute("disabled", "disabled"); //$NON-NLS-1$ //$NON-NLS-0$
 
                 this.appendThemeList();
             },
@@ -137,6 +140,7 @@ define([
                     textBox = document.createElement("textarea"); //$NON-NLS-0$
 
                 importInput.id = "fileInput";
+                importInput.className = "visuallyhidden"; //$NON-NLS-0$
                 importInput.type = "file";
                 importInput.addEventListener("change", this.importOnSelect.bind(this));
                 docFragment.appendChild(importInput);
@@ -145,10 +149,16 @@ define([
                 importLabel.className = "orionButton commandButton";
                 importLabel.htmlFor = importInput.id;
                 importLabel.innerHTML = messages["importThemeButton"];
+                importLabel.addEventListener("keydown", function(e) { //$NON-NLS-0$
+					if (e.keyCode === lib.KEY.SPACE) {
+						importLabel.click();
+					}
+				}, false);
                 docFragment.appendChild(importLabel);
 
                 dropZone.className = "drop-zone"; //$NON-NLS-0$
                 dropZone.id = "dropZone"; //$NON-NLS-0$
+                dropZone.setAttribute("aria-label", messages["Drop Theme File:"]); //$NON-NLS-0$
                 dropZone.textContent = messages["dndTheme"];
                 docFragment.appendChild(dropZone);
 
@@ -159,21 +169,24 @@ define([
 
                 textBox.rows = "4"; //$NON-NLS-0$
                 textBox.cols = "35"; //$NON-NLS-0$
+                textBox.setAttribute("aria-label", messages["Paste Theme:"]); //$NON-NLS-0$
                 textBox.placeholder = messages["textTheme"];
                 textBox.id = "themeText"; //$NON-NLS-0$
-                textBox.tabIndex = "-1"; //$NON-NLS-0$
                 textBox.addEventListener("input", this.watchTextarea.bind(this)); //$NON-NLS-0$
 
                 docFragment.appendChild(textBox);
                 this.$importThemeMessage.innerHTML = messages["ImportThemeDialogMessage"];
                 this.$importThemeContainer.appendChild(docFragment, null);
+                this.$frame.setAttribute("aria-describedby", "importThemeMessage"); //$NON-NLS-1$ //$NON-NLS-0$
             },
             watchTextarea: function() {
                 var textArea = document.getElementById("themeText"); //$NON-NLS-0$
                 if (textArea.value.length > 0) {
                     this.$importButton.classList.remove("disabled"); //$NON-NLS-0$
+	                this.$importButton.removeAttribute("disabled"); //$NON-NLS-0$
                 } else {
                     this.$importButton.classList.add("disabled"); //$NON-NLS-0$
+	                this.$importButton.setAttribute("disabled", "disabled"); //$NON-NLS-1$ //$NON-NLS-0$
                 }
             },
             dragEnter: function(e) {
@@ -249,10 +262,6 @@ define([
         });
 
         function showImportThemeDialog(data) {
-        	//Remove focus so when the dialog is closed this element is no longer selected.
-        	if (data && data.domNode) {
-        		data.domNode.blur();
-        	}
             new ImportThemeDialog(data).show();
         }
         ThemeImporter.prototype.showImportThemeDialog = showImportThemeDialog;
@@ -907,7 +916,7 @@ define([
                     var docFragment = document.createDocumentFragment(),
                         errorContainer = document.createElement("div"); //$NON-NLS-0$
 
-                    errorContainer.className = "error"; //$NON-NLS-0$
+                    errorContainer.className = "importerror"; //$NON-NLS-0$
                     errorContainer.id = "themeImportError"; //$NON-NLS-0$
                     errorContainer.textContent = messages["ImportThemeError"];
                     docFragment.appendChild(errorContainer);
