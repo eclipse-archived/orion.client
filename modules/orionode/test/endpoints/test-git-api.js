@@ -260,11 +260,10 @@ GitClient.prototype = {
 			.expect(201)
 			.end(function(err, res) {
 				assert.ifError(err);
-				var encodeBranch = api.encodeStringLocation(api.encodeURIComponent(branchName));
-//				assert.equal(res.body.CommitLocation,
-//					GIT_ROOT + "/commit/refs%25252Fheads%25252F" + encodeBranch + FILE_ROOT + client.getName());
-//				assert.equal(res.body.Location,
-//					GIT_ROOT + "/branch/" + encodeBranch + FILE_ROOT + client.getName());
+				assert.equal(res.body.CommitLocation,
+					api.encodeStringLocation(GIT_ROOT + "/commit/" + api.encodeURIComponent("refs/heads/" + branchName) + FILE_ROOT + client.getName()));
+				assert.equal(res.body.Location,
+					api.encodeStringLocation(GIT_ROOT + "/branch/" + api.encodeURIComponent(branchName) + FILE_ROOT + client.getName()));
 				client.next(resolve, res.body);
 			});
 		});
@@ -378,7 +377,7 @@ GitClient.prototype = {
 				assert.equal(res.body.Type, "Tag");
 				assert.equal(res.body.TagType, annotated ? "ANNOTATED" : "LIGHTWEIGHT");
 				assert.equal(res.body.CloneLocation, GIT_ROOT + "/clone" + FILE_ROOT + client.getName());
-//				assert.equal(res.body.CommitLocation, GIT_ROOT + "/commit/" + commitSHA + FILE_ROOT + client.getName());
+				assert.equal(res.body.CommitLocation, GIT_ROOT + "/commit/" + commitSHA + FILE_ROOT + client.getName());
 				assert.equal(res.body.TreeLocation, GIT_ROOT + "/tree" + FILE_ROOT + client.getName() + "/" + tagName);
 				client.next(resolve, res.body);
 			});
@@ -633,13 +632,13 @@ GitClient.prototype = {
 				assert.ifError(err);
 				getGitResponse(res).then(function(res2) {
 					assert.equal(res2.JsonData.Type, "Commit");
-					//assert.equal(res2.JsonData.Location, api.encodeStringLocation(GIT_ROOT + "/commit/" + api.encodeURIComponent(branch) + FILE_ROOT + client.getName() + "/" + path));
+					assert.equal(res2.JsonData.Location, api.encodeStringLocation(GIT_ROOT + "/commit/" + api.encodeURIComponent(branch) + FILE_ROOT + client.getName() + "/" + path));
 					assert.equal(res2.JsonData.CloneLocation, GIT_ROOT + "/clone" + FILE_ROOT + client.getName());
 
 					assert.equal(res2.JsonData.toRef.Name, toRef);
 					assert.equal(res2.JsonData.toRef.FullName, "refs/heads/" + toRef);
 					assert.equal(res2.JsonData.toRef.CloneLocation, GIT_ROOT + "/clone" + FILE_ROOT + client.getName());
-					//assert.equal(res2.JsonData.toRef.CommitLocation, api.encodeStringLocation(GIT_ROOT + "/commit/" + api.encodeURIComponent("refs/heads/" + toRef) + FILE_ROOT+ client.getName()));
+					assert.equal(res2.JsonData.toRef.CommitLocation, api.encodeStringLocation(GIT_ROOT + "/commit/" + api.encodeURIComponent("refs/heads/" + toRef) + FILE_ROOT+ client.getName()));
 					assert.equal(res2.JsonData.toRef.DiffLocation, api.encodeStringLocation(GIT_ROOT + "/diff/" + api.encodeURIComponent(toRef) + FILE_ROOT + client.getName()));
 					assert.equal(res2.JsonData.toRef.Location, api.encodeStringLocation(GIT_ROOT + "/branch/" + api.encodeURIComponent(toRef) + FILE_ROOT + client.getName()));
 					assert.equal(res2.JsonData.toRef.TreeLocation, api.encodeStringLocation(GIT_ROOT + "/tree" + FILE_ROOT + client.getName() + "/" + api.encodeURIComponent("refs/heads/" + toRef)));
@@ -976,10 +975,11 @@ maybeDescribe("git", function() {
 			var remoteURI = "https://github.com/oriongittester/orion-test-repo.git"; // small test repo
 			var remoteName = "origin";
 			var branchName = "master";
-
+			
 			// Credentials for a github user made for testing... Perhaps need a better solution.
 			var username = "oriongittester";
 			var password = "testpassword1";
+			var testUserEmail = "albertqcui+oriongit@gmail.com";
 
 			it('POST remote (adding a new remote)', function(finished) {
 				request()

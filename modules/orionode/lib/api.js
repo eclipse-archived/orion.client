@@ -183,8 +183,13 @@ function setHttpCodeMapping(mapping) {
 }
 
 var LocationRegex = /Location$/;
-var PercentReplaceRegex = /\%/g;
-var CommaReplaceRegex = /,/g;
+
+/**
+ * @name encodeLocation
+ * @description Encode object's location string's persentage and comma
+ * @param obj
+ * @returns returns special encoded object
+ */
 function encodeLocation(obj) {
 	for (var p in obj) {
 		if (p.match(LocationRegex)) {
@@ -206,8 +211,25 @@ function encodeLocation(obj) {
 	}
 	return obj;
 }
+
+/**
+ * @name encodeStringLocation
+ * @description encode persentage and comma only
+ * @param string
+ * @returns returns encoded version
+ */
 function encodeStringLocation(string){
-	return string.replace(PercentReplaceRegex, "%25").replace(CommaReplaceRegex, "%2C");
+	return string.replace(/\%/g, "%25").replace(/,/g, "%2C");
+}
+
+/**
+ * @name decodeStringLocation
+ * @description decode comma and persentage
+ * @param string
+ * @returns returns encoded version
+ */
+function decodeStringLocation(string){
+	return string.replace(/%2C/g, ",").replace(/%25/g, "%");
 }
 
 /**
@@ -301,6 +323,7 @@ exports.writeError = writeError;
 exports.writeResponse = writeResponse;
 exports.encodeLocation = encodeLocation;
 exports.encodeStringLocation = encodeStringLocation;
+exports.decodeStringLocation = decodeStringLocation;
 exports.setResponseNoCache = setResponseNoCache;
 exports.isValidProjectName = isValidProjectName;
 exports.sendStatus = sendStatus;
