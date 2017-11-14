@@ -589,8 +589,9 @@ define([
 				}
 			};
 			var createSection = function (parent, sibling, title, query, canHide, dropdown, noTwistie, expandOnFocus) {
+				var commitFilterSectionId = lib.validId(title + "commitFilterSection"); //$NON-NLS-0$
 				var section = new mSection.Section(parent, {
-					id: title + "commitFilterSection", //$NON-NLS-0$
+					id: commitFilterSectionId, //$NON-NLS-0$
 					title: title,
 					canHide: canHide,
 					hidden: true,
@@ -601,7 +602,7 @@ define([
 				});
 				section.domNode.classList.add("gitFilterBox"); //$NON-NLS-0$
 				var filter = document.createElement("input"); //$NON-NLS-0$
-				filter.setAttribute("aria-labelledby", title + "commitFilterSectionTitle"); //$NON-NLS-1$ //$NON-NLS-0$
+				filter.setAttribute("aria-labelledby", commitFilterSectionId + "Title"); //$NON-NLS-1$ //$NON-NLS-0$
 				filter.className = "gitFilterInput"; //$NON-NLS-0$
 				filter.placeholder = messages["Filter " + query.key];
 				section.query = query;

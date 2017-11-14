@@ -497,6 +497,20 @@ define(["orion/util"], function(util) {
 			frames[i].parentNode.style.pointerEvents = enable ? "" : "none"; //$NON-NLS-0$
 		}
 	}
+	
+	/**
+	 * Given a non-empty string, returns a string with no spaces in it (valid HTML5 id attribute).
+	 * Also removes any punctuation except for '_', '-', and '.' for compatibility with HTML4.
+	 * @name orion.webui.littlelib.validId
+	 * @function
+	 * @static
+	 * @param {String} str	A non-empty string
+	 * @returns A valid html id string
+	 */
+	function validId(str) {
+		return str.replace(/\s/, '-').replace(/[^A-Za-z0-9_.-]/, '.');
+	}
+	
 	/**
 	 * Maps a <code>keyCode</code> to <tt>KEY</tt> name. This is the inverse of {@link orion.webui.littlelib.KEY}.
 	 * @private
@@ -561,6 +575,7 @@ define(["orion/util"], function(util) {
 		processDOMNodes: processDOMNodes,
 		addAutoDismiss: addAutoDismiss,
 		setFramesEnabled: setFramesEnabled,
+		validId: validId,
 		getOffsetParent: getOffsetParent,
 		removeAutoDismiss: removeAutoDismiss,
 		keyName: keyName,
