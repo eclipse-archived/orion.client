@@ -239,7 +239,7 @@ GitClient.prototype = {
 		var client = this;
 		this.tasks.push(function(resolve) {
 			request()
-			.get(GIT_ROOT + "/status" + FILE_ROOT + api.encodeURIComponent(client.getName()))
+			.get(api.encodeStringLocation(GIT_ROOT + "/status" + FILE_ROOT + api.encodeURIComponent(client.getName())))
 			.expect(200)
 			.end(function(err, res) {
 				assert.ifError(err);
@@ -260,7 +260,7 @@ GitClient.prototype = {
 			.expect(201)
 			.end(function(err, res) {
 				assert.ifError(err);
-				var encodeBranch = api.encodeURIComponent(branchName).replace(/\%/g, "%25");
+				var encodeBranch = api.encodeStringLocation(api.encodeURIComponent(branchName));
 //				assert.equal(res.body.CommitLocation,
 //					GIT_ROOT + "/commit/refs%25252Fheads%25252F" + encodeBranch + FILE_ROOT + client.getName());
 //				assert.equal(res.body.Location,
@@ -290,7 +290,7 @@ GitClient.prototype = {
 		var client = this;
 		this.tasks.push(function(resolve) {
 			request()
-			.delete(GIT_ROOT + "/branch/" + api.encodeURIComponent(branchName) + FILE_ROOT + client.getName())
+			.delete(api.encodeStringLocation(GIT_ROOT + "/branch/" + api.encodeURIComponent(branchName) + FILE_ROOT + client.getName()))
 			.expect(200)
 			.end(function(err, res) {
 				assert.ifError(err);
@@ -356,7 +356,7 @@ GitClient.prototype = {
 		var client = this;
 		this.tasks.push(function(resolve) {
 			request()
-			.delete(GIT_ROOT + "/tag/" + api.encodeURIComponent(tagName) + FILE_ROOT + client.getName())
+			.delete(api.encodeStringLocation(GIT_ROOT + "/tag/" + api.encodeURIComponent(tagName) + FILE_ROOT + client.getName()))
 			.expect(200)
 			.end(function(err, res) {
 				assert.ifError(err);
@@ -589,7 +589,7 @@ GitClient.prototype = {
 			target = api.encodeURIComponent(target);
 
 			request()
-			.get(GIT_ROOT + "/commit/" + target + ".." + source + FILE_ROOT + client.getName())
+			.get(api.encodeStringLocation(GIT_ROOT + "/commit/" + target + ".." + source + FILE_ROOT + client.getName()))
 			.query(parameters)
 			.expect(202)
 			.end(function(err, res) {
@@ -626,23 +626,23 @@ GitClient.prototype = {
 		var client = this;
 		this.tasks.push(function(resolve) {
 			request()
-			.get(GIT_ROOT + '/commit/' + api.encodeURIComponent(branch) + FILE_ROOT + client.getName() + "/" + path)
+			.get(api.encodeStringLocation(GIT_ROOT + '/commit/' + api.encodeURIComponent(branch) + FILE_ROOT + client.getName() + "/" + path))
 			.expect(202)
 			.query(parameters)
 			.end(function(err, res) {
 				assert.ifError(err);
 				getGitResponse(res).then(function(res2) {
 					assert.equal(res2.JsonData.Type, "Commit");
-					//assert.equal(res2.JsonData.Location, GIT_ROOT + "/commit/" + api.encodeURIComponent(branch) + FILE_ROOT + client.getName() + "/" + path);
+					//assert.equal(res2.JsonData.Location, api.encodeStringLocation(GIT_ROOT + "/commit/" + api.encodeURIComponent(branch) + FILE_ROOT + client.getName() + "/" + path));
 					assert.equal(res2.JsonData.CloneLocation, GIT_ROOT + "/clone" + FILE_ROOT + client.getName());
 
 					assert.equal(res2.JsonData.toRef.Name, toRef);
 					assert.equal(res2.JsonData.toRef.FullName, "refs/heads/" + toRef);
 					assert.equal(res2.JsonData.toRef.CloneLocation, GIT_ROOT + "/clone" + FILE_ROOT + client.getName());
-					//assert.equal(res2.JsonData.toRef.CommitLocation, GIT_ROOT + "/commit/" + api.encodeURIComponent("refs/heads/" + toRef) + FILE_ROOT+ client.getName());
-					assert.equal(res2.JsonData.toRef.DiffLocation, GIT_ROOT + "/diff/" + api.encodeURIComponent(toRef) + FILE_ROOT + client.getName());
-					assert.equal(res2.JsonData.toRef.Location, GIT_ROOT + "/branch/" + api.encodeURIComponent(toRef) + FILE_ROOT + client.getName());
-					assert.equal(res2.JsonData.toRef.TreeLocation, GIT_ROOT + "/tree" + FILE_ROOT + client.getName() + "/" + api.encodeURIComponent("refs/heads/" + toRef));
+					//assert.equal(res2.JsonData.toRef.CommitLocation, api.encodeStringLocation(GIT_ROOT + "/commit/" + api.encodeURIComponent("refs/heads/" + toRef) + FILE_ROOT+ client.getName()));
+					assert.equal(res2.JsonData.toRef.DiffLocation, api.encodeStringLocation(GIT_ROOT + "/diff/" + api.encodeURIComponent(toRef) + FILE_ROOT + client.getName()));
+					assert.equal(res2.JsonData.toRef.Location, api.encodeStringLocation(GIT_ROOT + "/branch/" + api.encodeURIComponent(toRef) + FILE_ROOT + client.getName()));
+					assert.equal(res2.JsonData.toRef.TreeLocation, api.encodeStringLocation(GIT_ROOT + "/tree" + FILE_ROOT + client.getName() + "/" + api.encodeURIComponent("refs/heads/" + toRef)));
 					assert.equal(res2.JsonData.toRef.Type, "Branch");
 					
 					client.next(resolve, res2.JsonData);
@@ -658,7 +658,7 @@ GitClient.prototype = {
 		var client = this;
 		this.tasks.push(function(resolve) {
 			request()
-			.get(GIT_ROOT + "/config/clone" + FILE_ROOT + api.encodeURIComponent(client.getName()))
+			.get(api.encodeStringLocation(GIT_ROOT + "/config/clone" + FILE_ROOT + api.encodeURIComponent(client.getName())))
 			.expect(200)
 			.end(function(err, res) {
 				assert.ifError(err);
@@ -673,7 +673,7 @@ GitClient.prototype = {
 		var client = this;
 		this.tasks.push(function(resolve) {
 			request()
-			.get(GIT_ROOT + "/tree" + FILE_ROOT + api.encodeURIComponent(client.getName())+ "/" + "refs%25252Fheads%25252Fmaster?parts=meta")
+			.get(api.encodeStringLocation(GIT_ROOT + "/tree" + FILE_ROOT + api.encodeURIComponent(client.getName())+ "/" + api.encodeURIComponent("refs/heads/master") + "?parts=meta"))
 			.expect(200)
 			.end(function(err, res) {
 				assert.ifError(err);
@@ -693,7 +693,7 @@ GitClient.prototype = {
 		var client = this;
 		this.tasks.push(function(resolve) {
 			request()
-			.get(GIT_ROOT + "/diff/Default" + FILE_ROOT + path.join(api.encodeURIComponent(client.getName()), fileName) + "?parts=uris")
+			.get(api.encodeStringLocation(GIT_ROOT + "/diff/Default" + FILE_ROOT + path.join(api.encodeURIComponent(client.getName()), fileName) + "?parts=uris"))
 			.expect(200)
 			.end(function(err, res) {
 				assert.ifError(err);
@@ -1238,7 +1238,7 @@ maybeDescribe("git", function() {
 				.expect(201)
 				.end(function(err, res) {
 					assert.ifError(err);
-					assert.equal(res.body.CommitLocation, GIT_ROOT + "/commit/refs%25252Fheads%25252F" + branchName + FILE_ROOT + TEST_REPO_NAME);
+					assert.equal(res.body.CommitLocation, api.encodeStringLocation(GIT_ROOT + "/commit/" + api.encodeURIComponent("refs/heads/"+ branchName) + FILE_ROOT + TEST_REPO_NAME));
 					assert.equal(res.body.Location, GIT_ROOT + "/branch/" + branchName + FILE_ROOT + TEST_REPO_NAME);
 					finished();
 				});
@@ -3780,7 +3780,7 @@ maybeDescribe("git", function() {
 			assert.equal(tag.TagType, annotated ? "ANNOTATED" : "LIGHTWEIGHT");
 			assert.equal(tag.CloneLocation, GIT_ROOT + "/clone" + FILE_ROOT + testName);
 			assert.equal(tag.CommitLocation, GIT_ROOT + "/commit/" + commitSHA + FILE_ROOT + testName);
-			assert.equal(tag.TreeLocation, GIT_ROOT + "/tree" + FILE_ROOT + testName + "/" + api.encodeURIComponent(tagName).replace(/%/g, "%25"));
+			assert.equal(tag.TreeLocation, api.encodeStringLocation(GIT_ROOT + "/tree" + FILE_ROOT + testName + "/" + api.encodeURIComponent(tagName)));
 		}
 
 		describe("Create", function() {

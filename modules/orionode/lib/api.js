@@ -194,17 +194,20 @@ function encodeLocation(obj) {
 				});
 			} else if (typeof obj[p] === "object") {
 				if(obj[p].pathname){
-					obj[p].pathname = obj[p].pathname.replace(PercentReplaceRegex, "%25").replace(CommaReplaceRegex, "%2C");
+					obj[p].pathname = encodeStringLocation(obj[p].pathname);
 				}
 				obj[p] = url.format(obj[p]);
 			} else if (obj[p]) {
-				obj[p] = url.format({pathname: obj[p].replace(PercentReplaceRegex, "%25").replace(CommaReplaceRegex, "%2C")});
+				obj[p] = url.format({pathname: encodeStringLocation(obj[p])});
 			}
 		} else if (typeof obj[p] === "object") {
 			encodeLocation(obj[p]);
 		}
 	}
 	return obj;
+}
+function encodeStringLocation(string){
+	return string.replace(PercentReplaceRegex, "%25").replace(CommaReplaceRegex, "%2C");
 }
 
 /**
@@ -253,7 +256,7 @@ exports.decodeURIComponent = function(path) {
 	return result;
 };
 exports.encodeURIComponent = function(path) {
-	return encodeURIComponent(encodeURIComponent(path));
+	return encodeURIComponent(path);
 };
 
 /**
@@ -297,6 +300,7 @@ exports.join = join;
 exports.writeError = writeError;
 exports.writeResponse = writeResponse;
 exports.encodeLocation = encodeLocation;
+exports.encodeStringLocation = encodeStringLocation;
 exports.setResponseNoCache = setResponseNoCache;
 exports.isValidProjectName = isValidProjectName;
 exports.sendStatus = sendStatus;
