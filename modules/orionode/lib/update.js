@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016 IBM Corporation and others.
+ * Copyright (c) 2016, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -14,14 +14,15 @@ var express = require('express'),
 	electron = require('electron'),
 	autoUpdater = require('./autoUpdater.js'),
 	bodyParser = require('body-parser'),
-	prefs = require('./controllers/prefs'),
+	prefs = require('./prefs'),
 	os = require('os'),
 	platform = os.platform(),
 	arch = os.arch(),
 	version = electron.app.getVersion(),
 	log4js = require('log4js'),
 	tasks = require('./tasks'),
-	logger = log4js.getLogger("update");
+	logger = log4js.getLogger("update"),
+	responseTime = require('response-time');
 
 module.exports = {};
 module.exports.router = function(options) {
@@ -30,9 +31,10 @@ module.exports.router = function(options) {
 	var feedURL = configParams["orion.autoUpdater.url"];
 	return express.Router()
 	.use(bodyParser.json())
+	.use(responseTime({digits: 2, header: "X-Update-Response-Time", suffix: true}))
 	.post('/downloadUpdates', function (req, res) {
-		var allPrefs = prefs.readPrefs();
-		var updateChannel = allPrefs.user && allPrefs.user.updateChannel && allPrefs.user.updateChannel.name ? allPrefs.user.updateChannel.name : configParams["orion.autoUpdater.defaultChannel"];
+		var allPrefs = prefs.readElectronPrefs();
+		var updateChannel = (allPrefs.Properties && allPrefs.Properties["updateChannel/name"]) || configParams["orion.autoUpdater.defaultChannel"];
 		var task = new tasks.Task(res, false, true, 0, true);
 		if (platform === "linux") {
 			electron.shell.openExternal(feedURL + '/download/channel/' + updateChannel + '/linux');
@@ -49,6 +51,16 @@ module.exports.router = function(options) {
 				JsonData: {
 					"note": releaseNotes
 				},
+				Message: "OK",
+				Severity: "Ok"
+			});
+		});
+		autoUpdater.on("update-error", function(error) {
+			logger.error(error);
+			task.done({
+				HttpCode: 204,
+				Code: 0,
+				DetailedMessage: "update-error",
 				Message: "OK",
 				Severity: "Ok"
 			});

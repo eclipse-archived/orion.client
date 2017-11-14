@@ -1,6 +1,6 @@
 {
   "name": "orion",
-  "version": "15.0.0",
+  "version": "16.0.0",
   "description": "An Eclipse Orion server written in Node.js.",
   "homepage": "http://eclipse.org/orion/",
   "bugs": "https://bugs.eclipse.org/bugs/enter_bug.cgi?product=Orion&component=Node",
@@ -12,26 +12,29 @@
     "bluebird": "^3.3.3",
     "body-parser": "^1.15.0",
     "compression": "^1.6.0",
-    "connect-mongo": "^1.1.0",
+    "connect-mongo": "^2.0.0",
     "cookie-parser": "^1.4.1",
-    "debug": "^2.2.0",
     "diff": "^3.1.0",
     "express": "^4.13.3",
     "express-session": "^1.13.0",
+    "fs-ext": "0.6.0",
     "fs-extra": "^0.26.7",
     "generate-password": "^1.1.1",
     "google-protobuf": "^3.0.0-alpha.6.2",
-    "http-shutdown": "^1.2.0",
+    "graceful-cluster": "0.0.5",
+    "graceful-fs": "^4.1.11",
     "https": "^1.0.0",
     "js-yaml": "^3.6.1",
+    "jsonwebtoken": "^7.2.0",
     "lockfile": "^1.0.1",
-    "log4js": "^1.1.1",
+    "log4js": "^2.3.11",
+    "lru-cache-for-clusters-as-promised": "^1.5.15",
     "mime": "^1.3.4",
     "mkdirp": "^0.5.1",
     "mongodb": "^2.1.7",
     "mongoose": "^4.4.6",
     "multiparty": "^4.1.2",
-    "nodegit": "0.16.0",
+    "nodegit": "0.19.0",
     "nodemailer": "^2.3.0",
     "passport": "^0.3.2",
     "passport-github2": "^0.1.10",
@@ -40,42 +43,59 @@
     "passport-local-mongoose": "^4.0.0",
     "passport-local-mongoose-email": "^0.1.2",
     "request": "^2.69.0",
+    "response-time": "^2.3.2",
     "rimraf": "~2.2.6",
     "semver": "^5.3.0",
-    "socket.io": "~1.4.8",
+    "socket.io": "~2.0.3",
     "tiny-worker": "^1.1.4",
-    "unzip2": "^0.2.5",
     "xterm": "^2.3.2",
-    "yaml-ast-parser": "0.0.28"
+    "yaml-ast-parser": "0.0.28",
+    "yauzl": "^2.8.0"
   },
   "experimentalDependencies": {
     "node-pty": "^0.6.2"
   },
   "devDependencies": {
     "chai": "^3.5.0",
+    "chalk": "^1.0.0",
+    "coveralls": "^2.13.1",
     "electron": "1.4.10",
     "grunt": "^1.0.1",
     "grunt-cli": "^1.2.0",
     "grunt-contrib-clean": "^1.0.0",
     "grunt-contrib-copy": "^1.0.0",
     "grunt-contrib-requirejs": "^1.0.0",
+    "grunt-istanbul": "^0.8.0",
+    "grunt-karma": "^2.0.0",
+    "grunt-mocha-istanbul": "^5.0.2",
     "grunt-simple-mocha": "^0.4.1",
     "grunt-string-replace": "^1.3.1",
-    "mocha": "^3.2.0",
+    "jasmine": "^2.8.0",
+    "karma": "^1.7.1",
+    "karma-chai": "^0.1.0",
+    "karma-chrome-launcher": "^2.2.0",
+    "karma-coverage": "^1.1.1",
+    "karma-coverage-istanbul-reporter": "^1.3.0",
+    "karma-jasmine": "^1.1.0",
+    "karma-mocha": "^1.3.0",
+    "karma-requirejs": "^1.1.0",
+    "mocha": "^3.5.3",
     "nodemon": "^1.11.0",
+    "nyc": "^11.2.1",
     "requirejs": "^2.3.3",
     "superagent": "^3.5.1",
     "supertest": "^3.0.0"
   },
   "engines": {
-    "node": "^4.0.0"
+    "node": "^6.11.1"
   },
   "main": "server.js",
   "scripts": {
-    "dist:osx": "build --o",
+    "dist:osx": "build --o --publish=never",
     "dist:win": "build --w",
     "dist:linux": "build --l",
-    "test": "mocha --reporter spec",
+    "test": "grunt test_all",
+    "report-coverage": "cat ./coverage/combined/lcov.info | coveralls",
     "optimize": "grunt",
     "watch-server": "nodemon --debug server.js"
   },
@@ -83,9 +103,20 @@
     "appId": "org.eclipse.orion",
     "asar": true,
     "electronVersion": "1.4.10",
+    "productName": "orion",
+    "nodeGypRebuild": "false",
+    "npmRebuild": "false",
     "compression": "maximum",
-    "osx": {
-      "title": "Orion",
+    "mac": {
+      "category": "public.app-category.developer-tools",
+      "target": [
+        "dmg",
+        "zip"
+      ],
+      "icon": "build/icon.icns"
+    },
+    "dmg": {
+      "title": "orion",
       "icon": "build/icon.icns",
       "contents": [
         {
@@ -102,9 +133,10 @@
       ]
     },
     "win": {
-      "loadingGif": "build/orionLogo.gif",
-      "iconUrl": "http://git.eclipse.org/c/orion/org.eclipse.orion.client.git/plain/modules/orionode/build/orion.ico",
-      "remoteReleases": ""
+      "icon": "build/icon",
+      "target": [
+        "squirrel"
+      ]
     },
     "linux": {
       "target": [
@@ -112,11 +144,16 @@
         "rpm",
         "tar.gz"
       ]
+    },
+    "squirrelWindows": {
+      "loadingGif": "build/orionLogo.gif",
+      "iconUrl": "http://git.eclipse.org/c/orion/org.eclipse.orion.client.git/plain/modules/orionode/build/orion.ico",
+      "remoteReleases": ""
     }
   },
   "repository": {
     "type": "git",
-    "url": "git://git.eclipse.org/gitroot/orion/org.eclipse.orion.client.git"
+    "url": "https://github.com/eclipse/orion.client"
   },
   "keywords": [
     "orion",

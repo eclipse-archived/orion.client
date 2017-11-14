@@ -309,6 +309,7 @@ define([
 					this.switchViewMode();
 			}.bind(this)});
 	        var nextResultCommand = new mCommands.Command({
+	            name: sharedMessages["Next result"],
 	            tooltip: sharedMessages["Next result"],
 	            imageClass: "core-sprite-move-down", //$NON-NLS-1$
 	            id: "orion.problemsView.nextResult", //$NON-NLS-1$
@@ -321,6 +322,7 @@ define([
 	            }.bind(this)
 	        });
 	        var prevResultCommand = new mCommands.Command({
+	            name: sharedMessages["Previous result"],
 	            tooltip: sharedMessages["Previous result"],
 	            imageClass: "core-sprite-move-up", //$NON-NLS-1$
 	            id: "orion.problemsView.prevResult", //$NON-NLS-1$

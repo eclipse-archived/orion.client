@@ -24,8 +24,10 @@ define(['orion/objects', 'orion/webui/littlelib', 'orion/widgets/input/TextField
 
 		if (params.local) {
 			newTextfield.templateString =
-			'<span class="setting-label"></span>' + //$NON-NLS-0$
-			'<input class="setting-control" type="text" />' //$NON-NLS-0$
+			'<label>' + //$NON-NLS-0$
+				'<span class="setting-label"></span>' + //$NON-NLS-0$
+				'<input class="setting-control" type="text" />' + //$NON-NLS-0$
+			'</label>';  //$NON-NLS-0$
 
 			objects.mixin(SettingsTextfield.prototype, TextField.prototype, newTextfield);
 		}
@@ -54,6 +56,12 @@ define(['orion/objects', 'orion/webui/littlelib', 'orion/widgets/input/TextField
 				this.mylabel.textContent = this.fieldlabel;
 				if(this.fieldTitle) {
 					this.mylabel.parentNode.title = this.fieldTitle;
+				}
+				if(this.fieldType) {
+					this.textfield.type = this.fieldType;
+				}
+				if(this.fieldMin !== undefined) {
+					this.textfield.min = this.fieldMin;
 				}
 			}
 		}

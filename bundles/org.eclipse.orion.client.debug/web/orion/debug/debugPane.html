@@ -1,0 +1,56 @@
+<!-- This file is unused. For reference only. -->
+
+<div class="debugPane">
+    <div class="debugButtons">
+        <button class="orionButton commandButton disabled debugContinue" disabled="disabled">Continue</button>
+        <button class="orionButton commandButton disabled debugPause" disabled="disabled">Pause</button>
+        <button class="orionButton commandButton disabled debugStepOver" disabled="disabled">Step Over</button>
+        <button class="orionButton commandButton disabled debugStepIn" disabled="disabled">Step In</button>
+        <button class="orionButton commandButton disabled debugStepOut" disabled="disabled">Step Out</button>
+    </div>
+
+    <div class="stopReason"></div>
+
+    <div class="debugFrame">
+        <!-- Stack Trace -->
+        <div class="stackTrace dataArea">
+            <!--div class="thread" threadId=0>
+                <div class="threadDescription"></div>
+                <div class="stackFrame" frameId=0>
+                    <div class="stackName"></div>
+                    <div class="stackSource"></div>
+                </div>
+            </div-->
+        </div>
+
+        <!--span class="variable><span class="type">TYPE</span><span class="value"></span><span class="more">▼</span><div class="subvariable collapsed"><div class="variableWrapper"></div></div></span-->
+
+        <!-- Output -->
+        <div class="debugOutput dataArea">
+            <!--div class="input"></div-->
+            <!--div class="console"></div-->
+            <!--div class="stdout"></div-->
+            <!--div class="stderr"></div-->
+            <!--div class="telemetry"></div-->
+        </div>
+        <div class="replInput"><input type="text"></div>
+
+        <!-- Watch -->
+        <div class="watchList dataArea">
+            <!--div class="watch invalid" expr="myVar"><span class="name">myVar</span>: <span class="variable></span><span class="remove">×</span></div-->
+        </div>
+
+        <!-- Variables -->
+        <div class="variableList dataArea">
+            <!--div class="scope"><span class="variable></span></div-->
+        </div>
+
+        <!-- Breakpoints -->
+        <div class="breakpoints dataArea">
+            <div class="exceptionBreakpoint" extype="all"><input type="checkbox"><span class="name">All Exceptions</span></div>
+            <div class="exceptionBreakpoint" extype="uncaught"><input type="checkbox" checked="checked"><span class="name">Uncaught Exceptions</span></div>
+            <!--div class="sourceBreakpoint"><input type="checkbox"><span class="name">app.js:1</span><span class="remove">×</span></div-->
+            <!--div class="functionBreakpoint"><input type="checkbox" name="install"><span class="name">install</span><span class="remove">×</span></div-->
+        </div>
+    </div>
+</div>

@@ -601,6 +601,7 @@ define([
 				});
 				section.domNode.classList.add("gitFilterBox"); //$NON-NLS-0$
 				var filter = document.createElement("input"); //$NON-NLS-0$
+				filter.setAttribute("aria-labelledby", title + "commitFilterSectionTitle"); //$NON-NLS-1$ //$NON-NLS-0$
 				filter.className = "gitFilterInput"; //$NON-NLS-0$
 				filter.placeholder = messages["Filter " + query.key];
 				section.query = query;
@@ -820,6 +821,7 @@ define([
 			});
 			this.createFilter(this.parentId);
 			this.createTree(this.parentId, model, {
+				role: "presentation", // table element is only being used for row/column presentation
 				setFocus: false, // do not steal focus on load
 				selectionPolicy: this.selectionPolicy,
 				onComplete: function() {

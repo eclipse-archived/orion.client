@@ -9,8 +9,9 @@ sudo: false
 
 env:
   matrix:
-    - export NODE_VERSION="4"
-    - export NODE_VERSION="6"
+    - export NODE_VERSION="6.11.1"
+   # - export NODE_VERSION="7"
+   # - export NODE_VERSION="8"
 
 matrix:
   fast_finish: true
@@ -24,6 +25,7 @@ addons:
       - ubuntu-toolchain-r-test
     packages:
       - libstdc++-4.9-dev
+  chrome: stable
 
 before_install:
   - nvm install $NODE_VERSION
@@ -33,6 +35,8 @@ install:
   - cd modules/orionode;
   - npm install;
   - grunt;
-
 script:
   - npm pack;
+  - npm test
+after_success:
+  - npm run report-coverage

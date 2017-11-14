@@ -15,14 +15,14 @@ define([
 'orion/xhr',
 'orion/URL-shim' //global, stays last
 ], function(_xhr) {
-	
+
 	var worker, //the backing worker
 		_state, //the mutable testing state
-		callbacks, //the object of callback functions per request ID 
+		callbacks, //the object of callback functions per request ID
 		testFiles = Object.create(null), //list of xhr requests we should ignore
 		messageID = 0, //the message ID counter
 		ignore404s = false;
-	
+
 	/**
 	 * @description Create a new instance of the worker
 	 * @param {String} script The URL to load
@@ -35,7 +35,7 @@ define([
     	worker.onmessage = onmessage.bind(this);
     	worker.onerror = onerror.bind(this);
     	if(!state.delayedStart) {
-	    	worker.postMessage({request: 'start_server', args: {}}); 
+	    	worker.postMessage({request: 'start_server', args: {}});
 		}
     	messageID = 0;
     	callbacks = Object.create(null);
@@ -48,7 +48,7 @@ define([
 
 	/**
 	 * @name WrappedWorker.prototype.postMessage
-	 * @description Wraps the default postMessage function from the underlying worker to allow 
+	 * @description Wraps the default postMessage function from the underlying worker to allow
 	 * IDs to be added to the messages
 	 * @function
 	 * @param {Object} msg The message to send
@@ -57,7 +57,7 @@ define([
 	WrappedWorker.prototype.postMessage = function(msg, f) {
 		message(msg, f);
 	};
-	
+
 	/**
 	 * @name WrappedWorker.prototype.terminate
 	 * @description Stops the underlying worker
@@ -66,7 +66,7 @@ define([
 	WrappedWorker.prototype.terminate = function() {
 		worker.terminate();
 	};
-	
+
 	function message(msg, f) {
 		if(msg !== null && typeof msg === 'object') {
 			if(typeof msg.messageID !== 'number') {
@@ -75,9 +75,9 @@ define([
 				callbacks[msg.messageID] = f;
 			}
 		}
-		worker.postMessage(msg);	
+		worker.postMessage(msg);
 	}
-	
+
 	/**
 	 * @description Starts the worker
 	 * @function
@@ -108,7 +108,7 @@ define([
 	WrappedWorker.prototype.setTestState = function(state) {
 		_state = state;
 	};
-	
+
 	/**
 	 * @description Returns the current test state
 	 * @function
@@ -126,7 +126,7 @@ define([
 	WrappedWorker.prototype.ignore404s = function(flag) {
 		ignore404s = flag;
 	};
-	
+
 	/**
 	 * @description Adds a fake file that will return the given contents when requested rather than perform an xhr
 	 * only be ignored once.
@@ -136,14 +136,14 @@ define([
 	WrappedWorker.prototype.createTestFile = function(fileName, text) {
 		testFiles[fileName] = text;
 	};
-	
+
 	function maybeCallback(rejection, error) {
 		if(ignore404s && rejection.status === 404) {
 				return;
 		}
 		_state.callback(new Error(error));
 	}
-	
+
 	function onmessage(ev) {
 		if(typeof ev.data === 'object') {
 			var _d = ev.data;
@@ -160,7 +160,7 @@ define([
     			if(typeof _state.workerReady === 'function') {
 					_state.workerReady();
 				} else {
-					this.postMessage({request: 'start_server', args: {}}, 
+					this.postMessage({request: 'start_server', args: {}},
 						/* @callback */ function(response) {
 							delete _state.warmup;
 							_state.callback();
@@ -174,7 +174,7 @@ define([
 					if(typeof _d.args.file === 'object') {
 						filePath = _d.args.file.logical ? _d.args.file.logical : _d.args.file;
 						url = getFileURL(filePath);
-						
+
 						if (typeof testFiles[filePath] === 'string'){
 							if (testFiles[filePath].length > 0){
 								this.postMessage({request: 'read', ternID: _d.ternID, args: {contents: testFiles[filePath], file: filePath, logical: _d.args.file.logical}});
@@ -184,7 +184,7 @@ define([
 							testFiles[filePath] = undefined;
 							return;
 						}
-						
+
 						_xhr('GET', url.href, {log: true, timeout: 2000}).then(function(response) {
 							this.postMessage({request: 'read', ternID: _d.ternID, args: {contents: response.response, file: response.url, logical: _d.args.file.logical}});
 						}.bind(this), function(rejection) {
@@ -195,7 +195,7 @@ define([
 					} else if(typeof _d.args.file === 'string') {
 						filePath = _d.args.file;
 						url = getFileURL(filePath);
-						
+
 						if (typeof testFiles[filePath] === 'string'){
 							if (testFiles[filePath].length > 0){
 								this.postMessage({request: 'read', ternID: _d.ternID, args: {contents: testFiles[filePath], file: filePath, logical: _d.args.file.logical}});
@@ -205,7 +205,7 @@ define([
 							testFiles[filePath] = undefined;
 							return;
 						}
-						
+
 						_xhr('GET', url.href, {log: true, timeout: 2000}).then(function(response) {
 							this.postMessage({request: 'read', ternID: _d.ternID, args: {contents: response.target.response, file: response.target.responseURL}});
 						}.bind(this), function(rejection){
@@ -250,7 +250,7 @@ define([
 			}
 		}
 	}
-	
+
 	function onerror(err) {
 		if(err instanceof Error) {
 			_state.callback(err);
@@ -261,7 +261,7 @@ define([
 			_state.callback(new Error(err.message));
 		}
 	}
-	
+
 	function getFileURL(filePath){
 		var rootIndex = window.location.href.indexOf('js-tests/javascript');
 		if(!/\.js$/g.test(filePath)) {
@@ -284,10 +284,12 @@ define([
 			}
 		}
 	}
-	
+
 	return {
 		instance:  function(state) {
-			var path = "../../javascript/plugins/ternWorker.js";
+			// Allow for both self-hosted and hermetic (karma) tests.
+			var localTest = document.URL.indexOf('/js-tests/') > -1;
+			var path = "../../" + (!localTest ? "base/" : "") + "javascript/plugins/ternWorker.js";
 			if(typeof state.path === 'string') {
 				path = state.path;
 			}

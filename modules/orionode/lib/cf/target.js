@@ -15,10 +15,14 @@ var tasks = require("../tasks");
 var request = require("request");
 var orgs = require("./orgs_spaces");
 var bearerTokenStore = require("./accessTokenStore");
+var LRU = require("lru-cache-for-clusters-as-promised");
+
+// Caching for already located targets
+var targetCache = new LRU({max: 10000, maxAge: 1800000, namespace: "target"});
 
 module.exports.router = function(options) {
-	if(options.options.configParams["cf.bearer.token.store"]){
-		var getBearerToken = require(options.options.configParams["cf.bearer.token.store"]).getBearerTokenfromUserId;
+	if(options.configParams["cf.bearer.token.store"]){
+		var getBearerToken = require(options.configParams["cf.bearer.token.store"]).getBearerTokenfromUserId;
 	}
 	
 	module.exports.getAccessToken = getAccessToken;
@@ -106,31 +110,52 @@ function tryLogin(url, Username, Password, userId){
 }
 function computeTarget(userId, targetRequest){
 	if(targetRequest){
-		return orgs.getOrgsRequest(userId, targetRequest)
-		.then(function(OrgsArray){	
-			if(!targetRequest.Org){
-				var org = OrgsArray.completeOrgsArray[0];
-			}else{
-				var aimedOrg = OrgsArray.completeOrgsArray.find(function(org){
-					return org.entity.name === targetRequest.Org || org.metadata.guid === targetRequest.Org;
-				});
-				org = aimedOrg;
+		var cached;
+		if (userId && targetRequest.Url && targetRequest.Org && targetRequest.Space) {
+			var getKey = userId + targetRequest.Url + targetRequest.Org + targetRequest.Space;
+			cached = targetCache.get(getKey);
+		} else {
+			cached = Promise.resolve(null);
+		}
+		return cached
+		.then(function(value) {
+			if (value) {
+				return value;
 			}
-			if(!targetRequest.Space){
-				var space = org.Spaces[0];
-			}else{
-				var aimedSpace = org.Spaces.find(function(space){
-					return space.entity.name === targetRequest.Space || space.metadata.guid === targetRequest.Space;
+			return orgs.getOrgsRequest(userId, targetRequest)
+			.then(function(OrgsArray){	
+				if(!targetRequest.Org){
+					var org = OrgsArray.completeOrgsArray[0];
+				}else{
+					var aimedOrg = OrgsArray.completeOrgsArray.find(function(org){
+						return org.entity.name === targetRequest.Org || org.metadata.guid === targetRequest.Org;
+					});
+					org = aimedOrg;
+				}
+				if(!targetRequest.Space){
+					var space = org.Spaces[0];
+				}else{
+					var aimedSpace = org.Spaces.find(function(space){
+						return space.entity.name === targetRequest.Space || space.metadata.guid === targetRequest.Space;
+					});
+					space = aimedSpace;
+				}
+				delete org.Spaces;
+				
+				var target = {
+					"Type": "Target",
+					"Url": targetRequest.Url,
+					"Org": org,
+					"Space":space
+				};
+				
+				var putKey = userId + targetRequest.Url + org.entity.name + space.entity.name;
+				return targetCache.set(putKey, target)
+				.then(function() {
+					return  target;
 				});
-				space = aimedSpace;
-			}
-			delete org.Spaces;
-			return  {
-				"Type": "Target",
-				"Url": targetRequest.Url,
-				"Org": org,
-				"Space":space
-			};
+				
+			});
 		});
 	}
 	if(!targetRequest){
@@ -157,6 +182,14 @@ function caughtErrorHandler(task, err){
 		Message: err.message,
 		Severity: "Error"
 	};
+	//properly handle parse errors from the YAML parser
+	if(err.name && err.name === 'YAMLException') {
+		if(err.mark){
+			errorResponse.JsonData = err.mark;
+			errorResponse.JsonData.Line = err.mark.line + 1;
+		}
+		errorResponse.JsonData.Message = err.message;
+	}
 	if(err.bundleid){
 		errorResponse.BundleId = err.bundleid;
 	}
@@ -178,13 +211,14 @@ function cfRequest (method, userId, url, query, body, headers, requestHeader, ta
 	}
 	return Promise.resolve(waitFor).then(function(cloudAccessToken){
 		if(!requestHeader){
-			if (!cloudAccessToken) {
+			if (!cloudAccessToken || cloudAccessToken instanceof Error) {
 				var errorStatus = new Error("Not authenticated");
 				errorStatus.code = 401;
 				errorStatus.data = {
 					"description": "Not authenticated",
 					"error_code": "CF-NotAuthenticated"
 				};
+				errorStatus.data = Object.assign(errorStatus.data, cloudAccessToken);
 				return Promise.reject(errorStatus);
 			}
 			headers = headers || {};
@@ -204,17 +238,36 @@ function cfRequest (method, userId, url, query, body, headers, requestHeader, ta
 				if (error) {
 					return reject(error);
 				}
-	//			if (response.status) {
-	//				return reject();
-	//			}
+				var code = response.statusCode;
+				if (code === 204) {
+					return fullfill();
+				}
 				if (body instanceof Uint8Array) {
-					fullfill(response);
+					return fullfill(response);
 				}
-				else {
-					fullfill(parsebody(body));
+				var result = parsebody(body);
+				var err;
+				if (code !== 200 && code !== 201) {
+					var description = result.description || result.message;
+					if (!description) {
+						var defaultDesc = "Could not connect to host. Error: " + code;
+						description = result || defaultDesc;
+						if (description.length > 1000) description = defaultDesc;
+					}
+					err = new Error(description);
+					err.code = code;
+					err.data = result;
+					return reject(err);
 				}
+				if (result.error_code) {
+					err = new Error(result.description);
+					err.code = 500;
+					err.data = result;
+					return reject(err);
+				}
+				fullfill(result);
 			});
-		})
+		});
 	});
 }
 function fullTarget(req,target){

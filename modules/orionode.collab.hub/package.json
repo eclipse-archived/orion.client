@@ -1,0 +1,27 @@
+{
+  "name": "collab-socket-server",
+  "version": "0.1.0",
+  "main": "server.js",
+  "description": "A WebSocket server for the Orion collaboration feature.",
+  "keywords": [],
+  "author": "Orion contributors <orionnode@gmail.com>",
+  "license": "Eclipse Public License + Eclipse Distribution License",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/eclipse/orion.client/tree/master/modules/orionode.collab.hub"
+  },
+  "dependencies": {
+    "express": "^4.13.3",
+    "jsonwebtoken": "^7.2.0",
+    "ot": "^0.0.15",
+    "request": "^2.69.0",
+    "socket.io": "~2.0.3"
+  },
+  "devDependencies": {},
+  "engines": {
+    "node": "^6.11.1"
+  },
+  "scripts": {
+    "start": "node server.js"
+  }
+}

@@ -10,7 +10,7 @@
  ******************************************************************************/
 
 /*eslint-env browser, amd*/
-define(['orion/compare/compareUtils'], function(mCompareUtils) {
+define(['orion/compare/compareUtils', 'orion/editor/rulers', 'orion/objects'], function(mCompareUtils, mRulers, Object) {
 var orion = orion || {};
 
 orion.CompareRuler = (function() {
@@ -19,46 +19,10 @@ orion.CompareRuler = (function() {
 	 * @class The compare ruler is used by the compare editor to render trim around the editor.
 	 * @name orion.compare.rulers.CompareRuler
 	 */
-	function CompareRuler (rulerLocation, rulerOverview, rulerStyle) {
-		this._location = rulerLocation || "left"; //$NON-NLS-0$
-		this._overview = rulerOverview || "page"; //$NON-NLS-0$
-		this._rulerStyle = rulerStyle;
-		this._editor = null;
-		var self = this;
-		this._listener = {
-			onModelChanged: function(e) {
-				self._onModelChanged(e);
-			}
-		};
+	function CompareRuler (annoModel, rulerLocation, rulerOverview, rulerStyle) {
+		mRulers.Ruler.call(this, annoModel, rulerLocation, rulerOverview, rulerStyle);
 	}
-	CompareRuler.prototype = /** @lends orion.compare.rulers.CompareRuler.prototype */ {
-		setView: function (editor) {
-			if (this._onModelChanged && this._editor) {
-				this._editor.removeEventListener("ModelChanged", this._listener.onModelChanged);  //$NON-NLS-0$
-			}
-			this._editor = editor;
-			if (this._onModelChanged && this._editor) {
-				this._editor.addEventListener("ModelChanged", this._listener.onModelChanged); //$NON-NLS-0$
-			}
-		},
-		getLocation: function() {
-			return this._location;
-		},
-		getOverview: function(editor) {
-			return this._overview;
-		},
-		getAnnotationModel: function() {
-			return null;
-		},
-		addAnnotationType: function(type) {
-		},
-		isAnnotationTypeVisible: function(type) {
-			return false;
-		},
-		removeAnnotationType: function(type) {
-		},
-		setAnnotationModel: function (annotationModel) {
-		},
+	CompareRuler.prototype = Object.mixin(new mRulers.Ruler(),  /** @lends orion.compare.rulers.CompareRuler.prototype */ {
 		getAnnotations: function(startLine, endLine) {
 			var result = [];
 			for (var i=startLine; i<endLine; i++) {
@@ -69,13 +33,16 @@ orion.CompareRuler = (function() {
 			}
 			return result;
 		},
+		getAnnotationTypePriority: function(type) {
+			return 1;
+		},
 		getWidestAnnotation: function() {
 			return {html: this.getHTML(-1), style: this.getStyle(-1)};
 		},
 		getRulerStyle: function() {
 			return this.getStyle(undefined);
 		}
-	};
+	});
 	return CompareRuler;
 }());
 
@@ -85,8 +52,8 @@ orion.LineNumberCompareRuler = (function() {
 	 * @class The line number ruler is used by the compare editor to render line numbers next to the editor
 	 * @name orion.compare.rulers.LineNumberCompareRuler
 	 */
-	function LineNumberCompareRuler (diffNavigator, mapperColumnIndex , rulerLocation, rulerStyle, oddStyle, evenStyle) {
-		orion.CompareRuler.call(this, rulerLocation, "page", rulerStyle); //$NON-NLS-0$
+	function LineNumberCompareRuler (diffNavigator, mapperColumnIndex , annoModel, rulerLocation, rulerStyle, oddStyle, evenStyle) {
+		orion.CompareRuler.call(this, annoModel, rulerLocation, "page", rulerStyle); //$NON-NLS-0$
 		this._diffNavigator = diffNavigator;
 		this._oddStyle = oddStyle || {style: {backgroundColor: "white"}}; //$NON-NLS-0$
 		this._evenStyle = evenStyle || {style: {backgroundColor: "white"}}; //$NON-NLS-0$
@@ -102,7 +69,7 @@ orion.LineNumberCompareRuler = (function() {
 		}
 	};
 	LineNumberCompareRuler.prototype.getHTML = function(lineIndex) {
-		var model = this._editor.getModel();
+		var model = this._view.getModel();
 		var diffFeeder = this._diffNavigator.getFeeder(this._mapperColumnIndex === 0);
 		if(!diffFeeder){
 			return "";
@@ -122,23 +89,23 @@ orion.LineNumberCompareRuler = (function() {
 	};
 	LineNumberCompareRuler.prototype._onModelChanged = function(e) {
 		var start = e.start;
-		var model = this._editor.getModel();
+		var model = this._view.getModel();
 		var lineCount = model.getLineCount();
 		var numOfDigits = (lineCount+"").length;
 		if (this._numOfDigits !== numOfDigits) {
 			this._numOfDigits = numOfDigits;
 			var startLine = model.getLineAtOffset(start);
-			this._editor.redrawLines(startLine, lineCount, this);
+			this._view.redrawLines(startLine, lineCount, this);
 		}
 	};
 	return LineNumberCompareRuler;
 }());
 
 orion.CompareOverviewRuler = (function() {
-	function CompareOverviewRuler ( rulerLocation, rulerStyle , diffNavigator , onClick) {
+	function CompareOverviewRuler ( annoModel, rulerLocation, rulerStyle , diffNavigator , onClick) {
 		this._diffNavigator = diffNavigator;
 		this._onClick = onClick;
-		orion.CompareRuler.call(this, rulerLocation, "document", rulerStyle); //$NON-NLS-0$
+		orion.CompareRuler.call(this, annoModel, rulerLocation, "document", rulerStyle); //$NON-NLS-0$
 	}
 	CompareOverviewRuler.prototype = new orion.CompareRuler();
 	CompareOverviewRuler.prototype.getStyle = function(lineIndex) {
@@ -187,7 +154,7 @@ orion.CompareOverviewRuler = (function() {
 				if(anH < 0){
 					return null;
 				}
-				var clientArea = this._editor.getClientArea();
+				var clientArea = this._view.getClientArea();
 				var height =  Math.floor(clientArea.height*anH/lC);
 				if (height < 2){
 					height = 2;
@@ -210,10 +177,10 @@ orion.CompareOverviewRuler = (function() {
 		this._onClick(lineIndex , this);
 	};
 	CompareOverviewRuler.prototype._onModelChanged = function(e) {
-		var model = this._editor.getModel();
+		var model = this._view.getModel();
 		var lineCount = model.getLineCount();
 		if(lineCount > 0){
-			this._editor.redrawLines(0, 1, this);
+			this._view.redrawLines(0, 1, this);
 		}
 	};
 	return CompareOverviewRuler;

@@ -1,24 +1,20 @@
 {
-    "levels": {
-        "server": "INFO",
-        "audit-logs": "INFO",
-        "xfer": "ERROR",
-        "update": "DEBUG",
-        "user": "INFO",
-        "ttyshell": "INFO",
-        "tasks": "INFO",
-        "search-worker": "ERROR",
-        "git": "ERROR",
-        "electron": "ALL"
-    },
-    "appenders": [
-        {
-            "type": "console",
-            "layout": {
-                "type": "pattern",
-                "pattern": "[%d] [%p] [%c] %m",
-                "tokens": {}
-            }
+    "appenders": {
+        "console": {
+            "type": "console"
+        },
+        "datefile": {
+            "type": "dateFile",
+            "filename": "orion.log",
+            "pattern": ".yyyy-MM-dd",
+            "timezoneOffset": 0,
+            "daysToKeep": 30
         }
-    ]
+    },
+    "categories": {
+        "default": {
+            "appenders": ["console"],
+            "level": "all"
+        }
+    }
 }

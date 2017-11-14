@@ -37,6 +37,10 @@
 	/*eslint-env browser, amd*/
     require(["built-compare-amd.js"], function(Compare) {
 	var document = window.document;
+	
+	require(['orion/staticDataSource'], function(mDataSource) {
+		console.log(mDataSource.ContentTypes);
+	});
 
 	/** Buttons */	
 	var bCompare = document.getElementById("doCompare"); //$NON-NLS-0$

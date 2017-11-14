@@ -20,8 +20,9 @@ define([
 	'orion/metrics',
 	'orion/webui/dialogs/ConfirmDialog',
 	'orion/URITemplate',
-	'orion/PageLinks'
-], function(objects, messages, RunBarTemplate, lib, i18nUtil, mRichDropdown, mTooltip, mMetrics, mConfirmDialog, URITemplate, PageLinks) {
+	'orion/PageLinks',
+	'orion/Deferred'
+], function(objects, messages, RunBarTemplate, lib, i18nUtil, mRichDropdown, mTooltip, mMetrics, mConfirmDialog, URITemplate, PageLinks, Deferred) {
 	
 	var METRICS_LABEL_PREFIX = "RunBar"; //$NON-NLS-0$
 	var REDEPLOY_RUNNING_APP_WITHOUT_CONFIRMING = "doNotConfirmRedeployRunningApp"; //$NON-NLS-0$
@@ -40,6 +41,7 @@ define([
 	 * @param options.preferencesService
 	 * @param options.statusService
 	 * @param options.actionScopeId
+	 * @param options.generalPreferences
 	 */
 	function RunBar(options) {
 		this._project = null;
@@ -55,6 +57,7 @@ define([
 		this._projectClient = options.projectClient;
 		this._preferences = options.preferences;
 		this._editorInputManager = options.editorInputManager;
+		this._generalPreferences = options.generalPreferences;
 		
 		this._initialize();
 		this._setLaunchConfigurationsLabel(null);
@@ -120,6 +123,12 @@ define([
 					this._projectClient.getProject(e.metadata).then(function(project) {
 						this.setProject (project);
 					}.bind(this));
+				}.bind(this));
+				
+				window.addEventListener("focus", function() {
+					if (this._authenticationFailed) {
+						this._checkStatus();
+					}
 				}.bind(this));
 			} else {
 				throw new Error("this._domNode is null"); //$NON-NLS-0$
@@ -216,13 +225,24 @@ define([
 					var dropdownMenuItemSpan = lib.$(".dropdownMenuItem", createNewItem); //$NON-NLS-0$
 					dropdownMenuItemSpan.classList.add("addNewMenuItem"); //$NON-NLS-0$
 					
-					var defaultDeployCommand = this._projectCommands.getDeployProjectCommands(this._commandRegistry)[0];
-					if (defaultDeployCommand) {
-						this._commandRegistry.registerCommandContribution(createNewItem.id, defaultDeployCommand.id, 1); //$NON-NLS-0$
+					var defaultDeployCommands = this._projectCommands.getDeployProjectCommands(this._commandRegistry);
+					if (defaultDeployCommands) {
 						domNodeWrapperList = [];
-						this._commandRegistry.renderCommands(createNewItem.id, dropdownMenuItemSpan, this._project, this, "button", null, domNodeWrapperList); //$NON-NLS-0$
-						domNodeWrapperList[0].domNode.textContent = "+"; //$NON-NLS-0$
-						this._setNodeTooltip(domNodeWrapperList[0].domNode, messages["createNewTooltip"]); //$NON-NLS-0$
+						if (defaultDeployCommands.length === 1) {
+							this._commandRegistry.registerCommandContribution(createNewItem.id, defaultDeployCommands[0].id, 1);
+							this._commandRegistry.renderCommands(createNewItem.id, dropdownMenuItemSpan, this._project, this, "button", null, domNodeWrapperList);
+							domNodeWrapperList[0].domNode.textContent = "+";
+							this._setNodeTooltip(domNodeWrapperList[0].domNode, defaultDeployCommands[0].tooltip);
+						} else {
+							this._commandRegistry.addCommandGroup(createNewItem.id, "orion.deployServiceGroup", 1000, "+", null, null, null, "+", null, true);
+							for (var i = 0; i < defaultDeployCommands.length; i++) {
+								this._commandRegistry.registerCommandContribution(createNewItem.id, defaultDeployCommands[i].id, 1100 + i * 100, "orion.deployServiceGroup");
+							}
+							var menuWrapper = document.createElement('div');
+							menuWrapper.classList.add('dropdownSubMenu'); // Prevent auto dismiss
+							dropdownMenuItemSpan.appendChild(menuWrapper);
+							this._commandRegistry.renderCommands(createNewItem.id, menuWrapper, this._project, this, "tool", null, domNodeWrapperList);
+						}
 					}
 				}
 			}.bind(this);
@@ -457,6 +477,7 @@ define([
 		},
 		
 		setStatus: function(_status) {
+			this._authenticationFailed = false;
 			var longStatusText = null;
 			var tooltipText = "";
 			var uriTemplate = null;
@@ -509,6 +530,11 @@ define([
 							this._enableControl(this._playButton);
 							this._statusLight.classList.add("statusLightRed"); //$NON-NLS-0$
 							break;
+						case "PAUSED": //$NON-NLS-0$
+							this._enableControl(this._playButton);
+							this._enableControl(this._stopButton);
+							this._statusLight.classList.add("statusLightAmber"); //$NON-NLS-0$
+							break;
 						default:
 							break;
 					}
@@ -517,6 +543,9 @@ define([
 				
 				if (!_status.error && ("PROGRESS" !== _status.State)) {
 					this._startStatusPolling();
+				} else if (_status.error && _status.error.HttpCode === 401) {
+					this._authenticationFailed = true;
+					this._stopStatusPolling();
 				}
 			}
 			
@@ -924,23 +953,27 @@ define([
 			this._launchConfigurationsDropdownTriggerButton.disabled = true;
 		},
 		
+		_checkStatus: function() {
+			var launchConfiguration = this._selectedLaunchConfiguration;
+			if (!launchConfiguration) {
+				this._stopStatusPolling();
+				return;
+			}
+			var startTime = Date.now();
+			this._checkLaunchConfigurationStatus(launchConfiguration).then(function(_status) {
+				var interval = Date.now() - startTime;
+				mMetrics.logTiming("deployment", "check status (poll)", interval, launchConfiguration.Type); //$NON-NLS-1$ //$NON-NLS-2$
+
+				if (_status) {
+					launchConfiguration.status = _status;
+				}
+				this._updateLaunchConfiguration(launchConfiguration);
+			}.bind(this));
+		},
+		
 		_startStatusPolling: function() {
 			if (!this._statusPollingIntervalID) {
-				this._statusPollingIntervalID = window.setInterval(function(){
-					var launchConfiguration = this._selectedLaunchConfiguration;
-					if (!launchConfiguration) {
-						this._stopStatusPolling();
-						return;
-					}
-					var startTime = Date.now();
-					this._checkLaunchConfigurationStatus(launchConfiguration).then(function(_status) {
-						var interval = Date.now() - startTime;
-						mMetrics.logTiming("deployment", "check status (poll)", interval, launchConfiguration.Type); //$NON-NLS-1$ //$NON-NLS-2$
-
-						launchConfiguration.status = _status;
-						this._updateLaunchConfiguration(launchConfiguration);
-					}.bind(this));
-				}.bind(this), STATUS_POLL_INTERVAL_MS);
+				this._statusPollingIntervalID = window.setInterval(this._checkStatus.bind(this), STATUS_POLL_INTERVAL_MS);
 			}
 		},
 		
@@ -951,7 +984,7 @@ define([
 			}
 		}
 	});
-	
+
 	return {
 		RunBar: RunBar,
 		METRICS_LABEL_PREFIX: METRICS_LABEL_PREFIX

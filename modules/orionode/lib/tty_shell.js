@@ -15,6 +15,7 @@ var api = require('./api'),
 	fs = require('fs'),
 	http = require('http'),
 	path = require('path'),
+	express = require('express'),
 	log4js = require('log4js'),
 	logger = log4js.getLogger("ttyshell");
 var pty;
@@ -24,8 +25,8 @@ try {
 	logger.info("WARNING: node-pty is not installed. Some features will be unavailable. Reason: " + e.message);
 }
 
-exports.install = function(options) {
-	var io = options.io, fileRoot = options.fileRoot, workspaceDir = options.workspaceDir, app = options.app;
+exports.install = function(options, io) {
+	var fileRoot = options.fileRoot, workspaceDir = options.workspaceDir, app = options.app;
 	if (!io) {
 		throw new Error('missing options.io');
 	}
@@ -40,8 +41,18 @@ exports.install = function(options) {
 		var rest = api.rest(fileRoot, wwwPath || "");
 		// Check if the cwd passed in exists. If not, fall back to the user's
 		// workspace dir
-		
-		var file = fileUtil.getFile(req, rest);
+		if(!rest){
+			rest = api.rest(options.sharedWorkspaceFileRoot, wwwPath || "");
+		}
+		if(!rest) {
+			callback(userWorkspaceDir);
+			return;
+		}
+		var file = fileUtil.getFile(req, api.decodeURIComponent(rest));
+		if(!file) {
+			callback(userWorkspaceDir);
+			return;
+		}
 		var cwd = file.path;
 		fs.stat(cwd, function(err, stats) {
 			if (err || !stats.isDirectory()) {
@@ -50,6 +61,8 @@ exports.install = function(options) {
 			callback(cwd);
 		});
 	}
+
+	var authApp = express().use(options.authenticate);
 
 	io.of('/tty').on('connection', function(sock) {
 
@@ -65,7 +78,9 @@ exports.install = function(options) {
 		var passedCwd = "";
 		var req = sock.request;
 		var res = new http.ServerResponse(sock.request);
-		app.handle(req, res);
+		
+		authApp.handle(req, res);
+		req.app.locals.metastore = options.metastore;
 
 		res.end = function() {
 			userGot = true;
@@ -104,6 +119,10 @@ exports.install = function(options) {
 			}
 			if (req.user.workspace) {
 				userWorkspaceDir = path.join(userWorkspaceDir, req.user.workspace);
+			}
+			if (!req.app.locals.metastore) {
+				sock.emit('fail', 'No metastore found.');
+				return
 			}
 			resolvePath(req, userWorkspaceDir, cwd, function(realCWD) {
 				var buff = [];

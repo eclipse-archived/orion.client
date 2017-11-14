@@ -752,6 +752,7 @@ define ([], function() {
                 {
                         guiDir: isRtl ? "rtl" : "ltr",
                         dir: "ltr",
+                        subDir : args.subDir,
                         points: "/\\:.&<>"
                 };
                 if (!parseOnly) {

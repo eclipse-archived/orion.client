@@ -244,6 +244,19 @@ define([
 		},
 		
 		/**
+		 * Open an alert tooltip
+		 *
+		 * @param {DOMElement} node the dom node that is displaying the command
+		 * @param {String} message the message to show when confirming the command
+		 * @param {String} yesString the label to show on a yes/true choice
+		 * @param {Function} onConfirm a function that will be called when the user confirms the command.  The function
+		 * will be called with boolean indicating whether the command was confirmed.
+		 */
+		alert: function(node, message, yesString, onConfirm) {
+			this._popupDialog(false, "ALERT", node, message, [{label:yesString,callback:onConfirm,type:"ok"}]);
+		},
+		
+		/**
 		 * Open a parameter collector to confirm a command or collect user input.
 		 *
 		 * @param {Boolean} modal indicates whether the confirmation prompt should be modal.
@@ -252,8 +265,9 @@ define([
 		 * @param {String} message the message to show when confirming the command
 		 * @param {Array} an array of button label, callback, type objects; if the type is "yes", either input.value or true will be passed to callback depends on the dialog's type
 		 * @param {String} default message in the input box.
+		 * @param [Optional]{String} postion of the popupDialog if specified, postion of the popupDialog if specified, have to be one of "below", "right"
 		 */
-		_popupDialog: function(modal, style, node, message, buttonStringCallList, defaultInput) {
+		_popupDialog: function(modal, style, node, message, buttonStringCallList, defaultInput, positionString) {
 			var result;
 			if (this._parameterCollector && !modal) {
 				var self = this;
@@ -312,7 +326,7 @@ define([
 							this.destroy();
 						},
 						trigger: "click", //$NON-NLS-0$
-						position: style !== "PROMPT" ? ["below", "right", "above", "left"] : ["right","above", "below", "left"]//$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$
+						position: positionString ? positionString : style !== "PROMPT" ? ["below", "right", "above", "left"] : ["right","above", "below", "left"]//$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$
 					});
 					var parameterArea = tooltip.contentContainer();
 					parameterArea.classList.add("parameterPopup"); //$NON-NLS-0$
@@ -343,10 +357,10 @@ define([
 						}, 0);	
 					}
 				}
-				return;
-			} 
-			result = window.confirm(message);
-			buttonStringCallList[0].callback(result);
+			}else{
+				result = window.confirm(message);
+				buttonStringCallList[0].callback(result);
+			}
 		},
 		
 		/**
@@ -360,9 +374,13 @@ define([
 		 * @param {Boolean} modal indicates whether the confirmation prompt should be modal.
 		 * @param {Function} onConfirm a function that will be called when the user confirms the command.  The function
 		 * will be called with boolean indicating whether the command was confirmed.
+		 * @param [Optional]{String} postion of the popupDialog if specified, have to be one of "below", "right"
 		 */
-		prompt: function(node, message, yesString, noString, defaultInput, modal, onConfirm) {
-			this._popupDialog(modal,"PROMPT", node, message, [{label:yesString,callback:onConfirm,type:"ok"},{label:noString,callback:null,type:"cancel"}], defaultInput);
+		prompt: function(node, message, yesString, noString, defaultInput, modal, onConfirm, positionString) {
+			var position = null;
+			if(positionString === "below"){position = ["below", "right", "above", "left"];}
+			else if(positionString === "right"){position = ["right", "above", "below", "left"];}
+			this._popupDialog(modal,"PROMPT", node, message, [{label:yesString,callback:onConfirm,type:"ok"},{label:noString,callback:null,type:"cancel"}], defaultInput, position);
 		},
 		
 		/**

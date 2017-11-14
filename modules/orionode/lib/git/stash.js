@@ -9,12 +9,13 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 /*eslint-env node */
-var api = require('../api'), writeError = api.writeError, writeResponse = api.writeResponse;
-var git = require('nodegit');
-var mCommit = require('./commit');
-var clone = require('./clone');
-var express = require('express');
-var bodyParser = require('body-parser');
+var api = require('../api'), writeError = api.writeError, writeResponse = api.writeResponse,
+	git = require('nodegit'),
+	mCommit = require('./commit'),
+	clone = require('./clone'),
+	express = require('express'),
+	bodyParser = require('body-parser'),
+	responseTime = require('response-time');
 
 module.exports = {};
 
@@ -23,9 +24,14 @@ module.exports.router = function(options) {
 	var gitRoot = options.gitRoot;
 	if (!fileRoot) { throw new Error('options.fileRoot is required'); }
 	if (!gitRoot) { throw new Error('options.gitRoot is required'); }
-	
+
+	var contextPath = options && options.configParams["orion.context.path"] || "";
+	fileRoot = fileRoot.substring(contextPath.length);
+
 	return express.Router()
 	.use(bodyParser.json())
+	.use(responseTime({digits: 2, header: "X-GitapiStash-Response-Time", suffix: true}))
+	.use(options.checkUserAccess)
 	.get('*', getStash)
 	.delete(fileRoot + '*', deleteStash)
 	.delete('/:stashRev*', deleteStash)
@@ -40,8 +46,10 @@ function getStash(req, res) {
 	var pageSize = Number(query.pageSize) || Number.MAX_SAFE_INTEGER;
 	var fileDir;
 	var stashesPromises = [];
+	var theRepo;
 	return clone.getRepo(req)
 	.then(function(repo) {
+		theRepo = repo;
 		fileDir = clone.getfileDir(repo,req);
 		return git.Stash.foreach(repo, function(index, message, oid) {
 			if (filter && message.indexOf(filter) === -1) return;
@@ -74,6 +82,9 @@ function getStash(req, res) {
 	})
 	.catch(function(err) {
 		writeError(500, res, err.message);
+	})
+	.done(function() {
+		clone.freeRepo(theRepo);
 	});
 }
 
@@ -111,16 +122,19 @@ function putStash(req, res) {
 	})
 	.then(function(message) {
 		if (message === null) {
-			res.status(200).end();
+			writeResponse(200, res);
 		} else {
 			writeError(400, res, message);
 		}
 	})
 	.catch(function(err) {
-		if (err.message === "Reference 'refs/stash' not found"){
-			writeError(400, res, "Failed to apply stashed changes due to an empty stash.");
+		if (err.message === "reference 'refs/stash' not found"){
+			return writeError(400, res, "Failed to apply stashed changes due to an empty stash.");
 		}
 		writeError(404, res, err.message);
+	})
+	.done(function() {
+		clone.freeRepo(repo);
 	});
 }
 
@@ -162,13 +176,16 @@ function deleteStash(req, res) {
 	})
 	.then(function(message) {
 		if (message === null) {
-			res.status(200).end();
+			writeResponse(200, res);
 		} else {
 			writeError(400, res, message);
 		}
 	})
 	.catch(function(err) {
 		writeError(404, res, err.message);
+	})
+	.done(function() {
+		clone.freeRepo(repo);
 	});
 }
 
@@ -184,10 +201,13 @@ function postStash(req, res) {
 		return git.Stash.save(repo, clone.getSignature(repo), message, flags);
 	})
 	.then(function() {
-		res.status(200).end();
+		writeResponse(200, res);
 	})
 	.catch(function(err) {
 		writeError(404, res, err.message);
+	})
+	.done(function() {
+		clone.freeRepo(repo);
 	});
 }
 };

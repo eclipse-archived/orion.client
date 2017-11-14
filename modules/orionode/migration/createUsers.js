@@ -71,13 +71,11 @@ function login () {
 		}, function(res)
 		{
 			res.on('end', function() { //$NON-NLS-1$
-			debugger;
 				fulfill(res.headers.Cookie);
 			});
 		});
 	
 		req.on('error', function(err) { //$NON-NLS-1$
-		debugger;
 			console.log("LOGIN: " + err.message); //$NON-NLS-1$
 			reject();
 		});

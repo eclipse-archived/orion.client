@@ -82,7 +82,7 @@ define("orion/editor/textDND", ['orion/util'], function(util) { //$NON-NLS-1$ //
 					}
 				}
 				if (this._undoStack) { this._undoStack.startCompoundChange(); }
-				var move = dropEffect === "move"; //$NON-NLS-0$
+				var move = dropEffect === "move" && this._dropText; //$NON-NLS-0$
 				if (move) {
 					view.setText({text: "", selection: this._dragSelection});
 				}

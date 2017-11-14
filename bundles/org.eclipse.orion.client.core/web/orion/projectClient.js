@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2013, 2016 IBM Corporation and others.
+ * Copyright (c) 2013, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License v1.0
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution
@@ -93,7 +93,7 @@ define([
         },
         
 		getProject: function (metadata) {
-			if (!metadata || metadata.Projects) {
+			if (!metadata || metadata.Projects || !metadata.Parents) {
 				return new Deferred().resolve(null);
 			}
 			while (metadata.parent && metadata.parent.parent && metadata.parent.parent.type !== "ProjectRoot") {
@@ -608,12 +608,13 @@ define([
 								launchConf.Params.LogLocationTemplate = deployService.logLocationTemplate;
 							}
 							
-							if(deployService && deployService.getDevMode){
-								deployService.getDevMode(projectMetadata.ContentLocation + launchConf.Path).then(function(devModeParam){
+							if(deployService && deployService.getDevMode) {
+								//copy Java - no path, assume manifest.yml
+								var confLoc = projectMetadata.ContentLocation + (typeof launchConf.Path === 'string' ? launchConf.Path : "manifest.yml");
+								deployService.getDevMode(confLoc).then(function(devModeParam){
 									if (devModeParam) {
 										launchConf.Params.DevMode = devModeParam;
 									}
-									
 									def.resolve(launchConf);
 								}, function(){
 									def.resolve(launchConf);
@@ -764,12 +765,13 @@ define([
 							launchConfigurationEntry.Params.LogLocationTemplate = deployService.logLocationTemplate;
 						}
 						
-						if(deployService && deployService.getDevMode){
-							deployService.getDevMode(projectMetadata.ContentLocation + launchConfigurationEntry.Path).then(function(devModeParam){
+						if(deployService && deployService.getDevMode) {
+							//copy Java - if not path in launch config, assume manifest.yml
+							var confLoc = projectMetadata.ContentLocation + (typeof launchConfigurationEntry.Path === 'string' ? launchConfigurationEntry.Path : "manifest.yml");
+							deployService.getDevMode(confLoc).then(function(devModeParam){
 								if (devModeParam) {
 									launchConfigurationEntry.Params.DevMode = devModeParam;
 								}
-								
 								deferred.resolve(launchConfigurationEntry);
 							}, function(){
 								deferred.resolve(launchConfigurationEntry);
@@ -777,9 +779,6 @@ define([
 						} else {
 							deferred.resolve(launchConfigurationEntry);
 						}
-						
-						
-
 					}.bind(this), deferred.reject
 				);
 			}.bind(this), deferred.reject

@@ -122,6 +122,8 @@ define(['orion/webui/littlelib', 'orion/EventTarget'], function(lib, EventTarget
 				var isMenuBarItem = item.parentNode.getAttribute("role") === "menubar";
 				item = item.childNodes[0]; // the 'trigger'
 				
+				if (!item) return;
+				
 				if (isMenuBarItem) {
 					var openMBItem = null;
 					var menuBar = item.parentNode.parentNode;
@@ -135,6 +137,7 @@ define(['orion/webui/littlelib', 'orion/EventTarget'], function(lib, EventTarget
 					
 					// only open if there's already an opened menu bar item
 					if (openMBItem && openMBItem !== item) {
+						openMBItem.dropdown._closeSelectedSubmenu();
 						openMBItem.dropdown.close(false);
 						item.dropdown.open(event);
 					}

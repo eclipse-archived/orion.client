@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2010, 2016, 2017 IBM Corporation and others.
+ * Copyright (c) 2010, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License v1.0
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution
@@ -20,8 +20,9 @@ define([
 	'orion/objects',
 	'orion/PageUtil',
 	'orion/editor/textModelFactory',
+	'orion/formatter',
 	'orion/metrics'
-], function(messages, mNavigatorRenderer, i18nUtil, Deferred, EventTarget, objects, PageUtil, mTextModelFactory, mMetrics) {
+], function(messages, mNavigatorRenderer, i18nUtil, Deferred, EventTarget, objects, PageUtil, mTextModelFactory, mFormatter, mMetrics) {
 
 	function Idle(options){
 		this._document = options.document || document;
@@ -165,6 +166,7 @@ define([
 				}
 			}.bind(this));
 		}
+		this.syncEnabled = true;
 	}
 	objects.mixin(InputManager.prototype, /** @lends orion.editor.InputManager.prototype */ {
 		/**
@@ -224,11 +226,21 @@ define([
 					progress(fileClient.read(resource, true), messages.ReadingMetadata, fileURI).then(function(data) {
 						if (this._fileMetadata && !this._fileMetadata._saving && this._fileMetadata.Location === data.Location && this._fileMetadata.ETag !== data.ETag) {
 							this._fileMetadata = objects.mixin(this._fileMetadata, data);
-							if (!editor.isDirty() || window.confirm(messages.loadOutOfSync)) {
+							var doSync = function(){
 								progress(fileClient.read(resource), messages.Reading, fileURI).then(function(contents) {
 									editor.setInput(fileURI, null, contents, null, nofocus);
 									this._clearUnsavedChanges();
 								}.bind(this));
+							};
+							if (this.syncEnabled && !editor.isDirty()){
+								doSync();
+							}else{
+								var dialog = this.serviceRegistry.getService("orion.page.dialog");
+								dialog.confirm(messages.loadOutOfSync,function(result){
+									if(this.syncEnabled && result){
+										doSync();
+									}
+								});
 							}
 						}
 					}.bind(this));
@@ -356,11 +368,11 @@ define([
 		onFocus: function() {
 			// If there was an error while auto saving, auto save is temporarily disabled and
 			// we retry saving every time the editor gets focus
-			if (this._autoSaveEnabled && this._errorSaving) {
+			if (this._autoSaveEnabled && this._errorSaving && this.syncEnabled) {
 				this.save();
 				return;
 			}
-			if (this._autoLoadEnabled && this._fileMetadata) {
+			if (this._autoLoadEnabled && this._fileMetadata && this.syncEnabled) {
 				this.load();
 			}
 		},
@@ -385,7 +397,7 @@ define([
 				return deferred;
 			}
 			var editor = this.getEditor();
-			if (!editor || !editor.isDirty() || this.getReadOnly()) { return done(); }
+			if (!this.syncEnabled || !editor || !editor.isDirty() || this.getReadOnly()) { return done(); }
 			var failedSaving = this._errorSaving;
 			var input = this.getInput();
 			this.reportStatus(messages['Saving...']);
@@ -455,17 +467,18 @@ define([
 					// expected error - HTTP 412 Precondition Failed
 					// occurs when file is out of sync with the server
 					if (error.status === 412) {
-						var forceSave = window.confirm(messages.saveOutOfSync);
-						if (forceSave) {
-							// repeat save operation, but without ETag
-							var redef = that.fileClient.write(resource, contents);
-							if (progress) {
-								redef = progress.progress(redef, i18nUtil.formatMessage(messages.savingFile, input));
+						var dialog = that.serviceRegistry.getService("orion.page.dialog");	
+						dialog.confirm(messages.saveOutOfSync,function(result){
+							if(result){
+								var redef = that.fileClient.write(resource, contents);
+								if (progress) {
+									redef = progress.progress(redef, i18nUtil.formatMessage(messages.savingFile, input));
+								}
+								redef.then(successHandler, errorHandler);
+							}else{
+								return done();
 							}
-							redef.then(successHandler, errorHandler);
-						} else {
-							return done();
-						}
+						});
 					} else {
 						// unknown error
 						errorHandler(error);
@@ -475,7 +488,9 @@ define([
 			}
 
 			if (this.getFormatOnSaveEnabled()) {
-				return new mFormatter.Formatter(this.serviceRegistry, this, editor).doFormat().then(function() {return _save(this);}.bind(this));
+				return this._formatter.doFormat().then(function() {
+					return _save(this);
+				}.bind(this));
 			}
 			return _save(this);
 		},
@@ -497,7 +512,7 @@ define([
 				};
 				this._idle = new Idle(options);
 				this._idle.addEventListener("Idle", function () { //$NON-NLS-0$
-					if (!this._errorSaving) {
+					if (!this._errorSaving && this.syncEnabled) {
 						this._autoSaveActive = true;
 						this.save().then(function() {
 							this._autoSaveActive = false;
@@ -629,7 +644,7 @@ define([
 					if (this._autoSaveEnabled) {
 						this.save();
 						afterConfirm();
-					} else if(this.isUnsavedWarningNeeed()) {
+					} else if(this.syncEnabled && this.isUnsavedWarningNeeed()) {
 						var cancelCallback = function() {
 							window.location.hash = oldLocation;
 							this.reveal(this.getFileMetadata());
@@ -761,6 +776,7 @@ define([
 			this._logMetrics("open"); //$NON-NLS-0$
 			this.dispatchEvent(evt);
 			this.editor = editor = evt.editor;
+			this._formatter = new mFormatter.Formatter(this.serviceRegistry, this, editor);
 			if (!isDir) {
 				if (!noSetInput) {
 					editor.setInput(title, null, contents);
@@ -785,6 +801,9 @@ define([
 						evt.session.apply();
 					}
 				}
+				evt = {};
+				evt.type = 'InputContentsSet';
+				this.editor.dispatchEvent(evt);
 			}
 
 			this._saveEventLogged = false;

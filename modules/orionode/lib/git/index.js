@@ -9,13 +9,14 @@
  *		 IBM Corporation - initial API and implementation
  *******************************************************************************/
 /*eslint-env node */
-var api = require('../api'), writeError = api.writeError;
-var git = require('nodegit');
-var clone = require('./clone');
-var path = require('path');
-var fs = require('fs');
-var express = require('express');
-var bodyParser = require('body-parser');
+var api = require('../api'), writeError = api.writeError, writeResponse = api.writeResponse,
+	git = require('nodegit'),
+	clone = require('./clone'),
+	path = require('path'),
+	fs = require('fs'),
+	express = require('express'),
+	bodyParser = require('body-parser'),
+	responseTime = require('response-time');
 
 module.exports = {};
 
@@ -23,8 +24,13 @@ module.exports.router = function(options) {
 	var fileRoot = options.fileRoot;
 	if (!fileRoot) { throw new Error('options.fileRoot is required'); }
 	
+	var contextPath = options && options.configParams["orion.context.path"] || "";
+	fileRoot = fileRoot.substring(contextPath.length);
+	
 	return express.Router()
 	.use(bodyParser.json())
+	.use(responseTime({digits: 2, header: "X-GitapiIndex-Response-Time", suffix: true}))
+	.use(options.checkUserAccess)
 	.get(fileRoot + '*', getIndex)
 	.put(fileRoot + '*', putIndex)
 	.post(fileRoot + '*', postIndex);
@@ -59,17 +65,19 @@ function getIndex(req, res) {
 	.then(function(blob) {
 		if (typeof blob === 'number') {
 			if (blob === 204) {
-				res.sendStatus(204);
+				api.sendStatus(204, res);
 			} else {
 				writeError(404, res, filePath + " not found in index");
 			}
 		} else {
-			res.write(blob.toString());
-			res.status(200).end();
+			writeResponse(200, res, {"Content-Type":"application/octect-stream"}, blob.toString(), false, true);
 		}
 	})
 	.catch(function(err) {
 		writeError(404, res, err.message);
+	})
+	.done(function() {
+		clone.freeRepo(repo);
 	});
 }
 
@@ -101,9 +109,12 @@ function putIndex(req, res) {
 		return index.write();
 	})
 	.then(function() {
-		res.status(200).end();
+		writeResponse(200, res);
 	}).catch(function(err) {
 		writeError(404, res, err.message);
+	})
+	.done(function() {
+		clone.freeRepo(repo);
 	});
 }
 
@@ -146,9 +157,12 @@ function postIndex(req, res) {
 		return git.Reset.default(repo, commit, [filePath]);
 	})
 	.then(function() {
-		res.status(200).end();
+		writeResponse(200, res);
 	}).catch(function(err) {
 		writeError(404, res, err.message);
+	})
+	.done(function() {
+		clone.freeRepo(repo);
 	});
 }
 };

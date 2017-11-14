@@ -20,7 +20,8 @@ define({//Default message bundle
 	"EditorLinkWorkspace": "Edit",
 	"EditorRelatedLinkProj": "Show Project",
 	"sidebar": "Sidebar",
-	"Filter bindings": "Filter bindings",
+	"Filter bindings:": "Filter bindings:",
+	"Filter bindings": "Type characters to filter by name or key combination",
 	"BindingPrompt": "Enter the new binding",
 	"NoBinding": "---",
 	"orionClientLabel": "Orion client repository",
@@ -95,7 +96,8 @@ define({//Default message bundle
 	"FormatProgress" : "Formatting ${0} from ${1}",
 	"outlineTimeout": "Outline service timed out. Try reloading the page and opening the outline again.",
 	"UnknownError": "An unknown error occurred.",
-	"Filter": "Filter (* = any string, ? = any character)",
+	"Filter outline:": "Filter outline:",
+	"Filter": "Type characters (* = any string, ? = any character)",
 	"TemplateExplorerLabel": "Templates",
 	"OpenTemplateExplorer": "Open Template Explorer",
 	"Edit": "Edit",
@@ -170,5 +172,6 @@ define({//Default message bundle
 	"justNow": "just now", //Represent that the time elapsed is less than 1 minute
 	"fixAll": "Fix all",
 	"nextSplitter" : "Next Splitter",
-	"nextSplitterTooltip": "Move focus through the available splitters" 
+	"nextSplitterTooltip": "Move focus through the available splitters",
+	"Confirm": "Confirm"
 });

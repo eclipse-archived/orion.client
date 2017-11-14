@@ -912,9 +912,13 @@ and (max-device-width : 1024px)  {
 	left: 0;
 	right: 0;
 	background-color: rgb(57,75,84)/*rgb(38,52,63)*/;
-	z-index: 1000;
+	z-index: 149;
 	display: block;
 	box-shadow: 0 3px 7pt 0 rgba(0,0,0,0.3) inset;
+}
+
+.splash.modalBackdrop { /* splash should not be semi transparent when a dialog is open */
+	opacity: 1;
 }
 
 .splashSeeThroughX {

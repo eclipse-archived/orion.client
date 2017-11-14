@@ -13,7 +13,7 @@ var fs = require('fs'),
 	os = require('os'),
 	api = require('./lib/api'),
 	path = require('path'),
-	prefs = require('./lib/controllers/prefs');
+	prefs = require('./lib/prefs');
 
 module.exports.start = function(startServer, configParams) {
 	var electron = require('electron'),
@@ -21,7 +21,7 @@ module.exports.start = function(startServer, configParams) {
 		logger = log4js.getLogger('electron'),
 		autoUpdater = require('./lib/autoUpdater'),
 		spawn = require('child_process').spawn,
-		allPrefs = prefs.readPrefs(),
+		allPrefs = prefs.readElectronPrefs(),
 		feedURL = configParams["orion.autoUpdater.url"],
 		version = electron.app.getVersion(),
 		name = electron.app.getName(),
@@ -91,7 +91,7 @@ module.exports.start = function(startServer, configParams) {
 	}
 	
 	function updateWorkspacePrefs(workspace, _allPrefs){
-		var allPrefs = _allPrefs ? _allPrefs : prefs.readPrefs();
+		var allPrefs = _allPrefs ? _allPrefs : prefs.readElectronPrefs();
 		if (!allPrefs.user.workspace) allPrefs.user.workspace = {};
 		allPrefs.user.workspace.currentWorkspace = workspace;
 		if(!allPrefs.user.workspace.recentWorkspaces){
@@ -109,11 +109,11 @@ module.exports.start = function(startServer, configParams) {
 			allPrefs.user.workspace.recentWorkspaces.pop();
 			allPrefs.user.workspace.recentWorkspaces.unshift(workspace);
 		}
-		prefs.writePrefs(allPrefs);
+		prefs.writeElectronPrefs(allPrefs);
 	}
 	
 	function updateLastOpendTabsPrefs(tabs, activeIndex, originalWorkspace){
-		var allPrefs = prefs.readPrefs();
+		var allPrefs = prefs.readElectronPrefs();
 		var openedTabs = allPrefs.user && allPrefs.user.workspace && allPrefs.user.workspace.openedTabs;
 		if(!openedTabs){
 			((allPrefs.user || (allPrefs.user = {})).workspace || (allPrefs.user.workspace = {})).openedTabs || (allPrefs.user.workspace.openedTabs={});
@@ -122,7 +122,7 @@ module.exports.start = function(startServer, configParams) {
 		allPrefs.user.workspace.openedTabs[currentWorkspace] = {};
 		allPrefs.user.workspace.openedTabs[currentWorkspace].tabs = tabs;
 		allPrefs.user.workspace.openedTabs[currentWorkspace].activeIndex = activeIndex;
-		prefs.writePrefs(allPrefs);
+		prefs.writeElectronPrefs(allPrefs);
 	}
 
 	var readyToOpenDir, relativeFileUrl;
@@ -157,7 +157,7 @@ module.exports.start = function(startServer, configParams) {
 				}else if(stats.isDirectory()){
 					configParams.workspace = readyToOpenDir;
 				}
-				updateWorkspacePrefs(configParams.workspace, allPrefs);
+				// updateWorkspacePrefs(configParams.workspace, allPrefs);
 			}catch(e){}
 		}
 		if (process.platform === 'darwin') {
@@ -302,18 +302,19 @@ module.exports.start = function(startServer, configParams) {
 			});
 			nextWindow.on("close", function(event) {
 				function exit() {
-					allPrefs = prefs.readPrefs();
+					allPrefs = prefs.readElectronPrefs();
 					allPrefs.windowBounds = nextWindow.getBounds();
 					allPrefs.windowBounds.maximized = nextWindow.isMaximized();
-					prefs.writePrefs(allPrefs);
-					if (updateDownloaded) {
-						nextWindow.webContents.session.clearCache(function() {
+					prefs.writeElectronPrefs(allPrefs);
+					log4js.shutdown(function(){
+						if (updateDownloaded) {
+							nextWindow.webContents.session.clearCache(function() {
+								nextWindow.destroy();
+							});
+						}else{
 							nextWindow.destroy();
-						});
-					}else{
-						nextWindow.destroy();
-					}
-					log4js.shutdown();
+						}
+					});
 				}
 				event.preventDefault();
 				nextWindow.webContents.send('collect-tabs-info','closeorion');	
@@ -337,12 +338,12 @@ module.exports.start = function(startServer, configParams) {
 				newTargetWorkspace = workspaces[0];
 				originalWorkspace = workspaces[1];
 				// step1: update new pref's currentworkspace and recentworkspaces with newTargetWorkspace
-				updateWorkspacePrefs(newTargetWorkspace);
+				// updateWorkspacePrefs(newTargetWorkspace);
 				// step2: collect tabs info
 				nextWindow.webContents.send('collect-tabs-info','changeworkspace');
 			});
 			api.getOrionEE().on("open-tabs", function(){
-				var allPrefs = prefs.readPrefs();
+				var allPrefs = prefs.readElectronPrefs();
 				var openedTabs = allPrefs.user && allPrefs.user.workspace && allPrefs.user.workspace.openedTabs && allPrefs.user.workspace.openedTabs[newTargetWorkspace] && allPrefs.user.workspace.openedTabs[newTargetWorkspace]["tabs"] || [];
 				var activeIndex = allPrefs.user && allPrefs.user.workspace && allPrefs.user.workspace.openedTabs && allPrefs.user.workspace.openedTabs[newTargetWorkspace] && allPrefs.user.workspace.openedTabs[newTargetWorkspace]["activeIndex"] || 0;
 				var hostUrl = "http://localhost:" + configParams.port;

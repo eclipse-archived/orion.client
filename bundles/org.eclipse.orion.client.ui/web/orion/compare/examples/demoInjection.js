@@ -103,6 +103,7 @@ function(Compare) {
 	div2Insert.classList.add("injectedDiv");
 	var select123 = document.createElement("SELECT");
 	select123.classList.add("selectDiv");
+	select123.addEventListener("change", function(){alert("I am changed");});
 	div2Insert.appendChild(select123);
 	var textArea = document.createElement("TEXTAREA");
 	div2Insert.appendChild(textArea);
@@ -120,9 +121,12 @@ function(Compare) {
 		
 	});
 	
+	var oSerializer = new XMLSerializer();
+	var divHTML = oSerializer.serializeToString(div2Insert);
+	
 	function hookUp() {
 		compare.getCompareView().getWidget().addEventListener("contentLoaded", function(){ //$NON-NLS-0$
-	 			
+	 			return;
  			/*
  			 * Things you only need to do once
  			 */
@@ -141,9 +145,9 @@ function(Compare) {
  		 	
  		 	//As the annotation model is a range that is based on the charater offset of the {star, end}, you have to use the textModel to calculate that)
  		 	var textModel = compare.getCompareView().getWidget().getMainEditor().getTextView().getModel();
- 		 	var endIndex = textModel.getLineStart(lineNumber + 1);
- 		 	var startIndex = endIndex;//textModel.getLineStart(lineNumber);
- 		 	
+ 		 	//var startIndex = textModel.getLineStart(lineNumber+1);
+ 		 	var startIndex = textModel.getLineEnd(lineNumber);
+ 		 	var endIndex = startIndex;
  		 	//Add your annotation type to the editor 
  		 	annoStyler.addAnnotationType("compare.demo.customize.linehighlight");
  		 	//Add the same annotation type ot the annotation ruler(gutter)
@@ -163,34 +167,75 @@ function(Compare) {
 	 		 	html: "",
 	 		 	//style: {styleClass: "lineHighlightGutter"}, //Gutter style at the line
 	 		 	rangeStyle: {styleClass: "lineHighlightGutter2", node: div2Insert},
+//	 		 	rangeStyle: {styleClass: "lineHighlightGutter2", html: divHTML},
 	 		 	//rangeStyle: {styleClass: "lineHighlightGutter1", html: "<div style='width:100px;height:30px;background-color:blue'></div>"},
 	 //		 	lineStyle: {styleClass: "lineHighlight"} //The line style in the editor
  		 	}]);
 	 	});
 	}
 	function doCompare() {
-		var widget = compare.getCompareView().getWidget();
-		if(widget.type === "twoWay"){ //$NON-NLS-0$
-			var editors = widget.getEditors();
-			var oldContents = editors[0].getTextView().getText();
-			var newContents = editors[1].getTextView().getText();
-			if(compareType === "byTwoContents"){ //$NON-NLS-0$
-				widget.options.oldFile.Content = oldContents;
-				widget.options.newFile.Content = newContents;
-				widget.options.oldFile.URL = null;
-				widget.options.newFile.URL = null;
-			} else {
-				widget.options.oldFile.URL = oldContents;
-				widget.options.newFile.URL = newContents;
-				bCompareType.selectedIndex = 0;
-				compareType = bCompareType.options[bCompareType.selectedIndex].value;
-				bContentTypeTD.style.display = "block"; //$NON-NLS-0$
-			}
-			widget.options.mapper = null;
-			compare.refresh(true);
-			hookUp();
-			//widget.refresh();
-		}
+ 			var editor = compare.getCompareView().getWidget().getMainEditor();
+ 		 	//annotationModel is the handler you add or remove you annotation models
+ 		 	var annotationModel = editor.getAnnotationModel();
+  		 	if(!annotationModel){
+		 		return;
+ 		 	}
+ 		 	//Get the line styler inside the editor
+		 	var annoStyler = editor.getAnnotationStyler();
+ 		 	
+ 		 	//Get the REAL line number(if in inline mode, the GOTO_LINE has to be calculated because the textView is a merged one )
+ 		 	var lineNumber = compare.getCompareView().getWidget().getLineNumber(GOTO_LINE);
+ 		 	
+ 		 	//As the annotation model is a range that is based on the charater offset of the {star, end}, you have to use the textModel to calculate that)
+ 		 	var textModel = compare.getCompareView().getWidget().getMainEditor().getTextView().getModel();
+ 		 	//var startIndex = textModel.getLineStart(lineNumber+1);
+ 		 	var startIndex = textModel.getLineEnd(lineNumber);
+ 		 	var endIndex = startIndex;
+ 		 	//Add your annotation type to the editor 
+ 		 	annoStyler.addAnnotationType("compare.demo.customize.linehighlight");
+ 		 	//Add the same annotation type ot the annotation ruler(gutter)
+ 		 	editor.getAnnotationRuler().addAnnotationType("compare.demo.customize.linehighlight");
+  			/*
+ 			 * Eond of things you only need to do once
+ 			 */
+		 	
+  		 	//Add and/or remove your annotation models
+ 		 	//The first param is an array of the annotations you want to remove
+ 		 	//The second param is an array of the annotations you want to add
+ 		 	annotationModel.replaceAnnotations([], [{
+	 		 	start: startIndex,
+	 		 	end: endIndex,
+	 		 	title: "",
+	 		 	type: "compare.demo.customize.linehighlight",
+	 		 	html: "",
+	 		 	//style: {styleClass: "lineHighlightGutter"}, //Gutter style at the line
+	 		 	rangeStyle: {styleClass: "lineHighlightGutter2", node: div2Insert},
+//	 		 	rangeStyle: {styleClass: "lineHighlightGutter2", html: divHTML},
+	 		 	//rangeStyle: {styleClass: "lineHighlightGutter1", html: "<div style='width:100px;height:30px;background-color:blue'></div>"},
+	 //		 	lineStyle: {styleClass: "lineHighlight"} //The line style in the editor
+ 		 	}]);
+//		var widget = compare.getCompareView().getWidget();
+//		if(widget.type === "twoWay"){ //$NON-NLS-0$
+//			var editors = widget.getEditors();
+//			var oldContents = editors[0].getTextView().getText();
+//			var newContents = editors[1].getTextView().getText();
+//			if(compareType === "byTwoContents"){ //$NON-NLS-0$
+//				widget.options.oldFile.Content = oldContents;
+//				widget.options.newFile.Content = newContents;
+//				widget.options.oldFile.URL = null;
+//				widget.options.newFile.URL = null;
+//			} else {
+//				widget.options.oldFile.URL = oldContents;
+//				widget.options.newFile.URL = newContents;
+//				bCompareType.selectedIndex = 0;
+//				compareType = bCompareType.options[bCompareType.selectedIndex].value;
+//				bContentTypeTD.style.display = "block"; //$NON-NLS-0$
+//			}
+//			widget.options.mapper = null;
+//			compare.refresh(true);
+//			hookUp();
+//			//widget.refresh();
+//		}
 	}
 	function onCompareType(evt) {
 		compareType = bCompareType.options[bCompareType.selectedIndex].value;

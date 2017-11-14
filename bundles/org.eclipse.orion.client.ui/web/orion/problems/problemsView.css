@@ -25,12 +25,16 @@
 	vertical-align: middle;
 	width: 45px;
 }
+
+.problemsFilterLabel {
+	margin: 3px 6px;
+}
+
 .problemsFilter {
 	border: 1px solid lightgray;
 	margin: 3px 6px;
 	width: 95%; /* for older browsers */
 	width: calc(100% - 38px);
-	height: 20px;
 }
 
 .problemsCommandsContainerRight {

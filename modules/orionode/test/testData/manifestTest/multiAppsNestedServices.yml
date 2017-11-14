@@ -1,0 +1,24 @@
+applications:
+- name: publisher
+  memory: 64M
+  path: ./publisher
+  domain: cfapps.io
+  host: publisher
+  instances: 1
+  services:
+    work-queue:
+      type: rediscloud
+      provider: garantiadata
+      plan: 20mb
+  depends-on: ./subscriber
+- name: subscriber
+  memory: 64M
+  path: ./subscriber
+  domain: cfapps.io
+  host: subscriber
+  instances: 1
+  services:
+    work-queue:
+      type: rediscloud
+      provider: garantiadata
+      plan: 20mb

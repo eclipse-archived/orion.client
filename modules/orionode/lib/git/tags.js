@@ -9,14 +9,14 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 /*eslint-env node */
-var api = require('../api'), writeError = api.writeError, writeResponse = api.writeResponse;
-var git = require('nodegit');
-var async = require('async');
-var url = require('url');
-var clone = require('./clone');
-var express = require('express');
-var bodyParser = require('body-parser');
-var util = require('./util');
+var api = require('../api'), writeError = api.writeError, writeResponse = api.writeResponse,
+	git = require('nodegit'),
+	async = require('async'),
+	url = require('url'),
+	clone = require('./clone'),
+	express = require('express'),
+	bodyParser = require('body-parser'),
+	responseTime = require('response-time');
 
 module.exports = {};
 
@@ -26,10 +26,15 @@ module.exports.router = function(options) {
 	if (!fileRoot) { throw new Error('options.fileRoot is required'); }
 	if (!gitRoot) { throw new Error('options.gitRoot is required'); }
 
+	var contextPath = options && options.configParams["orion.context.path"] || "";
+	fileRoot = fileRoot.substring(contextPath.length);
+
 	module.exports.tagJSON = tagJSON;
 
 	return express.Router()
 	.use(bodyParser.json())
+	.use(responseTime({digits: 2, header: "X-GitapiTags-Response-Time", suffix: true}))
+	.use(options.checkUserAccess)
 	.get(fileRoot + '*', getTags)
 	.get('/:tagName*', getTags)
 	.delete('/:tagName*', deleteTag);
@@ -41,9 +46,9 @@ function tagJSON(fullName, shortName, sha, timestamp, fileDir, annotated) {
 		"CloneLocation": gitRoot + "/clone" + fileDir,
 		"CommitLocation": gitRoot + "/commit/" + sha + fileDir,
 		"LocalTimeStamp": timestamp,
-		"Location": gitRoot + "/tag/" + util.encodeURIComponent(shortName) + fileDir,
+		"Location": gitRoot + "/tag/" + api.encodeURIComponent(shortName) + fileDir,
 		"TagType": annotated ? "ANNOTATED" : "LIGHTWEIGHT",
-		"TreeLocation": gitRoot + "/tree" + fileDir + "/" + util.encodeURIComponent(shortName),
+		"TreeLocation": gitRoot + "/tree" + fileDir + "/" + api.encodeURIComponent(shortName),
 		"Type": "Tag"
 	};
 }
@@ -83,7 +88,7 @@ function isAnnotated(repo, ref) {
 }
 
 function getTags(req, res) {
-	var tagName = util.decodeURIComponent(req.params.tagName || "");
+	var tagName = api.decodeURIComponent(req.params.tagName || "");
 	var fileDir;
 	var query = req.query;
 	var page = Number(query.page) || 1;
@@ -118,6 +123,9 @@ function getTags(req, res) {
 		})
 		.catch(function(err) {
 			writeError(404, res, err.message);
+		})
+		.done(function() {
+			clone.freeRepo(theRepo);
 		});
 	}
 
@@ -143,72 +151,83 @@ function getTags(req, res) {
 			return git.Reference.lookup(theRepo, ref);
 		}))
 		.then(function(referenceList) {
-			async.each(referenceList, function(ref,callback) {
-				isAnnotated(theRepo, ref)
-				.then(function(annotated) {
-					if (typeof annotated === 'string') {
-						return writeError(400, res, annotated);
-					}
-					getTagCommit(theRepo, ref)
-					.then(function(commit) {
-						tags.push(tagJSON(ref.name(), ref.shorthand(), commit.sha(), commit.timeMs(), fileDir, annotated));
-						callback();
-					})
-					.catch(function() {
-						// ignore errors looking up commits
-						tags.push(tagJSON(ref.name(), ref.shorthand(), ref.target().toString(), 0, fileDir, annotated));
-						callback();
+			return new Promise(function(fulfill) {
+				async.each(referenceList, function(ref,callback) {
+					isAnnotated(theRepo, ref)
+					.then(function(annotated) {
+						if (typeof annotated === 'string') {
+							return writeError(400, res, annotated);
+						}
+						getTagCommit(theRepo, ref)
+						.then(function(commit) {
+							tags.push(tagJSON(ref.name(), ref.shorthand(), commit.sha(), commit.timeMs(), fileDir, annotated));
+							callback();
+						})
+						.catch(function() {
+							// ignore errors looking up commits
+							tags.push(tagJSON(ref.name(), ref.shorthand(), ref.target().toString(), 0, fileDir, annotated));
+							callback();
+						});
 					});
+				}, function(err) {
+					fulfill();
+					if (err) {
+						return writeError(403, res);
+					}
+					var resp = {
+						"Children": tags,
+						"Type": "Tag",
+					};
+		
+					if (page && page*pageSize < count) {
+						var nextLocation = url.parse(req.originalUrl, true);
+						nextLocation.query.page = page + 1 + "";
+						nextLocation.search = null; //So that query object will be used for format
+						nextLocation = url.format(nextLocation);
+						resp['NextLocation'] = nextLocation;
+					}
+		
+					if (page && page > 1) {
+						var prevLocation = url.parse(req.originalUrl, true);
+						prevLocation.query.page = page - 1 + "";
+						prevLocation.search = null;
+						prevLocation = url.format(prevLocation);
+						resp['PreviousLocation'] = prevLocation;
+					}
+		
+					writeResponse(200, res, null, resp, true);
 				});
-			}, function(err) {
-				if (err) {
-					return writeError(403, res);
-				}
-				var resp = {
-					"Children": tags,
-					"Type": "Tag",
-				};
-	
-				if (page && page*pageSize < count) {
-					var nextLocation = url.parse(req.originalUrl, true);
-					nextLocation.query.page = page + 1 + "";
-					nextLocation.search = null; //So that query object will be used for format
-					nextLocation = url.format(nextLocation);
-					resp['NextLocation'] = nextLocation;
-				}
-	
-				if (page && page > 1) {
-					var prevLocation = url.parse(req.originalUrl, true);
-					prevLocation.query.page = page - 1 + "";
-					prevLocation.search = null;
-					prevLocation = url.format(prevLocation);
-					resp['PreviousLocation'] = prevLocation;
-				}
-	
-				writeResponse(200, res, null, resp, true);
 			});
 		});
 	})
 	.catch(function(err) {
 		writeError(403, res, err.message);
+	})
+	.done(function() {
+		clone.freeRepo(theRepo);
 	});
 }
 
 function deleteTag(req, res) {
-	var tagName = util.decodeURIComponent(req.params.tagName);
+	var theRepo;
+	var tagName = api.decodeURIComponent(req.params.tagName);
 	return clone.getRepo(req)
 	.then(function(repo) {
+		theRepo = repo;
 		return git.Tag.delete(repo, tagName);
 	})
 	.then(function(resp) {
 		if (!resp) {
-			res.status(200).end();
+			writeResponse(200, res)
 		} else {
 			writeError(403, res);
 		} 
 	})
 	.catch(function(err) {
 		writeError(403, res, err.message);
+	})
+	.done(function() {
+		clone.freeRepo(theRepo);
 	});
 }
 };

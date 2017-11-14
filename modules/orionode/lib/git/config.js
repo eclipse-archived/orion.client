@@ -10,13 +10,16 @@
  *******************************************************************************/
 /*eslint-env node */
 /*globals configs:true val:true*/
-var api = require('../api'), writeError = api.writeError, writeResponse = api.writeResponse;
-var args = require('../args');
-var clone = require('./clone');
-var express = require('express');
-var bodyParser = require('body-parser');
-var util = require('./util');
-var git = require('nodegit');
+var api = require('../api'), writeError = api.writeError, writeResponse = api.writeResponse,
+	args = require('../args'),
+	clone = require('./clone'),
+	express = require('express'),
+	bodyParser = require('body-parser'),
+	gitUtil = require('./util'),
+	git = require('nodegit'),
+	log4js = require('log4js'),
+	logger = log4js.getLogger("git"),
+	responseTime = require('response-time');
 
 module.exports = {};
 
@@ -26,8 +29,26 @@ module.exports.router = function(options) {
 	if (!fileRoot) { throw new Error('options.fileRoot is required'); }
 	if (!gitRoot) { throw new Error('options.gitRoot is required'); }
 	
+	var contextPath = options && options.configParams["orion.context.path"] || "";
+	fileRoot = fileRoot.substring(contextPath.length);
+	
+	function checkUserAccess(req, res, next){
+		var uri = req.originalUrl.substring(req.baseUrl.length);
+		var uriSegs = uri.split("/");
+		if (uriSegs[1] === "clone" && "/" + uriSegs[2] === fileRoot){
+			uriSegs.splice(1, 1);
+			uri = uriSegs.join("/");
+		}else if (uriSegs[2] === "clone" && "/" + uriSegs[3] === fileRoot){
+			uriSegs.splice(1, 2);
+			uri = uriSegs.join("/");
+		}
+		req.user.checkRights(req.user.username, uri, req, res, next);
+	}
+	
 	return express.Router()
 	.use(bodyParser.json())
+	.use(responseTime({digits: 2, header: "X-GitapiConfig-Response-Time", suffix: true}))
+	.use(checkUserAccess) // Use specified checkUserAceess implementation instead of the common one from options
 	.get('/clone'+ fileRoot + '*', getConfig)
 	.get('/:key/clone'+ fileRoot + '*', getAConfig)
 	.delete('/:key/clone'+ fileRoot + '*', deleteConfig)
@@ -38,15 +59,17 @@ function configJSON(key, value, fileDir) {
 	return {
 		"Key": key,
 		"CloneLocation": gitRoot + "/clone" + fileDir,
-		"Location": gitRoot + "/config/" + util.encodeURIComponent(key) + "/clone" + fileDir,
+		"Location": gitRoot + "/config/" + api.encodeURIComponent(key) + "/clone" + fileDir,
 		"Value": Array.isArray(value) ? value : [value]
 	};
 }
 
 function getAConfig(req, res) {
-	var key = util.decodeURIComponent(req.params.key);
+	var theRepo;
+	var key = api.decodeURIComponent(req.params.key);
 	clone.getRepo(req)
 	.then(function(repo) {
+		theRepo = repo;
 		var fileDir = clone.getfileDir(repo,req);
 		var configFile = api.join(repo.path(), "config");
 		args.readConfigFile(configFile, function(err, config) {
@@ -72,13 +95,18 @@ function getAConfig(req, res) {
 	})
 	.catch(function(err) {
 		writeError(404, res, err.message);
-	});	
+	})
+	.done(function() {
+		clone.freeRepo(theRepo);
+	});
 }
 
 function getConfig(req, res) {
+	var theRepo;
 	var filter = req.query.filter;
 	clone.getRepo(req)
 	.then(function(repo) {
+		theRepo = repo;
 		var fileDir = clone.getfileDir(repo,req);
 		var configFile = api.join(repo.path(), "config");
 		args.readConfigFile(configFile, function(err, config) {
@@ -86,7 +114,7 @@ function getConfig(req, res) {
 				return writeError(400, res, err.message);
 			}
 			var waitFor = Promise.resolve();
-			if(options && options.options && options.options.configParams["orion.single.user"]){
+			if(options && options.configParams["orion.single.user"]){
 				var user = config.user || (config.user = {});
 				if(!user.name){
 					waitFor = git.Config.openDefault().then(function(defaultConfig){
@@ -98,7 +126,12 @@ function getConfig(req, res) {
 						});
 						return Promise.all([fillUserName,fillUserEmail]);
 					}).then(function(){
+						gitUtil.verifyConfigRemoteUrl(config);
 						args.writeConfigFile(configFile, config, function(err) {});
+					}).catch(function(err){
+						if(err.message.indexOf("was not found") !== -1){
+							return Promise.resolve();
+						}
 					});
 				}
 			}
@@ -127,19 +160,26 @@ function getConfig(req, res) {
 						}
 					}
 				}
+			}).catch(function(err) {
+				logger.error(err);
+				writeError(404, res, err.message);
 			});
 		//TODO read user prefs if no username/email is specified -> git/config/userInfo (GitName && GitEmail)
 		});
 	})
 	.catch(function(err) {
 		writeError(404, res, err.message);
+	})
+	.done(function() {
+		clone.freeRepo(theRepo);
 	});
 }
 	
 function updateConfig(req, res, key, value, callback) {
-	var fileDir;
+	var fileDir, theRepo;
 	clone.getRepo(req)
 	.then(function(repo) {
+		theRepo = repo;
 		fileDir = clone.getfileDir(repo,req);
 		var configFile = api.join(repo.path(), "config");
 		args.readConfigFile(configFile, function(err, config) {
@@ -155,6 +195,7 @@ function updateConfig(req, res, key, value, callback) {
 			var name = segments[segments.length - 1];
 			var result = callback(config, section, subsection, name, value);
 			if (result.status === 200 || result.status === 201) {
+				gitUtil.verifyConfigRemoteUrl(config);
 				args.writeConfigFile(configFile, config, function(err) {
 					if (err) {
 						return writeError(400, res, err.message);
@@ -163,7 +204,7 @@ function updateConfig(req, res, key, value, callback) {
 						var resp = configJSON(key, result.value, fileDir);
 						writeResponse(result.status, res, {"Location":resp.Location}, resp, true);
 					} else {
-						res.status(result.status).end();
+						writeResponse(result.status, res);
 					}
 				});
 			} else {
@@ -173,6 +214,9 @@ function updateConfig(req, res, key, value, callback) {
 	})
 	.catch(function(err) {
 		writeError(404, res, err.message);
+	})
+	.done(function() {
+		clone.freeRepo(theRepo);
 	});
 }
 

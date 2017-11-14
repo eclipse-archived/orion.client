@@ -9,11 +9,12 @@
  *	 IBM Corporation - initial API and implementation
  *******************************************************************************/
 /*eslint-env node */
-var api = require('../api'), writeError = api.writeError, writeResponse = api.writeResponse;
-var git = require('nodegit');
-var clone = require('./clone');
-var express = require('express');
-var bodyParser = require('body-parser');
+var api = require('../api'), writeError = api.writeError, writeResponse = api.writeResponse,
+	git = require('nodegit'),
+	clone = require('./clone'),
+	express = require('express'),
+	bodyParser = require('body-parser'),
+	responseTime = require('response-time');
 
 function router(options) {
 	var fileRoot = options.fileRoot;
@@ -21,13 +22,20 @@ function router(options) {
 	if (!fileRoot) { throw new Error('options.fileRoot is required'); }
 	if (!gitRoot) { throw new Error('options.gitRoot is required'); }
 	
+	var contextPath = options && options.configParams["orion.context.path"] || "";
+	fileRoot = fileRoot.substring(contextPath.length);
+
 	return express.Router()
 	.use(bodyParser.json())
+	.use(responseTime({digits: 2, header: "X-GitapiStatus-Response-Time", suffix: true}))
+	.use(options.checkUserAccess)
 	.get('*', getStatus);
 	
 	function getStatus(req, res) {
+		var theRepo;
 		return clone.getRepo(req)
 		.then(function(repo) {
+			theRepo = repo;
 			var fileDir = clone.getfileDir(repo,req);
 			return repo.getStatusExt({
 				flags: 
@@ -125,6 +133,9 @@ function router(options) {
 		})
 		.catch(function(err) {
 			writeError(400, res, err);
+		})
+		.done(function() {
+			clone.freeRepo(theRepo);
 		});
 	}
 }

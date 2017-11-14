@@ -24,7 +24,7 @@ define([
 	 * @name orion.widgets.Section
 	 * @class Generates a section
 	 * @param {DomNode} parent parent node
-	 * @param {DomNode} sibling if specified, the section will be inserted before the sibling
+	 * @param {DomNode} [options.sibling] if specified, the section will be inserted before the sibling
 	 * @param {String} options.id id of the section header
 	 * @param {String} options.title title (in HTML) of the section
 	 * @param {orion.preferences.PreferencesService} [options.preferenceService] used to store the hidden/shown state of the section if specified
@@ -594,7 +594,7 @@ define([
 			if (this.domNode) {
 				this.domNode.classList.remove("sectionClosed"); //$NON-NLS-0$
 				this.domNode.classList.add("sectionOpened"); //$NON-NLS-0$
-				this.domNode.setAttribute("aria-owns", this._contentParent.id);
+				if (this._contentParent) this.domNode.setAttribute("aria-owns", this._contentParent.id); //$NON-NLS-0$
 				if (this.dropdown) {
 					this.domNode.setAttribute("aria-expanded", "true"); //$NON-NLS-1$ //$NON-NLS-0$
 				}
@@ -637,7 +637,7 @@ define([
 			if (this.domNode) {
 				this.domNode.classList.add("sectionClosed"); //$NON-NLS-0$
 				this.domNode.classList.remove("sectionOpened"); //$NON-NLS-0$
-				this.domNode.removeAttribute("aria-owns");
+				this.domNode.removeAttribute("aria-owns"); //$NON-NLS-0$
 				if (this.dropdown) {
 					this.domNode.setAttribute("aria-expanded", "false"); //$NON-NLS-1$ //$NON-NLS-0$
 				}

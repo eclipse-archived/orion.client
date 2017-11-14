@@ -9,44 +9,56 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 /*eslint-env node */
-var git = require('nodegit');
-var api = require('../api'), writeError = api.writeError;
-var args = require('../args');
-var express = require('express');
-var bodyParser = require('body-parser');
-var clone = require('./clone');
-var fileUtil = require('../fileUtil');
+var git = require('nodegit'),
+	api = require('../api'), writeError = api.writeError, writeResponse = api.writeResponse,
+	args = require('../args'),
+	express = require('express'),
+	bodyParser = require('body-parser'),
+	clone = require('./clone'),
+	tasks = require('../tasks'),
+	fileUtil = require('../fileUtil'),
+	responseTime = require('response-time');
 
 module.exports = {};
 
 module.exports.router = function(options) {
 	var fileRoot = options.fileRoot;
 	if (!fileRoot) { throw new Error('options.fileRoot is required'); }
-	
+
+	var contextPath = options && options.configParams["orion.context.path"] || "";
+	fileRoot = fileRoot.substring(contextPath.length);
+
 	return express.Router()
 	.use(bodyParser.json())
+	.use(responseTime({digits: 2, header: "X-GitapiSubmodule-Response-Time", suffix: true}))
+	.use(options.checkUserAccess)
 	.put(fileRoot + '*', putSubmodule)
 	.post(fileRoot + '*', postSubmodule)
 	.delete(fileRoot + '*', deleteSubmodule);
 
 function putSubmodule(req, res) {
+	var theRepo;
 	return clone.getRepo(req)
 	.then(function(repo) {
-		return clone.foreachSubmodule(repo, req.body.Operation, false);
+		theRepo = repo;
+		return clone.foreachSubmodule(repo, req.body.Operation, false); // this foreachSubmodule doesn't need authentication, fix me if it's not right.
 	})
 	.then(function() {
-		res.status(200).end();
+		writeResponse(200, res);
 	})
 	.catch(function(err) {
 		return writeError(400, res, err.message);
+	})
+	.done(function() {
+		clone.freeRepo(theRepo);
 	});
 }
 function postSubmodule(req, res) {
+	var task = new tasks.Task(res, false, true, 0, true);
 	var url = req.body.GitUrl;
 	if (!url) {
 		return writeError(400, res, "Invalid parameters");
 	}
-	
 	var repo, submodule, subrepo, rest;
 	return clone.getRepo(req)
 	.then(function(_repo) {
@@ -72,7 +84,7 @@ function postSubmodule(req, res) {
 		})
 		.then(function(_subrepo) {
 			subrepo = _subrepo;
-			return subrepo.fetchAll({});
+			return subrepo.fetchAll({callbacks: clone.getRemoteCallbacks(req.body, req.user.username, task)});
 		})
 		.then(function() {
 			return subrepo.getReferenceCommit("origin/master");
@@ -87,14 +99,89 @@ function postSubmodule(req, res) {
 			return submodule.addFinalize();
 		})
 		.then(function() {
-			res.status(200).end();
+			task.done({
+				HttpCode: 200,
+				Code: 0,
+				DetailedMessage: "OK",
+				Message: "OK",
+				Severity: "Ok"
+			});
 		});
 	}).catch(function(err) {
-		writeError(400, res, err.message);
+		return deleteSubmoduleFromRepo(subrepo, repo)
+		.then(function(){
+			clone.handleRemoteError(task, err, url);
+		}).catch(function(){
+			clone.handleRemoteError(task, err, url);
+		});
+	})
+	.done(function() {
+		clone.freeRepo(repo);
+	});
+}
+
+/**
+ * @name deleteSubmoduleFromRepo
+ * @description Helper method used to delete a subrepo from a repo
+ * @param {Repository} subrepo object
+ * @param {Repository} parent repo object
+ * @returns returns Promise
+ * @since 17.0
+ */
+function deleteSubmoduleFromRepo(subrepo, repo) {
+	var submodulePath = subrepo.workdir().substring(repo.workdir().length).slice(0, -1);
+	var configFile = api.join(repo.path(), "config");
+	return new Promise(function(fulfill, reject) {
+		args.readConfigFile(configFile, function(err, config) {
+			if (err) return reject(err);
+			delete config["submodule"][submodulePath];
+			args.writeConfigFile(configFile, config, function(err) {
+				if (err) return reject(err);
+				configFile = api.join(repo.workdir(), ".gitmodules");
+				args.readConfigFile(configFile, function(err, config) {
+					if (err) return reject(err);
+					delete config["submodule"][submodulePath];
+					args.writeConfigFile(configFile, config, function(err) {
+						if (err) return reject(err);
+						fileUtil.rumRuff(subrepo.path(), function(err) {
+							if (err) return reject(err);
+							fileUtil.rumRuff(subrepo.workdir(), function(err) {
+								if (err) return reject(err);
+								var index;
+								return repo.refreshIndex()
+								.then(function(indexResult) {
+									index = indexResult;
+									var work = [];
+									if (Object.keys(config).length) {
+										work.push(index.addByPath(".gitmodules"));
+									} else {
+										work.push(index.removeByPath(".gitmodules"));
+									}
+									work.push(index.removeByPath(submodulePath));
+									return Promise.all(work);
+								})
+								.then(function() {
+									return index.write();
+								})
+								.then(function() {
+									return index.writeTree();
+								})
+								.then(function() {
+									fulfill();
+								}).catch(function(err) {
+									reject(err);
+								});
+							});
+						});
+						
+					});
+				});
+			});
+		});
 	});
 }
 function deleteSubmodule(req, res) {
-	var subrepo;
+	var subrepo, theRepo;
 	return clone.getRepo(req)
 	.then(function(_subrepo) {
 		subrepo = _subrepo;
@@ -104,62 +191,18 @@ function deleteSubmodule(req, res) {
 		});
 	})
 	.then(function(repo) {
-		var submodulePath = subrepo.workdir().substring(repo.workdir().length).slice(0, -1);
-		var configFile = api.join(repo.path(), "config");
-		return new Promise(function(fulfill, reject) {
-			args.readConfigFile(configFile, function(err, config) {
-				if (err) return reject(err);
-				delete config["submodule"][submodulePath];
-				args.writeConfigFile(configFile, config, function(err) {
-					if (err) return reject(err);
-					configFile = api.join(repo.workdir(), ".gitmodules");
-					args.readConfigFile(configFile, function(err, config) {
-						if (err) return reject(err);
-						delete config["submodule"][submodulePath];
-						args.writeConfigFile(configFile, config, function(err) {
-							if (err) return reject(err);
-							fileUtil.rumRuff(subrepo.path(), function(err) {
-								if (err) return reject(err);
-								fileUtil.rumRuff(subrepo.workdir(), function(err) {
-									if (err) return reject(err);
-									var index;
-									return repo.refreshIndex()
-									.then(function(indexResult) {
-										index = indexResult;
-										var work = [];
-										if (Object.keys(config).length) {
-											work.push(index.addByPath(".gitmodules"));
-										} else {
-											work.push(index.removeByPath(".gitmodules"));
-										}
-										work.push(index.removeByPath(submodulePath));
-										return Promise.all(work);
-									})
-									.then(function() {
-										return index.write();
-									})
-									.then(function() {
-										return index.writeTree();
-									})
-									.then(function() {
-										fulfill();
-									}).catch(function(err) {
-										reject(err);
-									});
-								});
-							});
-							
-						});
-					});
-				});
-			});
-		});
+		theRepo = repo;
+		return deleteSubmoduleFromRepo(subrepo, repo);
 	})
 	.then(function() {
-		res.status(200).end();
+		writeResponse(200, res);
 	})
 	.catch(function(err) {
 		return writeError(400, res, err.message);
+	})
+	.done(function() {
+		clone.freeRepo(subrepo);
+		clone.freeRepo(theRepo);
 	});
 }
 };

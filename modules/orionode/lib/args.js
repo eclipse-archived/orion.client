@@ -45,7 +45,9 @@ exports.createDirs = function(dirs, callback) {
 exports.readPasswordFile = function(passwordFile) {
 	if (passwordFile) {
 		try {
-			return fs.readFileSync(passwordFile,'utf8');
+			var lines = fs.readFileSync(passwordFile,'utf8')
+				.split('\n').filter(Boolean);
+			return lines.length>0?lines[0]:null;
 		} catch (e) {}
 	}
 	return null;

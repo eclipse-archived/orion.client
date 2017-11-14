@@ -1,7 +1,7 @@
 Orion
 =====
 
-Orion is an open-source development platform focused on creating applications for the web, in the web.
+Orion is an open-source development platform focused on creating applications for the web, in the web. 
 
 The vision behind Orion is to move software development to the web by 
 enabling open tool integration through HTTP and REST, JSON, OAuth, OpenID, and others. 

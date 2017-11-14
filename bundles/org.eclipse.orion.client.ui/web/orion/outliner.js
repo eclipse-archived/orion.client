@@ -573,8 +573,13 @@ define([
 			this.generateOutline();
 		},
 		_createFilterInput: function() {
+			var label = document.createElement("label"); //$NON-NLS-0$
+			label.textContent = messages["Filter outline:"];
+			label.classList.add("outlineFilterLabel"); //$NON-NLS-0$
+			label.setAttribute("for", "filterText"); //$NON-NLS-0$
+
 			var input = document.createElement("input"); //$NON-NLS-0$
-		
+			input.id = "filterText"; //$NON-NLS-0$
 			input.classList.add("outlineFilter"); //$NON-NLS-0$
 			input.placeholder = messages["Filter"]; //$NON-NLS-0$
 			input.type="text"; //$NON-NLS-0$
@@ -633,6 +638,7 @@ define([
 				}
 			}.bind(this), false);
 			
+			this._wrapperNode.appendChild(label);
 			this._wrapperNode.appendChild(input);
 			this._filterInput = input;
 		},

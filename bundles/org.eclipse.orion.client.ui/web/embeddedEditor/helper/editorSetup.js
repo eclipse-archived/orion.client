@@ -78,8 +78,9 @@ define([
 				commandRegistry: this._commandRegistry,
 				contentTypeRegistry: this._contentTypeRegistry,
 				editorCommands: this._editorCommands,
-				editorConfig: this._editorConfig,
+				editorConfig: options.editorConfig ? options.editorConfig: this._editorConfig,
 				statusReporter: options.statusReporter,
+				singleMode: options.singleMode,
 				progressService: this._progressService,
 				inputManager: this._inputManager, // fake it
 				fileService: this._fileClient, // fake it

@@ -71,7 +71,7 @@ define([
 			"no-self-assign" : 1,
 			"no-self-compare" : 1,
 			"no-shadow" : 3,
-			"no-shadow-global" : 3,
+			"no-shadow-global" : 0,
 			"no-sparse-arrays" : 3,
 			"no-throw-literal" : 3,
 			"no-trailing-spaces" : [0, { "skipBlankLines": true }],

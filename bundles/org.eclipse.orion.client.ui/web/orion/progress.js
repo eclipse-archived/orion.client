@@ -10,39 +10,56 @@
  *******************************************************************************/
 /*eslint-env browser, amd*/
 define(['i18n!orion/nls/messages', 'orion/webui/littlelib', 'orion/webui/dialogs/OperationsDialog',
-	'orion/webui/tooltip',
+	'orion/webui/tooltip', 'orion/Deferred',
 ], 
-function(messages, lib, mOperationsDialog, Tooltip) {
+function(messages, lib, mOperationsDialog, Tooltip, Deferred) {
 	
-	function ProgressMonitorTool(progressPane, commandRegistry){
+	function ProgressMonitorTool(progressPane, commandRegistry, preferenceService){
 		if(this._progressPane){
 			return;
 		}
-		this._progressPane = lib.node(progressPane);
-
-		this._progressPane.tooltip = new Tooltip.Tooltip({
-			node: this._progressPane,
-			text: messages["Operations"],
-			position: ["above", "below", "right", "left"] //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-		});
-
-		this._operationsDialog = new mOperationsDialog.OperationsDialog({triggerNode: this._progressPane, commandRegistry: commandRegistry});
-		var that = this;
-		this._progressPane.addEventListener("keydown", function(evt) {  //$NON-NLS-0$
-			if(evt.charOrCode === ' ' || evt.keyCode === lib.KEY.ENTER) { //$NON-NLS-0$
-				that._operationsDialog.show();
+		var prefDeferred = new Deferred();
+		if (Boolean(preferenceService)) {
+			preferenceService.get("/progressIndicator").then(function(prefs) {
+				prefDeferred.resolve(prefs);
+			});
+		} else {
+			prefDeferred.resolve();
+		}
+		prefDeferred.then(function(prefs) {
+			if (Boolean(prefs) && prefs.disabled === true) {
+				var pane = lib.node(progressPane);
+				if (Boolean(pane)) {
+					pane.parentElement.removeChild(pane);				
+				}
+				return;
 			}
-		});
-		
-		this._progressPane.addEventListener("click", /* @callback */ function(evt) {  //$NON-NLS-0$
-			if (that._operationsDialog.isShowing()) {
-				that._operationsDialog.hide();
-			} else {
-				that._operationsDialog.show();
-			}
-		});
-		
-		this._operationsDialog.setOperations(null, null); // initialize
+			this._progressPane = lib.node(progressPane);
+	
+			this._progressPane.tooltip = new Tooltip.Tooltip({
+				node: this._progressPane,
+				text: messages["Operations"],
+				position: ["above", "below", "right", "left"] //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			});
+	
+			this._operationsDialog = new mOperationsDialog.OperationsDialog({triggerNode: this._progressPane, commandRegistry: commandRegistry});
+			var that = this;
+			this._progressPane.addEventListener("keydown", function(evt) {  //$NON-NLS-0$
+				if(evt.charOrCode === ' ' || evt.keyCode === lib.KEY.ENTER) { //$NON-NLS-0$
+					that._operationsDialog.show();
+				}
+			});
+			
+			this._progressPane.addEventListener("click", /* @callback */ function(evt) {  //$NON-NLS-0$
+				if (that._operationsDialog.isShowing()) {
+					that._operationsDialog.hide();
+				} else {
+					that._operationsDialog.show();
+				}
+			});
+			
+			this._operationsDialog.setOperations(null, null); // initialize
+		}.bind(this));
 	}
 	
 	ProgressMonitorTool.prototype = {
@@ -134,7 +151,7 @@ function(messages, lib, mOperationsDialog, Tooltip) {
 	 * @param {orion.serviceregistry.ServiceRegistry} serviceRegistry
 	 * @param {orion.operationsclient.OperationsClient} operationsClient
 	 */
-	function ProgressService(serviceRegistry, operationsClient, commandRegistry, progressMonitorClass){
+	function ProgressService(serviceRegistry, operationsClient, commandRegistry, progressMonitorClass, preferenceService){
 		this._serviceRegistry = serviceRegistry;
 		this._serviceRegistration = serviceRegistry.registerService("orion.page.progress", this); //$NON-NLS-0$ 
 		this._commandRegistry = commandRegistry;
@@ -145,6 +162,7 @@ function(messages, lib, mOperationsDialog, Tooltip) {
 		this._lastOperation = null;
 		this._lastIconClass = null;
 		this._progressMonitorClass = progressMonitorClass;
+		this._preferenceService = preferenceService;
 	}
 	
 	ProgressService.prototype = /** @lends orion.progress.ProgressService.prototype */ {
@@ -152,7 +170,7 @@ function(messages, lib, mOperationsDialog, Tooltip) {
 				if(this._progressMonitorClass){
 					return; // we have an other progress monitor implementation, we don't need to initialize our UI
 				}
-				this._progressMonitorTool = new ProgressMonitorTool(progressPane, this._commandRegistry);
+				this._progressMonitorTool = new ProgressMonitorTool(progressPane, this._commandRegistry, this._preferenceService);
 			},
 			progress: function(deferred, operationName, progressMonitor){
 				var that = this;
@@ -265,9 +283,7 @@ function(messages, lib, mOperationsDialog, Tooltip) {
 				this._operations[operationIndex] = operation;
 				this._operationDeferrds[operationIndex] = deferred;
 				if(operation.Location){
-					var data = {};
-					data[operation.Location] = {Name: operation.Name, expires: operation.expires};
-					this._serviceRegistry.getService("orion.core.preference").put("/operations", data); //$NON-NLS-2$ //$NON-NLS-1$
+					this._operationsClient.addOperation(operation.Location, {Name: operation.Name, expires: operation.expires});
 				}
 				if(operation.progressMonitor){
 					operation.progressMonitor.progress(operation.Name);

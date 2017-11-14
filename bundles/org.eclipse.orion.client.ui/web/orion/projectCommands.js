@@ -508,7 +508,7 @@ define(['require', 'i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 
 				
 				messageService.close();
 				
-				if(!data.parameters){
+				if(!data.parameters && item.parametersRequested){
 					messageService.setProgressResult({
 						Message: errorMessage,
 						Severity: "Warning" //$NON-NLS-0$
@@ -589,7 +589,7 @@ define(['require', 'i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 
 			},
 			visibleWhen: function(items) {
 				var item = forceSingleItem(items);
-				return item.ServiceId && item.Name && item.parametersRequested;
+				return item.ServiceId && item.Name;
 			}
 		});
 		commandService.addCommand(checkStateCommand);
@@ -659,6 +659,8 @@ define(['require', 'i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 
 									data.oldParams = params;
 									commandService.collectParameters(data);
 								} else {
+									item.status = {CheckState: true};
+									sharedLaunchConfigurationDispatcher.dispatchEvent({type: "changeState", newValue: item });
 									errorHandler(error);
 								}
 							});
@@ -667,7 +669,7 @@ define(['require', 'i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 
 				},
 				visibleWhen: function(items) {
 					var item = forceSingleItem(items);
-					return item.ServiceId && item.Name && item.status && (start ? true /*item.status.State==="STOPPED"*/ : item.status.State==="STARTED");
+					return item.ServiceId && item.Name && item.status && (start ? true /*item.status.State==="STOPPED"*/ : (item.status.State === "STARTED" || item.status.State === "PAUSED"));
 				}
 			});
 			commandService.addCommand(stopApplicationCommand);
@@ -1294,13 +1296,22 @@ define(['require', 'i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 
 							} else if (nonZipFiles.length > 0) {
 								message = i18nUtil.formatMessage(messages["notZip"], nonZipFiles.join(', '));
 							}
-							if(nonZipFiles.length == 0 || window.confirm(message)) {
-								projectNameDialog.show();	// ask user for project name
+							if(nonZipFiles.length == 0) {
+								projectNameDialog.show();
+								fileInput.removeEventListener("change", changeListener);
+							}else{
+								var dialog = this.serviceRegistry.getService("orion.page.dialog");								
+								dialog.confirm(message, function(result){
+									if(result){
+										projectNameDialog.show(); // ask user for project name
+									}
+									fileInput.removeEventListener("change", changeListener);
+								});	
 							}
+						}else{
+							fileInput.removeEventListener("change", changeListener);
 						}
-
-						fileInput.removeEventListener("change", changeListener);
-					};
+					}.bind(this);
 					fileInput.addEventListener("change", changeListener);
 
 					// Launch file picker. Note that at the time when this code was written, web browser
@@ -1363,7 +1374,7 @@ define(['require', 'i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 
 				var command;
 				var commandParams = {
 					name: deployService.name,
-					tootlip: deployService.tooltip,
+					tooltip: deployService.tooltip,
 					id: "orion.project.deploy." + deployService.id,
 					callback: function func(data){
 						var project = data.items;

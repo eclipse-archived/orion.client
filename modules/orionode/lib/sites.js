@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012 IBM Corporation and others.
+ * Copyright (c) 2012, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -9,13 +9,16 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 /*eslint-env node */
-var api = require('./api'), writeError = api.writeError, writeResponse = api.writeResponse;
-var fileUtil = require('./fileUtil');
-var express = require('express');
-var bodyParser = require('body-parser');
-var fs = require('fs');
-var url = require('url');
-var mPath = require('path');
+var api = require('./api'), 
+	writeError = api.writeError, 
+	writeResponse = api.writeResponse,
+	fileUtil = require('./fileUtil'),
+	express = require('express'),
+	bodyParser = require('body-parser'),
+	fs = require('fs'),
+	url = require('url'),
+	mPath = require('path'),
+	responseTime = require('response-time');
 
 var RUNNING_SITES_FILENAME = "runningSites.json";
 var hosts = {};
@@ -35,6 +38,7 @@ module.exports = function(options) {
 
 	return express.Router()
 	.use(bodyParser.json())
+	.use(responseTime({digits: 2, header: "X-Sites-Response-Time", suffix: true}))
 	.get('/:site', getSite)
 	.get('/', getSites)
 	.put('/:site', putSite)
@@ -83,7 +87,7 @@ function virtualHost(vhost, req, res, next) {
 			}
 		})) return;
 	}
-	res.status(404).send(host ? "Not found" : "Site stopped: " + vhost);
+	writeResponse(400, res, null, host ? "Not found" : "Site stopped: " + vhost);
 }
 
 function getHostedSiteURL(site) {
@@ -136,14 +140,18 @@ function saveRunningSites() {
 
 function loadSites(req, callback) {
 	var store = fileUtil.getMetastore(req);
-	store.readUserPreferences(req.user, function(err, data) {
+	store.getUser(req.user.username, function(err, data) {
 		if (err) {
 			// assume that the file does not exits
 			return callback(null, {});
 		}
 		var prefs = {};
 		try {
-			prefs = JSON.parse(data);
+			if (typeof data.properties === "string") {
+				prefs = JSON.parse(data.properties); // metadata.properties need to be parse when using MongoDB
+			} else {
+				prefs = data.properties; // metadata.properties don't need to be parse when using FS
+			}
 		} catch (e) {}
 		return callback(null, prefs);
 	});
@@ -151,7 +159,7 @@ function loadSites(req, callback) {
 
 function saveSites(req, prefs, callback) {
 	var store = fileUtil.getMetastore(req);
-	store.updateUserPreferences(req.user, JSON.stringify(prefs, null, "\t"), callback);
+	store.updateUser(req.user.username, {properties: JSON.stringify(prefs, null, 2) }, callback);
 }
 
 function getSite(req, res) {
@@ -164,8 +172,7 @@ function getSite(req, res) {
 		if (site) {
 			writeResponse(200, res, null, siteJSON(site, req));
 		} else {
-			res.writeHead(400, "Site not found:" + req.params.id);
-			res.end();
+			writeError(400, res, "Site not found:" + req.params.id);
 		}
 	});
 }
@@ -189,22 +196,23 @@ function updateSite(req, res, callback, okStatus) {
 			return writeError(404, res, err.message);
 		}
 		if (!req.params.site) {
+			// TODO
 		}
 		var sites = prefs.sites || (prefs.sites = {});
 		var site = sites[req.params.site];
 		if (site || !req.params.site) {
 			site = callback(site, sites);
 			if (site && site.error) {
-				res.writeHead(site.status, site.error);
-				return res.end();
+				return writeError(site.status, res, site.error);
 			}
-			saveSites(req, prefs, function() {
-				if (err) res.writeHead(400, "Failed to update site:" + req.params.id);
-				site ? writeResponse(okStatus || 200, res, null, siteJSON(site, req)) : writeResponse(okStatus || 200, res, null);
+			saveSites(req, prefs, function(err) {
+				if (err) {
+					return writeError(400, res, "Failed to update site:" + req.params.id);
+				}
+				return site ? writeResponse(okStatus || 200, res, null, siteJSON(site, req)) : writeResponse(okStatus || 200, res, null);
 			});
 		} else {
-			res.writeHead(400, "Site not found:" + req.params.id);
-			res.end();
+			return writeError(400, res,  "Site not found:" + req.params.id);
 		}
 	});
 }

@@ -137,7 +137,8 @@ define([
 	 */
 	function WrappedWorker(script, onMessage, onError) {
 		var wUrl = new URL(script, window.location.href);
-		wUrl.query.set("worker-language", navigator.language); //$NON-NLS-1$
+		wUrl.query.set("worker-language",  ((navigator.languages && navigator.languages[0]) ||
+			navigator.language || navigator.userLanguage || 'root').toLowerCase()); //$NON-NLS-1$
 		this.worker = new Worker(wUrl.href);
 		this.worker.onmessage = onMessage.bind(this);
 		this.worker.onerror = onError.bind(this);
@@ -634,8 +635,13 @@ define([
 			name: javascriptMessages['jsHover'],
 			contentType: ["application/javascript", "text/html"] //$NON-NLS-1$ //$NON-NLS-2$
 		});
-		
-	
+
+	provider.registerService("orion.debug.hoverEvaluationProvider", new Hover.JavaScriptDebugHover(astManager, scriptresolver, ternWorker, CUProvider), //$NON-NLS-1$
+		{
+			name: javascriptMessages['jsHoverEvaluationProvider'],
+			contentType: ["application/javascript", "text/html"] //$NON-NLS-1$ //$NON-NLS-2$
+		});
+
 	/**
 	 * Register AST manager as Model Change listener
 	 */
@@ -2298,7 +2304,7 @@ define([
 				{
 					id: "no-shadow-global", //$NON-NLS-1$
 					name: javascriptMessages["noShadowGlobals"],
-					defaultValue: info,
+					defaultValue: ignore,
 					type: "number", //$NON-NLS-1$
 					options: severities
 				},

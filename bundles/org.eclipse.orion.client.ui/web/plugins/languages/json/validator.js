@@ -18,17 +18,74 @@ define([
 	
 	var DEFAULT_VALIDATION_OPTIONS = {
 			bitwise: false, eqeqeq: true, es5: true, immed: true, indent: 1, maxerr: 300, newcap: true, nomen: false,
-			onevar: false, plusplus: false, regexp: true, strict: false, undef: true, white: false
+			onevar: false, plusplus: false, regexp: true, strict: false, undef: true, white: false, mixed_spaces_tabs: false
 	};
+	
+	var JSLINTRC = ".jslintrc";
+	
+	/**
+	 * @name readConfigFile
+	 * @description Reads the JSLint configuratio file from the "project"
+	 * @param {?} meta The file metadata we are about to validate
+	 * @returns {?} Returns the JSLint configuration options to use or null
+	 * @since 16.0
+	 */
+	function readConfig(meta) {
+		if(!this.project || (this.project && meta.location.indexOf(this.project.Location) !== 0)) {
+			return this.getFileClient().getProject(meta.location, {names: [JSLINTRC]}).then(function(project) {
+				this.project = project;
+				return readFile.call(this, this.project.Location, JSLINTRC);
+			}.bind(this));
+		}
+		return readFile.call(this, this.project.Location, JSLINTRC);
+	}
+	
+	function readFile(projectPath, childName) {
+		var _project = this.project ? this.project.Location : projectPath;
+		if (_project.lastIndexOf('/') !== _project.length-1){
+			_project += '/';
+		}
+		var filePath = _project+childName;
+		return this.getFileClient().read(filePath, false, false, {readIfExists: true}).then(function(child) {
+			if(typeof child === 'string') {
+				try {
+		            return JSON.parse(child);
+	            } catch(e) {
+	            	return null;
+	            }
+	        }
+			return null;
+		},
+		function rejected() {
+			return null;
+		});
+	}
 	
 	/**
 	 * @name JsonValidator
 	 * @description Creates a new JsonValidator instance
+	 * @param {ServiceRegistry} serviceregistry The backing service registry 
 	 * @returns {JsonValidator} A new instance
 	 * @since 13.0
 	 */
-	function JsonValidator() {
+	function JsonValidator(serviceregistry) {
+		this.registry = serviceregistry;
+		this.project = null;
+		this.fileClient = null;
 	}
+	
+	/**
+	 * @name JsonValidator.prototype.getFileClient
+	 * @description Returns the file client to use
+	 * @function
+	 * @returns {orion.FileClient} The file client
+	 */
+	JsonValidator.prototype.getFileClient = function getFileClient() {
+		if(!this.fileClient) {
+			this.fileClient = this.registry.getService("orion.core.file.client"); //$NON-NLS-1$
+		}
+		return this.fileClient;
+	};
 	
 	/**
 	 * @name JsonValidator.prototype.computeProblems
@@ -37,14 +94,22 @@ define([
 	 * @param {?} editorContext The backing editor context
 	 * @param {?} context The state
 	 * @returns {Array.<{?}>} The array of Orion problems
+	 * @callback
 	 */
 	JsonValidator.prototype.computeProblems = function computeProblems(editorContext, context) {
-		return editorContext.getText().then(_computeProblems.bind(null, context));
+		return editorContext.getFileMetadata().then(function(meta) {
+			return readConfig.call(this, meta).then(function(config) {
+				var cfg = config || DEFAULT_VALIDATION_OPTIONS;
+				return editorContext.getText().then(function(text) {
+					return _computeProblems(cfg, text);
+				});
+			});
+		}.bind(this));
 	};
 
 	/* Runs JSLint on the given contents */
-	function jslint(contents) {
-		JSLINT(contents, DEFAULT_VALIDATION_OPTIONS);
+	function jslint(contents, options) {
+		JSLINT(contents, options);
 		return JSLINT.data();
 	}
 
@@ -53,7 +118,7 @@ define([
 	 * @param {String} contents Text of file.
 	 */
 	function _computeProblems(options, contents) {
-		var result = jslint(contents);
+		var result = jslint(contents, options);
 		var problems = [];
 		var i;
 		if (result.errors) {

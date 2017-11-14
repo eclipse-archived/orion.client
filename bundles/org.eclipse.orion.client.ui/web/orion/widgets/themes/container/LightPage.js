@@ -346,8 +346,7 @@ define({
 		},
 		".statusLight.statusLightProgress": {
 			"background": "transparent",
-			"border-color": "lightgray",
-			"border-top-color": "transparent"
+			"border-color": "transparent lightgray lightgray lightgray",
 		},
 		".statusLight.statusLightRed": {
 			"background": "#C1272D"

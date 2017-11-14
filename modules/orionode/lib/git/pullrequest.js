@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012, 2016, 2017 IBM Corporation and others.
+ * Copyright (c) 2012, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -9,12 +9,13 @@
  *		 IBM Corporation - initial API and implementation
  *******************************************************************************/
 /*eslint-env node */
-var clone = require('./clone');
-var express = require('express');
-var request = require('request');
-var bodyParser = require('body-parser');
-var url = require("url");
-var tasks = require('../tasks');
+var clone = require('./clone'),
+	express = require('express'),
+	request = require('request'),
+	bodyParser = require('body-parser'),
+	url = require("url"),
+	tasks = require('../tasks'),
+	responseTime = require('response-time');
 
 module.exports = {};
 
@@ -23,9 +24,14 @@ module.exports.router = function(options) {
 	var gitRoot = options.gitRoot;
 	if (!fileRoot) { throw new Error('options.fileRoot is required'); }
 	if (!gitRoot) { throw new Error('options.gitRoot is required'); }
-	
+
+	var contextPath = options && options.configParams["orion.context.path"] || "";
+	fileRoot = fileRoot.substring(contextPath.length);
+
 	return express.Router()
 	.use(bodyParser.json())
+	.use(responseTime({digits: 2, header: "X-GitapiPullrequest-Response-Time", suffix: true}))
+	.use(options.checkUserAccess)
 	.post(fileRoot + '*', getPullRequest);
 	
 function pullRequestJSON(cloneDir,remoteDir,bodyJson) {
@@ -66,7 +72,7 @@ function getPullRequest(req, res) {
 	var task = new tasks.Task(res, false, true, 0, false);
 	if(gitUrl){
 		var isSsh = false;
-		if (gitUrl.indexOf("@") < gitUrl.indexOf(":")){
+		if (gitUrl.indexOf("@") < gitUrl.indexOf(":") && gitUrl.indexOf("https://") === -1){
 			gitUrl = "ssh://" + gitUrl;
 			isSsh = true;
 		}
@@ -84,7 +90,7 @@ function getPullRequest(req, res) {
 		headers: authHeader ? {'User-Agent': 'request',	'Authorization': authHeader} : {'User-Agent': 'request'}
 	};
 	
-	var fileDir, cloneDir, remoteDir,bodyJson;
+	var fileDir, cloneDir, remoteDir,bodyJson, theRepo;
 	clone.getRepo(req)
 	.then(function(repo) {
 		fileDir = clone.getfileDir(repo,req); 
@@ -114,7 +120,7 @@ function getPullRequest(req, res) {
 						Message: message,
 						Severity: "Error"
 					});
-				} else if (!error && response.statusCode === 403 && body.indexOf("API rate limit exceeded") !== -1) {
+				} else if (!error && response.statusCode === 403 && body.indexOf(" rate limit exceeded") !== -1) {
 					task.done({
 						HttpCode: 403,
 						Code: 0,
@@ -137,6 +143,9 @@ function getPullRequest(req, res) {
 			});
 	}).catch(function(err){
 		clone.handleRemoteError(task, err, gitRoot + "/clone" + fileDir);
+	})
+	.done(function() {
+		clone.freeRepo(theRepo);
 	});
 	function toBase64 (str) {
 		return (new Buffer(str || '', 'utf8')).toString('base64');

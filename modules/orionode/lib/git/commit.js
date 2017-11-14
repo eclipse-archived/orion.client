@@ -9,21 +9,21 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 /*eslint-env node */
-var api = require('../api'), writeError = api.writeError, writeResponse = api.writeResponse;
-var path = require('path');
-var diff = require("./diff");
-var mTags = require("./tags");
-var clone = require("./clone");
-var git = require('nodegit');
-var url = require('url');
-var crypto = require('crypto');
-var async = require('async');
-var express = require('express');
-var bodyParser = require('body-parser');
-var util = require('./util');
-var remotes = require('./remotes');
-var branches = require('./branches');
-var tasks = require('../tasks');
+var api = require('../api'), writeError = api.writeError, writeResponse = api.writeResponse,
+	path = require('path'),
+	diff = require("./diff"),
+	mTags = require("./tags"),
+	clone = require("./clone"),
+	git = require('nodegit'),
+	url = require('url'),
+	crypto = require('crypto'),
+	async = require('async'),
+	express = require('express'),
+	bodyParser = require('body-parser'),
+	remotes = require('./remotes'),
+	branches = require('./branches'),
+	tasks = require('../tasks'),
+	responseTime = require('response-time');
 
 module.exports = {};
 
@@ -33,12 +33,17 @@ module.exports.router = function(options) {
 	if (!fileRoot) { throw new Error('options.fileRoot is required'); }
 	if (!gitRoot) { throw new Error('options.gitRoot is required'); }
 	
+	var contextPath = options && options.configParams["orion.context.path"] || "";
+	fileRoot = fileRoot.substring(contextPath.length);
+	
 	module.exports.commitJSON = commitJSON;
 	module.exports.getDiff = getDiff;
 	module.exports.getCommitParents = getCommitParents;
 
 	return express.Router()
 	.use(bodyParser.json())
+	.use(responseTime({digits: 2, header: "X-GitapiCommit-Response-Time", suffix: true}))
+	.use(options.checkUserAccess)
 	.get('/:scope'+ fileRoot + '*', getCommit)
 	.put('/:commit'+ fileRoot + '*', putCommit)
 	.post('/:commit'+ fileRoot + '*', postCommit);
@@ -75,7 +80,7 @@ function getCommit(req, res) {
 
 function getCommitLog(req, res) {
 	var task = new tasks.Task(res,false,false,0,false);
-	var scope = util.decodeURIComponent(req.params.scope);
+	var scope = api.decodeURIComponent(req.params.scope);
 	var fileDir;
 
 	var query = req.query;
@@ -89,7 +94,7 @@ function getCommitLog(req, res) {
 	var sha1Filter = query.sha1;
 	var fromDateFilter = query.fromDate ? parseInt(query.fromDate, 10) : 0;
 	var toDateFilter = query.toDate ? parseInt(query.toDate, 10) : 0;
-	var filterPath;
+	var filterPath, repo;
 	var behindCount = 0, aheadCount= 0;
 	function filterCommit(commit) {
 		if (sha1Filter && commit.sha() !== sha1Filter) return true;
@@ -169,8 +174,10 @@ function getCommitLog(req, res) {
 								if (entries[i] !== null && entries[i].id().equal(entryId)) {
 									// if the entry id is the same as a parent, that means
 									// the content from the other branches should be ignored
+									// as they have been discarded in favour of the changes
+									// of this particular branch of history
 									for (var j = 0; j < entries.length; j++) {
-										if (i !== j) {
+										if (i !== j && (base === null || !parents[j].id().equal(base))) {
 											ignore.push(parents[j].id());
 										}
 									}
@@ -221,14 +228,14 @@ function getCommitLog(req, res) {
 			}
 		})
 		.catch(function(err) {
-			if (err.message === "No merge base found") {
+			if (err.message === "no merge base found") {
 				// two commits in unrelated histories
 				return null;
 			}
 			throw err;
 		});
 	}
-	var commits = []	, repo;
+	var commits = [];
 	function sendResponse(over) {
 		var refs = scope.split("..");
 		var toRef, fromRef; 
@@ -243,7 +250,7 @@ function getCommitLog(req, res) {
 			"Children": commits,
 			"RepositoryPath": filterPath,
 			"Type": "Commit",
-			"Location":gitRoot + "/commit/" + util.encodeURIComponent(scope) + fileRoot + req.params[0],
+			"Location":gitRoot + "/commit/" + api.encodeURIComponent(scope) + fileRoot + req.params[0],
 			"CloneLocation": gitRoot + "/clone" + fileDir
 		};
 		if(mergeBase){
@@ -323,6 +330,7 @@ function getCommitLog(req, res) {
 			}
 		})
 		.then(function() {
+			clone.freeRepo(repo);
 			task.done({
 				HttpCode: 200,
 				Code: 0,
@@ -443,6 +451,7 @@ function getCommitLog(req, res) {
 				if (error.errno === git.Error.CODE.ITEROVER) {
 					sendResponse(true);
 				} else {
+					clone.freeRepo(repo);
 					task.done({
 						HttpCode: 404,
 						Code: 0,
@@ -496,6 +505,7 @@ function getCommitLog(req, res) {
 				if (error.errno === git.Error.CODE.ITEROVER) {
 					sendResponse(true);
 				} else {
+					clone.freeRepo(repo);
 					task.done({
 						HttpCode: 404,
 						Code: 0,
@@ -532,7 +542,7 @@ function getCommitLog(req, res) {
 				// find the common ancestor for calculating incoming/outgoing changes
 				return git.Merge.base(repo, commit0, commit1)
 				.catch(function(err) {
-					if (err.message === "No merge base found") {
+					if (err.message === "no merge base found") {
 						return null;
 					}
 					throw err;
@@ -567,6 +577,7 @@ function getCommitLog(req, res) {
 			log(repo, scope);
 		}
 	}).catch(function(err) {
+		clone.freeRepo(repo);
 		task.done({
 			HttpCode: 400,
 			Code: 0,
@@ -702,7 +713,11 @@ function getDiff(repo, commit, fileDir) {
 			"Children": diffs
 		};
 		if (patches.length > 100) {
-			result.NextLocation = {pathname: gitRoot + "/diff/" + range + fileDir, query: {pageSize: pageSize, page: page + 1}};
+			var nextLocation = url.parse(gitRoot + "/diff/" + range + fileDir, true);
+			nextLocation.query.page = page + 1 + "";
+			nextLocation.query.pageSize = pageSize + "";
+			nextLocation = url.format(nextLocation);
+			result.NextLocation = nextLocation;
 		}
 		return result;
 	});
@@ -732,6 +747,9 @@ function getCommitBody(req, res) {
 		writeResponse(200, res, {'Content-Type':'application/octect-stream','Content-Length': resp.length}, resp, false, true);
 	}).catch(function(err) {
 		writeError(404, res, err.message);
+	})
+	.done(function() {
+		clone.freeRepo(theRepo);
 	});
 }
 
@@ -739,7 +757,7 @@ function identifyNewCommitResource(req, res, newCommit) {
 	var originalUrl = url.parse(req.originalUrl, true);
 	var segments = originalUrl.pathname.split("/");
 	var contextPathSegCount = req.contextPath.split("/").length - 1;
-	segments[3 + contextPathSegCount] = segments[3 + contextPathSegCount] + ".." + util.encodeURIComponent(newCommit);
+	segments[3 + contextPathSegCount] = segments[3 + contextPathSegCount] + ".." + api.encodeURIComponent(newCommit);
 	var location = url.format({pathname: segments.join("/"), query: originalUrl.query});
 	writeResponse(200, res, null, {
 		"Location": location
@@ -778,6 +796,9 @@ function revert(req, res, commitToRevert) {
 	})
 	.catch(function(err) {
 		writeError(404, res, err.message);
+	})
+	.done(function() {
+		clone.freeRepo(theRepo);
 	});
 }
 
@@ -819,7 +840,7 @@ function cherryPick(req, res, commitToCherrypick) {
 		});
 	})
 	.catch(function(err) {
-		if(err.message.indexOf("Cannot create a tree") !== -1){
+		if(err.message.indexOf("cannot create a tree") !== -1){
 			writeResponse(200, res, null, {
 				"HeadUpdated": true,
 				"Result": "CONFLICTING"
@@ -827,6 +848,9 @@ function cherryPick(req, res, commitToCherrypick) {
 		}else{
 			writeError(400, res, err.message);
 		}
+	})
+	.done(function() {
+		clone.freeRepo(theRepo);
 	});
 }
 
@@ -933,6 +957,9 @@ function rebase(req, res, commitToRebase, rebaseOperation) {
 	})
 	.catch(function(err) {
 		writeError(400, res, err.message);
+	})
+	.done(function() {
+		clone.freeRepo(repo);
 	});
 
 }
@@ -1015,7 +1042,7 @@ function merge(req, res, branchToMerge, squash) {
 			});
 		})
 		.catch(function(err) {
-			if (err.message === "No merge base found") {
+			if (err.message === "no merge base found") {
 				// no common ancestor between the two branches, force the merge
 				return forceMerge(repo, head, commit, branchToMerge, true, function(conflictingPaths) {
 					paths = conflictingPaths;
@@ -1042,6 +1069,9 @@ function merge(req, res, branchToMerge, squash) {
 	})
 	.catch(function(err) {
 		writeError(400, res, err.message);
+	})
+	.done(function() {
+		clone.freeRepo(repo);
 	});
 }
 
@@ -1173,16 +1203,19 @@ function createCommit(repo, committerName, committerEmail, authorName, authorEma
 			if (amend) {
 				return parent.amend("HEAD",  author, committer, null, message, oid);
 			} else if (mergeRequired) {
-				var promises = [ Promise.resolve(parent) ];
 				// get merge heads
+				var oids = [];
 				return repo.mergeheadForeach(function(oid) {
-					promises.push(repo.getCommit(oid));
+					oids.push(oid.tostrS());
 				})
 				.then(function() {
 					// wait for all parents to be resolved
-					return Promise.all(promises);
+					return Promise.all(oids.map(function(oid) {
+						return repo.getCommit(oid);
+					}));
 				})
 				.then(function(parentCommits) {
+					parentCommits.unshift(parent);
 					// create the merge commit on top of the MERGE_HEAD parents
 					return repo.createCommit("HEAD", author, committer, message, oid, parentCommits);
 				});
@@ -1231,11 +1264,14 @@ function tag(req, res, commitId, name, isAnnotated, message) {
 	})
 	.catch(function(err) {
 		writeError(403, res, err.message);
+	})
+	.done(function() {
+		clone.freeRepo(theRepo);
 	});
 }
 
 function putCommit(req, res) {
-	var commit = util.decodeURIComponent(req.params.commit);
+	var commit = api.decodeURIComponent(req.params.commit);
 	var tagName = req.body.Name;
 	var isAnnotated = req.body.Annotated === undefined || req.body.Annotated;
 	var message = req.body.Message || "";
@@ -1267,7 +1303,7 @@ function postCommit(req, res) {
 		return;
 	}
 	
-	var commit = util.decodeURIComponent(req.params.commit);
+	var commit = api.decodeURIComponent(req.params.commit);
 	if (commit !== "HEAD") {
 		writeError(404, res, "Needs to be HEAD");
 		return;
@@ -1305,6 +1341,9 @@ function postCommit(req, res) {
 	})
 	.catch(function(err) {
 		writeError(403, res, err.message);
+	})
+	.done(function() {
+		clone.freeRepo(theRepo);
 	});
 }
 

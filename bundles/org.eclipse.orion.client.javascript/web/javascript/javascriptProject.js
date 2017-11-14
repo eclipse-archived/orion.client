@@ -67,41 +67,35 @@ define([
 		 * @callback
 		 */
 		onCreated: function onCreated(project, qualifiedName, fileName) {
-			//We can read the new files and update here, but that could take longer than 
-			//would be ready for the next getComputedEnvironment call - just wipe the cache
-			//and recompute when asked for
-			if(project.importantChange(qualifiedName, fileName)) {
-				this._update(project);
-			}
+			this.setUpdateRequired(project, qualifiedName, fileName);
 		},
 		/**
 		 * @callback
 		 */
 		onDeleted: function onDeleted(project, qualifiedName, fileName) {
-			//We don't have access to the deleted contents - wipe the cache and recompute
-			if(project.importantChange(qualifiedName, fileName)) {
-				this._update(project);
-			}
+			this.setUpdateRequired(project, qualifiedName, fileName);
 		},
 		/**
 		 * @callback
 		 */
 		onModified: function onModified(project, qualifiedName, fileName) {
-			project.updateNeeded = project.importantChange(qualifiedName, fileName);
+			this.setUpdateRequired(project, qualifiedName, fileName);
 		},
 		/**
-		 * @name _wipeCache
-		 * @description Clears the 'env' cache if the file name is a project configuration-like file
+		 * @name setUpdateRequired
+		 * @description Sets the state of the computed environemnt to needing an update
 		 * @function
-		 * @private
-		 * @param {JavaScriptProject} project The backing project
+		 * @param {JavaScriptProject.prototype} project The backing project making the callback
+		 * @param {string} qualifiedName The fully qualified name of the file that has changed
+		 * @param {string} fileName The file name
+		 * @since 16.0
 		 */
-		_update: function _update(project) {
-			project.projectPromise = new Deferred();
-			return computeEnvironment(project, true).then(/* @callback */ function(env) {
-				project.projectPromise.resolve();
-			});
-		} 
+		setUpdateRequired: function setUpdateRequired(project, qualifiedName, fileName) {
+			var important = project.importantChange(qualifiedName, fileName);	
+			if(important) {
+				project.updateNeeded = true;
+			}
+		}
 	};
 	
 	var initialized = false;
@@ -210,6 +204,9 @@ define([
 			return new Deferred().resolve(null);
 		}
 		var _project = this.projectMeta ? this.projectMeta.Location : projectPath;
+		if (_project.lastIndexOf('/') !== _project.length-1){
+			_project += '/';
+		}
 		var filePath = _project+childName;
 		if(this.map[filePath]) {
 			return new Deferred().resolve(this.map[filePath]);
@@ -225,8 +222,8 @@ define([
 			return null;
 		});
 	};
-	
-	/**
+	 
+	/** 
 	 * @description Fetch the children of the named child folder of the current project context
 	 * @function
 	 * @param {String} childName The short name of the project child to get
@@ -239,6 +236,9 @@ define([
 			return new Deferred().resolve(null);
 		}
 		var _project = this.projectMeta ? this.projectMeta.Location : projectPath;
+		if (_project.lastIndexOf('/') !== _project.length-1){
+			_project += '/';
+		}
 		var folderPath = _project+childName;
 		return this.getFileClient().fetchChildren(folderPath, {readIfExists: true}).then(function(children) {
             return children;
@@ -318,8 +318,8 @@ define([
 		switch(filename) {
 			case JavaScriptProject.prototype.TERN_PROJECT: {
 				var json = Object.create(null);
-				json.ecmaVersion = 6;
-				json.libs = ['ecma5', 'ecma6'];
+				json.ecmaVersion = 7;
+				json.libs = ['ecma5', 'ecma6', 'ecma7'];
 				json.plugins = Object.create(null);
 				json.loadEagerly = [];
 				return json;
@@ -437,7 +437,9 @@ define([
 			return true;
 		}
 		var folderPath = this.getProjectPath()+this.DEFINITIONS;
-		return qualifiedName === folderPath || qualifiedName.indexOf(folderPath) === 0;
+		//check for valid names from events
+		//see https://bugs.eclipse.org/bugs/show_bug.cgi?id=525696
+		return qualifiedName === folderPath || (qualifiedName && qualifiedName.indexOf(folderPath) === 0);
 	};
 
 	/**
@@ -483,7 +485,7 @@ define([
 			return project.getESlintOptions().then(function(options) {
 				processEslintOptions(project, options);
 				if(typeof project.map.env.ecmaVersion !== 'number') {
-					project.map.env.ecmaVersion = 6;
+					project.map.env.ecmaVersion = 7;
 				}
 				return project.getFile(project.NODE_MODULES).then(function(file) {
 					if(file && typeof file.contents === "string") {
@@ -506,6 +508,25 @@ define([
 				});
 			});
 		});
+	}
+	
+	/**
+	 * @description Translate the ecmaVersion from its year-form to simple number form
+	 * @param {number} ev The ecmaVersion to translate
+	 * @returns {number} The simple number to use for the ECMA version
+	 * @since 16.0
+	 */
+	function translateEcma(ev) {
+		var r = 7;
+		if(typeof ev === 'number') {
+			r = ev;
+			if(ev > 2014) {
+				r = ev - 2009;
+			} else if(r < 4) {
+				r = 7;
+			}
+		}
+		return r;
 	}
 	
 	/**
@@ -557,12 +578,16 @@ define([
 					}
 				} 
 				if(typeof vals.ecmaVersion === 'number') {
-					if(vals.ecmaVersion > 4 && vals.ecmaVersion < 8) {
-						project.map.env.envs.es6 = vals.ecmaVersion >= 6;
-						project.map.env.ecmaVersion = vals.ecmaVersion;
+					var ecma = translateEcma(vals.ecmaVersion);
+					if(ecma > 4 && ecma <= 9) {
+						project.map.env.envs.es6 = ecma >= 6;
+						project.map.env.envs.es7 = ecma >= 7;
+						project.map.env.envs.es8 = ecma >= 8;
+						project.map.env.ecmaVersion = ecma;
 					} else {
-						project.map.env.ecmaVersion = 6;
+						project.map.env.ecmaVersion = 7;
 						project.map.env.envs.es6 = true;
+						project.map.env.envs.es7 = true;
 					}
 				} 
 				if(vals.sourceType === 'modules') {

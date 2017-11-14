@@ -53,10 +53,19 @@ define([
 			this.filteredResources = filteredResources;
 		}
 		this.filter = new FileFilter(this.filteredResources);
+		this._annotations = [];
+		// Listen to annotation changed events
+		this._annotationChangedHandler = this._handleAnnotationChanged.bind(this)
+		this.fileClient.addEventListener('AnnotationChanged', this._annotationChangedHandler);
 	}
 	FileModel.prototype = new mExplorer.ExplorerModel();
 	objects.mixin(FileModel.prototype, /** @lends orion.explorer.FileModel.prototype */ {
-		getRoot: function(onItem) {
+		destroy: function () {
+			this.fileClient.removeEventListener("AnnotationChanged", this._annotationChangedHandler);
+			mExplorer.ExplorerModel.prototype.destroy.call(this);
+		},
+
+		getRoot: function(onItem){
 			onItem(this.root);
 		},
 
@@ -152,6 +161,27 @@ define([
 				result = this.root.Children.length > 0;
 			}
 			return result;
+		},
+
+		getAnnotations: function() {
+			return this._annotations;
+		},
+
+		_handleAnnotationChanged: function(evt) {
+			var model = this;
+			if (evt.removeTypes) {
+				for (var i = this._annotations.length - 1; i >= 0; i--) {
+					for (var j = 0; j < evt.removeTypes.length; j++) {
+						if (this._annotations[i] instanceof evt.removeTypes[j]) {
+							this._annotations.splice(i, 1);
+							break;
+						}
+					}
+				}
+			}
+			evt.annotations.forEach(function(annotation) {
+				model._annotations.push(annotation);
+			});
 		}
 	});
 
@@ -183,7 +213,7 @@ define([
 		},
 		_isExpression: function(fileFilter) {
 			if (fileFilter) {
-				return fileFilter.includes("*") || fileFilter.includes("?");
+				return (fileFilter.indexOf("*") > -1) || (fileFilter.indexOf("?") > -1);
 			}
 			return false;
 		},
@@ -274,10 +304,13 @@ define([
 		this.checkbox = false;
 		this._hookedDrag = false;
 		this.filteredResources = options.filteredResources;
+		this._annotations = [];
 		var modelEventDispatcher = options.modelEventDispatcher ? options.modelEventDispatcher : new EventTarget();
 		this.modelEventDispatcher = modelEventDispatcher;
-		//Listen to all resource changed events
+		// Listen to all resource changed events
 		this.fileClient.addEventListener("Changed", this._resourceChangedHandler = this.handleResourceChange.bind(this));
+		// Listen to annotation changed events
+		this.fileClient.addEventListener('AnnotationChanged', this._annotationChangedHandler = this._handleAnnotationChanged.bind(this));
 		// Listen to model changes from fileCommands
 		var _self = this;
 		this._modelListeners = {};
@@ -355,6 +388,7 @@ define([
 				parentNode.removeEventListener("click", this._clickListener);
 			}
 			this.fileClient.removeEventListener("Changed", this._resourceChangedHandler);
+			this.fileClient.removeEventListener("AnnotationChanged", this._annotationChangedHandler);
 			mExplorer.Explorer.prototype.destroy.call(this);
 		},
 		_isFileCreationAtRootEnabled : function() {
@@ -370,7 +404,9 @@ define([
 			var elementNode;
 			// Special case in electron, or when create file at root enabled.
 			// Need to find the workspace element to create file at workspace level.
-			if (loc === "/file") {
+			if (this.treeRoot && loc === this.treeRoot.Location) {
+				elementNode = this.treeRoot;
+			} else if (loc === "/file") {
 				if (util.isElectron || this._isFileCreationAtRootEnabled()) {
 					elementNode = this.model.root;
 				}
@@ -395,6 +431,9 @@ define([
 			if (evt && evt.created) {
 				return this._handleResourceCreate(evt);
 			}
+			if (evt && evt.refresh) {
+				return this._handleResourceRefresh(evt);
+			}
 			return new Deferred().resolve();
 		},
 		_handleResourceCreate: function(evt) {
@@ -404,7 +443,8 @@ define([
 					type: "create",
 					select: createdItem.eventData ? createdItem.eventData.select : false,
 					newValue: createdItem.result,
-					parent: this._getUIModel(createdItem.parent)
+					parent: this._getUIModel(createdItem.parent),
+					silent: evt.silent
 				};
 			}.bind(this));
 			return this.onModelCreate(items[0]).then(function( /*result*/ ) {
@@ -419,7 +459,8 @@ define([
 				return {
 					oldValue: uiModel,
 					newValue: null,
-					parent: uiModel ? uiModel.parent : null
+					parent: uiModel ? uiModel.parent : null,
+					silent: evt.silent
 				};
 			}.bind(this));
 			var newEvent = {
@@ -429,6 +470,24 @@ define([
 				return items[0];
 			});
 		},
+		_handleResourceRefresh: function(evt) {
+			// Get previous selection to display after refresh.
+			var selected = this.selection && this.selection.getSelection() ? this.selection.getSelection() : null;
+			// If no item is selected, default to the item in the current window hash
+			if (!selected) {
+				selected = {Location: window.location.href.split("#")[1]};
+			}
+			var selectedItem = this._getUIModel(selected.Location);
+			var promises = evt.refresh.map(function(refreshItem) {
+				var item = refreshItem && refreshItem.Location ? refreshItem : this.model.root;
+				return new Deferred().resolve(this.changedItem(item, item === this.model.root));
+			}.bind(this));
+			return Deferred.all(promises).then(function() {
+				if (selectedItem) {
+					this.reveal(selectedItem, true);
+				}
+			}.bind(this));
+		},
 		_handleResourceMoveOrCopy: function(evt) {
 			//Convert the item array( {source, target, result} ) to an array of {newValue, oldValue, parent}
 			var itemArray = evt.moved ? evt.moved : evt.copied;
@@ -436,7 +495,8 @@ define([
 				return {
 					oldValue: this._getUIModel(movedItem.source),
 					newValue: movedItem.result,
-					parent: this._getUIModel(movedItem.target)
+					parent: this._getUIModel(movedItem.target),
+					silent: evt.silent
 				};
 			}.bind(this));
 			var newEvent = {
@@ -464,8 +524,15 @@ define([
 		//		onLinkClick: function(clickEvent) {
 		//			this.dispatchEvent(clickEvent);
 		//		},
+
+		_handleAnnotationChanged: function(evt) {
+			if (this.myTree) {
+				this.myTree.requestAnnotationRefresh();
+			}
+		},
+
 		onModelCreate: function(modelEvent) {
-			return this.changedItem(modelEvent.parent, true);
+			return this.changedItem(modelEvent.parent, !modelEvent.silent);
 		},
 		onModelCopy: function(modelEvent) {
 			var ex = this,
@@ -476,7 +543,7 @@ define([
 				changedLocations[itemParent.Location] = itemParent;
 			});
 			return Deferred.all(Object.keys(changedLocations).map(function(loc) {
-				return ex.changedItem(changedLocations[loc], true);
+				return ex.changedItem(changedLocations[loc], !modelEvent.silent);
 			}));
 		},
 		onModelMove: function(modelEvent) {
@@ -513,7 +580,7 @@ define([
 				}
 			});
 			return Deferred.all(Object.keys(changedLocations).map(function(loc) {
-				return ex.changedItem(changedLocations[loc], true);
+				return ex.changedItem(changedLocations[loc], !modelEvent.silent);
 			}));
 		},
 		onModelDelete: function(modelEvent) {
@@ -526,7 +593,7 @@ define([
 					return false;
 				}
 				if (item.oldValue.Location === (treeRoot.Location || treeRoot.ContentLocation)) {
-					if (item.oldValue.Location !== (item.parent.Location || item.parent.ContentLocation)) {
+					if (item.parent && item.oldValue.Location !== (item.parent.Location || item.parent.ContentLocation)) {
 						newRoot = item.parent;
 					}
 					return true;
@@ -545,7 +612,7 @@ define([
 				}
 			});
 			return Deferred.all(Object.keys(changedLocations).map(function(loc) {
-				return ex.changedItem(changedLocations[loc], true);
+				return ex.changedItem(changedLocations[loc], !modelEvent.silent);
 			}));
 		},
 
@@ -858,25 +925,38 @@ define([
 								if (deferredWrapper) {
 									// this is part of a folder upload, upload the file directly without showing
 									// progress for it but call decrementEntryCount when the upload finishes
-									var unzip = file.name.indexOf(".zip") === file.name.length - 4 && window.confirm(i18nUtil.formatMessage(messages["Unzip ${0}?"], file.name)); //$NON-NLS-1$ //$NON-NLS-0$
-									performDrop(target, file, explorer, unzip, false, true).then(
-										decrementEntryCount,
-										function(error) {
-											decrementEntryCount();
-											var errorMessage = messages["UploadingFileErr"] + file.name;
-											if (error && error.Message) {
-												errorMessage += " [" + error.Message + "]";
+									var d = new Deferred();
+									if(file.name.indexOf(".zip") === file.name.length - 4){
+										var dialog = explorer.serviceRegistry.getService("orion.page.dialog");								
+										dialog.confirm(i18nUtil.formatMessage(messages["Unzip ${0}?"], file.name), function(result){
+											if(!result){
+												result = false;
 											}
-											if (statusService) {
-												statusService.setProgressResult({
-													Severity: "Error",
-													Message: errorMessage
-												});
-											} else {
-												window.console.log(errorMessage);
+											d.resolve(result);
+										});	
+									}else{
+										d.resolve(false);
+									}
+									Deferred.when(d, function(unzip){
+										performDrop(target, file, explorer, unzip, false, true).then(
+											decrementEntryCount,
+											function(error) {
+												decrementEntryCount();
+												var errorMessage = messages["UploadingFileErr"] + file.name;
+												if (error && error.Message) {
+													errorMessage += " [" + error.Message + "]";
+												}
+												if (statusService) {
+													statusService.setProgressResult({
+														Severity: "Error",
+														Message: errorMessage
+													});
+												} else {
+													window.console.log(errorMessage);
+												}
 											}
-										}
-									);
+										);
+									});
 								} else {
 									explorer._uploadFile(item, file, true);
 								}
@@ -1029,50 +1109,70 @@ define([
 					var ignoreErrors = false;
 
 					var statusService = this.registry.getService("orion.page.message"); //$NON-NLS-0$
-
-					var unzip = file.name.indexOf(".zip") === file.name.length - 4 && window.confirm(i18nUtil.formatMessage(messages["Unzip ${0}?"], file.name)); //$NON-NLS-1$ //$NON-NLS-0$
-					var promise = this.dragAndDrop(targetItem, file, this, unzip, false, true);
-					var done = function() {
-						destroy();
-						this.changedItem(targetItem, true);
-					}.bind(this);
-					promise.then(
-						done,
-						function(error) {
-							done();
-							if (ignoreErrors) {
-								return;
+					var d = new Deferred();
+					if(file.name.indexOf(".zip") === file.name.length - 4){
+						var dialog = this.serviceRegistry.getService("orion.page.dialog");								
+						dialog.confirm(i18nUtil.formatMessage(messages["Unzip ${0}?"], file.name), function(result){
+							if(!result){
+								result = false;
 							}
-							var errorMessage = messages["UploadingFileErr"] + file.name;
-							if (event && event.Message) {
-								errorMessage += " [" + event.Message + "]";
+							d.resolve(result);
+						});	
+					}else{
+						d.resolve(false);
+					}
+					Deferred.when(d, function(unzip){
+						var promise = this.dragAndDrop(targetItem, file, this, unzip, false, true);
+						var done = function() {
+							destroy();
+							this.fileClient.dispatchEvent({
+								type: "Changed",
+								created: [{
+									parent: targetItem.Location,
+									eventData: {
+										select: false
+									}
+								}]
+							});
+						}.bind(this);
+						promise.then(
+							done,
+							function(error) {
+								done();
+								if (ignoreErrors || error.userCanceled) {
+									return;
+								}
+								var errorMessage = messages["UploadingFileErr"] + file.name;
+								if (event && event.Message) {
+									errorMessage += " [" + event.Message + "]";
+								}
+								if (statusService) {
+									statusService.setProgressResult({
+										Severity: "Error",
+										Message: errorMessage
+									});
+								} else {
+									window.console.log(errorMessage);
+								}
+							},
+							function(event) {
+								var percentageText = "";
+								if (event.lengthComputable) {
+									percentageText = Math.floor(event.loaded / event.total * 100) + "%";
+									progressBar.style.width = percentageText;
+									var loadedKB = Math.round(event.loaded / 1024);
+									var totalKB = Math.round(event.total / 1024);
+									progressBar.title = messages["Upload progress: "] + percentageText + ",  " + loadedKB + "/" + totalKB + " KB"; //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+									refNode.title = progressBar.title;
+								}
 							}
-							if (statusService) {
-								statusService.setProgressResult({
-									Severity: "Error",
-									Message: errorMessage
-								});
-							} else {
-								window.console.log(errorMessage);
-							}
-						},
-						function(event) {
-							var percentageText = "";
-							if (event.lengthComputable) {
-								percentageText = Math.floor(event.loaded / event.total * 100) + "%";
-								progressBar.style.width = percentageText;
-								var loadedKB = Math.round(event.loaded / 1024);
-								var totalKB = Math.round(event.total / 1024);
-								progressBar.title = messages["Upload progress: "] + percentageText + ",  " + loadedKB + "/" + totalKB + " KB"; //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-								refNode.title = progressBar.title;
-							}
-						}
-					);
-
-					cancelButton.addEventListener("click", function() {
-						ignoreErrors = true;
-						promise.cancel();
-					});
+						);
+	
+						cancelButton.addEventListener("click", function() {
+							ignoreErrors = true;
+							promise.cancel();
+						});
+					}.bind(this));
 				}.bind(this));
 			}.bind(this);
 

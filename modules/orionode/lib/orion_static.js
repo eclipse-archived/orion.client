@@ -12,14 +12,11 @@
 var express = require('express');
 var nodePath = require('path');
 var mime = require('mime');
-//var mime = connect.mime;
 
-//not sure what mime is for
+//Add custom mime/extension mappings for files with costomized extension, like : pref
 mime.define({
 	'application/json': ['pref', 'json']
 });
-
-var _24_HOURS = 1440 * 60000;
 
 /**
  * @param {Object} options Options to be passed to static middleware
@@ -28,7 +25,6 @@ var _24_HOURS = 1440 * 60000;
 exports = module.exports = function(options) {
 	options = options || {};
 	options.dotfiles = 'allow';
-	options.maxAge = typeof options.maxAge === "number" ? options.maxAge : _24_HOURS;
 	var orionClientRoot = options.orionClientRoot;
 	if (!orionClientRoot) { throw new Error('orion-static root path required'); }
 
@@ -55,6 +51,7 @@ exports = module.exports = function(options) {
 		'./bundles/org.eclipse.orion.client.webtools/web',
 		'./bundles/org.eclipse.orion.client.users/web',
 		'./bundles/org.eclipse.orion.client.cf/web',
+		'./bundles/org.eclipse.orion.client.debug/web'
 	];
 	var fullStaticAssets = options.prependStaticAssets.concat(originalStaticAssets).concat(options.appendStaticAssets);
 	fullStaticAssets = fullStaticAssets.forEach(function(bundlePath) {

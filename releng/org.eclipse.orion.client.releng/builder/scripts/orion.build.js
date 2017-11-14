@@ -35,6 +35,7 @@
     // Bundles whose ./web/ folders will be copied into the staging directory by the builder.
     // ** For Nashorn compatibility, use single quotes here **
     bundles: [
+        '${orionClient}/bundles/org.eclipse.orion.client.collab',
         '${orionClient}/bundles/org.eclipse.orion.client.core',
         '${orionClient}/bundles/org.eclipse.orion.client.cf',
         '${orionClient}/bundles/org.eclipse.orion.client.ui',
@@ -43,10 +44,12 @@
         '${orionClient}/bundles/org.eclipse.orion.client.help',
         '${orionClient}/bundles/org.eclipse.orion.client.javascript',
         '${orionClient}/bundles/org.eclipse.orion.client.webtools',
-        '${orionClient}/bundles/org.eclipse.orion.client.users'
+        '${orionClient}/bundles/org.eclipse.orion.client.users',
+        '${orionClient}/bundles/org.eclipse.orion.client.debug'
     ],
     // Folders that should be searched for JSDoc
     jsdocs: [
+        '${orionClient}/bundles/org.eclipse.orion.client.collab/web/orion/',
         '${orionClient}/bundles/org.eclipse.orion.client.core/web/orion/',
         '${orionClient}/bundles/org.eclipse.orion.client.cf/web/orion/',
         '${orionClient}/bundles/org.eclipse.orion.client.ui/web/orion/',
@@ -139,7 +142,7 @@
             { name: "sites/sites" },
             { name: "sites/view" },
             { name: "webtools/plugins/webToolsPlugin" },
-            { name: "orion/splash" },
+            { name: "orion/splash" }
         ];
         modules.forEach(function(module) {
             module.excludeShallow = ["chai/chai"];

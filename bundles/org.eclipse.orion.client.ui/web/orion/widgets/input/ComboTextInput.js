@@ -65,6 +65,7 @@ define([
 				this._comboTextInputWrapper = this._domNode;
 			}
 			this._textInputNode = lib.$(".comboTextInputField", this._domNode); //$NON-NLS-0$
+			this._textInputNode.id = this._domNodeId + "comboTextInputField"; //$NON-NLS-0$
 			bidiUtils.initInputField(this._textInputNode);
 			this._textInputNode.addEventListener("focus", function() { //$NON-NLS-0$
 				this._domNode.classList.add("comboTextInputWrapperFocussed"); //$NON-NLS-0$ 
@@ -84,7 +85,6 @@ define([
 
 			this._comboTextInputButton = lib.$(".comboTextInputButton", this._domNode); //$NON-NLS-0$
 			if (this._hasButton) {
-				this._comboTextInputButton = lib.$(".comboTextInputButton", this._domNode); //$NON-NLS-0$
 				if (this._buttonText) {
 					this._comboTextInputButton.appendChild(document.createTextNode(this._buttonText));	
 				}
@@ -215,18 +215,6 @@ define([
 		 */
 		getRecentEntryButton: function() {
 			return this._recentEntryButton;
-		},
-		
-		/**
-		 * Sets the HTML title of the recentyEntryButton 
-		 * belonging to this combo text input.
-		 * 
-		 * @param {String} title The title of the recentEntryButton
-		 */
-		setRecentEntryButtonTitle: function(title){
-			if (this._recentEntryButton) {
-				this._recentEntryButton.title = title;
-			}
 		},
 		
 		/**

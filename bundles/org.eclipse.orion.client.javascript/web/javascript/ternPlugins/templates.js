@@ -40,6 +40,55 @@ define([
 	 */
 	var templates = [
 		{
+			prefix: "async", //$NON-NLS-1$
+			name: "async function",  //$NON-NLS-1$
+			nodes: {top:true, member:false, prop:false},
+			template: "async function ${name}(${param}) {\n"+
+   					  "    ${cursor}\n"+
+					  "}",
+			url: "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/async_function", 
+			doc: Messages.asyncFunction,
+			ecma: 9
+		},
+		{
+			prefix: "async", //$NON-NLS-1$
+			name: "async function expression",  //$NON-NLS-1$
+			nodes: {top:true, member:false, prop:false},
+			template: "var ${name} = async function ${name}(${param}) {\n"+
+   					  "    ${cursor}\n"+
+					  "};",
+			url: "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/async_function", 
+			doc: Messages.asyncFunctionExpression,
+			ecma: 9
+		},
+		{
+			prefix: "await", //$NON-NLS-1$
+			name: "await statement",  //$NON-NLS-1$
+			nodes: {top:true, assign: true, async:true, member:false, prop:false},
+			template: "await ${statement};", //$NON-NLS-1$
+			url: "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/await", 
+			doc: Messages.awaitExpression,
+			ecma: 9
+		},
+		{
+			prefix: "await", //$NON-NLS-1$
+			name: "await return statement",  //$NON-NLS-1$
+			nodes: {top:false, async:true, member:false, prop:false},
+			template: "return await ${statement};", //$NON-NLS-1$
+			url: "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/await", 
+			doc: Messages.awaitExpression,
+			ecma: 9
+		},
+		{
+			prefix: "await", //$NON-NLS-1$
+			name: "await variable statement",  //$NON-NLS-1$
+			nodes: {top:true, async:true, member:false, prop:false},
+			template: "var ${variable} = await ${statement};", //$NON-NLS-1$
+			url: "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/await", 
+			doc: Messages.awaitExpression,
+			ecma: 9
+		},
+		{
 			prefix: "if", //$NON-NLS-1$
 			name: "if statement",  //$NON-NLS-1$
 			nodes: {top:true, member:false, prop:false},
@@ -463,6 +512,9 @@ define([
 			      		if(kind && kind.kind) {
 				      		var tmpls = Finder.findTemplatesForKind(templates, kind.kind, cachedQuery.ecma ? cachedQuery.ecma : 6);
 				      		tmpls.forEach(function(template) {
+				      			if(!kind.isasync && template.nodes.async === true) {
+				      				return;
+				      			}
 								gather(template.name, null, 0, function(c) {
 									c.template = template.template;
 									c.doc = template.doc;

@@ -1,0 +1,18 @@
+---
+inherit: base-manifest.yml
+
+properties:
+  rails-env: production
+  app-host: app1-host
+
+applications:
+  - name: app1-web
+    host: ${app-host}
+    domain: ${target-base}
+    instances: 8
+    command: bundle exec rake server:start_command
+  - name: app1-worker1
+    instances: 4
+    command: bundle exec rake VERBOSE=true QUEUE=*
+  - name: app1-worker2
+    command: bundle exec rake VERBOSE=true

@@ -359,6 +359,10 @@ define([
 			element.id = id;
 			if (useImage && command.hasImage()) {
 				_addImageToElement(command, element, id);
+				// ensure there is accessible text describing this image
+				if (command.name) {
+					element.setAttribute("aria-label", command.name); //$NON-NLS-0$
+				}
 			} else {
 				element.className = "commandLink"; //$NON-NLS-0$
 				element.appendChild(document.createTextNode(command.name));

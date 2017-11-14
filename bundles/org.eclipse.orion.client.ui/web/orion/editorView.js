@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2010, 2016 IBM Corporation and others.
+ * Copyright (c) 2010, 2016, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License v1.0
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution
@@ -47,7 +47,7 @@ define([
 	'orion/commonPreferences',
 	'embeddedEditor/helper/memoryFileSysConst',
 	'orion/objects',
-	'orion/formatter'	
+	'orion/formatter'
 ], function(
 	messages,
 	mEditor, mAnnotations, mEventTarget, mTextView, mTextModelFactory, mEditorFeatures, mHoverFactory, mContentAssist,
@@ -98,6 +98,7 @@ define([
 		this.inputManager = options.inputManager;
 		this.preferences = options.preferences;
 		this.readonly = options.readonly;
+		this.singleMode = options.singleMode;
 		this.searcher = options.searcher;
 		this.statusReporter = options.statusReporter;
 		this.model = options.model;
@@ -208,6 +209,7 @@ define([
 			}
 			return {
 				readonly: this.readonly || this.inputManager.getReadOnly(),
+				singleMode: this.singleMode,
 				tabSize: prefs.tabSize || 4,
 				expandTab: prefs.expandTab,
 				wrapMode: prefs.wordWrap,
@@ -484,6 +486,17 @@ define([
 				domNode: this._parent,
 				syntaxHighlighter: this.syntaxHighlighter
 			});
+			if(this.preferences) {
+				this.preferences.get("/plugins").then(function(plugins) {
+					if (plugins["collab/plugins/collabPlugin.html"]) {
+						require(['orion/collab/collabClient'], function(mCollabClient){
+							mCollabClient.init(function() {
+								var collab = new mCollabClient.CollabClient(editor, that.inputManager, that.fileClient, that.serviceRegistry, that.commandRegistry, that.preferences);
+							})
+						});
+					}
+				});
+			}
 			editor.id = "orion.editor"; //$NON-NLS-0$
 			editor.processParameters = function(params) {
 				parseNumericParams(params, ["start", "end", "line", "offset", "length"]); //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-5$
@@ -614,7 +627,7 @@ define([
 			 * @since 9.0
 			 */
 			contextImpl.openEditor = function(fileurl, options) {
-				activateContext.openEditor(fileurl, options);
+				return activateContext.openEditor(fileurl, options);
 			};
 			
 			/**

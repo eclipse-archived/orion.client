@@ -48,10 +48,13 @@
 									 "var foo2 = foo."; 
 				codeEdit.create({parent: "embeddedEditor", contentType: "application/javascript", contents: contents}).then(function(editorViewer) {
 					document.getElementById("progressMessageDiv").textContent = "Plugins loaded!";
-					editorViewer.editor.getTextView().setAction("scrollLineDown", function(){
-						console.log("my action invoked!");
-						return true;
-					});
+					var actionID = editorViewer.editor.getTextView().getKeyModes()[0].match({keyCode:27/*esc*/, type: "keydown", metaKey: false, shiftKey: false, altKey: false, ctrlKey: false});
+					if(actionID) {
+						editorViewer.editor.getTextView().setAction(actionID, function(){
+							console.log("my action invoked!");
+							return true;
+						});
+					}	
 					//You can call APIs from editorViewer.editor  for further actions.
 				});
 			};

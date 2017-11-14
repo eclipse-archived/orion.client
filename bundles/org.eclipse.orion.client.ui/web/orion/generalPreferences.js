@@ -32,6 +32,7 @@ define([
 		enableProjectCreation: true,
 		enableLinkProjectCreation: true,
 		enableRefreshButton: false,
+		enableDebugger: false
 	};
 
 	function GeneralPreferences(preferences, callback) {

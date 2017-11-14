@@ -44,6 +44,15 @@ module.exports = function(grunt) {
 			};
 		});
 	};
+	
+	/**
+	 * @returns {Bundle[]} where Bundle is {{ name: string, path: string, web: string }}
+	 */
+	self.parseModules = function(buildConfig) {
+		return buildConfig.modules.map(function(module) {
+			return module.name;
+		});
+	};
 
 	/**
 	 * @returns {Object} A copy of `config` with the `excludeModules` removed from its `modules` section.

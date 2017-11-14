@@ -7,127 +7,223 @@
  *
  * Contributors:
  *     Remy Suen - initial API and implementation
+ *     IBM Corporation Inc. - additional tests
  *****************************************************************************/
 /*eslint-env node, mocha, assert, express*/
-var assert = require('assert');
-var express = require('express');
-var supertest = require('supertest');
-var tasks = require('../lib/tasks');
+var assert = require('assert'),
+	path = require("path"),
+	testData = require("./support/test_data"),
+	testHelper = require("./support/testHelper");
 
-var CONTEXT_PATH = '';
-var username = "testUser" + Date.now();
-var taskIds = [];
 
-var app = express();
-var options = {};
-options.metastore = app.locals.metastore = require('../lib/metastore/fs/store')({workspaceDir: ""});
-app.locals.metastore.setup(app);
-app.use(CONTEXT_PATH + '/taskHelper', require('./support/task_helper').router({
-	root: '/taskHelper',
-	options: options
-}))
-.use(CONTEXT_PATH + '/task', tasks.router({
-	taskRoot: CONTEXT_PATH + '/task',
-	options: options
-}));
-
-var request = supertest.bind(null, app);
+var CONTEXT_PATH = testHelper.CONTEXT_PATH,
+	WORKSPACE = testHelper.WORKSPACE,
+	METADATA =  testHelper.METADATA,
+	taskIds = [];
+	
+var request = testData.setupOrionServer();
 
 describe("Tasks API", function() {
-	beforeEach(function() {
+	beforeEach(function(done) {
+		//clean up done tasks before each test
+		request()
+			.del(CONTEXT_PATH + "/task")
+			.expect(200)
+			.end(function(err, res) {
+				testData.setUp(WORKSPACE, function(){
+					testData.setUpWorkspace(request, done);
+				}, false);
+		});
 	});
-
+	afterEach("Remove Workspace and Metastore", function(done) {
+		testData.tearDown(WORKSPACE, function(){
+			testData.tearDown(path.join(METADATA, '.orion'), function(){
+				testData.tearDown(METADATA, done);
+			});
+		});
+	});
+	/**
+	 * From: org.eclipse.orion.server.tests.tasks.TaskStoreTest.java
+	 */
+	describe("task store tests", function() {
+		it("testRead", function(done) {
+			request()
+				.put(CONTEXT_PATH + "/taskHelper")
+				.end(function(err, res) {
+					assert.ifError(err);
+					var taskLoc = res.body.Location;
+					//now fetch it
+					request()
+						.get(taskLoc)
+						.expect(200)
+						.end(function(err, res) {
+							testHelper.throwIfError(err);
+							assert(res.body && res.body.type === "loadstart", "We should have been able to fetch the created task.")
+							//mark the task done so it will be removed
+							request()
+								.post(path.join(CONTEXT_PATH, '/taskHelper', path.basename(taskLoc)))
+								.expect(200)
+								.end(done)
+						});
+				});
+		});
+		it("readAllTasksTest", function(done) {
+			//create a couple of tasks
+			request()
+				.put(CONTEXT_PATH + "/taskHelper")
+				.end(function(err, res) {
+					assert.ifError(err);
+					//mark it done
+					var taskLoc1 = res.body.Location;
+					//create a second task
+					request()
+						.put(CONTEXT_PATH + "/taskHelper")
+						.end(function(err, res) {
+							assert.ifError(err);
+							var taskLoc2 = res.body.Location;
+									//ask for all of them
+							request()
+								.post(path.join(CONTEXT_PATH, '/taskHelper', path.basename(taskLoc1)))
+								.expect(200)
+								.end(function(err, res) {
+									testHelper.throwIfError(err);
+									request()
+										.post(path.join(CONTEXT_PATH, '/taskHelper', path.basename(taskLoc2)))
+										.expect(200)
+										.end(done)
+								});
+						});
+				});
+		});
+	});
 	describe('delete all completed tasks', function(done) {
 		it('no tasks at all', function(finished) {
 			// delete all the tasks
 			request()
-			.del(CONTEXT_PATH + "/task")
-			.expect(200)
-			.end(function(err, res) {
-				assert.ifError(err);
-				// there were no tasks to begin with
-				assert.equal(res.body.length, 0);
-				finished();
-			});
+				.del(CONTEXT_PATH + "/task")
+				.expect(200)
+				.end(function(err, res) {
+					assert.ifError(err);
+					// there were no tasks to begin with
+					assert.equal(res.body.length, 0);
+					finished();
+				});
 		});
 
 		it('one running task', function(finished) {
 			// create a task
 			request()
-			.put(CONTEXT_PATH + "/taskHelper")
-			.end(function(err, res) {
-				assert.ifError(err);
-				var location = res.body.Location;
-
-				// delete all completed tasks
-				request()
-				.del(CONTEXT_PATH + "/task")
-				.expect(200)
+				.put(CONTEXT_PATH + "/taskHelper")
 				.end(function(err, res) {
 					assert.ifError(err);
-					// original task incomplete, still alive
-					assert.equal(res.body.length, 1);
-					assert.equal(res.body[0], location);
-
-					// mark test task as completed
+					var location = res.body.Location;
+					// delete all completed tasks
 					request()
-					.post(CONTEXT_PATH + "/taskHelper/" + location.substr(5))
-					.expect(200)
-					.end(function(err, res) {
-						assert.ifError(err);
-
-						// delete all completed tasks
-						request()
 						.del(CONTEXT_PATH + "/task")
 						.expect(200)
 						.end(function(err, res) {
 							assert.ifError(err);
-							// marked test task should not exist anymore
-							assert.equal(res.body.length, 0);
-							finished();
+							// original task incomplete, still alive
+							assert.equal(res.body.length, 1);
+							assert.equal(res.body[0], location);
+
+							// mark test task as completed
+							request()
+								.post(CONTEXT_PATH + "/taskHelper" + location.substr(5 + CONTEXT_PATH.length))
+								.expect(200)
+								.end(function(err, res) {
+									assert.ifError(err);
+
+									// delete all completed tasks
+									request()
+										.del(CONTEXT_PATH + "/task")
+										.expect(200)
+										.end(function(err, res) {
+											assert.ifError(err);
+											// marked test task should not exist anymore
+											assert.equal(res.body.length, 0);
+											finished();
+										});
+								});
 						});
-					});
 				});
-			});
 		});
 
 		it('one running task, one completed', function(finished) {
 			// spawn a running task
 			request()
-			.put(CONTEXT_PATH + "/taskHelper")
-			.end(function(err, res) {
-				assert.ifError(err);
-				var location = res.body.Location;
-				taskIds.push(location);
-
-				// spawn a second running task
-				request()
 				.put(CONTEXT_PATH + "/taskHelper")
 				.end(function(err, res) {
 					assert.ifError(err);
-					var location2 = res.body.Location;
-					taskIds.push(location2);
-
-					// mark the first one as completed
+					var location = res.body.Location;
+					taskIds.push(location);
+					// spawn a second running task
 					request()
-					.post(CONTEXT_PATH + "/taskHelper/" + location.substr(5))
-					.expect(200)
-					.end(function(err, res) {
-						assert.ifError(err);
-
-						// check that the second running task is still there after deletion
-						request()
-						.del(CONTEXT_PATH + "/task")
-						.expect(200)
+						.put(CONTEXT_PATH + "/taskHelper")
 						.end(function(err, res) {
 							assert.ifError(err);
-							assert.equal(res.body.length, 1);
-							assert.equal(res.body[0], location2);
-							finished();
+							var location2 = res.body.Location;
+							taskIds.push(location2);
+							// mark the first one as completed
+							request()
+								.post(CONTEXT_PATH + "/taskHelper" + location.substr(5 + CONTEXT_PATH.length))
+								.expect(200)
+								.end(function(err, res) {
+									assert.ifError(err);
+									// check that the second running task is still there after deletion
+									request()
+										.del(CONTEXT_PATH + "/task")
+										.expect(200)
+										.end(function(err, res) {
+											assert.ifError(err);
+											assert.equal(res.body.length, 1);
+											assert.equal(res.body[0], location2);
+											finished();
+										});
+								});
 						});
-					});
 				});
-			});
+		});
+
+		it('one running task, one canceled', function(finished) {
+			// spawn a running task
+			request()
+				.put(CONTEXT_PATH + "/taskHelper")
+				.end(function(err, res) {
+					assert.ifError(err);
+					var location = res.body.Location;
+					taskIds.push(location);
+					// spawn a second running task
+					request()
+						.put(CONTEXT_PATH + "/taskHelper")
+						.end(function(err, res) {
+							assert.ifError(err);
+							var location2 = res.body.Location;
+							taskIds.push(location2);
+							// mark the first one as completed
+							request()
+								.post(CONTEXT_PATH + "/taskHelper" + location.substr(5 + CONTEXT_PATH.length))
+								.expect(200)
+								.end(function(err, res) {
+									assert.ifError(err);
+									// check that the second running task is still there after deletion
+									request()
+										.put(location2)
+										.send({"abort": true})
+										.expect(200)
+										.end(function(err, res) {
+											request()
+											.get(location2)
+											.expect(200)
+											.end(function(err, res) {
+												testHelper.throwIfError(err);
+												assert(res.body && res.body.type === "abort", "We should have been able to fetch the created task.")
+												finished();
+											});
+										});
+								});
+						});
+				});
 		});
 	});
-}); // describe("Tasks API")
+});

@@ -11,7 +11,6 @@
 /*eslint-env node */
 var api = require('../api');
 var clone = require('./clone');
-var util = require('./util'); 
 
 module.exports = {};
 module.exports.GitFileDecorator = GitFileDecorator;
@@ -31,23 +30,28 @@ Object.assign(GitFileDecorator.prototype, {
 		if (isWorkspace && req.method === "GET") {
 			var children = json.Children;
 			return Promise.all(children.map(function(child) {
-				return addWorkSpaceGitLinks(gitRoot, child, {workspaceDir: file.workspaceDir, workspaceId: file.workspaceId, path: api.join(file.workspaceDir,child.Name)});		
+				return addWorkSpaceGitLinks(gitRoot, child, {workspaceDir: file.workspaceDir, workspaceId: file.workspaceId, path: api.join(file.workspaceDir,child.Name), contextPath: contextPath});		
 			}));
 		}
 		if (!isWorkspace && req.method === "GET") {
-			return clone.getRepoByPath(file.path, file.workspaceDir).then(function(repo) {
-				if(repo){
-					var fileDir = api.join(clone.getfileDir(repo, file), "/");
-					return getBranch(repo).then(function(branchname){
-						addGitLinks(gitRoot, json, branchname, fileDir);
-						var fileChildren = json.Children;
-						if(fileChildren){
-							calcGitLinks(gitRoot, fileChildren, branchname, fileDir);
-						}
-					});
+			var theRepo;
+			return clone.getRepoByPath(file.path, file.workspaceDir)
+			.then(function(repo) {
+				theRepo = repo;
+				return getBranch(theRepo);
+			}).then(function(branchname){
+				var fileDir = api.join(clone.getfileDir(theRepo, file), "/");
+				addGitLinks(gitRoot, json, branchname, fileDir, contextPath);
+				var fileChildren = json.Children;
+				if(fileChildren){
+					calcGitLinks(gitRoot, fileChildren, branchname, fileDir, contextPath);
 				}
 			})
-			.catch(function(){});
+			.catch(function(){
+			})
+			.then(function() {
+				clone.freeRepo(theRepo);
+			});
 		}			
 	}
 });
@@ -58,39 +62,44 @@ function getBranch(repo) {
 	});
 }
 	
-function calcGitLinks(gitRoot, fileChildren, branchname, fileDir) {
+function calcGitLinks(gitRoot, fileChildren, branchname, fileDir, contextPath) {
 	if (fileChildren) {
 		for (var j = 0; j < fileChildren.length; j++) {
 			var fileChild = fileChildren[j];
-			addGitLinks(gitRoot, fileChild, branchname, fileDir);
+			addGitLinks(gitRoot, fileChild, branchname, fileDir, contextPath);
 			var childItems = fileChild.Children;
 			if (childItems) {
-				calcGitLinks(gitRoot, childItems, branchname, fileDir);
+				calcGitLinks(gitRoot, childItems, branchname, fileDir, contextPath);
 			}
 		}
 	}
 }	
 	
 function addWorkSpaceGitLinks(gitRoot, workspaceChild, file){
-	return clone.getRepoByPath(file.path, file.workspaceDir).then(function(repo) {
-		if (repo) {
-			return Promise.resolve(getBranch(repo)).then(function(branchname){
-				var workDir = api.join(clone.getfileDir(repo, file) , "/");
-				addGitLinks(gitRoot, workspaceChild, branchname, workDir);
-			});
-		}
-	}).catch(function(){});
+	var theRepo;
+	return clone.getRepoByPath(file.path, file.workspaceDir)
+	.then(function(repo) {
+		theRepo = repo;
+		return getBranch(theRepo);
+	}).then(function(branchname){
+		var workDir = api.join(clone.getfileDir(theRepo, file) , "/");
+		addGitLinks(gitRoot, workspaceChild, branchname, workDir, file.contextPath);
+	}).catch(function(){
+	})
+	.then(function() {
+		clone.freeRepo(theRepo);
+	});
 }
 	
-function addGitLinks(gitRoot, json, branchname, fileDir){
-	var fileTarget = json.Location.substr(fileDir.length);
+function addGitLinks(gitRoot, json, branchname, fileDir, contextPath){
+	var fileTarget = json.Location.substr(contextPath.length + fileDir.length);
 	if(fileTarget === "/") fileTarget = "";
 	json.Git = {
 		"BlameLocation": gitRoot + "/blame/HEAD" + fileDir + fileTarget,
 		"CloneLocation": gitRoot + "/clone" + fileDir,
-		"CommitLocation": gitRoot + "/commit/" + util.encodeURIComponent(branchname) + fileDir + fileTarget,
+		"CommitLocation": gitRoot + "/commit/" + api.encodeURIComponent(branchname) + fileDir + fileTarget,
 		"ConfigLocation": gitRoot + "/config/clone" + fileDir + fileTarget,
-		"DefaultRemoteBranchLocation": gitRoot + "/remote/origin/"+ util.encodeURIComponent(branchname) + fileDir,
+		"DefaultRemoteBranchLocation": gitRoot + "/remote/origin/"+ api.encodeURIComponent(branchname) + fileDir,
 		"DiffLocation": gitRoot + "/diff/Default" + fileDir + fileTarget,
 		"HeadLocation": gitRoot + "/commit/HEAD" + fileDir + fileTarget,
 		"IndexLocation": gitRoot + "/index" + fileDir + fileTarget,

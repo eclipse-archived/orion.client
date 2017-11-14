@@ -1,4 +1,6 @@
 # Orion
+[![Build Status](https://travis-ci.org/eclipse/orion.client.svg?branch=master)](https://travis-ci.org/eclipse/orion.client) [![Coverage Status](https://coveralls.io/repos/github/eclipse/orion.client/badge.svg?branch=master)](https://coveralls.io/github/eclipse/orion.client?branch=master) [![NPM version](https://img.shields.io/npm/v/orion.svg)](https://npmjs.org/package/orion)
+
 A minimal, single-user deployment of [Eclipse Orion](http://www.eclipse.org/orion/). Orion provides an extensible IDE that runs in your browser. It's particularly good for writing Javascript.
 
 ## Features

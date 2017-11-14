@@ -45,7 +45,17 @@
 	background: #37474F;
 	border-radius: 5px;
 	padding: 2px 0 2px 4px;
-	width: 270px;
+	width: 300px;
+}
+
+.launchConfigurationsWrapper > .dropdownMenuOpen {
+	min-width: 300px;
+}
+
+.launchConfigurationsButton {
+	align-items: center;
+	display: flex !important;
+	flex-direction: row;
 }
 
 .launchConfigurationsButton > .dropdownTriggerButtonLabel {
@@ -90,6 +100,7 @@
 .addNewMenuItem > .orionButton {
 	font-size: 16px;
 	font-weight: bold;
+	padding-bottom: 6px;
 }
 
 .launchConfigurationDeleteButton.orionButton {

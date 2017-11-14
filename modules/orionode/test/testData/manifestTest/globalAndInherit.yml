@@ -1,0 +1,13 @@
+---
+inherit: simple-base-manifest.yml
+applications:
+ - name: springstorm
+   memory: 512M
+   instances: 1
+   host: 765deluge
+   path: ./april/build/libs/april-weather.war
+ - name: winterblast
+   memory: 1G
+   instances: 2
+   host: 321blizzard
+   path: ./december/target/december-weather.war

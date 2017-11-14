@@ -89,6 +89,7 @@ define([
 			holderDiv.className = "commitInfoHolder"; //$NON-NLS-0$
 			var tableDiv = document.createElement("div"); //$NON-NLS-0$
 			var table = document.createElement("table"); //$NON-NLS-0$
+			table.setAttribute("role", "presentation"); // table element is only being used for row/column presentation
 			tableDiv.appendChild(table);
 			var tableBody = document.createElement("tbody"); //$NON-NLS-0$
 			var row = document.createElement("tr"); //$NON-NLS-0$
@@ -243,8 +244,9 @@ define([
 					
 					var tagSpanAction = document.createElement("span"); //$NON-NLS-0$
 					tagSpanAction.className = "core-sprite-close gitCommitTagClose"; //$NON-NLS-0$
-					tagSpanAction.addEventListener("click", function(){ //$NON-NLS-0$
-						that.tagsCommandHandler.commandService.runCommand("eclipse.removeTag", tag, that.tagsCommandHandler); //$NON-NLS-0$
+					tagSpanAction.addEventListener("click", function(evt){ //$NON-NLS-0$
+						that.tagsCommandHandler.commandService.runCommand("eclipse.removeTag", tag, that.tagsCommandHandler, null, null, tagSpanAction); //$NON-NLS-0$
+						evt.stopPropagation();
 					});
 					tagSpan.appendChild(tagSpanAction);
 				});

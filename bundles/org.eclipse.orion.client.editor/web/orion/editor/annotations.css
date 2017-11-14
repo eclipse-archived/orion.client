@@ -39,6 +39,10 @@
 	background-repeat: repeat-y;
 	color: #CCCCCC;
 }
+.annotation.collabLineChanged {
+	background-repeat: repeat-y;
+	color: #FFFFFF;
+}
 .annotation.diffDeleted {
 	background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAQAAAADCAYAAAC09K7GAAAAFklEQVQYV2P8z8DwnwEJMCJzQGwMAQBhOAICSwrQUwAAAABJRU5ErkJggg==);
 	background-repeat: repeat-x;
@@ -50,6 +54,11 @@
 	color: #555555;
 }
 .lines .annotation.diffModified {
+	background-image: none;
+	background-color: rgba(85, 181, 219, 0.67);
+	color: #555555;
+}
+.lines .annotation.collabLineChanged {
 	background-image: none;
 	background-color: rgba(85, 181, 219, 0.67);
 	color: #555555;
@@ -88,6 +97,11 @@
 .annotationHTML.breakpoint {
 	/* images/breakpoint.gif */
 	background-image: url("data:image/gif;base64,R0lGODlhEAAQANUAAFheoFxkoFxnpmt0pmZxpnF7rYyWwmJwpnaFs3aDrWt8rXGBrYycwmZ3mXuNs42cu77F03GIs3aJrYGVu2J5oKCuxeDj6LK/03GLrYieu3aIoIygu6m4zcLN3MTM1m6Rs2aLriRgkSZilXGXtoGcs7LD0QBLhSZikihol3ScubrO2Yaqu5q4xpO0wpm7yabF0ZO9yaXI0r3X3tHj6P///wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACH5BAEAADQALAAAAAAQABAAAAafQJpwSCwWLYZBIDAwWIw0A+FFpW6aRUPCxe1yE4ahhdCCxWSzmSwGgxGeUceKpUqhUCkVa7UK0wgkJCUjJoUmIyWBBEIEGhoeJ4YmJx6OAUIADQ0QIZIhEJoAQgEUFBUgkiAVpZdRCxIPFx8iIh8XDw4FfhYHDhgZHB0dHBkYEwdwUQoTEc3OEwp+QwYHCBMMDBMIB9JESAJLAk5Q5EVBADs=");
+}
+.annotationHTML.conditionalBreakpoint {
+	/* images/breakpoint.gif */
+	background-image: url("data:image/gif;base64,R0lGODlhEAAQANUAAFheoFxkoFxnpmt0pmZxpnF7rYyWwmJwpnaFs3aDrWt8rXGBrYycwmZ3mXuNs42cu77F03GIs3aJrYGVu2J5oKCuxeDj6LK/03GLrYieu3aIoIygu6m4zcLN3MTM1m6Rs2aLriRgkSZilXGXtoGcs7LD0QBLhSZikihol3ScubrO2Yaqu5q4xpO0wpm7yabF0ZO9yaXI0r3X3tHj6P///wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACH5BAEAADQALAAAAAAQABAAAAafQJpwSCwWLYZBIDAwWIw0A+FFpW6aRUPCxe1yE4ahhdCCxWSzmSwGgxGeUceKpUqhUCkVa7UK0wgkJCUjJoUmIyWBBEIEGhoeJ4YmJx6OAUIADQ0QIZIhEJoAQgEUFBUgkiAVpZdRCxIPFx8iIh8XDw4FfhYHDhgZHB0dHBkYEwdwUQoTEc3OEwp+QwYHCBMMDBMIB9JESAJLAk5Q5EVBADs=");
+	filter: hue-rotate(180deg);
 }
 .annotationHTML.collapsed {
 	/* images/collapsed.png */
@@ -169,6 +183,14 @@
 	background-repeat: repeat-y;
 	background-position: left top;
 }
+.annotationHTML.collabLineChanged {
+	text-align: center;
+	border-radius: 50%;
+	line-height: 16px;
+	font-size: 11px;
+	font-family: monospace;
+	font-weight: bold;
+}
 
 /* Styles for the overview ruler  */
 .annotationOverview {
@@ -243,6 +265,10 @@
 	background-color: rgba(85, 181, 219, 0.61);
 	border: 1px solid black;
 }
+.annotationOverview.collabLineChanged {
+	background-color: #84b3cf;
+	border: 1px solid #9cc2d8;
+}
 
 /* Styles for text range */
 .annotationRange {
@@ -310,5 +336,8 @@
 
 .annotationLine.currentLine {
 	background-color: #EAF2FE;
+}
+.annotationLine.highlightedLine {
+	background: linear-gradient(rgba(255, 255, 153, .5) 100%, rgba(255, 255, 153, .5));
 }
 

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015 IBM Corporation and others.
+ * Copyright (c) 2015, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -9,12 +9,13 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 /*eslint-env node*/
-var fileUtil = require('./fileUtil');
-var api = require('./api');
-var path = require('path');
-var url = require('url');
-var express = require('express');
-var Promise = require('bluebird');
+var fileUtil = require('./fileUtil'),
+	api = require('./api'),
+	path = require('path'),
+	url = require('url'),
+	express = require('express'),
+	Promise = require('bluebird'),
+	responseTime = require('response-time');
 
 var fieldList = "Name,NameLower,Length,Directory,LastModified,Location,Path,RegEx,WholeWord,CaseSensitive,Exclude".split(",");
 
@@ -130,6 +131,7 @@ module.exports = function(options) {
 		search = require('./searchWorker');
 	}
 	return express.Router()
+	.use(responseTime({digits: 2, header: "X-Filesearch-Response-Time", suffix: true}))
 	.get('*', function(req, res) {
 		var searchOpts = new SearchOptions(req.originalUrl, req.contextPath);
 		buildSearchOptions(searchOpts);
@@ -142,17 +144,17 @@ module.exports = function(options) {
 		var file = fileUtil.getFile(req, loc);
 		
 		if (file) {
-			file.fileRoot = api.join(req.contextPath, "file", file.workspaceId);
+			file.fileRoot = api.join(typeof req.contextPath === 'string' ? req.contextPath : '', "file", file.workspaceId);
 			searchOpts.searchScope = [file];
 		} else {
 			var store = fileUtil.getMetastore(req);
 			searchOpts.searchScope = req.user.workspaces.map(function(w) {
-				var path = store.getWorkspaceDir(w.id);
+				var path = store.getWorkspaceDir(w);
 				return {
 					path: path,
-					workspaceId: w.id,
+					workspaceId: w,
 					workspaceDir: path,
-					fileRoot: api.join(req.contextPath, "file", w.id)
+					fileRoot: api.join(typeof req.contextPath === 'string' ? req.contextPath : '', "file", w)
 				};
 			});
 		}
@@ -163,7 +165,7 @@ module.exports = function(options) {
 		}
 
 		search(searchOpts).then(function(result) {
-			api.writeResponse(200, res, null, result);
+			return api.writeResponse(200, res, null, result);
 		}).catch (function(err) {
 			api.writeError(400, res, err);
 		});

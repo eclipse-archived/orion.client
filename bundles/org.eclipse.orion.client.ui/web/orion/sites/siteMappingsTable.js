@@ -9,8 +9,8 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 /*eslint-env browser, amd*/
-define(['i18n!orion/sites/nls/messages', 'orion/commands', 'orion/explorers/explorer', 'orion/i18nUtil', 'orion/Deferred', 'orion/webui/littlelib', 'orion/EventTarget'],
-		function(messages, mCommands, mExplorer, i18nUtil, Deferred, lib, EventTarget) {
+define(['i18n!orion/sites/nls/messages', 'orion/commands', 'orion/explorers/explorer', 'orion/i18nUtil', 'orion/bidiUtils', 'orion/Deferred', 'orion/webui/littlelib', 'orion/EventTarget'],
+		function(messages, mCommands, mExplorer, i18nUtil, bidiUtils, Deferred, lib, EventTarget) {
 
 var mSiteMappingsTable = {};
 
@@ -145,7 +145,7 @@ mSiteMappingsTable.Renderer = (function() {
 							a.target = "_new"; //$NON-NLS-0$
 							var span = document.createElement("span"); //$NON-NLS-0$
 							span.className += "imageSprite " + spriteClass; //$NON-NLS-0$
-							span.title = i18nUtil.formatMessage(title, href);
+							span.title = i18nUtil.formatMessage(title, bidiUtils.enforceSTT(href, 'filepath'));
 							a.appendChild(span);
 							lib.empty(col);
 							col.appendChild(a);

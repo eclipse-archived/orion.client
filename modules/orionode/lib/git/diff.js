@@ -9,20 +9,20 @@
  *	 IBM Corporation - initial API and implementation
  *******************************************************************************/
 /*eslint-env node */
-var git = require('nodegit');
-var url = require('url');
-var api = require('../api'), writeError = api.writeError, writeResponse = api.writeResponse;
-var clone = require('./clone');
-var fs = require('fs');
-var path = require('path');
-var mkdirp = require('mkdirp');
-var mDiff = require('diff');
-var request = require('request');
-var multiparty = require('multiparty');
-var express = require('express');
-var bodyParser = require('body-parser');
-var util = require('./util');
-var async = require('async');
+var git = require('nodegit'),
+	url = require('url'),
+	api = require('../api'), writeError = api.writeError, writeResponse = api.writeResponse,
+	clone = require('./clone'),
+	fs = require('fs'),
+	path = require('path'),
+	mkdirp = require('mkdirp'),
+	mDiff = require('diff'),
+	request = require('request'),
+	multiparty = require('multiparty'),
+	express = require('express'),
+	bodyParser = require('body-parser'),
+	async = require('async'),
+	responseTime = require('response-time');
 
 module.exports = {};
 
@@ -32,10 +32,15 @@ module.exports.router = function(options) {
 	if (!fileRoot) { throw new Error('options.fileRoot is required'); }
 	if (!gitRoot) { throw new Error('options.gitRoot is required'); }
 	
+	var contextPath = options && options.configParams["orion.context.path"] || "";
+	fileRoot = fileRoot.substring(contextPath.length);
+	
 	module.exports.changeType = changeType;
 
 	return express.Router()
 	.use(bodyParser.json())
+	.use(responseTime({digits: 2, header: "X-GitapiDiff-Response-Time", suffix: true}))
+	.use(options.checkUserAccess)
 	.get(fileRoot + '*', getDiff)
 	.get('/:scope'+ fileRoot + '*', getDiff)
 	.post('/:scope'+ fileRoot + '*', postDiff);
@@ -45,7 +50,7 @@ function getDiff(req, res) {
 	var parts = (query.parts || "").split(",");
 	var ignoreWS = query.ignoreWS === "true";
 	var paths = query.Path;
-	var scope = util.decodeURIComponent(req.params.scope || "");
+	var scope = api.decodeURIComponent(req.params.scope || "");
 	var filePath; 
 	
 	var diff, repo;
@@ -63,8 +68,8 @@ function getDiff(req, res) {
 			URIs = {
 				"BaseLocation": getBaseLocation(scope, p),
 				"CloneLocation": gitRoot + "/clone" + fileDir,
-				"Location": gitRoot + "/diff/" + util.encodeURIComponent(scope) + fileDir + filePath,
-				"NewLocation": getNewLocation(scope, p),
+				"Location": path.join(gitRoot, "/diff", api.encodeURIComponent(scope), fileDir, filePath),
+				"NewLocation": getNewLocation(scope, p, req.contextPath),
 				"OldLocation": getOldLocation(scope, p),
 				"Type": "Diff"
 			};
@@ -97,7 +102,7 @@ function getDiff(req, res) {
 				body += JSON.stringify(api.encodeLocation(URIs));
 				res.setHeader('Content-Type', 'application/json');
 			}
-			return res.status(200).end(body);
+			return writeResponse(200, res, null, body);
 		}
 		if (includeDiff || includeDiffs) {
 			var diffOptions = getOptions(ignoreWS, filePath, paths);
@@ -123,6 +128,9 @@ function getDiff(req, res) {
 	})
 	.catch(function(err) {
 		writeError(404, res, err.message);
+	})
+	.done(function() {
+		clone.freeRepo(repo);
 	});
 }
 
@@ -136,21 +144,24 @@ function changeType(patch) {
 function getOldLocation(scope, path) {
 	if (scope.indexOf("..") !== -1) {
 		var commits = scope.split("..");
-		return {pathname: gitRoot + "/commit/" + util.encodeURIComponent(commits[0]) + path, query: {parts: "body"}};
+		return {pathname: gitRoot + "/commit/" + api.encodeURIComponent(commits[0]) + path, query: {parts: "body"}};
 	} else if (scope === "Cached") {
 		return {pathname: gitRoot + "/commit/HEAD" + path, query: {parts: "body"}};
 	} else if (scope === "Default") {
 		return gitRoot + "/index" + path;
 	}
-	return {pathname: gitRoot + "/commit/" + util.encodeURIComponent(scope) + path, query: {parts: "body"}};
+	return {pathname: gitRoot + "/commit/" + api.encodeURIComponent(scope) + path, query: {parts: "body"}};
 }
 
-function getNewLocation(scope, path) {
+function getNewLocation(scope, path ,contextPath) {
 	if (scope.indexOf("..") !== -1) {
 		var commits = scope.split("..");
-		return {pathname: gitRoot + "/commit/" + util.encodeURIComponent(commits[1]) + path, query: {parts: "body"}};
+		return {pathname: gitRoot + "/commit/" + api.encodeURIComponent(commits[1]) + path, query: {parts: "body"}};
 	} else if (scope === "Cached") {
 		return gitRoot + "/index" + path;
+	}
+	if (path.startsWith(fileRoot)) {
+		path = contextPath + path; // Since git endpoint's fileRoot doesn't have contextPath part
 	}
 	return path;
 }
@@ -159,7 +170,7 @@ function getBaseLocation(scope, path) {
 	if (scope.indexOf("..") !== -1) {
 		var commits = scope.split("..");
 		//TODO find merge base
-		return {pathname: gitRoot + "/commit/" + util.encodeURIComponent(commits[1]) + path, query: {parts: "body"}};
+		return {pathname: gitRoot + "/commit/" + api.encodeURIComponent(commits[1]) + path, query: {parts: "body"}};
 	} else if (scope === "Cached") {
 		return {pathname: gitRoot + "/commit/HEAD" + path, query: {parts: "body"}};
 	}
@@ -190,7 +201,7 @@ function processDiff(diff, filePath, paths, fileDir, includeDiff, includeDiffs, 
 					diffs.Children.push({
 						"ChangeType": type,
 						"ContentLocation": p1,
-						"DiffLocation": gitRoot + "/diff/" + util.encodeURIComponent(scope) + p1,
+						"DiffLocation": gitRoot + "/diff/" + api.encodeURIComponent(scope) + p1,
 						"NewPath": newFilePath,
 						"OldPath": oldFilePath,
 						"Type": "Diff"
@@ -255,8 +266,8 @@ function processDiff(diff, filePath, paths, fileDir, includeDiff, includeDiffs, 
 		});
 		if (includeDiffs) {
 			diffs.Length = patches.length;
-			if (i < patches.length) {
-				diffs.NextLocation = "";
+			if (i < patches.length - 1) {
+				diffs.NextLocation  = {pathname: gitRoot + "/diff/" + scope + fileDir, query: {page: page + 1, pageSize:pageSize}}
 			}
 		}
 		return Promise.all(result);
@@ -341,8 +352,10 @@ function getDiffBetweenTwoCommits(repo, commits, options) {
 }
 
 function applyPatch(req, res) {
+	var theRepo;
 	return clone.getRepo(req)
 	.then(function(repo) {
+		theRepo = repo;
 		var radio = "", patchUrl = "", file = "";
 		var form = new multiparty.Form();
 		form.on("part", function(part) {
@@ -364,6 +377,7 @@ function applyPatch(req, res) {
 			part.resume();
 		});
 		form.on("error", function(err) {
+			clone.freeRepo(theRepo);
 			writeError(404, res, err.message);
 		});
 		form.on('close', function() {
@@ -416,22 +430,28 @@ function applyPatch(req, res) {
 						return;
 					},
 					complete: function(err) {
-						if (err) return writeError(404, res, err.message);
+						if (err) {
+							clone.freeRepo(theRepo);
+							return writeError(404, res, err.message);
+						}
 						var jsonData = {
 							modifiedFiles: successed.map(function(index) {
 								return this.getUnprefixFile(index.oldFileName);
 							}.bind(this))
 						};
 						if (failed.length) {
-							return writeResponse(400, res, null, {
+							var result = {
 								Message: "Some files did not apply: " + failed.map(function(index) {
 									return this.getUnprefixFile(index.oldFileName);
 								}.bind(this)).join(","),
 								HttpCode: 400,
 								Code: 0,
 								JsonData: jsonData
-							});
+							};
+							clone.freeRepo(theRepo);
+							return writeResponse(400, res, null, result);
 						}
+						clone.freeRepo(theRepo);
 						writeResponse(200, res, null, {
 							Message: "Ok",
 							HttpCode: 200,
@@ -448,6 +468,7 @@ function applyPatch(req, res) {
 						file = body;
 						apply();
 					} else {
+						clone.freeRepo(theRepo);
 						writeError(404, res, "Fail to fetch url");
 					}
 				});
@@ -456,6 +477,7 @@ function applyPatch(req, res) {
 		form.parse(req);
 	})
 	.catch(function(err) {
+		clone.freeRepo(theRepo);
 		writeError(404, res, err.message);
 	});
 }
@@ -468,7 +490,7 @@ function postDiff(req, res) {
 	var originalUrl = url.parse(req.originalUrl, true);
 	var segments = originalUrl.pathname.split("/");
 	var contextPathSegCount = req.contextPath.split("/").length - 1;
-	segments[3 + contextPathSegCount] = segments[3 + contextPathSegCount] + ".." + util.encodeURIComponent(newCommit);
+	segments[3 + contextPathSegCount] = segments[3 + contextPathSegCount] + ".." + api.encodeURIComponent(newCommit);
 	var location = url.format({pathname: segments.join("/"), query: originalUrl.query});
 	writeResponse(200, res, {'Location':location}, {Location: location}, false); // Avoid double encoding
 }

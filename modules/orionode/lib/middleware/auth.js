@@ -10,6 +10,7 @@
  *******************************************************************************/
 /*eslint-env node*/
 var basicAuth = require('basic-auth');
+var api = require('../api');
 
 function noop(req, res, next) {
 	next();
@@ -23,7 +24,7 @@ module.exports = function auth(pwd) {
 		var credentials = basicAuth(req);
 		if (!credentials || credentials.pass !== pwd) {
 			res.set('WWW-Authenticate', 'Basic realm="example"');
-			return res.sendStatus(401);
+			return api.sendStatus(401, res);
 		}
 		return next();
 	 };

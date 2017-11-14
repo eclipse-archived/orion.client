@@ -40,7 +40,7 @@ function doDelete(req, res) {
 }
 
 function doPut(req, res) {
-	var task = new tasks.Task(res, false, false, 0, false);
+	var task = new tasks.Task(res, true, false, 0, false);
 	taskList[task.id] = task;
 }
 

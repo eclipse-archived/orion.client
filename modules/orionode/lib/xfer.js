@@ -9,51 +9,86 @@
  * IBM Corporation - initial API and implementation
  *******************************************************************************/
 /*eslint-env node */
-var api = require('./api'), writeError = api.writeError, writeResponse = api.writeResponse;
-var archiver = require('archiver');
-var unzip = require('unzip2');
-var request = require('request');
-var express = require('express');
-var path = require('path');
-var os = require('os');
-//var Busboy = require('busboy');
-var Promise = require('bluebird');
-var mkdirp = require('mkdirp');
-var fs = Promise.promisifyAll(require('fs'));
-var fileUtil = require('./fileUtil');
-var log4js = require('log4js');
-var logger = log4js.getLogger("xfer");
+var api = require('./api'),
+	archiver = require('archiver'),
+	request = require('request'),
+	express = require('express'),
+	crypto = require("crypto"),
+	path = require('path'),
+	os = require('os'),
+//Busboy = require('busboy'),
+	Promise = require('bluebird'),
+	mkdirp = require('mkdirp'),
+	fs = Promise.promisifyAll(require('fs')),
+	fileUtil = require('./fileUtil'),
+	log4js = require('log4js'),
+	logger = log4js.getLogger("xfer"),
+	yauzl = require("yauzl"),
+	responseTime = require('response-time');
 
+var writeError = api.writeError, 
+	writeResponse = api.writeResponse;
+	
 function getUploadsFolder(options) {
-	if (options.options) {
-		return path.join(options.options.configParams['orion.single.user'] ? 
-			path.join(os.homedir(), ".orion") : options.options.workspaceDir, ".uploads");
+	if (options) {
+		return path.join(options.configParams['orion.single.user'] ? 
+			path.join(os.homedir(), ".orion") : options.workspaceDir, ".uploads");
 	}
 	return path.join(os.homedir(), ".orion");
+}
+
+var UPLOADS_FOLDER;
+var fileRoot;
+
+function checkUserAccess(req, res, next){
+	var uri = (typeof req.contextPath === "string" && req.originalUrl.substring(req.contextPath.length)) || req.originalUrl;
+	// import/export rights depend on access to the file content
+	if (uri.startsWith("/xfer/export/")){
+		if (path.extname(uri) !== ".zip") {
+			return writeError(400, res, "Export is not a zip");
+		}
+		uri = "/file/" + uri.substring("/xfer/export/".length, uri.length - 4) + '/';
+	} else if (uri.startsWith("/xfer/import/")) {
+		uri = "/file/" + uri.substring("/xfer/import/".length); //$NON-NLS-1$
+		if (!uri.endsWith("/")) //$NON-NLS-1$
+			uri += '/';
+	}	
+	req.user.checkRights(req.user.username, uri, req, res, next);
 }
 
 /**
  * @callback
  */
-module.exports = function(options) {
-	var fileRoot = options.fileRoot;
+module.exports.router = function(options) {
+	fileRoot = options.fileRoot;
 	if (!fileRoot) { throw new Error('options.fileRoot is required'); }
 	module.exports.write = write;
+	module.exports.zipPath = zipPath;
+	module.exports.copyPath = copyPath;
 	module.exports.getUploadDir = getUploadDir;
 	
-	var UPLOADS_FOLDER = getUploadsFolder(options);
+	UPLOADS_FOLDER = getUploadsFolder(options);
 	
 	mkdirp(UPLOADS_FOLDER, function (err) {
 		if (err) logger.error(err);
 	});
 
 	return express.Router()
+	.use(responseTime({digits: 2, header: "X-Xfer-Response-Time", suffix: true}))
+	.use(checkUserAccess)
 	.get('/export*', getXfer)
 	.post('/import*', postImportXfer);
-	
-	
-function getOptions(req) {
-	return req.get("X-Xfer-Options").split(",");
+};
+
+module.exports.getXferFrom = getXferFrom;
+module.exports.postImportXferTo = postImportXferTo;
+
+function getOptions(req, res) {
+	var opts = req.get("X-Xfer-Options");
+	if(typeof opts !== 'string') {
+		return [];
+	}
+	return opts.split(",");
 }
 	
 function reportTransferFailure(res, err) {
@@ -73,7 +108,11 @@ function reportTransferFailure(res, err) {
 function postImportXfer(req, res) {
 	var rest = req.params["0"];
 	var file = fileUtil.getFile(req, rest);
-	var xferOptions = getOptions(req);
+	postImportXferTo(req, res, file);
+}
+
+function postImportXferTo(req, res, file) {
+	var xferOptions = getOptions(req, res);
 	if (xferOptions.indexOf("sftp") !== -1) {
 		return writeError(500, res, "Not implemented yet.");
 	}
@@ -85,7 +124,7 @@ function postImportXfer(req, res) {
 			fileName = path.basename(sourceURL);
 		}
 	}
-	if (!fileName && !unzip) {
+	if (!fileName) {
 		return writeError(400, res, "Transfer request must indicate target filename");
 	}
 	function upload(request) {
@@ -104,8 +143,14 @@ function postImportXfer(req, res) {
 		var lengthStr = req.get("X-Xfer-Content-Length") || req.get("Content-Length");
 		if (lengthStr) length = Number(lengthStr);
 	} else {
-		upload(request(sourceURL));
-		return;
+		var rerr,
+			newreq = request(sourceURL, {}, function(err, res) {
+				rerr = err;
+		})
+		if(rerr) {
+			return writeError(400, res, rerr.message);
+		}
+		return upload(newreq);
 	}
 	if (req.get("Content-Type") === "application/octet-stream") {
 		upload(req);
@@ -124,6 +169,7 @@ function postImportXfer(req, res) {
 //	});
 //	busboy.on('finish', function() {
 //		console.log('Done parsing form!');
+// 		api.setResponseNoCache(res);
 //		res.writeHead(303, { Connection: 'close', Location: '/' });
 //		res.end();
 //	});
@@ -160,62 +206,70 @@ function completeTransfer(req, res, tempFile, file, fileName, xferOptions, shoul
 			excludes.push(".git");
 		}
 		var failed = [];
-		fs.createReadStream(tempFile)
-		.pipe(unzip.Parse())
-		.on('entry', function (entry) {
-			var entryName = entry.path;
-			var type = entry.type; // 'Directory' or 'File' 
-			var outputName = path.join(file.path, entryName);
-			if (!excluded(excludes, file.path, outputName)) {
-				if (type === "File") {
-					if (!overwrite && fs.existsSync(outputName)) {
-						failed.push(entryName);
-						entry.autodrain();
-						return;
+		yauzl.open(tempFile, {
+			lazyEntries: true,
+			validateEntrySizes: true
+		}, function(err, zipfile) {
+			if (err) {
+				return writeError(400, res, err.message);
+			}
+			zipfile.readEntry();
+			zipfile.on("close", function() {
+				fs.unlink(tempFile, function(exp){});
+				if (res) {
+					if (failed.length) {
+						return overrideError(failed);
 					}
-					// make sure all sub folders exist
-					var subfolderPath = path.join(file.path, path.dirname(entryName));
-					if (!fs.existsSync(subfolderPath)) {
-						mkdirp.sync(subfolderPath);
-					}
-					var writeStream = fs.createWriteStream(outputName);
-					writeStream.on('error', function(err) {
-						if (res) {
-							reportTransferFailure(res, err);
-							res = null;
+					res.setHeader("Location", api.join(fileRoot, file.workspaceId, file.path.substring(file.workspaceDir.length+1)));
+					writeResponse(201, res);
+					res = null;
+				}
+			});
+			zipfile.on("error",function(err){
+				if (res) {
+					return writeError(400, res, "Failed during file unzip: " + err.message);
+				}
+			});
+			zipfile.on("entry", function(entry) {
+				var entryName = entry.fileName;
+				var outputName = path.join(file.path, entryName);
+				if (!excluded(excludes, file.path, outputName)) {
+					if (/\/$/.test(entry.fileName)) {
+						if (!fs.existsSync(outputName)) {
+							mkdirp.sync(outputName);	
 						}
-					});
-					entry.pipe(writeStream);
-				} else if (type === "Directory") {
-					if (!fs.existsSync(outputName)) {
-						mkdirp.sync(outputName);
+						zipfile.readEntry();
+					}else {
+						if (!overwrite && fs.existsSync(outputName) || entry.isEncrypted()) {
+							failed.push(entryName);
+							zipfile.readEntry();
+							return;
+						}
+						// make sure all sub folders exist
+						var subfolderPath = path.join(file.path, path.dirname(entryName));
+						if (!fs.existsSync(subfolderPath)) {
+							mkdirp.sync(subfolderPath);
+						}
+						var writeStream = fs.createWriteStream(outputName);
+						zipfile.openReadStream(entry, {decompress: entry.isCompressed() ? true : null}, function(err, readStream) {
+							if (err) throw err;
+							readStream.on("end", function() {
+								zipfile.readEntry();
+							});
+							readStream.pipe(writeStream);
+						});
+						writeStream.on('error', function(err) {
+							if (res) {
+								reportTransferFailure(res, err);
+								res = null;
+							}
+						});
 					}
+				}else{
+					zipfile.readEntry();
 				}
-			} else {
-				entry.autodrain();
-			}
-		})
-		.on('error', function(error) {
-			if (res) {
-				writeResponse(200, res, null, {
-					Severity: "Error",
-					HttpCode:400,
-					Code: 0,
-					Message: "Failed during file unzip: " + error.message
-				});
-				res = null;
-			}
-		})
-		.on('close', function() {
-			fs.unlink(tempFile);
-			if (res) {
-				if (failed.length) {
-					return overrideError(failed);
-				}
-				res.setHeader("Location", api.join(fileRoot, file.workspaceId, file.path.substring(file.workspaceDir.length)));
-				res.status(201).end();
-				res = null;
-			}
+				return;
+			});
 		});
 	} else {
 		var newFile = path.join(file.path, fileName);
@@ -226,8 +280,8 @@ function completeTransfer(req, res, tempFile, file, fileName, xferOptions, shoul
 			if (err) {
 				return writeError(400, res, "Transfer failed");
 			}
-			res.setHeader("Location", api.join(fileRoot, file.workspaceId, file.path.substring(file.workspaceDir.length)));
-			res.status(201).end();
+			res.setHeader("Location", api.join(fileRoot, file.workspaceId, file.path.substring(file.workspaceDir.length+1)));
+			writeResponse(201, res);
 		});
 	}
 }
@@ -235,14 +289,13 @@ function completeTransfer(req, res, tempFile, file, fileName, xferOptions, shoul
 function getXfer(req, res) {
 	var rest = req.params["0"];
 	var file = fileUtil.getFile(req, rest);
-	
-	if (path.extname(file.path) !== ".zip") {
-		return writeError(400, res, "Export is not a zip");
-	}
-	
+	getXferFrom(req, res, file);
+}
+
+function getXferFrom(req, res, file) {
+	var filePath = file.path.replace(/.zip$/, "");
 	var zip = archiver('zip');
 	zip.pipe(res);
-	var filePath = file.path.replace(/.zip$/, "");
 	write(zip, filePath, filePath)
 	.then(function() {
 		zip.finalize();
@@ -257,7 +310,7 @@ function getXfer(req, res) {
 	});
 }
 
-function write (zip, base, filePath) {
+function write (zip, base, filePath, filter) {
 	return fs.statAsync(filePath)
 	.then(function(stats) {
 		/*eslint consistent-return:0*/
@@ -267,14 +320,89 @@ function write (zip, base, filePath) {
 			.then(function(directoryFiles) {
 				var SUBDIR_SEARCH_CONCURRENCY = 10;
 				return Promise.map(directoryFiles, function(entry) {
-					return write(zip, base, filePath + entry);
+					return write(zip, base, filePath + entry, filter);
 				},{ concurrency: SUBDIR_SEARCH_CONCURRENCY});
 			});
 		}
-		zip.file(filePath, { name: filePath.substring(base.length).replace(/\\/g, "/") });
+		if(!filter || !filter(filePath.substring(base.length + 1))){
+			zip.file(filePath, { name: filePath.substring(base.length).replace(/\\/g, "/") });
+		}
+	});
+}
+
+/**
+ * @name zipPath
+ * @description Used to zip a direcotry
+ * @param pathToZip
+ * @param options, options.additionalData is array of addition data, each one has a shape of {content:,filename:};options.filter is a filter function to exclude files
+ * @returns returns a Promise which resolves the zip file path
+ */
+function zipPath(pathToZip, options){
+	var zipFileName = crypto.randomBytes(5).toString("hex") + Date.now();
+	return new Promise(function(fulfill, reject){
+		var zip = archiver("zip");
+		var resultFilePath = path.join(getUploadDir(), zipFileName + ".zip");
+		mkdirp(path.dirname(resultFilePath), function(err) {
+			if (err) {
+				logger.error(err);
+				return reject(err);
+			}
+			var output = fs.createWriteStream(resultFilePath);
+			output.on('error', function(err) {
+				logger.error(err);
+				return reject(err);
+			});
+			zip.pipe(output);
+			return write(zip, pathToZip, pathToZip, options.filter)
+			.then(function() {
+				if(options.additionalData && options.additionalData.length > 0){
+					options.additionalData.forEach(function(data){
+						zip.append(data.content, data.filename);
+					});
+				}
+				zip.finalize();
+				zip.on("end", function(){
+					return fulfill(resultFilePath);
+				});
+				zip.on("error", function(err){
+					logger.error(err);
+					var errorStatus = new Error("Zipping process went wrong");
+					return reject(errorStatus);
+				});
+			});
+		});
+	});
+}
+/**
+ * @name copyPath
+ * @description Used to copy a file to a zip file
+ * @param filePath
+ * @returns returns Promise, which resolves the zip file path
+ */
+function copyPath(filePath){
+	var ramdomName = crypto.randomBytes(5).toString("hex") + Date.now();
+	var resultFilePath = path.join(getUploadDir(), ramdomName + ".zip");
+	return new Promise(function(fulfill, reject){
+		mkdirp(path.dirname(resultFilePath), function(err) {
+			if (err) {
+				logger.error(err);
+				return reject(err);
+			}
+			var readenWarfileStream = fs.createReadStream(filePath);
+			readenWarfileStream.on("error", function(err) {
+				reject(err);
+			});
+			var output = fs.createWriteStream(resultFilePath);
+			output.on("error", function(err) {
+				reject(err);
+			});
+			readenWarfileStream.on('end', function() {
+				return fulfill(resultFilePath);
+			});
+			readenWarfileStream.pipe(output);
+		});
 	});
 }
 function getUploadDir(){
 	return UPLOADS_FOLDER;
 }
-};

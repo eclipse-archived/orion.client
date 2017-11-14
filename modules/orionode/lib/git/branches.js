@@ -9,15 +9,17 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 /*eslint-env node */
-var api = require('../api'), writeError = api.writeError, writeResponse = api.writeResponse;
-var git = require('nodegit');
-var async = require('async');
-var mRemotes = require('./remotes');
-var clone = require('./clone');
-var express = require('express');
-var bodyParser = require('body-parser');
-var util = require('./util');
-var args = require('../args');
+var api = require('../api'), 
+	writeError = api.writeError, 
+	writeResponse = api.writeResponse,
+	git = require('nodegit'),
+	async = require('async'),
+	mRemotes = require('./remotes'),
+	clone = require('./clone'),
+	express = require('express'),
+	bodyParser = require('body-parser'),
+	args = require('../args'),
+	responseTime = require('response-time');
 
 module.exports = {};
 
@@ -27,12 +29,17 @@ module.exports.router = function(options) {
 	if (!fileRoot) { throw new Error('options.fileRoot is required'); }
 	if (!gitRoot) { throw new Error('options.gitRoot is required'); }
 	
+	var contextPath = options && options.configParams["orion.context.path"] || "";
+	fileRoot = fileRoot.substring(contextPath.length);
+	
 	module.exports.branchJSON = branchJSON;
 	module.exports.getBranchCommit = getBranchCommit;
 	module.exports.getBranchRemotes = getBranchRemotes;
-
+	
 	return express.Router()
 	.use(bodyParser.json())
+	.use(responseTime({digits: 2, header: "X-GitapiBranches-Response-Time", suffix: true}))
+	.use(options.checkUserAccess)
 	.get(fileRoot + '*', getBranches)
 	.get('/:branchName*', getBranches)
 	.delete('/:branchName*', deleteBranch)
@@ -41,17 +48,17 @@ module.exports.router = function(options) {
 	function branchJSON(repo, ref, fileDir) {
 		var fullName = ref.name();
 		var shortName = ref.shorthand();
-		var branchURL = util.encodeURIComponent(fullName);
+		var branchURL = api.encodeURIComponent(fullName);
 		var current = !!ref.isHead() || repo.headDetached() && ref.name() === "HEAD";
 		return {
 			"CloneLocation": gitRoot + "/clone"+ fileDir,
 			"CommitLocation": gitRoot + "/commit/" + branchURL + fileDir,
 			"Current": current,
 			"Detached": current && !!repo.headDetached(),
-			"DiffLocation": gitRoot + "/diff/" + util.encodeURIComponent(shortName) + fileDir,
+			"DiffLocation": gitRoot + "/diff/" + api.encodeURIComponent(shortName) + fileDir,
 			"FullName": fullName,
 			"HeadLocation": gitRoot + "/commit/HEAD" + fileDir,
-			"Location": gitRoot + "/branch/" + util.encodeURIComponent(shortName) + fileDir,
+			"Location": gitRoot + "/branch/" + api.encodeURIComponent(shortName) + fileDir,
 			"Name": shortName,
 			"RemoteLocation": [],
 			"TreeLocation": gitRoot + "/tree" + fileDir + "/" + branchURL,
@@ -126,7 +133,7 @@ module.exports.router = function(options) {
 	}
 	
 	function getBranches(req, res) {
-		var branchName = util.decodeURIComponent(req.params.branchName || "");
+		var branchName = api.decodeURIComponent(req.params.branchName || "");
 		var fileDir;
 		
 		var theRepo;
@@ -151,6 +158,9 @@ module.exports.router = function(options) {
 			})
 			.catch(function(err) {
 				writeError(500, res, err.message);
+			})
+			.done(function() {
+				clone.freeRepo(theRepo);
 			});
 			return;
 		}
@@ -202,6 +212,9 @@ module.exports.router = function(options) {
 		})
 		.catch(function(err) {
 			writeError(500, res, err.message);
+		})
+		.done(function() {
+			clone.freeRepo(theRepo);
 		});
 	}
 	
@@ -240,24 +253,32 @@ module.exports.router = function(options) {
 		})
 		.catch(function(err) {
 			writeError(500, res, err.message);
+		})
+		.done(function() {
+			clone.freeRepo(theRepo);
 		});
 	}
 	
 	function deleteBranch(req, res) {
-		var branchName = decodeURIComponent(req.params.branchName);
+		var theRepo;
+		var branchName = api.decodeURIComponent(req.params.branchName);
 		clone.getRepo(req)
 		.then(function(repo) {
+			theRepo = repo;
 			return git.Branch.lookup(repo, branchName, git.Branch.BRANCH.LOCAL);
 		})
 		.then(function(ref) {
 			if (git.Branch.delete(ref) === 0) {
-				res.status(200).end();
+				writeResponse(200, res);
 			} else {
 				writeError(403, res);
 			}
 		})
-		.catch(function() {
-			writeError(403, res);
+		.catch(function(err) {
+			writeError(403, res, err.message);
+		})
+		.done(function() {
+			clone.freeRepo(theRepo);
 		});
 	}
 };

@@ -1,0 +1,44 @@
+<html>
+<head>
+    <link rel="stylesheet" type="text/css" href="debugDeploymentWizard.css" />
+	<script src="../../requirejs/require.js"></script>
+	<script type="text/javascript">
+	/*global require*/
+		require({
+		  baseUrl: '../../',
+		  packages: [],
+		  paths: {
+			i18n: 'requirejs/i18n',
+			domReady: 'requirejs/domReady',
+			text: 'requirejs/text'
+		  }
+		});
+		require(["orion/debug/debugDeploymentWizard"]);
+	</script>
+</head>
+<body id="deployBody" class="dialogFrame lightPage">
+
+	<div class="dialogTitle" id="titleBar">
+		<span id="title" class="dialogTitleText layoutLeft">
+		</span>
+		<button aria-label="Close" class="dismissButton layoutRight core-sprite-close imageSprite closeDialog" id="closeDialog">
+		</button>
+	</div>
+	
+	<div>
+		<div id="messageContainer" class="messageContainer"><span id="messageLabel" class="messageLabel"><span id="messageText" style="float:left;"></span><span id="messageButton"></span></span></div>
+		<div id="wizard"></div>
+	</div>
+	
+		<script>
+			var themeVal = localStorage.getItem("pageTheme");
+			if (themeVal && typeof themeVal === "string" || themeVal instanceof String && themeVal.length > 0) {
+				themeVal.split(" ").forEach(function(clazz) {
+					if (!document.body.classList.contains(clazz)) {
+						document.body.classList.add(clazz);
+					}
+				});
+			}
+		</script>
+</body>
+</html>

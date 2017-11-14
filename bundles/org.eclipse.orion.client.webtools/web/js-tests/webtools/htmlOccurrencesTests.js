@@ -225,13 +225,13 @@ define([
 		it('Matching with duplicate attributes in 2 tags 3', function() {
 			editorContext.text = '<html width="100%"><body width="100%"></body></html>';
 			return occurrences.computeOccurrences(editorContext, {selection: {start: 9, end: 9}}).then(function(results) {
-				assertOccurrences(results, [{start: 1, end: 5}, {start: 46, end: 51}]);
+				assertOccurrences(results, [{start: 6, end: 11}]);
 			});
 		});
 		it('Matching with duplicate attributes in 2 tags 4', function() {
 			editorContext.text = '<html width="100%"><body width="100%"></body></html>';
 			return occurrences.computeOccurrences(editorContext, {selection: {start: 14, end: 14}}).then(function(results) {
-				assertOccurrences(results, [{start: 1, end: 5}, {start: 46, end: 51}]);
+				assertOccurrences(results, [{start: 6, end: 11}]);
 			});
 		});
 		it('Matching with duplicate attributes in 2 tags 5', function() {
@@ -249,13 +249,13 @@ define([
 		it('Matching with duplicate attributes in 2 tags 7', function() {
 			editorContext.text = '<html width="100%"><body width="100%"></body></html>';
 			return occurrences.computeOccurrences(editorContext, {selection: {start: 28, end: 28}}).then(function(results) {
-				assertOccurrences(results, [{start: 20, end: 24}, {start: 39, end: 44}]);
+				assertOccurrences(results, [{start: 25, end: 30}]);
 			});
 		});
 		it('Matching with duplicate attributes in 2 tags 8', function() {
 			editorContext.text = '<html width="100%"><body width="100%"></body></html>';
 			return occurrences.computeOccurrences(editorContext, {selection: {start: 34, end: 34}}).then(function(results) {
-				assertOccurrences(results, [{start: 20, end: 24}, {start: 39, end: 44}]);
+				assertOccurrences(results, [{start: 25, end: 30}]);
 			});
 		});
 		it('Matching void element tags - simple 1', function() {
@@ -273,7 +273,7 @@ define([
 		it('Matching void element tags - simple 3', function() {
 			editorContext.text = '<img src="test">';
 			return occurrences.computeOccurrences(editorContext, {selection: {start: 11, end: 11}}).then(function(results) {
-				assertOccurrences(results, [{start: 1, end: 4}]);
+				assertOccurrences(results, [{start: 5, end: 8}]);
 			});
 		});
 		it('Matching void element tags - simple 4', function() {
@@ -297,7 +297,7 @@ define([
 		it('Matching void element tags - unnecessary close tag 3', function() {
 			editorContext.text = '<img src="test"></img>';
 			return occurrences.computeOccurrences(editorContext, {selection: {start: 11, end: 11}}).then(function(results) {
-				assertOccurrences(results, [{start: 1, end: 4}]);
+				assertOccurrences(results, [{start: 5, end: 8}]);
 			});
 		});
 		it('Matching void element tags - unnecessary close tag 4', function() {
@@ -327,7 +327,7 @@ define([
 		it('Matching void element tags - unnecessary inline 3', function() {
 			editorContext.text = '<img src="test"/>';
 			return occurrences.computeOccurrences(editorContext, {selection: {start: 11, end: 11}}).then(function(results) {
-				assertOccurrences(results, [{start: 1, end: 4},{start: 15, end: 16}]);
+				assertOccurrences(results, [{start: 5, end: 8}]);
 			});
 		});
 		it('Matching void element tags - unnecessary inline 4', function() {

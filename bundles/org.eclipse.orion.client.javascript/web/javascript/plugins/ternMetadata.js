@@ -65,6 +65,11 @@ define([
 		}),
 		plugins: Object.freeze({
 			required: {
+				async_await: {
+					name: Messages.asyncAwaitPluginName,
+					description: Messages.asyncAwaitPluginDescription,
+					version: "1.0.0"
+				},
 				doc_comment: {
 					name: Messages["ternDocPluginName"],
 					description: Messages["ternDocPluginDescription"],

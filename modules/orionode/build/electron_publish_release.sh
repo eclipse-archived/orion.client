@@ -46,30 +46,32 @@ popd () {
     command popd "$@" > /dev/null
 }
 
-checkfile "dist/linux/${name}-${pkg_version}.deb"
-checkfile "dist/linux/${name}-${pkg_version}.rpm"
-checkfile "dist/linux/${name}-${pkg_version}.tar.gz"
-checkfile "dist/osx/${name}-${pkg_version}.dmg"
-checkfile "dist/osx/${name}-${pkg_version}-mac.zip"
+checkfile "dist/${name}_${pkg_version}_amd64.deb"
+checkfile "dist/${name}-${pkg_version}.x86_64.rpm"
+checkfile "dist/${name}-${pkg_version}.tar.gz"
+checkfile "dist/${name}-${pkg_version}.dmg"
+checkfile "dist/${name}-${pkg_version}-mac.zip"
+#checkfile "dist/${name}-${pkg_version}-nsis-setup.exe"
 checkfile "dist/win/${name}-${pkg_version}-full.nupkg"
 checkfile "dist/win/${name}-${pkg_version}-setup.exe"
 
 new_release
 
+pushd dist
 # upload linux artifacts to new release
-pushd dist/linux
-upload "${name}-${pkg_version}.deb"
-upload "${name}-${pkg_version}.rpm"
+upload "${name}_${pkg_version}_amd64.deb"
+upload "${name}-${pkg_version}.x86_64.rpm"
 upload "${name}-${pkg_version}.tar.gz"
-popd
 
 # upload osx artifacts to new release
-pushd dist/osx
 upload "${name}-${pkg_version}.dmg"
 upload "${name}-${pkg_version}-mac.zip"
+
+# upload windows nsis artifacts to new release
+#upload "${name}-${pkg_version}-nsis-setup.exe"
 popd
 
-# upload windows artifacts to new release
+# upload windows Squirrel artifacts to new release
 pushd dist/win
 upload "RELEASES"
 upload "${name}-${pkg_version}-full.nupkg"

@@ -391,7 +391,11 @@
         result = compute(this.self, this.args, this.argNodes)
         cx.disabledComputing = old;
       }
-      maybeIterator(fn, result).propagate(this.retval, weight)
+      //ORION - if a dependency fails to resolve, we end up with a null in the worklist, guard against it
+      var iter = maybeIterator(fn, result);
+      if(iter) {
+      	iter.propagate(this.retval, weight);
+      }
     },
     typeHint: function() {
       var names = [];

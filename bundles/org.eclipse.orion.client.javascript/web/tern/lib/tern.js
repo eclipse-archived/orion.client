@@ -177,7 +177,7 @@
       var self = this;
       doRequest(this, doc, function(err, data) {
         c(err, data);
-        if (self.uses > 40) {
+        if (self.uses > 4000) { //ORION - the default is too low
           self.reset();
           analyzeAll(self, null, function(){});
         }

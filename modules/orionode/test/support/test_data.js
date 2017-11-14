@@ -9,11 +9,19 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 /*eslint-env node*/
-var child_process = require('child_process');
-var path = require('path');
-var fs = require('fs');
-var rimraf = require('rimraf');
+var path = require('path'),
+	fs = require('fs'),
+	rimraf = require('rimraf'),
+	express = require('express'),
+	supertest = require('supertest'),
+	orionServer = require("../../index"),
+	checkRights = require('../../lib/accessRights').checkRights,
+	argslib = require('../../lib/args'),
+	testHelper = require('./testHelper'),
+	taskHelper = require('./task_helper'),
+	CONTEXT_PATH = testHelper.CONTEXT_PATH;
 
+var request;
 function debug(msg) {
 	if (exports.DEBUG) {
 		console.log(msg);
@@ -22,14 +30,29 @@ function debug(msg) {
 
 /**
  * Deletes dir and everything in it.
+ * @param {string} dir The directory to delete
+ * @param {fn} callback The function to call when the deletion is done
  */
-function tearDown(dir, callback) {
+exports.tearDown = tearDown = function tearDown(dir, callback) {
 	rimraf(dir, callback);
-}
-
+};
 
 /**
- * Creates a workspace directory with a few files and folders.
+ * Sets up the workspace metadata 
+ * @param {string} workspace The workspace path
+ * @param {?} metastore The backing metastore
+ * @param {?} params The params to use
+ */
+exports.setUpWorkspace = function setUpWorkspace(request, done) {
+	request()
+		.post(CONTEXT_PATH + '/workspace')
+		.set('Slug', 'Orion Content')
+		.expect(201)
+		.end(done);
+};
+
+/**
+ * Synchronously creates a workspace directory with a few files and folders.
  * Uses POSIX shell commands, so on Windows this must be run from within a Cygwin or MinGW shell. CMD.EXE will not work.
  <pre>
    dir
@@ -40,18 +63,10 @@ function tearDown(dir, callback) {
    |-------my subfolder/
  </pre>
  */
-function setUp(dir, callback) {
+exports.setUp = function setUp(dir, callback, wsjson) {
 	debug('Using directory: ' + dir);
 	function generateContent() {
 		debug('\nCreating content...');
-		/*
-		mkdir project
-		mkdir "project/my folder"
-		mkdir "project/my folder/my subfolder"
-		echo -n "hello world" > "project/fizz.txt"
-		echo -n "buzzzz" > "project/my folder/buzz.txt"
-		echo -n "whoa" > "project/my folder/my subfolder/quux.txt"
-		*/
 		var projectFolder = path.join(dir, "project");
 		var myFolder = path.join(projectFolder, "my folder");
 		var subfolder = path.join(myFolder, "my subfolder");
@@ -59,28 +74,104 @@ function setUp(dir, callback) {
 		fs.mkdirSync(projectFolder);
 		fs.mkdirSync(myFolder);
 		fs.mkdirSync(subfolder);
-
+		if(wsjson || wsjson === undefined) {
+			fs.writeFileSync(path.join(dir, 'workspace.json'), '{}');
+		}
 		fs.writeFileSync(path.join(projectFolder, "fizz.txt"), "hello world");
 		fs.writeFileSync(path.join(myFolder, "buzz.txt"), "buzzzz");
 		fs.writeFileSync(path.join(subfolder, "quux.txt"), "whoa");
+		fs.writeFileSync(path.join(subfolder, "foo.html"), "<html></html>");
+		fs.writeFileSync(path.join(subfolder, "bar.js"), "function myFunc(one) {}");
+		fs.writeFileSync(path.join(subfolder, "nonalpha.md"), "amber&sand");
 		callback();
 	}
-	fs.exists(dir, function(exists) {
-		if (exists) {
-			debug('\nDirectory exists; cleaning...');
-			tearDown(dir, function(err) {
-				if (err) {
-					debug(err);
-					return;
-				}
-				fs.mkdir(dir, generateContent);
-			});
-		} else {
-			fs.mkdir(dir, generateContent);
-		}
-	});
+	if(fs.existsSync(dir)) {
+		debug('\nDirectory exists; cleaning...');
+		tearDown(dir, function(err) {
+			if (err) {
+				debug(err);
+				return;
+			}
+			fs.mkdirSync(dir);
+			generateContent();
+		});
+	} else {
+		fs.mkdirSync(dir);
+		generateContent();
+	}
 }
 
+exports.setUpCF = function setUpCF(dir, callback) {
+	function createFiles() {
+		//copy in all the files
+		var test_data_path = path.join(__dirname, "../testData/manifestTest");
+		var files = fs.readdirSync(test_data_path);
+		if(Array.isArray(files)) {
+			files.forEach(function(file) {
+				if(!fs.statSync(path.join(test_data_path, file)).isFile()) {
+					return;
+				}
+				var rs = fs.createReadStream(path.join(test_data_path, file)),
+					ws = fs.createWriteStream(path.join(cf, file));
+				rs.on('error', (err) => {
+					console.log(err.message)
+				});
+				ws.on('error', (err) => {
+					console.log("error writing to: "+err.message);
+				});
+				rs.pipe(ws);
+			});
+		}
+		callback();
+	}
+	var cf = path.join(dir, "cftests");
+	if(fs.existsSync(cf)) {
+		debug('\nDirectory exists; cleaning...');
+		tearDown(cf, function(err) {
+			if (err) {
+				debug(err);
+				return;
+			}
+			fs.mkdirSync(cf);
+			createFiles();
+		});
+	} else {
+		fs.mkdirSync(cf);
+		createFiles();
+	}
+};
+
+exports.setupOrionServer = function setupOrionServer(helperMiddleware){
+	if(!request){
+		app = express();
+		var configFile = path.join(__dirname, '../../orion.conf');
+		var configParams = argslib.readConfigFileSync(configFile) || {};
+		var orion = function(){
+			var options = {};
+			options.workspaceDir = testHelper.WORKSPACE;
+			options.configParams = configParams;
+			options.configParams["orion.single.user.metaLocation"] = testHelper.METADATA;
+//			options.configParams = { "orion.single.user": true, "orion.single.user.metaLocation": testHelper.METADATA };
+			if (testHelper.CONTEXT_PATH) {
+				options.configParams["orion.context.listenPath"]=true;
+				options.configParams["orion.context.path"]=testHelper.CONTEXT_PATH;
+			}
+			return orionServer(options);
+		};
+		var userMiddleware = function(req, res, next) {
+			req.user = {workspaceDir: testHelper.WORKSPACE, username: testHelper.USERNAME};
+			req.user.checkRights = checkRights;
+			next();
+		};
+		app.use(userMiddleware);
+		app.use(testHelper.CONTEXT_PATH ? testHelper.CONTEXT_PATH : "/", function(req, res, next){
+			req.contextPath =  testHelper.CONTEXT_PATH;
+			next();
+		}, orion());
+		// Add a special taskHelper router
+		app.use(CONTEXT_PATH + '/taskHelper', taskHelper.router({root: '/taskHelper', metastore: app.locals.metastore}));
+		request = supertest.bind(null, app);
+	}
+	return request;
+};
 exports.DEBUG = process.env.DEBUG_TESTS || false;
-exports.setUp = setUp;
-exports.tearDown = tearDown;

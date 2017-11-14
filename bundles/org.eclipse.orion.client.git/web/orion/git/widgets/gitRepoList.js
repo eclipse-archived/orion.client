@@ -353,7 +353,7 @@ define([
 					
 					div.appendChild(horizontalBox);	
 					
-					var actionsID, title, description, subDescription, extraDescriptions = [], titleClass = "", titleLink;
+					var title, description, subDescription, extraDescriptions = [], titleClass = "", titleLink;
 					if (item.Type === "NoContent") { //$NON-NLS-0$
 						title = messages[item.Type];
 					} else if ((item.Type === "Clone" && !item.parent) || item.parent.Type === "RepoRoot") { //$NON-NLS-0$
@@ -369,9 +369,9 @@ define([
 
 							description = repo.GitUrl ? messages["git url:"] + repo.GitUrl : messages["(no remote)"];
 							if(repo.SubmoduleStatus && repo.SubmoduleStatus.Type ==="UNINITIALIZED" ){
-								subDescription = messages["location: "] + repo.SubmoduleStatus.Path;
+								subDescription = messages["location: "] + bidiUtils.enforceSTT(repo.SubmoduleStatus.Path, 'filepath');
 							}else {
-								subDescription = repo.Content ? messages["location: "] + repo.Content.Path : ellipses;
+								subDescription = repo.Content ? messages["location: "] + bidiUtils.enforceSTT(repo.Content.Path, 'filepath') : ellipses;
 							}
 							
 
@@ -464,7 +464,6 @@ define([
 					} else {
 						var actionsArea = document.createElement("div"); //$NON-NLS-0$
 						actionsArea.className = "sectionTableItemActions toolComposite"; //$NON-NLS-0$
-						actionsArea.id = actionsID;
 						horizontalBox.appendChild(actionsArea);
 						this.commandService.renderCommands(this.actionScopeId, actionsArea, item, explorer, explorer.section ? "tool" : "button"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$	
 					}

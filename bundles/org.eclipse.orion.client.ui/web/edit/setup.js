@@ -59,16 +59,27 @@ define([
 	'orion/generalPreferences',
 	'orion/breadcrumbs',
 	'orion/keyBinding',
-	'orion/urlModifier'
+	'orion/urlModifier',
+	'orion/debug/breakpoint',
+	'orion/editor/annotations',
+	'orion/debug/debugService'
 ], function(
 	messages, Sidebar, mInputManager, mCommands, mGlobalCommands,
 	mTextModelFactory, mUndoStack,
 	mFolderView, mEditorView, mPluginEditorView , mMarkdownView, mMarkdownEditor,
 	mCommandRegistry, mContentTypes, mFileClient, mFileCommands, mEditorCommands, mSelection, mStatus, mProgress, mOperationsClient, mGitClient, mSshTools, mOutliner, mDialogs, mExtensionCommands, ProjectCommands, mSearchClient,
-	EventTarget, URITemplate, i18nUtil, PageUtil, util, objects, lib, Deferred, mProjectClient, mSplitter, mTooltip, mContextMenu, mMenuBar, bidiUtils, mCustomGlobalCommands, mGeneralPrefs, mBreadcrumbs, mKeyBinding, urlModifier
+	EventTarget, URITemplate, i18nUtil, PageUtil, util, objects, lib, Deferred, mProjectClient, mSplitter, mTooltip, mContextMenu, mMenuBar, bidiUtils, mCustomGlobalCommands, mGeneralPrefs, mBreadcrumbs, mKeyBinding, urlModifier,
+	mBreakpoint, mAnnotations, mDebugService
 ) {
 
 var exports = {};
+
+// Dynamically loaded
+var mNativeDeployService = null;
+var debugMessages = null;
+var DebugFileImpl = null;
+
+var AT = mAnnotations.AnnotationType;
 
 var enableSplitEditor = true;
 
@@ -567,7 +578,7 @@ objects.mixin(TabWidget.prototype, {
 			if (evt.type === "click") {
 				that.setWindowLocation(this.href);
 			} else if (evt.type === "dblclick") {
-				that.transientToPermenant(this.href);
+				that.transientToPermanent(this.href);
 			}
 		};
 		editorTab.addEventListener("click", editorTabClickHandler);
@@ -619,15 +630,15 @@ objects.mixin(TabWidget.prototype, {
 	getDraggedNode: function() {
 		return this.beingDragged;
 	},
-	transientToPermenant: function(href){
-		var hrefHash = href && href.split("#")[1];
+	transientToPermanent: function(href){
+		var hrefHash = href && decodeURIComponent(href.split("#")[1]);
 		if(this.transientTab && hrefHash && hrefHash.indexOf(this.transientTab.location) === 0){
-			this.fileList.find(function(file){
-				if(hrefHash.indexOf(file.metadata.Location) === 0){
+			this.fileList.some(function(file) {
+				if (hrefHash.indexOf(file.metadata.Location) === 0) {
 					file.isTransient = false;
 					return true;
 				}
-			})
+			});
 			this.transientTab && this.transientTab.editorTabNode.classList.remove("transient");
 			this.transientTab = null;
 		}
@@ -746,7 +757,7 @@ objects.mixin(TabWidget.prototype, {
 		}
 		if(this.potentialTransientHref){
 			// In the case doubleclick event reveived before the transient tab is created, 
-			this.transientToPermenant(this.potentialTransientHref);
+			this.transientToPermanent(this.potentialTransientHref);
 			this.potentialTransientHref = null;
 		}
 
@@ -862,6 +873,8 @@ function EditorViewer(options) {
 	this.editModelContextServiceID = "orion.edit.model.context" + this.id; //$NON-NLS-0$
 	this.shown = true;
 
+	this.debugService = this.serviceRegistry.getService("orion.debug.service");
+	
 	var domNode = this.domNode = document.createElement("div"); //$NON-NLS-0$
 	domNode.className = "editorViewerFrame"; //$NON-NLS-0$
 	this.parent.appendChild(domNode);
@@ -898,6 +911,7 @@ objects.mixin(EditorViewer.prototype, {
 		this.createTabWidget();
 		this.createEditorView();
 		this.createTabWidgetContextMenu();
+		this.hookDebugService();
 	},
 	
 	createTextModel: function() {
@@ -965,12 +979,12 @@ objects.mixin(EditorViewer.prototype, {
 			callback: function(commandInvocation) {
 				// Get the right hand tabs from this.editorTab parent.
 				var firstNodeIndexToRemove;
-				Array.prototype.find.call(this.tabWidget.editorTabContainer.childNodes, function(node, index){
+				Array.prototype.some.call(this.tabWidget.editorTabContainer.childNodes, function(node, index){
 					if(node.metadata.Location === commandInvocation.items.Location){
 						firstNodeIndexToRemove = index + 1;
 						return true;
 					}
-				})
+				});
 				var closingButtons = [];
 				for(var j = firstNodeIndexToRemove; j < this.tabWidget.editorTabContainer.childNodes.length; j++){
 					var closeButton = this.tabWidget.editorTabContainer.childNodes[j].querySelector(".editorTabCloseButton");
@@ -988,7 +1002,7 @@ objects.mixin(EditorViewer.prototype, {
 				return data.userData && this.tabWidget.transientTab && data.items.Location === this.tabWidget.transientTab.location;
 			}.bind(this),
 			callback: function(commandInvocation) {
-				this.tabWidget.transientToPermenant(commandInvocation.userData);
+				this.tabWidget.transientToPermanent(commandInvocation.userData);
 			}.bind(this)
 		});
 		var nextTab = new mCommands.Command({
@@ -1084,7 +1098,7 @@ objects.mixin(EditorViewer.prototype, {
 			});
 		}.bind(this));
 	},
-
+	
 	createInputManager: function() {
 		var inputManager = this.inputManager = new mInputManager.InputManager({
 			serviceRegistry: this.serviceRegistry,
@@ -1105,29 +1119,46 @@ objects.mixin(EditorViewer.prototype, {
 			isUnsavedWarningNeeed:function(){
 				return this.getOpenEditorCount(this.inputManager.getFileMetadata()) === 1;
 			}.bind(this)
-		});
+		});	
 		inputManager.addEventListener("InputChanged", function(evt) { //$NON-NLS-0$
 			var metadata = evt.metadata;
 			if (metadata) {
 				var tabHref = this.activateContext.computeNavigationHref(evt.metadata);
 				var lastFile = PageUtil.hash();
-				sessionStorage.lastFile = lastFile;
+				if (lastFile  === "#" + metadata.Location){
+					sessionStorage.lastFile = lastFile;
+				}
 				this.tabWidget.addTab(metadata, tabHref);
 			} else {
 				delete sessionStorage.lastFile;
 			}
 			var view = this.getEditorView(evt.input, metadata);
 			this.setEditor(view ? view.editor : null);
+			this.addAnnotationsFromDebugService();
 			this.updateDirtyIndicator();
 			evt.editor = this.editor;
 			this.pool.metadata = metadata;
-			this.pool.model.addEventListener("postChanged", function(evt){
-				if(this.pool.undoStack._unsavedChanges && this.pool.undoStack._unsavedChanges.length > 0){
-					if(this.tabWidget.transientTab && this.tabWidget.transientTab.location === this.pool.metadata.Location){
-						this.tabWidget.transientToPermenant(this.tabWidget.transientTab.href);
+			
+			var editorView = this.getCurrentEditorView();
+			if (editorView && editorView.editor) {
+				this.editor.isFileInitiallyLoaded = false;
+				var textView = editorView.editor.getTextView();
+				textView.addEventListener("ModelChanged", function(){
+					if(this.editor.isFileInitiallyLoaded){
+						if(this.tabWidget.transientTab && this.tabWidget.transientTab.location === this.pool.metadata.Location){
+							this.tabWidget.transientToPermanent(this.tabWidget.transientTab.href);
+						}
 					}
-				}
-			}.bind(this));
+				}.bind(this));
+				var flagInitialLoad = function(evt){
+						if(typeof evt.contentsSaved === "undefined"){
+							this.editor.isFileInitiallyLoaded = true; 
+						}
+						this.editor.removeEventListener("InputChanged", flagInitialLoad);
+					}.bind(this);
+				this.editor.addEventListener("InputChanged", flagInitialLoad);
+			}
+			
 			if (this.shown) {
 				var href = window.location.href;
 				this.activateContext.setActiveEditorViewer(this);
@@ -1213,6 +1244,54 @@ objects.mixin(EditorViewer.prototype, {
 		this.selection.addEventListener("selectionChanged", function(evt) { //$NON-NLS-0$
 			inputManager.setInput(evt.selection);
 		});
+	},
+
+	hookDebugService: function() {
+		// Handle breakpoint event and add annotation
+		this.debugService.addEventListener("BreakpointAdded", function(e) {
+			if (!this.editor) {
+				return;
+			}
+			if (e.breakpoint.location === this.inputManager.getInput()) {
+				var annotation = this.breakpointToAnnotation(e.breakpoint);
+				var annotationModel = this.editor.getAnnotationModel();
+				annotationModel.addAnnotation(annotation);
+			}
+		}.bind(this));
+		this.debugService.addEventListener("BreakpointRemoved", function(e) {
+			if (!this.editor) {
+				return;
+			}
+			if (e.breakpoint.location === this.inputManager.getInput()) {
+				var annotation = this.breakpointToAnnotation(e.breakpoint);
+				var type = annotation.type;
+				var annotationModel = this.editor.getAnnotationModel();
+				var annotations = annotationModel.getAnnotations(annotation.start, annotation.end);
+				while (annotations.hasNext()) {
+					var annotation = annotations.next();
+					if (annotation.type === type) {
+						annotationModel.removeAnnotation(annotation);
+					}
+				}
+			}
+		}.bind(this));
+
+		// Handle line focused event
+		this.debugService.addEventListener("LineFocused", function(e) {
+			if (!this.editor) {
+				return;
+			}
+			if (e.location !== this.inputManager.getInput()) {
+				return;
+			}
+			this.editor.highlightLine(e.line);
+		}.bind(this));
+		this.debugService.addEventListener("LineUnfocused", function(e) {
+			if (!this.editor) {
+				return;
+			}
+			this.editor.unhighlightLine();
+		}.bind(this));
 	},
 
 	defaultOptions: function() {
@@ -1322,6 +1401,7 @@ objects.mixin(EditorViewer.prototype, {
 		if (this.editor === newEditor) { return; }
 		if (this.editor) {
 			this.editor.removeEventListener("DirtyChanged", this.editorDirtyListener); //$NON-NLS-0$
+			this.editor.removeEventListener("UserAnnotationModified", this.editorAnnotationModifiedListener);
 		}
 		this.editor = newEditor;
 		if (this.editor) {
@@ -1330,9 +1410,199 @@ objects.mixin(EditorViewer.prototype, {
 					editorViewer.updateDirtyIndicator();
 				});
 			}.bind(this));
+			this.editor.addEventListener("UserAnnotationModified", this.editorAnnotationModifiedListener = function(e) {
+				// Update debug service
+				e.removed.forEach(function(annotation) {
+					var breakpoint = this.annotationToBreakpoint(annotation);
+					if (breakpoint) {
+						this.debugService.removeBreakpoint(breakpoint);
+					}
+				}.bind(this));
+				e.added.forEach(function(annotation) {
+					var breakpoint = this.annotationToBreakpoint(annotation);
+					if (breakpoint instanceof mBreakpoint.LineConditionalBreakpoint) {
+						this.commandRegistry.prompt(this.domNode, messages["EnterCondition"], messages["OK"], messages["Cancel"], "true", false, function(condition) {
+							if (condition) {
+								breakpoint.condition = breakpoint.description = condition;
+								this.debugService.addBreakpoint(breakpoint);
+							}
+						}.bind(this));
+					} else {
+						if (breakpoint) {
+							this.debugService.addBreakpoint(breakpoint);
+						}
+					}
+				}.bind(this));
+			}.bind(this));
+			// Listen annotation changes
+			var annotationModel = this.editor.getAnnotationModel && this.editor.getAnnotationModel();
+			annotationModel && annotationModel.addEventListener("Changed", this.annotationModelChangedListener = function(e) {
+				if (e.changed.length === 0) {
+					return;
+				}
+				this._annotationChangedContext.events.push(e);
+				this._annotationChangedContext.locations.push(this.inputManager.getInput());
+				var textModel = this.editor.getModel();
+				if (textModel.getBaseModel) {
+					textModel = textModel.getBaseModel();
+				}
+				this._annotationChangedContext.textModels.push(textModel);
+				if (!this._annotationChangedContext.timeout) {
+					this._annotationChangedContext.timeout = setTimeout(this._annotationChangedHandler.bind(this), 0);
+				}
+			}.bind(this));
+			this.editor.addEventListener("TextViewUninstalled", this.editorUninstalledListener = function(e) {
+				this.editor.removeEventListener("TextViewUninstalled", this.editorUninstalledListener);
+				annotationModel && annotationModel.removeEventListener("Changed", this.annotationModelChangedListener);
+			}.bind(this));
 		}
 	},
+
+	_annotationChangedContext: {
+		timeout: undefined,
+		events: [],
+		locations: [],
+		textModels: []
+	},
+
+	/**
+	 * Handle all annotation changed events in the last tick.
+	 * This avoids duplicate events from a single text model.
+	 */
+	_annotationChangedHandler: function() {
+		/** All events from last tick */
+		var pendingEvents = this._annotationChangedContext.events;
+		var pendingLocations = this._annotationChangedContext.locations;
+		var pendingModels = this._annotationChangedContext.textModels;
+		/** All unique events from last tick */
+		var handlingEvents = [];
+		var handlingLocations = [];
+		var handlingModels = [];
+		// Cleanup
+		this._annotationChangedContext.timeout = undefined;
+		this._annotationChangedContext.events = [];
+		this._annotationChangedContext.locations = [];
+		// Remove duplicate events
+		for (var i = 0; i < pendingEvents.length; i++) {
+			var duplicate = false;
+			for (var j = 0; j < i; i++) {
+				if (pendingEvents[i].textModelChangedEvent === pendingEvents[j].textModelChangedEvent) {
+					duplicate = true;
+				}
+				break;
+			}
+			if (!duplicate) {
+				handlingEvents.push(pendingEvents[i]);
+				handlingLocations.push(pendingLocations[i]);
+				handlingModels.push(pendingModels[i]);
+			}
+		}
+
+		// Handle
+		for (i = 0; i < handlingEvents.length; i++) {
+			var e = handlingEvents[i];
+			for (j = 0; j < e.changed.length; j++) {
+				var annotation = e.changed[j];
+				var location = handlingLocations[i];
+				var oldLine;
+				var newLine = handlingModels[i].getLineAtOffset(annotation.start);
+				if (annotation._oldStart > e.textModelChangedEvent.start) {
+					oldLine = newLine - e.textModelChangedEvent.addedLineCount + e.textModelChangedEvent.removedLineCount;
+				} else {
+					oldLine = handlingModels[i].getLineAtOffset(annotation._oldStart);
+				}
+				var before = null;
+				var after = null;
+				if (annotation.type === AT.ANNOTATION_BOOKMARK) {
+					before = new mBreakpoint.LineBookmark(location, oldLine, annotation.title);
+					after = new mBreakpoint.LineBookmark(location, newLine, annotation.title);
+				} else if (annotation.type === AT.ANNOTATION_BREAKPOINT) {
+					before = new mBreakpoint.LineBreakpoint(location, oldLine, annotation.title, true);
+					after = new mBreakpoint.LineBreakpoint(location, newLine, annotation.title, true);
+				} else if (annotation.type === AT.ANNOTATION_CONDITIONAL_BREAKPOINT) {
+					before = new mBreakpoint.LineConditionalBreakpoint(location, oldLine, annotation.title, annotation.title, true);
+					after = new mBreakpoint.LineConditionalBreakpoint(location, newLine, annotation.title, annotation.title, true);
+				}
+				if (before && after) {
+					this.debugService.updateBreakpoint(before, after, true);
+				}
+			}
+		}
+	},
+
+	addAnnotationsFromDebugService: function() {
+		// Add local breakpoints to this editor
+		this.debugService.getBreakpointsByLocation(this.inputManager.getInput()).then(function(breakpoints) {
+			if (!this.editor) {
+				return;
+			}
+			var annotationModel = this.editor.getAnnotationModel();
+			annotationModel.removeAnnotations(AT.ANNOTATION_BOOKMARK);
+			annotationModel.removeAnnotations(AT.ANNOTATION_BREAKPOINT);
+			annotationModel.removeAnnotations(AT.ANNOTATION_CONDITIONAL_BREAKPOINT);
+			breakpoints.forEach(function(breakpoint) {
+				var annotation = this.breakpointToAnnotation(breakpoint);
+				if (annotation) {
+					annotationModel.addAnnotation(annotation);
+				}
+			}.bind(this));
+		}.bind(this));
+
+		// Add current focused line
+		this.debugService.getFocusedLine().then(function(lineWithLocation) {
+			if (!this.editor) {
+				return;
+			}
+			if (!lineWithLocation) {
+				return;
+			}
+			var line = lineWithLocation.line;
+			var location = lineWithLocation.location;
+			if (location !== this.inputManager.getInput()) {
+				return;
+			}
+			this.editor.highlightLine(line);
+		}.bind(this));
+	},
 	
+	annotationToBreakpoint: function(annotation) {
+		var location = this.inputManager.getInput();
+		var textModel = this.editor.getModel();
+		if (textModel.getBaseModel) {
+			textModel = textModel.getBaseModel();
+		}
+		var line = textModel.getLineAtOffset(annotation.start);
+		if (annotation.type === AT.ANNOTATION_BOOKMARK) {
+			return new mBreakpoint.LineBookmark(location, line, annotation.title);
+		} else if (annotation.type === AT.ANNOTATION_BREAKPOINT) {
+			return new mBreakpoint.LineBreakpoint(location, line, annotation.title, true);
+		} else if (annotation.type === AT.ANNOTATION_CONDITIONAL_BREAKPOINT) {
+			return new mBreakpoint.LineConditionalBreakpoint(location, line, annotation.title, annotation.title, true);
+		}
+		return null;
+	},
+
+	breakpointToAnnotation: function(breakpoint) {
+		var annotationType = undefined;
+		if (breakpoint instanceof mBreakpoint.LineBookmark) {
+			annotationType = AT.ANNOTATION_BOOKMARK;
+		} else if (breakpoint instanceof mBreakpoint.LineBreakpoint) {
+			annotationType = AT.ANNOTATION_BREAKPOINT;
+		} else if (breakpoint instanceof mBreakpoint.LineConditionalBreakpoint) {
+			annotationType = AT.ANNOTATION_CONDITIONAL_BREAKPOINT;
+		}
+		if (annotationType) {
+			var textModel = this.editor.getModel();
+			if (textModel.getBaseModel) {
+				textModel = textModel.getBaseModel();
+			}
+			var lineStart = textModel.getLineStart(breakpoint.line);
+			var lineEnd = textModel.getLineEnd(breakpoint.line);
+			return AT.createAnnotation(annotationType, lineStart, lineEnd, breakpoint.description);
+		}
+		return null;
+	},
+
 	updateDirtyIndicator: function(){
 		if (this.editor && this.editor.isDirty) {
 			var loc = this.inputManager.getFileMetadata().Location;
@@ -1386,9 +1656,21 @@ objects.mixin(EditorSetup.prototype, {
 		this.selection = new mSelection.Selection(serviceRegistry);
 		this.operationsClient = new mOperationsClient.OperationsClient(serviceRegistry);
 		this.statusService = new mStatus.StatusReportingService(serviceRegistry, this.operationsClient, "statusPane", "notifications", "notificationArea"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$ //$NON-NLS-3$
-		this.dialogService = new mDialogs.DialogService(serviceRegistry);
 		this.commandRegistry = new mCommandRegistry.CommandRegistry({selection: this.selection});
-		this.progressService = new mProgress.ProgressService(serviceRegistry, this.operationsClient, this.commandRegistry);
+		this.dialogService = new mDialogs.DialogService(serviceRegistry, this.commandRegistry);
+		this.progressService = new mProgress.ProgressService(serviceRegistry, this.operationsClient, this.commandRegistry, null, this.preferences);
+		this.getGeneralPreferences().then(function() {
+			if (this.generalPreferences.enableDebugger) {
+				this.nativeDeployService = new mNativeDeployService.NativeDeployService(serviceRegistry, this.commandRegistry);
+				var debugFileService = new DebugFileImpl();
+				serviceRegistry.registerService("orion.core.file", debugFileService, {
+					Name: debugMessages["DebugWorkspace"],
+					top: "/debug",
+					pattern: "/debug"
+				});
+				new HoverEvaluationService(serviceRegistry, this);
+			}
+		}.bind(this));
 		this.sshService = new mSshTools.SshService(serviceRegistry);
 		this.gitClient = new mGitClient.GitService(serviceRegistry);
 		
@@ -1412,12 +1694,34 @@ objects.mixin(EditorSetup.prototype, {
 			navToolbarId: "pageNavigationActions", //$NON-NLS-0$
 			editorContextMenuId: "editorContextMenuActions", //$NON-NLS-0$
 		});
+		this.debugService = new mDebugService.DebugService(serviceRegistry);
+		// Use localStorage based debug service until we find a good way to cache breakpoint position
+		// this.debugService = new mDebugService.PreferenceDebugService(serviceRegistry, this.preferences);
 	},
 	
 	getGeneralPreferences: function() {
-		return new mGeneralPrefs.GeneralPreferences(this.preferences).getPrefs().then(function(prefs) {
+		var deferred = new Deferred();
+		new mGeneralPrefs.GeneralPreferences(this.preferences).getPrefs().then(function(prefs) {
 			this.generalPreferences = prefs;
+			// Load debug package if needed
+			if (this.generalPreferences.enableDebugger && !mNativeDeployService) {
+				require(['orion/debug/debugPackage'], function() {
+					require([
+						'orion/debug/nativeDeployService',
+						'i18n!orion/debug/nls/messages',
+						'orion/debug/debugFileImpl'
+					], function(dymNativeDeployService, dyDebugMessage, dyDebugFileImpl) {
+						mNativeDeployService = dymNativeDeployService;
+						debugMessages = dyDebugMessage;
+						DebugFileImpl = dyDebugFileImpl;
+						deferred.resolve();
+					});
+				});
+			} else {
+				deferred.resolve();
+			}
 		}.bind(this));
+		return deferred;
 	},
 	
 	createBanner: function() {
@@ -1441,26 +1745,33 @@ objects.mixin(EditorSetup.prototype, {
 	createRunBar: function () {
 		var menuBar = this.menuBar;
 		var runBarParent = menuBar.runBarNode;
-		return mCustomGlobalCommands.createRunBar({
-			parentNode: runBarParent,
-			serviceRegistry: this.serviceRegistry,
-			commandRegistry: this.commandRegistry,
-			fileClient: this.fileClient,
-			projectCommands: ProjectCommands,
-			projectClient: this.serviceRegistry.getService("orion.project.client"),
-			progressService: this.progressService,
-			preferences: this.preferences,
-			editorInputManager: this.editorInputManager
-		}).then(function(runBar){
-			if (runBar) {
-				this.preferences.get('/runBar').then(function(prefs){ //$NON-NLS-1$
+		return this.preferences.get('/runbar').then(function(prefs) {
+			if (Boolean(prefs) && prefs.disabled === true) {
+				console.log('returning resolved promise.')
+				var d = new Deferred();
+				d.resolve();
+				return d;
+			}
+			return mCustomGlobalCommands.createRunBar({
+				parentNode: runBarParent,
+				serviceRegistry: this.serviceRegistry,
+				commandRegistry: this.commandRegistry,
+				fileClient: this.fileClient,
+				projectCommands: ProjectCommands,
+				projectClient: this.serviceRegistry.getService("orion.project.client"),
+				progressService: this.progressService,
+				preferences: this.preferences,
+				editorInputManager: this.editorInputManager,
+				generalPreferences: this.generalPreferences
+			}).then(function(runBar){
+				if (runBar) {
 					this.runBar = runBar;
 					var displayRunBar = prefs.display === undefined  || prefs.display;
-					if (util.isElectron || !displayRunBar) {
+					if (!displayRunBar) {
 						lib.node("runBarWrapper").style.display = "none";
 					}
-				}.bind(this));
-			}
+				}
+			}.bind(this));
 		}.bind(this));
 	},
 	
@@ -1504,6 +1815,7 @@ objects.mixin(EditorSetup.prototype, {
 			contentTypeRegistry: this.contentTypeRegistry,
 			editorInputManager: this.editorInputManager,
 			preferences: this.preferences,
+			generalPreferences: this.generalPreferences,
 			fileClient: this.fileClient,
 			outlineService: this.outlineService,
 			parent: this.sidebarDomNode,
@@ -1546,7 +1858,7 @@ objects.mixin(EditorSetup.prototype, {
 		}.bind(this));
 		this.sidebarNavInputManager.addEventListener("fileDoubleClicked", function(evt) { //$NON-NLS-0$
 			this.activeEditorViewer.tabWidget.potentialTransientHref = evt.href;
-			this.activeEditorViewer.tabWidget.transientToPermenant(evt.href);
+			this.activeEditorViewer.tabWidget.transientToPermanent(evt.href);
 		}.bind(this));
 		this.sidebarNavInputManager.addEventListener("create", function(evt) { //$NON-NLS-0$
 			if (evt.newValue && !evt.ignoreRedirect) {
@@ -1593,9 +1905,14 @@ objects.mixin(EditorSetup.prototype, {
 	 * @since 9.0
 	 */
 	openEditor: function(loc, options) {
-		var href = this.computeNavigationHref({Location: loc}, {start: options.start, end: options.end});
-		if (!href)
-			return;
+		var href = this.computeNavigationHref({Location: loc, Name: options.name}, {start: options.start, end: options.end});
+		var openEditorPromise = new Deferred();
+
+		if (!href) {
+			openEditorPromise.resolve();
+			return openEditorPromise;
+		}
+
 			
 		var mode = typeof(options.mode) === 'string' ? options.mode : 'replace'; //$NON-NLS-1$
 		switch (mode) {
@@ -1607,6 +1924,14 @@ objects.mixin(EditorSetup.prototype, {
 					history.pushState({}, "", currentHref);
 					this.lastHash = PageUtil.hash(); // Pushing to the history stack changes the hash
 				}
+
+				var inputManager = this.activeEditorViewer.inputManager;
+				var inputChangeListener = function() {
+					inputManager.removeEventListener("InputChanged", inputChangeListener);
+					openEditorPromise.resolve();
+				};
+				inputManager.addEventListener("InputChanged", inputChangeListener);
+
 				var hash = href.split('#')[1];
 				if (hash === window.location.hash.substring(1)) {
 					this.activeEditorViewer.inputManager.setInput(hash);
@@ -1616,6 +1941,7 @@ objects.mixin(EditorSetup.prototype, {
 				break;
 			case 'tab':
 				window.open(urlModifier(href));
+				openEditorPromise.resolve();
 				break;
 			case 'split':
 				var locWithParams = href.split('#')[1];
@@ -1630,8 +1956,10 @@ objects.mixin(EditorSetup.prototype, {
 				} else {
 					this.editorViewers[1].inputManager.setInput(locWithParams);
 				}
+				openEditorPromise.resolve();
 				break;
 		}
+		return openEditorPromise;
 	},
 	
 	createEditorViewer: function(id) {
@@ -1955,6 +2283,51 @@ objects.mixin(EditorSetup.prototype, {
 		});
 		this.commandRegistry.addCommand(changeSplitModeCommand);
 		this.commandRegistry.registerCommandContribution(toolbar, "orion.edit.splitmode", 0); //$NON-NLS-1$ //$NON-NLS-0$
+	}
+});
+
+/**
+ * Provides hover evaluation by project
+ * @name orion.projects.HoverEvaluationService
+ * @param {orion.serviceregistry.ServiceRegistry} serviceRegistry
+ * @param {EditorSetup} setup - need this to get the current project
+ */
+var HoverEvaluationService = function(serviceRegistry, setup) {
+	this._setup = setup;
+	this._projectClient = serviceRegistry.getService("orion.project.client");
+	serviceRegistry.registerService("orion.edit.hover", this, {
+		name: 'Hover Evaluation',
+		contentType: ["application/javascript", "text/x-c++src", "text/x-python"] // TODO: get by sub-services
+	});
+};
+
+objects.mixin(HoverEvaluationService.prototype, /** @lends orion.projects.HoverEvaluationService.prototype */ {
+		/**
+		 * Evaluate the hover
+		 * @param {Object} editorContext
+		 * @param {Object} ctxt
+		 * @return {Promise.<string>}
+		 */
+	computeHoverInfo: function(editorContext, ctxt) {
+		var promise = new Deferred();
+		var launchConf = this._setup.runBar.getSelectedLaunchConfiguration();
+		if (launchConf) {
+			this._projectClient.getProjectDeployService(launchConf.ServiceId, launchConf.Type).then(function(service){
+				if (service && service.computeHoverInfo) {
+					service.computeHoverInfo(launchConf, editorContext, ctxt).then(function(value) {
+						promise.resolve(value);
+					}, function() {
+						promise.resolve(null);
+					});
+				} else {
+					console.error('Failed to evaluate hover.');
+					promise.resolve(null);
+				}
+			});
+		} else {
+			promise.resolve(null);
+		}
+		return promise;
 	}
 });
 

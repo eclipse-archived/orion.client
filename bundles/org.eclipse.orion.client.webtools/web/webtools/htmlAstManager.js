@@ -36,18 +36,10 @@ define([
 			node.name = name;
 			node.type = 'tag'; //$NON-NLS-1$
 
-			node.attributes = Object.create(null);
-			for (var i = 0; i < this.attribstack.length; i++) {
-				var attrib = this.attribstack[i];
-				if (attrib.name) {
-					if (node.attributes[attrib.name]) {
-						// Store duplicate attributes for later linting
-						if (!node.duplicateAttributes) node.duplicateAttributes = [];
-						node.duplicateAttributes.push(node.attributes[attrib.name]);
-					}
-					node.attributes[attrib.name] = attrib;
-				}
-			}
+			node.attributes = [];
+			this.attribstack.forEach(function(attrib) {
+				node.attributes.push(attrib);
+			});
 			node.children = [];
 			var tag = this._getLastTag();
 			if (tag) {

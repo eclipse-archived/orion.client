@@ -32,6 +32,10 @@
 	width: 100%
 }
 
+.outlineFilterLabel {
+	margin: 3px 6px;
+}
+
 .outlineFilter {
 	border: 1px solid lightgrey;
 	margin: 3px 6px;

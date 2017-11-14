@@ -64,7 +64,9 @@ define([
 										switch(key) {
 											case "ecmaVersion":
 											case "dependencyBudget": {
-												if(typeof property.value.value !== 'number') {
+												if(!property.value) {
+													report(problems, i18nUtil.formatMessage(Messages['notNum'], key), property.range);
+												} else if(typeof property.value.value !== 'number') {
 													report(problems, i18nUtil.formatMessage(Messages['notNum'], key), property.value.range);
 												}
 												break;
@@ -73,7 +75,9 @@ define([
 											case 'dontLoad':
 											case 'loadEagerly': {
 												var arr = property.value;
-												if(arr.type !== 'ArrayExpression') {
+												if(!arr) {
+													report(problems, i18nUtil.formatMessage(Messages['notArray'], key), property.range);
+												} else if(arr.type !== 'ArrayExpression') {
 													report(problems, i18nUtil.formatMessage(Messages['notArray'], key), arr.range);
 												} else if(arr.elements) {
 													if(arr.elements.length < 1 && key !== 'loadEagerly') {
@@ -89,12 +93,16 @@ define([
 											}
 											case 'plugins': {
 												var obj = property.value;
-												if(obj.value === null || obj.type !== 'ObjectExpression') {
+												if(!obj) {
+													report(problems, i18nUtil.formatMessage(Messages['notObject'], key), property.range);
+												} else if(obj.value === null || obj.type !== 'ObjectExpression') {
 													report(problems, i18nUtil.formatMessage(Messages['notObject'], key), obj.range);
 												} else if(obj.properties) {
 													obj.properties.forEach(function(prop) {
-														if(prop.value === null || prop.value.type !== 'ObjectExpression') {
-															report(problems, i18nUtil.formatMessage(Messages['notObject'], prop.key.value), prop.value.range);
+														if(prop.value === null) {
+															report(problems, i18nUtil.formatMessage(Messages['pluginNotObject'], prop.key.value), prop.range);
+														} else if(!(prop.value.type === 'ObjectExpression' || (prop.value.type === 'Literal' && typeof prop.value.value === 'boolean'))) {
+															report(problems, i18nUtil.formatMessage(Messages['pluginNotObject'], prop.key.value), prop.value.range);
 														}
 													});
 												}
@@ -162,7 +170,7 @@ define([
 				var keys = Object.keys(json.plugins);
 				for(var i = 0, len = keys.length; i < len; i++) {
 					var p = json.plugins[keys[i]];
-					if(p === null || typeof p !== 'object') {
+					if(p === null || !(typeof p === 'object' || typeof p === 'boolean')) {
 						problems.push(i18nUtil.formatMessage(Messages['pluginNotObject'], keys[i]));
 					}
 				}

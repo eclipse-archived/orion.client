@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2014, 2015 IBM Corporation and others.
+ * Copyright (c) 2014, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License v1.0
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution
@@ -183,7 +183,7 @@ define([
 		_deploy: function(project, target, launchConf, deferred) {
 			var launchConfParams = launchConf.Parameters || {};
 			var appName = launchConfParams.Name;
-			var appPath = launchConf.Path;
+			var appPath = typeof launchConf.Path === 'string' ? launchConf.Path : 'manifest.yml';
 			var launchConfName = launchConf.ConfigurationName;
 
 			if (target && appName) {
@@ -320,7 +320,7 @@ define([
 		_edit: function(project, target, launchConf, deferred) {
 			var launchConfParams = launchConf.Parameters || {};
 			var appName = launchConfParams.Name;
-			var appPath = launchConf.Path;
+			var appPath = typeof launchConf.Path === 'string' ? launchConf.Path : 'manifest.yml';
 			var launchConfName = launchConf.ConfigurationName;
 			
 			var serviceRegistry = this.serviceRegistry;
@@ -392,6 +392,10 @@ define([
 					}
 					return appState;
 				}, function(error) {
+					if (error && error.HttpCode === 401) {
+						error = mCfUtil.defaultDecorateError(error, params.Target);
+						throw error;
+					}
 					return this._getTargets().then(function(result){
 						if(result.clouds){
 							result.clouds.forEach(function(data){

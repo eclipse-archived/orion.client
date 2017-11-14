@@ -9,14 +9,15 @@
  *		 IBM Corporation - initial API and implementation
  *******************************************************************************/
 /*eslint-env node */
-var api = require('../api'), writeError = api.writeError, writeResponse = api.writeResponse;
-var git = require('nodegit');
-var clone = require('./clone');
-var path = require('path');
-var express = require('express');
-var util = require('./util');
-var fileUtil = require('../fileUtil');
-var mime = require('mime');
+var api = require('../api'), writeError = api.writeError, writeResponse = api.writeResponse,
+	git = require('nodegit'),
+	clone = require('./clone'),
+	path = require('path'),
+	express = require('express'),
+	fileUtil = require('../fileUtil'),
+	mime = require('mime'),
+	metaUtil = require('../metastore/util/metaUtil'),
+	responseTime = require('response-time');
 
 module.exports = {};
 
@@ -26,10 +27,11 @@ module.exports.router = function(options) {
 	if (!fileRoot) { throw new Error('options.fileRoot is required'); }
 	if (!gitRoot) { throw new Error('options.gitRoot is required'); }
 	
-	/* Note that context path was not included in file and workspace root. */
-	var contextPath = options && options.options && options.options.configParams["orion.context.path"] || "";
+	var contextPath = options && options.configParams["orion.context.path"] || "";
+	fileRoot = fileRoot.substring(contextPath.length);
 	
 	return express.Router()
+	.use(responseTime({digits: 2, header: "X-GitapiTree-Response-Time", suffix: true}))
 	.get('/', getTree)
 	.get(fileRoot + '*', getTree);
 	
@@ -49,23 +51,22 @@ function treeJSON(location, name, timestamp, dir, length) {
 }
 
 function getTree(req, res) {
+	var readIfExists = req.headers ? Boolean(req.headers['read-if-exists']).valueOf() : false;
 	var repo;
-	
+	var store = fileUtil.getMetastore(req);
 	if (!req.params[0]) {
 		var workspaceRoot = gitRoot + "/tree" + fileRoot;
-		api.writeResponse(null, res, null, {
-				Id: req.user.username,
-				Name: req.user.username,
-				UserName: req.user.fullname || req.user.username,
-				Workspaces: req.user.workspaces.map(function(w) {
-					return {
-						Id: w.id,
-						Location: api.join(workspaceRoot, w.id),
-						Name: w.name
-					};
-				})
-			}, true);
-		return;
+		
+		var workspaceJson = {
+			Id: req.user.username,
+			Name: req.user.username,
+			UserName: req.user.fullname || req.user.username
+		};
+		return metaUtil.getWorkspaceMeta(req.user.workspaces, store, workspaceRoot)
+		.then(function(workspaceInfos){
+			workspaceJson.Workspaces = workspaceInfos || [];
+			return api.writeResponse(null, res, null, workspaceJson, true);
+		});
 	}
 	
 	var segmentCount = req.params["0"].split("/").length;
@@ -76,9 +77,12 @@ function getTree(req, res) {
 	
 	if (segmentCount === 2) {
 		var file = fileUtil.getFile(req, req.params["0"]);
-		fileUtil.getMetastore(req).getWorkspace(file.workspaceId, function(err, workspace) {
+		store.getWorkspace(file.workspaceId, function(err, workspace) {
 			if (err) {
 				return writeError(400, res, err);
+			}
+			if (!workspace) {
+				return writeError(404, res, "Workspace not found");
 			}
 			clone.getClones(req, res, function(repos) {
 				var tree = treeJSON(api.join(fileRoot, workspace.id), workspace.name, 0, true, 0);
@@ -114,7 +118,7 @@ function getTree(req, res) {
 			return git.Reference.list(repo)
 			.then(function(refs) {
 				return refs.map(function(ref) {
-					return treeJSON(path.join(location, util.encodeURIComponent(ref)), shortName(ref), 0, true, 0);
+					return treeJSON(path.join(location, api.encodeURIComponent(ref)), shortName(ref), 0, true, 0);
 				});
 			})
 			.then(function(children) {
@@ -124,14 +128,14 @@ function getTree(req, res) {
 			});
 		}
 		var segments = filePath.split("/");
-		var ref = util.decodeURIComponent(segments[0]);
+		var ref = api.decodeURIComponent(segments[0]);
 		var p = segments.slice(1).join("/");
 		return clone.getCommit(repo, ref)
 		.then(function(commit) {
 			return commit.getTree();
 		}).then(function(tree) {
 			var repoRoot =  clone.getfileDirPath(repo,req); 
-			var refLocation = path.join(repoRoot, util.encodeURIComponent(ref));
+			var refLocation = path.join(repoRoot, api.encodeURIComponent(ref));
 			function createParents(data) {
 				var parents = [], temp = data, l, end = gitRoot + "/tree" + repoRoot;
 				while (temp.Location.length > end.length) {
@@ -139,7 +143,7 @@ function getTree(req, res) {
 					var searchTerm = "^" + treePath.replace(/\//g, "\/");
 					var regex = new RegExp(searchTerm);
 					l = path.dirname(temp.Location).replace(regex, "") + "/";
-					var dir = treeJSON(l, shortName(util.decodeURIComponent(path.basename(l))), 0, true, 0);
+					var dir = treeJSON(l, shortName(api.decodeURIComponent(path.basename(l))), 0, true, 0);
 					parents.push(dir);
 					temp = dir;
 				}
@@ -147,7 +151,7 @@ function getTree(req, res) {
 			}
 			function sendDir(tree) {
 				var l = path.join(refLocation, p);
-				var result = treeJSON(l, shortName(util.decodeURIComponent(path.basename(l))), 0, true, 0);
+				var result = treeJSON(l, shortName(api.decodeURIComponent(path.basename(l))), 0, true, 0);
 				result.Children = tree.entries().map(function(entry) {
 					return treeJSON(path.join(refLocation, entry.path()), entry.name(), 0, entry.isDirectory(), 0);
 				});
@@ -171,6 +175,7 @@ function getTree(req, res) {
 								var contentType = mime.lookup(entry.path());
 								res.setHeader('Content-Type', contentType);
 								res.setHeader('Content-Length', buffer.length);
+								api.setResponseNoCache(res);
                 				res.status(200).end(buffer, 'binary');
 							}else{
 								var resp = blob.toString();
@@ -191,7 +196,14 @@ function getTree(req, res) {
 		});
 	})
 	.catch(function(err) {
-		writeError(404, res, err.message);
+		if (typeof readIfExists === 'boolean' && readIfExists) {
+			api.sendStatus(204, res);
+		}else{
+			writeError(404, res, err.message);
+		}
+	})
+	.done(function() {
+		clone.freeRepo(repo);
 	});
 }
 

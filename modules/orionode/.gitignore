@@ -18,4 +18,8 @@ dist/
 
 # Ignore per-user Orionode data
 .workspace*/
-test/.test_workspace/
+.test_workspace
+.test_metadata
+.nyc_output/
+coverage/
+orion_client_coverage/
