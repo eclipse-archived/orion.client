@@ -261,16 +261,18 @@ function getCommitLog(req, res) {
 		if (page && !over) {
 			var nextLocation = url.parse(req.originalUrl, true);
 			nextLocation.query.page = page + 1 + "";
+			nextLocation.pathname = decodeURIComponent(nextLocation.pathname);
 			nextLocation.search = null; //So that query object will be used for format
-			nextLocation = url.format(nextLocation);
+//			nextLocation = url.format(nextLocation);
 			resp['NextLocation'] = nextLocation;
 		}
 
 		if (page && page > 1) {
 			var prevLocation = url.parse(req.originalUrl, true);
 			prevLocation.query.page = page - 1 + "";
+			prevLocation.pathname = decodeURIComponent(prevLocation.pathname);
 			prevLocation.search = null;
-			prevLocation = url.format(prevLocation);
+//			prevLocation = url.format(prevLocation);
 			resp['PreviousLocation'] = prevLocation;
 		}
 		

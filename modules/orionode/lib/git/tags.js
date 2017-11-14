@@ -183,7 +183,7 @@ function getTags(req, res) {
 						var nextLocation = url.parse(req.originalUrl, true);
 						nextLocation.query.page = page + 1 + "";
 						nextLocation.search = null; //So that query object will be used for format
-						nextLocation = url.format(nextLocation);
+						nextLocation.pathname = decodeURIComponent(nextLocation.pathname);
 						resp['NextLocation'] = nextLocation;
 					}
 		
@@ -191,7 +191,7 @@ function getTags(req, res) {
 						var prevLocation = url.parse(req.originalUrl, true);
 						prevLocation.query.page = page - 1 + "";
 						prevLocation.search = null;
-						prevLocation = url.format(prevLocation);
+						prevLocation.pathname = decodeURIComponent(prevLocation.pathname);
 						resp['PreviousLocation'] = prevLocation;
 					}
 		

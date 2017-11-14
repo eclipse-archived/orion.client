@@ -267,7 +267,7 @@ function processDiff(diff, filePath, paths, fileDir, includeDiff, includeDiffs, 
 		if (includeDiffs) {
 			diffs.Length = patches.length;
 			if (i < patches.length - 1) {
-				diffs.NextLocation  = {pathname: gitRoot + "/diff/" + scope + fileDir, query: {page: page + 1, pageSize:pageSize}}
+				diffs.NextLocation  = {pathname: gitRoot + "/diff/" + scope + fileDir, query: {page: page + 1, pageSize:pageSize}};
 			}
 		}
 		return Promise.all(result);

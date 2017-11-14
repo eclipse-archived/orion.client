@@ -182,6 +182,9 @@ Task.prototype = {
 			default:
 				this.type = "abort";
 		}
+		if (this.result.JsonData) {
+			api.encodeLocation(this.result.JsonData);
+		}
 		if (!this.started) {
 			if (this.timeout) {
 				clearTimeout(this.timeout);
@@ -198,11 +201,7 @@ Task.prototype = {
 				} else {
 					if (this.result.JsonData) {
 						res.statusCode = this.result.HttpCode;
-						var resp = JSON.stringify(api.encodeLocation(this.result.JsonData));
-						api.writeResponse(this.result.HttpCode, res, {
-							'Content-Type': 'application/json',
-							'Content-Length': resp.length
-						}, resp, null, true);
+						api.writeResponse(this.result.HttpCode, res, null, this.result.JsonData, false, true);
 					} else if (this.type === "error") {
 						api.writeError(this.result.HttpCode, res, this.result.Message || "");
 					}
@@ -306,7 +305,7 @@ function cancelOperation(req, res){
 			if (err) {
 				writeError(500, res, err.toString());
 			}
-			writeResponse(200, res)
+			writeResponse(200, res);
 		});
 	});
 }
