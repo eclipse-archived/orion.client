@@ -31,6 +31,7 @@ define([
 		enableFolderCreationAtRoot: false,
 		enableProjectCreation: true,
 		enableLinkProjectCreation: true,
+		enableRefreshButton: false,
 		enableDebugger: false
 	};
 
