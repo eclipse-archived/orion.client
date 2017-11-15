@@ -1139,6 +1139,7 @@ define(["orion/Deferred", "orion/EventTarget", "orion/urlModifier", "orion/URL-s
                     iframe.sandbox = "allow-scripts allow-same-origin allow-forms allow-popups"; //$NON-NLS-0$
                     iframe.style.width = iframe.style.height = "100%"; //$NON-NLS-0$
                     iframe.frameBorder = 0;
+                    iframe.title = (parent || _parent).title;
                     (parent || _parent).appendChild(iframe);
                     channel.target = iframe.contentWindow;
                     channel.postMessage = function(message) {

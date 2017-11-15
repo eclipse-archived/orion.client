@@ -79,6 +79,7 @@ define([
 			img = document.createElement("img"); //$NON-NLS-0$
 			var url = URL.createObjectURL(blob);
 			img.src = url;
+			img.alt = "";
 			img.onload = function() {
 				URL.revokeObjectURL(url);
 				imgW = img.width;

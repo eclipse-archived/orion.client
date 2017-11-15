@@ -736,7 +736,7 @@ function Tooltip (view, editor) {
 			
 			var sectionDiv = util.createElement(document, "div"); //$NON-NLS-0$;
 			// render the title, if any
-			if (data.title) {
+			if (data.title && !data.hiddenTitle) {
 				var titleDiv = util.createElement(document, "div"); //$NON-NLS-0$;
 				if (this.hover.renderMarkDown) {
 					titleDiv.innerHTML = this.hover.renderMarkDown(data.title);
@@ -761,6 +761,7 @@ function Tooltip (view, editor) {
 							iframe.id = 'HtmlHover'; //$NON-NLS-0$
 							iframe.name = 'HTML Hover'; //$NON-NLS-0$
 							iframe.type = "text/html"; //$NON-NLS-0$
+							iframe.title = data.title || "HTML"; //$NON-NLS-0$
 							iframe.sandbox = "allow-scripts allow-same-origin allow-forms"; //$NON-NLS-0$
 							iframe.style.border = "none"; //$NON-NLS-0$
 							iframe.style.width = "100%"; //$NON-NLS-0$
