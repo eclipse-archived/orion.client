@@ -107,6 +107,7 @@ define([
 			root.style.width = "100%"; //$NON-NLS-0$
 			root.style.height = "100%"; //$NON-NLS-0$
 			root.style.overflow = "hidden"; //$NON-NLS-0$
+			root.title = this.metadata ? this.metadata.Name : "";
 			var self = this;
 			var plugin = this._getPlugin();
 			plugin.setParent(root).then(function() {

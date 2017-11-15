@@ -177,7 +177,7 @@ define([
 		
 		_getFontHover: function _getFontHover(prop, font){
 			var html = '<html><body style=\"background-color:white\"><div style="'+prop.replace(/"/g, "'")+':'+font.replace(/"/g, "'")+';margin:0px">'+messages['fontHoverExampleText']+'</div></body></html>';  //$NON-NLS-0$  //$NON-NLS-1$  //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
-			return {type: "html", content: html, height: '42px', width: '235px'};  //$NON-NLS-0$  //$NON-NLS-1$  //$NON-NLS-2$ //$NON-NLS-3$
+			return {title: font, hiddenTitle: true, type: "html", content: html, height: '42px', width: '235px'};  //$NON-NLS-0$  //$NON-NLS-1$  //$NON-NLS-2$ //$NON-NLS-3$
 		},
 		
 		_isColorFnName: function _isColorFnName(name) {
@@ -362,10 +362,11 @@ define([
 		      var path = this._getPathFromToken(token);
 		      var that = this;
 		      if(path) {
+		      	  var name = path.slice(path.lastIndexOf('/')+1);
 		          if(/^http/i.test(path) || /^data:image.*;base64/i.test(path)) {
 		          	  path = path.replace(/"/g, "&quot;"); //$NON-NLS-1$
     		          var html = '<html><body style="margin:1px;"><img src="'+path+'" style="width:100%;height:100%;"/></body></html>'; //$NON-NLS-0$  //$NON-NLS-1$ //$NON-NLS-2$
-    			      return {type: "html", content: html, width: "100px", height: "100px"};  //$NON-NLS-0$  //$NON-NLS-1$  //$NON-NLS-2$ //$NON-NLS-3$
+    			      return {title: name, hiddenTitle: true, type: "html", content: html, width: "100px", height: "100px"};  //$NON-NLS-0$  //$NON-NLS-1$  //$NON-NLS-2$ //$NON-NLS-3$
 		          }
 	              var idx = path.lastIndexOf('.');
 	              if(idx > -1) {
@@ -378,7 +379,7 @@ define([
             		            if(resolved.length > 0) {
             		            	 var loc = resolved[0].location.replace(/"/g, "&quot;"); //$NON-NLS-1$
             		                 var html = '<html><body style="margin:1px;"><img src="'+loc+'" style="width:100%;height:100%;"/></body></html>'; //$NON-NLS-0$  //$NON-NLS-1$ //$NON-NLS-2$
-			                         return {type: "html", content: html, width: "100px", height: "100px"};  //$NON-NLS-0$  //$NON-NLS-1$  //$NON-NLS-2$ //$NON-NLS-3$
+			                         return {title: name, hiddenTitle: true, type: "html", content: html, width: "100px", height: "100px"};  //$NON-NLS-0$  //$NON-NLS-1$  //$NON-NLS-2$ //$NON-NLS-3$
             		            }
             		        }
             	        });
@@ -388,7 +389,7 @@ define([
 		
 		_getColorHover: function _getColorHover(colorID){
 			var html = '<html><body style=\"background-color: ' + colorID.replace(/"/g, "'") + ';\"></html>'; //$NON-NLS-0$  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-			return {type: "html", content: html, width: "50px", height: "25px"};  //$NON-NLS-0$  //$NON-NLS-1$  //$NON-NLS-2$ //$NON-NLS-3$
+			return {title: colorID, hiddenTitle: true, type: "html", content: html, width: "50px", height: "25px"};  //$NON-NLS-0$  //$NON-NLS-1$  //$NON-NLS-2$ //$NON-NLS-3$
 		}
 		
 	});
