@@ -16,7 +16,7 @@ if (!isWin) {
 	fs = require("fs-ext");
 }
 var log4js = require("log4js");
-var logger = log4js.getLogger("server");
+var logger = log4js.getLogger("locker");
 var nodePath = require("path");
 var Promise = require("bluebird");
 var mkdirpAsync = Promise.promisify(require("mkdirp"));
@@ -100,14 +100,18 @@ var FileLocker = function(pathname) {
 };
 
 FileLocker.prototype.lock = function(shared) {
+	var time = Date.now();
 	return new Promise(function(resolve, reject) {
 		this._lock.lock(shared, function(releaser) {
 			this._acquireLock(shared).then(
 				function() {
+					var acquireTime = Date.now();
+					logger.info("time to acquire lock=" + (acquireTime - time) + " shared=" + shared);
 					resolve(function() {
 //						return new Promise(function(resolve, reject) {
 							this._releaseLock().then(
 								function() {
+									logger.info("time to release lock=" + (Date.now() - acquireTime) + " shared=" + shared);
 									releaser();
 //									resolve();
 								}

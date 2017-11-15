@@ -136,8 +136,10 @@ function _getAppwithAppName(userId, encodeName, appTarget){
 	var app = {};
 	
 	var cacheKey = getAppCacheKey(appTarget, encodeName);
+	var time = Date.now();
 	return appCache.get(cacheKey)
 	.then(function(value) {
+		logger.info("time to get app cache=" + (Date.now() - time));
 		if (value) {
 			return value;
 		}
@@ -163,8 +165,10 @@ function _getAppwithAppName(userId, encodeName, appTarget){
 					//ignore
 				})
 				.then(function() {
+					time = Date.now();
 					return appCache.set(cacheKey, appInfo)
 					.then(function() {
+						logger.info("time to set app cache=" + (Date.now() - time));
 						return appInfo;
 					});
 				});

@@ -14,6 +14,8 @@ var bodyParser = require("body-parser");
 var tasks = require("../tasks");
 var target = require("./target");
 var async = require("async");
+var log4js = require('log4js');
+var logger = log4js.getLogger("orgs");
 var LRU = require("lru-cache-for-clusters-as-promised");
 
 // Caching for already located targets
@@ -51,8 +53,10 @@ function getOrgs(req, res){
 
 function getOrgsRequest(userId, targetRequest){
 	var cacheKey = userId + targetRequest.Url;
+	var time = Date.now();
 	return orgsCache.get(cacheKey)
 	.then(function(value) {
+		logger.info("time to get orgs cache=" + (Date.now() - time));
 		if (value) {
 			return value;
 		}
@@ -89,9 +93,11 @@ function getOrgsRequest(userId, targetRequest){
 						if(err){
 							return reject(err);
 						}
+						time = Date.now();
 						var theOrgs = {"simpleorgsArray":simpleorgsArray,"completeOrgsArray":completeOrgsArray};
 						orgsCache.set(cacheKey, theOrgs)
 						.then(function() {
+							logger.info("time to set orgs cache=" + (Date.now() - time));
 							fulfill(theOrgs);
 						});
 					});

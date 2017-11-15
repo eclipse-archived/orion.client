@@ -15,6 +15,8 @@ var tasks = require("../tasks");
 var request = require("request");
 var orgs = require("./orgs_spaces");
 var bearerTokenStore = require("./accessTokenStore");
+var log4js = require('log4js');
+var logger = log4js.getLogger("target");
 var LRU = require("lru-cache-for-clusters-as-promised");
 
 // Caching for already located targets
@@ -117,8 +119,10 @@ function computeTarget(userId, targetRequest){
 		} else {
 			cached = Promise.resolve(null);
 		}
+		var time = Date.now();
 		return cached
 		.then(function(value) {
+			logger.info("time to get target cache=" + (Date.now() - time));
 			if (value) {
 				return value;
 			}
@@ -150,8 +154,10 @@ function computeTarget(userId, targetRequest){
 				};
 				
 				var putKey = userId + targetRequest.Url + org.entity.name + space.entity.name;
+				time = Date.now();
 				return targetCache.set(putKey, target)
 				.then(function() {
+					logger.info("time to set target cache=" + (Date.now() - time));
 					return  target;
 				});
 				
