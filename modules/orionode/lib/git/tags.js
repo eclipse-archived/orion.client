@@ -163,7 +163,7 @@ function getTags(req, res) {
 							tags.push(tagJSON(ref.name(), ref.shorthand(), commit.sha(), commit.timeMs(), fileDir, annotated));
 							callback();
 						})
-						.catch(function() {
+						.catch(function(err) {
 							// ignore errors looking up commits
 							tags.push(tagJSON(ref.name(), ref.shorthand(), ref.target().toString(), 0, fileDir, annotated));
 							callback();
@@ -191,7 +191,7 @@ function getTags(req, res) {
 						var prevLocation = url.parse(req.originalUrl, true);
 						prevLocation.query.page = page - 1 + "";
 						prevLocation.search = null;
-						prevLocation.pathname = api.decodeStringLocation(nextLocation.pathname);
+						prevLocation.pathname = api.decodeStringLocation(prevLocation.pathname);
 						resp['PreviousLocation'] = prevLocation;
 					}
 		

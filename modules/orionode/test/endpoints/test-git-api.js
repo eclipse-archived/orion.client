@@ -1572,7 +1572,137 @@ maybeDescribe("git", function() {
 			});
 		});
 	}); // describe("Use case 5")
+	
+	// Test "more commits" and "more tags"
+	describe('Test more commits', function(/*done*/) {
+		var remoteURI = "https://github.com/oriongittester/orion-test-repo2.git";
+		var repoName = "orion-test-repo2";
+		var username = "oriongittester";
+		var password = "testpassword1";
+	
+		it('Clone repo which has more then 40 commits, and test more commits', function(finished) {
+			request()
+			.post(GIT_ROOT + "/clone")
+			.send({
+				"GitUrl": remoteURI,	
+				"Location": '/workspace/' + WORKSPACE_ID,
+				"GitSshUsername": username,
+				"GitSshPassword": password
+			})
+			.expect(202)
+			.end(function(err, res) {
+				assert.ifError(err);
+				getGitResponse(res).then(function(result) {
+					assert.equal(result.HttpCode, 200);
+					assert.equal(result.Message, "OK");
+					// Get the default page of commits
+					request()
+					.get(api.encodeStringLocation(GIT_ROOT + "/commit/" + api.encodeURIComponent("refs/remotes/origin/master") + ".." + api.encodeURIComponent("master") + FILE_ROOT + repoName + "?page=1&pageSize=20&mergeBase=true"))
+					.expect(202)
+					.end(function(err, res) {
+						getGitResponse(res).then(function(result) {
+							assert.equal(result.HttpCode, 200);
+							assert.equal(result.Message, "OK");
+							assert.equal(result.JsonData.Children.length, 20); // The first page should be full of 20 commits;
+							var nextLocation = result.JsonData.NextLocation;
+							// Get the second page of commits
+							request()
+							.get(nextLocation)
+							.expect(202)
+							.end(function(err, res) {
+								getGitResponse(res).then(function(result) {
+									assert.equal(result.HttpCode, 200);
+									assert.equal(result.Message, "OK");
+									assert.equal(result.JsonData.Children.length, 20); // The second page should be full of 20 commits;
+									var nextLocation = result.JsonData.NextLocation;
+									request()
+									.get(nextLocation)
+									.expect(202)
+									.end(function(err, res) {
+										getGitResponse(res).then(function(result) {
+											assert.equal(result.HttpCode, 200);
+											assert.equal(result.Message, "OK");
+											assert(result.JsonData.Children.length > 0);
+											finished();
+										}).catch(function(err) {
+											assert.ifError(err);
+											finished();
+										});
+									});
+								}).catch(function(err) {
+									assert.ifError(err);
+									finished();
+								});
+							});
+						}).catch(function(err) {
+							assert.ifError(err);
+							finished();
+						});
+					});
+				}).catch(function(err) {
+					assert.ifError(err);
+					finished();
+				});
+			});
+		});
+	}); // describe("Test more commits")
 
+	// Test "more commits" and "more tags"
+	describe('Test more tags', function(/*done*/) {
+		var remoteURI = "https://github.com/oriongittester/orion-test-repo2.git";
+		var repoName = "orion-test-repo2";
+		var username = "oriongittester";
+		var password = "testpassword1";
+	
+		it('Clone repo which has more then 40 tags, and test more commits', function(finished) {
+			request()
+			.post(GIT_ROOT + "/clone")
+			.send({
+				"GitUrl": remoteURI,	
+				"Location": '/workspace/' + WORKSPACE_ID,
+				"GitSshUsername": username,
+				"GitSshPassword": password
+			})
+			.expect(202)
+			.end(function(err, res) {
+				assert.ifError(err);
+				getGitResponse(res).then(function(result) {
+					assert.equal(result.HttpCode, 200);
+					assert.equal(result.Message, "OK");
+					// Get the 20 tags
+					request()
+					.get(api.encodeStringLocation(GIT_ROOT + "/tag" + FILE_ROOT + repoName + "?commits=0&page=1&pageSize=20"))
+					.expect(200)
+					.end(function(err, res) {
+						assert.ifError(err);
+						assert.equal(res.body.Children.length, 21); // The first page should be full of 21 tags;
+						var nextLocation = res.body.NextLocation;
+						// Get the rest of tags
+						request()
+						.get(nextLocation)
+						.expect(200)
+						.end(function(err, res) {
+							assert.ifError(err);
+							assert.equal(res.body.Children.length, 21); // The second page should be full of 21 tags;
+							var nextLocation2 = res.body.NextLocation;
+							// Get the rest of tags
+							request()
+							.get(nextLocation2)
+							.expect(200)
+							.end(function(err, res) {
+								assert.ifError(err);
+								assert(res.body.Children.length > 0);
+								finished();
+							});
+						});
+					});
+				}).catch(function(err) {
+					assert.ifError(err);
+					finished();
+				});
+			});
+		});
+	}); // describe("Test more tags")
 
 	describe("Rebase", function() {
 		before(setup);
