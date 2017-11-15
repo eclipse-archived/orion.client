@@ -66,6 +66,7 @@ function startServer(options) {
 			addModulePath.addPath(path.join(__dirname, modulePath));
 		});
 	}
+	
 	options.maxAge = typeof options.maxAge === "number" ? options.maxAge : undefined;
 	var contextPath = options.configParams["orion.context.path"] || "";
 	var listenContextPath = options.configParams["orion.context.listenPath"] || false;
@@ -143,6 +144,8 @@ function startServer(options) {
 		let CloudFoundry = require('./lib/cf').CloudFoundry;
 		app.use('/metrics', require('./lib/metrics').router(options));
 		app.use('/version', require('./lib/version').router(options));
+		let About = require('./lib/about').About;
+		app.use('/about', new About().createRouter(options));
 		loadEndpoints(true);
 		app.use(require('./lib/user').router(options));
 		app.use('/site', options.authenticate, checkAuthenticated, checkAccessRights, require('./lib/sites')(options));
