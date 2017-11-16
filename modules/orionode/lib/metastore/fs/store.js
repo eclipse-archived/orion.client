@@ -16,6 +16,8 @@ var
     metaUtil = require('../util/metaUtil'),
     accessRights = require('../../accessRights'),
     os = require('os'),
+	log4js = require('log4js'),
+	logger = log4js.getLogger("metastore"),
     fileLocker = require('../../util/fileLocker');
 
 // Helper functions
@@ -382,7 +384,8 @@ Object.assign(FsMetastore.prototype, {
 					try {
 						parsedJson = JSON.parse(metadata);
 					} catch(err) {
-						parsedJson = metadata;
+						logger.error(user, metadataFile, err);
+						return callback(err, null);
 					}
 					callback(null, parsedJson);
 				},
@@ -408,25 +411,32 @@ Object.assign(FsMetastore.prototype, {
 		var metadataPath = getUserMetadataFileName(this._options, userData.username);
 		Promise.using(this.lock(userData.username, false), function() {
 			return new Promise(function(resolve, reject) {
-				mkdirpAsync(nodePath.dirname(metadataPath)).then(
-					function() {
+				fs.stat(getUserMetadataFileName(this._options, userData.username), function(err, stat) {
+					if (!err || err.code !== 'ENOENT' || stat) {
+						err = err && err.code !== 'ENOENT' ? err : new Error("User already exists");
+						logger.error(err)
+						return reject(err);
+					}
+					mkdirpAsync(nodePath.dirname(metadataPath))
+					.then(function() {
+							
 						var userProperty = {};
-			//			userData.password && (userProperty.Password = userData.password); //TODO password need to be pbewithmd5anddes encrypted
+//						userData.password && (userProperty.Password = userData.password); //TODO password need to be pbewithmd5anddes encrypted
 						userData.oauth && (userProperty.OAuth = userData.oauth);
 						userData.email && (userProperty.Email = userData.email);
-						userProperty["AccountCreationTimestamp"] = Date.now();
-						userProperty["UniqueId"] = userData.username;
+						userProperty.AccountCreationTimestamp = Date.now();
+						userProperty.UniqueId = userData.username;
 						
 						// give the user access to their own user profile
-						userProperty["UserRights"] = accessRights.createUserAccess(userData.username);
-						userProperty["UserRightsVersion"] = accessRights.getCurrentVersion();
+						userProperty.UserRights = accessRights.createUserAccess(userData.username);
+						userProperty.UserRightsVersion = accessRights.getCurrentVersion();
 						var userJson = {
-							"OrionVersion": VERSION,
-							"UniqueId": userData.username,
-							"UserName": userData.username,
-							"FullName": userData.fullname,
-							"WorkspaceIds":[],
-							"Properties": userProperty
+							OrionVersion: VERSION,
+							UniqueId: userData.username,
+							UserName: userData.username,
+							FullName: userData.fullname,
+							WorkspaceIds:[],
+							Properties: userProperty
 						};
 					 	this._updateUserMetadata(userData.username, userJson, function(error) {
 							if (error) {
@@ -441,9 +451,8 @@ Object.assign(FsMetastore.prototype, {
 								workspaces:[]
 							}); // TODO successful case needs to return user data including isAuthenticated, username, email, authToken for user.js
 						});
-					}.bind(this),
-					reject /* error case */
-				);
+					}.bind(this), reject);
+				}.bind(this));
 			}.bind(this));
 		}.bind(this)).then(
 			function(result) {
@@ -544,7 +553,8 @@ Object.assign(FsMetastore.prototype, {
 					try {
 						parsedJson = JSON.parse(metadata);
 					} catch(err) {
-						parsedJson = metadata;
+						logger.error(user, metadataFile, err);
+						return callback(err, null);
 					}
 					callback(null, parsedJson);
 				},
