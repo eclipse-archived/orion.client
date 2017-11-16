@@ -1747,7 +1747,6 @@ objects.mixin(EditorSetup.prototype, {
 		var runBarParent = menuBar.runBarNode;
 		return this.preferences.get('/runbar').then(function(prefs) {
 			if (Boolean(prefs) && prefs.disabled === true) {
-				console.log('returning resolved promise.')
 				var d = new Deferred();
 				d.resolve();
 				return d;
