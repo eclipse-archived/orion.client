@@ -1899,8 +1899,6 @@ objects.mixin(EditorSetup.prototype, {
 	 * 			'replace': replaces the current editor's content
 	 * 			    'tab': opens the file in a new tab
 	 * 			  'split': Splits the editor (if needed) and shows the new content in the non-active editor
-	 *   name - (string) Name used to determine the default editor to be used.
-	 *   forcePermanent - (boolean) If specified, and editor tabs are enabled, the newly created tab will be specified as non-transient.
 	 * splitHint - (string) If the mode is 'split' and the editor has not yet been split this determines the
 	 *             initial splitter mode. Can be one of 'horizontal', 'vertical' or 'picInPic'.
 	 * 
@@ -1921,18 +1919,6 @@ objects.mixin(EditorSetup.prototype, {
 					history.pushState({}, "", currentHref);
 					this.lastHash = PageUtil.hash(); // Pushing to the history stack changes the hash
 				}
-
-				var inputManager = this.activeEditorViewer.inputManager;
-				var activeEditorViewer = this.activeEditorViewer;
-				var inputChangeListener = function() {
-					inputManager.removeEventListener("InputChanged", inputChangeListener);
-					if (options.forcePermanent) {
-						activeEditorViewer.tabWidget.potentialTransientHref = href;
-						activeEditorViewer.tabWidget.transientToPermanent(href);
-					}
-					openEditorPromise.resolve();
-				};
-				inputManager.addEventListener("InputChanged", inputChangeListener);
 				var hash = href.split('#')[1];
 				if (hash === window.location.hash.substring(1)) {
 					this.activeEditorViewer.inputManager.setInput(hash);
