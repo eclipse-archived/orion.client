@@ -168,7 +168,17 @@ require([
         return Deferred.all(loadDefs(defNames, projectLoc));
       })
         .then(function (json) {
-          options.defs = json;
+        	var arr = json;
+        	if(!Array.isArray(arr)) {
+        		arr = [arr];
+        	}
+        	options.defs = [];
+        	arr.forEach(function(def) {
+        		if(Object.keys(def).length < 1) {
+        			return;
+        		}
+        		options.defs.push(def);
+        	});
           startAndMessage(options);
         }, fallback)
         .then(undefined, fallback);
