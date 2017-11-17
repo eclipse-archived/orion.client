@@ -48,7 +48,7 @@ function orionTasksAPI(options) {
 				// task meta saved in fs doesn't have username, while task saved in RAM and mongo does.
 				return writeError(404, res);
 			}
-			writeResponse(200, res, null, toJSON(task, true));
+			writeResponse(200, res, null, toJSON(task, true), true);
 		});
 	})
 	.delete('', deleteAllOperations)
@@ -62,7 +62,7 @@ function orionTasksAPI(options) {
 				// task meta saved in fs doesn't have username, while task saved in RAM and mongo does.
 				return writeError(404, res);
 			}
-			writeResponse(200, res, null, toJSON(task, false));
+			writeResponse(200, res, null, toJSON(task, false), true);
 		});
 	})
 	.delete('/temp/:id', deleteOperation)
@@ -182,9 +182,6 @@ Task.prototype = {
 			default:
 				this.type = "abort";
 		}
-		if (this.result.JsonData) {
-			api.encodeLocation(this.result.JsonData);
-		}
 		if (!this.started) {
 			if (this.timeout) {
 				clearTimeout(this.timeout);
@@ -201,7 +198,7 @@ Task.prototype = {
 				} else {
 					if (this.result.JsonData) {
 						res.statusCode = this.result.HttpCode;
-						api.writeResponse(this.result.HttpCode, res, null, this.result.JsonData, false, true);
+						api.writeResponse(this.result.HttpCode, res, null, this.result.JsonData, true);
 					} else if (this.type === "error") {
 						api.writeError(this.result.HttpCode, res, this.result.Message || "");
 					}
