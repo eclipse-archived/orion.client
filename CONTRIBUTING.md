@@ -1,5 +1,5 @@
 # Contributing to Orion
-Thanks for your interest in this project.
+Thanks for your interest in this project!
 
 ## Project description
 Orion is an open-source development platform focused on creating applications for the web, in the web.
