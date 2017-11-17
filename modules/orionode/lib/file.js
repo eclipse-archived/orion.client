@@ -38,7 +38,7 @@ module.exports = function(options) {
 	router.delete('*', deleteFile);
 
 	fileUtil.addFileModificationListener("fileEndpoint", {handleFileModficationEvent: function(eventData){
-		if(typeof eventData.type === "string" && eventData.type !== fileUtil.ChangeType.ZIPADD){
+		if(typeof eventData.type === "string"){
 			api.logAccess(logger, eventData.req.user.username);
 		}
 	}});

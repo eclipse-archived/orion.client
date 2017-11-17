@@ -414,7 +414,7 @@ Object.assign(FsMetastore.prototype, {
 				fs.stat(getUserMetadataFileName(this._options, userData.username), function(err, stat) {
 					if (!err || err.code !== 'ENOENT' || stat) {
 						err = err && err.code !== 'ENOENT' ? err : new Error("User already exists");
-						logger.error(err)
+						logger.error(err);
 						return reject(err);
 					}
 					mkdirpAsync(nodePath.dirname(metadataPath))
