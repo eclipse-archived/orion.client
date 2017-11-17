@@ -239,7 +239,7 @@ GitClient.prototype = {
 		var client = this;
 		this.tasks.push(function(resolve) {
 			request()
-			.get(GIT_ROOT + "/status" + FILE_ROOT + api.encodeURIComponent(client.getName()))
+			.get(api.encodeStringLocation(GIT_ROOT + "/status" + FILE_ROOT + api.encodeURIComponent(client.getName())))
 			.expect(200)
 			.end(function(err, res) {
 				assert.ifError(err);
@@ -260,11 +260,10 @@ GitClient.prototype = {
 			.expect(201)
 			.end(function(err, res) {
 				assert.ifError(err);
-				var encodeBranch = api.encodeURIComponent(branchName).replace(/\%/g, "%25");
 				assert.equal(res.body.CommitLocation,
-					GIT_ROOT + "/commit/refs%25252Fheads%25252F" + encodeBranch + FILE_ROOT + client.getName());
+					api.encodeStringLocation(GIT_ROOT + "/commit/" + api.encodeURIComponent("refs/heads/" + branchName) + FILE_ROOT + client.getName()));
 				assert.equal(res.body.Location,
-					GIT_ROOT + "/branch/" + encodeBranch + FILE_ROOT + client.getName());
+					api.encodeStringLocation(GIT_ROOT + "/branch/" + api.encodeURIComponent(branchName) + FILE_ROOT + client.getName()));
 				client.next(resolve, res.body);
 			});
 		});
@@ -290,7 +289,7 @@ GitClient.prototype = {
 		var client = this;
 		this.tasks.push(function(resolve) {
 			request()
-			.delete(GIT_ROOT + "/branch/" + api.encodeURIComponent(branchName) + FILE_ROOT + client.getName())
+			.delete(api.encodeStringLocation(GIT_ROOT + "/branch/" + api.encodeURIComponent(branchName) + FILE_ROOT + client.getName()))
 			.expect(200)
 			.end(function(err, res) {
 				assert.ifError(err);
@@ -356,7 +355,7 @@ GitClient.prototype = {
 		var client = this;
 		this.tasks.push(function(resolve) {
 			request()
-			.delete(GIT_ROOT + "/tag/" + api.encodeURIComponent(tagName) + FILE_ROOT + client.getName())
+			.delete(api.encodeStringLocation(GIT_ROOT + "/tag/" + api.encodeURIComponent(tagName) + FILE_ROOT + client.getName()))
 			.expect(200)
 			.end(function(err, res) {
 				assert.ifError(err);
@@ -589,7 +588,7 @@ GitClient.prototype = {
 			target = api.encodeURIComponent(target);
 
 			request()
-			.get(GIT_ROOT + "/commit/" + target + ".." + source + FILE_ROOT + client.getName())
+			.get(api.encodeStringLocation(GIT_ROOT + "/commit/" + target + ".." + source + FILE_ROOT + client.getName()))
 			.query(parameters)
 			.expect(202)
 			.end(function(err, res) {
@@ -626,23 +625,23 @@ GitClient.prototype = {
 		var client = this;
 		this.tasks.push(function(resolve) {
 			request()
-			.get(GIT_ROOT + '/commit/' + api.encodeURIComponent(branch) + FILE_ROOT + client.getName() + "/" + path)
+			.get(api.encodeStringLocation(GIT_ROOT + '/commit/' + api.encodeURIComponent(branch) + FILE_ROOT + client.getName() + "/" + path))
 			.expect(202)
 			.query(parameters)
 			.end(function(err, res) {
 				assert.ifError(err);
 				getGitResponse(res).then(function(res2) {
 					assert.equal(res2.JsonData.Type, "Commit");
-					assert.equal(res2.JsonData.Location, GIT_ROOT + "/commit/" + api.encodeURIComponent(branch) + FILE_ROOT + client.getName() + "/" + path);
+					assert.equal(res2.JsonData.Location, api.encodeStringLocation(GIT_ROOT + "/commit/" + api.encodeURIComponent(branch) + FILE_ROOT + client.getName() + "/" + path));
 					assert.equal(res2.JsonData.CloneLocation, GIT_ROOT + "/clone" + FILE_ROOT + client.getName());
 
 					assert.equal(res2.JsonData.toRef.Name, toRef);
 					assert.equal(res2.JsonData.toRef.FullName, "refs/heads/" + toRef);
 					assert.equal(res2.JsonData.toRef.CloneLocation, GIT_ROOT + "/clone" + FILE_ROOT + client.getName());
-					assert.equal(res2.JsonData.toRef.CommitLocation, GIT_ROOT + "/commit/" + api.encodeURIComponent("refs/heads/" + toRef) + FILE_ROOT+ client.getName());
-					assert.equal(res2.JsonData.toRef.DiffLocation, GIT_ROOT + "/diff/" + api.encodeURIComponent(toRef) + FILE_ROOT + client.getName());
-					assert.equal(res2.JsonData.toRef.Location, GIT_ROOT + "/branch/" + api.encodeURIComponent(toRef) + FILE_ROOT + client.getName());
-					assert.equal(res2.JsonData.toRef.TreeLocation, GIT_ROOT + "/tree" + FILE_ROOT + client.getName() + "/" + api.encodeURIComponent("refs/heads/" + toRef));
+					assert.equal(res2.JsonData.toRef.CommitLocation, api.encodeStringLocation(GIT_ROOT + "/commit/" + api.encodeURIComponent("refs/heads/" + toRef) + FILE_ROOT+ client.getName()));
+					assert.equal(res2.JsonData.toRef.DiffLocation, api.encodeStringLocation(GIT_ROOT + "/diff/" + api.encodeURIComponent(toRef) + FILE_ROOT + client.getName()));
+					assert.equal(res2.JsonData.toRef.Location, api.encodeStringLocation(GIT_ROOT + "/branch/" + api.encodeURIComponent(toRef) + FILE_ROOT + client.getName()));
+					assert.equal(res2.JsonData.toRef.TreeLocation, api.encodeStringLocation(GIT_ROOT + "/tree" + FILE_ROOT + client.getName() + "/" + api.encodeURIComponent("refs/heads/" + toRef)));
 					assert.equal(res2.JsonData.toRef.Type, "Branch");
 					
 					client.next(resolve, res2.JsonData);
@@ -658,7 +657,7 @@ GitClient.prototype = {
 		var client = this;
 		this.tasks.push(function(resolve) {
 			request()
-			.get(GIT_ROOT + "/config/clone" + FILE_ROOT + api.encodeURIComponent(client.getName()))
+			.get(api.encodeStringLocation(GIT_ROOT + "/config/clone" + FILE_ROOT + api.encodeURIComponent(client.getName())))
 			.expect(200)
 			.end(function(err, res) {
 				assert.ifError(err);
@@ -673,7 +672,7 @@ GitClient.prototype = {
 		var client = this;
 		this.tasks.push(function(resolve) {
 			request()
-			.get(GIT_ROOT + "/tree" + FILE_ROOT + api.encodeURIComponent(client.getName())+ "/" + "refs%25252Fheads%25252Fmaster?parts=meta")
+			.get(api.encodeStringLocation(GIT_ROOT + "/tree" + FILE_ROOT + api.encodeURIComponent(client.getName())+ "/" + api.encodeURIComponent("refs/heads/master") + "?parts=meta"))
 			.expect(200)
 			.end(function(err, res) {
 				assert.ifError(err);
@@ -693,7 +692,7 @@ GitClient.prototype = {
 		var client = this;
 		this.tasks.push(function(resolve) {
 			request()
-			.get(GIT_ROOT + "/diff/Default" + FILE_ROOT + path.join(api.encodeURIComponent(client.getName()), fileName) + "?parts=uris")
+			.get(api.encodeStringLocation(GIT_ROOT + "/diff/Default" + FILE_ROOT + path.join(api.encodeURIComponent(client.getName()), fileName) + "?parts=uris"))
 			.expect(200)
 			.end(function(err, res) {
 				assert.ifError(err);
@@ -976,10 +975,11 @@ maybeDescribe("git", function() {
 			var remoteURI = "https://github.com/oriongittester/orion-test-repo.git"; // small test repo
 			var remoteName = "origin";
 			var branchName = "master";
-
+			
 			// Credentials for a github user made for testing... Perhaps need a better solution.
 			var username = "oriongittester";
 			var password = "testpassword1";
+			var testUserEmail = "albertqcui+oriongit@gmail.com";
 
 			it('POST remote (adding a new remote)', function(finished) {
 				request()
@@ -1238,7 +1238,7 @@ maybeDescribe("git", function() {
 				.expect(201)
 				.end(function(err, res) {
 					assert.ifError(err);
-					assert.equal(res.body.CommitLocation, GIT_ROOT + "/commit/refs%25252Fheads%25252F" + branchName + FILE_ROOT + TEST_REPO_NAME);
+					assert.equal(res.body.CommitLocation, api.encodeStringLocation(GIT_ROOT + "/commit/" + api.encodeURIComponent("refs/heads/"+ branchName) + FILE_ROOT + TEST_REPO_NAME));
 					assert.equal(res.body.Location, GIT_ROOT + "/branch/" + branchName + FILE_ROOT + TEST_REPO_NAME);
 					finished();
 				});
@@ -1572,7 +1572,137 @@ maybeDescribe("git", function() {
 			});
 		});
 	}); // describe("Use case 5")
+	
+	// Test "more commits" and "more tags"
+	describe('Test more commits', function(/*done*/) {
+		var remoteURI = "https://github.com/oriongittester/orion-test-repo2.git";
+		var repoName = "orion-test-repo2";
+		var username = "oriongittester";
+		var password = "testpassword1";
+	
+		it('Clone repo which has more then 40 commits, and test more commits', function(finished) {
+			request()
+			.post(GIT_ROOT + "/clone")
+			.send({
+				"GitUrl": remoteURI,	
+				"Location": '/workspace/' + WORKSPACE_ID,
+				"GitSshUsername": username,
+				"GitSshPassword": password
+			})
+			.expect(202)
+			.end(function(err, res) {
+				assert.ifError(err);
+				getGitResponse(res).then(function(result) {
+					assert.equal(result.HttpCode, 200);
+					assert.equal(result.Message, "OK");
+					// Get the default page of commits
+					request()
+					.get(api.encodeStringLocation(GIT_ROOT + "/commit/" + api.encodeURIComponent("refs/remotes/origin/master") + ".." + api.encodeURIComponent("master") + FILE_ROOT + repoName + "?page=1&pageSize=20&mergeBase=true"))
+					.expect(202)
+					.end(function(err, res) {
+						getGitResponse(res).then(function(result) {
+							assert.equal(result.HttpCode, 200);
+							assert.equal(result.Message, "OK");
+							assert.equal(result.JsonData.Children.length, 20); // The first page should be full of 20 commits;
+							var nextLocation = result.JsonData.NextLocation;
+							// Get the second page of commits
+							request()
+							.get(nextLocation)
+							.expect(202)
+							.end(function(err, res) {
+								getGitResponse(res).then(function(result) {
+									assert.equal(result.HttpCode, 200);
+									assert.equal(result.Message, "OK");
+									assert.equal(result.JsonData.Children.length, 20); // The second page should be full of 20 commits;
+									var nextLocation = result.JsonData.NextLocation;
+									request()
+									.get(nextLocation)
+									.expect(202)
+									.end(function(err, res) {
+										getGitResponse(res).then(function(result) {
+											assert.equal(result.HttpCode, 200);
+											assert.equal(result.Message, "OK");
+											assert(result.JsonData.Children.length > 0);
+											finished();
+										}).catch(function(err) {
+											assert.ifError(err);
+											finished();
+										});
+									});
+								}).catch(function(err) {
+									assert.ifError(err);
+									finished();
+								});
+							});
+						}).catch(function(err) {
+							assert.ifError(err);
+							finished();
+						});
+					});
+				}).catch(function(err) {
+					assert.ifError(err);
+					finished();
+				});
+			});
+		});
+	}); // describe("Test more commits")
 
+	// Test "more commits" and "more tags"
+	describe('Test more tags', function(/*done*/) {
+		var remoteURI = "https://github.com/oriongittester/orion-test-repo2.git";
+		var repoName = "orion-test-repo2";
+		var username = "oriongittester";
+		var password = "testpassword1";
+	
+		it('Clone repo which has more then 40 tags, and test more commits', function(finished) {
+			request()
+			.post(GIT_ROOT + "/clone")
+			.send({
+				"GitUrl": remoteURI,	
+				"Location": '/workspace/' + WORKSPACE_ID,
+				"GitSshUsername": username,
+				"GitSshPassword": password
+			})
+			.expect(202)
+			.end(function(err, res) {
+				assert.ifError(err);
+				getGitResponse(res).then(function(result) {
+					assert.equal(result.HttpCode, 200);
+					assert.equal(result.Message, "OK");
+					// Get the 20 tags
+					request()
+					.get(api.encodeStringLocation(GIT_ROOT + "/tag" + FILE_ROOT + repoName + "?commits=0&page=1&pageSize=20"))
+					.expect(200)
+					.end(function(err, res) {
+						assert.ifError(err);
+						assert.equal(res.body.Children.length, 21); // The first page should be full of 21 tags;
+						var nextLocation = res.body.NextLocation;
+						// Get the rest of tags
+						request()
+						.get(nextLocation)
+						.expect(200)
+						.end(function(err, res) {
+							assert.ifError(err);
+							assert.equal(res.body.Children.length, 21); // The second page should be full of 21 tags;
+							var nextLocation2 = res.body.NextLocation;
+							// Get the rest of tags
+							request()
+							.get(nextLocation2)
+							.expect(200)
+							.end(function(err, res) {
+								assert.ifError(err);
+								assert(res.body.Children.length > 0);
+								finished();
+							});
+						});
+					});
+				}).catch(function(err) {
+					assert.ifError(err);
+					finished();
+				});
+			});
+		});
+	}); // describe("Test more tags")
 
 	describe("Rebase", function() {
 		before(setup);
@@ -3780,7 +3910,7 @@ maybeDescribe("git", function() {
 			assert.equal(tag.TagType, annotated ? "ANNOTATED" : "LIGHTWEIGHT");
 			assert.equal(tag.CloneLocation, GIT_ROOT + "/clone" + FILE_ROOT + testName);
 			assert.equal(tag.CommitLocation, GIT_ROOT + "/commit/" + commitSHA + FILE_ROOT + testName);
-			assert.equal(tag.TreeLocation, GIT_ROOT + "/tree" + FILE_ROOT + testName + "/" + api.encodeURIComponent(tagName).replace(/%/g, "%25"));
+			assert.equal(tag.TreeLocation, api.encodeStringLocation(GIT_ROOT + "/tree" + FILE_ROOT + testName + "/" + api.encodeURIComponent(tagName)));
 		}
 
 		describe("Create", function() {

@@ -183,8 +183,13 @@ function setHttpCodeMapping(mapping) {
 }
 
 var LocationRegex = /Location$/;
-var PercentReplaceRegex = /\%/g;
-var CommaReplaceRegex = /,/g;
+
+/**
+ * @name encodeLocation
+ * @description Encode object's location string's persentage and comma
+ * @param obj
+ * @returns returns special encoded object
+ */
 function encodeLocation(obj) {
 	for (var p in obj) {
 		if (p.match(LocationRegex)) {
@@ -194,17 +199,37 @@ function encodeLocation(obj) {
 				});
 			} else if (typeof obj[p] === "object") {
 				if(obj[p].pathname){
-					obj[p].pathname = obj[p].pathname.replace(PercentReplaceRegex, "%25").replace(CommaReplaceRegex, "%2C");
+					obj[p].pathname = encodeStringLocation(obj[p].pathname);
 				}
 				obj[p] = url.format(obj[p]);
 			} else if (obj[p]) {
-				obj[p] = url.format({pathname: obj[p].replace(PercentReplaceRegex, "%25").replace(CommaReplaceRegex, "%2C")});
+				obj[p] = url.format({pathname: encodeStringLocation(obj[p])});
 			}
 		} else if (typeof obj[p] === "object") {
 			encodeLocation(obj[p]);
 		}
 	}
 	return obj;
+}
+
+/**
+ * @name encodeStringLocation
+ * @description encode persentage and comma only
+ * @param string
+ * @returns returns encoded version
+ */
+function encodeStringLocation(string){
+	return string.replace(/\%/g, "%25").replace(/,/g, "%2C");
+}
+
+/**
+ * @name decodeStringLocation
+ * @description decode comma and persentage
+ * @param string
+ * @returns returns encoded version
+ */
+function decodeStringLocation(string){
+	return string.replace(/%2C/g, ",").replace(/%25/g, "%");
 }
 
 /**
@@ -253,7 +278,7 @@ exports.decodeURIComponent = function(path) {
 	return result;
 };
 exports.encodeURIComponent = function(path) {
-	return encodeURIComponent(encodeURIComponent(path));
+	return encodeURIComponent(path);
 };
 
 /**
@@ -297,6 +322,8 @@ exports.join = join;
 exports.writeError = writeError;
 exports.writeResponse = writeResponse;
 exports.encodeLocation = encodeLocation;
+exports.encodeStringLocation = encodeStringLocation;
+exports.decodeStringLocation = decodeStringLocation;
 exports.setResponseNoCache = setResponseNoCache;
 exports.isValidProjectName = isValidProjectName;
 exports.sendStatus = sendStatus;

@@ -261,16 +261,16 @@ function getCommitLog(req, res) {
 		if (page && !over) {
 			var nextLocation = url.parse(req.originalUrl, true);
 			nextLocation.query.page = page + 1 + "";
+			nextLocation.pathname = api.decodeStringLocation(nextLocation.pathname);
 			nextLocation.search = null; //So that query object will be used for format
-			nextLocation = url.format(nextLocation);
 			resp['NextLocation'] = nextLocation;
 		}
 
 		if (page && page > 1) {
 			var prevLocation = url.parse(req.originalUrl, true);
 			prevLocation.query.page = page - 1 + "";
+			prevLocation.pathname = api.decodeStringLocation(prevLocation.pathname);
 			prevLocation.search = null;
-			prevLocation = url.format(prevLocation);
 			resp['PreviousLocation'] = prevLocation;
 		}
 		
@@ -757,7 +757,7 @@ function identifyNewCommitResource(req, res, newCommit) {
 	var originalUrl = url.parse(req.originalUrl, true);
 	var segments = originalUrl.pathname.split("/");
 	var contextPathSegCount = req.contextPath.split("/").length - 1;
-	segments[3 + contextPathSegCount] = segments[3 + contextPathSegCount] + ".." + api.encodeURIComponent(newCommit);
+	segments[3 + contextPathSegCount] = segments[3 + contextPathSegCount] + ".." + api.encodeStringLocation(api.encodeURIComponent(newCommit));
 	var location = url.format({pathname: segments.join("/"), query: originalUrl.query});
 	writeResponse(200, res, null, {
 		"Location": location
