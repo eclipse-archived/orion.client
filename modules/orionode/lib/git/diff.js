@@ -490,8 +490,8 @@ function postDiff(req, res) {
 	var originalUrl = url.parse(req.originalUrl, true);
 	var segments = originalUrl.pathname.split("/");
 	var contextPathSegCount = req.contextPath.split("/").length - 1;
-	segments[3 + contextPathSegCount] = segments[3 + contextPathSegCount] + ".." + api.encodeURIComponent(newCommit);
+	segments[3 + contextPathSegCount] = segments[3 + contextPathSegCount] + ".." + api.encodeStringLocation(api.encodeURIComponent(newCommit));
 	var location = url.format({pathname: segments.join("/"), query: originalUrl.query});
-	writeResponse(200, res, {'Location':location}, {Location: location}, false); // Avoid double encoding
+	writeResponse(200, res, {'Location':location}, {Location: location}, false); // Avoid triple encoding
 }
 };
