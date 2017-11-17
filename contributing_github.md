@@ -189,4 +189,3 @@ template in your commit message:
 ```
 3. With your commit message properly formatted, all that's left is to push the commit to your repo
 and press the create pull request button. Thats it!
-
