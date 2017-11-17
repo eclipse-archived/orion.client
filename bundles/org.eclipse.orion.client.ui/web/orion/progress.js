@@ -163,7 +163,6 @@ function(messages, lib, mOperationsDialog, Tooltip, Deferred) {
 		this._lastIconClass = null;
 		this._progressMonitorClass = progressMonitorClass;
 		this._preferenceService = preferenceService;
-		console.log(preferenceService)
 	}
 	
 	ProgressService.prototype = /** @lends orion.progress.ProgressService.prototype */ {
