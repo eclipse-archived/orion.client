@@ -553,7 +553,7 @@ Object.assign(FsMetastore.prototype, {
 					try {
 						parsedJson = JSON.parse(metadata);
 					} catch(err) {
-						logger.error(user, metadataFile, err);
+						logger.error(user, metadataFile, err, "json <" + metadata + ">");
 						return callback(err, null);
 					}
 					callback(null, parsedJson);
