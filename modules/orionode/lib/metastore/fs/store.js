@@ -384,7 +384,7 @@ Object.assign(FsMetastore.prototype, {
 					try {
 						parsedJson = JSON.parse(metadata);
 					} catch(err) {
-						logger.error(user, metadataFile, err);
+						logger.error(metadataFile, err);
 						return callback(err, null);
 					}
 					callback(null, parsedJson);
@@ -609,44 +609,40 @@ Object.assign(FsMetastore.prototype, {
 					if (error) {
 						reject(new Error("createRenameDeleteProject failed to read workspace metadata for: " + workspaceId, error));
 					}
-					var projectJson = {
-						"OrionVersion": metadata.OrionVersion,
-						"UniqueId": projectInfo.projectName,
-						"WorkspaceId": workspaceId,
-						"FullName": projectInfo.projectName,
-						"Properties": {}
-					};
-					if (projectInfo.projectName){
-						if (projectInfo.contentLocation.startsWith(this._options.workspaceDir)) {
-							projectJson["ContentLocation"] = SERVERWORKSPACE + projectInfo.contentLocation.substr(this._options.workspaceDir.length);
-						} else {
-							projectJson["ContentLocation"] = projectInfo.contentLocation;
-						}
-						this._createProjectMetadata(workspaceId, projectInfo.projectName, projectJson, function(error) {
-							if (error) {
-								return reject(error);
-							}
-							if (projectInfo.originalPath) { // originalPath is in the format of "[ContextPath] (optional) + /file + [workspaceId] + /[originalName]/"
-								deleteProjectMetafile.call(this);
-							}
-							if(metadata) {
-								metadata.ProjectNames.indexOf(projectInfo.projectName) === -1 && metadata.ProjectNames.push(projectInfo.projectName);
-								this._updateWorkspaceMetadata(workspaceId, metadata, function(error) {
-									if (error) {
-										reject(new Error("createRenameDeleteProject failed to write workspace metadata for: " + workspaceId, error));
-									}
-									resolve();
-								});
-							}
-						}.bind(this));
-					} else if (projectInfo.originalPath) {
-						deleteProjectMetafile.call(this);
-						this._updateWorkspaceMetadata(workspaceId, metadata, function(error) {
+					var that = this;
+					function done() {
+						that._updateWorkspaceMetadata(workspaceId, metadata, function(error) {
 							if (error) {
 								reject(new Error("createRenameDeleteProject failed to write workspace metadata for: " + workspaceId, error));
 							}
 							resolve();
 						});
+					}
+					if (projectInfo.projectName){
+						var projectJson = {
+							OrionVersion: metadata.OrionVersion,
+							UniqueId: projectInfo.projectName,
+							WorkspaceId: workspaceId,
+							FullName: projectInfo.projectName,
+							Properties: {}
+						};
+						if (projectInfo.contentLocation.startsWith(this._options.workspaceDir)) {
+							projectJson.ContentLocation = SERVERWORKSPACE + projectInfo.contentLocation.substr(this._options.workspaceDir.length);
+						} else {
+							projectJson.ContentLocation = projectInfo.contentLocation;
+						}
+						that._createProjectMetadata(workspaceId, projectInfo.projectName, projectJson, function(error) {
+							if (error) {
+								return reject(error);
+							}
+							metadata.ProjectNames.indexOf(projectInfo.projectName) === -1 && metadata.ProjectNames.push(projectInfo.projectName);
+							if (projectInfo.originalPath) { // originalPath is in the format of "[ContextPath] (optional) + /file + [workspaceId] + /[originalName]/"
+								return deleteProjectMetafile();
+							}
+							done();
+						});
+					} else if (projectInfo.originalPath) {
+						return deleteProjectMetafile();
 					} else {
 						resolve(); // This shouldn't happen
 					}
@@ -654,10 +650,10 @@ Object.assign(FsMetastore.prototype, {
 						// Delete the old project metadata json file, and update workspace metadata Projectnames
 						var segs = projectInfo.originalPath.split("/");
 						var oldProjectName = projectInfo.originalPath.endsWith("/") ? segs[segs.length - 2] : segs[segs.length - 1];
-						var index = metadata && metadata.ProjectNames.indexOf(oldProjectName) || -1;
+						var index = metadata.ProjectNames.indexOf(oldProjectName);
 						index !== -1 && metadata.ProjectNames.splice(index, 1);
-						var metaFile = getProjectMetadataFileName(this._options, workspaceId, oldProjectName);
-						fs.unlinkAsync(metaFile).catchReturn({ code: 'ENOENT' }, null);
+						var metaFile = getProjectMetadataFileName(that._options, workspaceId, oldProjectName);
+						fs.unlinkAsync(metaFile).catchReturn({ code: 'ENOENT' }, null).then(done, done);
 					}
 				}.bind(this));
 			}.bind(this));
@@ -673,13 +669,8 @@ Object.assign(FsMetastore.prototype, {
 		return mkdirpAsync(nodePath.dirname(metaFile)).then( // create parent folder(s) if necessary
 			function() {
 				fs.statAsync(metaFile)
-				.then(function(stat){
-					if (stat.isFile()) {
-						var errorStatus = new Error(String("Failed to create or rename project: ").concat(projectName));
-						errorStatus.code = 500;
-						callback(errorStatus);
-					}
-				}).catch(function(){
+				.catchReturn({ code: 'ENOENT' }, null) // New file: suppress error
+				.then(function(){
 					fs.writeFileAsync(metaFile, JSON.stringify(metadata, null, 2)).then(callback, callback);
 				});
 			},

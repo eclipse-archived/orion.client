@@ -42,8 +42,9 @@ module.exports = function(options) {
 		var workspaceJson;
 		var workspaceLocation = api.join(workspaceRoot, workspace.id);
 		var parentFileLocation = api.join(fileRoot, workspace.id);
-		var workspaceDir = fileUtil.getMetastore(req).getWorkspaceDir(workspace.id);
-		return fileUtil.getChildren(parentFileLocation, workspaceLocation, workspaceDir, workspaceDir, 1)
+		var store = fileUtil.getMetastore(req);
+		var workspaceDir = store.getWorkspaceDir(workspace.id);
+		return fileUtil.getChildren(store, parentFileLocation, workspaceLocation, workspaceDir, workspaceDir, 1)
 		.then(function(children) {
 			children.forEach(function(child) {
 				child.Id = child.Name;
@@ -62,7 +63,7 @@ module.exports = function(options) {
 				Name: workspace.name,
 				Location: workspaceLocation,
 				ChildrenLocation: workspaceLocation,
-				ContentLocation: parentFileLocation,
+				ContentLocation: parentFileLocation + "/" ,
 				Children: children,
 				Projects: projects
 			};
@@ -150,19 +151,6 @@ module.exports = function(options) {
 				var projectLocation = api.join(fileRoot, workspace.id, projectName);
 				var file = fileUtil.getFile(req, api.join(workspace.id, projectName));
 				req.body.Directory = true;
-				
-				if(store.createRenameDeleteProject) {
-					return store.createRenameDeleteProject(workspace.id, {projectName:projectName, contentLocation:file.path, originalPath: req.body.Location})
-						.then(function(){
-							return fileUtil.handleFilePOST(workspaceRoot, fileRoot, req, res, file, {
-								Id: projectName,
-								ContentLocation: projectLocation,
-								Location: projectLocation
-							});
-						}).catch(function(err){
-							writeError(err.code || 500, res, err);
-						});
-				}
 				return fileUtil.handleFilePOST(workspaceRoot, fileRoot, req, res, file, {
 					Id: projectName,
 					ContentLocation: projectLocation,

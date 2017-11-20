@@ -158,11 +158,7 @@ Task.prototype = {
 			if (err) {
 				writeError(500, res, err.toString());
 			} else {
-				var resp = JSON.stringify(toJSON(this, true));
-				api.writeResponse(202, res, {
-					'Content-Type': 'application/json',
-					'Content-Length': resp.length
-				}, resp, null, true);
+				api.writeResponse(202, res, null, toJSON(this, true), true);
 			}
 		}.bind(this));
 	},

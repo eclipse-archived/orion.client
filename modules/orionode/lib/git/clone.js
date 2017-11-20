@@ -21,7 +21,6 @@ var api = require('../api'), writeError = api.writeError, writeResponse = api.wr
 	tasks = require('../tasks'),
 	express = require('express'),
 	bodyParser = require('body-parser'),
-	rmdir = require('rimraf'),
 	prefs = require('../prefs'),
 	credentialsProvider = require('./credentials'),
 	gitUtil = require('./util'),
@@ -427,32 +426,20 @@ function postInit(req, res) {
 		if (!file) {
 			return writeError(400, res, "Invalid parameters");
 		}
-		if(req.body.Path){
-			// If the directory exists
-			initRepo(file, req, res)
-			.then(function(){
-				writeResponse(201, res, null, {"Location": gitRoot + "/clone" + fileRoot + "/" + file.workspaceId + api.toURLPath(file.path.substring(file.workspaceDir.length))}, true);
-			}).catch(function(err){
-				writeError(403, res, err);
-			});
-		} else if (req.body.Location) {
-			// If the directory doesn't exist
-			initRepo(file, req, res)
-			.then(function(){
+		initRepo(file, req, res)
+		.then(function() {
+			if (!req.body.Path && req.body.Location) {
 				var store = fileUtil.getMetastore(req);
 				if(store.createRenameDeleteProject) {
-					return store.createRenameDeleteProject(file.workspaceId, {projectName: path.basename(file.path), contentLocation:file.path})
-					.then(function(){
-						writeResponse(201, res, null, {"Location": gitRoot + "/clone" + fileRoot + "/" + file.workspaceId + api.toURLPath(file.path.substring(file.workspaceDir.length))}, true);
-					}).catch(function(err){
-						writeError(err.code || 500, res, err);
-					});
+					return store.createRenameDeleteProject(file.workspaceId, {projectName: path.basename(file.path), contentLocation:file.path});
 				}
-				writeResponse(201, res, null, {"Location": gitRoot + "/clone" + fileRoot + "/" + file.workspaceId + api.toURLPath(file.path.substring(file.workspaceDir.length))}, true);
-			}).catch(function(err){
-				writeError(403, res, err);
-			});
-		}
+			}
+		})
+		.then(function(){
+			writeResponse(201, res, null, {"Location": gitRoot + "/clone" + fileRoot + "/" + file.workspaceId + api.toURLPath(file.path.substring(file.workspaceDir.length))}, true);
+		}).catch(function(err){
+			writeError(500, res, err);
+		});
 	}
 }
 
@@ -589,17 +576,8 @@ function putClone(req, res) {
 function deleteClone(req, res) {
 	var rest = req.params["0"];
 	var file = fileUtil.getFile(req, rest);
-	rmdir(file.path, function(err) {
-		if (err) return writeError(500, res, err);
-		var store = fileUtil.getMetastore(req);
-		if(store.createRenameDeleteProject) {
-			return store.createRenameDeleteProject(file.workspaceId, {originalPath: rest})
-			.then(function(){
-				writeResponse(200, res);
-			}).catch(function(err){
-				writeError(err.code || 500, res, err);
-			});
-		}
+	fileUtil.deleteFile(req, file, null, function(err) {
+		if (err) return writeError(err.code || 500, res, err);
 		writeResponse(200, res);
 	});
 }
@@ -792,7 +770,6 @@ function postClone(req, res) {
 		if (store.createRenameDeleteProject) {
 			return store.createRenameDeleteProject(file.workspaceId, {projectName: path.basename(file.path), contentLocation:file.path});
 		}
-		return Promise.resolve();
 	})
 	.then(function() {
 		task.done({
@@ -808,6 +785,9 @@ function postClone(req, res) {
 	})
 	.catch(function(err) {
 		handleRemoteError(task, err, cloneUrl);
+		return new Promise(function(resolve) {
+			fileUtil.deleteFile(req, file, null, resolve);
+		});
 	})
 	.done(function() {
 		freeRepo(repo);

@@ -68,12 +68,13 @@ var ChangeType = module.exports.ChangeType = Object.freeze({
 
 /**
  * Builds up an array of a directory's children, as File objects.
+ * @param {Store} store the file system store
  * @param {String} parentLocation Parent location in the file api for child items (ugh)
  * @param {Array} [exclude] Filenames of children to hide. If `null`, everything is included.
  * @param {Function} callback Invoked as func(error?, children)
  * @returns A promise
  */
-var getChildren = exports.getChildren = function(fileRoot, workspaceRoot, workspaceDir, directory, depth, excludes) {
+var getChildren = exports.getChildren = function(store, fileRoot, workspaceRoot, workspaceDir, directory, depth, excludes) {
 	return fs.readdirAsync(directory)
 	.then(function(files) {
 		return Promise.map(files, function(file) {
@@ -83,7 +84,7 @@ var getChildren = exports.getChildren = function(fileRoot, workspaceRoot, worksp
 			var filepath = path.join(directory, file);
 			return fs.statAsync(filepath)
 			.then(function(stats) {
-				return fileJSON(fileRoot, workspaceRoot, {workspaceDir: workspaceDir, path: filepath}, stats, depth ? depth - 1 : 0);
+				return fileJSON(store, fileRoot, workspaceRoot, {workspaceDir: workspaceDir, path: filepath}, stats, depth ? depth - 1 : 0);
 			})
 			.catch(function() {
 				return null; // suppress rejection
@@ -189,6 +190,7 @@ var getParents = exports.getParents = function(fileRoot, relativePath, includeFo
 
 /**
  * @description Tries to compute the project path for the given file path
+ * @param {Store} store the file system store
  * @param {string} workspaceDir The root workspace directory
  * @param {string} fileRoot The root file path of the server
  * @param {Object} file The file we want the project for
@@ -196,14 +198,14 @@ var getParents = exports.getParents = function(fileRoot, relativePath, includeFo
  * @returns {Promise} A promise to resolve the project
  * @since 14.0
  */
-exports.getProject = function getProject(fileRoot, workspaceRoot, file, options) {
+exports.getProject = function getProject(store, fileRoot, workspaceRoot, file, options) {
 	var names = options && typeof options.names === "object" ? options.names : {};
 	names['.git'] = {isDirectory: true};
 	names['project.json'] = Object.create(null);
 	return new Promise(function (resolve, reject) {
 		function findProject(filepath) {
 			if (filepath.length >= file.workspaceDir.length) {
-				getChildren(fileRoot, workspaceRoot, file.workspaceDir, filepath, 1).then(function(children) {
+				getChildren(store, fileRoot, workspaceRoot, file.workspaceDir, filepath, 1).then(function(children) {
 					if(Array.isArray(children) && children.length > 0) {
 						for(var i = 0, len = children.length; i < len; i++) {
 							var c = children[i],
@@ -370,7 +372,8 @@ exports.addDecorator = function(decorator) {
  */
 var writeFileMetadata = exports.writeFileMetadata = function(req, res, fileRoot, workspaceRoot, file, stats, etag, depth, metadataMixins) {
 	var result;
-	return fileJSON(fileRoot, workspaceRoot, file, stats, depth, metadataMixins)
+	var store = getMetastore(req);
+	return fileJSON(store, fileRoot, workspaceRoot, file, stats, depth, metadataMixins)
 	.then(function(originalJson) {
 		result = originalJson;
 		return Promise.map(decorators, function(decorator){
@@ -386,42 +389,55 @@ var writeFileMetadata = exports.writeFileMetadata = function(req, res, fileRoot,
 	})
 	.catch(api.writeError.bind(null, 500, res));
 };
-function fileJSON(fileRoot, workspaceRoot, file, stats, depth, metadataMixins) {
+function fileJSON(store, fileRoot, workspaceRoot, file, stats, depth, metadataMixins) {
 	depth = depth || 0;
 	var isDir = stats.isDirectory();
 	var wwwpath = api.toURLPath(file.path.substring(file.workspaceDir.length));
-	var result = {
-		Name: path.basename(file.path),
-		Location: getFileLocation(fileRoot, wwwpath, isDir),
-		Directory: isDir,
-		LocalTimeStamp: stats.mtime.getTime(),
-		Parents: getParents(fileRoot, wwwpath),
-		Attributes: {
-			// TODO fix this
-			ReadOnly: false, //!(stats.mode & USER_WRITE_FLAG === USER_WRITE_FLAG),
-			Executable: false //!(stats.mode & USER_EXECUTE_FLAG === USER_EXECUTE_FLAG)
-		}
-	};
-	if (metadataMixins) {
-		Object.keys(metadataMixins).forEach(function(property) {
-			result[property] = metadataMixins[property];
+	var getName;
+	if (isWorkspaceFile(file)) {
+		getName = new Promise(function(resolve, reject) {
+			store.getWorkspace(file.workspaceId, function(err, workspace) {
+				if (err) return reject(err);
+				resolve(workspace.name);
+			});
 		});
+	} else {
+		getName = Promise.resolve(path.basename(file.path));
 	}
-	result.WorkspaceLocation = workspaceRoot;
-	if (!isDir) {
-		return Promise.resolve(result);
-	}
-	// Orion's File Client expects ChildrenLocation to always be present
-	result.ChildrenLocation = {pathname: result.Location, query: {depth:1}};
-	result.ImportLocation = result.Location.replace(/\/file/, "/xfer/import").replace(/\/$/, "");
-	result.ExportLocation = result.Location.replace(/\/file/, "/xfer/export").replace(/\/$/, "") + ".zip";
-	if (depth <= 0) {
-		return Promise.resolve(result);
-	}
-	return getChildren(fileRoot, workspaceRoot, file.workspaceDir, file.path, depth)
-	.then(function(children) {
-		result.Children = children;
-		return result;
+	return getName.then(function(fileName) {
+		var result = {
+			Name: fileName,
+			Location: getFileLocation(fileRoot, wwwpath, isDir),
+			Directory: isDir,
+			LocalTimeStamp: stats.mtime.getTime(),
+			Parents: getParents(fileRoot, wwwpath),
+			Attributes: {
+				// TODO fix this
+				ReadOnly: false, //!(stats.mode & USER_WRITE_FLAG === USER_WRITE_FLAG),
+				Executable: false //!(stats.mode & USER_EXECUTE_FLAG === USER_EXECUTE_FLAG)
+			}
+		};
+		if (metadataMixins) {
+			Object.keys(metadataMixins).forEach(function(property) {
+				result[property] = metadataMixins[property];
+			});
+		}
+		result.WorkspaceLocation = workspaceRoot;
+		if (!isDir) {
+			return Promise.resolve(result);
+		}
+		// Orion's File Client expects ChildrenLocation to always be present
+		result.ChildrenLocation = {pathname: result.Location, query: {depth:1}};
+		result.ImportLocation = result.Location.replace(/\/file/, "/xfer/import").replace(/\/$/, "");
+		result.ExportLocation = result.Location.replace(/\/file/, "/xfer/export").replace(/\/$/, "") + ".zip";
+		if (depth <= 0) {
+			return Promise.resolve(result);
+		}
+		return getChildren(store, fileRoot, workspaceRoot, file.workspaceDir, file.path, depth)
+		.then(function(children) {
+			result.Children = children;
+			return result;
+		});
 	});
 }
 /**
@@ -445,7 +461,7 @@ var isFSCaseInsensitive = exports.isFSCaseInsensitive = function isFSCaseInsensi
 		}
 		return ISFS_CASE_INSENSITIVE = false;
 	}
-}
+};
 /**
  * Returns if the two files are referencing the same path, not considering the case-sensitivity of the underlying file system, only check if lower case path is same
  * @param {XMLHttpRequest} req The backing request
@@ -455,29 +471,17 @@ var isFSCaseInsensitive = exports.isFSCaseInsensitive = function isFSCaseInsensi
 var istheSamePath = exports.istheSamePath = function istheSamePath(req, fileRoot, dest) {
 	var originalFile = getFile(req, req.body.Location.replace(new RegExp("^"+fileRoot), ""));
 	return path.dirname(originalFile.path).toLowerCase() === path.dirname(dest.path).toLowerCase() && dest.path.toLowerCase() === originalFile.path.toLowerCase();
-}
-/**
- * Send the response to the file POST
- * @param {XMLHttpRequest} req The backing request
- * @param {XMLHttpResponse} res The response object
- * @param {string} fileRoot The root of the file endpoint
- * @param {string} workspaceRoot The root of the workspace endpoint
- * @param {?} destFile The destination file
- * @param {bool} isOverwrite If the write operation is an overwrite
- * @param {?} metadataMixins Properties to mix into the response
- * @since 17.0
- */
-function filePostResponse(req, res, fileRoot, workspaceRoot, destFile, isOverwrite, metadataMixins) {
-	// TODO: maybe set ReadOnly and Executable based on fileAtts
-	res.status(isOverwrite ? 200 : 201);
-	return fs.stat(destFile.path, function(err, stats) {
-		if(err) {
-			logger.error(err);
-			return api.writeError(500, res, err.message);
-		}
-		return writeFileMetadata(req, res, api.join(fileRoot, destFile.workspaceId), api.join(workspaceRoot, destFile.workspaceId), destFile, stats, /*etag*/null, /*depth*/0, metadataMixins);
-	})
 };
+function isProjectFile(file) {
+	var relativePath = file.path.substr(file.workspaceDir.length);
+	if(relativePath.lastIndexOf("/") === relativePath.length - 1){
+		relativePath = relativePath.substr(0, relativePath.length - 1);
+	}
+	return relativePath.split("/").length === 2;
+}
+function isWorkspaceFile(file) {
+	return file.workspaceDir === file.path;
+}
 /**
  * Helper for fulfilling a file POST request (for example, copy, move, or create).
  * @param {string} workspaceRoot The route of the /workspace handler (not including context path)
@@ -518,6 +522,7 @@ exports.handleFilePOST = function(workspaceRoot, fileRoot, req, res, destFile, m
 				return api.writeError(412, res, new Error('A file or folder with the same name already exists at this location.'));
 			}
 		}
+		var project = {};
 		if (isNonWrite) {
 			var sourceFile = getFile(req, api.decodeURIComponent(sourceUrl.replace(new RegExp("^"+fileRoot), "")));
 			return fs.stat(sourceFile.path, function(err, stats) {
@@ -529,11 +534,11 @@ exports.handleFilePOST = function(workspaceRoot, fileRoot, req, res, destFile, m
 				}
 				if (isCopy) {
 					return copy(sourceFile.path, destFile.path)
-						.then(function(result) {
-							var eventData = { type: ChangeType.RENAME, isDir: stats.isDirectory(), file: destFile, sourceFile: sourceFile, req: req};
-							exports.fireFileModificationEvent(eventData);
-							return filePostResponse(req, res, fileRoot, workspaceRoot, destFile, destExists, metadataMixins);
-						});
+					.then(function() {
+						var eventData = { type: ChangeType.RENAME, isDir: stats.isDirectory(), file: destFile, sourceFile: sourceFile, req: req};
+						exports.fireFileModificationEvent(eventData);
+						return done();
+					});
 				}
 				return fs.rename(sourceFile.path, destFile.path, function(err) {
 					if(err) {
@@ -541,11 +546,54 @@ exports.handleFilePOST = function(workspaceRoot, fileRoot, req, res, destFile, m
 						newerr.code = 403;
 						return api.writeError(403, res, newerr);
 					}
+					if (isProjectFile(sourceFile) && stats.isDirectory()) {
+						project.originalPath = sourceFile.path;
+					}
 					var eventData = { type: ChangeType.RENAME, isDir: stats.isDirectory(), file: destFile, sourceFile: sourceFile, req: req};
 					exports.fireFileModificationEvent(eventData);
 					// Rename always returns 200 no matter the file system is realy rename or creating a new file.
-					return filePostResponse(req, res, fileRoot, workspaceRoot, destFile, destExists, metadataMixins);
+					return done();
 				});
+			});
+		}
+		function done() {
+			var store = exports.getMetastore(req);
+			if (isProjectFile(destFile) && isDirectory) {
+				project.projectName = path.basename(destFile.path);
+				project.contentLocation = destFile.path;
+			}
+			return store.createRenameDeleteProject(destFile.workspaceId, project)
+			.then(function() {
+				res.status(destExists ? 200 : 201);
+				return fs.stat(destFile.path, function(err, stats) {
+					if(err) {
+						logger.error(err);
+						return api.writeError(500, res, err.message);
+					}
+					return writeFileMetadata(req, res, api.join(fileRoot, destFile.workspaceId), api.join(workspaceRoot, destFile.workspaceId), destFile, stats, /*etag*/null, /*depth*/0, metadataMixins);
+				});
+			})
+			.catch(function(err) {
+				return api.writeError(500, res, err);
+			});
+		}
+		function writeNew() {
+			if (isDirectory) {
+				return fs.mkdir(destFile.path, function(err) {
+					if(err) {
+						return api.writeError(500, res, "Failed to create new folder: " + destFile.path);
+					}
+					exports.fireFileModificationEvent({type: ChangeType.MKDIR, file: destFile, req: req});
+					done();
+				});
+			}
+			var eventData = { type: ChangeType.WRITE, file: destFile, req: req};
+			return fs.writeFile(destFile.path, '', function(err) {
+				if(err) {
+					return api.writeError(500, res, "Failed to create new file: " + destFile.path);
+				}
+				exports.fireFileModificationEvent(eventData);
+				done();
 			});
 		}
 		if(destExists) {
@@ -553,44 +601,58 @@ exports.handleFilePOST = function(workspaceRoot, fileRoot, req, res, destFile, m
 				if(err) {
 					return api.writeError(500, res, "Failed to unlink file: " + destFile.path);
 				}
-				writeNew(req, res, destFile, isDirectory, fileRoot, workspaceRoot, true, metadataMixins);
+				writeNew();
 			});
 		}
-		writeNew(req, res, destFile, isDirectory, fileRoot, workspaceRoot, false, metadataMixins);
+		writeNew();
 	});
 };
 
-/**
- * Write a new file or directory to disk
- * @param {XMLHttpRequest} req The backing request
- * @param {XMLHttpResponse} res The response object
- * @param {?} destFile The destination file
- * @param {bool} isDirectory If we are writig a directory or not
- * @param {string} fileRoot The file endpoint root
- * @param {string} workspaceRoot The workspace endpoint root
- * @param {bool} isOverwrite If the write operation is an overwrite
- * @param {?} metadataMixins properties to mix in to the repsonse
- * @since 17.0
- */
-function writeNew(req, res, destFile, isDirectory, fileRoot, workspaceRoot, isOverwrite, metadataMixins) {
-	if (isDirectory) {
-		return fs.mkdir(destFile.path, function(err) {
-			if(err) {
-				return api.writeError(500, res, "Failed to create new folder: " + destFile.path);
+exports.deleteFile = function(req, file, matchEtag, callback) {
+	exports.withStatsAndETag(file.path, function(error, stats, etag) {
+		var store = exports.getMetastore(req);
+		function done(error) {
+			if (error) {
+				error.code = 500;
+				callback(error);
+				return;
 			}
-			exports.fireFileModificationEvent({type: ChangeType.MKDIR, file: destFile, req: req});
-			return filePostResponse(req, res, fileRoot, workspaceRoot, destFile, isOverwrite, metadataMixins);
-		});
-	}
-	var eventData = { type: ChangeType.WRITE, file: destFile, req: req};
-	return fs.writeFile(destFile.path, '', function(err) {
-		if(err) {
-			return api.writeError(500, res, "Failed to create new file: " + destFile.path);
+			var eventData = { type: exports.ChangeType.DELETE, file: file, req: req};
+			exports.fireFileModificationEvent(eventData);
+			callback(null);
 		}
-		exports.fireFileModificationEvent(eventData);
-		return filePostResponse(req, res, fileRoot, workspaceRoot, destFile, isOverwrite, metadataMixins);
+		function checkMetadata(error) {
+			if (!error) {
+				if (file.path === file.workspaceDir) {
+					return store.deleteWorkspace(file.workspaceId, done);
+				} else if (store.createRenameDeleteProject && isProjectFile(file)) {
+					return store.createRenameDeleteProject(file.workspaceId, {originalPath: file.path})
+					.then(done, done);
+				}
+			}
+			done(error);
+		}
+		if (error && error.code === 'ENOENT') {
+			return checkMetadata();
+		} else if (matchEtag && matchEtag !== etag) {
+			var err = new Error("");
+			err.code = 412;
+			return callback(err);
+		}
+		if (stats.isDirectory()) {
+			exports.rumRuff(file.path, function(err){
+				if (err) {
+					logger.error(err);
+					return done(err);
+				}
+				
+				checkMetadata();
+			});
+		} else {
+			fs.unlink(file.path, checkMetadata);
+		}
 	});
-}
+};
 
 var _listeners = new Map();
 exports.addFileModificationListener = function(listenerId, theListener) {
