@@ -303,6 +303,9 @@
 			<widgetOptimizeFile out="${out}/codeEdit/javascript/plugins/javascriptPlugin.js"
 				buildfile="${staging}/embeddedJavascriptPlugin.build.js"
 				optimize="uglify2" />
+			<widgetOptimizeFile out="${out}/codeEdit/javascript/plugins/javascriptPlugin-non-minified.js"
+				buildfile="${staging}/embeddedJavascriptPlugin.build.js"
+				optimize="none" />
 			<widgetOptimizeFile out="${out}/codeEdit/webtools/plugins/webToolsPlugin.js"
 				buildfile="${staging}/embeddedWebtoolsPlugin.build.js"
 				optimize="uglify2" />
