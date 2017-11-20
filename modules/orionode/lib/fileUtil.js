@@ -562,7 +562,7 @@ exports.handleFilePOST = function(workspaceRoot, fileRoot, req, res, destFile, m
 				project.projectName = path.basename(destFile.path);
 				project.contentLocation = destFile.path;
 			}
-			return store.createRenameDeleteProject(destFile.workspaceId, project)
+			return (store.createRenameDeleteProject ? store.createRenameDeleteProject(destFile.workspaceId, project) : Promise.resolve())
 			.then(function() {
 				res.status(destExists ? 200 : 201);
 				return fs.stat(destFile.path, function(err, stats) {
