@@ -70,6 +70,12 @@ function getTaskRootLocation(options) {
 	return options.configParams['orion.file.tasks.location'] || nodePath.join(options.workspaceDir, '.metadata', '.tasks');
 }
 
+function writeJSON(fileName, object) {
+	return mkdirpAsync(nodePath.dirname(fileName)).then(function() {
+		return fs.writeFileAsync(fileName, JSON.stringify(object, null, 2) + "\n");
+	});
+}
+
 function FsMetastore(options) {
 	this._options = options;
 	this._taskList = {};
@@ -113,7 +119,7 @@ FsMetastore.prototype.setup = function(options) {
 					var obj = {};
 					obj[KEY_ORION_VERSION] = VERSION;
 					obj[KEY_ORION_DESCRIPTION] = DESCRIPTION_METASTORE;
-					fs.writeFileAsync(path, JSON.stringify(obj, null, 2)).then(
+					writeJSON(path, obj).then(
 						null,
 						function(error) {
 							throw new Error("Failed to update the metadata file for the workspace at: " + path, error);
@@ -131,14 +137,12 @@ FsMetastore.prototype.setup = function(options) {
 					var obj = {};
 					obj[KEY_ORION_VERSION] = VERSION;
 					obj[KEY_ORION_DESCRIPTION] = DESCRIPTION_METASTORE;
-					mkdirpAsync(nodePath.dirname(path)).then(function(){
-						fs.writeFileAsync(path, JSON.stringify(obj, null, 2)).then(
-							null,
-							function(error) {
-								throw new Error("Failed to write the metadata file for the new workspace at: " + path, error);
-							}
-						);
-					});
+					writeJSON(path, obj).then(
+						null,
+						function(error) {
+							throw new Error("Failed to write the metadata file for the new workspace at: " + path, error);
+						}
+					);
 				} else {
 					throw new Error("Failed to access the workspace metadata at: " + path, error);
 				}
@@ -399,12 +403,7 @@ Object.assign(FsMetastore.prototype, {
 	 */
 	_updateWorkspaceMetadata: function(workspaceId, metadata, callback) {
 		var metadataPath = getWorkspaceMetadataFileName(this._options, workspaceId);
-		return mkdirpAsync(nodePath.dirname(metadataPath)).then( // create parent folder(s) if necessary
-			function() {
-				fs.writeFileAsync(metadataPath, JSON.stringify(metadata, null, 2)).then(callback, callback);
-			},
-			callback /* error case */
-		);
+		return writeJSON(metadataPath, metadata).then(callback, callback);
 	},
 
 	createUser: function(userData, callback) {
@@ -568,12 +567,7 @@ Object.assign(FsMetastore.prototype, {
 	 */
 	_updateUserMetadata: function(user, metadata, callback) {
 		var metadataFile = getUserMetadataFileName(this._options, user);
-		return mkdirpAsync(nodePath.dirname(metadataFile)).then( // create parent folder(s) if necessary
-			function() {
-				fs.writeFileAsync(metadataFile, JSON.stringify(metadata, null, 2)).then(callback);
-			},
-			callback /* error case */
-		);
+		return writeJSON(metadataFile, metadata).then(callback, callback);
 	},
 
 	/** @callback */
@@ -666,16 +660,7 @@ Object.assign(FsMetastore.prototype, {
 	 */
 	_createProjectMetadata: function(workspaceId, projectName, metadata, callback) {
 		var metaFile = getProjectMetadataFileName(this._options, workspaceId, projectName);
-		return mkdirpAsync(nodePath.dirname(metaFile)).then( // create parent folder(s) if necessary
-			function() {
-				fs.statAsync(metaFile)
-				.catchReturn({ code: 'ENOENT' }, null) // New file: suppress error
-				.then(function(){
-					fs.writeFileAsync(metaFile, JSON.stringify(metadata, null, 2)).then(callback, callback);
-				});
-			},
-			callback /* error case */
-		);
+		return writeJSON(metaFile, metadata).then(callback, callback);
 	},
 
 	getUserTasksDirectory: function(username) {
@@ -812,13 +797,8 @@ Object.assign(FsMetastore.prototype, {
 
 		Promise.using(this.lock(taskObj.username, false), function() {
 			return new Promise(function(resolve, reject) {
-				mkdirpAsync(taskDir).then( // create parent folder(s) if necessary
-					function() {
-						var taskFile = nodePath.join(taskDir, taskObj.id);
-						return fs.writeFileAsync(taskFile, JSON.stringify(taskObj.toJSON(taskObj, true), null, 2)).then(resolve, reject);
-					},
-					reject /* error case */
-				);
+				var taskFile = nodePath.join(taskDir, taskObj.id);
+				return writeJSON(taskFile, taskObj.toJSON(taskObj, true)).then(resolve, reject);
 			});
 		}).then(
 			function(result) {
