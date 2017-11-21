@@ -106,15 +106,15 @@ FileLocker.prototype.lock = function(shared) {
 			this._acquireLock(shared).then(
 				function() {
 					var acquireTime = Date.now();
-//					logger.info("time to acquire lock=" + (acquireTime - time) + " shared=" + shared);
+					logger.info("get lock time=" + (acquireTime - time) + " shared=" + shared + " path=" + this._pathame);
 					resolve(function() {
 //						return new Promise(function(resolve, reject) {
 							this._releaseLock().then(
 								function() {
-//									logger.info("time to release lock=" + (Date.now() - acquireTime) + " shared=" + shared);
+									logger.info("release lock time=" + (Date.now() - acquireTime) + " shared=" + shared + " path=" + this._pathame);
 									releaser();
 //									resolve();
-								}
+								}.bind(this)
 //								reject
 							);
 //						}.bind(this));
@@ -206,15 +206,16 @@ FileLocker.prototype._releaseLock = function() {
 			}
 			this._inactivityTimer = setTimeout(
 				function() {
-					fs.close(this._fd, function(error) {
+					var fd = this._fd;
+					this._fd = null;
+					fs.close(fd, function(error) {
 						if (error) {
 // console.log("error 5");
 							/* no functional impact beyond possibly leaking a fd */
-							logger.warn("Failed to close an inactive lock file: " + this._fd, error);
+							logger.warn("Failed to close an inactive lock file: " + fd, error);
 						}
-						this._fd = null;
 // console.log("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<closed, fd set to null");
-					}.bind(this));
+					});
 				}.bind(this),
 				TIMEOUT_INACTIVE
 			);
