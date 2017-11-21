@@ -71,8 +71,23 @@ function getTaskRootLocation(options) {
 }
 
 function writeJSON(fileName, object) {
+	logger.info("write metadata " + fileName + " pid=" + process.pid);
 	return mkdirpAsync(nodePath.dirname(fileName)).then(function() {
 		return fs.writeFileAsync(fileName, JSON.stringify(object, null, 2) + "\n");
+	});
+}
+
+function readJSON(fileName) {
+	logger.info("read metadata " + fileName + " pid=" + process.pid);
+	return fs.readFileAsync(fileName, 'utf8')
+	.catchReturn({ code: 'ENOENT' }, null) // New file: suppress error
+	.then(function(metadata) {
+		try {
+			return JSON.parse(metadata);
+		} catch(err) {
+			logger.error(fileName, err), "json <" + metadata + ">";
+			throw err;
+		}
 	});
 }
 
@@ -380,21 +395,7 @@ Object.assign(FsMetastore.prototype, {
 	 */
 	_readWorkspaceMetadata: function(workspaceId, callback) {
 		var metadataFile = getWorkspaceMetadataFileName(this._options, workspaceId);
-		return fs.readFileAsync(metadataFile, 'utf8')
-			.catchReturn({ code: 'ENOENT' }, null) // New file: suppress error
-			.then(
-				function(metadata) {
-					var parsedJson;
-					try {
-						parsedJson = JSON.parse(metadata);
-					} catch(err) {
-						logger.error(metadataFile, err), "json <" + metadata + ">";
-						return callback(err, null);
-					}
-					callback(null, parsedJson);
-				},
-				callback /* error case */
-			);
+		return readJSON(metadataFile).then(function(result) { callback(null, result); }, callback);
 	},
 
 	/**
@@ -541,21 +542,7 @@ Object.assign(FsMetastore.prototype, {
 	 */
 	_readUserMetadata: function(user, callback) {
 		var metadataFile = getUserMetadataFileName(this._options, user);
-		return fs.readFileAsync(metadataFile, 'utf8')
-			.catchReturn({ code: 'ENOENT' }, null) // New file: suppress error, use ENOENT to pattern match the error then return null instead
-			.then(
-				function(metadata) {
-					var parsedJson;
-					try {
-						parsedJson = JSON.parse(metadata);
-					} catch(err) {
-						logger.error(user, metadataFile, err, "json <" + metadata + ">");
-						return callback(err, null);
-					}
-					callback(null, parsedJson);
-				},
-				callback /* error case */
-			);
+		return readJSON(metadataFile).then(function(result) { callback(null, result); }, callback);
 	},
 
 	/**
@@ -715,20 +702,7 @@ Object.assign(FsMetastore.prototype, {
 
 		Promise.using(this.lock(taskMeta.username, true), function() {
 			return new Promise(function(resolve, reject) {
-				fs.readFileAsync(taskFile, 'utf8')
-					.catchReturn({ code: 'ENOENT' }, null) // New file: suppress error
-					.then(
-						function(metadata) {
-							var parsedJson;
-							try {
-								parsedJson = JSON.parse(metadata);
-							} catch (err) {
-								parsedJson = metadata;
-							}
-							resolve(parsedJson);
-						},
-						reject /* error case */
-					);
+				return readJSON(taskFile).then(resolve, reject);
 			});
 		}).then(
 			function(result) {
@@ -759,16 +733,7 @@ Object.assign(FsMetastore.prototype, {
 						var fileReadPromises = [];
 						files.forEach(function(filename) {
 							if (filename !== FILENAME_TASKS_TEMP_DIR && !filename.startsWith(".")) {
-								fileReadPromises.push(fs.readFileAsync(nodePath.join(taskRoot, filename)).then(function(metadata) {
-									var parsedJson;
-									try {
-										parsedJson = JSON.parse(metadata);
-									} catch (err) {
-										parsedJson = metadata;
-									}
-									parsedJson.id = filename; // id is needed for taskDelete operation
-									return parsedJson;
-								}));					
+								fileReadPromises.push(readJSON(nodePath.join(taskRoot, filename)));					
 							}
 						});
 						return Promise.all(fileReadPromises).then(resolve);

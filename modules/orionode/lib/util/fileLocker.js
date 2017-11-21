@@ -106,12 +106,12 @@ FileLocker.prototype.lock = function(shared) {
 			this._acquireLock(shared).then(
 				function() {
 					var acquireTime = Date.now();
-					logger.info("get lock time=" + (acquireTime - time) + " shared=" + shared + " path=" + this._pathame);
+					logger.info("get lock time=" + (acquireTime - time) + " shared=" + shared + " path=" + this._pathame + " pid=" + process.pid);
 					resolve(function() {
 //						return new Promise(function(resolve, reject) {
 							this._releaseLock().then(
 								function() {
-									logger.info("release lock time=" + (Date.now() - acquireTime) + " shared=" + shared + " path=" + this._pathame);
+									logger.info("release lock time=" + (Date.now() - acquireTime) + " shared=" + shared + " path=" + this._pathame + " pid=" + process.pid);
 									releaser();
 //									resolve();
 								}.bind(this)
