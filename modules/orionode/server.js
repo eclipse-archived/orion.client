@@ -25,7 +25,7 @@ var auth = require('./lib/middleware/auth'),
 	api = require('./lib/api');
 
 // Patches the fs module to use graceful-fs instead
-require('graceful-fs').gracefulify(fs);
+//require('graceful-fs').gracefulify(fs);
 
 // Get the arguments, the workspace directory, and the password file (if configured), then launch the server
 var args = argslib.parseArgs(process.argv);
