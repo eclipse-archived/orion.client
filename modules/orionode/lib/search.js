@@ -136,6 +136,9 @@ module.exports = function(options) {
 		var searchOpts = new SearchOptions(req.originalUrl, req.contextPath);
 		buildSearchOptions(searchOpts);
 
+		if(!searchOpts.location) {
+			return api.writeError(400, res);
+		}
 		var loc = searchOpts.location;
 		loc = loc.replace(/^\/file/, "");
 		loc = loc.replace(/^\/workspace/, "");

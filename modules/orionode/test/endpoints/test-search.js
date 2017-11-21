@@ -455,6 +455,20 @@ describe("Search endpoint", function() {
 				});
 		});
 	});
+	it("Parse failure - bug527563", function(done){
+		testHelper.withWorkspace(request, PREFIX_WORKSPACE, WORKSPACE_ID)
+		.end(function(err, res) {
+			testHelper.throwIfError(err);
+			var sLoc = res.body.Location;
+			if(Array.isArray(res.body.Projects) && res.body.Projects[0]) {
+				sLoc = res.body.Projects[0].Location;
+			}
+			request()
+				.get(PREFIX)
+				.query('sort=Name%20asc&rows=30&start=0&q=NameLower:api.js?onload=loadPicker*+CaseSensitive:true+WholeWord:true+Location:/myserver/prefix/file/foobar@gmail.com-sha1024/javascript/*+Exclude:node_modules&some_extras=one:two:three')
+				.expect(400, done);
+		});
+	});
 	it("testSearchInProjectWithURLName");
 	it("testPathWithDBCS");
 	it("testFileWithDBCS");
