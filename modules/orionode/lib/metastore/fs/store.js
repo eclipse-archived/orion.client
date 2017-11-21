@@ -388,7 +388,7 @@ Object.assign(FsMetastore.prototype, {
 					try {
 						parsedJson = JSON.parse(metadata);
 					} catch(err) {
-						logger.error(metadataFile, err);
+						logger.error(metadataFile, err), "json <" + metadata + ">";
 						return callback(err, null);
 					}
 					callback(null, parsedJson);
@@ -410,47 +410,44 @@ Object.assign(FsMetastore.prototype, {
 		var metadataPath = getUserMetadataFileName(this._options, userData.username);
 		Promise.using(this.lock(userData.username, false), function() {
 			return new Promise(function(resolve, reject) {
-				fs.stat(getUserMetadataFileName(this._options, userData.username), function(err, stat) {
+				fs.stat(metadataPath, function(err, stat) {
 					if (!err || err.code !== 'ENOENT' || stat) {
 						err = err && err.code !== 'ENOENT' ? err : new Error("User already exists");
 						logger.error(err);
 						return reject(err);
 					}
-					mkdirpAsync(nodePath.dirname(metadataPath))
-					.then(function() {
 							
-						var userProperty = {};
-//						userData.password && (userProperty.Password = userData.password); //TODO password need to be pbewithmd5anddes encrypted
-						userData.oauth && (userProperty.OAuth = userData.oauth);
-						userData.email && (userProperty.Email = userData.email);
-						userProperty.AccountCreationTimestamp = Date.now();
-						userProperty.UniqueId = userData.username;
-						
-						// give the user access to their own user profile
-						userProperty.UserRights = accessRights.createUserAccess(userData.username);
-						userProperty.UserRightsVersion = accessRights.getCurrentVersion();
-						var userJson = {
-							OrionVersion: VERSION,
-							UniqueId: userData.username,
-							UserName: userData.username,
-							FullName: userData.fullname,
-							WorkspaceIds:[],
-							Properties: userProperty
-						};
-					 	this._updateUserMetadata(userData.username, userJson, function(error) {
-							if (error) {
-								return reject(error);
-							}
-							resolve({
-								username: userData.username,
-								email: userData.email,
-								fullname: userData.username,
-								oauth: userData.oauth,
-								properties: userProperty,
-								workspaces:[]
-							}); // TODO successful case needs to return user data including isAuthenticated, username, email, authToken for user.js
-						});
-					}.bind(this), reject);
+					var userProperty = {};
+//					userData.password && (userProperty.Password = userData.password); //TODO password need to be pbewithmd5anddes encrypted
+					userData.oauth && (userProperty.OAuth = userData.oauth);
+					userData.email && (userProperty.Email = userData.email);
+					userProperty.AccountCreationTimestamp = Date.now();
+					userProperty.UniqueId = userData.username;
+					
+					// give the user access to their own user profile
+					userProperty.UserRights = accessRights.createUserAccess(userData.username);
+					userProperty.UserRightsVersion = accessRights.getCurrentVersion();
+					var userJson = {
+						OrionVersion: VERSION,
+						UniqueId: userData.username,
+						UserName: userData.username,
+						FullName: userData.fullname,
+						WorkspaceIds:[],
+						Properties: userProperty
+					};
+				 	this._updateUserMetadata(userData.username, userJson, function(error) {
+						if (error) {
+							return reject(error);
+						}
+						resolve({
+							username: userData.username,
+							email: userData.email,
+							fullname: userData.username,
+							oauth: userData.oauth,
+							properties: userProperty,
+							workspaces:[]
+						}); // TODO successful case needs to return user data including isAuthenticated, username, email, authToken for user.js
+					});
 				}.bind(this));
 			}.bind(this));
 		}.bind(this)).then(
