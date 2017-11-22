@@ -24,15 +24,19 @@ var WORKSPACE = testHelper.WORKSPACE,
 
 var CONTEXT_PATH = testHelper.CONTEXT_PATH;
 
+var nconf = require("nconf");
+nconf.set("orion.single.user", true);
+nconf.set("orion.single.user.metaLocation", METADATA);
+if (CONTEXT_PATH) {
+	nconf.set("orion.context.listenPath", true);
+	nconf.set("orion.context.path", CONTEXT_PATH);
+}
+
 var orion = function(options) {
 	// Ensure tests run in 'single user' mode
 	options = options || {};
 	options.workspaceDir = WORKSPACE;
-	options.configParams = { "orion.single.user": true, "orion.single.user.metaLocation": METADATA };
-	 if (CONTEXT_PATH) {
-	 	options.configParams["orion.context.listenPath"]=true;
-		options.configParams["orion.context.path"]=CONTEXT_PATH;
-	 }
+	options.configParams = nconf;
 	return orionMiddleware(options);
 }
 

@@ -27,7 +27,7 @@ var vhosts = [];
 module.exports = function(options) {
 	loadRunningSites();
 	
-	vhosts = (options.configParams["orion.site.virtualHosts"] || "").split(",");
+	vhosts = (options.configParams.get("orion.site.virtualHosts") || "").split(",");
 
 	vhosts.forEach(function(host) {
 		if (host === "") {
@@ -74,7 +74,7 @@ function virtualHost(vhost, req, res, next) {
 				}
 				var relative  = urlPath.substring(mapping.Source.length);
 				var path;
-				if (options.configParams["orion.single.user"]) {
+				if (options.configParams.get("orion.single.user")) {
 					path = mPath.join(options.workspaceDir, mapping.Target, relative);
 				} else {
 					var file = fileUtil.getFile(req, mapping.Target);
@@ -127,14 +127,14 @@ function siteJSON(site, req) {
 }
 
 function loadRunningSites() {
-	if (!options.configParams["orion.sites.save.running"]) return;
+	if (!options.configParams.get("orion.sites.save.running")) return;
 	try {
 		hosts = JSON.parse(fs.readFileSync(mPath.join(options.workspaceDir, RUNNING_SITES_FILENAME), "utf8"));
 	} catch (e) {}
 }
 
 function saveRunningSites() {
-	if (!options.configParams["orion.sites.save.running"]) return;
+	if (!options.configParams.get("orion.sites.save.running")) return;
 	fs.writeFile(mPath.join(options.workspaceDir, RUNNING_SITES_FILENAME), JSON.stringify(hosts), "utf8");
 }
 

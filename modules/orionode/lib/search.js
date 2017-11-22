@@ -94,7 +94,7 @@ function buildSearchOptions(searchOpts) {
 
 module.exports = function(options) {
 	var search;
-	var USE_WORKERS = options.configParams.isElectron;
+	var USE_WORKERS = options.configParams.get("isElectron");
 	if (USE_WORKERS) {
 		var requests = {};
 		var WORKER_COUNT = 1;

@@ -22,17 +22,17 @@ module.exports.start = function(startServer, configParams) {
 		autoUpdater = require('./lib/autoUpdater'),
 		spawn = require('child_process').spawn,
 		allPrefs = prefs.readElectronPrefs(),
-		feedURL = configParams["orion.autoUpdater.url"],
+		feedURL = configParams.get("orion.autoUpdater.url"),
 		version = electron.app.getVersion(),
 		name = electron.app.getName(),
 		platform = os.platform(),
 		arch = os.arch();
 
-	configParams.isElectron = true;
-	electron.app.buildId = configParams["orion.buildId"];
+	configParams.set("isElectron", true);
+	electron.app.buildId = configParams.get("orion.buildId");
 
 	if (feedURL) {
-		var updateChannel = allPrefs.user && allPrefs.user.updateChannel && allPrefs.user.updateChannel.name ? allPrefs.user.updateChannel.name : configParams["orion.autoUpdater.defaultChannel"],
+		var updateChannel = allPrefs.user && allPrefs.user.updateChannel && allPrefs.user.updateChannel.name ? allPrefs.user.updateChannel.name : configParams.get("orion.autoUpdater.defaultChannel"),
 			latestUpdateURL;
 		if (platform === "linux") {
 			latestUpdateURL = feedURL + '/download/channel/' + updateChannel + '/linux';
@@ -118,7 +118,7 @@ module.exports.start = function(startServer, configParams) {
 		if(!openedTabs){
 			((allPrefs.user || (allPrefs.user = {})).workspace || (allPrefs.user.workspace = {})).openedTabs || (allPrefs.user.workspace.openedTabs={});
 		}
-		var currentWorkspace = (originalWorkspace ? originalWorkspace : allPrefs.user.workspace.currentWorkspace) || configParams.workspace;
+		var currentWorkspace = (originalWorkspace ? originalWorkspace : allPrefs.user.workspace.currentWorkspace) || configParams.get("workspace");
 		allPrefs.user.workspace.openedTabs[currentWorkspace] = {};
 		allPrefs.user.workspace.openedTabs[currentWorkspace].tabs = tabs;
 		allPrefs.user.workspace.openedTabs[currentWorkspace].activeIndex = activeIndex;
@@ -138,7 +138,7 @@ module.exports.start = function(startServer, configParams) {
 			Menu = electron.Menu;
 			
 		if (prefsWorkspace) {
-			configParams.workspace = prefsWorkspace;
+			configParams.set("workspace", prefsWorkspace);
 		}
 		if(readyToOpenDir){
 			try{
@@ -146,18 +146,18 @@ module.exports.start = function(startServer, configParams) {
 				if(stats.isFile()){
 					var parentDir = path.dirname(readyToOpenDir);
 					var similarity = 0;
-					configParams.workspace = parentDir;
+					configParams.set("workspace", parentDir);
 					recentWorkspaces.forEach(function(eachRecent){
 						if(parentDir.lastIndexOf(eachRecent,0) === 0 && eachRecent.length > similarity){
 							similarity = eachRecent.length;
-							return configParams.workspace = eachRecent;
+							return configParams.set("workspace", eachRecent);
 						}
 					});
-					relativeFileUrl = api.toURLPath(readyToOpenDir.substring(configParams.workspace.length));
+					relativeFileUrl = api.toURLPath(readyToOpenDir.substring(configParams.get("workspace").length));
 				}else if(stats.isDirectory()){
-					configParams.workspace = readyToOpenDir;
+					configParams.set("workspace", readyToOpenDir);
 				}
-				// updateWorkspacePrefs(configParams.workspace, allPrefs);
+				// updateWorkspacePrefs(configParams.get("workspace"), allPrefs);
 			}catch(e){}
 		}
 		if (process.platform === 'darwin') {
@@ -270,7 +270,7 @@ module.exports.start = function(startServer, configParams) {
 		});
 
 		function scheduleUpdateChecks () {
-			var checkInterval = (parseInt(configParams["orion.autoUpdater.checkInterval"], 10) || 30) * 1000 * 60;
+			var checkInterval = (configParams.get("orion.autoUpdater.checkInterval") >> 0 || 30) * 1000 * 60;
 			var resolveNewVersion = function() {
 				autoUpdater.resolveNewVersion(false);
 			}.bind(this);
@@ -346,7 +346,7 @@ module.exports.start = function(startServer, configParams) {
 				var allPrefs = prefs.readElectronPrefs();
 				var openedTabs = allPrefs.user && allPrefs.user.workspace && allPrefs.user.workspace.openedTabs && allPrefs.user.workspace.openedTabs[newTargetWorkspace] && allPrefs.user.workspace.openedTabs[newTargetWorkspace]["tabs"] || [];
 				var activeIndex = allPrefs.user && allPrefs.user.workspace && allPrefs.user.workspace.openedTabs && allPrefs.user.workspace.openedTabs[newTargetWorkspace] && allPrefs.user.workspace.openedTabs[newTargetWorkspace]["activeIndex"] || 0;
-				var hostUrl = "http://localhost:" + configParams.port;
+				var hostUrl = "http://localhost:" + configParams.get("port");
 				// step4: open tabs of new current workspace if any saved before
 				if(openedTabs.length > 0 && openedTabs[0] !== 'about:blank'){
 					nextWindow.webContents.executeJavaScript('createTab("' + hostUrl + "/" + openedTabs[0] + '");');
@@ -370,7 +370,7 @@ module.exports.start = function(startServer, configParams) {
 		}
 		startServer(function() {
 			var mainWindow,
-			 	hostUrl = "http://localhost:" + configParams.port,
+			 	hostUrl = "http://localhost:" + configParams.get("port"),
 			 	openedTabs = allPrefs.user && allPrefs.user.workspace && allPrefs.user.workspace.openedTabs && allPrefs.user.workspace.openedTabs[prefsWorkspace] && allPrefs.user.workspace.openedTabs[prefsWorkspace]["tabs"] || [],
 				activeIndex = allPrefs.user && allPrefs.user.workspace && allPrefs.user.workspace.openedTabs && allPrefs.user.workspace.openedTabs[prefsWorkspace] && allPrefs.user.workspace.openedTabs[prefsWorkspace]["activeIndex"] || 0;
 				
@@ -379,7 +379,7 @@ module.exports.start = function(startServer, configParams) {
 				openedTabs.unshift("edit/edit.html#/file" + relativeFileUrl);
 				activeIndex = 0;
 			}
-			if(readyToOpenDir && prefsWorkspace !== configParams.workspace){
+			if(readyToOpenDir && prefsWorkspace !== configParams.get("workspace")) {
 				mainWindow = createWindow(fileUrl ? fileUrl : hostUrl);
 			}else{
 				if(openedTabs.length > 0 && openedTabs[0] !== 'about:blank'){

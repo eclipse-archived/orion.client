@@ -18,7 +18,6 @@ var express = require('express'),
 	Promise = require('bluebird'),
 	nodemailer = require('nodemailer'),
 	fs = require('fs'),
-	args = require('./args'),
 	api = require('./api'),
 	generator = require('generate-password'),
 	log4js = require('log4js'),
@@ -76,19 +75,19 @@ function sendMail(opt){
 	read(function(err, subject, body){
 		logError(err);
 		var smtpConfig = {
-			host: opt.options.configParams["mail.smtp.host"],
-			port: opt.options.configParams["mail.smtp.port"],
+			host: opt.options.configParams.get("mail.smtp.host"),
+			port: opt.options.configParams.get("mail.smtp.port"),
 			secure: true,
 			auth: {
-				user: opt.options.configParams["mail.smtp.user"],
-				pass: opt.options.configParams["mail.smtp.password"]
+				user: opt.options.configParams.get("mail.smtp.user"),
+				pass: opt.options.configParams.get("mail.smtp.password")
 			}
 		};
 
-		if (opt.options.configParams["mail.from"]) {
+		if (opt.options.configParams.get("mail.from")) {
 			var transport = nodemailer.createTransport(smtpConfig);
 			var mailOptions = {
-				from: opt.options.configParams["mail.from"],
+				from: opt.options.configParams.get("mail.from"),
 				to: opt.user.email,
 				subject: subject,
 				text: body, 
@@ -139,10 +138,10 @@ module.exports.router = function(options) {
 	app.use(responseTime({digits: 2, header: "X-User-Response-Time", suffix: true}));
 	
 	function canAddUsers() {
-		return !options.configParams["orion.auth.user.creation"];
+		return !options.configParams.get("orion.auth.user.creation");
 	}
 	function isAdmin(username) {
-		return (options.configParams["orion.auth.user.creation"] || "").split(",").some(function(user) {
+		return (options.configParams.get("orion.auth.user.creation") || "").split(",").some(function(user) {
 			return user === username;
 		});
 	}
@@ -199,43 +198,43 @@ module.exports.router = function(options) {
 		});
 	}
 
-	if (options.configParams["orion.oauth.google.client"]) {
+	if (options.configParams.get("orion.oauth.google.client")) {
 		var GoogleStrategy = require('passport-google-oauth20').Strategy;
 		passport.use(new GoogleStrategy({
-			clientID: options.configParams["orion.oauth.google.client"],
-			clientSecret: options.configParams["orion.oauth.google.secret"],
+			clientID: options.configParams.get("orion.oauth.google.client"),
+			clientSecret: options.configParams.get("orion.oauth.google.secret"),
 			passReqToCallback: true,
-			callbackURL: (options.configParams["orion.auth.host"] || "") + "/auth/google/callback",
+			callbackURL: (options.configParams.get("orion.auth.host") || "") + "/auth/google/callback",
 			scope: "openid email"
 		}, /* @callback */ function(req, accessToken, refreshToken, profile, done) {
 			var email = profile.emails[0].value;
 			oauth(profile.provider + "/" + profile.id, email.split("@")[0], email, req, done);
 		}));
 		app.get('/login/oauth/google', passport.authenticate('google'));
-		app.get('/mixlogin/manageoauth/oauth/google', passport.authenticate('google', {callbackURL: (options.configParams["orion.auth.host"] || "") + "/auth/google/callback/link"}));
+		app.get('/mixlogin/manageoauth/oauth/google', passport.authenticate('google', {callbackURL: (options.configParams.get("orion.auth.host") || "") + "/auth/google/callback/link"}));
 		app.get('/auth/google/callback*', function(req, res) {
-			return passport.authenticate('google', {callbackURL: (options.configParams["orion.auth.host"] || "") + "/auth/google/callback" + (req.params["0"] || "")}, function(err, user, info){
+			return passport.authenticate('google', {callbackURL: (options.configParams.get("orion.auth.host") || "") + "/auth/google/callback" + (req.params["0"] || "")}, function(err, user, info){
 				createNewUser(req,res,err,user,info);
 			})(req,res);
 		});
 	}
 
-	if (options.configParams["orion.oauth.github.client"]) {
+	if (options.configParams.get("orion.oauth.github.client")) {
 		var GithubStrategy = require('passport-github2').Strategy;
 		passport.use(new GithubStrategy({
-			clientID: options.configParams["orion.oauth.github.client"],
-			clientSecret: options.configParams["orion.oauth.github.secret"],
+			clientID: options.configParams.get("orion.oauth.github.client"),
+			clientSecret: options.configParams.get("orion.oauth.github.secret"),
 			passReqToCallback: true,
-			callbackURL: (options.configParams["orion.auth.host"] || "") + "/auth/github/callback",
+			callbackURL: (options.configParams.get("orion.auth.host") || "") + "/auth/github/callback",
 			scope: "user:email"
 		}, /* @callback */ function(req, accessToken, refreshToken, profile, done) {
 			var email = profile.emails[0].value;
 			oauth(profile.provider + "/" + profile.id, profile.username, email, req, done);
 		}));
 		app.get('/login/oauth/github', passport.authenticate('github'));
-		app.get('/mixlogin/manageoauth/oauth/github', passport.authenticate('github', {callbackURL: (options.configParams["orion.auth.host"] || "") + "/auth/github/callback/link"}));
+		app.get('/mixlogin/manageoauth/oauth/github', passport.authenticate('github', {callbackURL: (options.configParams.get("orion.auth.host") || "") + "/auth/github/callback/link"}));
 		app.get('/auth/github/callback*', function(req, res) {
-			return passport.authenticate('github', {callbackURL: (options.configParams["orion.auth.host"] || "") + "/auth/github/callback" + (req.params["0"] || "")}, function(err, user, info){
+			return passport.authenticate('github', {callbackURL: (options.configParams.get("orion.auth.host") || "") + "/auth/github/callback" + (req.params["0"] || "")}, function(err, user, info){
 				createNewUser(req,res,err,user,info);
 			})(req,res);
 		});
@@ -393,7 +392,7 @@ module.exports.router = function(options) {
 
 	app.post('/users', options.authenticate, function(req, res){
 		// If there are admin accounts, only admin accounts can create users
-		if (options.configParams["orion.auth.user.creation"] && !isAdmin(req.user && req.user.username)) {
+		if (options.configParams.get("orion.auth.user.creation") && !isAdmin(req.user && req.user.username)) {
 			return api.writeResponse(403, res);
 		}
 		var userData = {
@@ -409,7 +408,7 @@ module.exports.router = function(options) {
 			if (err) {
 				return api.writeResponse(404, res, null, {Message: err.message});
 			}
-			if (options.configParams["orion.auth.user.creation.force.email"]) {
+			if (options.configParams.get("orion.auth.user.creation.force.email")) {
 				sendMail({user: user, options: options, template: CONFIRM_MAIL, auth: CONFIRM_MAIL_AUTH, req: req});
 				return api.writeResponse(201, res, null, {error: "Created"});
 			}
@@ -461,7 +460,7 @@ module.exports.router = function(options) {
 	});
 
 	app.post("/useremailconfirmation/cansendemails", /* @callback */ function(req, res){
-		api.writeResponse(200, res, null, {EmailConfigured: Boolean(options.configParams["mail.smtp.host"])});
+		api.writeResponse(200, res, null, {EmailConfigured: Boolean(options.configParams.get("mail.smtp.host"))});
 	});
 
 	app.post('/useremailconfirmation', function(req, res){
@@ -494,8 +493,8 @@ module.exports.router = function(options) {
 	app.post('/login/canaddusers', /* @callback */ function(req, res) {
 		return api.writeResponse(200, res, null, {
 			CanAddUsers: canAddUsers(), 
-			ForceEmail: Boolean(options.configParams["orion.auth.user.creation.force.email"]), 
-			RegistrationURI:options.configParams["orion.auth.registration.uri"] || undefined});
+			ForceEmail: Boolean(options.configParams.get("orion.auth.user.creation.force.email")), 
+			RegistrationURI:options.configParams.get("orion.auth.registration.uri") || undefined});
 	});
 	
 	app.post('/login', options.authenticate, function(req, res) {
@@ -503,8 +502,8 @@ module.exports.router = function(options) {
 			return api.writeResponse(200, res);
 		}
 		//add the web token with the response
-		if (options.configParams["orion.collab.enabled"] && options.configParams["orion.jwt.secret"]) {
-			req.user.jwt = jwt.sign({'username': req.user.username}, options.configParams["orion.jwt.secret"]);
+		if (options.configParams.get("orion.collab.enabled") && options.configParams.get("orion.jwt.secret")) {
+			req.user.jwt = jwt.sign({'username': req.user.username}, options.configParams.get("orion.jwt.secret"));
 		}
 		return api.writeResponse(200, res, null, userJSON(req.user));
 	});

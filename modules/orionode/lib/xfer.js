@@ -31,7 +31,7 @@ var writeError = api.writeError,
 	
 function getUploadsFolder(options) {
 	if (options) {
-		return path.join(options.configParams['orion.single.user'] ? 
+		return path.join(options.configParams.get('orion.single.user') ? 
 			path.join(os.homedir(), ".orion") : options.workspaceDir, ".uploads");
 	}
 	return path.join(os.homedir(), ".orion");

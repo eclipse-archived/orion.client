@@ -59,17 +59,17 @@ function handleError(err) {
 
 function startServer(options) {
 	options = options || {};
-	options.configParams = options.configParams || {};
-	if(options.configParams["additional.modules.path"]){
+	options.configParams = options.configParams || require("nconf");
+	if(options.configParams.get("additional.modules.path")){
 		var addModulePath = require('app-module-path');
-		options.configParams["additional.modules.path"].split(",").forEach(function(modulePath){
+		options.configParams.get("additional.modules.path").split(",").forEach(function(modulePath){
 			addModulePath.addPath(path.join(__dirname, modulePath));
 		});
 	}
 	
 	options.maxAge = typeof options.maxAge === "number" ? options.maxAge : undefined;
-	var contextPath = options.configParams["orion.context.path"] || "";
-	var listenContextPath = options.configParams["orion.context.listenPath"] || false;
+	var contextPath = options.configParams.get("orion.context.path") || "";
+	var listenContextPath = options.configParams.get("orion.context.listenPath") || false;
 	if (typeof options.workspaceDir !== "string") {
 		throw new Error("workspaceDir is required");
 	}
@@ -104,7 +104,7 @@ function startServer(options) {
 			req.user.checkRights(req.user.username, uri, req, res, next);
 		}
 		
-		var additionalEndpoints = options.configParams["additional.endpoint"] ? require(options.configParams["additional.endpoint"]) : [];
+		var additionalEndpoints = options.configParams.get("additional.endpoint") ? require(options.configParams.get("additional.endpoint")) : [];
 		function loadEndpoints(authenticated) {
 			additionalEndpoints.forEach(function(additionalEndpoint) {
 				if (authenticated !== Boolean(additionalEndpoint.authenticated)) return;
@@ -122,7 +122,7 @@ function startServer(options) {
 
 		// Configure metastore
 		var metastoreFactory;
-		if (!options.configParams['orion.single.user'] && options.configParams['orion.metastore.useMongo'] !== false) {
+		if (!options.configParams.get("orion.single.user") && options.configParams.get("orion.metastore.useMongo") !== false) {
 			metastoreFactory = require('./lib/metastore/mongodb/store');
 		} else {
 			metastoreFactory = require('./lib/metastore/fs/store');
@@ -157,17 +157,17 @@ function startServer(options) {
 		app.use('/cfapi', options.authenticate, checkAuthenticated, new CloudFoundry().createRouter(options));
 		app.use('/prefs', options.authenticate, checkAuthenticated, require('./lib/prefs').router(options));
 		app.use('/xfer', options.authenticate, checkAuthenticated, require('./lib/xfer').router(options));
-		if (options.configParams.isElectron) {
+		if (options.configParams.get("isElectron")) {
 			app.use('/update', options.authenticate, checkAuthenticated, require('./lib/update').router(options));
 		}
-		if(options.configParams["orion.collab.enabled"]){
+		if(options.configParams.get("orion.collab.enabled")) {
 			app.use('/sharedWorkspace', options.authenticate, checkAuthenticated, require('./lib/sharedWorkspace').router(options));
 		}
 		
 		var io = socketio.listen(options.server, { 'log level': 1, path: (listenContextPath ? contextPath : '' ) + '/socket.io' });
 		ttyShell.install(options, io);
-		if (options.configParams["orion.debug.enabled"]) {
-			var debugServer = require(options.configParams["debug.server.module"]);
+		if (options.configParams.get("orion.debug.enabled")) {
+			var debugServer = require(options.configParams.get("debug.server.module"));
 			debugServer.install(options, io);
 		}
 		
@@ -200,10 +200,10 @@ function startServer(options) {
 		if (fs.existsSync(MINIFIED_ORION_CLIENT)) {
 			app.use(express.static(MINIFIED_ORION_CLIENT, Object.assign({dotfiles: 'allow'}, staticCacheOption)));
 		} else {
-			var prependStaticAssets = (options.configParams["prepend.static.assets"] || "").split(",");
-			var appendStaticAssets = (options.configParams["append.static.assets"] || "").split(",");
+			var prependStaticAssets = (options.configParams.get("prepend.static.assets") || "").split(",");
+			var appendStaticAssets = (options.configParams.get("append.static.assets") || "").split(",");
 			var orionode_static = path.normalize(path.join(LIBS, 'orionode.client/'));
-			if(options.configParams["orion.collab.enabled"]){
+			if(options.configParams.get("orion.collab.enabled")) {
 				appendStaticAssets.push('./bundles/org.eclipse.orion.client.collab/web');
 			}
 			app.use(require('./lib/orion_static')(Object.assign({orionClientRoot: ORION_CLIENT, orionode_static: orionode_static, prependStaticAssets: prependStaticAssets, appendStaticAssets: appendStaticAssets}, staticCacheOption)));
