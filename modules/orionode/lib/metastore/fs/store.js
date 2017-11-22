@@ -85,7 +85,7 @@ function readJSON(fileName) {
 		try {
 			return JSON.parse(metadata);
 		} catch(err) {
-			logger.error(fileName, err), "json <" + metadata + ">";
+			logger.error(fileName, err, "json <" + metadata + ">");
 			throw err;
 		}
 	});
