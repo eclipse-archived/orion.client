@@ -8,16 +8,15 @@
  *
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
-
 /*eslint-env browser, amd*/
-define("orion/editor/editor", [ //$NON-NLS-0$
-	'i18n!orion/editor/nls/messages', //$NON-NLS-0$
-	'orion/editor/eventTarget', //$NON-NLS-0$
-	'orion/editor/tooltip', //$NON-NLS-0$
-	'orion/editor/annotations', //$NON-NLS-0$
-	'orion/objects', //$NON-NLS-0$
-	'orion/editor/util', //$NON-NLS-1$
-	'orion/util' //$NON-NLS-0$
+define("orion/editor/editor", [
+	'i18n!orion/editor/nls/messages',
+	'orion/editor/eventTarget',
+	'orion/editor/tooltip',
+	'orion/editor/annotations',
+	'orion/objects',
+	'orion/editor/util',
+	'orion/util'
 ], function(messages, mEventTarget, mTooltip, mAnnotations, objects, textUtil, util) {
 	
 	var AT = mAnnotations.AnnotationType;
@@ -979,7 +978,7 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 			if (this._textView) { return; }
 
 			// Create textView and install optional features
-			this._textView = this._textViewFactory();
+			this._textView = this._textViewFactory(this);
 			if (this._undoStackFactory) {
 				this._undoStack = this._undoStackFactory.createUndoStack(this);
 				this._textView.setOptions({undoStack: this._undoStack});
@@ -1330,7 +1329,7 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 					if (createAnnotation) {
 						annotation = createAnnotation(annotation);
 					} else {
-						var start, end;
+						var start, end, lineIndex, lineStart;
 						if (annotation.lineStart && annotation.lineEnd){
 							start = model.getLineStart(annotation.lineStart);
 							// If the closing line number of the modified range is on the last line,
@@ -1341,11 +1340,18 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 						}
 						else if (typeof annotation.line === "number") { //$NON-NLS-0$
 							// line/column
-							var lineIndex = annotation.line - 1;
-							var lineStart = model.getLineStart(lineIndex);
+							lineIndex = annotation.line - 1;
+							lineStart = model.getLineStart(lineIndex);
 							start = lineStart + annotation.start - 1;
 							end = lineStart + annotation.end - 1;
-						} else {
+						} else if (annotation.range) {
+							lineIndex = annotation.range.start.line;
+							lineStart = model.getLineStart(lineIndex);
+							start = lineStart + annotation.range.start.character;
+							lineIndex = annotation.range.end.line;
+							lineStart = model.getLineStart(lineIndex);
+							end = lineStart + annotation.range.end.character;
+ 						} else {
 							// document offsets
 							start = annotation.start;
 							end = annotation.end;
