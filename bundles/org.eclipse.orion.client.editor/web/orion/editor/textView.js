@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2010, 2016 IBM Corporation and others.
+ * Copyright (c) 2010, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -11,18 +11,17 @@
  *		Silenio Quarti (IBM Corporation) - initial API and implementation
  *		Mihai Sucan (Mozilla Foundation) - fix for Bug#334583 Bug#348471 Bug#349485 Bug#350595 Bug#360726 Bug#361180 Bug#362835 Bug#362428 Bug#362286 Bug#354270 Bug#361474 Bug#363945 Bug#366312 Bug#370584
  ******************************************************************************/
-
 /*eslint-env browser, amd*/
-define("orion/editor/textView", [  //$NON-NLS-1$
-	'i18n!orion/editor/nls/messages', //$NON-NLS-1$
-	'orion/editor/textModel', //$NON-NLS-1$
-	'orion/editor/keyModes', //$NON-NLS-1$
-	'orion/editor/eventTarget', //$NON-NLS-1$
-	'orion/editor/textTheme', //$NON-NLS-1$
-	'orion/editor/util', //$NON-NLS-1$
-	'orion/util', //$NON-NLS-1$
-	'orion/bidiUtils', //$NON-NLS-1$
-	'orion/metrics' //$NON-NLS-1$
+define("orion/editor/textView", [
+	'i18n!orion/editor/nls/messages',
+	'orion/editor/textModel',
+	'orion/editor/keyModes',
+	'orion/editor/eventTarget',
+	'orion/editor/textTheme',
+	'orion/editor/util',
+	'orion/util',
+	'orion/bidiUtils',
+	'orion/metrics'
 ], function(messages, mTextModel, mKeyModes, mEventTarget, mTextTheme, textUtil, util, bidiUtils, mMetrics) {
 
 	/** @private */
@@ -480,6 +479,9 @@ define("orion/editor/textView", [  //$NON-NLS-1$
 				//W3C
 				var sel = win.getSelection();
 				range = doc.createRange();
+				if(start.offset > end.offset) {
+					start.offset = end.offset;
+				}
 				range.setStart(start.node, start.offset);
 				range.setEnd(end.node, end.offset);
 				if (view._hasFocus && (
@@ -6587,11 +6589,16 @@ define("orion/editor/textView", [  //$NON-NLS-1$
 
 			if (e.text === null || e.text === undefined) { return false; }
 			
+			var previousSelection;
+			if (e.preserveSelection) {
+				previousSelection = this._getSelections();
+			}
+			
 			if (e.selection.length > 1) this.setRedraw(false);
 			
 			var undo = this._compoundChange;
 			if (undo) {
-				if (!Selection.compare(this._getSelections(), undo.owner.selection)) {
+				if (!Selection.compare(previousSelection || this._getSelections(), undo.owner.selection)) {
 					this._endUndo();
 					if (e.selection.length > 1) this._startUndo();
 				}
@@ -6602,23 +6609,30 @@ define("orion/editor/textView", [  //$NON-NLS-1$
 			var model = this._model;
 			try {
 				if (e._ignoreDOMSelection) { this._ignoreDOMSelection = true; }
-				var offset = 0, i = 0;
-				e.selection.forEach(function(selection) {
+				var offset = 0;
+				e.selection.forEach(function(selection, i) {
 					selection.start += offset;
 					selection.end += offset;
 					var text = Array.isArray(e.text) ? e.text[i] : e.text;
 					model.setText(text, selection.start, selection.end);
-					offset += (selection.start - selection.end) + text.length;
+					var delta = selection.start - selection.end + text.length;
+					offset += delta;
+					if (previousSelection) {
+						previousSelection.forEach(function(ps) {
+							if (ps.start > selection.start) ps.start += delta;
+							if (ps.end > selection.start) ps.end += delta;
+						});
+					}
 					selection.setCaret(caretAtEnd ? selection.start + text.length : selection.start);
-					i++;
 				});
 			} finally {
 				if (e._ignoreDOMSelection) { this._ignoreDOMSelection = false; }
 			}
-			this._setSelection(e.selection, show, true, callback);
-
+			this._setSelection(previousSelection || e.selection, show, true, callback);
 			undo = this._compoundChange;
-			if (undo) undo.owner.selection = e.selection;
+			if (undo) {
+				undo.owner.selection = previousSelection || e.selection;
+			}
 			
 			if (e.selection.length > 1) this.setRedraw(true);
 
