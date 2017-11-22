@@ -17,7 +17,6 @@ var api = require('../api'),
 	mRemotes = require('./remotes'),
 	clone = require('./clone'),
 	express = require('express'),
-	bodyParser = require('body-parser'),
 	args = require('../args'),
 	responseTime = require('response-time');
 
@@ -37,7 +36,6 @@ module.exports.router = function(options) {
 	module.exports.getBranchRemotes = getBranchRemotes;
 	
 	return express.Router()
-	.use(bodyParser.json())
 	.use(responseTime({digits: 2, header: "X-GitapiBranches-Response-Time", suffix: true}))
 	.use(options.checkUserAccess)
 	.get(fileRoot + '*', getBranches)

@@ -16,7 +16,6 @@ var api = require('../api'), writeError = api.writeError, writeResponse = api.wr
 	tasks = require('../tasks'),
 	clone = require('./clone'),
 	express = require('express'),
-	bodyParser = require('body-parser'),
 	gitUtil = require('./util'),
 	responseTime = require('response-time');
 
@@ -48,7 +47,6 @@ module.exports.router = function(options) {
 	}
 
 	return express.Router()
-	.use(bodyParser.json())
 	.use(responseTime({digits: 2, header: "X-GitapiRemotes-Response-Time", suffix: true}))
 	.use(checkUserAccess) // Use specified checkUserAceess implementation instead of the common one from options
 	.get(fileRoot + '*', getRemotes)

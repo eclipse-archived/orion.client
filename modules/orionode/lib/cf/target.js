@@ -10,7 +10,6 @@
  *******************************************************************************/
 /*eslint-env node, es6*/
 var express = require("express");
-var bodyParser = require("body-parser");
 var tasks = require("../tasks");
 var request = require("request");
 var orgs = require("./orgs_spaces");
@@ -35,7 +34,6 @@ module.exports.router = function(options) {
 	module.exports.fullTarget = fullTarget;
 
 	return express.Router()
-	.use(bodyParser.json())
 	.get("*", getTarget)
 	.post("*", postTarget);
 	

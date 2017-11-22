@@ -20,7 +20,6 @@ var git = require('nodegit'),
 	request = require('request'),
 	multiparty = require('multiparty'),
 	express = require('express'),
-	bodyParser = require('body-parser'),
 	async = require('async'),
 	responseTime = require('response-time');
 
@@ -38,7 +37,6 @@ module.exports.router = function(options) {
 	module.exports.changeType = changeType;
 
 	return express.Router()
-	.use(bodyParser.json())
 	.use(responseTime({digits: 2, header: "X-GitapiDiff-Response-Time", suffix: true}))
 	.use(options.checkUserAccess)
 	.get(fileRoot + '*', getDiff)

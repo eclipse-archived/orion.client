@@ -10,7 +10,6 @@
  *******************************************************************************/
 /*eslint-env node*/
 var express = require('express'),
-	bodyParser = require('body-parser'),
 	log4js = require('log4js'),
 	logger = log4js.getLogger('workspace'),
 	api = require('./api'),
@@ -30,7 +29,6 @@ module.exports = function(options) {
 	var singleUser = options.configParams.get("orion.single.user");
 	
 	var router = express.Router({mergeParams: true});
-	router.use(bodyParser.json());
 	router.use(responseTime({digits: 2, header: "X-Workspace-Response-Time", suffix: true}))
 	router.get('*', getWorkspace);
 	router.post('*', postWorkspace);

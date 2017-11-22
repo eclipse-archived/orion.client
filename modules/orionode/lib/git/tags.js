@@ -15,7 +15,6 @@ var api = require('../api'), writeError = api.writeError, writeResponse = api.wr
 	url = require('url'),
 	clone = require('./clone'),
 	express = require('express'),
-	bodyParser = require('body-parser'),
 	responseTime = require('response-time');
 
 module.exports = {};
@@ -32,7 +31,6 @@ module.exports.router = function(options) {
 	module.exports.tagJSON = tagJSON;
 
 	return express.Router()
-	.use(bodyParser.json())
 	.use(responseTime({digits: 2, header: "X-GitapiTags-Response-Time", suffix: true}))
 	.use(options.checkUserAccess)
 	.get(fileRoot + '*', getTags)

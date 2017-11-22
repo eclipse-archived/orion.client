@@ -12,7 +12,6 @@
 var clone = require('./clone'),
 	express = require('express'),
 	request = require('request'),
-	bodyParser = require('body-parser'),
 	url = require("url"),
 	tasks = require('../tasks'),
 	responseTime = require('response-time');
@@ -29,7 +28,6 @@ module.exports.router = function(options) {
 	fileRoot = fileRoot.substring(contextPath.length);
 
 	return express.Router()
-	.use(bodyParser.json())
 	.use(responseTime({digits: 2, header: "X-GitapiPullrequest-Response-Time", suffix: true}))
 	.use(options.checkUserAccess)
 	.post(fileRoot + '*', getPullRequest);

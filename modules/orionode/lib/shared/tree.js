@@ -17,7 +17,6 @@ var fileUtil = require('../fileUtil');
 var fs = require('fs');
 var sharedProjects = require('./db/sharedProjects');
 var xfer = require('../xfer');
-var bodyParser = require('body-parser');
 
 module.exports = {};
 
@@ -27,7 +26,6 @@ module.exports.router = function(options) {
 	var sharedWorkspaceFileRoot = options.sharedWorkspaceFileRoot;
 
 	return express.Router()
-	.use(bodyParser.json())
 	.get('/file/:workspaceId*', getTree)
 	.put('/file*', ensureAccess, putFile)
 	.post('/file*', ensureAccess, postFile)

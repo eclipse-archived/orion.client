@@ -14,7 +14,6 @@ var express = require('express'),
 	crypto = require('crypto'),
 	passport = require('passport'),
 	cookieParser = require('cookie-parser'),
-	bodyParser = require('body-parser'),
 	Promise = require('bluebird'),
 	nodemailer = require('nodemailer'),
 	fs = require('fs'),
@@ -132,8 +131,6 @@ function doLogin(req, user, callback) {
 
 module.exports.router = function(options) {
 	var app = express.Router();
-	app.use(bodyParser.json());
-	app.use(bodyParser.urlencoded({ extended: false }));
 	app.use(cookieParser());
 	app.use(responseTime({digits: 2, header: "X-User-Response-Time", suffix: true}));
 	

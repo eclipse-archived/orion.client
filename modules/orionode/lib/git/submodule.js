@@ -13,7 +13,6 @@ var git = require('nodegit'),
 	api = require('../api'), writeError = api.writeError, writeResponse = api.writeResponse,
 	args = require('../args'),
 	express = require('express'),
-	bodyParser = require('body-parser'),
 	clone = require('./clone'),
 	tasks = require('../tasks'),
 	fileUtil = require('../fileUtil'),
@@ -29,7 +28,6 @@ module.exports.router = function(options) {
 	fileRoot = fileRoot.substring(contextPath.length);
 
 	return express.Router()
-	.use(bodyParser.json())
 	.use(responseTime({digits: 2, header: "X-GitapiSubmodule-Response-Time", suffix: true}))
 	.use(options.checkUserAccess)
 	.put(fileRoot + '*', putSubmodule)

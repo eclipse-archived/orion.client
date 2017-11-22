@@ -8,10 +8,9 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-/*eslint-env node, express, body-parser*/
+/*eslint-env node, express */
 var express = require("express");
-var bodyParser = require("body-parser");
-var api = require("../api"), writeError = api.writeError, writeResponse = api.writeResponse;
+var api = require("../api"), writeResponse = api.writeResponse;
 var fileUtil = require("../fileUtil");
 var fs = require("fs");
 var path = require("path");
@@ -41,7 +40,6 @@ class ManifestRouter {
 			throw new Error('options.fileRoot is required'); 
 		}
 		return express.Router()
-			.use(bodyParser.json())
 			.get(this.fileRoot + "*", this.getManifests)
 			.get("*", this.getManifests);
 	}

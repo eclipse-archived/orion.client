@@ -8,9 +8,8 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-/*eslint-env node, express, body-parser, worker*/
+/*eslint-env node, express, worker*/
 var express = require("express");
-var bodyParser = require("body-parser");
 var target = require("./target");
 var apps = require("./apps");
 var tasks = require("../tasks");
@@ -19,7 +18,6 @@ var logspb = require("./logs_pb");
 module.exports.router = function() {
 
 	return express.Router()
-	.use(bodyParser.json())
 	.get("*", getLogz);
 	
 	function getLogz(req, res) {

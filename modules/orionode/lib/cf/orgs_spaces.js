@@ -10,7 +10,6 @@
  *******************************************************************************/
 /*eslint-env node */
 var express = require("express");
-var bodyParser = require("body-parser");
 var tasks = require("../tasks");
 var target = require("./target");
 var async = require("async");
@@ -26,7 +25,6 @@ module.exports.router = function() {
 	module.exports.getOrgsRequest = getOrgsRequest;
 
 	return express.Router()
-	.use(bodyParser.json())
 	.get("*", getOrgs);
 		
 function getOrgs(req, res){

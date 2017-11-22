@@ -14,7 +14,6 @@ var api = require('./api'),
 	writeResponse = api.writeResponse,
 	fileUtil = require('./fileUtil'),
 	express = require('express'),
-	bodyParser = require('body-parser'),
 	fs = require('fs'),
 	url = require('url'),
 	mPath = require('path'),
@@ -37,7 +36,6 @@ module.exports = function(options) {
 	});
 
 	return express.Router()
-	.use(bodyParser.json())
 	.use(responseTime({digits: 2, header: "X-Sites-Response-Time", suffix: true}))
 	.get('/:site', getSite)
 	.get('/', getSites)

@@ -13,7 +13,6 @@ var api = require('../api'), writeError = api.writeError, writeResponse = api.wr
 	git = require('nodegit'),
 	clone = require('./clone'),
 	express = require('express'),
-	bodyParser = require('body-parser'),
 	responseTime = require('response-time');
 
 function router(options) {
@@ -26,7 +25,6 @@ function router(options) {
 	fileRoot = fileRoot.substring(contextPath.length);
 
 	return express.Router()
-	.use(bodyParser.json())
 	.use(responseTime({digits: 2, header: "X-GitapiStatus-Response-Time", suffix: true}))
 	.use(options.checkUserAccess)
 	.get('*', getStatus);

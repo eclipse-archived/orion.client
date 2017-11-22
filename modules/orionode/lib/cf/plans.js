@@ -8,9 +8,8 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-/*eslint-env node, express, body-parser, js-yaml*/
+/*eslint-env node, express, js-yaml*/
 var express = require("express");
-var bodyParser = require("body-parser");
 var fs = require("fs");
 var path = require("path");
 var manifests = require("./manifests");
@@ -30,7 +29,6 @@ module.exports.router = function(options) {
 	
 	registerGenericDeploymentPackger();
 	return express.Router()
-	.use(bodyParser.json())
 	.get(fileRoot + "*", getplans);
 	
 function planJson(type, manifest, planner, wizard, required){

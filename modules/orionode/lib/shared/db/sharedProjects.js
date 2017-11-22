@@ -14,7 +14,6 @@ var express = require('express'),
 	expressSession = require('express-session'),
 	MongoStore = require('connect-mongo')(expressSession),
 	cookieParser = require('cookie-parser'),
-	bodyParser = require('body-parser'),
 	mongoose = require('mongoose'),
 	Promise = require('bluebird');
 	
@@ -63,8 +62,6 @@ module.exports = function(options) {
 	
 	var sharedProject = mongoose.model('sharedProject', sharedProjectsSchema);
 	
-	app.use(bodyParser.json());
-	app.use(bodyParser.urlencoded({ extended: false }));
 	app.use(cookieParser());
 	app.use(expressSession({
 		resave: false,

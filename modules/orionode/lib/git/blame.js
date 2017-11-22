@@ -12,7 +12,6 @@
 var api = require('../api'),
 	git = require('nodegit'),
 	express = require('express'),
-	bodyParser = require('body-parser'),
 	clone = require('./clone'),
 	commitm = require('./commit'),
 	responseTime = require('response-time');
@@ -29,7 +28,6 @@ module.exports.router = function(options) {
 	fileRoot = fileRoot.substring(contextPath.length);
 
 	return express.Router()
-	.use(bodyParser.json())
 	.use(responseTime({digits: 2, header: "X-GitapiBlame-Response-Time", suffix: true}))
 	.use(options.checkUserAccess)
 	.get('/:refName'+ fileRoot + "/*", getBlame);

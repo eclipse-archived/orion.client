@@ -13,7 +13,6 @@
 var express = require('express'),
 	electron = require('electron'),
 	autoUpdater = require('./autoUpdater.js'),
-	bodyParser = require('body-parser'),
 	prefs = require('./prefs'),
 	os = require('os'),
 	platform = os.platform(),
@@ -30,7 +29,6 @@ module.exports.router = function(options) {
 	if (!configParams) { throw new Error('options.configParams is required'); }
 	var feedURL = configParams.get("orion.autoUpdater.url");
 	return express.Router()
-	.use(bodyParser.json())
 	.use(responseTime({digits: 2, header: "X-Update-Response-Time", suffix: true}))
 	.post('/downloadUpdates', function (req, res) {
 		var allPrefs = prefs.readElectronPrefs();

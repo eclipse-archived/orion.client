@@ -14,7 +14,6 @@ var api = require('../api'), writeError = api.writeError, writeResponse = api.wr
 	args = require('../args'),
 	clone = require('./clone'),
 	express = require('express'),
-	bodyParser = require('body-parser'),
 	gitUtil = require('./util'),
 	git = require('nodegit'),
 	log4js = require('log4js'),
@@ -46,7 +45,6 @@ module.exports.router = function(options) {
 	}
 	
 	return express.Router()
-	.use(bodyParser.json())
 	.use(responseTime({digits: 2, header: "X-GitapiConfig-Response-Time", suffix: true}))
 	.use(checkUserAccess) // Use specified checkUserAceess implementation instead of the common one from options
 	.get('/clone'+ fileRoot + '*', getConfig)

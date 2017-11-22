@@ -15,7 +15,6 @@ var api = require('../api'), writeError = api.writeError, writeResponse = api.wr
 	path = require('path'),
 	fs = require('fs'),
 	express = require('express'),
-	bodyParser = require('body-parser'),
 	responseTime = require('response-time');
 
 module.exports = {};
@@ -28,7 +27,6 @@ module.exports.router = function(options) {
 	fileRoot = fileRoot.substring(contextPath.length);
 	
 	return express.Router()
-	.use(bodyParser.json())
 	.use(responseTime({digits: 2, header: "X-GitapiIndex-Response-Time", suffix: true}))
 	.use(options.checkUserAccess)
 	.get(fileRoot + '*', getIndex)

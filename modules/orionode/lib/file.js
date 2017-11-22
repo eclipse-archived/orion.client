@@ -10,7 +10,6 @@
  *******************************************************************************/
 /*eslint-env node*/
 var express = require('express'),
-	bodyParser = require('body-parser'),
 	ETag = require('./util/etag'),
 	fs = require('fs'),
 	mkdirp = require('mkdirp'),
@@ -30,11 +29,10 @@ module.exports = function(options) {
 	if (!workspaceRoot) { throw new Error('options.workspaceRoot is required'); }
 	
 	var router = express.Router({mergeParams: true});
-	var jsonParser = bodyParser.json({"limit":"10mb"});
 	router.use(responseTime({digits: 2, header: "X-File-Response-Time", suffix: true}));
-	router.get('*', jsonParser, getFile);
+	router.get('*', getFile);
 	router.put('*', putFile);
-	router.post('*', jsonParser, postFile);
+	router.post('*', postFile);
 	router.delete('*', deleteFile);
 
 	fileUtil.addFileModificationListener("fileEndpoint", {handleFileModficationEvent: function(eventData){

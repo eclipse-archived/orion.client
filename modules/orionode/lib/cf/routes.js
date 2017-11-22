@@ -10,7 +10,6 @@
  *******************************************************************************/
 /*eslint-env node */
 var express = require("express");
-var bodyParser = require("body-parser");
 var domains = require("./domains");
 var target = require("./target");
 var api = require("../api");
@@ -19,7 +18,6 @@ var tasks = require("../tasks");
 module.exports.router = function() {
 
 	return express.Router()
-		.use(bodyParser.json())
 		.get("*", getroutes);
 
 	function getroutes(req, res) {

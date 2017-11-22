@@ -10,6 +10,7 @@
  *******************************************************************************/
 /*eslint-env node */
 var express = require('express'),
+	bodyParser = require('body-parser'),
 	expressSession = require('express-session'),
 	passport = require('passport'),
 	path = require('path'),
@@ -79,6 +80,8 @@ function startServer(options) {
 
 		options.app = app;
 		
+		app.use(bodyParser.json({limit:"10mb"}));
+		app.use(bodyParser.urlencoded({ extended: false, limit:"10mb" }));
 		app.use(responseTime({digits: 2, header: "X-Total-Response-Time", suffix: true}));
 		
 		Object.assign(options, {

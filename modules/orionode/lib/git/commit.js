@@ -10,7 +10,6 @@
  *******************************************************************************/
 /*eslint-env node */
 var api = require('../api'), writeError = api.writeError, writeResponse = api.writeResponse,
-	path = require('path'),
 	diff = require("./diff"),
 	mTags = require("./tags"),
 	clone = require("./clone"),
@@ -19,7 +18,6 @@ var api = require('../api'), writeError = api.writeError, writeResponse = api.wr
 	crypto = require('crypto'),
 	async = require('async'),
 	express = require('express'),
-	bodyParser = require('body-parser'),
 	remotes = require('./remotes'),
 	branches = require('./branches'),
 	tasks = require('../tasks'),
@@ -41,7 +39,6 @@ module.exports.router = function(options) {
 	module.exports.getCommitParents = getCommitParents;
 
 	return express.Router()
-	.use(bodyParser.json())
 	.use(responseTime({digits: 2, header: "X-GitapiCommit-Response-Time", suffix: true}))
 	.use(options.checkUserAccess)
 	.get('/:scope'+ fileRoot + '*', getCommit)

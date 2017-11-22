@@ -10,7 +10,6 @@
  *******************************************************************************/
 /*eslint-env node */
 var express = require("express");
-var bodyParser = require("body-parser");
 var target = require("./target");
 var tasks = require("../tasks");
 var api = require("../api");
@@ -20,7 +19,6 @@ module.exports.router = function() {
 	module.exports.getCFdomains = getCFdomains;
 
 	return express.Router()
-		.use(bodyParser.json())
 		.get("*", getDomain);
 
 function getDomain(req, res) {

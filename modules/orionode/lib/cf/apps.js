@@ -12,7 +12,6 @@
 var express = require("express");
 var api = require("../api");
 var fileUtil = require("../fileUtil");
-var bodyParser = require("body-parser");
 var target = require("./target");
 var tasks = require("../tasks");
 var manifests = require("./manifests");
@@ -24,7 +23,6 @@ var async = require("async");
 var Promise = require("bluebird");
 var extService = require("./extService");
 var LRU = require("lru-cache-for-clusters-as-promised");
-var mkdirp = require('mkdirp');
 var log4js = require('log4js');
 var logger = log4js.getLogger("cf");
 
@@ -41,7 +39,6 @@ module.exports.router = function(options) {
 	module.exports.expireAppCache = expireAppCache;
 	
 	return express.Router()
-	.use(bodyParser.json())
 	.get("*", getapps)
 	.put("*", putapps);
 	

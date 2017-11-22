@@ -10,7 +10,6 @@
  *******************************************************************************/
 /*eslint-env node*/
 var express = require('express'),
-	bodyParser = require('body-parser'),
 	api = require('./api'),
 	crypto = require('crypto'),
 	log4js = require('log4js'),
@@ -33,7 +32,6 @@ function orionTasksAPI(options) {
 	if (!taskStore) { throw new Error('options.metastore is required'); }
 
 	return express.Router()
-	.use(bodyParser.json())
 	.use(responseTime({digits: 2, header: "X-Tasks-Response-Time", suffix: true}))
 	.param('id', function(req, res, next, value) {
 		req.id = value;
