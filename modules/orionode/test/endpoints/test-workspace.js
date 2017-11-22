@@ -201,7 +201,7 @@ describe("Workspace endpoint", function() {
 								.set('X-Create-Options', "move")
 								.set('Slug', 'someFolder')
 								.send({Location: pLoc})
-								.expect(500)
+								.expect(200)
 								.end(done);
 						});
 				});

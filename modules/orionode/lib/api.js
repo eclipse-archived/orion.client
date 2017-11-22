@@ -241,7 +241,7 @@ function decodeStringLocation(string){
  */
 function isValidProjectName(fileName) {
 	var result;
-	result = ['',' ','/'].some(function(value){
+	result = ['',' ','/','user'].some(function(value){
 		return value === fileName;
 	});
 	result |= ['/','\\'].some(function(value){

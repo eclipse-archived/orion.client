@@ -75,7 +75,7 @@ describe("Orion metastore", function() {
 				request()
 					.post(res.body.Location)
 					.set('Slug', 'user')
-					.expect(500)
+					.expect(400)
 					.end(done);
 			});
 	});
