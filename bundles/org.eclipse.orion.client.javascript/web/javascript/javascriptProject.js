@@ -753,6 +753,8 @@ define([
 							_handle.call(this, "onProjectChanged", this, evnt, project.Location);
 							this.projectPromise.resolve(project);
 						}.bind(this));
+				} if(file.location.indexOf(project.Location) === -1) {
+					this.projectPromise.resolve(project);
 				}
 				return this.projectPromise.then(function() {
 					_handle.call(this, "onInputChanged", this, evnt, project.Location);

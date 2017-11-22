@@ -82,7 +82,11 @@ define([
 					//don't monkey with existing comments
 					var template;
 					var start = parent.range[0];
-					if(parent.type === 'FunctionDeclaration') {
+					if(parent.type === 'ClassDeclaration') {
+						template = this._genTemplate(parent.id.name, [], false, parent.range[0], text, false, parent);
+					} else if(parent.type === 'MethodDefinition') {
+						template = this._genTemplate(parent.key.name, parent.value.params, false, parent.range[0], text, parent.kind === 'constructor');
+					} else if(parent.type === 'FunctionDeclaration') {
 						var len = parent.parents.length-1;
 						var funcParent = parent.parents[len];
 						if (funcParent && looksLikeExport(funcParent)) {
@@ -125,13 +129,15 @@ define([
 		 * @description Creates the boilerplate template
 		 * @function
 		 * @private
-		 * @param {String} name The name of the function
-		 * @param {Array} params The array of AST nodes 
-		 * @param {Boolean} isexpr If the template is for a function expression
-		 * @param {Number} offset The offset to start the template from
-		 * @param {String} text The original text
+		 * @param {string} name The name of the function
+		 * @param {[?]} params The array of AST nodes 
+		 * @param {bool} isexpr If the template is for a function expression
+		 * @param {num} offset The offset to start the template from
+		 * @param {string} text The original text
+		 * @param {bool} isctr If the template is for a constructor (es6)
+		 * @param {?} classNode If the template is for a class declaration (es6)
 		 */
-		_genTemplate: function(name, params, isexpr, offset, text) {
+		_genTemplate: function(name, params, isexpr, offset, text, isctr, classNode) {
 			var char = text[--offset];
 			var preamble = '';
 			//walk the preceeding whitespace so we will insert formatted at the same level
@@ -140,21 +146,36 @@ define([
 				char = text[--offset];
 			}
 			var parts = [];
-			parts.push('/**\n'+preamble+' * @name '+name+'\n'); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			if(!isctr) { //don't set the name as 'constructor' for a constructor - its meaningless
+				parts.push('/**\n'+preamble+' * @name '+name+'\n');
+			} else {
+				parts.push('/**\n');
+			}
+
 			//TODO add in description template once editor bug is fixed
 			//${description}
-			parts.push(preamble+' * @description description\n');  //$NON-NLS-1$
-			if(isexpr) {
-				parts.push(preamble+' * @function\n'); //$NON-NLS-1$
+			parts.push(preamble+' * @description description\n');
+			if(isctr) {
+				parts.push(preamble+' * @constructor\n');
+			}
+			if(classNode) {
+				parts.push(preamble+' * @class\n');
+				if(classNode.superClass && classNode.superClass.name) {
+					parts.push(preamble+' * @extends '+classNode.superClass.name+'\n');
+				}
+				parts.push(preamble+' * @since \n');
+			}
+			if(isexpr && !isctr && !classNode) {
+				parts.push(preamble+' * @function\n');
 			}
 			if(name.charAt(0) === '_') {
-				parts.push(preamble+' * @private\n'); //$NON-NLS-1$
+				parts.push(preamble+' * @private\n');
 			} 
 			var idx = name.lastIndexOf('.');
 			if(idx > -1) {
 				//might be member expression, take the last segment and see if it starts wth an underscore
 				if(name.slice(idx+1).charAt(0) === '_') {
-					parts.push(preamble+' * @private\n'); //$NON-NLS-1$
+					parts.push(preamble+' * @private\n');
 				}
 			}
 			if(params) {
@@ -162,12 +183,16 @@ define([
 				for(var i = 0; i < len; i++) {
 					//TODO add template for type infos after suporting editor bug is fixed
 					// {${param'+(i+1)+'}}
-					parts.push(preamble+' * @param '+ params[i].name+'\n');  //$NON-NLS-1$ //$NON-NLS-2$
+					parts.push(preamble+' * @param '+ params[i].name+'\n');
 				}
 			}
 			//TODO add in returns template once editor bug is fixed
 			//{${returns}}
-			parts.push(preamble+' * @returns returns\n'+preamble+' */\n'+preamble); //$NON-NLS-1$ //$NON-NLS-2$
+			if(!classNode) {
+				parts.push(preamble+' * @returns returns\n'+preamble+' */\n'+preamble);
+			} else {
+				parts.push(preamble+' */\n'+preamble);
+			}
 			return parts.join('');
 		},
 		
@@ -183,6 +208,8 @@ define([
 				return null;
 			}
 			switch(node.type) {
+				case 'ClassDeclaration':
+				case 'MethodDefinition': 
 				case 'FunctionDeclaration':
 					return node;
 				case 'Property':
