@@ -35,7 +35,7 @@ var DESCRIPTION_METASTORE = "This JSON file is at the root of the Orion metadata
 var VERSION = 8;
 
 function getUserRootLocation(options, userId) {
-	return options.configParams['orion.single.user'] ? nodePath.join(options.configParams['orion.single.user.metaLocation'] || os.homedir(), '.orion') : nodePath.join.apply(null, metaUtil.readMetaUserFolder(options.workspaceDir, userId));
+	return options.configParams.get('orion.single.user') ? nodePath.join(options.configParams.get('orion.single.user.metaLocation') || os.homedir(), '.orion') : nodePath.join.apply(null, metaUtil.readMetaUserFolder(options.workspaceDir, userId));
 }
 
 function getUserMetadataFileName(options, user) {
@@ -67,7 +67,7 @@ function getProjectMetadataFileName(options, workspaceId, projectName) {
 }
 
 function getTaskRootLocation(options) {
-	return options.configParams['orion.file.tasks.location'] || nodePath.join(options.workspaceDir, '.metadata', '.tasks');
+	return options.configParams.get('orion.file.tasks.location') || nodePath.join(options.workspaceDir, '.metadata', '.tasks');
 }
 
 function writeJSON(fileName, object) {
@@ -95,7 +95,7 @@ function FsMetastore(options) {
 	this._options = options;
 	this._taskList = {};
 	this._lockMap = {};
-	this._isSingleUser = options.configParams['orion.single.user'];
+	this._isSingleUser = options.configParams.get('orion.single.user');
 }
 
 FsMetastore.prototype.lock = function(userId, shared) {
@@ -104,7 +104,7 @@ FsMetastore.prototype.lock = function(userId, shared) {
 		if (!locker) {
 			var filePath;
 			if (this._isSingleUser) {
-				filePath = nodePath.join(this._options.configParams['orion.single.user.metaLocation'] || os.homedir(), '.orion');
+				filePath = nodePath.join(this._options.configParams.get('orion.single.user.metaLocation') || os.homedir(), '.orion');
 			} else {
 				var userPrefix = userId.substring(0, Math.min(2, userId.length));
 				filePath = nodePath.join(this._options.workspaceDir, userPrefix);

@@ -23,8 +23,8 @@ module.exports.router = function(options) {
 		.get('*', /* @callback */ function (req, res) {
 			res.setHeader("Cache-Control", "public, max-age=86400, must-revalidate"); 
 			return res.status(200).json({
-				tid: options.configParams["orion.metrics.google.tid"],
-				siteSpeedSampleRate: Math.min(100, Math.max(0, Number(options.configParams["orion.metrics.google.tid"]))) || undefined
+				tid: options.configParams.get("orion.metrics.google.tid"),
+				siteSpeedSampleRate: Math.min(100, Math.max(0, Number(options.configParams.get("orion.metrics.google.tid")))) || undefined
 			});
 		});
 };

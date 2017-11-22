@@ -18,6 +18,7 @@ var path = require('path'),
 	checkRights = require('../../lib/accessRights').checkRights,
 	argslib = require('../../lib/args'),
 	testHelper = require('./testHelper'),
+	nconf = require("nconf"),
 	taskHelper = require('./task_helper'),
 	CONTEXT_PATH = testHelper.CONTEXT_PATH;
 
@@ -145,16 +146,16 @@ exports.setupOrionServer = function setupOrionServer(helperMiddleware){
 	if(!request){
 		app = express();
 		var configFile = path.join(__dirname, '../../orion.conf');
-		var configParams = argslib.readConfigFileSync(configFile) || {};
+		nconf.file({file: configFile, format: nconf.formats.ini});
 		var orion = function(){
 			var options = {};
 			options.workspaceDir = testHelper.WORKSPACE;
-			options.configParams = configParams;
-			options.configParams["orion.single.user.metaLocation"] = testHelper.METADATA;
+			options.configParams = nconf;
+			options.configParams.set("orion.single.user.metaLocation", testHelper.METADATA);
 //			options.configParams = { "orion.single.user": true, "orion.single.user.metaLocation": testHelper.METADATA };
 			if (testHelper.CONTEXT_PATH) {
-				options.configParams["orion.context.listenPath"]=true;
-				options.configParams["orion.context.path"]=testHelper.CONTEXT_PATH;
+				options.configParams.set("orion.context.listenPath", true);
+				options.configParams.set("orion.context.path", testHelper.CONTEXT_PATH);
 			}
 			return orionServer(options);
 		};

@@ -22,23 +22,23 @@ var auth = require('./lib/middleware/auth'),
 	util = require('util'),
 	argslib = require('./lib/args'),
 	graceful = require('./graceful-cluster'),
+	configParams = require("nconf"),
 	api = require('./lib/api');
 
 // Patches the fs module to use graceful-fs instead
 //require('graceful-fs').gracefulify(fs);
 
-// Get the arguments, the workspace directory, and the password file (if configured), then launch the server
-var args = argslib.parseArgs(process.argv);
+configParams.argv().env();
 
 var PORT_LOW = 8082;
 var PORT_HIGH = 10082;
-var port = args.port || args.p || process.env.PORT || 8081;
-var configFile = args.config || args.c || path.join(__dirname, 'orion.conf');
+var port = configParams.get("port") || configParams.get("p") || configParams.get("PORT") || 8081;
+var configFile = configParams.get("config") || configParams.get("c") || path.join(__dirname, 'orion.conf');
 
-var configParams = argslib.readConfigFileSync(configFile) || {};
+configParams.file({file: configFile, format: path.extname(configFile) === ".conf" ? configParams.formats.ini : configParams.formats.json});
 
 var cluster;
-if (configParams["orion.cluster"]) {
+if (configParams.get("orion.cluster")) {
 	cluster = require('cluster');
 }
 
@@ -66,28 +66,23 @@ var logger = log4js.getLogger('server');
 
 function startServer(cb) {
 	
-	var workspaceArg = args.workspace || args.w;
-	var workspaceConfigParam = configParams.workspace;
-	var contextPath = configParams["orion.context.path"] || "";
-	var listenContextPath = configParams["orion.context.listenPath"] || false;
+	var workspaceArg = configParams.get("workspace") || configParams.get("w");
+	var contextPath = configParams.get("orion.context.path") || "";
+	var listenContextPath = configParams.get("orion.context.listenPath") || false;
 	var workspaceDir;
 	if (workspaceArg) {
-		// -workspace passed in command line is relative to cwd
 		workspaceDir = path.resolve(process.cwd(), workspaceArg);
-	} else if (workspaceConfigParam) {
-		 // workspace param in orion.conf is relative to the server install dir.
-		workspaceDir = path.resolve(__dirname, workspaceConfigParam);
-	} else if (configParams.isElectron) {
+	} else if (configParams.get("isElectron")) {
 		workspaceDir =  path.join(homeDir, '.orion', '.workspace');
 	} else {
 		workspaceDir = path.join(__dirname, '.workspace');
 	}
-	configParams.workspace = workspaceDir;
+	configParams.set("workspace", workspaceDir);
 	mkdirp.sync(workspaceDir);
-	var passwordFile = args.password || args.pwd;
+	var passwordFile = configParams.get("password") || configParams.get("pwd");
 	var password = argslib.readPasswordFile(passwordFile);
-	var dev = Object.prototype.hasOwnProperty.call(args, 'dev');
-	var log = Object.prototype.hasOwnProperty.call(args, 'log');
+	var dev = configParams.get("dev");
+	var log = configParams.get("log");
 	if (dev) {
 		process.env.OrionDevMode = true;
 		logger.info('Development mode: client code will not be cached.');
@@ -100,10 +95,10 @@ function startServer(cb) {
 	var server;
 	// create web server
 	var app = express();
-	if (configParams["orion.https.key"] && configParams["orion.https.cert"]) {
+	if (configParams.get("orion.https.key") && configParams.get("orion.https.cert")) {
 		server = https.createServer({
-			key: fs.readFileSync(configParams["orion.https.key"]),
-			cert: fs.readFileSync(configParams["orion.https.cert"])
+			key: fs.readFileSync(configParams.get("orion.https.key")),
+			cert: fs.readFileSync(configParams.get("orion.https.cert"))
 		}, app);
 	} else {
 		server = http.createServer(app);
@@ -113,11 +108,11 @@ function startServer(cb) {
 	if (log) {
 		var requestLogger = log4js.getLogger('request');
 		app.use(log4js.connectLogger(requestLogger, {
-		    format: ':method :url :status - :response-time ms'
+			format: ':method :url :status - :response-time ms'
 		}));
 	}
-	if (password || configParams.pwd) {
-		app.use(listenContextPath ? contextPath : "/", auth(password || configParams.pwd));
+	if (password || configParams.get("pwd")) {
+		app.use(listenContextPath ? contextPath : "/", auth(password || configParams.get("pwd")));
 	}
 	app.use(compression());
 	var orion = require('./index.js')({
@@ -131,13 +126,13 @@ function startServer(cb) {
 		next();
 	}, orion);
 	
-	if(configParams["orion.proxy.port"] && listenContextPath){
+	if(configParams.get("orion.proxy.port") && listenContextPath){
 		var httpProxy;
 		try {
 			httpProxy = require('http-proxy');
 			var proxy = httpProxy.createProxyServer({});
 			app.use('/', function(req, res, next) {
-				proxy.web(req, res, { target: 'http://127.0.0.1:' + configParams["orion.proxy.port"], changeOrigin: true }, function() { next(); } );
+				proxy.web(req, res, { target: 'http://127.0.0.1:' + configParams.get("orion.proxy.port"), changeOrigin: true }, function() { next(); } );
 			});
 		} catch (e) {
 			logger.info("WARNING: http-proxy is not installed. Some features will be unavailable. Reason: " + e.message);
@@ -167,7 +162,7 @@ function startServer(cb) {
 	});
 
 	server.on('listening', function() {
-		configParams.port = port;
+		configParams.set("port", port);
 		logger.info(util.format('Listening on port %d...', port));
 		if (cb) {
 			cb();
@@ -183,7 +178,7 @@ function startServer(cb) {
 	new graceful.GracefulServer({
 		server: server,
 		log: logger.info.bind(logger),
-		shutdownTimeout: configParams["shutdown.timeout"],
+		shutdownTimeout: configParams.get("shutdown.timeout"),
 		exitFunction: function(code) {
 			logger.info("Exiting worker " + process.pid + " with code: " + code);
 			function done() {
@@ -203,7 +198,7 @@ function startServer(cb) {
 	});
 	process.on('uncaughtException', function(err) {
 		logger.error(err);
-		if (configParams["orion.cluster"]) {
+		if (configParams.get("orion.cluster")) {
 			graceful.GracefulCluster.gracefullyRestartCurrentWorker();
 		} else {
 			process.exit(1);
@@ -224,13 +219,13 @@ if (cluster) {
 		require("lru-cache-for-clusters-as-promised").init();
 		logger.info("Master " + process.pid + " started");
 	}
-	var numCPUs = typeof configParams["orion.cluster"] === "boolean" ? os.cpus().length : configParams["orion.cluster"] >> 0;
+	var numCPUs = typeof configParams.get("orion.cluster") === "boolean" ? os.cpus().length : configParams.get("orion.cluster") >> 0;
 	graceful.GracefulCluster.start({
 		serverFunction: function() {
 			start(false); //TODO electron with cluster?
 		},
 		log: logger.info.bind(logger),
-		shutdownTimeout: configParams["shutdown.timeout"],
+		shutdownTimeout: configParams.get("shutdown.timeout"),
 		workersCount: numCPUs
 	});
 } else {

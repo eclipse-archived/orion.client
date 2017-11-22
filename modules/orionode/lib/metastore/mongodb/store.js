@@ -123,7 +123,7 @@ function findUser(id, user, callback) {
 
 function MongoDbMetastore(options) {
 	this.options = options;
-	if (options.configParams["orion.mongodb.cf"]) {
+	if (options.configParams.get("orion.mongodb.cf")) {
 		var cfenv = require('cfenv');
 		var appenv = cfenv.getAppEnv();
 		var services = appenv.services;
@@ -142,8 +142,8 @@ function MongoDbMetastore(options) {
 					}
 				});
 			}
-	} else if (options.configParams["orion.mongodb.url"]) {
-		mongoose.connect(options.configParams["orion.mongodb.url"], {
+	} else if (options.configParams.get("orion.mongodb.url")) {
+		mongoose.connect(options.configParams.get("orion.mongodb.url"), {
 			useMongoClient: true
 		});
 	} else {

@@ -25,7 +25,7 @@ module.exports.router = function(options) {
 	return express.Router()
 		.use(responseTime({digits: 2, header: "X-Version-Response-Time", suffix: true}))
 		.get('*', /* @callback */ function (req, res) {
-			var buildID = configParams["orion.buildId"] || BUILD_ID;
+			var buildID = configParams.get("orion.buildId") || BUILD_ID;
 			if(buildID === "unknown" && pjson && typeof pjson.version === 'string') {
 				//for the NPM case we want to return the version published to NPM (from the package.json)
 				buildID = pjson.version;

@@ -29,7 +29,7 @@ module.exports.router = function(options) {
 	if (!fileRoot) { throw new Error('options.fileRoot is required'); }
 	if (!gitRoot) { throw new Error('options.gitRoot is required'); }
 	
-	var contextPath = options && options.configParams["orion.context.path"] || "";
+	var contextPath = options && options.configParams.get("orion.context.path") || "";
 	fileRoot = fileRoot.substring(contextPath.length);
 	
 	function checkUserAccess(req, res, next){
@@ -114,7 +114,7 @@ function getConfig(req, res) {
 				return writeError(400, res, err.message);
 			}
 			var waitFor = Promise.resolve();
-			if(options && options.configParams["orion.single.user"]){
+			if(options && options.configParams.get("orion.single.user")) {
 				var user = config.user || (config.user = {});
 				if(!user.name){
 					waitFor = git.Config.openDefault().then(function(defaultConfig){

@@ -46,6 +46,9 @@ if(argv.length == 2) {
 	port = args.port || args.p || process.env.PORT || 8081;
 }
 
+var nconf = require("nconf");
+nconf.set("orion.single.user", true);
+
 // set up all parameters for startServer
 // only allows user to set workspaceDir and port
 var params = {
@@ -53,7 +56,7 @@ var params = {
 	workspaceDir: workspaceDir,
 	passwordFile: null,
 	password: null,
-	configParams: {"orion.single.user":true},
+	configParams: nconf,
 	dev: null,
 	log: null
 };

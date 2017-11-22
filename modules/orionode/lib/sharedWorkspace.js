@@ -44,7 +44,7 @@ module.exports.router = function(options) {
 			return false;
 		}
 		try {
-			var decoded = jwt.verify(authorization.substr(7), options.configParams["orion.jwt.secret"]);
+			var decoded = jwt.verify(authorization.substr(7), options.configParams.get("orion.jwt.secret"));
 			return true;
 		} catch (ex) {
 			return false;
