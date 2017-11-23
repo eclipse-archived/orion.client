@@ -42,6 +42,28 @@ define("orion/editor/textModel", ['orion/editor/eventTarget', 'orion/regex', 'or
 		this.setLineDelimiter(lineDelimiter);
 	}
 
+	/**
+	 * @name setRange
+	 * @description Sets the range attributes on the modelChang* events for VS code LSP compatibility
+	 * @param {TextModel} textModel The backing text model
+	 * @param {?} modelChangingEvent The event object to modify
+	 * @since 17.0
+	 */
+	function setRange(textModel, modelChangingEvent) {
+		var sl = textModel.getLineAtOffset(modelChangingEvent.start), 
+			el = textModel.getLineAtOffset(modelChangingEvent.start + modelChangingEvent.removedCharCount);
+		modelChangingEvent.range = {
+			start: {
+				line: sl,
+				character: modelChangingEvent.start - textModel.getLineStart(sl)
+			},
+			end: {
+				line: el,
+				character: modelChangingEvent.start + modelChangingEvent.removedCharCount - textModel.getLineStart(el)
+			}
+		};	
+	}
+	
 	TextModel.prototype = /** @lends orion.editor.TextModel.prototype */ {
 		/**
 		 * Destroys this text model.
@@ -431,6 +453,7 @@ define("orion/editor/textModel", ['orion/editor/eventTarget', 'orion/regex', 'or
 		 * @param {orion.editor.ModelChangingEvent} modelChangingEvent the changing event
 		 */
 		onChanging: function(modelChangingEvent) {
+			setRange(this, modelChangingEvent);
 			return this.dispatchEvent(modelChangingEvent);
 		},
 		/**
@@ -448,6 +471,7 @@ define("orion/editor/textModel", ['orion/editor/eventTarget', 'orion/regex', 'or
 		 * @param {orion.editor.ModelChangedEvent} modelChangedEvent the changed event
 		 */
 		onChanged: function(modelChangedEvent) {
+			setRange(this, modelChangedEvent);
 			return this.dispatchEvent(modelChangedEvent);
 		},
 		/**

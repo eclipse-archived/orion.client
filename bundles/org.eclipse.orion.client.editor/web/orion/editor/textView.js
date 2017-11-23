@@ -2738,18 +2738,6 @@ define("orion/editor/textView", [
 		 * @param {orion.editor.ModelChangingEvent} modelChangingEvent the event
 		 */
 		onModelChanging: function(modelChangingEvent) {
-			var sl = this._model.getLineAtOffset(modelChangingEvent.start), 
-				el = this.getLineAtOffset(modelChangingEvent.start + modelChangingEvent.removedCharCount);
-			modelChangingEvent.range = {
-				start: {
-					line: sl,
-					character: modelChangingEvent.start - this._model.getLineStart(sl)
-				},
-				end: {
-					line: el,
-					character: modelChangingEvent.start + modelChangingEvent.removedCharCount - this._model.getLineStart(el)
-				}
-			};
 			return this.dispatchEvent(modelChangingEvent);
 		},
 		/**
