@@ -101,7 +101,7 @@ fi
 sed -i .bak "s/\"name\": \"${name}\",/\"name\": \"Orion\",/" package.json
 sed -i .bak "s/\"productName\": \"${name}\",/\"productName\": \"Orion\",/" package.json
 npm run dist:osx
-sed -i .bak "s/\"name\": \"Orion\",/\"name\": \"${name}\",/" package.jsonnpm run dist:osx
+sed -i .bak "s/\"name\": \"Orion\",/\"name\": \"${name}\",/" package.json
 sed -i .bak "s/\"productName\": \"Orion\",/\"productName\": \"${name}\",/" package.json
 
 # Build windows setup, etc
