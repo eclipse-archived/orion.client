@@ -117,7 +117,7 @@
       "icon": "build/icon.icns"
     },
     "dmg": {
-      "title": "orion",
+      "title": "Orion",
       "icon": "build/icon.icns",
       "contents": [
         {
