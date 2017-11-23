@@ -99,8 +99,10 @@ if [ -f "$nodegit_lib" ]; then
 fi
 # Capitalize name in package.json
 sed -i .bak "s/\"name\": \"${name}\",/\"name\": \"Orion\",/" package.json
+sed -i .bak "s/\"productName\": \"${name}\",/\"productName\": \"Orion\",/" package.json
 npm run dist:osx
-sed -i .bak "s/\"name\": \"Orion\",/\"name\": \"${name}\",/" package.json
+sed -i .bak "s/\"name\": \"Orion\",/\"name\": \"${name}\",/" package.jsonnpm run dist:osx
+sed -i .bak "s/\"productName\": \"Orion\",/\"productName\": \"${name}\",/" package.json
 
 # Build windows setup, etc
 nodegit_lib=${NODEGIT_DIR}/v${nodegit_version}/electron/v${electron_version}/windows/nodegit.node
