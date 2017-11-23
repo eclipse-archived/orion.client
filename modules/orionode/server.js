@@ -240,6 +240,6 @@ try {
 		start(process.versions.electron);
 	}
 } catch (ex) {
-	logger.error("Error staring server up", ex);
+	logger.error("Error starting server up", ex);
 	throw ex;
 }
