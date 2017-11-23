@@ -33,7 +33,7 @@ configParams.argv({
 }).env({
 	parseValues: true
 });
-var configFile = configParams.get("config") || configParams.get("c") || path.join(__dirname, 'orion.conf');
+var configFile = configParams.any("config", "c") || path.join(__dirname, 'orion.conf');
 configParams.file({
 	parseValues: true,
 	file: configFile, 
@@ -42,7 +42,7 @@ configParams.file({
 
 var PORT_LOW = 8082;
 var PORT_HIGH = 10082;
-var port = configParams.get("port") || configParams.get("p") || configParams.get("PORT") || 8081;
+var port = configParams.any("port", "p", "PORT") || 8081;
 
 var cluster, clusterParam = configParams.get("orion_cluster");
 if (clusterParam) {
@@ -73,7 +73,7 @@ var logger = log4js.getLogger('server');
 
 function startServer(cb) {
 	
-	var workspaceArg = configParams.get("workspace") || configParams.get("w");
+	var workspaceArg = configParams.any("workspace", "w");
 	var contextPath = configParams.get("orion.context.path") || "";
 	var listenContextPath = configParams.get("orion.context.listenPath") || false;
 	var workspaceDir;
