@@ -28,14 +28,21 @@ var auth = require('./lib/middleware/auth'),
 // Patches the fs module to use graceful-fs instead
 //require('graceful-fs').gracefulify(fs);
 
-configParams.argv({parseValues: true}).env({parseValues: true});
+configParams.argv({
+	parseValues: true
+}).env({
+	parseValues: true
+});
+var configFile = configParams.get("config") || configParams.get("c") || path.join(__dirname, 'orion.conf');
+configParams.file({
+	parseValues: true,
+	file: configFile, 
+	format: path.extname(configFile) === ".conf" ? configParams.formats.ini : configParams.formats.json
+});
 
 var PORT_LOW = 8082;
 var PORT_HIGH = 10082;
 var port = configParams.get("port") || configParams.get("p") || configParams.get("PORT") || 8081;
-var configFile = configParams.get("config") || configParams.get("c") || path.join(__dirname, 'orion.conf');
-
-configParams.file({parseValues: true, file: configFile, format: path.extname(configFile) === ".conf" ? configParams.formats.ini : configParams.formats.json});
 
 var cluster, clusterParam = configParams.get("orion.cluster");
 if (clusterParam) {
