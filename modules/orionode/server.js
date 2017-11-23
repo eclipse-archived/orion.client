@@ -214,20 +214,25 @@ function start(electron) {
 	}
 }
 
-if (cluster) {
-	if (cluster.isMaster) {
-		require("lru-cache-for-clusters-as-promised").init();
-		logger.info("Master " + process.pid + " started");
+try {
+	if (cluster) {
+		if (cluster.isMaster) {
+			require("lru-cache-for-clusters-as-promised").init();
+			logger.info("Master " + process.pid + " started");
+		}
+		var numCPUs = typeof configParams.get("orion.cluster") === "boolean" ? os.cpus().length : configParams.get("orion.cluster") >> 0;
+		graceful.GracefulCluster.start({
+			serverFunction: function() {
+				start(false); //TODO electron with cluster?
+			},
+			log: logger.info.bind(logger),
+			shutdownTimeout: configParams.get("shutdown.timeout"),
+			workersCount: numCPUs
+		});
+	} else {
+		start(process.versions.electron);
 	}
-	var numCPUs = typeof configParams.get("orion.cluster") === "boolean" ? os.cpus().length : configParams.get("orion.cluster") >> 0;
-	graceful.GracefulCluster.start({
-		serverFunction: function() {
-			start(false); //TODO electron with cluster?
-		},
-		log: logger.info.bind(logger),
-		shutdownTimeout: configParams.get("shutdown.timeout"),
-		workersCount: numCPUs
-	});
-} else {
-	start(process.versions.electron);
+} catch (ex) {
+	logger.error("Error staring server up", ex);
+	throw ex;
 }
