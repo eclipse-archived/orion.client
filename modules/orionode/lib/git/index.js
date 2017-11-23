@@ -13,7 +13,9 @@ var api = require('../api'), writeError = api.writeError, writeResponse = api.wr
 	git = require('nodegit'),
 	clone = require('./clone'),
 	path = require('path'),
-	fs = require('fs'),
+	async = require('async'),
+	Promise = require('bluebird'),
+	fs = Promise.promisifyAll(require('fs')),
 	express = require('express'),
 	responseTime = require('response-time');
 
@@ -91,16 +93,33 @@ function putIndex(req, res) {
 	})
 	.then(function(indexResult) {
 		index = indexResult;
-		function doPath(p) {
-			if (fs.existsSync(path.join(repo.workdir(), p))) {
-				return index.addByPath(p);
-			}
-			return index.removeByPath(p);
-		}
-		if (req.body.Path) {
-			return Promise.all(req.body.Path.map(doPath));
-		}
-		return doPath(filePath);
+		var files = req.body.Path || [filePath];
+		return new Promise(function(fulfill, reject) {
+			async.series(files.map(function(p) {
+				return function(cb) {
+					return fs.statAsync(path.join(repo.workdir(), p))
+					.catchReturn({ code: 'ENOENT' }, null)
+					.then(function(exists) {
+						if (exists) {
+							return index.addByPath(p);
+						}
+						return index.removeByPath(p);
+					})
+					.then(function() {
+						return cb();
+					})
+					.catch(function(err) {
+						return cb(err);
+					});
+				};
+			}), function(err) {
+				if (err) {
+					reject(err);
+				} else {
+					fulfill();
+				}
+			});
+		});
 	})
 	.then(function() {
 		// this will write both files to the index
