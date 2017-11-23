@@ -44,7 +44,7 @@ var PORT_LOW = 8082;
 var PORT_HIGH = 10082;
 var port = configParams.get("port") || configParams.get("p") || configParams.get("PORT") || 8081;
 
-var cluster, clusterParam = configParams.get("orion.cluster");
+var cluster, clusterParam = configParams.get("orion_cluster");
 if (clusterParam) {
 	cluster = require('cluster');
 }
