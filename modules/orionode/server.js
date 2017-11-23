@@ -28,17 +28,17 @@ var auth = require('./lib/middleware/auth'),
 // Patches the fs module to use graceful-fs instead
 //require('graceful-fs').gracefulify(fs);
 
-configParams.argv().env();
+configParams.argv({parseValues: true}).env({parseValues: true});
 
 var PORT_LOW = 8082;
 var PORT_HIGH = 10082;
 var port = configParams.get("port") || configParams.get("p") || configParams.get("PORT") || 8081;
 var configFile = configParams.get("config") || configParams.get("c") || path.join(__dirname, 'orion.conf');
 
-configParams.file({file: configFile, format: path.extname(configFile) === ".conf" ? configParams.formats.ini : configParams.formats.json});
+configParams.file({parseValues: true, file: configFile, format: path.extname(configFile) === ".conf" ? configParams.formats.ini : configParams.formats.json});
 
-var cluster;
-if (configParams.get("orion.cluster")) {
+var cluster, clusterParam = configParams.get("orion.cluster");
+if (clusterParam) {
 	cluster = require('cluster');
 }
 
@@ -198,7 +198,7 @@ function startServer(cb) {
 	});
 	process.on('uncaughtException', function(err) {
 		logger.error(err);
-		if (configParams.get("orion.cluster")) {
+		if (clusterParam) {
 			graceful.GracefulCluster.gracefullyRestartCurrentWorker();
 		} else {
 			process.exit(1);
@@ -220,7 +220,7 @@ try {
 			require("lru-cache-for-clusters-as-promised").init();
 			logger.info("Master " + process.pid + " started");
 		}
-		var numCPUs = typeof configParams.get("orion.cluster") === "boolean" ? os.cpus().length : configParams.get("orion.cluster") >> 0;
+		var numCPUs = typeof clusterParam === "boolean" ? os.cpus().length : clusterParam >> 0;
 		graceful.GracefulCluster.start({
 			serverFunction: function() {
 				start(false); //TODO electron with cluster?
