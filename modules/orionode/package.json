@@ -148,7 +148,7 @@
     },
     "squirrelWindows": {
       "loadingGif": "build/orionLogo.gif",
-      "iconUrl": "http://git.eclipse.org/c/orion/org.eclipse.orion.client.git/plain/modules/orionode/build/orion.ico",
+      "iconUrl": "https://github.com/eclipse/orion.client/raw/master/modules/orionode/build/icon.ico",
       "remoteReleases": ""
     }
   },
