@@ -143,7 +143,7 @@ define([
 			var authServices = serviceRegistry.getServiceReferences("orion.core.auth"); //$NON-NLS-0$
 			authenticationIds = [];
 
-			var menuGenerator = customGlobalCommands.createMenuGenerator.apply(this, arguments);
+			var menuGenerator = customGlobalCommands.createMenuGenerator.call(this, serviceRegistry, keyAssistFunction, prefsService);
 
 			if (!menuGenerator) { return; }
 
