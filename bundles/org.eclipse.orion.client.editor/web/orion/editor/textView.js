@@ -479,9 +479,6 @@ define("orion/editor/textView", [
 				//W3C
 				var sel = win.getSelection();
 				range = doc.createRange();
-				if(start.offset > end.offset) {
-					start.offset = end.offset;
-				}
 				range.setStart(start.node, start.offset);
 				range.setEnd(end.node, end.offset);
 				if (view._hasFocus && (
