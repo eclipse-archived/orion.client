@@ -168,7 +168,7 @@ function startServer(options) {
 	}
 	
 	// Static files
-	app.use('/xterm', express.static(path.join(__dirname, 'node_modules', 'xterm', 'dist')));
+	app.use('/xterm', express.static(path.join(path.dirname(path.dirname(require.resolve("xterm"))), 'dist')));
 	
 	var staticCacheOption;
 	if(typeof options.maxAge !== "undefined" ) {
