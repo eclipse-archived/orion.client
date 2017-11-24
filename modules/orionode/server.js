@@ -72,10 +72,7 @@ if (process.versions.electron) {
 var logger = log4js.getLogger('server');
 
 function startServer(cb) {
-	
-	var workspaceArg = configParams.any("workspace", "w");
-	var contextPath = configParams.get("orion.context.path") || "";
-	var listenContextPath = configParams.get("orion.context.listenPath") || false;
+	var workspaceArg = configParams.any("workspace", "w") || configParams.get("_")[0];
 	var workspaceDir;
 	if (workspaceArg) {
 		workspaceDir = path.resolve(process.cwd(), workspaceArg);
@@ -86,6 +83,8 @@ function startServer(cb) {
 	}
 	configParams.set("workspace", workspaceDir);
 	mkdirp.sync(workspaceDir);
+	var contextPath = configParams.get("orion.context.path") || "";
+	var listenContextPath = configParams.get("orion.context.listenPath") || false;
 	var passwordFile = configParams.get("password") || configParams.get("pwd");
 	var password = argslib.readPasswordFile(passwordFile);
 	var dev = configParams.get("dev");
