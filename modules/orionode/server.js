@@ -21,7 +21,7 @@ var auth = require('./lib/middleware/auth'),
 	path = require('path'),
 	util = require('util'),
 	argslib = require('./lib/args'),
-	graceful = require('./graceful-cluster'),
+	graceful = require('./lib/graceful-cluster'),
 	configParams = require("nconf"),
 	api = require('./lib/api');
 
