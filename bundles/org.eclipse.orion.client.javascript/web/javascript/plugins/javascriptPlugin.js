@@ -93,6 +93,9 @@ define([
 		{
 			onModelChanged: function fileMapOnModelChanged(evnt) {
 				delete fileMap[evnt.file.location];
+			},
+			onInputChanged: function onInputChanged(evnt) {
+				delete fileMap[evnt.file.location];
 			}
 		},
 		{

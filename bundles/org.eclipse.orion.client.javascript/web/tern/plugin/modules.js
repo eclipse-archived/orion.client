@@ -76,8 +76,10 @@
       if (known && contents){
       	known.modName = modName;
       }
-      if (known) return known
-
+      //ORION we need to force a text change and recompute since it was opened (and likely edited)
+      if (known && !known.poisoned) {
+      	return known;
+	  }
       if (/\.js$|(?:^\/)[^\.]+$/.test(resolved))
         this.server.addFile(resolved, contents, parentFile)
       if (!relative) this.nonRelative[name] = resolved
@@ -102,7 +104,7 @@
     isImport: function(node, pos) { return this.findIn(this.importTests, node, pos) },
 
     get: function(name) {
-      return this.modules[name] || (this.modules[name] = new infer.AVal)
+      return this.modules[name] || (this.modules[name] = new infer.AVal);
     },
 
     completeModuleName: function(completions, query, word) {
@@ -382,7 +384,12 @@
     server.on("beforeLoad", function(file) {
       // ORION Only modify the scope if we are using node for dependencies in this file or we cannot use globals from other files
       if (isUsingModules(file)){
-      	file.scope = this.mod.modules.buildWrappingScope(file.scope, file.name, file.ast)
+      	file.scope = this.mod.modules.buildWrappingScope(file.scope, file.name, file.ast);
+      	var mod = this.mod.modules.get(file.name);
+      	if(mod) {
+      		//found an existing module that has been loaded in an editor, tag it
+      		mod.poisoned = true;
+      	}
   	  }
     })
 
