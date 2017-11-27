@@ -1124,7 +1124,6 @@ define("orion/editor/contentAssist", [
 	function ContentAssistWidget(contentAssist, parentNode) {
 		this.contentAssist = contentAssist;
 		this.textView = this.contentAssist.getTextView();
-		this.textViewListenerAdded = false;
 		this.isShowing = false;
 		this._useResizeTimer = false;
 		var document = this.textView.getOptions("parent").ownerDocument; //$NON-NLS-0$
@@ -1151,15 +1150,9 @@ define("orion/editor/contentAssist", [
 		textUtil.addEventListener(this.parentNode, "scroll", this.onScroll.bind(this));
 		
 		var self = this;
-		this.textViewListener = {
-			onMouseDown: function(event) {
-				var target = event.event.target || event.event.srcElement;
-				if (target.parentElement !== self.parentNode) {
-					self.contentAssist.deactivate();
-				}
-				// ignore the event if this is a click inside of the parentNode
-				// the click is handled by the onClick() function
-			}
+		this.autoDismissFunctionAdded = false;
+		this.autoDismissFunction = function() {
+			self.contentAssist.deactivate();
 		};
 		this.contentAssist.addEventListener("Deactivating", function(event) {
 			self.hide();
@@ -1521,9 +1514,10 @@ define("orion/editor/contentAssist", [
 				} else if(this._mutationObserver){
 					this._mutationObserver.observe(this.parentNode, {attributes: true});
 				}
-				if (!this.textViewListenerAdded) {
-					this.textView.addEventListener("MouseDown", this.textViewListener.onMouseDown);
-					this.textViewListenerAdded = true;
+				if (!this.autoDismissFunctionAdded) {
+					var tooltip = mTooltip.Tooltip.getTooltip(this.contentAssist.textView);
+					lib.addAutoDismiss([this.parentNode, tooltip._tooltipDiv], this.autoDismissFunction);
+					this.autoDismissFunctionAdded = true;
 				}
 			}
 		},
@@ -1543,9 +1537,9 @@ define("orion/editor/contentAssist", [
 			
 			this._contentAssistMode._hideTooltip();
 			
-			if (this.textViewListenerAdded) {
-				this.textView.removeEventListener("MouseDown", this.textViewListener.onMouseDown);
-				this.textViewListenerAdded = false;
+			if (this.autoDismissFunctionAdded) {
+				lib.removeAutoDismiss(this.autoDismissFunction);
+				this.autoDismissFunctionAdded = false;
 			}
 			
 			if (this.previousSelectedNode) {
