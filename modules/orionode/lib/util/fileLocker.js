@@ -20,11 +20,9 @@ var logger = log4js.getLogger("locker");
 var nodePath = require("path");
 var Promise = require("bluebird");
 var mkdirpAsync = Promise.promisify(require("mkdirp"));
+var constants = require("constants");
 
 var APPEND = "a+";
-var EXCLUSIVE = "ex";
-var SHARED = "sh";
-var UNLOCK = "un";
 
 var TIMEOUT_INACTIVE = 3 * 1000; /* 3s */
 if(process.env.OrionDevMode === "true" ){
@@ -143,15 +141,19 @@ FileLocker.prototype._acquireLock = function(shared) {
 				this._inactivityTimer = null;
 			}
 
-			fs.flock(this._fd, shared ? SHARED : EXCLUSIVE, function(error) {
-				if (error) {
-// console.log("error 3");
-					return reject(error);
-				}
-
-// console.log("acquired");
-				resolve();
-			});
+			var doit = function() {
+				fs.fcntl(this._fd, constants.F_SETLK, shared ? constants.F_RDLCK : constants.F_WRLCK, function(error) {
+					if (error && error.code === "EAGAIN") {
+						setTimeout(doit, 1);
+						return;
+					}
+					if (error) {
+						return reject(error);
+					}
+					resolve();
+				});
+			}.bind(this);
+			doit();
 		}.bind(this);
 
 		if (!this._fd) {
@@ -200,7 +202,7 @@ FileLocker.prototype._releaseLock = function() {
 			return resolve();
 		}
 
-		fs.flock(this._fd, UNLOCK, function(error) {
+		fs.fcntl(this._fd, constants.F_SETLK, constants.F_UNLCK, function(error) {
 			if (this._inactivityTimer) {
 				clearTimeout(this._inactivityTimer);
 			}
