@@ -13,6 +13,7 @@ module.exports = function(grunt) {
 	    staging = "target/staging/",
 	    optimized = "target/optimized/",
 	    fingerPrint = grunt.option("fp") || false,
+	    generateSourceMaps = grunt.option("generateSourceMaps") || false,
 	   // skipTest = grunt.option("skipTest") || false,
 	    skipMinify = grunt.option("skipMinify") || false;
 
@@ -196,7 +197,7 @@ module.exports = function(grunt) {
 	// Dynamic configuration
 	grunt.config("requirejs.compile.options", util.mixin(grunt.config("nodeBuildConfig"), {
 		optimize: "uglify2",
-		generateSourceMaps: false, // Turn off source maps to reduce download size
+		generateSourceMaps: generateSourceMaps,
 		appDir: staging,
 		baseUrl: "./",
 		dir: optimized
