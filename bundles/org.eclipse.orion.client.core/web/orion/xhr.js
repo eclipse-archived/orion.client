@@ -158,7 +158,7 @@ define([
 			if (typeof options.responseType === 'string') { //$NON-NLS-0$
 				xhr.responseType = options.responseType;
 			}
-			if (typeof options.timeout === 'number') { //$NON-NLS-0$
+			if (typeof options.timeout === 'number' && localStorage.noTimeout !== "false") { //$NON-NLS-0$
 				if (typeof xhr.timeout === 'number') { //$NON-NLS-0$
 					// Browser supports XHR timeout
 					xhr.timeout = options.timeout;
