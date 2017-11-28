@@ -256,6 +256,10 @@ function getClones(req, res, callback) {
 					git.Submodule.lookup(repo, name)
 					.then(function(submodule) {
 						theSubmodule = submodule;
+						if (!submodule.url()) {
+							freeRepo(theSubmodule);
+							return callback();
+						}
 						var status, subrepo;
 						var sublocation = api.join(location, submodule.path());
 						function done(json, unitialized) {
@@ -590,6 +594,9 @@ function foreachSubmodule(repo, operation, recursive, creds, username, task) {
 					git.Submodule.lookup(repo, name)
 					.then(function(submodule) {
 						theSubmodule = submodule;
+						if (!submodule.url()) {
+							return;
+						}
 						var op;
 						if (operation === "sync") {
 							op = submodule.sync();
@@ -702,7 +709,7 @@ function handleRemoteError(task, err, cloneUrl) {
 		fullCloneUrl = "ssh://" + cloneUrl;
 	}
 	var u = url.parse(fullCloneUrl, true);
-	var code = err.code || 403;
+	var code = err.code || 500;
 	var jsonData, message = err.message;
 	if (err.message && ["credentials", "authentication", "401"].some(function(s) { return err.message.indexOf(s) !== -1; })) {
 		code = 401;
