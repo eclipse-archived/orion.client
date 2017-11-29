@@ -73,15 +73,11 @@ define([
 		this._sidebarContextMenuNode.id = this.parentId + "ContextMenu"; //$NON-NLS-0$
 
 		this._parentNode.parentNode.insertBefore(this._sidebarContextMenuNode, this._parentNode);
-		if(util.isElectron){
-			this._parentNode.parentNode.classList.add("desktopmode");
-		}else{
-			this.preferences.get("/general/settings").then(function (settings) {
-				if(typeof settings.generalSettings === 'undefined' || settings.generalSettings.desktopSelectionPolicy){
-					this._parentNode.parentNode.classList.add("desktopmode");
-				}
-			}.bind(this));
-		}
+		this.isDesktopSelectionMode().then(function (desktopMode) {
+			if(desktopMode){
+				this._parentNode.parentNode.classList.add("desktopmode");
+			}
+		}.bind(this));
 
 		this.contextMenuActionsScope = this._sidebarContextMenuNode.id + "commonNavContextMenu"; //$NON-NLS-0$
 
