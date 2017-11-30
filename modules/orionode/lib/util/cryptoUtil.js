@@ -49,17 +49,22 @@ var pbewithmd5anddes = {
 var SALT_SEPARATOR = ",";
 
 module.exports = {
-	encrypt: function(text, password) {
-		var salt = crypto.randomBytes(8);
-		return salt.toString('base64') + SALT_SEPARATOR + pbewithmd5anddes.encrypt(text, password, salt, 1024);
+	encrypt: function(text, password, salt) {
+		var _salt = salt ? new Buffer(salt,'base64') : crypto.randomBytes(8);
+		var encrypted = pbewithmd5anddes.encrypt(text, password, _salt, 1024);
+		if (salt) return encrypted;
+		return _salt.toString('base64') + SALT_SEPARATOR + encrypted;
 	},
-	decrypt: function(encryptedText, password) {
-		var saltPos = encryptedText.indexOf(SALT_SEPARATOR);
-		if(saltPos === -1){
-			return encryptedText; //in this case, the secret wasn't encrypted.
+	decrypt: function(encryptedText, password, salt) {
+		var _salt = salt ? new Buffer(salt,'base64') : null, saltPos = -1;
+		if (!_salt) {
+			saltPos = encryptedText.indexOf(SALT_SEPARATOR);
+			if(saltPos === -1){
+				return encryptedText; //in this case, the secret wasn't encrypted.
+			}
+			_salt = new Buffer(encryptedText.substring(0, saltPos), 'base64');
 		}
-		var salt = new Buffer(encryptedText.substring(0, saltPos), 'base64');
 		var encryptedPassword = encryptedText.substring(saltPos + 1);
-		return pbewithmd5anddes.decrypt(encryptedPassword, password, salt, 1024);
+		return pbewithmd5anddes.decrypt(encryptedPassword, password, _salt, 1024);
 	}
 };
