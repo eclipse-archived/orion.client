@@ -389,9 +389,9 @@ Object.assign(FsMetastore.prototype, {
 	},
 
 	_computeLockFilePath: function(userId) {
-		var root = this._options.configParams.get('orion.lockFiles.root') || this._options.workspaceDir;
-		var salt = this._options.configParams.get('orion.lockFiles.salt');
-		var password = this._options.configParams.get('orion.lockFiles.password');
+		var root = this._options.configParams.get('orion_lockFiles_root') || this._options.workspaceDir;
+		var salt = this._options.configParams.get('orion_lockFiles_salt');
+		var password = this._options.configParams.get('orion_lockFiles_password');
 
 		if (salt && password) {
 			userId = new Buffer(cryptoUtil.encrypt(userId, password, salt)).toString('base64');
