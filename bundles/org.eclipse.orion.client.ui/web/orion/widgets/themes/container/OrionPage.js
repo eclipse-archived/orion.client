@@ -41,7 +41,7 @@ define({
 				"box-shadow": "0 1px 2px 0 rgb(16,106,91)",
 				"color": "#FFFFFF"
 			},
-			".commandButton:not(.primaryButton):hover": {
+			".commandButton:not(.primaryButton):not([disabled]):hover": {
 				"background": "rgba(16,106,91,0.50)",
 				"box-shadow": "0 1px 2px 0 rgb(16,106,91)",
 				"color": "#FFFFFF"

@@ -182,13 +182,13 @@ select {
 	color: #b94a48 !important;
 }
 
-.errorMessage button:hover {
+.errorMessage button:hover, .errorMessage button:focus {
 	color: #FFFFFF !important;
 }
 
 .messageContainer.errorMessage {
-	background-color: #f2dede !important;
-	border: 1px solid #eed3d7 !important;
+	background-color: #eed3d7 !important;
+	border: 1px solid #b94a48 !important;
 }
 
 .errorMessage, .errorMessage a {
@@ -211,7 +211,7 @@ select {
 	cursor: pointer;
 }
 
-.messageLabel button:hover {
+.messageLabel button:hover, .messageLabel button:focus {
 	color: #FFFFFF;
 }
 

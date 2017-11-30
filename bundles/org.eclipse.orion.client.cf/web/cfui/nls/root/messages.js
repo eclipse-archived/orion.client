@@ -187,6 +187,8 @@ define({//Default message bundle
 	"Click \"Save\" to proceed or \"Next\" to change the deployment parameters.": "Click \"Save\" to proceed or \"Next\" to change the deployment parameters.",
 	"deploy": "Deploy",
 	"save": "Save",
+	"Close": "Close",
+	"Dialog": "Dialog",
 	"configureApplicationDeployment": "Edit Launch Configuration",
 	"saveToManifestFile:": "Save to manifest file: ",
 	"bindServicesFromTheList.": "Bind services from the list.",
@@ -218,7 +220,10 @@ define({//Default message bundle
 	"leaveBlankForDefault": "Leave blank for default ${0}",
 	"createNew": "Create Cloud Foundry Configuration",
 	"createNewTooltip": "Create a new launch configuration",
-	"manifestOverride": "Yellow boxes indicate modified fields, which will override manifest file settings.",
+	"manifestOverride": "Shaded boxes indicate modified fields, which will override manifest file settings.",
+	"requiredField": "* Denotes required field.",
+	"Add": "Add",
+	"Remove": "Remove",
 	"noManifest": "No manifest found at /manifest.yml",
 	"refreshLogsPage": "[ Refresh the page to get the latest logs... ]"
 });

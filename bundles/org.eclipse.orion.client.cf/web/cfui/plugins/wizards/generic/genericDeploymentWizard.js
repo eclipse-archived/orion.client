@@ -29,12 +29,18 @@ define(['i18n!cfui/nls/messages', "orion/bootstrap", 'orion/Deferred', 'orion/cf
 	var showError = mWizardUtils.defaultShowError;
 
 	mBootstrap.startup().then(function(core) {
+		
+		var contentTitle = document.createElement("title"); //$NON-NLS-0$
+		contentTitle.textContent = window.frameElement.title = messages["Dialog"];
+		document.getElementById("deployHead").appendChild(contentTitle); //$NON-NLS-0$
 
 		/* set up initial message */
 		document.getElementById('title').appendChild(document.createTextNode(messages["configureApplicationDeployment"])); //$NON-NLS-1$//$NON-NLS-0$
 
 		/* allow the frame to be closed */
-		document.getElementById('closeDialog').addEventListener('click', closeFrame); //$NON-NLS-1$ //$NON-NLS-0$
+		var button = document.getElementById('closeDialog'); //$NON-NLS-0$
+		button.addEventListener('click', closeFrame); //$NON-NLS-0$
+		button.setAttribute("aria-label", messages["Close"]); //$NON-NLS-0$
 
 		/* allow frame to be dragged by title bar */
 		mWizardUtils.makeDraggable(this);

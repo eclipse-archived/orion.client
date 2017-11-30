@@ -232,6 +232,7 @@ define([
 							this._commandRegistry.registerCommandContribution(createNewItem.id, defaultDeployCommands[0].id, 1);
 							this._commandRegistry.renderCommands(createNewItem.id, dropdownMenuItemSpan, this._project, this, "button", null, domNodeWrapperList);
 							domNodeWrapperList[0].domNode.textContent = "+";
+							domNodeWrapperList[0].domNode.setAttribute("aria-label", defaultDeployCommands[0].name);
 							this._setNodeTooltip(domNodeWrapperList[0].domNode, defaultDeployCommands[0].tooltip);
 						} else {
 							this._commandRegistry.addCommandGroup(createNewItem.id, "orion.deployServiceGroup", 1000, "+", null, null, null, "+", null, true);
@@ -323,6 +324,12 @@ define([
 			if (this._logsLink) {
 				this._logsLink.removeEventListener("click", this._boundLinkClickListener); //$NON-NLS-0$
 				this._logsLink = null;
+			}
+		},
+		
+		focus: function() {
+			if (this._launchConfigurationsDropdownTriggerButton) {
+				this._launchConfigurationsDropdownTriggerButton.focus();
 			}
 		},
 		

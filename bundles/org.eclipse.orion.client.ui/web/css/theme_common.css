@@ -402,7 +402,7 @@ a.breadcrumb.currentLocation {
 	/* text-transform: uppercase; */
 }
 
-.commandButton:not(.primaryButton):hover {
+.commandButton:not(.primaryButton):not([disabled]):hover {
 	color: white;
 	background-color: #a5b5bc;
 	box-shadow: 0 1px 2px 0 rgba(0,0,0,0.2);
@@ -418,7 +418,7 @@ a.breadcrumb.currentLocation {
 	color: white;
 }
 
-.primaryButton:hover {
+.primaryButton:not([disabled]):hover {
 	background: #01CDB0;
 	border-color: #01CDB0;
 }

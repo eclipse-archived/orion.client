@@ -132,14 +132,16 @@ define(['i18n!cfui/nls/messages', 'orion/Deferred', 'cfui/cfUtil',  'orion/urlUt
 		    	
 				var titleBar = document.getElementById('titleBar'); //$NON-NLS-0$
 				titleBar.addEventListener('mousedown', function(e) { //$NON-NLS-0$
-					frameHolder._dragging = true;
-					if (titleBar.setCapture)
-						titleBar.setCapture();
-					
-					frameHolder.start = {
-						screenX: e.screenX,
-						screenY: e.screenY
-					};
+					if (e.srcElement.id !== 'closeDialog') {
+						frameHolder._dragging = true;
+						if (titleBar.setCapture)
+							titleBar.setCapture();
+						
+						frameHolder.start = {
+							screenX: e.screenX,
+							screenY: e.screenY
+						};
+					}
 				});
 				
 				titleBar.addEventListener('mousemove', function(e) { //$NON-NLS-0$

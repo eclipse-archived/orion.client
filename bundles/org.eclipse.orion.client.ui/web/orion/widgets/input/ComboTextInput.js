@@ -158,6 +158,7 @@ define([
 				deleteToolTips: messages["DeleteSearchTrmMsg"] //$NON-NLS-0$
 			});
 			
+			this._recentEntryButton.setAttribute("aria-label", messages["Open"]);
 			this._recentEntryButton.addEventListener("click", function(event){ 
 				this._textInputNode.focus();
 				this._inputCompletion._proposeOn();

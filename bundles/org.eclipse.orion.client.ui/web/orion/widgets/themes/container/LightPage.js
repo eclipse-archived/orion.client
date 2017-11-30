@@ -41,7 +41,7 @@ define({
 				"box-shadow": "0 1px 2px 0 rgb(60, 113, 179)",
 				"color": "#000000"
 			},
-			".commandButton:not(.primaryButton):hover": {
+			".commandButton:not(.primaryButton):not([disabled]):hover": {
 				"background": "rgba(60, 113, 179, 0.50)",
 				"box-shadow": "0 1px 2px 0 rgb(60, 113, 179)",
 				"color": "#000000"
@@ -85,7 +85,7 @@ define({
 			"box-shadow": "0 1px 2px 0 rgb(60, 113, 179)",
 			"color": "#000000"
 		},
-		".commandButton:not(.primaryButton):hover": {
+		".commandButton:not(.primaryButton):not([disabled]):hover": {
 			"background-color": "rgba(60, 113, 179, 0.25)",
 			"box-shadow": "0 1px 2px 0 rgb(60, 113, 179)",
 			"color": "#000000"
@@ -359,7 +359,7 @@ define({
 			},
 			"color": "#FFFFFF",
 			"background-color": "rgb(60, 113, 179)",
-			".commandButton:not(.primaryButton):hover":{
+			".commandButton:not(.primaryButton):not([disabled]):hover":{
 				"color": "white",
    				"background-color": "rgba(196, 197, 200, 0.25)"
 			},

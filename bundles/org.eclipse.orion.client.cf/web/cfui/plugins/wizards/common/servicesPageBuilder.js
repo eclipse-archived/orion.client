@@ -63,17 +63,17 @@ define([
 			var self = this;
 			return new mWizard.WizardPage({
 				
-				template:'<table class="formTable">'+ //$NON-NLS-0$
-					"<tr class=\"rowSeparator\">" +
-						"<td colspan=\"3\"><div class=\"wiz-hr\"><span id=\"servicesManifestSettings\"></span></div></td>" + //$NON-NLS-0$
-					"</tr>" + //$NON-NLS-0$
+				template:'<table class="formTable" role="presentation">'+ //$NON-NLS-0$
+					'<tr class="rowSeparator">' + //$NON-NLS-0$
+						'<td colspan="3"><div class="wiz-hr"><span id="servicesManifestSettings"></span></div></td>' + //$NON-NLS-0$
+					'</tr>' + //$NON-NLS-0$
 					'<tr>'+ //$NON-NLS-0$
 						'<td id="allServicesLabel" class="label" colspan="3"></td>'+ //$NON-NLS-0$
 					'</tr>'+ //$NON-NLS-0$
 					'<tr>'+ //$NON-NLS-0$
-						'<td id="servicesLabel" class="label"></td>'+ //$NON-NLS-0$
-						'<td id="servicesLabel">&nbsp;</td>'+ //$NON-NLS-0$
-						'<td id="servicesAdded" class="label"></td>'+ //$NON-NLS-0$
+						'<td class="label"><label id="servicesLabel"></label></td>'+ //$NON-NLS-0$
+						'<td>&nbsp;</td>'+ //$NON-NLS-0$
+						'<td class="label"><label id="servicesAdded"></label></td>'+ //$NON-NLS-0$
 					'</tr>'+ //$NON-NLS-0$
 					'<tr>'+ //$NON-NLS-0$
 						'<td id="servicesDropdown" class="listCell"></td>'+ //$NON-NLS-0$
@@ -90,17 +90,23 @@ define([
 					if(!isRendered()){
 						document.getElementById("servicesManifestSettings").textContent = messages["manifestSettings"]; //$NON-NLS-0$
 			    		document.getElementById("allServicesLabel").appendChild(document.createTextNode(messages["bindServicesFromTheList."])); //$NON-NLS-0$
-			    		document.getElementById("servicesLabel").appendChild(document.createTextNode(messages["availableServices:"])); //$NON-NLS-0$
+			    		var label = document.getElementById("servicesLabel"); //$NON-NLS-0$
+			    		label.appendChild(document.createTextNode(messages["availableServices:"]));
+			    		label.htmlFor = "servicesDropdownField"; //$NON-NLS-0$
 						document.getElementById("servicesOverrideNote").textContent = messages["manifestOverride"]; //$NON-NLS-1$ //$NON-NLS-0$
 			    		
 			    		self._servicesDropdown = document.createElement("select"); //$NON-NLS-0$
+			    		self._servicesDropdown.id = "servicesDropdownField"; //$NON-NLS-0$
 			    		self._servicesDropdown.size = 7;
 			    		self._servicesDropdown.multiple="multiple"; //$NON-NLS-0$
 				    	
 			    		document.getElementById("servicesDropdown").appendChild(self._servicesDropdown); //$NON-NLS-0$
 				    	
-				    	document.getElementById("servicesAdded").appendChild(document.createTextNode(messages["boundServices:"])); //$NON-NLS-0$
+				    	label = document.getElementById("servicesAdded"); //$NON-NLS-0$
+				    	label.appendChild(document.createTextNode(messages["boundServices:"]));
+				    	label.htmlFor = "servicesListField"; //$NON-NLS-0$
 				    	self._servicesList = document.createElement("select"); //$NON-NLS-0$
+			    		self._servicesList.id = "servicesListField"; //$NON-NLS-0$
 				    	self._servicesList.multiple="multiple"; //$NON-NLS-0$
 				    	self._servicesList.size = 7;
 			    		
@@ -109,10 +115,12 @@ define([
 				    	var addButton = document.createElement("button"); //$NON-NLS-0$
 				    	addButton.appendChild(document.createTextNode(">")); //$NON-NLS-0$
 				    	addButton.className = "orionButton commandButton"; //$NON-NLS-0$
+				    	addButton.setAttribute("aria-label", messages["Add"]); //$NON-NLS-0$
 				    	
 				    	var removeButton = document.createElement("button"); //$NON-NLS-0$
 				    	removeButton.className = "orionButton commandButton"; //$NON-NLS-0$
 				    	removeButton.appendChild(document.createTextNode("<")); //$NON-NLS-0$
+				    	removeButton.setAttribute("aria-label", messages["Remove"]); //$NON-NLS-0$
 				    	
 				    	document.getElementById("servicesAddRemoveButtonsCol").appendChild(removeButton); //$NON-NLS-0$
 				    	document.getElementById("servicesAddRemoveButtonsCol").appendChild(addButton); //$NON-NLS-0$
