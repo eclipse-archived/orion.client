@@ -48,32 +48,32 @@ define(['i18n!cfui/nls/messages', 'orion/webui/Wizard'], function(messages, mWiz
 			var self = this;
 			return new mWizard.WizardPage({
 				
-				template: '<table class="formTable">'+ //$NON-NLS-0$
+				template: '<table class="formTable" role="presentation">'+ //$NON-NLS-0$
 					"<tr class=\"rowSeparator\">" +
 						"<td colspan=\"2\"><div class=\"wiz-hr\"><span id=\"addlManifestSettings\"></span></div></td>" + //$NON-NLS-0$
 					"</tr>" + //$NON-NLS-0$
 					'<tr>'+ //$NON-NLS-0$
-						'<td id="commandLabel" class="label"></td>'+ //$NON-NLS-0$
+						'<td class="label"><label id="commandLabel"></label></td>'+ //$NON-NLS-0$
 						'<td id="command" class="selectCell"></td>'+ //$NON-NLS-0$
 					'</tr>'+ //$NON-NLS-0$
 					'<tr>'+ //$NON-NLS-0$
-						'<td id="pathLabel" class="label"></td>'+ //$NON-NLS-0$
+						'<td class="label"><label id="pathLabel"></label></td>'+ //$NON-NLS-0$
 						'<td id="path" class="selectCell"></td>'+ //$NON-NLS-0$
 					'</tr>'+ //$NON-NLS-0$
 					'<tr>'+ //$NON-NLS-0$
-						'<td id="buildpackLabel" class="label"></td>'+ //$NON-NLS-0$
+						'<td class="label"><label id="buildpackLabel"></label></td>'+ //$NON-NLS-0$
 						'<td id="buildpack" class="selectCell"></td>'+ //$NON-NLS-0$
 					'</tr>'+ //$NON-NLS-0$
 					'<tr>'+ //$NON-NLS-0$
-						'<td id="memoryLabel" class="label"></td>'+ //$NON-NLS-0$
+						'<td class="label"><label id="memoryLabel"></label></td>'+ //$NON-NLS-0$
 						'<td id="memory" class="selectCell"></td>'+ //$NON-NLS-0$
 					'</tr>'+ //$NON-NLS-0$
 					'<tr>'+ //$NON-NLS-0$
-						'<td id="instancesLabel" class="label"></td>'+ //$NON-NLS-0$
+						'<td class="label"><label id="instancesLabel"></label></td>'+ //$NON-NLS-0$
 						'<td id="instances" class="selectCell"></td>'+ //$NON-NLS-0$
 					'</tr>'+ //$NON-NLS-0$
 					'<tr>'+ //$NON-NLS-0$
-						'<td id="timeoutLabel" class="label"></td>'+ //$NON-NLS-0$
+						'<td class="label"><label id="timeoutLabel"></label></td>'+ //$NON-NLS-0$
 						'<td id="timeout" class="selectCell"></td>'+ //$NON-NLS-0$
 					'</tr>'+ //$NON-NLS-0$
 				'</table>' + //$NON-NLS-0$
@@ -101,8 +101,11 @@ define(['i18n!cfui/nls/messages', 'orion/webui/Wizard'], function(messages, mWiz
 						document.getElementById("addlOverrideNote").textContent = messages["manifestOverride"]; //$NON-NLS-1$ //$NON-NLS-0$
 
 						/* command */
-				    	document.getElementById("commandLabel").appendChild(document.createTextNode(messages["command:"])); //$NON-NLS-0$
+				    	var label = document.getElementById("commandLabel"); //$NON-NLS-0$
+				    	label.appendChild(document.createTextNode(messages["command:"]));
+				    	label.htmlFor = "commandField"; //$NON-NLS-0$
 				    	self._command = document.createElement("input"); //$NON-NLS-0$
+				    	self._command.id = "commandField"; //$NON-NLS-0$
 				    	if (self._manifestInstrumentation.command) {
 				    		self._command.value = self._manifestInstrumentation.command;
 				    		self._command.classList.add("modifiedCell");
@@ -114,8 +117,11 @@ define(['i18n!cfui/nls/messages', 'orion/webui/Wizard'], function(messages, mWiz
 				    	document.getElementById("command").appendChild(self._command); //$NON-NLS-0$
 				    	
 				    	/* path */
-				    	document.getElementById("pathLabel").appendChild(document.createTextNode(messages["path:"])); //$NON-NLS-0$
+				    	label = document.getElementById("pathLabel"); //$NON-NLS-0$
+				    	label.appendChild(document.createTextNode(messages["path:"]));
+				    	label.htmlFor = "pathField"; //$NON-NLS-0$
 				    	self._path = document.createElement("input"); //$NON-NLS-0$
+				    	self._path.id = "pathField"; //$NON-NLS-0$
 				    	if (self._manifestInstrumentation.path) {
 				    		self._path.value = self._manifestInstrumentation.path;
 				    		self._path.classList.add("modifiedCell");
@@ -127,8 +133,11 @@ define(['i18n!cfui/nls/messages', 'orion/webui/Wizard'], function(messages, mWiz
 				    	document.getElementById("path").appendChild(self._path); //$NON-NLS-0$
 				    	
 				    	/* buildpack */
-				    	document.getElementById("buildpackLabel").appendChild(document.createTextNode(messages["buildpackUrl:"])); //$NON-NLS-0$
+				    	label = document.getElementById("buildpackLabel"); //$NON-NLS-0$
+				    	label.appendChild(document.createTextNode(messages["buildpackUrl:"]));
+				    	label.htmlFor = "buildpackField"; //$NON-NLS-0$
 				    	self._buildpack = document.createElement("input"); //$NON-NLS-0$
+				    	self._buildpack.id = "buildpackField"; //$NON-NLS-0$
 				    	if (self._manifestInstrumentation.buildpack) {
 				    		self._buildpack.value = self._manifestInstrumentation.buildpack;
 				    		self._buildpack.classList.add("modifiedCell");
@@ -140,8 +149,11 @@ define(['i18n!cfui/nls/messages', 'orion/webui/Wizard'], function(messages, mWiz
 				    	document.getElementById("buildpack").appendChild(self._buildpack); //$NON-NLS-0$
 				    	
 				    	/* memory */
-				    	document.getElementById("memoryLabel").appendChild(document.createTextNode(messages["memory:"])); //$NON-NLS-0$
+				    	label = document.getElementById("memoryLabel"); //$NON-NLS-0$
+				    	label.appendChild(document.createTextNode(messages["memory:"]));
+				    	label.htmlFor = "memoryField"; //$NON-NLS-0$
 				    	self._memory = document.createElement("input"); //$NON-NLS-0$
+				    	self._memory.id = "memoryField"; //$NON-NLS-0$
 				    	if (self._manifestInstrumentation.memory) {
 				    		self._memory.value = self._manifestInstrumentation.memory;
 				    		self._memory.classList.add("modifiedCell");
@@ -153,8 +165,11 @@ define(['i18n!cfui/nls/messages', 'orion/webui/Wizard'], function(messages, mWiz
 				    	document.getElementById("memory").appendChild(self._memory); //$NON-NLS-0$
 				    	
 				    	/* instances */
-				    	document.getElementById("instancesLabel").appendChild(document.createTextNode(messages["instances:"])); //$NON-NLS-0$
+				    	label = document.getElementById("instancesLabel"); //$NON-NLS-0$
+				    	label.appendChild(document.createTextNode(messages["instances:"]));
+				    	label.htmlFor = "instancesField"; //$NON-NLS-0$
 				    	self._instances = document.createElement("input"); //$NON-NLS-0$
+				    	self._instances.id = "instancesField"; //$NON-NLS-0$
 				    	self._instances.type = "number"; //$NON-NLS-0$
 				    	self._instances.min = "0"; //$NON-NLS-0$
 				    	if (self._manifestInstrumentation.instances) {
@@ -168,8 +183,11 @@ define(['i18n!cfui/nls/messages', 'orion/webui/Wizard'], function(messages, mWiz
 				    	document.getElementById("instances").appendChild(self._instances); //$NON-NLS-0$
 				    	
 				    	/* timeout */
-				    	document.getElementById("timeoutLabel").appendChild(document.createTextNode(messages["timeout(sec):"])); //$NON-NLS-0$
+				    	label = document.getElementById("timeoutLabel"); //$NON-NLS-0$
+				    	label.appendChild(document.createTextNode(messages["timeout(sec):"]));
+				    	label.htmlFor = "timeoutField"; //$NON-NLS-0$
 				    	self._timeout = document.createElement("input"); //$NON-NLS-0$
+				    	self._timeout.id = "timeoutField"; //$NON-NLS-0$
 				    	self._timeout.type = "number"; //$NON-NLS-0$
 				    	self._timeout.min = "0"; //$NON-NLS-0$
 				    	if (self._manifestInstrumentation.timeout) {

@@ -1,5 +1,5 @@
 <html lang="en">
-<head>
+<head id="deployHead">
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 	<meta name="copyright" content="Copyright (c) IBM Corporation and others 2012, 2017." >
 	<meta http-equiv="Content-Language" content="en-us">
@@ -21,16 +21,18 @@
 </head>
 <body id="deployBody" class="dialogFrame lightPage">
 
-	<div class="dialogTitle" id="titleBar">
-		<span id="title" class="dialogTitleText layoutLeft">
-		</span>
-		<button aria-label="Close" class="dismissButton layoutRight core-sprite-close imageSprite closeDialog" id="closeDialog">
-		</button>
-	</div>
-	
-	<div>
-		<div id="messageContainer" class="messageContainer"><span id="messageLabel" class="messageLabel"><span id="messageText" style="float:left;"></span><span id="messageButton"></span></span></div>
-		<div id="wizard"></div>
+	<div role="dialog" aria-modal="true" aria-labelledby="title" aria-describedby="messageText">
+		<div class="dialogTitle" id="titleBar">
+			<span id="title" class="dialogTitleText layoutLeft">
+			</span>
+			<button class="dismissButton layoutRight core-sprite-close imageSprite closeDialog" id="closeDialog">
+			</button>
+		</div>
+		
+		<div>
+			<div id="messageContainer" class="messageContainer"><span id="messageLabel" class="messageLabel"><span id="messageText" style="float:left;"></span><span id="messageButton"></span></span></div>
+			<div id="wizard"></div>
+		</div>
 	</div>
 	
 		<script>

@@ -355,45 +355,45 @@ define(['i18n!cfui/nls/messages', 'orion/selection', 'orion/widgets/input/ComboT
 			var self = this;
 			return new mWizard.WizardPage({
 				
-		    	template: "<table class=\"formTable\">"+ //$NON-NLS-0$
+		    	template: "<table class=\"formTable\" role=\"presentation\">"+ //$NON-NLS-0$
 					"<tr>"+ //$NON-NLS-0$
-						"<td id=\"launchConfLabel\" class=\"label\"></td>"+ //$NON-NLS-0$
+						"<td class=\"label\"><label id=\"launchConfLabel\"></label></td>"+ //$NON-NLS-0$
 						"<td id=\"launchConf\" class=\"selectCell\"></td>"+ //$NON-NLS-0$
 					"</tr>"+ //$NON-NLS-0$
 					"<tr>"+ //$NON-NLS-0$
-						"<td id=\"cloudsLabel\" class=\"label\"></td>"+ //$NON-NLS-0$
+						"<td class=\"label\"><label id=\"cloudsLabel\"></label></td>"+ //$NON-NLS-0$
 						"<td id=\"clouds\" class=\"selectCell\"></td>"+ //$NON-NLS-0$
 					"</tr>"+ //$NON-NLS-0$
 					"<tr>"+ //$NON-NLS-0$
-						"<td id=\"orgsLabel\" class=\"label\"></td>"+ //$NON-NLS-0$
+						"<td class=\"label\"><label id=\"orgsLabel\"></label></td>"+ //$NON-NLS-0$
 						"<td id=\"orgs\" class=\"selectCell\"></td>"+ //$NON-NLS-0$
 					"</tr>"+ //$NON-NLS-0$
 					"<tr>"+ //$NON-NLS-0$
-						"<td id=\"spacesLabel\" class=\"label\"></td>"+ //$NON-NLS-0$
+						"<td class=\"label\"><label id=\"spacesLabel\"></label></td>"+ //$NON-NLS-0$
 						"<td id=\"spaces\" class=\"selectCell\"></td>"+ //$NON-NLS-0$
 					"</tr>"+ //$NON-NLS-0$
 					"<tr>"+ //$NON-NLS-0$
-						"<td id=\"manifestLabel\" class=\"label\"></td>"+ //$NON-NLS-0$
+						"<td class=\"label\"><label id=\"manifestLabel\"></label></td>"+ //$NON-NLS-0$
 						"<td id=\"manifest\" class=\"selectCell\"></td>"+ //$NON-NLS-0$
 					"</tr>"+ //$NON-NLS-0$
 					"<tr class=\"rowSeparator\">" + //$NON-NLS-0$
 						"<td colspan=\"2\"><div class=\"wiz-hr\"><span id=\"manifestSettings\"></span></div></td>" + //$NON-NLS-0$
 					"</tr>" + //$NON-NLS-0$
 					"<tr>"+ //$NON-NLS-0$
-						"<td id=\"nameLabel\" class=\"label\"></td>"+ //$NON-NLS-0$
+						"<td class=\"label\"><label id=\"nameLabel\"></label></td>"+ //$NON-NLS-0$
 						"<td id=\"name\" class=\"selectCell\"></td>"+ //$NON-NLS-0$
 					"</tr>"+ //$NON-NLS-0$
 					"<tr>"+ //$NON-NLS-0$
-						"<td id=\"hostLabel\" class=\"label\"></td>"+ //$NON-NLS-0$
+						"<td class=\"label\"><label id=\"hostLabel\"></label></td>"+ //$NON-NLS-0$
 						"<td id=\"host\" class=\"selectCell\"></td>"+ //$NON-NLS-0$
 					"</tr>"+ //$NON-NLS-0$
 					"<tr>"+ //$NON-NLS-0$
-						"<td id=\"domainsLabel\" class=\"label\"></td>"+ //$NON-NLS-0$
+						"<td class=\"label\"><label id=\"domainsLabel\"></label></td>"+ //$NON-NLS-0$
 						"<td id=\"domains\" class=\"selectCell\"></td>"+ //$NON-NLS-0$
 					"</tr>"+ //$NON-NLS-0$
 				"</table>" +  //$NON-NLS-0$
 				'<div class="manifestOverride">' + //$NON-NLS-0$
-					'<div id="overrideNote"></div>' + //$NON-NLS-0$
+					'<div id="overrideNote" style="white-space: pre;"></div>' + //$NON-NLS-0$
 				'</div>', //$NON-NLS-0$
 				
 				render: function(){
@@ -416,18 +416,28 @@ define(['i18n!cfui/nls/messages', 'orion/selection', 'orion/widgets/input/ComboT
 						self._targets = {};
 	
 						// render the override note
-						document.getElementById("overrideNote").textContent = messages["manifestOverride"]; //$NON-NLS-1$ //$NON-NLS-0$
+						document.getElementById("overrideNote").textContent = messages["manifestOverride"] + "\n" + messages["requiredField"]; //$NON-NLS-1$ //$NON-NLS-0$
 	
 						// render the launch config field
-						document.getElementById("launchConfLabel").textContent = messages["launchConfLabel"]; //$NON-NLS-1$ //$NON-NLS-0$
+						var label = document.getElementById("launchConfLabel"); //$NON-NLS-0$
+						label.textContent = messages["launchConfLabel"];
+						label.htmlFor = "launchConfField"; //$NON-NLS-0$
+						
 						self._launchConfInput = document.createElement("input"); //$NON-NLS-0$
+						self._launchConfInput.id = "launchConfField"; //$NON-NLS-0$
+						self._launchConfInput.required = true;
 						self._launchConfInput.value = self._confName;
 						document.getElementById("launchConf").appendChild(self._launchConfInput); //$NON-NLS-0$
 						
 						/* render the clouds field */
 						if (self._clouds.length > 1){
-							document.getElementById("cloudsLabel").appendChild(document.createTextNode(messages["target*:"])); //$NON-NLS-0$
+							label = document.getElementById("cloudsLabel"); //$NON-NLS-0$
+							label.appendChild(document.createTextNode(messages["target*:"]));
+							label.htmlFor = "cloudsField"; //$NON-NLS-0$
+							
 							self._cloudsDropdown = document.createElement("select"); //$NON-NLS-0$
+							self._cloudsDropdown.id = "cloudsField"; //$NON-NLS-0$
+							self._cloudsDropdown.required = true;
 							
 							self._clouds.forEach(function(cloud){
 								var option = document.createElement("option"); //$NON-NLS-0$
@@ -454,14 +464,20 @@ define(['i18n!cfui/nls/messages', 'orion/selection', 'orion/widgets/input/ComboT
 							
 						} else {
 							document.getElementById("cloudsLabel").appendChild(document.createTextNode(messages["target:"])); //$NON-NLS-0$
-							var span = document.createElement("span");
+							var span = document.createElement("span"); //$NON-NLS-0$
+							span.setAttribute("aria-labelledby", "cloudsLabel"); //$NON-NLS-1$ //$NON-NLS-0$
 							span.textContent = self._clouds[0].Name || self._clouds[0].Url;
 							document.getElementById("clouds").appendChild(span); //$NON-NLS-0$
 						}
 		
 						/* render the organizations field */
-						document.getElementById("orgsLabel").appendChild(document.createTextNode(messages["organization*:"])); //$NON-NLS-0$
+						label = document.getElementById("orgsLabel"); //$NON-NLS-0$
+						label.appendChild(document.createTextNode(messages["organization*:"]));
+						label.htmlFor = "orgsField"; //$NON-NLS-0$
+
 						self._orgsDropdown = document.createElement("select"); //$NON-NLS-0$
+						self._orgsDropdown.id = "orgsField"; //$NON-NLS-0$
+						self._orgsDropdown.required = true;
 						self._orgsDropdown.onchange = function(event){
 							self._showMessage(messages["loadingDeploymentSettings..."]);
 							lib.empty(self._domainsDropdown);
@@ -477,8 +493,13 @@ define(['i18n!cfui/nls/messages', 'orion/selection', 'orion/widgets/input/ComboT
 						self._selection = new mSelection.Selection(self._serviceRegistry, "orion.Spaces.selection"); //$NON-NLS-0$
 						self._selection.addEventListener("selectionChanged", function(){this.validate();}.bind(this.wizard)); //$NON-NLS-0$
 						
-						document.getElementById("spacesLabel").appendChild(document.createTextNode(messages["space*:"])); //$NON-NLS-0$
+						label = document.getElementById("spacesLabel"); //$NON-NLS-0$
+						label.appendChild(document.createTextNode(messages["space*:"]));
+						label.htmlFor = "spacesField"; //$NON-NLS-0$
+
 						self._spacesDropdown = document.createElement("select"); //$NON-NLS-0$
+						self._spacesDropdown.id = "spacesField"; //$NON-NLS-0$
+						self._spacesDropdown.required = true;
 						self._spacesDropdown.onchange = function(/*event*/){
 							self._showMessage(messages["loadingDeploymentSettings..."]);
 							lib.empty(self._domainsDropdown);
@@ -492,8 +513,12 @@ define(['i18n!cfui/nls/messages', 'orion/selection', 'orion/widgets/input/ComboT
 						document.getElementById("spaces").appendChild(self._spacesDropdown); //$NON-NLS-0$
 						
 						// render the manifest file
-						document.getElementById("manifestLabel").textContent = messages["manifestLabel"];
+						label = document.getElementById("manifestLabel"); //$NON-NLS-0$
+						label.textContent = messages["manifestLabel"];
+						label.htmlFor = "manifestField"; //$NON-NLS-0$
+
 						self._manifestInput = document.createElement("input"); //$NON-NLS-0$
+						self._manifestInput.id = "manifestField"; //$NON-NLS-0$
 						self._manifestInput.value = (self._initManifestPath == "") ? "manifest.yml" : self._initManifestPath;
 						self._manifestInput.readOnly = false; // TODO should be editable
 						self._manifestInput.setAttribute("spellcheck", "false");
@@ -543,12 +568,20 @@ define(['i18n!cfui/nls/messages', 'orion/selection', 'orion/widgets/input/ComboT
 						document.getElementById("manifestSettings").textContent = messages["manifestSettings"]; //$NON-NLS-0$
 						
 						/* render the domains field */
-						document.getElementById("domainsLabel").appendChild(document.createTextNode(messages["domain*:"])); //$NON-NLS-0$
+						label = document.getElementById("domainsLabel"); //$NON-NLS-0$
+						label.appendChild(document.createTextNode(messages["domain*:"]));
+						label.htmlFor = "domainsField"; //$NON-NLS-0$
+
 						self._domainsDropdown = document.createElement("select"); //$NON-NLS-0$
+						self._domainsDropdown.id = "domainsField"; //$NON-NLS-0$
+						self._domainsDropdown.required = true;
 						document.getElementById("domains").appendChild(self._domainsDropdown); //$NON-NLS-0$
 						
 						/* render the application name field */
-						document.getElementById("nameLabel").appendChild(document.createTextNode(messages["applicationName*:"])); //$NON-NLS-0$
+						label = document.getElementById("nameLabel"); //$NON-NLS-0$
+						label.appendChild(document.createTextNode(messages["applicationName*:"]));
+						label.htmlFor = "nameField"; //$NON-NLS-0$
+
 						self._appsDropdown = new ComboTextInput({
 							id: "applicationNameTextInput", //$NON-NLS-0$
 							parentNode: document.getElementById("name"), //$NON-NLS-0$
@@ -573,6 +606,8 @@ define(['i18n!cfui/nls/messages', 'orion/selection', 'orion/widgets/input/ComboT
 						});
 						
 						self._appsInput = self._appsDropdown.getTextInputNode();						
+						self._appsInput.id = "nameField"; //$NON-NLS-0$
+						self._appsInput.required = true;
 						self._appsInput.onkeyup = function(){this.validate();}.bind(this.wizard);
 						self._appsInput.addEventListener("focus",function(){this.validate();}.bind(this.wizard)); //$NON-NLS-0$
 
@@ -588,7 +623,10 @@ define(['i18n!cfui/nls/messages', 'orion/selection', 'orion/widgets/input/ComboT
 				    	}
 						
 						/* render the application host field */
-						document.getElementById("hostLabel").appendChild(document.createTextNode(messages["host:"])); //$NON-NLS-0$
+						label = document.getElementById("hostLabel"); //$NON-NLS-0$
+						label.appendChild(document.createTextNode(messages["host:"]));
+						label.htmlFor = "hostField"; //$NON-NLS-0$
+
 						self._hostDropdown = new ComboTextInput({
 							id: "applicationRouteTextInput", //$NON-NLS-0$
 							parentNode: document.getElementById("host"), //$NON-NLS-0$
@@ -615,6 +653,7 @@ define(['i18n!cfui/nls/messages', 'orion/selection', 'orion/widgets/input/ComboT
 						self._hostDropdown._recentEntryButton.disabled = true;
 
 						self._hostInput = self._hostDropdown.getTextInputNode();
+						self._hostInput.id = "hostField"; //$NON-NLS-0$
 	//					self._hostInput.value = self._manifestApplication.host || self._manifestApplication.name || "";
 						
 						if (self._manifestInstrumentation.host) {
@@ -628,6 +667,7 @@ define(['i18n!cfui/nls/messages', 'orion/selection', 'orion/widgets/input/ComboT
 						var selectedCloud = self._clouds[self._clouds.length > 1 ? self._cloudsDropdown.selectedIndex : 0];
 						self._loadTargets(selectedCloud);
 						
+						self._launchConfInput.focus();
 						setRendered(true);
 					}
 			    },

@@ -100,42 +100,47 @@ define(['require', 'i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 
 	});
 
 	function localHandleStatus(status, allowHTML, context) {
-		if (!allowHTML && status && typeof status.HTML !== "undefined") { //$NON-NLS-0$
-			delete status.HTML;
-		}
-
-		if(status.Retry && status.Retry.parameters){
-			if(status.forceShowMessage){
-				progress.setProgressResult(status);
+		if (status) {
+			if (!allowHTML && typeof status.HTML !== "undefined") { //$NON-NLS-0$
+				delete status.HTML;
 			}
-			
-			var options = {
-				hasOptionalParameters: !!status.Retry.optionalParameters, 
-				optionalParams: status.Retry.optionalParameters
-			};
-			context.data.parameters = getCommandParameters(status.Retry.parameters, options, context.oldParams);
-			context.data.oldParams = context.oldParams;
-			context.commandService.collectParameters(context.data);
-		} else {
-			storeLastDeployment(context.project.Name, context.deployService, context.launchConfiguration);
-			if ( ("Error" === status.Severity) || ("Warning" === status.Severity) ) { //$NON-NLS-1$ //$NON-NLS-0$
-				progress.setProgressResult(status); //show errors and warnings
+	
+			if(status.Retry && status.Retry.parameters){
+				if(status.forceShowMessage){
+					progress.setProgressResult(status);
+				}
+				
+				var options = {
+					hasOptionalParameters: !!status.Retry.optionalParameters, 
+					optionalParams: status.Retry.optionalParameters
+				};
+				context.data.parameters = getCommandParameters(status.Retry.parameters, options, context.oldParams);
+				context.data.oldParams = context.oldParams;
+				context.commandService.collectParameters(context.data);
+			} else {
+				storeLastDeployment(context.project.Name, context.deployService, context.launchConfiguration);
+				if ( ("Error" === status.Severity) || ("Warning" === status.Severity) ) { //$NON-NLS-1$ //$NON-NLS-0$
+					progress.setProgressResult(status); //show errors and warnings
+				}
+			}
+	
+			if(status.ToSave){
+				context.projectClient.saveProjectLaunchConfiguration(context.project, status.ToSave.ConfigurationName, context.deployService.id, status.ToSave.Parameters, status.ToSave.Url, status.ToSave.ManageUrl, status.ToSave.Path, status.ToSave.Type, status.AdditionalConfiguration).then(
+					function(configuration){
+						storeLastDeployment(context.project.Name, context.deployService, configuration);
+						if(sharedLaunchConfigurationDispatcher){
+							sharedLaunchConfigurationDispatcher.dispatchEvent({type: "create", newValue: configuration });
+						}
+						if(configuration.File.parent.parent){
+							fileDispatcher.dispatchEvent({type: "create", parent: configuration.File.parent.parent, newValue: configuration.File.parent, ignoreRedirect: true});
+						}
+						fileDispatcher.dispatchEvent({type: "create", parent: configuration.File.parent, newValue: configuration.File, ignoreRedirect: true});
+					}, context.errorHandler
+				);
 			}
 		}
-
-		if(status.ToSave){
-			context.projectClient.saveProjectLaunchConfiguration(context.project, status.ToSave.ConfigurationName, context.deployService.id, status.ToSave.Parameters, status.ToSave.Url, status.ToSave.ManageUrl, status.ToSave.Path, status.ToSave.Type, status.AdditionalConfiguration).then(
-				function(configuration){
-					storeLastDeployment(context.project.Name, context.deployService, configuration);
-					if(sharedLaunchConfigurationDispatcher){
-						sharedLaunchConfigurationDispatcher.dispatchEvent({type: "create", newValue: configuration });
-					}
-					if(configuration.File.parent.parent){
-						fileDispatcher.dispatchEvent({type: "create", parent: configuration.File.parent.parent, newValue: configuration.File.parent, ignoreRedirect: true});
-					}
-					fileDispatcher.dispatchEvent({type: "create", parent: configuration.File.parent, newValue: configuration.File, ignoreRedirect: true});
-				}, context.errorHandler
-			);
+		if (context.data.handler && typeof context.data.handler.focus === "function") {
+			context.data.handler.focus();
 		}
 	}
 
@@ -213,10 +218,15 @@ define(['require', 'i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 
 						options.height = result.Height;
 						options.id = result.UriTemplateId || context.deployService.id;
 						context.oldParams = enhansedLaunchConf.Params;
+						options.cancelled = function(status){
+							localHandleStatus(status, null, context);
+						};
 						options.done = function(status){
 							localHandleStatus(status, null, context);
 						};
-						options.status = function(status){localHandleStatus(status, null, context);};
+						options.status = function(status){
+							localHandleStatus(status, null, context);
+						};
 						mEditorCommands.createDelegatedUI(options);
 						return;
 					}
@@ -297,10 +307,15 @@ define(['require', 'i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 
 					options.height = result.Height;
 					options.id = result.UriTemplateId || context.deployService.id;
 					context.oldParams = enhansedLaunchConf.Params;
+					options.cancelled = function(status){
+						localHandleStatus(status, null, context);
+					};
 					options.done = function(status){
 						localHandleStatus(status, null, context);
 					};
-					options.status = function(status){localHandleStatus(status, null, context);};
+					options.status = function(status){
+						localHandleStatus(status, null, context);
+					};
 					mEditorCommands.createDelegatedUI(options);
 					return;
 				}
