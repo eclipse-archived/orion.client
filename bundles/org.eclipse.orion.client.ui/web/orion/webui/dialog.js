@@ -10,8 +10,8 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 /*eslint-env browser, amd*/
-define(['orion/webui/littlelib', 'orion/uiUtils'], 
-		function(lib, uiUtil) {
+define(['i18n!orion/nls/messages', 'orion/webui/littlelib', 'orion/uiUtils'], 
+		function(containerMessages, lib, uiUtil) {
 	/**
 	 * Holds the current opened modal dialog.
 	 */
@@ -55,7 +55,7 @@ define(['orion/webui/littlelib', 'orion/uiUtils'],
 		/* Not used by clients */
 		CONTAINERTEMPLATE:		
 		'<div class="dialog" role="dialog">' + //$NON-NLS-0$
-			'<div class="dialogTitle"><span id="title" class="dialogTitleText layoutLeft"></span><button aria-label="Close" class="dismissButton layoutRight core-sprite-close imageSprite" id="closeDialog"></button></div>' + //$NON-NLS-0$
+			'<div class="dialogTitle"><span id="title" class="dialogTitleText layoutLeft"></span><button class="dismissButton layoutRight core-sprite-close imageSprite" id="closeDialog"></button></div>' + //$NON-NLS-0$
 			'<div id="dialogContent" class="dialogContent layoutBlock"></div>' + //$NON-NLS-1$ //$NON-NLS-0$
 			'<div id="buttons" class="dialogButtons"></div>' + //$NON-NLS-1$ //$NON-NLS-0$
 		'</div>', //$NON-NLS-0$
@@ -79,6 +79,7 @@ define(['orion/webui/littlelib', 'orion/uiUtils'],
 				this.$frame.setAttribute("aria-labelledby", "title");
 			}
 			this.$close = lib.$("#closeDialog", this.$frame);//$NON-NLS-0$
+			this.$close.setAttribute("aria-label", containerMessages["Close"]); //$NON-NLS-0$
 			var self = this;
 			this.$close.addEventListener("click", function(event) { //$NON-NLS-0$
 				self.hide();
@@ -289,7 +290,7 @@ define(['orion/webui/littlelib', 'orion/uiUtils'],
 			this.$lastFocusedElement = this.$originalFocus = document.activeElement;
 			this.$frame.style.top = top + "px"; //$NON-NLS-0$
 			this.$frame.style.left = left + "px"; //$NON-NLS-0$ 
-			this.$frame.style["max-width"] = "calc(100% - " + left + "px";
+			this.$frame.style["max-width"] = "calc(100% - " + left + "px)";
 			this.$frame.classList.add("dialogShowing"); //$NON-NLS-0$
 			if (typeof this._afterShowing === "function") { //$NON-NLS-0$
 				this._afterShowing();
