@@ -50,13 +50,13 @@ var SALT_SEPARATOR = ",";
 
 module.exports = {
 	encrypt: function(text, password, salt) {
-		var _salt = salt ? new Buffer(salt,'base64') : crypto.randomBytes(8);
+		var _salt = salt ? new Buffer(salt,'utf-8') : crypto.randomBytes(8);
 		var encrypted = pbewithmd5anddes.encrypt(text, password, _salt, 1024);
 		if (salt) return encrypted;
 		return _salt.toString('base64') + SALT_SEPARATOR + encrypted;
 	},
 	decrypt: function(encryptedText, password, salt) {
-		var _salt = salt ? new Buffer(salt,'base64') : null, saltPos = -1;
+		var _salt = salt ? new Buffer(salt,'utf-8') : null, saltPos = -1;
 		if (!_salt) {
 			saltPos = encryptedText.indexOf(SALT_SEPARATOR);
 			if(saltPos === -1){
