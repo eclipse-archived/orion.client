@@ -148,7 +148,7 @@ select {
 	position: absolute;
 	text-align: center;
 	box-shadow: 0 2px 0 rgba(0, 0, 0, 0.1);
-	background-color: #dff0d8;
+	background-color: #e6f0e1;
 	border-bottom-left-radius: 5px;
 	border-bottom-right-radius: 5px;
 	margin-left: 5%;
@@ -175,28 +175,28 @@ select {
 }
 
 .errorMessage input {
-	border-color: #eed3d7 !important;
+	border-color: #eddadd !important;
 }
 
 .errorMessage button {
-	color: #b94a48 !important;
+	color: #b82b28 !important;
 }
 
 .errorMessage button:hover, .errorMessage button:focus {
-	color: #FFFFFF !important;
+	color: #701a19 !important;
 }
 
 .messageContainer.errorMessage {
-	background-color: #eed3d7 !important;
-	border: 1px solid #b94a48 !important;
+	background-color: #eddadd !important;
+	border: 1px solid #b82b28 !important;
 }
 
 .errorMessage, .errorMessage a {
-	color: #b94a48 !important;
+	color: #b82b28 !important;
 }
 
 .messageLabel a {
-	color: #b94a48;
+	color: #b82b28;
 	text-decoration: underline;
 }
 
@@ -204,7 +204,7 @@ select {
 	border: none;
 	border-radius: 5px;
 	background: none repeat scroll 0 0 rgba(0, 0, 0, 0);
-	color: #b94a48;
+	color: #b82b28;
 	font-family: Arial, Helvetica, Myriad, Tahoma, clean, sans-serif,
 		Lucida Sans Unicode, Lucida Grande, Verdana;
 	font-size: 9pt;
@@ -212,11 +212,11 @@ select {
 }
 
 .messageLabel button:hover, .messageLabel button:focus {
-	color: #FFFFFF;
+	color: #701a19;
 }
 
 .messageLabel {
-	color: #468847;
+	color: #3a7a3a;
 	float: left;
 	max-height: 1000px;
 	overflow: hidden;
