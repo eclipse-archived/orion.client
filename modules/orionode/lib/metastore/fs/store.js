@@ -18,7 +18,8 @@ var
     os = require('os'),
 	log4js = require('log4js'),
 	logger = log4js.getLogger("metastore"),
-    fileLocker = require('../../util/fileLocker');
+    fileLocker = require('../../util/fileLocker'),
+    cryptoUtil = require('../../util/cryptoUtil');
 
 // Helper functions
 var FILENAME_METASTORE = "metastore.json";
@@ -106,9 +107,7 @@ FsMetastore.prototype.lock = function(userId, shared) {
 			if (this._isSingleUser) {
 				filePath = nodePath.join(this._options.configParams.get('orion.single.user.metaLocation') || os.homedir(), '.orion');
 			} else {
-				var userPrefix = userId.substring(0, Math.min(2, userId.length));
-				filePath = nodePath.join(this._options.workspaceDir, userPrefix);
-				filePath = nodePath.join(filePath, userId);
+				filePath = this._computeLockFilePath(userId);
 			}
 			filePath = nodePath.join(filePath, ".lock");
 			locker = new fileLocker(filePath);
@@ -388,7 +387,22 @@ Object.assign(FsMetastore.prototype, {
 			callback /* error case */
 		);
 	},
-	
+
+	_computeLockFilePath: function(userId) {
+		var root = this._options.configParams.get('orion.lockFiles.root') || this._options.workspaceDir;
+		var salt = this._options.configParams.get('orion.lockFiles.salt');
+		var password = this._options.configParams.get('orion.lockFiles.password');
+
+		if (salt && password) {
+			userId = new Buffer(cryptoUtil.encrypt(userId, password, salt)).toString('base64');
+		}
+
+		var userPrefix = userId.substring(0, Math.min(2, userId.length));
+		var result = nodePath.join(root, userPrefix);
+		result = nodePath.join(result, userId);
+		return result;
+	},
+
 	/**
 	 * @private
 	 * Helper method to read the whole workspace metadata
