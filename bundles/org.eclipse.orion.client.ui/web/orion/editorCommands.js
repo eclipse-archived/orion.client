@@ -693,6 +693,11 @@ define([
 					window.__electron.remote.dialog.showOpenDialog({properties: ['openDirectory']}, function(result) {
 						if (!result) return;
 						that.fileClient.changeWorkspace(result[0]).then(function() {
+							localStorage.removeItem("/inlineSearchOtherScope");
+							var searchClient = that.serviceRegistry.getService("orion.core.search.client");
+							if (searchClient) {
+								searchClient.setLocationOther(null);
+							}
 							delete sessionStorage.lastFile;
 						});			
 					});
@@ -719,6 +724,11 @@ define([
 									name: folderLocation,
 									callback: function() {
 										that.fileClient.changeWorkspace(folderLocation).then(function() {
+											localStorage.removeItem("/inlineSearchOtherScope");
+											var searchClient = that.serviceRegistry.getService("orion.core.search.client");
+											if (searchClient) {
+												searchClient.setLocationOther(null);
+											}
 											delete sessionStorage.lastFile;
 										});
 									}
