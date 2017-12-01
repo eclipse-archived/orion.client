@@ -88,16 +88,21 @@ ReentrantLock.prototype.lockRelease = function() {
 	}
 };
 
-var FileLocker = function(pathname) {
+var FileLocker = function(pathname, options) {
 	this._counter = 0;
 	this._fd;
 	this._lock = new ReentrantLock();
 	this._locking = !isWin;
+	this._exclusiveLocksOnly = options.configParams.get('orion_exclusive_locks_only') === true;
 	this._pathame = pathname;
 	this._inactivityTimer;
 };
 
 FileLocker.prototype.lock = function(shared) {
+	if (this._exclusiveLocksOnly) {
+		shared = false;
+	}
+
 	var time = Date.now();
 	return new Promise(function(resolve, reject) {
 		this._lock.lock(shared, function(releaser) {
