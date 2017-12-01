@@ -110,7 +110,7 @@ FsMetastore.prototype.lock = function(userId, shared) {
 				filePath = this._computeLockFilePath(userId);
 			}
 			filePath = nodePath.join(filePath, ".lock");
-			locker = new fileLocker(filePath);
+			locker = new fileLocker(filePath, this._options);
 			this._lockMap[userId] = locker;
 		}
 		locker.lock(shared).then(resolve, reject);
