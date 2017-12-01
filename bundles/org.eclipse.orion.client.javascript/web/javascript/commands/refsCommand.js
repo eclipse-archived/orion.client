@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2015 IBM Corporation and others.
+ * Copyright (c) 2015, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License v1.0
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution
@@ -114,36 +114,35 @@ define([
 		/**
 		 * @callback
 		 */
-		execute: function(editorContext, options) {
-			var that = this;
+		findReferences: function findReferences(editorContext, options) {
 			var deferred = new Deferred();
 			editorContext.getFileMetadata().then(function(metadata) {
 				var loc = null;
-				if(options.kind === 'project' && Array.isArray(metadata.parents) && metadata.parents.length > 0) {
+				if(/*options.kind === 'project' && */Array.isArray(metadata.parents) && metadata.parents.length > 0) {
 					loc = metadata.parents[metadata.parents.length - 1].Location;
 					deferred.progress({message: Messages['allProjectRefs']});
 				} else {
 					deferred.progress({message: Messages['allWorkspaceRefs']});
 				}
-				that.scriptresolver.setSearchLocation(loc);
-			    if(options.contentType.id === 'application/javascript') {
-	    			that._findRefs(editorContext, options, metadata, deferred);
+				this.scriptresolver.setSearchLocation(loc);
+			    if(metadata.contentType.id === 'application/javascript') {
+	    			this._findRefs(editorContext, options, metadata, deferred);
 			    } else {
 			        return editorContext.getText().then(function(text) {
 			            var offset = options.offset;
-			        	var cu = that.cuprovider.getCompilationUnit(function(){
+			        	var cu = this.cuprovider.getCompilationUnit(function(){
 		            		return Finder.findScriptBlocks(text);
 		            	}, {location:options.input, contentType:options.contentType});
     			        if(cu.validOffset(offset)) {
-    			        	that._findRefs(editorContext, options, metadata, deferred);
+    			        	this._findRefs(editorContext, options, metadata, deferred);
     			        } else {
     			        	deferred.reject({Severity: 'Warning', Message: Messages['notHtmlOffset']});
     			        }
-			        }, /* @callback */ function(err) {
+			        }.bind(this), /* @callback */ function(err) {
 			        	deferred.reject(Messages['noFileContents']);
 			        });
 			    }
-			}, /* @callback */ function(err) {
+			}.bind(this), /* @callback */ function(err) {
 				deferred.reject({Severity: 'Error', Message: Messages['noFileMeta']}); //$NON-NLS-1$
 			});
 			return deferred;
