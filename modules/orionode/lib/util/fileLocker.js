@@ -129,18 +129,19 @@ FileLocker.prototype.lock = function(shared) {
 };
 
 FileLocker.prototype._acquireLock = function(shared) {
-	return new Promise(function(resolve, reject) {
 // console.log("acquireLock: " + this._counter);
-		if (!this._locking || this._counter++) {
-			return resolve();
-		}
+	if (this._inactivityTimer) {
+		clearTimeout(this._inactivityTimer);
+		this._inactivityTimer = null;
+	}
+
+	if (!this._locking || this._counter++) {
+		return this._pendingAcquireLock || Promise.resolve();
+	}
+
+	return this._pendingAcquireLock || (this._pendingAcquireLock = new Promise(function(resolve, reject) {
 
 		var lock = function() {
-			if (this._inactivityTimer) {
-				clearTimeout(this._inactivityTimer);
-				this._inactivityTimer = null;
-			}
-
 			var doit = function() {
 				fs.fcntl(this._fd, constants.F_SETLK, shared ? constants.F_RDLCK : constants.F_WRLCK, function(error) {
 					if (error && error.code === "EAGAIN") {
@@ -160,7 +161,6 @@ FileLocker.prototype._acquireLock = function(shared) {
 			var openLockFile = function() {
 				fs.open(this._pathame, APPEND, function(error, fd) {
 					if (error) {
-// console.log("error 2");
 	 					if (error.code === "ENOENT") {
 	 						var dirPath = nodePath.dirname(this._pathame);
 							return mkdirpAsync(dirPath).then(
@@ -172,19 +172,7 @@ FileLocker.prototype._acquireLock = function(shared) {
 	 					}
 						return reject(error);
 					}
-					
-					/* verify that there were not multiple concurrent opens occurring */
-					if (!this._fd) {
-						this._fd = fd; /* typical case */
-// console.log(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>opened, fd set to: " + fd);
-					} else {
-// console.log("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++redundant!");
-						/* this is a redundant fd so close it */
-						fs.close(fd, function(error) {
-							/* no functional impact beyond possibly leaking a fd */
-							logger.warn("Failed to close a redundant fd: " + fd, error);
-						});
-					}
+					this._fd = fd;
 					lock();
 				}.bind(this));
 			}.bind(this);
@@ -192,15 +180,21 @@ FileLocker.prototype._acquireLock = function(shared) {
 		} else {
 			lock();
 		}
+	}.bind(this))).then(function() {
+		this._pendingAcquireLock = null;
+	}.bind(this), function(err) {
+		this._pendingAcquireLock = null;
+		return Promise.reject(err);
 	}.bind(this));
 };
 
 FileLocker.prototype._releaseLock = function() {
-	return new Promise(function(resolve, reject) {
 // console.log("releaseLock: " + this._counter);
-		if (!this._locking || --this._counter) {
-			return resolve();
-		}
+	if (!this._locking || --this._counter) {
+		return this._pendingReleaseLock || Promise.resolve();
+	}
+
+	return this._pendingReleaseLock || (this._pendingReleaseLock = new Promise(function(resolve, reject) {
 
 		fs.fcntl(this._fd, constants.F_SETLK, constants.F_UNLCK, function(error) {
 			if (this._inactivityTimer) {
@@ -230,6 +224,11 @@ FileLocker.prototype._releaseLock = function() {
 
 			resolve();
 		}.bind(this));
+	}.bind(this))).then(function() {
+		this._pendingReleaseLock = null;
+	}.bind(this), function(err) {
+		this._pendingReleaseLock = null;
+		return Promise.reject(err);
 	}.bind(this));
 };
 
