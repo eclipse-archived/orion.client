@@ -178,7 +178,10 @@ FileLocker.prototype._acquireLock = function(shared) {
 						return reject(error);
 					}
 					this._fd = fd;
-					lock();
+					fs.chmod(this._pathame, "600", function() {
+						//ignore errors
+						lock();
+					});
 				}.bind(this));
 			}.bind(this);
 			openLockFile();
