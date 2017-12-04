@@ -125,7 +125,7 @@ define([
 			}
 			
 			if(Array.isArray(element.attributes) && element.attributes.some(function(attrib) {
-				return attrib.name === 'alt' && attrib.value;
+				return attrib.name === 'alt' && typeof attrib.value === 'string';
 			})) {
 				return [];
 			}
