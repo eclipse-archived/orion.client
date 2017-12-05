@@ -155,7 +155,8 @@ define([
 			if(cType && cType.extension && cType.extension.length > 0) {
 				fileExt = cType.extension[0];
 			}
-			var currentLocation = inMemoryFilePattern + this.id + "/foo." + fileExt; //$NON-NLS-1$
+			var fileName = options && options.fileName || "foo";
+			var currentLocation = inMemoryFilePattern + this.id + "/" + fileName + "." + fileExt; //$NON-NLS-1$
 			var def;
 			var sameFile = currentLocation === this.lastFileLocation;
 			if(sameFile || !this.lastFileLocation) {
