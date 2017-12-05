@@ -692,24 +692,13 @@ define([
 		}
 	);
 
-	provider.registerServiceProvider("orion.edit.command", //$NON-NLS-1$
-		new OpenDeclCommand.OpenDeclarationCommand(ternWorker, "replace"), //$NON-NLS-1$
-		{
-			name: javascriptMessages["openDeclName"],
-			tooltip: javascriptMessages['openDeclTooltip'],
-			id: "open.js.decl", //$NON-NLS-1$
-			key: [114, false, false, false, false],
-			contentType: ['application/javascript', 'text/html'] //$NON-NLS-1$ //$NON-NLS-2$
+	provider.registerServiceProvider("orion.edit.open.declaration",
+		new OpenDeclCommand.OpenDeclarationCommand(ternWorker, "replace"), {
+			contentType: ["application/javascript", "text/html"],
+			id: "orion.open.declaration.js"
 		}
 	);
 
-	provider.registerServiceProvider("orion.edit.command.category", //$NON-NLS-1$
-		{},
-		{
-			id: "js.references", //$NON-NLS-1$
-			name: javascriptMessages['referencesMenuName'],
-			tooltip: javascriptMessages['referencesMenuTooltip']
-		});
 	var refscommand = new RefsCommand(ternWorker,
 		astManager,
 		scriptresolver,
@@ -718,7 +707,6 @@ define([
 	
 	provider.registerServiceProvider("orion.edit.references",
 		refscommand, {
-			name: javascriptMessages['projectRefsTooltip'],
 			contentType: ["application/javascript", "text/html"],
 			id: "orion.references.js"
 		}

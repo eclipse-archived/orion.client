@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2014, 2015 IBM Corporation and others.
+ * Copyright (c) 2014, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License v1.0
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution
@@ -48,13 +48,15 @@ define([
 	}
 
 	Objects.mixin(OpenDeclarationCommand.prototype, {
-		/* override */
-		execute: function(editorContext, options) {
-			var that = this;
+		
+		/**
+		 * @callback
+		 */
+		findDeclaration: function findDeclaration(editorContext, options) {
 			var deferred = new Deferred();
 			editorContext.getText().then(function(text) {
-				return that._findDecl(editorContext, options, text, deferred);
-			}, deferred.reject);
+				return this._findDecl(editorContext, options, text, deferred);
+			}.bind(this), deferred.reject);
 			return deferred;
 		},
 
@@ -95,13 +97,14 @@ define([
 								if(response.declaration.guess) {
 									return deferred.reject({Severity: 'Warning', Message: Messages['noDeclFound']}); //$NON-NLS-1$
 								} 
-								var opts = Object.create(null);
-								opts.start = response.declaration.start;
-								opts.end = response.declaration.end;
+								var value = Object.create(null);
+								value.start = response.declaration.start;
+								value.end = response.declaration.end;
 								if(this.openMode !== null && typeof this.openMode !== 'undefined') {
-									opts.mode = this.openMode;
+									value.mode = this.openMode;
 								}
-								return deferred.resolve(editorContext.openEditor(response.declaration.file, opts));
+								value.file = response.declaration.file;
+								return deferred.resolve(value);
 						} else if (response.declaration.origin) {
 							if(response.declaration.guess) {
 								return deferred.reject({Severity: 'Warning', Message: Messages['noDeclFound']}); //$NON-NLS-1$

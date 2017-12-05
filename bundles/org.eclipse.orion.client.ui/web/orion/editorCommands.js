@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2011, 2015 IBM Corporation and others.
+ * Copyright (c) 2011, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License v1.0
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution
@@ -152,6 +152,8 @@ define([
 		this.blamer = options.blamer;
 		this.formatter = options.formatter;
 		this.references = options.references;
+		this.openDecl = options.openDecl;
+		
 		var that = this;
 		this.listener = {
 			onServiceAdded: function(event) {
@@ -185,6 +187,8 @@ define([
 			this._createOpenRecentCommand();
 			this._createSwitchWorkspaceCommand();
 			this._createReferencesCommand();
+			this._createOpenDeclCommand();
+			
 			return this._createEditCommands();
 		},
 		//TODO: We need a better way invoke side bar action 
@@ -211,6 +215,7 @@ define([
 			this.blamer = target.blamer;
 			this.formatter = target.formatter;
 			this.references = target.references;
+			this.openDecl = target.openDecl;
 			this.textSearcher = target.textSearcher;
 			
 			if (this._recreateEditCommands) {
@@ -265,6 +270,7 @@ define([
 			commandRegistry.registerCommandContribution(this.toolbarId , "orion.edit.blame", 2, "orion.menuBarToolsGroup", false, new mKeyBinding.KeyBinding('b', true, true), new mCommandRegistry.URLBinding("blame", "blame"), this); //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-5$
 			commandRegistry.registerCommandContribution(this.toolbarId , "orion.edit.diff", 3, "orion.menuBarToolsGroup", false, new mKeyBinding.KeyBinding('d', true, true), new mCommandRegistry.URLBinding("diff", "diff"), this); //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-5$
 			commandRegistry.registerCommandContribution(this.toolbarId , "orion.edit.references", 5, "orion.menuBarToolsGroup", false, new mKeyBinding.KeyBinding('y', true, true), null, this);
+			commandRegistry.registerCommandContribution(this.toolbarId , "orion.edit.open.declaration", 5, "orion.menuBarToolsGroup", false, new mKeyBinding.KeyBinding(114, false, false), null, this);
 
 			// 'Delimiters' cascade
 			var index = 0;
@@ -322,7 +328,8 @@ define([
 			commandRegistry.registerCommandContribution(this.editorContextMenuId, "orion.edit.reloadWithEncoding", 1000, "orion.editorContextMenuGroup/orion.editorContextMenuToolsGroup"); //$NON-NLS-1$ //$NON-NLS-2$
 			commandRegistry.registerCommandContribution(this.editorContextMenuId , "orion.edit.blame", 1, "orion.editorContextMenuGroup/orion.editorContextMenuToolsGroup", false); //$NON-NLS-1$ //$NON-NLS-2$
 			commandRegistry.registerCommandContribution(this.editorContextMenuId , "orion.edit.diff", 2, "orion.editorContextMenuGroup/orion.editorContextMenuToolsGroup", false); //$NON-NLS-1$ //$NON-NLS-2$
-			commandRegistry.registerCommandContribution(this.editorContextMenuId , "orion.edit.references", 4, "orion.editorContextMenuGroup/orion.editorContextMenuToolsGroup", false);
+			commandRegistry.registerCommandContribution(this.editorContextMenuId , "orion.edit.references", 5, "orion.editorContextMenuGroup/orion.editorContextMenuToolsGroup", false);
+			commandRegistry.registerCommandContribution(this.editorContextMenuId , "orion.edit.open.declaration", 4, "orion.editorContextMenuGroup/orion.editorContextMenuToolsGroup", false);
 
 			// 'Delimiters' cascade
 			commandRegistry.addCommandGroup(this.editorContextMenuId, "orion.editorContextMenuDelimitersGroup", 999, messages["Convert Line Delimiters"], "orion.editorContextMenuGroup/orion.editorContextMenuToolsGroup"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
@@ -1019,6 +1026,45 @@ define([
 				}.bind(this)
 			});
 			this.commandService.addCommand(refsCommand);
+		},
+		
+		/**
+		 * @name _createReferencesCommand
+		 * @description Creates the retargettable 'References' command
+		 * @function
+		 * @private
+		 * @since 17.0
+		 */
+		_createOpenDeclCommand: function _createOpenDeclCommand(){
+			var declCommand = new mCommands.Command({
+				name: messages.OpenDeclaration,
+				tooltip: messages.OpenDeclarationTooltip,
+				id: "orion.edit.open.declaration",
+				parameters: new mCommandRegistry.ParametersDescription([new mCommandRegistry.CommandParameter('declaration', 'boolean')], {clientCollect: true}),
+				visibleWhen: /** @callback */ function(items, data) {
+					var inputManager = data.handler.inputManager || this.inputManager;
+					if (inputManager && inputManager.getReadOnly()) {
+						return false;
+					}
+					var editor = data.handler.editor || this.editor;
+					var decl = data.handler.openDecl || this.openDecl;
+					return editor && editor.installed && decl && decl.isVisible();
+				}.bind(this),
+				callback: /* @callback */ function(data) {
+					var statusService = this.serviceRegistry.getService("orion.page.message");
+					var progress = this.serviceRegistry.getService("orion.page.progress"); //$NON-NLS-0$
+					var msg = i18nUtil.formatMessage(messages.running, messages.FindDeclaration);
+					var serviceCall = this.openDecl.findDeclaration(data);
+					if (statusService) {
+						statusService.createProgressMonitor(serviceCall, msg);
+					}
+					progress.showWhile(serviceCall, msg).then(function(result) {
+						return this.editor.getEditorContext().openEditor(result.file, result);
+					}.bind(this));
+					this.editor.focus();
+				}.bind(this)
+			});
+			this.commandService.addCommand(declCommand);
 		},
 
 		_createDiffCommand: function(){
