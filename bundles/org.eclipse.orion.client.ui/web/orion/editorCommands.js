@@ -151,6 +151,7 @@ define([
 		this.differ = options.differ;
 		this.blamer = options.blamer;
 		this.formatter = options.formatter;
+		this.references = options.references;
 		var that = this;
 		this.listener = {
 			onServiceAdded: function(event) {
@@ -183,6 +184,7 @@ define([
 			this._createOpenFolderCommand();
 			this._createOpenRecentCommand();
 			this._createSwitchWorkspaceCommand();
+			this._createReferencesCommand();
 			return this._createEditCommands();
 		},
 		//TODO: We need a better way invoke side bar action 
@@ -208,6 +210,7 @@ define([
 			this.differ = target.differ;
 			this.blamer = target.blamer;
 			this.formatter = target.formatter;
+			this.references = target.references;
 			this.textSearcher = target.textSearcher;
 			
 			if (this._recreateEditCommands) {
@@ -261,6 +264,7 @@ define([
 			commandRegistry.registerCommandContribution(this.toolbarId , "orion.edit.showTooltip", 1, "orion.menuBarToolsGroup", false, null, null, this);//$NON-NLS-1$ //$NON-NLS-2$ 
 			commandRegistry.registerCommandContribution(this.toolbarId , "orion.edit.blame", 2, "orion.menuBarToolsGroup", false, new mKeyBinding.KeyBinding('b', true, true), new mCommandRegistry.URLBinding("blame", "blame"), this); //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-5$
 			commandRegistry.registerCommandContribution(this.toolbarId , "orion.edit.diff", 3, "orion.menuBarToolsGroup", false, new mKeyBinding.KeyBinding('d', true, true), new mCommandRegistry.URLBinding("diff", "diff"), this); //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-5$
+			commandRegistry.registerCommandContribution(this.toolbarId , "orion.edit.references", 5, "orion.menuBarToolsGroup", false, new mKeyBinding.KeyBinding('y', true, true), null, this);
 
 			// 'Delimiters' cascade
 			var index = 0;
@@ -318,6 +322,7 @@ define([
 			commandRegistry.registerCommandContribution(this.editorContextMenuId, "orion.edit.reloadWithEncoding", 1000, "orion.editorContextMenuGroup/orion.editorContextMenuToolsGroup"); //$NON-NLS-1$ //$NON-NLS-2$
 			commandRegistry.registerCommandContribution(this.editorContextMenuId , "orion.edit.blame", 1, "orion.editorContextMenuGroup/orion.editorContextMenuToolsGroup", false); //$NON-NLS-1$ //$NON-NLS-2$
 			commandRegistry.registerCommandContribution(this.editorContextMenuId , "orion.edit.diff", 2, "orion.editorContextMenuGroup/orion.editorContextMenuToolsGroup", false); //$NON-NLS-1$ //$NON-NLS-2$
+			commandRegistry.registerCommandContribution(this.editorContextMenuId , "orion.edit.references", 4, "orion.editorContextMenuGroup/orion.editorContextMenuToolsGroup", false);
 
 			// 'Delimiters' cascade
 			commandRegistry.addCommandGroup(this.editorContextMenuId, "orion.editorContextMenuDelimitersGroup", 999, messages["Convert Line Delimiters"], "orion.editorContextMenuGroup/orion.editorContextMenuToolsGroup"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
@@ -973,6 +978,47 @@ define([
 				}
 			});
 			this.commandService.addCommand(formatterCommand);
+		},
+		
+		/**
+		 * @name _createReferencesCommand
+		 * @description Creates the retargettable 'References' command
+		 * @function
+		 * @private
+		 * @since 17.0
+		 */
+		_createReferencesCommand: function _createReferencesCommand(){
+			var refsCommand = new mCommands.Command({
+				name: messages.References,
+				tooltip: messages.ReferencesTooltip,
+				id: "orion.edit.references",
+				parameters: new mCommandRegistry.ParametersDescription([new mCommandRegistry.CommandParameter('references', 'boolean')], {clientCollect: true}),
+				visibleWhen: /** @callback */ function(items, data) {
+					var inputManager = data.handler.inputManager || this.inputManager;
+					if (inputManager && inputManager.getReadOnly()) {
+						return false;
+					}
+					var editor = data.handler.editor || this.editor;
+					var refs = data.handler.references || this.references;
+					return editor && editor.installed && refs && refs.isVisible();
+				}.bind(this),
+				callback: /* @callback */ function(data) {
+					var statusService = this.serviceRegistry.getService("orion.page.message");
+					var progress = this.serviceRegistry.getService("orion.page.progress"); //$NON-NLS-0$
+					var msg = i18nUtil.formatMessage(messages.running, messages.FindReferences);
+					var serviceCall = this.references.findReferences(data);
+					if (statusService) {
+						statusService.createProgressMonitor(serviceCall, msg);
+					}
+					progress.showWhile(serviceCall, msg).then(function(result) {
+						if(this.sideBar) {
+							this.sideBar.fillSearchPane(result.searchParams, result.refResult ? result : null);
+						}
+					}.bind(this));
+					this.editor.focus();
+				}.bind(this)
+			});
+			this.commandService.addCommand(refsCommand);
 		},
 
 		_createDiffCommand: function(){

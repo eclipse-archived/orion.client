@@ -715,38 +715,12 @@ define([
 		scriptresolver,
 		CUProvider,
 		serviceRegistry);
-	provider.registerServiceProvider("orion.edit.command", //$NON-NLS-1$
-		{
-			/** @callback */
-			execute: function(editorContext, options) {
-				options.kind = 'project'; //$NON-NLS-1$
-				return refscommand.execute(editorContext, options);
-			}
-		},
-		{
-			name: javascriptMessages["projectRefsName"],
-			tooltip: javascriptMessages['projectRefsTooltip'],
-			parentPath: "js.references", //$NON-NLS-1$
-			id: "project.js.refs", //$NON-NLS-1$
-			key: ["y", true, true, false, false], //$NON-NLS-1$
-			contentType: ['application/javascript', 'text/html'] //$NON-NLS-1$ //$NON-NLS-2$
-		}
-	);
-	provider.registerServiceProvider("orion.edit.command", //$NON-NLS-1$
-		{
-			/** @callback */
-			execute: function(editorContext, options) {
-				options.kind = 'workspace'; //$NON-NLS-1$
-				return refscommand.execute(editorContext, options);
-			}
-		},
-		{
-			name: javascriptMessages["workspaceRefsName"],
-			tooltip: javascriptMessages['workspaceRefsTooltip'],
-			parentPath: "js.references", //$NON-NLS-1$
-			id: "workspace.js.refs", //$NON-NLS-1$
-			//key : [ "g", true, true, false, false],
-			contentType: ['application/javascript', 'text/html'] //$NON-NLS-1$ //$NON-NLS-2$
+	
+	provider.registerServiceProvider("orion.edit.references",
+		refscommand, {
+			name: javascriptMessages['projectRefsTooltip'],
+			contentType: ["application/javascript", "text/html"],
+			id: "orion.references.js"
 		}
 	);
 
