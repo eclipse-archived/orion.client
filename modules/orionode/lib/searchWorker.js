@@ -191,8 +191,7 @@ try {
 			filenamePatterns = buildFilenamePattern(searchOpts);
 			excludeFilenamePatterns = buildExcludeFilenamePattern(searchOpts);
 		} catch (err) {
-			Promise.reject(err);
-			return;
+			return Promise.reject(err);
 		}
 
 		var results = [];
