@@ -321,18 +321,6 @@ function getFileLocation(fileRoot, wwwpath, isDir) {
 }
 
 /**
- * Gets a boolean associated with a key. Copes with Orion server REST API's use of "true" and "false" strings.
- * @param {Object} obj
- * @param {String} key
- * @returns {Boolean} Returns <code>false</code> if there is no such key, or if the value is not the boolean <code>true</code> 
- * or the string <code>"true"</code>.
- */
-function getBoolean(obj, key) {
-	var val = obj[key];
-	return Object.prototype.hasOwnProperty.call(obj, key) && (val === true || val === 'true');
-}
-
-/**
  * File decorator interface.
  */
 exports.FileDecorator = FileDecorator;
@@ -492,7 +480,7 @@ function isWorkspaceFile(file) {
  * @param {?} metadataMixins Additional metadata to be mixed in to the File response.
  */
 exports.handleFilePOST = function(workspaceRoot, fileRoot, req, res, destFile, metadataMixins) {
-	var isDirectory = req.body && getBoolean(req.body, 'Directory'),
+	var isDirectory = req.body && req.body.Directory,
 		xCreateOptions = (req.headers['x-create-options'] || "").split(","),
 		isCopy = xCreateOptions.indexOf('copy') !== -1, 
 		isMove = xCreateOptions.indexOf('move') !== -1,

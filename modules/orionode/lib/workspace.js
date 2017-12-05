@@ -148,7 +148,6 @@ module.exports = function(options) {
 				// Create/Move/Rename a project
 				var projectLocation = api.join(fileRoot, workspace.id, projectName);
 				var file = fileUtil.getFile(req, api.join(workspace.id, projectName));
-				req.body.Directory = true;
 				return fileUtil.handleFilePOST(workspaceRoot, fileRoot, req, res, file, {
 					Id: projectName,
 					ContentLocation: projectLocation,
