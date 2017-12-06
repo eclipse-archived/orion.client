@@ -533,7 +533,7 @@ function updateApp(req, appTarget){
 }
 function getStackGuidByName(userId, stackname ,appTarget){
 	logger.debug("Getting stack guid=" + theApp.appName);
-	return target.cfRequest("GET", userId, appTarget.Url + "/v2/stacks", {"q":"name:"+ stackname,"inline-relations-depth":"1"})
+	return target.cfRequest("GET", userId, appTarget.Url + "/v2/stacks", {"q":"name:"+ stackname,"inline-relations-depth":"1"}, null, null, null, appTarget)
 	.then(function(result){
 		return result.resources[0] && result.resources[0].metadata.guid || null;
 	});
