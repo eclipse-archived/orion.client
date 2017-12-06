@@ -56,7 +56,7 @@ module.exports.router = function() {
 					},
 					encoding: null
 				};
-				return target.cfRequest(null, null, null, null, null, null, logzHeader);
+				return target.cfRequest(null, null, null, null, null, null, logzHeader, targetRequest);
 			});
 		}).then(function(response) {
 			var body = response.body;

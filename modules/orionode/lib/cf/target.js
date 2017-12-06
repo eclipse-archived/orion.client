@@ -78,7 +78,7 @@ function tryLogin(url, Username, Password, userId){
 		url: url + "/v2/info",
 		headers: {"Accept": "application/json",	"Content-Type": "application/json"}
 	};
-	return cfRequest(null, null, null, null, null, null, infoHeader)
+	return cfRequest(null, null, null, null, null, null, infoHeader, {Url: url})
 	.then(function(response){
 		var authorizationEndpoint = response.authorization_endpoint;
 		return new Promise(function(fulfill, reject) {

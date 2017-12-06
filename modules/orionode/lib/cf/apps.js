@@ -632,7 +632,7 @@ function uploadBits(req, appTarget){
 				return Promise.reject(errorStatus);
 			});
 			logger.debug("Upload application content(upload start)=" + theApp.appName);
-			return target.cfRequest(null, null, null ,null, null, null,uploadBitsHeader);
+			return target.cfRequest(null, null, null ,null, null, null,uploadBitsHeader, appTarget);
 		}).then(function(requestResult){
 			logger.debug("Upload application content(upload done)=" + theApp.appName);
 			var ATTEMPTACCOUNT = 150;
