@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2016 IBM Corporation and others.
+ * Copyright (c) 2016, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -12,7 +12,8 @@
 /*eslint-env browser, amd*/
 
 define ([
-], function() {
+	'orion/Deferred'
+], function(Deferred) {
 	
 	function Formatter(serviceRegistry, inputManager, editor) {
 		this.serviceRegistry = serviceRegistry;
@@ -53,6 +54,7 @@ define ([
 				var context = {start: selection.start, end: selection.end};
 				return service.format(this.editor.getEditorContext(), context);
 			}
+			return new Deferred().resolve();
 		}
 	};
 	return {Formatter: Formatter}; 
