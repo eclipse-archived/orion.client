@@ -274,8 +274,8 @@ function cfRequest (method, userId, url, query, body, headers, requestHeader, ta
 		});
 	});
 }
-function fullTarget(req,target){
-	if(req.headers['accept-language']){	
+function fullTarget(req, target){
+	if(req.headers['accept-language'] && target) {
 		target['accept-language'] = req.headers['accept-language'];
 	}
 	return target;
