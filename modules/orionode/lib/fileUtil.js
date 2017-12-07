@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012, 2016, 2017 IBM Corporation and others.
+ * Copyright (c) 2012, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -620,8 +620,14 @@ exports.deleteFile = function(req, file, matchEtag, callback) {
 			}
 			done(error);
 		}
-		if (error && error.code === 'ENOENT') {
-			return checkMetadata();
+		if (error) {
+			if(error.code === 'ENOENT') {
+				return checkMetadata();
+			} else if(error.code === 'ENAMETOOLONG') {
+				var err = new Error("Requested file path is too long");
+				err.code = 400;
+				return callback(err);
+			}
 		} else if (matchEtag && matchEtag !== etag) {
 			var err = new Error("");
 			err.code = 412;

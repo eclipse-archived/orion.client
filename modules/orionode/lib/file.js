@@ -208,11 +208,15 @@ module.exports = function(options) {
 			});
 		}
 		return fileUtil.withStatsAndETag(file.path, function(error, stats, etag) {
-			if (error && error.code === 'ENOENT') {
-				if(typeof readIfExists === 'boolean' && readIfExists) {
-					api.sendStatus(204, res);
-				} else {
-					writeError(404, res, 'File not found: ' + rest);
+			if (error) {
+				if(error.code === 'ENOENT') {
+					if(typeof readIfExists === 'boolean' && readIfExists) {
+						api.sendStatus(204, res);
+					} else {
+						writeError(404, res, 'File not found: ' + rest);
+					}
+				} else if(error.code === 'ENAMETOOLONG') {
+					writeError(400, res, 'The given file path is too long: '+file.path);
 				}
 			} else if (error) {
 				writeError(500, res, error);
@@ -269,6 +273,9 @@ module.exports = function(options) {
 			});
 		}
 		return fileUtil.withStatsAndETag(file.path, function(error, stats, etag) {
+			if(error && error.code === 'ENAMETOOLONG') {
+				return api.writeError(400, res);
+			}
 			if(stats && stats.isDirectory()) {
 				return api.writeError(400, res, "Cannot write contents to a folder: "+file.path);
 			}
