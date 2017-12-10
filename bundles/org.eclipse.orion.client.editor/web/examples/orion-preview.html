@@ -1,55 +1,47 @@
-<div class="editorSection">
-	<div class="editorSectionHeader" style="padding-top: 12px; padding-bottom: 11.5px;"><span>Theme Preview</span></div>
-	<div id="containerPreview" style="position: absolute; margin: 4px; height: 90%; width: 90%;">
+<section class="editorSection" aria-label=${Preview}>
+	<div id="themePreviewTitle" class="editorSectionHeader" style="padding-top: 12px; padding-bottom: 11.5px;"><span>${Theme Preview}</span></div>
+	<div id="containerPreview" role="img" aria-labelledby="themePreviewTitle" style="position: absolute; margin: 4px; height: 90%; width: 90%;">
 		<div id="orion-editor" spellcheck="false" class="orionPage lightPage">
-			<header id="banner" role="banner" class="headerLayout" style="height: 0;">
-				<nav id="navbar"></nav>
-				<div id="notificationArea" class="notificationHide">
-					<div class="notifications" id="notifications" aria-live="assertive" aria-atomic="true"></div>
-					<div class="layoutRight"><button type="button" aria-label="Close notification" class="dismissButton layoutRight core-sprite-close imageSprite" id="closeNotifications" style="cursor: pointer;"></button></div>
-				</div>
-			</header>
-			<input id="fileSelectorInput" type="file" multiple="" style="position:fixed; top: -100px; visibility: hidden;" tabindex="-1" aria-hidden="true">
-			<nav id="sideMenu" class="sideMenu" aria-label="Sidebar" style="top: 0;">
+			<div class="sideMenu" aria-label="${Sidebar}" style="top: 0;">
 				<div class="sideMenuHome"></div>
 				<button class="sideMenuScrollButton sideMenuTopScrollButton core-sprite-openarrow"></button>
 				<ul class="sideMenuList">
-					<li class="sideMenuItem sideMenu-notification sideMenuItemActive"><a class="submenu-trigger core-sprite-edit" aria-label="Editor"  aria-current="page" href="#"></a></li>
-					<li class="sideMenuItem sideMenu-notification"><a class="submenu-trigger core-sprite-git-logo" aria-label="Git" href="#"></a></li>
-					<li class="sideMenuItem sideMenu-notification"><a class="submenu-trigger core-sprite-shell" aria-label="Shell" href="#"></a></li>
-					<li class="sideMenuItem sideMenu-notification"><a class="submenu-trigger core-sprite-sites" aria-label="Sites" href="#"></a></li>
-					<li class="sideMenuItem sideMenu-notification"><a class="submenu-trigger core-sprite-gear" aria-label="Settings" href="#"></a></li>
+					<li class="sideMenuItem sideMenu-notification sideMenuItemActive"><a class="submenu-trigger core-sprite-edit" aria-label="${EditorPage}"  aria-current="page" href="#"></a></li>
+					<li class="sideMenuItem sideMenu-notification"><a class="submenu-trigger core-sprite-git-logo" aria-label="${Git}" href="#"></a></li>
+					<li class="sideMenuItem sideMenu-notification"><a class="submenu-trigger core-sprite-shell" aria-label="${Shell}" href="#"></a></li>
+					<li class="sideMenuItem sideMenu-notification"><a class="submenu-trigger core-sprite-sites" aria-label="${Sites}" href="#"></a></li>
+					<li class="sideMenuItem sideMenu-notification"><a class="submenu-trigger core-sprite-gear" aria-label="${Settings}" href="#"></a></li>
 				</ul>
 				<button class="sideMenuScrollButton sideMenuBottomScrollButton core-sprite-openarrow"></button>
-			</nav>
-			<div id="pageContent" class="content-fixedHeight" style="top: 0;">
-				<div id="sideMenuToggle" class="sideMenuToggle"></div>
-				<div id="pageToolbar" class="mainToolbar toolComposite toolbarLayout">
-					<ul id="fileActions" class="commandList layoutLeft pageActions">
-						<li>
-							<button class="dropdownTrigger orionButton commandButton" style="visibility: visible;">
-								File<!--span class="dropdownArrowDown core-sprite-openarrow"></span-->
+			</div>
+			<div class="content-fixedHeight" style="top: 0;">
+				<div class="sideMenuToggle"></div>
+				<div class="mainToolbar toolComposite toolbarLayout">
+					<ul role="menubar" class="commandList layoutLeft pageActions">
+						<li role="none">
+							<button class="dropdownTrigger orionButton commandButton" aria-haspopup="true" aria-expanded="false">
+								${File}
 							</button>
 						</li>
 					</ul>
-					<ul id="editActions" class="commandList layoutLeft pageActions">
-						<li>
-							<button class="dropdownTrigger orionButton commandButton" style="visibility: visible;">
-								Edit<!--span class="dropdownArrowDown core-sprite-openarrow"></span-->
+					<ul class="commandList layoutLeft pageActions">
+						<li role="none">
+							<button class="dropdownTrigger orionButton commandButton" aria-haspopup="true" aria-expanded="false">
+								${Edit}
 							</button>
 						</li>
 					</ul>
-					<ul id="viewActions" class="commandList layoutLeft pageActions">
-						<li>
-							<button class="dropdownTrigger orionButton commandButton" style="visibility: visible;">
-								View<!--span class="dropdownArrowDown core-sprite-openarrow"></span-->
+					<ul class="commandList layoutLeft pageActions">
+						<li role="none">
+							<button class="dropdownTrigger orionButton commandButton" aria-haspopup="true" aria-expanded="false">
+								${View}
 							</button>
 						</li>
 					</ul>
-					<ul id="toolsActions" class="commandList layoutLeft pageActions">
-						<li>
-							<button class="dropdownTrigger orionButton commandButton" style="visibility: visible;">
-								Tools<!--span class="dropdownArrowDown core-sprite-openarrow"></span-->
+					<ul class="commandList layoutLeft pageActions">
+						<li role="none">
+							<button class="dropdownTrigger orionButton commandButton" aria-haspopup="true" aria-expanded="false">
+								${Tools}
 							</button>
 						</li>
 					</ul>
@@ -58,22 +50,21 @@
 						<div id="runBarWrapper" class="runBarWrapper">
 							<div class="launchConfigurationsWrapper" style="border-radius:5px; display: inline-block; margin: 0 8px 0 0; min-width 270 px; z-index: 60">
 								<button class="dropdownTrigger orionButton commandButton launchConfigurationsButton" style="border-radius: 5px">
-								<span class="dropdownTriggerButtonLabel" style="align-items: center; display: inline-flex; overflow:hidden; text-overflow: ellipsis; vertical-align: top; white-space:nowrap">Create new launch configuration</span>
+								<span class="dropdownTriggerButtonLabel" style="align-items: center; display: inline-flex; overflow:hidden; text-overflow: ellipsis; vertical-align: top; white-space:nowrap">${Create new launch configuration}</span>
 								<span class="dropdownArrowDown core-sprite-openarrow"></span>
 								</button>
-								<ul class="dropdownMenu" tabindex="0"></ul>
 							</div>
-							<button id="runBarPlayButton" class="runBarButton playButton core-sprite-play disabled" aria-label="Deploy" disabled="true" aria-disabled="true"></button>
-							<button id="runBarStopButton" class="runBarButton stopButton core-sprite-stop disabled" aria-label="Stop" disabled="true" aria-disabled="true"></button>
-							<a id="runBarAppLink" class="runBarLink appLink core-sprite-open disabled" target="_blank" aria-label="Open App" disabled="true" aria-disabled="true"></a>
-							<a id="runBarLogsLink" class="runBarLink logsLink core-sprite-runlogs disabled" target="_blank" aria-label="Logs" disabled="true" aria-disabled="true"></a>
+							<button id="runBarPlayButton" class="commandImage playButton core-sprite-play" aria-label="${Deploy}"></button>
+							<button id="runBarStopButton" class="commandImage stopButton core-sprite-stop" aria-label="${Stop}"></button>
+							<a id="runBarAppLink" class="commandImage appLink core-sprite-open" target="_blank" href="#" aria-label="${Open App}"></a>
+							<a id="runBarLogsLink" class="commandImage logsLink core-sprite-runlogs" target="_blank" href="#" aria-label="${Logs}"></a>
 						</div>
 					</div>
 					<div class="layoutFlexStretch"></div>
-					<div class="layoutRight status" id="statusPane" role="status" aria-live="off"></div>
-					<button class="layoutRight progressWatch" id="progressPane" aria-label="Operations">
-						<div id="watchButton" class="watchButton"></div>
-						<div id="watchBody" class="watchBody">
+					<div class="layoutRight status"></div>
+					<button class="layoutRight progressWatch" aria-label="${Operations}">
+						<div class="watchButton"></div>
+						<div class="watchBody">
 							<span class="hand longMinute">
 							<span class="darkSide"></span>
 							</span>
@@ -82,42 +73,36 @@
 							</span>
 						</div>
 					</button>
-					<ul class="layoutRight commandList pageActions" id="pageNavigationActions"></ul>
-					<ul class="layoutRight commandList pageActions" id="settingsActions">
+					<ul class="layoutRight commandList pageActions"></ul>
+					<ul class="layoutRight commandList pageActions">
 						<li>
-							<button class="dropdownTrigger dropdownButtonWithIcon commandImage orionButton" aria-label="Single Page"><span class="commandSprite core-sprite-page"></span></button>
-							<ul class="dropdownMenu" tabindex="0"></ul>
+							<button class="dropdownTrigger dropdownButtonWithIcon commandImage orionButton" aria-label="${Single Page}"><span class="commandSprite core-sprite-page"></span></button>
 						</li>
 					</ul>
-					<ul class="layoutRight commandList pageActions userMenu" id="userMenu">
+					<ul class="layoutRight commandList pageActions userMenu">
 						<li>
-							<button id="userTrigger" class="dropdownTrigger commandImage" aria-label="Help">
+							<button class="dropdownTrigger commandImage" aria-label="${Help}">
 							<span class="commandSprite core-sprite-silhouette"></span>
 							</button>
 						</li>
 					</ul>
-					<div id="mainToolbarslideContainer" class="slideParameters slideContainer">
-						<span id="mainToolbarpageCommandParameters" class="layoutLeft parameters"></span>
-						<span id="mainToolbarpageCommandDismiss" class="layoutRight parametersDismiss"></span>
-					</div>
 				</div>
-				<div id="innerPanels" class="innerPanels">
-					<div id="auxpane" class="auxpane sidePanelLayout hasSplit" style="position: absolute; top: auto; bottom: auto; height: 100%; left: 0px; right: auto; width: 497px; visibility: visible; display: block;">
-						<div class="fixedToolbarHolder sidebarWrapper">
-							<span id="sidebarToolbar" class="sidebarToolbar mainToolbar toolComposite toolbarLayout">
+				<div class="innerPanels">
+					<div class="auxpane sidePanelLayout hasSplit" style="position: absolute; top: auto; bottom: auto; height: 100%; left: 0px; right: auto; width: 497px; visibility: visible; display: block;">
+						<div class="fixedToolbarHolder sidebarWrapper desktopmode">
+							<span class="sidebarToolbar mainToolbar toolComposite toolbarLayout">
 								<div class="filesystemSwitcherWrapper">
-									<div class="filesystemName">Orion Content (localhost)</div>
+									<div class="filesystemName">${Orion Content (localhost)}</div>
 									<ul class="filesystemSwitcher commandList pageActions">
 										<li>
-											<button class="dropdownTrigger dropdownButtonWithIcon commandImage orionButton" aria-label="Choose Filesystem"><span class="commandSprite core-sprite-openarrow"></span></button>
-											<ul class="dropdownMenu" tabindex="0" style="position: fixed;"></ul>
+											<button class="dropdownTrigger dropdownButtonWithIcon commandImage orionButton" aria-label="${Choose Filesystem}"><span class="commandSprite core-sprite-openarrow"></span></button>
 										</li>
 									</ul>
 								</div>
 							</span>
 							<div id="pageSidebar" class="dropdownTrigger toolbarTarget sidebar selectionModelContainer" tabindex="0">
-								<div role="tree" aria-activedescendant="pageSidebarfile.definitionsNameLink">
-									<table aria-label="Navigator" role="presentation" id="pageSidebarinnerTree" class="miniNavTreeTable">
+								<div role="tree" aria-label="${Navigator}" aria-activedescendant="pageSidebarfile.definitions" tabindex="-1" style="outline: none;">
+									<table role="presentation" id="pageSidebarinnerTree" class="miniNavTreeTable">
 										<tbody id="pageSidebarinnerTreetbody">
 											<tr id="pageSidebarfile.definitions" class="navRow treeTableRow selectableNavRow treeIterationCursorRow checkedRow" role="treeitem">
 												<!--CSS class added to resolve conflict with settings.css-->
@@ -140,7 +125,7 @@
 					<div class="split splitLayout" style="left: 497px; position: absolute; right: auto; visibility: visible;">
 						<div class="splitThumb splitThumbLeftLayout"></div>
 					</div>
-					<div id="rightPane" class="mainpane mainPanelLayout hasSplit" style="position: absolute; top: auto; bottom: auto; height: 100%; width: auto; right: 0px; left: 500px; display: block;">
+					<div class="mainpane mainPanelLayout hasSplit" style="position: absolute; top: auto; bottom: auto; height: 100%; width: auto; right: 0px; left: 500px; display: block;">
 						<div class="fixedToolbarHolder">
 						</div>
 					</div>
@@ -148,4 +133,4 @@
 			</div>
 		</div>
 	</div>
-</div>
+</section>

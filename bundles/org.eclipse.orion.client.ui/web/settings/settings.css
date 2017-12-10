@@ -4,7 +4,7 @@
 @import "../css/images.css";
 @import "./services.css";
 @import "../css/theme.css";
-@import "../orion/editor/editor.css";
+@import "../edit/edit.css";
 
 #pluginUrlEntry {
 	background: white;
