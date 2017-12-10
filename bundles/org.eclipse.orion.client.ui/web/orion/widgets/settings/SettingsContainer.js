@@ -393,7 +393,7 @@ define([
 				commandService: this.commandService, 
 				preferences: themePreferences, 
 				themeData: containerTheme, 
-				toolbarId: 'ideThemeSettingsToolActionsArea',
+				toolbarId: 'containerThemeSettingsToolActionsArea',
 				scopeList: scopeList,
 				previewWidget: previewWidget,
 				setup: setup,
@@ -405,7 +405,7 @@ define([
 			
 			var editorPreferences = new mEditorPreferences.EditorPreferences (this.preferences);
 			this.containerThemeSettings = new ThemeSettings({
-				id: "ideThemeSettings",
+				id: "containerThemeSettings",
 				title: messages.IDEThemes,
 				registry: this.registry,
 				preferences: editorPreferences,
