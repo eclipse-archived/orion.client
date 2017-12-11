@@ -220,7 +220,7 @@ function completeTransfer(req, res, tempFile, file, fileName, xferOptions, shoul
 					if (failed.length) {
 						return overrideError(failed);
 					}
-					res.setHeader("Location", api.join(fileRoot, file.workspaceId, file.path.substring(file.workspaceDir.length+1)));
+					res.setHeader("Location", fileUtil.encodeSlug(api.join(fileRoot, file.workspaceId, file.path.substring(file.workspaceDir.length+1))));
 					writeResponse(201, res);
 					res = null;
 				}
@@ -280,7 +280,7 @@ function completeTransfer(req, res, tempFile, file, fileName, xferOptions, shoul
 			if (err) {
 				return writeError(400, res, "Transfer failed");
 			}
-			res.setHeader("Location", api.join(fileRoot, file.workspaceId, file.path.substring(file.workspaceDir.length+1)));
+			res.setHeader("Location", fileUtil.encodeSlug(api.join(fileRoot, file.workspaceId, file.path.substring(file.workspaceDir.length+1))));
 			writeResponse(201, res);
 		});
 	}

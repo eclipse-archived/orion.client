@@ -275,6 +275,12 @@ exports.decodeSlug = function(slug) {
 	return slug;
 };
 
+
+exports.encodeSlug = function(slug) {
+	if (typeof slug === "string") return encodeURIComponent(slug);
+	return slug;
+};
+
 /**
  * Gets the stats for filepath and calculates the ETag based on the bytes in the file.
  * @param {Function} callback Invoked as callback(error, stats, etag) -- the etag can be null if filepath represents a directory.
