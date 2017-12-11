@@ -175,7 +175,7 @@ html[dir="rtl"] .mainToolbar .sectionWrapper { /* ACGC */
 	-webkit-flex: 0 0 auto;
 }
 
-.sidebar > .sectionWrapper {
+.sidebar > .orionSection > .sectionWrapper {
 	margin: 0;
 	flex: 0 0 auto;
 	-ms-flex: 0 0 auto;
@@ -186,7 +186,7 @@ html[dir="rtl"] .mainToolbar .sectionWrapper { /* ACGC */
 	background-color: white;
 }
 
-.sidebar > .sectionTable {
+.sidebar > .orionSection > .sectionTable {
 	margin: 0;
 	background-color: #fcfcfc;
 	flex: 1 0;
@@ -366,6 +366,9 @@ table .sectionTable {
 	top: 0;
 	box-shadow: none;
 	overflow: visible;
+}
+
+.workingTarget > .orionSection {
 	display: -webkit-box;
 	display: -moz-box;
 	display: -ms-flexbox;
@@ -374,10 +377,15 @@ table .sectionTable {
 	flex-direction: column;
 	-ms-flex-direction: column;
 	-webkit-flex-direction: column;
+	height: 100%;
 }
 
 .sidebar {
 	overflow: visible;
+}
+
+.sidebar > .orionSection {
+	top: 0;
 	display: -webkit-box;
 	display: -moz-box;
 	display: -ms-flexbox;
@@ -386,6 +394,7 @@ table .sectionTable {
 	flex-direction: column;
 	-ms-flex-direction: column;
 	-webkit-flex-direction: column;
+	height: 100%;
 }
 
 .sidebarWrapper > .sidebar {

@@ -66,14 +66,19 @@ define([
 		if (!options.title) {
 			throw new Error("Missing required argument: title"); //$NON-NLS-0$
 		}
+		
+		// create the section container
+		this._sectionContainer = document.createElement("div"); //$NON-NLS-0$;
+		this._sectionContainer.classList.add("orionSection"); //$NON-NLS-0$
 
 		// setting up the section
 		var wrapperClasses = options.useAuxStyle ? ["sectionWrapper", "sectionWrapperAux", "toolComposite"] : ["sectionWrapper", "toolComposite"]; //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		this.domNode = document.createElement("div"); //$NON-NLS-0$
+		this._sectionContainer.appendChild(this.domNode);
 		if (options.sibling) {
-			parent.insertBefore(this.domNode, options.sibling);
+			parent.insertBefore(this._sectionContainer, options.sibling);
 		} else {
-			parent.appendChild(this.domNode);
+			parent.appendChild(this._sectionContainer);
 		}
 		for(var i=0; i<wrapperClasses.length; i++) {
 			this.domNode.classList.add(wrapperClasses[i]);
@@ -107,7 +112,7 @@ define([
 			}, false);
 			this.domNode.addEventListener("keydown", function(evt) { //$NON-NLS-0$
 				if (evt.target === that.domNode || evt.target === that.titleNode || evt.target === that.twistie) {
-					if(evt.keyCode === lib.KEY.ENTER) {
+					if(evt.keyCode === lib.KEY.ENTER || evt.keyCode === lib.KEY.SPACE) {
 						that._changeExpandedState();
 						evt.preventDefault();
 					} else if(evt.keyCode === lib.KEY.DOWN && that.dropdown) {
@@ -213,23 +218,26 @@ define([
 		searchbox.id = options.id + "FilterSearchBox"; //$NON-NLS-0$
 		this.domNode.appendChild(searchbox);
 		
+		this._toolRightActionsNode = document.createElement("div"); //$NON-NLS-0$
+		this._toolRightActionsNode.classList.add("layoutRight"); //$NON-NLS-0$
 		this._toolActionsNode = document.createElement("div"); //$NON-NLS-0$
 		this._toolActionsNode.id = options.id + "ToolActionsArea"; //$NON-NLS-0$
-		this._toolActionsNode.classList.add("layoutRight"); //$NON-NLS-0$
+		this._toolActionsNode.classList.add("layoutLeft"); //$NON-NLS-0$
 		this._toolActionsNode.classList.add("sectionActions"); //$NON-NLS-0$
-		this.domNode.appendChild(this._toolActionsNode);
-		this.actionsNode = document.createElement("ul"); //$NON-NLS-0$
-		this.actionsNode.id = options.id + "ActionArea"; //$NON-NLS-0$
-		this.actionsNode.classList.add("layoutRight"); //$NON-NLS-0$
-		this.actionsNode.classList.add("commandList"); //$NON-NLS-0$
-		this.actionsNode.classList.add("sectionActions"); //$NON-NLS-0$
-		this.domNode.appendChild(this.actionsNode);
+		this._toolRightActionsNode.appendChild(this._toolActionsNode);
 		this.selectionNode = document.createElement("ul"); //$NON-NLS-0$
 		this.selectionNode.id = options.id + "SelectionArea"; //$NON-NLS-0$
-		this.selectionNode.classList.add("layoutRight"); //$NON-NLS-0$
+		this.selectionNode.classList.add("layoutLeft"); //$NON-NLS-0$
 		this.selectionNode.classList.add("commandList"); //$NON-NLS-0$
 		this.selectionNode.classList.add("sectionActions"); //$NON-NLS-0$
-		this.domNode.appendChild(this.selectionNode);
+		this._toolRightActionsNode.appendChild(this.selectionNode);
+		this.actionsNode = document.createElement("ul"); //$NON-NLS-0$
+		this.actionsNode.id = options.id + "ActionArea"; //$NON-NLS-0$
+		this.actionsNode.classList.add("layoutLeft"); //$NON-NLS-0$
+		this.actionsNode.classList.add("commandList"); //$NON-NLS-0$
+		this.actionsNode.classList.add("sectionActions"); //$NON-NLS-0$
+		this._toolRightActionsNode.appendChild(this.actionsNode);
+		this.domNode.appendChild(this._toolRightActionsNode);
 		
 		if(options.slideout){
 			var slideoutFragment = mHTMLFragments.slideoutHTMLFragment(options.id);
@@ -242,24 +250,22 @@ define([
 		this._contentParent = document.createElement("div"); //$NON-NLS-0$
 		this._contentParent.id = this.id + "Content"; //$NON-NLS-0$
 		this._contentParent.classList.add("sectionTable"); //$NON-NLS-0$
-		this._contentParent.setAttribute("aria-labelledby", this.titleNode.id); //$NON-NLS-0$
 
 		// if dropdown, mark up _contentParent as combo's dropdown or dialog button's popup
 		if (options.dropdown) {
 			this._contentParent.classList.add("sectionDropdown");
 			this._contentParent.setAttribute("role", "dialog"); //$NON-NLS-1$ //$NON-NLS-0$
-			this.titleNode.setAttribute("aria-controls", this._contentParent.id); //$NON-NLS-0$
+			this._contentParent.setAttribute("aria-labelledby", this.titleNode.id); //$NON-NLS-0$
 			this.domNode.setAttribute("aria-owns", this._contentParent.id); //$NON-NLS-0$
 		} else {
-			this._contentParent.setAttribute("role", "region"); //$NON-NLS-1$ //$NON-NLS-0$
+			// if not dropdown, mark up _sectionContainer as region landmark
+			this._sectionContainer.setAttribute("role", "region"); //$NON-NLS-1$ //$NON-NLS-0$
+			this._sectionContainer.setAttribute("aria-labelledby", this.titleNode.id); //$NON-NLS-0$
 		}
+		
 		// initially style as hidden until we determine what needs to happen
 		this._collapse();
-		if (options.sibling) {
-			parent.insertBefore(this._contentParent, options.sibling);
-		} else {
-			parent.appendChild(this._contentParent);
-		}
+		this._sectionContainer.appendChild(this._contentParent);
 
 		if(options.content){
 			this.setContent(options.content);
@@ -335,6 +341,11 @@ define([
 				parent = this._contentParent.parentNode;
 				if (parent) parent.removeChild(this._contentParent);
 				this._contentParent = null;
+			}
+			if (this._sectionContainer) {
+				parent = this._sectionContainer.parentNode;
+				if (parent) parent.removeChild(this._sectionContainer);
+				this._sectionContainer = null;
 			}
 		},
 			
