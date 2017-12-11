@@ -22,6 +22,7 @@ var express = require('express'),
 	log4js = require('log4js'),
 	logger = log4js.getLogger("user"),
 	jwt = require('jsonwebtoken'),
+	checkRights = require('./accessRights').checkRights
 	responseTime = require('response-time');
 	
 var AUTH_TOKEN_BYTES = 48;
@@ -263,8 +264,10 @@ module.exports.router = function(options) {
 		if (!req.user || !(req.params.id === req.user.username || isAdmin(req.user.username))) {
 			return api.writeResponse(403, res);
 		}
-		var uri = req.originalUrl.substring(req.baseUrl.length + (typeof req.contextPath === 'string' ? req.contextPath.length : 0));
-		req.user.checkRights(req.user.username, uri, req, res, next);
+		var contextPath = options.configParams.get("orion.context.path") || "";
+		var listenContextPath = options.configParams.get("orion.context.listenPath") || false;
+		var uri = req.originalUrl.substring(listenContextPath ? contextPath.length : 0);
+		checkRights(req.user.username, uri, req, res, next);
 	}
 
 	app.get("/users", options.authenticate, checkUserAccess, function(req,res) {
