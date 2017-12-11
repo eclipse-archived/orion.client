@@ -1337,7 +1337,8 @@ maybeDescribe("git", function() {
 				request()
 				.post(WORKSPACE_ROOT)
 				.send({
-					"Name":  ParentFolder
+					"Name":  ParentFolder,
+					Directory: true
 				})
 				.expect(201)
 				.end(function(err, res){

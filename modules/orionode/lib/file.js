@@ -217,9 +217,11 @@ module.exports = function(options) {
 					}
 				} else if(error.code === 'ENAMETOOLONG') {
 					writeError(400, res, 'The given file path is too long: '+file.path);
+				} else if(error.code === 'ENOTDIR') {
+					writeError(400, res, 'Resource is not a folder: '+file.path);
+				} else {
+					writeError(500, res, error);
 				}
-			} else if (error) {
-				writeError(500, res, error);
 			} else if (stats.isFile() && getParam(req, 'parts') !== 'meta') {
 				// GET file contents
 				writeFileContents(res, file.path, stats, etag);
@@ -273,7 +275,7 @@ module.exports = function(options) {
 			});
 		}
 		return fileUtil.withStatsAndETag(file.path, function(error, stats, etag) {
-			if(error && error.code === 'ENAMETOOLONG') {
+			if(error && (error.code === 'ENAMETOOLONG' || error.code === 'ENOTDIR')) {
 				return api.writeError(400, res);
 			}
 			if(stats && stats.isDirectory()) {
@@ -284,8 +286,12 @@ module.exports = function(options) {
 				return write();
 			} else if (ifMatchHeader !== etag) {
 				return api.writeResponse(412, res);
-			} else if (error && error.code === 'ENOENT') {
-				return api.writeResponse(404, res);
+			} else if (error) {
+				if(error.code === 'ENOENT') {
+					return api.writeResponse(404, res);
+				} else if(error.code === 'ENOTDIR') {
+					return api.writeResponse(400, res);
+				}
 			}
 			write();
 		});

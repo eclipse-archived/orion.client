@@ -100,6 +100,7 @@ describe("Workspace endpoint", function() {
 			request()
 				.post(ws.Location)
 				.set('Slug', 'testMoveFolderToProjectSrc')
+				.send({Location: 'testMoveFolderToProjectSrc', Directory: true})
 				.expect(201)
 				.end(function(err, res) {
 					testHelper.throwIfError(err);
@@ -185,6 +186,7 @@ describe("Workspace endpoint", function() {
 			request()
 				.post(ws.Location)
 				.set('Slug', 'testMoveProjectToFolderSrc')
+				.send({Location: 'testMoveProjectToFolderSrc', Directory: true})
 				.expect(201)
 				.end(function(err, res) {
 					testHelper.throwIfError(err);
@@ -192,6 +194,7 @@ describe("Workspace endpoint", function() {
 					request()
 						.post(ws.Location)
 						.set('Slug', 'someFolder')
+						.send({Location: 'someFolder', Directory: true})
 						.expect(201)
 						.end(function(err, res) {
 							testHelper.throwIfError(err);
@@ -215,6 +218,7 @@ describe("Workspace endpoint", function() {
 				request()
 					.post(wLoc)
 					.set('Slug', 'testMoveProjectToFolderSrc') // create the project to move
+					.send({Location: 'testMoveProjectToFolderSrc', Directory: true})
 					.expect(201)
 					.end(function(err, res) {
 						testHelper.throwIfError(err);
@@ -222,6 +226,7 @@ describe("Workspace endpoint", function() {
 						request()
 							.post(wLoc)
 							.set('Slug', 'someOtherProject') //create the other project to move to 
+							.send({Location: 'someOtherProject', Directory: true})
 							.expect(201)
 							.end(function(err, res) {
 								testHelper.throwIfError(err);
@@ -387,6 +392,7 @@ describe("Workspace endpoint", function() {
 			request()
 				.post(ws.Location)
 				.set('Slug', 'testGetProjectMetadata')
+				.send({Location: 'testGetProjectMetadata', Directory: true})
 				.expect(201)
 				.end(function(err, res) {
 					testHelper.throwIfError(err);
