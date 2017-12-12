@@ -142,7 +142,7 @@ describe("Orion metastore", function() {
 						request()
 							.post(ws)
 							.set('Slug', 'testCreateProjectWithDuplicateProjectName')
-							.expect(500)  // _createProjectMetadata will happen first to check duplication, and 500 will be sent back
+							.expect(200)
 							.end(done);
 					});
 			});
@@ -350,7 +350,7 @@ describe("Orion metastore", function() {
 				request()
 					.post(res.body.Location)
 					.type('json')
-					.send({Name: 'testReadProject'})
+					.send({Name: 'testReadProject', Directory: true})
 					.expect(201)
 					.end(function(err, res) {
 						testHelper.throwIfError(err);

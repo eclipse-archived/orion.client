@@ -633,6 +633,10 @@ exports.deleteFile = function(req, file, matchEtag, callback) {
 				var err = new Error("Requested file path is too long");
 				err.code = 400;
 				return callback(err);
+			} else if(error.code === 'ENOTDIR') {
+				var err = new Error("Requested folder path is invalid");
+				err.code = 400;
+				return callback(err);
 			}
 		} else if (matchEtag && matchEtag !== etag) {
 			var err = new Error("");

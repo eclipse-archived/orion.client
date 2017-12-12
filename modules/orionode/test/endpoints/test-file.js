@@ -170,6 +170,72 @@ describe('File endpoint', function() {
 			.del(PREFIX + '/project/maintenance2/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/maintenance/')
 			.expect(400, done);
 		});
+		/**
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=528420
+		 */
+		it('GET file - bad single quoted file after file', function(done) {
+			testHelper.createFile(request, '/project', '/fooFile.txt')
+			.then(function(res) {
+				request()
+					.get(PREFIX + '/project/fooFile.txt/\'bad00001')
+					.expect(400, done);
+			});
+		});
+		/**
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=528420
+		 */
+		it('GET file - bad file after file', function(done) {
+			testHelper.createFile(request, '/project', '/fooFile.txt')
+			.then(function(res) {
+				request()
+					.get(PREFIX + '/project/fooFile.txt/bad00002')
+					.expect(400, done);
+			});
+		});
+		/**
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=528420
+		 */
+		it('GET file - bad double quoted file after file', function(done) {
+			testHelper.createFile(request, '/project', '/fooFile.txt')
+			.then(function(res) {
+				request()
+					.get(PREFIX + '/project/fooFile.txt/"bad00003')
+					.expect(400, done);
+			});
+		});
+		/**
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=528420
+		 */
+		it('POST file - bad double quoted folder after file', function(done) {
+			request()
+				.post(PREFIX + '/project/fooFiletxt/"bad00003')
+				.type('json')
+				.send({Location: '"bad00003', Directory: true})
+				.expect(400, done);
+		});
+		/**
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=528420
+		 */
+		it('PUT file - bad double quoted folder after file', function(done) {
+			testHelper.createFile(request, '/project', '/fooFile.txt')
+			.then(function(res) {
+				request()
+					.put(PREFIX + '/project/fooFile.txt/"bad00003')
+					.send("Hello!")
+					.expect(400, done);
+			});
+		});
+		/**
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=528420
+		 */
+		it('DEL file - bad double quoted folder after file', function(done) {
+			testHelper.createFile(request, '/project', '/fooFile.txt')
+			.then(function(res) {
+				request()
+					.del(PREFIX + '/project/fooFile.txt/"bad00003')
+					.expect(400, done);
+			});
+		});
 	})
 	/**
 	 * http://wiki.eclipse.org/Orion/Server_API/File_API#Actions_on_files
@@ -1204,7 +1270,7 @@ describe('File endpoint', function() {
 				request()
 				.post(PREFIX + '/project')
 				.type('json')
-				.send({ Name: 'new directory', Directory: 'true' })
+				.send({ Name: 'new directory', Directory: 'true' }) //only works because of the truthy value of a non-empty string
 				.expect(201)
 				.end(function(err, res) {
 					testHelper.throwIfError(err);
@@ -1219,7 +1285,7 @@ describe('File endpoint', function() {
 				.post(PREFIX + '/project')
 				.type('json')
 				.set('Slug', 'Not a directory')
-				.send({ Directory: "false" })
+				.send({ Directory: false })
 				.expect(201)
 				.end(function(err, res) {
 					testHelper.throwIfError(err);
