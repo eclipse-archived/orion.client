@@ -1296,11 +1296,16 @@ html[dir="rtl"] .sectionWrapper, html[dir="rtl"] .sectionTable{ /* ACGC */
 	margin-bottom: 5px;
 }
 
+.sectionTable.sectionOpened {
+	visibility: visible;
+}
+
 .sectionTable.sectionClosed {
 	height: 0;
 	-webkit-transform: scaleY(0);
 	-ms-transform: scaleY(0);
 	transform: scaleY(0);
+	visibility: hidden;
 }
 
 .sectionWrapper{
