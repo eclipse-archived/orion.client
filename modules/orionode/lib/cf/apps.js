@@ -185,6 +185,7 @@ function toAppLocation(req,location){
 		return path.join(file.workspaceDir, location.replace(fileRoot,"").split("/")[2]);
 	}
 }
+
 function putapps(req, res){
 	var theApp = {};
 	//theApp's shape 
@@ -290,15 +291,22 @@ function putapps(req, res){
 			if(!instrumentationJSON || !manifest.applications){
 				return;
 			}
-			for(var key in instrumentationJSON){
+			Object.keys(instrumentationJSON).forEach(function(key) {
 				var value = instrumentationJSON[key];
+				if(key === 'instances') {
+					if(typeof value !== 'number') {
+						var num = Number(value);
+						value = isNaN(num) ? 1 : num;
+						instrumentationJSON.instances = value;
+					}
+				}
 				for(var j = 0; j < manifest.applications.length ; j++){
 					if(key === "memory" && !updateMemory(manifest.applications[j],value)){
-						continue;
+						return;
 					}
 					manifest.applications[j][key] = value;
 				}
-			}
+			});
 		}
 		function updateMemory(application, value){
 			if(!application.memory) return true;
