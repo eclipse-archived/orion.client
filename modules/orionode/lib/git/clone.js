@@ -664,7 +664,8 @@ function getRemoteCallbacks(creds, username, task) {
 		 * @callback
 		 */
 		credentials: function(gitUrl, urlUsername) {
-			if (gitUrl.indexOf("@") !== -1 && gitUrl.indexOf("@") < gitUrl.indexOf(":") && creds.GitSshPrivateKey) {
+			var isSsh = gitUrl.indexOf("@") !== -1 && gitUrl.indexOf("@") < gitUrl.indexOf(":");
+			if (isSsh && creds.GitSshPrivateKey) {
 				var privateKey = creds.GitSshPrivateKey;
 				var passphrase = creds.GitSshPassphrase;
 				return git.Cred.sshKeyMemoryNew(
@@ -685,6 +686,10 @@ function getRemoteCallbacks(creds, username, task) {
 					gitusername,
 					password || ""
 				);
+			}
+
+			if (isSsh) {
+				return git.Cred.defaultNew();
 			}
 
 			return new Promise(function(resolve, reject) {
