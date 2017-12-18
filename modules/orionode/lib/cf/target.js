@@ -134,6 +134,9 @@ function computeTarget(userId, targetRequest){
 					});
 					org = aimedOrg;
 				}
+				if (!org) {
+					return Promise.reject(new Error("Organization not found"));
+				}
 				if(!targetRequest.Space){
 					var space = org.Spaces[0];
 				}else{
