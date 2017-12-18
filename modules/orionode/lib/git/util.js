@@ -38,28 +38,27 @@ module.exports.decodeURIComponent = function(path) {
  * @version 17.0
  */
 module.exports.verifyConfigRemoteUrl = function(config) {
+	var fixed = false;
 	var remote = config.remote;
 	if(remote){
 		Object.keys(remote).forEach(function(key){
 			if(Array.isArray(remote[key].url)){
-				remote[key].url = remote[key].url.map(function(each){
-					return removeTrailingSlash(each);
+				remote[key].url = remote[key].url.map(function(url){
+					if (url.endsWith(".git/")) {
+						fixed |= true;
+						return url.slice(0 , -1);
+					}
+					return url;
 				});
 			} else {
-				remote[key].url = removeTrailingSlash(remote[key].url);
+				var url = remote[key].url;
+				if (url.endsWith(".git/")) {
+					fixed |= true;
+					url = url.slice(0 , -1);
+				}
+				remote[key].url = url;
 			}
 		});
 	}
+	return fixed;
 };
-/**
- * @name removeTrailingSlash
- * @description Helper method to remove trailing slash of url
- * @param url to be checked
- * @version 17.0
- */
-function removeTrailingSlash(url) {
-	if(url.endsWith("/")){
-		url = url.slice(0 , -1);
-	}
-	return url;
-}

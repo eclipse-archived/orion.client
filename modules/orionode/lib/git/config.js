@@ -111,6 +111,7 @@ function getConfig(req, res) {
 			if (err) {
 				return writeError(400, res, err.message);
 			}
+			var needsWrite = false;
 			var waitFor = Promise.resolve();
 			if(options && options.configParams.get("orion.single.user")) {
 				var user = config.user || (config.user = {});
@@ -124,17 +125,19 @@ function getConfig(req, res) {
 						});
 						return Promise.all([fillUserName,fillUserEmail]);
 					}).then(function(){
-						gitUtil.verifyConfigRemoteUrl(config);
-						args.writeConfigFile(configFile, config, function(err) {});
-					}).catch(function(err){
-						if(err.message.indexOf("was not found") !== -1){
-							return Promise.resolve();
-						}
+						needsWrite = true;
+					}).catch(function(){
+						return Promise.resolve();
 					});
 				}
 			}
 			return waitFor.then(function(){
 				configs = [];
+				
+				needsWrite |= gitUtil.verifyConfigRemoteUrl(config);
+				if (needsWrite) {
+					args.writeConfigFile(configFile, config, function() {});
+				}
 				
 				getFullPath(config, "");
 				
