@@ -702,25 +702,25 @@ function getRemoteCallbacks(creds, username, task) {
 }
 
 function handleRemoteError(task, err, cloneUrl) {
-	var fullCloneUrl;
-	if (cloneUrl.indexOf("://") !== -1){
-		fullCloneUrl = cloneUrl;
-	} else if (cloneUrl.indexOf("@") !== -1 && cloneUrl.indexOf("@") < cloneUrl.indexOf(":")){
-		fullCloneUrl = "ssh://" + cloneUrl;
-	}
-	var u = url.parse(fullCloneUrl, true);
 	var code = err.code || 500;
 	var jsonData, message = err.message;
 	if (err.message && ["credentials", "authentication", "401"].some(function(s) { return err.message.indexOf(s) !== -1; })) {
 		code = 401;
-		jsonData = {
-			"Host": u.hostname,
-			"HumanishName": u.pathname.substring(u.pathname.lastIndexOf("/") + 1).replace(".git", ""),
-			"Port": u.port,
-			"Scheme": u.protocol && u.protocol.replace(":", ""),
-			"Url": cloneUrl,
-			"User": u.auth
-		};
+		jsonData = {"Url": cloneUrl};
+		var fullCloneUrl;
+		if (cloneUrl.indexOf("://") !== -1) {
+			fullCloneUrl = cloneUrl;
+		} else if (cloneUrl.indexOf("@") !== -1 && cloneUrl.indexOf("@") < cloneUrl.indexOf(":")) {
+			fullCloneUrl = "ssh://" + cloneUrl;
+		}
+		if (fullCloneUrl) {
+			var u = url.parse(fullCloneUrl, true);
+			jsonData.Host = u.hostname;
+			jsonData.HumanishName = u.pathname.substring(u.pathname.lastIndexOf("/") + 1).replace(".git", "");
+			jsonData.Port = u.port;
+			jsonData.Scheme = u.protocol && u.protocol.replace(":", "");
+			jsonData.User = u.auth;
+		}
 	} else if (err.message && ["404"].some(function(s) { return err.message.indexOf(s) !== -1; })) {
 		code = 404;
 		message = "Remote repository does not exist";
