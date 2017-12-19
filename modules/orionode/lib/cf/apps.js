@@ -302,7 +302,7 @@ function putapps(req, res){
 				}
 				for(var j = 0; j < manifest.applications.length ; j++){
 					if(key === "memory" && !updateMemory(manifest.applications[j],value)){
-						return;
+						continue;
 					}
 					manifest.applications[j][key] = value;
 				}
