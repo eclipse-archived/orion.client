@@ -222,6 +222,9 @@ function updateConfig(req, res, key, value, callback) {
 }
 
 function postConfig(req, res) {
+	if (!req.body.Key) {
+		return writeError(400, res, "Config entry key must be provided");
+	}
 	updateConfig(req, res, req.body.Key, req.body.Value, function(config, section, subsection, name, value) {
 		var bucket;
 		if (!config[section]) config[section] = {};
@@ -244,9 +247,8 @@ function postConfig(req, res) {
 }
 
 function putConfig(req, res) {
-	var value = req.body.Value;
-	if (!value) {
-		return writeError(400, res, "Config entry value must be provided");
+	if (!req.params.key || !req.body.Value) {
+		return writeError(400, res, "Config entry key and value must be provided");
 	}
 	updateConfig(req, res, req.params.key, req.body.Value, function(config, section, subsection, name, value) {
 		var bucket;
@@ -263,6 +265,9 @@ function putConfig(req, res) {
 }
 
 function deleteConfig(req, res) {
+	if (!req.params.key) {
+		return writeError(400, res, "Config entry key must be provided");
+	}
 	updateConfig(req, res, req.params.key, null, function(config, section, subsection, name) {
 		var bucket;
 		if (config[section]) {

@@ -326,7 +326,7 @@ function fetchRemote(req, res, remote, branch, force) {
 			err.message = "Error fetching git remote";
 			err.code = 404;
 		}
-		clone.handleRemoteError(task, err, remoteObj.url());
+		clone.handleRemoteError(task, err, remoteObj ? remoteObj.url() : undefined);
 	})
 	.done(function() {
 		clone.freeRepo(repo);
@@ -406,7 +406,7 @@ function pushRemote(req, res, remote, branch, pushSrcRef, tags, force) {
 		}
 	})
 	.catch(function(err) {
-		clone.handleRemoteError(task, err, remoteObj.url());
+		clone.handleRemoteError(task, err, remoteObj ? remoteObj.url() : undefined);
 	})
 	.done(function() {
 		clone.freeRepo(repo);
