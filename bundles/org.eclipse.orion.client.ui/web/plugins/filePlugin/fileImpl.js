@@ -364,7 +364,8 @@ define(["orion/Deferred", "orion/xhr", "orion/URL-shim", "orion/operation", "ori
 				return;
 			}
 			var data = {
-				Name: projectName
+				Name: projectName,
+				Directory: true
 			};
 			if (serverPath) {
 				data.ContentLocation = serverPath;

@@ -149,7 +149,6 @@ module.exports = function(options) {
 				// Create/Move/Rename a project
 				var projectLocation = api.join(fileRoot, workspace.id, projectName);
 				var file = fileUtil.getFile(req, api.join(workspace.id, projectName));
-				req.body.Directory = true;
 				
 				if(store.createRenameDeleteProject) {
 					return store.createRenameDeleteProject(workspace.id, {projectName:projectName, contentLocation:file.path, originalPath: req.body.Location})
