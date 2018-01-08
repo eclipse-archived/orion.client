@@ -10,6 +10,7 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 /*eslint-env browser, amd*/
+/*eslint-disable no-undef-expression */
 define(['embeddedEditor/builder/embeddedEditor',
 		'orion/Deferred'
 ],
@@ -39,7 +40,7 @@ Deferred) {
 						 
 	var contents2 = '<server description="new server">\n' +
 					 '</server>';
-	var embeddedEditor = new mEmbeddedEditor({
+	var codeEdit = new mEmbeddedEditor({
 		_defaultPlugins: defaultPluginURLs,
 		//defaultPlugins: [],
 		editorConfig: {showWhitespaces: true, zoomRuler: true, zoomRulerLocalVisible: true},
@@ -51,31 +52,9 @@ Deferred) {
 		name: 'Xtext Language',
 		'extends': 'text/plain'
 	};
-	embeddedEditor.serviceRegistry.registerService('orion.core.contenttype', {}, {contentTypes: [cto]});
-	var proposals = [
-		"proposal ",
-		"proposal ",
-		"proposal ",
-		"proposal ",
-		"proposal ",
-		"proposal ",
-		"proposal ",
-		"proposal ",
-		"proposal ",
-		"proposal ",
-		"proposal ",
-		"proposal ",
-		"proposal ",
-		"proposal ",
-		"proposal ",
-		"proposal ",
-		"proposal ",
-		"proposal ",
-		"proposal ",
-		"proposal "
-	];
+	codeEdit.serviceRegistry.registerService('orion.core.contenttype', {}, {contentTypes: [cto]});
 	var contentAssistProvider = {
-	    computeProposals: function(buffer, offset, context) {
+	    computeProposals: function(/*buffer, offset, context*/) {
 	        var result = [];
 	        for(var i = 0; i < 10; i++){
 	            result.push({proposal: "proposal " + i});
@@ -133,8 +112,10 @@ Deferred) {
 		}
 	};
 	
+	var jsEditor;
+	
 	function createJSEditorInstance() {
-		embeddedEditor.create({parent: "embeddedEditor", statusReporter: statusReporter}).then(function(editorViewer) {
+		codeEdit.create({parent: "embeddedEditor", statusReporter: statusReporter}).then(function(editorViewer) {
 			document.getElementById("progressMessageDiv").textContent = "Plugins loaded!";
 			jsEditor = editorViewer;
 			editorViewer.setContents(contents, "application/javascript");
@@ -194,48 +175,17 @@ Deferred) {
 
 	var startup = function() {
 		createJSEditorInstance();
-/*		
-var defaults = {
-		autoSave: true,
-		autoSaveTimeout: 250,
-		autoLoad: true,
-		saveDiffs: true,
-		contentAssistAutoTrigger: true,
-		showOccurrences: true,
-		autoPairParentheses: true,
-		autoPairBraces: true,
-		autoPairSquareBrackets: true,
-		autoPairAngleBrackets: false,
-		autoPairQuotations: true,
-		autoCompleteComments: true,
-		smartIndentation: true,
-		trimTrailingWhiteSpace: false,
-		tabSize: 4,
-		expandTab: false,
-		scrollAnimation: true,
-		scrollAnimationTimeout: 300,
-		annotationRuler: true,
-		lineNumberRuler: true,
-		foldingRuler: true,
-		overviewRuler: true,
-		zoomRuler: false,
-		showWhitespaces: false,
-		wordWrap: false,
-		showMargin: false,
-		marginOffset: 80,
-		keyBindings: "Default",
-		diffService: false
-	};	
-	*/
-		embeddedEditor.create({parent: "embeddedEditor1", singleMode: true, editorConfig: {lineNumberRuler: false, overviewRuler: false},
+		codeEdit.create({parent: "embeddedEditor1", singleMode: true, editorConfig: {lineNumberRuler: false, overviewRuler: false},
 							   contentType: "application/json",
 							   contents: contents1}).then(function(editorViewer){
+			//editorViewer.readonly = true;
+			//editorViewer.editor.getTextView().setOptions({"readonly": true});
 			var height = editorViewer.editor.getTextView().computeSize().height;
 			var parent = document.getElementById("embeddedEditor1");
 			parent.style.height = height + "px"; //$NON-NLS-0$
 		});
 		
-		embeddedEditor.create({parent: "embeddedEditor2",
+		codeEdit.create({parent: "embeddedEditor2",
 							   contentType: "foo/bar",
 							   contents: contents2}).then(function(editorViewer){
 			editorViewer.inputManager.setAutoSaveTimeout(-1);
@@ -305,37 +255,31 @@ var defaults = {
 		}
 	];
 	
-	embeddedEditor.startup().then(function() {
-//		var fileClient = embeddedEditor.serviceRegistry.getService("orion.core.file.client");
-//		if(fileClient) {
-//			var promises = [];
-//			files2create.forEach(function(file) {
-//				var promise = fileClient.createFile("/in_memory_fs/project/", file.name).then(function(result){
-//					return fileClient.write(result.Location, file.contents);
-//				});
-//				promises.push(promise);			
-//			});
-//		}
-//		embeddedEditor.Deferred.all(promises).then(function(result) {
-//			new embeddedEditor.Deferred().resolve(result).then(function(rr) {
-//				console.log(rr);
-//			});
-//			startup();
-//		});
-
-		embeddedEditor.importFiles(files2create).then(function(results) {
+	function disableDefaultJSContentAssist() {
+		codeEdit.serviceRegistry.getServiceReferences("orion.edit.contentassist").forEach(function(ref){
+			if(ref.getProperty("id") === "orion.edit.contentassist.javascript.tern") {
+				codeEdit.serviceRegistry._internalRegistry.unregisterService(ref.getProperty("service.id"));
+//				var service = codeEdit.serviceRegistry.getService(ref);
+//				if (service) {
+//					service.computeContentAssist = function(){};
+//				}
+			}
+		});	
+	}
+	
+	codeEdit.startup().then(function() {
+		disableDefaultJSContentAssist();
+		codeEdit.importFiles(files2create).then(function(results) {
 			console.log(results);
 			startup();
-			embeddedEditor.exportFiles(files2export).then(function(exportResults) {
+			codeEdit.exportFiles(files2export).then(function(exportResults) {
 				console.log(exportResults);				
 			});
 		});
 		
 	});
 	
-
-
-//	embeddedEditor.create({parent: "embeddedEditor1"}).then(function(editorViewer) {
+//	codeEdit.create({parent: "embeddedEditor1"}).then(function(editorViewer) {
 //		editorViewer.setContents(contents, "application/javascript");
 //		editorViewer.inputManager.setAutoSaveTimeout(-1);
 //		//editorViewer.editor.getTextView().setOptions({themeClass: "editorTheme"});
@@ -363,7 +307,7 @@ var defaults = {
 //		}
 //	});
 	
-//	embeddedEditor.create({parent: "embeddedEditor1",
+//	codeEdit.create({parent: "embeddedEditor1",
 //						   contentType: "foo/bar",
 //						   contents: contents2}).then(function(editorViewer){
 //		editorViewer.inputManager.setAutoSaveTimeout(-1);
