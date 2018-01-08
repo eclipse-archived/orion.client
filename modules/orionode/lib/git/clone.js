@@ -568,7 +568,7 @@ function putClone(req, res) {
 		writeResponse(200, res);
 	})
 	.catch(function(err){
-		writeError(403, res, err.message);
+		writeError(403, res, err);
 	})
 	.done(function() {
 		freeRepo(theRepo);
