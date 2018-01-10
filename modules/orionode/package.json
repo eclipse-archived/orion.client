@@ -95,7 +95,7 @@
     "dist:osx": "build --o --publish=never",
     "dist:win": "build --w",
     "dist:linux": "build --l",
-    "test": "grunt test_all",
+    "test": "grunt server_unit_tests",
     "report-coverage": "cat ./coverage/combined/lcov.info | coveralls",
     "optimize": "grunt",
     "watch-server": "nodemon --debug server.js"
