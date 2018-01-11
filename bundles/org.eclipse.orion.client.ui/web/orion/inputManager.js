@@ -21,7 +21,7 @@ define([
 	'orion/PageUtil',
 	'orion/editor/textModelFactory',
 	'orion/formatter',
-	'orion/lsp/languageServerRegistry',
+	'lsp/languageServerRegistry',
 	'orion/metrics'
 ], function(messages, mNavigatorRenderer, i18nUtil, Deferred, EventTarget, objects, PageUtil, mTextModelFactory, mFormatter, mLanguageServerRegistry, mMetrics) {
 
