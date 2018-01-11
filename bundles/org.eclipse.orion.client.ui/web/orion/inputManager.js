@@ -21,8 +21,9 @@ define([
 	'orion/PageUtil',
 	'orion/editor/textModelFactory',
 	'orion/formatter',
+	'orion/lsp/languageServerRegistry',
 	'orion/metrics'
-], function(messages, mNavigatorRenderer, i18nUtil, Deferred, EventTarget, objects, PageUtil, mTextModelFactory, mFormatter, mMetrics) {
+], function(messages, mNavigatorRenderer, i18nUtil, Deferred, EventTarget, objects, PageUtil, mTextModelFactory, mFormatter, mLanguageServerRegistry, mMetrics) {
 
 	function Idle(options){
 		this._document = options.document || document;
@@ -147,6 +148,7 @@ define([
 		this.generalPreferences = options.generalPreferences || {};
 		this.isEditorTabsEnabled = options.isEditorTabsEnabled || false;
 		this._input = this._title = "";
+		this.languageServerRegistry = new mLanguageServerRegistry.LanguageServerRegistry(this.serviceRegistry, options.problemsServiceID || "orion.core.marker"); //$NON-NLS-0$
 		if (this.fileClient) {
 			this.fileClient.addEventListener("Changed", function(evt) { //$NON-NLS-0$
 				if (this._fileMetadata && this._fileMetadata._saving) {
@@ -453,6 +455,12 @@ define([
 					}
 					if (that.postSave) {
 						that.postSave(closing);
+					}
+					// get the lsp service matching the current content type
+					var lspLanguageServer = that.languageServerRegistry.getServerByContentType(that.getContentType());
+					if (lspLanguageServer) {
+						var text = lspLanguageServer.includeTextOnSave() ? that.getEditor().getText() : undefined;
+						lspLanguageServer.didSave(that.getFileMetadata().Location, text);
 					}
 					return done(result);
 				}
