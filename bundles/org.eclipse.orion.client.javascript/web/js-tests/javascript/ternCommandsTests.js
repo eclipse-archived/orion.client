@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2015, 2016 IBM Corporation, Inc. and others.
+ * Copyright (c) 2015, 2018 IBM Corporation, Inc. and others.
  * All rights reserved. This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License v1.0
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution
@@ -93,17 +93,42 @@ define([
 	}
 
 	function testOpenDecl(options, expected) {
-		testOpenCommand(openDeclCommand, options, expected);
+		var _p = setup(options);
+		assert(_p, 'setup() should have completed normally');
+		openDeclCommand.findDeclaration(_p.editorContext, _p.params).then(function (result) {
+			try {
+				if (!expected) {
+					// We expect an error status as the result
+					if (!result){
+						// If no error was returned, check to see if we have results
+						if (_p.editorContext.options){
+							var actual = _p.editorContext.options;
+							assert(false, 'Expected error status indicating no result, instead found result: ' + actual.start + '-' + actual.end);
+						}
+						assert(result, 'Expected error status indicating no result, instead result returned was ' + result);
+					}
+					worker.getTestState().callback();
+					return;
+				}
+//				assert(_p.editorContext.options, "OpenEditor was not called on the editor context");
+//				actual = _p.editorContext.options;
+				//The command is executed in the platform and wrapped in a service call, so the editorContext.openEditor function
+				//is not called until after the open decl command completes. Just test the results of the command now
+				assert.equal(result.start, expected.start, 'The offset starts are not the same. Actual ' + result.start + '-' + result.end + ' Expected ' + expected.start + '-' + expected.end);
+				assert.equal(result.end, expected.end, 'The offset ends are not the same. Actual ' + result.start + '-' + result.end + ' Expected ' + expected.start + '-' + expected.end);
+				worker.getTestState().callback();
+			} catch (err){
+				worker.getTestState().callback(err);
+			}
+		}, function (error) {
+			handleFailure(expected, error);
+		});
 	}
 
 	function testOpenImpl(options, expected){
-		testOpenCommand(openImplCommand, options, expected);
-	}
-
-	function testOpenCommand(command, options, expected){
 		var _p = setup(options);
 		assert(_p, 'setup() should have completed normally');
-		command.execute(_p.editorContext, _p.params).then(function (result) {
+		openImplCommand.execute(_p.editorContext, _p.params).then(function (result) {
 			try {
 				if (!expected) {
 					// We expect an error status as the result
@@ -127,7 +152,12 @@ define([
 				worker.getTestState().callback(err);
 			}
 		}, function (error) {
-			if (!expected) {
+			handleFailure(expected, error);
+		});
+	}
+	
+	function handleFailure(expected, error) {
+		if (!expected) {
 				if (error.Severity === "Warning") {
 					worker.getTestState().callback();
 					return;
@@ -163,7 +193,6 @@ define([
 			} else {
 				worker.getTestState().callback(new Error('Unknown error'));
 			}
-		});
 	}
 
 	describe('Tern based commands tests', function() {
