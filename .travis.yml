@@ -5,7 +5,7 @@ branches:
 os:
   - linux
 
-sudo: false
+sudo: required
 
 env:
   matrix:
