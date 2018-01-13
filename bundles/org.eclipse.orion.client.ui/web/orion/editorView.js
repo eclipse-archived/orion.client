@@ -485,7 +485,7 @@ define([
 				foldingRulerFactory: new mEditorFeatures.FoldingRulerFactory(),
 				zoomRulerFactory: new mEditorFeatures.ZoomRulerFactory(),
 				lineNumberRulerFactory: new mEditorFeatures.LineNumberRulerFactory(),
-				hoverFactory: new mHoverFactory.HoverFactory(serviceRegistry, inputManager, commandRegistry),
+				hoverFactory: new mHoverFactory.HoverFactory(serviceRegistry, inputManager, commandRegistry, languageServerRegistry),
 				contentAssistFactory: contentAssistFactory,
 				keyBindingFactory: keyBindingFactory,
 				statusReporter: this.statusReporter,
