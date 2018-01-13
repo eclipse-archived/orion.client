@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2010, 2016 IBM Corporation and others.
+ * Copyright (c) 2010, 2018 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -22,8 +22,13 @@ define([
 	'orion/i18nUtil',
 	'orion/keyBinding',
 	'orion/globalCommands',
-	'orion/webui/Slideout'
-], function(objects, messages, Deferred, lib, mUIUtils, mExplorer, mCommands, URITemplate, EventTarget, i18nUtil, KeyBinding, mGlobalCommands, mSlideout) {
+	'orion/webui/Slideout',
+	'lsp/languageServerRegistry',
+	'lsp/utils'
+], function(
+	objects, messages, Deferred, lib, mUIUtils, mExplorer, mCommands, URITemplate, EventTarget, i18nUtil,
+	KeyBinding, mGlobalCommands, mSlideout, mLanguageServerRegistry, Utils
+) {
 
 	var OUTLINE_TIMEOUT_MS = 2 * 60 * 1000; // determines how many milliseconds we will wait for the outline service to compute and return an outline before considering it timed out
 	
@@ -393,6 +398,7 @@ define([
 			this._inputManager = options.inputManager;
 			this._sidebar = options.sidebar;
 			this._switcherNode = options.switcherNode;
+			this.languageServerRegistry = new mLanguageServerRegistry.LanguageServerRegistry(this._serviceRegistry, options.problemsServiceID || "orion.core.marker"); //$NON-NLS-0$
 			
 			var _self = this;
 
@@ -451,7 +457,7 @@ define([
 			}
 			this._outlineService.emitOutline(this._inputManager);
 		},
-		setSelectedProvider: function(/** orion.serviceregistry.ServiceReference */ provider) {
+		setSelectedProvider: function(/** orion.serviceregistry.ServiceReference or lspServer implementation */ provider) {
 			this.providerId = provider.getProperty("id"); //$NON-NLS-0$
 			this.providerName = provider.getProperty("name"); //$NON-NLS-0$
 			this._outlineService.setProvider(provider);
@@ -649,28 +655,36 @@ define([
 		 * @param {String} title TODO this is deprecated, should be removed along with "pattern" property of outliners.
 		 */
 		setContentType: function(fileContentType, title) {
-			var allOutlineProviders = this._serviceRegistry.getServiceReferences("orion.edit.outliner"); //$NON-NLS-0$
+			if (!fileContentType) return;
+			var lspServer = this.languageServerRegistry.getServerByContentType(fileContentType);
+			var filteredProviders = null;
 			var _self = this;
-			// Filter to capable providers
-			var filteredProviders = this.filteredProviders = allOutlineProviders.filter(function(serviceReference) {
-				var contentTypeIds = serviceReference.getProperty("contentType"), //$NON-NLS-0$
-				    pattern = serviceReference.getProperty("pattern"); // for backwards compatibility //$NON-NLS-0$
-				if (contentTypeIds) {
-					return contentTypeIds.some(function(contentTypeId) {
-						return _self._contentTypeRegistry.isExtensionOf(fileContentType, contentTypeId);
-					});
-				} else if (pattern && new RegExp(pattern).test(title)) {
-					return true;
-				}
-				return false;
-			});
-			// Load resource bundles
-			this._providerLookup = true;
-			filteredProviders.forEach(function(provider) {
-				provider.displayName = provider.getProperty("name") || provider.getProperty("nameKey"); //$NON-NLS-0$
-			});
-			
-			_self._providerLookup = false;
+			if (lspServer) {
+				filteredProviders = [];
+				filteredProviders.push(lspServer);
+			} else {
+				var allOutlineProviders = this._serviceRegistry.getServiceReferences("orion.edit.outliner"); //$NON-NLS-0$
+				// Filter to capable providers
+				filteredProviders = this.filteredProviders = allOutlineProviders.filter(function(serviceReference) {
+					var contentTypeIds = serviceReference.getProperty("contentType"), //$NON-NLS-0$
+					    pattern = serviceReference.getProperty("pattern"); // for backwards compatibility //$NON-NLS-0$
+					if (contentTypeIds) {
+						return contentTypeIds.some(function(contentTypeId) {
+							return _self._contentTypeRegistry.isExtensionOf(fileContentType, contentTypeId);
+						});
+					} else if (pattern && new RegExp(pattern).test(title)) {
+						return true;
+					}
+					return false;
+				});
+				// Load resource bundles
+				this._providerLookup = true;
+				filteredProviders.forEach(function(provider) {
+					provider.displayName = provider.getProperty("name") || provider.getProperty("nameKey"); //$NON-NLS-0$
+				});
+				
+				_self._providerLookup = false;
+			}
 			_self._outlineService.setOutlineProviders(filteredProviders);
 			_self.setOutlineProviders(filteredProviders);
 			_self.generateOutline();
@@ -718,7 +732,7 @@ define([
 				}
 			});
 		},
-		setProvider: function(/** orion.serviceregistry.ServiceReference */ provider) {
+		setProvider: function(/** orion.serviceregistry.ServiceReference or language server implementation*/ provider) {
 			if (this._providerResolved) {
 				this._provider = new Deferred();
 			}
@@ -744,21 +758,31 @@ define([
 				var title = editor.getTitle();
 				var serviceRegistry = self._serviceRegistry;
 				var progress = serviceRegistry.getService("orion.page.progress"); //$NON-NLS-0$
-				var outlineProviderService = serviceRegistry.getService(provider);
-				var method, args;
-				if ((method = outlineProviderService.computeOutline)) {
-					var contentType = inputManager.getContentType();
-					args = [editor.getEditorContext(), {
-						contentType: contentType && contentType.id
-					}];
-				} else if ((method = outlineProviderService.getOutline)) {
-					args = [editor.getText(), title];
-				}
-				progress.progress(method.apply(outlineProviderService, args), i18nUtil.formatMessage(messages["OutlineProgress"], title, provider.displayName)).then(function(outline) { //$NON-NLS-0$
-					if (outline) {
-						self.dispatchEvent({ type:"outline", outline: outline, title: title, providerId: provider.getProperty("id") }); //$NON-NLS-1$ //$NON-NLS-0$
+				var result = null;
+				if (provider._id && provider.isDocumentSymbolEnabled()) {
+					// outline comes from the lsp server implementation
+					result = Utils.documentSymbol(provider, inputManager.inputManager);
+				} else {
+					var outlineProviderService = serviceRegistry.getService(provider);
+					var method, args;
+					if ((method = outlineProviderService.computeOutline)) {
+						var contentType = inputManager.getContentType();
+						args = [editor.getEditorContext(), {
+							contentType: contentType && contentType.id
+						}];
+					} else if ((method = outlineProviderService.getOutline)) {
+						args = [editor.getText(), title];
 					}
-				});
+					result = method.apply(outlineProviderService, args);
+				}
+				progress.progress(
+					result,
+					i18nUtil.formatMessage(messages["OutlineProgress"], title, provider.displayName)).then(function(outline) { //$NON-NLS-0$
+						if (outline) {
+							self.dispatchEvent({ type:"outline", outline: outline, title: title, providerId: provider.getProperty("id") }); //$NON-NLS-1$ //$NON-NLS-0$
+						}
+					}
+				);
 			});
 		}
 	};
