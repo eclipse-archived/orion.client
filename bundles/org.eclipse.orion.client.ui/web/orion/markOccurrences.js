@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2013, 2014 IBM Corporation and others.
+ * Copyright (c) 2013, 2018 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -11,13 +11,16 @@
 
 /*eslint-env browser, amd*/
 define([
-	'orion/Deferred'
-], function(Deferred) {
+	'orion/Deferred',
+	'lsp/utils'
+], function(Deferred, Utils) {
 
-	function MarkOccurrences(serviceRegistry, inputManager, editor) {
+	function MarkOccurrences(serviceRegistry, inputManager, editor, languageServerRegistry) {
 		this.registry = serviceRegistry;
 		this.inputManager = inputManager;
 		this.editor = editor;
+		this.languageServerRegistry = languageServerRegistry;
+		this._languageServer = null;
 	}
 	MarkOccurrences.prototype = {
 		/**
@@ -92,9 +95,9 @@ define([
 						contentType: that.inputManager.getContentType().id
 					};
 					
+					var servicePromises = [];
+					var allOccurrences = [];
 					if(Array.isArray(that.occurrencesServices) && that.occurrencesServices.length > 0) {
-						var servicePromises = [];
-						var allOccurrences = [];
 						for (var i=0; i<that.occurrencesServices.length; i++) {
 							var serviceEntry = that.occurrencesServices[i];
 							if (serviceEntry){
@@ -103,15 +106,21 @@ define([
 								}));	
 							}
 						}
-						Deferred.all(servicePromises).then(function(){
-							that.editor.showOccurrences(allOccurrences);
-						});
 					}
+					if (that._languageServer && that._languageServer.isDocumentHighlightEnabled()) {
+						servicePromises.push(Utils.computeOccurrences(that._languageServer, that.inputManager, editor, context).then(function (occurrences) {
+							allOccurrences = allOccurrences.concat(occurrences);
+						}));
+					}
+					Deferred.all(servicePromises).then(function(){
+						that.editor.showOccurrences(allOccurrences);
+					});
 				}, 500);
 			};
 						
 			that.inputManager.addEventListener("InputChanged", function(evt) {
 				var textView = that.editor.getTextView();
+				var addedSelectionListener = false;
 				if (textView) {
 					textView.removeEventListener("Selection", selectionListener);
 					getServiceRefs(that.registry, evt.contentType, evt.title).then(function(serviceRefs) {
@@ -127,9 +136,16 @@ define([
 									that.occurrencesServices.push(service);
 								}
 							}
-							textView.addEventListener("Selection", selectionListener);
+							if (!addedSelectionListener) {
+								addedSelectionListener = true;
+								textView.addEventListener("Selection", selectionListener);
+							}
 						}
 					});
+					that._languageServer = that.languageServerRegistry.getServerByContentType(evt.contentType);
+					if (that._languageServer && !addedSelectionListener) {
+						textView.addEventListener("Selection", selectionListener);
+					}
 				}
 			});
 		}

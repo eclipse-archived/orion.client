@@ -571,7 +571,7 @@ define([
 				});
 			}
 
-			var markOccurrences = this.markOccurrences = new mMarkOccurrences.MarkOccurrences(serviceRegistry, inputManager, editor);
+			var markOccurrences = this.markOccurrences = new mMarkOccurrences.MarkOccurrences(serviceRegistry, inputManager, editor, languageServerRegistry);
 			markOccurrences.setOccurrencesVisible(this.settings.showOccurrences);
 			markOccurrences.findOccurrences();
 			
