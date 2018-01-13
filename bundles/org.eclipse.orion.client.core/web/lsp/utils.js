@@ -55,7 +55,12 @@ define([
 						if (typeof hoverContents === 'string' && hoverContents.length === 0) {
 							return new Deferred().resolve('');
 						}
-						hover.content = result.contents[0];
+						if (typeof result.contents[0] === 'object') {
+							// this must be a MarkedString with { language: string, value: string }
+							hover.content = result.contents[0].value;
+						} else {
+							hover.content = result.contents[0];
+						}
 					} else if (typeof result.contents === 'string') {
 						if (result.contents.length === 0) {
 							return new Deferred().resolve('');
