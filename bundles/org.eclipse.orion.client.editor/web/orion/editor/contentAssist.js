@@ -410,6 +410,7 @@ define("orion/editor/contentAssist", [
 				try {
 					if (providerInfo.lspServer) {
 						// completion comes from the lsp service
+						ecProvider = _self.editorContextProvider;
 						editorContext = ecProvider.getEditorContext();
 						params = objects.mixin(params, ecProvider.getOptions());
 						promise = Utils.computeContentAssist(provider, editorContext, params);
