@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2010, 2017 IBM Corporation and others.
+ * Copyright (c) 2010, 2018 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License v1.0
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution
@@ -784,7 +784,7 @@ define([
 			this._logMetrics("open"); //$NON-NLS-0$
 			this.dispatchEvent(evt);
 			this.editor = editor = evt.editor;
-			this._formatter = new mFormatter.Formatter(this.serviceRegistry, this, editor);
+			this._formatter = new mFormatter.Formatter(this.serviceRegistry, this, editor, this.languageServerRegistry);
 			if (!isDir) {
 				if (!noSetInput) {
 					editor.setInput(title, null, contents);

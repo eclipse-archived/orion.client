@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2010, 2016, 2017 IBM Corporation and others.
+ * Copyright (c) 2010, 2018 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License v1.0
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution
@@ -49,7 +49,8 @@ define([
 	'orion/objects',
 	'orion/formatter',
 	'orion/references',
-	'orion/openDeclaration'
+	'orion/openDeclaration',
+	'lsp/languageServerRegistry'
 ], function(
 	messages,
 	mEditor, mAnnotations, mEventTarget, mTextView, mTextModelFactory, mEditorFeatures, mHoverFactory, mContentAssist,
@@ -59,7 +60,7 @@ define([
 	mMarkOccurrences, mSyntaxchecker, LiveEditSession,
 	mProblems, mBlamer, mDiffer,
 	mKeyBinding, util, Deferred, mContextMenu, mMetrics, mCommonPreferences, memoryFileSysConst, objects, mFormatter, mReferences,
-	mOpenDecl
+	mOpenDecl, mLanguageServerRegistry
 ) {
 	var inMemoryFilePattern = memoryFileSysConst.MEMORY_FILE_PATTERN;
 	var Dispatcher = mDispatcher.Dispatcher;
@@ -351,6 +352,7 @@ define([
 			var progress = this.progress;
 			var contentTypeRegistry = this.contentTypeRegistry;
 			var editorCommands = this.editorCommands;
+			var languageServerRegistry = new mLanguageServerRegistry.LanguageServerRegistry(serviceRegistry, this.problemsServiceID);
 
 			var textViewFactory = function() {
 				var options = that.updateViewOptions(that.settings);
@@ -557,7 +559,7 @@ define([
 
 			this.blamer = new mBlamer.Blamer(serviceRegistry, inputManager, editor);
 			this.differ = new mDiffer.Differ(serviceRegistry, inputManager, editor);
-			this.formatter = new mFormatter.Formatter(serviceRegistry, inputManager, editor);
+			this.formatter = new mFormatter.Formatter(serviceRegistry, inputManager, editor, languageServerRegistry);
 			this.references = new mReferences.References(serviceRegistry, inputManager, editor);
 			this.openDecl = new mOpenDecl.OpenDeclaration(serviceRegistry, inputManager, editor);
 			
