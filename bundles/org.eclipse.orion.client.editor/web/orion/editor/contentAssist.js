@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2011, 2016 IBM Corporation and others.
+ * Copyright (c) 2011, 2018 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -22,8 +22,9 @@ define("orion/editor/contentAssist", [
 	'orion/editor/util',
 	'orion/util',
 	'orion/webui/littlelib',
-	'orion/metrics'
-], function(messages, mKeyBinding, mKeyModes, mEventTarget, Deferred, objects, mTooltip, textUtil, util, lib, mMetrics) {
+	'orion/metrics',
+	'lsp/utils'
+], function(messages, mKeyBinding, mKeyModes, mEventTarget, Deferred, objects, mTooltip, textUtil, util, lib, mMetrics, Utils) {
 	/**
 	 * @name orion.editor.ContentAssistProvider
 	 * @class Interface defining a provider of content assist proposals.
@@ -407,7 +408,12 @@ define("orion/editor/contentAssist", [
 					indentation: indentation
 				};
 				try {
-					if ((func = provider.computeContentAssist)) {
+					if (providerInfo.lspServer) {
+						// completion comes from the lsp service
+						editorContext = ecProvider.getEditorContext();
+						params = objects.mixin(params, ecProvider.getOptions());
+						promise = Utils.computeContentAssist(provider, editorContext, params);
+					} else if ((func = provider.computeContentAssist)) {
 						ecProvider = _self.editorContextProvider;
 						editorContext = ecProvider.getEditorContext();
 						params = objects.mixin(params, ecProvider.getOptions());
@@ -637,7 +643,7 @@ define("orion/editor/contentAssist", [
 			
 			this._providers = providerInfoArray;
 			this._charTriggersInstalled = providerInfoArray.some(function(info){
-				return info.charTriggers;
+				return info.charTriggers || info.lspServer;
 			});
 			this._updateAutoTriggerListenerState();
 		},
@@ -731,7 +737,26 @@ define("orion/editor/contentAssist", [
 					// check if the charTriggers RegExp matches the currentChar
 					// we're assuming that this will fail much more often than
 					// the excludedStyles test so do this first for better performance
-					var charTriggers = info.charTriggers;
+					var charTriggers = null;
+					if (info.lspServer) {
+						var capabilities = info.provider.capabilities;
+						if (capabilities && capabilities.completionProvider && !info.charTriggers) {
+							// we should get the completion options
+							var completionOptions = capabilities.completionProvider;
+
+							// build up the regex for triggerCharacters
+							var triggers = "[";
+							// don't assume that the language server supports trigger characters
+							if (completionOptions.triggerCharacters) {
+								completionOptions.triggerCharacters.forEach(function(character) {
+									triggers += character;
+								});
+							}
+							triggers += "]";
+							info.charTriggers = new RegExp(triggers);
+						}
+					} 
+					charTriggers = info.charTriggers;
 					if (charTriggers && charTriggers.test(currentChar)) {
 						var isExcluded = false;
 						var excludedStyles = info.excludedStyles;
