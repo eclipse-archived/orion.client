@@ -2,7 +2,7 @@
 <feature
       id="org.eclipse.orion.client.feature"
       label="%featureName"
-      version="17.0.0.qualifier"
+      version="18.0.0.qualifier"
       provider-name="%providerName"
       plugin="org.eclipse.orion.client.core"
       license-feature="org.eclipse.license"
