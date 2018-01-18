@@ -34,6 +34,7 @@ define([
 	'javascript/outliner',
 	'javascript/astOutliner',
 	'javascript/cuProvider',
+	'orion/urlModifier',
 	'orion/util',
 	'javascript/logger',
 	'javascript/commands/generateDocCommand',
@@ -49,7 +50,7 @@ define([
 	'orion/i18nUtil',
 	'orion/URL-shim'
 ], function(PluginProvider, mServiceRegistry, Deferred, ScriptResolver, ASTManager, QuickFixes, JavaScriptFormatter, JavaScriptProject, TernAssist,
-	JsonAstManager, TernProjectSupport, PackageJsonSupport, ESLintSupport, EslintValidator, Occurrences, Hover, Outliner, AstOutliner, CUProvider, Util, Logger, GenerateDocCommand, OpenDeclCommand, OpenImplCommand,
+	JsonAstManager, TernProjectSupport, PackageJsonSupport, ESLintSupport, EslintValidator, Occurrences, Hover, Outliner, AstOutliner, CUProvider, urlModifier, Util, Logger, GenerateDocCommand, OpenDeclCommand, OpenImplCommand,
 	RenameCommand, RefsCommand, mJS, mJSON, mJSONSchema, mEJS, javascriptMessages, i18nUtil) {
 
 	var serviceRegistry = new mServiceRegistry.ServiceRegistry();
@@ -140,6 +141,7 @@ define([
 	 */
 	function WrappedWorker(script, onMessage, onError) {
 		var wUrl = new URL(script, window.location.href);
+		wUrl = new URL(urlModifier(wUrl.href));
 		wUrl.query.set("worker-language",  ((navigator.languages && navigator.languages[0]) ||
 			navigator.language || navigator.userLanguage || 'root').toLowerCase()); //$NON-NLS-1$
 		this.worker = new Worker(wUrl.href);
