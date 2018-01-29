@@ -187,7 +187,7 @@ function caughtErrorHandler(task, err){
 		DetailedMessage: err.detailMessage || err.message,
 		JsonData: err.data || {},
 		Message: err.message,
-		Severity: "Error"
+		Severity: err.severity || "Error"
 	};
 	//properly handle parse errors from the YAML parser
 	if(err.name && err.name === 'YAMLException') {
