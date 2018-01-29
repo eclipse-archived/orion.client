@@ -202,6 +202,19 @@ function startServer(cb) {
 			return Promise.all(data.promises).then(done, done);
 		}
 	});
+	if (cluster && configParams.get("orion_cluster_restart_timeout")) {
+		try {
+			var date = require("cron-parser").parseExpression(configParams.get("orion_cluster_restart_timeout"), {utc: true}).next();
+			var timeout = date.getTime() - Date.now();
+			logger.info('Cluster: worker ' + process.pid + ' scheduling restart on ' + date + " -> timeout=" + timeout);
+			setTimeout(function() {
+				logger.info('Cluster: worker ' + process.pid + ' restarting by timer...');
+				graceful.GracefulCluster.gracefullyRestartCurrentWorker();
+			}, timeout);
+		} catch (ex) {
+			logger.error(ex);
+		} 
+	}
 	process.on('uncaughtException', function(err) {
 		logger.error(err);
 		if (clusterParam) {
