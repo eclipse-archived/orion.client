@@ -186,7 +186,7 @@ function startServer(cb) {
 		log: logger.info.bind(logger),
 		shutdownTimeout: configParams.get("shutdown.timeout"),
 		exitFunction: function(code) {
-			(code ? logger.warn : logger.info)("Exiting worker " + process.pid + " with code: " + code + "(code=1 means timeout)");
+			(code ? logger.warn : logger.info).bind(logger)("Exiting worker " + process.pid + " with code: " + code + "(code=1 means timeout)");
 			function done() {
 				log4js.shutdown(function() {
 					logger.info("log4js shutdown in worker: " + process.pid);
