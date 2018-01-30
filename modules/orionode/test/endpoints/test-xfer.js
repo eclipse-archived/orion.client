@@ -101,7 +101,8 @@ describe("XFER endpoint", function() {
 					.end(function(err, res) {
 						testHelper.throwIfError(err);
 						assert(res.header.location, "There was no location in the response");
-						assert.equal(res.header.location, PREFIX + '/project/importFromUrlRaw', "The file location is not correct");
+						//TODO update after we decide if the location should be returned encoded
+						assert.equal(decodeURIComponent(res.header.location), PREFIX + '/project/importFromUrlRaw', "The file location is not correct");
 						done();
 					});
 			});
@@ -120,7 +121,8 @@ describe("XFER endpoint", function() {
 					.end(function(err, res) {
 						testHelper.throwIfError(err);
 						assert(res.header.location, "There was no location in the response");
-						assert.equal(res.header.location, PREFIX + '/project/importFromUrlNoHeader', "The file location is not correct");
+						//TODO update after we decide if the location should be returned encoded
+						assert.equal(decodeURIComponent(res.header.location), PREFIX + '/project/importFromUrlNoHeader', "The file location is not correct");
 						done();
 					});
 			});
@@ -137,7 +139,8 @@ describe("XFER endpoint", function() {
 					.end(function(err, res) {
 						testHelper.throwIfError(err);
 						assert(res.header.location, "There was no location in the response");
-						assert.equal(res.header.location, PREFIX + '/project/importFromUrlAutoExtracted', "The file location is not correct");
+						//TODO update after we decide if the location should be returned encoded
+						assert.equal(decodeURIComponent(res.header.location), PREFIX + '/project/importFromUrlAutoExtracted', "The file location is not correct");
 						done();
 					});
 			});
