@@ -33,8 +33,9 @@ define([
 	'orion/regex',
 	'orion/PageUtil',
 	'orion/uiUtils',
-	'orion/util'
-], function(messages, i18nUtil, lib, fileUtil, DropDownMenu, Deferred, URITemplate, mCommands, mKeyBinding, mCommandRegistry, mExtensionCommands, mContentTypes, mSearchUtils, objects, mPageUtil, PageLinks, mAnnotations, regex, PageUtil, mUIUtils, util) {
+	'orion/util',
+	'orion/urlModifier'
+], function(messages, i18nUtil, lib, fileUtil, DropDownMenu, Deferred, URITemplate, mCommands, mKeyBinding, mCommandRegistry, mExtensionCommands, mContentTypes, mSearchUtils, objects, mPageUtil, PageLinks, mAnnotations, regex, PageUtil, mUIUtils, util, urlModifier) {
 
 	var exports = {};
 
@@ -52,7 +53,7 @@ define([
 		iframe.type = "text/html"; //$NON-NLS-0$
 		iframe.sandbox = "allow-scripts allow-same-origin allow-forms allow-popups"; //$NON-NLS-0$
 		iframe.frameborder = options.border !== undefined ? options.border : 1;
-		iframe.src = href;
+		iframe.src = urlModifier(href);
 		iframe.className = "delegatedUI"; //$NON-NLS-0$
 		if (options.width) {
 			delegatedParent.style.width = options.width;
