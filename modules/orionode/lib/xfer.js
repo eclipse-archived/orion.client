@@ -43,7 +43,7 @@ var fileRoot;
 
 function checkUserAccess(req, res, next){
 	var uri = (typeof req.contextPath === "string" && req.originalUrl.substring(req.contextPath.length)) || req.originalUrl;
-	uri = url.parse(uri).pathname
+	uri = url.parse(uri).pathname;
 	// import/export rights depend on access to the file content
 	if (uri.startsWith("/xfer/export/")){
 		if (path.extname(uri) !== ".zip") {
