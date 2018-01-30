@@ -57,10 +57,10 @@ function getplans(req, res){
 	req.user.checkRights(req.user.username, uri, req, res, function(){
 		var filePath = manifests.retrieveProjectFilePath(req);
 		fs.lstat(filePath, function(err, state){
-			if(err){
+			if(err && err.code !== 'ENOENT'){
 				return writeError(404, res, err.message);
 			}
-			if(state.isFile()){
+			if(!state || state.isFile()){
 				filePath = path.dirname(filePath);
 			}
 			return manifests.retrieveManifestFile(req, res)
