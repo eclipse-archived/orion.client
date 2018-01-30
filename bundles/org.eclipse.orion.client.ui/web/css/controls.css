@@ -1117,6 +1117,10 @@ html[dir="rtl"] .uploadChooser{ /* ACGC */
 	display: table-row;
 }
 
+.local .setting-content > div > label {
+	display: table-row;
+}
+
 .local .setting-header {
 	font-weight: bold;
 	margin: 4px;
