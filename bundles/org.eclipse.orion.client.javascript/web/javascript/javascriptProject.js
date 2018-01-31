@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2016, 2017 IBM Corporation and others.
+ * Copyright (c) 2016, 2018 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License v1.0
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution
@@ -500,6 +500,9 @@ define([
 									project.map.env.defs.push(project.DEFINITIONS+'/'+def.Name);
 								});
 							}
+							if(project.map.env.ternproject && project.map.env.ternproject.vals && project.map.env.ternproject.vals.ecmaVersion > project.map.env.ecmaVersion) {
+								project.map.env.ecmaVersion = project.map.env.ternproject.vals.ecmaVersion;
+							}
 							return project.map.env;
 						}, function rejected() {
 							return project.map.env;
@@ -616,7 +619,7 @@ define([
 				});
 			}
 			if(options.vals.ecmaVersion) {
-				project.map.env.ecmaVersion = options.vals.ecmaVersion;
+				project.map.env.ecmaVersion = translateEcma(options.vals.ecmaVersion);
 			}
 		}
 	}
@@ -656,6 +659,11 @@ define([
 					if(vals.eslintConfig) {
 						if(!project.map.env.eslint) {
 							project.map.env.eslint = {file: file, vals: vals.eslintConfig};
+						}
+						if(typeof vals.eslintConfig.ecmaVersion === "number") {
+							var val = translateEcma(vals.eslintConfig.ecmaVersion);
+							//what to do here is ecmaVersion is set via someone else? package.json will torch it
+							project.map.env.ecmaVersion = val;
 						}
 					}
 				}

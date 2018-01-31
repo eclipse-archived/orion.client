@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2015, 2017 IBM Corporation and others.
+ * Copyright (c) 2015, 2018 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License v1.0
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution
@@ -282,6 +282,15 @@ define([
 	 * @since 14.0
 	 */
 	function prepareOptions(json, env) {
+		if(typeof env.ecmaVersion === 'number') {
+			if(!json.ecmaVersion) {
+				//just set it
+				json.ecmaVersion = env.ecmaVersion;
+			} else if(env.ecmaVersion > json.ecmaVersion){
+				//only set it if its greater (more compatible) - don't downgrade ECMA via multiple configs
+				json.ecmaVersion = env.ecmaVersion;
+			}
+		}
 		if(env && env.envs) {
 			//TODO make this more dynamic once we have the ability to install definition files and plugins
 			TernDefaults.defNames.forEach(function(def) {
