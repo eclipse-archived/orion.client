@@ -767,6 +767,9 @@ function bindServices(req, appTarget){
 					async.each(manifestService, function(service, cb) {
 						return getServiceGuid(req.user.username, service, appTarget)
 						.then(function(serviceInstanceGUID){
+							if (!serviceInstanceGUID) {
+								return Promise.reject(new Error("Service instance " + service + " cannot be found in target space"));
+							}
 							return bindService(req.user.username, serviceInstanceGUID, appTarget);
 						}).then(function(){
 							return cb();
