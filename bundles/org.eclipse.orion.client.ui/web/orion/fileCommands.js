@@ -1031,7 +1031,9 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/i18n
 					);
 				}
 			},
-			visibleWhen: checkFolderSelection
+			visibleWhen: function(item) {
+				return isFileCreationAtRootEnabled() || checkFolderSelection(item);
+			}
 		});
 		commandService.addCommand(importZipURLCommand);
 		
@@ -1133,7 +1135,9 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/i18n
 				fileInput.parentNode.replaceChild(cloneInput, fileInput);
 				
 			},
-			visibleWhen: checkFolderSelection
+			visibleWhen: function(item) {
+				return isFileCreationAtRootEnabled() || checkFolderSelection(item);
+			}
 		});
 		commandService.addCommand(importCommand);
 		
