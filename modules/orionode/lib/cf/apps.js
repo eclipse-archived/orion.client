@@ -340,8 +340,6 @@ function putapps(req, res){
 		target.caughtErrorHandler(task, err);
 	});
 	
-var DEFAULT_TIMEOUT = 180;
-	
 function respondAppPutRequest(task,status){
 	var resp;
 	var appJson = {
@@ -349,6 +347,7 @@ function respondAppPutRequest(task,status){
 		metadata:theApp.appMetadata	
 	};
 	if(status === "RUNNING"){
+		var DEFAULT_TIMEOUT = 180;
 		resp = {
 			"App":appJson,
 			"DeployedPackage":theApp.appPackageType || "unknown",
@@ -376,6 +375,7 @@ function respondAppPutRequest(task,status){
 function startApp(userId, userTimeout ,appTarget){
 	expireAppCache(appTarget, theApp.appName);
 	
+	var DEFAULT_TIMEOUT = 180;
 	var MAX_TIMEOUT = 180;
 	var body = {"console":true, "state":"STARTED"};
 	logger.debug("Starting application=" + theApp.appName);
