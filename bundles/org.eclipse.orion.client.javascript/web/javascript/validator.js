@@ -232,7 +232,7 @@ define([
 	function configureRules(cfg, confg) {
 		if(cfg && cfg.rules) {
 			Object.keys(cfg.rules).forEach(function(key) {
-				if(!Rules.defaults[key]) {
+				if(!Rules.defaults.hasOwnProperty(key)) {
 					delete cfg.rules[key];
 				}
 			});
