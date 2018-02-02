@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2016 IBM Corporation and others.
+ * Copyright (c) 2016, 2018 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -279,7 +279,7 @@ define([
 						start: 21,
 						end: 21
 					};
-					return getFixes({
+					getFixes({
 						buffer: "var MYCONSTANT = \"\";\nexport function myFunc() { return MYCONSTANT; }",
 						rule: rule,
 						expected: expected,
@@ -296,7 +296,7 @@ define([
 						start: 0,
 						end: 12
 					};
-					return getFixes({buffer: "class Foo {}",
+					getFixes({buffer: "class Foo {}",
 							rule: rule,
 							expected: expected,
 							callback: done,
@@ -311,7 +311,7 @@ define([
 					var expected = {value: "",
 									start: 0, 
 									end: 12};
-					return getFixes({buffer: 'var [a] = 4;', 
+					getFixes({buffer: 'var [a] = 4;', 
 									  rule: rule,
 									  expected: expected,
 									  callback: callback,
@@ -322,7 +322,7 @@ define([
 					var expected = {value: "",
 									start: 5, 
 									end: 6};
-					return getFixes({buffer: 'var [d, , b] = [1, 2, 3]; console.log(b);', 
+					getFixes({buffer: 'var [d, , b] = [1, 2, 3]; console.log(b);', 
 									  rule: rule,
 									  expected: expected,
 									  callback: callback,
@@ -333,7 +333,7 @@ define([
 					var expected = {value: "",
 									start: 5, 
 									end: 9};
-					return getFixes({buffer: 'var {op, lhs, rhs} = () => {}; console.log(lhs);console.log(rhs);', 
+					getFixes({buffer: 'var {op, lhs, rhs} = () => {}; console.log(lhs);console.log(rhs);', 
 									  rule: rule,
 									  expected: expected,
 									  callback: callback,
@@ -344,7 +344,7 @@ define([
 					var expected = {value: "",
 									start: 77, 
 									end: 96};
-					return getFixes({buffer: 
+					getFixes({buffer: 
 											"/*eslint-env browser */\n" +
 											"function f() {\n" +
 											"	var {\n" +
@@ -370,7 +370,7 @@ define([
 					var expected = {value: "",
 									start: 40,
 									end: 81};
-					return getFixes({buffer: 
+					getFixes({buffer: 
 											"/*eslint-env browser */\n" +
 											"function f() {\n" +
 											"	var {\n" +
@@ -391,7 +391,7 @@ define([
 					var expected = {value: "\"this is a template literal\"",
 									start: 15,
 									end: 43};
-					return getFixes({buffer: 'var backtick = `this is a template literal`;', 
+					getFixes({buffer: 'var backtick = `this is a template literal`;', 
 									  rule: rule,
 									  expected: expected,
 									  callback: callback,

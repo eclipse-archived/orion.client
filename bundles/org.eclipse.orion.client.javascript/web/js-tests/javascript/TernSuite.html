@@ -31,7 +31,11 @@
 				'js-tests/javascript/ternProjectHoverTests',
 				// 'js-tests/javascript/ternProjectManagerTestsx' // Not working.
 				], function(){
-			mocha.run();
+					before("reset timeout", function(done) {
+						this.timeout(30000);
+						done();
+					});
+					mocha.run();
 		});
 	});
   </script>

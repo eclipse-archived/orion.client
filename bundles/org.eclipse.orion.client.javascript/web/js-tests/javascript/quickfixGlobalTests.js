@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2017 IBM Corporation and others.
+ * Copyright (c) 2017, 2018 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License v1.0
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution
@@ -265,7 +265,7 @@ return function(worker) {
 				start: 8,
 				end: 9
 			}];
-			return getFixes({
+			getFixes({
 				buffer: "var a = 1",
 				rule: rule,
 				fixid: "ignore-in-file",
@@ -286,7 +286,7 @@ return function(worker) {
 				end: 24
 			}
 			];
-			return getFixes({
+			getFixes({
 				buffer: "<html>\n<script>var a = 1</script></html>",
 				rule: rule,
 				fixid: "ignore-in-file",
@@ -307,7 +307,7 @@ return function(worker) {
 				start: 32,
 				end: 33
 			}];
-			return getFixes({
+			getFixes({
 				buffer: "/* This is a comment */\nvar a = 1",
 				rule: rule,
 				fixid: "ignore-in-file",
@@ -327,7 +327,7 @@ return function(worker) {
 				start: 47,
 				end: 48
 			}];
-			return getFixes({
+			getFixes({
 				buffer: "<html>\n<script>/*eslint-disable yoda*/\nvar a = 1</script></html>",
 				rule: rule,
 				fixid: "ignore-in-file",
@@ -348,7 +348,7 @@ return function(worker) {
 				start: 32,
 				end: 33
 			}];
-			return getFixes({
+			getFixes({
 				buffer: "/*eslint-disable yoda*/\nvar a = 1",
 				rule: rule,
 				fixid: "ignore-in-file",
@@ -369,7 +369,7 @@ return function(worker) {
 				end: 66
 			}
 			];
-			return getFixes({
+			getFixes({
 				buffer: "/* \t\t\t\teslint-disable     \t\tyoda, no-undef\t\t          */\nvar a = 1",
 				rule: rule,
 				fixid: "ignore-in-file",
@@ -389,7 +389,7 @@ return function(worker) {
 				start: 41,
 				end: 42
 			}];
-			return getFixes({
+			getFixes({
 				buffer: "/*eslint-disable no-undef,yoda*/\nvar a = 1",
 				rule: rule,
 				fixid: "ignore-in-file",
@@ -409,7 +409,7 @@ return function(worker) {
 				start: 42,
 				end: 43
 			}];
-			return getFixes({
+			getFixes({
 				buffer: "/*eslint-disable no-undef, yoda*/\nvar a = 1",
 				rule: rule,
 				fixid: "ignore-in-file",
@@ -429,7 +429,7 @@ return function(worker) {
 				start: 66,
 				end: 67
 			}];
-			return getFixes({
+			getFixes({
 				buffer: "/* This is a comment */\n/*eslint-disable no-undef, yoda*/\nvar a = 1",
 				rule: rule,
 				fixid: "ignore-in-file",
@@ -449,7 +449,7 @@ return function(worker) {
 				start: 8,
 				end: 9
 			}];
-			return getFixes({
+			getFixes({
 				buffer: "var a = 1\n/*eslint-disable yoda*/",
 				rule: rule,
 				fixid: "ignore-in-file",
@@ -469,7 +469,7 @@ return function(worker) {
 				start: 30,
 				end: 37
 			}];
-			return getFixes({
+			getFixes({
 				buffer: "/* Comment */\nfunction foo(){\nrequire();\n}\n",
 				rule: rule,
 				fixid: "ignore-in-file",
@@ -488,7 +488,7 @@ return function(worker) {
 				start: 27,
 				end: 31
 			}];
-			return getFixes({
+			getFixes({
 				buffer: "/* Comment */\n/*eslint-env node */\nfunction foo(){\nrequire();\n}\n",
 				rule: rule,
 				fixid: "ignore-in-file",
@@ -504,7 +504,7 @@ return function(worker) {
 				start: 15,
 				end: 15
 			};
-			return getFixes({
+			getFixes({
 				buffer: "<html>\n<script>/* Comment */\n/*eslint-env node */\nfunction foo(){\nrequire();\n}\n</script>\n</html>",
 				rule: rule,
 				fixid: "ignore-in-file",
@@ -525,7 +525,7 @@ return function(worker) {
 				start: 27,
 				end: 31
 			}];
-			return getFixes({
+			getFixes({
 				buffer: "/* Comment */\n/*eslint-env node */\n/*eslint-disable yoda*/\nfunction foo(){\nrequire();\n}\n",
 				rule: rule,
 				fixid: "ignore-in-file",
@@ -545,7 +545,7 @@ return function(worker) {
 				start: 51,
 				end: 55
 			}];
-			return getFixes({
+			getFixes({
 				buffer: "/* Comment */\n/*eslint-disable yoda*/\n/*eslint-env node */\nfunction foo(){\nrequire();\n}\n",
 				rule: rule,
 				fixid: "ignore-in-file",
@@ -565,7 +565,7 @@ return function(worker) {
 				start: 70,
 				end: 71
 			}];
-			return getFixes({
+			getFixes({
 				buffer: "/*eslint-disable no-undef, yoda*/\n/*eslint-disable foo, bar*/\nvar a = 1",
 				rule: rule,
 				fixid: "ignore-in-file",
@@ -590,7 +590,7 @@ return function(worker) {
 				start: 31,
 				end: 32
 			}];
-			return getFixes({
+			getFixes({
 				buffer: "/*eslint-enable semi*/\nvar a = 1",
 				rule: rule,
 				fixid: "ignore-in-file",
@@ -615,7 +615,7 @@ return function(worker) {
 				start: 36,
 				end: 37
 			}];
-			return getFixes({
+			getFixes({
 				buffer: "/*eslint-enable semi,yoda*/\nvar a = 1",
 				rule: rule,
 				fixid: "ignore-in-file",
@@ -640,7 +640,7 @@ return function(worker) {
 				start: 37,
 				end: 38
 			}];
-			return getFixes({
+			getFixes({
 				buffer: "/*eslint-enable semi, yoda*/\nvar a = 1",
 				rule: rule,
 				fixid: "ignore-in-file",
@@ -660,7 +660,7 @@ return function(worker) {
 				start: 0,
 				end: 0
 			}];
-			return getFixes({
+			getFixes({
 				buffer: "/*eslint-enable*/\nvar a = 1",
 				rule: rule,
 				fixid: "ignore-in-file",
@@ -685,7 +685,7 @@ return function(worker) {
 				start: 55,
 				end: 56
 			}];
-			return getFixes({
+			getFixes({
 				buffer: "/*eslint-disable yoda*/\n/*eslint-enable semi*/\nvar a = 1",
 				rule: rule,
 				fixid: "ignore-in-file",
@@ -710,7 +710,7 @@ return function(worker) {
 				start: 64,
 				end: 65
 			}];
-			return getFixes({
+			getFixes({
 				buffer: "/*eslint-disable yoda*/\n/*eslint-enable semi,no-undef*/\nvar a = 1",
 				rule: rule,
 				fixid: "ignore-in-file",
@@ -735,7 +735,7 @@ return function(worker) {
 				start: 65,
 				end: 66
 			}];
-			return getFixes({
+			getFixes({
 				buffer: "/*eslint-disable yoda*/\n/*eslint-enable semi, no-undef*/\nvar a = 1",
 				rule: rule,
 				fixid: "ignore-in-file",
