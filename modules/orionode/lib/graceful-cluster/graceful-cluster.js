@@ -81,6 +81,7 @@ GracefulCluster.start = function(options) {
             cluster.fork().on('message', function(message) {
                 if (message.cmd === 'restart' && message.pid && restartQueue.indexOf(message.pid) === -1) {
                     // When worker asks to restart gracefully in cluster, then add it to restart queue.
+                    log('Cluster graceful shutdown: queued. pid=' + message.pid);
                     restartQueue.push(message.pid);
                     checkRestartQueue();
                 }
