@@ -8,7 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-var express = require('express'),
+let express = require('express'),
 	apps = require('./cf/apps'),
 	domains = require('./cf/domains'),
 	logz = require('./cf/logz'),
@@ -54,4 +54,11 @@ class CloudFoundry {
 	}
 }
 
-module.exports.CloudFoundry = CloudFoundry;
+/**
+ * API callback to load the endpoint
+ * @param {{?}} options 
+ */
+module.exports.router = function router(options) {
+	let cf = new CloudFoundry();
+	return cf.createRouter(options);
+};

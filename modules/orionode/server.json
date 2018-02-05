@@ -1,0 +1,79 @@
+{
+    "endpoints": [
+        {
+            "endpoint": "/metrics",
+            "module": "./lib/metrics"
+        },
+        {
+            "endpoint": "/version",
+            "module": "./lib/version"
+        },
+        {
+            "endpoint": "/about",
+            "module": "./lib/about"
+        },
+        {
+            "module": "./lib/user"
+        },
+        {
+            "endpoint": "/site",
+            "authenticated": true,
+            "checkAccess": true,
+            "module": "./lib/sites"
+        },
+        {
+            "endpoint": "/task",
+            "authenticated": true,
+            "module": "./lib/tasks"
+        },
+        {
+            "endpoint": "/filesearch",
+            "authenticated": true,
+            "module": "./lib/search"
+        },
+        {
+            "endpoint": "/file*",
+            "authenticated": true,
+            "checkAccess": true,
+            "module": "./lib/file"
+        },
+        {
+            "endpoint": "/workspace*",
+            "authenticated": true,
+            "checkAccess": true,
+            "module": "./lib/workspace"
+        },
+        {
+            "endpoint": "/gitapi",
+            "authenticated": true,
+            "module": "./lib/git"
+        },
+        {
+            "endpoint": "/cfapi",
+            "authenticated": true,
+            "module": "./lib/cf"
+        },
+        {
+            "endpoint": "/prefs",
+            "authenticated": true,
+            "module": "./lib/prefs"
+        },
+        {
+            "endpoint": "/xfer",
+            "authenticated": true,
+            "module": "./lib/xfer"
+        },
+        {
+            "endpoint": "/update",
+            "authenticated": true,
+            "ifProp": "isElectron",
+            "module": "./lib/update"
+        },
+        {
+            "endpoint": "/sharedWorkspace",
+            "authenticated": true,
+            "ifProp": "orion.collab.enabled",
+            "module": "./lib/sharedWorkspace"
+        }
+    ]
+}

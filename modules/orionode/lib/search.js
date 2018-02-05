@@ -92,7 +92,7 @@ function buildSearchOptions(searchOpts) {
 	}
 }
 
-module.exports = function(options) {
+module.exports.router = function router(options) {
 	var search;
 	var USE_WORKERS = options.configParams.get("isElectron");
 	if (USE_WORKERS) {
