@@ -73,7 +73,7 @@ let createUserAccess = function createUserAccess(UserId) {
 		"Uri": "/users/" + UserId
 	}];
 };
-module.exports.createUserAccess = createUserAccess
+module.exports.createUserAccess = createUserAccess;
 
 /**
  * Callback used in checkAccess
@@ -100,10 +100,10 @@ function hasAccess(access, res, err, next, uri){
  */
 function getMethod(methodName){
 	switch(methodName) {
-		case "POST": return POST
-		case "PUT": return PUT
-		case "GET": return GET
-		case "DELETE": return DELETE
+		case "POST": return POST;
+		case "PUT": return PUT;
+		case "GET": return GET;
+		case "DELETE": return DELETE;
 	}
 	return 0;
 }
@@ -134,9 +134,10 @@ function wildCardMatch(text, pattern){
 /**
  * Function to fetch the authorization data from the given metadata
  * @param {{?}} metadata The metadata object
+ * @param {{?}} store The backing metastore
  * @returns {{?}[]}
  */
-function getAuthorizationData(metadata){
+function getAuthorizationData(metadata, store){
 	var properties;
 	var workspaceIDs;
 	var isPropertyString;
@@ -202,7 +203,7 @@ module.exports.checkRights = function checkRights(userId, uri, req, res, next, m
 		if (typeof metadata === "undefined") {
 			return hasAccess(false, res, null, next, uri);
 		}
-		var userRightArray = getAuthorizationData(metadata);
+		var userRightArray = getAuthorizationData(metadata, store);
 		var access = userRightArray && userRightArray.some(function(userRight){
 			if(wildCardMatch(uri, userRight.Uri) && ((methodMask & userRight.Method) === methodMask)) {
 				return true;
