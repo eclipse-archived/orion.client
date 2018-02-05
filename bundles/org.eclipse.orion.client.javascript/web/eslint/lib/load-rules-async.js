@@ -2263,7 +2263,7 @@ define([
 				// any tab after a space /
 				var lineStart = /^(?=[\t ]* \t)/; // smart-tabs enabled
 				//var lineStart = /^(?=[\t ]*( \t|\t ))/; // smart-tabs disabled
-
+				//var lineStart = /^(?:<script>)*(?=[\t ]* \t)/; // include <script> at start of line
 				/**
 				 * @description Check the Program node in the AST (the whole AST)
 				 * @param {Object} node The AST node
