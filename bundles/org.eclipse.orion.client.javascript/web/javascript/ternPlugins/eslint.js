@@ -391,13 +391,6 @@ define([
 							range: element.related.range
 						};
 					}
-					// Don't insert annotations at Program node start (0) as we may be in a HTML file script block
-					if (strippedMessage.node && strippedMessage.nodeType === 'Program'){
-						strippedMessage.line = undefined;
-						strippedMessage.column = undefined;
-						var programStartRange = Finder.findProgramStartRange(file.ast);
-						strippedMessage.node.range = programStartRange;
-					}
 					strippedMessages.push(strippedMessage);
 				});
 			} catch(e) {
