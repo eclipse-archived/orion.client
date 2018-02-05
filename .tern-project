@@ -4,7 +4,7 @@
 		"requirejs": {},
 		"express": {}
 	},
-	"ecmaVersion": 5,
+	"ecmaVersion": 6,
 	"libs": [
 		"ecma5",
 		"browser",
