@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2016 IBM Corporation and others.
+ * Copyright (c) 2016, 2018 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -349,6 +349,27 @@ define([
 				});
 			});
 			describe('Let and Const', function(){
+				/**
+				 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=530787
+				 */
+				it('Const trailing inner scopes', function(done) {
+					var text = "function f() {if(true) {}const c = 1;}";
+					return computeOccurrences(text, getOptions(done, 31, 31), [{start:31, end:32}]);
+				});
+				/**
+				 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=530787
+				 */
+				it('Const trailing inner scope with nested same name', function(done) {
+					var text = "function f() {if(true) {const c = 43;}const c = 1;}";
+					return computeOccurrences(text, getOptions(done, 44, 44), [{start:44, end:45}]);
+				});
+				/**
+				 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=530787
+				 */
+				it('Const trailing inner scope with nested same name 2', function(done) {
+					var text = "function f() {if(true) {const c = 43;}const c = 1;}";
+					return computeOccurrences(text, getOptions(done, 31, 31), [{start:30, end:31}]);
+				});
 				it('Const basic 1', function(done) {
 					var text = "if (true) { const a=3; a++; }";
 					return computeOccurrences(text, getOptions(done, 18, 19), [{start:18, end:19}, {start:23, end:24}]);

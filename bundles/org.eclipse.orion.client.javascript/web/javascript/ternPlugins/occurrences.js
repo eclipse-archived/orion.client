@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2016 IBM Corporation and others.
+ * Copyright (c) 2016, 2018 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -754,7 +754,7 @@ define([
 	 */
 	function _popBlock() {
 		var scope = scopes[scopes.length-1];
-		if (!scope.isLet || !scope.blocks || scope.blocks.length === 0){
+		if (!scope.blocks || scope.blocks.length === 0){
 			return false;
 		}
 		var block = scope.blocks.pop();
@@ -764,23 +764,24 @@ define([
 			}
 			return false;
 		}
-		var i, j;
-		var len = block.occurrences.length;
-		if (defscope && defscope === block){
-			for(i = 0; i < len; i++) {
-				occurrences.push(block.occurrences[i]);
+		if(scope.isLet && Array.isArray(block.occurrences)) {
+			var i, j;
+			var len = block.occurrences.length;
+			if (defscope && defscope === block){
+				for(i = 0; i < len; i++) {
+					occurrences.push(block.occurrences[i]);
+				}
+				return true;
 			}
-			return true;
-		}
-
-		// We popped out of a scope but don't know where the define is, treat the occurrences like they belong to the outer scope (Bug 445410)
-		if (scope.blocks.length > 0){
-			for (j=0; j< len; j++) {
-				scope.blocks[scope.blocks.length - 1].occurrences.push(block.occurrences[j]);
-			}
-		} else {
-			for (j=0; j< len; j++) {
-				scope.occurrences.push(block.occurrences[j]);
+			// We popped out of a scope but don't know where the define is, treat the occurrences like they belong to the outer scope (Bug 445410)
+			if (scope.blocks.length > 0){
+				for (j=0; j< len; j++) {
+					scope.blocks[scope.blocks.length - 1].occurrences.push(block.occurrences[j]);
+				}
+			} else {
+				for (j=0; j< len; j++) {
+					scope.occurrences.push(block.occurrences[j]);
+				}
 			}
 		}
 		return false;
