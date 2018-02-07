@@ -181,25 +181,35 @@ function startServer(cb) {
 		}
 	});
 	server.listen(port);
+	var shutdownTimeout = configParams.get("shutdown.timeout");
 	new graceful.GracefulServer({
 		server: server,
 		log: logger.info.bind(logger),
-		shutdownTimeout: configParams.get("shutdown.timeout"),
+		shutdownTimeout: shutdownTimeout,
 		exitFunction: function(code) {
-			(code ? logger.warn : logger.info).bind(logger)("Exiting worker " + process.pid + " with code: " + code + "(code=1 means timeout)");
-			function done() {
-				log4js.shutdown(function() {
-					logger.info("log4js shutdown in worker: " + process.pid);
-					process.exit(code || 0);
-				});
+			var _shutdownTimer;
+			_shutdownTimer = setTimeout(function() {
+				_shutdownTimer = null;
+				serverExit(1);
+			}, this.shutdownTimeout);
+			function serverExit(code) {
+				(code ? logger.warn : logger.info).bind(logger)("Exiting worker " + process.pid + " with code: " + code + " (code=1 means timeout)");
+				function done() {
+					if (_shutdownTimer) clearTimeout(_shutdownTimer);
+					log4js.shutdown(function() {
+						logger.info("log4js shutdown. Worker exiting: " + process.pid);
+						process.exit(code || 0);
+					});
+				}
+				var data = {
+					code: code,
+					promises: []
+				};
+				api.getOrionEE().emit("close-socket", data);
+				api.getOrionEE().emit("close-server", data);
+				return Promise.all(data.promises).then(done, done);
 			}
-			var data = {
-				code: code,
-				promises: []
-			};
-			api.getOrionEE().emit("close-socket", data);
-			api.getOrionEE().emit("close-server", data);
-			return Promise.all(data.promises).then(done, done);
+			serverExit(code);
 		}
 	});
 	if (cluster && configParams.get("orion_cluster_restart_timeout")) {
