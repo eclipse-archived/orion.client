@@ -93,20 +93,27 @@ function tryLoadRouter(endpoint, args, options) {
 	if (conditional && options.configParams.get(endpoint.ifProp) || !conditional) {
 		try {
 			const mod = require(endpoint.module);
+			let fn = null;
 			if (typeof mod.router === 'function') {
-				const router = mod.router(options);
-				if (router === null) {
-					return; //endpoint does not want to take part in routing, quit
-				}
-				args.push(router);
+				fn = mod.router;
+			} else if(typeof mod === 'function') {
+				fn = mod;
 			} else {
 				//TODO log this properly
 				console.log("Endpoint did not provide the API 'router' function: " + JSON.stringify(endpoint, null, '\t'));
 				return;
 			}
-			if (endpoint.endpoint) { //last sanity check in case other options have been provided
-				options.app.use.apply(options.app, args);
+			if(fn) {
+				const router = fn(options);
+				if (router === null) {
+					return; //endpoint does not want to take part in routing, quit
+				}
+				args.push(router);
+				if (endpoint.endpoint) { //last sanity check in case other options have been provided
+					options.app.use.apply(options.app, args);
+				}
 			}
+			
 		} catch (err) {
 			//TODO log this properly
 			console.log("Failed to load module: " + err.message);
@@ -231,8 +238,6 @@ module.exports = function startServer(options) {
 		gitRoot: contextPath + '/gitapi'
 	});
 
-	const additionalEndpoints = options.configParams.get("additional.endpoint") ? require(options.configParams.get("additional.endpoint")) : [];
-	loadEndpoints(additionalEndpoints, options);
 	// Configure metastore
 	let metastoreFactory;
 	if (!options.configParams.get("orion.single.user") && options.configParams.get("orion.metastore.useMongo") !== false) {
@@ -252,6 +257,8 @@ module.exports = function startServer(options) {
 		passport.initialize(),
 		passport.session()
 	].concat(options.authenticate || []);
+	const additionalEndpoints = options.configParams.get("additional.endpoint") ? require(options.configParams.get("additional.endpoint")) : [];
+	loadEndpoints(additionalEndpoints, options);
 	const serverconf = options.configParams.get("orion.server.config") ? require(options.configParams.get("orion.server.config")) : [];
 	if (serverconf && serverconf.endpoints) {
 		loadEndpoints(serverconf.endpoints, options);
