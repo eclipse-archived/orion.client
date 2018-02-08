@@ -109,9 +109,7 @@ function tryLoadRouter(endpoint, args, options) {
 					return; //endpoint does not want to take part in routing, quit
 				}
 				args.push(router);
-				if (endpoint.endpoint) { //last sanity check in case other options have been provided
-					options.app.use.apply(options.app, args);
-				}
+				options.app.use.apply(options.app, args);
 			}
 			
 		} catch (err) {
