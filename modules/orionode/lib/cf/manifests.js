@@ -40,7 +40,7 @@ class ManifestRouter {
 			throw new Error('options.fileRoot is required'); 
 		}
 		return express.Router()
-			.get(this.fileRoot + "*", this.getManifests)
+			.get(options.fileRoot + "*", this.getManifests)
 			.get("*", this.getManifests);
 	}
 	

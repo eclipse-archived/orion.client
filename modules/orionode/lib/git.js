@@ -44,9 +44,9 @@ try {
 }
 
 if (hasNodegit) {
-	module.exports = Git;
+	module.exports.router = Git;
 } else {
-	module.exports = Nothing;
+	module.exports.router = Nothing;
 }
 
 function Nothing() {

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012, 2017 IBM Corporation and others.
+ * Copyright (c) 2012, 2018 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -20,7 +20,7 @@ var express = require('express'),
 var writeError = api.writeError, 
 	writeResponse = api.writeResponse;
 
-module.exports = function(options) {
+module.exports.router = function router(options) {
 	var fileRoot = options.fileRoot;
 	var workspaceRoot = options.workspaceRoot;
 	if (!fileRoot) { throw new Error('options.fileRoot is required'); }

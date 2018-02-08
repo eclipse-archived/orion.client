@@ -24,7 +24,6 @@ class About {
 	 * @description Create a new instance of the class
 	 */
 	constructor() {
-		
 	}
 	/**
 	 * @description Create an express Router for handling /about
@@ -62,5 +61,10 @@ class About {
 			});
 	}
 }
-
-module.exports.About = About;
+/**
+ * API callback to load the router
+ * @param {{?}} options 
+ */
+module.exports.router = function router(options) {
+	return new About().createRouter(options);
+};
