@@ -55,9 +55,6 @@ const EXT_CACHE_MAPPING = {
 };
 
 let workspaceDir = "";
-
-//configure logging
-log4js.configure(path.join(__dirname, 'config/log4js.json'));
 const logger = log4js.getLogger('index');
 
 /**
