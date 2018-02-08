@@ -87,35 +87,41 @@ function checkAccessRights(req, res, next) {
 /**
  * Tries to load the router from an endpoint
  * @param {{?}} endpoint The metadata for the endpoint to load
- * @param {{?}[]} args The arguments to pass to the express app use call
  * @param {{?}} options The map of options from the server load
  */
-function tryLoadRouter(endpoint, args, options) {
-	const conditional = endpoint.hasOwnProperty("ifProp");
-	if (conditional && options.configParams.get(endpoint.ifProp) || !conditional) {
-		try {
-			const mod = require(endpoint.module);
-			let fn = null;
-			if (typeof mod.router === 'function') {
-				fn = mod.router;
-			} else if(typeof mod === 'function') {
-				fn = mod;
-			} else {
-				logger.log("Endpoint did not provide the API 'router' function: " + JSON.stringify(endpoint, null, '\t'));
-				return;
-			}
-			if(fn) {
-				const router = fn(options);
-				if (!router) {
-					return; //endpoint does not want to take part in routing, quit
-				}
-				args.push(router);
-				options.app.use.apply(options.app, args);
-			}
-			
-		} catch (err) {
-			logger.log("Failed to load module: " + err.message);
+function tryLoadRouter(endpoint, options) {
+	const args = [];
+	if (typeof endpoint.endpoint === 'string') {
+		args.push(endpoint.endpoint);
+	}
+	if (endpoint.authenticated) {
+		args.push(options.authenticate);
+		args.push(checkAuthenticated);
+	}
+	if (endpoint.checkAccess) {
+		args.push(checkAccessRights);
+	}
+	try {
+		const mod = require(endpoint.module);
+		let fn = null;
+		if (typeof mod.router === 'function') {
+			fn = mod.router;
+		} else if(typeof mod === 'function') {
+			fn = mod;
+		} else {
+			logger.log("Endpoint did not provide the API 'router' function: " + JSON.stringify(endpoint, null, '\t'));
+			return;
 		}
+		if(fn) {
+			const router = fn(options);
+			if (!router) {
+				return; //endpoint does not want to take part in routing, quit
+			}
+			args.push(router);
+			options.app.use.apply(options.app, args);
+		}
+	} catch (err) {
+		logger.log("Failed to load module: " + err.message);
 	}
 }
 
@@ -132,18 +138,10 @@ function loadEndpoints(endpoints, options, auth) {
 				//after endpoints refactored, remove this check
 				return;
 			}
-			const args = [];
-			if (typeof endpoint.endpoint === 'string') {
-				args.push(endpoint.endpoint);
+			const conditional = endpoint.hasOwnProperty("ifProp");
+			if (conditional && options.configParams.get(endpoint.ifProp) || !conditional) {
+				tryLoadRouter(endpoint, options);
 			}
-			if (endpoint.authenticated) {
-				args.push(options.authenticate);
-				args.push(checkAuthenticated);
-			}
-			if (endpoint.checkAccess) {
-				args.push(checkAccessRights);
-			}
-			tryLoadRouter(endpoint, args, options);
 		});
 	}
 }
