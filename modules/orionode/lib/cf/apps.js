@@ -500,7 +500,7 @@ function createApp(req, appTarget){
 			"space_guid": appTarget.Space.metadata.guid,
 			"name":theApp.appName,
 			"instances": Number(theApp.manifest.applications[0].instances) || 1,
-			"buildPack":theApp.manifest.applications[0].buildpack || null,
+			"buildpack":theApp.manifest.applications[0].buildpack || null,
 			"command":theApp.manifest.applications[0].command,
 			"memory": normalizeMemoryMeasure(theApp.manifest.applications[0].memory),
 			"stack_guid":stackGuid,
@@ -527,7 +527,7 @@ function updateApp(req, appTarget){
 		var body = {
 			"name":theApp.appName,
 			"instances":theApp.manifest.applications[0].instances || 1,
-			"buildPack":theApp.manifest.applications[0].buildpack || null,
+			"buildpack":theApp.manifest.applications[0].buildpack || null,
 			"command":theApp.manifest.applications[0].command,
 			"memory": normalizeMemoryMeasure(theApp.manifest.applications[0].memory),
 			"stack_guid":stackGuid,
