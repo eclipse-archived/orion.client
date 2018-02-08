@@ -19,6 +19,7 @@ let express = require('express'),
 	socketio = require('socket.io'),
 	ttyShell = require('./lib/tty_shell'),
 	responseTime = require('response-time'),
+	log4js = require('log4js'),
 	//lsregistry = require("./lib/lsRegistry"),
 	addModulePath = require('app-module-path');
 
@@ -54,6 +55,10 @@ const EXT_CACHE_MAPPING = {
 };
 
 let workspaceDir = "";
+
+//configure logging
+log4js.configure(path.join(__dirname, 'config/log4js.json'));
+const logger = log4js.getLogger('index');
 
 /**
  * Check if the request is authenticated
@@ -99,8 +104,7 @@ function tryLoadRouter(endpoint, args, options) {
 			} else if(typeof mod === 'function') {
 				fn = mod;
 			} else {
-				//TODO log this properly
-				console.log("Endpoint did not provide the API 'router' function: " + JSON.stringify(endpoint, null, '\t'));
+				logger.log("Endpoint did not provide the API 'router' function: " + JSON.stringify(endpoint, null, '\t'));
 				return;
 			}
 			if(fn) {
@@ -113,8 +117,7 @@ function tryLoadRouter(endpoint, args, options) {
 			}
 			
 		} catch (err) {
-			//TODO log this properly
-			console.log("Failed to load module: " + err.message);
+			logger.log("Failed to load module: " + err.message);
 		}
 	}
 }
@@ -128,11 +131,10 @@ function tryLoadRouter(endpoint, args, options) {
 function loadEndpoints(endpoints, options, auth) {
 	if (Array.isArray(endpoints)) {
 		endpoints.forEach(function(endpoint) {
-			
 			if (auth !== Boolean(endpoint.authenticated)) {
+				//after endpoints refactored, remove this check
 				return;
 			}
-			console.log("LOADED: "+endpoint.module)
 			const args = [];
 			if (typeof endpoint.endpoint === 'string') {
 				args.push(endpoint.endpoint);
@@ -160,19 +162,18 @@ function loadLanguageServers(servers, io, options) {
 	if (Array.isArray(servers) && options.configParams.get('orion.single.user')) {
 		const rootPath = path.join(__dirname, "language_servers");
 		if (!fs.existsSync(rootPath)) {
-			//TODO log this properly
-			console.log("'language_servers' folder does not exist. Stopped loading language servers.");
+			logger.log("'language_servers' folder does not exist. Stopped loading language servers.");
 			return;
 		}
 		addModulePath.addPath(rootPath);
 		servers.forEach(function(ls) {
 			if (typeof ls.dirName !== "string") {
-				console.log("Language server metadata is missing 'dirName' property: " + JSON.stringify(ls, null, '\t'));
+				logger.log("Language server metadata is missing 'dirName' property: " + JSON.stringify(ls, null, '\t'));
 				return;
 			}
 			const lsPath = path.join(rootPath, ls.dirName);
 			if (!fs.existsSync(lsPath)) {
-				console.log("Language server folder does not exist: " + lsPath);
+				logger.log("Language server folder does not exist: " + lsPath);
 				return;
 			}
 			addModulePath.addPath(lsPath);
@@ -186,11 +187,10 @@ function loadLanguageServers(servers, io, options) {
 					// 		OUT_PORT: 8124
 					// 	});
 				} else {
-					console.log("Tried to install language server '" + lsPath + "' - but it has no createServer function");
+					logger.log("Tried to install language server '" + lsPath + "' - but it has no createServer function");
 				}
 			} catch (err) {
-				//TODO log this properly
-				console.log("Failed to load language server: " + err);
+				logger.log("Failed to load language server: " + err);
 			}
 		});
 	}

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016, 2017 IBM Corporation and others.
+ * Copyright (c) 2016, 2018 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -20,6 +20,20 @@ var LRU = require("lru-cache-for-clusters-as-promised");
 
 // Caching for already located targets
 var targetCache = new LRU({max: 10000, maxAge: 1800000, namespace: "target"});
+/**
+ * UTILITY
+ * @param {{?}} body The JSON body to parse
+ */
+function parsebody(body){
+	var result;
+	try {
+		result = typeof body === "string" ? JSON.parse(body): body;
+	} catch(err) {
+		result = body;
+	}
+	return result;
+}
+module.exports.parsebody = parsebody;
 
 module.exports.router = function(options) {
 	if(options.configParams.get("cf.bearer.token.store")) {
@@ -27,7 +41,6 @@ module.exports.router = function(options) {
 	}
 	
 	module.exports.getAccessToken = getAccessToken;
-	module.exports.parsebody = parsebody;
 	module.exports.computeTarget = computeTarget;
 	module.exports.cfRequest = cfRequest;
 	module.exports.caughtErrorHandler = caughtErrorHandler;
@@ -202,15 +215,7 @@ function caughtErrorHandler(task, err){
 	}
 	task.done(errorResponse);
 }
-function parsebody(body){
-	var result;
-	try{
-		result = typeof body === "string" ? JSON.parse(body): body;
-	}catch(err){
-		result = body;
-	}
-	return result;
-}
+
 function cfRequest (method, userId, url, query, body, headers, requestHeader, target) {
 	var waitFor;
 	if(!requestHeader){
