@@ -105,7 +105,7 @@ function tryLoadRouter(endpoint, args, options) {
 			}
 			if(fn) {
 				const router = fn(options);
-				if (router === null) {
+				if (!router) {
 					return; //endpoint does not want to take part in routing, quit
 				}
 				args.push(router);
@@ -123,10 +123,16 @@ function tryLoadRouter(endpoint, args, options) {
  * Function that loads endpoints from the configuration file
  * @param {{?}[]} endpoints The array of endpoints
  * @param {{?}} options The map of options
+ * @param {bool} auth If we should be loading endpoints that require authentication
  */
-function loadEndpoints(endpoints, options) {
+function loadEndpoints(endpoints, options, auth) {
 	if (Array.isArray(endpoints)) {
 		endpoints.forEach(function(endpoint) {
+			
+			if (auth !== Boolean(endpoint.authenticated)) {
+				return;
+			}
+			console.log("LOADED: "+endpoint.module)
 			const args = [];
 			if (typeof endpoint.endpoint === 'string') {
 				args.push(endpoint.endpoint);
@@ -136,10 +142,6 @@ function loadEndpoints(endpoints, options) {
 				args.push(checkAuthenticated);
 			}
 			if (endpoint.checkAccess) {
-				if (args.length < 2) {
-					args.push(null);
-					args.push(null);
-				}
 				args.push(checkAccessRights);
 			}
 			tryLoadRouter(endpoint, args, options);
@@ -256,11 +258,13 @@ module.exports = function startServer(options) {
 		passport.session()
 	].concat(options.authenticate || []);
 	const additionalEndpoints = options.configParams.get("additional.endpoint") ? require(options.configParams.get("additional.endpoint")) : [];
-	loadEndpoints(additionalEndpoints, options);
 	const serverconf = options.configParams.get("orion.server.config") ? require(options.configParams.get("orion.server.config")) : [];
-	if (serverconf && serverconf.endpoints) {
-		loadEndpoints(serverconf.endpoints, options);
+	let endpoints = Array.isArray(additionalEndpoints) ? additionalEndpoints : [];
+	if(Array.isArray(serverconf.endpoints)) {
+		endpoints = endpoints.concat(serverconf.endpoints);
 	}
+	loadEndpoints(endpoints, options, false);
+	loadEndpoints(endpoints, options, true);
 	const io = socketio.listen(options.server, {
 		'log level': 1,
 		path: (listenContextPath ? contextPath : '') + '/socket.io'
