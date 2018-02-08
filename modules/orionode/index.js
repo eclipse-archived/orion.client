@@ -255,7 +255,7 @@ module.exports = function startServer(options) {
 		passport.session()
 	].concat(options.authenticate || []);
 	const additionalEndpoints = options.configParams.get("additional.endpoint") ? require(options.configParams.get("additional.endpoint")) : [];
-	const serverconf = options.configParams.get("orion.server.config") ? require(options.configParams.get("orion.server.config")) : [];
+	const serverconf = require(options.configParams.get("orion.server.config") || "./server.json");
 	let endpoints = Array.isArray(additionalEndpoints) ? additionalEndpoints : [];
 	if(Array.isArray(serverconf.endpoints)) {
 		endpoints = endpoints.concat(serverconf.endpoints);
