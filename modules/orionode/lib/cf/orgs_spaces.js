@@ -29,18 +29,25 @@ module.exports.router = function() {
 		
 function getOrgs(req, res){
 	var task = new tasks.Task(res,false,false,0,false);
-	var resp = {};
 	var targetRequest = JSON.parse(req.query.Target);
 	getOrgsRequest(req.user.username, target.fullTarget(req,targetRequest))
-	.then(function(orgsArray){
-		resp = {
-			"Orgs" : orgsArray.simpleorgsArray
-		};
+	.then(function(orgs){
+		var result = [];
+		orgs.forEach(function(org) {
+			var o = resourceJson(org, "Org");
+			o.Spaces = [];
+			org.spaces.forEach(function(space) {
+				o.Spaces.push(resourceJson(space));
+			})
+			result.push(o);
+		});
 		task.done({
 			HttpCode: 200,
 			Code: 0,
 			DetailedMessage: "OK",
-			JsonData: resp,
+			JsonData: {
+				"Orgs" : result
+			},
 			Message: "OK",
 			Severity: "Ok"
 		});
@@ -59,47 +66,28 @@ function getOrgsRequest(userId, targetRequest){
 			return value;
 		}
 		return target.cfRequest("GET", userId, targetRequest.Url + "/v2/organizations", {"inline-relations-depth":"1"}, null, null, null, targetRequest)
-		// TODO In Java code, there is a case that Region is needed, but that value was always assigned as null.
 		.then(function(result){
-			var completeOrgsArray = [];
-			var simpleorgsArray = [];
-			completeOrgsArray = result.resources;
+			var orgs = result.resources || [];
 			return new Promise(function(fulfill,reject){
-				if(completeOrgsArray){
-					async.each(completeOrgsArray, function(resource, cb) {
-						return target.cfRequest("GET", userId, targetRequest.Url + resource.entity.spaces_url, {"inline-relations-depth":"1"}, null, null, null, targetRequest)
-						.then(function(spaceJson){	
-							var spaces = [];
-							var spaceResources = spaceJson && spaceJson.resources || [];
-							for(var k = 0; k < spaceResources.length ; k++ ){
-								spaces.push(resourceJson(spaceResources[k],"Space"));
-							}
-							var orgWithSpace = {};
-							orgWithSpace = resourceJson(resource,"Org");
-							orgWithSpace.Spaces = spaces;
-							resource.Spaces = spaceResources;
-							if(orgWithSpace.Spaces){
-								simpleorgsArray.unshift(orgWithSpace);
-							}else{
-								simpleorgsArray.push(orgWithSpace);
-							}
-							cb();
-						}).catch(function(err){
-							cb(err);
-						});
-					}, function(err) {
-						if(err){
-							return reject(err);
-						}
-						time = Date.now();
-						var theOrgs = {"simpleorgsArray":simpleorgsArray,"completeOrgsArray":completeOrgsArray};
-						orgsCache.set(cacheKey, theOrgs)
-						.then(function() {
-							logger.info("time to set orgs cache=" + (Date.now() - time));
-							fulfill(theOrgs);
-						});
+				async.each(orgs, function(org, cb) {
+					return target.cfRequest("GET", userId, targetRequest.Url + org.entity.spaces_url, {"inline-relations-depth":"1"}, null, null, null, targetRequest)
+					.then(function(result){	
+						org.spaces = result && result.resources || [];
+						cb();
+					}).catch(function(err){
+						cb(err);
 					});
-				}
+				}, function(err) {
+					if(err){
+						return reject(err);
+					}
+					time = Date.now();
+					orgsCache.set(cacheKey, orgs)
+					.then(function() {
+						logger.info("time to set orgs cache=" + (Date.now() - time));
+						fulfill(orgs);
+					});
+				});
 			});
 		});
 	});

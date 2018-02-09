@@ -138,35 +138,34 @@ function computeTarget(userId, targetRequest){
 				return value;
 			}
 			return orgs.getOrgsRequest(userId, targetRequest)
-			.then(function(OrgsArray){	
+			.then(function(orgs) {
+				var org, space;
 				if(!targetRequest.Org){
-					var org = OrgsArray.completeOrgsArray[0];
-				}else{
-					var aimedOrg = OrgsArray.completeOrgsArray.find(function(org){
+					org = orgs[0];
+				} else {
+					org = orgs.find(function(org){
 						return org.entity.name === targetRequest.Org || org.metadata.guid === targetRequest.Org;
 					});
-					org = aimedOrg;
 				}
 				if (!org) {
 					return Promise.reject(new Error("Organization not found"));
 				}
 				if(!targetRequest.Space){
-					var space = org.Spaces[0];
-				}else{
-					var aimedSpace = org.Spaces.find(function(space){
+					space = org.spaces[0];
+				} else {
+					space = org.spaces.find(function(space){
 						return space.entity.name === targetRequest.Space || space.metadata.guid === targetRequest.Space;
 					});
-					space = aimedSpace;
 				}
-				delete org.Spaces;
-				
+				if (!space) {
+					return Promise.reject(new Error("Space not found"));
+				}
 				var target = {
 					"Type": "Target",
 					"Url": targetRequest.Url,
 					"Org": org,
-					"Space":space
+					"Space": space
 				};
-				
 				var putKey = userId + targetRequest.Url + org.entity.name + space.entity.name;
 				time = Date.now();
 				return targetCache.set(putKey, target)
