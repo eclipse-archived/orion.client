@@ -26,7 +26,7 @@ Object.keys(window.__karma__.files).forEach(function (file) {
   }
 })
 
-require.config({
+requirejs.config({
   baseUrl: '/base',
 
   paths: {
