@@ -519,6 +519,9 @@ exports.handleFilePOST = function(workspaceRoot, fileRoot, req, res, destFile, m
 		var project = {};
 		if (isNonWrite) {
 			var sourceFile = getFile(req, api.decodeURIComponent(sourceUrl.replace(new RegExp("^"+fileRoot), "")));
+			if (path.resolve(destFile.path).indexOf(path.resolve(sourceFile.path)) === 0) {
+				return api.writeError(400, res, "The destination cannot be a descendent of the source location");
+			}
 			return fs.stat(sourceFile.path, function(err, stats) {
 				if(err) {
 					if (err.code === 'ENOENT') {
