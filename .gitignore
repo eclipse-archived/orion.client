@@ -21,3 +21,6 @@ node_modules/
 .DS_Store
 
 /modules/orionode.debug.server/adapters
+
+# VS Code dev
+.vscode
