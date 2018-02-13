@@ -10,6 +10,8 @@
  *******************************************************************************/
 let express = require('express'),
 	bodyParser = require('body-parser'),
+	cookieParser = require('cookie-parser'),
+	csurf = require('csurf'),
 	expressSession = require('express-session'),
 	passport = require('passport'),
 	path = require('path'),
@@ -56,6 +58,7 @@ const EXT_CACHE_MAPPING = {
 
 let workspaceDir = "";
 const logger = log4js.getLogger('index');
+let csrf;
 
 /**
  * Check if the request is authenticated
@@ -91,8 +94,19 @@ function checkAccessRights(req, res, next) {
  */
 function tryLoadRouter(endpoint, options) {
 	const args = [];
-	if (typeof endpoint.endpoint === 'string') {
+	var isEndpoint = typeof endpoint.endpoint === 'string';
+	if (isEndpoint) {
 		args.push(endpoint.endpoint);
+	}
+	if (isEndpoint && csrf && (endpoint.checkCSRF === undefined || endpoint.checkCSRF)) { // perform CSRF by default
+		args.push(csrf);
+		args.push(function(req, res, next) {
+			var tokenCookie = 'x-csrf-token';
+			if (!req.cookies[tokenCookie]) {
+				res.cookie(tokenCookie, req.csrfToken());
+			}
+			next();
+		});
 	}
 	if (endpoint.authenticated) {
 		args.push(options.authenticate);
@@ -219,6 +233,7 @@ module.exports = function startServer(options) {
 		extended: false,
 		limit: "10mb"
 	}));
+	app.use(cookieParser());
 	app.use(responseTime({
 		digits: 2,
 		header: "X-Total-Response-Time",
@@ -252,6 +267,15 @@ module.exports = function startServer(options) {
 		passport.initialize(),
 		passport.session()
 	].concat(options.authenticate || []);
+	if (options.configParams.get("orion.XSRFPreventionFilterEnabled")) {
+		csrf = csurf({ cookie: true });
+		options.CSRF = csrf;
+	} else {
+		/**
+		 * @callback
+		 */
+		options.CSRF = function noop(req, res, next) { next(); };
+	}
 	const additionalEndpoints = options.configParams.get("additional.endpoint") ? require(options.configParams.get("additional.endpoint")) : [];
 	const serverconf = require(options.configParams.get("orion.server.config") || "./server.json");
 	let endpoints = Array.isArray(additionalEndpoints) ? additionalEndpoints : [];

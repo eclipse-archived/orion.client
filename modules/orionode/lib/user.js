@@ -270,7 +270,7 @@ module.exports.router = function(options) {
 		checkRights(req.user.username, uri, req, res, next);
 	}
 
-	app.get("/users", options.authenticate, checkUserAccess, function(req,res) {
+	app.get("/users", options.CSRF, options.authenticate, checkUserAccess, function(req,res) {
 		var start = Math.max(0, Number(req.query.start)) || 0;
 		var rows = Math.max(0, Number(req.query.rows)) || 20;
 		metastore(req).getAllUsers(start, rows, function(err, users) {
@@ -293,7 +293,7 @@ module.exports.router = function(options) {
 		});
 	});
 
-	app.get("/users/:id", options.authenticate, checkUserAccess, function(req,res){
+	app.get("/users/:id", options.CSRF, options.authenticate, checkUserAccess, function(req,res){
 		metastore(req).getUser(req.params.id, function(err, user) {
 			if (err) {
 				return api.writeResponse(404, res);
@@ -305,7 +305,7 @@ module.exports.router = function(options) {
 		});
 	});
 
-	app.put("/users/:id", options.authenticate, checkUserAccess, function(req,res){
+	app.put("/users/:id", options.CSRF, options.authenticate, checkUserAccess, function(req,res){
 		var id = req.params.id;
 		var store = metastore(req);
 		store.getUser(id, function(err, user) {
@@ -360,14 +360,14 @@ module.exports.router = function(options) {
 		});
 	});
 
-	app.delete("/users/:id", options.authenticate, checkUserAccess, function(req,res){
+	app.delete("/users/:id", options.CSRF, options.authenticate, checkUserAccess, function(req,res){
 		metastore(req).deleteUser(req.params.id, function(err) {
 			if (err) return api.writeResponse(400, res);
 			return api.writeResponse(200, res);
 		});
 	});
 
-	app.post("/users/:id", options.authenticate, checkUserAccess, function(req,res){
+	app.post("/users/:id", options.CSRF, options.authenticate, checkUserAccess, function(req,res){
 		var id = req.params.id;
 		var newPassword = req.body.Password;
 		if (!newPassword) {
@@ -390,7 +390,7 @@ module.exports.router = function(options) {
 		});
 	});
 
-	app.post('/users', options.authenticate, function(req, res){
+	app.post('/users', options.CSRF, options.authenticate, function(req, res){
 		// If there are admin accounts, only admin accounts can create users
 		if (options.configParams.get("orion.auth.user.creation") && !isAdmin(req.user && req.user.username)) {
 			return api.writeResponse(403, res);

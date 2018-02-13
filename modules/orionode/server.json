@@ -13,7 +13,8 @@
             "module": "./lib/about"
         },
         {
-            "module": "./lib/user"
+            "module": "./lib/user",
+            "checkCSRF": false
         },
         {
             "endpoint": "/site",
