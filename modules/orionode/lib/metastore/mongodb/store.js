@@ -19,6 +19,8 @@ var expressSession = require('express-session'),
 	log4js = require('log4js'),
 	mkdirp = require('mkdirp'),
 	metaUtil = require('../util/metaUtil'),
+	rimraf = require('rimraf'),
+	fs = require('fs'),
 	accessRights = require('../../accessRights'),
 	logger = log4js.getLogger("mongo-store");
 
@@ -38,7 +40,7 @@ var workspaceSchema = new mongoose.Schema({
 	properties: {
 		type: mongoose.Schema.Types.Mixed
 	}
-});
+}, { usePushEach: true });
 var orionAccountSchema = new mongoose.Schema({
 	username: {
 		type: String,
@@ -75,7 +77,7 @@ var orionAccountSchema = new mongoose.Schema({
 		type: Date,
 		"default": Date.now
 	}
-});
+}, { usePushEach: true });
 orionAccountSchema.plugin(passportLocalMongooseEmail);
 var orionAccount = mongoose.model('orionAccount', orionAccountSchema);
 
@@ -109,7 +111,7 @@ var taskSchema = new mongoose.Schema({
 	expires: Number,
 	cancelable: Boolean
 	// uriUnqualStrategy: String // TODO needed?
-});
+}, { usePushEach: true });
 var orionTask = mongoose.model("orionTask", taskSchema);
 
 // If `user` has already been fetched from DB, use it, otherwise obtain from findByUsername
@@ -304,8 +306,30 @@ Object.assign(MongoDbMetastore.prototype, {
 			}
 		});
 	},
-	deleteUser: function(id, callback) {
-		orionAccount.remove({username: id}, callback);
+	/**
+	 * Delete the user from the store with the given user ID
+	 * @param {string} id The user identifier to delete
+	 * @param {fn(Error: err)} callback The callback to call when complete
+	 */
+	deleteUser: function deleteUser(id, callback) {
+		orionAccount.findByUsername(id, function(err, user) {
+			if(err) {
+				callback(err);
+			}
+			const userPath = path.join(this.options.workspaceDir, id.substring(0,2));
+			fs.access(userPath, (err) => {
+				if(err) {
+					callback(err);
+				}
+				//TODO should a delete failure prevent the user delete?
+				return rimraf(userPath, (err) => {
+					if(err) {
+						callback(err);
+					}
+					orionAccount.remove({username: id}, callback);
+				});
+			});
+		}.bind(this));
 	},
 	confirmEmail: function(authToken, callback) {
 		orionAccount.verifyEmail(authToken, callback);
