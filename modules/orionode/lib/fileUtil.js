@@ -90,12 +90,12 @@ var getChildren = exports.getChildren = function(store, fileRoot, workspaceRoot,
 				return null; // suppress rejection
 			});
 		});
-	}, function reject(err) {
+	}, /* @callback */ function reject(err) {
 		return [];
 	})
 	.then(function(results) {
 		return results.filter(function(r) { return r; });
-	}, function reject(err) {
+	}, /* @callback */ function reject(err) {
 		return [];
 	});
 };
@@ -105,13 +105,12 @@ var getChildren = exports.getChildren = function(store, fileRoot, workspaceRoot,
  * @throws {Error} If p is outside the workspaceDir (and thus is unsafe)
  */
 var safePath = exports.safePath = function(workspaceDir, p) {
-	workspaceDir = path.normalize(workspaceDir);
-	p = path.normalize(p);
-	var relativePath = path.relative(workspaceDir, p);
+	let newpath = path.normalize(p);
+	var relativePath = path.relative(path.normalize(workspaceDir), newpath);
 	if (relativePath.indexOf('..' + path.sep) === 0) {
-		throw new Error('Path ' + p + ' is outside workspace');
+		throw new Error('Path ' + newpath + ' is outside workspace');
 	}
-	return p;
+	return newpath;
 };
 
 /**
@@ -124,12 +123,33 @@ var safeFilePath = exports.safeFilePath = function(workspaceDir, filepath) {
 	return safePath(workspaceDir, path.join(workspaceDir, filepath));
 };
 
+/**
+ * Fetch the metastore for the given request. This function will throw an exception is the metastore cannot be found.
+ * @deprecated Use {@link getMetastoreSafe} instead
+ * @param {XMLHttpRequest} req The request
+ * @returns {{?}} the metastore
+ * @throws {Error} Throws an error if the metastore cannot be found.
+ */
 var getMetastore = exports.getMetastore = function(req) {
 	var ms = req.app.locals.metastore;
 	if (!ms) {
 		throw new Error("No metastore found");
 	}
 	return ms;
+};
+
+/**
+ * Fetch the metastore for the given request in a safe manner using a promise
+ * @param {XMLHttpRequest} req The request
+ * @returns {Promise} A promise to resolve the metastore
+ * @since 18.0
+ */
+module.exports.getMetastoreSafe = function getMetastoreSafe(req) {
+	var ms = req.app.locals.metastore;
+	if (!ms) {
+		return Promise.reject(new Error("No metastore found"));
+	}
+	return Promise.resolve(ms);
 };
 
 /**
@@ -333,6 +353,9 @@ exports.FileDecorator = FileDecorator;
 function FileDecorator() {
 }
 Object.assign(FileDecorator.prototype, {
+	/**
+	 * @callback
+	 */
 	decorate: function(req, file, json) {
 	}
 });
@@ -497,7 +520,7 @@ exports.handleFilePOST = function(workspaceRoot, fileRoot, req, res, destFile, m
 	} else if (isNonWrite && !sourceUrl) {
 		return api.writeError(400, res, 'Missing Location property in request body');
 	}
-	return fs.stat(destFile.path, function(err, stats) {
+	return fs.stat(destFile.path, /* @callback */ function(err, stats) {
 		var destExists = true;
 		if(err) {
 			destExists = false;
@@ -519,9 +542,9 @@ exports.handleFilePOST = function(workspaceRoot, fileRoot, req, res, destFile, m
 		var project = {};
 		if (isNonWrite) {
 			var sourceFile = getFile(req, api.decodeURIComponent(sourceUrl.replace(new RegExp("^"+fileRoot), "")));
-			if (path.resolve(destFile.path).indexOf(path.resolve(sourceFile.path)) === 0) {
-				return api.writeError(400, res, "The destination cannot be a descendent of the source location");
-			}
+			// if (path.resolve(destFile.path).indexOf(path.resolve(sourceFile.path)) === 0) {
+			// 	return api.writeError(400, res, "The destination cannot be a descendent of the source location");
+			// }
 			return fs.stat(sourceFile.path, function(err, stats) {
 				if(err) {
 					if (err.code === 'ENOENT') {
@@ -700,7 +723,7 @@ exports.removeFileModificationListener = function(id) {
  * @see {ChangeType} For a listing of available event types
  */
 exports.fireFileModificationEvent = function(eventData) {
-	_listeners.forEach(function(val, key, map) {
+	_listeners.forEach(/* @callback */ function(val, key, map) {
 		if(typeof val.handleFileModficationEvent === 'function') {
 			//logger.debug('notifying "'+key+'" ('+eventData.type+'): '+JSON.stringify(eventData.file, null, '\t'));
 			val.handleFileModficationEvent(eventData);

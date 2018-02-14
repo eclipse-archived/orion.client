@@ -87,7 +87,6 @@ define([
 				position: ['right', 'above', 'below', 'left'] //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			});
 
-			this.username = "";
 			var deleteCommand = new mCommands.Command({
 				name: messages["Delete"],
 				tooltip: messages["DeleteUser"],
@@ -122,7 +121,7 @@ define([
 		deleteUser: function(){
 			if(confirm(messages["DeleteUserComfirmation"])){			
 				var userService = this.userService; //$NON-NLS-0$
-				userService.deleteUser("/users/" + this.username).then(function(jsonData) {  //$NON-NLS-0$
+				userService.deleteUser("/users/" + this.UserName).then(function(jsonData) {  //$NON-NLS-0$
 					window.location.reload();
 				}, function(jsonData) {
 					alert(jsonData.Message);

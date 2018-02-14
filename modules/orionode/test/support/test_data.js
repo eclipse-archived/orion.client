@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2013, 2017 IBM Corporation and others.
+ * Copyright (c) 2013, 2018 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -157,6 +157,7 @@ exports.setupOrionServer = function setupOrionServer(helperMiddleware){
 				options.configParams.set("orion.context.listenPath", true);
 				options.configParams.set("orion.context.path", testHelper.CONTEXT_PATH);
 			}
+			options.configParams.set('orion.XSRFPreventionFilterEnabled', false);
 			return orionServer(options);
 		};
 		var userMiddleware = function(req, res, next) {

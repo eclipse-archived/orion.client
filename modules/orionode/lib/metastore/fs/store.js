@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016, 2017 IBM Corporation and others.
+ * Copyright (c) 2016, 2018 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -8,8 +8,7 @@
  * Contributors:
  *	 IBM Corporation - initial API and implementation
  *******************************************************************************/
-var
-    nodePath = require('path'),
+const nodePath = require('path'),
     Promise = require('bluebird'),
     fs = Promise.promisifyAll(require('fs')),
     mkdirpAsync = Promise.promisify(require('mkdirp')),
@@ -17,20 +16,20 @@ var
     accessRights = require('../../accessRights'),
     os = require('os'),
 	log4js = require('log4js'),
+	rimraf = require('rimraf'),
 	logger = log4js.getLogger("metastore"),
     fileLocker = require('../../util/fileLocker'),
     cryptoUtil = require('../../util/cryptoUtil');
 
-// Helper functions
-var FILENAME_METASTORE = "metastore.json";
-var FILENAME_TASKS_TEMP_DIR = "temp";
-var FILENAME_USER_METADATA = "user.json";
-var KEY_ORION_DESCRIPTION = "OrionDescription";
-var KEY_ORION_VERSION = "OrionVersion";
-var WORKSPACE_ID = "anonymous-OrionContent";
-var DEFAULT_WORKSPACE_NAME = "OrionContent";
-var SERVERWORKSPACE = "${SERVERWORKSPACE}";
-var DESCRIPTION_METASTORE = "This JSON file is at the root of the Orion metadata store responsible for persisting user, workspace and project files and metadata.";
+const FILENAME_METASTORE = "metastore.json",
+	FILENAME_TASKS_TEMP_DIR = "temp",
+	FILENAME_USER_METADATA = "user.json",
+	KEY_ORION_DESCRIPTION = "OrionDescription",
+	KEY_ORION_VERSION = "OrionVersion",
+	WORKSPACE_ID = "anonymous-OrionContent",
+	DEFAULT_WORKSPACE_NAME = "OrionContent",
+	SERVERWORKSPACE = "${SERVERWORKSPACE}",
+	DESCRIPTION_METASTORE = "This JSON file is at the root of the Orion metadata store responsible for persisting user, workspace and project files and metadata.";
 
 // The current version of the Simple Meta Store.
 var VERSION = 8;
@@ -438,31 +437,34 @@ Object.assign(FsMetastore.prototype, {
 					userData.email && (userProperty.Email = userData.email);
 					userProperty.AccountCreationTimestamp = Date.now();
 					userProperty.UniqueId = userData.username;
-					
-					// give the user access to their own user profile
 					userProperty.UserRights = accessRights.createUserAccess(userData.username);
 					userProperty.UserRightsVersion = accessRights.getCurrentVersion();
-					var userJson = {
-						OrionVersion: VERSION,
-						UniqueId: userData.username,
-						UserName: userData.username,
-						FullName: userData.fullname,
-						WorkspaceIds:[],
-						Properties: userProperty
-					};
-				 	this._updateUserMetadata(userData.username, userJson, function(error) {
-						if (error) {
-							return reject(error);
-						}
-						resolve({
-							username: userData.username,
-							email: userData.email,
-							fullname: userData.username,
-							oauth: userData.oauth,
-							properties: userProperty,
-							workspaces:[]
-						}); // TODO successful case needs to return user data including isAuthenticated, username, email, authToken for user.js
-					});
+					cryptoUtil.generateAuthToken(48, function(err, token) {
+						var userJson = {
+							OrionVersion: VERSION,
+							UniqueId: userData.username,
+							UserName: userData.username,
+							FullName: userData.fullname,
+							authToken: token,
+							isAuthenticated: false,  //not authenticated until email is confirmed
+							WorkspaceIds:[],
+							Properties: userProperty
+						};
+						 this._updateUserMetadata(userData.username, userJson, function(error) {
+							if (error) {
+								return reject(error);
+							}
+							resolve({
+								username: userData.username,
+								email: userData.email,
+								fullname: userData.username,
+								oauth: userData.oauth,
+								properties: userProperty,
+								authToken: token,
+								workspaces:[]
+							});
+						});
+					}.bind(this));
 				}.bind(this));
 			}.bind(this));
 		}.bind(this)).then(
@@ -545,9 +547,25 @@ Object.assign(FsMetastore.prototype, {
 		);
 	},
 
-	/** @callback */
+	/** 
+	 * Deletes the given user and calls the callback
+	 * @param {string} id The user id to delete
+	 * @param {fn(err)} callback The function callback
+	 * @callback 
+	 */
 	deleteUser: function(id, callback) {
-		callback(new Error("Not implemented"));
+		let userLocation = getUserRootLocation(this._options, id);
+		fs.access(userLocation, (err) => {
+			if(err) {
+				return callback(err);
+			}
+			rimraf(userLocation, (err) => {
+				if(err) {
+					return callback(err);
+				}
+				callback();
+			});
+		});
 	},
 	
 	/**

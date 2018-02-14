@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016 IBM Corporation and others.
+ * Copyright (c) 2016, 2018 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -66,5 +66,19 @@ module.exports = {
 		}
 		var encryptedPassword = encryptedText.substring(saltPos + 1);
 		return pbewithmd5anddes.decrypt(encryptedPassword, password, _salt, 1024);
+	},
+	/**
+	 * Generates an auth token of the given number of bytes
+	 * @param {number} bytes The number of bytes in length to make the token
+	 * @param {fn} callback The callback to be called with the new auth token
+	 * @since 18.0
+	 */
+	generateAuthToken: function generateAuthToken(bytes, callback) {
+		crypto.randomBytes(bytes, function(err, randomBytes) {
+			if(err) {
+				return callback(err);
+			}
+			callback(null, randomBytes.toString('hex'));
+		});
 	}
 };
