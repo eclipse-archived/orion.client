@@ -9,18 +9,18 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 /*eslint-env mocha */
-var assert = require('assert'),
+const assert = require('assert'),
 	path = require('path'),
 	testData = require('../support/test_data'),
 	testHelper = require('../support/testHelper');
 
 	
-var CONTEXT_PATH = testHelper.CONTEXT_PATH,
+const CONTEXT_PATH = testHelper.CONTEXT_PATH,
 	WORKSPACE = testHelper.WORKSPACE,
 	METADATA =  testHelper.METADATA,
 	WORKSPACE_ID = testHelper.WORKSPACE_ID;
 	
-var request = testData.setupOrionServer();
+let request = testData.setupOrionServer();
 
 // Like `assert.ifError` but allows the message to be overridden
 function throwIfError(cause, message) {
@@ -32,13 +32,12 @@ function throwIfError(cause, message) {
 	throw err;
 }
 
-
 /**
  * These test are all skipped until we have proper authentication support
  */
-describe.skip("Users endpoint", function() {
+describe("Users endpoint", function() {
 	beforeEach(function(done) { // testData.setUp.bind(null, parentDir)
-		testData.setUp(WORKSPACE, function(){
+		testData.setUp(WORKSPACE, function() {
 			testData.setUpWorkspace(request, done);
 		});
 	});
@@ -52,58 +51,46 @@ describe.skip("Users endpoint", function() {
 	/**
 	 * From: org.eclipse.orion.server.tests.servlets.users.BasicUsersTest.java
 	 */
-	describe("Basic users tests", function() {
+	describe("Single user mode", function() {
 		it("testGetUsersList", function(done) {
 			request()
 				.get(CONTEXT_PATH + '/users')
 				.set('Orion-Version', 1)
-				.set('Authorization', 'Basic '+Buffer.from('admin:admin', "UTF8").toString('base64')) //in multi-tennant mode this will work
+				.expect(403, done);
+		});
+		it("testGetUser - anonymous", function(done) {
+			request()
+				.get(CONTEXT_PATH + '/users/anonymous')
+				.set('Orion-Version', 1)
 				.expect(200)
 				.end(function(err, res) {
-					throwIfError(err);
+					testHelper.throwIfError(err);
+					assert(res, "There should have been a user record returned for 'anonymous' in single user mode");
 					done();
 				});
 		});
-		it("testGetUsersListNoAuth", function(done) {
-			request()
-				.get(CONTEXT_PATH + '/users')
-				.expect(403)
-				.end(function(err, res) {
-					throwIfError(err);
-					done();
-				});
-		});
-		it("testGetUsersListNotAuthUser", function(done) {
-			request()
-				.get(CONTEXT_PATH + '/users')
-				.set('Orion-Version', 1)
-				.set('Authorization', 'Basic '+Buffer.from('some:user', "UTF8").toString('base64')) //TODO in multi-tennant mode this will work
-				.expect(403)
-				.end(function(err, res) {
-					throwIfError(err);
-					done();
-				});
-		});
-		it.skip("testMoveUser");
-		it.skip("testReadAllUsers");
-		it.skip("testGetUserHomeWithNullArgument");
-		it.skip("testGetUserHome");
-		it.skip("testReadUser");
-		it.skip("testUpdateUser");
-		it.skip("testAddUserProperty");
-		it.skip("testDeleteUserProperty");
-		it.skip("testNoUserProperty");
-		it.skip("testUpdateUserProperty");
-		it.skip("testReadUserByEmailConfirmationProperty");
-		it.skip("testReadUserByPasswordResetIdProperty");
-		it.skip("testReadUserByDiskUsageAndTimestampProperty");
-		it.skip("testReadUserByBlockedProperty");
-		it.skip("testReadUserByEmailProperty");
-		it.skip("testReadUserByOauthProperty");
-		it.skip("testReadUserByOpenidProperty");
-		it.skip("testReadUserByPasswordProperty");
-		it.skip("testReadUserByUserNameProperty");
-		it.skip("testReadUserThatDoesNotExist");
+	});
+	describe.skip("Multi-tenant mode", function() {
+		it("testMoveUser");
+		it("testReadAllUsers");
+		it("testGetUserHomeWithNullArgument");
+		it("testGetUserHome");
+		it("testReadUser");
+		it("testUpdateUser");
+		it("testAddUserProperty");
+		it("testDeleteUserProperty");
+		it("testNoUserProperty");
+		it("testUpdateUserProperty");
+		it("testReadUserByEmailConfirmationProperty");
+		it("testReadUserByPasswordResetIdProperty");
+		it("testReadUserByDiskUsageAndTimestampProperty");
+		it("testReadUserByBlockedProperty");
+		it("testReadUserByEmailProperty");
+		it("testReadUserByOauthProperty");
+		it("testReadUserByOpenidProperty");
+		it("testReadUserByPasswordProperty");
+		it("testReadUserByUserNameProperty");
+		it("testReadUserThatDoesNotExist");
 		it("testCreateDuplicateUser", function(done) {
 			var json = {UserName: "testCreateDuplicateUser", Email: 'testCreateDuplicateUser@bar.org', FullName: "testCreateDuplicateUser Bar", Password: "1234"};
 			request()
@@ -216,7 +203,7 @@ describe.skip("Users endpoint", function() {
 		/**
 		 * TODO we currently don't have a unique ID implementation in the node server
 		 */
-		it.skip("testDeleteUserByUniqueIdProperty", function(done) {
+		it("testDeleteUserByUniqueIdProperty", function(done) {
 			var json = {UserName: "testDeleteUserByUniqueIdProperty", Email: 'testDeleteUserByUniqueIdProperty@bar.org', FullName: "testDeleteUserByUniqueIdProperty Bar", Password: "1234"};
 			request()
 				.post(CONTEXT_PATH + '/users')
@@ -299,6 +286,6 @@ describe.skip("Users endpoint", function() {
 							.end(done)
 					});
 		});
-		it.skip("testCreateDeleteRights");
+		it("testCreateDeleteRights");
 	});
 });

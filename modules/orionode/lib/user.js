@@ -362,14 +362,14 @@ module.exports.router = function router(options) {
 	 * @param {fn} next The next function to skip ahead
 	 */
 	function checkUserAccess(req, res, next) {
-		const isAdmin = isAdmin(options, req.user.username);
-		if (!req.user || !(req.params.id === req.user.username || isAdmin)) {
+		const isadmin = isAdmin(options, req.user.username);
+		if (!req.user || !(req.params.id === req.user.username || isadmin)) {
 			return api.writeResponse(403, res);
 		}
 		const contextPath = options.configParams.get("orion.context.path") || "",
 			listenContextPath = options.configParams.get("orion.context.listenPath") || false,
 			uri = req.originalUrl.substring(listenContextPath ? contextPath.length : 0);
-		if(isAdmin) {
+		if(isadmin) {
 			return next();
 		}
 		checkRights(req.user.username, uri, req, res, next);
