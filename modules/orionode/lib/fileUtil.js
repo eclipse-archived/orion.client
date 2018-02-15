@@ -551,46 +551,43 @@ exports.handleFilePOST = function(workspaceRoot, fileRoot, req, res, destFile, m
 		}
 		var project = {};
 		if (isNonWrite) {
-			var regex = new RegExp("^"+fileRoot);
-			if (!regex.test(sourceUrl)) {
-				var err1 = new Error("Failed to move project: " + sourceUrl);
-				err1.code = 403;
-				return api.writeError(403, res, err1);
-			}
-			var sourceFile = getFile(req, api.decodeURIComponent(sourceUrl.replace(regex, "")));
-			return fs.stat(sourceFile.path, function(err, stats) {
-				if(err) {
-					if (err.code === 'ENOENT') {
-						return api.writeError(typeof err.code === 'number' || 404, res, 'File not found:' + sourceUrl);
+			var uri = sourceUrl.substring(typeof req.contextPath === 'string' ? req.contextPath.length : 0);
+			return req.user.checkRights(req.user.username, uri, req, res, function(){
+				var sourceFile = getFile(req, api.decodeURIComponent(sourceUrl.replace(new RegExp("^"+fileRoot), "")));
+				return fs.stat(sourceFile.path, function(err, stats) {
+					if(err) {
+						if (err.code === 'ENOENT') {
+							return api.writeError(typeof err.code === 'number' || 404, res, 'File not found:' + sourceUrl);
+						}
+						return api.writeError(500, res, err);
 					}
-					return api.writeError(500, res, err);
-				}
-				if (isParentOf(sourceFile.path, destFile.path)) {
-					return api.writeError(400, res, "The destination cannot be a descendent of the source location");
-				}
-				if (isCopy) {
-					return copy(sourceFile.path, destFile.path)
-					.then(function() {
+					if (isParentOf(sourceFile.path, destFile.path)) {
+						return api.writeError(400, res, "The destination cannot be a descendent of the source location");
+					}
+					if (isCopy) {
+						return copy(sourceFile.path, destFile.path)
+						.then(function() {
+							var eventData = { type: ChangeType.RENAME, isDir: stats.isDirectory(), file: destFile, sourceFile: sourceFile, req: req};
+							exports.fireFileModificationEvent(eventData);
+							return done();
+						});
+					}
+					return fs.rename(sourceFile.path, destFile.path, function(err) {
+						if(err) {
+							var newerr = new Error("Failed to move project: " + sourceUrl);
+							newerr.code = 403;
+							return api.writeError(403, res, newerr);
+						}
+						if (isProjectFile(sourceFile) && stats.isDirectory()) {
+							project.originalPath = sourceFile.path;
+						}
 						var eventData = { type: ChangeType.RENAME, isDir: stats.isDirectory(), file: destFile, sourceFile: sourceFile, req: req};
 						exports.fireFileModificationEvent(eventData);
+						// Rename always returns 200 no matter the file system is realy rename or creating a new file.
 						return done();
 					});
-				}
-				return fs.rename(sourceFile.path, destFile.path, function(err) {
-					if(err) {
-						var newerr = new Error("Failed to move project: " + sourceUrl);
-						newerr.code = 403;
-						return api.writeError(403, res, newerr);
-					}
-					if (isProjectFile(sourceFile) && stats.isDirectory()) {
-						project.originalPath = sourceFile.path;
-					}
-					var eventData = { type: ChangeType.RENAME, isDir: stats.isDirectory(), file: destFile, sourceFile: sourceFile, req: req};
-					exports.fireFileModificationEvent(eventData);
-					// Rename always returns 200 no matter the file system is realy rename or creating a new file.
-					return done();
 				});
-			});
+			}, "GET");
 		}
 		function done() {
 			var store = exports.getMetastore(req);
