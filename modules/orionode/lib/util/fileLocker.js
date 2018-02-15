@@ -152,7 +152,7 @@ FileLocker.prototype._acquireLock = function(shared) {
 						return reject(error);
 					}
 					resolve();
-				});
+				}.bind(this));
 			}.bind(this);
 			doit();
 		}.bind(this);
