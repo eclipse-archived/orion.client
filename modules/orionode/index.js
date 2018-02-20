@@ -245,7 +245,8 @@ module.exports = function startServer(options) {
 		taskRoot: contextPath + '/task',
 		workspaceRoot: contextPath + '/workspace',
 		fileRoot: contextPath + '/file',
-		gitRoot: contextPath + '/gitapi'
+		gitRoot: contextPath + '/gitapi',
+		usersRoot: contextPath + '/users'
 	});
 
 	// Configure metastore

@@ -38,10 +38,22 @@ function getUserRootLocation(options, userId) {
 	return options.configParams.get('orion.single.user') ? nodePath.join(options.configParams.get('orion.single.user.metaLocation') || os.homedir(), '.orion') : nodePath.join.apply(null, metaUtil.readMetaUserFolder(options.workspaceDir, userId));
 }
 
+/**
+ * Returns the fully qualified file path of the metadata for the given user. Returns null if no user
+ * is provided
+ * @param {{?}} options The options map
+ * @param {string|{?}} user The user id or map of user options
+ */
 function getUserMetadataFileName(options, user) {
-	var userId = typeof user === "string" ? user : user.username;
-	var metadataFolder = getUserRootLocation(options, userId);
-	return nodePath.join(metadataFolder, FILENAME_USER_METADATA);
+	let userId;
+	if(typeof user === "string") {
+		userId = user;
+	} else if(user && typeof user.username === 'string') {
+		userId = user.username;
+	} else {
+		return null;
+	}
+	return nodePath.join(getUserRootLocation(options, userId), FILENAME_USER_METADATA);
 }
 
 function getWorkspaceMetadataFileName(options, workspaceId) {
@@ -425,10 +437,16 @@ Object.assign(FsMetastore.prototype, {
 		Promise.using(this.lock(userData.username, false), function() {
 			return new Promise(function(resolve, reject) {
 				fs.stat(metadataPath, function(err, stat) {
+					if(stat && this._options.configParams.get('orion.single.user')) {
+						let ret = new Error("Cannot create users in single user mode");
+						ret.code = 400;
+						logger.error(ret);
+						return reject(ret);
+					}
 					if (!err || err.code !== 'ENOENT' || stat) {
-						err = err && err.code !== 'ENOENT' ? err : new Error("User already exists");
-						logger.error(err);
-						return reject(err);
+						let ret = err && err.code !== 'ENOENT' ? err : new Error("User already exists");
+						logger.error(ret);
+						return reject(ret);
 					}
 							
 					var userProperty = {};
@@ -521,7 +539,7 @@ Object.assign(FsMetastore.prototype, {
 					
 					// userData.properties contains all the properties, not only the ones that are changed, 
 					// because of locking, it's safe to say the properties hasn't been changed by other operations
-					metadata.Properties = userData.properties;
+					metadata.Properties = userData.properties || {};
 					// update other userData 
 					userData.fullname && (metadata.FullName = userData.fullname);
 					userData.password && (metadata.Properties.Password = userData.password);  // TODO need to encrypt password
@@ -548,12 +566,16 @@ Object.assign(FsMetastore.prototype, {
 	},
 
 	/** 
-	 * Deletes the given user and calls the callback
+	 * Deletes the given user and calls the callback. If the server is launched in single user mode
+	 * the call immediately callsback with an error. The default single user mode user cannot delete themselves.
 	 * @param {string} id The user id to delete
 	 * @param {fn(err)} callback The function callback
 	 * @callback 
 	 */
 	deleteUser: function(id, callback) {
+		if(this._options.configParams.get('orion.single.user')) {
+			return callback(new Error("The default user cannot be deleted in single user mode"));
+		}
 		let userLocation = getUserRootLocation(this._options, id);
 		fs.access(userLocation, (err) => {
 			if(err) {

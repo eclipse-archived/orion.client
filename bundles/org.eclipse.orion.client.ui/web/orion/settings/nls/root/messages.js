@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2012, 2016 IBM Corporation and others.
+ * Copyright (c) 2012, 2018 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License v1.0
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution
@@ -126,7 +126,7 @@ define({//Default message bundle
 	"Delete": "Delete",
 	"DeletePlugFromConfig": "Delete this plug-in from the configuration",
 	"DeleteUser": "Delete User Profile as well as workspaces and projects",
-	"DeleteUserComfirmation": "WARNING: This will permanently delete your user profile as well as all of your work!",
+	"DeleteUserComfirmation": "WARNING: This will permanently delete your user profile and all workspaces, including all the data contained therein. \n\nThis process is not revesable.",
 	"TypePlugURL": "Type a plug-in url here ...",
 	"Already installed": "Already installed",
 	"Installed":"Installed ${0}",

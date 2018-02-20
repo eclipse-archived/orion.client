@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2012, 2017 IBM Corporation and others.
+ * Copyright (c) 2012, 2018 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -103,6 +103,7 @@ define([
 			
 				var categories = prefs[ 'categories' ] || {};
 				if (!util.isElectron && (categories.showUserSettings === undefined || categories.showUserSettings)) {
+
 					_self.settingsCategories.push({
 						id: "userSettings", //$NON-NLS-0$
 						textContent: messages["User Profile"],
@@ -167,7 +168,7 @@ define([
 				}
 
 				_self.settingsCategories.forEach(function(item) {
-					item.show = item.show.bind(_self, item.id);
+					item.show = item.show.bind(_self, item.id, prefs[item.id] || {});
 				}.bind(_self));
 
 				// Add plugin-contributed extension categories
@@ -254,7 +255,7 @@ define([
 			this.editorSettings.show();
 		},
 		
-		showUserSettings: function(id){
+		showUserSettings: function(id, options){
 
 			this.selectCategory(id);
 
@@ -276,7 +277,8 @@ define([
 				statusService: this.preferencesStatusService,
 				dialogService: this.preferenceDialogService,
 				commandService: this.commandService,
-				userClient: this.userClient
+				userClient: this.userClient,
+				pageOptions: options
 			}, userNode);
 			
 			this.userWidget.show();

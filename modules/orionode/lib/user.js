@@ -20,6 +20,7 @@ const express = require('express'),
 	log4js = require('log4js'),
 	logger = log4js.getLogger("user"),
 	jwt = require('jsonwebtoken'),
+	path = require('path'),
 	checkRights = require('./accessRights').checkRights,
 	fileUtil = require('./fileUtil'),
 	responseTime = require('response-time');
@@ -58,13 +59,14 @@ function isAdmin(options, username) {
 /**
  * Write out the JSON for the given user metadata
  * @param {{?}} user The user to write JSON for
+ * @param {{?}} options The map of server options
  * @returns {?} A new JSON object for the user
  */
-function userJSON(user) {
+function userJSON(user, options) {
 	return {
 		FullName: user.fullname,
 		UserName: user.username,
-		Location: "/users/" + user.username,
+		Location: path.join(options.usersRoot, user.username),
 		Email: user.email,
 		EmailConfirmed: user.isAuthenticated,
 		HasPassword: true,
@@ -388,7 +390,7 @@ module.exports.router = function router(options) {
 				const end = start + rows,
 					result = [];
 				for (var i = start; i < end; i++) {
-					result.push(userJSON(users[i]));
+					result.push(userJSON(users[i], options));
 				}
 				return api.writeResponse(200, res, null, {
 					Users: result,
@@ -411,7 +413,7 @@ module.exports.router = function router(options) {
 				if (!user) {
 					return api.writeError(400, res, "User not found: " + req.params.id);
 				}
-				return api.writeResponse(200, res, null, userJSON(user));
+				return api.writeResponse(200, res, null, userJSON(user, options));
 			});
 		}, function noMetastore(err) {
 			return api.writeError(500, res, err);
@@ -534,7 +536,7 @@ module.exports.router = function router(options) {
 		fileUtil.getMetastoreSafe(req).then(function(store) {
 			store.createUser(userData, function(err, user) {
 				if (err) {
-					return api.writeResponse(404, res, null, {Message: err.message});
+					return api.writeResponse(err.code || 404, res, null, {Message: err.message});
 				}
 				if (options.configParams.get("orion.auth.user.creation.force.email")) {
 					return sendMail({user: user, options: options, template: CONFIRM_MAIL, auth: CONFIRM_MAIL_AUTH, req: req}, /* @callback */ function(err, info) {
@@ -639,7 +641,7 @@ module.exports.router = function router(options) {
 		if (options.configParams.get("orion.collab.enabled") && options.configParams.get("orion.jwt.secret")) {
 			req.user.jwt = jwt.sign({'username': req.user.username}, options.configParams.get("orion.jwt.secret"));
 		}
-		return api.writeResponse(200, res, null, userJSON(req.user));
+		return api.writeResponse(200, res, null, userJSON(req.user, options));
 	});
 	
 	return app;
