@@ -55,6 +55,7 @@ module.exports = function(grunt) {
 				src: ['./test', './test/metastore', './test/endpoints'],
 				options: {
 					coverageFolder: './coverage/server_coverage',
+					mochaOptions: ['--exit'],
 					reportFormats: ['html', 'lcov']
 				},
 			},
