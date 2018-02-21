@@ -49,12 +49,8 @@ define([
 		 _selectItem: function(item){
 		 	var itemToSelect = item || this.getItems()[0];
 		 	if (itemToSelect) {
-//		 		if (this._selectedItem) {
-//		 			this._selectedItem.classList.remove("dropdownMenuItemSelected"); //$NON-NLS-0$
-//			 	}
 			 	this._selectedItem = itemToSelect;
 			 	this._selectedItem.focus();
-//			 	this._selectedItem.classList.add("dropdownMenuItemSelected"); //$NON-NLS-0$	
 		 	}
 		 },
 	});

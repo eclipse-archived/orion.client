@@ -44,9 +44,11 @@ define([
 				lib.$("span", lib.node("userTrigger")).className += " core-sprite-silhouette";
 			}
 			
+			var optionsLabel = widgetMessages['Help'];
 			var dropdownNode = lib.node("userDropdown"); //$NON-NLS-0$
 			var userDropdown = new mDropdown.Dropdown({
 				dropdown: dropdownNode,
+				name: optionsLabel,
 				selectionClass: "dropdownSelection" //$NON-NLS-0$
 			});
 			var menuGenerator = new mUserMenu.UserMenu({
@@ -54,7 +56,6 @@ define([
 				dropdown: userDropdown,
 				serviceRegistry: serviceRegistry
 			});
-			var optionsLabel = widgetMessages['Help'];
 			var dropdownTrigger = lib.node("userTrigger"); //$NON-NLS-0$
 			dropdownTrigger.setAttribute("aria-label", optionsLabel);
 

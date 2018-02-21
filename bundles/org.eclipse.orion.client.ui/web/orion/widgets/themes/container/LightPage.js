@@ -118,6 +118,9 @@ define({
 		".dropdownTrigger:not(.dropdownDefaultButton)": {
 			"color": "#152935 !important"
 		},
+		".dropdownSelection.dropdownTriggerOpen": {
+			"background-color": "#CEDBEC !important"
+		},
 		".editorViewerHeader": {
 			"background": "#F5F7FA !important",
 			"color": "#152935 !important"
@@ -359,11 +362,11 @@ define({
 			},
 			"color": "#FFFFFF",
 			"background-color": "rgb(60, 113, 179)",
-			".commandButton:not(.primaryButton):not([disabled]):hover":{
+			".commandButton:not(.primaryButton):focus":{
 				"color": "white",
    				"background-color": "rgba(196, 197, 200, 0.25)"
 			},
-			".commandButton:not(.primaryButton):focus":{
+			".commandButton:not(.primaryButton):not([disabled]):hover":{
 				"color": "white",
    				"background-color": "rgba(196, 197, 200, 0.25)"
 			}

@@ -693,7 +693,6 @@ a.breadcrumb.currentLocation {
 	margin: 0; /* needed for context menu positioning to work properly */
 	cursor: default;
 	font-size: 12px;
-	margin: 0;
 	outline: none;
 	padding: 3px 0 3px;
 }
@@ -801,6 +800,10 @@ a.breadcrumb.currentLocation {
 	margin-bottom: -1px !important;
 	position: relative !important;
 	z-index: 200 !important;
+}
+
+.dropdownSelection.dropdownTriggerOpen {
+	background-color: #CEDBEC !important;
 }
 
 .checkedMenuItem {

@@ -80,7 +80,7 @@ define({
 			"box-shadow": "0 1px 2px 0 rgb(16,106,91)",
 			"color": "black"
 		},
-		".commandButton:not(.primaryButton):hover": {
+		".commandButton:not(.primaryButton):not([disabled]):hover": {
 			"background-color": "rgba(16,106,91,0.25)",
 			"box-shadow": "0 1px 2px 0 rgb(16,106,91)",
 			"color": "black"
@@ -112,6 +112,9 @@ define({
 		},
 		".dropdownTrigger:not(.dropdownDefaultButton)": {
 			"color": "#FFFFFF !important"
+		},
+		".dropdownSelection.dropdownTriggerOpen": {
+			"background-color": "#C3DAD6 !important"
 		},
 		".editorViewerHeader": {
 			"background": "#3B4B54 !important",
@@ -223,7 +226,7 @@ define({
 			".commandButton:not(.primaryButton):focus": {
 				"color": "#FFFFFF"
 			},
-			".commandButton:not(.primaryButton):hover": {
+			".commandButton:not(.primaryButton):not([disabled]):hover": {
 				"color": "#FFFFFF"
 			}
 		},
@@ -378,14 +381,14 @@ define({
 			},
 			"color": "#FFFFFF",
 			"background-color": "rgb(16,106,91)",
-			".commandButton:not(.primaryButton):hover":{
-				"color": "white",
-    			"background-color": "rgba(59, 75, 84, 0.5)"
-			},
 			".commandButton:not(.primaryButton):focus":{
 				"color": "white",
     			"background-color": "rgba(59, 75, 84, 0.5)"			
-    		}
+    		},
+			".commandButton:not(.primaryButton):not([disabled]):hover":{
+				"color": "white",
+    			"background-color": "rgba(59, 75, 84, 0.5)"
+			}
 		},
 		".titleActionContainer": {
 			"background": "#3B4B54 !important",
