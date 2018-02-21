@@ -128,6 +128,7 @@ objects.mixin(MenuBar.prototype, {
 		var editMenuBar = document.createElement("ul"); //$NON-NLS-0$
 		var menuBarScope = editMenuBar.id = this.menuBarActionScope;
 		editMenuBar.setAttribute("role", "menubar");
+		editMenuBar.style.outline = "none";
 		var menuBar = new mMenuBar.MenuBar({
 			dropdown: editMenuBar,
 		});

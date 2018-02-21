@@ -201,6 +201,7 @@ define([
 		}
 		menuButton.dropdown = new Dropdown.Dropdown({
 			dropdown: newMenu, 
+			name: name,
 			populate: populateFunction,
 			selectionClass: selectionClass,
 			skipTriggerEventListeners: !!dropdownArrow,
@@ -739,17 +740,23 @@ define([
 			choices.forEach(function(choice) {
 				if (choice.name) {
 					var itemNode = document.createElement("li"); //$NON-NLS-0$
-					itemNode.setAttribute("role", "none");
+					itemNode.setAttribute("role", "none"); //$NON-NLS-0$ //$NON-NLS-1$
 					parent.appendChild(itemNode);
 					var node = document.createElement("span"); //$NON-NLS-0$
-					node.tabIndex = 0; 
-					node.setAttribute("role", "menuitem");  //$NON-NLS-2$ //$NON-NLS-1$
+					node.tabIndex = -1; 
 					node.classList.add("dropdownMenuItem"); //$NON-NLS-0$
+					node.style.outline = "none";
 					if (addCheck) {
+						node.setAttribute("role", "menuitemradio");  //$NON-NLS-1$ //$NON-NLS-0$
+						node.setAttribute("aria-checked", choice.checked ? "true" : "false"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 						var check = document.createElement("span"); //$NON-NLS-0$
 						check.classList.add("check"); //$NON-NLS-0$
+						check.setAttribute("role", "none"); //$NON-NLS-0$ //$NON-NLS-1$
+						check.setAttribute("aria-hidden", "true");  //$NON-NLS-1$ //$NON-NLS-0$
 						check.appendChild(document.createTextNode(choice.checked ? "\u25CF" : "")); //$NON-NLS-1$ //$NON-NLS-0$
 						node.appendChild(check);
+					} else {
+						node.setAttribute("role", "menuitem");  //$NON-NLS-1$ //$NON-NLS-0$
 					}
 					if (choice.imageClass) {
 						var image = document.createElement("span"); //$NON-NLS-0$
