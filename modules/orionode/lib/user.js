@@ -522,8 +522,12 @@ module.exports.router = function router(options) {
 
 	app.post('/users', options.CSRF, options.authenticate, function(req, res) {
 		// If there are admin accounts, only admin accounts can create users
-		if (options.configParams.get("orion.auth.user.creation") && !isAdmin(options, req.user && req.user.username)) {
-			return api.writeResponse(403, res);
+		if (options.configParams.get("orion.auth.user.creation")) {
+			if(!isAdmin(options, req.user && req.user.username)) {
+				return api.writeResponse(403, res);
+			}
+		} else {
+			return api.writeResponse(400, res);
 		}
 		const userData = {
 			username: req.body.UserName,

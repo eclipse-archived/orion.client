@@ -227,7 +227,7 @@ describe("Users endpoint", function() {
 		});
 		
 	});
-	describe("Login", function() {
+	describe.skip("Login", function() {
 		before("Start server in multi-tenant mode", function() {
 			request = testData.setupOrionServer({
 				"orion.single.user": false,
@@ -242,7 +242,7 @@ describe("Users endpoint", function() {
 		it("login / form");
 		it("login / canaddusers");
 	});
-	describe("Email confirmation", function() {
+	describe.skip("Email confirmation", function() {
 		before("Start server in multi-tenant mode", function() {
 			request = testData.setupOrionServer({
 				"orion.single.user": false,
@@ -257,7 +257,7 @@ describe("Users endpoint", function() {
 		it("useremailconfirmation / resetPwd");
 		it("useremailconfirmation / verifyEmail");
 	});
-	describe("Multi-tenant mode - ADMIN", function() {
+	describe.skip("Multi-tenant mode - ADMIN", function() {
 		before("Start server in multi-tenant mode", function() {
 			request = testData.setupOrionServer({
 				"orion.single.user": false,

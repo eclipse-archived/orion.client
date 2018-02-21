@@ -133,48 +133,44 @@ FsMetastore.prototype.lock = function(userId, shared) {
 
 FsMetastore.prototype.setup = function(options) {
 	if (!this._isSingleUser) {
-		metaUtil.initializeAdminUser(options, this).then(function(user) {
-			/* verify that existing metadata in this workspace will be usable by this server */
-			var path = nodePath.join(this._options.workspaceDir, FILENAME_METASTORE);
-			fs.readFile(path, 'utf8', function(err, content) {
-				if(err) {
-					if (err.code === "ENOENT") {
-						/* brand new workspace */
-						var obj = {};
-						obj[KEY_ORION_VERSION] = VERSION;
-						obj[KEY_ORION_DESCRIPTION] = DESCRIPTION_METASTORE;
-						writeJSON(path, obj).then(
-							null,
-							function(error) {
-								throw new Error("Failed to write the metadata file for the new workspace at: " + path, error);
-							}
-						);
-					} else {
-						throw new Error("Failed to access the workspace metadata at: " + path, err);
+		metaUtil.initializeAdminUser(options, this);
+		/* verify that existing metadata in this workspace will be usable by this server */
+		var path = nodePath.join(options.workspaceDir, FILENAME_METASTORE);
+		fs.readFileAsync(path, 'utf8').then(function(content) {
+			var json = JSON.parse(content);
+			var metaVersion = parseInt(json[KEY_ORION_VERSION], 10);
+			if (metaVersion < VERSION) {
+				/* this is fine, user metadata will be migrated when they next log in */
+				var obj = {};
+				obj = {};
+				obj[KEY_ORION_VERSION] = VERSION;
+				obj[KEY_ORION_DESCRIPTION] = DESCRIPTION_METASTORE;
+				writeJSON(path, obj).then(
+					null,
+					function(error) {
+						throw new Error("Failed to update the metadata file for the workspace at: " + path, error);
 					}
-					return;
-				}
-				var json = JSON.parse(content);
-				var metaVersion = parseInt(json[KEY_ORION_VERSION], 10);
-				if (metaVersion < VERSION) {
-					/* this is fine, user metadata will be migrated when they next log in */
-					obj = {};
-					obj[KEY_ORION_VERSION] = VERSION;
-					obj[KEY_ORION_DESCRIPTION] = DESCRIPTION_METASTORE;
-					writeJSON(path, obj).then(
-						null,
-						function(error) {
-							throw new Error("Failed to update the metadata file for the workspace at: " + path, error);
-						}
-					);
-				} else if (metaVersion > VERSION) {
-					throw new Error("Cannot run an older server (metadata version " + VERSION + ") on a workspace accessed by a newer server (metadata version " + metaVersion + ")");
-				} else if (isNaN(metaVersion)) {
-					throw new Error("Invalid metadata version ('" + metaVersion + "') read from " + path);
-				}
-			});
-		}.bind(this), function rejectAdmin(err) {
-			throw err;
+				);
+			} else if (metaVersion > VERSION) {
+				throw new Error("Cannot run an older server (metadata version " + VERSION + ") on a workspace accessed by a newer server (metadata version " + metaVersion + ")");
+			} else if (isNaN(metaVersion)) {
+				throw new Error("Invalid metadata version ('" + metaVersion + "') read from " + path);
+			}
+		}, function reject(error) {
+			if (error.code === "ENOENT") {
+				/* brand new workspace */
+				var obj = {};
+				obj[KEY_ORION_VERSION] = VERSION;
+				obj[KEY_ORION_DESCRIPTION] = DESCRIPTION_METASTORE;
+				writeJSON(path, obj).then(
+					null,
+					function(error) {
+						throw new Error("Failed to write the metadata file for the new workspace at: " + path, error);
+					}
+				);
+			} else {
+				throw new Error("Failed to access the workspace metadata at: " + path, error);
+			}
 		});
 	}
 	// Used only for single user case (Electron or local debug)
