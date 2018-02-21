@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017 IBM Corporation and others.
+ * Copyright (c) 2017, 2018 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -8,10 +8,78 @@
  * Contributors:
  *	 IBM Corporation - initial API and implementation
  *******************************************************************************/
-var args = require('../../args');
-var async = require("async");
-var api = require('../../api');
-var SEPARATOR = "-";
+const args = require('../../args'),
+	async = require("async"),
+	api = require('../../api'),
+	Promise = require('bluebird');
+
+const SEPARATOR = "-";
+
+/**
+ * If the `orion.auth.admin.default.password` property is set, automatically create an admin user
+ * @param {{?}} options The server options map
+ * @param {{?}} store The backing metastore to create the admin user in
+ * @returns {Promise} Returns a promise to create the default admin user
+ * @since 18.0
+ */
+module.exports.initializeAdminUser = function initializeAdminUser(options, store) {
+	return new Promise(function(resolve, reject) {
+		const pw = options.configParams.get("orion.auth.admin.default.password");
+		if(typeof pw === 'string' && pw.length > 0) {
+			const userData = {
+				username: "admin",
+				email: "admin",
+				fullname: "admin",
+				password: pw,
+				properties:{}
+			};
+			store.createUser(userData, function(err, user) {
+				if(err) {
+					return reject(err);
+				}
+				return resolve(user);
+			});
+		}
+		return resolve({});
+	});
+};
+
+/**
+ * Utility function to initialize the `anonymous` user. This function does not return a result, instead it calls the 
+ * given `next()` function to proceed
+ * @param {XMLHttpRequest} req The original request
+ * @param {fn} next The routing function to proceed with once the user is initialized
+ * @param {{?}} store The backing file store
+ * @since 18.0
+ */
+module.exports.initializeAnonymousUser = function initializeAnonymousUser(req, next, store) {
+	if (store._isSingleUser) {
+		store.getUser("anonymous", function(err, user) {
+			if (err) {
+				throw new Error("Failed to get 'anonymous' user's metadata");
+			}
+			if (!user) {
+				store.createUser({
+					username: "anonymous",
+					fullname: "anonymous",
+					email: "anonymous",
+					password: "default",
+					properties: {}
+				}, /** @callback */ function(err, user) {
+					// TODO can err possibly happen in this context?
+					req.user = user;
+					next();
+				});
+			} else {
+				req.user = user;
+				next();
+			}
+		});
+	} else {
+		next();
+	}
+};
+
 module.exports.encodeWorkspaceId = function (userId, workspaceName) {
 	var workspaceId = workspaceName.replace(/ /g, "").replace(/\#/g, "").replace(/\-/g, "");
 	return userId + SEPARATOR + workspaceId;
@@ -96,5 +164,5 @@ module.exports.getWorkspaceMeta = function (workspaceIds, store, workspaceRoot){
 			});
 	}).then(function(){
 		return workspaceInfos;
-	})
+	});
 };

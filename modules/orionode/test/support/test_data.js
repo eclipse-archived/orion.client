@@ -142,27 +142,54 @@ exports.setUpCF = function setUpCF(dir, callback) {
 	}
 };
 
-exports.setupOrionServer = function setupOrionServer(helperMiddleware){
-	if(!request){
+/**
+ * Create and start a new Orion server
+ * @param {{?}} confOptions The map of configuration options or null
+ */
+exports.setupOrionServer = function setupOrionServer(confOptions){
+	if(!request || confOptions) {
 		app = express();
 		var configFile = path.join(__dirname, '../../orion.conf');
 		nconf.file({file: configFile, format: nconf.formats.ini});
-		var orion = function(){
+		let useAdmin = false;
+		var orion = function() {
 			var options = {};
 			options.workspaceDir = testHelper.WORKSPACE;
 			options.configParams = nconf;
+			if(confOptions !== null && typeof confOptions === 'object') {
+				Object.keys(confOptions).forEach(function(key) {
+					options.configParams.set(key, confOptions[key]);
+				});
+			}
 			options.configParams.set("orion.single.user.metaLocation", testHelper.METADATA);
-//			options.configParams = { "orion.single.user": true, "orion.single.user.metaLocation": testHelper.METADATA };
 			if (testHelper.CONTEXT_PATH) {
 				options.configParams.set("orion.context.listenPath", true);
 				options.configParams.set("orion.context.path", testHelper.CONTEXT_PATH);
 			}
 			options.configParams.set('orion.XSRFPreventionFilterEnabled', false);
+			if(options.configParams.get('orion.auth.user.creation') === 'admin') {
+				useAdmin = true;
+				options.configParams.set('orion.auth.name', 'Basic');
+				options.configParams.set('orion.auth.admin.default.password', 'admin');
+			}
+			if(options.configParams.get('orion.single.user') === false) {
+				// TODO if we add tests for mongo, this will hve to be handled properly
+				options.configParams.set('orion.metastore.useMongo', false);
+			}
 			return orionServer(options);
 		};
 		var userMiddleware = function(req, res, next) {
-			req.user = {workspaceDir: testHelper.WORKSPACE, username: testHelper.USERNAME};
-			req.user.checkRights = checkRights;
+			if(!req.user) {
+				let user = testHelper.USERNAME;
+				if(useAdmin) {
+					user = 'admin';
+				}
+				req.user = {
+					workspaceDir: testHelper.WORKSPACE, 
+					username: user
+				};
+				req.user.checkRights = checkRights;
+			}
 			next();
 		};
 		app.use(userMiddleware);
@@ -170,7 +197,6 @@ exports.setupOrionServer = function setupOrionServer(helperMiddleware){
 			req.contextPath =  testHelper.CONTEXT_PATH;
 			next();
 		}, orion());
-		// Add a special taskHelper router
 		app.use(CONTEXT_PATH + '/taskHelper', taskHelper.router({root: '/taskHelper', metastore: app.locals.metastore}));
 		request = supertest.bind(null, app);
 	}

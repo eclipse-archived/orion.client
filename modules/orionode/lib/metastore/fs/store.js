@@ -32,7 +32,7 @@ const FILENAME_METASTORE = "metastore.json",
 	DESCRIPTION_METASTORE = "This JSON file is at the root of the Orion metadata store responsible for persisting user, workspace and project files and metadata.";
 
 // The current version of the Simple Meta Store.
-var VERSION = 8;
+const VERSION = 8;
 
 function getUserRootLocation(options, userId) {
 	return options.configParams.get('orion.single.user') ? nodePath.join(options.configParams.get('orion.single.user.metaLocation') || os.homedir(), '.orion') : nodePath.join.apply(null, metaUtil.readMetaUserFolder(options.workspaceDir, userId));
@@ -107,7 +107,7 @@ function FsMetastore(options) {
 	this._options = options;
 	this._taskList = {};
 	this._lockMap = {};
-	this._isSingleUser = options.configParams.get('orion.single.user');
+	this._isSingleUser = !!options.configParams.get('orion.single.user');
 }
 
 FsMetastore.prototype.lock = function(userId, shared) {
@@ -133,15 +133,32 @@ FsMetastore.prototype.lock = function(userId, shared) {
 
 FsMetastore.prototype.setup = function(options) {
 	if (!this._isSingleUser) {
-		/* verify that existing metadata in this workspace will be usable by this server */
-		var path = nodePath.join(this._options.workspaceDir, FILENAME_METASTORE);
-		fs.readFileAsync(path, 'utf8').then(
-			function(content) {
+		metaUtil.initializeAdminUser(options, this).then(function(user) {
+			/* verify that existing metadata in this workspace will be usable by this server */
+			var path = nodePath.join(this._options.workspaceDir, FILENAME_METASTORE);
+			fs.readFile(path, 'utf8', function(err, content) {
+				if(err) {
+					if (err.code === "ENOENT") {
+						/* brand new workspace */
+						var obj = {};
+						obj[KEY_ORION_VERSION] = VERSION;
+						obj[KEY_ORION_DESCRIPTION] = DESCRIPTION_METASTORE;
+						writeJSON(path, obj).then(
+							null,
+							function(error) {
+								throw new Error("Failed to write the metadata file for the new workspace at: " + path, error);
+							}
+						);
+					} else {
+						throw new Error("Failed to access the workspace metadata at: " + path, err);
+					}
+					return;
+				}
 				var json = JSON.parse(content);
 				var metaVersion = parseInt(json[KEY_ORION_VERSION], 10);
 				if (metaVersion < VERSION) {
 					/* this is fine, user metadata will be migrated when they next log in */
-					var obj = {};
+					obj = {};
 					obj[KEY_ORION_VERSION] = VERSION;
 					obj[KEY_ORION_DESCRIPTION] = DESCRIPTION_METASTORE;
 					writeJSON(path, obj).then(
@@ -155,58 +172,18 @@ FsMetastore.prototype.setup = function(options) {
 				} else if (isNaN(metaVersion)) {
 					throw new Error("Invalid metadata version ('" + metaVersion + "') read from " + path);
 				}
-			},
-			function(error) {
-				if (error.code === "ENOENT") {
-					/* brand new workspace */
-					var obj = {};
-					obj[KEY_ORION_VERSION] = VERSION;
-					obj[KEY_ORION_DESCRIPTION] = DESCRIPTION_METASTORE;
-					writeJSON(path, obj).then(
-						null,
-						function(error) {
-							throw new Error("Failed to write the metadata file for the new workspace at: " + path, error);
-						}
-					);
-				} else {
-					throw new Error("Failed to access the workspace metadata at: " + path, error);
-				}
-			}
-		);
+			});
+		}.bind(this), function rejectAdmin(err) {
+			throw err;
+		});
 	}
-
 	// Used only for single user case (Electron or local debug)
 	options.authenticate = [function(req, res, next) {
-		if (this._isSingleUser) {
-			this.getUser("anonymous", function(err, user) {
-				if (err) {
-					throw new Error("Failed to get 'anonymous' user's metadata");
-				}
-				if (!user) {
-					this.createUser({
-						username: "anonymous",
-						fullname: "anonymous",
-						email: "anonymous",
-						password: "default",
-						properties: {}
-					}, /** @callback */ function(err, user) {
-						// TODO can err possibly happen in this context?
-						req.user = user;
-						next();
-					});
-				} else {
-					req.user = user;
-					next();
-				}
-			}.bind(this));
-		} else {
-			next();
-		}
+		metaUtil.initializeAnonymousUser(req, next, this);
 	}.bind(this)];
 };
 
 Object.assign(FsMetastore.prototype, {
-	
 	createWorkspace: function(userId, workspaceData, callback) {
 		if (!userId) {
 			return callback(new Error('createWorkspace.userId is null'));
@@ -610,9 +587,14 @@ Object.assign(FsMetastore.prototype, {
 
 	/** @callback */
 	getAllUsers: function(start, rows, callback) {
-		this.getUser("anonymous", function(err, user) {
-			callback(err, user ? [user] : user);
-		});
+		if(typeof this._options.workspaceDir === 'string') {
+			if(this._isSingleUser) {
+				return this.getUser("anonymous", function(err, user) {
+					callback(err, user ? [user] : user);
+				});
+			}
+		}
+		return [];
 	},
 	
 	/** @callback */

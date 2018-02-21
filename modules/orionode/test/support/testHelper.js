@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017 IBM Corporation and others.
+ * Copyright (c) 2017, 2018 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -156,6 +156,26 @@ exports.throwIfError = throwIfError = function throwIfError(cause, message) {
 	err.cause = cause;
 	throw err;
 };
+
+/**
+ * Shim to use client side function name in node
+ * @param {string} str The string to encode in Base64
+ * @returns {string} A new Base64 encoded string
+ * @since 18.0
+ */
+exports.btoa = function btoa(str) {
+	return Buffer.from(str).toString('base64');
+}
+
+/**
+ * Shim to use client side function name in node
+ * @param {string} str64 The Base64-encoded string to decode
+ * @returns {string} The decoded string
+ * @since 18.0
+ */
+exports.atob = function atob(str64) {
+	return Buffer.from(str64, 'base64').toString();
+}
 
  /**
   * The oriongittester github account's RSA private key
