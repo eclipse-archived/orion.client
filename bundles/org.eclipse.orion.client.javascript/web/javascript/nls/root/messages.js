@@ -390,7 +390,7 @@ define({
 	'js_indent_size' : 'Indention size:',
 	'js_indent_char' : 'Indentation character:',
 	'js_eol' : 'Character(s) to use as line terminators:',
-	'js_end_with_newline' : 'End ouput with newline:',
+	'js_end_with_newline' : 'End output with newline:',
 	'indentation_unix' : 'Unix',
 	'indentation_mac' : 'Mac',
 	'indentation_windows' : 'Windows',
