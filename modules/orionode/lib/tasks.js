@@ -91,7 +91,7 @@ api.getOrionEE().on("close-server", function(data) {
 		logger.error("Cancelling all tasks in worker: " + process.pid);
 		var keys = Object.keys(allTasks);
 		keys.forEach(function(key) {
-			logger.error("Cancelling: " + key + " url=" + allTasks[key].res.req.originalUrl + " pid=" + process.pid);
+			logger.error("Cancelling: " + key + " url=" + allTasks[key].res.req.method + " " + allTasks[key].res.req.originalUrl + " pid=" + process.pid);
 			allTasks[key].done({
 				HttpCode: 500,
 				Code: 0,

@@ -88,7 +88,7 @@ var FileLocker = function(pathname, options) {
 	this._fd;
 	this._lock = new ReentrantLock();
 	this._locking = !isWin;
-	this._exclusiveLocksOnly = options.configParams.get('orion_exclusive_locks_only') === true;
+	this._exclusiveLocksOnly = options && options.configParams && options.configParams.get('orion_exclusive_locks_only') === true;
 	this._pathame = pathname;
 	this._inactivityTimer;
 };
@@ -110,12 +110,17 @@ FileLocker.prototype.lock = function(shared) {
 							function() {
 								logger.info("release lock time=" + (Date.now() - acquireTime) + " shared=" + shared + " path=" + this._pathame + " pid=" + process.pid);
 								releaser();
+							}.bind(this),
+							function(error) {
+								logger.error("An error occurred while releasing lock file: " + this._pathame, error);
+								releaser();
 							}.bind(this)
 						);
 					}.bind(this));
 				}.bind(this),
 				function(error) {
 					logger.error("An error occurred while locking file: " + this._pathame, error);
+					releaser();
 					reject(error);
 				}.bind(this)
 			);
@@ -141,8 +146,8 @@ FileLocker.prototype._acquireLock = function(shared) {
 				fs.fcntl(this._fd, constants.F_SETLK, shared ? constants.F_RDLCK : constants.F_WRLCK, function(error) {
 					if (error && error.code === "EAGAIN") {
 						if (Date.now() - startTime > 60000) {// 1 minute
-							logger.error("Timeout out locking= " + this._pathame, error);
-							reject(new Error("Timeout out locking= " + this._pathame));
+							logger.error("Timeout locking= " + this._pathame, error);
+							reject(new Error("Timeout locking= " + this._pathame));
 							return;
 						}
 						setTimeout(doit, 1);
@@ -186,9 +191,31 @@ FileLocker.prototype._acquireLock = function(shared) {
 	}.bind(this))).then(function() {
 		this._pendingAcquireLock = null;
 	}.bind(this), function(err) {
+		this._closeLockFile();
 		this._pendingAcquireLock = null;
 		return Promise.reject(err);
 	}.bind(this));
+};
+
+
+FileLocker.prototype._closeLockFile = function() {
+	if (this._inactivityTimer) {
+		clearTimeout(this._inactivityTimer);
+	}
+	this._inactivityTimer = setTimeout(
+		function() {
+			var fd = this._fd;
+			this._fd = null;
+			if (!fd) return;
+			fs.close(fd, function(error) {
+				if (error) {
+					/* no functional impact beyond possibly leaking a fd */
+					logger.warn("Failed to close an inactive lock file: " + fd, error);
+				}
+			});
+		}.bind(this),
+		TIMEOUT_INACTIVE
+	);
 };
 
 FileLocker.prototype._releaseLock = function() {
@@ -199,23 +226,7 @@ FileLocker.prototype._releaseLock = function() {
 	return this._pendingReleaseLock || (this._pendingReleaseLock = new Promise(function(resolve, reject) {
 
 		fs.fcntl(this._fd, constants.F_SETLK, constants.F_UNLCK, function(error) {
-			if (this._inactivityTimer) {
-				clearTimeout(this._inactivityTimer);
-			}
-			this._inactivityTimer = setTimeout(
-				function() {
-					var fd = this._fd;
-					this._fd = null;
-					if (!fd) return;
-					fs.close(fd, function(error) {
-						if (error) {
-							/* no functional impact beyond possibly leaking a fd */
-							logger.warn("Failed to close an inactive lock file: " + fd, error);
-						}
-					});
-				}.bind(this),
-				TIMEOUT_INACTIVE
-			);
+			this._closeLockFile();
 
 			if (error) {
 				return reject(error);
