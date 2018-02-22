@@ -41,7 +41,6 @@ function createUser(request, data) {
  * These test are all skipped until we have proper authentication support
  */
 describe("Users endpoint", function() {
-	it("testCreateDeleteRights");
 	describe("Single user mode", function() {
 		beforeEach(function(done) { // testData.setUp.bind(null, parentDir)
 			testData.setUp(WORKSPACE, function() {
@@ -50,8 +49,8 @@ describe("Users endpoint", function() {
 		});
 		afterEach("Remove .test_workspace", function(done) {
 			testData.tearDown(testHelper.WORKSPACE, function(){
-				testData.tearDown(path.join(METADATA, '.orion'), function(){
-					testData.tearDown(METADATA, done)
+				testData.tearDown(path.join(testHelper.METADATA, '.orion'), function(){
+					testData.tearDown(testHelper.METADATA, done)
 				})
 			});
 		});
@@ -290,8 +289,11 @@ describe("Users endpoint", function() {
 				"orion.single.user": false
 			});
 		});
-		after("Reset to default server state", function() {
+		after("Reset to default server state", function(done) {
 			request = testData.setupOrionServer({});
+			testData.tearDown(testHelper.WORKSPACE, function() {
+				done();
+			});
 		});
 		it("testGetUsers", function(done) {
 			request()
@@ -364,14 +366,14 @@ describe("Users endpoint", function() {
 				.post(CONTEXT_PATH + '/users')
 				.set('Orion-Version', 1)
 				.send({Password: "pw", FullName: "user1", Email: "user1@email.ca", UserName: "user1"})
-				.expect(400, done);
+				.expect(201, done);
 		});
 		it("testPostUsers - trailing slash", function(done) {
 			request()
 				.post(CONTEXT_PATH + '/users/')
 				.set('Orion-Version', 1)
 				.send({Password: "pw", FullName: "user1", Email: "user1@email.ca", UserName: "user1"})
-				.expect(400, done);
+				.expect(404, done);
 		});
 		it("testDeleteUser - anonymous", function(done) {
 			request()
@@ -414,7 +416,7 @@ describe("Users endpoint", function() {
 			request()
 				.post(CONTEXT_PATH + '/users')
 				.send(json)
-				.expect(400, done);
+				.expect(201, done);
 		});
 		it("testCreateUserWithNoUserName", function(done) {
 			var json = {Email: 'testCreateDuplicateUser@bar.org', FullName: "testCreateDuplicateUser Bar", Password: "1234"};
@@ -428,83 +430,108 @@ describe("Users endpoint", function() {
 			request()
 				.post(CONTEXT_PATH + '/users')
 				.send(json)
-				.expect(400, done);
+				.expect(201, done);
 		});
 		it("testCreateUserDuplicateEmail", function(done) {
 			var json = {UserName: "testCreateUserDuplicateEmail", Email: 'testCreateUserDuplicateEmail@bar.org', FullName: "testCreateUserDuplicateEmail Bar", Password: "1234"};
 			request()
 				.post(CONTEXT_PATH + '/users')
 				.send(json)
-				.expect(400, done);
+				.expect(201, done);
 		});
 		it("testCreateUserEmailDifferentCase", function(done) {
 			var json = {UserName: "testCreateUserEmailDifferentCase", Email: 'testCreateUserEmailDifferentCase@bar.org', FullName: "testCreateUserEmailDifferentCase Bar", Password: "1234"};
 			request()
 				.post(CONTEXT_PATH + '/users')
 				.send(json)
-				.expect(400, done);
-		});
-		it("testCreateUserInvalidName", function(done) {
-			var json = {UserName: "foo", Email: 'foo@bar.org', FullName: "Foo Bar", Password: "1234"};
-			var badChars = " !@#$%^&*()-=_+[]{}\";':\\/><.,`~";
-			for(var i = 0, len = badChars.length; i < len; i++) {
-				json.UserName = "bad" + badChars.charAt(i) + "name";
-				request()
-					.post(CONTEXT_PATH + '/users')
-					.send(json)
-					.expect(400)
-					.end(function(err, res) {
-						testHelper.throwIfError(err);
-					});
-				if(i === len-1) {
-					done();
-				}
-			}
+				.expect(201, done);
 		});
 		it("testCreateDeleteUsers", function(done) {
 			var json = {UserName: "testCreateDeleteUsers", Email: 'testCreateDeleteUsers@bar.org', FullName: "testCreateDeleteUsers Bar", Password: "1234"};
 			request()
 				.post(CONTEXT_PATH + '/users')
 				.send(json)
-				.expect(400, done);
-		});
-		/**
-		 * TODO we currently don't have a unique ID implementation in the node server
-		 */
-		it("testDeleteUserByUniqueIdProperty", function(done) {
-			var json = {UserName: "testDeleteUserByUniqueIdProperty", Email: 'testDeleteUserByUniqueIdProperty@bar.org', FullName: "testDeleteUserByUniqueIdProperty Bar", Password: "1234"};
-			request()
-				.post(CONTEXT_PATH + '/users')
-				.send(json)
-				.expect(400, done);
+				.expect(201)
+				.end(function(err, res) {
+					testHelper.throwIfError(err);
+					request()
+						.delete(CONTEXT_PATH + '/users/testCreateDeleteUsers')
+						.expect(403, done) //TODO what to do in single user mode?
+				});
 		});
 		it("testUpdateUsers", function(done) {
 			var json = {UserName: "testUpdateUsers", Email: 'testUpdateUsers@bar.org', FullName: "testUpdateUsers Bar", Password: "1234"};
 			request()
 				.post(CONTEXT_PATH + '/users')
 				.send(json)
-				.expect(400, done);
+				.expect(201)
+				.end(function(err, res) {
+					testHelper.throwIfError(err);
+					done();
+				});
 		});
 		it("testResetUser", function(done) {
 			var json = {roles: "admin", UserName: "testResetUser", Email: 'testResetUser@bar.org', FullName: "testResetUser Bar", Password: "1234"};
 			request()
 				.post(CONTEXT_PATH + '/users')
 				.send(json)
-				.expect(400, done);
+				.expect(201)
+				.end(function(err, res) {
+					testHelper.throwIfError(err);
+					done();
+				});
 		});
 		it("testCreateUser", function(done) {
 			var json = {UserName: "testCreateUser", Email: 'testCreateUser@bar.org', FullName: "testCreateUser Bar", Password: "1234"};
 			request()
 				.post(CONTEXT_PATH + '/users')
 				.send(json)
-				.expect(400, done);
+				.expect(201)
+				.end(function(err, res) {
+					testHelper.throwIfError(err);
+					done();
+				});
 		});
 		it("testChangeUserName", function(done) {
 			var json = {UserName: "testChangeUserName", Email: 'testChangeUserName@bar.org', FullName: "testChangeUserName Bar", Password: "1234"};
 			request()
 				.post(CONTEXT_PATH + '/users')
 				.send(json)
-				.expect(400, done);
+				.expect(201)
+				.end(function(err, res) {
+					testHelper.throwIfError(err);
+					done();
+				});
+		});
+		describe("Create users with invalid user names", function() {
+			Array.from(" !@#$%^&*()-=_+[]{}\";':\\/><.,`~|\u001C\u204B").forEach(function(c) {
+				const uname = "bad" + c + "name";
+				it("testCreateUserBadName: "+uname, function(done) {
+					request()
+						.post(CONTEXT_PATH + '/users')
+						.send({
+							UserName: uname, 
+							Email: 'emailz', 
+							FullName: "Bad"+c, 
+							Password: "1234"})
+						.expect(400, done);
+				});
+			});
+		});
+		describe("Create users with allowed UNICODE user names", function() {
+			Array.from("\u225B\u1F707\u11ACB").forEach(function(c) {
+				const uname = "good" + c + "name";
+				it("testCreateUserBadName: "+uname, function(done) {
+					request()
+						.post(CONTEXT_PATH + '/users')
+						.send({
+							UserName: uname, 
+							Email: 'emailz', 
+							FullName: "Good"+c, 
+							Password: "1234"})
+						.expect(201, done);
+				});
+			});
 		});
 	});
 });

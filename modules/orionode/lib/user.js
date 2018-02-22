@@ -522,15 +522,33 @@ module.exports.router = function router(options) {
 
 	app.post('/users', options.CSRF, options.authenticate, function(req, res) {
 		// If there are admin accounts, only admin accounts can create users
-		if (options.configParams.get("orion.auth.user.creation")) {
+		const admins = options.configParams.get("orion.auth.user.creation");
+		if (typeof admins === 'string' && admins.length > 0) {
 			if(!isAdmin(options, req.user && req.user.username)) {
 				return api.writeResponse(403, res);
 			}
+		}
+		const uname = req.body.UserName;
+		if(typeof uname === 'string') {
+			if(!!options.configParams.get('orion.auth.disable.account.rules')) {
+				if(uname.length < 3) {
+					return api.writeResponse(400, res, null, {Message: "User name must be 3 characters or longer"});
+				}
+				if(uname.length > 20) {
+					return api.writeResponse(400, res, null, {Message: "User name must be 20 characters or shorter"});
+				}
+			}
+			for (let i = 0, len = uname.length; i < len; i++) {
+				const c = uname.charAt(i);
+				if(!api.isLetterOrDigit(c)) {
+					return api.writeResponse(400, res, null, {Message: "Invalid character in user name: "+c});
+				}
+			}
 		} else {
-			return api.writeResponse(400, res);
+			return api.writeResponse(400, res, null, {Message: "Invalid user name for new user"});
 		}
 		const userData = {
-			username: req.body.UserName,
+			username: uname,
 			email: req.body.Email,
 			fullname: req.body.FullName,
 			oauth: req.body.identifier,

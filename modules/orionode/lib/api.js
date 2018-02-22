@@ -249,6 +249,29 @@ function isValidProjectName(fileName) {
 	});
 	return !result;
 }
+const ILOD_UNICODE_REGEX = /[^\u{0000}-\u{001F}\u{2000}-\u{206F}]/u;
+/**
+ * Checks if the given character if a letter or a digit.
+ * Any letter of digit from ASCII is true, and any character that is not part of the follow tables is true:
+ * - General Punctuation
+ * - Control Character
+ * @param {string} char The character to check
+ * @returns {bool} True if the char is a letter or digit, as defined above
+ * @since 18.0
+ */
+exports.isLetterOrDigit = function isLetterOrDigit(char) {
+	const code = char.charCodeAt(0);
+	if(code < 48 || (code > 57 && code < 65) || (code > 90 && code < 97) || (code > 122 && code < 128)) {
+		return false;
+	}
+	if(code <= 255) { // extended ascii
+		return true;
+	}
+	if(ILOD_UNICODE_REGEX.test(char)) { //unicode
+		return true;
+	}
+	return false;
+}
 
 /**
  * @name logAccess
