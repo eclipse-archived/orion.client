@@ -104,7 +104,7 @@ define(['orion/webui/littlelib', 'orion/EventTarget'], function(lib, EventTarget
 				// if trigger node is not key enabled, then add key handler for ENTER, SPACE and DOWN arrow
 				if (this._triggerNode.tagName.toLowerCase() === "span") { //$NON-NLS-0$
 					this._triggerNode.addEventListener("keydown", function(event) { //$NON-NLS-0$
-						if (event.keyCode === lib.KEY.ENTER || event.keyCode === lib.KEY.SPACE || event.keyCode === lib.KEY.DOWN) {
+						if (event.keyCode === lib.KEY.ENTER || event.keyCode === lib.KEY.SPACE) {
 							triggerClickHandler(event);
 						}
 					}.bind(this), false);
