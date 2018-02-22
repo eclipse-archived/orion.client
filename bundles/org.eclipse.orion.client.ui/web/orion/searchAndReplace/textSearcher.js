@@ -142,10 +142,12 @@ define([
 				parentDiv.appendChild(optionsDiv);
 				optionsDiv.classList.add("findOptionsDiv"); //$NON-NLS-0$
 				var optionMenu = mCommands.createDropdownMenu(optionsDiv, messages['Options'], null, "dismissButton", null, true); //$NON-NLS-0$
+				that._handleEsc(optionMenu.menuButton);
 				optionMenu.menuButton.classList.add("parameterInlineButton"); //$NON-NLS-0$
 				mCommands.createCheckedMenuItem(optionMenu.menu, messages["Show all"], that._showAll,
 					function(event) {
 						var checked = event.target.checked;
+						event.target.setAttribute("aria-checked", checked);
 						that.setOptions({showAll: checked});
 						optionMenu.dropdown.close(true);
 					});
@@ -153,20 +155,25 @@ define([
 				that._selectedLinesUI = mCommands.createCheckedMenuItem(optionMenu.menu, messages["Selected Lines"], that._selectedLines,
 					function(event) {
 						var checked = event.target.checked;
+						event.target.setAttribute("aria-checked", checked);
 						that.setOptions({selectedLines: checked});
 						optionMenu.dropdown.close(true);
 					});
 				
 				mCommands.createCheckedMenuItem(optionMenu.menu, messages["Case sensitive"], !that._caseInsensitive,
 					function(event) {
-						that.setOptions({caseInsensitive: !event.target.checked});
+						var checked = event.target.checked;
+						event.target.setAttribute("aria-checked", checked);
+						that.setOptions({caseInsensitive: !checked});
 						optionMenu.dropdown.close(true);
 						that.find(true);
 					});
 				
 				mCommands.createCheckedMenuItem(optionMenu.menu,  messages["Wrap search"], that._wrap,
 					function(event) {
-						that.setOptions({wrap: event.target.checked});
+						var checked = event.target.checked;
+						event.target.setAttribute("aria-checked", checked);
+						that.setOptions({wrap: checked});
 						optionMenu.dropdown.close(true);
 					});
 					
@@ -174,21 +181,27 @@ define([
 				if (!this._incrementalDisabled) {
 					mCommands.createCheckedMenuItem(optionMenu.menu,  messages["Incremental search"], that._incremental,
 						function(event) {
-							that.setOptions({incremental: event.target.checked});
+							var checked = event.target.checked;
+							event.target.setAttribute("aria-checked", checked);
+							that.setOptions({incremental: checked});
 							optionMenu.dropdown.close(true);
 						});
 				}
 					
 				mCommands.createCheckedMenuItem(optionMenu.menu,  messages["Whole Word"], that._wholeWord,
 					function(event) {
-						that.setOptions({wholeWord: event.target.checked});
+						var checked = event.target.checked;
+						event.target.setAttribute("aria-checked", checked);
+						that.setOptions({wholeWord: checked});
 						optionMenu.dropdown.close(true);
 						that.find(true);
 					});
 					
 				that._regExBox = mCommands.createCheckedMenuItem(optionMenu.menu,  messages["Regular expression"], that._regex,
 					function(event) {
-						that.setOptions({regex: event.target.checked});
+						var checked = event.target.checked;
+						event.target.setAttribute("aria-checked", checked);
+						that.setOptions({regex: checked});
 						optionMenu.dropdown.close(true);
 						that.find(true);
 						that._showReplaceInfo();
@@ -197,7 +210,9 @@ define([
 				if (!readonly) {
 					mCommands.createCheckedMenuItem(optionMenu.menu,  messages["Find after replace"], that._findAfterReplace,
 						function(event) {
-							that.setOptions({findAfterReplace: event.target.checked});
+							var checked = event.target.checked;
+							event.target.setAttribute("aria-checked", checked);
+							that.setOptions({findAfterReplace: checked});
 							optionMenu.dropdown.close(true);
 						});
 				}
@@ -303,15 +318,18 @@ define([
 				});
 	    	}
 	    },
-		_createButton: function(text, parent, callback) {
-			var button  = document.createElement("button"); //$NON-NLS-0$
-			button.addEventListener("click", callback.bind(this), false); //$NON-NLS-0$
+	    _handleEsc: function(element) {
 			var self = this;
-			button.addEventListener("keydown", function(e) { //$NON-NLS-0$
+			element.addEventListener("keydown", function(e) { //$NON-NLS-0$
 				if (e.keyCode === lib.KEY.ESCAPE) {
 					self.hide();
 				}
 			});
+	    },
+		_createButton: function(text, parent, callback) {
+			var button  = document.createElement("button"); //$NON-NLS-0$
+			button.addEventListener("click", callback.bind(this), false); //$NON-NLS-0$
+			this._handleEsc(button);
 			button.appendChild(document.createTextNode(text)); //$NON-NLS-0$
 			button.className = "dismissButton parameterInlineButton"; //$NON-NLS-0$
 			

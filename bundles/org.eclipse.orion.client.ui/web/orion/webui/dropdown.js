@@ -98,13 +98,20 @@ define(['orion/webui/littlelib', 'orion/EventTarget'], function(lib, EventTarget
 			}.bind(this);
 			
 			if (!options.skipTriggerEventListeners) {
-				// click on trigger opens or toggles.
+				// click on trigger opens or closes.
 				this._triggerNode.addEventListener("click", triggerClickHandler, false); //$NON-NLS-0$
 
-				// if trigger node is not key enabled...
+				// if trigger node is not key enabled, then add key handler for ENTER, SPACE and DOWN arrow
 				if (this._triggerNode.tagName.toLowerCase() === "span") { //$NON-NLS-0$
 					this._triggerNode.addEventListener("keydown", function(event) { //$NON-NLS-0$
-						if (event.keyCode === lib.KEY.ENTER || event.keyCode === lib.KEY.SPACE) {
+						if (event.keyCode === lib.KEY.ENTER || event.keyCode === lib.KEY.SPACE || event.keyCode === lib.KEY.DOWN) {
+							triggerClickHandler(event);
+						}
+					}.bind(this), false);
+				} else {
+					// add key handler for DOWN arrow
+					this._triggerNode.addEventListener("keydown", function(event) { //$NON-NLS-0$
+						if (event.keyCode === lib.KEY.DOWN) {
 							triggerClickHandler(event);
 						}
 					}.bind(this), false);
@@ -172,7 +179,7 @@ define(['orion/webui/littlelib', 'orion/EventTarget'], function(lib, EventTarget
 		 */			
 		toggle: function(mouseEvent /* optional */) {
 			if (this.isVisible()) {
-				return this.close();
+				return this.close(true);
 			}
 			return this.open(mouseEvent);
 		},
@@ -344,14 +351,19 @@ define(['orion/webui/littlelib', 'orion/EventTarget'], function(lib, EventTarget
 		 *
 		 */
 		getItems: function() {
-			var items = lib.$$array("li:not(.dropdownSeparator) > [role^='menuitem']", this._dropdownNode, true); //$NON-NLS-0$
+			var items = lib.$$array("li:not(.dropdownSeparator) [role^='menuitem']", this._dropdownNode, true); //$NON-NLS-0$
 			// We only want the direct li children, not any descendants.  But we can't preface a query with ">"
 			// So we do some reachy filtering here.
 			var filtered = [];
 			var self = this;
 			items.forEach(function(item) {
-				if (item.parentNode.parentNode === self._dropdownNode) {
-					filtered.push(item);
+				var menuitem = item;
+				if (menuitem.parentNode.tagName.toLowerCase() === "label") {
+					// if the parent is a label, go up one more (this can happen with input menu items, such as checkbox)
+					menuitem = item.parentNode;
+				}
+				if (menuitem.parentNode.parentNode === self._dropdownNode) {
+					filtered.push(menuitem);
 				}
 			});
 			
@@ -448,6 +460,8 @@ define(['orion/webui/littlelib', 'orion/EventTarget'], function(lib, EventTarget
 									this._selectedItem.dropdown._selectItem(); // select first item in submenu
 								} else {
 									this._selectedItem.click();
+									// click handling auto closes menus without restoring focus to trigger, so need to restore here
+									this._triggerNode.focus();
 								}
 							}
 						}
