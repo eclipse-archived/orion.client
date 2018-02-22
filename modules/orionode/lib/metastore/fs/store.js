@@ -590,7 +590,7 @@ Object.assign(FsMetastore.prototype, {
 				});
 			}
 		}
-		return [];
+		return callback(null, []);
 	},
 	
 	/** @callback */

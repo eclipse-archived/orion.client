@@ -256,15 +256,18 @@ describe("Users endpoint", function() {
 		it("useremailconfirmation / resetPwd");
 		it("useremailconfirmation / verifyEmail");
 	});
-	describe.skip("Multi-tenant mode - ADMIN", function() {
+	describe("Multi-tenant mode - ADMIN", function() {
 		before("Start server in multi-tenant mode", function() {
 			request = testData.setupOrionServer({
 				"orion.single.user": false,
 				"orion.auth.user.creation": "admin"
 			});
 		});
-		after("Reset to default server state", function() {
+		after("Reset to default server state", function(done) {
 			request = testData.setupOrionServer({});
+			testData.tearDown(testHelper.WORKSPACE, function() {
+				done();
+			});
 		});
 		it("testGetUsers", function(done) {
 			request()
@@ -275,7 +278,128 @@ describe("Users endpoint", function() {
 				.end(function(err, res) {
 					testHelper.throwIfError(err);
 					assert(res, "There must be a response");
+					assert(res.body, "There must be a response body");
+					assert(Array.isArray(res.body.Users), "There must be a users array");
 					done();
+				});
+		});
+		it("testGetUsers - trailing slash", function(done) {
+			request()
+				.get(CONTEXT_PATH + '/users/')
+				.set('Orion-Version', 1)
+				.set('Authorization', 'Basic '+ testHelper.btoa('admin:admin'))
+				.expect(200)
+				.end(function(err, res) {
+					testHelper.throwIfError(err);
+					assert(res, "There must be a response");
+					assert(res.body, "There must be a response body");
+					assert(Array.isArray(res.body.Users), "There must be a users array");
+					done();
+				});
+		});
+		it("testGetUser - non-existent", function(done) {
+			request()
+				.get(CONTEXT_PATH + '/users/nouser')
+				.set('Orion-Version', 1)
+				.expect(400, done);
+		});
+		it("testGetUser - non-existent, trailing slash", function(done) {
+			request()
+				.get(CONTEXT_PATH + '/users/nouser/')
+				.set('Orion-Version', 1)
+				.expect(400, done);
+		});
+		it("testPutUser - non existent user", function(done) {
+			request()
+				.put(CONTEXT_PATH + '/users/nouser')
+				.set('Orion-Version', 1)
+				.send({Password: "newpw", FullName: "no", Email: "no@anon.ca"})
+				.expect(400, done);
+		});
+		it("testPutUser - non existent user, trailing slash", function(done) {
+			request()
+				.put(CONTEXT_PATH + '/users/nouser/')
+				.set('Orion-Version', 1)
+				.send({Password: "newpw", FullName: "anonEmouse", Email: "anonEmouse@anon.ca"})
+				.expect(400, done);
+		});
+		it("testPutUser - root", function(done) {
+			request()
+				.put(CONTEXT_PATH + '/users')
+				.set('Orion-Version', 1)
+				.send({Password: "newpw", FullName: "anonEmouse", Email: "anonEmouse@anon.ca"})
+				.expect(404, done);
+		});
+		it("testPutUser - root, trailing slash", function(done) {
+			request()
+				.put(CONTEXT_PATH + '/users/')
+				.set('Orion-Version', 1)
+				.send({Password: "newpw", FullName: "anonEmouse", Email: "anonEmouse@anon.ca"})
+				.expect(404, done);
+		});
+		it("testPostUser - non existent", function(done) {
+			request()
+				.post(CONTEXT_PATH + '/users/nouser')
+				.set('Orion-Version', 1)
+				.send({Password: "pw"})
+				.expect(400, done);
+		});
+		it("testPostUser - non existent, trailing slash", function(done) {
+			request()
+				.post(CONTEXT_PATH + '/users/nouser/')
+				.set('Orion-Version', 1)
+				.send({Password: "pw"})
+				.expect(400, done);
+		});
+		it("testPostUsers", function(done) {
+			request()
+				.post(CONTEXT_PATH + '/users')
+				.set('Orion-Version', 1)
+				.send({Password: "pw", FullName: "user12", Email: "user12@email.ca", UserName: "user12"})
+				.expect(201, done);
+		});
+		it("testPostUsers - trailing slash", function(done) {
+			request()
+				.post(CONTEXT_PATH + '/users/')
+				.set('Orion-Version', 1)
+				.send({Password: "pw", FullName: "user13", Email: "user13@email.ca", UserName: "user13"})
+				.expect(201, done);
+		});
+		it("testDeleteUser - non existent user", function(done) {
+			request()
+				.delete(CONTEXT_PATH + '/users/nope')
+				.set('Orion-Version', 1)
+				.expect(400, done);
+		});
+		it("testDeleteUser - non existent user, trailing slash", function(done) {
+			request()
+				.delete(CONTEXT_PATH + '/users/nope/')
+				.set('Orion-Version', 1)
+				.expect(400, done);
+		});
+		it("testDeleteUser - sent to root", function(done) {
+			request()
+				.delete(CONTEXT_PATH + '/users')
+				.set('Orion-Version', 1)
+				.expect(404, done);
+		});
+		it("testDeleteUser - sent to root trailing slash", function(done) {
+			request()
+				.delete(CONTEXT_PATH + '/users/')
+				.set('Orion-Version', 1)
+				.expect(404, done);
+		});
+		it("testCreateDeleteUser - ADMIN", function(done) {
+			var json = {UserName: "u12", Email: 'u12@bar.org', FullName: "u12 Bar", Password: "1234"};
+			request()
+				.post(CONTEXT_PATH + '/users')
+				.send(json)
+				.expect(201)
+				.end(function(err, res) {
+					testHelper.throwIfError(err);
+					request()
+						.delete(CONTEXT_PATH + '/users/u12')
+						.expect(200, done) //TODO what to do in single user mode?
 				});
 		});
 	});
