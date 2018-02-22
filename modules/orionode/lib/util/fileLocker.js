@@ -129,31 +129,29 @@ FileLocker.prototype.lock = function(shared) {
 };
 
 FileLocker.prototype._acquireLock = function(shared) {
+	if (!this._locking) {
+		return Promise.resolve();
+	}
+	
 	if (this._inactivityTimer) {
 		clearTimeout(this._inactivityTimer);
 		this._inactivityTimer = null;
 	}
 
-	if (!this._locking || this._counter++) {
-		return this._pendingAcquireLock || Promise.resolve();
-	}
-
-	return this._pendingAcquireLock || (this._pendingAcquireLock = new Promise(function(resolve, reject) {
-
+	function acquire(resolve, reject) {
 		var lock = function() {
 			var startTime = Date.now();
 			var doit = function() {
 				fs.fcntl(this._fd, constants.F_SETLK, shared ? constants.F_RDLCK : constants.F_WRLCK, function(error) {
 					if (error && error.code === "EAGAIN") {
-						if (Date.now() - startTime > 60000) {// 1 minute
-							logger.error("Timeout locking= " + this._pathame, error);
-							reject(new Error("Timeout locking= " + this._pathame));
+						if (Date.now() - startTime <= 60000) { // 1 minute
+							setTimeout(doit, 1);
 							return;
 						}
-						setTimeout(doit, 1);
-						return;
+						error = new Error("Timeout locking " + error);
 					}
 					if (error) {
+						this._closeLockFile();
 						return reject(error);
 					}
 					resolve();
@@ -188,12 +186,24 @@ FileLocker.prototype._acquireLock = function(shared) {
 		} else {
 			lock();
 		}
-	}.bind(this))).then(function() {
-		this._pendingAcquireLock = null;
-	}.bind(this), function(err) {
-		this._closeLockFile();
-		this._pendingAcquireLock = null;
-		return Promise.reject(err);
+	}
+	
+	var result = this._pendingAcquireLock;
+	if (!result) {
+		if (this._counter !== 0) {
+			result = Promise.resolve();
+		} else {
+			result = this._pendingAcquireLock = new Promise(acquire.bind(this))
+			.then(function() {
+				this._pendingAcquireLock = null;
+			}.bind(this), function(err) {
+				this._pendingAcquireLock = null;
+				return Promise.reject(err);
+			}.bind(this));
+		} 
+	}
+	return result.then(function() {
+		this._counter++;
 	}.bind(this));
 };
 
@@ -204,6 +214,7 @@ FileLocker.prototype._closeLockFile = function() {
 	}
 	this._inactivityTimer = setTimeout(
 		function() {
+			this._inactivityTimer = null;
 			var fd = this._fd;
 			this._fd = null;
 			if (!fd) return;
