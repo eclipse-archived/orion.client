@@ -172,6 +172,26 @@ define([
 		// bind name to fragment variable
 		lib.processTextNodes(buttonFragment, {ButtonText: name});
 		parent.appendChild(buttonFragment);
+
+		var trigger = parent.firstChild;
+		var inMenubar = false;
+		var parentNode = parent.parentNode;
+		while(parentNode && (document !== parentNode)) {
+			if (parentNode.getAttribute("role") === "menubar") { //$NON-NLS-0$
+				inMenubar = true;
+				break;
+			}
+			parentNode = parentNode.parentNode;
+		}
+		if (inMenubar) {
+			trigger.setAttribute("role", "menuitem");
+		} else {
+			// menu button
+			if (trigger.tagName.toLowerCase() !== "button") {
+				trigger.setAttribute("role", "button");
+			}
+		}
+
 		var newMenu = parent.lastChild;
 		var menuButton;
 		var dropdownArrow;
@@ -225,6 +245,7 @@ define([
 		var itemParent = parent.lastChild;
 		var checkbox = lib.$(".checkedMenuItem", itemParent); //$NON-NLS-0$
 		checkbox.checked = checked;
+		checkbox.setAttribute("aria-checked", checked);
 		checkbox.addEventListener("change", onChange, false); //$NON-NLS-0$
 		return checkbox;
 	}
