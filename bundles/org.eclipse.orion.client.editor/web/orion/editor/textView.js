@@ -2956,6 +2956,7 @@ define("orion/editor/textView", [
 					div = div.nextSibling;
 				}
 			}
+			if (!div) { return; }
 			if (ruler) {
 				div.rulerChanged = true;
 			} else {
