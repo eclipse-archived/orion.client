@@ -20,7 +20,7 @@ const express = require('express'),
 	log4js = require('log4js'),
 	logger = log4js.getLogger("user"),
 	jwt = require('jsonwebtoken'),
-	path = require('path'),
+	url = require('url'),
 	checkRights = require('./accessRights').checkRights,
 	fileUtil = require('./fileUtil'),
 	responseTime = require('response-time');
@@ -66,7 +66,7 @@ function userJSON(user, options) {
 	return {
 		FullName: user.fullname,
 		UserName: user.username,
-		Location: path.join(options.usersRoot, user.username),
+		Location: api.join(options.usersRoot, user.username),
 		Email: user.email,
 		EmailConfirmed: user.isAuthenticated,
 		HasPassword: true,
@@ -370,7 +370,7 @@ module.exports.router = function router(options) {
 		}
 		const contextPath = options.configParams.get("orion.context.path") || "",
 			listenContextPath = options.configParams.get("orion.context.listenPath") || false,
-			uri = req.originalUrl.substring(listenContextPath ? contextPath.length : 0);
+			uri = url.parse(req.originalUrl.substring(listenContextPath ? contextPath.length : 0)).pathname;
 		if(isadmin) {
 			return next();
 		}
