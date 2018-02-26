@@ -15,6 +15,7 @@ let express = require('express'),
 	expressSession = require('express-session'),
 	passport = require('passport'),
 	path = require('path'),
+	responseTime = require('response-time'),
 	fs = require('fs'),
 	api = require('./lib/api'),
 	checkRights = require('./lib/accessRights').checkRights,
@@ -96,6 +97,9 @@ function tryLoadRouter(endpoint, options) {
 	var isEndpoint = typeof endpoint.endpoint === 'string';
 	if (isEndpoint) {
 		args.push(endpoint.endpoint);
+	}
+	if (isEndpoint) {
+		args.push(responseTime({digits: 2, header: "X-Total-Response-Time", suffix: true}));
 	}
 	if (endpoint.authenticated) {
 		args.push(options.authenticate);
@@ -232,7 +236,6 @@ module.exports = function startServer(options) {
 		bodyParser.json({limit: "10mb"}),
 		bodyParser.urlencoded({extended: false, limit: "10mb"}),
 		cookieParser()
-//		responseTime({digits: 2, header: "X-User-Response-Time", suffix: true})
 	];
 
 	Object.assign(options, {
