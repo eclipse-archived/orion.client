@@ -15,12 +15,12 @@ let express = require('express'),
 	expressSession = require('express-session'),
 	passport = require('passport'),
 	path = require('path'),
+	responseTime = require('response-time'),
 	fs = require('fs'),
 	api = require('./lib/api'),
 	checkRights = require('./lib/accessRights').checkRights,
 	socketio = require('socket.io'),
 	ttyShell = require('./lib/tty_shell'),
-	responseTime = require('response-time'),
 	log4js = require('log4js'),
 	//lsregistry = require("./lib/lsRegistry"),
 	addModulePath = require('app-module-path');
@@ -98,6 +98,16 @@ function tryLoadRouter(endpoint, options) {
 	if (isEndpoint) {
 		args.push(endpoint.endpoint);
 	}
+	if (isEndpoint) {
+		args.push(responseTime({digits: 2, header: "X-Total-Response-Time", suffix: true}));
+	}
+	if (endpoint.authenticated) {
+		args.push(options.authenticate);
+		args.push(checkAuthenticated);
+	}
+	if (isEndpoint) {
+		args.push(options.basicMiddleware);
+	}
 	if (isEndpoint && csrf && (endpoint.checkCSRF === undefined || endpoint.checkCSRF)) { // perform CSRF by default
 		args.push(csrf);
 		args.push(function(req, res, next) {
@@ -107,10 +117,6 @@ function tryLoadRouter(endpoint, options) {
 			}
 			next();
 		});
-	}
-	if (endpoint.authenticated) {
-		args.push(options.authenticate);
-		args.push(checkAuthenticated);
 	}
 	if (endpoint.checkAccess) {
 		args.push(checkAccessRights);
@@ -226,19 +232,11 @@ module.exports = function startServer(options) {
 	workspaceDir = options.workspaceDir;
 	const app = express();
 	options.app = app;
-	app.use(bodyParser.json({
-		limit: "10mb"
-	}));
-	app.use(bodyParser.urlencoded({
-		extended: false,
-		limit: "10mb"
-	}));
-	app.use(cookieParser());
-	app.use(responseTime({
-		digits: 2,
-		header: "X-Total-Response-Time",
-		suffix: true
-	}));
+	options.basicMiddleware = [
+		bodyParser.json({limit: "10mb"}),
+		bodyParser.urlencoded({extended: false, limit: "10mb"}),
+		cookieParser()
+	];
 
 	Object.assign(options, {
 		sharedWorkspaceFileRoot: contextPath + '/sharedWorkspace/tree/file',

@@ -11,7 +11,6 @@
 const express = require('express'),
 	crypto = require('crypto'),
 	passport = require('passport'),
-	cookieParser = require('cookie-parser'),
 	Promise = require('bluebird'),
 	nodemailer = require('nodemailer'),
 	fs = require('fs'),
@@ -22,8 +21,7 @@ const express = require('express'),
 	jwt = require('jsonwebtoken'),
 	url = require('url'),
 	checkRights = require('./accessRights').checkRights,
-	fileUtil = require('./fileUtil'),
-	responseTime = require('response-time');
+	fileUtil = require('./fileUtil');
 	
 const AUTH_TOKEN_BYTES = 48,
 	CONFIRM_MAIL = "./multitenant/EmailConfirmation.txt",
@@ -282,9 +280,9 @@ function configureGoogleOAuth(app, options) {
 			const email = profile.emails[0].value;
 			oauth(profile.provider + "/" + profile.id, email.split("@")[0], email, req, done);
 		}));
-		app.get('/login/oauth/google', passport.authenticate('google'));
-		app.get('/mixlogin/manageoauth/oauth/google', passport.authenticate('google', {callbackURL: (options.configParams.get("orion.auth.host") || "") + "/auth/google/callback/link"}));
-		app.get('/auth/google/callback*', function(req, res) {
+		app.get('/login/oauth/google', options.basicMiddleware, passport.authenticate('google'));
+		app.get('/mixlogin/manageoauth/oauth/google', options.basicMiddleware, passport.authenticate('google', {callbackURL: (options.configParams.get("orion.auth.host") || "") + "/auth/google/callback/link"}));
+		app.get('/auth/google/callback*', options.basicMiddleware, function(req, res) {
 			return passport.authenticate('google', {callbackURL: (options.configParams.get("orion.auth.host") || "") + "/auth/google/callback" + (req.params["0"] || "")}, /* @callback */ function(err, user, info){
 				createNewUser(req,res,err,user, options);
 			})(req,res);
@@ -312,9 +310,9 @@ function configureGithubOAuth(app, options) {
 			const email = profile.emails[0].value;
 			oauth(profile.provider + "/" + profile.id, profile.username, email, req, done);
 		}));
-		app.get('/login/oauth/github', passport.authenticate('github'));
-		app.get('/mixlogin/manageoauth/oauth/github', passport.authenticate('github', {callbackURL: (options.configParams.get("orion.auth.host") || "") + "/auth/github/callback/link"}));
-		app.get('/auth/github/callback*', function(req, res) {
+		app.get('/login/oauth/github', options.basicMiddleware, passport.authenticate('github'));
+		app.get('/mixlogin/manageoauth/oauth/github', options.basicMiddleware, passport.authenticate('github', {callbackURL: (options.configParams.get("orion.auth.host") || "") + "/auth/github/callback/link"}));
+		app.get('/auth/github/callback*', options.basicMiddleware, function(req, res) {
 			return passport.authenticate('github', {callbackURL: (options.configParams.get("orion.auth.host") || "") + "/auth/github/callback" + (req.params["0"] || "")}, /* @callback */ function(err, user, info){
 				createNewUser(req,res,err,user, options);
 			})(req,res);
@@ -329,18 +327,16 @@ function configureGithubOAuth(app, options) {
  */
 module.exports.router = function router(options) {
 	const app = express.Router();
-	app.use(cookieParser());
-	app.use(responseTime({digits: 2, header: "X-User-Response-Time", suffix: true}));
 	
 	configureGoogleOAuth(app, options);
 	configureGithubOAuth(app, options);
 
-	app.post('/logout', options.authenticate, function(req, res) {
+	app.post('/logout', options.authenticate, options.basicMiddleware, function(req, res) {
 		req.logout();
 		api.writeResponse(null, res);
 	});
 	
-	app.post('/login/form', options.authenticate, function(req, res, next) {
+	app.post('/login/form', options.authenticate, options.basicMiddleware, function(req, res, next) {
 		passport.authenticate('local', function(err, user, info) {
 			if (err) { 
 				return next(err);  
@@ -377,7 +373,7 @@ module.exports.router = function router(options) {
 		checkRights(req.user.username, uri, req, res, next);
 	}
 
-	app.get("/users", options.CSRF, options.authenticate, checkUserAccess, function(req, res) {
+	app.get("/users", options.authenticate, options.basicMiddleware, options.CSRF, checkUserAccess, function(req, res) {
 		let start = Math.max(0, Number(req.query.start)) || 0,
 			rows = Math.max(0, Number(req.query.rows)) || 20;
 		fileUtil.getMetastoreSafe(req).then(function(store) {
@@ -404,7 +400,7 @@ module.exports.router = function router(options) {
 		});
 	});
 
-	app.get("/users/:id", options.CSRF, options.authenticate, checkUserAccess, function(req, res) {
+	app.get("/users/:id", options.authenticate, options.basicMiddleware, options.CSRF, checkUserAccess, function(req, res) {
 		fileUtil.getMetastoreSafe(req).then(function(store) {
 			store.getUser(req.params.id, function(err, user) {
 				if (err) {
@@ -420,7 +416,7 @@ module.exports.router = function router(options) {
 		});
 	});
 
-	app.put("/users/:id", options.CSRF, options.authenticate, checkUserAccess, function(req, res) {
+	app.put("/users/:id", options.authenticate, options.basicMiddleware, options.CSRF, checkUserAccess, function(req, res) {
 		const id = req.params.id;
 		fileUtil.getMetastoreSafe(req).then(function(store) {
 			store.getUser(id, function(err, user) {
@@ -481,7 +477,7 @@ module.exports.router = function router(options) {
 		});
 	});
 
-	app.delete("/users/:id", options.CSRF, options.authenticate, checkUserAccess, function(req, res) {
+	app.delete("/users/:id", options.authenticate, options.basicMiddleware, options.CSRF, checkUserAccess, function(req, res) {
 		fileUtil.getMetastoreSafe(req).then(function(store) {
 			store.deleteUser(req.params.id, function(err) {
 				if (err) {
@@ -494,7 +490,7 @@ module.exports.router = function router(options) {
 		});
 	});
 
-	app.post("/users/:id", options.CSRF, options.authenticate, checkUserAccess, function(req, res) {
+	app.post("/users/:id", options.authenticate, options.basicMiddleware, options.CSRF, checkUserAccess, function(req, res) {
 		const id = req.params.id,
 			newPassword = req.body.Password;
 		if (!newPassword) {
@@ -520,7 +516,7 @@ module.exports.router = function router(options) {
 		});
 	});
 
-	app.post('/users', options.CSRF, options.authenticate, function(req, res) {
+	app.post('/users', options.authenticate, options.basicMiddleware, options.CSRF, function(req, res) {
 		// If there are admin accounts, only admin accounts can create users
 		const admins = options.configParams.get("orion.auth.user.creation");
 		if (typeof admins === 'string' && admins.length > 0) {
@@ -582,7 +578,7 @@ module.exports.router = function router(options) {
 		});
 	});
 
-	app.get('/useremailconfirmation/verifyEmail', function(req, res) {
+	app.get('/useremailconfirmation/verifyEmail', options.basicMiddleware, function(req, res) {
 		const authToken = req.query.authToken;
 		fileUtil.getMetastoreSafe(req).then(function(store) {
 			store.confirmEmail(authToken, /* @callback */ function(err, user) {
@@ -598,7 +594,7 @@ module.exports.router = function router(options) {
 		});
 	});
 
-	app.get('/useremailconfirmation/resetPwd', function(req, res) {
+	app.get('/useremailconfirmation/resetPwd', options.basicMiddleware, function(req, res) {
 		const authToken = req.query.authToken;
 		fileUtil.getMetastoreSafe(req).then(function(store) {
 			store.confirmEmail(authToken, function(err, user) {
@@ -630,11 +626,11 @@ module.exports.router = function router(options) {
 		});
 	});
 
-	app.post("/useremailconfirmation/cansendemails", /* @callback */ function(req, res) {
+	app.post("/useremailconfirmation/cansendemails", options.basicMiddleware, /* @callback */ function(req, res) {
 		api.writeResponse(200, res, null, {EmailConfigured: Boolean(options.configParams.get("mail.smtp.host"))});
 	});
 
-	app.post('/useremailconfirmation', function(req, res){
+	app.post('/useremailconfirmation', options.basicMiddleware, function(req, res){
 		fileUtil.getMetastoreSafe(req).then(function(store) {
 			if (req.body.UserName) {
 				store.getUser(req.body.UserName, function(err, user) {
@@ -648,14 +644,14 @@ module.exports.router = function router(options) {
 		});
 	});
 
-	app.post('/login/canaddusers', /* @callback */ function(req, res) {
+	app.post('/login/canaddusers', options.basicMiddleware, /* @callback */ function(req, res) {
 		return api.writeResponse(200, res, null, {
 			CanAddUsers: canAddUsers(options), 
 			ForceEmail: Boolean(options.configParams.get("orion.auth.user.creation.force.email")), 
 			RegistrationURI:options.configParams.get("orion.auth.registration.uri") || undefined});
 	});
 	
-	app.post('/login', options.authenticate, function(req, res) {
+	app.post('/login', options.authenticate, options.basicMiddleware, function(req, res) {
 		if (!req.user) {
 			return api.writeResponse(200, res);
 		}
