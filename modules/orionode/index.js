@@ -141,7 +141,7 @@ function tryLoadRouter(endpoint, options) {
 			options.app.use.apply(options.app, args);
 		}
 	} catch (err) {
-		logger.log("Failed to load module: " + err.message);
+		logger.error("Failed to load module: " + err.message);
 	}
 }
 
