@@ -86,7 +86,7 @@ function respondAppGetRequest(resp,task){
 }
 function getAppwithoutName(req, task, appTarget){
 	var appsArray = [];
-	target.cfRequest("GET", req.user.username, appTarget.Url + appTarget.Space.entity.apps_url, {"inline-relations-depth":"2"}, null, null, null, appTarget)
+	return target.cfRequest("GET", req.user.username, appTarget.Url + appTarget.Space.entity.apps_url, {"inline-relations-depth":"2"}, null, null, null, appTarget)
 	.then(function(result){
 		var appResources = result.resources;
 		for(var k = 0; k < appResources.length; k++){
