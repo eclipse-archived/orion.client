@@ -428,12 +428,11 @@ define([
 					if (bindings.length > 0) {
 						for (var j = 0; j < bindings.length; j++) {
 							binding = bindings[j];
-							var bindingString = mUIUtils.getUserKeyString(binding);
 							if (binding.scopeName) {
 								if (!scopes[binding.scopeName]) {
 									scopes[binding.scopeName] = [];
 								}
-								scopes[binding.scopeName].push({bindingString: bindingString, name: actionDescription.name, execute: execute(actionID)});
+								scopes[binding.scopeName].push({binding: binding, name: actionDescription.name, execute: execute(actionID)});
 							} else {
 								keyAssist.createItem(binding, actionDescription.name, actionID, execute(actionID));
 							}
@@ -447,7 +446,7 @@ define([
 						keyAssist.createHeader(scopedBinding);
 						for (var k = 0; k < scopes[scopedBinding].length; k++) {
 							binding = scopes[scopedBinding][k];
-							keyAssist.createItem(binding, binding.name, binding.name, binding.execute);
+							keyAssist.createItem(binding.binding, binding.name, binding.name, binding.execute);
 						}
 					}
 				}
