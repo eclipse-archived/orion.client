@@ -19,7 +19,9 @@ const nodePath = require('path'),
 	rimraf = require('rimraf'),
 	logger = log4js.getLogger("metastore"),
     fileLocker = require('../../util/fileLocker'),
-    cryptoUtil = require('../../util/cryptoUtil');
+	cryptoUtil = require('../../util/cryptoUtil'),
+	passport = require('passport'),
+	LocalStrategy = require('passport-local').Strategy;
 
 const FILENAME_METASTORE = "metastore.json",
 	FILENAME_TASKS_TEMP_DIR = "temp",
@@ -103,14 +105,24 @@ function readJSON(fileName) {
 	});
 }
 
+/**
+ * Creates a new filesystem-based metastore
+ * @param {{?}} options The map of server options
+ */
 function FsMetastore(options) {
 	this._options = options;
 	this._taskList = {};
 	this._lockMap = {};
 	this._isSingleUser = !!options.configParams.get('orion.single.user');
+	this._isFormAuthType = options.configParams.get('orion.auth.name') === 'FORM+OAuth';
 }
 
-FsMetastore.prototype.lock = function(userId, shared) {
+/**
+ * Acquires a lock for the given user ID
+ * @param {string} userId The user ID
+ * @param {boolean} shared If the lock should be shared or not
+ */
+FsMetastore.prototype.lock = function lock(userId, shared) {
 	var promise = new Promise(function(resolve, reject) {
 		var locker = this._lockMap[userId];
 		if (!locker) {
@@ -131,8 +143,38 @@ FsMetastore.prototype.lock = function(userId, shared) {
 	});
 };
 
-FsMetastore.prototype.setup = function(options) {
+/**
+ * Sets up the metastore
+ * @param {{?}} options The map of server options
+ */
+FsMetastore.prototype.setup = function setup(options) {
 	if (!this._isSingleUser) {
+		if(this._isFormAuthType) {
+			passport.use(new LocalStrategy(
+				function(username, password, done) {
+					this.getUser(username, function(err, userInfo) {
+						if (err) { 
+							return done(err);
+						}
+						if (!userInfo) {
+							return done(null, false, { message: 'Incorrect username.' });
+						}
+						if (!cryptoUtil.validatePassword(password, userInfo)) {
+							return done(null, false, { message: 'Incorrect password.' });
+						}
+						return done(null, userInfo);
+					});
+				}.bind(this)
+			));
+			passport.serializeUser(function(user, done) {
+				done(null, user.username); 
+			});
+			passport.deserializeUser(function(id, done) {
+				this.getUser(id, function(err, userInfo) {
+					done(null, userInfo);
+				});
+			}.bind(this));
+		}
 		metaUtil.initializeAdminUser(options, this);
 		/* verify that existing metadata in this workspace will be usable by this server */
 		var path = nodePath.join(options.workspaceDir, FILENAME_METASTORE);
@@ -422,10 +464,16 @@ Object.assign(FsMetastore.prototype, {
 						return reject(ret);
 					}
 							
-					var userProperty = {};
-//					userData.password && (userProperty.Password = userData.password); //TODO password need to be pbewithmd5anddes encrypted
-					userData.oauth && (userProperty.OAuth = userData.oauth);
-					userData.email && (userProperty.Email = userData.email);
+					var userProperty = Object.create(null);
+					if(userData.password) {
+						userProperty.Password = cryptoUtil.encrypt(userData.password, "");
+					}
+					if(userData.oauth) {
+						userProperty.OAuth = userData.oauth;
+					}
+					if(userData.email) {
+						userProperty.Email = userData.email;
+					}
 					userProperty.AccountCreationTimestamp = Date.now();
 					userProperty.UniqueId = userData.username;
 					userProperty.UserRights = accessRights.createUserAccess(userData.username);
@@ -512,15 +560,17 @@ Object.assign(FsMetastore.prototype, {
 					
 					// userData.properties contains all the properties, not only the ones that are changed, 
 					// because of locking, it's safe to say the properties hasn't been changed by other operations
-					metadata.Properties = userData.properties || {};
-					// update other userData 
+					metadata.Properties = userData.properties || Object.create(null);
 					userData.fullname && (metadata.FullName = userData.fullname);
 					userData.password && (metadata.Properties.Password = userData.password);  // TODO need to encrypt password
 					userData.email && (metadata.Properties.Email = userData.email);
-					userData.login_timestamp && (metadata.Properties.LastLoginTimestamp = userData.login_timestamp.getTime());
+					if(userData.login_timestamp) {
+						metadata.Properties.LastLoginTimestamp = userData.login_timestamp;
+						if(typeof userData.login_timestamp.getTime === 'function') {
+							metadata.Properties.LastLoginTimestamp = userData.login_timestamp.getTime();
+						}
+					}
 					userData.username && (metadata.UserName = userData.username);
-		
-					// TODO update isAuthenticated
 		
 					this._updateUserMetadata(id, metadata, function(error) {
 						if (error) {
