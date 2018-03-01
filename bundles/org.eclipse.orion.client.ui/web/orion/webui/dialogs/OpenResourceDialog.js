@@ -27,8 +27,9 @@ define([
 	'orion/webui/dialog', 
 	'orion/metrics',
 	'orion/generalPreferences',
-	'orion/Deferred'
-], function(messages, searchMSG, extensionCommands, i18nUtil, bidiUtils, mSearchUtils, navigatorRenderer, mContentTypes, require, lib, util, dialog, mMetrics, mGeneralPreferences, Deferred) {
+	'orion/Deferred',
+	'orion/urlModifier'
+], function(messages, searchMSG, extensionCommands, i18nUtil, bidiUtils, mSearchUtils, navigatorRenderer, mContentTypes, require, lib, util, dialog, mMetrics, mGeneralPreferences, Deferred, urlModifier) {
 	//default search renderer until we factor this out completely
 	function DefaultSearchRenderer(serviceRegistry, commandRegistry) {
 		this.serviceRegistry = serviceRegistry;
@@ -202,7 +203,7 @@ define([
 	OpenResourceDialog.prototype.TEMPLATE = 
 		'<div role="search">' + //$NON-NLS-0$
 			'<div><label id="fileNameMessage" for="fileName">${Type the name of a file to open (? = any character, * = any string):}</label></div>' + //$NON-NLS-0$
-			'<div><input id="fileName" type="text" class="openResourceDialogInput" style="min-width: 25em; width:90%;"/></div>' + //$NON-NLS-0$
+			'<div><input id="fileName" type="text" class="openResourceDialogInput" aria-autocomplete="list" style="min-width: 25em; width:90%;"/></div>' + //$NON-NLS-0$
 			'<div><label for="searchScope"><input id="searchScope" type="checkbox" style="width: auto" class="openResourceDialogInput"/>${Search In All Folders}</label></input></div>' + //$NON-NLS-0$
 			'<div id="progress" style="padding: 2px 0 0; width: 100%;"><img src="'+ require.toUrl("../../../images/progress_running.gif") + '" class="progressPane_running_dialog" id="crawlingProgress"></img></div>' +  //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			'<div id="results" style="max-height:250px; height:auto; overflow-y:auto;" aria-live="off"></div>' + //$NON-NLS-0$
