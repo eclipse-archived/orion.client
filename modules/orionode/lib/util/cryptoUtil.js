@@ -80,22 +80,5 @@ module.exports = {
 			}
 			callback(null, randomBytes.toString('hex'));
 		});
-	},
-	/**
-	 * Validates the given password against the one from the user info. The Password in the user info is expected to be 
-	 * in the standard form: `info: {properties: {Password: encrypted}}`
-	 * @param {string} given The password to test
-	 * @param {{?}} userInfo The standard user information object
-	 * @since 18.0
-	 */
-	validatePassword: function validatePassword(given, userInfo) {
-		if(userInfo && userInfo.properties) {
-			const encryptedPw = userInfo.properties.Password;
-			if(typeof encryptedPw === 'string') {
-				const pw = this.decrypt(encryptedPw, "");
-				return typeof pw === 'string' && pw === given;
-			}
-		}
-		return false;
 	}
 };

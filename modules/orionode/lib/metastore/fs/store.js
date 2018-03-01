@@ -106,6 +106,24 @@ function readJSON(fileName) {
 }
 
 /**
+ * Validates the given password against the one from the user info. The Password in the user info is expected to be 
+ * in the standard form: `info: {properties: {Password: encrypted}}`
+ * @param {string} given The password to test
+ * @param {{?}} userInfo The standard user information object
+ * @since 18.0
+ */
+function validatePassword(given, userInfo) {
+	if(userInfo && userInfo.properties) {
+		const encryptedPw = userInfo.properties.Password;
+		if(typeof encryptedPw === 'string') {
+			const pw = cryptoUtil.decrypt(encryptedPw, "");
+			return typeof pw === 'string' && pw === given;
+		}
+	}
+	return false;
+}
+
+/**
  * Creates a new filesystem-based metastore
  * @param {{?}} options The map of server options
  */
@@ -159,7 +177,7 @@ FsMetastore.prototype.setup = function setup(options) {
 						if (!userInfo) {
 							return done(null, false, { message: 'Incorrect username.' });
 						}
-						if (!cryptoUtil.validatePassword(password, userInfo)) {
+						if (!validatePassword(password, userInfo)) {
 							return done(null, false, { message: 'Incorrect password.' });
 						}
 						return done(null, userInfo);
