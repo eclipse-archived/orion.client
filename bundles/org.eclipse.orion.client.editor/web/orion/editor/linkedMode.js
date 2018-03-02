@@ -319,7 +319,15 @@ define("orion/editor/linkedMode", [
 				this.linkedModeModel.nextModel = linkedModeModel;
 			}
 			this.linkedModeModel = linkedModeModel;
-			this.selectLinkedGroup(0);
+			var select = true;
+			var caretOffset = this.editor.getCaretOffset();
+			linkedModeModel.groups[0].positions.some(function(p) {
+				if (p.offset <= caretOffset && caretOffset <= p.offset + p.length) {
+					select = false;
+					return true;
+				}
+			});
+			this.selectLinkedGroup(0, select);
 		},
 		/** 
 		 * Exits Linked Mode. Optionally places the caret at linkedMode escapePosition. 
@@ -402,15 +410,18 @@ define("orion/editor/linkedMode", [
 		/**
 		 * @description Selects the group of the given index from the currently active model
 		 * @param {Number} index The group index to select
+		 * @param {Boolean} [selectText=true] whether the group text should be selected
 		 */
-		selectLinkedGroup: function(index) {
+		selectLinkedGroup: function(index, selectText) {
 			var model = this.linkedModeModel;
 			if (model) {
 				model.selectedGroupIndex = index;
 				var group = model.groups[index];
 				var position = group.positions[0];
 				var editor = this.editor;
-				editor.setSelection(position.offset, position.offset + position.length);
+				if (selectText === undefined || selectText) {
+					editor.setSelection(position.offset, position.offset + position.length);
+				}
 				var contentAssist = this.contentAssist;
 				if (contentAssist) {
 					contentAssist.offset = undefined;
