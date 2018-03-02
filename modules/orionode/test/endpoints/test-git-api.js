@@ -770,7 +770,7 @@ maybeDescribe("git", function() {
 				.catch(function(err) {
 					assert.ifError(err);
 				})
-				.done(function() {
+				.finally(function() {
 					finished();
 				});
 			});
@@ -863,7 +863,7 @@ maybeDescribe("git", function() {
 				.catch(function(err) {
 					assert.ifError(err);
 				})
-				.done(function() {
+				.finally(function() {
 					finished();
 				});
 			});
@@ -917,7 +917,7 @@ maybeDescribe("git", function() {
 				.catch(function(err) {
 					assert.ifError(err);
 				})
-				.done(function() {
+				.finally(function() {
 					finished();
 				});
 			});
@@ -1198,7 +1198,7 @@ maybeDescribe("git", function() {
 				.catch(function(err) {
 					assert.ifError(err);
 				})
-				.done(function() {
+				.finally(function() {
 					finished();
 				});
 			});
@@ -1255,7 +1255,7 @@ maybeDescribe("git", function() {
 				.catch(function(err) {
 					assert.ifError(err);
 				})
-				.done(function() {
+				.finally(function() {
 					finished();
 				});
 			});
@@ -1376,7 +1376,7 @@ maybeDescribe("git", function() {
 				.catch(function(err) {
 					assert.ifError(err);
 				})
-				.done(function() {
+				.finally(function() {
 					finished();
 				});
 			});
@@ -1427,7 +1427,7 @@ maybeDescribe("git", function() {
 				.catch(function(err) {
 					assert.ifError(err);
 				})
-				.done(function() {
+				.finally(function() {
 					finished();
 				});
 			});

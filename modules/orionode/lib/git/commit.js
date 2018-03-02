@@ -745,7 +745,7 @@ function getCommitBody(req, res) {
 	}).catch(function(err) {
 		writeError(404, res, err.message);
 	})
-	.done(function() {
+	.finally(function() {
 		clone.freeRepo(theRepo);
 	});
 }
@@ -794,7 +794,7 @@ function revert(req, res, commitToRevert) {
 	.catch(function(err) {
 		writeError(404, res, err.message);
 	})
-	.done(function() {
+	.finally(function() {
 		clone.freeRepo(theRepo);
 	});
 }
@@ -846,7 +846,7 @@ function cherryPick(req, res, commitToCherrypick) {
 			writeError(400, res, err.message);
 		}
 	})
-	.done(function() {
+	.finally(function() {
 		clone.freeRepo(theRepo);
 	});
 }
@@ -955,7 +955,7 @@ function rebase(req, res, commitToRebase, rebaseOperation) {
 	.catch(function(err) {
 		writeError(400, res, err.message);
 	})
-	.done(function() {
+	.finally(function() {
 		clone.freeRepo(repo);
 	});
 
@@ -1067,7 +1067,7 @@ function merge(req, res, branchToMerge, squash) {
 	.catch(function(err) {
 		writeError(400, res, err.message);
 	})
-	.done(function() {
+	.finally(function() {
 		clone.freeRepo(repo);
 	});
 }
@@ -1262,7 +1262,7 @@ function tag(req, res, commitId, name, isAnnotated, message) {
 	.catch(function(err) {
 		writeError(403, res, err.message);
 	})
-	.done(function() {
+	.finally(function() {
 		clone.freeRepo(theRepo);
 	});
 }
@@ -1339,7 +1339,7 @@ function postCommit(req, res) {
 	.catch(function(err) {
 		writeError(403, res, err.message);
 	})
-	.done(function() {
+	.finally(function() {
 		clone.freeRepo(theRepo);
 	});
 }

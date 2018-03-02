@@ -47,7 +47,7 @@ function putSubmodule(req, res) {
 	.catch(function(err) {
 		return writeError(400, res, err.message);
 	})
-	.done(function() {
+	.finally(function() {
 		clone.freeRepo(theRepo);
 	});
 }
@@ -113,7 +113,7 @@ function postSubmodule(req, res) {
 			clone.handleRemoteError(task, err, url);
 		});
 	})
-	.done(function() {
+	.finally(function() {
 		clone.freeRepo(repo);
 	});
 }
@@ -198,7 +198,7 @@ function deleteSubmodule(req, res) {
 	.catch(function(err) {
 		return writeError(400, res, err.message);
 	})
-	.done(function() {
+	.finally(function() {
 		clone.freeRepo(subrepo);
 		clone.freeRepo(theRepo);
 	});

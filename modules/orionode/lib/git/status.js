@@ -132,7 +132,7 @@ function router(options) {
 		.catch(function(err) {
 			writeError(400, res, err);
 		})
-		.done(function() {
+		.finally(function() {
 			clone.freeRepo(theRepo);
 		});
 	}

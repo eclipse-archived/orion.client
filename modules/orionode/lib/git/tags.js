@@ -122,7 +122,7 @@ function getTags(req, res) {
 		.catch(function(err) {
 			writeError(404, res, err.message);
 		})
-		.done(function() {
+		.finally(function() {
 			clone.freeRepo(theRepo);
 		});
 	}
@@ -201,7 +201,7 @@ function getTags(req, res) {
 	.catch(function(err) {
 		writeError(403, res, err.message);
 	})
-	.done(function() {
+	.finally(function() {
 		clone.freeRepo(theRepo);
 	});
 }
@@ -224,7 +224,7 @@ function deleteTag(req, res) {
 	.catch(function(err) {
 		writeError(403, res, err.message);
 	})
-	.done(function() {
+	.finally(function() {
 		clone.freeRepo(theRepo);
 	});
 }

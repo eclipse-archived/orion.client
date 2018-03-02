@@ -81,7 +81,7 @@ function getStash(req, res) {
 	.catch(function(err) {
 		writeError(500, res, err.message);
 	})
-	.done(function() {
+	.finally(function() {
 		clone.freeRepo(theRepo);
 	});
 }
@@ -131,7 +131,7 @@ function putStash(req, res) {
 		}
 		writeError(404, res, err.message);
 	})
-	.done(function() {
+	.finally(function() {
 		clone.freeRepo(repo);
 	});
 }
@@ -182,7 +182,7 @@ function deleteStash(req, res) {
 	.catch(function(err) {
 		writeError(404, res, err.message);
 	})
-	.done(function() {
+	.finally(function() {
 		clone.freeRepo(repo);
 	});
 }
@@ -204,7 +204,7 @@ function postStash(req, res) {
 	.catch(function(err) {
 		writeError(404, res, err.message);
 	})
-	.done(function() {
+	.finally(function() {
 		clone.freeRepo(repo);
 	});
 }

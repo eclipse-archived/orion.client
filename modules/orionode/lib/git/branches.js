@@ -157,7 +157,7 @@ module.exports.router = function(options) {
 			.catch(function(err) {
 				writeError(500, res, err.message);
 			})
-			.done(function() {
+			.finally(function() {
 				clone.freeRepo(theRepo);
 			});
 			return;
@@ -211,7 +211,7 @@ module.exports.router = function(options) {
 		.catch(function(err) {
 			writeError(500, res, err.message);
 		})
-		.done(function() {
+		.finally(function() {
 			clone.freeRepo(theRepo);
 		});
 	}
@@ -252,7 +252,7 @@ module.exports.router = function(options) {
 		.catch(function(err) {
 			writeError(500, res, err.message);
 		})
-		.done(function() {
+		.finally(function() {
 			clone.freeRepo(theRepo);
 		});
 	}
@@ -275,7 +275,7 @@ module.exports.router = function(options) {
 		.catch(function(err) {
 			writeError(403, res, err.message);
 		})
-		.done(function() {
+		.finally(function() {
 			clone.freeRepo(theRepo);
 		});
 	}

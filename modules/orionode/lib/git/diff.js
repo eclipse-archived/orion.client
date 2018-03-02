@@ -127,7 +127,7 @@ function getDiff(req, res) {
 	.catch(function(err) {
 		writeError(404, res, err.message);
 	})
-	.done(function() {
+	.finally(function() {
 		clone.freeRepo(repo);
 	});
 }

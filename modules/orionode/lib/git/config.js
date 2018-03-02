@@ -94,7 +94,7 @@ function getAConfig(req, res) {
 	.catch(function(err) {
 		writeError(404, res, err.message);
 	})
-	.done(function() {
+	.finally(function() {
 		clone.freeRepo(theRepo);
 	});
 }
@@ -171,7 +171,7 @@ function getConfig(req, res) {
 	.catch(function(err) {
 		writeError(404, res, err.message);
 	})
-	.done(function() {
+	.finally(function() {
 		clone.freeRepo(theRepo);
 	});
 }
@@ -216,7 +216,7 @@ function updateConfig(req, res, key, value, callback) {
 	.catch(function(err) {
 		writeError(404, res, err.message);
 	})
-	.done(function() {
+	.finally(function() {
 		clone.freeRepo(theRepo);
 	});
 }

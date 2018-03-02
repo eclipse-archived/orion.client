@@ -285,7 +285,7 @@ function getClones(req, res, callback) {
 							modules.push(json);
 							done(json, true || subrepo.isEmpty());
 						})
-						.done(function() {
+						.finally(function() {
 							freeRepo(subrepo);
 						});
 					}).catch(function() {
@@ -570,7 +570,7 @@ function putClone(req, res) {
 	.catch(function(err){
 		writeError(403, res, err);
 	})
-	.done(function() {
+	.finally(function() {
 		freeRepo(theRepo);
 	});
 }
@@ -801,7 +801,7 @@ function postClone(req, res) {
 			fileUtil.deleteFile(req, file, null, resolve);
 		});
 	})
-	.done(function() {
+	.finally(function() {
 		freeRepo(repo);
 	});
 }

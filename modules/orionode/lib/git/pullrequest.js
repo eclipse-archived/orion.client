@@ -142,7 +142,7 @@ function getPullRequest(req, res) {
 	}).catch(function(err){
 		clone.handleRemoteError(task, err, gitRoot + "/clone" + fileDir);
 	})
-	.done(function() {
+	.finally(function() {
 		clone.freeRepo(theRepo);
 	});
 	function toBase64 (str) {

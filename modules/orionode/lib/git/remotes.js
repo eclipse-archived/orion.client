@@ -197,7 +197,7 @@ function getRemotes(req, res) {
 		.catch(function() {
 			return writeError(403, res);
 		})
-		.done(function() {
+		.finally(function() {
 			clone.freeRepo(theRepo);
 		});
 	}
@@ -263,7 +263,7 @@ function addRemote(req, res) {
 	.catch(function(err) {
 		writeError(403, res, err.message);
 	})
-	.done(function() {
+	.finally(function() {
 		clone.freeRepo(repo);
 	});
 }
@@ -328,7 +328,7 @@ function fetchRemote(req, res, remote, branch, force) {
 		}
 		clone.handleRemoteError(task, err, remoteObj ? remoteObj.url() : undefined);
 	})
-	.done(function() {
+	.finally(function() {
 		clone.freeRepo(repo);
 	});
 }
@@ -408,7 +408,7 @@ function pushRemote(req, res, remote, branch, pushSrcRef, tags, force) {
 	.catch(function(err) {
 		clone.handleRemoteError(task, err, remoteObj ? remoteObj.url() : undefined);
 	})
-	.done(function() {
+	.finally(function() {
 		clone.freeRepo(repo);
 	});
 }
@@ -438,7 +438,7 @@ function deleteRemote(req, res) {
 	.catch(function(err) {
 		return writeError(400, res, err.message);
 	})
-	.done(function() {
+	.finally(function() {
 		clone.freeRepo(theRepo);
 	});
 }
