@@ -233,6 +233,7 @@ define("orion/editor/linkedMode", [
 				
 				// Cancel this modification and apply same modification to all positions in changing group
 				this.ignoreVerify = true;
+				var delta = 0;
 				for (i = sortedPositions.length - 1; i >= 0; i--) {
 					pos = sortedPositions[i];
 					if (pos.model === model && pos.group === changed.group) {
@@ -241,9 +242,11 @@ define("orion/editor/linkedMode", [
 							text = evnt.text[i];
 						}
 						this.editor.setText(text, pos.oldOffset + deltaStart , pos.oldOffset + deltaEnd, false);
+						delta = pos.oldOffset <= evnt.start ? delta + changeCount : delta;
 					}
 				}
 				this.ignoreVerify = false;
+				this.editor.setCaretOffset(evnt.end + delta);
 				evnt.text = null;
 				this._updateAnnotations(sortedPositions);
 			}.bind(this)
@@ -266,7 +269,7 @@ define("orion/editor/linkedMode", [
 			return bindings;
 		},
 		/**
-		 * Starts Linked Mode, selects the first position and registers the listeners.
+		 * Starts Linked Mode and registers the listeners.
 		 * @param {Object} linkedModeModel An object describing the model to be used by linked mode.
 		 * Contains one or more position groups. If a position in a group is edited, the other positions in
 		 * the same group are edited the same way. The model structure is as follows:
