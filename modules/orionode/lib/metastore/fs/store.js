@@ -503,7 +503,7 @@ Object.assign(FsMetastore.prototype, {
 							UserName: userData.username,
 							FullName: userData.fullname,
 							authToken: token,
-							isAuthenticated: false,  //not authenticated until email is confirmed
+							emailConfirmed: false,
 							WorkspaceIds:[],
 							Properties: userProperty
 						};
@@ -518,6 +518,7 @@ Object.assign(FsMetastore.prototype, {
 								oauth: userData.oauth,
 								properties: userProperty,
 								authToken: token,
+								emailConfirmed: userJson.emailConfirmed,
 								workspaces:[]
 							});
 						});
@@ -547,6 +548,7 @@ Object.assign(FsMetastore.prototype, {
 							fullname: metadata.FullName,
 							oauth: metadata.Properties.OAuth,
 							properties: metadata.Properties,
+							emailConfirmed: Boolean(metadata.emailConfirmed || metadata.isAuthenticated),
 							login_timestamp: new Date(parseInt(metadata.Properties.LastLoginTimestamp, 10)),
 							disk_usage: metadata.Properties.DiskUsage,
 							disk_usage_timestamp: new Date(parseInt(metadata.Properties.DiskUsageTimestamp, 10)),
@@ -672,8 +674,34 @@ Object.assign(FsMetastore.prototype, {
 	},
 	
 	/** @callback */
-	confirmEmail: function(authToken, callback) {
-		callback(new Error("Not implemented"));
+	confirmEmail: function(user, authToken, callback) {
+		Promise.using(this.lock(id, false), function() {
+			return new Promise(function(resolve, reject) {
+				this._readUserMetadata(user.username, function(error, metadata) {
+					if (error) {
+						return callback(error);
+					}
+					if(metadata.emailConfirmed) {
+						return callback(new Error("Email is already confirmed."));
+					}
+					if(typeof authToken === 'string' && authToken.length > 0 && authToken === metadata.authToken) {
+						metadata.emailConfirmed = true;
+						return this._updateUserMetadata(id, metadata, function(error) {
+							if (error) {
+								return callback(error);
+							}
+							callback();
+						});
+					}
+					callback(new Error("Confirmation authentication tokens do not match."));
+				}.bind(this));
+			}.bind(this));
+		}.bind(this)).then(
+			function(result) {
+				callback(null, result);
+			},
+			callback /* error case */
+		);
 	},
 	
 	createRenameDeleteProject: function(workspaceId, projectInfo) {

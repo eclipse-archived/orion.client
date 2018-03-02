@@ -24,14 +24,21 @@ const express = require('express'),
 	fileUtil = require('./fileUtil');
 	
 const AUTH_TOKEN_BYTES = 48,
+	EMAIL_QUERY_PARAM = "EmailConfirmationId",
+	PASSWORD_QUERY_PARAM = "PasswordResetId",
 	CONFIRM_MAIL = "./multitenant/EmailConfirmation.txt",
 	PWD_CONFIRM_RESET_MAIL = "./multitenant/EmailConfirmationPasswordReset.txt",
-	PWD_RESET_MAIL = "./multitenant/PasswordReset.txt",
-	//TODO this URL is wrong, should be: /useremailconfirmation/<userId>?EmailConfirmationId=
-	CONFIRM_MAIL_AUTH = "/useremailconfirmation/verifyEmail?authToken=",
-	//TODO this URL is wrong, should be: /useremailconfirmation/<userId>?PasswordResetId=
-	RESET_PWD_AUTH = "/useremailconfirmation/resetPwd?authToken=";
+	PWD_RESET_MAIL = "./multitenant/PasswordReset.txt";
 
+/**
+ * Composes the email URL path to use for email address confirmations and password resets
+ * @param {string} user The user ID
+ * @param {string} param The query param name
+ * @since 18.0
+ */
+function getEmaillUrl(user, param) {
+	return "/useremailconfirmation/"+user+"?"+param+"=";
+}
 /**
   * Checks if user creation has been enabled in the server configuration
   * @param {?} options The map of server options
@@ -40,7 +47,7 @@ const AUTH_TOKEN_BYTES = 48,
   */
  function canAddUsers(options) {
 	return !options.configParams.get("orion.auth.user.creation");
-};
+}
 
  /**
   * Checks if the 'admin' user has been enabled in the server configuration
@@ -52,7 +59,7 @@ function isAdmin(options, username) {
 	return (options.configParams.get("orion.auth.user.creation") || "").split(",").some(function(user) {
 		return user === username;
 	});
-};
+}
 
 /**
  * Write out the JSON for the given user metadata
@@ -66,7 +73,7 @@ function userJSON(user, options) {
 		UserName: user.username,
 		Location: api.join(options.usersRoot, user.username),
 		Email: user.email,
-		EmailConfirmed: user.isAuthenticated,
+		EmailConfirmed: emailConfirmed(user),
 		HasPassword: true,
 		OAuth: user.oauth || undefined,
 		LastLoginTimestamp: user.login_timestamp ? user.login_timestamp.getTime() : 0,
@@ -74,6 +81,16 @@ function userJSON(user, options) {
 		DiskUsage: user.disk_usage || 0 ,
 		jwt: user.jwt
 	};
+}
+
+/**
+ * Returns if the user has confirmed thier email. This checks two different flags based on which metastore 
+ * handled the verification
+ * @param {{?}} user The user object
+ * @since 18.0
+ */
+function emailConfirmed(user) {
+	return Boolean(user && (user.emailConfirmed || user.isAuthenticated));
 }
 
 /**
@@ -202,7 +219,7 @@ function resetPassword(req, res, options, err, user) {
 	if (err || !user) {
 		return api.writeError(404, res, "User " +  (req.body.UserName || req.body.Email) + " not found");
 	}
-	if (!user.isAuthenticated){
+	if (!emailConfirmed(user)) {
 		return api.writeError(400, res, "Email confirmation has not completed. Please follow the instructions from the confirmation email in your inbox and then request a password reset again.");
 	}
 	crypto.randomBytes(AUTH_TOKEN_BYTES, function(randomBytes) {
@@ -212,7 +229,8 @@ function resetPassword(req, res, options, err, user) {
 					logger.error(err);
 					return api.writeError(500, res,  "Error updating user");
 				}
-				return sendMail({user: user, options: options, template: PWD_CONFIRM_RESET_MAIL, auth: RESET_PWD_AUTH, req: req}, /* @callback */ function(err, info) {
+				const emailUrl = getEmaillUrl(user.username, PASSWORD_QUERY_PARAM);
+				return sendMail({user: user, options: options, template: PWD_CONFIRM_RESET_MAIL, auth: emailUrl, req: req}, /* @callback */ function(err, info) {
 					if(err) {
 						return api.writeError(500, res, err);
 					}
@@ -526,7 +544,7 @@ module.exports.router = function router(options) {
 		}
 		const uname = req.body.UserName;
 		if(typeof uname === 'string') {
-			if(!!options.configParams.get('orion.auth.disable.account.rules')) {
+			if(Boolean(options.configParams.get('orion.auth.disable.account.rules'))) {
 				if(uname.length < 3) {
 					return api.writeResponse(400, res, null, {Message: "User name must be 3 characters or longer"});
 				}
@@ -557,14 +575,15 @@ module.exports.router = function router(options) {
 					return api.writeResponse(err.code || 404, res, null, {Message: err.message});
 				}
 				if (options.configParams.get("orion.auth.user.creation.force.email")) {
-					return sendMail({user: user, options: options, template: CONFIRM_MAIL, auth: CONFIRM_MAIL_AUTH, req: req}, /* @callback */ function(err, info) {
+					const emailUrl = getEmaillUrl(user.username, EMAIL_QUERY_PARAM);
+					return sendMail({user: user, options: options, template: CONFIRM_MAIL, auth: emailUrl, req: req}, /* @callback */ function(err, info) {
 						if(err) {
 							return api.writeError(500, res, err);
 						}
 						return api.writeResponse(201, res, null, {Message: "Created"});
 					});
 				}
-				user.isAuthenticated = true;
+				//user.emailConfirmed = true;
 				store.updateUser(user.username, user, /* @callback */ function(err, user) {
 					if (err) {
 						logger.error(err);
@@ -578,48 +597,53 @@ module.exports.router = function router(options) {
 		});
 	});
 
-	app.get('/useremailconfirmation/verifyEmail', options.basicMiddleware, function(req, res) {
-		const authToken = req.query.authToken;
+	app.get('/useremailconfirmation/:id', options.basicMiddleware, function(req, res) {
+		const isVerifyEmail = Boolean(req.query.EmailConfirmationId),
+				isChangePassword = Boolean(req.query.PasswordResetId),
+				id = req.params.id;
 		fileUtil.getMetastoreSafe(req).then(function(store) {
-			store.confirmEmail(authToken, /* @callback */ function(err, user) {
+			store.getUser(id, (err, user) => {
 				if (err) {
-					return logger.error(err);
+					return api.writeResponse(404, res);
 				}
-				//TODO NLS this string
-				return api.writeResponse(200, res, null, "<html><body><p>Your email address has been confirmed. Thank you! <a href=\"" + ( req.protocol + '://' + req.get('host'))
-				+ "\">Click here</a> to continue and login to your account.</p></body></html>");
-			});
-		}, function noMetastore(err) {
-			return api.writeError(500, res, err);
-		});
-	});
-
-	app.get('/useremailconfirmation/resetPwd', options.basicMiddleware, function(req, res) {
-		const authToken = req.query.authToken;
-		fileUtil.getMetastoreSafe(req).then(function(store) {
-			store.confirmEmail(authToken, function(err, user) {
-				if (err) {
-					return logger.error(err);
+				if (!user) {
+					return api.writeError(400, res, "User not found: " + id);
 				}
-				//generate pwd
-				const password = generator.generate({
-					length: 8,
-					numbers: true,
-					excludeSimilarCharacters:true
-				});
-				user.password = password;
-				store.updateUser(user.username, user, function(err, user) {
-					if (err) {
-						return logger.error(err);
-					}
-					return sendMail({user: user, options: options, template: PWD_RESET_MAIL, auth: "", req: req, pwd: password}, /* @callback */ function(err, info) {
-						if(err) {
-							return api.writeError(500, res, err);
+				if(isVerifyEmail) {
+					return store.confirmEmail(user, req.query.EmailConfirmationId, /* @callback */ function(err, user) {
+						if (err) {
+							return logger.error(err);
 						}
-						//TODO NLS this message
-						return api.writeResponse(200, res, null, "<html><body><p>Your password has been successfully reset. Your new password has been sent to the email address associated with your account.</p></body></html>");
+						//TODO NLS this string
+						return api.writeResponse(200, res, null, "<html><body><p>Your email address has been confirmed. Thank you! <a href=\"" + ( req.protocol + '://' + req.get('host'))
+						+ "\">Click here</a> to continue and login to your account.</p></body></html>");
 					});
-				});
+				} else if (isChangePassword) {
+					return store.confirmEmail(user, req.query.PasswordResetId, function(err, user) {
+						if (err) {
+							return logger.error(err);
+						}
+						//generate pwd
+						const password = generator.generate({
+							length: 8,
+							numbers: true,
+							excludeSimilarCharacters:true
+						});
+						user.password = password;
+						store.updateUser(user.username, user, function(err, user) {
+							if (err) {
+								return logger.error(err);
+							}
+							return sendMail({user: user, options: options, template: PWD_RESET_MAIL, auth: "", req: req, pwd: password}, /* @callback */ function(err, info) {
+								if(err) {
+									return api.writeError(500, res, err);
+								}
+								//TODO NLS this message
+								return api.writeResponse(200, res, null, "<html><body><p>Your password has been successfully reset. Your new password has been sent to the email address associated with your account.</p></body></html>");
+							});
+						});
+					});
+				}
 			});
 		}, function noMetastore(err) {
 			return api.writeError(500, res, err);

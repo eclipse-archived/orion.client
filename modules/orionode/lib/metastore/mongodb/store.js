@@ -284,7 +284,6 @@ Object.assign(MongoDbMetastore.prototype, {
 			// userData.properties contains all the properties, not only the ones that are changed, 
 			// because of locking, it's safe to say the properties hasn't been changed by other operations
 			Object.assign(user, userData);
-
 			// Setting password and authToken are special cases handled by specific methods
 			if (typeof userData.password !== 'undefined') {
 				user.setPassword(userData.password, function(err, user) {
@@ -332,7 +331,7 @@ Object.assign(MongoDbMetastore.prototype, {
 			});
 		}.bind(this));
 	},
-	confirmEmail: function(authToken, callback) {
+	confirmEmail: function(user, authToken, callback) {
 		orionAccount.verifyEmail(authToken, callback);
 	},
 	createTask: function(taskObj, callback) {
