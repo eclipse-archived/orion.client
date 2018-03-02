@@ -284,13 +284,35 @@ orion.CompareCurveRuler =  (function() {
 			var w =  canvas.parentNode.clientWidth;
 			
 			if(mapperIndex === this._diffNavigator.getCurrentMapperIndex()){
+				var leftHalfHeight = this._leftLineH*mapperItem[0]/2;
+				var rightHalfHeight = this._rightLineH*mapperItem[1]/2;
+				var xLeft = leftHalfHeight === 0 ? 0 : 2;
+				var xRight = rightHalfHeight === 0 ? w : w-3;
 				context.stroke();
 				context.strokeStyle = '#000';  //$NON-NLS-0$
-				context.lineWidth   = 1;
+				context.lineWidth   = 1; // lineWidth = 2 is easier to see but long curves look jaggy
 				context.beginPath();
-				context.moveTo(0 , leftMiddle);
-				context.bezierCurveTo( w/3, leftMiddle, w*0.666  ,rightMiddle , w ,rightMiddle);
+				context.moveTo(xLeft , leftMiddle);
+				context.bezierCurveTo( (xRight-xLeft)/3, leftMiddle, (xRight-xLeft)*0.666, rightMiddle, xRight, rightMiddle);
 				context.stroke();
+				if (leftHalfHeight > 0) {
+					context.moveTo(0, leftMiddle - leftHalfHeight);
+					context.lineTo(xLeft, leftMiddle - leftHalfHeight);
+					context.stroke();
+					context.lineTo(xLeft, leftMiddle + leftHalfHeight);
+					context.stroke();
+					context.lineTo(0, leftMiddle + leftHalfHeight);
+					context.stroke();
+				}
+				if (rightHalfHeight > 0) {
+					context.moveTo(w, rightMiddle - rightHalfHeight);
+					context.lineTo(xRight, rightMiddle - rightHalfHeight);
+					context.stroke();
+					context.lineTo(xRight, rightMiddle + rightHalfHeight);
+					context.stroke();
+					context.lineTo(w, rightMiddle + rightHalfHeight);
+					context.stroke();
+				}
 				context.strokeStyle = '#AAAAAA';  //$NON-NLS-0$
 				context.lineWidth   = 1;
 				context.beginPath();
