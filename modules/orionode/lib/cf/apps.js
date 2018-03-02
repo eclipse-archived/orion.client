@@ -770,7 +770,14 @@ function bindServices(req, appTarget){
 							if (!serviceInstanceGUID) {
 								return Promise.reject(new Error("Service instance " + service + " cannot be found in target space"));
 							}
-							return bindService(req.user.username, serviceInstanceGUID, appTarget);
+							return bindService(req.user.username, serviceInstanceGUID, appTarget)
+							.catch(function(err) {
+								/* the binding might be already present - detect it by checking the error code type */
+								if (err.data && (!err.data.error_code || "CF-ServiceBindingAppServiceTaken" === err.data.error_code)) {
+									return;
+								}
+								return Promise.reject(err);
+							});
 						}).then(function(){
 							return cb();
 						})
