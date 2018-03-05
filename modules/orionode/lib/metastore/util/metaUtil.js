@@ -33,11 +33,16 @@ module.exports.initializeAdminUser = function initializeAdminUser(options, store
 				password: pw,
 				properties:{}
 			};
-			return store.createUser(userData, function(err, user) {
-				if(err) {
-					return reject(err);
+			return store.getUser("admin", function(err, user) {
+				if(user) {
+					return resolve(user);
 				}
-				return resolve(user);
+				return store.createUser(userData, function(err, user) {
+					if(err) {
+						return reject(err);
+					}
+					return resolve(user);
+				});
 			});
 		}
 		return resolve({});
