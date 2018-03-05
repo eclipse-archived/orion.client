@@ -27,7 +27,7 @@ define({
 	"Replace": "Replace",
 	"Replace...": "Preview",
 	"Replace All": "Replace All",
-	"Show Replace": "Replace",
+	"Show Replace": "a\u2192C",
 	"Hide Replace": "Search Mode",
 	"Search ${0}": "Search ${0}",
 	"TypeKeyOrWildCard": "Type a keyword or wild card to search in ",

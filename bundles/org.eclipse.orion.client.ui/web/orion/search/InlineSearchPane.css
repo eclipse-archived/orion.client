@@ -653,6 +653,12 @@
     top: 2px;
 }
 
+.searchOptionControlButton:hover {
+	background-color:#7fa4c0;
+	border-color: #3C71B3;
+	color:rgb(255, 255, 255);
+}
+
 .locationElementWrapper {
     white-space: nowrap;
     overflow: hidden;
@@ -705,6 +711,7 @@
     left: -7px;
 }
 .checkedSearchOptionButton{
-	background-color:#3C71B3;
+	background-color:#7fa4c0;
+	border-color: #3C71B3;
 	color:rgb(255, 255, 255);
 }
