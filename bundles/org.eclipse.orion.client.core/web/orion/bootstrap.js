@@ -81,6 +81,10 @@ define(['require', 'i18n!orion/nls/messages',  'orion/Deferred', 'orion/servicer
 								return new Deferred().reject({});
 							});
 						}
+						if (pageLoader) {
+							pageLoader.getStep().message = messages.AuthenticatedUser;
+							pageLoader.update();
+						}
 					});
 				}
 			}).then(function() {

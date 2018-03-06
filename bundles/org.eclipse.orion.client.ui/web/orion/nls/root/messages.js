@@ -57,6 +57,7 @@ define({//Default message bundle
 	"LoadingPage": "Loading Page",
 	"LoadingPlugins": "Loading Plugins",
 	"AuthenticatingUser": "Authenticating user...",
+	"AuthenticatedUser": "Authenticated user",
 	"LoadingResources": "Loading Resources",
 	"plugin_started": "\"${0}\" started",
 	"plugin_lazy activation": "\"${0}\" lazily activated",
