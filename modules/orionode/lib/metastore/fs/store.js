@@ -21,7 +21,8 @@ const nodePath = require('path'),
     fileLocker = require('../../util/fileLocker'),
 	cryptoUtil = require('../../util/cryptoUtil'),
 	passport = require('passport'),
-	LocalStrategy = require('passport-local').Strategy;
+	LocalStrategy = require('passport-local').Strategy,
+	userIndex = require('../util/userIndex');
 
 const FILENAME_METASTORE = "metastore.json",
 	FILENAME_TASKS_TEMP_DIR = "temp",
@@ -193,7 +194,15 @@ FsMetastore.prototype.setup = function setup(options) {
 				});
 			}.bind(this));
 		}
-		metaUtil.initializeAdminUser(options, this);
+		
+		metaUtil.initializeAdminUser(options, this).then(function() {
+			this._index = new userIndex(this._options.workspaceDir);
+			this._index.getUserIndex().then(() => {
+				logger.log("computed index");
+			}, (err) => {
+				logger.error("Failed to compute user index: "+err);
+			});
+		}.bind(this));
 		/* verify that existing metadata in this workspace will be usable by this server */
 		var path = nodePath.join(options.workspaceDir, FILENAME_METASTORE);
 		fs.readFileAsync(path, 'utf8').then(function(content) {
@@ -521,14 +530,19 @@ Object.assign(FsMetastore.prototype, {
 								emailConfirmed: userJson.emailConfirmed,
 								workspaces:[]
 							});
-						});
+						}.bind(this));
 					}.bind(this));
 				}.bind(this));
 			}.bind(this));
 		}.bind(this)).then(
 			function(result) {
+				if(this._index) {
+					return this._index.createUser(result).then(function() {
+						callback(null, result);
+					});
+				}
 				callback(null, result);
-			},
+			}.bind(this),
 			callback /* error case */
 		);
 	},
@@ -596,12 +610,17 @@ Object.assign(FsMetastore.prototype, {
 						if (error) {
 							return reject(error);
 						}
-						resolve(); // TODO needs to return user data with name, email and authToken for user.sendEmail method.
+						resolve(metadata); // TODO needs to return user data with name, email and authToken for user.sendEmail method.
 					});
 				}.bind(this));
 			}.bind(this));
 		}.bind(this)).then(
 			function(result) {
+				if(this._index) {
+					return this._index.updateUser(result, result).then(() => {
+						callback(null, result);
+					});
+				}
 				callback(null, result);
 			},
 			callback /* error case */
@@ -627,6 +646,11 @@ Object.assign(FsMetastore.prototype, {
 			rimraf(userLocation, (err) => {
 				if(err) {
 					return callback(err);
+				}
+				if(this._index) {
+					return this._index.deleteUser(id).then(function() {
+						callback();
+					});
 				}
 				callback();
 			});
@@ -657,6 +681,13 @@ Object.assign(FsMetastore.prototype, {
 			if(this._isSingleUser) {
 				return this.getUser("anonymous", function(err, user) {
 					callback(err, user ? [user] : user);
+				});
+			}
+			if(this._index) {
+				return this._index.getAllUsers().then((users) => {
+					callback(null, users.slice(start, start+rows));
+				}, (err) => {
+					callback(err);
 				});
 			}
 		}
