@@ -11,7 +11,7 @@
  *******************************************************************************/
 /*eslint-env browser, amd*/
 
-define(['require', 'orion/Deferred', 'orion/serviceregistry', 'orion/preferences', 'orion/pluginregistry', 'orion/config', 'orion/urlModifier'], function(require, Deferred, mServiceregistry, mPreferences, mPluginRegistry, mConfig, urlModifier) {
+define(['require', 'i18n!orion/nls/messages',  'orion/Deferred', 'orion/serviceregistry', 'orion/preferences', 'orion/pluginregistry', 'orion/config', 'orion/urlModifier'], function(require, messages, Deferred, mServiceregistry, mPreferences, mPluginRegistry, mConfig, urlModifier) {
 
 	var once; // Deferred
 
@@ -65,8 +65,13 @@ define(['require', 'orion/Deferred', 'orion/serviceregistry', 'orion/preferences
 					serviceRegistry.registerService.bind(serviceRegistry, "orion.cm.configadmin") //$NON-NLS-0$
 				);
 			}).then(function() {
+				if (pageLoader) pageLoader.nextStep();
 				var auth = serviceRegistry.getService("orion.core.auth"); //$NON-NLS-0$
 				if (auth) {
+					if (pageLoader) {
+						pageLoader.getStep().message = messages.AuthenticatingUser;
+						pageLoader.update();
+					}
 					return auth.getUser().then(function(user) {
 						if (!user) {
 							return auth.getAuthForm(window.location.href).then(function(formURL) {
@@ -84,7 +89,6 @@ define(['require', 'orion/Deferred', 'orion/serviceregistry', 'orion/preferences
 					preferences: preferences,
 					pluginRegistry: pluginRegistry
 				};
-				if (pageLoader) pageLoader.nextStep();
 				once.resolve(result);
 				return result;
 			});

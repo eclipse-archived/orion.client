@@ -56,6 +56,7 @@ define({//Default message bundle
 	"SplashTitleGit": "Loading Git Repositories",
 	"LoadingPage": "Loading Page",
 	"LoadingPlugins": "Loading Plugins",
+	"AuthenticatingUser": "Authenticating user...",
 	"LoadingResources": "Loading Resources",
 	"plugin_started": "\"${0}\" started",
 	"plugin_lazy activation": "\"${0}\" lazily activated",
