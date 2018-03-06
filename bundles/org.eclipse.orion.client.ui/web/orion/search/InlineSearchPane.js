@@ -222,6 +222,7 @@ define([
 		},
 		
 		_replacePreview: function(){
+			this._searchResultExplorer._replaceRenderer.cleanBreadCrumbs();
 			var deferredOptions = this.getOptions();
 			deferredOptions.then(function(options){
 				if(!options.replace){
