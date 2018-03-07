@@ -235,7 +235,7 @@ FileLocker.prototype._releaseLock = function() {
 	}
 
 	return this._pendingReleaseLock || (this._pendingReleaseLock = new Promise(function(resolve, reject) {
-
+		if (!this._fd) return;
 		fs.fcntl(this._fd, constants.F_SETLK, constants.F_UNLCK, function(error) {
 			this._closeLockFile();
 
