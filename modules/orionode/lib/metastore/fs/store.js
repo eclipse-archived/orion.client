@@ -84,14 +84,21 @@ function getProjectMetadataFileName(options, workspaceId, projectName) {
 function getTaskRootLocation(options) {
 	return options.configParams.get('orion.file.tasks.location') || nodePath.join(options.workspaceDir, '.metadata', '.tasks');
 }
-
+/**
+ * Write JSON to the given file
+ * @param {string} fileName The name of the file to write to
+ * @param {{?}} object The object to write out
+ */
 function writeJSON(fileName, object) {
 	logger.info("write metadata " + fileName + " pid=" + process.pid);
 	return mkdirpAsync(nodePath.dirname(fileName)).then(function() {
 		return fs.writeFileAsync(fileName, JSON.stringify(object, null, 2) + "\n");
 	});
 }
-
+/**
+ * Read the JSON from the given file
+ * @param {string} fileName The name of the file to read
+ */
 function readJSON(fileName) {
 	logger.info("read metadata " + fileName + " pid=" + process.pid);
 	return fs.readFileAsync(fileName, 'utf8')
@@ -194,15 +201,10 @@ FsMetastore.prototype.setup = function setup(options) {
 				});
 			}.bind(this));
 		}
-		
-		metaUtil.initializeAdminUser(options, this).then(function() {
-			this._index = new userIndex(this._options.workspaceDir);
-			this._index.getUserIndex().then(() => {
-				logger.log("computed index");
-			}, (err) => {
-				logger.error("Failed to compute user index: "+err);
-			});
-		}.bind(this));
+
+		this._index = new userIndex(this);
+		metaUtil.initializeAdminUser(options, this);
+
 		/* verify that existing metadata in this workspace will be usable by this server */
 		var path = nodePath.join(options.workspaceDir, FILENAME_METASTORE);
 		fs.readFileAsync(path, 'utf8').then(function(content) {
@@ -696,12 +698,26 @@ Object.assign(FsMetastore.prototype, {
 	
 	/** @callback */
 	getUserByEmail: function(email, callback) {
-		callback(new Error("Not implemented"));
+		if(this._index) {
+			return this._index.getUserByEmail(email).then((userInfo) => {
+				callback(null, userInfo);
+			}, (err) => {
+				callback(err)
+			});
+		}
+		callback(new Error("There is no user index available."));
 	},
 
 	/** @callback */
 	getUserByOAuth: function(oauth, callback) {
-		callback(new Error("Not implemented"));
+		if(this._index) {
+			return this._index.getUserByOauth(oauth).then((userInfo) => {
+				callback(null, userInfo);
+			}, (err) => {
+				callback(err)
+			});
+		}
+		callback(new Error("There is no user index available."));
 	},
 	
 	/** @callback */
