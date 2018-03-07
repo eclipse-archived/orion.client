@@ -593,36 +593,46 @@ Object.assign(FsMetastore.prototype, {
 					if (error) {
 						return reject(error);
 					}
-					
 					// userData.properties contains all the properties, not only the ones that are changed, 
 					// because of locking, it's safe to say the properties hasn't been changed by other operations
 					metadata.Properties = userData.properties || Object.create(null);
-					userData.fullname && (metadata.FullName = userData.fullname);
-					userData.password && (metadata.Properties.Password = userData.password);  // TODO need to encrypt password
-					userData.email && (metadata.Properties.Email = userData.email);
+					if(userData.fullname) {
+						metadata.FullName = userData.fullname;
+					}
+					if(userData.password){
+						metadata.Properties.Password = cryptoUtil.encrypt(userData.password, "");
+					}
+					if(userData.email) {
+						metadata.Properties.Email = userData.email;
+					}
 					if(userData.login_timestamp) {
 						metadata.Properties.LastLoginTimestamp = userData.login_timestamp;
 						if(typeof userData.login_timestamp.getTime === 'function') {
 							metadata.Properties.LastLoginTimestamp = userData.login_timestamp.getTime();
 						}
 					}
-					userData.username && (metadata.UserName = userData.username);
+					if(userData.username) {
+						metadata.UserName = userData.username;
+					}
+					if(userData.oauth) {
+						metadata.Properties.OAuth = userData.oauth;
+					}
 		
 					this._updateUserMetadata(id, metadata, function(error) {
 						if (error) {
 							return reject(error);
 						}
-						resolve(metadata); // TODO needs to return user data with name, email and authToken for user.sendEmail method.
-					});
+						if(this._index) {
+							return this._index.updateUser(id, metadata).then(() => {
+								resolve(metadata);
+							});
+						}
+						resolve(metadata);
+					}.bind(this));
 				}.bind(this));
 			}.bind(this));
 		}.bind(this)).then(
 			function(result) {
-				if(this._index) {
-					return this._index.updateUser(result, result).then(() => {
-						callback(null, result);
-					});
-				}
 				callback(null, result);
 			},
 			callback /* error case */

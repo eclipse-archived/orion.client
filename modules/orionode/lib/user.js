@@ -71,7 +71,6 @@ function userJSON(user, options) {
 	return {
 		FullName: user.fullname,
 		UserName: user.username,
-		Location: api.join(options.usersRoot, user.username),
 		Email: user.email,
 		EmailConfirmed: emailConfirmed(user),
 		HasPassword: true,
@@ -472,7 +471,7 @@ module.exports.router = function router(options) {
 							api.writeError(500, res, err.message);
 							return;
 						}
-						if (existing && existing.length) {
+						if (existing && (id !== existing.username)) {
 							api.writeError(409, res, "This account is already linked to someone else");
 							return;
 						}

@@ -37,7 +37,7 @@ class UserIndex {
 	 */
 	getUserByEmail(userEmail) {
 		return this.getUserIndex().then(function() {
-			const uname = emailIndex.get(userEmail);
+			const uname = this.emailIndex.get(userEmail);
 			if(uname) {
 				return new Promise(function(resolve, reject) {
 					this._metastore.getUser(uname, (err, userInfo) => {
@@ -46,7 +46,7 @@ class UserIndex {
 						}
 						return resolve(userInfo);
 					});
-				});
+				}.bind(this));
 			}
 			return null;
 		}.bind(this));
@@ -95,10 +95,9 @@ class UserIndex {
 		return new Promise(function(resolve, reject) {
 			if(this.indexReady()) {
 				//if the index has been initialized, update it
-				let u = Object.create(null);
-				u.dir = userInfo.properties.location;
-				u.email = userInfo.email;
-				this.oauthIndex.set(userInfo.username, u);
+				if(userInfo.oauth) {
+					this.oauthIndex.set(userInfo.oauth, userInfo.username);
+				}
 				this.emailIndex.set(userInfo.email, userInfo.username);
 				this.userIndex.set(userInfo.username, {email: userInfo.email, oauth: userInfo.oauth});
 				return this.flush().then(() => {
@@ -116,22 +115,16 @@ class UserIndex {
 	 * @param {{?}} userInfo The user information object
 	 */
 	deleteUser(userId) {
-		return new Promise(function(resolve, reject) {
-			if(this.indexReady()) {
-				//if the index has been initialized, update it
-				//TODO
-				const id = this.userIndex.get(userId);
-				if(id) {
-					this.emailIndex.delete(id.email);
-					if(id.oauth) {
-						this.oauthIndex.delete(id.oauth);
-					}
-					return this.flush().then(() => {
-						resolve();
-					});
+		return this.getUserIndex().then(function() {
+			//we need to load the index in case it exists and holds the user (but we have not lazily loaded it yet)
+			const id = this.userIndex.get(userId);
+			if(id) {
+				this.emailIndex.delete(id.email);
+				if(id.oauth) {
+					this.oauthIndex.delete(id.oauth);
 				}
+				return this.flush();
 			}
-			resolve();
 			//reject(new Error("Failed to delete user from index: "+userId));
 		}.bind(this));
 	}
@@ -139,24 +132,25 @@ class UserIndex {
 	 * This function is intended to be called when a metastore implementation puts (updates) a user - so that the 
 	 * caches can be updated while the file lock is in use
 	 * @callback
+	 * @param {string} userId The ID of the user
 	 * @param {{?}} userInfo The user information object
 	 */
-	updateUser(oldInfo, newInfo) {
+	updateUser(userId, newInfo) {
 		return new Promise(function(resolve, reject) {
 			if(this.indexReady()) {
 				//if the index is ready update it, otherwise, no-op
-				const oldUser = this.userIndex.get(oldInfo.username);
+				const oldUser = this.userIndex.get(userId);
 				if(oldUser) {
 					if(oldUser.oauth) {
-						this.oauthIndex.delete(oldInfo.oauth);
+						this.oauthIndex.delete(oldUser.oauth);
 					}
 					this.emailIndex.delete(oldUser.email);
 				}
-				if(newInfo.oauth) {
-					this.oauthIndex.set(newInfo.oauth, newInfo.username);
+				if(newInfo.Properties.OAuth) {
+					this.oauthIndex.set(newInfo.Properties.OAuth, newInfo.UserName);
 				}
-				this.emailIndex.set(newInfo.email, newInfo.username);
-				this.userIndex.set(newInfo.username, {email: newInfo.email, oauth: newInfo.oauth});
+				this.emailIndex.set(newInfo.Properties.Email, newInfo.UserName);
+				this.userIndex.set(newInfo.UserName, {email: newInfo.Properties.Email, oauth: newInfo.Properties.OAuth});
 				return this.flush().then(() => {
 					resolve();
 				});
