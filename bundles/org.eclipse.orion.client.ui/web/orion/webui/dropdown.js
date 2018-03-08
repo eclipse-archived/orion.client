@@ -487,15 +487,18 @@ define(['orion/webui/littlelib', 'orion/EventTarget'], function(lib, EventTarget
 		 },
 		 
 		 /**
-		  * Closes the menu containing the specified item
+		  * Closes the menubar menu containing the specified item
 		  * and opens the menu next to it in the specified direction.
 		  * @param {Object} item An item within a menu
 		  * @param {Integer} direction Either KEY.RIGHT or KEY.LEFT typed by user
 		  * @param {Boolean} select If true, select the first item
 		  */
 		 _closeThenOpen: function(item, direction, select) {
-			while (item.parentNode.getAttribute("role") !== "menubar")  {
+			while (item.parentNode && (document !== item.parentNode) && item.parentNode.getAttribute("role") !== "menubar")  {
 				item = item.parentNode;
+			}
+			if (!item.parentNode || document === item.parentNode) {
+				return; // item is not in a menubar
 			}
 			var trigger = item.childNodes[0];
 			var menuBar = item.parentNode;
