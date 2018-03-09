@@ -199,7 +199,8 @@ define(['orion/PageUtil', 'orion/xsrfUtils', 'orion/PageLinks', './jquery'],func
     function getRedirect() {
         var regex = new RegExp('[\\?&]redirect=([^&#]*)');
         var results = regex.exec(window.location.href);
-        return results === null ? null : results[1];
+        if (!results) return null;
+        return new URL(decodeURIComponent(results[1])).origin === window.location.origin ? results[1] : null;
     }
 
     function hasClass(ele,cls) {

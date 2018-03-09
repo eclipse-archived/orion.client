@@ -11,11 +11,6 @@
 /*eslint-env amd, browser*/
 /*global URL*/
 define(['domReady', 'orion/xhr', 'orion/webui/littlelib', './common'], function(domReady, xhr, lib, common) {
-	function getRedirect() {
-		var regex = new RegExp('[\\?&]redirect=([^&#]*)');
-		var results = regex.exec(window.location.href);
-		return results === null ? null : results[1];
-	}
 
 	function setUpLoginPage () {
 		document.getElementById("signInBtn").addEventListener("click", common.confirmLogin, false);
@@ -50,7 +45,7 @@ define(['domReady', 'orion/xhr', 'orion/webui/littlelib', './common'], function(
 				document.getElementById("orionInfoArea").className = "orion-info";
 				document.getElementById("orionInfoMessage").textContent = messages[0].title;
 			}
-		}, function(error) {
+		}, function() {
 		});
 	}
 
@@ -92,11 +87,7 @@ define(['domReady', 'orion/xhr', 'orion/webui/littlelib', './common'], function(
 
 		var oauth = common.getParam("oauth");
 		if (oauth) {
-			var oauthMessage = common.decodeBase64(oauth);
-
-			var hashes = window.location.href.slice(window.location.href.indexOf('?') + 1);
-			var url = window.location.href;
-			var redirectURL = url.replace("LoginWindow", "register");
+			var redirectURL = window.location.href.replace("LoginWindow", "register");
 			window.location.replace(redirectURL);
 		}
 
