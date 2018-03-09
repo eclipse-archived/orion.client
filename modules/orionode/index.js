@@ -97,8 +97,6 @@ function tryLoadRouter(endpoint, options) {
 	var isEndpoint = typeof endpoint.endpoint === 'string';
 	if (isEndpoint) {
 		args.push(endpoint.endpoint);
-	}
-	if (isEndpoint) {
 		args.push(responseTime({digits: 2, header: "X-Total-Response-Time", suffix: true}));
 	}
 	if (endpoint.authenticated) {
