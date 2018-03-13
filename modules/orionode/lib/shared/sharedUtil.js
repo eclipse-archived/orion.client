@@ -42,7 +42,7 @@ module.exports = function(options) {
 
     function getFile(res, filepath, stats, etag) {
         var stream = fs.createReadStream(filepath);
-        res.setHeader("Cache-Control", "no-cache");
+		api.setResponseNoCache(res);
         res.setHeader('Content-Length', stats.size);
         res.setHeader('ETag', etag);
         res.setHeader('Accept-Patch', 'application/json-patch; charset=UTF-8');

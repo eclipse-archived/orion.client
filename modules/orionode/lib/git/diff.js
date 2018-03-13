@@ -90,7 +90,7 @@ function getDiff(req, res) {
 				res.setHeader('Content-Type', 'multipart/related; boundary="BOUNDARY"');
 			} else if (includeDiff) {
 				body += diffContents.join("");
-				res.setHeader("Cache-Control", "no-cache");
+				api.setResponseNoCache(res);
 				res.setHeader("Content-Disposition", "attachment; filename=\"changes.patch\"");
 				res.setHeader('Content-Type', 'plain/text');
 			} else if (includeDiffs) {
