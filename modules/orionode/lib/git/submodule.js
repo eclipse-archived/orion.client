@@ -127,6 +127,7 @@ function postSubmodule(req, res) {
  * @since 17.0
  */
 function deleteSubmoduleFromRepo(subrepo, repo) {
+	if (!subrepo) return;
 	var submodulePath = subrepo.workdir().substring(repo.workdir().length).slice(0, -1);
 	var configFile = api.join(repo.path(), "config");
 	return new Promise(function(fulfill, reject) {
