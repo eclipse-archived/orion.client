@@ -176,100 +176,51 @@ function getBaseLocation(scope, path) {
 }
 
 function processDiff(diff, filePath, paths, fileDir, includeDiff, includeDiffs, query, scope, diffContents, diffs) {
-	var page = Number(query.page) || 1;
-	var pageSize = Number(query.pageSize) || Number.MAX_SAFE_INTEGER;
-	return diff.patches()
-	.then(function(patches) {
-		var result = [];
-		var start = pageSize * (page - 1);
-		var end = Math.min(pageSize + start, patches.length);
-		var i = start;
-		patches.forEach(function(patch, pi) {
-			var newFile = patch.newFile();
-			var newFilePath = newFile.path();
-			var oldFile = patch.oldFile();
-			var oldFilePath = oldFile.path();
-			// Need when both filePath and paths are set, otherwise options.pathspec will take care of filtering the patches
-			if ((!filePath || newFilePath.startsWith(filePath)) && (!paths || paths.indexOf(newFilePath) !== -1)) {
-
-				if (includeDiffs && (start <= pi && pi < end)) {
-					i = pi;
-					var type = changeType(patch);
-					var p1 = api.toURLPath(path.join(fileDir, type !== "Deleted" ? newFilePath : oldFilePath));
-					diffs.Children.push({
-						"ChangeType": type,
-						"ContentLocation": p1,
-						"DiffLocation": gitRoot + "/diff/" + api.encodeURIComponent(scope) + p1,
-						"NewPath": newFilePath,
-						"OldPath": oldFilePath,
-						"Type": "Diff"
-					});
-				}
-		
-				if (includeDiff) {
-					var buffer = [];
-					buffer.push("diff --git a/" + oldFilePath + " b/" + newFilePath + "\n");
-					if (patch.isAdded()) {
-						buffer.push("new file mode " + newFile.mode().toString(8) + "\n");
-					}
-					if (patch.isDeleted()) {
-						buffer.push("deleted file mode " + oldFile.mode().toString(8) + "\n");
-					}
-					buffer.push("index " + oldFile.id().toString().substring(0, 7) + ".." + newFile.id().toString().substring(0, 7)
-						+ (patch.isDeleted() || patch.isAdded() ? "" : " " + newFile.mode().toString(8)) + "\n");
-					buffer.push("--- " + (patch.isAdded() ? "/dev/null" : "a/" + oldFilePath) + "\n");
-					buffer.push("+++ " + (patch.isDeleted() ? "/dev/null" : "b/" + newFilePath) + "\n"); 
-		
-					result.push(patch.hunks()
-					.then(function(hunks) {
-						return new Promise(function(fulfill, reject) {
-							async.series(hunks.map(function(hunk) {
-								return function(cb) {
-									hunk.lines().then(function(lines) {
-										buffer.push(hunk.header());
-										lines.forEach(function(line) {
-											var prefix = " ";
-											switch(line.origin()) {
-												case git.Diff.LINE.ADDITION:
-													prefix = "+";
-													break;
-												case git.Diff.LINE.DELETION:
-													prefix = "-";
-													break;
-												case git.Diff.LINE.DEL_EOFNL:
-												case git.Diff.LINE.ADD_EOFNL:
-													prefix = "";
-													break;
-											}
-											buffer.push(prefix + line.content());
-										});
-									})
-									.then(function(){
-										cb();
-									});
-								};
-							}), function(err) {
-								if (err) {
-									reject(err);
-								} else {
-									fulfill();
-								}
-							});
-						}).then(function(){
-							diffContents.push(buffer.join(""));
+	var result = [];
+	if (includeDiff) {
+		result.push(diff.toBuf(git.Diff.FORMAT.PATCH)
+		.then(function(buf) {
+			diffContents.push(buf.toString());
+		}));
+	}
+	if (includeDiffs) {
+		var page = Number(query.page) || 1;
+		var pageSize = Number(query.pageSize) || Number.MAX_SAFE_INTEGER;
+		result.push(diff.patches()
+		.then(function(patches) {
+			var start = pageSize * (page - 1);
+			var end = Math.min(pageSize + start, patches.length);
+			var i = start;
+			patches.forEach(function(patch, pi) {
+				var newFile = patch.newFile();
+				var newFilePath = newFile.path();
+				var oldFile = patch.oldFile();
+				var oldFilePath = oldFile.path();
+				// Need when both filePath and paths are set, otherwise options.pathspec will take care of filtering the patches
+				if ((!filePath || newFilePath.startsWith(filePath)) && (!paths || paths.indexOf(newFilePath) !== -1)) {
+	
+					if (start <= pi && pi < end) {
+						i = pi;
+						var type = changeType(patch);
+						var p1 = api.toURLPath(path.join(fileDir, type !== "Deleted" ? newFilePath : oldFilePath));
+						diffs.Children.push({
+							"ChangeType": type,
+							"ContentLocation": p1,
+							"DiffLocation": gitRoot + "/diff/" + api.encodeURIComponent(scope) + p1,
+							"NewPath": newFilePath,
+							"OldPath": oldFilePath,
+							"Type": "Diff"
 						});
-					}));
+					}
 				}
-			}
-		});
-		if (includeDiffs) {
+			});
 			diffs.Length = patches.length;
 			if (i < patches.length - 1) {
 				diffs.NextLocation  = {pathname: gitRoot + "/diff/" + scope + fileDir, query: {page: page + 1, pageSize:pageSize}};
 			}
-		}
-		return Promise.all(result);
-	});
+		}));
+	}
+	return Promise.all(result);
 }
 
 function getOptions(ignoreWS, filePath, paths) {
