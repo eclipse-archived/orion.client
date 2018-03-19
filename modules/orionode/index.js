@@ -22,7 +22,7 @@ let express = require('express'),
 	socketio = require('socket.io'),
 	ttyShell = require('./lib/tty_shell'),
 	log4js = require('log4js'),
-	//lsregistry = require("./lib/lsRegistry"),
+	lsregistry = require("./lib/lsRegistry"),
 	addModulePath = require('app-module-path');
 
 const LIBS = path.normalize(path.join(__dirname, 'lib/'));
@@ -173,18 +173,18 @@ function loadEndpoints(endpoints, options, auth) {
  */
 function loadLanguageServers(servers, io, options) {
 	if (Array.isArray(servers) && options.configParams.get('orion.single.user')) {
-		const rootPath = path.join(__dirname, "language_servers");
+		const rootPath = path.join(__dirname, "languages");
 		if (!fs.existsSync(rootPath)) {
-			logger.log("'language_servers' folder does not exist. Stopped loading language servers.");
+			logger.log("'languages' folder does not exist. Stopped loading language servers.");
 			return;
 		}
 		addModulePath.addPath(rootPath);
 		servers.forEach(function(ls) {
-			if (typeof ls.dirName !== "string") {
-				logger.log("Language server metadata is missing 'dirName' property: " + JSON.stringify(ls, null, '\t'));
+			if (typeof ls.module !== "string") {
+				logger.log("Language server metadata is missing 'module' property: " + JSON.stringify(ls, null, '\t'));
 				return;
 			}
-			const lsPath = path.join(rootPath, ls.dirName);
+			const lsPath = path.join(rootPath, ls.module);
 			if (!fs.existsSync(lsPath)) {
 				logger.log("Language server folder does not exist: " + lsPath);
 				return;
@@ -192,15 +192,15 @@ function loadLanguageServers(servers, io, options) {
 			addModulePath.addPath(lsPath);
 			try {
 				const server = require(lsPath);
-				if (server && typeof server.createServer === 'function') {
-					// lsregistry.installServer(server.createServer(), { 
-					// 		io: io, 
-					// 		workspaceDir: workspaceDir,
-					// 		IN_PORT: 8123,
-					// 		OUT_PORT: 8124
-					// 	});
+				if (server) {
+					lsregistry.installServer(new server(options), { 
+							io: io, 
+							workspaceDir: workspaceDir,
+							IN_PORT: 8123,
+							OUT_PORT: 8124
+						});
 				} else {
-					logger.log("Tried to install language server '" + lsPath + "' - but it has no createServer function");
+					logger.log("Tried to install language server '" + lsPath + "' but could not instantiate it");
 				}
 			} catch (err) {
 				logger.log("Failed to load language server: " + err);
@@ -286,7 +286,7 @@ module.exports = function startServer(options) {
 		path: (listenContextPath ? contextPath : '') + '/socket.io'
 	});
 	if (serverconf && Array.isArray(serverconf.languages)) {
-		loadLanguageServers(serverconf.languages, io);
+		loadLanguageServers(serverconf.languages, io, options);
 	}
 	ttyShell.install(options, io);
 	if (options.configParams.get("orion.debug.enabled")) {
