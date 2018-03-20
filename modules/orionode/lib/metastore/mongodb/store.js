@@ -280,9 +280,20 @@ Object.assign(MongoDbMetastore.prototype, {
 			if (err) {
 				return callback(err);
 			}
+		
+			if (typeof userData === "function") {
+				userData = userData(user);
+				if (!userData) {
+					return resolve();
+				}
+			}
+			
 			// mixin new properties
 			// userData.properties contains all the properties, not only the ones that are changed, 
 			// because of locking, it's safe to say the properties hasn't been changed by other operations
+			if (typeof user.properties !== "string") {
+				user.properties = JSON.stringify(user.properties, null, 2);
+			}
 			Object.assign(user, userData);
 			// Setting password and authToken are special cases handled by specific methods
 			if (typeof userData.password !== 'undefined') {

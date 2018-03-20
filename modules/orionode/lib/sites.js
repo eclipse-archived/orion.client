@@ -155,11 +155,6 @@ function loadSites(req, callback) {
 	});
 }
 
-function saveSites(req, prefs, callback) {
-	var store = fileUtil.getMetastore(req);
-	store.updateUser(req.user.username, {properties: JSON.stringify(prefs, null, 2) }, callback);
-}
-
 function getSite(req, res) {
 	loadSites(req, function (err, prefs) {
 		if (err) {
@@ -189,29 +184,39 @@ function getSites(req, res) {
 }
 
 function updateSite(req, res, callback, okStatus) {
-	loadSites(req, function (err, prefs) {
-		if (err) {
-			return writeError(404, res, err.message);
-		}
+	var site;
+	var store = fileUtil.getMetastore(req);
+	store.updateUser(req.user.username, function(data) {
+		var prefs = {};
+		try {
+			if (typeof data.properties === "string") {
+				prefs = JSON.parse(data.properties); // metadata.properties need to be parse when using MongoDB
+			} else {
+				prefs = data.properties; // metadata.properties don't need to be parse when using FS
+			}
+		} catch (e) {}
 		if (!req.params.site) {
 			// TODO
 		}
 		var sites = prefs.sites || (prefs.sites = {});
-		var site = sites[req.params.site];
+		site = sites[req.params.site];
 		if (site || !req.params.site) {
 			site = callback(site, sites);
 			if (site && site.error) {
-				return writeError(site.status, res, site.error);
+				writeError(site.status, res, site.error);
+				return null;
 			}
-			saveSites(req, prefs, function(err) {
-				if (err) {
-					return writeError(400, res, "Failed to update site:" + req.params.id);
-				}
-				return site ? writeResponse(okStatus || 200, res, null, siteJSON(site, req)) : writeResponse(okStatus || 200, res, null);
-			});
+			data.properties = prefs;
+			return data;
 		} else {
-			return writeError(400, res,  "Site not found:" + req.params.id);
+			writeError(400, res,  "Site not found:" + req.params.id);
+			return null;
 		}
+	}, function(err) {
+		if (err) {
+			return writeError(err.code || 404, res, err);
+		}
+		return site ? writeResponse(okStatus || 200, res, null, siteJSON(site, req)) : writeResponse(okStatus || 200, res, null);
 	});
 }
 

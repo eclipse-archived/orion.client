@@ -13,16 +13,16 @@
 var api = require('./api'),
 	fileUtil = require('./fileUtil'),
  	writeResponse = api.writeResponse,
+ 	writeError = api.writeError,
     express = require('express'),
     nodePath = require('path'),
     nodeUrl = require('url'),
+    fs = require('fs'),
     os = require('os'),
     Long_Key_Prefs = require('./model/long_key_pref'),
     Preference = require('./model/pref'),
     Promise = require('bluebird'),
     responseTime = require('response-time');
-
-    var fs = Promise.promisifyAll(require('fs'));
 
 module.exports = {};
 
@@ -84,17 +84,11 @@ function handleGet(req, res){
 	});
 }
 function handlePut(req, res){
-	return new Promise(function(fulfill, reject) {
-		read(req, res, function(err, scope, prefs){
-			if (err) {
-				return reject(err);
-			}
-			if (scope === "user") {
-				fulfill(new MODEL(prefs || null));
-			}
-			// TODO wrap workspace preference
-		});
-	}).then(function(prefs){
+	if (!(req.is('json') || req.is('urlencoded'))) {
+		return api.sendStatus(400, res);// unknown content type
+	}
+	update(req, function(metadata) {
+		var prefs = new MODEL(metadata.properties || null);
 		var urlObj = req._parsedUrl || nodeUrl.parse(req.url),
 			prefPath = urlObj.pathname.split("/").slice(2).join("/"),
 			prefNode = prefs.get(prefPath);
@@ -105,13 +99,6 @@ function handlePut(req, res){
 		if (req.is('json')) {
 			// Replace entire pref node
 			prefs.set(prefPath, body);
-			return save(req, prefs)
-			.then(function(){
-				return api.sendStatus(204, res);
-			}).catch(function(err){
-				// choose to ignore err
-				return api.sendStatus(204, res);	
-			});
 		} else if (req.is('urlencoded')) {
 			// Replace a single property
 			var key = body.key, value = body.value;
@@ -126,35 +113,25 @@ function handlePut(req, res){
 				node[key] = value; // FIXME watch out for __proto__ hacks
 			}
 			prefs.set(prefPath, node);
-			return save(req, prefs)
-			.then(function(){
-				return api.sendStatus(204, res);
-			}).catch(function(err){
-				// choose to ignore err
-				return api.sendStatus(204, res);	
-			});
 		}
-		return api.sendStatus(400, res);// unknown content type
+		metadata.properties = prefs.getJson();
+		return metadata;
+	}, function(err) {
+		if (err) {
+			writeError(err.code || 500, res, err);
+		}
+		api.sendStatus(204, res);
 	});
 }
 function handleDelete(req, res){
-	return new Promise(function(fulfill, reject) {
-		read(req, res, function(err, scope, prefs){
-			if (err) {
-				return reject(err);
-			}
-			if (scope === "user") {
-				fulfill(new MODEL(prefs || null));
-			}
-			// TODO wrap workspace preference
-		});
-	}).then(function(prefs){
+	update(req, function(metadata) {
+		var prefs = new MODEL(metadata.properties);
 		var urlObj = req._parsedUrl || nodeUrl.parse(req.url),
 			prefPath = urlObj.pathname.split("/").slice(2).join("/"),
 			node = prefs.get(prefPath);
 		if (node === NOT_EXIST) {
 			// Deleting a nonexistent node (or some key therein), noop
-			return api.sendStatus(204, res);
+			return null;
 		}
 		var key = req.params.key;
 		if (typeof key === 'string') {
@@ -165,43 +142,24 @@ function handleDelete(req, res){
 			// Delete entire node
 			prefs.delete(prefPath);
 		}
-		return save(req, prefs)
-		.then(function(){
-			return api.sendStatus(204, res);
-		}).catch(function(err){
-			// choose to ignore err
-			return api.sendStatus(204, res);	
-		});
+		metadata.properties = prefs.getJson();
+		return metadata;
+	}, function(err) {
+		if (err) {
+			writeError(err.code || 500, res, err);
+		}
+		api.sendStatus(204, res);
 	});
-}
-
-function save(req, prefs) {
-	/*eslint-disable consistent-return*/
-	if (!prefs.modified()) {
-		return Promise.resolve();
-	}
-	return new Promise(function(fulfill, reject) {
-		update(req, prefs.getJson(), function(err){
-			if (err) {
-				return reject(err);
-			}
-			fulfill();
-		});
-	})
-	.catch(function(err) {
-		throw err;
-	});
-	/*eslint-enable*/
 }
 	
 function read(req, res, callback){
 	var scopeSegs = req.url.split("/");
-	var scope = scopeSegs[1];
-	var store = fileUtil.getMetastore(req);
-	// ensure that there is at least one additional segment following the /user, /workspace or /project segment
 	if (scopeSegs.length < 3) {
 		return writeResponse(405, res);
 	}
+	var scope = scopeSegs[1];
+	var store = fileUtil.getMetastore(req);
+	// ensure that there is at least one additional segment following the /user, /workspace or /project segment
 	if (scope === "user"){
 		store.getUser(req.user.username, function(err, data) {
 			callback(err, scope, data ? data.properties : null);
@@ -212,24 +170,21 @@ function read(req, res, callback){
 		});
 	} else if (scope === "project") {
 		// TODO implement read project prefs
+		return writeResponse(500, res, "Not implemented");
 	} else {
 		return writeResponse(405, res);
 	}
 }
 	
-function update(req, prefs, callback){
+function update(req, changeCallback, doneCallback) {
 	var scope = req.url.split("/")[1];
 	var store = fileUtil.getMetastore(req);
-	if(scope === "user"){
-		store.updateUser(req.user.username, {properties:prefs}, function(err){
-			callback(err);
-		});
-	}else if(scope === "workspace"){
-		store.updateWorkspace(req.user.workspaceId, {properties:prefs}, function(err){
-			callback(err);
-		});
-	}else if(scope === "project"){
-		// TODO implement update project prefs
+	if (scope === "user") {
+		store.updateUser(req.user.username, changeCallback, doneCallback);
+	} else if(scope === "workspace") {
+		store.updateWorkspace(req.user.workspaceId, changeCallback, doneCallback);
+	} else if(scope === "project") {
+		doneCallback(new Error("Not implemented"));
 	}
 }
 };

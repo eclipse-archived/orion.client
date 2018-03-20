@@ -312,6 +312,14 @@ Object.assign(FsMetastore.prototype, {
 			callback /* error case */
 		);
 	},
+	
+	_convertWorkspace: function(metadata) {
+		return {
+			"id": metadata.UniqueId,
+			"name": metadata.FullName,
+			"properties": metadata.Properties
+		};
+	},
 
 	getWorkspace: function(workspaceId, callback) {
 		if (workspaceId !== WORKSPACE_ID) {
@@ -325,19 +333,8 @@ Object.assign(FsMetastore.prototype, {
 						if (!metadata) {
 							return resolve(null);
 						}
-						var workspace = {
-							"id": metadata.UniqueId,
-							"name": metadata.FullName,
-							"properties": {}
-						};
-						// TODO Workspace properties is where tabs info goes, implement later
-						var propertyKeys = Object.keys(metadata.Properties);
-						propertyKeys.forEach(function(propertyKey) {
-							workspace.properties[propertyKey] = metadata.Properties[propertyKey];
-							// TODO password needs to be handled specifically since it needs to be decrypted. (referrence setProperties line 967)
-						});
-						return resolve(workspace);
-					});
+						return resolve(this._convertWorkspace(metadata));
+					}.bind(this));
 				}.bind(this));
 			}.bind(this)).then(
 				function(result) {
@@ -415,6 +412,13 @@ Object.assign(FsMetastore.prototype, {
 					if (error) {
 						return reject(error);
 					}
+					if (typeof workspacedata === "function") {
+						workspacedata = workspacedata(this._convertWorkspace(metadata));
+						if (!workspacedata) {
+							return resolve();
+						}
+					}
+					//TODO other properties 
 					metadata.Properties = workspacedata.properties;
 					this._updateWorkspaceMetadata(workspaceId, metadata, function(error) {
 						if (error) {
@@ -532,6 +536,23 @@ Object.assign(FsMetastore.prototype, {
 			callback /* error case */
 		);
 	},
+	
+	_convertUser: function(metadata) {
+		// TODO password needs to be handled specifically since it needs to be decrypted. (referrence setProperties line 967)				
+		return {
+			username: metadata.UserName,
+			email: metadata.Properties.Email,
+			fullname: metadata.FullName,
+			oauth: metadata.Properties.OAuth,
+			properties: metadata.Properties,
+			emailConfirmed: Boolean(metadata.emailConfirmed || metadata.isAuthenticated),
+			login_timestamp: new Date(parseInt(metadata.Properties.LastLoginTimestamp, 10)),
+			disk_usage: metadata.Properties.DiskUsage,
+			disk_usage_timestamp: new Date(parseInt(metadata.Properties.DiskUsageTimestamp, 10)),
+			created_at:  new Date(parseInt(metadata.Properties.AccountCreationTimestamp, 10)),
+			workspaces: metadata.WorkspaceIds || []
+		};
+	},
 
 	getUser: function(id, callback) {
 		Promise.using(this.lock(id, true), function() {
@@ -542,24 +563,10 @@ Object.assign(FsMetastore.prototype, {
 					}
 					// TODO Check if migration is needed and migrate if so
 					if (metadata) {
-						var metadataToServe = {
-							username: metadata.UserName,
-							email: metadata.Properties.Email,
-							fullname: metadata.FullName,
-							oauth: metadata.Properties.OAuth,
-							properties: metadata.Properties,
-							emailConfirmed: Boolean(metadata.emailConfirmed || metadata.isAuthenticated),
-							login_timestamp: new Date(parseInt(metadata.Properties.LastLoginTimestamp, 10)),
-							disk_usage: metadata.Properties.DiskUsage,
-							disk_usage_timestamp: new Date(parseInt(metadata.Properties.DiskUsageTimestamp, 10)),
-							created_at:  new Date(parseInt(metadata.Properties.AccountCreationTimestamp, 10))
-						};
-						// TODO password needs to be handled specifically since it needs to be decrypted. (referrence setProperties line 967)				
-						metadataToServe.workspaces = metadata.WorkspaceIds || [];
-						return resolve(metadataToServe);
+						return resolve(this._convertUser(metadata));
 					}
 					resolve(); /* indicates that there was not an error and the user does not exist */
-				});
+				}.bind(this));
 			}.bind(this));
 		}.bind(this)).then(
 			function(result) {
@@ -576,6 +583,13 @@ Object.assign(FsMetastore.prototype, {
 				this._readUserMetadata(id, function(error, metadata) {
 					if (error) {
 						return reject(error);
+					}
+					
+					if (typeof userData === "function") {
+						userData = userData(this._convertUser(metadata));
+						if (!userData) {
+							return resolve();
+						}
 					}
 					
 					// userData.properties contains all the properties, not only the ones that are changed, 
