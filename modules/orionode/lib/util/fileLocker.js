@@ -164,7 +164,7 @@ FileLocker.prototype._acquireLock = function(shared) {
 			var openLockFile = function() {
 				fs.open(this._pathame, APPEND, function(error, fd) {
 					if (error) {
-	 					if (error.code === "ENOENT") {
+	 					if (error.code === "ENOENT" || error.code === "ENOTDIR") {
 	 						var dirPath = nodePath.dirname(this._pathame);
 							return mkdirpAsync(dirPath).then(
 								function() {
