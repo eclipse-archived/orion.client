@@ -157,6 +157,10 @@ define(['i18n!cfui/nls/messages', 'orion/selection', 'orion/widgets/input/ComboT
 			});
 			self._setSelection();
 			self._selection.getSelection(function(selection){
+				if (!selection) {
+					self._hideMessage();
+					return;
+				}
 				self._loadDomains(selection);
 				self._loadApplications(selection);
 				self._loadHosts(selection);
