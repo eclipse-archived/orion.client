@@ -101,7 +101,9 @@ function tryLoadRouter(endpoint, options) {
 	}
 	if (endpoint.authenticated) {
 		args.push(options.authenticate);
-		args.push(checkAuthenticated);
+		if (endpoint.checkAuthenticated === undefined || endpoint.checkAuthenticated) {
+			args.push(checkAuthenticated);
+		}
 	}
 	if (isEndpoint) {
 		args.push(options.basicMiddleware);
