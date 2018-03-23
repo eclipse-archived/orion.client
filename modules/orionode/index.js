@@ -318,6 +318,9 @@ module.exports = function startServer(options) {
 				} else {
 					res.setHeader("Cache-Control", _24_HOURS);
 				}
+				if (urlPath.indexOf("OrionIconFont-Regular") !== -1) {
+					res.setHeader("Access-Control-Allow-Origin", "*");
+				}
 			}
 		};
 	}
