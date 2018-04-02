@@ -118,7 +118,7 @@ function handlePut(req, res){
 		return metadata;
 	}, function(err) {
 		if (err) {
-			writeError(err.code || 500, res, err);
+			return writeError(err.code || 500, res, err);
 		}
 		api.sendStatus(204, res);
 	});
@@ -146,7 +146,7 @@ function handleDelete(req, res){
 		return metadata;
 	}, function(err) {
 		if (err) {
-			writeError(err.code || 500, res, err);
+			return writeError(err.code || 500, res, err);
 		}
 		api.sendStatus(204, res);
 	});
