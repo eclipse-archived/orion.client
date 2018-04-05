@@ -91,6 +91,7 @@ var FileLocker = function(pathname, options) {
 	this._exclusiveLocksOnly = options && options.configParams && options.configParams.get('orion_exclusive_locks_only') === true;
 	this._pathame = pathname;
 	this._inactivityTimer;
+	this._lockTimeout = options && options.configParams && options.configParams.get('orion_tasks_timeout');
 };
 
 FileLocker.prototype.lock = function(shared) {
@@ -99,24 +100,51 @@ FileLocker.prototype.lock = function(shared) {
 	}
 
 	var time = Date.now();
+	var stack = new Error().stack;
 	return new Promise(function(resolve, reject) {
 		this._lock.lock(shared, function(releaser) {
 			this._acquireLock(shared).then(
 				function() {
 					var acquireTime = Date.now();
 					logger.info("get lock time=" + (acquireTime - time) + " shared=" + shared + " path=" + this._pathame + " pid=" + process.pid);
-					resolve(function() {
-						this._releaseLock().then(
-							function() {
-								logger.info("release lock time=" + (Date.now() - acquireTime) + " shared=" + shared + " path=" + this._pathame + " pid=" + process.pid);
-								releaser();
-							}.bind(this),
-							function(error) {
-								logger.error("An error occurred while releasing lock file: " + this._pathame, error);
-								releaser();
-							}.bind(this)
-						);
-					}.bind(this));
+
+					resolve(
+						function() {
+							var lockTimer;
+							var doit = function() {
+								if (lockTimer) {
+									clearTimeout(lockTimer);
+								}
+
+								this._releaseLock().then(
+									function() {
+										logger.info("release lock time=" + (Date.now() - acquireTime) + " shared=" + shared + " path=" + this._pathame + " pid=" + process.pid);
+										releaser();
+									}.bind(this),
+									function(error) {
+										logger.error("An error occurred while releasing lock file: " + this._pathame, error);
+										releaser();
+									}.bind(this)
+								);
+							}.bind(this);
+
+							if (this._lockTimeout) {
+								/*
+								 * Start a timer for the specified maximum lock interval.  If it expires then auto-release this lock so that
+								 * other processes are not permanently blocked on it.
+								 */
+								lockTimer = setTimeout(
+									function() {
+										logger.error("Auto-released a timed-out lock: shared=" + shared + " path=" + this._pathame + " pid=" + process.pid + " stack: " + stack);
+										doit();
+									}.bind(this),
+									this._lockTimeout * 1000
+								);
+							}
+
+							return doit;
+						}.bind(this)()
+					);
 				}.bind(this),
 				function(error) {
 					logger.error("An error occurred while locking file: " + this._pathame, error);
