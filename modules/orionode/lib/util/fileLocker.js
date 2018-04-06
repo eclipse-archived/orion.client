@@ -87,7 +87,7 @@ var FileLocker = function(pathname, options) {
 	this._counter = 0;
 	this._fd;
 	this._lock = new ReentrantLock();
-	this._exclusiveLock = new ReentrantLock();
+	this._syncLock = new ReentrantLock();
 	this._locking = !isWin;
 	this._exclusiveLocksOnly = options && options.configParams && options.configParams.get('orion_exclusive_locks_only') === true;
 	this._pathame = pathname;
@@ -98,7 +98,7 @@ var FileLocker = function(pathname, options) {
 
 FileLocker.prototype._synchronized = function(func, args) {
 	return new Promise(function(resolve, reject) {
-		this._exclusiveLock.lock(false, function(releaser) {
+		this._syncLock.lock(false, function(releaser) {
 			func.apply(this, args).then(function(result) {
 				releaser();
 				resolve(result);
