@@ -177,14 +177,19 @@ function read(req, res, callback){
 }
 	
 function update(req, changeCallback, doneCallback) {
-	var scope = req.url.split("/")[1];
+	var segments = req.url.split("/");
+	var scope = segments[1];
 	var store = fileUtil.getMetastore(req);
-	if (scope === "user") {
+	if (scope === "user" && segments.length > 2) {
 		store.updateUser(req.user.username, changeCallback, doneCallback);
-	} else if(scope === "workspace") {
+	} else if(scope === "workspace" && segments.length > 2) {
 		store.updateWorkspace(req.user.workspaceId, changeCallback, doneCallback);
-	} else if(scope === "project") {
+	} else if(scope === "project" && segments.length > 2) {
 		doneCallback(new Error("Not implemented"));
+	} else {
+		var error = new Error("Method not allowed");
+		error.code = 405;
+		return doneCallback(error);
 	}
 }
 };
