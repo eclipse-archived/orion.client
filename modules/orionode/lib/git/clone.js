@@ -695,7 +695,7 @@ function getRemoteCallbacks(creds, username, task) {
 			return new Promise(function(resolve, reject) {
 				credentialsProvider.getCredentials(gitUrl, username).then(
 					function(result) {
-						resolve(result);
+						resolve(git.Cred.userpassPlaintextNew(result.username, result.password));
 					},
 					function(error) {
 						resolve(git.Cred.defaultNew());

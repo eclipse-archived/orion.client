@@ -9,7 +9,6 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 /*eslint-env node */
-var git = require('nodegit');
 var url = require('url');
 
 module.exports = {};
@@ -47,7 +46,7 @@ module.exports.getCredentials = function(uri, user) {
 				function(result) {
 					if (++doneCount <= tokenProviders.length) {
 						doneCount = tokenProviders.length;
-						fulfill(git.Cred.userpassPlaintextNew(result.username, result.password));
+						fulfill(result);
 					}
 				},
 				function(error) {
