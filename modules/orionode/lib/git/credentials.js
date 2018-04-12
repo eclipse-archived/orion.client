@@ -9,10 +9,6 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 /*eslint-env node */
-var url = require('url');
-
-module.exports = {};
-
 var tokenProviders = [];
 
 module.exports.addTokenProvider = function(value) {
