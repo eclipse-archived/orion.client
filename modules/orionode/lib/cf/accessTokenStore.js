@@ -11,16 +11,21 @@
 /*eslint-env node */
 var userBearerTokens = {};
 
-exports.getBearerToken = function(userId, target, getBearerToken){
-	if(getBearerToken){
-		 return getBearerToken(userId, target)
-		 .then(function(bearerToken){
-			return bearerToken;
-		 });
-	}else if(userBearerTokens[userId]){
+exports.defaultStore = {
+	getBearerToken: function(userId, target) {
 		return Promise.resolve(userBearerTokens[userId]);
+	},
+	setBearerToken: function(userId, bearerToken) {
+		userBearerTokens[userId] = bearerToken;
 	}
-};
-exports.setBearerToken = function(userId, bearerToken){
-	userBearerTokens[userId] = bearerToken;
-};
+}
+
+var tokenStore = exports.defaultStore;
+
+exports.setBearerTokenStore = function(store) {
+	tokenStore = store;
+}
+
+exports.getBearerTokenStore = function() {
+	return tokenStore;
+}

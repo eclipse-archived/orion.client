@@ -36,9 +36,6 @@ function parsebody(body){
 module.exports.parsebody = parsebody;
 
 module.exports.router = function(options) {
-	if(options.configParams.get("cf.bearer.token.store")) {
-		var getBearerToken = require(options.configParams.get("cf.bearer.token.store")).getBearerTokenfromUserId;
-	}
 	
 	module.exports.getAccessToken = getAccessToken;
 	module.exports.computeTarget = computeTarget;
@@ -103,7 +100,8 @@ function tryLogin(url, Username, Password, userId){
 			request.post(authorizationHeader, function (error, response, body) {
 				var respondJson = parsebody(body);
 				if(!error && response.statusCode === 200){
-					bearerTokenStore.setBearerToken && bearerTokenStore.setBearerToken(userId, respondJson.access_token);		
+					var store = bearerTokenStore.getBearerTokenStore();
+					store.setBearerToken && store.setBearerToken(userId, respondJson.access_token);		
 					return fulfill();
 				}
 				if(error){
@@ -190,7 +188,8 @@ function computeTarget(userId, targetRequest){
 	}
 }
 function getAccessToken(userId, target){
-	return bearerTokenStore.getBearerToken(userId, target, getBearerToken);
+	var store = bearerTokenStore.getBearerTokenStore();
+	return store.getBearerToken(userId, target);
 }
 function caughtErrorHandler(task, err){
 	var errorResponse = {
