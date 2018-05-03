@@ -317,7 +317,7 @@ define(["orion/Deferred", "orion/commands", 	'orion/PageUtil', "orion/contentTyp
 			}
 			
 			var showCommand = true;
-			var contentType = contentTypes ? mContentTypes.getFilenameContentType(item.Name, contentTypes) : null;
+			var contentType = contentTypes ? mContentTypes.getFilenameContentType(item.Name || item.Location, contentTypes) : null;
 			contentType = contentType || {
 				id:"application/octet-stream"
 			};

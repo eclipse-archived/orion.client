@@ -1219,7 +1219,7 @@ objects.mixin(EditorViewer.prototype, {
 								inputManager.removeEventListener("InputChanged", this.loadComplete);
 								that.tabWidget.closeTab(metadata, false);
 							}.bind(this));
-							inputManager.setInput(uriTemplate.expand({resource: newLocation || metadata.WorkspaceLocation || fileClient.fileServiceRootURL(metadata.Location)}));
+							window.location = urlModifier(that.activateContext.computeNavigationHref({Location: newLocation || metadata.WorkspaceLocation || fileClient.fileServiceRootURL(metadata.Location)}));
 						} else {
 							that.tabWidget.closeTab(metadata, false);
 						}
@@ -1234,7 +1234,7 @@ objects.mixin(EditorViewer.prototype, {
 							inputManager.removeEventListener("InputChanged", this.loadComplete);
 							that.tabWidget.closeTab(metadata, false);
 						}.bind(this));
-						inputManager.setInput(uriTemplate.expand({resource: item.result && item.result.Location || metadata.WorkspaceLocation || fileClient.fileServiceRootURL(selectedMetadata.Location)}));
+						window.location = urlModifier(that.activateContext.computeNavigationHref({Location: item.result && item.result.Location || metadata.WorkspaceLocation || fileClient.fileServiceRootURL(selectedMetadata.Location)}));
 					} else if (that.tabWidget.editorTabs.hasOwnProperty(sourceLocation)) {
 						that.tabWidget.closeTab(metadata, false);
 					}
