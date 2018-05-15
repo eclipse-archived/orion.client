@@ -1157,11 +1157,9 @@ html[dir="rtl"] .local .setting-label { /* ACGC */
 	width: 600px;
 	height: 400px;
 	z-index: 150;
-	border: 1px inset;
 	box-shadow: 2px 2px 5px 3px rgba(0, 0, 0, 0.2);
 	border: 1px solid #BBBBBB;
-    border-collapse: separate;
-    border-radius: 1px;
+	border-collapse: separate;
 }
 
 /* FOR NAVIGATION DROP DOWN */
