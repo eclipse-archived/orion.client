@@ -10,7 +10,7 @@
 define({
 	"pluginName": "Orion JSON Support",
 	"pluginDescription": "This plugin provides JSON support for Orion.",
-	
+	"jsonSourceOutline": "JSON Source Outline",
 	//Formatting
 	"jsonFormatter": "Orion JSON formatting support",
 	'jsonFormattingOptions' : 'Formatting Settings for JSON',

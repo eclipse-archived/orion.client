@@ -18,8 +18,9 @@ define([
 	"plugins/languages/json/validator",
 	"plugins/languages/json/jsonFormatter",
 	"plugins/languages/json/jsonAstManager",
+	"plugins/languages/json/outliner",
 	"i18n!plugins/languages/json/nls/messages",
-], function(PluginProvider, mServiceRegistry, mJSON, mJSONSchema, mValidator, JsonFormatter, JsonAstManager, Messages) {
+], function(PluginProvider, mServiceRegistry, mJSON, mJSONSchema, mValidator, JsonFormatter, JsonAstManager, JsonOutliner, Messages) {
 
 	var headers = {
 		name: Messages['pluginName'],
@@ -64,6 +65,16 @@ define([
 	pluginProvider.registerService(["orion.edit.validator"], new mValidator(serviceRegistry), { //$NON-NLS-1$
 		contentType: ["application/json"] //$NON-NLS-1$
 	});
+	/**
+	 * Outliner
+	 */
+	pluginProvider.registerService("orion.edit.outliner", new JsonOutliner(jsonAstManager),
+		{
+			contentType: ["application/json"],
+			name: Messages['jsonSourceOutline'],
+			title: Messages['jsonSourceOutline'],
+			id: "orion.json.outliner.source"
+		});
 	/**
 	 * Formatting
 	 */
