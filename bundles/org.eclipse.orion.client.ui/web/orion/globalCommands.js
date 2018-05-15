@@ -599,6 +599,7 @@ define([
 
 		var toolbar = lib.node("pageToolbar"); //$NON-NLS-0$
 		if (toolbar) {
+			toolbar.setAttribute("aria-label", messages.toolbar); //$NON-NLS-1$
 			toolbar.classList.add("toolbarLayout"); //$NON-NLS-0$
 			toolbar.innerHTML = ToolbarTemplate + commonHTML.slideoutHTMLFragment("mainToolbar"); //$NON-NLS-0$
 		}

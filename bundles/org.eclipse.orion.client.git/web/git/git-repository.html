@@ -19,12 +19,12 @@
 				require(["orion/splash"], load, load);
 			}, self.errback);
 		</script>
-</head>
+	</head>
 	<body id="orion-repository" class="orionPage lightPage">
 		<nav id="sideMenu" class="sideMenu"></nav>
 		<div id="pageContent" class="content-fixedHeight">
 			<div id="sideMenuToggle" class="sideMenuToggle"></div>
-			<div id="pageToolbar" class="mainToolbar toolComposite toolbarLayout"></div>
+			<section id="pageToolbar" class="mainToolbar toolComposite toolbarLayout"></section>
 			<div id="innerPanels" class="innerPanels">
 				<div id="leftPane" class="auxpane sidePanelLayout hasSplit">
 					<div class="fixedToolbarHolder sidebarWrapper">
@@ -32,11 +32,11 @@
 					</div>
 				</div>
 				<div class="split splitLayout"></div>
-				<div id="rightPane" class="mainpane mainPanelLayout hasSplit">
+				<main id="rightPane" class="mainpane mainPanelLayout hasSplit">
 					<div class="fixedToolbarHolder">
 						<div id="table" class="workingTarget"></div>
 					</div>
-				</div>
+				</main>
 			</div>
 		</div>
 		<div class="footer-fixed-bottom footer" id="footer"></div>

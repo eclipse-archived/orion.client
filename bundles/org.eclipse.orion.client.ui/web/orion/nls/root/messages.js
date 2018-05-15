@@ -20,6 +20,7 @@ define({//Default message bundle
 	"EditorLinkWorkspace": "Edit",
 	"EditorRelatedLinkProj": "Show Project",
 	"sidebar": "Sidebar",
+	"toolbar": "Toolbar",
 	"Filter bindings:": "Filter bindings:",
 	"Filter bindings": "Type characters to filter by name or key combination",
 	"BindingPrompt": "Enter the new binding",

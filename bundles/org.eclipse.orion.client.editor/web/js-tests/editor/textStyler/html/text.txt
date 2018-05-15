@@ -125,14 +125,14 @@
 		<div class="orion-banner">
 			<div class="orion-nav-bar">
 				<header class="orion-logo" role="banner"></header>
-				<nav role="navigation">
+				<nav>
 					<a class="orion-rss-link" href="http://planetorion.org/news/" target="_blank" title="Orion News" alt="Orion News" tabindex="100"></a>
 					<a class="orion-twitter-link" href="http://twitter.com/orionhub" target="_blank" title="Orion Twitter" alt="Orion Twitter" tabindex="99"></a>
 				</nav>
 			</div>
 		</div>
 		<div class="orion-login-container" id="login-window" style="display:none;">
-			<div class="orion-landing-area" role="main">
+			<main class="orion-landing-area">
 				<aside id="orionInfoArea" class="orion-info" style="visibility: hidden;" tabindex="0" role="complementary" aria-atomic="true" aria-live="assertive">
 						<div id="orionInfoLink" class="orion-info-link"><a href="/mixloginstatic/ServerStatus.html"> [more info...]</a></div>
 				</aside>
@@ -214,7 +214,7 @@
 						<input id="registerButton" type="button" class="orion-register-button" value="Create a new account" tabindex="0">
 					</form>
 				</div>
-			</div>
+			</main>
 		</div>
 	</body>
 </html>

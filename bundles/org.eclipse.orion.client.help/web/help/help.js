@@ -814,6 +814,11 @@ define(["require", "i18n!orion/help/nls/messages", "orion/bootstrap", "orion/com
 		mGlobalCommands.generateBanner("orion-helpPage", serviceRegistry, commandRegistry, core.preferences); //$NON-NLS-0$
 		mGlobalCommands.setPageTarget({task: messages.Help, serviceRegistry: serviceRegistry, commandService: commandRegistry});
 
+		var toc = lib.node("auxpane"); //$NON-NLS-0$
+		toc.setAttribute("aria-label", messages.TOC); //$NON-NLS-0$
+		var topic = lib.node("rightPane"); //$NON-NLS-0$
+		topic.setAttribute("aria-label", messages.Topic); //$NON-NLS-0$
+		
 		var sideBar = lib.node("pageSidebar"); //$NON-NLS-0$
 		var outputDiv = lib.node("output"); //$NON-NLS-0$
 

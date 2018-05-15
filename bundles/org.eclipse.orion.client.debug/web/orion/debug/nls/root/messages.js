@@ -41,5 +41,6 @@ define({ //Default message bundle
 	"UncaughtExceptions": "Uncaught Exceptions",
 	"Add": "Add",
 	"Clear": "Clear",
-	"Maximize": "Toggle Maximize"
+	"Maximize": "Toggle Maximize",
+	"Close": "Close"
 });

@@ -1646,6 +1646,7 @@ function EditorSetup(serviceRegistry, pluginRegistry, preferences, readonly) {
 	this.sidebarDomNode = lib.node("pageSidebar"); //$NON-NLS-0$
 	this.sidebarToolbar = lib.node("sidebarToolbar"); //$NON-NLS-0$
 	this.pageToolbar = lib.node("pageToolbar"); //$NON-NLS-0$
+	lib.node("auxpane").setAttribute("aria-label", messages.Navigator); //$NON-NLS-1$ //$NON-NLS-0$
 
 	this.editorViewers = [];
 }

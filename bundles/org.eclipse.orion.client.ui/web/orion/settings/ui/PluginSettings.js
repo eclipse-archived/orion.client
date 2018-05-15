@@ -358,12 +358,9 @@ define([
 	SettingsRenderer.prototype.getCellElement = function(col_no, /*Setting*/ setting, rowElement) {
 		var sectionId = setting.getPid(), headerId = sectionId + 'header'; //$NON-NLS-0$
 		
-		var settingSection = document.createElement('section');
+		var settingSection = document.createElement('div');
 		settingSection.id = sectionId;
 		settingSection.className = 'setting-row'; //$NON-NLS-0$
-		settingSection.setAttribute('role', 'region'); //$NON-NLS-0$ //$NON-NLS-1$ //$NON-NLS-2$
-		settingSection.setAttribute('aria-label', setting.getName()); //$NON-NLS-0$ // currently there's only one section, so just use setting name
-//		settingSection.setAttribute('aria-labelledby', headerId); //$NON-NLS-0$ // if there are ever multiple sections, use section header
 
 		var sectionHeader = document.createElement('div'); //$NON-NLS-0$
 		sectionHeader.id = headerId;
