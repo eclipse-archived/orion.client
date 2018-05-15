@@ -218,7 +218,7 @@ objects.mixin(SiteEditor.prototype, {
 		this.convertToolbar = lib.$(".convertToolbar"); //$NON-NLS-0$
 		this.convertToolbar.id = this.id + "_convertToolbar"; //$NON-NLS-0$
 
-		lib.$(".siteConfigNameLabel", this.node).htmlFor = (/*"htmlFor", */name.id); //$NON-NLS-1$ //$NON-NLS-0$
+		lib.$(".siteConfigNameLabel", this.node).htmlFor = (/*"htmlFor", */this.name.id); //$NON-NLS-1$ //$NON-NLS-0$
 		lib.$(".hostHintLabel", this.node).htmlFor = (/*"htmlFor", */this.hostHint.id); //$NON-NLS-1$ //$NON-NLS-0$
 	},
 

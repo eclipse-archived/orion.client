@@ -52,7 +52,7 @@ define([
 				new mSection.Section(this.node, {
 					id: "fileNavigation", //$NON-NLS-0$
 					title: messages.fileNavigation,
-					content: '<section class="setting-row" role="region" aria-labelledby="fileNavigationTitle" id="setting-row-general">', //$NON-NLS-0$
+					content: '<div class="setting-row" id="setting-row-general">', //$NON-NLS-0$
 				});
 
 				var settingsContentElement = document.createElement('div');

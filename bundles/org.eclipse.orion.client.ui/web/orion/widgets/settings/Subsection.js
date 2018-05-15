@@ -28,11 +28,9 @@ define([
 		this.parentNode = options.parentNode;
 		this.children = options.children;
 		
-		var node = document.createElement('section'); //$NON-NLS-0$
+		var node = document.createElement('div'); //$NON-NLS-0$
 		node.classList.add('setting-row'); //$NON-NLS-0$
-		node.setAttribute('role', 'region'); //$NON-NLS-1$ //$NON-NLS-0$
 		var headerId = this.headerId = 'setting-header-' + sectionName.replace(/\s/g, ''); //$NON-NLS-0$
-		node.setAttribute('aria-labelledby', headerId); //$NON-NLS-0$
 		var titleNode = this.titleNode = document.createElement('div'); //$NON-NLS-0$
 		titleNode.classList.add('setting-header'); //$NON-NLS-0$
 		if(options.additionalCssClass) {

@@ -117,7 +117,6 @@ define(['i18n!orion/sites/nls/messages', 'orion/explorers/explorer', 'orion/Defe
 							// If there are sites of just one config type, put them in a table
 							} else {
 								var contentParent = document.createElement("div"); //$NON-NLS-0$
-								contentParent.setAttribute("role", "region"); //$NON-NLS-1$ //$NON-NLS-0$
 								document.getElementById(that.parentId).appendChild(contentParent);
 								var div = document.createElement("div"); //$NON-NLS-0$
 								div.id = siteServiceId + '_Node'; //$NON-NLS-0$

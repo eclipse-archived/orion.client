@@ -25,22 +25,22 @@
 		<nav id="sideMenu" class="sideMenu"></nav>
 		<div id="pageContent" class="content-fixedHeight">
 			<div id="sideMenuToggle" class="sideMenuToggle"></div>
-			<div id="pageToolbar" class="mainToolbar toolComposite toolbarLayout"></div>
+			<section id="pageToolbar" class="mainToolbar toolComposite toolbarLayout"></section>
 			<div id="innerPanels" class="innerPanels">
-				<div id="auxpane" class="auxpane sidePanelLayout hasSplit">
+				<nav id="auxpane" class="auxpane sidePanelLayout hasSplit" aria-labelledby="categoriesTitle">
 					<div class="fixedToolbarHolder">
 						<div id="sidebarToolbar" class="sidebarToolbar mainToolbar toolComposite toolbarLayout"></div>
 						<div id="categoriesTitle" class="categoriesTitle"></div>
 						<div id="categoriesContainer" class="toolbarTarget categoriesContainer toolbarTarget-toolbarHidden"></div>
 					</div>
-				</div>
+				</nav>
 				<div class="split splitLayout settingsSplitLayout" style="left: 300px;"></div>
-				<div id="rightPane" class="mainpane mainPanelLayout hasSplit">
+				<main id="rightPane" class="mainpane mainPanelLayout hasSplit">
 					<div class="fixedToolbarHolder">
-						<div class="toolbarTarget workingTarget toolbarTarget-toolbarHidden" tabindex="0" id="settings" role="tabpanel">
-						</div>				
+						<div id="settings" role="tabpanel" class="toolbarTarget workingTarget toolbarTarget-toolbarHidden">
+						</div>
 					</div>
-				</div>
+				</main>
 			</div>
 			<div class="footer-fixed-bottom footer" id="footer"></div>
 		</div>

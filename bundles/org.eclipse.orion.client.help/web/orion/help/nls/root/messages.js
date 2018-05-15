@@ -11,6 +11,8 @@
 define({//Default message bundle
 	"Help": "Help",
 	"Contents": "Contents",
+	"TOC": "Table of Contents",
+	"Topic": "Topic",
 	"Print": "Print",
 	"unknownError": "An unknown error occurred.",
 	"noResponse": "No response from server. Check your internet connection and try again.",

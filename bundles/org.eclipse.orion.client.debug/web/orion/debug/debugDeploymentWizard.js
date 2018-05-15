@@ -49,7 +49,9 @@ define([
         document.getElementById('title').appendChild(document.createTextNode(messages["configureApplicationDeployment"]));
 
         /* allow the frame to be closed */
-        document.getElementById('closeDialog').addEventListener('click', closeFrame);
+        var closeButton = document.getElementById('closeDialog');
+        closeButton.setAttribute('aria-label', messages["Close"]);
+        closeButton.addEventListener('click', closeFrame);
 
         /* allow frame to be dragged by title bar */
         var titleBar = document.getElementById('titleBar');
