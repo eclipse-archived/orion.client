@@ -90,6 +90,8 @@ define({
 	"${0}. Try your search again.": "${0}. Try your search again.",
 	"DeleteSearchTrmMsg": "Click or use delete key to delete the search term",
 	"${0} matches": "${0} matches",
+	"regexOff" : "Regular expressions are off",
+	"regexOn" : "Regular expressions are on",
 	"regexOptionOff" : "Regular expressions are off. Click here or use the options to turn them on for replacement",
 	"regexOptionOn" : "Regular expressions are on. Click here or use the options to turn them off",
 	"Scope": "Find in:",

@@ -16,9 +16,10 @@ define([
 	'orion/editor/find', 'orion/commands', 
 	'orion/bidiUtils',
 	'orion/objects',
+	'orion/webui/tooltip',
 	'orion/inputCompletion/inputCompletion', 
 	'orion/webui/littlelib' ], 
-	function(messages, mFind, mCommands, bidiUtils, objects, mInputCompletion, lib){
+	function(messages, mFind, mCommands, bidiUtils, objects, mTooltip, mInputCompletion, lib){
 	
 	var MAX_RECENT_FIND_NUMBER = 30;
 	function TextSearcher(editor, serviceRegistry, cmdservice, undoStack, options) {
@@ -50,6 +51,10 @@ define([
 			if(visible){
 				this._commandService.closeParameterCollector();
 			}
+			if (this._infoTooltip) {
+				this._infoTooltip.destroy();
+				this._infoTooltip = null;
+			}
 		},
 		show: function(options) {
 			mFind.Find.prototype.show.call(this, options);
@@ -79,15 +84,26 @@ define([
 			}, 10);
 		},
 		_showReplaceInfo: function() {
+			if (this._infoTooltip) {
+				this._infoTooltip.destroy();
+				this._infoTooltip = null;
+			}
+			var infoText;
 			if(this._regex) {
 				this._replaceInfo.src = "data:image/gif;base64,R0lGODlhBwAIAMQAAMzX6cbT5kh4qFiIuKC40FCIuGSXwmWZw2SaxGacxmadxmWcxbPM4GigyJW92JzC26DI0P///////wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACH5BAEAABIALAAAAAAHAAgAAAUmoEQUQkFI0PBEz5A2yII0w9AwkUPbRpTsjUNEQUsFIgCXiGSShAAAOw==";//$NON-NLS-0$
-				this._replaceInfo.title=messages["regexOptionOn"];
-				this._replaceInfo.style.display = "";
+				this._replaceInfo.alt = messages["regexOn"];
+				infoText = messages["regexOptionOn"];
 			} else {
 				this._replaceInfo.src ="data:image/gif;base64,R0lGODlhBwAIAEAAACH5BAEAABIALAAAAAAHAAgAhwAAAAAAMwAAZgAAmQAAzAAA/wArAAArMwArZgArmQArzAAr/wBVAABVMwBVZgBVmQBVzABV/wCAAACAMwCAZgCAmQCAzACA/wCqAACqMwCqZgCqmQCqzACq/wDVAADVMwDVZgDVmQDVzADV/wD/AAD/MwD/ZgD/mQD/zAD//zMAADMAMzMAZjMAmTMAzDMA/zMrADMrMzMrZjMrmTMrzDMr/zNVADNVMzNVZjNVmTNVzDNV/zOAADOAMzOAZjOAmTOAzDOA/zOqADOqMzOqZjOqmTOqzDOq/zPVADPVMzPVZjPVmTPVzDPV/zP/ADP/MzP/ZjP/mTP/zDP//2YAAGYAM2YAZmYAmWYAzGYA/2YrAGYrM2YrZmYrmWYrzGYr/2ZVAGZVM2ZVZmZVmWZVzGZV/2aAAGaAM2aAZmaAmWaAzGaA/2aqAGaqM2aqZmaqmWaqzGaq/2bVAGbVM2bVZmbVmWbVzGbV/2b/AGb/M2b/Zmb/mWb/zGb//5kAAJkAM5kAZpkAmZkAzJkA/5krAJkrM5krZpkrmZkrzJkr/5lVAJlVM5lVZplVmZlVzJlV/5mAAJmAM5mAZpmAmZmAzJmA/5mqAJmqM5mqZpmqmZmqzJmq/5nVAJnVM5nVZpnVmZnVzJnV/5n/AJn/M5n/Zpn/mZn/zJn//8wAAMwAM8wAZswAmcwAzMwA/8wrAMwrM8wrZswrmcwrzMwr/8xVAMxVM8xVZsxVmcxVzMxV/8yAAMyAM8yAZsyAmcyAzMyA/8yqAMyqM8yqZsyqmcyqzMyq/8zVAMzVM8zVZszVmczVzMzV/8z/AMz/M8z/Zsz/mcz/zMz///8AAP8AM/8AZv8Amf8AzP8A//8rAP8rM/8rZv8rmf8rzP8r//9VAP9VM/9VZv9Vmf9VzP9V//+AAP+AM/+AZv+Amf+AzP+A//+qAP+qM/+qZv+qmf+qzP+q///VAP/VM//VZv/Vmf/VzP/V////AP//M///Zv//mf//zP///wAAAAAAAAAAAAAAAAgsAPcpQzMJjbJ9xNAQQ6hwUqaHDws+3PeQoMN9DiUuzFRQ2ZiDyyYdHFhwYUAAOw==";
-				this._replaceInfo.title=messages["regexOptionOff"];
-				this._replaceInfo.style.display = "";
+				this._replaceInfo.alt = messages["regexOff"];
+				infoText = messages["regexOptionOff"];
 			}
+			this._replaceInfo.style.display = "";
+			this._infoTooltip = new mTooltip.Tooltip({
+				node: this._replaceInfo,
+				text: infoText,
+				position: ["below"] //$NON-NLS-1$
+			});
 		},
 		_createActionTable: function() {
 			var that = this;
