@@ -47,6 +47,14 @@ hard-coded numbers elsewhere.
 	height: 26px; /* $FSToolbarHeight */
 }
 
+/* $FooterHeight */
+.footerLayout {
+	height: 35px;
+	padding-left:10px;
+	font-size:0.9em;
+	font-weight:bold;
+}
+
 /* Banner Layout Classes */
 
 .bannerLeftArea{
@@ -102,6 +110,13 @@ hard-coded numbers elsewhere.
   
 }
 
+.footer {
+	display: none;
+}
+
+.footer-visible {
+	display: block;
+}
 
 .bannerRightArea{
 	-ms-flex: 1 6 20%;
@@ -132,7 +147,6 @@ hard-coded numbers elsewhere.
 	overflow: hidden;
     position: absolute;
     top: 0;
-	/* bottom: 36px; $FooterHeight + footer border (1px) */    
     bottom: 0;
     left: 35px;
     right: 0;
@@ -142,6 +156,11 @@ hard-coded numbers elsewhere.
 
 .content-fixedHeight-animation {
     transition: left 0.3s ease; /* if this is changed SideMenu.js->TRANSITION_DURATION_MS needs to be changed as well */
+}
+
+.content-fixedHeight-withFooter {
+	/* bottom: 36px; $FooterHeight + footer border (1px) */    
+	bottom: 35px;
 }
 
 .content-fixedHeight-maximized {
@@ -159,12 +178,42 @@ hard-coded numbers elsewhere.
 .footer-fixed-bottom {
 	position: fixed;
 	bottom: 0;
-	z-index: 50;
 	right: 0;
 	left: 0;
 	/* height: 36px;  It has to be this */
-	height: 0;
-	background:#ededed;
+	height: 35px;
+}
+
+.footerBlock {
+	float: left;
+	margin: 8px;
+	color: #7F7F7F;
+	font-weight: bold;
+}
+
+.footerRightBlock {
+	float: right;
+	margin: 4px;
+}
+
+.footerRightBlock ul {
+	margin: 0;
+	margin-top:4px;
+	font-size: .9em;
+	margin-right: 4px;
+}
+
+.footerRightBlock li {
+	display: inline;
+}
+
+.footerRightBlock li:after {
+	content: ' ';
+	padding: 0 8px;
+}
+
+.footerRightBlock li:last-child:after {
+	content: none;
 }
 
 .layoutBlock {
@@ -631,7 +680,6 @@ and (max-device-width : 1024px)  {
 	float: left;
     position: absolute;
     top: 0;
-	/* bottom: 36px; $FooterHeight + footer border (1px) */   
     bottom: 0;
     -webkit-animation: slide 0.5s forwards;
     -webkit-animation-delay: 2s;
@@ -649,6 +697,11 @@ and (max-device-width : 1024px)  {
 
 .sideMenu.animating {
 	z-index: 0;
+}
+
+.sideMenu-withFooter {
+	/* bottom: 36px; $FooterHeight + footer border (1px) */   
+    bottom: 35px;
 }
 
 .sideMenu-maximized {

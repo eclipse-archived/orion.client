@@ -119,10 +119,6 @@ img {
     position: relative;
 }
 
-.form-elements-container label {
-    display: none;
-}
-
 .form-elements-container.has-error input {
     border-color: red;
 }
@@ -134,7 +130,7 @@ img {
 
 .orion-auth p {
     font-size: 12px;
-    max-width: 220px;
+    max-width: 300px;
     color: #878787;
 }
 
@@ -144,7 +140,7 @@ p.status {
     min-height: 18px;
     margin-bottom: 0;
     font-size: 12px;
-    max-width: 220px;
+    max-width: 300px;
 }
 
 input::-ms-clear,
@@ -478,6 +474,18 @@ input::-ms-reveal {
     width: 100%;
 }
 
+.email-warning {
+	font-family: "Helvetica Neue", Helvetica, Roboto, Arial, sans-serif;
+	font-size: 10px;
+	max-width: 330px;
+}
+
+.agreement-container {
+    margin: 10px 0;
+    font-family: "Helvetica Neue", Helvetica, Roboto, Arial, sans-serif;
+    font-size: 12px;
+}
+
 .login-button {
     background: #FDD900;
     border: none;
@@ -548,4 +556,8 @@ input::-ms-reveal {
 .footer > p {
     font-size: 0.9rem;
     margin-top: 20px;
+}
+
+.legal {
+	margin-left: 10px;
 }

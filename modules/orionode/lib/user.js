@@ -18,6 +18,7 @@ const express = require('express'),
 	generator = require('generate-password'),
 	log4js = require('log4js'),
 	logger = log4js.getLogger("user"),
+	path = require('path'),
 	jwt = require('jsonwebtoken'),
 	url = require('url'),
 	checkRights = require('./accessRights').checkRights,
@@ -26,9 +27,9 @@ const express = require('express'),
 const AUTH_TOKEN_BYTES = 48,
 	EMAIL_QUERY_PARAM = "EmailConfirmationId",
 	PASSWORD_QUERY_PARAM = "PasswordResetId",
-	CONFIRM_MAIL = "./multitenant/EmailConfirmation.txt",
-	PWD_CONFIRM_RESET_MAIL = "./multitenant/EmailConfirmationPasswordReset.txt",
-	PWD_RESET_MAIL = "./multitenant/PasswordReset.txt";
+	CONFIRM_MAIL = "../multitenant/EmailConfirmation.txt",
+	PWD_CONFIRM_RESET_MAIL = "../multitenant/EmailConfirmationPasswordReset.txt",
+	PWD_RESET_MAIL = "../multitenant/PasswordReset.txt";
 
 /**
  * Composes the email URL path to use for email address confirmations and password resets
@@ -99,7 +100,8 @@ function emailConfirmed(user) {
  * @param {fn(Error, {?})} callback The callback when the email has been sent or an error occurs
  */
 function sendMail(opt, callback){
-	fs.readFile(opt.template, 'utf8', function (err,data) {
+	var fileName = path.normalize(path.join(__dirname, opt.template));
+	fs.readFile(fileName, 'utf8', function (err,data) {
 		if (err) {
 			return callback(err);
 		}

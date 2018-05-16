@@ -59,8 +59,14 @@
 
 									<div class="form-elements-container email-container" id="emailContainer">
 										<input class="login-field" type="email" id="email" placeholder="Email" />
+										<div class="email-warning">The Eclipse community is an open and transparent community. Most of what you submit on our site will be visible to everyone, and your email address may be visible to users who use Bugzilla, Gerrit, Git, and our mailing lists. You may prefer to use an email account specifically for this purpose.</span>
 									</div>
 									<div class="hide spinner"></div>
+									
+									<div class="form-elements-container agreement-container" id="agreementContainer">
+										<label><input class="agreement-field" type="checkbox" id="agreement">I agree to the Eclipse.org <a href="https://www.eclipse.org/legal/termsofuse.php">Terms of Use</a> and <a href="https://www.eclipse.org/legal/privacy.php">Privacy Policy</a>.</input></label>
+									</div>
+									
 								</fieldset>
 
 								<button class="login-button" id="signUpBtn">Sign Up</button>
@@ -85,7 +91,12 @@
 				</div>
 			</div>
 			<div class="footer">
-				<p id="copyright">&copy; Copyright 2015 - Eclipse Foundation</p>
+				<p id="copyright">
+					Copyright &copy; Eclipse Foundation, Inc. All Rights Reserved.
+					<a class="legal" href="https://www.eclipse.org/legal/privacy.php">Privacy Policy</a>
+					<a class="legal" href="https://www.eclipse.org/legal/termsofuse.php">Terms of Use</a>
+					<a class="legal" href="https://www.eclipse.org/legal/copyright.php">Copyright Agent</a>
+				</p>
 			</div>
 		</div>
 	</body>
