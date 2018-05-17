@@ -203,7 +203,7 @@ define(['i18n!cfui/nls/messages', "orion/bootstrap", 'orion/Deferred', 'orion/cf
 						pages: [page1, page2, page3],
 						onCancel: closeFrame,
 						buttonNames: { ok: messages["save"] }, //$NON-NLS-0$
-						size: { width: "calc(100% - 24px)", height: "370px" }, //$NON-NLS-0$//$NON-NLS-1$
+						size: { width: "calc(100% - 24px)", height: "390px" }, //$NON-NLS-0$//$NON-NLS-1$
 						onSubmit: mDeploymentLogic.buildDeploymentTrigger({
 							ConfName : launchConfName,
 							showMessage : showMessage,

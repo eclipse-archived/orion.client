@@ -50,7 +50,7 @@ require([
 			return {
 				LocationTemplate : "{+OrionHome}/cfui/plugins/wizards/generic/genericDeploymentWizard.html",
 				Width : "478px",
-				Height : "470px"
+				Height : "490px"
 			};
 		}
 	};
