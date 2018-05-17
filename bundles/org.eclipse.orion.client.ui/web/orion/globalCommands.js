@@ -619,21 +619,18 @@ define([
 
 		var footer = lib.node("footer"); //$NON-NLS-0$
 		if (footer && FooterTemplate) {
-			prefsService.get("/footer").then(function(prefs) {
-				if (!prefs || !prefs.visible) return;
-				footer.innerHTML = FooterTemplate;
-				// do the i18n string substitutions
-				lib.processTextNodes(footer, messages);
-				var sideMenuNode = lib.node("sideMenu"); //$NON-NLS-0$
-				if (sideMenuNode) {
-					sideMenuNode.classList.add("content-fixedHeight-withFooter");
-				}
-				var content = lib.$(".content-fixedHeight"); //$NON-NLS-0$
-				if (content) {
-					content.classList.add("content-fixedHeight-withFooter");
-				}
-				footer.classList.add("footer-visible");
-			});
+			footer.innerHTML = FooterTemplate;
+			// do the i18n string substitutions
+			lib.processTextNodes(footer, messages);
+			var sideMenuNode = lib.node("sideMenu"); //$NON-NLS-0$
+			if (sideMenuNode) {
+				sideMenuNode.classList.add("content-fixedHeight-withFooter");
+			}
+			var content = lib.$(".content-fixedHeight"); //$NON-NLS-0$
+			if (content) {
+				content.classList.add("content-fixedHeight-withFooter");
+			}
+			footer.classList.add("footer-visible");
 		}
 
 		// Set up a custom parameter collector that slides out of adjacent tool areas.
