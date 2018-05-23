@@ -3921,6 +3921,11 @@ define("orion/editor/textView", [
 				}
 			}
 			if (!ignore) {
+				if (e.key) {
+					this._doContent(e.key);
+					if (e.preventDefault) { e.preventDefault(); }
+					return false;
+				}
 				var key = util.isOpera ? e.which : (e.charCode !== undefined ? e.charCode : e.keyCode);
 				if (key > 31) {
 					this._doContent(String.fromCharCode (key));
