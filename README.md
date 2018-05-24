@@ -13,7 +13,6 @@ IDE experience in a browser tab.
 Please refer to our [project page](https://projects.eclipse.org/projects/ecd.orion) for plan and overall project information, or
 head over to the [wiki](http://wiki.eclipse.org/Orion) for even more information about Orion.
 
-
 Contributing
 ------------
 
