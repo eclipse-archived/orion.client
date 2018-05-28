@@ -1,46 +1,46 @@
-<section class="editorSection" aria-label=${Preview}>
+<div class="editorSection" role="img" aria-labelledby="themePreviewTitle" >
 	<div id="themePreviewTitle" class="editorSectionHeader" style="padding-top: 12px; padding-bottom: 11.5px;"><span>${Theme Preview}</span></div>
-	<div id="containerPreview" role="img" aria-labelledby="themePreviewTitle" style="position: absolute; margin: 4px; height: 90%; width: 90%;">
+	<div id="containerPreview" style="position: absolute; margin: 4px; height: 90%; width: 90%;">
 		<div id="orion-editor" spellcheck="false" class="orionPage lightPage">
 			<div class="sideMenu" aria-label="${Sidebar}" style="top: 0;">
 				<div class="sideMenuHome"></div>
-				<button class="sideMenuScrollButton sideMenuTopScrollButton core-sprite-openarrow"></button>
+				<button class="sideMenuScrollButton sideMenuTopScrollButton core-sprite-openarrow" tabindex="-1"></button>
 				<ul class="sideMenuList">
-					<li class="sideMenuItem sideMenu-notification sideMenuItemActive"><a class="submenu-trigger core-sprite-edit" aria-label="${EditorPage}"  aria-current="page" href="#"></a></li>
-					<li class="sideMenuItem sideMenu-notification"><a class="submenu-trigger core-sprite-git-logo" aria-label="${Git}" href="#"></a></li>
-					<li class="sideMenuItem sideMenu-notification"><a class="submenu-trigger core-sprite-shell" aria-label="${Shell}" href="#"></a></li>
-					<li class="sideMenuItem sideMenu-notification"><a class="submenu-trigger core-sprite-sites" aria-label="${Sites}" href="#"></a></li>
-					<li class="sideMenuItem sideMenu-notification"><a class="submenu-trigger core-sprite-gear" aria-label="${Settings}" href="#"></a></li>
+					<li class="sideMenuItem sideMenu-notification sideMenuItemActive"><a class="submenu-trigger core-sprite-edit" aria-label="${EditorPage}" aria-current="page" href="#" tabindex="-1"></a></li>
+					<li class="sideMenuItem sideMenu-notification"><a class="submenu-trigger core-sprite-git-logo" aria-label="${Git}" href="#" tabindex="-1"></a></li>
+					<li class="sideMenuItem sideMenu-notification"><a class="submenu-trigger core-sprite-shell" aria-label="${Shell}" href="#" tabindex="-1"></a></li>
+					<li class="sideMenuItem sideMenu-notification"><a class="submenu-trigger core-sprite-sites" aria-label="${Sites}" href="#" tabindex="-1"></a></li>
+					<li class="sideMenuItem sideMenu-notification"><a class="submenu-trigger core-sprite-gear" aria-label="${Settings}" href="#" tabindex="-1"></a></li>
 				</ul>
-				<button class="sideMenuScrollButton sideMenuBottomScrollButton core-sprite-openarrow"></button>
+				<button class="sideMenuScrollButton sideMenuBottomScrollButton core-sprite-openarrow" tabindex="-1"></button>
 			</div>
 			<div class="content-fixedHeight" style="top: 0;">
 				<div class="sideMenuToggle"></div>
 				<div class="mainToolbar toolComposite toolbarLayout">
 					<ul role="menubar" class="commandList layoutLeft pageActions">
 						<li role="none">
-							<button class="dropdownTrigger orionButton commandButton" aria-haspopup="true" aria-expanded="false">
+							<button class="dropdownTrigger orionButton commandButton" aria-haspopup="true" aria-expanded="false" tabindex="-1">
 								${File}
 							</button>
 						</li>
 					</ul>
 					<ul class="commandList layoutLeft pageActions">
 						<li role="none">
-							<button class="dropdownTrigger orionButton commandButton" aria-haspopup="true" aria-expanded="false">
+							<button class="dropdownTrigger orionButton commandButton" aria-haspopup="true" aria-expanded="false" tabindex="-1">
 								${Edit}
 							</button>
 						</li>
 					</ul>
 					<ul class="commandList layoutLeft pageActions">
 						<li role="none">
-							<button class="dropdownTrigger orionButton commandButton" aria-haspopup="true" aria-expanded="false">
+							<button class="dropdownTrigger orionButton commandButton" aria-haspopup="true" aria-expanded="false" tabindex="-1">
 								${View}
 							</button>
 						</li>
 					</ul>
 					<ul class="commandList layoutLeft pageActions">
 						<li role="none">
-							<button class="dropdownTrigger orionButton commandButton" aria-haspopup="true" aria-expanded="false">
+							<button class="dropdownTrigger orionButton commandButton" aria-haspopup="true" aria-expanded="false" tabindex="-1">
 								${Tools}
 							</button>
 						</li>
@@ -49,20 +49,20 @@
 					<div class="layoutLeft runBar">
 						<div id="runBarWrapper" class="runBarWrapper">
 							<div class="launchConfigurationsWrapper" style="border-radius:5px; display: inline-block; margin: 0 8px 0 0; min-width 270 px; z-index: 60">
-								<button class="dropdownTrigger orionButton commandButton launchConfigurationsButton" style="border-radius: 5px">
+								<button class="dropdownTrigger orionButton commandButton launchConfigurationsButton" style="border-radius: 5px" tabindex="-1">
 								<span class="dropdownTriggerButtonLabel" style="align-items: center; display: inline-flex; overflow:hidden; text-overflow: ellipsis; vertical-align: top; white-space:nowrap">${Create new launch configuration}</span>
 								<span class="dropdownArrowDown core-sprite-openarrow"></span>
 								</button>
 							</div>
-							<button id="runBarPlayButton" class="commandImage playButton core-sprite-play" aria-label="${Deploy}"></button>
-							<button id="runBarStopButton" class="commandImage stopButton core-sprite-stop" aria-label="${Stop}"></button>
-							<a id="runBarAppLink" class="commandImage appLink core-sprite-open" target="_blank" href="#" aria-label="${Open App}"></a>
-							<a id="runBarLogsLink" class="commandImage logsLink core-sprite-runlogs" target="_blank" href="#" aria-label="${Logs}"></a>
+							<button id="runBarPlayButton" class="commandImage playButton core-sprite-play" aria-label="${Deploy}" tabindex="-1"></button>
+							<button id="runBarStopButton" class="commandImage stopButton core-sprite-stop" aria-label="${Stop}" tabindex="-1"></button>
+							<a id="runBarAppLink" class="commandImage appLink core-sprite-open" target="_blank" href="#" aria-label="${Open App}" tabindex="-1"></a>
+							<a id="runBarLogsLink" class="commandImage logsLink core-sprite-runlogs" target="_blank" href="#" aria-label="${Logs}" tabindex="-1"></a>
 						</div>
 					</div>
 					<div class="layoutFlexStretch"></div>
 					<div class="layoutRight status"></div>
-					<button class="layoutRight progressWatch" aria-label="${Operations}">
+					<button class="layoutRight progressWatch" aria-label="${Operations}" tabindex="-1">
 						<div class="watchButton"></div>
 						<div class="watchBody">
 							<span class="hand longMinute">
@@ -76,12 +76,12 @@
 					<ul class="layoutRight commandList pageActions"></ul>
 					<ul class="layoutRight commandList pageActions">
 						<li>
-							<button class="dropdownTrigger dropdownButtonWithIcon commandImage orionButton" aria-label="${Single Page}"><span class="commandSprite core-sprite-page"></span></button>
+							<button class="dropdownTrigger dropdownButtonWithIcon commandImage orionButton" aria-label="${Single Page}" tabindex="-1"><span class="commandSprite core-sprite-page"></span></button>
 						</li>
 					</ul>
 					<ul class="layoutRight commandList pageActions userMenu">
 						<li>
-							<button class="dropdownTrigger commandImage" aria-label="${Help}">
+							<button class="dropdownTrigger commandImage" aria-label="${Help}" tabindex="-1">
 							<span class="commandSprite core-sprite-silhouette"></span>
 							</button>
 						</li>
@@ -95,12 +95,12 @@
 									<div class="filesystemName">${Orion Content (localhost)}</div>
 									<ul class="filesystemSwitcher commandList pageActions">
 										<li>
-											<button class="dropdownTrigger dropdownButtonWithIcon commandImage orionButton" aria-label="${Choose Filesystem}"><span class="commandSprite core-sprite-openarrow"></span></button>
+											<button class="dropdownTrigger dropdownButtonWithIcon commandImage orionButton" aria-label="${Choose Filesystem}" tabindex="-1"><span class="commandSprite core-sprite-openarrow"></span></button>
 										</li>
 									</ul>
 								</div>
 							</span>
-							<div id="pageSidebar" class="dropdownTrigger toolbarTarget sidebar selectionModelContainer" tabindex="0">
+							<div id="pageSidebar" class="dropdownTrigger toolbarTarget sidebar selectionModelContainer">
 								<div role="tree" aria-label="${Navigator}" aria-activedescendant="pageSidebarfile.definitions" tabindex="-1" style="outline: none;">
 									<table role="presentation" id="pageSidebarinnerTree" class="miniNavTreeTable">
 										<tbody id="pageSidebarinnerTreetbody">
@@ -133,4 +133,4 @@
 			</div>
 		</div>
 	</div>
-</section>
+</div>

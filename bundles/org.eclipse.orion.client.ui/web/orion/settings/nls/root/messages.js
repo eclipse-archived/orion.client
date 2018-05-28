@@ -370,7 +370,6 @@ define({//Default message bundle
     "containerTheme tertiary text": "Tertiary Text Color",
     "containerTheme flavor color": "Flavor color",
     "Theme Preview": "Theme Preview",
-    "Preview": "Interactive preview of selected theme",
 	"Sidebar": "Sidebar",
 	"EditorPage": "Editor",
 	"Shell": "Shell",
