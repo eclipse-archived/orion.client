@@ -285,6 +285,9 @@
 	-ms-transition: bottom 0.7s;
 	-o-transition: bottom 0.7s;
 }
+.notificationShow button {
+	display: block;
+}
 .notificationHide {
 	color: white; 
 	background-color: #1BB199; 
@@ -307,6 +310,9 @@
 	-moz-transition: bottom 0.7s;
 	-ms-transition: bottom 0.7s;
 	-o-transition: bottom 0.7s;
+}
+.notificationHide button {
+	display: none;
 }
 
 .notifications a {
