@@ -50,7 +50,7 @@ hard-coded numbers elsewhere.
 /* $FooterHeight */
 .footerLayout {
 	height: 35px;
-	padding-left:10px;
+	padding-left: 8px;
 	font-size:0.9em;
 	font-weight:bold;
 }
@@ -193,7 +193,7 @@ hard-coded numbers elsewhere.
 
 .footerRightBlock {
 	float: right;
-	margin: 4px;
+	margin: 8px 8px 0 4px;
 }
 
 .footerRightBlock ul {
@@ -219,9 +219,12 @@ hard-coded numbers elsewhere.
 .layoutBlock {
 	clear: both;
 	margin: 0;
-	/* padding: 2px 8px; */
-	padding: 4px 4px 0 4px;
 	vertical-align: baseline;
+}
+
+.layoutBlock:not(.footerLayout) {
+	/* padding: 2px 8px; */
+	padding: 4px 4px 0 4px;	
 }
 
 .layoutLeft {
