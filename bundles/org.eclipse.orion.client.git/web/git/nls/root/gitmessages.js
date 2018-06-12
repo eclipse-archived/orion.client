@@ -80,6 +80,7 @@ define({//Default message bundle
 	"Commit": "Commit", //$NON-NLS-0$  //$NON-NLS-1$
 	"CommitTooltip": "Commit the selected files with the given message.", //$NON-NLS-0$  //$NON-NLS-1$
 	"AuthMsgLink":"Authentication required for: ${0}. <a target=\"_blank\" href=\"${1}\">${2}</a> and re-try the request. </span>", //$NON-NLS-0$  //$NON-NLS-1$
+	"CommitOptions": "Commit Options", //$NON-NLS-0$  //$NON-NLS-1$
 	"SmartCommit": "Enter the commit message", //$NON-NLS-0$  //$NON-NLS-1$
 	"SmartCommitLabel": "Commit message", //$NON-NLS-0$  //$NON-NLS-1$
 	"SmartCountCommit": "Commit ${0} file(s)", //$NON-NLS-0$  //$NON-NLS-1$

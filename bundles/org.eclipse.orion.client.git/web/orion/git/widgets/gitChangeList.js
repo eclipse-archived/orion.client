@@ -928,6 +928,9 @@ define([
 						var outerDiv = document.createElement("div"); //$NON-NLS-0$
 						outerDiv.id = "gitCommitMessage"; //$NON-NLS-0$
 						outerDiv.className = "gitCommitMessage toolComposite"; //$NON-NLS-0$
+						outerDiv.setAttribute("role", "group"); //$NON-NLS-1$ //$NON-NLS-0$
+						outerDiv.setAttribute("aria-label", messages["CommitOptions"]); //$NON-NLS-0$
+						
 						td.colSpan = 2;
 						tableRow.classList.remove("selectableNavRow"); //$NON-NLS-0$
 						
@@ -990,8 +993,11 @@ define([
 						
 						function createGroup(parent, key) {
 							var div = document.createElement("div"); //$NON-NLS-0$
+							div.setAttribute("role", "group"); //$NON-NLS-1$ //$NON-NLS-0$
+							div.setAttribute("aria-labelledby", key); //$NON-NLS-0$
 							div.classList.add("gitChangeListGroup"); //$NON-NLS-0$
 							var label = document.createElement("div"); //$NON-NLS-0$
+							label.id = key;
 							label.textContent = messages[key];
 							label.classList.add("gitChangeListInputLabel"); //$NON-NLS-0$
 							div.appendChild(label);
@@ -1049,6 +1055,7 @@ define([
 							
 						var div1Content = createGroup(moreDiv, "Author:"); //$NON-NLS-0$
 						var div1ContentTable = document.createElement("table"); //$NON-NLS-0$
+						div1ContentTable.setAttribute("role", "presentation"); //$NON-NLS-1$ //$NON-NLS-0$
 						var div1ContentTbody = document.createElement("tbody"); //$NON-NLS-0$
 						div1ContentTable.appendChild(div1ContentTbody);
 						div1Content.appendChild(div1ContentTable);
@@ -1057,6 +1064,7 @@ define([
 
 						var div2Content = createGroup(moreDiv, "Committer:"); //$NON-NLS-0$
 						var div2ContentTable = document.createElement("table"); //$NON-NLS-0$
+						div2ContentTable.setAttribute("role", "presentation"); //$NON-NLS-1$ //$NON-NLS-0$
 						var div2ContentTbody = document.createElement("tbody"); //$NON-NLS-0$
 						div2ContentTable.appendChild(div2ContentTbody);
 						div2Content.appendChild(div2ContentTable);
