@@ -299,16 +299,20 @@ define({//Default message bundle
 	//CSS content assist
 	// 'element' 'id' 'class' and 'attribute' can be replaced with translated text, but they are describing specific CSS structures
 	// See https://www.w3schools.com/cssref/css_selectors.asp
-	"elementRuleDescription": "Rule : element { }",
-	"idRuleDescription": "Rule : #id { }",
-	"classRuleDescription": "Rule : .class { }",
+	"elementRuleDescription": "Rule: element { }",
+	"idRuleDescription": "Rule: #id { }",
+	"classRuleDescription": "Rule: .class { }",
+	"pseudoClassRuleDescription": "Rule: :pseudo-class { }",
+	"pseudoElementRuleDescription": "Rule: ::pseudo-element { }",
 	"elementSelector": "element",
 	"idSelector": "#id",
 	"classSelector": ".class",
 	"attributeSelector": "[attribute]",
-	"elementRuleDoc": "A rule (ruleset) that applies to all elements that match the given name.",
+	"elementRuleDoc": "A rule (ruleset) that applies to all elements that match the given type.",
 	"classRuleDoc": "A rule (ruleset) that applies to elements based on the value of their class attribute.",
-	"idRuleDoc": "A rule (ruleset) that applies to elements based on the value of its id attribute.",
+	"idRuleDoc": "A rule (ruleset) that applies to an element based on the value of its id attribute.",
+	"pseudoClassRuleDoc": "A rule (ruleset) that applies to elements based on a particular state.",
+	"pseudoElementRuleDoc": "A rule (ruleset) that applies to specific parts of elements.",
 
 	// See https://developer.mozilla.org/en-US/docs/Web/CSS/At-rule
 	'charsetTemplateDoc': 'Defines the character set used by the style sheet.',
