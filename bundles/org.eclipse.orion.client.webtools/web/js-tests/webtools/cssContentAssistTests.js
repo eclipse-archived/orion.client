@@ -114,9 +114,11 @@ define([
 	describe('CSS Content Assist Tests', function() {
 		it('General - empty file', function() {
 			var expected = [
-				{ description: 'Rule : element { }', proposal: 'element {\n\t\n}'},
-				{ description: 'Rule : #id { }', proposal: '#id {\n\t\n}'},
-				{ description: 'Rule : .class { }', proposal: '#id {\n\t\n}'},
+				{ description: 'Rule: element { }', proposal: 'element {\n\t\n}'},
+				{ description: 'Rule: #id { }', proposal: '#id {\n\t\n}'},
+				{ description: 'Rule: .class { }', proposal: '.class {\n\t\n}'},
+				{ description: 'Rule: :pseudo-class { }', proposal: ':pseudoclass {\n\t\n}'},
+				{ description: 'Rule: ::pseudo-element { }', proposal: '::pseudoelement {\n\t\n}'},
 				{ description: '@charset', proposal: '@charset "charset";'},
 				{ description: '@import', proposal: '@import "url";'},
 				{ description: '@namespace', proposal: '@namespace "url";'},
@@ -130,9 +132,11 @@ define([
 		});
 		it('General - after rule close', function() {
 			var expected = [
-				{ description: 'Rule : element { }', proposal: 'element {\n\t\n}'},
-				{ description: 'Rule : #id { }', proposal: '#id {\n\t\n}'},
-				{ description: 'Rule : .class { }', proposal: '#id {\n\t\n}'},
+				{ description: 'Rule: element { }', proposal: 'element {\n\t\n}'},
+				{ description: 'Rule: #id { }', proposal: '#id {\n\t\n}'},
+				{ description: 'Rule: .class { }', proposal: '.class {\n\t\n}'},
+				{ description: 'Rule: :pseudo-class { }', proposal: ':pseudoclass {\n\t\n}'},
+				{ description: 'Rule: ::pseudo-element { }', proposal: '::pseudoelement {\n\t\n}'},
 				{ description: '@charset', proposal: '@charset "charset";'},
 				{ description: '@import', proposal: '@import "url";'},
 				{ description: '@namespace', proposal: '@namespace "url";'},
@@ -146,9 +150,11 @@ define([
 		});
 		it('General - after @import', function() {
 			var expected = [
-				{ description: 'Rule : element { }', proposal: 'element {\n\t\n}'},
-				{ description: 'Rule : #id { }', proposal: '#id {\n\t\n}'},
-				{ description: 'Rule : .class { }', proposal: '#id {\n\t\n}'},
+				{ description: 'Rule: element { }', proposal: 'element {\n\t\n}'},
+				{ description: 'Rule: #id { }', proposal: '#id {\n\t\n}'},
+				{ description: 'Rule: .class { }', proposal: '.class {\n\t\n}'},
+				{ description: 'Rule: :pseudo-class { }', proposal: ':pseudoclass {\n\t\n}'},
+				{ description: 'Rule: ::pseudo-element { }', proposal: '::pseudoelement {\n\t\n}'},
 				{ description: '@charset', proposal: '@charset "charset";'},
 				{ description: '@import', proposal: '@import "url";'},
 				{ description: '@namespace', proposal: '@namespace "url";'},
@@ -162,9 +168,11 @@ define([
 		});
 		it('General - ru prefix', function() {
 			var expected = [
-				{ description: 'Rule : element { }', proposal: 'element {\n\t\n}'},
-				{ description: 'Rule : #id { }', proposal: '#id {\n\t\n}'},
-				{ description: 'Rule : .class { }', proposal: '#id {\n\t\n}'},
+				{ description: 'Rule: element { }', proposal: 'element {\n\t\n}'},
+				{ description: 'Rule: #id { }', proposal: '#id {\n\t\n}'},
+				{ description: 'Rule: .class { }', proposal: '.class {\n\t\n}'},
+				{ description: 'Rule: :pseudo-class { }', proposal: ':pseudoclass {\n\t\n}'},
+				{ description: 'Rule: ::pseudo-element { }', proposal: '::pseudoelement {\n\t\n}'},
 			];
 			return runTest({buffer: "abc { a: 1; } ru "}, 'ru', 16, expected);
 		});
@@ -278,9 +286,11 @@ define([
 		});
 		it('Conditional at rules media 4', function() {
 			var expected = [
-				{ description: 'Rule : element { }', proposal: 'element {\n\t\n}'},
-				{ description: 'Rule : #id { }', proposal: '#id {\n\t\n}'},
-				{ description: 'Rule : .class { }', proposal: '#id {\n\t\n}'},
+				{ description: 'Rule: element { }', proposal: 'element {\n\t\n}'},
+				{ description: 'Rule: #id { }', proposal: '#id {\n\t\n}'},
+				{ description: 'Rule: .class { }', proposal: '.class {\n\t\n}'},
+				{ description: 'Rule: :pseudo-class { }', proposal: ':pseudoclass {\n\t\n}'},
+				{ description: 'Rule: ::pseudo-element { }', proposal: '::pseudoelement {\n\t\n}'},
 				{ description: '@media', proposal: '@media media-query-list {\n\t\n}'},
 				{ description: '@supports', proposal: '@supports (condition) {\n\t\n}'},
 				{ description: '@page', proposal: '@page page-selector-list {\n\t\n}'},
@@ -314,9 +324,11 @@ define([
 		});
 		it('Conditional at rules supports 4', function() {
 			var expected = [
-				{ description: 'Rule : element { }', proposal: 'element {\n\t\n}'},
-				{ description: 'Rule : #id { }', proposal: '#id {\n\t\n}'},
-				{ description: 'Rule : .class { }', proposal: '#id {\n\t\n}'},
+				{ description: 'Rule: element { }', proposal: 'element {\n\t\n}'},
+				{ description: 'Rule: #id { }', proposal: '#id {\n\t\n}'},
+				{ description: 'Rule: .class { }', proposal: '.class {\n\t\n}'},
+				{ description: 'Rule: :pseudo-class { }', proposal: ':pseudoclass {\n\t\n}'},
+				{ description: 'Rule: ::pseudo-element { }', proposal: '::pseudoelement {\n\t\n}'},
 				{ description: '@media', proposal: '@media media-query-list {\n\t\n}'},
 				{ description: '@supports', proposal: '@supports (condition) {\n\t\n}'},
 				{ description: '@page', proposal: '@page page-selector-list {\n\t\n}'},

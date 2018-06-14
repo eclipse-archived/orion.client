@@ -28,28 +28,42 @@ define([
 	CssContentAssistProvider.prototype = new mTemplates.TemplateContentAssist([], []);
 	
 	
-	// TODO Support additional templates
+	// TODO Support additional templates (i.e. universal selector, attribute selector)
 	var ruleTemplates = [
 		{
 			prefix: "Rule", //$NON-NLS-1$
 			description: Messages['elementRuleDescription'],
 			template: "${element} {\n\t${cursor}\n}", //$NON-NLS-1$
 			doc: Messages['elementRuleDoc'],
-			url: "https://developer.mozilla.org/en-US/docs/Web/CSS/Syntax#CSS_rulesets" //$NON-NLS-1$
+			url: "https://developer.mozilla.org/en-US/docs/Web/CSS/Type_selectors" //$NON-NLS-1$
 		},
 		{
 			prefix: "Rule", //$NON-NLS-1$
 			description: Messages['idRuleDescription'],
 			template: "#${id} {\n\t${cursor}\n}", //$NON-NLS-1$
 			doc: Messages['idRuleDoc'],
-			url: "https://developer.mozilla.org/en-US/docs/Web/CSS/Syntax#CSS_rulesets" //$NON-NLS-1$
+			url: "https://developer.mozilla.org/en-US/docs/Web/CSS/ID_selectors" //$NON-NLS-1$
 		},
 		{
 			prefix: "Rule", //$NON-NLS-1$
 			description: Messages['classRuleDescription'],
-			template: "#${id} {\n\t${cursor}\n}", //$NON-NLS-1$
+			template: ".${class} {\n\t${cursor}\n}", //$NON-NLS-1$
 			doc: Messages['classRuleDoc'],
-			url: "https://developer.mozilla.org/en-US/docs/Web/CSS/Syntax#CSS_rulesets" //$NON-NLS-1$
+			url: "https://developer.mozilla.org/en-US/docs/Web/CSS/Class_selectors" //$NON-NLS-1$
+		},
+		{
+			prefix: "Rule", //$NON-NLS-1$
+			description: Messages['pseudoClassRuleDescription'],
+			template: ":${pseudoclass} {\n\t${cursor}\n}", //$NON-NLS-1$
+			doc: Messages['pseudoClassRuleDoc'],
+			url: "https://developer.mozilla.org/en-US/docs/Web/CSS/Pseudo-classes" //$NON-NLS-1$
+		},
+		{
+			prefix: "Rule", //$NON-NLS-1$
+			description: Messages['pseudoElementRuleDescription'],
+			template: "::${pseudoelement} {\n\t${cursor}\n}", //$NON-NLS-1$
+			doc: Messages['pseudoElementRuleDoc'],
+			url: "https://developer.mozilla.org/en-US/docs/Web/CSS/Pseudo-elements" //$NON-NLS-1$
 		},
 	];
 	//https://developer.mozilla.org/en-US/docs/Web/CSS/At-rule
