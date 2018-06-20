@@ -114,11 +114,13 @@ define([
 	describe('CSS Content Assist Tests', function() {
 		it('General - empty file', function() {
 			var expected = [
-				{ description: 'Rule: element { }', proposal: 'element {\n\t\n}'},
-				{ description: 'Rule: #id { }', proposal: '#id {\n\t\n}'},
-				{ description: 'Rule: .class { }', proposal: '.class {\n\t\n}'},
-				{ description: 'Rule: :pseudo-class { }', proposal: ':pseudoclass {\n\t\n}'},
-				{ description: 'Rule: ::pseudo-element { }', proposal: '::pseudoelement {\n\t\n}'},
+				{ description: 'element { }', proposal: 'element {\n\t\n}'},
+				{ description: '#id { }', proposal: '#id {\n\t\n}'},
+				{ description: '.class { }', proposal: '.class {\n\t\n}'},
+				{ description: '[attribute] { }', proposal: '[attribute] {\n\t\n}'},
+				{ description: '* { }', proposal: '* {\n\t\n}'},
+				{ description: ':pseudo-class { }', proposal: ':pseudoclass {\n\t\n}'},
+				{ description: '::pseudo-element { }', proposal: '::pseudoelement {\n\t\n}'},
 				{ description: '@charset', proposal: '@charset "charset";'},
 				{ description: '@import', proposal: '@import "url";'},
 				{ description: '@namespace', proposal: '@namespace "url";'},
@@ -132,11 +134,13 @@ define([
 		});
 		it('General - after rule close', function() {
 			var expected = [
-				{ description: 'Rule: element { }', proposal: 'element {\n\t\n}'},
-				{ description: 'Rule: #id { }', proposal: '#id {\n\t\n}'},
-				{ description: 'Rule: .class { }', proposal: '.class {\n\t\n}'},
-				{ description: 'Rule: :pseudo-class { }', proposal: ':pseudoclass {\n\t\n}'},
-				{ description: 'Rule: ::pseudo-element { }', proposal: '::pseudoelement {\n\t\n}'},
+				{ description: 'element { }', proposal: 'element {\n\t\n}'},
+				{ description: '#id { }', proposal: '#id {\n\t\n}'},
+				{ description: '.class { }', proposal: '.class {\n\t\n}'},
+				{ description: '[attribute] { }', proposal: '[attribute] {\n\t\n}'},
+				{ description: '* { }', proposal: '* {\n\t\n}'},
+				{ description: ':pseudo-class { }', proposal: ':pseudoclass {\n\t\n}'},
+				{ description: '::pseudo-element { }', proposal: '::pseudoelement {\n\t\n}'},
 				{ description: '@charset', proposal: '@charset "charset";'},
 				{ description: '@import', proposal: '@import "url";'},
 				{ description: '@namespace', proposal: '@namespace "url";'},
@@ -150,11 +154,13 @@ define([
 		});
 		it('General - after @import', function() {
 			var expected = [
-				{ description: 'Rule: element { }', proposal: 'element {\n\t\n}'},
-				{ description: 'Rule: #id { }', proposal: '#id {\n\t\n}'},
-				{ description: 'Rule: .class { }', proposal: '.class {\n\t\n}'},
-				{ description: 'Rule: :pseudo-class { }', proposal: ':pseudoclass {\n\t\n}'},
-				{ description: 'Rule: ::pseudo-element { }', proposal: '::pseudoelement {\n\t\n}'},
+				{ description: 'element { }', proposal: 'element {\n\t\n}'},
+				{ description: '#id { }', proposal: '#id {\n\t\n}'},
+				{ description: '.class { }', proposal: '.class {\n\t\n}'},
+				{ description: '[attribute] { }', proposal: '[attribute] {\n\t\n}'},
+				{ description: '* { }', proposal: '* {\n\t\n}'},
+				{ description: ':pseudo-class { }', proposal: ':pseudoclass {\n\t\n}'},
+				{ description: '::pseudo-element { }', proposal: '::pseudoelement {\n\t\n}'},
 				{ description: '@charset', proposal: '@charset "charset";'},
 				{ description: '@import', proposal: '@import "url";'},
 				{ description: '@namespace', proposal: '@namespace "url";'},
@@ -165,16 +171,190 @@ define([
 				{ description: '@keyframes', proposal: '@keyframes name {\n\t\n}'},
 			];
 			return runTest({buffer: "@import \"foo\";\n"}, '', 15, expected);
-		});
-		it('General - ru prefix', function() {
+		});	
+		it('Selector id - #', function() {
 			var expected = [
-				{ description: 'Rule: element { }', proposal: 'element {\n\t\n}'},
-				{ description: 'Rule: #id { }', proposal: '#id {\n\t\n}'},
-				{ description: 'Rule: .class { }', proposal: '.class {\n\t\n}'},
-				{ description: 'Rule: :pseudo-class { }', proposal: ':pseudoclass {\n\t\n}'},
-				{ description: 'Rule: ::pseudo-element { }', proposal: '::pseudoelement {\n\t\n}'},
+				{ description: '#id { }', proposal: '#id {\n\t\n}'},
 			];
-			return runTest({buffer: "abc { a: 1; } ru "}, 'ru', 16, expected);
+			return runTest({buffer: "#"}, '#', 1, expected);
+		});
+		it('Selector class - .', function() {
+			var expected = [
+				{ description: '.class { }', proposal: '.class {\n\t\n}'},
+			];
+			return runTest({buffer: "."}, '.', 1, expected);
+		});
+		it('Selector attribute - [', function() {
+			var expected = [
+				{ description: '[attribute] { }', proposal: '[attribute] {\n\t\n}'},
+			];
+			return runTest({buffer: "["}, '[', 1, expected);
+		});
+		it('Selector attribute - []', function() {
+			var expected = [
+				{ description: '[attribute] { }', proposal: '[attribute] {\n\t\n}'},
+			];
+			return runTest({buffer: "[]"}, '[', 1, expected);
+		});
+		it('Selector universal - *', function() {
+			var expected = [
+				{ description: '* { }', proposal: '* {\n\t\n}'},
+			];
+			// need .other because if * is the only character in the file, the ast calls it DeclarationBody
+			return runTest({buffer: "*\n.other{ }"}, '*', 1, expected);
+		});
+		it('Selector list of all pseudo-classes starting with : (also proposes :: pseudo-elements)', function() {
+			var expected = [
+				{ description: ':pseudo-class { }', proposal: ':pseudoclass {\n\t\n}'},
+				{ description: '::pseudo-element { }', proposal: '::pseudoelement {\n\t\n}'},
+				{ name: ':active', proposal: ':active {\n\t\n}\n'},
+				{ name: ':checked', proposal: ':checked {\n\t\n}\n'},
+				{ name: ':default', proposal: ':default {\n\t\n}\n'},
+				{ name: ':disabled', proposal: ':disabled {\n\t\n}\n'},
+				{ name: ':empty', proposal: ':empty {\n\t\n}\n'},
+				{ name: ':enabled', proposal: ':enabled {\n\t\n}\n'},
+				{ name: ':first-child', proposal: ':first-child {\n\t\n}\n'},
+				{ name: ':first-of-type', proposal: ':first-of-type {\n\t\n}\n'},
+				{ name: ':focus', proposal: ':focus {\n\t\n}\n'},
+				{ name: ':hover', proposal: ':hover {\n\t\n}\n'},
+				{ name: ':indeterminate', proposal: ':indeterminate {\n\t\n}\n'},
+				{ name: ':lang(lang)', proposal: ':lang(lang) {\n\t\n}\n'},
+				{ name: ':last-child', proposal: ':last-child {\n\t\n}\n'},
+				{ name: ':last-of-type', proposal: ':last-of-type {\n\t\n}\n'},
+				{ name: ':link', proposal: ':link {\n\t\n}\n'},
+				{ name: ':not(selector)', proposal: ':not(selector) {\n\t\n}\n'},
+				{ name: ':nth-child(n)', proposal: ':nth-child(n) {\n\t\n}\n'},
+				{ name: ':nth-last-child(n)', proposal: ':nth-last-child(n) {\n\t\n}\n'},
+				{ name: ':nth-last-of-type(n)', proposal: ':nth-last-of-type(n) {\n\t\n}\n'},
+				{ name: ':nth-of-type(n)', proposal: ':nth-of-type(n) {\n\t\n}\n'},
+				{ name: ':only-child', proposal: ':only-child {\n\t\n}\n'},
+				{ name: ':only-of-type', proposal: ':only-of-type {\n\t\n}\n'},
+				{ name: ':optional', proposal: ':optional {\n\t\n}\n'},
+				{ name: ':required', proposal: ':required {\n\t\n}\n'},
+				{ name: ':root', proposal: ':root {\n\t\n}\n'},
+				{ name: ':target', proposal: ':target {\n\t\n}\n'},
+				{ name: ':valid', proposal: ':valid {\n\t\n}\n'},
+				{ name: ':visited', proposal: ':visited {\n\t\n}\n'},
+				{ name: '::after', proposal: '::after {\n\t\n}\n'},
+				{ name: '::before', proposal: '::before {\n\t\n}\n'},
+				{ name: '::first-letter', proposal: '::first-letter {\n\t\n}\n'},
+				{ name: '::first-line', proposal: '::first-line {\n\t\n}\n'},
+			];
+			return runTest({buffer: ":"}, ':', 1, expected);
+		});
+		it('Selector list of all pseudo-elements starting with ::', function() {
+			var expected = [
+				{ description: '::pseudo-element { }', proposal: '::pseudoelement {\n\t\n}'},
+				{ name: '::after', proposal: '::after {\n\t\n}\n'},
+				{ name: '::before', proposal: '::before {\n\t\n}\n'},
+				{ name: '::first-letter', proposal: '::first-letter {\n\t\n}\n'},
+				{ name: '::first-line', proposal: '::first-line {\n\t\n}\n'},
+			];
+			return runTest({buffer: "::"}, '::', 2, expected);
+		});
+		it('Selector specific pseudo-class starting with :a -> :active', function() {
+			var expected = [
+				{ name: ':active', proposal: ':active {\n\t\n}\n'},
+			];
+			// need .other because if :a is the only text in the file, the ast calls it DeclarationBody
+			return runTest({buffer: ":a\n.other{ }"}, ':a', 2, expected);
+		});
+		it('Selector list of pseudo-classes starting with :f', function() {
+			var expected = [
+				{ name: ':first-child', proposal: ':first-child {\n\t\n}\n'},
+				{ name: ':first-of-type', proposal: ':first-of-type {\n\t\n}\n'},
+				{ name: ':focus', proposal: ':focus {\n\t\n}\n'},
+			];
+			// need .other because if :f is the only text in the file, the ast calls it DeclarationBody
+			return runTest({buffer: ":f\n.other{ }"}, ':f', 2, expected);
+		});
+		it('Selector list of pseudo-classes starting with :nt', function() {
+			var expected = [
+				{ name: ':nth-child(n)', proposal: ':nth-child(n) {\n\t\n}\n'},
+				{ name: ':nth-last-child(n)', proposal: ':nth-last-child(n) {\n\t\n}\n'},
+				{ name: ':nth-last-of-type(n)', proposal: ':nth-last-of-type(n) {\n\t\n}\n'},
+				{ name: ':nth-of-type(n)', proposal: ':nth-of-type(n) {\n\t\n}\n'},
+			];
+			// need .other because if :nt is the only text in the file, the ast calls it DeclarationBody
+			return runTest({buffer: ":nt\n.other{ }"}, ':nt', 3, expected);
+		});
+		it('Selector list of pseudo-classes starting with .myclass: (also proposes :: pseudo-elements)', function() {
+			var expected = [
+				{ description: ':pseudo-class { }', proposal: ':pseudoclass {\n\t\n}'},
+				{ description: '::pseudo-element { }', proposal: '::pseudoelement {\n\t\n}'},
+				{ name: ':active', proposal: ':active {\n\t\n}\n'},
+				{ name: ':checked', proposal: ':checked {\n\t\n}\n'},
+				{ name: ':default', proposal: ':default {\n\t\n}\n'},
+				{ name: ':disabled', proposal: ':disabled {\n\t\n}\n'},
+				{ name: ':empty', proposal: ':empty {\n\t\n}\n'},
+				{ name: ':enabled', proposal: ':enabled {\n\t\n}\n'},
+				{ name: ':first-child', proposal: ':first-child {\n\t\n}\n'},
+				{ name: ':first-of-type', proposal: ':first-of-type {\n\t\n}\n'},
+				{ name: ':focus', proposal: ':focus {\n\t\n}\n'},
+				{ name: ':hover', proposal: ':hover {\n\t\n}\n'},
+				{ name: ':indeterminate', proposal: ':indeterminate {\n\t\n}\n'},
+				{ name: ':lang(lang)', proposal: ':lang(lang) {\n\t\n}\n'},
+				{ name: ':last-child', proposal: ':last-child {\n\t\n}\n'},
+				{ name: ':last-of-type', proposal: ':last-of-type {\n\t\n}\n'},
+				{ name: ':link', proposal: ':link {\n\t\n}\n'},
+				{ name: ':not(selector)', proposal: ':not(selector) {\n\t\n}\n'},
+				{ name: ':nth-child(n)', proposal: ':nth-child(n) {\n\t\n}\n'},
+				{ name: ':nth-last-child(n)', proposal: ':nth-last-child(n) {\n\t\n}\n'},
+				{ name: ':nth-last-of-type(n)', proposal: ':nth-last-of-type(n) {\n\t\n}\n'},
+				{ name: ':nth-of-type(n)', proposal: ':nth-of-type(n) {\n\t\n}\n'},
+				{ name: ':only-child', proposal: ':only-child {\n\t\n}\n'},
+				{ name: ':only-of-type', proposal: ':only-of-type {\n\t\n}\n'},
+				{ name: ':optional', proposal: ':optional {\n\t\n}\n'},
+				{ name: ':required', proposal: ':required {\n\t\n}\n'},
+				{ name: ':root', proposal: ':root {\n\t\n}\n'},
+				{ name: ':target', proposal: ':target {\n\t\n}\n'},
+				{ name: ':valid', proposal: ':valid {\n\t\n}\n'},
+				{ name: ':visited', proposal: ':visited {\n\t\n}\n'},
+				{ name: '::after', proposal: '::after {\n\t\n}\n'},
+				{ name: '::before', proposal: '::before {\n\t\n}\n'},
+				{ name: '::first-letter', proposal: '::first-letter {\n\t\n}\n'},
+				{ name: '::first-line', proposal: '::first-line {\n\t\n}\n'},
+			];
+			return runTest({buffer: ".myclass:"}, ':', 9, expected);
+		});
+		it('Selector specific pseudo-class starting with a:vi -> :visited', function() {
+			var expected = [
+				{ name: ':visited', proposal: ':visited {\n\t\n}\n'},
+			];
+			// need .other because if a:vi is the only text in the file, the ast calls it DeclarationBody
+			return runTest({buffer: "a:vi\n.other{ }"}, ':vi', 4, expected);
+		});
+		it('Selector specific pseudo-element starting with ::a -> :after', function() {
+			var expected = [
+				{ name: '::after', proposal: '::after {\n\t\n}\n'},
+			];
+			// need .other because if ::a is the only text in the file, the ast calls it DeclarationBody
+			return runTest({buffer: "::a\n.other{ }"}, '::a', 3, expected);
+		});
+		it('Selector list of pseudo-elements starting with ::f', function() {
+			var expected = [
+				{ name: '::first-letter', proposal: '::first-letter {\n\t\n}\n'},
+				{ name: '::first-line', proposal: '::first-line {\n\t\n}\n'},
+			];
+			// need .other because if ::f is the only text in the file, the ast calls it DeclarationBody
+			return runTest({buffer: "::f\n.other{ }"}, '::f', 3, expected);
+		});
+		it('Selector list of pseudo-elements starting with .myclass::', function() {
+			var expected = [
+				{ description: '::pseudo-element { }', proposal: '::pseudoelement {\n\t\n}'},
+				{ name: '::after', proposal: '::after {\n\t\n}\n'},
+				{ name: '::before', proposal: '::before {\n\t\n}\n'},
+				{ name: '::first-letter', proposal: '::first-letter {\n\t\n}\n'},
+				{ name: '::first-line', proposal: '::first-line {\n\t\n}\n'},
+			];
+			return runTest({buffer: ".myclass::"}, '::', 10, expected);
+		});
+		it('Selector specific pseudo-element starting with span::b', function() {
+			var expected = [
+				{ name: '::before', proposal: '::before {\n\t\n}\n'},
+			];
+			// need .other because if span::b is the only text in the file, the ast calls it DeclarationBody
+			return runTest({buffer: "span::b\n.other{ }"}, '::b', 7, expected);
 		});
 		
 		it('Property - cue', function() {
@@ -286,11 +466,13 @@ define([
 		});
 		it('Conditional at rules media 4', function() {
 			var expected = [
-				{ description: 'Rule: element { }', proposal: 'element {\n\t\n}'},
-				{ description: 'Rule: #id { }', proposal: '#id {\n\t\n}'},
-				{ description: 'Rule: .class { }', proposal: '.class {\n\t\n}'},
-				{ description: 'Rule: :pseudo-class { }', proposal: ':pseudoclass {\n\t\n}'},
-				{ description: 'Rule: ::pseudo-element { }', proposal: '::pseudoelement {\n\t\n}'},
+				{ description: 'element { }', proposal: 'element {\n\t\n}'},
+				{ description: '#id { }', proposal: '#id {\n\t\n}'},
+				{ description: '.class { }', proposal: '.class {\n\t\n}'},
+				{ description: '[attribute] { }', proposal: '[attribute] {\n\t\n}'},
+				{ description: '* { }', proposal: '* {\n\t\n}'},
+				{ description: ':pseudo-class { }', proposal: ':pseudoclass {\n\t\n}'},
+				{ description: '::pseudo-element { }', proposal: '::pseudoelement {\n\t\n}'},
 				{ description: '@media', proposal: '@media media-query-list {\n\t\n}'},
 				{ description: '@supports', proposal: '@supports (condition) {\n\t\n}'},
 				{ description: '@page', proposal: '@page page-selector-list {\n\t\n}'},
@@ -324,11 +506,13 @@ define([
 		});
 		it('Conditional at rules supports 4', function() {
 			var expected = [
-				{ description: 'Rule: element { }', proposal: 'element {\n\t\n}'},
-				{ description: 'Rule: #id { }', proposal: '#id {\n\t\n}'},
-				{ description: 'Rule: .class { }', proposal: '.class {\n\t\n}'},
-				{ description: 'Rule: :pseudo-class { }', proposal: ':pseudoclass {\n\t\n}'},
-				{ description: 'Rule: ::pseudo-element { }', proposal: '::pseudoelement {\n\t\n}'},
+				{ description: 'element { }', proposal: 'element {\n\t\n}'},
+				{ description: '#id { }', proposal: '#id {\n\t\n}'},
+				{ description: '.class { }', proposal: '.class {\n\t\n}'},
+				{ description: '[attribute] { }', proposal: '[attribute] {\n\t\n}'},
+				{ description: '* { }', proposal: '* {\n\t\n}'},
+				{ description: ':pseudo-class { }', proposal: ':pseudoclass {\n\t\n}'},
+				{ description: '::pseudo-element { }', proposal: '::pseudoelement {\n\t\n}'},
 				{ description: '@media', proposal: '@media media-query-list {\n\t\n}'},
 				{ description: '@supports', proposal: '@supports (condition) {\n\t\n}'},
 				{ description: '@page', proposal: '@page page-selector-list {\n\t\n}'},
