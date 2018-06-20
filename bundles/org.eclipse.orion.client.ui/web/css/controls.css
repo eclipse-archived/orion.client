@@ -1694,13 +1694,12 @@ html[dir="rtl"] .fileExplorerProgressDiv { /* ACGC */
 	cursor: pointer;
 }
 
-/* The visuallyhidden class can be used to visually hide an element, yet keep it available to keyboard and screen reader users.
- * In general, visually hiding an element in this way is a bad idea, and every effort should be made to fit the element into the
- * the visual presentation (or hide it from everybody using display: none; visibility: hidden; or the hidden attribute).
- * However, there are rare occasions when this is useful. For example, some inputs are hard to style, so if they are visuallyhidden,
- * their corresponding label element can be styled instead (use input:focus + label to style the label when the input receives focus).
- * Do not use this class for hiding label text; for that, use aria-label.
- * <<<< READ THE COMMENT BEFORE USING */
+/* The visuallyhidden class can be used to hide an element offscreen,
+ * yet keep it available to keyboard and screen reader users.
+ * In general, hiding an element in this way is a bad idea, and every
+ * effort should be made to fit it into the visual presentation.
+ * However, there are occasions when this can improve UX. Use wisely.
+ * <<<< READ COMMENT BEFORE USING */
 .visuallyhidden {
     position: absolute;
     left: -9999em;
