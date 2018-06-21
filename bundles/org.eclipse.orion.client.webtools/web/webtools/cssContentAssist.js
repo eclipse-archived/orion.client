@@ -414,60 +414,23 @@ define([
 		},
 		
 		inPropertyValue: function inPropertyValue(node) {
-			if (node){
-				if (node.type === 'PropertyValue'){
-					return true;
-				}
-			}
-			return false;
+			return node && node.type === 'PropertyValue';
 		}, 
 		
 		inProperty: function inProperty(node) {
-			if (node){
-				if (node.type === 'Property'){
-					return true;
-				}
-				if (node.type === 'Declaration'){
-					return true;
-				}
-				if (node.type === 'DeclarationBody'){
-					return true;
-				}
-			}
-			return false;
+			return node && (node.type === 'Property' || node.type === 'Declaration' || node.type === 'DeclarationBody');
 		},
 		
 		inConditionalAtRule: function inConditionalAtRule(node) {
-			if (node){
-				if (node.type === 'MediaBody'){
-					return true;
-				}
-				if (node.type === 'SupportsBody'){
-					return true;
-				}
-			}
-			return false;
+			return node && (node.type === 'MediaBody' || node.type === 'SupportsBody');
 		},
 		
 		inSelector: function inSelector(node) {
-			if (node){
-				if (node.type === 'SelectorBody'){
-					return true;
-				}
-				if (node.type === 'Selector'){
-					return true;
-				}
-			}
-			return false;
+			return node && (node.type === 'SelectorBody' || node.type === 'Selector');
 		},
 		
 		inRoot: function inRoot(node) {
-			if (node){
-				if (node.type === 'StyleSheet'){
-					return true;
-				}
-			}
-			return false;
+			return node && node.type === 'StyleSheet';
 		},
 		
 		getPropertyValueProposals: function getPropertyValueProposals(params, node) {
