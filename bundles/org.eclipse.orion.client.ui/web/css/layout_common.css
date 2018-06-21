@@ -507,6 +507,8 @@ hard-coded numbers elsewhere.
 }
 
 .focusedEditorTab {
+	border-top: 2px solid;
+	margin-top: -1px;
 	background: white;
 	color: black;
 }

@@ -461,6 +461,7 @@ define({
 			"border-right": "1px solid #C4C5C8"
 		},
 		".focusedEditorTab": {
+			"border-top": "2px solid #3C71B3",
 			"background-color": "#FFFFFF",
 			"color": "#152935"
 		},
