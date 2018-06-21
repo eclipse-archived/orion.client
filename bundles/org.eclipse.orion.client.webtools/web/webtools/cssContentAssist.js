@@ -28,38 +28,51 @@ define([
 	CssContentAssistProvider.prototype = new mTemplates.TemplateContentAssist([], []);
 	
 	
-	// TODO Support additional templates (i.e. universal selector, attribute selector)
 	var ruleTemplates = [
 		{
-			prefix: "Rule", //$NON-NLS-1$
+			prefix: "", //$NON-NLS-1$
 			description: Messages['elementRuleDescription'],
 			template: "${element} {\n\t${cursor}\n}", //$NON-NLS-1$
 			doc: Messages['elementRuleDoc'],
 			url: "https://developer.mozilla.org/en-US/docs/Web/CSS/Type_selectors" //$NON-NLS-1$
 		},
 		{
-			prefix: "Rule", //$NON-NLS-1$
+			prefix: "#", //$NON-NLS-1$
 			description: Messages['idRuleDescription'],
 			template: "#${id} {\n\t${cursor}\n}", //$NON-NLS-1$
 			doc: Messages['idRuleDoc'],
 			url: "https://developer.mozilla.org/en-US/docs/Web/CSS/ID_selectors" //$NON-NLS-1$
 		},
 		{
-			prefix: "Rule", //$NON-NLS-1$
+			prefix: ".", //$NON-NLS-1$
 			description: Messages['classRuleDescription'],
 			template: ".${class} {\n\t${cursor}\n}", //$NON-NLS-1$
 			doc: Messages['classRuleDoc'],
 			url: "https://developer.mozilla.org/en-US/docs/Web/CSS/Class_selectors" //$NON-NLS-1$
 		},
 		{
-			prefix: "Rule", //$NON-NLS-1$
+			prefix: "[", //$NON-NLS-1$
+			description: Messages['attributeRuleDescription'],
+			template: "[${attribute}] {\n\t${cursor}\n}", //$NON-NLS-1$
+			doc: Messages['attributeRuleDoc'],
+			url: "https://developer.mozilla.org/en-US/docs/Web/CSS/Attribute_selectors" //$NON-NLS-1$
+		},
+		{
+			prefix: "*", //$NON-NLS-1$
+			description: Messages['universalRuleDescription'],
+			template: "* {\n\t${cursor}\n}", //$NON-NLS-1$
+			doc: Messages['universalRuleDoc'],
+			url: "https://developer.mozilla.org/en-US/docs/Web/CSS/Universal_selectors" //$NON-NLS-1$
+		},
+		{
+			prefix: ":", //$NON-NLS-1$
 			description: Messages['pseudoClassRuleDescription'],
 			template: ":${pseudoclass} {\n\t${cursor}\n}", //$NON-NLS-1$
 			doc: Messages['pseudoClassRuleDoc'],
 			url: "https://developer.mozilla.org/en-US/docs/Web/CSS/Pseudo-classes" //$NON-NLS-1$
 		},
 		{
-			prefix: "Rule", //$NON-NLS-1$
+			prefix: "::", //$NON-NLS-1$
 			description: Messages['pseudoElementRuleDescription'],
 			template: "::${pseudoelement} {\n\t${cursor}\n}", //$NON-NLS-1$
 			doc: Messages['pseudoElementRuleDoc'],
@@ -139,11 +152,183 @@ define([
 //		}
 	];
 	
-	// TODO Selector templates
-//		"elementSelector": "element",
-//	"idSelector": "#id",
-//	"classSelector": ".class",
-//	"attributeSelector": "[attribute]",
+	var pseudoClasses = [
+		{
+			prefix: ":active", //$NON-NLS-0$
+			description: Messages['activeDoc'],
+			url: "https://developer.mozilla.org/en-US/docs/Web/CSS/:active" //$NON-NLS-0$
+		},
+		{
+			prefix: ":checked", //$NON-NLS-0$
+			description: Messages['checkedDoc'],
+			url: "https://developer.mozilla.org/en-US/docs/Web/CSS/:checked" //$NON-NLS-0$
+		},
+		{
+			prefix: ":default", //$NON-NLS-0$
+			description: Messages['defaultDoc'],
+			url: "https://developer.mozilla.org/en-US/docs/Web/CSS/:default" //$NON-NLS-0$
+		},
+		{
+			prefix: ":disabled", //$NON-NLS-0$
+			description: Messages['disabledDoc'],
+			url: "https://developer.mozilla.org/en-US/docs/Web/CSS/:disabled" //$NON-NLS-0$
+		},
+		{
+			prefix: ":empty", //$NON-NLS-0$
+			description: Messages['emptyDoc'],
+			url: "https://developer.mozilla.org/en-US/docs/Web/CSS/:empty" //$NON-NLS-0$
+		},
+		{
+			prefix: ":enabled", //$NON-NLS-0$
+			description: Messages['enabledDoc'],
+			url: "https://developer.mozilla.org/en-US/docs/Web/CSS/:enabled" //$NON-NLS-0$
+		},
+		{
+			prefix: ":first-child", //$NON-NLS-0$
+			description: Messages['firstChildDoc'],
+			url: "https://developer.mozilla.org/en-US/docs/Web/CSS/:first-child" //$NON-NLS-0$
+		},
+		{
+			prefix: ":first-of-type", //$NON-NLS-0$
+			description: Messages['firstOfTypeDoc'],
+			url: "https://developer.mozilla.org/en-US/docs/Web/CSS/:first-of-type" //$NON-NLS-0$
+		},
+		{
+			prefix: ":focus", //$NON-NLS-0$
+			description: Messages['focusDoc'],
+			url: "https://developer.mozilla.org/en-US/docs/Web/CSS/:focus" //$NON-NLS-0$
+		},
+		/*{
+			prefix: ":focus-visible", //$NON-NLS-0$
+			description: Messages['focusVisibleDoc'],
+			url: "https://developer.mozilla.org/en-US/docs/Web/CSS/:focus-visible" //$NON-NLS-0$
+		},*/
+		{
+			prefix: ":hover", //$NON-NLS-0$
+			description: Messages['hoverDoc'],
+			url: "https://developer.mozilla.org/en-US/docs/Web/CSS/:hover" //$NON-NLS-0$
+		},
+		{
+			prefix: ":indeterminate", //$NON-NLS-0$
+			description: Messages['indeterminateDoc'],
+			url: "https://developer.mozilla.org/en-US/docs/Web/CSS/:indeterminate" //$NON-NLS-0$
+		},
+		{
+			prefix: ":lang(lang)", //$NON-NLS-0$
+			description: Messages['langDoc'],
+			url: "https://developer.mozilla.org/en-US/docs/Web/CSS/:lang" //$NON-NLS-0$
+		},
+		{
+			prefix: ":last-child", //$NON-NLS-0$
+			description: Messages['lastChildDoc'],
+			url: "https://developer.mozilla.org/en-US/docs/Web/CSS/:last-child" //$NON-NLS-0$
+		},
+		{
+			prefix: ":last-of-type", //$NON-NLS-0$
+			description: Messages['lastOfTypeDoc'],
+			url: "https://developer.mozilla.org/en-US/docs/Web/CSS/:last-of-type" //$NON-NLS-0$
+		},
+		{
+			prefix: ":link", //$NON-NLS-0$
+			description: Messages['linkDoc'],
+			url: "https://developer.mozilla.org/en-US/docs/Web/CSS/:link" //$NON-NLS-0$
+		},
+		{
+			prefix: ":not(selector)", //$NON-NLS-0$
+			description: Messages['notDoc'],
+			url: "https://developer.mozilla.org/en-US/docs/Web/CSS/:not" //$NON-NLS-0$
+		},
+		{
+			prefix: ":nth-child(n)", //$NON-NLS-0$
+			description: Messages['nthChildDoc'],
+			url: "https://developer.mozilla.org/en-US/docs/Web/CSS/:nth-child" //$NON-NLS-0$
+		},
+		{
+			prefix: ":nth-last-child(n)", //$NON-NLS-0$
+			description: Messages['nthLastChildDoc'],
+			url: "https://developer.mozilla.org/en-US/docs/Web/CSS/:nth-last-child" //$NON-NLS-0$
+		},
+		{
+			prefix: ":nth-last-of-type(n)", //$NON-NLS-0$
+			description: Messages['nthLastOfTypeDoc'],
+			url: "https://developer.mozilla.org/en-US/docs/Web/CSS/:nth-last-of-type" //$NON-NLS-0$
+		},
+		{
+			prefix: ":nth-of-type(n)", //$NON-NLS-0$
+			description: Messages['nthOfTypeDoc'],
+			url: "https://developer.mozilla.org/en-US/docs/Web/CSS/:nth-of-type" //$NON-NLS-0$
+		},
+		{
+			prefix: ":only-child", //$NON-NLS-0$
+			description: Messages['onlyChildDoc'],
+			url: "https://developer.mozilla.org/en-US/docs/Web/CSS/:only-child" //$NON-NLS-0$
+		},
+		{
+			prefix: ":only-of-type", //$NON-NLS-0$
+			description: Messages['onlyOfTypeDoc'],
+			url: "https://developer.mozilla.org/en-US/docs/Web/CSS/:only-of-type" //$NON-NLS-0$
+		},
+		{
+			prefix: ":optional", //$NON-NLS-0$
+			description: Messages['optionalDoc'],
+			url: "https://developer.mozilla.org/en-US/docs/Web/CSS/:optional" //$NON-NLS-0$
+		},
+		{
+			prefix: ":required", //$NON-NLS-0$
+			description: Messages['requiredDoc'],
+			url: "https://developer.mozilla.org/en-US/docs/Web/CSS/:required" //$NON-NLS-0$
+		},
+		{
+			prefix: ":root", //$NON-NLS-0$
+			description: Messages['rootDoc'],
+			url: "https://developer.mozilla.org/en-US/docs/Web/CSS/:root" //$NON-NLS-0$
+		},
+		{
+			prefix: ":target", //$NON-NLS-0$
+			description: Messages['targetDoc'],
+			url: "https://developer.mozilla.org/en-US/docs/Web/CSS/:target" //$NON-NLS-0$
+		},
+		{
+			prefix: ":valid", //$NON-NLS-0$
+			description: Messages['validDoc'],
+			url: "https://developer.mozilla.org/en-US/docs/Web/CSS/:valid" //$NON-NLS-0$
+		},
+		{
+			prefix: ":visited", //$NON-NLS-0$
+			description: Messages['visitedDoc'],
+			url: "https://developer.mozilla.org/en-US/docs/Web/CSS/:visited" //$NON-NLS-0$
+		}
+	];
+	
+	var pseudoElements = [
+		{
+			prefix: "::after", //$NON-NLS-0$
+			description: Messages['afterDoc'],
+			url: "https://developer.mozilla.org/en-US/docs/Web/CSS/::after" //$NON-NLS-0$
+		},
+		{
+			prefix: "::before", //$NON-NLS-0$
+			description: Messages['beforeDoc'],
+			url: "https://developer.mozilla.org/en-US/docs/Web/CSS/::before" //$NON-NLS-0$
+		},
+		{
+			prefix: "::first-letter", //$NON-NLS-0$
+			description: Messages['firstLetterDoc'],
+			url: "https://developer.mozilla.org/en-US/docs/Web/CSS/::first-letter" //$NON-NLS-0$
+		},
+		{
+			prefix: "::first-line", //$NON-NLS-0$
+			description: Messages['firstLineDoc'],
+			url: "https://developer.mozilla.org/en-US/docs/Web/CSS/::first-line" //$NON-NLS-0$
+		},
+		/*{
+			prefix: "::selection", //$NON-NLS-0$
+			description: Messages['selectionDoc'],
+			url: "https://developer.mozilla.org/en-US/docs/Web/CSS/::selection" //$NON-NLS-0$
+		},*/
+	];
+	
+
 	
 	Objects.mixin(CssContentAssistProvider.prototype, {
 
@@ -188,8 +373,14 @@ define([
 			var index = offset;
 			while (index > 0) {
 				var char = text.substring(index - 1, index);
-				if (/[A-Za-z\-\@]/.test(char)) {
+				if (/[A-Za-z\-\@\#\.\[\:\*]/.test(char)) {
 					index--;
+					if (/[\@\#\.\[\:\*]/.test(char)) {
+						if (text.substring(index - 1, index) === ':') {
+							index--;
+						}
+						break;
+					}
 				} else {
 					break;
 				}
@@ -212,6 +403,8 @@ define([
 					return this.getPropertyProposals(params);
 				} else if (this.inConditionalAtRule(node)){
 					return this.getConditionalAtRuleProposals(params);
+				} else if (this.inSelector(node)){
+					return this.getSelectorProposals(params, node);
 				} else if (this.inRoot(node)){
 					return this.getRootProposals(params);
 				}
@@ -256,12 +449,21 @@ define([
 			return false;
 		},
 		
-		inRoot: function inRoot(node) {
+		inSelector: function inSelector(node) {
 			if (node){
-				if (node.type === 'StyleSheet'){
+				if (node.type === 'SelectorBody'){
 					return true;
 				}
 				if (node.type === 'Selector'){
+					return true;
+				}
+			}
+			return false;
+		},
+		
+		inRoot: function inRoot(node) {
+			if (node){
+				if (node.type === 'StyleSheet'){
 					return true;
 				}
 			}
@@ -371,6 +573,55 @@ define([
 			return proposals;	
 		},
 		
+		getSelectorProposals: function getSelectorProposals(params, node) {
+			var proposals = [];
+			var prefix = params.prefix ? params.prefix : "";
+			for(var i = 0; i < ruleTemplates.length; i++) {
+				if (ruleTemplates[i].prefix.startsWith(prefix)) {
+					// TODO For '[', look ahead 1 for existing ']' to prune.
+//					if (prefix === '[' && params.line && params.line.indexOf(']', params.offset - node.range[0]) !== -1) {
+//						params.selection.end++;
+//					}
+					var prop = this._makeTemplateProposal(params, ruleTemplates[i]);
+					if (prop){
+						proposals.push(prop);
+					}
+				}
+			}
+			var pseudos;
+			if (prefix.startsWith('::')) {
+				pseudos = pseudoElements;
+			} else if (prefix.startsWith(':')) {
+				pseudos = pseudoClasses.concat(pseudoElements);
+			}
+			if (pseudos) {
+				for(var j = 0; j < pseudos.length; j++) {
+					var pseudo = pseudos[j];
+					var pseudoPrefix = pseudo.prefix;
+					if(jsUtil.looselyMatches(prefix, pseudoPrefix)) {
+						var declarationBody = ' {\n\t\n}\n'; //$NON-NLS-0$
+						// Look ahead for existing '{', and if there, don't add declaration body
+						if (params.line && params.line.indexOf('{', params.offset - node.range[0]) !== -1) {
+							declarationBody = '';
+						}
+						var hover = Object.create(null);
+						hover.type = 'markdown'; //$NON-NLS-0$
+						hover.content = pseudo.description;
+						hover.content += i18nUtil.formatMessage(Messages['onlineDocumentation'], pseudo.url);
+						var proposal = this._makeComputedProposal(pseudoPrefix + declarationBody, pseudoPrefix, null, hover, prefix);
+						proposal.escapePosition = pseudoPrefix.length - prefix.length;
+						if (declarationBody === '') {
+							proposal.escapePosition += node.range[0] + params.line.length + 2;
+						} else {
+							proposal.escapePosition += params.offset + 4;
+						}
+						proposals.push(proposal);
+					}
+				}
+			}
+			return proposals;
+		},
+		
 		getRootProposals: function getRootProposals(params) {
 			var proposals = [];
 			for(var i = 0; i < ruleTemplates.length; i++) {
@@ -416,7 +667,9 @@ define([
 			if(jsUtil.looselyMatches(namePrefix, template.prefix)) {
 				var t = new mTemplates.Template(template.prefix, template.description, template.template);
 				var prop = t.getProposal(params.prefix, params.offset, params);
+				prop.tags = [{cssClass: "iconTemplate"}];
 				prop.prefix = params.prefix;
+				prop.name = template.name;
 				prop.overwrite = true;
 				prop.style = 'emphasis'; //$NON-NLS-1$
 				prop.kind = 'css'; //$NON-NLS-1$
