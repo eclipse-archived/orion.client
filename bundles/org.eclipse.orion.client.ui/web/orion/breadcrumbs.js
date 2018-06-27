@@ -149,7 +149,6 @@ define(['require', 'orion/webui/littlelib'], function (require, lib) {
                 this._container.appendChild(this.crumbs);
 
                 this.dirty = document.createElement("span"); //$NON-NLS-0$
-                this.dirty.id = "dirty"; //$NON-NLS-0$
                 this.dirty.className = "modifiedFileMarker"; //$NON-NLS-0$
             }
             

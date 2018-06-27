@@ -364,15 +364,6 @@ define([
 			}
 			window.document.title = title;
 		}
-
-		var dirty = lib.node("dirty"); //$NON-NLS-0$f
-		if (dirty) {
-			if (isDirty) {
-				dirty.textContent = "*";
-			} else {
-				dirty.textContent = "";
-			}
-		}
 	}
 
 	/**

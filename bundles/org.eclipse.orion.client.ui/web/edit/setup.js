@@ -861,6 +861,13 @@ objects.mixin(TabWidget.prototype, {
 			if (dirtyIndicator) {
 				dirtyIndicator.style.display = isDirty ? "block" : "none";
 			}
+			var breadcrumb = this.editorTabs[location].breadcrumb;
+			if (breadcrumb) {
+				dirtyIndicator = breadcrumb.dirty;
+				if (dirtyIndicator) {
+					dirtyIndicator.textContent = isDirty ? "*" : "";
+				}
+			}
 		}
 	}
 });
@@ -1609,7 +1616,7 @@ objects.mixin(EditorViewer.prototype, {
 			var loc = this.inputManager.getFileMetadata().Location;
 			var dirty = this.editor.isDirty();
 			mGlobalCommands.setDirtyIndicator(dirty);
-			// Update all dirty indicator for each tab associated with this file.
+			// Update all dirty indicators for each tab associated with this file.
 			this.activateContext.editorViewers.forEach(function(editorViewer) {
 				editorViewer.tabWidget.updateDirtyIndicator(loc, dirty);
 			});
