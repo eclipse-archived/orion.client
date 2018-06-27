@@ -129,6 +129,9 @@ define([
 			if (options.dropdown) {
 				if (options.iconClass) {
 					this.domNode.setAttribute("role", "button"); //$NON-NLS-1$ //$NON-NLS-0$
+					if (options.tooltip) {
+						this.domNode.setAttribute("aria-label", options.tooltip); //$NON-NLS-0$
+					}
 				} else {
 					this.domNode.setAttribute("role", "combobox"); //$NON-NLS-1$ //$NON-NLS-0$
 					this.domNode.setAttribute("aria-readonly", "true"); //$NON-NLS-1$ //$NON-NLS-0$
