@@ -16,6 +16,7 @@ var auth = require('./lib/middleware/auth'),
 	fs = require('fs'),
 	mkdirp = require('mkdirp'),
 	os = require('os'),
+	constants = require('constants'),
 	log4js = require('log4js'),
 	compression = require('compression'),
 	path = require('path'),
@@ -103,6 +104,7 @@ function startServer(cb) {
 	var app = express();
 	if (configParams.get("orion.https.key") && configParams.get("orion.https.cert")) {
 		server = https.createServer({
+			secureOptions: constants.SSL_OP_NO_TLSv1,
 			key: fs.readFileSync(configParams.get("orion.https.key")),
 			cert: fs.readFileSync(configParams.get("orion.https.cert"))
 		}, app);
