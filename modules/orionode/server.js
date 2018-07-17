@@ -138,7 +138,7 @@ function startServer(cb) {
 		var httpProxy;
 		try {
 			httpProxy = require('http-proxy');
-			var proxyHost = configParams.get("orion.proxy.host") || "http://127.0.0.1";
+			var proxyHost = configParams.get("orion.proxy.host");
 			var proxyPort = configParams.get("orion.proxy.port");
 			var proxy = httpProxy.createProxyServer({});
 			app.use(function(req, res, next) {
