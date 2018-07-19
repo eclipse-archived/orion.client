@@ -15,6 +15,8 @@ var url = require('url'),
 	logger = log4js.getLogger("response"),
 	orionEE,
 	httpCodeMapping;
+	
+var REGEX_CRLF = /[\r\n]/g;
 
 /*
  * Sadly, the Orion client code expects http://orionserver/file and http://orionserver/file/ 
@@ -100,7 +102,7 @@ function writeResponse(code, res, headers, body, needEncodeLocation, noCachedStr
 		}
 		if (headers && typeof headers === 'object') {
 			Object.keys(headers).forEach(function(header) {
-				res.setHeader(header, headers[header]);
+				res.setHeader(header.replace(REGEX_CRLF, ""), headers[header].replace(REGEX_CRLF, ""));
 			});
 		}
 		if (typeof body !== 'undefined') {
