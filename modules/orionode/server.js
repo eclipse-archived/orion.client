@@ -24,7 +24,8 @@ var auth = require('./lib/middleware/auth'),
 	argslib = require('./lib/args'),
 	graceful = require('./lib/graceful-cluster'),
 	configParams = require("nconf"),
-	api = require('./lib/api');
+	api = require('./lib/api'),
+	serverUtil = require('./lib/util/serverUtil');
 
 // Patches the fs module to use graceful-fs instead
 require('graceful-fs').gracefulify(fs);
@@ -196,29 +197,7 @@ function startServer(cb) {
 		log: logger.info.bind(logger),
 		shutdownTimeout: shutdownTimeout,
 		exitFunction: function(code) {
-			var _shutdownTimer;
-			_shutdownTimer = setTimeout(function() {
-				_shutdownTimer = null;
-				serverExit(1);
-			}, this.shutdownTimeout);
-			function serverExit(code) {
-				(code ? logger.warn : logger.info).bind(logger)("Exiting worker " + process.pid + " with code: " + code + " (code=1 means timeout)");
-				function done() {
-					if (_shutdownTimer) clearTimeout(_shutdownTimer);
-					log4js.shutdown(function() {
-						logger.info("log4js shutdown. Worker exiting: " + process.pid);
-						process.exit(code || 0);
-					});
-				}
-				var data = {
-					code: code,
-					promises: []
-				};
-				api.getOrionEE().emit("close-socket", data);
-				api.getOrionEE().emit("close-server", data);
-				return Promise.all(data.promises).then(done, done);
-			}
-			serverExit(code);
+			serverUtil.shutdown(code, shutdownTimeout, logger);
 		}
 	});
 	if (cluster && configParams.get("orion_cluster_restart_timeout")) {
