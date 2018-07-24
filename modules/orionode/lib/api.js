@@ -102,7 +102,11 @@ function writeResponse(code, res, headers, body, needEncodeLocation, noCachedStr
 		}
 		if (headers && typeof headers === 'object') {
 			Object.keys(headers).forEach(function(header) {
-				res.setHeader(header.replace(REGEX_CRLF, ""), headers[header].replace(REGEX_CRLF, ""));
+				var value = headers[header];
+				res.setHeader(
+					header.replace(REGEX_CRLF, ""),
+					typeof value === "string" ? value.replace(REGEX_CRLF, "") : value
+				);
 			});
 		}
 		if (typeof body !== 'undefined') {
