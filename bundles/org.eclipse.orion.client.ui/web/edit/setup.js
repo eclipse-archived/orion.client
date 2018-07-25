@@ -1148,7 +1148,7 @@ objects.mixin(EditorViewer.prototype, {
 			this.pool.metadata = metadata;
 			
 			var editorView = this.getCurrentEditorView();
-			if (editorView && editorView.editor) {
+			if (editorView && editorView.editor && typeof editorView.editor.getTextView === 'function') {
 				this.editor.isFileInitiallyLoaded = false;
 				var textView = editorView.editor.getTextView();
 				textView.addEventListener("ModelChanged", function(){
