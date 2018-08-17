@@ -17,7 +17,7 @@
 
 	<groupId>org.eclipse.orion.feature</groupId>
 	<artifactId>org.eclipse.orion.client.feature</artifactId>
-	<version>18.0.0-SNAPSHOT</version>
+	<version>19.0.0-SNAPSHOT</version>
 	<packaging>eclipse-feature</packaging>
 
     <parent>
