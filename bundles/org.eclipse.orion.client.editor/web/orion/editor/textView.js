@@ -3952,7 +3952,7 @@ define("orion/editor/textView", [
 			}
 			this._handleDocKeyUp(e);
 			// don't commit for space (it happens during JP composition)  
-			if (e.keyCode === 13) {
+			if (e.keyCode === 13 && !util.isMac) {
 				this._commitIME();
 			}
 		},
