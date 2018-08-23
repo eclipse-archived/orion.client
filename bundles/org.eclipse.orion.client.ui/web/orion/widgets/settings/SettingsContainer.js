@@ -146,14 +146,14 @@ define([
 				if (categories.showPluginSettings === undefined || categories.showPluginSettings) {
 					_self.settingsCategories.push({
 						id: "plugins", //$NON-NLS-0$
-						textContent: messages["Plugins"],
+						textContent: messages.Plugins,
 						show: _self.showPlugins
 					});
 				}
 				
 				if (categories.showGlobalizationSettings === undefined || categories.showGlobalizationSettings) {
 					_self.settingsCategories.push({
-						id: "Globalization", //$NON-NLS-0$
+						id: "globalizationSettings", //$NON-NLS-0$
 						textContent: messages.Globalization,
 						show: _self.showGlobalizationSettings
 					});
