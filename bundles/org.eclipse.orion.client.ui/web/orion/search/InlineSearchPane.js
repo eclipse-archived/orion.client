@@ -479,7 +479,6 @@ define([
 			label.setAttribute("for", "advSearchInputcomboTextInputField"); //$NON-NLS-1$ //$NON-NLS-0$
 			label = lib.$("#searchScopeLabel", this._searchWrapper);
 			label.appendChild(document.createTextNode(messages["Scope"])); //$NON-NLS-1$ //$NON-NLS-0$
-			label.setAttribute("for", "searchScopeInputcomboTextInputField"); //$NON-NLS-1$ //$NON-NLS-0$
 			label = lib.$("#fileNamePatternsLabel", this._searchWrapper);
 			label.appendChild(document.createTextNode(messages["File name patterns (comma-separated)"])); //$NON-NLS-1$ //$NON-NLS-0$
 			label.setAttribute("for", "fileNamePatternsInputcomboTextInputField"); //$NON-NLS-1$ //$NON-NLS-0$
@@ -608,6 +607,12 @@ define([
 					});
 					searchScopeDialog.show();
 				}.bind(this));
+			}.bind(this));
+			this._searchScopeElementWrapper.addEventListener("keypress", function(e) {
+				e.preventDefault();
+				if (e.keyCode === lib.KEY.ENTER) {
+					this._searchScopeSelectButton.click();
+				}
 			}.bind(this));
 			this._searchScopeSelected.addEventListener("change", function(){
 				if(this._searchScopeSelected.checked){

@@ -197,7 +197,7 @@
 }
 
 .fileNamePatternsHint {
-	color: #777;
+	color: #707070;
 	font-size: 11px;
 	margin: 0 0 2px 0;
 	padding: 0 2px;
@@ -667,6 +667,7 @@
     background-color: inherit;
     margin-top: 8px;
     margin-right: 8px;
+    padding-left: 1px;
 }
 
 .locationElementWrapper:before {
@@ -679,7 +680,7 @@
     font-weight: normal;
     vertical-align: bottom;
     white-space: nowrap;
-    padding-left: 3px;
+    padding-left: 2px;
 }
 
 .locationElementWrapper span {

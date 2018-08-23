@@ -18,6 +18,7 @@ define({
 	"Incremental search": "Incremental search",
 	"Whole Word": "Whole Word",
 	"Regular expression": "Regular expression",
+	"Replace Mode": "Replace Mode",
 	"Find after replace": "Find after replace",
 	"Options": "Options",
 	"Find next match": "Find next match",

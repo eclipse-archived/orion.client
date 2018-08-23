@@ -8,7 +8,7 @@
 		<div class="searchOptionControlBar">
 			<div class="searchGeneralOptionBlock">
 				<span class="searchOption">
-					<button id="toggleReplaceLink" class="searchOptionControlButton" aria-pressed="false">${Show Replace}</button>
+					<button id="toggleReplaceLink" class="searchOptionControlButton" aria-pressed="false" aria-label="${Replace Mode}">${Show Replace}</button>
 				</span>
 				<span class="searchOption">
 					<button id="advSearchCaseSensitive" class="searchOptionControlButton advSearchCaseSensitive" aria-pressed="false" aria-label="${Case sensitive}"></button>
@@ -24,12 +24,12 @@
 	</div>
 	<div class="searchParamBlockDiv">
 				<div class="searchOptionBlock">
-					<label id="searchScopeLabel" class="searchLabel scopeLabel"></label>
+					<span id="searchScopeLabel" class="searchLabel scopeLabel"></span>
 					<div id="searchScopeInputWrapper" class="searchScopeInputWrapper">
-						<span id="searchScopeElementWrapper" class="searchScopeElementWrapper"></span>
+						<span id="searchScopeElementWrapper" class="searchScopeElementWrapper" role="textbox" tabindex="0" aria-labelledby="searchScopeLabel" aria-readonly="true"></span>
 						<button id="searchScopeSelectButton" class="commandButton core-sprite-outline searchScopeSelectButton" aria-label="${Choose a Folder}"></button>
 					</div>
-					<div>
+					<div role="radiogroup" aria-labelledby="searchScopeLabel">
 						<span class="searchOption">
 							<input type="radio" id="advSearchScopeSelected" name="advSearchScope" value="selected" class="searchRadiobox">
 							<label id="advSearchScopeSelectedLabel" class="searchRadioboxLabel" for="advSearchScopeSelected">${Scope Selected}</label>
