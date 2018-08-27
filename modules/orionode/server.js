@@ -192,14 +192,14 @@ function startServer(cb) {
 	});
 	server.listen(port);
 	var shutdownTimeout = configParams.get("shutdown.timeout");
-	new graceful.GracefulServer({
-		server: server,
-		log: logger.info.bind(logger),
-		shutdownTimeout: shutdownTimeout,
-		exitFunction: function(code) {
-			serverUtil.shutdown(code, shutdownTimeout, logger);
-		}
-	});
+//	new graceful.GracefulServer({
+//		server: server,
+//		log: logger.info.bind(logger),
+//		shutdownTimeout: shutdownTimeout,
+//		exitFunction: function(code) {
+//			serverUtil.shutdown(code, shutdownTimeout, logger);
+//		}
+//	});
 	
 	
 	
