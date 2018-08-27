@@ -204,10 +204,16 @@ function startServer(cb) {
 	
 	
 	process.on('SIGTERM', function() {
-		logger.error("\n\nGOT SIGTERM!!!!\n\n");
+		logger.error("\n\nGOT SIGTERM!!!! Will shut down in 10s\n\n");
+		setTimeout(function() {
+			process.exit(0);
+		}, 10000);
 	});
 	process.on('SIGINT', function() {
-		logger.error("\n\nGOT SIGINT!!!!\n\n");		
+		logger.error("\n\nGOT SIGINT!!!! Will shut down in 10s\n\n");
+		setTimeout(function() {
+			process.exit(0);
+		}, 10000);
 	});
 	
 	
