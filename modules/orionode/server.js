@@ -200,6 +200,18 @@ function startServer(cb) {
 			serverUtil.shutdown(code, shutdownTimeout, logger);
 		}
 	});
+	
+	
+	
+	process.on('SIGTERM', function() {
+		logger.error("\n\nGOT SIGTERM!!!!\n\n");
+	});
+	process.on('SIGINT', function() {
+		logger.error("\n\nGOT SIGINT!!!!\n\n");		
+	});
+	
+	
+	
 	if (cluster && configParams.get("orion_cluster_restart_timeout")) {
 		try {
 			var date = require("cron-parser").parseExpression(configParams.get("orion_cluster_restart_timeout"), {utc: true}).next();
