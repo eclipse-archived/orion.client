@@ -192,28 +192,14 @@ function startServer(cb) {
 	});
 	server.listen(port);
 	var shutdownTimeout = configParams.get("shutdown.timeout");
-//	new graceful.GracefulServer({
-//		server: server,
-//		log: logger.info.bind(logger),
-//		shutdownTimeout: shutdownTimeout,
-//		exitFunction: function(code) {
-//			serverUtil.shutdown(code, shutdownTimeout, logger);
-//		}
-//	});
-
-
-
-	process.on('SIGTERM', function() {
-		logger.error("\n\nGOT SIGTERM!!!! Will shut down in 10s\n\n");
-		setTimeout(function() {
-			logger.error("\n\nbye!\n\n");
-			setTimeout(function() {
-				process.exit(0);
-			}, 2000);
-		}, 10000);
+	new graceful.GracefulServer({
+		server: server,
+		log: logger.info.bind(logger),
+		shutdownTimeout: shutdownTimeout,
+		exitFunction: function(code) {
+			serverUtil.shutdown(code, shutdownTimeout, logger);
+		}
 	});
-
-
 
 	if (cluster && configParams.get("orion_cluster_restart_timeout")) {
 		try {
