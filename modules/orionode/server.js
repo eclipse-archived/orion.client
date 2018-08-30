@@ -200,24 +200,21 @@ function startServer(cb) {
 //			serverUtil.shutdown(code, shutdownTimeout, logger);
 //		}
 //	});
-	
-	
-	
+
+
+
 	process.on('SIGTERM', function() {
 		logger.error("\n\nGOT SIGTERM!!!! Will shut down in 10s\n\n");
 		setTimeout(function() {
-			process.exit(0);
+			logger.error("\n\nbye!\n\n");
+			setTimeout(function() {
+				process.exit(0);
+			}, 2000);
 		}, 10000);
 	});
-	process.on('SIGINT', function() {
-		logger.error("\n\nGOT SIGINT!!!! Will shut down in 10s\n\n");
-		setTimeout(function() {
-			process.exit(0);
-		}, 10000);
-	});
-	
-	
-	
+
+
+
 	if (cluster && configParams.get("orion_cluster_restart_timeout")) {
 		try {
 			var date = require("cron-parser").parseExpression(configParams.get("orion_cluster_restart_timeout"), {utc: true}).next();
