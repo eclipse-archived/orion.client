@@ -137,6 +137,8 @@ define({//Default message bundle
 	"ReloadedNPlugs":"Reloaded ${0} plug-ins.",
 	"Reloaded":"Reloaded ${0}",
 	"Services": "Services",
+	"Previous Service": "Previous Service",
+	"Next Service": "Next Service",
 	"Value": "Value",
 	"JavaScript Object": "JavaScript Object",
 	"CheckJsConsoleDrillDown": "click here, then check javascript console to drill down",

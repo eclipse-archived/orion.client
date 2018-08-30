@@ -36,14 +36,14 @@ define(['i18n!orion/settings/nls/messages', 'orion/objects', 'orion/webui/little
 		templateString:'<div class="plugin-service-carousel" ><div class="serviceContainer"><div class="serviceContainerClosed" tabindex="0" role="button" aria-pressed="false">${Services}</div>' + //$NON-NLS-2$ //$NON-NLS-0$
 						'<div class="serviceCount">0</div></div>' + //$NON-NLS-0$
 					   '<div class="serviceRails serviceRailsHidden" tabindex="0" role="group">' + //$NON-NLS-0$
-		                  '<div class="leftButton leftButtonArea" role="presentation">' + //$NON-NLS-0$
-		                    '<span class="leftCarousel carouselControl">&lt;</span>' + //$NON-NLS-0$
+		                  '<div class="leftButton leftButtonArea">' + //$NON-NLS-0$
+		                    '<span class="leftCarousel carouselControl" aria-label="${Previous Service}">&lt;</span>' + //$NON-NLS-0$
 		                  '</div>' + //$NON-NLS-0$
-		                  '<div class="listContainer" role="presentation">' + //$NON-NLS-0$
+		                  '<div class="listContainer">' + //$NON-NLS-0$
 							'<ul class="serviceList"></ul>' + //$NON-NLS-0$
 		                  '</div>' + //$NON-NLS-0$
-		                  '<div class="rightButton rightButtonArea" role="presentation">' +  //$NON-NLS-0$
-							'<span class="rightCarousel carouselControl">&gt;</span>' +  //$NON-NLS-0$
+		                  '<div class="rightButton rightButtonArea">' +  //$NON-NLS-0$
+							'<span class="rightCarousel carouselControl" aria-label="${Next Service}">&gt;</span>' +  //$NON-NLS-0$
 		                  '</div>' + //$NON-NLS-0$
 		               '</div></div>', //$NON-NLS-0$
 
@@ -53,6 +53,7 @@ define(['i18n!orion/settings/nls/messages', 'orion/objects', 'orion/webui/little
 			var label = this.serviceLabel = lib.$('.serviceContainerClosed', this.node); //$NON-NLS-0$
 			this.serviceCount = lib.$('.serviceCount', this.node); //$NON-NLS-0$
 			var rails = this.rails = lib.$('.serviceRails', this.node); //$NON-NLS-0$
+			rails.setAttribute("aria-label", messages['Services']);
 			this.leftbutton = lib.$('.leftButton', this.node); //$NON-NLS-0$
 			this.listContainer = lib.$('.listContainer', this.node); //$NON-NLS-0$
 			this.testlist = lib.$('.serviceList', this.node); //$NON-NLS-0$
@@ -66,7 +67,7 @@ define(['i18n!orion/settings/nls/messages', 'orion/objects', 'orion/webui/little
 			rails.addEventListener('mouseleave', this.hideButtons.bind(this));  //$NON-NLS-0$
 			rails.addEventListener('focus', this.showButtons.bind(this));       //$NON-NLS-0$
 			rails.addEventListener('blur', this.hideButtons.bind(this));        //$NON-NLS-0$ 
-			rails.addEventListener('keypress', this.handleKeypress.bind(this)); //$NON-NLS-0$
+			rails.addEventListener('keydown', this.handleKeydown.bind(this)); //$NON-NLS-0$
 
 			this.postCreate();
 		},
@@ -94,12 +95,14 @@ define(['i18n!orion/settings/nls/messages', 'orion/objects', 'orion/webui/little
 			this.rails.classList.add( "serviceRailsVisible" ); //$NON-NLS-0$
 			this.serviceLabel.classList.remove( "serviceContainerClosed" ); //$NON-NLS-0$
 			this.serviceLabel.classList.add( "serviceContainerOpen" ); //$NON-NLS-0$
+			this.serviceLabel.setAttribute("aria-pressed", "true");
 			this.serviceState = true; 
 		},
 		
 		collapse: function(){
 			this.serviceLabel.classList.remove( "serviceContainerOpen" ); //$NON-NLS-0$
 			this.serviceLabel.classList.add( "serviceContainerClosed" ); //$NON-NLS-0$
+			this.serviceLabel.setAttribute("aria-pressed", "false");
 			this.rails.classList.remove( "serviceRailsVisible" ); //$NON-NLS-0$
 			this.rails.classList.add( "serviceRailsHidden" ); //$NON-NLS-0$
 			this.serviceState = false; 
@@ -174,7 +177,7 @@ define(['i18n!orion/settings/nls/messages', 'orion/objects', 'orion/webui/little
 		
 				for( var count=0; count < this.pointer; count++ ){
 					this.listContainer.childNodes[0].childNodes[count].style.display = "none" ; //$NON-NLS-1$ //$NON-NLS-0$
-				};
+				}
 			
 				setBounds( this.rails, this.box );
 			}
@@ -205,6 +208,7 @@ define(['i18n!orion/settings/nls/messages', 'orion/objects', 'orion/webui/little
 
 			var listItem = document.createElement("li"); //$NON-NLS-0$
 			listItem.classList.add("serviceData"); //$NON-NLS-0$
+			listItem.setAttribute("aria-label", data.service);
 			location.appendChild(listItem);
 
 			var entry = document.createElement("div"); //$NON-NLS-0$
@@ -293,12 +297,16 @@ define(['i18n!orion/settings/nls/messages', 'orion/objects', 'orion/webui/little
 			}
 		},
 		
-		handleKeypress: function(evt) {
+		handleKeydown: function(evt) {
 			if( evt.keyCode === lib.KEY.LEFT && this.leftbutton.style.visibility !== "hidden" ) { //$NON-NLS-0$
 				this.slideLeft();
+				evt.preventDefault();
+				evt.stopPropagation();
 			}
 			else if( evt.keyCode === lib.KEY.RIGHT && this.rightbutton.style.visibility !== "hidden" ) { //$NON-NLS-0$
 				this.slideRight();
+				evt.preventDefault();
+				evt.stopPropagation();
 			}
 		}
 	});
