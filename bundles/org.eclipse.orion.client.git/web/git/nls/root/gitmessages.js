@@ -82,7 +82,7 @@ define({//Default message bundle
 	"AuthMsgLink":"Authentication required for: ${0}. <a target=\"_blank\" href=\"${1}\">${2}</a> and re-try the request. </span>", //$NON-NLS-0$  //$NON-NLS-1$
 	"CommitOptions": "Commit Options", //$NON-NLS-0$  //$NON-NLS-1$
 	"SmartCommit": "Enter the commit message", //$NON-NLS-0$  //$NON-NLS-1$
-	"SmartCommitLabel": "Commit message", //$NON-NLS-0$  //$NON-NLS-1$
+	"SmartCommitLabel": "Commit message:", //$NON-NLS-0$  //$NON-NLS-1$
 	"SmartCountCommit": "Commit ${0} file(s)", //$NON-NLS-0$  //$NON-NLS-1$
 	"Amend last commit": "Amend last commit", //$NON-NLS-0$  //$NON-NLS-1$
 	" Amend": " Amend", //$NON-NLS-0$  //$NON-NLS-1$

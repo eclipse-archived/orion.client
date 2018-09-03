@@ -496,12 +496,17 @@ _:-moz-tree-row(hover), .gitChangeListCheck { /* Firefox  HACK */
 	background-color: #F2FBF9;
 }
 
+.gitCommitMessageSection .sectionTableItem {
+	padding-top: 8px;
+}
+
 .gitCommitMessage .gitCommitMessageTopRow {
 	width: calc(100% - 26px);
 	background-color: #FFF;
 	padding: 5px;
 	padding-bottom: 0;
 	margin: 10px;
+	margin-top: 4px;
 	margin-bottom: 0;
 	border-radius: 5px;
 	border: 1px solid #1bb199;
@@ -521,6 +526,10 @@ _:-moz-tree-row(hover), .gitChangeListCheck { /* Firefox  HACK */
 
 .invalidFileCount {
 	color: rgba(255, 0, 0, 1);
+}
+
+.gitCommitMessageLabel {
+	margin-left: 20px;
 }
 
 .gitCommitMessage .gitCommitMessageTopRow textarea {

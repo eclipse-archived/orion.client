@@ -933,6 +933,12 @@ define([
 						
 						td.colSpan = 2;
 						tableRow.classList.remove("selectableNavRow"); //$NON-NLS-0$
+
+						var label = document.createElement("label"); //$NON-NLS-0$
+						label.htmlFor = "nameparameterCollector"; //$NON-NLS-0$
+						label.textContent = messages["SmartCommitLabel"];
+						label.className = "gitCommitMessageLabel"; //$NON-NLS-0$
+						outerDiv.appendChild(label);
 						
 						var topRow = document.createElement("div"); //$NON-NLS-0$
 						topRow.className = "gitCommitMessageTopRow"; //$NON-NLS-0$
@@ -941,7 +947,6 @@ define([
 						textArea.rows = 4;
 						textArea.id = "nameparameterCollector"; //$NON-NLS-0$
 						textArea.placeholder = messages["SmartCommit"];
-						textArea.setAttribute("aria-label", messages["SmartCommitLabel"]);
 						textArea.classList.add("parameterInput"); //$NON-NLS-0$
 						textArea.addEventListener("keyup", function() { //$NON-NLS-0$
 							textArea.parentNode.classList.remove("invalidParam"); //$NON-NLS-0$
