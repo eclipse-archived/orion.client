@@ -25,8 +25,6 @@ function(messages, dialog, mFileUtils, mSelection, mExplorer, mExplorerTable, bi
 		var col = document.createElement("td"); //$NON-NLS-0$
 		tableRow.appendChild(col);
 		var span = document.createElement("span"); //$NON-NLS-0$
-		span.id = this.explorer.model.getId(item);
-		//span.id = tableRow.id+"navSpan"; //$NON-NLS-0$
 		col.appendChild(span);
 		span.className = "mainNavColumn singleNavColumn"; //$NON-NLS-0$
 		this.getExpandImage(tableRow, span);
