@@ -252,7 +252,9 @@ define(['i18n!orion/nls/messages', 'orion/webui/littlelib', 'orion/bidiUtils', '
 						label = document.createElement("label"); //$NON-NLS-0$
 						label.classList.add("parameterInput"); //$NON-NLS-0$
 						label.setAttribute("for", parm.name + "parameterCollector"); //$NON-NLS-1$ //$NON-NLS-0$
-						label.textContent = parm.label;
+						if (parm.type !== "boolean") {
+							label.textContent = parm.label;
+						}
 						parameterArea.appendChild(label);
 					} 
 					var type = parm.type;
@@ -306,6 +308,10 @@ define(['i18n!orion/nls/messages', 'orion/webui/littlelib', 'orion/bidiUtils', '
 							}
 						}					
 						(!isSTT ? bidiUtils.initInputField(field) : bidiFormat.attach(field, "url", {}, false, "en"));
+					}
+					if (label && parm.type === "boolean") {
+						// label text goes after checkbox
+						label.appendChild(document.createTextNode(parm.label));
 					}
 					field.classList.add("parameterInput"); //$NON-NLS-0$
 					// for fun

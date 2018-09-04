@@ -1010,7 +1010,7 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/i18n
 		});
 		commandService.addCommand(newFolderCommand);
 
-		var zipURLParameters = new mCommandRegistry.ParametersDescription([new mCommandRegistry.CommandParameter('url', 'url', messages['File URL:'], 'URL'), new mCommandRegistry.CommandParameter('unzip', 'boolean', messages["Unzip *.zip files:"], true)]);//$NON-NLS-4$  //$NON-NLS-3$  //$NON-NLS-2$  //$NON-NLS-1$ //$NON-NLS-0$
+		var zipURLParameters = new mCommandRegistry.ParametersDescription([new mCommandRegistry.CommandParameter('url', 'url', messages['File URL:'], 'URL'), new mCommandRegistry.CommandParameter('unzip', 'boolean', messages["Unzip *.zip files"], true)]);//$NON-NLS-4$  //$NON-NLS-3$  //$NON-NLS-2$  //$NON-NLS-1$ //$NON-NLS-0$
 
 		var importZipURLCommand = new mCommands.Command({
 			name: messages["Import from HTTP..."],
@@ -1299,7 +1299,7 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/i18n
 		var parametersArray = href ? [] : [
 			new mCommandRegistry.CommandParameter("folderName", "text", messages['Folder name:'], name), //$NON-NLS-1$ //$NON-NLS-0$
 			new mCommandRegistry.CommandParameter("url", "url", messages['Extracted from:'], hrefContent), //$NON-NLS-1$ //$NON-NLS-0$
-			new mCommandRegistry.CommandParameter("unzip", "boolean", messages['Unzip *.zip files:'], true) //$NON-NLS-1$ //$NON-NLS-0$
+			new mCommandRegistry.CommandParameter("unzip", "boolean", messages['Unzip *.zip files'], true) //$NON-NLS-1$ //$NON-NLS-0$
 		];
 		var parameterDescription = null;
 		if (parametersArray.length > 0) {

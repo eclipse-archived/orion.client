@@ -101,7 +101,7 @@ define({//Default message bundle
 	"Import from HTTP...": "HTTP",
 	"File URL:": "File URL:",
 	"ImportURL": "Import a file from a URL and optionally unzip it",
-	"Unzip *.zip files:": "Unzip *.zip files:",
+	"Unzip *.zip files": "Unzip *.zip files",
 	"Extracted from:": "Extracted from:",
 	"FolderDropNotSupported": "Did not drop ${0}. Folder drop is not supported in this browser.",
 	"CreateFolderErr": "You cannot copy files directly into the workspace. Create a folder first.",

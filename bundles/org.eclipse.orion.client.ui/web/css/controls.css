@@ -191,6 +191,7 @@ html[dir="rtl"] .parametersDismiss { /* ACGC */
 	cursor: pointer;
     border-radius: 1px;
 	padding: 2px;
+	padding-top: 1px;
 	font: 8pt Lucida Sans Unicode,Lucida Grande,Verdana,Arial,Helvetica,Myriad,Tahoma,clean,sans-serif;  /* to override user agent stylesheet */
 	margin: 0 4px 0;
 	vertical-align: middle;
@@ -263,7 +264,6 @@ label.parameterInput {
 	font-weight: normal;
 	vertical-align: middle;
 	color:#333;
-	outline:none;
 }
 
 button.dismissButton.parameterInput {
