@@ -20,7 +20,7 @@ function shutdown(code, shutdownTimeout, logger) {
 		setTimeout(function() {
 			logger.info("Server hard shutdown, exiting: " + process.pid);
 			process.exit(2);
-		}, /*shutdownTimeout*/ 3000);
+		}, shutdownTimeout);
 	}, shutdownTimeout);
 	function serverExit(code) {
 		(code ? logger.warn : logger.info).bind(logger)("Exiting " + process.pid + " with code: " + code + " (code=1 means timeout)");

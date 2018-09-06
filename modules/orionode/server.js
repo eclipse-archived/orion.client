@@ -197,17 +197,7 @@ function startServer(cb) {
 		log: logger.info.bind(logger),
 		shutdownTimeout: shutdownTimeout,
 		exitFunction: function(code) {
-			var counter = 0;
-			var doit = function() {
-				logger.error("Shut down time: " + (++counter * 30) + "s");
-				if (counter < 15) {
-					setTimeout(doit, 30000);
-				} else {
-					process.exit(0); // just in case
-				}
-			};
-			setTimeout(doit, 30000);
-			serverUtil.shutdown(code, /*shutdownTimeout*/ 120000, logger);
+			serverUtil.shutdown(code, shutdownTimeout, logger);
 		}
 	});
 
