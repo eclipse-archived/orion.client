@@ -26,8 +26,8 @@ function shutdown(code, shutdownTimeout, logger) {
 		(code ? logger.warn : logger.info).bind(logger)("Exiting " + process.pid + " with code: " + code + " (code=1 means timeout)");
 		function done() {
 			if (_shutdownTimer) clearTimeout(_shutdownTimer);
+			logger.error("Server shutting down, exiting: " + process.pid + " code: "+ (code || 0));
 			log4js.shutdown(function() {
-				logger.info("Server shutting down, exiting: " + process.pid);
 				process.exit(code || 0);
 			});
 		}
