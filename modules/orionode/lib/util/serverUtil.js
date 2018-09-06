@@ -18,15 +18,15 @@ function shutdown(code, shutdownTimeout, logger) {
 		_shutdownTimer = null;
 		serverExit(1);
 		setTimeout(function() {
-			logger.info("Server hard shutdown, exiting: " + process.pid);
+			logger.warn("Exiting after hard shutdown timed out, pid: " + process.pid);
 			process.exit(2);
-		}, shutdownTimeout);
+		}, shutdownTimeout / 10);
 	}, shutdownTimeout);
 	function serverExit(code) {
-		(code ? logger.warn : logger.info).bind(logger)("Exiting " + process.pid + " with code: " + code + " (code=1 means timeout)");
+		(code ? logger.warn : logger.info).bind(logger)("Initiating shutdown, pid: " + process.pid + " with code: " + code + " (code=1 means hard)");
 		function done() {
 			if (_shutdownTimer) clearTimeout(_shutdownTimer);
-			logger.error("Server shutting down, exiting: " + process.pid + " code: "+ (code || 0));
+			logger.info("Exiting after all tasks ended, pid: " + process.pid + " code: " + (code || 0) + " (code=1 means hard)");
 			log4js.shutdown(function() {
 				process.exit(code || 0);
 			});
