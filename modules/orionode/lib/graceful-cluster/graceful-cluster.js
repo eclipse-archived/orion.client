@@ -36,6 +36,7 @@ GracefulCluster.start = function(options) {
 
     var exitFunction = options.exitFunction || (function gracefulClusterExit () { process.exit(0); });
     var log = options.log || console.log;
+    var errorLog = options.errorLog || log;
     var shutdownTimeout = options.shutdownTimeout || 5000;
     var disableGraceful = options.disableGraceful;
     var workersCount = options.workersCount || numCPUs;
@@ -195,7 +196,7 @@ GracefulCluster.start = function(options) {
             setInterval(function() {
                 var mem = process.memoryUsage().rss;
                 if (mem > options.restartOnMemory) {
-                    log('Cluster: worker ' + process.pid + ' used too much memory (' + Math.round(mem / (1024*1024)) + ' MB), restarting...');
+                    errorLog('Cluster: worker ' + process.pid + ' used too much memory (' + Math.round(mem / (1024*1024)) + ' MB), restarting...');
                     GracefulCluster.gracefullyRestartCurrentWorker();
                 }
 
