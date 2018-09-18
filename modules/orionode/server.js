@@ -50,6 +50,10 @@ var cluster, clusterParam = configParams.get("orion_cluster");
 if (clusterParam) {
 	cluster = require('cluster');
 }
+var restartOnMemoryLimit = parseInt(configParams.get("orion_threshold_memory_mb"));
+if (restartOnMemoryLimit) {
+	restartOnMemoryLimit = restartOnMemoryLimit * 1024 * 1024; /* bytes */
+}
 
 var homeDir = os.homedir();
 if (process.versions.electron) {
@@ -245,7 +249,8 @@ try {
 			},
 			log: logger.info.bind(logger),
 			shutdownTimeout: configParams.get("shutdown.timeout"),
-			workersCount: numCPUs
+			workersCount: numCPUs,
+			restartOnMemory: restartOnMemoryLimit
 		});
 	} else {
 		start(process.versions.electron);
