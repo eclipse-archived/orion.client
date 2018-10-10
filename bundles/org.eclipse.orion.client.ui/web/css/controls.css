@@ -288,6 +288,7 @@ input.parameterInput[type=checkbox] {
 textarea.parameterInput {
 	vertical-align: top;
 	width: 50em;
+	outline: none;
 }
 
 div.parameterInput[contenteditable="true"] {
