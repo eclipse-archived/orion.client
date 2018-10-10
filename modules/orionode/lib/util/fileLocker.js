@@ -121,12 +121,12 @@ FileLocker.prototype.lock = function(shared) {
 			this._synchronized(this._acquireLock, [shared]).then(
 				function() {
 					var acquireTime = Date.now();
-					logger.info("get lock time=" + (acquireTime - time) + " shared=" + shared + " path=" + this._pathame + " pid=" + process.pid);
+					logger.debug("get lock time=" + (acquireTime - time) + " shared=" + shared + " path=" + this._pathame + " pid=" + process.pid);
 					resolve(function() {
-						logger.info("release lock time1=" + (Date.now() - acquireTime) + " shared=" + shared + " path=" + this._pathame + " pid=" + process.pid);
+						logger.debug("release lock time1=" + (Date.now() - acquireTime) + " shared=" + shared + " path=" + this._pathame + " pid=" + process.pid);
 						this._synchronized(this._releaseLock).then(
 							function() {
-								logger.info("release lock time2=" + (Date.now() - acquireTime) + " shared=" + shared + " path=" + this._pathame + " pid=" + process.pid);
+								logger.debug("release lock time2=" + (Date.now() - acquireTime) + " shared=" + shared + " path=" + this._pathame + " pid=" + process.pid);
 								releaser();
 							}.bind(this),
 							function(error) {
@@ -194,7 +194,7 @@ FileLocker.prototype._acquireLock = function(shared) {
 						return reject(error);
 					}
 					this._fd = fd;
-					logger.info("FD set=" + fd + " count=" + this._counter + " path=" + this._pathame + " pid=" + process.pid);
+					logger.debug("FD set=" + fd + " count=" + this._counter + " path=" + this._pathame + " pid=" + process.pid);
 					fs.chmod(this._pathame, "600", function() {
 						//ignore errors
 						lock();
@@ -234,7 +234,7 @@ FileLocker.prototype._closeLockFile = function() {
 		}
 		this._inactivityTimer = null;
 		var fd = this._fd;
-		logger.info("FD cleared was=" + fd + " count=" + this._counter + " path=" + this._pathame + " pid=" + process.pid);
+		logger.debug("FD cleared was=" + fd + " count=" + this._counter + " path=" + this._pathame + " pid=" + process.pid);
 		this._fd = null;
 		return new Promise(function(resolve) {
 			if (!fd) return;
