@@ -197,7 +197,7 @@ module.exports = function(grunt) {
 
 	// Dynamic configuration
 	grunt.config("requirejs.compile.options", util.mixin(grunt.config("nodeBuildConfig"), {
-		optimize: "uglify2",
+		optimize: "none",
 		generateSourceMaps: generateSourceMaps,
 		appDir: staging,
 		baseUrl: "./",
