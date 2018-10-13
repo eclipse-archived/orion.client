@@ -12,10 +12,10 @@ module.exports = function(grunt) {
 	    clientPath = "../../",
 	    staging = "target/staging/",
 	    optimized = "target/optimized/",
-	    fingerPrint = grunt.option("fp") || false,
-	    generateSourceMaps = grunt.option("generateSourceMaps") || false,
+	    fingerPrint = false,//grunt.option("fp") || false,
+	    generateSourceMaps = false,//grunt.option("generateSourceMaps") || false,
 	   // skipTest = grunt.option("skipTest") || false,
-	    skipMinify = grunt.option("skipMinify") || false;
+	    skipMinify = true;//grunt.option("skipMinify") || false;
 
 	var socketioPath =  grunt.file.exists('./node_modules/socket.io/node_modules/socket.io-client') ?
 			'../../node_modules/socket.io/node_modules/socket.io-client/dist/socket.io' :
