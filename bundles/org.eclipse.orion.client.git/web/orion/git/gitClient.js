@@ -84,7 +84,7 @@ eclipse.GitService = (function() {
 			}
 			//NOTE: require.toURL needs special logic here to handle "gitapi/clone"
 			var gitapiCloneUrl = require.toUrl("gitapi/clone/._"); //$NON-NLS-0$
-			gitapiCloneUrl = gitapiCloneUrl.substring(0,gitapiCloneUrl.length-2);
+			gitapiCloneUrl = gitapiCloneUrl.substring(0,gitapiCloneUrl.length-3);
 			
 			var clientDeferred = new Deferred();
 			xhr("POST", gitapiCloneUrl, { 
