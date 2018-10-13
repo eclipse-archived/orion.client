@@ -154,7 +154,6 @@ define([
 		};
 	
 		try {
-			console.log(method + " " + url);
 			xhr.open(method, url, true /* async */);
 			if (typeof options.responseType === 'string') { //$NON-NLS-0$
 				xhr.responseType = options.responseType;
