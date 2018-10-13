@@ -230,8 +230,7 @@ module.exports = function(grunt) {
 	grunt.registerTask("optimize", fingerPrint ?
 		["printBuild", "copy:stage", "requirejs", "fingerprint", "string-replace:requiremin", "copy:unstage"]:
 		["printBuild", "copy:stage", "requirejs", "string-replace:requiremin", "copy:unstage"]);
-	var tasksArray = ["checkDirs", "clean", "copy:orionserver"];
-	grunt.registerTask("default", tasksArray);
+	grunt.registerTask("default", ["checkDirs", "clean", "copy:orionserver", "optimize"]);
 	grunt.registerTask("server_unit_tests", ["mocha_istanbul:coverage"]);
   grunt.registerTask("client_unit_tests", ["karma:client_unit_tests:start"]);
   grunt.registerTask("combine_reports", ["makeReport"]);
