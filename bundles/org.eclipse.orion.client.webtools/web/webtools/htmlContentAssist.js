@@ -30,10 +30,12 @@ define([
 		"\t<title>${title}</title>\n" + //$NON-NLS-0$
 		"</head>\n" + //$NON-NLS-0$
 		"<body>\n" + //$NON-NLS-0$
-		"\t<h1>${header}</h1>\n" + //$NON-NLS-0$
-		"\t<p>\n" + //$NON-NLS-0$
-		"\t\t${cursor}\n" + //$NON-NLS-0$
-		"\t</p>\n" + //$NON-NLS-0$
+		"\t<main>\n" + //$NON-NLS-0$
+		"\t\t<h1>${header}</h1>\n" + //$NON-NLS-0$
+		"\t\t<p>\n" + //$NON-NLS-0$
+		"\t\t\t${cursor}\n" + //$NON-NLS-0$
+		"\t\t</p>\n" + //$NON-NLS-0$
+		"\t</main>\n" + //$NON-NLS-0$
 		"</body>\n" + //$NON-NLS-0$
 		"</html>"); //$NON-NLS-0$
 		
