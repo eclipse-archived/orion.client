@@ -31,7 +31,7 @@ define([
 		"</head>\n" + //$NON-NLS-0$
 		"<body>\n" + //$NON-NLS-0$
 		"\t<main>\n" + //$NON-NLS-0$
-		"\t\t<h1>${header}</h1>\n" + //$NON-NLS-0$
+		"\t\t<h1>${heading}</h1>\n" + //$NON-NLS-0$
 		"\t\t<p>\n" + //$NON-NLS-0$
 		"\t\t\t${cursor}\n" + //$NON-NLS-0$
 		"\t\t</p>\n" + //$NON-NLS-0$
