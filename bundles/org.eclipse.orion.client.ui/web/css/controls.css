@@ -350,7 +350,7 @@ div.parameterInput[contenteditable="true"]:before {
 }
 
 .mainNavColumn {
-	display: inline-block;
+	display: inline;
 	vertical-align: baseline;
 	white-space: nowrap;
 }
