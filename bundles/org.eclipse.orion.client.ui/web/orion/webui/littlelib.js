@@ -494,6 +494,7 @@ define(["orion/util"], function(util) {
 	function setFramesEnabled(enable) {
 		var frames = document.getElementsByTagName("iframe"); //$NON-NLS-0$
 		for (var i = 0; i<frames.length; i++) {
+			if (frames[i].parentNode === document.body) continue;
 			frames[i].parentNode.style.pointerEvents = enable ? "" : "none"; //$NON-NLS-0$
 		}
 	}
