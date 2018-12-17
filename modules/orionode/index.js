@@ -109,7 +109,6 @@ function tryLoadRouter(endpoint, options) {
 		args.push(options.basicMiddleware);
 	}
 	if (isEndpoint && csrf && (endpoint.checkCSRF === undefined || endpoint.checkCSRF)) { // perform CSRF by default
-		logger.info("Setting x-csrf-token");
 		args.push(csrf);
 		args.push(function(req, res, next) {
 			var preamble = options.configParams.get("orion_cookies_name_premable") || "";
@@ -274,7 +273,6 @@ module.exports = function startServer(options) {
 		passport.session()
 	].concat(options.authenticate || []);
 	if (options.configParams.get("orion.XSRFPreventionFilterEnabled")) {
-		logger.info("XSRF prevention filter enabled");
 		var cookieKey = (options.configParams.get("orion_cookies_name_premable") || "") + '_csrf';
 		var cookiePath = options.configParams.get("orion_cookies_path") || '/';
 		csrf = csurf({cookie: {key: cookieKey, path: cookiePath }});
