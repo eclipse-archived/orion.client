@@ -124,8 +124,6 @@ function tryLoadRouter(endpoint, options) {
 			}
 			next();
 		});
-	} else {
-		logger.warn("test output 2, isEndpoint: " + isEndpoint + " csrf: " + csrf + " last: " + (endpoint.checkCSRF === undefined || endpoint.checkCSRF));
 	}
 	if (endpoint.checkAccess) {
 		args.push(checkAccessRights);
@@ -285,7 +283,6 @@ module.exports = function startServer(options) {
 		/**
 		 * @callback
 		 */
-		logger.warn("test output");
 		options.CSRF = function noop(req, res, next) { next(); };
 	}
 	const additionalEndpoints = options.configParams.get("additional.endpoint") ? require(options.configParams.get("additional.endpoint")) : [];
