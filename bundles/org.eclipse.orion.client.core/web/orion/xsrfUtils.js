@@ -23,7 +23,7 @@ define([],function(){
 			n = cookies[i].substr(0, cookies[i].indexOf("=")).trim();//$NON-NLS-0$
 			v = cookies[i].substr(cookies[i].indexOf("=") + 1).trim();//$NON-NLS-0$
 
-			if(n == XSRF_TOKEN) {
+			if(n.endsWith(XSRF_TOKEN)) {
 				return v;
 			}
 		}
