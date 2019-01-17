@@ -350,5 +350,10 @@ module.exports = function startServer(options) {
 			appendStaticAssets: appendStaticAssets
 		}, staticCacheOption)));
 	}
+	
+	app.use(function(req, res, next) {
+		res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
+		next();
+	});
 	return app;
 };
