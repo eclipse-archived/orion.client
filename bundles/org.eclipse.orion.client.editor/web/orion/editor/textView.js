@@ -3921,7 +3921,7 @@ define("orion/editor/textView", [
 				}
 			}
 			if (!ignore) {
-				if (e.key) {
+				if (e.key && !util.isFirefox) {
 					this._doContent(e.key);
 					if (e.preventDefault) { e.preventDefault(); }
 					return false;
