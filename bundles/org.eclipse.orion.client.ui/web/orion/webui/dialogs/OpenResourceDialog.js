@@ -201,7 +201,7 @@ define([
 
 
 	OpenResourceDialog.prototype.TEMPLATE = 
-		'<div role="search">' + //$NON-NLS-0$
+		'<div>' + //$NON-NLS-0$
 			'<div><label id="fileNameMessage" for="fileName">${Type the name of a file to open (? = any character, * = any string):}</label></div>' + //$NON-NLS-0$
 			'<div><input id="fileName" type="text" class="openResourceDialogInput" aria-autocomplete="list" style="min-width: 25em; width:90%;"/></div>' + //$NON-NLS-0$
 			'<div><label for="searchScope"><input id="searchScope" type="checkbox" style="width: auto" class="openResourceDialogInput"/>${Search In All Folders}</label></input></div>' + //$NON-NLS-0$
