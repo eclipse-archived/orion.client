@@ -549,6 +549,7 @@ function(messages, Deferred, lib, mContentTypes, i18nUtil, mExplorer, mCommands,
         });
         
         var nextResultCommand = new mCommands.Command({
+        	name: messages["Next result"],
             tooltip: messages["Next result"],
             imageClass: "core-sprite-move-down", //$NON-NLS-1$
             id: "orion.search.nextResult", //$NON-NLS-1$
@@ -561,6 +562,7 @@ function(messages, Deferred, lib, mContentTypes, i18nUtil, mExplorer, mCommands,
             }
         });
         var prevResultCommand = new mCommands.Command({
+        	name: messages["Previous result"],
             tooltip: messages["Previous result"],
             imageClass: "core-sprite-move-up", //$NON-NLS-1$
             id: "orion.search.prevResult", //$NON-NLS-1$
