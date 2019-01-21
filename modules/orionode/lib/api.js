@@ -18,6 +18,8 @@ var url = require('url'),
 	
 var REGEX_CRLF = /[\r\n]/g;
 
+var shouldAddStrictTransportHeaders = false;
+
 /*
  * Sadly, the Orion client code expects http://orionserver/file and http://orionserver/file/ 
  * to both point to the File API. That's what this helper is for.
@@ -72,7 +74,7 @@ function sendStatus(code, res){
 		if (httpCodeMapping) {
 			code = mapHttpStatusCode(code);
 		}
-		setSecurityHeaders(res);
+		addStrictTransportHeaders(res);
 		setResponseNoCache(res);
 		return res.sendStatus(code);
 	}catch(err){
@@ -113,17 +115,17 @@ function writeResponse(code, res, headers, body, needEncodeLocation, noCachedStr
 		if (typeof body !== 'undefined') {
 			if (typeof body === 'object') {
 				needEncodeLocation && encodeLocation(body);
-				setSecurityHeaders(res);
+				addStrictTransportHeaders(res);
 				setResponseNoCache(res);			
 				return res.json(body);
 			}
 			if(noCachedStringRes){
-				setSecurityHeaders(res);
+				addStrictTransportHeaders(res);
 				setResponseNoCache(res);
 			}
 			res.send(body);
 		} else {
-			setSecurityHeaders(res);
+			addStrictTransportHeaders(res);
 			setResponseNoCache(res);
 			res.end();
 		}
@@ -148,7 +150,7 @@ function writeError(code, res, msg) {
 			code = mapHttpStatusCode(code);
 		}
 		msg = msg instanceof Error ? msg.message : msg;
-		setSecurityHeaders(res);
+		addStrictTransportHeaders(res);
 		setResponseNoCache(res);
 		if (typeof msg === 'string') {
 			var err = JSON.stringify({Severity: "Error", Message: msg});
@@ -172,8 +174,14 @@ function setResponseNoCache(res){
 	res.setHeader("Expires", "0"); // HTTP 1.1.		
 }
 
-function setSecurityHeaders(res) {
-	res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
+function setShouldAddStrictTransportHeaders(value) {
+	shouldAddStrictTransportHeaders = Boolean(value);
+}
+
+function addStrictTransportHeaders(res) {
+	if (shouldAddStrictTransportHeaders) {
+		res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
+	}
 }
 
 /**
@@ -363,7 +371,8 @@ exports.encodeLocation = encodeLocation;
 exports.encodeStringLocation = encodeStringLocation;
 exports.decodeStringLocation = decodeStringLocation;
 exports.setResponseNoCache = setResponseNoCache;
-exports.setSecurityHeaders = setSecurityHeaders;
+exports.addStrictTransportHeaders = addStrictTransportHeaders;
+exports.setShouldAddStrictTransportHeaders = setShouldAddStrictTransportHeaders;
 exports.isValidProjectName = isValidProjectName;
 exports.sendStatus = sendStatus;
 exports.getOrionEE = getOrionEE;

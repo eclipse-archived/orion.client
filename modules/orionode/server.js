@@ -73,6 +73,8 @@ if (process.versions.electron) {
 
 var logger = log4js.getLogger('server');
 
+api.setShouldAddStrictTransportHeaders(configParams.get("orion_add_strict_transport_headers"));
+
 var restartOnMemoryLimit = parseInt(configParams.get("orion_threshold_memory_mb"));
 if (restartOnMemoryLimit) {
 	logger.info("Process memory limit: " + restartOnMemoryLimit + "MB");
