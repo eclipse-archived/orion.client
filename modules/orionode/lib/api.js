@@ -72,6 +72,7 @@ function sendStatus(code, res){
 		if (httpCodeMapping) {
 			code = mapHttpStatusCode(code);
 		}
+		setSecurityHeaders(res);
 		setResponseNoCache(res);
 		return res.sendStatus(code);
 	}catch(err){
@@ -144,6 +145,7 @@ function writeError(code, res, msg) {
 			code = mapHttpStatusCode(code);
 		}
 		msg = msg instanceof Error ? msg.message : msg;
+		setSecurityHeaders(res);
 		setResponseNoCache(res);
 		if (typeof msg === 'string') {
 			var err = JSON.stringify({Severity: "Error", Message: msg});
@@ -165,6 +167,10 @@ function setResponseNoCache(res){
 	res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate"); // HTTP 1.1.
 	res.setHeader("Pragma", "no-cache"); // HTTP 1.1.
 	res.setHeader("Expires", "0"); // HTTP 1.1.		
+}
+
+function setSecurityHeaders(res) {
+	res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
 }
 
 /**
