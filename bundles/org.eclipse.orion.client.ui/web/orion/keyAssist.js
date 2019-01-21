@@ -70,13 +70,8 @@ define([
 			keyAssistContents.addEventListener(util.isFirefox ? "DOMMouseScroll" : "mousewheel", function (e) { //$NON-NLS-2$ //$NON-NLS-1$
 				this._scrollWheel(e);
 			}.bind(this));
-			document.addEventListener("keydown", function (e) { //$NON-NLS-1$
+			keyAssistDiv.addEventListener("keydown", function (e) { //$NON-NLS-1$
 				if (e.keyCode === lib.KEY.ESCAPE) {
-					this.hide();
-				}
-			}.bind(this));
-			document.addEventListener("keypress", function (e) { //$NON-NLS-1$
-				if (e.key === "Escape") {
 					this.hide();
 				}
 			}.bind(this));
