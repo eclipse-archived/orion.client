@@ -173,7 +173,7 @@ function setResponseNoCache(res){
 }
 
 function setSecurityHeaders(res) {
-	res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
+	//res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
 }
 
 /**
