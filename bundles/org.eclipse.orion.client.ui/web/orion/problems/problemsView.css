@@ -39,9 +39,11 @@
 
 .problemsCommandsContainerRight {
 	padding-right: 5px;
+	margin: 5px 0;
 }
 
 .problemsCommandsContainerLeft {
+	margin: 5px 0;
 }
 
 .problemsCommandsContainer {

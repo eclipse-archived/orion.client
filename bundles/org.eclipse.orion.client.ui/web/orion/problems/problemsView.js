@@ -57,6 +57,15 @@ define([
 			explorerParentNode.id = "problemsExplorerParent_id"; //$NON-NLS-0$
 			explorerParentNode.classList.add("problemsExplorerNodeWrapper"); //$NON-NLS-0$
 			this._inner_node.appendChild(explorerParentNode);
+			this._inner_node.addEventListener("keydown", function(e) { //$NON-NLS-0$
+				if(e.defaultPrevented){// If the key event was handled by other listeners and preventDefault was set on(e.g. input completion handled ENTER), we do not handle it here
+					return;
+				}
+				var keyCode= e.charCode || e.keyCode;
+				if (keyCode === lib.KEY.ESCAPE) {
+						this.hide();
+				}
+			}.bind(this));
 			this._problemsExplorer = new mProblemsExplorer.ProblemsExplorer({parentId: explorerParentNode.id, serviceRegistry: this.serviceRegistry, commandRegistry: this.commandRegistry, 
 																			preferences: this.preferences, contentTypeRegistry: this.contentTypeRegistry, fileClient: this.fileClient});
 		},

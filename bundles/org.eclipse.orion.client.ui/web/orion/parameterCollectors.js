@@ -225,6 +225,14 @@ define(['i18n!orion/nls/messages', 'orion/webui/littlelib', 'orion/bidiUtils', '
 						lib.stop(event);
 					}
 				};
+				var keyPressHandler = function(event) {
+					if (event.key === "Escape") {
+						if (typeof(cancelFunction) === 'function') cancelFunction();
+						localClose();
+						lib.stop(event);
+					}
+				};
+				parent.addEventListener("keypress", keyPressHandler);
 
 				var makeButton = function(text, parent) {
 					var button = document.createElement("button"); //$NON-NLS-0$
@@ -332,6 +340,7 @@ define(['i18n!orion/nls/messages', 'orion/webui/littlelib', 'orion/bidiUtils', '
 					}
 					
 					field.addEventListener("keydown", keyHandler, false); //$NON-NLS-0$
+					field.addEventListener("keypress", keyPressHandler, false); //$NON-NLS-0$
 				});
 				var parentDismiss = dismissArea;
 				if (!parentDismiss) {

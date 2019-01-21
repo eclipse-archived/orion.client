@@ -75,6 +75,11 @@ define([
 					this.hide();
 				}
 			}.bind(this));
+			document.addEventListener("keypress", function (e) { //$NON-NLS-1$
+				if (e.key === "Escape") {
+					this.hide();
+				}
+			}.bind(this));
 			lib.addAutoDismiss([keyAssistDiv], function () {
 				this.hide();
 			}.bind(this));
