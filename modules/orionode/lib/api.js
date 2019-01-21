@@ -113,14 +113,17 @@ function writeResponse(code, res, headers, body, needEncodeLocation, noCachedStr
 		if (typeof body !== 'undefined') {
 			if (typeof body === 'object') {
 				needEncodeLocation && encodeLocation(body);
+				setSecurityHeaders(res);
 				setResponseNoCache(res);			
 				return res.json(body);
 			}
 			if(noCachedStringRes){
+				setSecurityHeaders(res);
 				setResponseNoCache(res);
 			}
 			res.send(body);
 		} else {
+			setSecurityHeaders(res);
 			setResponseNoCache(res);
 			res.end();
 		}
@@ -360,6 +363,7 @@ exports.encodeLocation = encodeLocation;
 exports.encodeStringLocation = encodeStringLocation;
 exports.decodeStringLocation = decodeStringLocation;
 exports.setResponseNoCache = setResponseNoCache;
+exports.setSecurityHeaders = setSecurityHeaders;
 exports.isValidProjectName = isValidProjectName;
 exports.sendStatus = sendStatus;
 exports.getOrionEE = getOrionEE;

@@ -9,7 +9,9 @@
  *	 IBM Corporation - initial API and implementation
  *******************************************************************************/
 /*eslint-env node */
-var express = require('express'),
+var
+	api = require('./api'),
+	express = require('express'),
 	responseTime = require('response-time');
 
 module.exports = {};
@@ -20,11 +22,11 @@ module.exports.router = function(options) {
 
 	return express.Router()
 		.use(responseTime({digits: 2, header: "X-Metrics-Response-Time", suffix: true}))
-		.get('*', /* @callback */ function (req, res) {
-			res.setHeader("Cache-Control", "public, max-age=86400, must-revalidate"); 
-			return res.status(200).json({
+		.get('*', /* @callback */ function(req, res) {
+			var body = {
 				tid: options.configParams.get("orion.metrics.google.tid"),
 				siteSpeedSampleRate: Math.min(100, Math.max(0, Number(options.configParams.get("orion.metrics.google.tid")))) || undefined
-			});
+			};
+			api.writeResponse(200, res, null, body);
 		});
 };

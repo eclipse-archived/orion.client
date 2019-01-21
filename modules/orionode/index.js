@@ -320,10 +320,13 @@ module.exports = function startServer(options) {
 			setHeaders: function(res, urlPath, stat) {
 				const ext = path.extname(urlPath);
 				if (path.basename(path.dirname(urlPath)) === "requirejs") {
+					api.setSecurityHeaders(res);
 					res.setHeader("Cache-Control", _24_HOURS);
 				} else if (EXT_CACHE_MAPPING[ext]) {
+					api.setSecurityHeaders(res);
 					res.setHeader("Cache-Control", EXT_CACHE_MAPPING[ext]);
 				} else {
+					api.setSecurityHeaders(res);
 					res.setHeader("Cache-Control", _24_HOURS);
 				}
 				if (urlPath.endsWith(".woff") || urlPath.endsWith(".ttf")) {
