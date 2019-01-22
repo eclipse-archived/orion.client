@@ -42,6 +42,7 @@ module.exports = function(options) {
 
     function getFile(res, filepath, stats, etag) {
         var stream = fs.createReadStream(filepath);
+		api.addStrictTransportHeaders(res);
 		api.setResponseNoCache(res);
         res.setHeader('Content-Length', stats.size);
         res.setHeader('ETag', etag);

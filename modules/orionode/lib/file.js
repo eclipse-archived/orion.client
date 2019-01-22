@@ -59,6 +59,7 @@ module.exports.router = function router(options) {
 		res.setHeader('Content-Length', stats.size);
 		res.setHeader('ETag', etag);
 		res.setHeader('Accept-Patch', 'application/json-patch; charset=UTF-8');
+		api.addStrictTransportHeaders(res);
 		api.setResponseNoCache(res);
 		stream.pipe(res);
 		stream.on('error', function(e) {

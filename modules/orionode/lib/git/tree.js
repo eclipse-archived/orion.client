@@ -175,6 +175,7 @@ function getTree(req, res) {
 								var contentType = mime.lookup(entry.path());
 								res.setHeader('Content-Type', contentType);
 								res.setHeader('Content-Length', buffer.length);
+								api.addStrictTransportHeaders(res);
 								api.setResponseNoCache(res);
                 				res.status(200).end(buffer, 'binary');
 							}else{

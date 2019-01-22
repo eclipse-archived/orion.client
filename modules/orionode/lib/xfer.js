@@ -295,6 +295,7 @@ function getXfer(req, res) {
 }
 
 function getXferFrom(req, res, file) {
+	api.addStrictTransportHeaders(res);
 	api.setResponseNoCache(res);
 	var filePath = file.path.replace(/.zip$/, "");
 	var zip = archiver('zip');
