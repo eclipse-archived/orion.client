@@ -112,25 +112,23 @@ function writeResponse(code, res, headers, body, needEncodeLocation, noCachedStr
 				);
 			});
 		}
+		addStrictTransportHeaders(res);
 		if (typeof body !== 'undefined') {
 			if (typeof body === 'object') {
 				needEncodeLocation && encodeLocation(body);
-				addStrictTransportHeaders(res);
 				setResponseNoCache(res);			
 				return res.json(body);
 			}
-			if(noCachedStringRes){
-				addStrictTransportHeaders(res);
+			if (noCachedStringRes){
 				setResponseNoCache(res);
 			}
 			res.send(body);
 		} else {
-			addStrictTransportHeaders(res);
 			setResponseNoCache(res);
 			res.end();
 		}
-	}catch(err){
-		logger.error(res.req.originalUrl , err.message);
+	} catch(err) {
+		logger.error(res.req.originalUrl, err.message);
 		throw err;
 	}
 }
