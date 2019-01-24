@@ -303,6 +303,10 @@ html[dir="rtl"] .setting-row { /* ACGC */
 	top: 10px;
 }
 
+.stretch {
+	float: left;
+}
+
 html[dir="rtl"] .addPluginClosed{ /* ACGC */
 	float: left;
 }
