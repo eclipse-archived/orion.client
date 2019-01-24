@@ -1208,26 +1208,34 @@ define([
 
 						var prefix = explorer.prefix + item.parent.name + item.parent.type;
 
-						var compareWidgetActionWrapper = document.createElement("ul"); //$NON-NLS-0$
-						compareWidgetActionWrapper.className = "layoutRight commandList"; //$NON-NLS-0$
-						compareWidgetActionWrapper.id = prefix + "CompareWidgetActionWrapper"; //$NON-NLS-0$
-						actionsWrapper.appendChild(compareWidgetActionWrapper);
+						var leftActions = document.createElement("div"); //$NON-NLS-0$
+						actionsWrapper.appendChild(leftActions);
 
-						var compareWidgetLeftActionWrapper = document.createElement("ul"); //$NON-NLS-0$
-						compareWidgetLeftActionWrapper.className = "layoutLeft commandList"; //$NON-NLS-0$
-						compareWidgetLeftActionWrapper.id = prefix + "CompareWidgetLeftActionWrapper"; //$NON-NLS-0$
-						actionsWrapper.appendChild(compareWidgetLeftActionWrapper);
 						var dirtyindicator = document.createElement("span"); //$NON-NLS-0$
 						dirtyindicator.className = "layoutLeft"; //$NON-NLS-0$
 						dirtyindicator.id = prefix + "DirtyId"; //$NON-NLS-0$
-						actionsWrapper.appendChild(dirtyindicator);
+						leftActions.appendChild(dirtyindicator);
+						
+						var rightActions = document.createElement("div"); //$NON-NLS-0$
+						rightActions.className = "layoutRight"; //$NON-NLS-0$
+						actionsWrapper.appendChild(rightActions);
+
+						var compareWidgetLeftActionWrapper = document.createElement("ul"); //$NON-NLS-0$
+						compareWidgetLeftActionWrapper.className = "commandList"; //$NON-NLS-0$
+						compareWidgetLeftActionWrapper.id = prefix + "CompareWidgetLeftActionWrapper"; //$NON-NLS-0$
+						leftActions.appendChild(compareWidgetLeftActionWrapper);
 						
 						diffActionWrapper = document.createElement("ul"); //$NON-NLS-0$
-						diffActionWrapper.className = "layoutRight commandList"; //$NON-NLS-0$
+						diffActionWrapper.className = "layoutLeft commandList"; //$NON-NLS-0$
 						diffActionWrapper.id = prefix + "DiffActionWrapperChange"; //$NON-NLS-0$
-						actionsWrapper.appendChild(diffActionWrapper);
+						rightActions.appendChild(diffActionWrapper);
 						explorer.commandService.registerCommandContribution(prefix + "CompareWidgetLeftActionWrapper", "eclipse.orion.git.toggleMaximizeCommand", 1000); //$NON-NLS-1$ //$NON-NLS-0$
 
+						var compareWidgetActionWrapper = document.createElement("ul"); //$NON-NLS-0$
+						compareWidgetActionWrapper.className = "layoutLeft commandList"; //$NON-NLS-0$
+						compareWidgetActionWrapper.id = prefix + "CompareWidgetActionWrapper"; //$NON-NLS-0$
+						rightActions.appendChild(compareWidgetActionWrapper);
+						
 						var diffContainer = document.createElement("div"); //$NON-NLS-0$
 						diffContainer.className = "gitChangeListCompare"; //$NON-NLS-0$
 						diffContainer.id = "diffArea_" + item.DiffLocation; //$NON-NLS-0$
