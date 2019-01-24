@@ -1072,6 +1072,7 @@ define("orion/editor/rulers", [
 					theme = rulerTheme;
 				}
 				options.themeClass = theme;
+				options.label = "__hidden__";
 				options.noScroll = true;
 				options.readonly = true;
 				return options;

@@ -13,6 +13,7 @@
 /*eslint-env browser, amd*/
 define([
 	'i18n!orion/edit/nls/messages',
+	'orion/i18nUtil',
 	'orion/editor/editor',
 	'orion/editor/annotations',
 	'orion/editor/eventTarget',
@@ -53,7 +54,7 @@ define([
 	'lsp/languageServerRegistry',
 	'lsp/utils'
 ], function(
-	messages,
+	messages, i18nUtil,
 	mEditor, mAnnotations, mEventTarget, mTextView, mTextModelFactory, mEditorFeatures, mHoverFactory, mContentAssist,
 	mEmacs, mVI, mEditorPreferences, mThemePreferences, mThemeData, EditorSettings,
 	mSearcher, mEditorCommands, mGlobalCommands,
@@ -214,6 +215,7 @@ define([
 				wrapOffset = marginOffset;
 			}
 			return {
+				label: i18nUtil.formatMessage(messages.fileContents, this.inputManager.getFileMetadata().Name),
 				readonly: this.readonly || this.inputManager.getReadOnly(),
 				singleMode: this.singleMode,
 				tabSize: prefs.tabSize || 4,

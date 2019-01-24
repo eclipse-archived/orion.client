@@ -116,6 +116,7 @@ define({
 	"OK": "Ok",
 	"Format" : "Format Code",
 	"FormatTooltip":"Format editor contents",
+	"fileContents":"${0} contents",
 	"References" : "References",
 	"ReferencesTooltip":"Find references in project",
 	"FindReferences": "Finding references",

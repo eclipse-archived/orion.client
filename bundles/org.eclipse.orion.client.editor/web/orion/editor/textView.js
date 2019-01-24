@@ -1698,6 +1698,7 @@ define("orion/editor/textView", [
 	 * @property {String|DOMElement} parent the parent element for the view, it can be either a DOM element or an ID for a DOM element.
 	 * @property {orion.editor.TextModel} [model] the text model for the view. If it is not set the view creates an empty {@link orion.editor.TextModel}.
 	 * @property {Boolean} [readonly=false] whether or not the view is read-only.
+	 * @property {String} [label=Text View] the text view label.
 	 * @property {Boolean} [fullSelection=true] whether or not the view is in full selection mode.
 	 * @property {Boolean} [tabMode=true] whether or not the tab keypress is consumed by the view or is used for focus traversal.
 	 * @property {Boolean} [expandTab=false] whether or not the tab key inserts white spaces.
@@ -5744,8 +5745,7 @@ define("orion/editor/textView", [
 			rootDiv.style.height = "100%"; //$NON-NLS-1$
 			rootDiv.style.overflow = "hidden"; //$NON-NLS-1$
 			rootDiv.style.WebkitTextSizeAdjust = "100%"; //$NON-NLS-1$
-			rootDiv.setAttribute("role", "application"); //$NON-NLS-1$ //$NON-NLS-2$
-			rootDiv.setAttribute("aria-label", "Text View"); //$NON-NLS-1$
+			this._setLabel(this._label, true);
 			_parent.appendChild(rootDiv);
 			
 			var leftDiv = this._createRulerParent(doc, "textviewLeftRuler"); //$NON-NLS-1$
@@ -5901,6 +5901,7 @@ define("orion/editor/textView", [
 			return {
 				parent: {value: undefined, update: null},
 				model: {value: undefined, update: this.setModel},
+				label: {value: "Text View", update: this._setLabel},
 				scrollAnimation: {value: 0, update: null},
 				readonly: {value: false, update: this._setReadOnly},
 				fullSelection: {value: true, update: this._setFullSelection},
@@ -7114,6 +7115,14 @@ define("orion/editor/textView", [
 					this._cursorDiv.parentNode.removeChild(this._cursorDiv);
 					this._cursorDiv = null;
 				}
+			}
+		},
+		_setLabel: function(label) {
+			if (label === "__hidden__" ) {
+				this._rootDiv.setAttribute("aria-hidden", "true"); //$NON-NLS-1$
+			} else {
+				this._rootDiv.setAttribute("role", "application"); //$NON-NLS-1$ //$NON-NLS-2$
+				this._rootDiv.setAttribute("aria-label", label); //$NON-NLS-1$
 			}
 		},
 		_setMarginOffset: function(marginOffset, init) {
