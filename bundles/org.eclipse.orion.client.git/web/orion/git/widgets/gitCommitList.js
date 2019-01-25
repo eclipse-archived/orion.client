@@ -779,13 +779,14 @@ define([
 			var filterActions = document.createElement("div"); //$NON-NLS-0$
 			filterActions.className = "commitFilterActions"; //$NON-NLS-0$
 			content.appendChild(filterActions);
+			var commitFilterScope = "commitFilterActions"; //$NON-NLS-0$
 			var actionsArea = document.createElement("ul"); //$NON-NLS-0$
 			actionsArea.className = "layoutRight commandList"; //$NON-NLS-0$
-			actionsArea.id = "commitFilterActions"; //$NON-NLS-0$
+			actionsArea.setAttribute("role", "none"); //$NON-NLS-1$ //$NON-NLS-0$
 			filterActions.appendChild(actionsArea);
-			this.commandService.registerCommandContribution(actionsArea.id, "eclipse.orion.git.commit.clearFilter", 300); //$NON-NLS-0$
-			this.commandService.registerCommandContribution(actionsArea.id, "eclipse.orion.git.commit.performFilter", 400); //$NON-NLS-0$
-			this.commandService.renderCommands(actionsArea.id, actionsArea, {
+			this.commandService.registerCommandContribution(commitFilterScope, "eclipse.orion.git.commit.clearFilter", 300); //$NON-NLS-0$
+			this.commandService.registerCommandContribution(commitFilterScope, "eclipse.orion.git.commit.performFilter", 400); //$NON-NLS-0$
+			this.commandService.renderCommands(commitFilterScope, actionsArea, {
 				filter: doFilter,
 				clear: doClear
 			}, explorer, "button"); //$NON-NLS-0$
@@ -1242,7 +1243,7 @@ define([
 			
 					actionsArea = document.createElement("ul"); //$NON-NLS-0$
 					actionsArea.className = "layoutRight commandList"; //$NON-NLS-0$
-					actionsArea.id = item.Type + "Actions"; //$NON-NLS-0$
+					actionsArea.setAttribute("role", "none"); //$NON-NLS-1$ //$NON-NLS-0$
 					horizontalBox.appendChild(actionsArea);
 					
 					horizontalBox.classList.add("toolComposite"); //$NON-NLS-0$
@@ -1292,7 +1293,7 @@ define([
 					var itemActionScope = "itemLevelCommands"; //$NON-NLS-0$
 					actionsArea = document.createElement("ul"); //$NON-NLS-0$
 					actionsArea.className = "layoutLeft commandList toolComposite commitActions"; //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0
-					actionsArea.id = itemActionScope;
+					actionsArea.setAttribute("role", "none"); //$NON-NLS-1$ //$NON-NLS-0$
 					var moreDiv = commitInfo.moreButton.parentNode;
 					moreDiv.appendChild(actionsArea);
 					
