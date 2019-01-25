@@ -137,8 +137,8 @@ define([
 					this.domNode.setAttribute("aria-readonly", "true"); //$NON-NLS-1$ //$NON-NLS-0$
 				}
 				this.domNode.setAttribute("aria-haspopup", "dialog"); //$NON-NLS-1$ //$NON-NLS-0$
-				this.domNode.setAttribute("aria-expanded", "false"); //$NON-NLS-1$ //$NON-NLS-0$
 			}
+			this.domNode.setAttribute("aria-expanded", "false"); //$NON-NLS-1$ //$NON-NLS-0$
 		}
 		var classes;
 		if(options.iconClass){
@@ -180,6 +180,11 @@ define([
 			this.titleNode.setAttribute("aria-readonly", "true"); //$NON-NLS-1$ //$NON-NLS-0$
 			this.domNode.setAttribute("aria-labelledby", this.titleNode.id); //$NON-NLS-1$ //$NON-NLS-0$
 		}
+		if (!options.dropdown && options.canHide) {
+			this.domNode.setAttribute("role", "button"); //$NON-NLS-1$ //$NON-NLS-0$
+			this.domNode.setAttribute("aria-labelledby", this.titleNode.id); //$NON-NLS-1$ //$NON-NLS-0$
+		}
+
 		this.domNode.appendChild(this.titleNode);
 		this.titleNode.textContent = options.title;
 
@@ -609,7 +614,7 @@ define([
 				this.domNode.classList.remove("sectionClosed"); //$NON-NLS-0$
 				this.domNode.classList.add("sectionOpened"); //$NON-NLS-0$
 				if (this._contentParent) this.domNode.setAttribute("aria-owns", this._contentParent.id); //$NON-NLS-0$
-				if (this.dropdown) {
+				if (this.canHide) {
 					this.domNode.setAttribute("aria-expanded", "true"); //$NON-NLS-1$ //$NON-NLS-0$
 				}
 			}
@@ -652,7 +657,7 @@ define([
 				this.domNode.classList.add("sectionClosed"); //$NON-NLS-0$
 				this.domNode.classList.remove("sectionOpened"); //$NON-NLS-0$
 				this.domNode.removeAttribute("aria-owns"); //$NON-NLS-0$
-				if (this.dropdown) {
+				if (this.canHide) {
 					this.domNode.setAttribute("aria-expanded", "false"); //$NON-NLS-1$ //$NON-NLS-0$
 				}
 			}
