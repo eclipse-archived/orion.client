@@ -401,6 +401,7 @@ function(messages, i18nUtil, mCommands, mCommandRegistry, lib, mTooltip, colors,
 		if (scope.tooltip) {
 			scope.tooltip.destroy();
 		}
+		element.setAttribute("aria-label", scope.value);
 		scope.tooltip = element.tooltip = new mTooltip.Tooltip({
 			node: element,
 			text: scope.value,
