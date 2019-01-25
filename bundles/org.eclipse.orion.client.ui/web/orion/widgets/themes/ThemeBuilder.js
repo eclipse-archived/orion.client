@@ -198,7 +198,9 @@ function(messages, i18nUtil, mCommands, mCommandRegistry, lib, mTooltip, colors,
 			for (var i = 0; i < scopeList.length; i++){
 				if (scopeList[i].id === id){
 					scopeList[i].value = val;
-					document.getElementById(scopeList[i].id).value = val; /* in case a color name was entered change it to hex */
+					var element = document.getElementById(scopeList[i].id);
+					element.value = val; /* in case a color name was entered change it to hex */
+					makeTooltip(element, scopeList[i]);
 					for (var l = 0; l < scopeList[i].objPath.length; l++){
 						if(scopeList[i].objPath[l].lastIndexOf("backgroundImage") !== -1){
 							setValueToPath(currentTheme, scopeList[i].objPath[l], imageDataUrl);
@@ -213,7 +215,9 @@ function(messages, i18nUtil, mCommands, mCommandRegistry, lib, mTooltip, colors,
 		} else {
 			for (i = 0; i < scopeList.length; i++){
 				if (scopeList[i].id === id) { //Resets the value back to its original value if the typed value was invalid
-					document.getElementById(scopeList[i].id).value = scopeList[i].value;
+					var element = document.getElementById(scopeList[i].id);
+					element.value = scopeList[i].value;
+					makeTooltip(element, scopeList[i]);
 				}
 			}
 		}
@@ -306,7 +310,9 @@ function(messages, i18nUtil, mCommands, mCommandRegistry, lib, mTooltip, colors,
 			}
 		}
 		for (i = 0; i < scopeList.length; i++){
-			document.getElementById(scopeList[i].id).value = scopeList[i].value; // updates the input[type=color] with correct color
+			var element = document.getElementById(scopeList[i].id);
+			element.value = scopeList[i].value; // updates the input[type=color] with correct color
+			makeTooltip(element, scopeList[i]);
 		}
 		checkForChanges(); // checks if any value is changed
 	}
@@ -390,6 +396,17 @@ function(messages, i18nUtil, mCommands, mCommandRegistry, lib, mTooltip, colors,
 		this.apply();
 	}
 	ThemeBuilder.prototype.select = select;
+	
+	function makeTooltip(element, scope) {
+		if (scope.tooltip) {
+			scope.tooltip.destroy();
+		}
+		scope.tooltip = element.tooltip = new mTooltip.Tooltip({
+			node: element,
+			text: scope.value,
+			position: ["left", "below", "above", "right"] //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$
+		});
+	}
 	
 	function renderData(anchor, state) {
 		anchor.innerHTML = this.template; // ok--this is a fixed value

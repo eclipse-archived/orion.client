@@ -712,7 +712,6 @@ html[dir="rtl"] .themeController { /* ACGC */
     float: right;
     background: none;
     position:relative;
-    outline: none;
     top: 0px;
 }
 
