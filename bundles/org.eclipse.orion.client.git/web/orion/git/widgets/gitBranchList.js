@@ -382,7 +382,7 @@ define([
 						horizontalBox.appendChild(expandContainer);
 					}
 					
-					var actionsID, title, description, subDescription, titleClass = "gitBranchTitle", titleLink; //$NON-NLS-0$
+					var title, description, subDescription, titleClass = "gitBranchTitle", titleLink; //$NON-NLS-0$
 					if (item.Type === "NoContent") { //$NON-NLS-0$
 						title = messages[item.Type];
 						titleClass = "";
@@ -401,7 +401,6 @@ define([
 							description = tracksMessage;
 							subDescription = i18nUtil.formatMessage(messages["last modified ${0} by ${1}"], new Date(commit.Time).toLocaleString(), commit.AuthorName); //$NON-NLS-0$
 						}
-						actionsID = "branchActionsArea"; //$NON-NLS-0$
 					} else if (item.parent.Type === "TagRoot") { //$NON-NLS-0$
 						if (explorer.showHistory) createExpand();
 						if (item.Commit) {
@@ -409,7 +408,6 @@ define([
 //							description = util.trimCommitMessage(commit.Message);
 //							subDescription = i18nUtil.formatMessage(messages["authored by 0 (1) on 2"], commit.AuthorName, commit.AuthorEmail, new Date(commit.Time).toLocaleString()); //$NON-NLS-0$
 						}
-						actionsID = "tagActionsArea"; //$NON-NLS-0$
 					} else if (item.parent.Type === "StashRoot") { //$NON-NLS-0$
 						if (explorer.showHistory) createExpand();
 						commit = item;
@@ -419,7 +417,6 @@ define([
 						if (item.Type !== "TagRoot" && item.Type !== "StashRoot" && item.Type !== "PullRequestRoot") { //$NON-NLS-1$ //$NON-NLS-0$
 							description = item.GitUrl || item.Description || item.parent.repository.ContentLocation;
 						}
-						actionsID = "remoteActionsArea"; //$NON-NLS-0$
 					} else if (item.parent.Type === "PullRequestRoot") { //$NON-NLS-0$
 						var head = item.PullRequest.head;
 						var base = item.PullRequest.base;
@@ -431,7 +428,6 @@ define([
 						description = i18nUtil.formatMessage(messages["PullRequestDescription"], item.PullRequest.number, item.PullRequest.title);
 					}  else if (item.parent.Type === "Remote") { //$NON-NLS-0$
 						if (explorer.showHistory) createExpand();
-						actionsID = "branchActionsArea"; //$NON-NLS-0$
 						description = "";
 					} else if (item.Type === "CommitList") { //$NON-NLS-0$
 						tableRow.classList.remove("selectableNavRow"); //$NON-NLS-0$
@@ -503,7 +499,6 @@ define([
 
 					var actionsArea = document.createElement("div"); //$NON-NLS-0$
 					actionsArea.className = "sectionTableItemActions toolComposite"; //$NON-NLS-0$
-					actionsArea.id = actionsID;
 					horizontalBox.appendChild(actionsArea);
 					this.commandService.renderCommands(this.actionScopeId, actionsArea, item, this.explorer, "tool"); //$NON-NLS-0$	
 					return td;
