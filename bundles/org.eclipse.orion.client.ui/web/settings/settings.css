@@ -498,6 +498,7 @@ html[dir="rtl"] .serviceContainer { /* ACGC */
 	font-size: 9px;
 	font-weight: normal;
 	margin-left: 5px;
+	margin-right: 5px;
 	border: 1px solid #707070;
 }
 

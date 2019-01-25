@@ -64,8 +64,7 @@ define(['i18n!orion/settings/nls/messages', 'orion/i18nUtil', 'require', 'orion/
 	objects.mixin(PluginList.prototype, {
 		templateString: '' +  //$NON-NLS-0$
 						'<div id="pluginSectionHeader" class="pluginSectionHeader sectionWrapper toolComposite">' +  /* pluginSectionHeader */ //$NON-NLS-0$
-							'<div class="sectionAnchor sectionTitle layoutLeft"></div>' + /* pluginTitle */ //$NON-NLS-0$
-							'<div class="sectionItemCount layoutLeft">0</div>' + /* pluginCount */ //$NON-NLS-0$
+							'<div><span class="sectionItemCount layoutLeft">0</span><span class="sectionAnchor sectionTitle layoutLeft"></span></div>' + /* pluginCount pluginTitle */ //$NON-NLS-0$
 							'<div id="pluginCommands" class="pluginCommands layoutRight sectionActions"></div>' + /* pluginCommands */ //$NON-NLS-0$
 						'</div>' + //$NON-NLS-0$
 
