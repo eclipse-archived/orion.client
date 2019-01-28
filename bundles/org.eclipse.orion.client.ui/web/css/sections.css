@@ -29,6 +29,7 @@ html[dir="rtl"] .sectionIcon { /* ACGC */
 	font-size: 9px;
 	font-weight: normal;
 	margin-left: 5px;
+	margin-right: 5px;
 }
 
 html[dir="rtl"] .sectionItemCount { /* ACGC */
