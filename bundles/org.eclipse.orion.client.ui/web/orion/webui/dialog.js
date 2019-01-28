@@ -76,7 +76,7 @@ define(['i18n!orion/nls/messages', 'orion/webui/littlelib', 'orion/uiUtils'],
 //			this.handle = lib.addAutoDismiss([this.$frame], this.hide.bind(this));
 			if (this.title) {
 				lib.$(".dialogTitleText", this.$frame).appendChild(document.createTextNode(this.title)); //$NON-NLS-0$
-				this.$frame.setAttribute("aria-labelledby", "title");
+				this.$frame.setAttribute("aria-label", this.title);
 			}
 			this.$close = lib.$(".closeDialog", this.$frame);//$NON-NLS-0$
 			this.$close.setAttribute("aria-label", containerMessages["Close"]); //$NON-NLS-0$
