@@ -935,7 +935,7 @@ define([
 						tableRow.classList.remove("selectableNavRow"); //$NON-NLS-0$
 
 						var label = document.createElement("label"); //$NON-NLS-0$
-						label.htmlFor = "nameparameterCollector"; //$NON-NLS-0$
+						label.htmlFor = "commitMsgparameterCollector"; //$NON-NLS-0$
 						label.textContent = messages["SmartCommitLabel"];
 						label.className = "gitCommitMessageLabel"; //$NON-NLS-0$
 						outerDiv.appendChild(label);
@@ -945,7 +945,7 @@ define([
 						
 						var textArea = explorer.messageTextArea = document.createElement("textarea"); //$NON-NLS-0$
 						textArea.rows = 4;
-						textArea.id = "nameparameterCollector"; //$NON-NLS-0$
+						textArea.id = "commitMsgparameterCollector"; //$NON-NLS-0$
 						textArea.placeholder = messages["SmartCommit"];
 						textArea.classList.add("parameterInput"); //$NON-NLS-0$
 						textArea.addEventListener("keyup", function() { //$NON-NLS-0$
