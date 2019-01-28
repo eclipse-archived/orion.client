@@ -36,11 +36,7 @@ function(messages, lib, mOperationsDialog, Tooltip, Deferred) {
 			}
 			this._progressPane = lib.node(progressPane);
 	
-			this._progressPane.tooltip = new Tooltip.Tooltip({
-				node: this._progressPane,
-				text: messages["Operations"],
-				position: ["above", "below", "right", "left"] //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-			});
+			this._makeTooltip(messages["Operations"]); //$NON-NLS-0$
 	
 			this._operationsDialog = new mOperationsDialog.OperationsDialog({triggerNode: this._progressPane, commandRegistry: commandRegistry});
 			var that = this;
@@ -63,6 +59,16 @@ function(messages, lib, mOperationsDialog, Tooltip, Deferred) {
 	}
 	
 	ProgressMonitorTool.prototype = {
+			_makeTooltip: function(message) {
+				if (this._progressPane.tooltip) {
+					this._progressPane.tooltip.destroy();
+				}
+				this._progressPane.tooltip = new Tooltip.Tooltip({
+					node: this._progressPane,
+					text: message,
+					position: ["left", "above", "below", "right"] //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+				});
+			},
 			_switchIconTo: function(iconClass) {
 				if (this._lastIconClass) {
 					this._progressPane.classList.remove(this._lastIconClass);
@@ -81,8 +87,7 @@ function(messages, lib, mOperationsDialog, Tooltip, Deferred) {
 				
 				if(this._isEmpty(operationsToDisplay)){
 					this._switchIconTo("progressPane_empty"); //$NON-NLS-0$
-					this._progressPane.title = messages["Operations"]; //$NON-NLS-0$
-					this._progressPane.alt = messages["Operations"]; //$NON-NLS-0$
+					this._makeTooltip(messages["Operations"]); //$NON-NLS-0$
 					if(this._progressPane.hasAttribute("aria-valuetext")) { //$NON-NLS-0$
 						this._progressPane.removeAttribute("aria-valuetext"); //$NON-NLS-0$
 					}
@@ -107,26 +112,22 @@ function(messages, lib, mOperationsDialog, Tooltip, Deferred) {
 				}
 				switch(status){
 				case "running": //$NON-NLS-0$
-					this._progressPane.title = messages["Operations running"];
-					this._progressPane.alt = messages['Operations running'];
+					this._makeTooltip(messages["Operations running"]); //$NON-NLS-0$
 					this._progressPane.setAttribute("aria-valuetext", messages['Operations running']); //$NON-NLS-0$
 					this._switchIconTo("running"); //$NON-NLS-0$
 					break;
 				case "warning": //$NON-NLS-0$
-					this._progressPane.title = messages["SomeOpWarning"];
-					this._progressPane.alt = messages['SomeOpWarning'];
+					this._makeTooltip(messages["SomeOpWarning"]); //$NON-NLS-0$
 					this._progressPane.setAttribute("aria-valuetext", messages['SomeOpWarning']); //$NON-NLS-0$
 					this._switchIconTo("warning"); //$NON-NLS-0$
 					break;
 				case "error": //$NON-NLS-0$
-					this._progressPane.title = messages["SomeOpErr"];
-					this._progressPane.alt = messages['SomeOpErr'];
+					this._makeTooltip(messages["SomeOpErr"]); //$NON-NLS-0$
 					this._progressPane.setAttribute("aria-valuetext", messages['SomeOpErr']); //$NON-NLS-0$
 					this._switchIconTo("error"); //$NON-NLS-0$
 					break;
 				default:
-					this._progressPane.title = messages["Operations"];
-					this._progressPane.alt = messages['Operations'];
+					this._makeTooltip(messages["Operations"]); //$NON-NLS-0$
 					if(this._progressPane.hasAttribute("aria-valuetext")) { //$NON-NLS-0$
 						this._progressPane.removeAttribute("aria-valuetext"); //$NON-NLS-0$
 					}
