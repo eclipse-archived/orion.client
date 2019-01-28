@@ -337,7 +337,7 @@ function(messages, i18nUtil, mCommands, mCommandRegistry, lib, mTooltip, colors,
 			}
 			else {
 				var hideValueCSS = hiddenValues.indexOf(scopeList[i].id) >= 0 ? "style='display: none'" : ""; //$NON-NLS-0$
-				htmlString = htmlString + "<li " + hideValueCSS + "><label for='"+scopeList[i].id+"'>" + scopeList[i].display + "</label><input id='"+scopeList[i].id+"' class='colorpicker-input" + ieClass + "' type='color' value='" + scopeList[i].value + "'></li>";//$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+				htmlString = htmlString + "<li " + hideValueCSS + "><label for='"+scopeList[i].id+"' id='"+scopeList[i].id+"Label'>" + scopeList[i].display + "</label><input id='"+scopeList[i].id+"' aria-labelledby='" + scopeList[i].id + " " + scopeList[i].id + "Label' class='colorpicker-input" + ieClass + "' type='color' value='" + scopeList[i].value + "'></li>";//$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			}
 		}
 		return htmlString;
