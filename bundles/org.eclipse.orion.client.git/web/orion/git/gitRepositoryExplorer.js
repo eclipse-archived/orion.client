@@ -791,8 +791,6 @@ define([
 		this.destroyConfig();
 		var parent = lib.node('settingsActions'); //$NON-NLS-0$
 		
-		parent.setAttribute("role", "none");
-		
 		var section = this.configSection = new mSection.Section(parent, {
 			id: "configSection", //$NON-NLS-0$
 			title: "\u200B", //$NON-NLS-0$
