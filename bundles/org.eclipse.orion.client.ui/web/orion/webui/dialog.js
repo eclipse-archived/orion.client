@@ -55,9 +55,9 @@ define(['i18n!orion/nls/messages', 'orion/webui/littlelib', 'orion/uiUtils'],
 		/* Not used by clients */
 		CONTAINERTEMPLATE:		
 		'<div class="dialog" role="dialog">' + //$NON-NLS-0$
-			'<div class="dialogTitle"><span id="title" class="dialogTitleText layoutLeft"></span><button class="dismissButton layoutRight core-sprite-close imageSprite" id="closeDialog"></button></div>' + //$NON-NLS-0$
-			'<div id="dialogContent" class="dialogContent layoutBlock"></div>' + //$NON-NLS-1$ //$NON-NLS-0$
-			'<div id="buttons" class="dialogButtons"></div>' + //$NON-NLS-1$ //$NON-NLS-0$
+			'<div class="dialogTitle"><span class="dialogTitleText layoutLeft"></span><button class="dismissButton closeDialog layoutRight core-sprite-close imageSprite"></button></div>' + //$NON-NLS-0$
+			'<div class="dialogContent layoutBlock"></div>' + //$NON-NLS-1$ //$NON-NLS-0$
+			'<div class="dialogButtons"></div>' + //$NON-NLS-1$ //$NON-NLS-0$
 		'</div>', //$NON-NLS-0$
 
 		/* 
@@ -75,10 +75,10 @@ define(['i18n!orion/nls/messages', 'orion/webui/littlelib', 'orion/uiUtils'],
 			this.$frame = parent.lastChild;
 //			this.handle = lib.addAutoDismiss([this.$frame], this.hide.bind(this));
 			if (this.title) {
-				lib.$("#title", this.$frame).appendChild(document.createTextNode(this.title)); //$NON-NLS-0$
+				lib.$(".dialogTitleText", this.$frame).appendChild(document.createTextNode(this.title)); //$NON-NLS-0$
 				this.$frame.setAttribute("aria-labelledby", "title");
 			}
-			this.$close = lib.$("#closeDialog", this.$frame);//$NON-NLS-0$
+			this.$close = lib.$(".closeDialog", this.$frame);//$NON-NLS-0$
 			this.$close.setAttribute("aria-label", containerMessages["Close"]); //$NON-NLS-0$
 			var self = this;
 			this.$close.addEventListener("click", function(event) { //$NON-NLS-0$
