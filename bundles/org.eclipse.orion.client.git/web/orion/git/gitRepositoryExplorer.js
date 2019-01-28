@@ -791,7 +791,11 @@ define([
 		this.destroyConfig();
 		var parent = lib.node('settingsActions'); //$NON-NLS-0$
 		
-		var section = this.configSection = new mSection.Section(parent, {
+		var li = document.createElement("li");
+		li.setAttribute("role", "none");
+		parent.appendChild(li);
+		
+		var section = this.configSection = new mSection.Section(li, {
 			id: "configSection", //$NON-NLS-0$
 			title: "\u200B", //$NON-NLS-0$
 			iconClass: ["core-sprite-wrench"], //$NON-NLS-0$
