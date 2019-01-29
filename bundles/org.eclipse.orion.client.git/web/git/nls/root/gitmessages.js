@@ -468,6 +468,7 @@ define({//Default message bundle
 	"See the status" : "See the status", //$NON-NLS-0$  //$NON-NLS-1$
 	"Choose target location" : "Choose target location", //$NON-NLS-0$  //$NON-NLS-1$
 	"Default target location" : "Default target location", //$NON-NLS-0$  //$NON-NLS-1$
+	"Patch Location": "Patch Location", //$NON-NLS-0$  //$NON-NLS-1$
 	"Change..." : "Change...", //$NON-NLS-0$  //$NON-NLS-1$
 	"Merge Squash": "Merge Squash", //$NON-NLS-0$  //$NON-NLS-1$
 	"Squash the content of the branch to the index" : "Squash the content of the branch to the index", //$NON-NLS-0$  //$NON-NLS-1$
