@@ -250,11 +250,16 @@ define([
 			
 			this._launchConfigurationsDropdown = new mRichDropdown.RichDropdown({
 				parentNode: this._launchConfigurationsWrapper,
+				id: "launchConfig",  //$NON-NLS-0$
 				populateFunction: populateFunction
 			});
 			this._launchConfigurationsDropdownTriggerButton = this._launchConfigurationsDropdown.getDropdownTriggerButton();
 			this._launchConfigurationsDropdownTriggerButton.classList.remove("dropdownDefaultButton"); //$NON-NLS-0$
 			this._launchConfigurationsDropdownTriggerButton.classList.add("launchConfigurationsButton"); //$NON-NLS-0$
+			this._launchConfigurationsDropdownTriggerButton.setAttribute("aria-label", messages["launchConfiguration"]); //$NON-NLS-0$
+			this._launchConfigurationsDropdownTriggerButton.setAttribute("aria-labelledby", "launchConfigButton launchConfigLabel"); //$NON-NLS-1$ //$NON-NLS-0$
+			var dropdownNode = this._launchConfigurationsDropdown.getDropdownNode();
+			dropdownNode.setAttribute("aria-label", messages["launchConfigurations"]); //$NON-NLS-0$
 			
 			this._disableLaunchConfigurationsDropdown(); // start with control greyed out until launch configs are set
 			
