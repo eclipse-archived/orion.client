@@ -21,10 +21,15 @@ define([ 'i18n!git/nls/gitmessages', 'orion/webui/dialog', 'orion/xsrfUtils', 'o
 
 	ApplyPatchDialog.prototype.TEMPLATE =
 
-	'<div style="padding:4px"><input type="radio" name="radio" value="urlRadio" id="urlRadio" checked/>' +
-		messages["URL:"] + '<input type="text" name="url" id="patchurl"/></div>' +
-	'<div style="padding:4px"><input type="radio" name="radio" value="fileRadio" id="fileRadio"/>' +
-		messages["File:"] + '<input type="file" name="selectedFile" id="selectedFile" class="uploadChooser" />' +
+	'<div role="radiogroup" aria-label="${Patch Location}">' +
+		'<div style="padding:4px"><input type="radio" name="radio" value="urlRadio" id="urlRadio" checked/>' +
+			'<label for="urlRadio" id="urlRadioLabel">${URL:}</label>' + 
+			'<input type="text" name="url" id="patchurl" aria-labelledby="urlRadioLabel"/>' +
+		'</div>' +
+		'<div style="padding:4px"><input type="radio" name="radio" value="fileRadio" id="fileRadio"/>' +
+			'<label for="fileRadio" id="fileRadioLabel">${File:}</label>' + 
+			'<input type="file" name="selectedFile" id="selectedFile" class="uploadChooser" aria-labelledby="fileRadioLabel selectedFile"/>' +
+		'</div>' +
 	'</div>';
 
 	ApplyPatchDialog.prototype._init = function(options) {
