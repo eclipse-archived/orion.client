@@ -28,7 +28,7 @@ define([ 'i18n!git/nls/gitmessages', 'orion/webui/dialog', 'orion/xsrfUtils', 'o
 		'</div>' +
 		'<div style="padding:4px"><input type="radio" name="radio" value="fileRadio" id="fileRadio"/>' +
 			'<label for="fileRadio" id="fileRadioLabel">${File:}</label>' + 
-			'<input type="file" name="selectedFile" id="selectedFile" class="uploadChooser" aria-labelledby="fileRadioLabel"/>' +
+			'<input type="file" name="selectedFile" id="selectedFile" class="uploadChooser" aria-labelledby="fileRadioLabel selectedFile"/>' +
 		'</div>' +
 	'</div>';
 
