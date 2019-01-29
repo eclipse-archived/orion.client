@@ -1328,7 +1328,7 @@ html[dir="rtl"] .sectionWrapper, html[dir="rtl"] .sectionTable{ /* ACGC */
 	transition: all 0.1s ease;
 }
 
-.sectionWrapper.sectionClosed {
+.sectionWrapper.sectionClosed:not(:focus) {
 	box-shadow: none;
 }
 
