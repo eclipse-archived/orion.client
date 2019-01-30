@@ -1243,7 +1243,9 @@ define([
 			
 					actionsArea = document.createElement("ul"); //$NON-NLS-0$
 					actionsArea.className = "layoutRight commandList"; //$NON-NLS-0$
-					actionsArea.id = item.Type + "Actions";
+					if (item.Type !== "NoCommits") { //$NON-NLS-0$
+						actionsArea.id = item.Type + "Actions";
+					}
 					actionsArea.setAttribute("role", "none"); //$NON-NLS-1$ //$NON-NLS-0$
 					horizontalBox.appendChild(actionsArea);
 					
