@@ -10,6 +10,8 @@
  ******************************************************************************/
 /*eslint-env browser, amd*/
 define(['orion/webui/littlelib'], function(lib) {
+	
+	var ID_INDEX = 0;
 
 	/**
 	 * Attaches tooltip behavior to a given node.  The tooltip will be assigned class "tooltip" which can be
@@ -134,7 +136,7 @@ define(['orion/webui/littlelib'], function(lib) {
 
 				if (this._trigger === "mouseover") { //$NON-NLS-0$
 					this._tipInner.setAttribute("role", "tooltip"); //$NON-NLS-2$ //$NON-NLS-1$
-					this._tipInner.id = "tooltip" + Date.now(); //$NON-NLS-0$
+					this._tipInner.id = "tooltip" + ID_INDEX++; //$NON-NLS-0$
 					var label = this._node.getAttribute("aria-label");
 					if (this._text !== label) {
 						this._node.setAttribute("aria-describedby", this._tipInner.id); //$NON-NLS-0$
