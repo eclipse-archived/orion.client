@@ -29,6 +29,7 @@ define([
 	function RichDropdown(options) {
 		this._parentNode = options.parentNode;
 		this._buttonName = options.buttonName;
+		this._id = options.id || "dropDown";
 		this._buttonDecorator = options.buttonDecorator;
 		this._populateFunction = options.populateFunction;
 		this._noDropdownArrow = options.noDropdownArrow;
@@ -40,9 +41,12 @@ define([
 			var wrapperNode = lib.createNodes(RichDropdownTemplate);
 			
 			this._dropdownTriggerButton = lib.$("button.dropdownTrigger", wrapperNode); //$NON-NLS-0$
+			this._dropdownTriggerButton.id = this._id + "Button"; //$NON-NLS-0$
 			this._dropdownTriggerButtonLabel = lib.$(".dropdownTriggerButtonLabel", this._dropdownTriggerButton); //$NON-NLS-0$
+			this._dropdownTriggerButtonLabel.id = this._id + "Label"; //$NON-NLS-0$
 			
 			this._dropdownNode = lib.$("ul.dropdownMenu", wrapperNode); //$NON-NLS-0$
+			this._dropdownNode.id = this._id + "Dropdown"; //$NON-NLS-0$
 			
 			if (this._buttonName) {
 				this.setDropdownTriggerButtonName(this._buttonName, this._buttonDecorator);
@@ -54,6 +58,11 @@ define([
 			} else {
 				this._dropdownButtonArrow = dropdownArrow;
 			}
+			this._dropdownTriggerButton.setAttribute("aria-haspopup", "dialog"); //$NON-NLS-1$ //$NON-NLS-0$
+			this._dropdownTriggerButton.setAttribute("aria-expanded", "false"); //$NON-NLS-1$ //$NON-NLS-0$
+			this._dropdownTriggerButton.setAttribute("aria-controls", this._dropdownNode.id); //$NON-NLS-0$
+			this._dropdownNode.setAttribute("role", "dialog"); //$NON-NLS-1$ //$NON-NLS-0$
+			this._dropdownNode.setAttribute("aria-modal", "true"); //$NON-NLS-1$ //$NON-NLS-0$
 						
 			this._parentNode.appendChild(this._dropdownTriggerButton);
 			this._parentNode.appendChild(this._dropdownNode);
@@ -66,6 +75,13 @@ define([
 		 */
 		getDropdownTriggerButton: function() {
 			return this._dropdownTriggerButton;
+		},
+		
+		/**
+		 * @return {DOMNode} The DOM node of this dropdown's dropdown list
+		 */
+		getDropdownNode: function() {
+			return this._dropdownNode;
 		},
 		
 		/**
@@ -94,6 +110,7 @@ define([
 		 * @param {DOMNode} labelNode A dom node which will replace the dropdownTriggerButtonLabel
 		 */
 		setCustomTriggerButtonLabelNode: function(labelNode) {
+			labelNode.id = this._dropdownTriggerButtonLabel.id;
 			this._dropdownTriggerButton.replaceChild(labelNode, this._dropdownTriggerButtonLabel);
 			this._dropdownTriggerButtonLabel = labelNode;
 		},
