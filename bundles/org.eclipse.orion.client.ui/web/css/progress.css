@@ -8,8 +8,8 @@
 }
 
 .progressInfo {
-	color: black !important;
-	background-color: #1BB199 !important;
+	color: white !important;
+	background-color: #5aaafa !important;
 }
 
 /* More prominent hyperlinks in notification area */
@@ -19,20 +19,20 @@
 
 .progressWarning {
 	color: black !important;
-	background-color: #f0ad4e !important;
-	border: 1px solid #f0ad4e !important;
+	background-color: #efc100 !important;
+	border: 1px solid #efc100 !important;
 }
 
 .progressError {
-	color: black !important;
-	background-color: #d9534f !important;
-	border: 1px solid #d9534f !important;
+	color: white !important;
+	background-color: #e0182d !important;
+	border: 1px solid #e0182d !important;
 }
 
 .progressNormal {
-	color: black !important;
-	background-color: #1BB199 !important;
-	border: 1px solid #1BB199 !important;
+	color: white !important;
+	background-color: #5aa700 !important;
+	border: 1px solid #5aa700 !important;
 }
 
 .progressPane {
