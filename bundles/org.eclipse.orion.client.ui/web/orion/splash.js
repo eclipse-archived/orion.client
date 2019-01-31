@@ -60,7 +60,7 @@ step.prototype.getStepNode = function() {
 	
 	var stepNode = document.createElement( 'div' );
 	stepNode.className = 'splashStep';
-	stepNode.innerHTML =  '<div class="splashVisual">' + 
+	stepNode.innerHTML =  '<div class="splashVisual" aria-hidden="true">' + 
 								'<div id="step' + this.order + '"></div>' +
 							'</div>' +
 							'<div class="splashVerbal">' + this.description + '</div>';
@@ -103,14 +103,13 @@ function loader( domNode, title ){
 	}
 
 	this.template = '<div class="splashLoader">' +
-						'<div class="splashAbout">' + this.title + '</div>' +
+						'<label class="splashAbout" for="progressbar">' + this.title + '</label>' +
 						'<div class="splashProgressbar">' +
-							'<progress id ="progressbar"></progress>' +
+							'<progress id ="progressbar" aria-describedby="stepMessages"></progress>' +
 						'</div>' +
-						'<div id="steps" class="splashSteps">' +
+						'<div id="steps" class="splashSteps" role="status">' +
 						'</div>' +
-						'<div id="stepMessages" class="splashMessages">' +
-						'</div>' +
+						'<div id="stepMessages" class="splashMessages" role="status" aria-live="off">' +
 						'</div>' +
 					'</div>';   
 	
@@ -191,7 +190,7 @@ loader.prototype.nextStep = function(){
 				break;
 
 			case myStep.TYPE_DRIVEN:
-				 myStep.spin();
+				myStep.spin();
 				break;
 	}
 	this.update();
@@ -290,7 +289,7 @@ loader.prototype.update = function(){
 	var splashProgress = this.splashProgress;
 	if (splashProgress) {
 		splashProgress.max = total;
-		splashProgress.value = worked;
+		splashProgress.value = Math.ceil(worked);
 	}	
 };
 
@@ -306,6 +305,13 @@ loader.prototype.takeDown = function() {
 	var splash = document.getElementById("splash");
 	if (splash && splash.parentNode) {
 		splash.parentNode.removeChild(splash);
+	}
+
+	// Remove "busy" from all elements.
+	for(var child = document.body.firstElementChild; child !== null; child = child.nextElementSibling) {
+		if (child.tagName !== "SCRIPT") {
+			child.removeAttribute("aria-busy");
+		}
 	}
 };
 
@@ -333,7 +339,14 @@ function start() {
 	
 	var splash = document.getElementById("splash");
 	if (!splash) return;
-
+	
+	// Mark all elements behind the splash as "busy" until splash is torn down so screen readers don't go there.
+	for(var child = document.body.firstElementChild; child !== null; child = child.nextElementSibling) {
+		if (child !== splash && child.tagName !== "SCRIPT") {
+			child.setAttribute("aria-busy", "true");
+		}
+	}
+	
 	var showTimeout = 3000;
 	if (localStorage.showSplashTimeout) {
 		try {
