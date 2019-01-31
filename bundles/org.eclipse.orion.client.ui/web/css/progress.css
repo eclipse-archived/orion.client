@@ -8,7 +8,7 @@
 }
 
 .progressInfo {
-	color: white !important;
+	color: black !important;
 	background-color: #1BB199 !important;
 }
 
@@ -18,19 +18,19 @@
 }
 
 .progressWarning {
-	color: white !important;
+	color: black !important;
 	background-color: #f0ad4e !important;
 	border: 1px solid #f0ad4e !important;
 }
 
 .progressError {
-	color: white !important;
+	color: black !important;
 	background-color: #d9534f !important;
 	border: 1px solid #d9534f !important;
 }
 
 .progressNormal {
-	color: white !important;
+	color: black !important;
 	background-color: #1BB199 !important;
 	border: 1px solid #1BB199 !important;
 }

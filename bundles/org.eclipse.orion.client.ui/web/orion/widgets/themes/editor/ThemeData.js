@@ -61,7 +61,7 @@ define([
 								"backgroundColor": "rgba(85, 181, 219, 0.67)"
 							},
 							"blame":{
-								"color": "#707070",
+								"color": "black",
 								"backgroundColor": "rgb(255, 132, 44)"
 							},
 							"currentBlame":{

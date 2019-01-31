@@ -152,7 +152,7 @@ define({
 			"background-color": "rgba(60, 113, 179, 0.25)"
 		},
 		".gitStatusTitle": {
-			"color": "#0462AB !important"
+			"color": "#035899 !important"
 		},
 		".label.parameterInput": {
 			"color": "#FFFFFF !important"

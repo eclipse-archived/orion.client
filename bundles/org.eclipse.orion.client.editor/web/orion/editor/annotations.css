@@ -22,7 +22,7 @@
 .annotation.selectedLinkedGroup {
 }
 .annotation.blame {
-	color: #707070;
+	color: black;
 	background-color: rgb(255, 132, 44);
 }
 .annotation.currentBlame {

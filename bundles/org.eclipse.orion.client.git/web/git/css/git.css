@@ -560,9 +560,8 @@ _:-moz-tree-row(hover), .gitChangeListCheck { /* Firefox  HACK */
 .gitCommitMore {
 	padding: 0;
 	margin: 10px 5px 5px 0;
-	opacity: 0.81;
 	border: none;
-	background: transparent;
+	background-color: transparent;
 	color: #00aed1;
 	cursor: pointer;
 	float: left;
@@ -573,7 +572,7 @@ _:-moz-tree-row(hover), .gitChangeListCheck { /* Firefox  HACK */
 }
 
 .gitListCell:hover .gitCommitMore {
-	opacity: 1;
+	opacity: 0.8;
 }
 
 .gitListMore {
@@ -600,7 +599,7 @@ _:-moz-tree-row(hover), .gitChangeListCheck { /* Firefox  HACK */
 }
 
 .gitCommitListSection {
-	background-color: #e9f1f4;
+	background-color: #ebf2f5;
 }
 
 .gitListCell {

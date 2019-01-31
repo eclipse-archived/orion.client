@@ -170,14 +170,14 @@ define([
 				}
 			}
 			var message = _status.DetailedMessage || _status.Message || _status;
-			var color = "red"; //$NON-NLS-0$
+			var color = "#DF0000"; //$NON-NLS-0$
 			if (_status.Severity) {
 				switch (_status.Severity) {
 				case SEV_WARNING:
 					color = "#FFCC00"; //$NON-NLS-0$
 					break;
 				case SEV_ERROR:
-					color = "red"; //$NON-NLS-0$
+					color = "#DF0000"; //$NON-NLS-0$
 					break;
 				case SEV_INFO:
 				case SEV_OK:
