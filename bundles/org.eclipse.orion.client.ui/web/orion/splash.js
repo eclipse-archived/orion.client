@@ -60,7 +60,7 @@ step.prototype.getStepNode = function() {
 	
 	var stepNode = document.createElement( 'div' );
 	stepNode.className = 'splashStep';
-	stepNode.innerHTML =  '<div class="splashVisual" aria-hidden="true">' + 
+	stepNode.innerHTML =  '<div class="splashVisual">' + 
 								'<div id="step' + this.order + '"></div>' +
 							'</div>' +
 							'<div class="splashVerbal">' + this.description + '</div>';
@@ -107,7 +107,7 @@ function loader( domNode, title ){
 						'<div class="splashProgressbar">' +
 							'<progress id ="progressbar" aria-describedby="stepMessages"></progress>' +
 						'</div>' +
-						'<div id="steps" class="splashSteps" role="status">' +
+						'<div id="steps" class="splashSteps">' +
 						'</div>' +
 						'<div id="stepMessages" class="splashMessages" role="status" aria-live="off">' +
 						'</div>' +
