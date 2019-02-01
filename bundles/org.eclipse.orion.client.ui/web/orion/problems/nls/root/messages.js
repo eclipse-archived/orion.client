@@ -16,6 +16,8 @@ define({//Default message bundle
 	"Errors": "Errors", //$NON-NLS-1$ //$NON-NLS-0$
 	"Info": "Information", //$NON-NLS-1$ //$NON-NLS-0$
 	"Warnings": "Warnings", //$NON-NLS-1$ //$NON-NLS-0$
+	"Error": "Error", //$NON-NLS-1$ //$NON-NLS-0$
+	"Warning": "Warning", //$NON-NLS-1$ //$NON-NLS-0$
 	"items": " (${0} items)", //$NON-NLS-1$ //$NON-NLS-0$
 	"viewByTypes" : "By types", //$NON-NLS-1$ //$NON-NLS-0$
 	"viewByFiles" : "By files", //$NON-NLS-1$ //$NON-NLS-0$
