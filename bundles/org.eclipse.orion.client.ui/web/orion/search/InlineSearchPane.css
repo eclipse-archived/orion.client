@@ -362,7 +362,7 @@
 }
 
 .fullPathSpan {
-	color: #666 !important;
+	color: #555 !important;
 	display: none;
 	flex-grow: 0;
 	flex-shrink: 2;
@@ -429,7 +429,7 @@
 }
 
 .ellipsisSpan {
-	color: #666 !important;
+	color: #555 !important;
 	flex-grow: 0;
 	flex-shrink: 0;
 	-webkit-flex-grow: 0;		/* Safari */
