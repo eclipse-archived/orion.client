@@ -174,7 +174,7 @@ define(['orion/Deferred'], function(Deferred) {
 								textDecoration: "line-through" //$NON-NLS-0$
 							},
 							table: {
-								color: "#357d21" //$NON-NLS-0$
+								color: "#157B07" //$NON-NLS-0$
 							}
 						},
 						quote: {

@@ -1,7 +1,7 @@
 /*Editor syntax highlighting themes*/
 /*Refer to https://manual.macromates.com/en/language_grammars at section 12.4 for the theme hierarchy*/
 .editorTheme .comment {
-	color: #357d21;
+	color: #157B07;
 }
 .editorTheme .constant.numeric.hex {
 	color: #9932CC;

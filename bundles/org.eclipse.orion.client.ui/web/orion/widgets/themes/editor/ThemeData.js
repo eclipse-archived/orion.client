@@ -61,7 +61,7 @@ define([
 								"backgroundColor": "rgba(85, 181, 219, 0.67)"
 							},
 							"blame":{
-								"color": "#707070",
+								"color": "black",
 								"backgroundColor": "rgb(255, 132, 44)"
 							},
 							"currentBlame":{
@@ -120,7 +120,7 @@ define([
 					"backgroundColor": "#FFFFFF",
 					"color": "#151515",
 					"comment": {
-						"color": "#357D21"
+						"color": "#157B07"
 					},
 					"constant": {
 						"color": "#9932CC",
@@ -189,7 +189,7 @@ define([
 								"textDecoration": "line-through"
 							},
 							"table": {
-								"color": "#357D21"
+								"color": "#157B07"
 							}
 						},
 						"quote": {

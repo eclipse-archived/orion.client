@@ -138,22 +138,26 @@
 
 /* The added block in the new file/left side, lightest green */
 .annotationLine.addedBlockDiff {
+	color: black !important;
 	background-color: #E5FFCF;
 }
 
 /* The current added block in the new file/left side, 2nd lightest green */
 .annotationLine.currentAddedBlockDiff {
+	color: black !important;
 	background-color: #CFFFCF;
 }
 
 /* The deleted block in the old file/right side, lightest red */
 .annotationLine.deletedBlockDiff {
-	background-color: #FAE6E6;
+	color: black !important;
+	background-color: #FAF0F0;
 }
 
 /* The current deleted block in the old file/right side, 2nd lightest red */
 .annotationLine.currentDeletedBlockDiff {
-	background-color: #FCD6D6;
+	color: black !important;
+	background-color: #FFE4E4;
 }
 
 /* Style for an empty block, which draws a lighter black line on top of a line to indicate an insertion or deletion */
@@ -176,11 +180,13 @@
 
 /* The conflicting block in both the old file/right side and new file/left side, lighter yellow */
 .annotationLine.blockDiffConflict {
+	color: black !important;
 	background-color: #FFFFCA;
 }
 
 /* The curent conflicting block in both the old file/right side and new file/left side, darker yellow */
 .annotationLine.currentBlockDiffConflict {
+	color: black !important;
 	background-color: #FFFF5B;
 }
 
@@ -188,21 +194,25 @@
 
 /* The added word in the new file/left side, 3rd lightest green */
 .annotationRange.addedWordDiff {
+	color: black !important;
 	background-color: #B8E8B8;
 }
 
 /* The current added word in the new file/left side, darkest green */
 .annotationRange.currentAddedWordDiff {
+	color: black !important;
 	background-color: #93FF93;
 }
 
 /* The deleted word in the old file/right side, 3rd lightest red */
 .annotationRange.deletedWordDiff {
+	color: black !important;
 	background-color: #F9BDBD;
 }
 
 /* The current deleted word in the old file/right side, darkest red */
 .annotationRange.currentDeletedWordDiff {
+	color: black !important;
 	background-color: #FF8B8B;
 }
 
