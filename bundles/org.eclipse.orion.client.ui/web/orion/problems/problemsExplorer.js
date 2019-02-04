@@ -61,17 +61,20 @@ define([
 	 * @param {String} additionalCss The class name of any additional CSS to use
 	 */
 	function getDetailDecoratorIcon(holderDiv, severity, additionalCss){
-		var icon = document.createElement("div");
+		var icon = document.createElement("span");
 		
 		icon.classList.add("problemsDecorator"); //$NON-NLS-1$
 		if(additionalCss) {
 			icon.classList.add(additionalCss);
 		}
 		if(severity === "error") {
+			icon.setAttribute("aria-label", messages.Error); //$NON-NLS-1$
 			icon.classList.add("problemsError"); //$NON-NLS-1$
 		} else if(severity === "info") {
+			icon.setAttribute("aria-label", messages.Info); //$NON-NLS-1$
 			icon.classList.add("problemsInfo"); //$NON-NLS-1$
 		} else {
+			icon.setAttribute("aria-label", messages.Warning); //$NON-NLS-1$
 			icon.classList.add("problemsWarning"); //$NON-NLS-1$
 		}
 		holderDiv.appendChild(icon);
