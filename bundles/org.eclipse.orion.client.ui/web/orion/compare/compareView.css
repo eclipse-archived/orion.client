@@ -151,13 +151,13 @@
 /* The deleted block in the old file/right side, lightest red */
 .annotationLine.deletedBlockDiff {
 	color: black !important;
-	background-color: #FAE6E6;
+	background-color: #FAF0F0;
 }
 
 /* The current deleted block in the old file/right side, 2nd lightest red */
 .annotationLine.currentDeletedBlockDiff {
 	color: black !important;
-	background-color: #FCD6D6;
+	background-color: #FFE4E4;
 }
 
 /* Style for an empty block, which draws a lighter black line on top of a line to indicate an insertion or deletion */

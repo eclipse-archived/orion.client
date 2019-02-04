@@ -120,7 +120,7 @@ define([
 					"backgroundColor": "#FFFFFF",
 					"color": "#151515",
 					"comment": {
-						"color": "#357D21"
+						"color": "#157B07"
 					},
 					"constant": {
 						"color": "#9932CC",
@@ -189,7 +189,7 @@ define([
 								"textDecoration": "line-through"
 							},
 							"table": {
-								"color": "#357D21"
+								"color": "#157B07"
 							}
 						},
 						"quote": {
