@@ -240,31 +240,32 @@ define([
 						if (that.simpleLog || !targetRef || util.sameRef(activeBranch, targetRef)) {
 							that.outgoingItem = that.incomingItem = that.syncItem = null;
 							return getSimpleLog();
-						} 
-						return Deferred.when(repository.status || (repository.status = that.progressService.progress(that.gitClient.getGitStatus(repository.StatusLocation), messages['Getting changes'])), function(status) { //$NON-NLS-0$
-							repository.status = status;
-							onComplete(that.processChildren(parentItem, [
-								status,
-								that.outgoingItem || (that.outgoingItem = {
-									Type: "Outgoing", //$NON-NLS-0$
-									selectable: false,
-									isNotSelectable: true,
-								}),
-								that.incomingItem || (that.incomingItem = {
-									Type: "Incoming", //$NON-NLS-0$
-									selectable: false,
-									isNotSelectable: true,
-								}),
-								that.syncItem || (that.syncItem = {
-									Type: "Synchronized", //$NON-NLS-0$
-									selectable: false,
-									isNotSelectable: true,
-								})
-							]));
-						}, function(error){
-							if (progress) progress.done();
-							that.handleError(error);
-						});
+						} else {
+							return Deferred.when(repository.status || (repository.status = that.progressService.progress(that.gitClient.getGitStatus(repository.StatusLocation), messages['Getting changes'])), function(status) { //$NON-NLS-0$
+								repository.status = status;
+								onComplete(that.processChildren(parentItem, [
+									status,
+									that.outgoingItem = {
+										Type: "Outgoing", //$NON-NLS-0$
+										selectable: false,
+										isNotSelectable: true,
+									},
+									that.incomingItem = {
+										Type: "Incoming", //$NON-NLS-0$
+										selectable: false,
+										isNotSelectable: true,
+									},
+									that.syncItem = {
+										Type: "Synchronized", //$NON-NLS-0$
+										selectable: false,
+										isNotSelectable: true,
+									}
+								]));
+							}, function(error){
+								if (progress) progress.done();
+								that.handleError(error);
+							});
+						}	
 					}, function(error){
 						if (progress) progress.done();
 						that.handleError(error);
