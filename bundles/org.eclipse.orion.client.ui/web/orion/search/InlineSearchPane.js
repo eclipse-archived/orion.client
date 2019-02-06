@@ -463,11 +463,11 @@ define([
 
 			this._toggleSearchOptionsLink = lib.$("#toggleSearchOptionsLink", this._searchWrapper); //$NON-NLS-0$
 			this._toggleSearchOptionsLink.addEventListener("click", this.showSearchOptions.bind(this)); //$NON-NLS-0$
-			var span = document.createElement("span");
+			var span = document.createElement("span"); //$NON-NLS-0$
 			span.setAttribute("aria-hidden", "true"); //$NON-NLS-1$ //$NON-NLS-0$
-			span.textContent = messages["^"];
+			span.textContent = "^ "; //$NON-NLS-0$
 			this._toggleSearchOptionsLink.appendChild(span);
-			span = document.createElement("span");
+			span = document.createElement("span"); //$NON-NLS-0$
 			span.textContent = messages["Edit Search"];
 			this._toggleSearchOptionsLink.appendChild(span);
 
@@ -663,13 +663,16 @@ define([
 		},
 		
 		_toggleReplaceFieldVisibility: function () {
+			var focusElement = this._searchTextInputBox;
 			if (this._replaceBoxIsHidden()) {
 				this._showReplaceField();
-				this._replaceTextInputBox.focus();
+				if (this._searchTextInputBox.value.length > 0) {
+					focusElement = this._replaceTextInputBox.focus();
+				}
 			} else {
 				this._hideReplaceField();
-				this._searchTextInputBox.focus();
 			}
+			focusElement.focus();
 		},
 		_toggleCaseSensitive: function () {
 			if(this._caseSensitive){
