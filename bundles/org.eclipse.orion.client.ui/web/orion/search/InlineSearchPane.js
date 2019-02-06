@@ -710,7 +710,7 @@ define([
 		showSearchOptions: function() {
 			this._searchWrapper.classList.remove("searchOptionsHidden"); //$NON-NLS-0$
 			this._toggleSearchOptionsLink.classList.add("linkHidden"); //$NON-NLS-0$
-			this._searchTextInputBox.focus();
+			this.focusOnTextInput();
 		},
 		
 		_hideSearchOptions: function() {
