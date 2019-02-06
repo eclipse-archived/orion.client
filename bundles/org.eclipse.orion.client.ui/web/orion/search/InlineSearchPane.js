@@ -667,7 +667,7 @@ define([
 			if (this._replaceBoxIsHidden()) {
 				this._showReplaceField();
 				if (this._searchTextInputBox.value.length > 0) {
-					focusElement = this._replaceTextInputBox.focus();
+					focusElement = this._replaceTextInputBox;
 				}
 			} else {
 				this._hideReplaceField();
