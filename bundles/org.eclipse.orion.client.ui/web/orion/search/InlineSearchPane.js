@@ -72,6 +72,7 @@ define([
 			this._searchResultsTitle = lib.$(".searchResultsTitle", this._searchWrapper); //$NON-NLS-0$
 			this._searchResultsWrapperDiv = lib.$(".searchResultsWrapperDiv", this._searchWrapper); //$NON-NLS-0$
 			this._searchResultsWrapperDiv.id = "inlineSearchResultsWrapper";
+			this._searchResultsWrapperDiv.setAttribute("aria-labelledby", "searchResultsTitle");
 			
 			this._replaceCompareTitleDiv = lib.node("replaceCompareTitleDiv"); //$NON-NLS-0$
 			this._replaceCompareDiv = lib.node("replaceCompareDiv"); //$NON-NLS-0$
@@ -462,7 +463,13 @@ define([
 
 			this._toggleSearchOptionsLink = lib.$("#toggleSearchOptionsLink", this._searchWrapper); //$NON-NLS-0$
 			this._toggleSearchOptionsLink.addEventListener("click", this.showSearchOptions.bind(this)); //$NON-NLS-0$
-			this._toggleSearchOptionsLink.textContent = messages["^ Edit Search"]; //$NON-NLS-0$
+			var span = document.createElement("span"); //$NON-NLS-0$
+			span.setAttribute("aria-hidden", "true"); //$NON-NLS-1$ //$NON-NLS-0$
+			span.textContent = "^ "; //$NON-NLS-0$
+			this._toggleSearchOptionsLink.appendChild(span);
+			span = document.createElement("span"); //$NON-NLS-0$
+			span.textContent = messages["Edit Search"];
+			this._toggleSearchOptionsLink.appendChild(span);
 
 			if (this._replaceBoxIsHidden()) {
 	        	this._toggleReplaceLink.classList.remove("checkedSearchOptionButton"); //$NON-NLS-0$	
@@ -656,12 +663,16 @@ define([
 		},
 		
 		_toggleReplaceFieldVisibility: function () {
+			var focusElement = this._searchTextInputBox;
 			if (this._replaceBoxIsHidden()) {
 				this._showReplaceField();
+				if (this._searchTextInputBox.value.length > 0) {
+					focusElement = this._replaceTextInputBox;
+				}
 			} else {
 				this._hideReplaceField();
 			}
-			this._searchTextInputBox.focus();
+			focusElement.focus();
 		},
 		_toggleCaseSensitive: function () {
 			if(this._caseSensitive){
@@ -702,6 +713,7 @@ define([
 		showSearchOptions: function() {
 			this._searchWrapper.classList.remove("searchOptionsHidden"); //$NON-NLS-0$
 			this._toggleSearchOptionsLink.classList.add("linkHidden"); //$NON-NLS-0$
+			this.focusOnTextInput();
 		},
 		
 		_hideSearchOptions: function() {
