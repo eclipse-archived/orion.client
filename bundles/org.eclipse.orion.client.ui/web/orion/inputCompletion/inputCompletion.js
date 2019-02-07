@@ -191,7 +191,7 @@ define(['orion/EventTarget', 'orion/bidiUtils', 'orion/urlModifier'], function( 
 	InputCompletion.prototype.onKeyDown = function(e){
 		var keyCode= e.charCode || e.keyCode;
 		if(this._dismissed){
-			if (keyCode === 13/* Enter */ && e.shiftKey) {
+			if (keyCode === 13/* Enter */) {
 				this._proposeOn();
 				e.preventDefault();
 				e.stopPropagation();
