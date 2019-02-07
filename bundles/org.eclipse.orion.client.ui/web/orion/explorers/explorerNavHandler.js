@@ -386,6 +386,15 @@ exports.ExplorerNavHandler = (function() {
 		},
 
 		toggleCursor:  function(model, on){
+			if (!model) {
+				model = this._modelIterator.cursor();
+			}
+			if (!model) {
+				model = this.model.root && this.model.root.children && this.model.root.children[0];
+				if (model) {
+					this.cursorOn(model);
+				}
+			}
 			var currentRow = this.getRowDiv(model);
 			var currentgrid = this.getCurrentGrid(model);
 			if(currentgrid) {
