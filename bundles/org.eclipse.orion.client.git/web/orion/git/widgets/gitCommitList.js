@@ -369,7 +369,7 @@ define([
 		},
 		processChildren: function(parentItem, items) {
 			if (items.length === 0) {
-				items = [{Type: "NoCommits", selectable: false, isNotSelectable: true}]; //$NON-NLS-0$
+				items = [{Type: "NoCommits"}]; //$NON-NLS-0$
 			}else if(this.graph){
 				uiUtil.getCommitSvgs(items);
 			}
