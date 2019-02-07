@@ -13,6 +13,8 @@ define("orion/widgets/settings/EditorSettings", //$NON-NLS-0$
 [
 	'i18n!orion/settings/nls/messages', //$NON-NLS-0$
 	'orion/section', //$NON-NLS-0$
+	'orion/webui/tooltip', //$NON-NLS-0$
+	'orion/i18nUtil', //$NON-NLS-0$
 	'orion/commands', //$NON-NLS-0$
 	'orion/objects', //$NON-NLS-0$
 	'orion/PageLinks',
@@ -22,7 +24,7 @@ define("orion/widgets/settings/EditorSettings", //$NON-NLS-0$
 	'orion/widgets/input/SettingsSelect', //$NON-NLS-0$
 	'orion/widgets/settings/Subsection', //$NON-NLS-0$
 	'orion/urlModifier'
-], function (messages, mSection, commands, objects, PageLinks, lib, SettingsTextfield, SettingsCheckbox, SettingsSelect, Subsection, urlModifier) {
+], function (messages, mSection, mTooltip, i18nUtil, commands, objects, PageLinks, lib, SettingsTextfield, SettingsCheckbox, SettingsSelect, Subsection, urlModifier) {
 	var KEY_MODES = [
 		{value: "", label: messages.Default},
 		{value: "Emacs", label: "Emacs"}, //$NON-NLS-1$ //$NON-NLS-2$
@@ -35,23 +37,43 @@ define("orion/widgets/settings/EditorSettings", //$NON-NLS-0$
 	function addLocalIndicator(widget, property, info, options, prefs, editorSettings) {
 		if (!options.local) {
 			var indicator = document.createElement("span"); //$NON-NLS-0$
+			indicator.tabIndex = 0;
+			indicator.setAttribute("role", "button");
+			var checked = prefs[property + "LocalVisible"];
 			indicator.classList.add(localIndicatorClass);
-			indicator.classList.add(prefs[property + "LocalVisible"] ? on : off); //$NON-NLS-0$
-			indicator.title = messages.localSettingsTooltip;
-			indicator.addEventListener("click", function(e) { //$NON-NLS-0$
-				if (indicator.classList.contains(off)) {
-					indicator.classList.add(on);
-					indicator.classList.remove(off);
-				} else {
-					indicator.classList.add(off);
-					indicator.classList.remove(on);
+			toggleIndicatorSwitch(indicator, property, checked);
+			indicator.tooltip = new mTooltip.Tooltip({
+				node: indicator,
+				text: messages.localSettingsTooltip,
+				position: ["above", "below", "right", "left"] //$NON-NLS-0$ //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			});
+			indicator.addEventListener("keydown", function(e) { //$NON-NLS-0$
+				if (e.keyCode === lib.KEY.SPACE || e.keyCode === lib.KEY.ENTER) {
+					toggleIndicatorSwitch(indicator, property, indicator.classList.contains(off), editorSettings);
+					lib.stop(e);
 				}
-				editorSettings.update();
+			});
+			indicator.addEventListener("click", function(e) { //$NON-NLS-0$
+				toggleIndicatorSwitch(indicator, property, indicator.classList.contains(off), editorSettings);
 			});
 			var label = lib.$("label", widget.node); //$NON-NLS-0$
 			label.parentNode.insertBefore(indicator, label);
 		}
 		return widget;
+	}
+	
+	function toggleIndicatorSwitch(indicator, property, checked, editorSettings) {
+		if (checked) {
+			indicator.classList.add(on);
+			indicator.classList.remove(off);
+			indicator.setAttribute("aria-pressed", "true"); //$NON-NLS-0$ //$NON-NLS-1$
+		} else {
+			indicator.classList.add(off);
+			indicator.classList.remove(on);
+			indicator.setAttribute("aria-pressed", "false"); //$NON-NLS-0$ //$NON-NLS-1$
+		}
+		indicator.setAttribute("aria-label", i18nUtil.formatMessage(messages.localSettings, messages[property])); //$NON-NLS-0$
+		if (editorSettings) editorSettings.update();
 	}
 
 	function createBooleanProperty(property, options, prefs, editorSettings) {
@@ -297,19 +319,21 @@ define("orion/widgets/settings/EditorSettings", //$NON-NLS-0$
 					} else {
 						var infoText = document.createElement("div"); //$NON-NLS-0$
 						infoText.classList.add("setting-info"); //$NON-NLS-0$
+						infoText.id = "setting-info"; //$NON-NLS-0$
 						infoText.textContent = messages.editorSettingsInfo;
 						var onIcon = document.createElement("span"); //$NON-NLS-0$
 						onIcon.classList.add(localIndicatorClass);
 						onIcon.classList.add(on);
-						var offIcon = document.createElement("span"); //$NON-NLS-0$
-						offIcon.classList.add(localIndicatorClass);
-						offIcon.classList.add(off);
+						onIcon.setAttribute("role", "img"); //$NON-NLS-1$ //$NON-NLS-0$
+						onIcon.setAttribute("aria-label", messages["localSettingsButton"]); //$NON-NLS-0$
 						var wrenchIcon = document.createElement("span"); //$NON-NLS-0$
 						wrenchIcon.classList.add("core-sprite-wrench"); //$NON-NLS-0$
 						wrenchIcon.classList.add("icon-inline"); //$NON-NLS-0$
 						wrenchIcon.classList.add("imageSprite"); //$NON-NLS-0$
-						lib.processDOMNodes(infoText, [onIcon, offIcon, wrenchIcon]);
+						wrenchIcon.setAttribute("aria-hidden", "true"); //$NON-NLS-1$ //$NON-NLS-0$
+						lib.processDOMNodes(infoText, [onIcon, wrenchIcon]);
 						sectionWidget.getContentElement().appendChild(infoText);
+						sectionWidget.getContentElement().parentElement.setAttribute("aria-describedby", infoText.id); //$NON-NLS-0$
 					}
 					for (var subsection in sections[section]) {
 						if (sections[section].hasOwnProperty(subsection)) {

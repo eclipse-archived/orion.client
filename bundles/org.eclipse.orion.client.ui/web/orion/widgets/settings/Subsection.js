@@ -33,6 +33,8 @@ define([
 		var headerId = this.headerId = 'setting-header-' + sectionName.replace(/\s/g, ''); //$NON-NLS-0$
 		var titleNode = this.titleNode = document.createElement('div'); //$NON-NLS-0$
 		titleNode.classList.add('setting-header'); //$NON-NLS-0$
+		node.setAttribute("role", "group");
+		node.setAttribute("aria-labelledby", headerId);
 		if(options.additionalCssClass) {
 			titleNode.classList.add(options.additionalCssClass); //$NON-NLS-0$
 		}
