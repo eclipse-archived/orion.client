@@ -258,6 +258,7 @@ define([
 				var moreButton = this.moreButton = document.createElement("button"); //$NON-NLS-0$
 				moreButton.className = "gitCommitMore"; //$NON-NLS-0$
 				moreButton.textContent = commit.full ? messages["less"] : messages["more"];
+				moreButton.tabIndex = -1;
 				actions.appendChild(moreButton);
 				detailsDiv.appendChild(actions);
 			}

@@ -392,7 +392,14 @@ exports.ExplorerNavHandler = (function() {
 				if(currentRow){
 					if (on) {
 						currentRow.classList.add("treeIterationCursorRow"); //$NON-NLS-0$
+						if (this._parentDiv === document.activeElement || document.activeElement.parentNode === currentRow.parentNode) {
+							currentRow.tabIndex = "0";
+							this._parentDiv.tabIndex = "-1";
+							currentRow.focus();
+						}
 					} else {
+						currentRow.tabIndex = "-1";
+						this._parentDiv.tabIndex = "0";
 						currentRow.classList.remove("treeIterationCursorRow"); //$NON-NLS-0$
 					}
 				}
@@ -412,7 +419,14 @@ exports.ExplorerNavHandler = (function() {
 				if(currentRow){
 					if (on) {
 						currentRow.classList.add("treeIterationCursorRow_Dotted"); //$NON-NLS-0$
+						if (this._parentDiv === document.activeElement || document.activeElement.parentNode === currentRow.parentNode) {
+							currentRow.tabIndex = "0";
+							this._parentDiv.tabIndex = "-1";
+							currentRow.focus();
+						}
 					} else {
+						currentRow.tabIndex = "-1";
+						this._parentDiv.tabIndex = "0";
 						currentRow.classList.remove("treeIterationCursorRow_Dotted"); //$NON-NLS-0$
 					}
 				}

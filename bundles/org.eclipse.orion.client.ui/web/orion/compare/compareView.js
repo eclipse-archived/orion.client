@@ -512,6 +512,7 @@ exports.TwoWayCompareView = (function() {
 			domNode: parentDiv
 		});
 				
+		editor.setNoFocus(true);
 		editor.installTextView();
 		editor.setInput(null, null, fileOptions.Content ? fileOptions.Content : initString);
 		editor.setOverviewRulerVisible(false);
@@ -824,7 +825,8 @@ exports.InlineCompareView = (function() {
 			annotationFactory: new mEditorFeatures.AnnotationFactory(),
 			domNode: parentDiv
 		});
-				
+	
+		this._editor.setNoFocus(true);
 		this._editor.installTextView();
 		this._editor.setInput(null, null, initString);
 		this._editor.setOverviewRulerVisible(false);

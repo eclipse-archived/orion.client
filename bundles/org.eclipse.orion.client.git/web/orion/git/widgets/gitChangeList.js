@@ -104,7 +104,7 @@ define([
 				}
 			}
 			if (item.NextLocation) {
-				fullList.push({Type: "MoreFiles", NextLocation: item.NextLocation, selectable: false, isNotSelectable: true}); //$NON-NLS-0$
+				fullList.push({Type: "MoreFiles", NextLocation: item.NextLocation}); //$NON-NLS-0$
 			}
 			return fullList;
 		},
@@ -348,6 +348,7 @@ define([
 		this.progressService = options.progressService;
 		this.preferencesService = options.preferencesService;
 		this.standAloneOptions = options.standAloneOptions;
+		this.selectionPolicy = options.selectionPolicy;
 		this.explorerSelectionScope = "explorerSelection";  //$NON-NLS-0$
 		this.createSelection();
 		this.createCommands();
@@ -519,6 +520,7 @@ define([
 			this.createTree(this.parentId, model, {
 				role: "presentation", // table element is only being used for row/column presentation
 				setFocus: false, // do not steal focus on load
+				selectionPolicy: this.selectionPolicy,
 				preCollapse: function(rowItem, row) {
 					if(rowItem && rowItem.children && rowItem.children.length === 1 && rowItem.children[0].resourceComparer) {
 						if(!rowItem.children[0].resourceComparer.isDirty()) {
@@ -932,7 +934,6 @@ define([
 						outerDiv.setAttribute("aria-label", messages["CommitOptions"]); //$NON-NLS-0$
 						
 						td.colSpan = 2;
-						tableRow.classList.remove("selectableNavRow"); //$NON-NLS-0$
 
 						var label = document.createElement("label"); //$NON-NLS-0$
 						label.htmlFor = "commitMsgparameterCollector"; //$NON-NLS-0$
@@ -1198,7 +1199,6 @@ define([
 						div.appendChild(actionsArea);
 						explorer.commandService.renderCommands(actionsArea.id, actionsArea, explorer, explorer, "button"); //$NON-NLS-0$	
 					} else {
-						tableRow.classList.remove("selectableNavRow"); //$NON-NLS-0$
 						
 						// render the compare widget
 						td.colSpan = 2;

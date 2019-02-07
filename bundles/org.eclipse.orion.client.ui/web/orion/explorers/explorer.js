@@ -798,6 +798,7 @@ exports.ExplorerRenderer = (function() {
 		
 		render: function(item, tableRow){
 			tableRow.classList.add("navRow"); //$NON-NLS-0$
+			tableRow.tabIndex = -1;
 			this.renderRow(item, tableRow);
 		},
 		
