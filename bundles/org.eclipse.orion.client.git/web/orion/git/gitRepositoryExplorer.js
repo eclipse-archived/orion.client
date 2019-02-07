@@ -677,7 +677,7 @@ define([
 			repository: repository,
 			section: section,
 			editableInComparePage: true,
-			//selectionPolicy: "cursorOnly", //$NON-NLS-0$
+			selectionPolicy: "cursorOnly", //$NON-NLS-0$
 			handleError: this.handleError.bind(this),
 			gitClient: this.gitClient,
 			progressService: this.progressService,
