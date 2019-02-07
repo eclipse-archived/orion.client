@@ -189,10 +189,16 @@ define(['orion/EventTarget', 'orion/bidiUtils', 'orion/urlModifier'], function( 
 	 * If this function returns true, the caller's listener has to stop handling it.
 	 */
 	InputCompletion.prototype.onKeyDown = function(e){
+		var keyCode= e.charCode || e.keyCode;
 		if(this._dismissed){
+			if (keyCode === 13/* Enter */ && e.shiftKey) {
+				this._proposeOn();
+				e.preventDefault();
+				e.stopPropagation();
+				return false;
+			}
 			return true;
 		}
-		var keyCode= e.charCode || e.keyCode;
 		if (keyCode === 13/* Enter */) {//If there is already a selected/hightlighted item in the proposal list, then put hte proposal back to the input field and dismiss the proposal UI
 			if(this._proposalList && this._proposalList.length > 0 && this._proposalIndex >= 0 && this._proposalIndex < this._proposalList.length){
 				e.preventDefault();
