@@ -1105,6 +1105,13 @@ define([
 							item.parent.more = false;
 						});
 					});
+					moreButton.tabIndex = -1;
+					tableRow.addEventListener("blur", function() {
+						moreButton.tabIndex = -1;
+					});
+					tableRow.addEventListener("focus", function() {
+						moreButton.tabIndex = 0;
+					});
 					return td;
 				}
 
