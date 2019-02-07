@@ -588,7 +588,7 @@ exports.ExplorerNavHandler = (function() {
 				var checkBox  = lib.node(this.explorer.renderer.getCheckBoxId(tableRow.id));
 				var checked = toggle ? !checkBox.checked : true;
 				if(checked !== checkBox.checked){
-					this.explorer.renderer.onCheck(tableRow, checkBox, checked, true);
+					this.explorer.renderer.onCheck(tableRow, checkBox, checked, true, false, model);
 				}
 			} else {
 				this._select(model, toggle);
