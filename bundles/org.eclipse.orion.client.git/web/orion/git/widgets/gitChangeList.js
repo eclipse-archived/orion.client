@@ -412,6 +412,17 @@ define([
 				var parent = this.model.root;
 				var commitInfo = this.getCommitInfo();
 				var moreVisible = this.getMoreVisible();
+				var navHandler = this.getNavHandler();
+				var index = -1;
+				var rowDiv = navHandler.getRowDiv(navHandler.currentModel());
+				if (rowDiv) {
+					var nodes = rowDiv.parentNode.childNodes;
+					for (index=0; index<nodes.length; index++) {
+						if (nodes[index] === rowDiv) {
+							break;
+						}
+					}
+				}
 				parent.children = parent.Children = null;
 				this.model.getChildren(parent, function(children) {
 					parent.removeAll = true;
@@ -422,6 +433,13 @@ define([
 					that.selection.setSelections(selection);
 					that.setMoreVisible(moreVisible);
 					that.setCommitInfo(commitInfo);
+
+					navHandler.refreshModel(that.getNavDict(), that.model, children);
+					navHandler.focus();
+					if (index !== -1) {
+						navHandler.cursorOn(children[index], true);
+					}
+
 					deferred.resolve(children);
 				});
 			} else if (this.prefix === "diff") { //$NON-NLS-0$
