@@ -303,6 +303,13 @@ define(['i18n!orion/nls/messages', 'orion/webui/littlelib', 'orion/uiUtils'],
 			}
 		},
 		
+		/**
+		 * Set the node that should receive focus after the dialog is closed.
+		 */
+		setOriginalFocus: function(node) {
+			this.$originalFocus = node;
+		},
+		
 		_getFirstFocusField: function() {
 			return this.firstFocus && lib.$('#' + this.firstFocus, this.$parent) ||
 				lib.firstTabbable(this.$parent) ||
