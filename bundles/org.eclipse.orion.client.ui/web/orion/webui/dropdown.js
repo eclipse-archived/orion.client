@@ -61,6 +61,7 @@ define(['orion/webui/littlelib', 'orion/EventTarget'], function(lib, EventTarget
 			this._selectionClass = options.selectionClass;
 			this._parentDropdown = options.parentDropdown;
 			this._positioningNode = options.positioningNode;
+			this._trapTabs = options.trapTabs;
 			
 			if (!this._parentDropdown) {
 				//if a parentDropdown isn't specified move up in dom tree looking for one
@@ -242,6 +243,10 @@ define(['orion/webui/littlelib', 'orion/EventTarget'], function(lib, EventTarget
 					if (this._parentDropdown) {
 						this._parentDropdown.submenuOpen(this);
 					}
+					
+					if (this._trapTabs) {
+						lib.trapTabs(this._dropdownNode);
+					}
 				}
 			}
 			return actionTaken;
@@ -389,7 +394,7 @@ define(['orion/webui/littlelib', 'orion/EventTarget'], function(lib, EventTarget
 		 * A key is down in the dropdown node
 		 */
 		 _dropdownKeyDown: function(event) {
-		 	if (event.keyCode === lib.KEY.TAB) {
+		 	if (event.keyCode === lib.KEY.TAB && !this._trapTabs) {
 		 		if (this._selectedItem || this._isVisible) {
 		 			var keepIterating = true;
 		 			while (keepIterating) {

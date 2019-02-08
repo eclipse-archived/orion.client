@@ -67,7 +67,7 @@ define([
 			this._parentNode.appendChild(this._dropdownTriggerButton);
 			this._parentNode.appendChild(this._dropdownNode);
 			
-			this._dropdownTriggerButton.dropdown = new mDropdown.Dropdown({dropdown: this._dropdownNode, populate: this._populateFunction});
+			this._dropdownTriggerButton.dropdown = new mDropdown.Dropdown({dropdown: this._dropdownNode, populate: this._populateFunction, trapTabs: true});
 		},
 		
 		/**
