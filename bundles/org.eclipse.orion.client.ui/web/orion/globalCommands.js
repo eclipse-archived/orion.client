@@ -11,7 +11,7 @@
  *******************************************************************************/
 /*eslint-env browser, amd*/
 define([
-		'i18n!orion/nls/messages', 'i18n!orion/widgets/nls/messages', 'require', 'orion/commonHTMLFragments', 'orion/keyBinding', 'orion/EventTarget', 'orion/commands',
+		'i18n!orion/nls/messages', 'i18n!orion/widgets/nls/messages', 'i18n!orion/edit/nls/messages',  'require', 'orion/commonHTMLFragments', 'orion/keyBinding', 'orion/EventTarget', 'orion/commands',
 		'orion/parameterCollectors', 'orion/extensionCommands', 'orion/webui/littlelib', 'orion/i18nUtil',
 		'orion/webui/splitter', 'orion/webui/dropdown', 'orion/webui/tooltip', 'orion/contentTypes', 'orion/keyAssist',
 		'orion/widgets/themes/ThemePreferences', 'orion/widgets/themes/container/ThemeData', 'orion/Deferred',
@@ -19,7 +19,7 @@ define([
 		'text!orion/banner/footer.html', 'text!orion/banner/toolbar.html',
 		'orion/util', 'orion/customGlobalCommands', 'orion/webui/SideMenu', 'orion/objects', "orion/metrics"
 	],
-	function (messages, widgetMessages, require, commonHTML, KeyBinding, EventTarget, mCommands, mParameterCollectors, mExtensionCommands,
+	function (messages, widgetMessages, editMessages, require, commonHTML, KeyBinding, EventTarget, mCommands, mParameterCollectors, mExtensionCommands,
 		lib, i18nUtil, mSplitter, mDropdown, mTooltip, mContentTypes, mKeyAssist, mThemePreferences, mThemeData, Deferred,
 		mUserMenu, PageLinks, openResource, Banner, FooterTemplate, ToolbarTemplate, util, mCustomGlobalCommands, SideMenu, objects, mMetrics) {
 	/**
@@ -794,8 +794,8 @@ define([
 			commandRegistry.registerCommandContribution("globalActions", "orion.backgroundOperations", 100, null, true, new KeyBinding.KeyBinding('o', true, true)); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 
 			var showTooltipCommand = new mCommands.Command({
-				name: messages.showTooltip,
-				tooltip: messages.showTooltipTooltip,
+				name: editMessages.showTooltip,
+				tooltip: editMessages.showTooltipTooltip,
 				id: "orion.edit.showTooltip", //$NON-NLS-0$
 				visibleWhen: /** @callback */ function(items, data) {
 					return true;
