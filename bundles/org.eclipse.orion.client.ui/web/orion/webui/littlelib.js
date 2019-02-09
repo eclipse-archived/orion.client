@@ -475,6 +475,43 @@ define(["orion/util"], function(util) {
 	}
 	
 	/**
+	 * Return focus to the element that was active before the <code>hidingParent</code> was
+	 * shown if the parent contains the active element. If the previous active node is no
+	 * longer availble, the first tabbable ancestor is focused.
+	 * 
+	 * @name orion.webui.littlelib.returnFocus
+	 * @function
+	 * @static
+	 * @param {Element} hidingParent The node that is hiding
+	 * @param {Element} previousActiveElement The previously focus node
+	 */
+	function returnFocus(hidingParent, previousActiveElement, hideCallback) {
+		var activeElement = document.activeElement;
+		var hasFocus = hidingParent && (hidingParent === activeElement || (hidingParent.compareDocumentPosition(activeElement) & 16) !== 0);
+		if (hideCallback) {
+			hideCallback();
+		}
+		var temp = previousActiveElement;
+		if (hasFocus) {
+			while (temp && temp !== document.body) {
+				if (document.compareDocumentPosition(temp) !== 1 && temp.offsetParent) {
+					var tabbable = firstTabbable(temp);
+					if (tabbable) {
+						temp = tabbable;
+						break;
+					}
+				}
+				temp = temp.parentNode;
+			}
+			if (temp) {
+				temp.focus();
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	/**
 	 * Cancels the default behavior of an event and stops its propagation.
 	 * @name orion.webui.littlelib.stop
 	 * @function
@@ -579,6 +616,7 @@ define(["orion/util"], function(util) {
 		validId: validId,
 		getOffsetParent: getOffsetParent,
 		removeAutoDismiss: removeAutoDismiss,
+		returnFocus: returnFocus,
 		keyName: keyName,
 		KEY: KEY,
 		createNodes: createNodes

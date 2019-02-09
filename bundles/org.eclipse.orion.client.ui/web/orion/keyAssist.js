@@ -311,13 +311,10 @@ define([
 			if (!this.isVisible()) {
 				return;
 			}
-			var activeElement = document.activeElement;
 			var keyAssistDiv = this._keyAssistDiv;
-			var hasFocus = keyAssistDiv === activeElement || (keyAssistDiv.compareDocumentPosition(activeElement) & 16) !== 0;
-			keyAssistDiv.style.display = "none"; //$NON-NLS-1$
-			if (hasFocus && document.compareDocumentPosition(this._previousActiveElement) !== 1) {
-				this._previousActiveElement.focus();
-			}
+			lib.returnFocus(keyAssistDiv, this._previousActiveElement, function() {
+				keyAssistDiv.style.display = "none"; //$NON-NLS-1$
+			});
 			this._previousActiveElement = null;
 		},
 		isVisible: function () {
