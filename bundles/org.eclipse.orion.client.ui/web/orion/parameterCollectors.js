@@ -38,30 +38,31 @@ define(['i18n!orion/nls/messages', 'orion/webui/littlelib', 'orion/bidiUtils', '
 	
 		close: function () {
 			if (this._activeElements) {
-				if (this._activeElements.parameterArea) {
-					lib.empty(this._activeElements.parameterArea);
-				}
-				if (this._activeElements.slideContainer) {
-					this._activeElements.slideContainer.classList.remove("slideContainerActive"); //$NON-NLS-0$
-				}
-				if (this._activeElements.dismissArea) {
-					 lib.empty(this._activeElements.dismissArea);
-				}
-				if (this._activeElements.commandNode) {
-					this._activeElements.commandNode.classList.remove("activeCommand"); //$NON-NLS-0$
-				}
-				if (this._activeElements.closeTooltip) {
-		            this._activeElements.closeTooltip.destroy();
-		            this._activeElements.closeTooltip = null;
-		        }
-				this._toolbarLayoutFunction(this._activeElements);
-				if (this._activeElements.onClose) {
-					this._activeElements.onClose();
-				}
-				if (this._oldFocusNode) {
-					this._oldFocusNode.focus();
-					this._oldFocusNode = null;
-				}
+				lib.returnFocus(this._activeElements.parameterArea, this._oldFocusNode, function() {
+					if (this._activeElements.parameterArea) {
+						lib.empty(this._activeElements.parameterArea);
+					}
+					if (this._activeElements.slideContainer) {
+						this._activeElements.slideContainer.classList.remove("slideContainerActive"); //$NON-NLS-0$
+					}
+					if (this._activeElements.dismissArea) {
+						 lib.empty(this._activeElements.dismissArea);
+					}
+					if (this._activeElements.commandNode) {
+						this._activeElements.commandNode.classList.remove("activeCommand"); //$NON-NLS-0$
+					}
+					if (this._activeElements.closeTooltip) {
+			            this._activeElements.closeTooltip.destroy();
+			            this._activeElements.closeTooltip = null;
+			        }
+					this._toolbarLayoutFunction(this._activeElements);
+					if (this._activeElements.onClose) {
+						this._activeElements.onClose();
+					}
+					if (this._oldFocusNode) {
+						this._oldFocusNode = null;
+					}
+				}.bind(this));
 			}
 			this._activeElements = null;
 		},
