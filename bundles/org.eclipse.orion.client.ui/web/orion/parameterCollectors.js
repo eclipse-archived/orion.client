@@ -38,7 +38,7 @@ define(['i18n!orion/nls/messages', 'orion/webui/littlelib', 'orion/bidiUtils', '
 	
 		close: function () {
 			if (this._activeElements) {
-				lib.returnFocus(this._activeElements.parameterArea, this._oldFocusNode, function() {
+				lib.returnFocus(this._activeElements.slideContainer, this._oldFocusNode, function() {
 					if (this._activeElements.parameterArea) {
 						lib.empty(this._activeElements.parameterArea);
 					}
