@@ -304,7 +304,10 @@ define([
 				}
 			}.bind(this));
 		},
-	    _initCompletion: function(searchStringInput) {
+		_returnFocus: function() {
+			// Let parameter collector handle this
+		},
+		_initCompletion: function(searchStringInput) {
 			if(this._completion){
 				this._completion.setInputField(searchStringInput);
 			} else { //Create the inputCompletion lazily.
@@ -370,6 +373,9 @@ define([
 			image.addEventListener("keydown", function(e) { //$NON-NLS-0$
 				if (e.keyCode === lib.KEY.SPACE || e.keyCode === lib.KEY.ENTER) {
 					toggle();
+				}
+				if (e.keyCode === lib.KEY.ESCAPE) {
+					that.hide();
 				}
 			});
 			parent.appendChild(image);
