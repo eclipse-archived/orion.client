@@ -263,7 +263,7 @@
 
 .notificationShow {
 	color: white; 
-	background-color: #1BB199; 
+	background-color: #458500; 
 	bottom: 0;
 	position: fixed;
 	float: left; 
@@ -290,7 +290,7 @@
 }
 .notificationHide {
 	color: white; 
-	background-color: #1BB199; 
+	background-color: #458500; 
 	bottom: -45px;
 	position: fixed;
 	text-align:center;
