@@ -477,7 +477,7 @@ define(["orion/util"], function(util) {
 	/**
 	 * Return focus to the element that was active before the <code>hidingParent</code> was
 	 * shown if the parent contains the active element. If the previous active node is no
-	 * longer availble, the first tabbable ancestor is focused.
+	 * longer available, the first tabbable in the nearest ancestor is focused.
 	 * 
 	 * @name orion.webui.littlelib.returnFocus
 	 * @function
