@@ -535,6 +535,7 @@ _:-moz-tree-row(hover), .gitChangeListCheck { /* Firefox  HACK */
 .gitCommitMessage .gitCommitMessageTopRow textarea {
 	width: calc(100% - 10px);
 	background-color: transparent;
+	resize: vertical;
 	border-width: 0px;
 }
 

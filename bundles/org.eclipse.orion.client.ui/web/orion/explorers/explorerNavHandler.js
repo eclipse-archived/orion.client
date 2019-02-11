@@ -97,6 +97,8 @@ exports.ExplorerNavHandler = (function() {
 				return self.onSpace(e);
 			} else if(e.keyCode === lib.KEY.ENTER) {
 				return self.onEnter(e);
+			} else if(e.keyCode === lib.KEY.TAB && e.shiftKey) {
+				parentDiv.tabIndex = -1;
 			}
 		};
 		parentDiv.addEventListener("keydown", keyListener, false); //$NON-NLS-0$
@@ -386,13 +388,29 @@ exports.ExplorerNavHandler = (function() {
 		},
 
 		toggleCursor:  function(model, on){
+			if (!model) {
+				model = this._modelIterator.cursor();
+			}
+			if (!model) {
+				model = this.model.root && this.model.root.children && this.model.root.children[0];
+				if (model) {
+					this.cursorOn(model);
+				}
+			}
 			var currentRow = this.getRowDiv(model);
 			var currentgrid = this.getCurrentGrid(model);
 			if(currentgrid) {
 				if(currentRow){
 					if (on) {
 						currentRow.classList.add("treeIterationCursorRow"); //$NON-NLS-0$
+						if (this._parentDiv === document.activeElement || document.activeElement.parentNode === currentRow.parentNode) {
+							currentRow.tabIndex = "0";
+							this._parentDiv.tabIndex = "-1";
+							currentRow.focus();
+						}
 					} else {
+						currentRow.tabIndex = "-1";
+						this._parentDiv.tabIndex = "0";
 						currentRow.classList.remove("treeIterationCursorRow"); //$NON-NLS-0$
 					}
 				}
@@ -412,7 +430,14 @@ exports.ExplorerNavHandler = (function() {
 				if(currentRow){
 					if (on) {
 						currentRow.classList.add("treeIterationCursorRow_Dotted"); //$NON-NLS-0$
+						if (this._parentDiv === document.activeElement || document.activeElement.parentNode === currentRow.parentNode) {
+							currentRow.tabIndex = "0";
+							this._parentDiv.tabIndex = "-1";
+							currentRow.focus();
+						}
 					} else {
+						currentRow.tabIndex = "-1";
+						this._parentDiv.tabIndex = "0";
 						currentRow.classList.remove("treeIterationCursorRow_Dotted"); //$NON-NLS-0$
 					}
 				}
@@ -565,7 +590,7 @@ exports.ExplorerNavHandler = (function() {
 				var checkBox  = lib.node(this.explorer.renderer.getCheckBoxId(tableRow.id));
 				var checked = toggle ? !checkBox.checked : true;
 				if(checked !== checkBox.checked){
-					this.explorer.renderer.onCheck(tableRow, checkBox, checked, true);
+					this.explorer.renderer.onCheck(tableRow, checkBox, checked, true, false, model);
 				}
 			} else {
 				this._select(model, toggle);

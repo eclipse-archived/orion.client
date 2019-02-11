@@ -246,7 +246,12 @@ exports.Explorer = (function() {
 				role: options ? options.role : undefined,
 				model: model,
 				parent: parentId,
-				onComplete: options ? options.onComplete : undefined,
+				onComplete: function(tree) {
+					if(this.selectionPolicy === "cursorOnly"){ //$NON-NLS-0$
+						this.initNavHandler();
+					}
+					if (options.onComplete) options.onComplete(tree);
+				}.bind(this),
 				labelColumnIndex: this.renderer.getLabelColumnIndex(),
 				renderer: this.renderer,
 				showRoot: options ? !!options.showRoot : false,  
@@ -259,9 +264,6 @@ exports.Explorer = (function() {
 				tableRowElement: options ? options.tableRowElement : undefined
 			});
 			this.renderer._initializeUIState();
-			if(this.selectionPolicy === "cursorOnly"){ //$NON-NLS-0$
-				this.initNavHandler();
-			}
 		},
 		getNavHandler: function(){
 			return this._navHandler;
@@ -798,6 +800,7 @@ exports.ExplorerRenderer = (function() {
 		
 		render: function(item, tableRow){
 			tableRow.classList.add("navRow"); //$NON-NLS-0$
+			tableRow.tabIndex = -1;
 			this.renderRow(item, tableRow);
 		},
 		

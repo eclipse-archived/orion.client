@@ -327,9 +327,16 @@ define([
 			if (!force) {
 				if (compareLocation(that.repository, repository)) return;
 			}
-			that.repository = repository;
 			that.initTitleBar(repository || {});
 			if (repository) {
+				that.repositoriesNavigator.model.repositories.some(function(repo){
+					if (repo.Location === repository.Location) {
+						repository = repo;
+						return true;
+					}
+					return false;
+				});
+				that.repository = repository;
 				that.preferencesService.put("/git/settings", {lastRepo: {Location: that.repository.Location}}); //$NON-NLS-1$
 				that.repositoriesNavigator.select(that.repository);
 				that.repositoriesSection.setTitle(repository.Name);
@@ -337,6 +344,7 @@ define([
 				that.displayConfig(repository, "full"); //$NON-NLS-0$
 				that.setSelectedReference(that.reference);
 			} else {
+				that.repository = null;
 				mMetrics.logPageLoadTiming("interactive", window.location.pathname);
 				mMetrics.logPageLoadTiming("complete", window.location.pathname);
 				this.loadingDeferred.resolve();
@@ -509,7 +517,7 @@ define([
 			mGitCommands.preStateChanged().then(function(doIt) {
 				if(doIt) {
 					this.changes = this.reference = this.log = null;
-					section.setHidden(true);
+					//section.setHidden(true);
 					this.setSelectedRepository(selected);
 					window.location.href = repoTemplate.expand({resource: this.lastResource = selected.Location});
 				} else {
@@ -593,7 +601,7 @@ define([
 							return;
 					}
 					this.changes = this.reference = this.log = null;
-					section.setHidden(true);
+					//section.setHidden(true);
 					this.setSelectedReference(selected);
 					if (!util.isNewBranch(selected)) {
 						window.location.href = repoTemplate.expand({resource: this.lastResource = selected.Location});
@@ -669,6 +677,7 @@ define([
 			repository: repository,
 			section: section,
 			editableInComparePage: true,
+			selectionPolicy: "cursorOnly", //$NON-NLS-0$
 			handleError: this.handleError.bind(this),
 			gitClient: this.gitClient,
 			progressService: this.progressService,
@@ -748,6 +757,10 @@ define([
 					explorer.select(repository.status);
 				}
 
+				if (document.activeElement === document.body) {
+					explorer.getNavHandler().focus();
+				}
+
 				mMetrics.logPageLoadTiming("complete", window.location.pathname); //$NON-NLS-0$
 				this.loadingDeferred.resolve();
 			}.bind(this), this.loadingDeferred.reject);
@@ -775,6 +788,7 @@ define([
 			prefix: "diff", //$NON-NLS-0$
 			repository: repository,
 			commit: commit,
+			selectionPolicy: "cursorOnly", //$NON-NLS-0$
 			changes: commit ? commit.Diffs : null,
 			location: location,
 			commitName: commitName,

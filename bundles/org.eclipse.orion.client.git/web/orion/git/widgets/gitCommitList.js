@@ -240,32 +240,25 @@ define([
 						if (that.simpleLog || !targetRef || util.sameRef(activeBranch, targetRef)) {
 							that.outgoingItem = that.incomingItem = that.syncItem = null;
 							return getSimpleLog();
-						} else {
-							return Deferred.when(repository.status || (repository.status = that.progressService.progress(that.gitClient.getGitStatus(repository.StatusLocation), messages['Getting changes'])), function(status) { //$NON-NLS-0$
-								repository.status = status;
-								onComplete(that.processChildren(parentItem, [
-									status,
-									that.outgoingItem = {
-										Type: "Outgoing", //$NON-NLS-0$
-										selectable: false,
-										isNotSelectable: true,
-									},
-									that.incomingItem = {
-										Type: "Incoming", //$NON-NLS-0$
-										selectable: false,
-										isNotSelectable: true,
-									},
-									that.syncItem = {
-										Type: "Synchronized", //$NON-NLS-0$
-										selectable: false,
-										isNotSelectable: true,
-									}
-								]));
-							}, function(error){
-								if (progress) progress.done();
-								that.handleError(error);
-							});
-						}	
+						}
+						return Deferred.when(repository.status || (repository.status = that.progressService.progress(that.gitClient.getGitStatus(repository.StatusLocation), messages['Getting changes'])), function(status) { //$NON-NLS-0$
+							repository.status = status;
+							onComplete(that.processChildren(parentItem, [
+								status,
+								that.outgoingItem = {
+									Type: "Outgoing" //$NON-NLS-0$
+								},
+								that.incomingItem = {
+									Type: "Incoming" //$NON-NLS-0$
+								},
+								that.syncItem = {
+									Type: "Synchronized" //$NON-NLS-0$
+								}
+							]));
+						}, function(error){
+							if (progress) progress.done();
+							that.handleError(error);
+						});
 					}, function(error){
 						if (progress) progress.done();
 						that.handleError(error);
@@ -284,21 +277,20 @@ define([
 					}, function(error) {
 						that.handleError(error);
 					});
-				} else {
-					return Deferred.when(that.log || that._getLog(parentItem), function(log) {
-						that.log = parentItem.log = log;
-						var children = [];
-						if (log.toRef.Type === "RemoteTrackingBranch") { //$NON-NLS-0$
-							log.Children.forEach(function(commit) {
-								commit.incoming = true;
-							});
-							children = that.processMoreChildren(parentItem, log.Children.slice(0), log);
-						}
-						onComplete(that.processChildren(parentItem, children));
-					}, function(error){
-						that.handleError(error);
-					});
 				}
+				return Deferred.when(that.log || that._getLog(parentItem), function(log) {
+					that.log = parentItem.log = log;
+					var children = [];
+					if (log.toRef.Type === "RemoteTrackingBranch") { //$NON-NLS-0$
+						log.Children.forEach(function(commit) {
+							commit.incoming = true;
+						});
+						children = that.processMoreChildren(parentItem, log.Children.slice(0), log);
+					}
+					onComplete(that.processChildren(parentItem, children));
+				}, function(error){
+					that.handleError(error);
+				});
 			} else if (parentItem.Type === "Outgoing") { //$NON-NLS-0$
 				if (tracksRemoteBranch) {
 					return Deferred.when(parentItem.more ? that._getLog(parentItem) : that.outgoingCommits || that._getOutgoing(), function(outgoingCommits) {
@@ -371,13 +363,13 @@ define([
 				fullList = children;
 			}
 			if (item.NextLocation) {
-				fullList.push({Type: type, NextLocation: item.NextLocation, selectable: false, isNotSelectable: true}); //$NON-NLS-0$
+				fullList.push({Type: type, NextLocation: item.NextLocation});
 			}
 			return fullList;
 		},
 		processChildren: function(parentItem, items) {
 			if (items.length === 0) {
-				items = [{Type: "NoCommits", selectable: false, isNotSelectable: true}]; //$NON-NLS-0$
+				items = [{Type: "NoCommits"}]; //$NON-NLS-0$
 			}else if(this.graph){
 				uiUtil.getCommitSvgs(items);
 			}
@@ -980,7 +972,7 @@ define([
 						this.ignoreFetch = true;
 						var done = function() {
 							this.ignoreFetch = false;
-							this.changedItem();
+							return this.changedItem();
 						}.bind(this);
 						return Deferred.all(remotes).then(done, done);
 					}
@@ -1112,6 +1104,13 @@ define([
 							if (offsetParent) offsetParent.scrollTop = scrollTop;
 							item.parent.more = false;
 						});
+					});
+					moreButton.tabIndex = -1;
+					tableRow.addEventListener("blur", function() {
+						moreButton.tabIndex = -1;
+					});
+					tableRow.addEventListener("focus", function() {
+						moreButton.tabIndex = 0;
 					});
 					return td;
 				}
@@ -1291,6 +1290,12 @@ define([
 					commitInfo.moreButton.addEventListener("click", function() { //$NON-NLS-0$
 						item.full = !item.full;
 						explorer.myTree.redraw(item);
+					});
+					tableRow.addEventListener("blur", function() {
+						commitInfo.moreButton.tabIndex = -1;
+					});
+					tableRow.addEventListener("focus", function() {
+						commitInfo.moreButton.tabIndex = 0;
 					});
 					
 					var itemActionScope = "itemLevelCommands"; //$NON-NLS-0$

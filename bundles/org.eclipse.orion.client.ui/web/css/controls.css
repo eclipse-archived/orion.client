@@ -908,6 +908,10 @@ html[dir="rtl"] .checkColumn { /* ACGC */
 	outline: none;
 }
 
+.selectionModelContainer > div > table{
+  border-spacing: 0px 3px;
+}
+
 .treeIterationCursor {
 	border-radius:4px;
 }
