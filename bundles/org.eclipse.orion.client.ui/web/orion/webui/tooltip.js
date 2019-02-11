@@ -124,9 +124,6 @@ define(['orion/webui/littlelib'], function(lib) {
 				var self = this;
 				lib.addAutoDismiss([this._tip, this._node], function() {self.hide();});
 
-				if (this._showByKB) {
-					this._tip.tabIndex = "0";
-				}
 				this._tip.addEventListener("keydown", function (e) {
 					if (e.keyCode === lib.KEY.ESCAPE) {
 						self._node.focus();
@@ -159,6 +156,7 @@ define(['orion/webui/littlelib'], function(lib) {
 					}, false);
 				}
 			}
+			this._tipInner.tabIndex = this._showByKB ? 0 : -1;
 			return this._tip;
 		},
 		
@@ -352,10 +350,10 @@ define(['orion/webui/littlelib'], function(lib) {
 			}
 			
 			if (this._showByKB) {
-				this._tip.focus();
+				this._tipInner.focus();
 			}
 			
-			lib.trapTabs(this._tip);
+			lib.trapTabs(this._tipInner);
 			
 			if (this._afterShowing) {
 				this._afterShowing();
