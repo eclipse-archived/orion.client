@@ -9,7 +9,7 @@
 
 .progressInfo {
 	color: white !important;
-	background-color: #5aaafa !important;
+	background-color: #3C71B3 !important;
 }
 
 /* More prominent hyperlinks in notification area */
@@ -263,7 +263,7 @@
 
 .notificationShow {
 	color: white; 
-	background-color: #1BB199; 
+	background-color: #458500; 
 	bottom: 0;
 	position: fixed;
 	float: left; 
@@ -290,7 +290,7 @@
 }
 .notificationHide {
 	color: white; 
-	background-color: #1BB199; 
+	background-color: #458500; 
 	bottom: -45px;
 	position: fixed;
 	text-align:center;
