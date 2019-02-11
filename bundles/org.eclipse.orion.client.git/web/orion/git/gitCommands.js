@@ -1679,6 +1679,9 @@ var exports = {};
 				});
 						
 				dialog.show();
+				if (data.domNode) {
+					dialog.setOriginalFocus(data.domNode);
+				}
 			}
 		};
 
@@ -1737,6 +1740,9 @@ var exports = {};
 					});
 							
 					dialog.show();
+					if (data.domNode) {
+						dialog.setOriginalFocus(data.domNode);
+					}
 				}
 			},
 			visibleWhen : function() {
@@ -2645,6 +2651,9 @@ var exports = {};
 				});
 						
 				dialog.show();
+				if (data.domNode) {
+					dialog.setOriginalFocus(data.domNode);
+				}
 			}
 		};
 		

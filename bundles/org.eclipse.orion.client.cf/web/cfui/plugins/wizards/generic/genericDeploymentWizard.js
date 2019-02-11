@@ -10,11 +10,11 @@
  ******************************************************************************/
 /*global parent window document define orion setTimeout URL*/
 
-define(['i18n!cfui/nls/messages', "orion/bootstrap", 'orion/Deferred', 'orion/cfui/cFClient', 'orion/PageUtil', 'orion/selection',
+define(['i18n!cfui/nls/messages', "orion/bootstrap", "orion/webui/littlelib", 'orion/Deferred', 'orion/cfui/cFClient', 'orion/PageUtil', 'orion/selection',
 	'orion/PageLinks', 'orion/preferences', 'orion/fileClient', 'cfui/cfUtil', 'cfui/plugins/wizards/common/wizardUtils',
 	'orion/webui/Wizard', 'cfui/plugins/wizards/common/deploymentLogic', 'cfui/plugins/wizards/common/corePageBuilder',
 	'cfui/plugins/wizards/common/servicesPageBuilder', 'cfui/plugins/wizards/common/additionalParamPageBuilder'],
-		function(messages, mBootstrap, Deferred, CFClient, PageUtil, mSelection, PageLinks, Preferences, mFileClient, mCfUtil, mWizardUtils, Wizard,
+		function(messages, mBootstrap, lib, Deferred, CFClient, PageUtil, mSelection, PageLinks, Preferences, mFileClient, mCfUtil, mWizardUtils, Wizard,
 				mDeploymentLogic, mCorePageBuilder, mServicesPageBuilder, mAdditionalParamPageBuilder) {
 
 	/* plugin-host communication */
@@ -232,6 +232,8 @@ define(['i18n!cfui/nls/messages', "orion/bootstrap", 'orion/Deferred', 'orion/cf
 					    	AppPath : resource.AppPath
 						})
 					});
+					
+					lib.trapTabs(document.body);
 				}
 			)
 		}, function(error){
