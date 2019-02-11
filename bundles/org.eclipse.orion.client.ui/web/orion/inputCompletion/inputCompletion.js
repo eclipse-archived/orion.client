@@ -190,13 +190,22 @@ define(['orion/EventTarget', 'orion/bidiUtils', 'orion/urlModifier'], function( 
 	 */
 	InputCompletion.prototype.onKeyDown = function(e){
 		var keyCode= e.charCode || e.keyCode;
-		if(this._dismissed){
-			if (keyCode === 13/* Enter */) {
-				this._proposeOn();
-				e.preventDefault();
-				e.stopPropagation();
-				return false;
+		if(keyCode === 40 /* Down arrow */ || keyCode === 38 /* Up arrow */){
+			if (e.altKey) {
+				if (keyCode === 40 && this._dismissed) {
+					this._proposeOn(this._inputField.value);
+					e.preventDefault();
+					e.stopPropagation();
+					return false;
+				} else if (keyCode === 38 && !this._dismissed) {
+					this._dismiss();//Dismiss the proposal UI and do nothing.
+					e.preventDefault();
+					e.stopPropagation();
+					return false;
+				}
 			}
+		}
+		if (this._dismissed) {
 			return true;
 		}
 		if (keyCode === 13/* Enter */) {//If there is already a selected/hightlighted item in the proposal list, then put hte proposal back to the input field and dismiss the proposal UI
