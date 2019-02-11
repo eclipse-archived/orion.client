@@ -121,17 +121,9 @@ define([
 		 * Hides the slideout.
 		 */
 		hide: function() {
-			// remove focus from activeElement if it is child of slideout
-			var activeElement = document.activeElement;
-			while (activeElement) {
-				if (this._wrapperNode === activeElement) {
-					document.activeElement.blur();
-				}
-				activeElement = activeElement.parentNode;
-			}
-			
+			lib.returnFocus(this._wrapperNode, this._previousActiveElement);
 			this._previousActiveElement = null;
-			
+
 			// step 1: remove CSS class which positions slideout within visible range
 			this._wrapperNode.classList.remove("slideoutWrapperVisible"); //$NON-NLS-0$
 			

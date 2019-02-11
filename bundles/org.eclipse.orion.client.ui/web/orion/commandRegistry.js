@@ -332,9 +332,7 @@ define([
 					parameterArea.classList.add("parameterPopup"); //$NON-NLS-0$
 					var originalFocusNode = window.document.activeElement;
 					closeFunction = function() {
-						if (originalFocusNode) {
-							originalFocusNode.focus();
-						}
+						lib.returnFocus(parameterArea, originalFocusNode);
 						tooltip.destroy();
 					};
 					var messageArea = document.createElement("div"); //$NON-NLS-0$
@@ -456,9 +454,7 @@ define([
 							parameterArea.classList.add("parameterPopup"); //$NON-NLS-0$
 							var originalFocusNode = window.document.activeElement;
 							var focusNode = this._parameterCollector.getFillFunction(commandInvocation, function() {
-								if (originalFocusNode) {
-									originalFocusNode.focus();
-								}
+								lib.returnFocus(parameterArea, originalFocusNode);
 								tooltip.destroy();
 								if (commandInvocation.domParent) commandInvocation.domParent.classList.remove("parameterPopupOpen"); //$NON-NLS-0$
 							}, cancelCallback)(parameterArea);

@@ -300,6 +300,12 @@ define("orion/editor/find", [ //$NON-NLS-0$
 			var textView = this._editor.getTextView();
 			if (textView) {
 				textView.removeEventListener("Focus", this._listeners.onEditorFocus); //$NON-NLS-0$
+			}
+			this._returnFocus();
+		},
+		_returnFocus: function() {
+			var textView = this._editor.getTextView();
+			if (textView) {
 				textView.focus();
 			}
 		},

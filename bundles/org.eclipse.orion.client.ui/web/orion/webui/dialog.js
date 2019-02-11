@@ -220,28 +220,24 @@ define(['i18n!orion/nls/messages', 'orion/webui/littlelib', 'orion/uiUtils'],
 		 * as destroying resources.
 		 */
 		hide: function(keepCurrentModal) {
-			var activeElement = document.activeElement;
-			var hasFocus = this.$frameParent === activeElement || (this.$frameParent.compareDocumentPosition(activeElement) & 16) !== 0;
-			var originalFocus = this.$originalFocus;
-			if(!keepCurrentModal && modalDialogManager.dialog === this) {
-				modalDialogManager.dialog = null;
-			}
-			if (typeof this._beforeHiding === "function") { //$NON-NLS-0$
-				this._beforeHiding();
-			}
-			if (this._modalListener) {
-				this.$frameParent.removeEventListener("focus", this._modalListener, true);  //$NON-NLS-0$
-				this.$frameParent.removeEventListener("click", this._modalListener, true);  //$NON-NLS-0$
-			}
-
-			this.$frame.classList.remove("dialogShowing"); //$NON-NLS-0$
-			lib.setFramesEnabled(true);
-			if (typeof this._afterHiding === "function") { //$NON-NLS-0$
-				this._afterHiding();
-			}
-			if (hasFocus && originalFocus && document.compareDocumentPosition(originalFocus) !== 1) {
-				originalFocus.focus();
-			}
+			lib.returnFocus(this.$frameParent, this.$originalFocus, function() {
+				if(!keepCurrentModal && modalDialogManager.dialog === this) {
+					modalDialogManager.dialog = null;
+				}
+				if (typeof this._beforeHiding === "function") { //$NON-NLS-0$
+					this._beforeHiding();
+				}
+				if (this._modalListener) {
+					this.$frameParent.removeEventListener("focus", this._modalListener, true);  //$NON-NLS-0$
+					this.$frameParent.removeEventListener("click", this._modalListener, true);  //$NON-NLS-0$
+				}
+	
+				this.$frame.classList.remove("dialogShowing"); //$NON-NLS-0$
+				lib.setFramesEnabled(true);
+				if (typeof this._afterHiding === "function") { //$NON-NLS-0$
+					this._afterHiding();
+				}
+			}.bind(this));
 			var self = this;
 			if (!this.keepAlive) {
 				window.setTimeout(function() { self.destroy(); }, 0);
