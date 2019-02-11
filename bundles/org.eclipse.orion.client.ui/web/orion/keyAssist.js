@@ -140,6 +140,7 @@ define([
 			var row = this._keyAssistTable.insertRow(-1);
 			row.id = "keyAssist-keyBinding-" + this._idCount++; //$NON-NLS-1$
 			row.setAttribute("role", "menuitem"); //$NON-NLS-2$ //$NON-NLS-1$
+			row.tabIndex = -1;
 			row.cmdID = cmdID;
 			row._execute = execute;
 			row.curBinding = binding;
