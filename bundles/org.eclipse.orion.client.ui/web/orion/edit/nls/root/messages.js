@@ -111,6 +111,8 @@ define({
 	"showProblems": "Show Problems...",
 	"showTooltip": "Show Tooltip",
 	"showTooltipTooltip": "Shows the tooltip immediately based on the caret position",
+	"showLineTooltip": "Show Line Tooltip",
+	"showLineTooltipTooltip": "Shows the tooltip immediately based on the current line",
 	"emptyDeploymentInfoMessage": "Use the Launch Configurations dropdown to deploy this project",
 	"Orion": "Orion",
 	"OK": "Ok",

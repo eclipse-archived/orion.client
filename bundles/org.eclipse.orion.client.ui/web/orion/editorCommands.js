@@ -178,6 +178,7 @@ define([
 			this._createFindCommnand();
 			this._createBlameCommand();
 			this._createDiffCommand();
+			this._createShowTooltipCommand();
 			this._createUndoStackCommands();
 			this._createClipboardCommands();
 			this._createDelimiterCommands();
@@ -267,7 +268,8 @@ define([
 			commandRegistry.registerCommandContribution(this.editToolbarId || this.pageNavId, "orion.edit.find", 0, this.editToolbarId ? "orion.menuBarEditGroup/orion.findGroup" : null, !this.editToolbarId, new mKeyBinding.KeyBinding('f', true), new mCommandRegistry.URLBinding("find", "find"), this); //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-5$
 			commandRegistry.registerCommandContribution(this.editToolbarId || this.pageNavId , "orion.edit.format", 2, this.editToolbarId ? "orion.menuBarEditGroup/orion.edit.formatGroup" : null, !this.editToolbarId, new mKeyBinding.KeyBinding('f', false, true, true), new mCommandRegistry.URLBinding("format", "format"), this); //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-5$
 			commandRegistry.registerCommandContribution(this.toolbarId, "orion.keyAssist", 0, "orion.menuBarToolsGroup", false, new mKeyBinding.KeyBinding(191, false, true, !util.isMac, util.isMac)); //$NON-NLS-1$ //$NON-NLS-0$ //$NON-NLS-2$
-			commandRegistry.registerCommandContribution(this.toolbarId , "orion.edit.showTooltip", 1, "orion.menuBarToolsGroup", false, null, null, this);//$NON-NLS-1$ //$NON-NLS-2$ 
+			commandRegistry.registerCommandContribution(this.toolbarId , "orion.edit.showTooltip", 1, "orion.menuBarToolsGroup", false, new mKeyBinding.KeyBinding(113), null, this);//$NON-NLS-1$ //$NON-NLS-2$ 
+			commandRegistry.registerCommandContribution(this.toolbarId , "orion.edit.showLineTooltip", 1, "orion.menuBarToolsGroup", false, new mKeyBinding.KeyBinding(113, true), null, this);//$NON-NLS-1$ //$NON-NLS-2$ 
 			commandRegistry.registerCommandContribution(this.toolbarId , "orion.edit.blame", 2, "orion.menuBarToolsGroup", false, new mKeyBinding.KeyBinding('b', true, true), new mCommandRegistry.URLBinding("blame", "blame"), this); //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-5$
 			commandRegistry.registerCommandContribution(this.toolbarId , "orion.edit.diff", 3, "orion.menuBarToolsGroup", false, new mKeyBinding.KeyBinding('d', true, true), new mCommandRegistry.URLBinding("diff", "diff"), this); //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-5$
 			commandRegistry.registerCommandContribution(this.toolbarId , "orion.edit.references", 5, "orion.menuBarToolsGroup", false, new mKeyBinding.KeyBinding('y', true, true), null, this);
@@ -1092,6 +1094,53 @@ define([
 			});
 			this.commandService.addCommand(diffCommand);
 		},
+
+		_createShowTooltipCommand: function(){
+			var that = this;
+			
+			function doit(all) {
+				var editor = this.editor;
+				var tooltip = editor.getTooltip();
+				var tv = editor.getTextView();
+				var offset = tv.getCaretOffset();
+				var pos = tv.getLocationAtOffset(offset);
+				tooltip.show({
+					x: pos.x,
+					y: pos.y,
+					getTooltipInfo: function() {
+						return editor._getTooltipInfo(this.x, this.y, all);
+					}
+				}, false, true);
+			}
+			
+			var showTooltipCommand = new mCommands.Command({
+				name: messages.showTooltip,
+				tooltip: messages.showTooltipTooltip,
+				id: "orion.edit.showTooltip", //$NON-NLS-0$
+				visibleWhen: /** @callback */ function(items, data) {
+					var editor = data.handler.editor || that.editor;
+					return editor && editor.installed;
+				},
+				callback: function() {
+					doit.bind(this)(false);
+				}
+			});
+			this.commandService.addCommand(showTooltipCommand);
+			var showLineTooltipCommand = new mCommands.Command({
+				name: messages.showLineTooltip,
+				tooltip: messages.showLineTooltipTooltip,
+				id: "orion.edit.showLineTooltip", //$NON-NLS-0$
+				visibleWhen: /** @callback */ function(items, data) {
+					var editor = data.handler.editor || that.editor;
+					return editor && editor.installed;
+				},
+				callback: function() {
+					doit.bind(this)(true);
+				}
+			});
+			this.commandService.addCommand(showLineTooltipCommand);
+		},
+
 		_onServiceRemoved: function(serviceReference) {
 			if (serviceReference.getProperty("objectClass").indexOf("orion.edit.command") !== -1) { //$NON-NLS-1$ //$NON-NLS-2$
 				this._recreateEditCommands = true;

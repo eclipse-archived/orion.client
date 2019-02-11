@@ -836,7 +836,7 @@ define("orion/editor/editor", [
 		},
 
 		/** @private */
-		_getTooltipInfo: function(x, y) {
+		_getTooltipInfo: function(x, y, all) {
 			var textView = this._textView;
 			var annotationModel = this.getAnnotationModel();
 			if (!annotationModel) { return null; }
@@ -845,16 +845,21 @@ define("orion/editor/editor", [
 			if (!textView.isValidTextPosition(x, y)) { return null; }
 			var offset = textView.getOffsetAtLocation(x, y);
 			if (offset === -1) { return null; }
-			offset = this.mapOffset(offset);
-			var annotations = annotationStyler.getAnnotationsByType(annotationModel, offset, offset + 1);
-			var rangeAnnotations = [];
-			for (var i = 0; i < annotations.length; i++) {
-				if (annotations[i].rangeStyle) {
-					rangeAnnotations.push(annotations[i]);
+			var allAnnotations;
+			if (all) {
+				var lineIndex = this.getLineAtOffset(offset);
+				allAnnotations = this.getAnnotationRuler()._getAnnotationsAtLineIndex(lineIndex);
+			} else {
+				var annotations = annotationStyler.getAnnotationsByType(annotationModel, offset, offset + 1);
+				allAnnotations = [];
+				for (var i = 0; i < annotations.length; i++) {
+					if (annotations[i].rangeStyle) {
+						allAnnotations.push(annotations[i]);
+					}
 				}
 			}
 			var info = {
-				contents: rangeAnnotations,
+				contents: allAnnotations,
 				position: "below", //$NON-NLS-0$
 				context: {source: "editor", offset: offset} //$NON-NLS-0$
 			};
