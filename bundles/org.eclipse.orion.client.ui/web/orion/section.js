@@ -314,7 +314,7 @@ define([
 			lib.addAutoDismiss([this._contentParent, this.positionNode || this.domNode], function (event) {
 				var temp = event.target;
 				while (temp) {
-					if (temp.classList && temp.classList.contains("tooltipContainer")) { //$NON-NLS-0$
+					if (temp.classList && (temp.classList.contains("tooltipContainer") || temp.classList.contains("dialog"))) { //$NON-NLS-1$ $NON-NLS-0$
 						return;
 					}
 					temp = temp.parentNode;
