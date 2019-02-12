@@ -873,10 +873,7 @@ define([
 				name: messages["FilterCommits"],
 				tooltip: messages["FilterCommitsTip"],
 				callback: function(data) {
-					if (data) {
-						this.filterSection.setHidden(!this.filterSection.hidden);
-						this.filterSection.setOriginalFocus(data.domNode);
-					}
+					this.filterSection.setHidden(!this.filterSection.hidden);
 				},
 				visibleWhen: function() {
 					filterCommand.imageClass = that.model.isFiltered() ? "core-sprite-show-filtered" : "core-sprite-filter"; //$NON-NLS-1$ //$NON-NLS-0$
