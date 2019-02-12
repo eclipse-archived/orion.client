@@ -818,7 +818,7 @@ define([
 					} else if (domFocus.commandTooltip || domFocus.tooltip) {
 						var tooltip = domFocus.commandTooltip ? domFocus.commandTooltip : domFocus.tooltip;
 						tooltip._showByKB = true;
-						tooltip.show();
+						tooltip.show(0);
 					}
 				}
 			});
