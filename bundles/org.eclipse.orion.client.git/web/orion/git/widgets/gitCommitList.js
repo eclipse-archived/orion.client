@@ -972,6 +972,7 @@ define([
 				if (node) {
 					commandService.destroy(actionsNodeScope);
 				}
+				node.setAttribute("role", "none"); //$NON-NLS-1$ //$NON-NLS-0$
 				var itemActionScope = "itemLevelCommands";
 				commandService.registerCommandContribution(itemActionScope, "eclipse.checkoutCommit", 1); //$NON-NLS-1$ //$NON-NLS-0$
 				commandService.registerCommandContribution(itemActionScope, "eclipse.orion.git.undoCommit", 2); //$NON-NLS-1$ //$NON-NLS-0$
