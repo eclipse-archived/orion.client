@@ -220,6 +220,7 @@ html[dir="rtl"] .mainToolbar .sectionWrapper { /* ACGC */
 	margin-top: -1px;
 	resize: none;
 	background-color: white;
+	border-color: #e3e7ea;
 	border-bottom-left-radius: 8px;
 	border-bottom-right-radius: 8px;
 }
