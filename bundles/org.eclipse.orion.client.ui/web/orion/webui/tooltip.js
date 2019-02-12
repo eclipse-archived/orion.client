@@ -312,7 +312,7 @@ define(['orion/webui/littlelib'], function(lib) {
 		/**
 		 * Show the tooltip.
 		 */			
-		show: function() {
+		show: function(delay) {
 			if(this.isTurnedOff){
 				return;
 			}
@@ -323,8 +323,9 @@ define(['orion/webui/littlelib'], function(lib) {
 				window.clearTimeout(this._timeout);
 				this._timeout = null;
 			}
-			if (this._showDelay) {
-				this._timeout = window.setTimeout(this._showImmediately.bind(this), this._showDelay);	
+			var showDelay = delay !== undefined ? delay : this._showDelay;
+			if (showDelay) {
+				this._timeout = window.setTimeout(this._showImmediately.bind(this), showDelay);	
 			} else {
 				this._showImmediately();
 			}

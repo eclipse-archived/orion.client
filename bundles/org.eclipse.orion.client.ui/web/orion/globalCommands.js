@@ -778,7 +778,7 @@ define([
 			});
 
 			commandRegistry.addCommand(configDetailsCommand);
-			commandRegistry.registerCommandContribution("globalActions", "orion.configDetailsPage", 100, null, true, new KeyBinding.KeyBinding(112, true, true)); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			commandRegistry.registerCommandContribution("globalActions", "orion.configDetailsPage", 100, null, true, new KeyBinding.KeyBinding(112, true, true, true)); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 
 			// Background Operations Page, Ctrl+Shift+O
 			var operationsCommand = new mCommands.Command({
@@ -818,12 +818,12 @@ define([
 					} else if (domFocus.commandTooltip || domFocus.tooltip) {
 						var tooltip = domFocus.commandTooltip ? domFocus.commandTooltip : domFocus.tooltip;
 						tooltip._showByKB = true;
-						tooltip.show();
+						tooltip.show(0);
 					}
 				}
 			});
 			commandRegistry.addCommand(showTooltipCommand);
-			commandRegistry.registerCommandContribution("globalActions" , "orion.edit.showTooltip", 1, null, true, new KeyBinding.KeyBinding(113), null, this);//$NON-NLS-1$
+			commandRegistry.registerCommandContribution("globalActions" , "orion.edit.showTooltip", 1, null, true, new KeyBinding.KeyBinding(112, false, true), null, this);//$NON-NLS-1$
 
 			var focusNextSplitter = new mCommands.Command({
 				name: messages.nextSplitter,
