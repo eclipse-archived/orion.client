@@ -177,6 +177,17 @@ define([
 			this._renderButtons();
 			this._renderPage();
 			this._renderCommonPane();
+			var element = this.parent;
+			while(element.parentNode) {
+				if (element.getAttribute("role") === "dialog") break;
+				element = element.parentNode;
+			}
+			var dialogElement = element.getAttribute("role") === "dialog" ? element : this.parent;
+			dialogElement.addEventListener('keydown', function (e) {
+				if(e.keyCode === lib.KEY.ESCAPE) {
+					this.onCancel();
+				}
+			}.bind(this), false);
 		},
 		validate: function(page_no, setValid){
 			if(typeof page_no === "undefined"){
