@@ -68,8 +68,6 @@ define({//Default message bundle
 	"no renderer": "no renderer",
 	"could not find table row ": "could not find table row ",
 	"Operations": "Operations",
-	"ShowTooltip": "Show Tooltip",
-	"ShowTooltipTooltip": "Show the command tooltip",
 	"Operations running": "Operations running",
 	"SomeOpWarning": "Some operations finished with warning",
 	"SomeOpErr": "Some operations finished with error",
