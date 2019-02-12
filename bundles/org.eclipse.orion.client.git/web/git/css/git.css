@@ -471,6 +471,10 @@ _:-moz-tree-row(hover), .gitChangeListCheck { /* Firefox  HACK */
 	padding-right: 10px;
 }
 
+.gitChangeListGroupContent table td {
+	border: none;
+}
+
 .gitChangeListCompareActions {
 	overflow: hidden;
 	padding: 5px;
