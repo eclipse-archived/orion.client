@@ -324,8 +324,6 @@ define([
 			this._contentParent.addEventListener("keydown", function(evt) { //$NON-NLS-0$
 				if(evt.keyCode === lib.KEY.ESCAPE) {
 					that.setHidden(true);
-					var node = that._originalFocus || that.domNode;
-					node.focus();
 				}
 			}, false);
 		}
@@ -415,6 +413,13 @@ define([
 		 */
 		setOnExpandCollapse: function(func){
 			this._onExpandCollapse = func;
+		},
+		
+		/**
+		 * Set the node that should receive focus after the dropdown is closed.
+		 */
+		getOriginalFocus: function() {
+			return this._originalFocus || this.domNode;
 		},
 		
 		/**
@@ -618,6 +623,7 @@ define([
 		},
 		
 		_expand: function() {
+			this._originalFocus = document.activeElement;
 			this._positionDropdown();
 			if (this._contentParent) {
 				this._contentParent.classList.remove("sectionClosed"); //$NON-NLS-0$
@@ -661,19 +667,21 @@ define([
 		},
 		
 		_collapse: function() {
-			this.hidden = true;
-			if (this._contentParent) {
-				this._contentParent.classList.add("sectionClosed"); //$NON-NLS-0$
-				this._contentParent.classList.remove("sectionOpened"); //$NON-NLS-0$
-			}
-			if (this.domNode) {
-				this.domNode.classList.add("sectionClosed"); //$NON-NLS-0$
-				this.domNode.classList.remove("sectionOpened"); //$NON-NLS-0$
-				this.domNode.removeAttribute("aria-owns"); //$NON-NLS-0$
-				if (this.canHide) {
-					this.domNode.setAttribute("aria-expanded", "false"); //$NON-NLS-1$ //$NON-NLS-0$
+			lib.returnFocus(this._contentParent, this._originalFocus, function() {
+				this.hidden = true;
+				if (this._contentParent) {
+					this._contentParent.classList.add("sectionClosed"); //$NON-NLS-0$
+					this._contentParent.classList.remove("sectionOpened"); //$NON-NLS-0$
 				}
-			}
+				if (this.domNode) {
+					this.domNode.classList.add("sectionClosed"); //$NON-NLS-0$
+					this.domNode.classList.remove("sectionOpened"); //$NON-NLS-0$
+					this.domNode.removeAttribute("aria-owns"); //$NON-NLS-0$
+					if (this.canHide) {
+						this.domNode.setAttribute("aria-expanded", "false"); //$NON-NLS-1$ //$NON-NLS-0$
+					}
+				}
+			}.bind(this));
 		}
 	};
 	
