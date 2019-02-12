@@ -215,7 +215,7 @@ html[dir="rtl"] .mainToolbar .sectionWrapper { /* ACGC */
 	margin-left: 10px;
 	margin-right: 10px;
 	position: absolute;
-	width: calc(100% - 20px);
+	width: calc(100% - 22px);
 	z-index: 200;
 	margin-top: -1px;
 	resize: none;
