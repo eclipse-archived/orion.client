@@ -324,7 +324,8 @@ define([
 			this._contentParent.addEventListener("keydown", function(evt) { //$NON-NLS-0$
 				if(evt.keyCode === lib.KEY.ESCAPE) {
 					that.setHidden(true);
-					that.domNode.focus();
+					var node = that._originalFocus || that.domNode;
+					node.focus();
 				}
 			}, false);
 		}
@@ -414,6 +415,13 @@ define([
 		 */
 		setOnExpandCollapse: function(func){
 			this._onExpandCollapse = func;
+		},
+		
+		/**
+		 * Set the node that should receive focus after the dropdown is closed.
+		 */
+		setOriginalFocus: function(node) {
+			this._originalFocus = node;
 		},
 
 		/**
@@ -560,23 +568,28 @@ define([
 		},
 		
 		_changeExpandedState: function() {
+			var focus = this.hidden;
 			if (this.hidden){
 				this._expand();
-				
+			} else {
+				this._collapse();
+			}
+
+			this._updateExpandedState(true);
+			
+			if (focus) {
 				if (this.dropdown) {
-					var firstTabbable = lib.firstTabbable(this.domNode.nextElementSibling);					
+					var firstTabbable = lib.firstTabbable(this._contentParent);					
 					if (firstTabbable) {
-						if (firstTabbable.tagName === "INPUT" || firstTabbable.tabIndex >= 0) {
-							firstTabbable.focus(); //$NON-NLS-0$
+						if (firstTabbable.tagName === "INPUT" || firstTabbable.tabIndex >= 0) { //$NON-NLS-0$
+							setTimeout(function() {
+								firstTabbable.focus();
+							}, 50);
 						}
 						lib.trapTabs(this.domNode.nextElementSibling);
 					}
 				}
-			} else {
-				this._collapse();
 			}
-			
-			this._updateExpandedState(true);
 		},
 		
 		_updateExpandedState: function(storeValue) {

@@ -557,26 +557,9 @@ define([
 				});
 				doFilter();
 			}
-			var blurHandler = function(e) {
-				var relatedTarget = e.relatedTarget || e.toElement;
-				function check(focus) {
-					if (!(focus === document.body || lib.contains(mainSection.domNode, focus) || lib.contains(mainSection.getContentElement(), focus))) {
-						mainSection.setHidden(true);
-					}
-				}
-				if (relatedTarget) {
-					check(relatedTarget);
-				} else {
-					setTimeout(function () { check(document.activeElement); }, 10);
-				}
-			};
 			var keyHandler = function(event){ //$NON-NLS-0$
 				if (event.keyCode === lib.KEY.ENTER) {
 					doFilter();
-					event.preventDefault();
-				}
-				if (event.keyCode === lib.KEY.ESCAPE) {
-					mainSection.setHidden(true);
 					event.preventDefault();
 				}
 			};
@@ -612,14 +595,13 @@ define([
 						section.setHidden(false);
 					});
 				}
-				filter.addEventListener("blur", blurHandler); //$NON-NLS-0$
 				return section;
 			}.bind(this);
 			
 			var content = this.section.getContentElement();
 			mainSection = this.filterSection = new mSection.Section(content, {
 				id: "commitFilterSection", //$NON-NLS-0$
-				title: "\u00A0", //$NON-NLS-0$
+				title: messages.FilterCommits, //$NON-NLS-0$
 				canHide: true,
 				hidden: true,
 				sibling: content.firstChild,
@@ -759,7 +741,6 @@ define([
 				}
 			}.bind(this));
 			pathSection.getContentElement().addEventListener("keydown", keyHandler); //$NON-NLS-0$
-			pathSection.getContentElement().addEventListener("blur", blurHandler); //$NON-NLS-0$
 			selection.addEventListener("selectionChanged", function(e) { //$NON-NLS-0$
 				var selected = e.selection;
 				if (!selected || this.treePath === selected) return;
@@ -782,9 +763,6 @@ define([
 				filter: doFilter,
 				clear: doClear
 			}, explorer, "button"); //$NON-NLS-0$
-			[].forEach.call(lib.$$(".orionButton", filterActions), function(b) { //$NON-NLS-0$
-				b.addEventListener("blur", blurHandler); //$NON-NLS-0$
-			});
 
 			sections.push(messageSection);
 			sections.push(authorSection);
@@ -906,8 +884,10 @@ define([
 				name: messages["FilterCommits"],
 				tooltip: messages["FilterCommitsTip"],
 				callback: function(data) {
-					if (data) this.filterSection.setHidden(!this.filterSection.hidden);
-					data.domNode.focus();
+					if (data) {
+						this.filterSection.setHidden(!this.filterSection.hidden);
+						this.filterSection.setOriginalFocus(data.domNode);
+					}
 				},
 				visibleWhen: function() {
 					filterCommand.imageClass = that.model.isFiltered() ? "core-sprite-show-filtered" : "core-sprite-filter"; //$NON-NLS-1$ //$NON-NLS-0$
