@@ -127,7 +127,7 @@ define(['orion/webui/littlelib'], function(lib) {
 				this._tip.addEventListener("keydown", function (e) {
 					if (e.keyCode === lib.KEY.ESCAPE) {
 						self._node.focus();
-						self.hide();
+						self.hide(0);
 					}
 				}, false);
 
