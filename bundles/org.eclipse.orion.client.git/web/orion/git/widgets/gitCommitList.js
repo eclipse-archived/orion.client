@@ -529,7 +529,7 @@ define([
 			var doFilter = function() {
 				if (sections.every(function(s) {
 					var prop = s.query.key + "Query"; //$NON-NLS-0$
-					var field = lib.$(".gitFilterInput", s.domNode); //$NON-NLS-0$
+					var field = lib.$(".gitFilterInput", s); //$NON-NLS-0$
 					if (field.value && s.query.isValid) {
 						if (!s.query.isValid(field.value)) {
 							field.classList.add("invalidParam"); //$NON-NLS-0$
@@ -552,7 +552,7 @@ define([
 			}.bind(this);
 			function doClear() {
 				sections.forEach(function(s) {
-					var field = lib.$(".gitFilterInput", s.domNode); //$NON-NLS-0$
+					var field = lib.$(".gitFilterInput", s); //$NON-NLS-0$
 					field.value = "";
 				});
 				doFilter();
@@ -563,38 +563,35 @@ define([
 					event.preventDefault();
 				}
 			};
-			var createSection = function (parent, sibling, title, query, canHide, dropdown, noTwistie, expandOnFocus) {
+			var createSection = function (parent, title, query) {
 				var commitFilterSectionId = lib.validId(title + "commitFilterSection"); //$NON-NLS-0$
-				var section = new mSection.Section(parent, {
-					id: commitFilterSectionId, //$NON-NLS-0$
-					title: title,
-					canHide: canHide,
-					hidden: true,
-					sibling: sibling,
-					dropdown: dropdown,
-					noTwistie: noTwistie,
-					preferenceService: this.preferencesService
-				});
-				section.domNode.classList.add("gitFilterBox"); //$NON-NLS-0$
+				var section = document.createElement("tr"); //$NON-NLS-0$
+				section.classList.add("commitFilter"); //$NON-NLS-0$
+				var labelCol = document.createElement("td"); //$NON-NLS-0$
+				labelCol.className = "commitFilterLabelColumn"; //$NON-NLS-0$
+				var inputCol = document.createElement("td"); //$NON-NLS-0$
+				inputCol.className = "commitFilterInputColumn"; //$NON-NLS-0$
+				section.appendChild(labelCol);
+				section.appendChild(inputCol);
+				
+				var label = document.createElement("label");
+				label.setAttribute("for", commitFilterSectionId); //$NON-NLS-0$
+				label.textContent = title;
+				
 				var filter = document.createElement("input"); //$NON-NLS-0$
-				filter.setAttribute("aria-labelledby", commitFilterSectionId + "Title"); //$NON-NLS-1$ //$NON-NLS-0$
+				filter.id = commitFilterSectionId;
 				filter.className = "gitFilterInput"; //$NON-NLS-0$
 				filter.placeholder = messages["Filter " + query.key];
 				section.query = query;
-				section.searchBox.appendChild(filter);
+				section.appendChild(filter);
 				filter.addEventListener("keydown", keyHandler); //$NON-NLS-0$
 				filter.addEventListener("input", function(event) { //$NON-NLS-0$
 					event.target.classList.remove("invalidParam"); //$NON-NLS-0$
 				});
 				
-				if (expandOnFocus) {
-					filter.addEventListener("focus", function(){ //$NON-NLS-0$
-						section.setHidden(false);
-					});
-					filter.addEventListener("click", function(){ //$NON-NLS-0$
-						section.setHidden(false);
-					});
-				}
+				labelCol.appendChild(label);
+				inputCol.appendChild(filter);
+				parent.appendChild(section);
 				return section;
 			}.bind(this);
 			
@@ -615,20 +612,15 @@ define([
 			mainSection.addEventListener("toggle", function(event){ //$NON-NLS-0$
 				if (event.isExpanded) {
 					sections.forEach(function(s) {
-						var field = lib.$(".gitFilterInput", s.domNode); //$NON-NLS-0$
+						var field = lib.$(".gitFilterInput", s); //$NON-NLS-0$
 						var result = s.query.getValue ? s.query.getValue() : s.query.value;
 						if (result !== undefined) {
 							field.value = result;
 						}
 					}.bind(this));
-				} else {
-					sections.forEach(function(s) {
-						s.setHidden(true);
-					});
 				}
 			}.bind(this));
 
-			
 			var createStringQuery = function() {
 				return this.value ? this.key + "=" + encodeURIComponent(this.value) : ""; //$NON-NLS-0$ 
 			};
@@ -677,54 +669,52 @@ define([
 			};
 			
 			content = mainSection.getContentElement();
-			var messageSection = createSection(content, null, messages["Message:"], {key: "filter", createQuery: createStringQuery}); //$NON-NLS-0$
-			messageSection.domNode.classList.add("commitFilter"); //$NON-NLS-0$
-			messageSection.getContentElement().classList.add("commitFilter"); //$NON-NLS-0$
-
-			var authorSection = createSection(content, null, messages["Author:"],  {key: "author", createQuery: createStringQuery}); //$NON-NLS-0$
-			authorSection.domNode.classList.add("commitFilter"); //$NON-NLS-0$
-			authorSection.getContentElement().classList.add("commitFilter"); //$NON-NLS-0$
-
-			var committerSection = createSection(content, null, messages["Committer:"],  {key: "committer", createQuery: createStringQuery}); //$NON-NLS-0$
-			committerSection.domNode.classList.add("commitFilter"); //$NON-NLS-0$
-			committerSection.getContentElement().classList.add("commitFilter"); //$NON-NLS-0$
-
-			var sha1Section = createSection(content, null, messages["SHA1:"],  {key: "sha1", createQuery: createStringQuery}); //$NON-NLS-0$
-			sha1Section.domNode.classList.add("commitFilter"); //$NON-NLS-0$
-			sha1Section.getContentElement().classList.add("commitFilter"); //$NON-NLS-0$
 			
-			var fromDateSection = createSection(content, null, messages["fromDate:"],  {key: "fromDate", createQuery: createDateQuery, isValid: isValidDate, calcDate: ""}); //$NON-NLS-0$
-			fromDateSection.domNode.classList.add("commitFilter"); //$NON-NLS-0$
-			fromDateSection.getContentElement().classList.add("commitFilter"); //$NON-NLS-0$
+			var contentTable = document.createElement("table"); //$NON-NLS-0$
+			contentTable.className = "filterSections";
+			contentTable.setAttribute("role", "presentation"); //$NON-NLS-1$ //$NON-NLS-0$
+			var contentTbody = document.createElement("tbody"); //$NON-NLS-0$
+			contentTable.appendChild(contentTbody);
+			content.appendChild(contentTable);
 			
-			var toDateSection = createSection(content, null, messages["toDate:"],  {key: "toDate", createQuery: createDateQuery, isValid: isValidDate, calcDate: ""}); //$NON-NLS-0$
-			toDateSection.domNode.classList.add("commitFilter"); //$NON-NLS-0$
-			toDateSection.getContentElement().classList.add("commitFilter"); //$NON-NLS-0$
+			var messageSection = createSection(contentTable, messages["Message:"], {key: "filter", createQuery: createStringQuery}); //$NON-NLS-0$
+			var authorSection = createSection(contentTable, messages["Author:"],  {key: "author", createQuery: createStringQuery}); //$NON-NLS-0$
+			var committerSection = createSection(contentTable, messages["Committer:"],  {key: "committer", createQuery: createStringQuery}); //$NON-NLS-0$
+			var sha1Section = createSection(contentTable, messages["SHA1:"],  {key: "sha1", createQuery: createStringQuery}); //$NON-NLS-0$
+			var fromDateSection = createSection(contentTable, messages["fromDate:"],  {key: "fromDate", createQuery: createDateQuery, isValid: isValidDate, calcDate: ""}); //$NON-NLS-0$
+			var toDateSection = createSection(contentTable, messages["toDate:"],  {key: "toDate", createQuery: createDateQuery, isValid: isValidDate, calcDate: ""}); //$NON-NLS-0$
 			var that = this;
-			var pathSection = createSection(content, null, messages["Path:"],  {
+			var pathSection = createSection(contentTable, messages["Path:"],  {
 				key: "path", //$NON-NLS-0$
 				createQuery: function() {return "";}, 
-				getValue: function() {return that.model.repositoryPath;}, 
+				getValue: function() {return that.model.repositoryPath || "";}, 
 				setValue: function(s) {that.repositoryPath = that.model.repositoryPath = s;}
-			}, true, false, false, true);
-			pathSection.domNode.classList.add("commitFilter"); //$NON-NLS-0$
-			pathSection.getContentElement().classList.add("pathFilter"); //$NON-NLS-0$
-			pathSection.domNode.tabIndex = -1;
+			});
+			
+			var pathRow = document.createElement("tr"); //$NON-NLS-0$
+			pathRow.classList.add("commitFilter"); //$NON-NLS-0$
+			var pathCol = document.createElement("td"); //$NON-NLS-0$
+			pathCol.colSpan = 2;
+			pathRow.appendChild(pathCol);
+			contentTable.appendChild(pathRow);
+			var treeDiv = document.createElement("div");
+			treeDiv.className = "commitFilterPathFilter";
+			pathCol.appendChild(treeDiv);
 			var selection = this.treeSelection = new mSelection.Selection(this.registry, "orion.selection.commitTree"); //$NON-NLS-0$
 			var explorer  = this.treeNavigator = new mGitFileList.GitFileListExplorer({
 				serviceRegistry: this.registry,
 				commandRegistry: this.commandService,
-				parentId: pathSection.getContentElement(),
+				parentId: treeDiv,
+				setFocus: false,
 				repository: this.root.repository,
 				fileClient: this.fileClient,
-				section: pathSection,
 				selection: selection,
 				selectionPolicy: "singleSelection", //$NON-NLS-0$
 				handleError: this.handleError.bind(this),
 				gitClient: this.gitClient,
 				progressService: this.progressService
 			});
-			pathSection.addEventListener("toggle", function(e) { //$NON-NLS-0$
+			mainSection.addEventListener("toggle", function(e) { //$NON-NLS-0$
 				if (e.isExpanded) {
 					var location;
 					var model = this.model;
@@ -740,15 +730,14 @@ define([
 					}.bind(this));
 				}
 			}.bind(this));
-			pathSection.getContentElement().addEventListener("keydown", keyHandler); //$NON-NLS-0$
+			treeDiv.addEventListener("keydown", keyHandler); //$NON-NLS-0$
 			selection.addEventListener("selectionChanged", function(e) { //$NON-NLS-0$
 				var selected = e.selection;
 				if (!selected || this.treePath === selected) return;
-				var field = lib.$(".gitFilterInput", pathSection.domNode); //$NON-NLS-0$
+				var field = lib.$(".gitFilterInput", pathSection); //$NON-NLS-0$
 				field.value = util.relativePath(selected);
 			}.bind(this));
-			
-			
+
 			var filterActions = document.createElement("div"); //$NON-NLS-0$
 			filterActions.className = "commitFilterActions"; //$NON-NLS-0$
 			content.appendChild(filterActions);
