@@ -607,7 +607,9 @@ define([
 				preferenceService: this.preferencesService
 			});
 			mainSection.domNode.classList.add("commitFilterHeader"); //$NON-NLS-0$
+			mainSection.domNode.setAttribute("aria-hidden", "true"); //$NON-NLS-1$ //$NON-NLS-0$
 			mainSection.getContentElement().classList.add("commitFilterHeader"); //$NON-NLS-0$
+			mainSection.getContentElement().setAttribute("aria-modal", "true"); //$NON-NLS-1$ //$NON-NLS-0$
 			mainSection.domNode.tabIndex = -1;
 			mainSection.addEventListener("toggle", function(event){ //$NON-NLS-0$
 				if (event.isExpanded) {
@@ -874,6 +876,7 @@ define([
 				tooltip: messages["FilterCommitsTip"],
 				callback: function(data) {
 					this.filterSection.setHidden(!this.filterSection.hidden);
+					data.domNode.setAttribute("aria-expanded", !this.filterSection.hidden); //$NON-NLS-1$ //$NON-NLS-0$
 				},
 				visibleWhen: function() {
 					filterCommand.imageClass = that.model.isFiltered() ? "core-sprite-show-filtered" : "core-sprite-filter"; //$NON-NLS-1$ //$NON-NLS-0$
@@ -1030,6 +1033,12 @@ define([
 					}
 				}
 				commandService.renderCommands(actionsNodeScope, actionsNodeScope, {LocalBranch: activeBranch, Remote: targetRef}, this, "tool"); //$NON-NLS-0$
+				
+				var filterButton = node.querySelector("[aria-label='" + messages.FilterCommits + "']");
+				if (filterButton) {
+					filterButton.setAttribute("aria-haspopup", "dialog");
+					filterButton.setAttribute("aria-expanded", "false");
+				}
 			}.bind(this));
 		}
 	});
