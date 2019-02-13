@@ -203,52 +203,49 @@ html[dir="rtl"] .mainToolbar .sectionWrapper { /* ACGC */
 	height: 100%;
 }
 
-.commitFilterHeader.sectionWrapper {
-	border-width: 0;
-	padding: 0;
-	margin: 0;
-	height: 0;
-}
-
-.commitFilterHeader.sectionTable {
+.commitFilterPanel {
 	margin: 0;
 	margin-left: 10px;
 	margin-right: 10px;
 	position: absolute;
-	width: calc(100% - 20px);
+	width: calc(100% - 24px);
 	z-index: 200;
 	margin-top: -1px;
+	resize: none;
 	background-color: white;
+	border: 1px solid #e3e7ea;
+	border-top: none;
 	border-bottom-left-radius: 8px;
 	border-bottom-right-radius: 8px;
 }
 
-.commitFilterHeader.sectionTable.sectionClosed {
-	visibility: hidden;
+.commitFilterPanel .filterSections {
+	width: 100%;
+	table-layout: auto;
+	padding-left: 10px;
+	padding-right: 10px;
 }
 
-.commitFilter.sectionWrapper {
-	border-width: 0;
-	padding-bottom: 0px;
-	padding-left: 15px;
-	padding-top: 5px;
-	margin: 0;
-	opacity: 1;
-	min-height: 35px;
+.commitFilterLabelColumn {
+	text-align: right;
 }
 
-.commitFilter.sectionWrapper.sectionClosed:hover {
-	box-shadow: initial;
+.commitFilterInputColumn {
+	width: 100%;
 }
 
-.commitFilter .sectionTitle {
-	width: 100px;
-	color: #333;
-	padding-left: 3px;
+.commitFilterPanel .filterSections td {
+	border: none;
+}
+
+.commitFilterPanel input {
+	border: 1px solid #ddd;
+	min-width: 260px;
+	width: 70%;
 }
 
 .commitFilterActions {
-	padding: 5px;
+	padding: 10px;
 	overflow: hidden;
 }
 
@@ -257,25 +254,18 @@ html[dir="rtl"] .mainToolbar .sectionWrapper { /* ACGC */
 }
 
 .core-sprite-leftarrow {
-  	color: #777;
+	color: #777;
 }
 
 .core-sprite-save {
-  	color: #777;
+	color: #777;
 }
 
-.pathFilter.sectionTable.sectionOpened {
-	height: 300px;
-	margin-top: 5px;
-	margin-right: 5px;
-	margin-left: 5px;
+.sidebar .selectionModelContainer.commitFilterPathFilter {
+	height: 160px;
 	background-color: white;
-	border-top: 1px solid #ddd;
+	border: 1px solid #ddd;
 	overflow-y: auto;
-}
-
-.pathFilter.sectionTable.sectionClosed {
-	height: 0;
 }
 
 .mainToolbar .gitFilterBox input {

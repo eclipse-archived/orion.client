@@ -311,7 +311,7 @@ define([
 			this._updateExpandedState(true);
 			this.dropdown = true;
 			this.positionNode = options.positionNode;
-			lib.addAutoDismiss([this._contentParent, this.positionNode || this.domNode], function (event) {
+			lib.addAutoDismiss([this._contentParent, this.domNode], function (event) {
 				var temp = event.target;
 				while (temp) {
 					if (temp.classList && (temp.classList.contains("tooltipContainer") || temp.classList.contains("dialog"))) { //$NON-NLS-1$ $NON-NLS-0$
@@ -324,7 +324,6 @@ define([
 			this._contentParent.addEventListener("keydown", function(evt) { //$NON-NLS-0$
 				if(evt.keyCode === lib.KEY.ESCAPE) {
 					that.setHidden(true);
-					that.domNode.focus();
 				}
 			}, false);
 		}
@@ -414,6 +413,20 @@ define([
 		 */
 		setOnExpandCollapse: function(func){
 			this._onExpandCollapse = func;
+		},
+		
+		/**
+		 * Set the node that should receive focus after the dropdown is closed.
+		 */
+		getOriginalFocus: function() {
+			return this._originalFocus || this.domNode;
+		},
+		
+		/**
+		 * Set the node that should receive focus after the dropdown is closed.
+		 */
+		setOriginalFocus: function(node) {
+			this._originalFocus = node;
 		},
 
 		/**
@@ -560,23 +573,26 @@ define([
 		},
 		
 		_changeExpandedState: function() {
+			var focus = this.hidden;
 			if (this.hidden){
 				this._expand();
-				
+			} else {
+				this._collapse();
+			}
+
+			this._updateExpandedState(true);
+			
+			if (focus) {
 				if (this.dropdown) {
-					var firstTabbable = lib.firstTabbable(this.domNode.nextElementSibling);					
+					var firstTabbable = lib.firstTabbable(this._contentParent);					
 					if (firstTabbable) {
-						if (firstTabbable.tagName === "INPUT" || firstTabbable.tabIndex >= 0) {
-							firstTabbable.focus(); //$NON-NLS-0$
+						if (firstTabbable.tagName === "INPUT" || firstTabbable.tabIndex >= 0) { //$NON-NLS-0$
+							firstTabbable.focus();
 						}
 						lib.trapTabs(this.domNode.nextElementSibling);
 					}
 				}
-			} else {
-				this._collapse();
 			}
-			
-			this._updateExpandedState(true);
 		},
 		
 		_updateExpandedState: function(storeValue) {
@@ -605,6 +621,7 @@ define([
 		},
 		
 		_expand: function() {
+			this._originalFocus = document.activeElement;
 			this._positionDropdown();
 			if (this._contentParent) {
 				this._contentParent.classList.remove("sectionClosed"); //$NON-NLS-0$
@@ -648,19 +665,21 @@ define([
 		},
 		
 		_collapse: function() {
-			this.hidden = true;
-			if (this._contentParent) {
-				this._contentParent.classList.add("sectionClosed"); //$NON-NLS-0$
-				this._contentParent.classList.remove("sectionOpened"); //$NON-NLS-0$
-			}
-			if (this.domNode) {
-				this.domNode.classList.add("sectionClosed"); //$NON-NLS-0$
-				this.domNode.classList.remove("sectionOpened"); //$NON-NLS-0$
-				this.domNode.removeAttribute("aria-owns"); //$NON-NLS-0$
-				if (this.canHide) {
-					this.domNode.setAttribute("aria-expanded", "false"); //$NON-NLS-1$ //$NON-NLS-0$
+			lib.returnFocus(this._contentParent, this._originalFocus, function() {
+				this.hidden = true;
+				if (this._contentParent) {
+					this._contentParent.classList.add("sectionClosed"); //$NON-NLS-0$
+					this._contentParent.classList.remove("sectionOpened"); //$NON-NLS-0$
 				}
-			}
+				if (this.domNode) {
+					this.domNode.classList.add("sectionClosed"); //$NON-NLS-0$
+					this.domNode.classList.remove("sectionOpened"); //$NON-NLS-0$
+					this.domNode.removeAttribute("aria-owns"); //$NON-NLS-0$
+					if (this.canHide) {
+						this.domNode.setAttribute("aria-expanded", "false"); //$NON-NLS-1$ //$NON-NLS-0$
+					}
+				}
+			}.bind(this));
 		}
 	};
 	

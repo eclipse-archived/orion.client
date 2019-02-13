@@ -292,6 +292,7 @@ define([
 			});
 			this.createFilter();
 			this.createTree(this.parentId, model, {
+				role: "presentation", // table element is only being used for row/column presentation
 				setFocus: false, // do not steal focus on load
 				selectionPolicy: this.selectionPolicy,
 				onComplete: function() {

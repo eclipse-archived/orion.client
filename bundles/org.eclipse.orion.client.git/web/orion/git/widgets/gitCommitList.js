@@ -525,11 +525,11 @@ define([
 		},
 		createFilter: function() {
 			if (!this.section) return;
-			var sections = [], mainSection;
+			var sections = [], mainSection, explorer;
 			var doFilter = function() {
 				if (sections.every(function(s) {
 					var prop = s.query.key + "Query"; //$NON-NLS-0$
-					var field = lib.$(".gitFilterInput", s.domNode); //$NON-NLS-0$
+					var field = lib.$(".gitFilterInput", s); //$NON-NLS-0$
 					if (field.value && s.query.isValid) {
 						if (!s.query.isValid(field.value)) {
 							field.classList.add("invalidParam"); //$NON-NLS-0$
@@ -552,101 +552,119 @@ define([
 			}.bind(this);
 			function doClear() {
 				sections.forEach(function(s) {
-					var field = lib.$(".gitFilterInput", s.domNode); //$NON-NLS-0$
+					var field = lib.$(".gitFilterInput", s); //$NON-NLS-0$
 					field.value = "";
 				});
 				doFilter();
 			}
-			var blurHandler = function(e) {
-				var relatedTarget = e.relatedTarget || e.toElement;
-				function check(focus) {
-					if (!(focus === document.body || lib.contains(mainSection.domNode, focus) || lib.contains(mainSection.getContentElement(), focus))) {
-						mainSection.setHidden(true);
-					}
-				}
-				if (relatedTarget) {
-					check(relatedTarget);
-				} else {
-					setTimeout(function () { check(document.activeElement); }, 10);
-				}
-			};
-			var keyHandler = function(event){ //$NON-NLS-0$
+			var filterHandler = function(event){
 				if (event.keyCode === lib.KEY.ENTER) {
 					doFilter();
 					event.preventDefault();
 				}
+			};
+			var escHandler = function(event){
 				if (event.keyCode === lib.KEY.ESCAPE) {
 					mainSection.setHidden(true);
-					event.preventDefault();
 				}
 			};
-			var createSection = function (parent, sibling, title, query, canHide, dropdown, noTwistie, expandOnFocus) {
+			var createSection = function (parent, title, query) {
 				var commitFilterSectionId = lib.validId(title + "commitFilterSection"); //$NON-NLS-0$
-				var section = new mSection.Section(parent, {
-					id: commitFilterSectionId, //$NON-NLS-0$
-					title: title,
-					canHide: canHide,
-					hidden: true,
-					sibling: sibling,
-					dropdown: dropdown,
-					noTwistie: noTwistie,
-					preferenceService: this.preferencesService
-				});
-				section.domNode.classList.add("gitFilterBox"); //$NON-NLS-0$
+				var section = document.createElement("tr"); //$NON-NLS-0$
+				section.classList.add("commitFilter"); //$NON-NLS-0$
+				var labelCol = document.createElement("td"); //$NON-NLS-0$
+				labelCol.className = "commitFilterLabelColumn"; //$NON-NLS-0$
+				var inputCol = document.createElement("td"); //$NON-NLS-0$
+				inputCol.className = "commitFilterInputColumn"; //$NON-NLS-0$
+				section.appendChild(labelCol);
+				section.appendChild(inputCol);
+				
+				var label = document.createElement("label");
+				label.setAttribute("for", commitFilterSectionId); //$NON-NLS-0$
+				label.textContent = title;
+				
 				var filter = document.createElement("input"); //$NON-NLS-0$
-				filter.setAttribute("aria-labelledby", commitFilterSectionId + "Title"); //$NON-NLS-1$ //$NON-NLS-0$
+				filter.id = commitFilterSectionId;
 				filter.className = "gitFilterInput"; //$NON-NLS-0$
 				filter.placeholder = messages["Filter " + query.key];
 				section.query = query;
-				section.searchBox.appendChild(filter);
-				filter.addEventListener("keydown", keyHandler); //$NON-NLS-0$
+				section.appendChild(filter);
+				filter.addEventListener("keydown", filterHandler); //$NON-NLS-0$
 				filter.addEventListener("input", function(event) { //$NON-NLS-0$
 					event.target.classList.remove("invalidParam"); //$NON-NLS-0$
 				});
 				
-				if (expandOnFocus) {
-					filter.addEventListener("focus", function(){ //$NON-NLS-0$
-						section.setHidden(false);
-					});
-					filter.addEventListener("click", function(){ //$NON-NLS-0$
-						section.setHidden(false);
-					});
-				}
-				filter.addEventListener("blur", blurHandler); //$NON-NLS-0$
+				labelCol.appendChild(label);
+				inputCol.appendChild(filter);
+				parent.appendChild(section);
 				return section;
-			}.bind(this);
+			};
 			
-			var content = this.section.getContentElement();
-			mainSection = this.filterSection = new mSection.Section(content, {
-				id: "commitFilterSection", //$NON-NLS-0$
-				title: "\u00A0", //$NON-NLS-0$
-				canHide: true,
-				hidden: true,
-				sibling: content.firstChild,
-				dropdown: true,
-				positionNode: this.section.domNode,
-				preferenceService: this.preferencesService
-			});
-			mainSection.domNode.classList.add("commitFilterHeader"); //$NON-NLS-0$
-			mainSection.getContentElement().classList.add("commitFilterHeader"); //$NON-NLS-0$
-			mainSection.domNode.tabIndex = -1;
-			mainSection.addEventListener("toggle", function(event){ //$NON-NLS-0$
-				if (event.isExpanded) {
-					sections.forEach(function(s) {
-						var field = lib.$(".gitFilterInput", s.domNode); //$NON-NLS-0$
-						var result = s.query.getValue ? s.query.getValue() : s.query.value;
-						if (result !== undefined) {
-							field.value = result;
-						}
-					}.bind(this));
-				} else {
-					sections.forEach(function(s) {
-						s.setHidden(true);
+			var that = this;
+			
+			mainSection = this.filterSection = {
+				hidden: false,
+				create: function(parent) {
+					var content = this.content = document.createElement("div");
+					this.sibling = parent.firstChild;
+					parent.insertBefore(content, parent.firstChild);
+					content.classList.add("commitFilterPanel");
+					content.setAttribute("role", "dialog");
+					content.setAttribute("aria-modal", "true");
+					content.setAttribute("aria-label", messages.FilterCommits);
+					content.addEventListener("keydown", escHandler);
+					lib.trapTabs(content);
+					lib.addAutoDismiss([content], function() {
+						mainSection.setHidden(true);
 					});
+					
+				},
+				setHidden: function(hidden) {
+					if (this.hidden === hidden) return;
+					this.hidden = hidden;
+					if (that._filterButton) {
+						that._filterButton.setAttribute("aria-expanded", !hidden); //$NON-NLS-0$
+					}
+					if (hidden) {
+						this.sibling.setAttribute("aria-hidden", false);
+						lib.returnFocus(this.content, this.originalFocus, function() {
+							this.content.style.display = "none";
+						}.bind(this));
+					} else {
+						// Hide sibling to work around JAWS bug https://github.com/FreedomScientific/VFO-standards-support/issues/91
+						this.sibling.setAttribute("aria-hidden", true);
+						sections.forEach(function(s) {
+							var field = lib.$(".gitFilterInput", s); //$NON-NLS-0$
+							var result = s.query.getValue ? s.query.getValue() : s.query.value;
+							if (result !== undefined) {
+								field.value = result;
+							}
+						});
+						
+						var location;
+						var model = that.model;
+						var commit = that.selection && that.selection.getSelection();
+						if (commit && commit.Type === "Commit") { //$NON-NLS-0$
+							location = commit.TreeLocation;
+						} else {
+							location = (model.simpleLog ? model.getTargetReference() : model.getActiveBranch()).TreeLocation;
+						}
+						if (location) {
+							explorer.display(location).then(function() {
+								explorer.myTree.expand(explorer.model.root);
+							});
+						}
+						
+						this.content.style.display = "block";
+						
+						this.originalFocus = document.activeElement;
+						lib.firstTabbable(this.content).focus();
+					}
 				}
-			}.bind(this));
+			};
+			mainSection.create(this.section.getContentElement());
+			mainSection.setHidden(true);
 
-			
 			var createStringQuery = function() {
 				return this.value ? this.key + "=" + encodeURIComponent(this.value) : ""; //$NON-NLS-0$ 
 			};
@@ -694,83 +712,60 @@ define([
 				return !isNaN(d.valueOf());
 			};
 			
-			content = mainSection.getContentElement();
-			var messageSection = createSection(content, null, messages["Message:"], {key: "filter", createQuery: createStringQuery}); //$NON-NLS-0$
-			messageSection.domNode.classList.add("commitFilter"); //$NON-NLS-0$
-			messageSection.getContentElement().classList.add("commitFilter"); //$NON-NLS-0$
-
-			var authorSection = createSection(content, null, messages["Author:"],  {key: "author", createQuery: createStringQuery}); //$NON-NLS-0$
-			authorSection.domNode.classList.add("commitFilter"); //$NON-NLS-0$
-			authorSection.getContentElement().classList.add("commitFilter"); //$NON-NLS-0$
-
-			var committerSection = createSection(content, null, messages["Committer:"],  {key: "committer", createQuery: createStringQuery}); //$NON-NLS-0$
-			committerSection.domNode.classList.add("commitFilter"); //$NON-NLS-0$
-			committerSection.getContentElement().classList.add("commitFilter"); //$NON-NLS-0$
-
-			var sha1Section = createSection(content, null, messages["SHA1:"],  {key: "sha1", createQuery: createStringQuery}); //$NON-NLS-0$
-			sha1Section.domNode.classList.add("commitFilter"); //$NON-NLS-0$
-			sha1Section.getContentElement().classList.add("commitFilter"); //$NON-NLS-0$
+			var contentTable = document.createElement("table"); //$NON-NLS-0$
+			contentTable.className = "filterSections";
+			contentTable.setAttribute("role", "presentation"); //$NON-NLS-1$ //$NON-NLS-0$
+			var contentTbody = document.createElement("tbody"); //$NON-NLS-0$
+			contentTable.appendChild(contentTbody);
+			mainSection.content.appendChild(contentTable);
 			
-			var fromDateSection = createSection(content, null, messages["fromDate:"],  {key: "fromDate", createQuery: createDateQuery, isValid: isValidDate, calcDate: ""}); //$NON-NLS-0$
-			fromDateSection.domNode.classList.add("commitFilter"); //$NON-NLS-0$
-			fromDateSection.getContentElement().classList.add("commitFilter"); //$NON-NLS-0$
-			
-			var toDateSection = createSection(content, null, messages["toDate:"],  {key: "toDate", createQuery: createDateQuery, isValid: isValidDate, calcDate: ""}); //$NON-NLS-0$
-			toDateSection.domNode.classList.add("commitFilter"); //$NON-NLS-0$
-			toDateSection.getContentElement().classList.add("commitFilter"); //$NON-NLS-0$
-			var that = this;
-			var pathSection = createSection(content, null, messages["Path:"],  {
+			var messageSection = createSection(contentTable, messages["Message:"], {key: "filter", createQuery: createStringQuery}); //$NON-NLS-0$
+			var authorSection = createSection(contentTable, messages["Author:"],  {key: "author", createQuery: createStringQuery}); //$NON-NLS-0$
+			var committerSection = createSection(contentTable, messages["Committer:"],  {key: "committer", createQuery: createStringQuery}); //$NON-NLS-0$
+			var sha1Section = createSection(contentTable, messages["SHA1:"],  {key: "sha1", createQuery: createStringQuery}); //$NON-NLS-0$
+			var fromDateSection = createSection(contentTable, messages["fromDate:"],  {key: "fromDate", createQuery: createDateQuery, isValid: isValidDate, calcDate: ""}); //$NON-NLS-0$
+			var toDateSection = createSection(contentTable, messages["toDate:"],  {key: "toDate", createQuery: createDateQuery, isValid: isValidDate, calcDate: ""}); //$NON-NLS-0$
+			var pathSection = createSection(contentTable, messages["Path:"],  {
 				key: "path", //$NON-NLS-0$
 				createQuery: function() {return "";}, 
-				getValue: function() {return that.model.repositoryPath;}, 
+				getValue: function() {return that.model.repositoryPath || "";}, 
 				setValue: function(s) {that.repositoryPath = that.model.repositoryPath = s;}
-			}, true, false, false, true);
-			pathSection.domNode.classList.add("commitFilter"); //$NON-NLS-0$
-			pathSection.getContentElement().classList.add("pathFilter"); //$NON-NLS-0$
-			pathSection.domNode.tabIndex = -1;
+			});
+			
+			var pathRow = document.createElement("tr"); //$NON-NLS-0$
+			pathRow.classList.add("commitFilter"); //$NON-NLS-0$
+			var pathCol = document.createElement("td"); //$NON-NLS-0$
+			pathCol.colSpan = 2;
+			pathRow.appendChild(pathCol);
+			contentTable.appendChild(pathRow);
+			var treeDiv = document.createElement("div");
+			treeDiv.className = "commitFilterPathFilter";
+			pathCol.appendChild(treeDiv);
 			var selection = this.treeSelection = new mSelection.Selection(this.registry, "orion.selection.commitTree"); //$NON-NLS-0$
-			var explorer  = this.treeNavigator = new mGitFileList.GitFileListExplorer({
+			explorer = this.treeNavigator = new mGitFileList.GitFileListExplorer({
 				serviceRegistry: this.registry,
 				commandRegistry: this.commandService,
-				parentId: pathSection.getContentElement(),
+				parentId: treeDiv,
+				setFocus: false,
 				repository: this.root.repository,
 				fileClient: this.fileClient,
-				section: pathSection,
 				selection: selection,
 				selectionPolicy: "singleSelection", //$NON-NLS-0$
 				handleError: this.handleError.bind(this),
 				gitClient: this.gitClient,
 				progressService: this.progressService
 			});
-			pathSection.addEventListener("toggle", function(e) { //$NON-NLS-0$
-				if (e.isExpanded) {
-					var location;
-					var model = this.model;
-					var commit = this.selection && this.selection.getSelection();
-					if (commit && commit.Type === "Commit") { //$NON-NLS-0$
-						location = commit.TreeLocation;
-					} else {
-						location = (model.simpleLog ? model.getTargetReference() : model.getActiveBranch()).TreeLocation;
-					}
-					if (!location) return;
-					explorer.display(location).then(function() {
-						explorer.myTree.expand(explorer.model.root);
-					}.bind(this));
-				}
-			}.bind(this));
-			pathSection.getContentElement().addEventListener("keydown", keyHandler); //$NON-NLS-0$
-			pathSection.getContentElement().addEventListener("blur", blurHandler); //$NON-NLS-0$
+			treeDiv.addEventListener("keydown", filterHandler); //$NON-NLS-0$
 			selection.addEventListener("selectionChanged", function(e) { //$NON-NLS-0$
 				var selected = e.selection;
 				if (!selected || this.treePath === selected) return;
-				var field = lib.$(".gitFilterInput", pathSection.domNode); //$NON-NLS-0$
+				var field = lib.$(".gitFilterInput", pathSection); //$NON-NLS-0$
 				field.value = util.relativePath(selected);
 			}.bind(this));
-			
-			
+
 			var filterActions = document.createElement("div"); //$NON-NLS-0$
 			filterActions.className = "commitFilterActions"; //$NON-NLS-0$
-			content.appendChild(filterActions);
+			mainSection.content.appendChild(filterActions);
 			var commitFilterScope = "commitFilterActions"; //$NON-NLS-0$
 			var actionsArea = document.createElement("ul"); //$NON-NLS-0$
 			actionsArea.className = "layoutRight commandList"; //$NON-NLS-0$
@@ -782,9 +777,6 @@ define([
 				filter: doFilter,
 				clear: doClear
 			}, explorer, "button"); //$NON-NLS-0$
-			[].forEach.call(lib.$$(".orionButton", filterActions), function(b) { //$NON-NLS-0$
-				b.addEventListener("blur", blurHandler); //$NON-NLS-0$
-			});
 
 			sections.push(messageSection);
 			sections.push(authorSection);
@@ -905,9 +897,9 @@ define([
 				id: "eclipse.orion.git.commit.toggleFilter", //$NON-NLS-0$
 				name: messages["FilterCommits"],
 				tooltip: messages["FilterCommitsTip"],
+				extraClass: "filterButton",
 				callback: function(data) {
-					if (data) this.filterSection.setHidden(!this.filterSection.hidden);
-					data.domNode.focus();
+					this.filterSection.setHidden(!this.filterSection.hidden);
 				},
 				visibleWhen: function() {
 					filterCommand.imageClass = that.model.isFiltered() ? "core-sprite-show-filtered" : "core-sprite-filter"; //$NON-NLS-1$ //$NON-NLS-0$
@@ -918,7 +910,7 @@ define([
 			
 			var performFilterCommand = new mCommands.Command({
 				id: "eclipse.orion.git.commit.performFilter", //$NON-NLS-0$
-				name: messages["OK"],
+				name: messages["Filter"],
 				callback: function(data) {
 					data.items.filter();
 				},
@@ -998,69 +990,79 @@ define([
 			var section = this.section;
 			if (!section) return;
 			var actionsNodeScope = section.actionsNode.id;
-			if (lib.node(actionsNodeScope)) {
-				commandService.destroy(actionsNodeScope);
-			}
-			var itemActionScope = "itemLevelCommands";
-			commandService.registerCommandContribution(itemActionScope, "eclipse.checkoutCommit", 1); //$NON-NLS-1$ //$NON-NLS-0$
-			commandService.registerCommandContribution(itemActionScope, "eclipse.orion.git.undoCommit", 2); //$NON-NLS-1$ //$NON-NLS-0$
-			commandService.registerCommandContribution(itemActionScope, "eclipse.orion.git.resetIndex", 3); //$NON-NLS-0$
-			commandService.registerCommandContribution(itemActionScope, "eclipse.orion.git.addTag", 4); //$NON-NLS-1$ //$NON-NLS-0$
-			commandService.registerCommandContribution(itemActionScope, "eclipse.orion.git.cherryPick", 5); //$NON-NLS-1$ //$NON-NLS-0$
-			commandService.registerCommandContribution(itemActionScope, "eclipse.orion.git.revert", 6); //$NON-NLS-1$ //$NON-NLS-0$
-			commandService.registerCommandContribution(itemActionScope, "eclipse.openGitCommit", 7); //$NON-NLS-1$ //$NON-NLS-0$
-			commandService.registerCommandContribution(itemActionScope, "eclipse.orion.git.showCommitPatchCommand", 8); //$NON-NLS-1$ //$NON-NLS-0$
-								
-
-			if (model.isRebasing()) {
-				commandService.registerCommandContribution(actionsNodeScope, "eclipse.orion.git.commit.toggleFilter", 100, null, false, new KeyBinding.KeyBinding('h', true, true)); //$NON-NLS-1$ //$NON-NLS-0$
-				commandService.registerCommandContribution(actionsNodeScope, "eclipse.orion.git.rebaseContinueCommand", 200); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-				commandService.registerCommandContribution(actionsNodeScope, "eclipse.orion.git.rebaseSkipPatchCommand", 300); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-				commandService.registerCommandContribution(actionsNodeScope, "eclipse.orion.git.rebaseAbortCommand", 400); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-				commandService.renderCommands(actionsNodeScope, actionsNodeScope, repository.status, this, "tool"); //$NON-NLS-0$
-				return;
-			}
-
-			var activeBranch = model.getActiveBranch();
-			var targetRef = model.getTargetReference();
-			
-			commandService.registerCommandContribution(actionsNodeScope, "eclipse.orion.git.commit.toggleFilter", 20, null, false, new KeyBinding.KeyBinding('h', true, true)); //$NON-NLS-1$ //$NON-NLS-0$
-			commandService.registerCommandContribution(actionsNodeScope, "eclipse.orion.git.commit.graph", 50); //$NON-NLS-0$
-			commandService.registerCommandContribution(actionsNodeScope, "eclipse.orion.git.commit.simpleLog", 70); //$NON-NLS-0$
-			commandService.registerCommandContribution(actionsNodeScope, "eclipse.orion.git.sync", 100); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-
-				
-			if (currentBranch && !this.model.simpleLog && targetRef && !model.isCherryPicking() && !model.isMerging()) {
-				var incomingActionScope = this.incomingActionScope;
-				var outgoingActionScope = this.outgoingActionScope;
-				
-				if (lib.node(incomingActionScope)) {
-					commandService.destroy(incomingActionScope);
-					
-					commandService.addCommandGroup(incomingActionScope, "eclipse.gitFetchGroup", 500, messages['fetchGroup'], null, null, null, "Fetch", null, "eclipse.orion.git.fetch"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-					commandService.registerCommandContribution(incomingActionScope, "eclipse.orion.git.fetch", 100, "eclipse.gitFetchGroup"); //$NON-NLS-0$ //$NON-NLS-1$
-					commandService.registerCommandContribution(incomingActionScope, "eclipse.orion.git.fetchForce", 200, "eclipse.gitFetchGroup"); //$NON-NLS-0$ //$NON-NLS-1$
-					
-					commandService.registerCommandContribution(incomingActionScope, "eclipse.orion.git.merge", 300); //$NON-NLS-0$
-					commandService.registerCommandContribution(incomingActionScope, "eclipse.orion.git.mergeSquash", 350); //$NON-NLS-1$ //$NON-NLS-0$
-					commandService.registerCommandContribution(incomingActionScope, "eclipse.orion.git.rebase", 200); //$NON-NLS-0$
-					commandService.renderCommands(incomingActionScope, incomingActionScope, targetRef, this, "tool"); //$NON-NLS-0$
+			var node = lib.node(actionsNodeScope);
+			lib.returnFocus(node, node, function() {
+				if (node) {
+					commandService.destroy(actionsNodeScope);
 				}
-				
-				if (lib.node(outgoingActionScope)) {
-					commandService.destroy(outgoingActionScope);
-					
-					commandService.addCommandGroup(outgoingActionScope, "eclipse.gitPushGroup", 1000, messages['pushGroup'], null, null, null, "Push", null, "eclipse.orion.git.push"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-					commandService.registerCommandContribution(outgoingActionScope, "eclipse.orion.git.push", 1100, "eclipse.gitPushGroup"); //$NON-NLS-0$ //$NON-NLS-1$
-					commandService.registerCommandContribution(outgoingActionScope, "eclipse.orion.git.pushForce", 1200, "eclipse.gitPushGroup"); //$NON-NLS-0$ //$NON-NLS-1$
-					commandService.registerCommandContribution(outgoingActionScope, "eclipse.orion.git.pushBranch", 1300, "eclipse.gitPushGroup"); //$NON-NLS-0$ //$NON-NLS-1$
-					commandService.registerCommandContribution(outgoingActionScope, "eclipse.orion.git.pushForceBranch", 1400, "eclipse.gitPushGroup"); //$NON-NLS-0$ //$NON-NLS-1$
-					commandService.registerCommandContribution(outgoingActionScope, "eclipse.orion.git.pushToGerrit", 1500, "eclipse.gitPushGroup"); //$NON-NLS-0$ //$NON-NLS-1$
-
-					commandService.renderCommands(outgoingActionScope, outgoingActionScope, {LocalBranch: activeBranch, Remote: targetRef}, this, "tool"); //$NON-NLS-0$
+				node.setAttribute("role", "none"); //$NON-NLS-1$ //$NON-NLS-0$
+				var itemActionScope = "itemLevelCommands";
+				commandService.registerCommandContribution(itemActionScope, "eclipse.checkoutCommit", 1); //$NON-NLS-1$ //$NON-NLS-0$
+				commandService.registerCommandContribution(itemActionScope, "eclipse.orion.git.undoCommit", 2); //$NON-NLS-1$ //$NON-NLS-0$
+				commandService.registerCommandContribution(itemActionScope, "eclipse.orion.git.resetIndex", 3); //$NON-NLS-0$
+				commandService.registerCommandContribution(itemActionScope, "eclipse.orion.git.addTag", 4); //$NON-NLS-1$ //$NON-NLS-0$
+				commandService.registerCommandContribution(itemActionScope, "eclipse.orion.git.cherryPick", 5); //$NON-NLS-1$ //$NON-NLS-0$
+				commandService.registerCommandContribution(itemActionScope, "eclipse.orion.git.revert", 6); //$NON-NLS-1$ //$NON-NLS-0$
+				commandService.registerCommandContribution(itemActionScope, "eclipse.openGitCommit", 7); //$NON-NLS-1$ //$NON-NLS-0$
+				commandService.registerCommandContribution(itemActionScope, "eclipse.orion.git.showCommitPatchCommand", 8); //$NON-NLS-1$ //$NON-NLS-0$
+									
+	
+				if (model.isRebasing()) {
+					commandService.registerCommandContribution(actionsNodeScope, "eclipse.orion.git.commit.toggleFilter", 100, null, false, new KeyBinding.KeyBinding('h', true, true)); //$NON-NLS-1$ //$NON-NLS-0$
+					commandService.registerCommandContribution(actionsNodeScope, "eclipse.orion.git.rebaseContinueCommand", 200); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+					commandService.registerCommandContribution(actionsNodeScope, "eclipse.orion.git.rebaseSkipPatchCommand", 300); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+					commandService.registerCommandContribution(actionsNodeScope, "eclipse.orion.git.rebaseAbortCommand", 400); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+					commandService.renderCommands(actionsNodeScope, actionsNodeScope, repository.status, this, "tool"); //$NON-NLS-0$
+					return;
 				}
-			}
-			commandService.renderCommands(actionsNodeScope, actionsNodeScope, {LocalBranch: activeBranch, Remote: targetRef}, this, "tool"); //$NON-NLS-0$
+	
+				var activeBranch = model.getActiveBranch();
+				var targetRef = model.getTargetReference();
+				
+				commandService.registerCommandContribution(actionsNodeScope, "eclipse.orion.git.commit.toggleFilter", 20, null, false, new KeyBinding.KeyBinding('h', true, true)); //$NON-NLS-1$ //$NON-NLS-0$
+				commandService.registerCommandContribution(actionsNodeScope, "eclipse.orion.git.commit.graph", 50); //$NON-NLS-0$
+				commandService.registerCommandContribution(actionsNodeScope, "eclipse.orion.git.commit.simpleLog", 70); //$NON-NLS-0$
+				commandService.registerCommandContribution(actionsNodeScope, "eclipse.orion.git.sync", 100); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+	
+					
+				if (currentBranch && !this.model.simpleLog && targetRef && !model.isCherryPicking() && !model.isMerging()) {
+					var incomingActionScope = this.incomingActionScope;
+					var outgoingActionScope = this.outgoingActionScope;
+					
+					if (lib.node(incomingActionScope)) {
+						commandService.destroy(incomingActionScope);
+						
+						commandService.addCommandGroup(incomingActionScope, "eclipse.gitFetchGroup", 500, messages['fetchGroup'], null, null, null, "Fetch", null, "eclipse.orion.git.fetch"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+						commandService.registerCommandContribution(incomingActionScope, "eclipse.orion.git.fetch", 100, "eclipse.gitFetchGroup"); //$NON-NLS-0$ //$NON-NLS-1$
+						commandService.registerCommandContribution(incomingActionScope, "eclipse.orion.git.fetchForce", 200, "eclipse.gitFetchGroup"); //$NON-NLS-0$ //$NON-NLS-1$
+						
+						commandService.registerCommandContribution(incomingActionScope, "eclipse.orion.git.merge", 300); //$NON-NLS-0$
+						commandService.registerCommandContribution(incomingActionScope, "eclipse.orion.git.mergeSquash", 350); //$NON-NLS-1$ //$NON-NLS-0$
+						commandService.registerCommandContribution(incomingActionScope, "eclipse.orion.git.rebase", 200); //$NON-NLS-0$
+						commandService.renderCommands(incomingActionScope, incomingActionScope, targetRef, this, "tool"); //$NON-NLS-0$
+					}
+					
+					if (lib.node(outgoingActionScope)) {
+						commandService.destroy(outgoingActionScope);
+						
+						commandService.addCommandGroup(outgoingActionScope, "eclipse.gitPushGroup", 1000, messages['pushGroup'], null, null, null, "Push", null, "eclipse.orion.git.push"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+						commandService.registerCommandContribution(outgoingActionScope, "eclipse.orion.git.push", 1100, "eclipse.gitPushGroup"); //$NON-NLS-0$ //$NON-NLS-1$
+						commandService.registerCommandContribution(outgoingActionScope, "eclipse.orion.git.pushForce", 1200, "eclipse.gitPushGroup"); //$NON-NLS-0$ //$NON-NLS-1$
+						commandService.registerCommandContribution(outgoingActionScope, "eclipse.orion.git.pushBranch", 1300, "eclipse.gitPushGroup"); //$NON-NLS-0$ //$NON-NLS-1$
+						commandService.registerCommandContribution(outgoingActionScope, "eclipse.orion.git.pushForceBranch", 1400, "eclipse.gitPushGroup"); //$NON-NLS-0$ //$NON-NLS-1$
+						commandService.registerCommandContribution(outgoingActionScope, "eclipse.orion.git.pushToGerrit", 1500, "eclipse.gitPushGroup"); //$NON-NLS-0$ //$NON-NLS-1$
+	
+						commandService.renderCommands(outgoingActionScope, outgoingActionScope, {LocalBranch: activeBranch, Remote: targetRef}, this, "tool"); //$NON-NLS-0$
+					}
+				}
+				commandService.renderCommands(actionsNodeScope, actionsNodeScope, {LocalBranch: activeBranch, Remote: targetRef}, this, "tool"); //$NON-NLS-0$
+				
+				var filterButton = this._filterButton = node.querySelector(".filterButton");
+				if (filterButton) {
+					filterButton.setAttribute("aria-haspopup", "dialog");
+					filterButton.setAttribute("aria-expanded", "false");
+				}
+			}.bind(this));
 		}
 	});
 	

@@ -275,7 +275,7 @@ define({//Default message bundle
 	"Clear": "Clear", //$NON-NLS-0$  //$NON-NLS-1$
 	"Filter": "Filter", //$NON-NLS-0$  //$NON-NLS-1$
 	"FilterCommits": "Filter Commits", //$NON-NLS-0$  //$NON-NLS-1$
-	"FilterCommitsTip": "Toggles the filter commits panel", //$NON-NLS-0$  //$NON-NLS-1$
+	"FilterCommitsTip": "Shows the filter commits panel", //$NON-NLS-0$  //$NON-NLS-1$
 	"MaximizeCmd": "Maximize", //$NON-NLS-0$  //$NON-NLS-1$
 	"MaximizeTip": "Toggles the maximize state of the editor", //$NON-NLS-0$  //$NON-NLS-1$
 	" [New branch]": " [New branch]", //$NON-NLS-0$  //$NON-NLS-1$
@@ -475,13 +475,13 @@ define({//Default message bundle
 	"Local Branch Name:" : "Local Branch Name:", //$NON-NLS-0$  //$NON-NLS-1$
 	"Local": "local", //$NON-NLS-0$  //$NON-NLS-1$
 	"Filter items" : "Filter items", //$NON-NLS-0$  //$NON-NLS-1$
-	"Filter filter" : "Filter message", //$NON-NLS-0$  //$NON-NLS-1$
-	"Filter author" : "Filter author", //$NON-NLS-0$  //$NON-NLS-1$
-	"Filter committer" : "Filter commiter", //$NON-NLS-0$  //$NON-NLS-1$
-	"Filter sha1" : "Filter sha1", //$NON-NLS-0$  //$NON-NLS-1$
+	"Filter filter" : "Filter by message", //$NON-NLS-0$  //$NON-NLS-1$
+	"Filter author" : "Filter by author", //$NON-NLS-0$  //$NON-NLS-1$
+	"Filter committer" : "Filter by commiter", //$NON-NLS-0$  //$NON-NLS-1$
+	"Filter sha1" : "Filter by sha1", //$NON-NLS-0$  //$NON-NLS-1$
 	"Filter fromDate" : "Filter from date YYYY-MM-DD or 1(h d w m y)", //$NON-NLS-0$  //$NON-NLS-1$
 	"Filter toDate" : "Filter to date YYYY-MM-DD or 1(h d w m y)", //$NON-NLS-0$  //$NON-NLS-1$
-	"Filter path" : "Filter path", //$NON-NLS-0$  //$NON-NLS-1$
+	"Filter path" : "Filter by path", //$NON-NLS-0$  //$NON-NLS-1$
 	"Filter remote branches" : "Filter remote branches", //$NON-NLS-0$  //$NON-NLS-1$
 	"Getting remote branches" : "Getting remote branches ${0}", //$NON-NLS-0$  //$NON-NLS-1$
 	"Getting remote details": "Getting remote details: ${0}", //$NON-NLS-0$  //$NON-NLS-1$
