@@ -311,7 +311,7 @@ define([
 			this._updateExpandedState(true);
 			this.dropdown = true;
 			this.positionNode = options.positionNode;
-			lib.addAutoDismiss([this._contentParent, this.positionNode || this.domNode], function (event) {
+			lib.addAutoDismiss([this._contentParent, this.domNode], function (event) {
 				var temp = event.target;
 				while (temp) {
 					if (temp.classList && (temp.classList.contains("tooltipContainer") || temp.classList.contains("dialog"))) { //$NON-NLS-1$ $NON-NLS-0$

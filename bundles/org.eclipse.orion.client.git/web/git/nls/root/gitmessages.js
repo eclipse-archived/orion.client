@@ -275,7 +275,7 @@ define({//Default message bundle
 	"Clear": "Clear", //$NON-NLS-0$  //$NON-NLS-1$
 	"Filter": "Filter", //$NON-NLS-0$  //$NON-NLS-1$
 	"FilterCommits": "Filter Commits", //$NON-NLS-0$  //$NON-NLS-1$
-	"FilterCommitsTip": "Toggles the filter commits panel", //$NON-NLS-0$  //$NON-NLS-1$
+	"FilterCommitsTip": "Shows the filter commits panel", //$NON-NLS-0$  //$NON-NLS-1$
 	"MaximizeCmd": "Maximize", //$NON-NLS-0$  //$NON-NLS-1$
 	"MaximizeTip": "Toggles the maximize state of the editor", //$NON-NLS-0$  //$NON-NLS-1$
 	" [New branch]": " [New branch]", //$NON-NLS-0$  //$NON-NLS-1$
