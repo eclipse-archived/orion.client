@@ -29,6 +29,14 @@ define([
 
 	function registerServiceProviders(provider) {
 		var loginData;
+		
+		function parseJSON(str) {
+			try {
+				return JSON.parse(str);
+			} catch (e) {
+				return null;
+			}
+		}
 	
 		var serviceImpl = {
 			getUser: function() {
@@ -42,7 +50,7 @@ define([
 					},
 					timeout: 15000
 				}).then(function(result) {
-					loginData = result.response ? JSON.parse(result.response) : null;
+					loginData = result.response ? parseJSON(result.response) : null;
 					if (loginData) {
 						localStorage.setItem('orion.user', JSON.stringify(loginData))
 					}
@@ -52,7 +60,7 @@ define([
 					if (error instanceof Error && error.name === "Cancel") {
 						return "_cancel";
 					}
-					return error.response ? JSON.parse(error.response) : null;
+					return error.response ? parseJSON(error.response) : null;
 				});
 				return loginData;
 			},
@@ -66,9 +74,9 @@ define([
 					timeout: 15000
 				}).then(function(result) {
 					loginData = null;
-					return result.response ? JSON.parse(result.response) : null;
+					return result.response ? parseJSON(result.response) : null;
 				}, function(error) {
-					return error.response ? JSON.parse(error.response) : null;
+					return error.response ? parseJSON(error.response) : null;
 				});
 			},
 			getAuthForm: function(notify) {
