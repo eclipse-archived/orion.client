@@ -606,6 +606,7 @@ define([
 				hidden: false,
 				create: function(parent) {
 					var content = this.content = document.createElement("div");
+					this.sibling = parent.firstChild;
 					parent.insertBefore(content, parent.firstChild);
 					content.classList.add("commitFilterPanel");
 					content.setAttribute("role", "dialog");
@@ -625,10 +626,12 @@ define([
 						that._filterButton.setAttribute("aria-expanded", !hidden); //$NON-NLS-0$
 					}
 					if (hidden) {
+						this.sibling.setAttribute("aria-hidden", false);
 						lib.returnFocus(this.content, this.originalFocus, function() {
 							this.content.style.display = "none";
 						}.bind(this));
 					} else {
+						this.sibling.setAttribute("aria-hidden", true);
 						sections.forEach(function(s) {
 							var field = lib.$(".gitFilterInput", s); //$NON-NLS-0$
 							var result = s.query.getValue ? s.query.getValue() : s.query.value;
