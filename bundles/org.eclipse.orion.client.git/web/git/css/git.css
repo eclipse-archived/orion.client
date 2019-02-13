@@ -212,6 +212,7 @@ html[dir="rtl"] .mainToolbar .sectionWrapper { /* ACGC */
 	z-index: 200;
 	margin-top: -1px;
 	resize: none;
+	overflow: hidden;
 	background-color: white;
 	border: 1px solid #e3e7ea;
 	border-top: none;
