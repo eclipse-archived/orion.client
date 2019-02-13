@@ -595,6 +595,7 @@ define([
 				return section;
 			}.bind(this);
 			
+			var that = this;
 			var content = this.section.getContentElement();
 			mainSection = this.filterSection = new mSection.Section(content, {
 				id: "commitFilterSection", //$NON-NLS-0$
@@ -612,6 +613,9 @@ define([
 			mainSection.getContentElement().setAttribute("aria-modal", "true"); //$NON-NLS-1$ //$NON-NLS-0$
 			mainSection.domNode.tabIndex = -1;
 			mainSection.addEventListener("toggle", function(event){ //$NON-NLS-0$
+				if (that._filterButton) {
+					that._filterButton.setAttribute("aria-expanded", event.isExpanded); //$NON-NLS-1$ //$NON-NLS-0$
+				}
 				if (event.isExpanded) {
 					sections.forEach(function(s) {
 						var field = lib.$(".gitFilterInput", s); //$NON-NLS-0$
@@ -685,7 +689,6 @@ define([
 			var sha1Section = createSection(contentTable, messages["SHA1:"],  {key: "sha1", createQuery: createStringQuery}); //$NON-NLS-0$
 			var fromDateSection = createSection(contentTable, messages["fromDate:"],  {key: "fromDate", createQuery: createDateQuery, isValid: isValidDate, calcDate: ""}); //$NON-NLS-0$
 			var toDateSection = createSection(contentTable, messages["toDate:"],  {key: "toDate", createQuery: createDateQuery, isValid: isValidDate, calcDate: ""}); //$NON-NLS-0$
-			var that = this;
 			var pathSection = createSection(contentTable, messages["Path:"],  {
 				key: "path", //$NON-NLS-0$
 				createQuery: function() {return "";}, 
@@ -877,7 +880,6 @@ define([
 				extraClass: "filterButton",
 				callback: function(data) {
 					this.filterSection.setHidden(!this.filterSection.hidden);
-					data.domNode.setAttribute("aria-expanded", !this.filterSection.hidden); //$NON-NLS-1$ //$NON-NLS-0$
 				},
 				visibleWhen: function() {
 					filterCommand.imageClass = that.model.isFiltered() ? "core-sprite-show-filtered" : "core-sprite-filter"; //$NON-NLS-1$ //$NON-NLS-0$
@@ -1035,7 +1037,7 @@ define([
 				}
 				commandService.renderCommands(actionsNodeScope, actionsNodeScope, {LocalBranch: activeBranch, Remote: targetRef}, this, "tool"); //$NON-NLS-0$
 				
-				var filterButton = node.querySelector(".filterButton");
+				var filterButton = this._filterButton = node.querySelector(".filterButton");
 				if (filterButton) {
 					filterButton.setAttribute("aria-haspopup", "dialog");
 					filterButton.setAttribute("aria-expanded", "false");
