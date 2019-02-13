@@ -890,7 +890,7 @@ define([
 			
 			var performFilterCommand = new mCommands.Command({
 				id: "eclipse.orion.git.commit.performFilter", //$NON-NLS-0$
-				name: messages["OK"],
+				name: messages["Filter"],
 				callback: function(data) {
 					data.items.filter();
 				},
