@@ -141,7 +141,7 @@ define(["orion/util"], function(util) {
 	 * @param {Node} node
 	 */
 	function empty(node) {
-		while (node.hasChildNodes()) {
+		while (node && node.hasChildNodes()) {
 			var child = node.firstChild;
 			node.removeChild(child);
 		}

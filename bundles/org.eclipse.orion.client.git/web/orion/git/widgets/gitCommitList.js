@@ -525,7 +525,7 @@ define([
 		},
 		createFilter: function() {
 			if (!this.section) return;
-			var sections = [], mainSection;
+			var sections = [], mainSection, explorer;
 			var doFilter = function() {
 				if (sections.every(function(s) {
 					var prop = s.query.key + "Query"; //$NON-NLS-0$
@@ -557,10 +557,15 @@ define([
 				});
 				doFilter();
 			}
-			var keyHandler = function(event){ //$NON-NLS-0$
+			var filterHandler = function(event){
 				if (event.keyCode === lib.KEY.ENTER) {
 					doFilter();
 					event.preventDefault();
+				}
+			};
+			var escHandler = function(event){
+				if (event.keyCode === lib.KEY.ESCAPE) {
+					mainSection.setHidden(true);
 				}
 			};
 			var createSection = function (parent, title, query) {
@@ -584,7 +589,7 @@ define([
 				filter.placeholder = messages["Filter " + query.key];
 				section.query = query;
 				section.appendChild(filter);
-				filter.addEventListener("keydown", keyHandler); //$NON-NLS-0$
+				filter.addEventListener("keydown", filterHandler); //$NON-NLS-0$
 				filter.addEventListener("input", function(event) { //$NON-NLS-0$
 					event.target.classList.remove("invalidParam"); //$NON-NLS-0$
 				});
@@ -593,39 +598,68 @@ define([
 				inputCol.appendChild(filter);
 				parent.appendChild(section);
 				return section;
-			}.bind(this);
+			};
 			
 			var that = this;
-			var content = this.section.getContentElement();
-			mainSection = this.filterSection = new mSection.Section(content, {
-				id: "commitFilterSection", //$NON-NLS-0$
-				title: messages.FilterCommits, //$NON-NLS-0$
-				canHide: true,
-				hidden: true,
-				sibling: content.firstChild,
-				dropdown: true,
-				positionNode: this.section.domNode,
-				preferenceService: this.preferencesService
-			});
-			mainSection.domNode.classList.add("commitFilterHeader"); //$NON-NLS-0$
-			mainSection.domNode.setAttribute("aria-hidden", "true"); //$NON-NLS-1$ //$NON-NLS-0$
-			mainSection.getContentElement().classList.add("commitFilterHeader"); //$NON-NLS-0$
-			mainSection.getContentElement().setAttribute("aria-modal", "true"); //$NON-NLS-1$ //$NON-NLS-0$
-			mainSection.domNode.tabIndex = -1;
-			mainSection.addEventListener("toggle", function(event){ //$NON-NLS-0$
-				if (that._filterButton) {
-					that._filterButton.setAttribute("aria-expanded", event.isExpanded); //$NON-NLS-1$ //$NON-NLS-0$
-				}
-				if (event.isExpanded) {
-					sections.forEach(function(s) {
-						var field = lib.$(".gitFilterInput", s); //$NON-NLS-0$
-						var result = s.query.getValue ? s.query.getValue() : s.query.value;
-						if (result !== undefined) {
-							field.value = result;
+			
+			mainSection = this.filterSection = {
+				hidden: false,
+				create: function(parent) {
+					var content = this.content = document.createElement("div");
+					parent.insertBefore(content, parent.firstChild);
+					content.classList.add("commitFilterPanel");
+					content.setAttribute("role", "dialog");
+					content.setAttribute("aria-modal", "true");
+					content.setAttribute("aria-label", messages.FilterCommits);
+					content.addEventListener("keydown", escHandler);
+					lib.trapTabs(content);
+					lib.addAutoDismiss([content], function() {
+						mainSection.setHidden(true);
+					});
+					
+				},
+				setHidden: function(hidden) {
+					if (this.hidden === hidden) return;
+					this.hidden = hidden;
+					if (that._filterButton) {
+						that._filterButton.setAttribute("aria-expanded", !hidden); //$NON-NLS-0$
+					}
+					if (hidden) {
+						lib.returnFocus(this.content, this.originalFocus, function() {
+							this.content.style.display = "none";
+						}.bind(this));
+					} else {
+						sections.forEach(function(s) {
+							var field = lib.$(".gitFilterInput", s); //$NON-NLS-0$
+							var result = s.query.getValue ? s.query.getValue() : s.query.value;
+							if (result !== undefined) {
+								field.value = result;
+							}
+						});
+						
+						var location;
+						var model = that.model;
+						var commit = that.selection && that.selection.getSelection();
+						if (commit && commit.Type === "Commit") { //$NON-NLS-0$
+							location = commit.TreeLocation;
+						} else {
+							location = (model.simpleLog ? model.getTargetReference() : model.getActiveBranch()).TreeLocation;
 						}
-					}.bind(this));
+						if (location) {
+							explorer.display(location).then(function() {
+								explorer.myTree.expand(explorer.model.root);
+							});
+						}
+						
+						this.content.style.display = "block";
+						
+						this.originalFocus = document.activeElement;
+						lib.firstTabbable(this.content).focus();
+					}
 				}
-			}.bind(this));
+			};
+			mainSection.create(this.section.getContentElement());
+			mainSection.setHidden(true);
 
 			var createStringQuery = function() {
 				return this.value ? this.key + "=" + encodeURIComponent(this.value) : ""; //$NON-NLS-0$ 
@@ -674,14 +708,12 @@ define([
 				return !isNaN(d.valueOf());
 			};
 			
-			content = mainSection.getContentElement();
-			
 			var contentTable = document.createElement("table"); //$NON-NLS-0$
 			contentTable.className = "filterSections";
 			contentTable.setAttribute("role", "presentation"); //$NON-NLS-1$ //$NON-NLS-0$
 			var contentTbody = document.createElement("tbody"); //$NON-NLS-0$
 			contentTable.appendChild(contentTbody);
-			content.appendChild(contentTable);
+			mainSection.content.appendChild(contentTable);
 			
 			var messageSection = createSection(contentTable, messages["Message:"], {key: "filter", createQuery: createStringQuery}); //$NON-NLS-0$
 			var authorSection = createSection(contentTable, messages["Author:"],  {key: "author", createQuery: createStringQuery}); //$NON-NLS-0$
@@ -706,7 +738,7 @@ define([
 			treeDiv.className = "commitFilterPathFilter";
 			pathCol.appendChild(treeDiv);
 			var selection = this.treeSelection = new mSelection.Selection(this.registry, "orion.selection.commitTree"); //$NON-NLS-0$
-			var explorer  = this.treeNavigator = new mGitFileList.GitFileListExplorer({
+			explorer = this.treeNavigator = new mGitFileList.GitFileListExplorer({
 				serviceRegistry: this.registry,
 				commandRegistry: this.commandService,
 				parentId: treeDiv,
@@ -719,23 +751,7 @@ define([
 				gitClient: this.gitClient,
 				progressService: this.progressService
 			});
-			mainSection.addEventListener("toggle", function(e) { //$NON-NLS-0$
-				if (e.isExpanded) {
-					var location;
-					var model = this.model;
-					var commit = this.selection && this.selection.getSelection();
-					if (commit && commit.Type === "Commit") { //$NON-NLS-0$
-						location = commit.TreeLocation;
-					} else {
-						location = (model.simpleLog ? model.getTargetReference() : model.getActiveBranch()).TreeLocation;
-					}
-					if (!location) return;
-					explorer.display(location).then(function() {
-						explorer.myTree.expand(explorer.model.root);
-					}.bind(this));
-				}
-			}.bind(this));
-			treeDiv.addEventListener("keydown", keyHandler); //$NON-NLS-0$
+			treeDiv.addEventListener("keydown", filterHandler); //$NON-NLS-0$
 			selection.addEventListener("selectionChanged", function(e) { //$NON-NLS-0$
 				var selected = e.selection;
 				if (!selected || this.treePath === selected) return;
@@ -745,7 +761,7 @@ define([
 
 			var filterActions = document.createElement("div"); //$NON-NLS-0$
 			filterActions.className = "commitFilterActions"; //$NON-NLS-0$
-			content.appendChild(filterActions);
+			mainSection.content.appendChild(filterActions);
 			var commitFilterScope = "commitFilterActions"; //$NON-NLS-0$
 			var actionsArea = document.createElement("ul"); //$NON-NLS-0$
 			actionsArea.className = "layoutRight commandList"; //$NON-NLS-0$

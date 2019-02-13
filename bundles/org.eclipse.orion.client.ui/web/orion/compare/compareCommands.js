@@ -235,11 +235,15 @@ exports.CompareCommandFactory = (function() {
 				return;
 			}
 			if(toggleCommandSpanId) {
-				lib.empty(lib.node(toggleCommandSpanId));
+				var toggleCommandNode = lib.node(toggleCommandSpanId);
+				if (!toggleCommandNode) return;
+				lib.empty(toggleCommandNode);
 				commandService.renderCommands(toggleCommandSpanId, toggleCommandSpanId, compareWidget, compareWidget, "tool", null); //$NON-NLS-0$
 			}
 			if(commandSpanId) {
-				lib.empty(lib.node(commandSpanId));
+				var commandNode = lib.node(commandSpanId);
+				if (!commandNode) return;
+				lib.empty(commandNode);
 				if(this.options.gridRenderer && this.options.gridRenderer.navGridHolder){
 					this.options.gridRenderer.navGridHolder.splice(0, this.options.gridRenderer.navGridHolder.length);
 					if(this.options.gridRenderer.additionalCmdRender){

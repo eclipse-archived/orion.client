@@ -203,33 +203,23 @@ html[dir="rtl"] .mainToolbar .sectionWrapper { /* ACGC */
 	height: 100%;
 }
 
-.commitFilterHeader.sectionWrapper {
-	border-width: 0;
-	padding: 0;
-	margin: 0;
-	height: 0;
-}
-
-.commitFilterHeader.sectionTable {
+.commitFilterPanel {
 	margin: 0;
 	margin-left: 10px;
 	margin-right: 10px;
 	position: absolute;
-	width: calc(100% - 22px);
+	width: calc(100% - 24px);
 	z-index: 200;
 	margin-top: -1px;
 	resize: none;
 	background-color: white;
-	border-color: #e3e7ea;
+	border: 1px solid #e3e7ea;
+	border-top: none;
 	border-bottom-left-radius: 8px;
 	border-bottom-right-radius: 8px;
 }
 
-.commitFilterHeader.sectionTable.sectionClosed {
-	visibility: hidden;
-}
-
-.commitFilterHeader.sectionTable .filterSections {
+.commitFilterPanel .filterSections {
 	width: 100%;
 	table-layout: auto;
 	padding-left: 10px;
@@ -244,11 +234,11 @@ html[dir="rtl"] .mainToolbar .sectionWrapper { /* ACGC */
 	width: 100%;
 }
 
-.commitFilterHeader.sectionTable .filterSections td {
+.commitFilterPanel .filterSections td {
 	border: none;
 }
 
-.commitFilterHeader.sectionTable input {
+.commitFilterPanel input {
 	border: 1px solid #ddd;
 	min-width: 260px;
 	width: 70%;

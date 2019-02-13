@@ -587,9 +587,7 @@ define([
 					var firstTabbable = lib.firstTabbable(this._contentParent);					
 					if (firstTabbable) {
 						if (firstTabbable.tagName === "INPUT" || firstTabbable.tabIndex >= 0) { //$NON-NLS-0$
-							setTimeout(function() {
-								firstTabbable.focus();
-							}, 50);
+							firstTabbable.focus();
 						}
 						lib.trapTabs(this.domNode.nextElementSibling);
 					}
