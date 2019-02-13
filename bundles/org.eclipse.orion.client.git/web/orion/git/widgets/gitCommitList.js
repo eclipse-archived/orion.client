@@ -631,6 +631,7 @@ define([
 							this.content.style.display = "none";
 						}.bind(this));
 					} else {
+						// Hide sibling to work around JAWS bug https://github.com/FreedomScientific/VFO-standards-support/issues/91
 						this.sibling.setAttribute("aria-hidden", true);
 						sections.forEach(function(s) {
 							var field = lib.$(".gitFilterInput", s); //$NON-NLS-0$
