@@ -49,6 +49,7 @@ define([
 		},
 
 		setHash: function(iframe, hash){
+			if (!iframe) return;
 			if(iframe.src.indexOf("#")>0){ //$NON-NLS-0$
 				iframe.src = iframe.src.substr(0, iframe.src.indexOf("#")) + "#" + hash; //$NON-NLS-1$ //$NON-NLS-0$
 			}else{
