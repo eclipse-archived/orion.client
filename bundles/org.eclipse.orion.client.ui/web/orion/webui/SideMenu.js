@@ -147,7 +147,7 @@ define(['i18n!orion/nls/messages', 'orion/webui/littlelib', 'orion/PageUtil', 'o
 					anchor.commandTooltip = new mTooltip.Tooltip({
 						node: anchor,
 						text: listItem.categoryName,
-						position: ["above", "below", "right", "left"] //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+						position: ["right", "above", "below", "left"] //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 					});
 					this._categorizedAnchors[categoryInfo.id] = anchor;
 				}, this);
