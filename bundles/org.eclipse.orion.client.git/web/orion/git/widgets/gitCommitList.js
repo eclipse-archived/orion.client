@@ -874,6 +874,7 @@ define([
 				id: "eclipse.orion.git.commit.toggleFilter", //$NON-NLS-0$
 				name: messages["FilterCommits"],
 				tooltip: messages["FilterCommitsTip"],
+				extraClass: "filterButton",
 				callback: function(data) {
 					this.filterSection.setHidden(!this.filterSection.hidden);
 					data.domNode.setAttribute("aria-expanded", !this.filterSection.hidden); //$NON-NLS-1$ //$NON-NLS-0$
@@ -1034,7 +1035,7 @@ define([
 				}
 				commandService.renderCommands(actionsNodeScope, actionsNodeScope, {LocalBranch: activeBranch, Remote: targetRef}, this, "tool"); //$NON-NLS-0$
 				
-				var filterButton = node.querySelector("[aria-label='" + messages.FilterCommits + "']");
+				var filterButton = node.querySelector(".filterButton");
 				if (filterButton) {
 					filterButton.setAttribute("aria-haspopup", "dialog");
 					filterButton.setAttribute("aria-expanded", "false");
