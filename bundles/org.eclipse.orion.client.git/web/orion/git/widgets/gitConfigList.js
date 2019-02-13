@@ -158,7 +158,7 @@ define([
 			if (this.section.filterBox) {
 				this.section.filterBox.destroy();
 			}
-			this.section.filterBox = uiUtil.createFilter(this.section, messages["Filter configuration entries"],  function(value) {
+			this.section.filterBox = uiUtil.createFilter(this.section, "Filter configuration entries",  function(value) {
 				this.model.filterQuery = value.trim();
 				this.changedItem();
 			}.bind(this));

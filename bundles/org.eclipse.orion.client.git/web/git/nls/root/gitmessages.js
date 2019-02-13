@@ -274,6 +274,7 @@ define({//Default message bundle
 	"Cancel": "Cancel", //$NON-NLS-0$  //$NON-NLS-1$
 	"Clear": "Clear", //$NON-NLS-0$  //$NON-NLS-1$
 	"Filter": "Filter", //$NON-NLS-0$  //$NON-NLS-1$
+	"Filter:": "Filter:", //$NON-NLS-0$  //$NON-NLS-1$
 	"FilterCommits": "Filter Commits", //$NON-NLS-0$  //$NON-NLS-1$
 	"FilterCommitsTip": "Shows the filter commits panel", //$NON-NLS-0$  //$NON-NLS-1$
 	"MaximizeCmd": "Maximize", //$NON-NLS-0$  //$NON-NLS-1$
@@ -603,9 +604,9 @@ define({//Default message bundle
 	'PluralSubmodule' : "${0} (${1} submodules)", //$NON-NLS-1$ //$NON-NLS-0$
 	'UninitializedSubmodule' : " ( Uninitialized Submodule )", //$NON-NLS-1$ //$NON-NLS-0$
 	"Detach Head:": "Detach Head:", //$NON-NLS-0$ //$NON-NLS-1$
-	"Filter repositories": "Filter repositories", //$NON-NLS-0$ //$NON-NLS-1$
-	"Filter references": "Filter references", //$NON-NLS-0$ //$NON-NLS-1$
-	"Filter configuration entries": "Filter configuration entries", //$NON-NLS-0$ //$NON-NLS-1$
+	"Filter repositories": "Filter by repository name", //$NON-NLS-0$ //$NON-NLS-1$
+	"Filter references": "Filter by reference name", //$NON-NLS-0$ //$NON-NLS-1$
+	"Filter configuration entries": "Filter by configuration key", //$NON-NLS-0$ //$NON-NLS-1$
 	"ContinueTooltip": "Use after merging the conflicts and selecting all files", //$NON-NLS-0$  //$NON-NLS-1$
 	"SkipTooltip": "Bypass the current patch", //$NON-NLS-0$  //$NON-NLS-1$
 	"AbortTooltip": "Abort to end the rebase at any time", //$NON-NLS-0$  //$NON-NLS-1$

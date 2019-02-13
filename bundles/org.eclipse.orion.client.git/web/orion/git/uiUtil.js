@@ -24,14 +24,21 @@ define([
 ], function(messages, Tooltip, mCompareCommands, mResourceComparer, lib, bidiUtils, mGitUtil) {
 	var exports = Object.create(mGitUtil); // extend util
 
-	function createFilter(section, msg, callback) {
+	function createFilter(section, msgKey, callback) {
 		var filterDiv = document.createElement("div"); //$NON-NLS-0$
 		filterDiv.className = "gitFilterBox"; //$NON-NLS-0$
-			
+		
+		var id = lib.validId(msgKey);
+		var label = document.createElement("label");
+		label.textContent = messages["Filter:"];
+		label.setAttribute("for", id);
+		filterDiv.appendChild(label);
+
+		var msg = messages[msgKey];
 		var filter = document.createElement("input"); //$NON-NLS-0$
+		filter.id = id;
 		filter.type = "search"; //$NON-NLS-1$
 		filter.placeholder = msg;
-		filter.setAttribute("aria-label", msg); //$NON-NLS-1$ 
 		bidiUtils.initInputField(filter);
 		filterDiv.appendChild(filter);
 		
