@@ -501,12 +501,18 @@ objects.mixin(TabWidget.prototype, {
 		var that = this;
 		var editorTab = document.createElement("div");
 		editorTab.className = "editorTab";
+		editorTab.setAttribute("role", "presentation");
 		if (!this.enableEditorTabs) {
 			editorTab.classList.add("editorTabsDisabled");
 		}
-		editorTab.setAttribute("draggable", true);
-		editorTab.setAttribute("role", "tab");
-		editorTab.setAttribute("aria-controls", "editorViewerContent_Panel" + this.id);
+		var editorTabContent = document.createElement("div");
+		editorTabContent.tabIndex = 0;
+		editorTabContent.className = "editorTabContent";
+		editorTab.appendChild(editorTabContent);
+
+		editorTabContent.setAttribute("draggable", true);
+		editorTabContent.setAttribute("role", "tab");
+		editorTabContent.setAttribute("aria-controls", "editorViewerContent_Panel" + this.id);
 
 		this.editorTabContainer.appendChild(editorTab);
 		
@@ -514,11 +520,12 @@ objects.mixin(TabWidget.prototype, {
 		dirtyIndicator.classList.add("editorViewerHeaderDirtyIndicator");
 		dirtyIndicator.textContent = "*";
 		dirtyIndicator.style.display = "none";
-		editorTab.appendChild(dirtyIndicator);
+		editorTabContent.appendChild(dirtyIndicator);
 		
 		var curFileNode = document.createElement("span");
 		curFileNode.className = "editorViewerHeaderTitle";
-		editorTab.appendChild(curFileNode);
+		curFileNode.tabIndex = -1;
+		editorTabContent.appendChild(curFileNode);
 		var curFileNodeName = metadata.Name || "";
 		if (bidiUtils.isBidiEnabled()) {
 			curFileNodeName = bidiUtils.enforceTextDirWithUcc(curFileNodeName);
@@ -526,6 +533,9 @@ objects.mixin(TabWidget.prototype, {
 		curFileNode.textContent = curFileNodeName;
 
 		var closeButton = document.createElement("div");
+		closeButton.setAttribute("role", "button");
+		closeButton.setAttribute("aria-label", messages["closeSelf"]);
+		closeButton.tabIndex = 0;
 		closeButton.className = "editorTabCloseButton core-sprite-close imageSprite ";
 		// Unicode multiplication sign
 		closeButton.metadata = metadata;
@@ -534,11 +544,18 @@ objects.mixin(TabWidget.prototype, {
 			var isDirty = dirtyIndicator.style.display !== "none";
 			that.closeTab(this.metadata, isDirty);
 		});
-		editorTab.appendChild(closeButton);
+		closeButton.addEventListener("keydown", function(e) {
+			if (e.keyCode === lib.KEY.ENTER || e.keyCode === lib.KEY.SPACE) {
+				e.stopPropagation();
+				var isDirty = dirtyIndicator.style.display !== "none";
+				that.closeTab(this.metadata, isDirty);
+			}
+		});
+		editorTabContent.appendChild(closeButton);
 		editorTab.metadata = metadata;
 		editorTab.href = href;
 		
-		var fileNodeTooltip = new mTooltip.Tooltip({
+		var fileNodeTooltip = editorTabContent.tooltip = new mTooltip.Tooltip({
 			node: curFileNode,
 			position: ["below", "above", "right", "left"]
 		});
@@ -584,6 +601,12 @@ objects.mixin(TabWidget.prototype, {
 		};
 		editorTab.addEventListener("click", editorTabClickHandler);
 		editorTab.addEventListener("dblclick", editorTabClickHandler);
+		editorTab.addEventListener("keydown", function(e) {
+			if (e.keyCode === lib.KEY.ENTER || e.keyCode === lib.KEY.SPACE) {
+				e.stopPropagation();
+				that.setWindowLocation(this.href);
+			}
+		});
 
 		editorTab.addEventListener("mouseup", function(e) {
 			var button = e.which;
@@ -687,7 +710,7 @@ objects.mixin(TabWidget.prototype, {
 			this.selectedFile.checked = false;
 			curEditorTabNode = this.getCurrentEditorTabNode();
 			curEditorTabNode.classList.remove("focusedEditorTab");
-			curEditorTabNode.setAttribute("aria-selected", "false");
+			curEditorTabNode.firstChild.setAttribute("aria-selected", "false");
 		}
 		// If the editor tab exists, reuse it.
 		if (this.editorTabs.hasOwnProperty(metadata.Location)) {
@@ -764,7 +787,7 @@ objects.mixin(TabWidget.prototype, {
 
 		// Style the editor tab
 		editorTab.editorTabNode.classList.add("focusedEditorTab");
-		editorTab.editorTabNode.setAttribute("aria-selected", "true");
+		editorTab.editorTabNode.firstChild.setAttribute("aria-selected", "true");
 		// Update the selected file
 		this.selectedFile = this.fileList[0];
 		// Enforce maximum editor tabs
@@ -1541,7 +1564,7 @@ objects.mixin(EditorViewer.prototype, {
 	addAnnotationsFromDebugService: function() {
 		// Add local breakpoints to this editor
 		this.debugService.getBreakpointsByLocation(this.inputManager.getInput()).then(function(breakpoints) {
-			if (!this.editor) {
+			if (!this.editor || !this.editor.getAnnotationModel) {
 				return;
 			}
 			var annotationModel = this.editor.getAnnotationModel();

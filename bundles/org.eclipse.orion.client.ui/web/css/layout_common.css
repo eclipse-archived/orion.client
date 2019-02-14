@@ -412,7 +412,7 @@ hard-coded numbers elsewhere.
 	color: white;
 	display: flex;
 	flex-direction: row;
-	height: 26px;
+	height: 35px;
 }
 
 .editorTabContainerOuter {
@@ -439,9 +439,16 @@ hard-coded numbers elsewhere.
 .editorTab {
 	border-top: 1px solid black;
 	border-right: 1px solid black;
+	padding-top: 1px;
 	display: flex;
 	flex: 0 1 auto;
-    overflow-x: hidden;
+}
+
+.editorTabContent {
+	display: flex;
+	flex: 0 1 auto;
+	margin: 3px;
+	overflow-x: hidden;
 }
 
 .editorTabsDisabled {
@@ -475,6 +482,7 @@ hard-coded numbers elsewhere.
 	margin-left: 5px;
 	margin-right: 5px;
 	overflow: hidden;
+	outline: none;
     white-space: nowrap;
     flex: 1 1 auto;
 }
@@ -490,7 +498,7 @@ hard-coded numbers elsewhere.
 .editorViewerContent {
 	position: absolute;
 	width: 100%;
-	top: 26px;
+	top: 34px;
 	bottom: 0;
 	overflow: auto
 }
@@ -508,7 +516,7 @@ hard-coded numbers elsewhere.
 
 .focusedEditorTab {
 	border-top: 2px solid;
-	margin-top: -1px;
+	padding-top: 0;
 	background: white;
 	color: black;
 }
