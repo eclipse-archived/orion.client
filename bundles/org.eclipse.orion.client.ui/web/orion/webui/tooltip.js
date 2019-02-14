@@ -126,8 +126,9 @@ define(['orion/webui/littlelib'], function(lib) {
 
 				this._tip.addEventListener("keydown", function (e) {
 					if (e.keyCode === lib.KEY.ESCAPE) {
-						self._node.focus();
-						self.hide(0);
+						lib.returnFocus(self._tipInner, self._originalFocus, function() {
+							self.hide(0);
+						});
 					}
 				}, false);
 
@@ -332,6 +333,7 @@ define(['orion/webui/littlelib'], function(lib) {
 		},
 		
 		_showImmediately: function() {
+			this._originalFocus = document.activeElement;
 			var positioned = false;
 			var index = 0;
 			// See if the tooltip can fit anywhere around the anchor
