@@ -309,6 +309,7 @@ function TabWidget(options) {
 	this.restoreTabsFromStorage(); // have to be after createDropdown_ call.
 }
 
+var LABEL_ID = 1;
 TabWidget.prototype = {};
 objects.mixin(TabWidget.prototype, {
 	createDropdown_ : function() {
@@ -508,8 +509,10 @@ objects.mixin(TabWidget.prototype, {
 		}
 		this.editorTabContainer.appendChild(editorTab);
 		
+		var labelID = "editorTabLabel_" + LABEL_ID++;
 		var panelIP = "editorViewerContent_Panel" + this.id;
 		var editorTabContent = document.createElement("div");
+		editorTabContent.setAttribute("aria-labelledby", labelID);
 		editorTabContent.tabIndex = 0;
 		editorTabContent.className = "editorTabContent";
 		editorTabContent.setAttribute("role", "tab");
@@ -537,6 +540,7 @@ objects.mixin(TabWidget.prototype, {
 		});
 		
 		var curFileNode = document.createElement("span");
+		curFileNode.id = labelID;
 		curFileNode.className = "editorViewerHeaderTitle";
 		editorTabContentFocus.appendChild(curFileNode);
 		var curFileNodeName = metadata.Name || "";
