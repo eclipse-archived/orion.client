@@ -502,30 +502,43 @@ objects.mixin(TabWidget.prototype, {
 		var editorTab = document.createElement("div");
 		editorTab.className = "editorTab";
 		editorTab.setAttribute("role", "presentation");
+		editorTab.setAttribute("draggable", true);
 		if (!this.enableEditorTabs) {
 			editorTab.classList.add("editorTabsDisabled");
 		}
+		this.editorTabContainer.appendChild(editorTab);
+		
+		var panelIP = "editorViewerContent_Panel" + this.id;
 		var editorTabContent = document.createElement("div");
 		editorTabContent.tabIndex = 0;
 		editorTabContent.className = "editorTabContent";
+		editorTabContent.setAttribute("role", "tab");
+		editorTabContent.setAttribute("aria-controls", panelIP);
 		editorTab.appendChild(editorTabContent);
 
-		editorTabContent.setAttribute("draggable", true);
-		editorTabContent.setAttribute("role", "tab");
-		editorTabContent.setAttribute("aria-controls", "editorViewerContent_Panel" + this.id);
+		var editorTabContentFocus = document.createElement("div");
+		editorTabContentFocus.tabIndex = -1;
+		editorTabContentFocus.className = "editorTabContentFocus";
+		editorTabContent.appendChild(editorTabContentFocus);
 
-		this.editorTabContainer.appendChild(editorTab);
-		
 		var dirtyIndicator = document.createElement("span");
 		dirtyIndicator.classList.add("editorViewerHeaderDirtyIndicator");
 		dirtyIndicator.textContent = "*";
 		dirtyIndicator.style.display = "none";
-		editorTabContent.appendChild(dirtyIndicator);
+		editorTabContentFocus.appendChild(dirtyIndicator);
+		editorTabContentFocus.addEventListener("click", function(evt) {
+			if (editorTabContentFocus !== document.activeElement) return;
+			var panel = document.querySelector("#" + panelIP);
+			if (!panel) return;
+			var tabbable = lib.firstTabbable(panel);
+			if (tabbable) {
+				tabbable.focus();
+			}
+		});
 		
 		var curFileNode = document.createElement("span");
 		curFileNode.className = "editorViewerHeaderTitle";
-		curFileNode.tabIndex = -1;
-		editorTabContent.appendChild(curFileNode);
+		editorTabContentFocus.appendChild(curFileNode);
 		var curFileNodeName = metadata.Name || "";
 		if (bidiUtils.isBidiEnabled()) {
 			curFileNodeName = bidiUtils.enforceTextDirWithUcc(curFileNodeName);
@@ -551,7 +564,7 @@ objects.mixin(TabWidget.prototype, {
 				that.closeTab(this.metadata, isDirty);
 			}
 		});
-		editorTabContent.appendChild(closeButton);
+		editorTabContentFocus.appendChild(closeButton);
 		editorTab.metadata = metadata;
 		editorTab.href = href;
 		
