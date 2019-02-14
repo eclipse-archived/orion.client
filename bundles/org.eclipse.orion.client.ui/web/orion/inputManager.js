@@ -86,7 +86,9 @@ define([
 				newError.Severity = parsedError.Severity || newError.Severity;
 				newError.Message = parsedError.Message || newError.Message;
 			} catch (e) {
-				newError.Message = responseText;
+				if (responseText.length < 200) {
+					newError.Message = responseText;
+				}
 			}
 		} else {
 			try {
