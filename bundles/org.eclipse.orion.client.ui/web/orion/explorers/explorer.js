@@ -550,7 +550,7 @@ exports.ExplorerRenderer = (function() {
 			}
 			this.renderTableHeader(tableNode);
 			var self = this;
-			tableNode.onclick = function(evt) {
+			tableNode.addEventListener("mousedown", function(evt) {
 				var target = evt.target;
 				var tableRow = target;
 				while (tableRow && tableRow !== tableNode) {
@@ -589,8 +589,10 @@ exports.ExplorerRenderer = (function() {
 					if (prefPath && window.sessionStorage) {
 						self._storeExpansions(prefPath);
 					}
+					evt.stopPropagation();
+					evt.preventDefault();
 				}
-			};
+			});
 		},
 		getActionsColumn: function(item, tableRow, renderType, columnClass, renderAsGrid){
 			renderType = renderType || "tool"; //$NON-NLS-0$
