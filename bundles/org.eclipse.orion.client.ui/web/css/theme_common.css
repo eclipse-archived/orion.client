@@ -331,9 +331,10 @@ a.breadcrumb.currentLocation {
 }
 
 .sidebarToolbar {
-	display: inline;
+	display: flex;
 	overflow: visible;
 	padding: 0 !important;
+	background-color: transparent !important;
 }
 
 /* Searchbox in the top navigation area seems a difficult thing to 
