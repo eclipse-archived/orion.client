@@ -381,9 +381,25 @@ define([
 	};
 	
 	GitRepositoryExplorer.prototype.setSelectedChanges = function(changes) {
+		if (changes && changes.length > 2) changes = null;
+		if (changes && changes.length === 1 && changes[0].Type === "Incoming") changes = null;
+		if (changes && changes.length === 1 && changes[0].Type === "Outgoing") changes = null;
+		if (changes && changes.length === 1 && changes[0].Type === "Synchronized") changes = null;
+		if (changes && changes.length === 1 && changes[0].Type === "NoCommits") changes = null;
+		changes = changes || (this.repository.status ? [this.repository.status] : []);
+		if (this.changes && changes) {
+			if (this.changes.length === changes.length) {
+				var i;
+				for (i = 0; i < changes.length; i++) {
+					if (changes[i] !== this.changes[i]) 
+						break;
+				}
+				if (i === changes.length) return;
+			}
+		}
 		lib.empty(lib.node('table')); //$NON-NLS-0$
 		var title;
-		this.changes = changes = changes || (this.repository.status ? [this.repository.status] : []);
+		this.changes = changes;
 		if (changes.length === 2) {
 			if (changes[0].Type === "Commit" && changes[1].Type === "Commit") { //$NON-NLS-1$ //$NON-NLS-0$
 				title = i18nUtil.formatMessage(messages["CompareChanges"], util.shortenRefName(changes[0]), util.shortenRefName(changes[1]));
