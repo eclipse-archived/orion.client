@@ -9,7 +9,7 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 /*eslint-env browser, amd*/
-define(['orion/objects', 'orion/webui/littlelib', 'orion/widgets/input/Checkbox'],  function(objects, lib, Checkbox) {
+define(['orion/objects', 'orion/webui/littlelib', 'orion/widgets/input/Checkbox', 'orion/webui/tooltip'],  function(objects, lib, Checkbox, mTooltip) {
 
 	/**
 	 * This is just an orion/widgets/input/Select with a label.
@@ -18,6 +18,7 @@ define(['orion/objects', 'orion/webui/littlelib', 'orion/widgets/input/Checkbox'
 		makeLocalCheckbox(params);
 		Checkbox.apply(this, arguments);
 		this.mylabel = lib.$(".setting-label", this.node); //$NON-NLS-0$
+		this.mycontrol = lib.$(".setting-control", this.node); //$NON-NLS-0$
 	}
 
 	objects.mixin(SettingsCheckbox.prototype, Checkbox.prototype, makeCheckbox());
@@ -49,7 +50,11 @@ define(['orion/objects', 'orion/webui/littlelib', 'orion/widgets/input/Checkbox'
 				Checkbox.prototype.postCreate.call(this);
 				this.mylabel.textContent = this.fieldlabel;
 				if(this.fieldTitle) {
-					this.mylabel.parentNode.title = this.fieldTitle;
+					this.mycontrol.commandTooltip = new mTooltip.Tooltip({
+						node: this.mycontrol,
+						text: this.fieldTitle,
+						position: ["above", "below", "right", "left"] //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+					});
 				}
 			},
 
@@ -58,8 +63,14 @@ define(['orion/objects', 'orion/webui/littlelib', 'orion/widgets/input/Checkbox'
 				if (this.mylabel) {
 					this.mylabel = null;
 				}
+				if (this.mycontrol) {
+					if (this.mycontrol.commandTooltip) {
+			            this.mycontrol.commandTooltip.destroy();
+			        }
+		            this.mycontrol = null;
+		        }
 			}
-		}
+		};
 	}
 
 

@@ -9,6 +9,7 @@
  ******************************************************************************/
 /*eslint-env browser, amd*/
 define({//Default message bundle
+	"Accessibility": "Accessibility",
 	"Globalization": "Globalization",
 	"Enable bidi support": "Enable bidi support",
 	"Base text direction": "Base text direction",
@@ -111,6 +112,19 @@ define({//Default message bundle
 	"Disable": "Disable",
 	"Disabled":"Disabled ${0}",
 	"DisableTooltip": "Disable the plug-in",
+	"Visualizations": "Visualizations",
+	"hideCodeMap": "Hide Code Map",
+	"disableCodeFolding": "Disable Code Folding",
+	"disableCodeFoldingTooltip": "Disables hiding of blocks of code in the editor",
+	"Keyboard": "Keyboard",
+	"shortcutInfoMac.md": "`Ctrl+Shift+?` lists the key bindings for the current page. The list can be filtered, and key bindings can be edited.\n\n#### Common shortcuts:\n\n- `Cmd+M` switches between Traversal Mode and Insert Tab Character Mode in the code editor\n\n- `Ctrl+Space` for code completion (content assist) in the editor\n\n- `Shift+F1` shows a tooltip (if available) for the current caret position or focused control, which can be closed with `Esc`\n\n- `Shift+F10` opens a context menu\n\n- `Cmd++` zoom in, `Cmd+-` zoom out, `Cmd+0` reset",
+	"shortcutInfoWin.md": "`Alt+Shift+?` lists the key bindings for the current page. The list can be filtered, and key bindings can be edited.\n\n#### Common shortcuts:\n\n- `Ctrl+M` switches between Traversal Mode and Insert Tab Character Mode in the code editor\n\n- `Ctrl+Space` for code completion (content assist) in the editor\n\n- `Shift+F1` shows a tooltip (if available) for the current caret position or focused control, which can be closed with `Esc`\n\n- `Shift+F10` opens a context menu\n\n- `Ctrl++` zoom in, `Ctrl+-` zoom out, `Ctrl+0` reset",
+	"Themes": "Themes",
+	"themeInfo.md": "Font size can be changed in the [Editor Theme settings](${0}), and theme colors can be changed in the Editor or [IDE Theme settings](${1}).",
+	"ScreenReaders": "Screen Readers",
+	"srInfo.md": "When editing code, set your screen reader to say all punctuation.",
+	"Documentation": "Documentation",
+	"docInfo.md": "For more information on accessibility, see our [Accessibility documentation](${0}).",
 	"Enable": "Enable",
 	"Enabled":"Enabled ${0}",
 	"EnableTooltip": "Enable the plug-in",

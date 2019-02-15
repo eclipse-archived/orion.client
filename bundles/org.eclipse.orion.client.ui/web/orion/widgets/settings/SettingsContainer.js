@@ -45,6 +45,7 @@ define([
 	'orion/widgets/settings/UserSettings',
 	'orion/widgets/settings/GlobalizationSettings',
 	'orion/widgets/settings/GeneralSettings',
+	'orion/widgets/settings/AccessibilitySettings',
 	'orion/editorPreferences',
 	'orion/generalPreferences',
 	'orion/metrics',
@@ -52,7 +53,7 @@ define([
 	'orion/xhr'
 ], function(messages, mCommands, mGlobalCommands, PageUtil, lib, i18nUtil, objects, mOperationsClient, URITemplate, 
 		ThemeBuilder, SettingsList, mStatus, mThemePreferences, editorThemeData, containerThemeData, editorThemeImporter, SplitSelectionLayout, PluginList, 
-		GitSettings, EditorSettings, EditorWidget, ContainerWidget, ThemeSettings, ContainerSetup, editorSetup, ContainerScopeList, EditorScopeList, UserSettings, GlobalizationSettings, GeneralSettings, 
+		GitSettings, EditorSettings, EditorWidget, ContainerWidget, ThemeSettings, ContainerSetup, editorSetup, ContainerScopeList, EditorScopeList, UserSettings, GlobalizationSettings, GeneralSettings, AccessibilitySettings, 
 		mEditorPreferences, mGeneralPreferences, mMetrics, util, xhr) {
 
 	
@@ -164,6 +165,14 @@ define([
 						id: "General", //$NON-NLS-0$
 						textContent: messages.General,
 						show: _self.showGeneralSettings
+					});
+				}
+
+				if (categories.showAccessibilitySettings === undefined || categories.showAccessibilitySettings) {
+					_self.settingsCategories.push({
+						id: "accessibilitySettings", //$NON-NLS-0$
+						textContent: messages.Accessibility,
+						show: _self.showAccessibilitySettings
 					});
 				}
 
@@ -479,6 +488,36 @@ define([
 			}, userNode);
 			
 			this.generalWidget.show();
+		},
+		
+		showAccessibilitySettings: function(id){
+
+			this.selectCategory(id);
+
+			lib.empty(this.table);
+
+			if (this.accessibilityWidget) {
+				this.accessibilityWidget.destroy();
+			}
+
+			this.updateToolbar(id);
+			
+			var userNode = document.createElement('div');
+			this.table.appendChild(userNode);
+			
+			var editorPreferences = new mEditorPreferences.EditorPreferences (this.preferences);
+			this.accessibilityWidget = new AccessibilitySettings({
+				registry: this.registry,
+				settings: this.settingsCore,
+				preferences: this.preferences,
+				editorPreferences: editorPreferences,
+				statusService: this.preferencesStatusService,
+				dialogService: this.preferenceDialogService,
+				commandService: this.commandService,
+				userClient: this.userClient	
+			}, userNode);
+			
+			this.accessibilityWidget.show();
 		},
 		
 		initPlugins: function(id){
