@@ -9,7 +9,7 @@
  * Contributors: Anton McConville - IBM Corporation - initial API and implementation
  ******************************************************************************/
 /*eslint-env browser, amd*/
-define(['orion/objects', 'orion/webui/littlelib', 'orion/widgets/input/TextField'], function(objects, lib, TextField) {
+define(['orion/objects', 'orion/webui/littlelib', 'orion/widgets/input/TextField', 'orion/webui/tooltip'], function(objects, lib, TextField, mTooltip) {
 
 	function SettingsTextfield(params, node) {
 		makeLocalTextfield(params);
@@ -55,7 +55,11 @@ define(['orion/objects', 'orion/webui/littlelib', 'orion/widgets/input/TextField
 				TextField.prototype.postCreate.call(this);
 				this.mylabel.textContent = this.fieldlabel;
 				if(this.fieldTitle) {
-					this.mylabel.parentNode.title = this.fieldTitle;
+					this.mylabel.parentNode.commandTooltip = new mTooltip.Tooltip({
+						node: this.mylabel.parentNode,
+						text: this.fieldTitle,
+						position: ["above", "below", "right", "left"] //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+					});
 				}
 				if(this.fieldType) {
 					this.textfield.type = this.fieldType;

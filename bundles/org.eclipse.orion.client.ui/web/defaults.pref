@@ -11,5 +11,8 @@
 		"edit/content/jsonEditorPlugin.html":true,
 		"cfui/plugins/cFPlugin.html":true,
 		"cfui/plugins/cFDeployPlugin.html":true
+	},
+	"/a11yLinks":{
+		"a11yInfoLink": "https://wiki.eclipse.org/Orion/Accessibility"
 	}
 }
