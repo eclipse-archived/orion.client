@@ -45,13 +45,17 @@
 	height: 16px;
 }
 
+.progressWatchWrapper {
+	width: 16px;
+	height: 16px;
+	margin: 3px;
+}
+
 .progressWatch {
 	cursor: pointer;
 	text-align: center;
 	position: relative;
 	display: inline-block;
-	width: 16px;
-	height: 16px;
 	background: transparent;
 	border: none;
 	margin-top: -2px;
