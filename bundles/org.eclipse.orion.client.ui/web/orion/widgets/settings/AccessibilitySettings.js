@@ -63,7 +63,7 @@ define([
 				keyboardSubsection.show();
 
 				var themeInfo = new SettingsInfo({
-					content: this._themeContent()
+					content: i18nUtil.formatMessage(this._themeContent(), "#,category=themeSettings")
 				});
 				
 				var themeSubsection = new Subsection({
