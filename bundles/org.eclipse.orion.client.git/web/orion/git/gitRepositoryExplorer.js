@@ -381,11 +381,12 @@ define([
 	};
 	
 	GitRepositoryExplorer.prototype.setSelectedChanges = function(changes) {
-		if (changes && changes.length > 2) changes = null;
-		if (changes && changes.length === 1 && changes[0].Type === "Incoming") changes = null;
-		if (changes && changes.length === 1 && changes[0].Type === "Outgoing") changes = null;
-		if (changes && changes.length === 1 && changes[0].Type === "Synchronized") changes = null;
-		if (changes && changes.length === 1 && changes[0].Type === "NoCommits") changes = null;
+		if (changes) {
+			changes = changes.filter(function(c) {
+				return !(c.Type === "Incoming" || c.Type === "Outgoing" || c.Type === "Synchronized" || c.Type === "NoCommits" || c.Type === "MoreCommits");
+			});
+		}
+		if (changes && (0 === changes.length || changes.length > 2)) changes = null;
 		changes = changes || (this.repository.status ? [this.repository.status] : []);
 		if (this.changes && changes) {
 			if (this.changes.length === changes.length) {
