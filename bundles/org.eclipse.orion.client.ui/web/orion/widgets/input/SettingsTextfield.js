@@ -15,6 +15,7 @@ define(['orion/objects', 'orion/webui/littlelib', 'orion/widgets/input/TextField
 		makeLocalTextfield(params);
 		TextField.apply(this, arguments);
 		this.mylabel = lib.$(".setting-label", this.node); //$NON-NLS-0$
+		this.mycontrol = lib.$(".setting-control", this.node); //$NON-NLS-0$
 	}
 
 	objects.mixin(SettingsTextfield.prototype, TextField.prototype, makeTextfield());
@@ -49,14 +50,20 @@ define(['orion/objects', 'orion/webui/littlelib', 'orion/widgets/input/TextField
 				if (this.mylabel) {
 					this.mylabel = null;
 				}
-			},
+				if (this.mycontrol) {
+					if (this.mycontrol.commandTooltip) {
+			            this.mycontrol.commandTooltip.destroy();
+			        }
+		            this.mycontrol = null;
+		        }
+		    },
 
 			postCreate: function(){
 				TextField.prototype.postCreate.call(this);
 				this.mylabel.textContent = this.fieldlabel;
 				if(this.fieldTitle) {
-					this.mylabel.parentNode.commandTooltip = new mTooltip.Tooltip({
-						node: this.mylabel.parentNode,
+					this.mycontrol.commandTooltip = new mTooltip.Tooltip({
+						node: this.mycontrol,
 						text: this.fieldTitle,
 						position: ["above", "below", "right", "left"] //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 					});
@@ -68,7 +75,7 @@ define(['orion/objects', 'orion/webui/littlelib', 'orion/widgets/input/TextField
 					this.textfield.min = this.fieldMin;
 				}
 			}
-		}
+		};
 	}
 
 	return SettingsTextfield;

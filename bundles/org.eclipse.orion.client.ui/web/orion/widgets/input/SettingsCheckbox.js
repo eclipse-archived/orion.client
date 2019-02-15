@@ -63,8 +63,14 @@ define(['orion/objects', 'orion/webui/littlelib', 'orion/widgets/input/Checkbox'
 				if (this.mylabel) {
 					this.mylabel = null;
 				}
+				if (this.mycontrol) {
+					if (this.mycontrol.commandTooltip) {
+			            this.mycontrol.commandTooltip.destroy();
+			        }
+		            this.mycontrol = null;
+		        }
 			}
-		}
+		};
 	}
 
 
