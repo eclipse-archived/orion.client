@@ -31,17 +31,19 @@ define([
 
 		// TODO these should be real Orion sections, not fake DIVs
 		templateString: '' +  //$NON-NLS-0$
-					'<div class="sectionWrapper toolComposite">' +  //$NON-NLS-0$
-						'<div class="sectionAnchor sectionTitle layoutLeft">${User Profile}</div>' +   //$NON-NLS-0$
+					'<div class="sectionWrapper toolComposite" aria-owns="userProfileContent">' +  //$NON-NLS-0$
+						'<div id="userProfileTitle" class="sectionAnchor sectionTitle layoutLeft">${User Profile}</div>' +   //$NON-NLS-0$
 						'<div id="userCommands" class="layoutRight sectionActions"></div>' +  //$NON-NLS-0$
 					'</div>' + //$NON-NLS-2$ //$NON-NLS-0$
-					'<div class="sectionTable sections userProfile">' + //$NON-NLS-0$
-					
+					'<div id="userProfileContent" class="sectionTable sections userProfile">' + //$NON-NLS-0$					
 					'</div>', //$NON-NLS-0$
 
 		createElements: function() {
 			this.node.innerHTML = this.templateString;
 			lib.processTextNodes(this.node, messages);
+			
+			this.node.setAttribute("role", "region");
+			this.node.setAttribute("aria-labelledby", "userProfileTitle");
 			
 			this.sections = lib.$('.sections', this.node);  //$NON-NLS-0$
 			
