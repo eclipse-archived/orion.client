@@ -769,7 +769,6 @@ _:-moz-tree-row(hover), .colorpicker-input { /* Firefox  HACK */
     font-size: 12px;
     position: relative;
     top: -2px;
-    outline: none;
 }
 
 html[dir="rtl"] .scopeList li select{ /* ACGC */
