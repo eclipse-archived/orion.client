@@ -849,25 +849,27 @@ objects.mixin(TabWidget.prototype, {
 		}
 		
 		var tab = this.editorTabs[metadata.Location];
-		if (tab) {
-			tab.breadcrumb.destroy();
-			tab.fileNodeToolTip.destroy();
-		}
-		
-		this.editorTabContainer.removeChild(tab.editorTabNode);
-		delete this.editorTabs[metadata.Location];
-		
-		if (this.fileList.length < 2) {
-			this.tabWidgetDropdownNode.style.display = "none";
-			var closeButton = this.getCurrentEditorCloseButtonNode();
-			closeButton.style.display = "none";
-		}
-
-		if (lastHref !== this.selectedFile.href) {
-			this.activateEditorViewer();
-			this.setWindowLocation(this.selectedFile.href);
-		}
-		this.setTabStorage();
+		lib.returnFocus(tab && tab.editorTabNode, lib.node("editorViewerContent_Panel" + this.id), function() {
+			if (tab) {
+				tab.breadcrumb.destroy();
+				tab.fileNodeToolTip.destroy();
+			}
+			
+			this.editorTabContainer.removeChild(tab.editorTabNode);
+			delete this.editorTabs[metadata.Location];
+			
+			if (this.fileList.length < 2) {
+				this.tabWidgetDropdownNode.style.display = "none";
+				var closeButton = this.getCurrentEditorCloseButtonNode();
+				closeButton.style.display = "none";
+			}
+	
+			if (lastHref !== this.selectedFile.href) {
+				this.activateEditorViewer();
+				this.setWindowLocation(this.selectedFile.href);
+			}
+			this.setTabStorage();
+		}.bind(this));
 	},
 	scrollToTab: function(tab) {
 		var sib = tab.previousSibling;
