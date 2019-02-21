@@ -1210,8 +1210,8 @@ html[dir="rtl"] .groupedContentDivider{ /* ACGC */
 }
 
 .currentLocation{
-	margin-left:auto;
-	margin-right:auto;
+	margin-left:3px;
+	margin-right:3px;
 }
 
 .modifiedFileMarker{

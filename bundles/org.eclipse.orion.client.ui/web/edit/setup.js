@@ -309,6 +309,7 @@ function TabWidget(options) {
 	this.restoreTabsFromStorage(); // have to be after createDropdown_ call.
 }
 
+var LABEL_ID = 1;
 TabWidget.prototype = {};
 objects.mixin(TabWidget.prototype, {
 	createDropdown_ : function() {
@@ -501,24 +502,48 @@ objects.mixin(TabWidget.prototype, {
 		var that = this;
 		var editorTab = document.createElement("div");
 		editorTab.className = "editorTab";
+		// NOTE: Setting role=presentation to this div otherwise VoiceOver reads "tab 1 of 1" for all tabs
+		editorTab.setAttribute("role", "presentation");
+		editorTab.setAttribute("draggable", true);
 		if (!this.enableEditorTabs) {
 			editorTab.classList.add("editorTabsDisabled");
 		}
-		editorTab.setAttribute("draggable", true);
-		editorTab.setAttribute("role", "tab");
-		editorTab.setAttribute("aria-controls", "editorViewerContent_Panel" + this.id);
-
 		this.editorTabContainer.appendChild(editorTab);
 		
+		var labelID = "editorTabLabel_" + LABEL_ID++;
+		var panelIP = "editorViewerContent_Panel" + this.id;
+		var editorTabContent = document.createElement("div");
+		editorTabContent.setAttribute("aria-labelledby", labelID);
+		editorTabContent.tabIndex = 0;
+		editorTabContent.className = "editorTabContent";
+		editorTabContent.setAttribute("role", "tab");
+		editorTabContent.setAttribute("aria-controls", panelIP);
+		editorTab.appendChild(editorTabContent);
+
+		var editorTabContentFocus = document.createElement("div");
+		editorTabContentFocus.tabIndex = -1;
+		editorTabContentFocus.className = "editorTabContentFocus";
+		editorTabContent.appendChild(editorTabContentFocus);
+
 		var dirtyIndicator = document.createElement("span");
 		dirtyIndicator.classList.add("editorViewerHeaderDirtyIndicator");
 		dirtyIndicator.textContent = "*";
 		dirtyIndicator.style.display = "none";
-		editorTab.appendChild(dirtyIndicator);
+		editorTabContentFocus.appendChild(dirtyIndicator);
+		editorTabContentFocus.addEventListener("click", function(evt) {
+			if (editorTabContentFocus !== document.activeElement) return;
+			var panel = document.querySelector("#" + panelIP);
+			if (!panel) return;
+			var tabbable = lib.firstTabbable(panel);
+			if (tabbable) {
+				tabbable.focus();
+			}
+		});
 		
 		var curFileNode = document.createElement("span");
+		curFileNode.id = labelID;
 		curFileNode.className = "editorViewerHeaderTitle";
-		editorTab.appendChild(curFileNode);
+		editorTabContentFocus.appendChild(curFileNode);
 		var curFileNodeName = metadata.Name || "";
 		if (bidiUtils.isBidiEnabled()) {
 			curFileNodeName = bidiUtils.enforceTextDirWithUcc(curFileNodeName);
@@ -526,6 +551,9 @@ objects.mixin(TabWidget.prototype, {
 		curFileNode.textContent = curFileNodeName;
 
 		var closeButton = document.createElement("div");
+		closeButton.setAttribute("role", "button");
+		closeButton.setAttribute("aria-label", messages["closeSelf"]);
+		closeButton.tabIndex = 0;
 		closeButton.className = "editorTabCloseButton core-sprite-close imageSprite ";
 		// Unicode multiplication sign
 		closeButton.metadata = metadata;
@@ -534,11 +562,18 @@ objects.mixin(TabWidget.prototype, {
 			var isDirty = dirtyIndicator.style.display !== "none";
 			that.closeTab(this.metadata, isDirty);
 		});
-		editorTab.appendChild(closeButton);
+		closeButton.addEventListener("keydown", function(e) {
+			if (e.keyCode === lib.KEY.ENTER || e.keyCode === lib.KEY.SPACE) {
+				e.stopPropagation();
+				var isDirty = dirtyIndicator.style.display !== "none";
+				that.closeTab(this.metadata, isDirty);
+			}
+		});
+		editorTabContentFocus.appendChild(closeButton);
 		editorTab.metadata = metadata;
 		editorTab.href = href;
 		
-		var fileNodeTooltip = new mTooltip.Tooltip({
+		var fileNodeTooltip = editorTabContent.tooltip = new mTooltip.Tooltip({
 			node: curFileNode,
 			position: ["below", "above", "right", "left"]
 		});
@@ -584,6 +619,12 @@ objects.mixin(TabWidget.prototype, {
 		};
 		editorTab.addEventListener("click", editorTabClickHandler);
 		editorTab.addEventListener("dblclick", editorTabClickHandler);
+		editorTab.addEventListener("keydown", function(e) {
+			if (e.keyCode === lib.KEY.ENTER || e.keyCode === lib.KEY.SPACE) {
+				e.stopPropagation();
+				that.setWindowLocation(this.href);
+			}
+		});
 
 		editorTab.addEventListener("mouseup", function(e) {
 			var button = e.which;
@@ -687,7 +728,7 @@ objects.mixin(TabWidget.prototype, {
 			this.selectedFile.checked = false;
 			curEditorTabNode = this.getCurrentEditorTabNode();
 			curEditorTabNode.classList.remove("focusedEditorTab");
-			curEditorTabNode.setAttribute("aria-selected", "false");
+			curEditorTabNode.firstChild.setAttribute("aria-selected", "false");
 		}
 		// If the editor tab exists, reuse it.
 		if (this.editorTabs.hasOwnProperty(metadata.Location)) {
@@ -764,7 +805,7 @@ objects.mixin(TabWidget.prototype, {
 
 		// Style the editor tab
 		editorTab.editorTabNode.classList.add("focusedEditorTab");
-		editorTab.editorTabNode.setAttribute("aria-selected", "true");
+		editorTab.editorTabNode.firstChild.setAttribute("aria-selected", "true");
 		// Update the selected file
 		this.selectedFile = this.fileList[0];
 		// Enforce maximum editor tabs
@@ -808,25 +849,27 @@ objects.mixin(TabWidget.prototype, {
 		}
 		
 		var tab = this.editorTabs[metadata.Location];
-		if (tab) {
-			tab.breadcrumb.destroy();
-			tab.fileNodeToolTip.destroy();
-		}
-		
-		this.editorTabContainer.removeChild(tab.editorTabNode);
-		delete this.editorTabs[metadata.Location];
-		
-		if (this.fileList.length < 2) {
-			this.tabWidgetDropdownNode.style.display = "none";
-			var closeButton = this.getCurrentEditorCloseButtonNode();
-			closeButton.style.display = "none";
-		}
-
-		if (lastHref !== this.selectedFile.href) {
-			this.activateEditorViewer();
-			this.setWindowLocation(this.selectedFile.href);
-		}
-		this.setTabStorage();
+		lib.returnFocus(tab && tab.editorTabNode, lib.node("editorViewerContent_Panel" + this.id), function() {
+			if (tab) {
+				tab.breadcrumb.destroy();
+				tab.fileNodeToolTip.destroy();
+			}
+			
+			this.editorTabContainer.removeChild(tab.editorTabNode);
+			delete this.editorTabs[metadata.Location];
+			
+			if (this.fileList.length < 2) {
+				this.tabWidgetDropdownNode.style.display = "none";
+				var closeButton = this.getCurrentEditorCloseButtonNode();
+				closeButton.style.display = "none";
+			}
+	
+			if (lastHref !== this.selectedFile.href) {
+				this.activateEditorViewer();
+				this.setWindowLocation(this.selectedFile.href);
+			}
+			this.setTabStorage();
+		}.bind(this));
 	},
 	scrollToTab: function(tab) {
 		var sib = tab.previousSibling;
@@ -1541,7 +1584,7 @@ objects.mixin(EditorViewer.prototype, {
 	addAnnotationsFromDebugService: function() {
 		// Add local breakpoints to this editor
 		this.debugService.getBreakpointsByLocation(this.inputManager.getInput()).then(function(breakpoints) {
-			if (!this.editor) {
+			if (!this.editor || !this.editor.getAnnotationModel) {
 				return;
 			}
 			var annotationModel = this.editor.getAnnotationModel();
