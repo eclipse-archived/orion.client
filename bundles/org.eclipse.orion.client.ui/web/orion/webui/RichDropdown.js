@@ -58,11 +58,10 @@ define([
 			} else {
 				this._dropdownButtonArrow = dropdownArrow;
 			}
-			this._dropdownTriggerButton.setAttribute("aria-haspopup", "dialog"); //$NON-NLS-1$ //$NON-NLS-0$
+			this._dropdownTriggerButton.setAttribute("aria-haspopup", "menu"); //$NON-NLS-1$ //$NON-NLS-0$
 			this._dropdownTriggerButton.setAttribute("aria-expanded", "false"); //$NON-NLS-1$ //$NON-NLS-0$
 			this._dropdownTriggerButton.setAttribute("aria-controls", this._dropdownNode.id); //$NON-NLS-0$
-			this._dropdownNode.setAttribute("role", "dialog"); //$NON-NLS-1$ //$NON-NLS-0$
-			this._dropdownNode.setAttribute("aria-modal", "true"); //$NON-NLS-1$ //$NON-NLS-0$
+			this._dropdownNode.setAttribute("role", "menu"); //$NON-NLS-1$ //$NON-NLS-0$
 						
 			this._parentNode.appendChild(this._dropdownTriggerButton);
 			this._parentNode.appendChild(this._dropdownNode);
