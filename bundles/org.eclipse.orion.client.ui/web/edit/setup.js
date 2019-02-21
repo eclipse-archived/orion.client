@@ -502,6 +502,7 @@ objects.mixin(TabWidget.prototype, {
 		var that = this;
 		var editorTab = document.createElement("div");
 		editorTab.className = "editorTab";
+		// NOTE: Setting role=presentation to this div otherwise VoiceOver reads "tab 1 of 1" for all tabs
 		editorTab.setAttribute("role", "presentation");
 		editorTab.setAttribute("draggable", true);
 		if (!this.enableEditorTabs) {
