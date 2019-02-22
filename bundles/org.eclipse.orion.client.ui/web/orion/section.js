@@ -86,7 +86,7 @@ define([
 		this.domNode.id = options.id;
 		
 		if(options.tooltip) {
-			this.domNode.optionsTooltip = new sTooltip.Tooltip({
+			this.domNode.tooltip = new sTooltip.Tooltip({
 				node: this.domNode,
 				text: options.tooltip,
 				position: ["above", "below", "right", "left"] //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
@@ -339,6 +339,10 @@ define([
 		 */
 		destroy: function() {
 			var parent;
+			if (this.domNode.tooltip) {
+				this.domNode.tooltip.destroy();
+				this.domNode.tooltip = null;
+			}
 			if (this.domNode) {
 				parent = this.domNode.parentNode;
 				if (parent) parent.removeChild(this.domNode);
