@@ -53,6 +53,10 @@
 	top: 0;
 }
 
+.sidebarToolbar {
+	display: none;
+}
+
 .navbar {
 	background: white;
 	margin: 0;
