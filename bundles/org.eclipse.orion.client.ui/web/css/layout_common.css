@@ -495,7 +495,8 @@ hard-coded numbers elsewhere.
 
 .editorViewerTabDropdown {
 	justify-content: flex-end;
-	margin-right: 12px;
+	margin-right: 10px;
+	margin-left: 10px;
 }
 
 .editorViewerContent {
