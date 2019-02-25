@@ -517,6 +517,7 @@ define([
 			title: messages["Repo"],
 			sibling: sibling,
 //			iconClass: ["gitImageSprite", "git-sprite-repository"], //$NON-NLS-1$ //$NON-NLS-0$
+			tooltip: messages.RepositoryTooltip,
 			slideout: true,
 			content: '<div id="repositoryNode" class="repoDropdownList"></div><div id="dropdownRepositoryActionsNode" class="sectionDropdownActions toolComposite"></div>', //$NON-NLS-0$
 			canHide: true,
@@ -576,6 +577,7 @@ define([
 			title: this.previousBranchTitle || "\u00A0", //$NON-NLS-0$
 			sibling: sibling,
 //			iconClass: ["gitImageSprite", "git-sprite-branch"], //$NON-NLS-1$ //$NON-NLS-0$
+			tooltip: messages.ReferenceTooltip,
 			slideout: true,
 			content: '<div id="branchNode" class="branchDropdownList"></div><div id="dropdownBranchesActionsNode" class="sectionDropdownActions toolComposite"></div>', //$NON-NLS-0$
 			canHide: true,
@@ -833,7 +835,8 @@ define([
 			dropdown: true,
 			noTwistie: true,
 			noArrow: true,
-			tooltip: messages["Configurations"],
+			name: messages["Configurations"],
+			tooltip: messages["ConfigurationsTooltip"],
 			preferenceService: this.preferencesService
 		});
 			
