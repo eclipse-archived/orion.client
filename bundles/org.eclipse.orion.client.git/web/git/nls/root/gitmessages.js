@@ -545,9 +545,9 @@ define({//Default message bundle
 	"Synchronized" : "History", //$NON-NLS-0$  //$NON-NLS-1$
 	"Uncommited" : "Uncommited", //$NON-NLS-0$  //$NON-NLS-1$
 	"Repository:" : "Repository:", //$NON-NLS-0$  //$NON-NLS-1$
-	"RepositoryTooltip" : "Selects the git repository. New repositories can be cloned and/or inited by activating the respective commands.", //$NON-NLS-0$  //$NON-NLS-1$
+	"RepositoryTooltip" : "Selects the git repository. New repositories can be cloned or init'ed with the Clone or Init buttons.", //$NON-NLS-0$  //$NON-NLS-1$
 	"Reference:" : "Reference:", //$NON-NLS-0$  //$NON-NLS-1$
-	"ReferenceTooltip": "Selects the target reference. The target reference is used for comparing against the active branch to see incoming and outgoing changes. It is also the target of push and sync operations.  Every reference can be checked out by activating the checkout command.  Remote repositories can be fetched by activating the fetch command.", //$NON-NLS-0$  //$NON-NLS-1$
+	"ReferenceTooltip": "Selects the target reference. The target reference is used for comparing against the active branch to see incoming and outgoing changes. It is also the target of push and sync operations. A reference can be checked out with its Checkout button. Remote repositories can be fetched with their Fetch button.", //$NON-NLS-0$  //$NON-NLS-1$
 	"Author:" : "Author:", //$NON-NLS-0$  //$NON-NLS-1$
 	"Committer:" : "Committer:", //$NON-NLS-0$  //$NON-NLS-1$
 	"SHA1:" : "SHA1:", //$NON-NLS-0$  //$NON-NLS-1$
@@ -600,7 +600,7 @@ define({//Default message bundle
 	'Ssh Passphrase:' : 'Ssh Passphrase:', //$NON-NLS-0$  //$NON-NLS-1$
 	'confirmUnsavedChanges': 'There are unsaved changes. Do you want to save them?', //$NON-NLS-1$ //$NON-NLS-0$
 	'NewConfigurationEntryTooltip': "Add a new entry to the repository configuration", //$NON-NLS-1$ //$NON-NLS-0$
-	'Configurations' : "Displays the repository configurations. Configuration entries can be added, removed and/or edited by the activating the respective commands.", //$NON-NLS-0$  //$NON-NLS-1$
+	'Configurations' : "Displays the repository configurations. New configuration entries can be added with the New button, and existing entries can be edited or removed with their Edit or Delete buttons.", //$NON-NLS-0$  //$NON-NLS-1$
 	'DetachedHead ${0}' : "Detached HEAD@${0}", //$NON-NLS-1$ //$NON-NLS-0$
 	'SingleSubmodule' : "${0} (${1} submodule)", //$NON-NLS-1$ //$NON-NLS-0$
 	'PluralSubmodule' : "${0} (${1} submodules)", //$NON-NLS-1$ //$NON-NLS-0$
