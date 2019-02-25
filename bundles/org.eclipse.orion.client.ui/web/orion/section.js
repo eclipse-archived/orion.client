@@ -26,7 +26,9 @@ define([
 	 * @param {DomNode} parent parent node
 	 * @param {DomNode} [options.sibling] if specified, the section will be inserted before the sibling
 	 * @param {String} options.id id of the section header
-	 * @param {String} options.title title (in HTML) of the section
+	 * @param {String} options.title title of the section
+	 * @param {String} options.tooltip tooltip for the section
+	 * @param {String} options.name accessible name of an icon section
 	 * @param {orion.preferences.PreferencesService} [options.preferenceService] used to store the hidden/shown state of the section if specified
 	 * @param {String|Array} [options.headerClass] a class or array of classes to use in the section header, in addition to the default header classes
 	 * @param {String|Array} [options.iconClass] a class or array of classes to use in the icon decorating section, no icon displayed if not provided
