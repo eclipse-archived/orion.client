@@ -120,6 +120,7 @@ define([
 				
 				// Keyboard support
 				this.$splitter.addEventListener("keydown", this._keyDown.bind(this), false); //$NON-NLS-0$
+				this.$splitter.addEventListener("focus", this._focusGained.bind(this), false); //$NON-NLS-0$
 				this.$splitter.addEventListener("blur", this._focusLost.bind(this), false); //$NON-NLS-0$
 			}
 			window.addEventListener("resize", this._resize.bind(this), false);  //$NON-NLS-0$
@@ -568,11 +569,13 @@ define([
 					this._thumbDown();
 				}
 			} else if (evt.keyCode === lib.KEY.ESCAPE) {
-				// put the focus on the 'primary' pane
-				var primaryPane = this._thumb && !this._collapseTrailing ? this.$trailing : this.$leading;
-				var toFocus = lib.firstTabbable(primaryPane);
-				if (toFocus) {
-					toFocus.focus();
+				if (!lib.returnFocus(this.$splitter, this._previousActiveElement)) {
+					// put the focus on the 'primary' pane if previous active element is not available
+					var primaryPane = this._thumb && !this._collapseTrailing ? this.$trailing : this.$leading;
+					var toFocus = lib.firstTabbable(primaryPane);
+					if (toFocus) {
+						toFocus.focus();
+					}
 				}
 			}
 		},
@@ -580,6 +583,10 @@ define([
 		_focusLost: function(evt) {
 			// Ensure that the splitter can't get focus
 			this.$splitter.tabIndex = "-1";
+		},
+
+		_focusGained: function(evt) {
+			this._previousActiveElement = evt.relatedTarget;
 		},
 		
 		_touchStart: function(event) {
