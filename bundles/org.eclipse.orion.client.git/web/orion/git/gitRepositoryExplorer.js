@@ -835,7 +835,8 @@ define([
 			dropdown: true,
 			noTwistie: true,
 			noArrow: true,
-			tooltip: messages["Configurations"],
+			name: messages["Configurations"],
+			tooltip: messages["ConfigurationsTooltip"],
 			preferenceService: this.preferencesService
 		});
 			

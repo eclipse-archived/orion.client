@@ -129,7 +129,10 @@ define([
 			if (options.dropdown) {
 				if (options.iconClass) {
 					this.domNode.setAttribute("role", "button"); //$NON-NLS-1$ //$NON-NLS-0$
-					if (options.tooltip) {
+					// ensure there is accessible text describing this image
+					if (options.name) {
+						this.domNode.setAttribute("aria-label", options.name); //$NON-NLS-0$
+					} else if (options.tooltip) {
 						this.domNode.setAttribute("aria-label", options.tooltip); //$NON-NLS-0$
 					}
 				} else {
