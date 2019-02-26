@@ -75,7 +75,7 @@ define({
 	"Tools": "Tools",
 	"Add": "Add",
 	"noActions": "There are no actions for the current selection.",
-	"NoFile": "Use the ${0} to create new files and folders. Click a file to start coding.",
+	"NoFile": "Use the ${0} to create new files and folders. Click a file to start coding, or go to the Git page to bring in existing code.",
 	"LocalEditorSettings": "Local Editor Settings",
 	"EditorSettings": "Editor Settings",
 	"NoProject": "${0} is not a project. To convert it to a project use ${1}.",

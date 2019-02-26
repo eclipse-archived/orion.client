@@ -113,7 +113,7 @@ define({//Default message bundle
 	"Enter project name:": "Enter project name:",
 	"Create new project" : "Create new project",
 	"Creating project ${0}": "Creating project ${0}",
-	"NoFile": "Use the ${0} menu to create new files and folders. Click a file to start coding.",
+	"NoFile": "Use the ${0} menu to create new files and folders. Click a file to start coding, or go to the Git page to bring in existing code.",
 	"Download": "Download",
 	"Download_tooltips": "Download the file contents as the displayed name",
 	"Downloading...": "Reading file contents...",
