@@ -147,6 +147,10 @@ define(['i18n!orion/nls/messages', 'orion/webui/littlelib', 'orion/Deferred'], f
 					row.setAttribute("aria-level", indentLevel + 1);
 					row.setAttribute("aria-setsize", children.length);
 					row.setAttribute("aria-posinset", i + 1);
+					row.setAttribute("aria-expanded", false);
+				} else if (this._role === "tree") {
+					row.setAttribute("role", "treeitem");
+					row.setAttribute("aria-expanded", false);
 				}
 				if(this._renderer && typeof this._renderer.initSelectableRow === "function") { //$NON-NLS-0$
 					this._renderer.initSelectableRow(children[i], row);
