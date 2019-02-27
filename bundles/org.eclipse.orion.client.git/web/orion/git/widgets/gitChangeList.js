@@ -536,7 +536,7 @@ define([
 				section: this.section
 			});
 			this.createTree(this.parentId, model, {
-				role: "presentation", // table element is only being used for row/column presentation
+				role: "treegrid",
 				setFocus: false, // do not steal focus on load
 				selectionPolicy: this.selectionPolicy,
 				preCollapse: function(rowItem, row) {

@@ -111,8 +111,9 @@ define(['i18n!orion/nls/messages', 'orion/webui/littlelib', 'orion/Deferred'], f
 				this._renderer.tableCallback(table);
 			}
 			table.id = this._id;
+			table.setAttribute("role", "presentation"); //$NON-NLS-0$
 			if (this._role) {
-				table.setAttribute("role", this._role); //$NON-NLS-0$
+				this._parent.setAttribute("role", this._role); //$NON-NLS-0$
 			}
 			if (this._tableStyle) {
 				table.classList.add(this._tableStyle);
@@ -151,6 +152,8 @@ define(['i18n!orion/nls/messages', 'orion/webui/littlelib', 'orion/Deferred'], f
 				} else if (this._role === "tree") {
 					row.setAttribute("role", "treeitem");
 					row.setAttribute("aria-expanded", false);
+				} else if (this._role === "grid") {
+					row.setAttribute("role", "row");
 				}
 				if(this._renderer && typeof this._renderer.initSelectableRow === "function") { //$NON-NLS-0$
 					this._renderer.initSelectableRow(children[i], row);

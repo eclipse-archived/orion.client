@@ -79,6 +79,7 @@ define([
 	});
 
 	function FolderNavExplorer(options) {
+		options.role = "grid"; //$NON-NLS-0$
 		options.setFocus = false; // do not steal focus on load
 		options.cachePrefix = null; // do not persist table state
 		options.dragAndDrop = FileCommands.uploadFile;
