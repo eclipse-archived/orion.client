@@ -111,10 +111,7 @@ define(['i18n!orion/nls/messages', 'orion/webui/littlelib', 'orion/Deferred'], f
 				this._renderer.tableCallback(table);
 			}
 			table.id = this._id;
-			table.setAttribute("role", "presentation"); //$NON-NLS-0$
-			if (this._role) {
-				this._parent.setAttribute("role", this._role); //$NON-NLS-0$
-			}
+			table.setAttribute("role", this._role || "presentation"); //$NON-NLS-0$
 			if (this._tableStyle) {
 				table.classList.add(this._tableStyle);
 			}
