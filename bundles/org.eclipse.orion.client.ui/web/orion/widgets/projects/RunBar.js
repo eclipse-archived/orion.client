@@ -125,10 +125,12 @@ define([
 					}.bind(this));
 				}.bind(this));
 				
+				window.addEventListener("blur", function() {
+					this._stopStatusPolling();
+				}.bind(this));
+				
 				window.addEventListener("focus", function() {
-					if (this._authenticationFailed) {
-						this._checkStatus();
-					}
+					this._checkStatus();
 				}.bind(this));
 			} else {
 				throw new Error("this._domNode is null"); //$NON-NLS-0$
@@ -972,7 +974,12 @@ define([
 				return;
 			}
 			var startTime = Date.now();
-			this._checkLaunchConfigurationStatus(launchConfiguration).then(function(_status) {
+			if (this._pendingCheckStatus) {
+				return;
+			}
+			this._pendingCheckStatus = this._checkLaunchConfigurationStatus(launchConfiguration);
+			this._pendingCheckStatus.then(function(_status) {
+				this._pendingCheckStatus = null;
 				var interval = Date.now() - startTime;
 				mMetrics.logTiming("deployment", "check status (poll)", interval, launchConfiguration.Type); //$NON-NLS-1$ //$NON-NLS-2$
 
@@ -980,6 +987,8 @@ define([
 					launchConfiguration.status = _status;
 				}
 				this._updateLaunchConfiguration(launchConfiguration);
+			}.bind(this), function() {
+				this._pendingCheckStatus = null;
 			}.bind(this));
 		},
 		
