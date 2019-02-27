@@ -604,8 +604,10 @@ exports.ExplorerNavHandler = (function() {
 			var rowDiv = this.getRowDiv(model);
 			if(rowDiv){
 				if (this._inSelection(model) < 0) {
+					rowDiv.setAttribute("aria-selected", true);
 					rowDiv.classList.add("checkedRow"); //$NON-NLS-0$
 				} else {
+					rowDiv.setAttribute("aria-selected", false);
 					rowDiv.classList.remove("checkedRow"); //$NON-NLS-0$
 				}
 			}
