@@ -388,7 +388,7 @@ exports.ExplorerNavHandler = (function() {
 		},
 
 		getFocusableElems: function(root) {
-			var nodeList = root.querySelectorAll('a,button,input,select,textarea');
+			var nodeList = root.querySelectorAll('a,button,input,select,textarea,div[tabIndex]');
 			return Array.prototype.slice.call(nodeList);
 		},
 
