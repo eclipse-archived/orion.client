@@ -405,6 +405,9 @@ exports.ExplorerNavHandler = (function() {
 			var currentRow = this.getRowDiv(model);
 			var currentgrid = this.getCurrentGrid(model);
 			this.getFocusableElems(this._parentDiv).forEach(function(element) {
+				if (element.savedTabIndex === undefined) {
+					element.savedTabIndex = element.tabIndex;
+				}
 				element.tabIndex = -1;
 			});
 			if(currentgrid) {
@@ -414,6 +417,9 @@ exports.ExplorerNavHandler = (function() {
 						if (this._parentDiv === document.activeElement || document.activeElement.parentNode === currentRow.parentNode) {
 							currentRow.tabIndex = "0";
 							this.getFocusableElems(currentRow).forEach(function(element) {
+								if (element.savedTabIndex === -1) {
+									return;
+								}
 								element.tabIndex = 0;
 							});
 							this._parentDiv.tabIndex = "-1";
@@ -444,6 +450,9 @@ exports.ExplorerNavHandler = (function() {
 						if (this._parentDiv === document.activeElement || document.activeElement.parentNode === currentRow.parentNode) {
 							currentRow.tabIndex = "0";
 							this.getFocusableElems(currentRow).forEach(function(element) {
+								if (element.savedTabIndex === -1) {
+									return;
+								}
 								element.tabIndex = 0;
 							});
 							this._parentDiv.tabIndex = "-1";
