@@ -132,6 +132,7 @@ define([
 					iconElement = addImageToLink(contentType, imageHolderDom, item.Location, image);
 				}
 				link.href = href;
+				link.tabIndex = -1;
 				if(renderer && typeof renderer.updateFileNode === 'function') { //$NON-NLS-0$
 					renderer.updateFileNode(item, link, mContentTypes.isImage(contentType), iconElement);
 				}
