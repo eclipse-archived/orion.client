@@ -387,6 +387,11 @@ exports.ExplorerNavHandler = (function() {
 			return node === stop ? null : node;
 		},
 
+		getFocusableElems: function(root) {
+			var nodeList = root.querySelectorAll('a,button,input,select,textarea');
+			return Array.prototype.slice.call(nodeList);
+		},
+
 		toggleCursor:  function(model, on){
 			if (!model) {
 				model = this._modelIterator.cursor();
@@ -399,12 +404,18 @@ exports.ExplorerNavHandler = (function() {
 			}
 			var currentRow = this.getRowDiv(model);
 			var currentgrid = this.getCurrentGrid(model);
+			this.getFocusableElems(this._parentDiv).forEach(function(element) {
+				element.tabIndex = -1;
+			});
 			if(currentgrid) {
 				if(currentRow){
 					if (on) {
 						currentRow.classList.add("treeIterationCursorRow"); //$NON-NLS-0$
 						if (this._parentDiv === document.activeElement || document.activeElement.parentNode === currentRow.parentNode) {
 							currentRow.tabIndex = "0";
+							this.getFocusableElems(currentRow).forEach(function(element) {
+								element.tabIndex = 0;
+							});
 							this._parentDiv.tabIndex = "-1";
 							currentRow.focus();
 						}
@@ -432,6 +443,9 @@ exports.ExplorerNavHandler = (function() {
 						currentRow.classList.add("treeIterationCursorRow_Dotted"); //$NON-NLS-0$
 						if (this._parentDiv === document.activeElement || document.activeElement.parentNode === currentRow.parentNode) {
 							currentRow.tabIndex = "0";
+							this.getFocusableElems(currentRow).forEach(function(element) {
+								element.tabIndex = 0;
+							});
 							this._parentDiv.tabIndex = "-1";
 							currentRow.focus();
 						}
