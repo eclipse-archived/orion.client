@@ -53,6 +53,7 @@ define([
 			}
 			keyAssistDiv.appendChild(keyAssistContents);
 			var keyAssistTable = this._keyAssistTable = document.createElement('table'); //$NON-NLS-1$
+			keyAssistTable.setAttribute("role", "presentation");
 			keyAssistTable.tabIndex = 0;
 			keyAssistTable.classList.add("keyAssistList"); //$NON-NLS-1$
 			keyAssistContents.appendChild(keyAssistTable);
