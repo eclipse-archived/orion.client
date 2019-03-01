@@ -420,7 +420,9 @@ function(messages, Deferred, lib, mContentTypes, i18nUtil, mExplorer, mCommands,
     SearchReportExplorer.prototype = new mExplorer.Explorer();
 
     SearchReportExplorer.prototype.report = function() {
-        this.createTree(this.parentId, new mExplorer.ExplorerFlatModel(null, null, this.reportList));
+        this.createTree(this.parentId, new mExplorer.ExplorerFlatModel(null, null, this.reportList), {
+            role: "grid"
+        });
     };
 
     SearchReportExplorer.prototype.constructor = SearchReportExplorer;
@@ -754,7 +756,8 @@ function(messages, Deferred, lib, mContentTypes, i18nUtil, mExplorer, mCommands,
             this.reportStatus(messages["Preparing preview..."]);
         }
         var that = this;
-		this.createTree(this.getParentDivId(), this.model, {
+        this.createTree(this.getParentDivId(), this.model, {
+            role: "treegrid",
             selectionPolicy: "singleSelection", //$NON-NLS-1$
             indent: 0,
             setFocus: true,
@@ -1141,6 +1144,7 @@ function(messages, Deferred, lib, mContentTypes, i18nUtil, mExplorer, mCommands,
             this.initCommands();
             _empty(this.getParentDivId());
             this.createTree(this.getParentDivId(), this.model, {
+                role: "treegrid",
 				selectionPolicy: "singleSelection", //$NON-NLS-1$
                 indent: 0,
 				getChildrenFunc: function(model) {return this.model.getFilteredChildren(model);}.bind(this),
@@ -1170,6 +1174,7 @@ function(messages, Deferred, lib, mContentTypes, i18nUtil, mExplorer, mCommands,
         var that = this;
         this.model.buildResultModel();
         this.createTree(this.getParentDivId(), this.model, {
+            role: "treegrid",
             selectionPolicy: "singleSelection", //$NON-NLS-1$
             getChildrenFunc: function(model) {return this.model.getFilteredChildren(model);}.bind(this),
             indent: 0,

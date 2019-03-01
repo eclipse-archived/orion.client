@@ -52,7 +52,7 @@ function(messages, dialog, mFileUtils, mSelection, mExplorer, mExplorerTable, bi
 
 	DirectoryPrompterDialog.prototype.TEMPLATE = 
 		'<div id="message" style="width: 25em; padding-bottom: 5px;"></div>' + //$NON-NLS-0$
-		'<div id="directoryTree" class="explorerTreeClass" style="width:25em; min-height: 25em; max-height:30em; height: auto; overflow-y: auto;"></div>'; //$NON-NLS-0$
+		'<div id="directoryTree" class="explorerTreeClass" style="padding: 3px; width:25em; min-height: 25em; max-height:30em; height: auto; overflow-y: auto;"></div>'; //$NON-NLS-0$
 
 	DirectoryPrompterDialog.prototype._init = function(options) {
 		this.title = options.title || messages['Choose a Folder'];
