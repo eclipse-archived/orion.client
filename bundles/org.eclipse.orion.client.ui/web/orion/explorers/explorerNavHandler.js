@@ -112,11 +112,11 @@ exports.ExplorerNavHandler = (function() {
 		};
 		parentDiv.addEventListener("mousedown", mouseListener, false); //$NON-NLS-0$
 		this._listeners.push({type: "mousedown", listener: mouseListener}); //$NON-NLS-0$
-		var l1 = function (e) { 
+		var l1 = this._blurListener = function (e) { 
 			if(self.explorer.onFocus){
 				self.explorer.onFocus(false);
 			} else {
-				self.toggleCursor(null, false);
+				self.toggleCursor(null, false, e);
 			}
 		};
 		parentDiv.addEventListener("blur", l1, false); //$NON-NLS-0$
@@ -125,7 +125,7 @@ exports.ExplorerNavHandler = (function() {
 			if(self.explorer.onFocus){
 				self.explorer.onFocus(true);
 			} else {
-				self.toggleCursor(null, true);
+				self.toggleCursor(null, true, e);
 			}
 		};
 		parentDiv.addEventListener("focus", l2, false); //$NON-NLS-0$
@@ -390,7 +390,7 @@ exports.ExplorerNavHandler = (function() {
 			return Array.prototype.slice.call(nodeList);
 		},
 
-		toggleCursor:  function(model, on){
+		toggleCursor:  function(model, on, evt){
 			if (!model) {
 				model = this._modelIterator.cursor();
 			}
@@ -402,19 +402,25 @@ exports.ExplorerNavHandler = (function() {
 			}
 			var currentRow = this.getRowDiv(model);
 			var currentgrid = this.getCurrentGrid(model);
-			this.getFocusableElems(this._parentDiv).forEach(function(element) {
-				if (element.savedTabIndex === undefined) {
-					element.savedTabIndex = element.tabIndex;
-				}
-				element.tabIndex = -1;
-			});
-			if(currentgrid) {
+			if (on) {
+				this.getFocusableElems(this._parentDiv).forEach(function(element) {
+					if (element.savedTabIndex === undefined) {
+						element.savedTabIndex = element.tabIndex;
+					}
+					element.tabIndex = -1;
+				});
+			}
+			var handleRow = function (className) {
 				if(currentRow){
 					if (on) {
-						currentRow.classList.add("treeIterationCursorRow"); //$NON-NLS-0$
+						currentRow.classList.add(className);
 						if (!currentRow._focusListener) {
 							currentRow._focusListener = this._focusListener;
 							currentRow.addEventListener("focus", this._focusListener);
+						}
+						if (!currentRow._blurListener) {
+							currentRow._blurListener = this._blurListener;
+							currentRow.addEventListener("blur", this._blurListener);
 						}
 						if (this._parentDiv === document.activeElement || document.activeElement.parentNode === currentRow.parentNode) {
 							currentRow.tabIndex = "0";
@@ -430,9 +436,12 @@ exports.ExplorerNavHandler = (function() {
 					} else {
 						currentRow.tabIndex = "-1";
 						this._parentDiv.tabIndex = "0";
-						currentRow.classList.remove("treeIterationCursorRow"); //$NON-NLS-0$
+						currentRow.classList.remove(className);
 					}
 				}
+			}.bind(this);
+			if(currentgrid) {
+				handleRow("treeIterationCursorRow"); //$NON-NLS-0$
 				if(currentgrid.domNode){
 					var ariaElement = this.getAriaContainerElement(currentgrid.domNode);
 					if (on) {
@@ -446,30 +455,7 @@ exports.ExplorerNavHandler = (function() {
 					}
 				}
 			} else {
-				if(currentRow){
-					if (on) {
-						currentRow.classList.add("treeIterationCursorRow_Dotted"); //$NON-NLS-0$
-						if (!currentRow._focusListener) {
-							currentRow._focusListener = this._focusListener;
-							currentRow.addEventListener("focus", this._focusListener);
-						}
-						if (this._parentDiv === document.activeElement || document.activeElement.parentNode === currentRow.parentNode) {
-							currentRow.tabIndex = "0";
-							this.getFocusableElems(currentRow).forEach(function(element) {
-								if (element.savedTabIndex === -1) {
-									return;
-								}
-								element.tabIndex = 0;
-							});
-							this._parentDiv.tabIndex = "-1";
-							currentRow.focus();
-						}
-					} else {
-						currentRow.tabIndex = "-1";
-						this._parentDiv.tabIndex = "0";
-						currentRow.classList.remove("treeIterationCursorRow_Dotted"); //$NON-NLS-0$
-					}
-				}
+				handleRow("treeIterationCursorRow_Dotted"); //$NON-NLS-0$
 			}
 		},
 		
