@@ -356,7 +356,7 @@ hard-coded numbers elsewhere.
 	position: relative;
 	left: 0;
 	top: 0;
-	height: calc(100% - 29px);
+	height: calc(100% - 35px);
 	overflow-x: visible;
 }
 
