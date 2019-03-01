@@ -669,6 +669,7 @@ define([
 				this.setRenderer(this._ProblemsRendererByType);
 	    	}
 	        this.createTree(this.parentId, model, {
+	            role: "treegrid",
 	            selectionPolicy: "singleSelection", //$NON-NLS-1$
 	            gridClickSelectionPolicy: "true", //$NON-NLS-1$
 	            indent: 18,
