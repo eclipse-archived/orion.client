@@ -51,7 +51,7 @@ define(['i18n!orion/operations/nls/messages', 'orion/Deferred', 'orion/webui/lit
 				var operationLocations = Object.keys(globalOperations);
 				var operations = {};
 				Deferred.all(operationLocations.map(function(operationLocation) {
-					var operation = globalOperations[operationLocation];
+					var operation = JSON.parse(JSON.stringify(globalOperations[operationLocation]));
 					operation.Location = operationLocation;
 					operations[operationLocation]= operation;
 					var done = new Deferred();
@@ -101,7 +101,7 @@ define(['i18n!orion/operations/nls/messages', 'orion/Deferred', 'orion/webui/lit
 					operation.deferred.then(success.bind(operationLocation), failure.bind(operationLocation), progress.bind(operationLocation));
 					return done;
 				})).then(function() {
-					preferences.put("/operations", globalOperations, {clear: true});
+					return preferences.put("/operations", globalOperations, {clear: true});
 				});
 				that._loadOperationsList.bind(that)(operations);
 
@@ -113,7 +113,9 @@ define(['i18n!orion/operations/nls/messages', 'orion/Deferred', 'orion/webui/lit
 			this.operations = operationsList;
 			mOperationsCommands.updateNavTools(this.registry, this.commandRegistry, this, this.toolbarId, this.selectionToolsId, this.operations);
 			this.model = new exports.OperationsModel(operationsList);
-			this.createTree(this.parentId, this.model);
+			this.createTree(this.parentId, this.model, {
+				role: "grid"
+			});
 			this.getNavHandler().refreshModel(this.getNavDict(), this.model, operationsList);
 		};
 		
@@ -143,6 +145,7 @@ define(['i18n!orion/operations/nls/messages', 'orion/Deferred', 'orion/webui/lit
 		
 		OperationsModel.prototype.getItem = function(location){
 			var operationInfo = this.operations[location];
+			operationInfo.parent = this.root;
 			operationInfo.Location = location;
 			return operationInfo;
 		};
@@ -156,6 +159,7 @@ define(['i18n!orion/operations/nls/messages', 'orion/Deferred', 'orion/webui/lit
 			for(var location in this.operations){
 				ret.push(this.getItem(location));
 			}
+			parentItem.children = ret;
 			onComplete(ret);
 		};
 		
