@@ -20,11 +20,11 @@ define('orion/editor/edit', [ //$NON-NLS-0$
 	"orion/editor/projectionTextModel", //$NON-NLS-0$
 	"orion/editor/editor", //$NON-NLS-0$
 	"orion/editor/editorFeatures", //$NON-NLS-0$
-	'orion/staticDataSource',
+	
 	"orion/editor/contentAssist", //$NON-NLS-0$
 	"orion/editor/textStyler" //$NON-NLS-0$
 
-], function(require, mTextView, mTextModel, mTextTheme, mProjModel, mEditor, mEditorFeatures, mStaticDataSource, mContentAssist, mTextStyler) {
+], function(require, mTextView, mTextModel, mTextTheme, mProjModel, mEditor, mEditorFeatures, mContentAssist, mTextStyler) {
 
 	/**	@private */
 	function getDisplay(window, document, element) {
@@ -236,71 +236,69 @@ define('orion/editor/edit', [ //$NON-NLS-0$
 				}
 			};
 		}
-		
-		var syntaxHighlighter = new mStaticDataSource.SyntaxHighlighter();
-		
-//		var syntaxHighlighter = {
-//			styler: null, 
-//			
-//			highlight: function(contentType, grammarProvider, editor) {
-//				if (this.styler && this.styler.destroy) {
-//					this.styler.destroy();
-//				}
-//				this.styler = null;
-//
-//				/* to maintain backwards-compatibility convert previously-supported lang values to types */
-//				if (contentType === "js") { //$NON-NLS-0$
-//					contentType = "application/javascript"; //$NON-NLS-0$
-//				} else if (contentType === "css") { //$NON-NLS-0$
-//					contentType = "text/css"; //$NON-NLS-0$
-//				} else if (contentType === "html") { //$NON-NLS-0$
-//					contentType = "text/html"; //$NON-NLS-0$
-//				} else if (contentType === "java") { //$NON-NLS-0$
-//					contentType = "text/x-java-source"; //$NON-NLS-0$
-//				}
-//
-//				var textView = editor.getTextView();
-//				var annotationModel = editor.getAnnotationModel();
-//				var loadGrammar = function(contentType) {
-//					/* attempt to locate an included file containing the grammar for contentType */
-//					var folderName = contentType.replace(/[*|:/".<>?+]/g, '_');
-//					require(["./stylers/" + folderName + "/syntax"], //$NON-NLS-1$ //$NON-NLS-0$
-//						function(grammar) {
-//							var stylerAdapter = new mTextStyler.createPatternBasedAdapter(grammar.grammars, grammar.id, contentType);
-//							this.styler = new mTextStyler.TextStyler(textView, annotationModel, stylerAdapter);
-//						},
-//						/* @callback */ function(error) {
-//							/*
-//							 * A grammar file was not found for the specified contentType, so syntax styling will
-//							 * not be shown (the editor will still work fine otherwise).  requireJS has already
-//							 * written an error message to the console regarding the missing grammar file.
-//							 */
-//						}
-//					);
-//				};
-//
-//				if (contentType) {
-//					if (grammarProvider && (typeof grammarProvider === "function")) { //$NON-NLS-0$
-//						grammarProvider(contentType).then(
-//							function(result) {
-//								if (result && result.grammars && result.id) {
-//									var stylerAdapter = new mTextStyler.createPatternBasedAdapter(result.grammars, result.id, contentType);
-//									this.styler = new mTextStyler.TextStyler(textView, annotationModel, stylerAdapter);
-//								}
-//							}.bind(this),
-//							/* @callback */ function(error) {
-//								loadGrammar(contentType); /* fall back to default grammar file lookup */
-//							}
-//						);
-//					} else {
-//						loadGrammar(contentType);
-//					}
-//				}
-//				if (contentType === "text/css") { //$NON-NLS-0$
-//					editor.setFoldingRulerVisible(options.showFoldingRuler === undefined || options.showFoldingRuler);
-//				}
-//			}
-//		};
+	
+		var syntaxHighlighter = {
+			styler: null, 
+			
+			highlight: function(contentType, grammarProvider, editor) {
+				if (this.styler && this.styler.destroy) {
+					this.styler.destroy();
+				}
+				this.styler = null;
+
+				/* to maintain backwards-compatibility convert previously-supported lang values to types */
+				if (contentType === "js") { //$NON-NLS-0$
+					contentType = "application/javascript"; //$NON-NLS-0$
+				} else if (contentType === "css") { //$NON-NLS-0$
+					contentType = "text/css"; //$NON-NLS-0$
+				} else if (contentType === "html") { //$NON-NLS-0$
+					contentType = "text/html"; //$NON-NLS-0$
+				} else if (contentType === "java") { //$NON-NLS-0$
+					contentType = "text/x-java-source"; //$NON-NLS-0$
+				}
+
+				var textView = editor.getTextView();
+				var annotationModel = editor.getAnnotationModel();
+				var loadGrammar = function(contentType) {
+					/* attempt to locate an included file containing the grammar for contentType */
+					var folderName = contentType.replace(/[*|:/".<>?+]/g, '_');
+					require(["./stylers/" + folderName + "/syntax"], //$NON-NLS-1$ //$NON-NLS-0$
+						function(grammar) {
+							var stylerAdapter = new mTextStyler.createPatternBasedAdapter(grammar.grammars, grammar.id, contentType);
+							this.styler = new mTextStyler.TextStyler(textView, annotationModel, stylerAdapter);
+						},
+						/* @callback */ function(error) {
+							/*
+							 * A grammar file was not found for the specified contentType, so syntax styling will
+							 * not be shown (the editor will still work fine otherwise).  requireJS has already
+							 * written an error message to the console regarding the missing grammar file.
+							 */
+						}
+					);
+				};
+
+				if (contentType) {
+					if (grammarProvider && (typeof grammarProvider === "function")) { //$NON-NLS-0$
+						grammarProvider(contentType).then(
+							function(result) {
+								if (result && result.grammars && result.id) {
+									var stylerAdapter = new mTextStyler.createPatternBasedAdapter(result.grammars, result.id, contentType);
+									this.styler = new mTextStyler.TextStyler(textView, annotationModel, stylerAdapter);
+								}
+							}.bind(this),
+							/* @callback */ function(error) {
+								loadGrammar(contentType); /* fall back to default grammar file lookup */
+							}
+						);
+					} else {
+						loadGrammar(contentType);
+					}
+				}
+				if (contentType === "text/css") { //$NON-NLS-0$
+					editor.setFoldingRulerVisible(options.showFoldingRuler === undefined || options.showFoldingRuler);
+				}
+			}
+		};
 
 		var editor = new mEditor.Editor({
 			textViewFactory: textViewFactory,
