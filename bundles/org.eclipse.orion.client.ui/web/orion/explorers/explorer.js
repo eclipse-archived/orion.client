@@ -791,6 +791,7 @@ exports.ExplorerRenderer = (function() {
 			placeHolder.appendChild(expandImage);
 			expandImage.classList.add(this._twistieSpriteClass);
 			expandImage.classList.add(this._collapseImageClass);
+			tableRow.setAttribute("aria-expanded", false);
 			if (decorateImageClass) {
 				var decorateImage = document.createElement("span"); //$NON-NLS-0$
 				placeHolder.appendChild(decorateImage);
