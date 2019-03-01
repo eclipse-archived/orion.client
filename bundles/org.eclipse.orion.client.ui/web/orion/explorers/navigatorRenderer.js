@@ -165,19 +165,15 @@ define([
 	NavigatorRenderer.prototype = new mExplorer.SelectionRenderer(); 
 
 	NavigatorRenderer.prototype.wrapperCallback = function(wrapperElement) {
-		//wrapperElement.setAttribute("role", "tree"); //$NON-NLS-1$ //$NON-NLS-2$
 	};
 
 	NavigatorRenderer.prototype.tableCallback = function(tableElement) {
-//		tableElement.setAttribute("aria-label", messages["Navigator"]); //$NON-NLS-1$
-//		tableElement.setAttribute("role", "presentation"); //$NON-NLS-1$ //$NON-NLS-2$
 	};
 
 	/**
 	 * @param {Element} rowElement
 	 */
 	NavigatorRenderer.prototype.rowCallback = function(rowElement, model) {
-//		rowElement.setAttribute("role", "treeitem"); //$NON-NLS-1$ //$NON-NLS-2$
 	};
 	
 	
