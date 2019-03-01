@@ -97,8 +97,6 @@ exports.ExplorerNavHandler = (function() {
 				return self.onSpace(e);
 			} else if(e.keyCode === lib.KEY.ENTER) {
 				return self.onEnter(e);
-			} else if(e.keyCode === lib.KEY.TAB && e.shiftKey) {
-				parentDiv.tabIndex = -1;
 			}
 		};
 		parentDiv.addEventListener("keydown", keyListener, false); //$NON-NLS-0$
@@ -123,7 +121,7 @@ exports.ExplorerNavHandler = (function() {
 		};
 		parentDiv.addEventListener("blur", l1, false); //$NON-NLS-0$
 		this._listeners.push({type: "blur", listener: l1}); //$NON-NLS-0$
-		var l2 = function (e) { 
+		var l2 = this._focusListener = function (e) { 
 			if(self.explorer.onFocus){
 				self.explorer.onFocus(true);
 			} else {
@@ -414,6 +412,10 @@ exports.ExplorerNavHandler = (function() {
 				if(currentRow){
 					if (on) {
 						currentRow.classList.add("treeIterationCursorRow"); //$NON-NLS-0$
+						if (!currentRow._focusListener) {
+							currentRow._focusListener = this._focusListener;
+							currentRow.addEventListener("focus", this._focusListener);
+						}
 						if (this._parentDiv === document.activeElement || document.activeElement.parentNode === currentRow.parentNode) {
 							currentRow.tabIndex = "0";
 							this.getFocusableElems(currentRow).forEach(function(element) {
@@ -447,6 +449,10 @@ exports.ExplorerNavHandler = (function() {
 				if(currentRow){
 					if (on) {
 						currentRow.classList.add("treeIterationCursorRow_Dotted"); //$NON-NLS-0$
+						if (!currentRow._focusListener) {
+							currentRow._focusListener = this._focusListener;
+							currentRow.addEventListener("focus", this._focusListener);
+						}
 						if (this._parentDiv === document.activeElement || document.activeElement.parentNode === currentRow.parentNode) {
 							currentRow.tabIndex = "0";
 							this.getFocusableElems(currentRow).forEach(function(element) {
