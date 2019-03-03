@@ -249,6 +249,10 @@ exports.Explorer = (function() {
 				onComplete: function(tree) {
 					if(this.selectionPolicy === "cursorOnly"){ //$NON-NLS-0$
 						this.initNavHandler();
+						var navHandler = this.getNavHandler();
+						if (navHandler) {
+							navHandler.rowsChanged();
+						}
 					}
 					if (options.onComplete) options.onComplete(tree);
 				}.bind(this),
@@ -812,6 +816,10 @@ exports.ExplorerRenderer = (function() {
 			if(this.explorer.selectionPolicy !== "cursorOnly"){ //$NON-NLS-0$
 				this.explorer.refreshSelection();
 				this.explorer.initNavHandler();			
+			}
+			var navHandler = this.explorer.getNavHandler();
+			if (navHandler) {
+				navHandler.rowsChanged();
 			}
 			if (!this._noRowHighlighting){
 				var even = "darkSectionTreeTableRow"; //$NON-NLS-0$

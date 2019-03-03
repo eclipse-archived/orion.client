@@ -53,12 +53,13 @@ exports.ExplorerNavHandler = (function() {
 		this.model = this.explorer.model;
 		this._navDict = navDict;
 		
-	    this._listeners = [];
-	    this._selections = [];
-	    
-	    this._currentColumn = 0;
-	    var parentDiv = this._getEventListeningDiv();
-	    parentDiv.tabIndex = 0;
+		this._listeners = [];
+		this._selections = [];
+
+		this._currentColumn = 0;
+		var parentDiv = this._getEventListeningDiv();
+		this._parentDiv = parentDiv;
+		parentDiv.tabIndex = 0;
 		parentDiv.classList.add("selectionModelContainer"); //$NON-NLS-0$
 		var self = this;
 		this._modelIterator = new mTreeModelIterator.TreeModelIterator([], {
@@ -74,10 +75,10 @@ exports.ExplorerNavHandler = (function() {
 		});
 		this._init(options);
 		
-	    if(!options || options.setFocus !== false){
-			parentDiv.focus();
-	    }
-	    var keyListener = function (e) { 
+		if(!options || options.setFocus !== false){
+			this.focus();
+		}
+		var keyListener = function (e) { 
 			if(UiUtils.isFormElement(e.target)) {
 				// Not for us
 				return true;
@@ -130,7 +131,6 @@ exports.ExplorerNavHandler = (function() {
 		};
 		parentDiv.addEventListener("focus", l2, false); //$NON-NLS-0$
 		this._listeners.push({type: "focus", listener: l2}); //$NON-NLS-0$
-		this._parentDiv = parentDiv;
 	}
 	
 	ExplorerNavHandler.prototype = /** @lends orion.explorerNavHandler.ExplorerNavHandler.prototype */ {
@@ -389,6 +389,28 @@ exports.ExplorerNavHandler = (function() {
 			var nodeList = root.querySelectorAll('a,button,input,select,textarea,div[tabIndex]');
 			return Array.prototype.slice.call(nodeList);
 		},
+		
+		getAllRows: function() {
+			var nodeList = this._parentDiv.querySelectorAll(".treeTableRow");
+			return Array.prototype.slice.call(nodeList);
+		},
+		
+		rowsChanged: function() {
+			this.getAllRows().forEach(function(row) {
+				var model = this._modelIterator.cursor();
+				if (!model) {
+					this._modelIterator.setCursor(row._item);
+				} 
+				if (!row._focusListener) {
+					row._focusListener = this._focusListener;
+					row.addEventListener("focus", this._focusListener);
+				}
+				if (!row._blurListener) {
+					row._blurListener = this._blurListener;
+					row.addEventListener("blur", this._blurListener);
+				}
+			}.bind(this));
+		},
 
 		toggleCursor:  function(model, on, evt){
 			if (!model) {
@@ -396,9 +418,7 @@ exports.ExplorerNavHandler = (function() {
 			}
 			if (!model) {
 				model = this.model.root && this.model.root.children && this.model.root.children[0];
-				if (model) {
-					this.cursorOn(model);
-				}
+				this._modelIterator.setCursor(model);
 			}
 			var currentRow = this.getRowDiv(model);
 			var currentgrid = this.getCurrentGrid(model);
@@ -413,16 +433,8 @@ exports.ExplorerNavHandler = (function() {
 			var handleRow = function (className) {
 				if(currentRow){
 					if (on) {
-						currentRow.classList.add(className);
-						if (!currentRow._focusListener) {
-							currentRow._focusListener = this._focusListener;
-							currentRow.addEventListener("focus", this._focusListener);
-						}
-						if (!currentRow._blurListener) {
-							currentRow._blurListener = this._blurListener;
-							currentRow.addEventListener("blur", this._blurListener);
-						}
 						if (this._parentDiv === document.activeElement || document.activeElement.parentNode === currentRow.parentNode) {
+							currentRow.classList.add(className);
 							currentRow.tabIndex = "0";
 							this.getFocusableElems(currentRow).forEach(function(element) {
 								if (element.savedTabIndex === -1) {
@@ -431,7 +443,9 @@ exports.ExplorerNavHandler = (function() {
 								element.tabIndex = 0;
 							});
 							this._parentDiv.tabIndex = "-1";
-							currentRow.focus();
+							if (!(evt && evt.target !== this._parentDiv)) {
+								currentRow.focus();
+							}
 						}
 					} else {
 						currentRow.tabIndex = "-1";
