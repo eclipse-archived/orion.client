@@ -18,6 +18,7 @@ var ETag = require('./util/etag'),
 	api = require('./api'),
 	log4js = require('log4js'),
 	logger = log4js.getLogger("file"),
+	constants = require("constants"),
 	fs = Promise.promisifyAll(require('fs'));
 	
 var ISFS_CASE_INSENSITIVE;
@@ -422,8 +423,6 @@ function fileJSON(store, fileRoot, workspaceRoot, file, stats, depth, metadataMi
 		getName = Promise.resolve(path.basename(file.path));
 	}
 	return getName.then(function(fileName) {
-		const USER_WRITE_FLAG = 128;
-		const USER_EXECUTE_FLAG = 64;
 		var result = {
 			Name: fileName,
 			Location: getFileLocation(fileRoot, wwwpath, isDir),
@@ -432,8 +431,8 @@ function fileJSON(store, fileRoot, workspaceRoot, file, stats, depth, metadataMi
 			Length: stats.size,
 			Parents: getParents(fileRoot, wwwpath),
 			Attributes: {
-				ReadOnly: !((stats.mode & USER_WRITE_FLAG) === USER_WRITE_FLAG),
-				Executable: (stats.mode & USER_EXECUTE_FLAG) === USER_EXECUTE_FLAG
+				ReadOnly: !((stats.mode & constants.S_IWUSR) === constants.S_IWUSR),
+				Executable: (stats.mode & constants.S_IXUSR) === constants.S_IXUSR
 			}
 		};
 		if (metadataMixins) {
