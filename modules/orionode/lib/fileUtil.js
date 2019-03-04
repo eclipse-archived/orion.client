@@ -427,6 +427,7 @@ function fileJSON(store, fileRoot, workspaceRoot, file, stats, depth, metadataMi
 			Location: getFileLocation(fileRoot, wwwpath, isDir),
 			Directory: isDir,
 			LocalTimeStamp: stats.mtime.getTime(),
+			Length: stats.size,
 			Parents: getParents(fileRoot, wwwpath),
 			Attributes: {
 				// TODO fix this
