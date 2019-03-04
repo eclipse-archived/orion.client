@@ -38,7 +38,6 @@ define([
 	 * @param {Boolean} [options.canHide] if true section may be hidden
 	 * @param {Boolean} [options.hidden] if true section will be hidden at first display
 	 * @param {Boolean} [options.useAuxStyle] if true the section will be styled for an auxiliary pane
-	 * @param {Boolean} [options.keepHeader] if true the embedded explorer will keep its header
 	 * @param {Boolean} [options.noTwistie] if true the twisties will not be displayed
 	 * @param {Boolean} [options.dropdown] if true the section is dropdown
 	 * @param {Boolean} [options.noArrow] if true no dropdown arrow
@@ -163,10 +162,6 @@ define([
 			}.bind(this));
 		}
 		
-		if(options.keepHeader){
-			this._keepHeader = options.keepHeader;
-		}
-
 		this.titleActionsNode = document.createElement("div"); //$NON-NLS-0$
 		this.titleActionsNode.id = options.id + "TitleActionsArea"; //$NON-NLS-0$
 		this.titleActionsNode.classList.add("layoutLeft"); //$NON-NLS-0$
@@ -530,21 +525,6 @@ define([
 			});
 			if(explorer.renderer){
 				explorer.renderer.section = this;
-				if(!this._keepHeader){
-					objects.mixin(explorer.renderer, {
-						getCellHeaderElement: function(col_no){
-							var firstHeader = Object.getPrototypeOf(this).getCellHeaderElement.call(this, col_no);
-							if(firstHeader){
-								var sectionTitle = firstHeader.innerHTML;
-								if (bidiUtils.isBidiEnabled()) {
-									sectionTitle = bidiUtils.enforceTextDirWithUcc(sectionTitle);
-								}
-								this.section.setTitle(sectionTitle);
-							}
-							return null;
-						}
-					});
-				}
 			}
 		},
 

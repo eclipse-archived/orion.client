@@ -389,7 +389,7 @@ define([
 					kb = length / 1024;
 				sizeColumn.textContent = Math.ceil(kb).toLocaleString() + " KB"; //$NON-NLS-0$
 			}
-			sizeColumn.style.textAlign = "right"; //$NON-NLS-0$
+			sizeColumn.style.textAlign = "left"; //$NON-NLS-0$
 			return sizeColumn;
 		case commitCase:// LastCommit field is optional. For file services that dod not return this properties, we do not have to render this column.
 			if (this.oneColumn || !item.LastCommit) {

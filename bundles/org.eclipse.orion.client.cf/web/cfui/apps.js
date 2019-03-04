@@ -253,7 +253,6 @@ mBootstrap.startup().then(function(core) {
 			slideout: true,
 			canHide: false,
 			preferenceService: preferences,
-			keepHeader: true,
 			headerClass: ["sectionTreeTableHeader"]
 		});
 
@@ -305,7 +304,6 @@ mBootstrap.startup().then(function(core) {
 			slideout: true,
 			canHide: false,
 			preferenceService: preferences,
-			keepHeader: true,
 			headerClass: ["sectionTreeTableHeader"]
 		});
 

@@ -176,15 +176,6 @@ define([
 	AdditionalInfoRenderer.prototype = new mExplorer.SelectionRenderer();
 	AdditionalInfoRenderer.prototype.constructor = AdditionalInfoRenderer;
 
-	AdditionalInfoRenderer.prototype.getCellHeaderElement = function(col_no){
-		if(col_no===0){
-			var td = document.createElement("td");
-			td.colSpan = 2;
-			td.appendChild(document.createTextNode(this.explorer.model.root.Name));
-			return td;
-		}
-	};
-
 	AdditionalInfoRenderer.prototype.getCellElement = function(col_no, item, tableRow){
 		if(col_no===0) {
 			var td = document.createElement("td");
