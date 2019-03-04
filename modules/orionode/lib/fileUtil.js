@@ -422,6 +422,8 @@ function fileJSON(store, fileRoot, workspaceRoot, file, stats, depth, metadataMi
 		getName = Promise.resolve(path.basename(file.path));
 	}
 	return getName.then(function(fileName) {
+		const USER_WRITE_FLAG = 128;
+		const USER_EXECUTE_FLAG = 64;
 		var result = {
 			Name: fileName,
 			Location: getFileLocation(fileRoot, wwwpath, isDir),
@@ -430,9 +432,8 @@ function fileJSON(store, fileRoot, workspaceRoot, file, stats, depth, metadataMi
 			Length: stats.size,
 			Parents: getParents(fileRoot, wwwpath),
 			Attributes: {
-				// TODO fix this
-				ReadOnly: false, //!(stats.mode & USER_WRITE_FLAG === USER_WRITE_FLAG),
-				Executable: false //!(stats.mode & USER_EXECUTE_FLAG === USER_EXECUTE_FLAG)
+				ReadOnly: !((stats.mode & USER_WRITE_FLAG) === USER_WRITE_FLAG),
+				Executable: (stats.mode & USER_EXECUTE_FLAG) === USER_EXECUTE_FLAG
 			}
 		};
 		if (metadataMixins) {
