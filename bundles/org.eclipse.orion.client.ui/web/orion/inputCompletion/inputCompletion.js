@@ -230,6 +230,7 @@ define(['orion/EventTarget', 'orion/bidiUtils', 'orion/urlModifier'], function( 
 			return false;
 		} else if(keyCode === 27/* ESC */) {
 			e.preventDefault();
+			e.stopPropagation();
 			this._dismiss();//Dismiss the proposal UI and do nothing.
 			return false;
 		} else if(keyCode === 46/* DELETE */) {
