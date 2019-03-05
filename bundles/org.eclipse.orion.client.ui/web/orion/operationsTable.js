@@ -180,38 +180,28 @@ define(['i18n!orion/operations/nls/messages', 'orion/Deferred', 'orion/webui/lit
 			if (this.options['minimal']) //$NON-NLS-0$
 				return;
 
-			var col, h2;
+			var str;
 			switch(col_no){
 				case 0: 
-					col = document.createElement("th");
-					col.style.height = "8px;";
-					h2 = document.createElement("h2");
-					col.appendChild(h2);
-					h2.textContent = messages["Name"];
-					return col;
+					str = messages["Name"];
+					break;
 				case 1:
-					col = document.createElement("th");
-					col.style.height = "8px;";
-					h2 = document.createElement("h2");
-					col.appendChild(h2);
-					h2.textContent = messages["Actions"];
-					return col;
+					str = messages["Actions"];
+					break;
 				case 2: 
-					col = document.createElement("th");
-					col.style.height = "8px;";
-					h2 = document.createElement("h2");
-					col.appendChild(h2);
-					h2.textContent = messages["Status"];
-					return col;
+					str = messages["Status"];
+					break;
 				case 3: 
-					col = document.createElement("th");
-					col.style.height = "8px;";
-					h2 = document.createElement("h2");
-					col.appendChild(h2);
-					h2.textContent = messages["Scheduled"];
-					return col;
+					str = messages["Scheduled"];
+					break;
+				default:
+					return null;
 			}
 			
+			var th = document.createElement("th");
+			th.style.paddingTop = th.style.paddingLeft = th.style.paddingBottom = "6px"; //$NON-NLS-0$
+			th.textContent = str;
+			return th;
 		};
 		
 		OperationsRenderer.prototype.getCellElement = function(col_no, item, tableRow){
