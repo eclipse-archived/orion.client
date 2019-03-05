@@ -174,7 +174,7 @@ define([
 			});
 			this.createFilter();
 			this.createTree(this.parentId, model, {
-				role: "treegrid",
+				role: "grid",
 				setFocus: false, // do not steal focus on load
 			});
 			this.updateCommands();
