@@ -116,7 +116,6 @@ define(['i18n!orion/operations/nls/messages', 'orion/Deferred', 'orion/webui/lit
 			this.createTree(this.parentId, this.model, {
 				role: "grid"
 			});
-			this.getNavHandler().refreshModel(this.getNavDict(), this.model, operationsList);
 		};
 		
 		OperationsExplorer.prototype.changedItem = function(location){

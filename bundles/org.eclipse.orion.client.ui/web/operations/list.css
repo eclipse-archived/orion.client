@@ -6,11 +6,6 @@
 
 @import "../css/theme.css";
 
-#tasks-list{
-	padding-left: 5px;
-	padding-right: 5px;
-}
-
 .pageLayoutTarget {
 	padding-top: 0;
 }
