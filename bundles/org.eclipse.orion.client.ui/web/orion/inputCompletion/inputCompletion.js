@@ -337,6 +337,7 @@ define(['orion/EventTarget', 'orion/bidiUtils', 'orion/urlModifier'], function( 
 			var deleteBtn;
 			if(typeof category.item.value === "string"){ //$NON-NLS-0$
 				var tbl = document.createElement('table'); //$NON-NLS-0$
+				tbl.setAttribute("role", "presentation"); //$NON-NLS-1$ //$NON-NLS-0$
 				tbl.style.width = "100%"; //$NON-NLS-0$
 				tbl.style.tableLayout = 'fixed'; //$NON-NLS-0$
 				tbl.style.borderSpacing = "0"; //$NON-NLS-0$
