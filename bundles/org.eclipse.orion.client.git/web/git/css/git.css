@@ -212,7 +212,7 @@ html[dir="rtl"] .mainToolbar .sectionWrapper { /* ACGC */
 	z-index: 200;
 	margin-top: -1px;
 	resize: none;
-	overflow: scroll;
+	overflow: auto;
 	background-color: white;
 	border: 1px solid #e3e7ea;
 	border-top: none;
@@ -248,10 +248,6 @@ html[dir="rtl"] .mainToolbar .sectionWrapper { /* ACGC */
 .commitFilterActions {
 	padding: 10px;
 	overflow: hidden;
-}
-
-.core-sprite-edit {
-	color: #77858d;
 }
 
 .core-sprite-leftarrow {

@@ -55,5 +55,5 @@ html[dir="rtl"] .slideoutWrapper { /* BDL */
 	height: calc(100% - 10px);
 	margin: 0;
 	padding: 4px 0;
-	width: 100%;
+	width: calc(100% - 6px);
 }

@@ -53,6 +53,7 @@ define([
 			}
 			keyAssistDiv.appendChild(keyAssistContents);
 			var keyAssistTable = this._keyAssistTable = document.createElement('table'); //$NON-NLS-1$
+			keyAssistTable.setAttribute("role", "presentation");
 			keyAssistTable.tabIndex = 0;
 			keyAssistTable.classList.add("keyAssistList"); //$NON-NLS-1$
 			keyAssistContents.appendChild(keyAssistTable);
@@ -63,6 +64,9 @@ define([
 			}.bind(this));
 			keyAssistTable.addEventListener("keydown", function (e) { //$NON-NLS-1$
 				this._keyDown(e);
+			}.bind(this));
+			keyAssistTable.addEventListener("focus", function (e) { //$NON-NLS-1$
+				this.selectRow(this._selectedIndex !== -1 ? this._selectedIndex : 0);
 			}.bind(this));
 			keyAssistInput.addEventListener("input", function (e) { //$NON-NLS-1$
 				this.filterChanged();
@@ -168,8 +172,13 @@ define([
 			column = row.insertCell(-1);
 			column.classList.add("keyAssistActions"); //$NON-NLS-1$
 			var eb = document.createElement("button"); //$NON-NLS-1$
+			eb.tabIndex = -1;
 			eb.classList.add("keyAssistEditButton"); //$NON-NLS-1$
-			eb.classList.add("core-sprite-edit"); //$NON-NLS-1$
+			eb.classList.add("orionButton"); //$NON-NLS-1$
+			eb.classList.add("commandImage"); //$NON-NLS-1$
+			var span = document.createElement("span"); //$NON-NLS-0$
+			span.classList.add("core-sprite-edit"); //$NON-NLS-1$
+			eb.appendChild(span);
 			eb.setAttribute("aria-label", messages["Edit"]); //$NON-NLS-1$
 			//eb.textContent = "E"; //$NON-NLS-1$
 			eb.addEventListener("click", function(evt) {
@@ -344,19 +353,31 @@ define([
 			this.selectRow(selectedIndex, rows);
 		},
 		selectRow: function(index, rows) {
+			var row, editButton;
+			if (!rows) {
+				rows = this._keyAssistTable.querySelectorAll(".keyAssistItem");
+			}
 			if (this._selectedIndex !== -1) {
 				row = rows[this._selectedIndex];
 				row.classList.remove("selected"); //$NON-NLS-1$
-				row.childNodes[3].firstChild.classList.remove("keyAssistEditButtonVisible"); //$NON-NLS-1$
+				editButton = row.querySelector(".keyAssistEditButton");
+				if (editButton) {
+					editButton.classList.remove("keyAssistEditButtonVisible"); //$NON-NLS-1$
+					editButton.tabIndex = -1;
+				}
 				this._selectedRow = null;
 			}
 			
 			if (index >= 0 && index < rows.length) {
 				this._selectedIndex = index;
 				this._selectedRow = rows[this._selectedIndex];
-				var row = this._selectedRow;
+				row = this._selectedRow;
 				row.classList.add("selected"); //$NON-NLS-1$
-				row.childNodes[3].firstChild.classList.add("keyAssistEditButtonVisible"); //$NON-NLS-1$
+				editButton = row.querySelector(".keyAssistEditButton");
+				if (editButton) {
+					editButton.classList.add("keyAssistEditButtonVisible"); //$NON-NLS-1$
+					editButton.tabIndex = 0;
+				}
 				this._keyAssistTable.setAttribute("aria-activedescendant", row.id); //$NON-NLS-1$
 				this._keyAssistTable.focus();
 				var rowRect = row.getBoundingClientRect();
@@ -377,6 +398,7 @@ define([
 			if (this.isVisible()) {
 				return;
 			}
+			lib.trapTabs(this._keyAssistDiv);
 			this._previousActiveElement = document.activeElement;
 			this.createContents();
 			this._keyAssistContents.style.height = Math.floor(this._keyAssistDiv.parentNode.clientHeight * 0.75) + "px"; //$NON-NLS-1$

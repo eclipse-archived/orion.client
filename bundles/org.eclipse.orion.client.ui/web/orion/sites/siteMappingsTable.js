@@ -66,7 +66,7 @@ mSiteMappingsTable.Renderer = (function() {
 			switch(col_no){
 				case 0:
 					col = document.createElement("th"); //$NON-NLS-1$ //$NON-NLS-0$
-					col.textContent = " "; //$NON-NLS-0$
+					col.textContent = messages["Type"]; //$NON-NLS-0$
 					col.classList.add("isValidColumn"); //$NON-NLS-0$
 					return col;
 				case 1:
@@ -221,7 +221,7 @@ mSiteMappingsTable.MappingsTable = (function() {
 			this.siteClient.updateMappingsDisplayStrings(this.siteConfiguration).then(function(updatedSite) {
 				self.siteConfiguration.Mappings = updatedSite.Mappings;
 				// Build visuals
-				self.createTree(self.parentId, new mSiteMappingsTable.Model(null, fetchItems, self.siteConfiguration.Mappings));
+				self.createTree(self.parentId, new mSiteMappingsTable.Model(null, fetchItems, self.siteConfiguration.Mappings), {role: "grid"});
 			});
 		},
 		render: function() {

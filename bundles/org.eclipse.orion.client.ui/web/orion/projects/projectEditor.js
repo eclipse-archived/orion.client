@@ -64,9 +64,6 @@ define([
 	ProjectInfoRenderer.prototype = new mExplorer.SelectionRenderer();
 	ProjectInfoRenderer.prototype.constructor = ProjectInfoRenderer;
 
-	ProjectInfoRenderer.prototype.getCellHeaderElement = function(col_no){
-	};
-
 	ProjectInfoRenderer.prototype.getCellElement = function(col_no, item, tableRow){
 		if(col_no===0) {
 			var td = document.createElement("td");
@@ -176,15 +173,6 @@ define([
 	AdditionalInfoRenderer.prototype = new mExplorer.SelectionRenderer();
 	AdditionalInfoRenderer.prototype.constructor = AdditionalInfoRenderer;
 
-	AdditionalInfoRenderer.prototype.getCellHeaderElement = function(col_no){
-		if(col_no===0){
-			var td = document.createElement("td");
-			td.colSpan = 2;
-			td.appendChild(document.createTextNode(this.explorer.model.root.Name));
-			return td;
-		}
-	};
-
 	AdditionalInfoRenderer.prototype.getCellElement = function(col_no, item, tableRow){
 		if(col_no===0) {
 			var td = document.createElement("td");
@@ -262,9 +250,6 @@ define([
 
 	DependenciesRenderer.prototype = new mExplorer.SelectionRenderer();
 	DependenciesRenderer.prototype.constructor = DependenciesRenderer;
-
-	DependenciesRenderer.prototype.getCellHeaderElement = function(col_no){
-	};
 
 	DependenciesRenderer.prototype.getCellElement = function(col_no, item, tableRow){
 		if(col_no===0) {

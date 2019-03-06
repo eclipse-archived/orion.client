@@ -338,12 +338,11 @@ function(messages, Deferred, lib, mContentTypes, i18nUtil, mExplorer, mCommands,
     SearchReportRenderer.prototype = new mExplorer.SelectionRenderer();
 
     SearchReportRenderer.prototype.getCellHeaderElement = function(col_no) {
-        var th, h2;
+        var th;
         switch (col_no) {
             case 0:
                 th = _createElement('th', "search_report", null, null); //$NON-NLS-1$ //$NON-NLS-1$ //$NON-NLS-2$
-                h2 = _createElement('h2', null, null, th); //$NON-NLS-1$
-                h2.textContent = messages["Files replaced"];
+                th.textContent = messages["Files replaced"];
                 break;
         }
         return th;
@@ -420,7 +419,9 @@ function(messages, Deferred, lib, mContentTypes, i18nUtil, mExplorer, mCommands,
     SearchReportExplorer.prototype = new mExplorer.Explorer();
 
     SearchReportExplorer.prototype.report = function() {
-        this.createTree(this.parentId, new mExplorer.ExplorerFlatModel(null, null, this.reportList));
+        this.createTree(this.parentId, new mExplorer.ExplorerFlatModel(null, null, this.reportList), {
+            role: "grid"
+        });
     };
 
     SearchReportExplorer.prototype.constructor = SearchReportExplorer;
@@ -754,7 +755,8 @@ function(messages, Deferred, lib, mContentTypes, i18nUtil, mExplorer, mCommands,
             this.reportStatus(messages["Preparing preview..."]);
         }
         var that = this;
-		this.createTree(this.getParentDivId(), this.model, {
+        this.createTree(this.getParentDivId(), this.model, {
+            role: "treegrid",
             selectionPolicy: "singleSelection", //$NON-NLS-1$
             indent: 0,
             setFocus: true,
@@ -1141,6 +1143,7 @@ function(messages, Deferred, lib, mContentTypes, i18nUtil, mExplorer, mCommands,
             this.initCommands();
             _empty(this.getParentDivId());
             this.createTree(this.getParentDivId(), this.model, {
+                role: "treegrid",
 				selectionPolicy: "singleSelection", //$NON-NLS-1$
                 indent: 0,
 				getChildrenFunc: function(model) {return this.model.getFilteredChildren(model);}.bind(this),
@@ -1170,6 +1173,7 @@ function(messages, Deferred, lib, mContentTypes, i18nUtil, mExplorer, mCommands,
         var that = this;
         this.model.buildResultModel();
         this.createTree(this.getParentDivId(), this.model, {
+            role: "treegrid",
             selectionPolicy: "singleSelection", //$NON-NLS-1$
             getChildrenFunc: function(model) {return this.model.getFilteredChildren(model);}.bind(this),
             indent: 0,

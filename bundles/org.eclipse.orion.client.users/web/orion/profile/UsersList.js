@@ -80,7 +80,7 @@ eclipse.UsersList = (function(){
 		flatModel.service = service;
 		flatModel.queryObject = queryObj;
 		this.queryObject = queryObj;
-		this.createTree(this.parentId, flatModel, {setFocus: true}); //$NON-NLS-0$
+		this.createTree(this.parentId, flatModel, {role: "grid", setFocus: true}); //$NON-NLS-0$
 		mUsersUtil.updateNavTools(this.registry, this.commandService, this, this.toolbarId, this.pageNavId, this.selectionToolsId, {});
 	};
 	
@@ -121,23 +121,21 @@ eclipse.UsersRenderer = (function() {
 	
 	UsersRenderer.prototype.getCellHeaderElement = function(col_no){
 		var col = document.createElement("th"); //$NON-NLS-0$
-		var h2 = document.createElement("h2"); //$NON-NLS-0$
-		col.appendChild(h2);
 		switch(col_no){
 		case 0: 
-			h2.textContent = messages["User Name"];
+			col.textContent = messages["User Name"];
 			return col;
 		case 1:
-			h2.textContent = messages["Actions"];
+			col.textContent = messages["Actions"];
 			return col;
 		case 2:
-			h2.textContent = messages["Full Name"];
+			col.textContent = messages["Full Name"];
 			return col;
 		case 3:
-			h2.textContent = messages["Last Login"];
+			col.textContent = messages["Last Login"];
 			return col;
 		case 4:
-			h2.textContent = messages["Disk Usage"];
+			col.textContent = messages["Disk Usage"];
 			return col;
 		}
 	};

@@ -299,6 +299,7 @@ define([
 		this.renderer = options.rendererFactory(this);
 		this.dragAndDrop = options.dragAndDrop;
 		this.setFocus = options.setFocus;
+		this.role = options.role || "treegrid";
 		this.model = null;
 		this.myTree = null;
 		this.checkbox = false;
@@ -1529,6 +1530,7 @@ define([
 
 					var deferred = new Deferred();
 					self.createTree(self.parentId, self.model, {
+						role: self.role,
 						onComplete: function(tree) {
 							deferred.resolve(tree);
 						},

@@ -111,9 +111,7 @@ define(['i18n!orion/nls/messages', 'orion/webui/littlelib', 'orion/Deferred'], f
 				this._renderer.tableCallback(table);
 			}
 			table.id = this._id;
-			if (this._role) {
-				table.setAttribute("role", this._role); //$NON-NLS-0$
-			}
+			table.setAttribute("role", this._role || "presentation"); //$NON-NLS-0$
 			if (this._tableStyle) {
 				table.classList.add(this._tableStyle);
 			}
@@ -142,6 +140,19 @@ define(['i18n!orion/nls/messages', 'orion/webui/littlelib', 'orion/Deferred'], f
 		_generateChildren: function(children, indentLevel, referenceNode) {
 			for (var i=0; i<children.length; i++) {
 				var row = document.createElement(this._tableRowElement); //$NON-NLS-0$
+				if (this._role === "treegrid") {
+					row.setAttribute("role", "row");
+					row.setAttribute("aria-level", indentLevel + 1);
+					row.setAttribute("aria-setsize", children.length);
+					row.setAttribute("aria-posinset", i + 1);
+				} else if (this._role === "tree") {
+					row.setAttribute("role", "treeitem");
+					row.setAttribute("aria-level", indentLevel + 1);
+					row.setAttribute("aria-setsize", children.length);
+					row.setAttribute("aria-posinset", i + 1);
+				} else if (this._role === "grid") {
+					row.setAttribute("role", "row");
+				}
 				if(this._renderer && typeof this._renderer.initSelectableRow === "function") { //$NON-NLS-0$
 					this._renderer.initSelectableRow(children[i], row);
 				}
@@ -410,6 +421,7 @@ define(['i18n!orion/nls/messages', 'orion/webui/littlelib', 'orion/Deferred'], f
 			var id = typeof(itemOrId) === "string" ? itemOrId : this._treeModel.getId(itemOrId); //$NON-NLS-0$
 			var row = lib.node(id);
 			if (row) {
+				row.setAttribute("aria-expanded", true);
 				var tree = this;
 				if (row._expanded) {
 					if (postExpandFunc) {
@@ -502,6 +514,7 @@ define(['i18n!orion/nls/messages', 'orion/webui/littlelib', 'orion/Deferred'], f
 			var id = typeof(itemOrId) === "string" ? itemOrId : this._treeModel.getId(itemOrId); //$NON-NLS-0$
 			var row = lib.node(id);
 			if (row) {
+				row.setAttribute("aria-expanded", false);
 				if (!row._expanded) {
 					return;
 				}

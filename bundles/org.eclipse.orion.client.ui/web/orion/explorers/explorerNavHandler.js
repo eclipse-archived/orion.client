@@ -53,12 +53,13 @@ exports.ExplorerNavHandler = (function() {
 		this.model = this.explorer.model;
 		this._navDict = navDict;
 		
-	    this._listeners = [];
-	    this._selections = [];
-	    
-	    this._currentColumn = 0;
-	    var parentDiv = this._getEventListeningDiv();
-	    parentDiv.tabIndex = 0;
+		this._listeners = [];
+		this._selections = [];
+
+		this._currentColumn = 0;
+		var parentDiv = this._getEventListeningDiv();
+		this._parentDiv = parentDiv;
+		parentDiv.tabIndex = 0;
 		parentDiv.classList.add("selectionModelContainer"); //$NON-NLS-0$
 		var self = this;
 		this._modelIterator = new mTreeModelIterator.TreeModelIterator([], {
@@ -74,10 +75,10 @@ exports.ExplorerNavHandler = (function() {
 		});
 		this._init(options);
 		
-	    if(!options || options.setFocus !== false){
-			parentDiv.focus();
-	    }
-	    var keyListener = function (e) { 
+		if(!options || options.setFocus !== false){
+			this.focus();
+		}
+		var keyListener = function (e) { 
 			if(UiUtils.isFormElement(e.target)) {
 				// Not for us
 				return true;
@@ -97,8 +98,6 @@ exports.ExplorerNavHandler = (function() {
 				return self.onSpace(e);
 			} else if(e.keyCode === lib.KEY.ENTER) {
 				return self.onEnter(e);
-			} else if(e.keyCode === lib.KEY.TAB && e.shiftKey) {
-				parentDiv.tabIndex = -1;
 			}
 		};
 		parentDiv.addEventListener("keydown", keyListener, false); //$NON-NLS-0$
@@ -114,25 +113,24 @@ exports.ExplorerNavHandler = (function() {
 		};
 		parentDiv.addEventListener("mousedown", mouseListener, false); //$NON-NLS-0$
 		this._listeners.push({type: "mousedown", listener: mouseListener}); //$NON-NLS-0$
-		var l1 = function (e) { 
+		var l1 = this._blurListener = function (e) { 
 			if(self.explorer.onFocus){
 				self.explorer.onFocus(false);
 			} else {
-				self.toggleCursor(null, false);
+				self.toggleCursor(null, false, e);
 			}
 		};
 		parentDiv.addEventListener("blur", l1, false); //$NON-NLS-0$
 		this._listeners.push({type: "blur", listener: l1}); //$NON-NLS-0$
-		var l2 = function (e) { 
+		var l2 = this._focusListener = function (e) { 
 			if(self.explorer.onFocus){
 				self.explorer.onFocus(true);
 			} else {
-				self.toggleCursor(null, true);
+				self.toggleCursor(null, true, e);
 			}
 		};
 		parentDiv.addEventListener("focus", l2, false); //$NON-NLS-0$
 		this._listeners.push({type: "focus", listener: l2}); //$NON-NLS-0$
-		this._parentDiv = parentDiv;
 	}
 	
 	ExplorerNavHandler.prototype = /** @lends orion.explorerNavHandler.ExplorerNavHandler.prototype */ {
@@ -387,33 +385,77 @@ exports.ExplorerNavHandler = (function() {
 			return node === stop ? null : node;
 		},
 
-		toggleCursor:  function(model, on){
+		getFocusableElems: function(root) {
+			var nodeList = root.querySelectorAll('a,button,input,select,textarea,div[tabIndex]');
+			return Array.prototype.slice.call(nodeList);
+		},
+		
+		getAllRows: function() {
+			var nodeList = this._parentDiv.querySelectorAll(".treeTableRow");
+			return Array.prototype.slice.call(nodeList);
+		},
+		
+		rowsChanged: function() {
+			this.getAllRows().forEach(function(row) {
+				var model = this._modelIterator.cursor();
+				if (!model) {
+					this._modelIterator.setCursor(row._item);
+				} 
+				if (!row._focusListener) {
+					row._focusListener = this._focusListener;
+					row.addEventListener("focus", this._focusListener);
+				}
+				if (!row._blurListener) {
+					row._blurListener = this._blurListener;
+					row.addEventListener("blur", this._blurListener);
+				}
+			}.bind(this));
+		},
+
+		toggleCursor:  function(model, on, evt){
 			if (!model) {
 				model = this._modelIterator.cursor();
 			}
 			if (!model) {
 				model = this.model.root && this.model.root.children && this.model.root.children[0];
-				if (model) {
-					this.cursorOn(model);
-				}
+				this._modelIterator.setCursor(model);
 			}
 			var currentRow = this.getRowDiv(model);
 			var currentgrid = this.getCurrentGrid(model);
-			if(currentgrid) {
+			if (on) {
+				this.getFocusableElems(this._parentDiv).forEach(function(element) {
+					if (element.savedTabIndex === undefined) {
+						element.savedTabIndex = element.tabIndex;
+					}
+					element.tabIndex = -1;
+				});
+			}
+			var handleRow = function (className) {
 				if(currentRow){
 					if (on) {
-						currentRow.classList.add("treeIterationCursorRow"); //$NON-NLS-0$
 						if (this._parentDiv === document.activeElement || document.activeElement.parentNode === currentRow.parentNode) {
+							currentRow.classList.add(className);
 							currentRow.tabIndex = "0";
+							this.getFocusableElems(currentRow).forEach(function(element) {
+								if (element.savedTabIndex === -1) {
+									return;
+								}
+								element.tabIndex = 0;
+							});
 							this._parentDiv.tabIndex = "-1";
-							currentRow.focus();
+							if (!(evt && evt.target !== this._parentDiv)) {
+								currentRow.focus();
+							}
 						}
 					} else {
 						currentRow.tabIndex = "-1";
 						this._parentDiv.tabIndex = "0";
-						currentRow.classList.remove("treeIterationCursorRow"); //$NON-NLS-0$
+						currentRow.classList.remove(className);
 					}
 				}
+			}.bind(this);
+			if(currentgrid) {
+				handleRow("treeIterationCursorRow"); //$NON-NLS-0$
 				if(currentgrid.domNode){
 					var ariaElement = this.getAriaContainerElement(currentgrid.domNode);
 					if (on) {
@@ -427,20 +469,7 @@ exports.ExplorerNavHandler = (function() {
 					}
 				}
 			} else {
-				if(currentRow){
-					if (on) {
-						currentRow.classList.add("treeIterationCursorRow_Dotted"); //$NON-NLS-0$
-						if (this._parentDiv === document.activeElement || document.activeElement.parentNode === currentRow.parentNode) {
-							currentRow.tabIndex = "0";
-							this._parentDiv.tabIndex = "-1";
-							currentRow.focus();
-						}
-					} else {
-						currentRow.tabIndex = "-1";
-						this._parentDiv.tabIndex = "0";
-						currentRow.classList.remove("treeIterationCursorRow_Dotted"); //$NON-NLS-0$
-					}
-				}
+				handleRow("treeIterationCursorRow_Dotted"); //$NON-NLS-0$
 			}
 		},
 		
@@ -604,8 +633,10 @@ exports.ExplorerNavHandler = (function() {
 			var rowDiv = this.getRowDiv(model);
 			if(rowDiv){
 				if (this._inSelection(model) < 0) {
+					rowDiv.setAttribute("aria-selected", true);
 					rowDiv.classList.add("checkedRow"); //$NON-NLS-0$
 				} else {
+					rowDiv.setAttribute("aria-selected", false);
 					rowDiv.classList.remove("checkedRow"); //$NON-NLS-0$
 				}
 			}

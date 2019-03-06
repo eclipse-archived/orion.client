@@ -99,17 +99,15 @@ define(['i18n!orion/compare/nls/messages', 'require', 'orion/webui/littlelib', '
 	CompareTreeExplorerRenderer.prototype = new mExplorer.SelectionRenderer();
 	
 	CompareTreeExplorerRenderer.prototype.getCellHeaderElement = function(col_no){
-		var col, h2;
+		var col;
 		switch(col_no){
 			case 0:
-				col = _createElement('th'); //$NON-NLS-0$
-				h2 = _createElement('h2', "compare_tree_grid", null, col); //$NON-NLS-1$ //$NON-NLS-0$
-				h2.textContent = i18nUtil.formatMessage(messages["n of t files changed"], this.explorer._compareResults.length, this.explorer._totalFiles); //$NON-NLS-0$
+				col = _createElement('th', "compare_tree_grid"); //$NON-NLS-1$ //$NON-NLS-0$
+				col.textContent = i18nUtil.formatMessage(messages["n of t files changed"], this.explorer._compareResults.length, this.explorer._totalFiles); //$NON-NLS-0$
 				return col;
 			case 1: 
-				col = _createElement('th'); //$NON-NLS-0$
-				h2 = _createElement('h2', "compare_tree_grid", null, col); //$NON-NLS-1$ //$NON-NLS-0$
-				h2.textContent = messages["Location"]; //$NON-NLS-0$
+				col = _createElement('th', "compare_tree_grid"); //$NON-NLS-1$ //$NON-NLS-0$
+				col.textContent = messages["Location"]; //$NON-NLS-0$
 			return col;
 		}
 	};
@@ -454,7 +452,7 @@ define(['i18n!orion/compare/nls/messages', 'require', 'orion/webui/littlelib', '
 					return 0;
 				}
 			});
-		this.createTree(this.parentId, new CompareTreeModel(null, null, this._compareResults), {selectionPolicy: "cursorOnly", setFocus: true}); //$NON-NLS-0$
+		this.createTree(this.parentId, new CompareTreeModel(null, null, this._compareResults), {role: "grid", selectionPolicy: "cursorOnly", setFocus: true}); //$NON-NLS-0$
 	};
 	
 	CompareTreeExplorer.prototype.constructor = CompareTreeExplorer;

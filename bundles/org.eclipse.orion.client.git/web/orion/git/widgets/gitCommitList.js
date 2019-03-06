@@ -807,7 +807,7 @@ define([
 			});
 			this.createFilter(this.parentId);
 			this.createTree(this.parentId, model, {
-				role: "presentation", // table element is only being used for row/column presentation
+				role: "treegrid",
 				setFocus: false, // do not steal focus on load
 				selectionPolicy: this.selectionPolicy,
 				onComplete: function() {
@@ -1107,13 +1107,6 @@ define([
 							item.parent.more = false;
 						});
 					});
-					moreButton.tabIndex = -1;
-					tableRow.addEventListener("blur", function() {
-						moreButton.tabIndex = -1;
-					});
-					tableRow.addEventListener("focus", function() {
-						moreButton.tabIndex = 0;
-					});
 					return td;
 				}
 
@@ -1292,12 +1285,6 @@ define([
 					commitInfo.moreButton.addEventListener("click", function() { //$NON-NLS-0$
 						item.full = !item.full;
 						explorer.myTree.redraw(item);
-					});
-					tableRow.addEventListener("blur", function() {
-						commitInfo.moreButton.tabIndex = -1;
-					});
-					tableRow.addEventListener("focus", function() {
-						commitInfo.moreButton.tabIndex = 0;
 					});
 					
 					var itemActionScope = "itemLevelCommands"; //$NON-NLS-0$

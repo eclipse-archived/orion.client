@@ -249,6 +249,10 @@ exports.Explorer = (function() {
 				onComplete: function(tree) {
 					if(this.selectionPolicy === "cursorOnly"){ //$NON-NLS-0$
 						this.initNavHandler();
+						var navHandler = this.getNavHandler();
+						if (navHandler) {
+							navHandler.rowsChanged();
+						}
 					}
 					if (options.onComplete) options.onComplete(tree);
 				}.bind(this),
@@ -639,7 +643,7 @@ exports.ExplorerRenderer = (function() {
 				}
 				checkColumn.appendChild(check);
 				var self = this;
-				check.addEventListener("click", function(evt) { //$NON-NLS-0$
+				check.addEventListener("mousedown", function(evt) { //$NON-NLS-0$
 					var newValue = evt.target.checked ? false : true;
 					self.onCheck(tableRow, evt.target, newValue, true, false, item);
 					lib.stop(evt);
@@ -791,6 +795,7 @@ exports.ExplorerRenderer = (function() {
 			placeHolder.appendChild(expandImage);
 			expandImage.classList.add(this._twistieSpriteClass);
 			expandImage.classList.add(this._collapseImageClass);
+			tableRow.setAttribute("aria-expanded", false);
 			if (decorateImageClass) {
 				var decorateImage = document.createElement("span"); //$NON-NLS-0$
 				placeHolder.appendChild(decorateImage);
@@ -811,6 +816,10 @@ exports.ExplorerRenderer = (function() {
 			if(this.explorer.selectionPolicy !== "cursorOnly"){ //$NON-NLS-0$
 				this.explorer.refreshSelection();
 				this.explorer.initNavHandler();			
+			}
+			var navHandler = this.explorer.getNavHandler();
+			if (navHandler) {
+				navHandler.rowsChanged();
 			}
 			if (!this._noRowHighlighting){
 				var even = "darkSectionTreeTableRow"; //$NON-NLS-0$
@@ -877,6 +886,7 @@ exports.SelectionRenderer = (function(){
 	SelectionRenderer.prototype.renderTableHeader = function(tableNode){
 		var thead = document.createElement('thead'); //$NON-NLS-0$
 		var row = document.createElement('tr'); //$NON-NLS-0$
+		row.setAttribute("role", "row"); //$NON-NLS-1$ //$NON-NLS-0$
 		thead.classList.add("navTableHeading"); //$NON-NLS-0$
 		if (this._useCheckboxSelection) {
 			row.appendChild(this.initCheckboxColumn(tableNode));
@@ -888,6 +898,7 @@ exports.SelectionRenderer = (function(){
 			if (cell.innerHTML.length > 0) {
 				cell.classList.add("navColumn"); //$NON-NLS-0$
 			}
+			cell.setAttribute("role", "columnheader"); //$NON-NLS-1$ //$NON-NLS-0$
 			row.appendChild(cell);			
 			cell = this.getCellHeaderElement(++i);
 		}
@@ -936,6 +947,9 @@ exports.SelectionRenderer = (function(){
 		var i = 0;
 		var cell = this.getCellElement(i, item, tableRow);
 		while(cell){
+			if (tableRow.getAttribute("role") === "row") {
+				cell.setAttribute("role", "gridcell");
+			}
 			tableRow.appendChild(cell);
 			if (i===0) {
 				if(this.getPrimColumnStyle){

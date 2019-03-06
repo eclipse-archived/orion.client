@@ -132,6 +132,7 @@ define([
 					iconElement = addImageToLink(contentType, imageHolderDom, item.Location, image);
 				}
 				link.href = href;
+				link.tabIndex = -1;
 				if(renderer && typeof renderer.updateFileNode === 'function') { //$NON-NLS-0$
 					renderer.updateFileNode(item, link, mContentTypes.isImage(contentType), iconElement);
 				}
@@ -164,19 +165,15 @@ define([
 	NavigatorRenderer.prototype = new mExplorer.SelectionRenderer(); 
 
 	NavigatorRenderer.prototype.wrapperCallback = function(wrapperElement) {
-		wrapperElement.setAttribute("role", "tree"); //$NON-NLS-1$ //$NON-NLS-2$
 	};
 
 	NavigatorRenderer.prototype.tableCallback = function(tableElement) {
-		tableElement.setAttribute("aria-label", messages["Navigator"]); //$NON-NLS-1$
-		tableElement.setAttribute("role", "presentation"); //$NON-NLS-1$ //$NON-NLS-2$
 	};
 
 	/**
 	 * @param {Element} rowElement
 	 */
 	NavigatorRenderer.prototype.rowCallback = function(rowElement, model) {
-		rowElement.setAttribute("role", "treeitem"); //$NON-NLS-1$ //$NON-NLS-2$
 	};
 	
 	
@@ -213,27 +210,6 @@ define([
 		return null;
 	};
 	
-	/**
-	 * Creates the column header element. We are really only using the header for a spacer at this point.
-	 * @name orion.explorer.NavigatorRenderer.prototype.getCellHeaderElement
-	 * @function
-	 * @returns {Element}
-	 */
-	NavigatorRenderer.prototype.getCellHeaderElement = function(col_no){
-		// TODO see https://bugs.eclipse.org/bugs/show_bug.cgi?id=400121
-		if (this.oneColumn && col_no !== 0) {
-			return null;
-		}
-
-		switch(col_no){
-		case 0:
-		case 1:
-		case 2:
-			var th = document.createElement("th"); //$NON-NLS-0$
-			th.style.height = "8px"; //$NON-NLS-0$
-		}
-	};
-		
 	/**
 	 * Creates a image DOM Element for the specified folder.
 	 * @name orion.explorer.NavigatorRenderer#getFolderImage
@@ -392,7 +368,7 @@ define([
 					kb = length / 1024;
 				sizeColumn.textContent = Math.ceil(kb).toLocaleString() + " KB"; //$NON-NLS-0$
 			}
-			sizeColumn.style.textAlign = "right"; //$NON-NLS-0$
+			sizeColumn.style.textAlign = "left"; //$NON-NLS-0$
 			return sizeColumn;
 		case commitCase:// LastCommit field is optional. For file services that dod not return this properties, we do not have to render this column.
 			if (this.oneColumn || !item.LastCommit) {

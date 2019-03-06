@@ -51,7 +51,7 @@ define(['i18n!orion/operations/nls/messages', 'orion/Deferred', 'orion/webui/lit
 				var operationLocations = Object.keys(globalOperations);
 				var operations = {};
 				Deferred.all(operationLocations.map(function(operationLocation) {
-					var operation = globalOperations[operationLocation];
+					var operation = JSON.parse(JSON.stringify(globalOperations[operationLocation]));
 					operation.Location = operationLocation;
 					operations[operationLocation]= operation;
 					var done = new Deferred();
@@ -101,7 +101,7 @@ define(['i18n!orion/operations/nls/messages', 'orion/Deferred', 'orion/webui/lit
 					operation.deferred.then(success.bind(operationLocation), failure.bind(operationLocation), progress.bind(operationLocation));
 					return done;
 				})).then(function() {
-					preferences.put("/operations", globalOperations, {clear: true});
+					return preferences.put("/operations", globalOperations, {clear: true});
 				});
 				that._loadOperationsList.bind(that)(operations);
 
@@ -113,8 +113,9 @@ define(['i18n!orion/operations/nls/messages', 'orion/Deferred', 'orion/webui/lit
 			this.operations = operationsList;
 			mOperationsCommands.updateNavTools(this.registry, this.commandRegistry, this, this.toolbarId, this.selectionToolsId, this.operations);
 			this.model = new exports.OperationsModel(operationsList);
-			this.createTree(this.parentId, this.model);
-			this.getNavHandler().refreshModel(this.getNavDict(), this.model, operationsList);
+			this.createTree(this.parentId, this.model, {
+				role: "grid"
+			});
 		};
 		
 		OperationsExplorer.prototype.changedItem = function(location){
@@ -143,6 +144,7 @@ define(['i18n!orion/operations/nls/messages', 'orion/Deferred', 'orion/webui/lit
 		
 		OperationsModel.prototype.getItem = function(location){
 			var operationInfo = this.operations[location];
+			operationInfo.parent = this.root;
 			operationInfo.Location = location;
 			return operationInfo;
 		};
@@ -156,6 +158,7 @@ define(['i18n!orion/operations/nls/messages', 'orion/Deferred', 'orion/webui/lit
 			for(var location in this.operations){
 				ret.push(this.getItem(location));
 			}
+			parentItem.children = ret;
 			onComplete(ret);
 		};
 		
@@ -176,38 +179,28 @@ define(['i18n!orion/operations/nls/messages', 'orion/Deferred', 'orion/webui/lit
 			if (this.options['minimal']) //$NON-NLS-0$
 				return;
 
-			var col, h2;
+			var str;
 			switch(col_no){
 				case 0: 
-					col = document.createElement("th");
-					col.style.height = "8px;";
-					h2 = document.createElement("h2");
-					col.appendChild(h2);
-					h2.textContent = messages["Name"];
-					return col;
+					str = messages["Name"];
+					break;
 				case 1:
-					col = document.createElement("th");
-					col.style.height = "8px;";
-					h2 = document.createElement("h2");
-					col.appendChild(h2);
-					h2.textContent = messages["Actions"];
-					return col;
+					str = messages["Actions"];
+					break;
 				case 2: 
-					col = document.createElement("th");
-					col.style.height = "8px;";
-					h2 = document.createElement("h2");
-					col.appendChild(h2);
-					h2.textContent = messages["Status"];
-					return col;
+					str = messages["Status"];
+					break;
 				case 3: 
-					col = document.createElement("th");
-					col.style.height = "8px;";
-					h2 = document.createElement("h2");
-					col.appendChild(h2);
-					h2.textContent = messages["Scheduled"];
-					return col;
+					str = messages["Scheduled"];
+					break;
+				default:
+					return null;
 			}
 			
+			var th = document.createElement("th");
+			th.style.paddingTop = th.style.paddingLeft = th.style.paddingBottom = "6px"; //$NON-NLS-0$
+			th.textContent = str;
+			return th;
 		};
 		
 		OperationsRenderer.prototype.getCellElement = function(col_no, item, tableRow){

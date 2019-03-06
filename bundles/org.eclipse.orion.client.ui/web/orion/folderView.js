@@ -10,6 +10,7 @@
 
 /*eslint-env browser, amd*/
 define([
+	'i18n!orion/navigate/nls/messages',
 	'orion/globalCommands',
 	'orion/explorers/explorer-table',
 	'orion/explorers/navigatorRenderer',
@@ -25,7 +26,7 @@ define([
 	'orion/projects/projectView',
 	'orion/generalPreferences',
 	'orion/section'
-], function(mGlobalCommands, mExplorerTable, mNavigatorRenderer, FileCommands, mMarkdownView, mProjectEditor, PageUtil, 
+], function(messages, mGlobalCommands, mExplorerTable, mNavigatorRenderer, FileCommands, mMarkdownView, mProjectEditor, PageUtil, 
 			URITemplate, lib, objects, util, Deferred, mProjectView, mGeneralPrefs, mSection) {
 
 	var ID_COUNT = 0;
@@ -60,15 +61,24 @@ define([
 		 * override NavigatorRenderer's prototype
 		 */
 		getCellHeaderElement: function(col_no) {
-			var td;
-			if (col_no === 0) {
-				td = document.createElement("th");
-				td.colSpan = 1;
-				var root = this.explorer.treeRoot;
-				td.appendChild(document.createTextNode(root.Parents || util.isElectron ? root.Name : this.explorer.fileClient.fileServiceName(root.Location)));
-				return td;
+			var labelText = "";
+			switch (col_no) {
+			case 0:
+				labelText = messages["Name"];
+				break;
+			case 1:
+				labelText = messages["Date Modified"];
+				break;
+			case 2:
+				labelText = messages["Size"];
+				break;
+			default:
+				return null;
 			}
-			return null;
+			var th = document.createElement("th"); //$NON-NLS-0$
+			th.style.paddingTop = th.style.paddingLeft = "4px"; //$NON-NLS-0$
+			th.textContent = labelText;
+			return th;
 		},
 		/**
 		 * override NavigatorRenderer's prototype
@@ -79,6 +89,7 @@ define([
 	});
 
 	function FolderNavExplorer(options) {
+		options.role = "grid"; //$NON-NLS-0$
 		options.setFocus = false; // do not steal focus on load
 		options.cachePrefix = null; // do not persist table state
 		options.dragAndDrop = FileCommands.uploadFile;
@@ -246,7 +257,7 @@ define([
 						if (this.showFolderNav) {
 							var navNode = document.createElement("div");
 							navNode.id = "folderNavNode" + this.idCount; //$NON-NLS-0$
-							var title = sectionNames[sectionName] || "Files";
+							var title = sectionNames[sectionName] || this._metadata.Name;
 							var foldersSection = new mSection.Section(this._node, {
 								id: "folderNavSection" + this.idCount,
 								headerClass: ["sectionTreeTableHeader"],

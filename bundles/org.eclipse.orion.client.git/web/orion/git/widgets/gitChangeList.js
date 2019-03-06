@@ -536,7 +536,7 @@ define([
 				section: this.section
 			});
 			this.createTree(this.parentId, model, {
-				role: "presentation", // table element is only being used for row/column presentation
+				role: "treegrid",
 				setFocus: false, // do not steal focus on load
 				selectionPolicy: this.selectionPolicy,
 				preCollapse: function(rowItem, row) {
@@ -622,7 +622,9 @@ define([
 		updateCommands: function() {
 			mExplorer.createExplorerCommands(this.commandService);
 			var actionsNodeScope = this.section.selectionNode.id;
+			this.section.selectionNode.setAttribute("role", "none"); //$NON-NLS-1$ //$NON-NLS-0$
 			var selectionNodeScope = this.section.actionsNode.id;
+			this.section.actionsNode.setAttribute("role", "none"); //$NON-NLS-1$ //$NON-NLS-0$
 			
 			var commandRegistry = this.commandService;
 			var explorerSelectionScope = this.prefix === "all" || this.prefix === "diff" ? this.explorerSelectionScope : actionsNodeScope; //$NON-NLS-1$ //$NON-NLS-0$
