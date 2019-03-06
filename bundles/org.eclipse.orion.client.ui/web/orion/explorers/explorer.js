@@ -643,7 +643,7 @@ exports.ExplorerRenderer = (function() {
 				}
 				checkColumn.appendChild(check);
 				var self = this;
-				check.addEventListener("click", function(evt) { //$NON-NLS-0$
+				check.addEventListener("mousedown", function(evt) { //$NON-NLS-0$
 					var newValue = evt.target.checked ? false : true;
 					self.onCheck(tableRow, evt.target, newValue, true, false, item);
 					lib.stop(evt);
