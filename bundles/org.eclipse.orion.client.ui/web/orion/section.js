@@ -270,6 +270,9 @@ define([
 			// if not dropdown, mark up _sectionContainer as region landmark
 			this._sectionContainer.setAttribute("role", "region"); //$NON-NLS-1$ //$NON-NLS-0$
 			this._sectionContainer.setAttribute("aria-labelledby", this.titleNode.id); //$NON-NLS-0$
+			if (options.canHide) {
+				this.domNode.setAttribute("aria-controls", this._contentParent.id); //$NON-NLS-0$
+			}
 		}
 		
 		// initially style as hidden until we determine what needs to happen
@@ -620,7 +623,9 @@ define([
 			if (this.domNode) {
 				this.domNode.classList.remove("sectionClosed"); //$NON-NLS-0$
 				this.domNode.classList.add("sectionOpened"); //$NON-NLS-0$
-				if (this._contentParent) this.domNode.setAttribute("aria-owns", this._contentParent.id); //$NON-NLS-0$
+				if (this._contentParent && this.domNode.getAttribute("role") !== "button") {
+					this.domNode.setAttribute("aria-owns", this._contentParent.id); //$NON-NLS-0$
+				}
 				if (this.canHide) {
 					this.domNode.setAttribute("aria-expanded", "true"); //$NON-NLS-1$ //$NON-NLS-0$
 				}
