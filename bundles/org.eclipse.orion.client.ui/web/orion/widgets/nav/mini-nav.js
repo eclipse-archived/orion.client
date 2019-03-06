@@ -152,6 +152,7 @@ define([
 					});
 				}
 				this.explorer = new MiniNavExplorer({
+					name: messages["Navigator"],
 					preferences: this.preferences,
 					commandRegistry: this.commandRegistry,
 					fileClient: this.fileClient,

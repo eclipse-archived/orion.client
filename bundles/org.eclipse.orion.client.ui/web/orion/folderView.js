@@ -11,6 +11,7 @@
 /*eslint-env browser, amd*/
 define([
 	'i18n!orion/navigate/nls/messages',
+	'i18n!orion/edit/nls/messages',
 	'orion/globalCommands',
 	'orion/explorers/explorer-table',
 	'orion/explorers/navigatorRenderer',
@@ -26,7 +27,7 @@ define([
 	'orion/projects/projectView',
 	'orion/generalPreferences',
 	'orion/section'
-], function(messages, mGlobalCommands, mExplorerTable, mNavigatorRenderer, FileCommands, mMarkdownView, mProjectEditor, PageUtil, 
+], function(messages, editMessages, mGlobalCommands, mExplorerTable, mNavigatorRenderer, FileCommands, mMarkdownView, mProjectEditor, PageUtil, 
 			URITemplate, lib, objects, util, Deferred, mProjectView, mGeneralPrefs, mSection) {
 
 	var ID_COUNT = 0;
@@ -266,6 +267,7 @@ define([
 								canHide: true
 							});
 							this.folderNavExplorer = new FolderNavExplorer({
+								name: editMessages["FolderNavigator"],
 								parentId: navNode,
 								view: this,
 								menuBar: this.menuBar,

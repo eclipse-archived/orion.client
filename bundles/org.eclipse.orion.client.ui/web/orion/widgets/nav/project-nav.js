@@ -305,6 +305,7 @@ define([
 					});
 				}
 				this.explorer = new ProjectNavExplorer({
+					name: messages["ProjectNavigator"],
 					preferences: this.preferences,
 					commandRegistry: this.commandRegistry,
 					fileClient: this.fileClient,

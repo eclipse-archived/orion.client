@@ -244,6 +244,7 @@ exports.Explorer = (function() {
 			this.myTree = new mTreeTable.TableTree({
 				id: treeId,
 				role: options ? options.role : undefined,
+				name: options ? options.name : undefined,
 				model: model,
 				parent: parentId,
 				onComplete: function(tree) {

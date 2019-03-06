@@ -68,6 +68,7 @@ define({
 	"Actions": "Actions",
 	"Navigator": "Navigator",
 	"FolderNavigator": "Folder Navigator",
+	"ProjectNavigator": "Project Navigator",
 	"Project": "Project",
 	"New": "New",
 	"File": "File",
