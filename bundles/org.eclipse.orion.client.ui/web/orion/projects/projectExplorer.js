@@ -30,10 +30,6 @@ define([
 	
 	ProjectsRenderer.prototype = new mExplorer.SelectionRenderer();
 	
-	ProjectsRenderer.prototype.getCellHeaderElement = function(){
-		return null;
-	};
-	
 	ProjectsRenderer.prototype.emptyCallback = function(bodyElement) {
 		var tr = document.createElement("tr"); //$NON-NLS-0$
 		var td = document.createElement("td"); //$NON-NLS-0$

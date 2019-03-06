@@ -141,9 +141,6 @@ define([
 	    		tableRow.classList.add("searchDetailRow"); //$NON-NLS-0$
 	    	}
 	    },
-	    getCellHeaderElement: function(/*col_no*/) {
-	        return null;
-	    },
 	    focus: function() {
 	        var resultParentDiv = lib.node(this.explorer.getParentDivId());
 	        window.setTimeout(function() {

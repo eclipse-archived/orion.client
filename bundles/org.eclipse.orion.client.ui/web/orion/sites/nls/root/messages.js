@@ -11,6 +11,7 @@
 define({//Default message bundle
 	"OK": "OK",
 	"Name:": "Name:",
+	"Type": "Type",
 	"Path":"Path",
 	"Mount at (server path)": "Mount at (server path)",
 	"Mappings:": "Mappings:",

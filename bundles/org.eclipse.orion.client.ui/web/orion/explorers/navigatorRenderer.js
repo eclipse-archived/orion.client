@@ -211,27 +211,6 @@ define([
 	};
 	
 	/**
-	 * Creates the column header element. We are really only using the header for a spacer at this point.
-	 * @name orion.explorer.NavigatorRenderer.prototype.getCellHeaderElement
-	 * @function
-	 * @returns {Element}
-	 */
-	NavigatorRenderer.prototype.getCellHeaderElement = function(col_no){
-		// TODO see https://bugs.eclipse.org/bugs/show_bug.cgi?id=400121
-		if (this.oneColumn && col_no !== 0) {
-			return null;
-		}
-
-		switch(col_no){
-		case 0:
-		case 1:
-		case 2:
-			var th = document.createElement("th"); //$NON-NLS-0$
-			th.style.height = "8px"; //$NON-NLS-0$
-		}
-	};
-		
-	/**
 	 * Creates a image DOM Element for the specified folder.
 	 * @name orion.explorer.NavigatorRenderer#getFolderImage
 	 * @type {Function}

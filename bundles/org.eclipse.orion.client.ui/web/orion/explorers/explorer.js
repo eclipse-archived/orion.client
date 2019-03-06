@@ -886,6 +886,7 @@ exports.SelectionRenderer = (function(){
 	SelectionRenderer.prototype.renderTableHeader = function(tableNode){
 		var thead = document.createElement('thead'); //$NON-NLS-0$
 		var row = document.createElement('tr'); //$NON-NLS-0$
+		row.setAttribute("role", "row"); //$NON-NLS-1$ //$NON-NLS-0$
 		thead.classList.add("navTableHeading"); //$NON-NLS-0$
 		if (this._useCheckboxSelection) {
 			row.appendChild(this.initCheckboxColumn(tableNode));
@@ -897,6 +898,7 @@ exports.SelectionRenderer = (function(){
 			if (cell.innerHTML.length > 0) {
 				cell.classList.add("navColumn"); //$NON-NLS-0$
 			}
+			cell.setAttribute("role", "columnheader"); //$NON-NLS-1$ //$NON-NLS-0$
 			row.appendChild(cell);			
 			cell = this.getCellHeaderElement(++i);
 		}

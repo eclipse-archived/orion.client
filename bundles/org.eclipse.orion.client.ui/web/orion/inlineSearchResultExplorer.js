@@ -338,12 +338,11 @@ function(messages, Deferred, lib, mContentTypes, i18nUtil, mExplorer, mCommands,
     SearchReportRenderer.prototype = new mExplorer.SelectionRenderer();
 
     SearchReportRenderer.prototype.getCellHeaderElement = function(col_no) {
-        var th, h2;
+        var th;
         switch (col_no) {
             case 0:
                 th = _createElement('th', "search_report", null, null); //$NON-NLS-1$ //$NON-NLS-1$ //$NON-NLS-2$
-                h2 = _createElement('h2', null, null, th); //$NON-NLS-1$
-                h2.textContent = messages["Files replaced"];
+                th.textContent = messages["Files replaced"];
                 break;
         }
         return th;
