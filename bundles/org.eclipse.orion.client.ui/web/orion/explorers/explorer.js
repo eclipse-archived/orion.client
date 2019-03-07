@@ -550,7 +550,7 @@ exports.ExplorerRenderer = (function() {
 		initTable: function (tableNode, tableTree) {
 			this.tableTree = tableTree;
 			this.tableNode = tableNode;
-			if (!this.selectionPolicy) {
+			if (!this.selectionPolicy && this.role) {
 				this.tableNode.setAttribute("aria-multiselectable", true);
 			}
 			lib.empty(tableNode);
