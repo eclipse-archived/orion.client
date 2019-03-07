@@ -550,6 +550,9 @@ exports.ExplorerRenderer = (function() {
 		initTable: function (tableNode, tableTree) {
 			this.tableTree = tableTree;
 			this.tableNode = tableNode;
+			if (!this.selectionPolicy) {
+				this.tableNode.setAttribute("aria-multiselectable", true);
+			}
 			lib.empty(tableNode);
 			if (this._treeTableClass) {
 				tableNode.classList.add(this._treeTableClass); 
@@ -631,6 +634,7 @@ exports.ExplorerRenderer = (function() {
 				check.rowId = tableRow.id;
 				if(this.getCheckedFunc){
 					check.checked = this.getCheckedFunc(item);
+					tableRow.setAttribute("aria-selected", check.checked);
 					if (check.checked) {
 						if(this._highlightSelection){
 							tableRow.classList.add("checkedRow"); //$NON-NLS-0$
@@ -647,6 +651,7 @@ exports.ExplorerRenderer = (function() {
 				var self = this;
 				check.addEventListener("mousedown", function(evt) { //$NON-NLS-0$
 					var newValue = evt.target.checked ? false : true;
+					tableRow.setAttribute("aria-selected", newValue);
 					self.onCheck(tableRow, evt.target, newValue, true, false, item);
 					lib.stop(evt);
 				}, false);
@@ -943,7 +948,7 @@ exports.SelectionRenderer = (function(){
 		var checkColumn = this.getCheckboxColumn(item, tableRow);
 		if(checkColumn) {
 			if (item.selectable !== undefined && !item.selectable) {
-				checkColumn.style.visibility = "hidden";
+				checkColumn.style.opacity = 0;
 			}
 			checkColumn.classList.add('checkColumn'); //$NON-NLS-0$
 			tableRow.appendChild(checkColumn);
