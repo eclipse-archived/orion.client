@@ -203,6 +203,21 @@ define([
 	}
 	GitConfigListRenderer.prototype = Object.create(mExplorer.SelectionRenderer.prototype);
 	objects.mixin(GitConfigListRenderer.prototype, {
+		getCellHeaderElement: function(col_no) {
+			var labelText = "";
+			switch (col_no) {
+			case 0:
+				labelText = messages["Configurations"];
+				break;
+			default:
+				return null;
+			}
+			var th = document.createElement("th"); //$NON-NLS-0$
+			th.className = "visuallyhidden"; //$NON-NLS-0$
+			th.style.paddingTop = th.style.paddingLeft = "4px"; //$NON-NLS-0$
+			th.textContent = labelText;
+			return th;
+		},
 		getCellElement: function(col_no, item, tableRow){
 			if (col_no > 1) return null;
 			var div, td;

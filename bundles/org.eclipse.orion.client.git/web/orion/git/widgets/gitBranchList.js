@@ -339,6 +339,21 @@ define([
 	}
 	GitBranchListRenderer.prototype = Object.create(mExplorer.SelectionRenderer.prototype);
 	objects.mixin(GitBranchListRenderer.prototype, {
+		getCellHeaderElement: function(col_no) {
+			var labelText = "";
+			switch (col_no) {
+			case 0:
+				labelText = messages["References"];
+				break;
+			default:
+				return null;
+			}
+			var th = document.createElement("th"); //$NON-NLS-0$
+			th.className = "visuallyhidden"; //$NON-NLS-0$
+			th.style.paddingTop = th.style.paddingLeft = "4px"; //$NON-NLS-0$
+			th.textContent = labelText;
+			return th;
+		},
 		getCellElement: function(col_no, item, tableRow){
 			var div, td;
 			switch (col_no) {
