@@ -537,6 +537,7 @@ define([
 			});
 			this.createTree(this.parentId, model, {
 				role: "treegrid",
+				name: this.prefix === "all" ? messages["Git Status"] : messages["CommitChanges"],
 				setFocus: false, // do not steal focus on load
 				selectionPolicy: this.selectionPolicy,
 				preCollapse: function(rowItem, row) {

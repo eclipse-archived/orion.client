@@ -288,6 +288,7 @@ define([
 			this.createFilter();
 			this.createTree(this.parentId, model, {
 				role: "treegrid",
+				name: messages["Repo"],
 				setFocus: false, // do not steal focus on load
 				selectionPolicy: this.selectionPolicy,
 				onComplete: function() {

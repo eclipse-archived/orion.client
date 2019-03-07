@@ -546,6 +546,7 @@ define({//Default message bundle
 	"Uncommited" : "Uncommited", //$NON-NLS-0$  //$NON-NLS-1$
 	"Repository:" : "Repository:", //$NON-NLS-0$  //$NON-NLS-1$
 	"RepositoryTooltip" : "Selects the git repository. New repositories can be cloned or init'ed with the Clone or Init buttons.", //$NON-NLS-0$  //$NON-NLS-1$
+	"References" : "References", //$NON-NLS-0$  //$NON-NLS-1$
 	"Reference:" : "Reference:", //$NON-NLS-0$  //$NON-NLS-1$
 	"ReferenceTooltip": "Selects the target reference. The target reference is used for comparing against the active branch to see incoming and outgoing changes. It is also the target of push and sync operations. A reference can be checked out with its Checkout button. Remote repositories can be fetched with their Fetch button.", //$NON-NLS-0$  //$NON-NLS-1$
 	"Author:" : "Author:", //$NON-NLS-0$  //$NON-NLS-1$

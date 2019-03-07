@@ -114,7 +114,8 @@ define(['i18n!orion/operations/nls/messages', 'orion/Deferred', 'orion/webui/lit
 			mOperationsCommands.updateNavTools(this.registry, this.commandRegistry, this, this.toolbarId, this.selectionToolsId, this.operations);
 			this.model = new exports.OperationsModel(operationsList);
 			this.createTree(this.parentId, this.model, {
-				role: "grid"
+				role: "grid",
+				name: messages["All Operations"]
 			});
 		};
 		
@@ -242,7 +243,9 @@ define(['i18n!orion/operations/nls/messages', 'orion/Deferred', 'orion/webui/lit
 				
 				return col;
 			case 1:
-				return this.getActionsColumn(item, tableRow);
+				col = this.getActionsColumn(item, tableRow);
+				col.setAttribute("aria-label", messages["Actions"]);
+				return col;
 			case 2:
 				var message = "";
 				if(item.operation && item.operation.error){

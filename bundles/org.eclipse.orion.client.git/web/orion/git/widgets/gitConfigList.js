@@ -175,6 +175,7 @@ define([
 			this.createFilter();
 			this.createTree(this.parentId, model, {
 				role: "grid",
+				name: messages["Configurations"],
 				setFocus: false, // do not steal focus on load
 			});
 			this.updateCommands();
@@ -235,6 +236,7 @@ define([
 					div.appendChild(valueNode);
 					break;
 				case 1:
+					td.setAttribute("aria-label", messages["Actions"]);
 					var actionsArea = document.createElement("ul"); //$NON-NLS-0$
 					actionsArea.className = "sectionTableItemActions layoutRight commandList toolComposite"; //$NON-NLS-0$
 					actionsArea.setAttribute("role", "none"); //$NON-NLS-1$ //$NON-NLS-0$
