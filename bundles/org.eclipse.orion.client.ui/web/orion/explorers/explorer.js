@@ -940,12 +940,13 @@ exports.SelectionRenderer = (function(){
 			
 			navDict.addRow(item, tableRow);
 		}
-		if (item.selectable === undefined || item.selectable) {
-			var checkColumn = this.getCheckboxColumn(item, tableRow);
-			if(checkColumn) {
-				checkColumn.classList.add('checkColumn'); //$NON-NLS-0$
-				tableRow.appendChild(checkColumn);
+		var checkColumn = this.getCheckboxColumn(item, tableRow);
+		if(checkColumn) {
+			if (item.selectable !== undefined && !item.selectable) {
+				checkColumn.style.visibility = "hidden";
 			}
+			checkColumn.classList.add('checkColumn'); //$NON-NLS-0$
+			tableRow.appendChild(checkColumn);
 		}
 
 		var i = 0;

@@ -682,7 +682,7 @@ define([
 			id: "statusSection", //$NON-NLS-0$
 			title: messages["WorkingDirChanges"],
 			slideout: false,
-			content: '<div id="statusNode"></div>', //$NON-NLS-0$
+			content: '<div class="gitCommitMessageSection"></div><div id="statusNode"></div>', //$NON-NLS-0$
 			canHide: false,
 			noTwistie: true,
 			preferenceService: this.preferencesService

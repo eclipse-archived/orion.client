@@ -372,19 +372,6 @@ exports.ExplorerNavHandler = (function() {
 			return null;
 		},
 
-		/**
-		 * @returns {Element} The ancestor element of <code>node</code> that provides grid/tree/treegrid behavior,
-		 * or <code>null</code> if no such node was found.
-		 */
-		getAriaContainerElement: function(node) {
-			var stop = this._parentDiv, role;
-			while (node && node !== stop &&
-					(role = node.getAttribute("role")) !== "grid" && role !== "tree" && role !== "treegrid") {//$NON-NLS-3$//$NON-NLS-2$//$NON-NLS-1$//$NON-NLS-0$
-				node = node.parentNode;
-			}
-			return node === stop ? null : node;
-		},
-
 		getFocusableElems: function(root) {
 			var nodeList = root.querySelectorAll('a,button,input,select,textarea,div[tabIndex]');
 			return Array.prototype.slice.call(nodeList);
@@ -456,8 +443,8 @@ exports.ExplorerNavHandler = (function() {
 			}.bind(this);
 			if(currentgrid) {
 				handleRow("treeIterationCursorRow"); //$NON-NLS-0$
-				if(currentgrid.domNode){
-					var ariaElement = this.getAriaContainerElement(currentgrid.domNode);
+				if(currentgrid.domNode && currentgrid.domNode.tabIndex !== -1){
+					var ariaElement = currentRow;
 					if (on) {
 						currentgrid.domNode.classList.add("treeIterationCursor"); //$NON-NLS-0$
 						if (ariaElement) {

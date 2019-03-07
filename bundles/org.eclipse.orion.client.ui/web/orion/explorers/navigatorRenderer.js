@@ -384,6 +384,41 @@ define([
 			return messageColumn;
 		}
 	};
+	
+	
+	/**
+	 * override SelectionRenderer's prototype
+	 */
+	NavigatorRenderer.prototype.getCellHeaderElement = function(col_no) {
+		var labelText = "";
+		switch (col_no) {
+		case 0:
+			labelText = messages["Name"];
+			break;
+		case 1:
+			if (this.oneColumn) {
+				return null;
+			}
+			labelText = messages["Date Modified"];
+			break;
+		case 2:
+			if (this.oneColumn) {
+				return null;
+			}
+			labelText = messages["Size"];
+			break;
+		default:
+			return null;
+		}
+		var th = document.createElement("th"); //$NON-NLS-0$
+		if (this.oneColumn) {
+			th.className = "visuallyhidden"; //$NON-NLS-0$
+		}
+		th.style.paddingTop = th.style.paddingLeft = "4px"; //$NON-NLS-0$
+		th.textContent = labelText;
+		return th;
+	};
+	
 	NavigatorRenderer.prototype.constructor = NavigatorRenderer;
 	
 	//return module exports
