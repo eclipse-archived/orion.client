@@ -488,6 +488,7 @@ _:-moz-tree-row(hover), .gitChangeListCheck { /* Firefox  HACK */
 }
 
 .gitCommitMessageSection {
+	color: #505050;
 	background-color: #F2FBF9;
 	padding-top: 8px;
 	margin: 3px;

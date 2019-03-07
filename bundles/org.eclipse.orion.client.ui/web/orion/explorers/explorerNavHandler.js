@@ -113,6 +113,12 @@ exports.ExplorerNavHandler = (function() {
 		};
 		parentDiv.addEventListener("mousedown", mouseListener, false); //$NON-NLS-0$
 		this._listeners.push({type: "mousedown", listener: mouseListener}); //$NON-NLS-0$
+		var offsetParent = lib.getOffsetParent(this._parentDiv);
+		var scrollListener = function() {
+			self._scrollTop = offsetParent ? offsetParent.scrollTop : 0;
+		};
+		offsetParent.addEventListener("scroll", scrollListener);
+		this._listeners.push({type: "scroll", listener: scrollListener}); //$NON-NLS-0$
 		var l1 = this._blurListener = function (e) { 
 			if(self.explorer.onFocus){
 				self.explorer.onFocus(false);
@@ -122,7 +128,8 @@ exports.ExplorerNavHandler = (function() {
 		};
 		parentDiv.addEventListener("blur", l1, false); //$NON-NLS-0$
 		this._listeners.push({type: "blur", listener: l1}); //$NON-NLS-0$
-		var l2 = this._focusListener = function (e) { 
+		var l2 = this._focusListener = function (e) {
+			offsetParent.scrollTop = self._scrollTop;
 			if(self.explorer.onFocus){
 				self.explorer.onFocus(true);
 			} else {
@@ -491,19 +498,23 @@ exports.ExplorerNavHandler = (function() {
 				var offsetParent = lib.getOffsetParent(currentRowDiv);
 				if (offsetParent) {
 					var visible = true;
-					if(currentRowDiv.offsetTop <= offsetParent.scrollTop){
+					var rowTop = this._parentDiv.offsetTop + currentRowDiv.offsetTop;
+					var clientHeight = offsetParent.clientHeight;
+					if(rowTop <= offsetParent.scrollTop){
 						visible = false;
 						if(next === undefined){
 							next = false;
 						}
-					}else if((currentRowDiv.offsetTop + currentRowDiv.offsetHeight) >= (offsetParent.scrollTop + offsetParent.clientHeight)){
+					}else if((rowTop + currentRowDiv.offsetHeight) >= (offsetParent.scrollTop + offsetParent.clientHeight)){
 						visible = false;
 						if(next === undefined){
 							next = true;
 						}
 					}
 					if(!visible){
-						offsetParent.scrollTop = currentRowDiv.offsetTop - (next ? offsetParent.clientHeight * 3 / 4: offsetParent.clientHeight / 4); 
+						var scrollTop = this._parentDiv.offsetTop + currentRowDiv.offsetTop - (next ? clientHeight * 3 / 4 : clientHeight / 4);
+						this._scrollTop = scrollTop;
+						offsetParent.scrollTop = scrollTop; 
 						//currentRowDiv.scrollIntoView(!next);
 					}
 				}
