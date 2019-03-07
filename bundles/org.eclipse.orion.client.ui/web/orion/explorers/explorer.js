@@ -235,6 +235,7 @@ exports.Explorer = (function() {
 			}
 			this.model = model;
 			this._parentId = parentId;
+			this.role = options && options.role;
 			this._treeOptions = options;
 			var useSelection = !options || (options && !options.noSelection);
 			if(useSelection){
@@ -808,6 +809,9 @@ exports.ExplorerRenderer = (function() {
 		
 		render: function(item, tableRow){
 			tableRow.classList.add("navRow"); //$NON-NLS-0$
+			if (this.explorer.role) {
+				tableRow.tabIndex = -1;
+			}
 			this.renderRow(item, tableRow);
 		},
 		
