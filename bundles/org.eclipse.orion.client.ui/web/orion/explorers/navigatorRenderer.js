@@ -367,6 +367,8 @@ define([
 				var length = parseInt(item.Length, 10),
 					kb = length / 1024;
 				sizeColumn.textContent = Math.ceil(kb).toLocaleString() + " KB"; //$NON-NLS-0$
+			} else {
+				sizeColumn.textContent = "--";
 			}
 			sizeColumn.style.textAlign = "left"; //$NON-NLS-0$
 			return sizeColumn;
