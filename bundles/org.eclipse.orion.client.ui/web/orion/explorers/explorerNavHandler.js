@@ -439,6 +439,7 @@ exports.ExplorerNavHandler = (function() {
 							this._parentDiv.tabIndex = "-1";
 							if (!(evt && evt.target !== this._parentDiv)) {
 								currentRow.focus();
+								this.scroll(true);
 							}
 						}
 					} else {
@@ -471,30 +472,9 @@ exports.ExplorerNavHandler = (function() {
 			return this._modelIterator.cursor();
 		},
 		
-		cursorOn: function(model, force, next, noScroll){
-			var previousModel, currentModel;
-			if(model || force){
-				if(currentModel === this._modelIterator.cursor()){
-					return;
-				}
-				previousModel = this._modelIterator.cursor();
-				currentModel = model;
-				this._modelIterator.setCursor(currentModel);
-			} else {
-				previousModel = this._modelIterator.prevCursor();
-				currentModel = this._modelIterator.cursor();
-			}
-			if(previousModel === currentModel && !force){
-				return;
-			}
-			this.toggleCursor(previousModel, false);
-			if(force && !currentModel){
-				return;
-			}
-			this.moveColumn(null, 0);
-			this.toggleCursor(currentModel, true);
+		scroll: function(next) {
 			var currentRowDiv = this.getRowDiv();
-			if(currentRowDiv && !noScroll) {
+			if(currentRowDiv) {
 				var offsetParent = lib.getOffsetParent(currentRowDiv);
 				if (offsetParent) {
 					var visible = true;
@@ -518,6 +498,33 @@ exports.ExplorerNavHandler = (function() {
 						//currentRowDiv.scrollIntoView(!next);
 					}
 				}
+			}
+		},
+		
+		cursorOn: function(model, force, next, noScroll){
+			var previousModel, currentModel;
+			if(model || force){
+				if(currentModel === this._modelIterator.cursor()){
+					return;
+				}
+				previousModel = this._modelIterator.cursor();
+				currentModel = model;
+				this._modelIterator.setCursor(currentModel);
+			} else {
+				previousModel = this._modelIterator.prevCursor();
+				currentModel = this._modelIterator.cursor();
+			}
+			if(previousModel === currentModel && !force){
+				return;
+			}
+			this.toggleCursor(previousModel, false);
+			if(force && !currentModel){
+				return;
+			}
+			this.moveColumn(null, 0);
+			this.toggleCursor(currentModel, true);
+			if(!noScroll) {
+				this.scroll(next);
 			}
 			if(this.explorer.onCursorChanged){
 				this.explorer.onCursorChanged(previousModel, currentModel);
