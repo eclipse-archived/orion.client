@@ -239,7 +239,7 @@ define([
 	       				searchParams = mSearchUtils.copySearchParams(this._filledResult.searchParams);
 	       				searchParams.replace = options.replace;
 					} else {
-						searchParams = mSearchUtils.getSearchParams(this._searcher, options.keyword, options);
+						searchParams = mSearchUtils.getSearchParams(this._searcher, options.keyword, options, this.getSearchScopeOption());
 						this._hideSearchOptions();
 					}
 					this._searchResultExplorer.runSearch(searchParams, this._searchResultsWrapperDiv, this._filledResult);

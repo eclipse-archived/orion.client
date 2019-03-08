@@ -892,6 +892,7 @@ html[dir="rtl"] .secondaryColumnLeft { /* ACGC */
 .checkColumn {
 	padding: 0;
 	padding-left:10px;
+	vertical-align: middle;
 }
 
 html[dir="rtl"] .checkColumn { /* ACGC */

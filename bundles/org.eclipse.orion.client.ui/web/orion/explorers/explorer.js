@@ -872,6 +872,8 @@ exports.ExplorerRenderer = (function() {
 	return ExplorerRenderer;
 }());
 
+var CHECK_COLUMN_ID = 0;
+
 /**
  * @name orion.explorer.SelectionRenderer
  * @class This  renderer renders a tree table and installs a selection and cursoring model to
@@ -894,25 +896,34 @@ exports.SelectionRenderer = (function(){
 
 	SelectionRenderer.prototype.renderTableHeader = function(tableNode){
 		var thead = document.createElement('thead'); //$NON-NLS-0$
-		var row = document.createElement('tr'); //$NON-NLS-0$
-		row.setAttribute("role", "row"); //$NON-NLS-1$ //$NON-NLS-0$
 		thead.classList.add("navTableHeading"); //$NON-NLS-0$
-		if (this._useCheckboxSelection) {
-			row.appendChild(this.initCheckboxColumn(tableNode));
-		}
-		
-		var i = 0;
-		var cell = this.getCellHeaderElement(i);
-		while(cell){
-			if (cell.innerHTML.length > 0) {
-				cell.classList.add("navColumn"); //$NON-NLS-0$
+		var rowCount = this.getHeaderRowCount ? this.getHeaderRowCount() : 1;
+		var empty = rowCount === 1;
+		for (var r=0; r<rowCount; r++) {
+			var row = document.createElement('tr'); //$NON-NLS-0$
+			row.setAttribute("role", "row"); //$NON-NLS-1$ //$NON-NLS-0$
+			if (this._useCheckboxSelection) {
+				var col = this.initCheckboxColumn(tableNode);
+				col.id = this._checkColumnId = "checkColumn_" + CHECK_COLUMN_ID++;
+				row.appendChild(col);
 			}
-			cell.setAttribute("role", "columnheader"); //$NON-NLS-1$ //$NON-NLS-0$
-			row.appendChild(cell);			
-			cell = this.getCellHeaderElement(++i);
+			
+			var i = 0;
+			var cell = this.getCellHeaderElement(i, r);
+			while(cell){
+				if (cell.innerHTML.length > 0 && !this.getPrimColumnStyle) {
+					cell.classList.add("navColumn"); //$NON-NLS-0$
+				}
+				cell.setAttribute("role", "columnheader"); //$NON-NLS-1$ //$NON-NLS-0$
+				row.appendChild(cell);			
+				cell = this.getCellHeaderElement(++i, r);
+			}
+			thead.appendChild(row);
+			if (i > 0 && empty) {
+				empty = false;
+			}
 		}
-		thead.appendChild(row);
-		if (i > 0) {
+		if (!empty) {
 			tableNode.appendChild(thead);
 		}
 	};
@@ -947,6 +958,9 @@ exports.SelectionRenderer = (function(){
 		}
 		var checkColumn = this.getCheckboxColumn(item, tableRow);
 		if(checkColumn) {
+			if (this._checkColumnId) {
+				checkColumn.setAttribute("headers", this._checkColumnId);
+			}
 			if (item.selectable !== undefined && !item.selectable) {
 				checkColumn.style.opacity = 0;
 				checkColumn.setAttribute("aria-hidden", true);
