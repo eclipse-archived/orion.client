@@ -390,7 +390,7 @@ define([
 				th.setAttribute("headers", headers);
 			}
 			th.style.textAlign = "left";
-			//th.className = "visuallyhidden"; //$NON-NLS-0$
+			th.className = "visuallyhidden"; //$NON-NLS-0$
 			th.style.paddingTop = th.style.paddingLeft = "4px"; //$NON-NLS-0$
 			th.textContent = labelText;
 			return th;
