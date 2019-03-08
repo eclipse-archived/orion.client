@@ -33,7 +33,7 @@ function(messages, require, lib, popupdialog) {
 		'</tr></table>' + //$NON-NLS-0$
 		'<div id="operationsExist">' + //$NON-NLS-0$
 			'<div style="padding-left: 7px" id="myOperationsListEmpty">${NoPageOps}</div>' + //$NON-NLS-0$
-			'<table id="myOperationsList" style="display: none;"></table>' + //$NON-NLS-0$
+			'<table role="presentation" id="myOperationsList" style="display: none;"></table>' + //$NON-NLS-0$
 		'</div>' + //$NON-NLS-0$
 		'<div style="padding-left: 7px" id="operationsDontExist">${NoOperations}</div>'; //$NON-NLS-0$
 	
