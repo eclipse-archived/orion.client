@@ -358,7 +358,6 @@
 	display: inline-flex;
 	display: -webkit-inline-flex;		/* Safari */
 	padding: 7px 10px 7px 2px;
-	width: 100%;
 }
 
 .fullPathSpan {
@@ -457,7 +456,6 @@
 .navlink.searchDetailLink {
 	padding: 5px 0;
 	vertical-align: baseline;
-	width: 100%;
 }
 
 /* search match occurrences */
