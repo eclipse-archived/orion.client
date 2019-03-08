@@ -75,9 +75,6 @@ exports.ExplorerNavHandler = (function() {
 		});
 		this._init(options);
 		
-		if(!options || options.setFocus !== false){
-			this.focus();
-		}
 		var keyListener = function (e) { 
 			if(UiUtils.isFormElement(e.target)) {
 				// Not for us
@@ -120,24 +117,25 @@ exports.ExplorerNavHandler = (function() {
 		offsetParent.addEventListener("scroll", scrollListener);
 		this._listeners.push({type: "scroll", listener: scrollListener}); //$NON-NLS-0$
 		var l1 = this._blurListener = function (e) { 
+			self.toggleCursor(null, false, e);
 			if(self.explorer.onFocus){
 				self.explorer.onFocus(false);
-			} else {
-				self.toggleCursor(null, false, e);
 			}
 		};
 		parentDiv.addEventListener("blur", l1, false); //$NON-NLS-0$
 		this._listeners.push({type: "blur", listener: l1}); //$NON-NLS-0$
 		var l2 = this._focusListener = function (e) {
 			offsetParent.scrollTop = self._scrollTop;
+			self.toggleCursor(null, true, e);
 			if(self.explorer.onFocus){
 				self.explorer.onFocus(true);
-			} else {
-				self.toggleCursor(null, true, e);
 			}
 		};
 		parentDiv.addEventListener("focus", l2, false); //$NON-NLS-0$
 		this._listeners.push({type: "focus", listener: l2}); //$NON-NLS-0$
+		if(!options || options.setFocus !== false){
+			this.focus();
+		}
 	}
 	
 	ExplorerNavHandler.prototype = /** @lends orion.explorerNavHandler.ExplorerNavHandler.prototype */ {
@@ -393,7 +391,11 @@ exports.ExplorerNavHandler = (function() {
 			this.getAllRows().forEach(function(row) {
 				var model = this._modelIterator.cursor();
 				if (!model) {
-					this._modelIterator.setCursor(row._item);
+					model = row._item;
+					this._modelIterator.setCursor(model);
+					if (this._parentDiv === document.activeElement) {
+						this.toggleCursor(model, true);
+					}
 				} 
 				if (!row._focusListener) {
 					row._focusListener = this._focusListener;
