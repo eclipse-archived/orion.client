@@ -58,12 +58,13 @@
 .sectionTableItem {
 	padding-top: 2px;
 	padding-bottom: 2px;
+	padding-left: 0;
 }
 
 .gitChangeListCompare {
 	height: 420px;
 	border: 1px solid lightgray;
-	margin-right: 10px;
+	margin-right: 20px;
 	min-height: 50px;
 }
 
@@ -71,7 +72,7 @@
 	position: absolute;
 	top: 1px;
 	left: 1px;
-	width: calc(100% - 14px);
+	width: calc(100% - 8px);
 	height: calc(100% - 14px);
 	background-color: white;
 	padding-bottom: 10px;
@@ -469,6 +470,9 @@ _:-moz-tree-row(hover), .gitChangeListCheck { /* Firefox  HACK */
 .gitChangeListCompareActions {
 	overflow: hidden;
 	padding: 5px;
+	padding-top: 0;
+	padding-bottom: 4px;
+	margin-right: 20px;
 }
 
 .gitCommitInfoValue {
@@ -618,7 +622,7 @@ _:-moz-tree-row(hover), .gitChangeListCheck { /* Firefox  HACK */
 .gitCommitListSectionTitle {
 	font-size: 8.5pt;
 	/* text-transform: uppercase; */
-	margin-top: 4px;
+	margin-top: 0;
 	color: #3B4B54;
 }
 
