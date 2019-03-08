@@ -436,7 +436,7 @@ exports.ExplorerNavHandler = (function() {
 								}
 								element.tabIndex = 0;
 							});
-							this._parentDiv.tabIndex = "-1";
+							this._parentDiv.removeAttribute("tabindex");
 							if (!(evt && evt.target !== this._parentDiv)) {
 								currentRow.focus();
 								this.scroll(true);
