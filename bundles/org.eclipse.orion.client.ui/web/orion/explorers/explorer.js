@@ -949,6 +949,7 @@ exports.SelectionRenderer = (function(){
 		if(checkColumn) {
 			if (item.selectable !== undefined && !item.selectable) {
 				checkColumn.style.opacity = 0;
+				checkColumn.setAttribute("aria-hidden", true);
 			}
 			checkColumn.classList.add('checkColumn'); //$NON-NLS-0$
 			tableRow.appendChild(checkColumn);
