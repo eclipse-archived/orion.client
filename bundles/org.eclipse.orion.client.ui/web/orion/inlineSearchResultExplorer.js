@@ -1078,7 +1078,7 @@ function(messages, Deferred, lib, mContentTypes, i18nUtil, mExplorer, mCommands,
             	this._timer = null;
                 this.onReplaceCursorChanged(currentModel);
             }.bind(this), 200);
-        } else if (currentModel.type === "detail") {
+        } else if (currentModel && currentModel.type === "detail") {
             if (this._popUpContext) {
                 this.popupContext(currentModel);
                 this.renderer.replaceDetailIcon(currentModel, "left"); //$NON-NLS-1$
