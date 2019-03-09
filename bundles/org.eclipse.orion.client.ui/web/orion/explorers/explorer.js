@@ -223,7 +223,8 @@ exports.Explorer = (function() {
 				this.selection.setSelections([]);
 			}
 			if(this.getNavHandler()){
-				this.getNavHandler()._clearSelection();
+				this.getNavHandler().destroy();
+				this._navHandler = null;
 			}
 			var treeId = parentId + "innerTree"; //$NON-NLS-0$
 			var existing = lib.node(treeId);

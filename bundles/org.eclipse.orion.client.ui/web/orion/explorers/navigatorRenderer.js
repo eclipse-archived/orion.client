@@ -86,6 +86,7 @@ define([
 		}
 		if (item.Directory) {
 			link = document.createElement("a"); //$NON-NLS-0$
+			link.tabIndex = -1;
 			link.className = "navlinkonpage"; //$NON-NLS-0$
 			var template = !folderPageURL ? uriTemplate : new URITemplate(folderPageURL + "#{,resource,params*}"); //$NON-NLS-0$
 			link.href = template.expand({resource: item.ChildrenLocation});
@@ -97,6 +98,7 @@ define([
 				openWithCommands = mExtensionCommands.getOpenWithCommands(commandService);
 			}
 			link = document.createElement("a"); //$NON-NLS-0$
+			link.tabIndex = -1;
 			link.className= "navlink targetSelector"; //$NON-NLS-0$
 			if (linkProperties && typeof linkProperties === "object") { //$NON-NLS-0$
 				Object.keys(linkProperties).forEach(function(property) {
@@ -132,7 +134,6 @@ define([
 					iconElement = addImageToLink(contentType, imageHolderDom, item.Location, image);
 				}
 				link.href = href;
-				link.tabIndex = -1;
 				if(renderer && typeof renderer.updateFileNode === 'function') { //$NON-NLS-0$
 					renderer.updateFileNode(item, link, mContentTypes.isImage(contentType), iconElement);
 				}

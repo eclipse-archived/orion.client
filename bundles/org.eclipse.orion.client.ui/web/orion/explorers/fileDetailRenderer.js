@@ -337,7 +337,7 @@ define([
 				_place(document.createTextNode(lineNumber), span, "last"); //$NON-NLS-1$ //$NON-NLS-0$
 			} else {
 				var matchNumber = detailInfo.matchNumber + 1;
-				_place(document.createTextNode(lineNumber + "(" + matchNumber + "):"), span, "last"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+				_place(document.createTextNode(lineNumber + " (" + matchNumber + ")"), span, "last"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			}
 			spanHolder.appendChild(span);
 		},

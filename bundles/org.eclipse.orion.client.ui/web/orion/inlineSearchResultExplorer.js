@@ -169,6 +169,7 @@ function(messages, Deferred, lib, mContentTypes, i18nUtil, mExplorer, mCommands,
 			openWithCommands = mExtensionCommands.getOpenWithCommands(commandService);
 		}
 		link = document.createElement("a"); //$NON-NLS-0$
+		link.tabIndex = -1;
 		link.className= "navlink targetSelector"; //$NON-NLS-0$
 		if (linkProperties && typeof linkProperties === "object") { //$NON-NLS-0$
 			Object.keys(linkProperties).forEach(function(property) {
