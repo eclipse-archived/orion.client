@@ -71,7 +71,7 @@ define(['require', 'orion/webui/littlelib'], function (require, lib) {
                 seg.appendChild(document.createTextNode(this._workspaceRootSegmentName));
                 return seg;
             }
-            return null;
+            return document.createElement("span");
         },
 
         segments: [],
@@ -218,7 +218,8 @@ define(['require', 'orion/webui/littlelib'], function (require, lib) {
             	}
             }
             
-            this.crumbs.appendChild(this.dirty);
+            if (this.dirty)
+               this.crumbs.appendChild(this.dirty);
         },
 
         firstSegment: function (segment) {

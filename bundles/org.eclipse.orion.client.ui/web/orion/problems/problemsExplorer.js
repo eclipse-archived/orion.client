@@ -670,6 +670,7 @@ define([
 	    	}
 	        this.createTree(this.parentId, model, {
 	            role: "treegrid",
+	            name: messages["Problems"],
 	            selectionPolicy: "singleSelection", //$NON-NLS-1$
 	            gridClickSelectionPolicy: "true", //$NON-NLS-1$
 	            indent: 18,
@@ -721,6 +722,22 @@ define([
 	    renderDetailLineNumber: function(item, spanHolder) {
 	        _place(document.createTextNode(item.line + ":"), spanHolder, "last"); //$NON-NLS-1$
 	    },
+	    /** @callback */
+		getCellHeaderElement: function(col_no) {
+			var labelText = "";
+			switch (col_no) {
+			case 0:
+				labelText = messages["Problems"];
+				break;
+			default:
+				return null;
+			}
+			var th = document.createElement("th"); //$NON-NLS-0$
+			th.className = "visuallyhidden"; //$NON-NLS-0$
+			th.style.paddingTop = th.style.paddingLeft = "4px"; //$NON-NLS-0$
+			th.textContent = labelText;
+			return th;
+		},
 	    /** @callback */
 		getCellElement: function(col_no, item, tableRow){
 			var div, td, itemLabel;
