@@ -441,7 +441,7 @@ exports.ExplorerNavHandler = (function() {
 							this._parentDiv.removeAttribute("tabindex");
 							if (!(evt && evt.target !== this._parentDiv)) {
 								currentRow.focus();
-								this.scroll(true);
+								this.scroll();
 							}
 						}
 					} else {
@@ -474,13 +474,25 @@ exports.ExplorerNavHandler = (function() {
 			return this._modelIterator.cursor();
 		},
 		
+		getScrollParent: function(node) {
+			if (!node) {
+				return null;
+			}
+			var overflow = window.getComputedStyle(node).overflowY;
+			if (!(overflow === "visible" || overflow === "hidden")) {
+				return node;
+			}
+			return this.getScrollParent(node.parentNode);
+		},
+		
 		scroll: function(next) {
 			var currentRowDiv = this.getRowDiv();
 			if(currentRowDiv) {
 				var offsetParent = lib.getOffsetParent(currentRowDiv);
 				if (offsetParent) {
 					var visible = true;
-					var rowTop = this._parentDiv.offsetTop + currentRowDiv.offsetTop;
+					var offset = this.getScrollParent(currentRowDiv) !== this._parentDiv ? this._parentDiv.offsetTop : 0;
+					var rowTop = offset + currentRowDiv.offsetTop;
 					var clientHeight = offsetParent.clientHeight;
 					if(rowTop <= offsetParent.scrollTop){
 						visible = false;
@@ -494,7 +506,7 @@ exports.ExplorerNavHandler = (function() {
 						}
 					}
 					if(!visible){
-						var scrollTop = this._parentDiv.offsetTop + currentRowDiv.offsetTop - (next ? clientHeight * 3 / 4 : clientHeight / 4);
+						var scrollTop = offset + currentRowDiv.offsetTop - (next ? clientHeight * 3 / 4 : clientHeight / 4);
 						this._scrollTop = scrollTop;
 						offsetParent.scrollTop = scrollTop; 
 						//currentRowDiv.scrollIntoView(!next);

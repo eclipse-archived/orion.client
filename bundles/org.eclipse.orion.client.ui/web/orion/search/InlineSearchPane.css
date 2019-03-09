@@ -112,12 +112,15 @@
 }
 
 .searchWrapper {
-	height: 100%;
-	width: 100%;
+	width: calc(100% - 12px);
+	height: calc(100% - 16px);
+	padding: 6px;
+	padding-top: 10px;
+	display: flex;
+	flex-direction: column;
 }
 
 .searchOptWrapperDiv {
-	transition: height 0.2s ease;
 }
 
 .replaceModeActive > .searchOptWrapperDiv {
@@ -126,15 +129,11 @@
 .searchWrapper.searchOptionsHidden > .searchOptWrapperDiv {
 	height: 0;
 	overflow: hidden;
-	visibility: hidden;
+	display: none;
 }
 
 .searchWrapper.searchOptParamBlockHidden > .searchOptWrapperDiv > .searchParamBlockDiv {
 	display: none;
-}
-
-.searchWrapper.searchOptParamBlockHidden > .searchResultsWrapperDiv{
-	height: calc(100% - 150px);
 }
 
 .searchWrapper.searchOptParamBlockHidden > .searchOptWrapperDiv > .searchMainOptionBlock > .toggleDisplayLink{
@@ -146,10 +145,11 @@
 }
 
 .searchResultsWrapperDiv {
-	height: calc(100% - 220px - 97px); /* subtract height of search options*/
-	transition: height 0.2s ease; /* avoid extra scroll bar while switching between search and replace modes */
-	width: 100%;
+	flex: 1 1 auto;
+	background-color: white;
+	outline: 1px solid lightgray;
 	overflow: auto;
+	min-width: 274px;
 }
 
 .searchResultsWrapperDiv > div {
@@ -159,15 +159,6 @@
 
 .searchResultsWrapperDiv > div > .treetable {
 	background: white;
-}
-
-.searchWrapper.searchOptionsHidden > .searchResultsWrapperDiv{
-	height: calc(100% - 70px);
-	overflow: auto;
-}
-
-.replaceModeActive > .searchResultsWrapperDiv {
-	height: calc(100% - 220px - 54px - 38px); /* subtract height of search options and replace box */
 }
 
 .searchWrapper > .comboTextInputWrapper {
@@ -183,9 +174,7 @@
 
 .replaceWrapper {
 	display: block;
-	max-height: 50px; /* for transition */
 	overflow: visible;
-	transition: max-height 0.2s ease;
 }
 
 .replaceWrapperHidden {
@@ -203,7 +192,6 @@
 	padding: 0 2px;
 	display: block;
 	visibility: hidden;
-	text-align: center;
 	transition: opacity 0.1s ease;
 	min-width: 252px;
 	text-align: left;
@@ -234,7 +222,7 @@
 }
 
 .searchMainOptionBlock {
-	margin: 5px 10px 5px 10px;
+	margin-bottom: 10px;
 	display: flex;
 	flex-direction: column;
 	flex-wrap: nowrap;
@@ -245,9 +233,8 @@
 }
 
 .searchOptionBlock {
-	margin: 0 10px 10px 10px;
+	margin-bottom: 10px;
 	min-width: 254px;
-	width: calc(100% - 20px);
 }
 .searchGeneralOptionBlock{
 	margin-left: 4px;
@@ -531,9 +518,7 @@
 	display: inline-block;
 	font-weight: bold;
 	margin: 0;
-	margin-left: 5px;
 	color: #333;
-	overflow: hidden;
 	text-overflow: ellipsis;
 	vertical-align: middle;
 	white-space: nowrap;
@@ -544,6 +529,10 @@
 	display: block;
 	margin: 5px 0;
 	white-space: nowrap;
+}
+
+.searchPageActions:empty {
+	margin: 0;
 }
 
 .searchPageActionsRight {

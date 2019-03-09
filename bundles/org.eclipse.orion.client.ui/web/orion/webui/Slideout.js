@@ -98,6 +98,7 @@ define([
 		 */
 		show: function(slideoutViewMode) {
 			this._previousActiveElement = document.activeElement;
+			lib.trapTabs(this._wrapperNode);
 			
 			// replace _contentNode's contents
 			if (this._currentViewMode !== slideoutViewMode) {
