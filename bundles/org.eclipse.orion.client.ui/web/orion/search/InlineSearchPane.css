@@ -329,6 +329,10 @@
 	height: calc(100% - 14px);
 }
 
+.projectNavSidebarWrapper .sidebarToolbar {
+	display: none;
+}
+
 .filePathSpan {
 	display: inline-flex;
 	display: -webkit-inline-flex;		/* Safari */
