@@ -801,10 +801,10 @@ define([
 					return true;
 				},
 				callback: function() {
-					var domFocus = document.activeElement;
+					var domFocus = document.activeElement, label, tooltip;
 					if (this.editor && this.editor._domNode.contains(domFocus)) {
 						var editor = this.editor;
-						var tooltip = editor.getTooltip();
+						tooltip = editor.getTooltip();
 						var tv = editor.getTextView();
 						var offset = tv.getCaretOffset();
 						var pos = tv.getLocationAtOffset(offset);
@@ -816,7 +816,11 @@ define([
 							}
 						}, false, true);
 					} else if (domFocus.commandTooltip || domFocus.tooltip) {
-						var tooltip = domFocus.commandTooltip ? domFocus.commandTooltip : domFocus.tooltip;
+						tooltip = domFocus.commandTooltip ? domFocus.commandTooltip : domFocus.tooltip;
+						tooltip._showByKB = true;
+						tooltip.show(0);
+					} else if (domFocus.id && (label = document.querySelector("label[for=" + domFocus.id + "]")) && label.tooltip) {
+						tooltip = label.tooltip;
 						tooltip._showByKB = true;
 						tooltip.show(0);
 					}

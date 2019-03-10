@@ -510,7 +510,7 @@ define([
 		},
 
 		_generateTooltips: function(node,message){
-			return new mTooltip.Tooltip({
+			return node.tooltip = new mTooltip.Tooltip({
 				node: node,
 				text: message,
 				position: ["below", "right", "above", "left"] //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$
