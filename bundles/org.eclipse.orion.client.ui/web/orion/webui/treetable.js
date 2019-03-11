@@ -107,7 +107,7 @@ define(['i18n!orion/nls/messages', 'orion/webui/littlelib', 'orion/Deferred'], f
 			if (this._renderer.wrapperCallback) {
 				this._renderer.wrapperCallback(wrapper);
 			}
-			var table = document.createElement(this._tableElement); //$NON-NLS-0$
+			var table = this._table = document.createElement(this._tableElement); //$NON-NLS-0$
 			if (this._renderer.tableCallback) {
 				this._renderer.tableCallback(table);
 			}
@@ -503,15 +503,17 @@ define(['i18n!orion/nls/messages', 'orion/webui/littlelib', 'orion/Deferred'], f
 		},
 		
 		_collapse : function(id, row) {
-			row._expanded = false;
-			if(this._renderer.updateExpandVisuals) {
-			    this._renderer.updateExpandVisuals(row, false);
-			}
-			this._removeChildRows(id);
-			this._rowsChanged();
-			if(this._onCollapse){
-				this._onCollapse(row._item);
-			}
+			lib.returnFocus(this._table, row, function() {
+				row._expanded = false;
+				if(this._renderer.updateExpandVisuals) {
+				    this._renderer.updateExpandVisuals(row, false);
+				}
+				this._removeChildRows(id);
+				this._rowsChanged();
+				if(this._onCollapse){
+					this._onCollapse(row._item);
+				}
+			}.bind(this));
 		},
 		
 		collapse: function(itemOrId, byToggle) {

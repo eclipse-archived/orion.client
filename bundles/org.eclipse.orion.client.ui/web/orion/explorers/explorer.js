@@ -264,7 +264,12 @@ exports.Explorer = (function() {
 				showRoot: options ? !!options.showRoot : false,  
 				indent: options ? options.indent: undefined,
 				preCollapse: options ? options.preCollapse: undefined,
-				onCollapse: options ? options.onCollapse: undefined,
+				onCollapse: options && options.onCollapse ? options.onCollapse : function(model) {
+					var navHandler = this.getNavHandler();
+					if (navHandler) {
+						navHandler.onCollapse(model);
+					}
+				}.bind(this),
 				navHandlerFactory: options ? options.navHandlerFactory: undefined,
 				tableElement: options ? options.tableElement : undefined,
 				tableBodyElement: options ? options.tableBodyElement : undefined,

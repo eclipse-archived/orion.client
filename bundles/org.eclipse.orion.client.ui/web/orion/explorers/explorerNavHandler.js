@@ -712,7 +712,7 @@ exports.ExplorerNavHandler = (function() {
 		
 		onCollapse: function(model)	{
 			if(this._modelIterator.collapse(model)){
-				this.cursorOn();
+				this.cursorOn(model);
 			}
 		},
 		
