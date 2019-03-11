@@ -101,7 +101,6 @@ define({
 	"UnnamedCommand": "Unnamed",
 	"Search": "Search...",
 	"Show Debug": "Debug...",
-	"ClickEditLabel": "Click to edit",
 	"ProjectInfo": "Project Information",
 	"Name": "Name",
 	"Description": "Description",
