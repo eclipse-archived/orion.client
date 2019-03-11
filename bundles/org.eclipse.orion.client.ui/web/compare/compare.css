@@ -14,4 +14,7 @@
 	color: white;
 	background: #3B4B54;
 }
-	
+
+.mainpane {
+	padding-right: 0;
+}
