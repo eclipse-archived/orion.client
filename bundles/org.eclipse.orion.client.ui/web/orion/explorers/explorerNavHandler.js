@@ -287,6 +287,7 @@ exports.ExplorerNavHandler = (function() {
 			if(this._selectionPolicy === "cursorOnly"){ //$NON-NLS-0$
 				if(toggling && this.explorer.renderer._useCheckboxSelection){
 					this._checkRow(model,true);
+					return true;
 				}
 				return false;
 			}
