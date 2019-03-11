@@ -978,7 +978,7 @@ define([
 						if (targetIsRoot) {
 							(progress ? progress.progress(fileClient.createProject(target.ChildrenLocation, entry.name), i18nUtil.formatMessage(messages["Creating ${0}"], entry.name)) :
 								fileClient.createProject(target.ChildrenLocation, entry.name)).then(function(project) {
-								(progress ? progress.progress(fileClient.read(project.ContentLocation, true), messages["Loading "] + project.name) :
+								(progress ? progress.progress(fileClient.read(project.ContentLocation, true), i18nUtil.formatMessage(messages["Loading ${0}"], project.name)) :
 									fileClient.read(project.ContentLocation, true)).then(function(folder) {
 									traverseChildren(folder);
 								}, internalErrorHandler);
@@ -1457,7 +1457,7 @@ define([
 			var self = this;
 			if (force || path !== this.treeRoot.Path || path !== this._lastPath) {
 				this._lastPath = path;
-				return this.load(this.fileClient.read(path, true), messages["Loading "] + path, postLoad).then(function() {
+				return this.load(this.fileClient.read(path, true), i18nUtil.formatMessage(messages["Loading ${0}"], path), postLoad).then(function() {
 					self.treeRoot.Path = path;
 					return self.treeRoot;
 				}, function(err) {

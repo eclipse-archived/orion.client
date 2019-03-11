@@ -90,7 +90,7 @@ define({//Default message bundle
 	"Fetching children of ": "Fetching children of ",
 	"Paste": "Paste",
 	"Open With": "Open With",
-	"Loading ": "Loading ",
+	"Loading ${0}": "Loading ${0}",
 	"New": "New",
 	"File": "File",
 	"Actions": "Actions",
