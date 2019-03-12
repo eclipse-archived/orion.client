@@ -411,6 +411,12 @@ exports.ExplorerNavHandler = (function() {
 
 		toggleCursor:  function(model, on, evt){
 			if (!model) {
+				if (on && evt && evt.target._item) {
+					model = evt.target._item;
+					this._modelIterator.setCursor(model);
+				}
+			}
+			if (!model) {
 				model = this._modelIterator.cursor();
 			}
 			if (!model) {

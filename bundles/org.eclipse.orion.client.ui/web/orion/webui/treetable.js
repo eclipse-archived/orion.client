@@ -325,39 +325,41 @@ define(['i18n!orion/nls/messages', 'orion/webui/littlelib', 'orion/Deferred'], f
 				var row = lib.node(parentId);
 				if (row) {
 					// if it is showing children, refresh what is showing
-					row._item = item;
-					// If the row should be expanded
-					if (row && (forceExpand || row._expanded)) {
-						this._removeChildRows(parentId);
-						if(children){
-							row._expanded = true;
-							if(this._renderer.updateExpandVisuals) {
-							    this._renderer.updateExpandVisuals(row, true);
+					lib.returnFocus(this._table, row, function() {
+						row._item = item;
+						// If the row should be expanded
+						if (row && (forceExpand || row._expanded)) {
+							this._removeChildRows(parentId);
+							if(children){
+								row._expanded = true;
+								if(this._renderer.updateExpandVisuals) {
+									this._renderer.updateExpandVisuals(row, true);
+								}
+								this._generateChildren(children, row._depth+1, row); //$NON-NLS-0$
+								this._rowsChanged();
+							} else {
+								tree = this;
+								if(this._renderer.updateExpandVisuals) {
+								    this._renderer.updateExpandVisuals(row, "progress"); //$NON-NLS-0$
+								}
+								children = this._treeModel.getChildren(row._item, function(children) {
+									if (tree.destroyed) { return; }
+									if(tree._renderer.updateExpandVisuals) {
+									    tree._renderer.updateExpandVisuals(row, true);
+									}
+									if (!row._expanded) {
+										row._expanded = true;
+										tree._generateChildren(children, row._depth+1, row); //$NON-NLS-0$
+										tree._rowsChanged();
+									}
+								});
 							}
-							this._generateChildren(children, row._depth+1, row); //$NON-NLS-0$
-							this._rowsChanged();
 						} else {
-							tree = this;
 							if(this._renderer.updateExpandVisuals) {
-							    this._renderer.updateExpandVisuals(row, "progress"); //$NON-NLS-0$
+								this._renderer.updateExpandVisuals(row, false);
 							}
-							children = this._treeModel.getChildren(row._item, function(children) {
-								if (tree.destroyed) { return; }
-								if(tree._renderer.updateExpandVisuals) {
-								    tree._renderer.updateExpandVisuals(row, true);
-								}
-								if (!row._expanded) {
-									row._expanded = true;
-									tree._generateChildren(children, row._depth+1, row); //$NON-NLS-0$
-									tree._rowsChanged();
-								}
-							});
 						}
-					} else {
-					    if(this._renderer.updateExpandVisuals) {
-						     this._renderer.updateExpandVisuals(row, false);
-						}
-					}
+					}.bind(this));
 				} else {
 					// the item wasn't found.  We could refresh the root here, but for now
 					// let's log it to figure out why.
