@@ -169,7 +169,7 @@ define([
 		var selectTo = options.selectTo;
 		var isInitialValid = options.isInitialValid;
 		var insertAsChild = options.insertAsChild;
-		var previousActiveElement = document.activeElement;
+		var previousActiveElement = refNode;
 		
 		var done = false;
 		var handler = function(isKeyEvent) {
@@ -187,15 +187,15 @@ define([
 						if (hideRefNode) {
 							refNode.style.display = "";
 						}
-						done = true;
-						// some clients remove temporary dom structures in the onComplete processing, so check that we are still in DOM
-						if (editBox.parentNode) {
-							editBox.parentNode.removeChild(editBox);
-						}
-						if (onEditDestroy) {
-							onEditDestroy();
-						}
 					});
+					done = true;
+					// some clients remove temporary dom structures in the onComplete processing, so check that we are still in DOM
+					if (editBox.parentNode) {
+						editBox.parentNode.removeChild(editBox);
+					}
+					if (onEditDestroy) {
+						onEditDestroy();
+					}
 				}
 				if (isKeyEvent && event.keyCode === lib.KEY.ESCAPE) {
 					hide();
