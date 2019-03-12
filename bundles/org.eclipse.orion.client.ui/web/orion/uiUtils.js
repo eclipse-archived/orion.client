@@ -169,7 +169,7 @@ define([
 		var selectTo = options.selectTo;
 		var isInitialValid = options.isInitialValid;
 		var insertAsChild = options.insertAsChild;
-		var previousActiveElement = document.activeElement;
+		var previousActiveElement;
 		
 		var done = false;
 		var handler = function(isKeyEvent) {
@@ -183,12 +183,12 @@ define([
 					return;
 				}
 				function hide() {
+					done = true;
 					lib.returnFocus(editBox, previousActiveElement, function() {
 						if (hideRefNode) {
 							refNode.style.display = "";
 						}
 					});
-					done = true;
 					// some clients remove temporary dom structures in the onComplete processing, so check that we are still in DOM
 					if (editBox.parentNode) {
 						editBox.parentNode.removeChild(editBox);
@@ -229,6 +229,7 @@ define([
 		editBox.addEventListener("keydown", handler(true), false); //$NON-NLS-0$
 		editBox.addEventListener("blur", handler(false), false); //$NON-NLS-0$
 		window.setTimeout(function() {
+			previousActiveElement = document.activeElement;
 			editBox.focus(); 
 			if (initialText) {
 				var box = lib.node(id);
