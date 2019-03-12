@@ -11,6 +11,8 @@
 /*eslint-env browser, amd*/
 define([
 	'i18n!orion/edit/nls/messages',
+	'i18n!orion/navigate/nls/messages',
+	'orion/i18nUtil',
 	'orion/globalCommands',
 	'orion/explorers/explorer-table',
 	'orion/explorers/navigatorRenderer',
@@ -25,7 +27,7 @@ define([
 	'orion/projects/projectView',
 	'orion/generalPreferences',
 	'orion/section'
-], function(editMessages, mGlobalCommands, mExplorerTable, mNavigatorRenderer, FileCommands, mMarkdownView, mProjectEditor, PageUtil, 
+], function(editMessages, navMessages, i18nUtil, mGlobalCommands, mExplorerTable, mNavigatorRenderer, FileCommands, mMarkdownView, mProjectEditor, PageUtil, 
 			URITemplate, lib, objects, Deferred, mProjectView, mGeneralPrefs, mSection) {
 
 	var ID_COUNT = 0;
@@ -91,7 +93,7 @@ define([
 	objects.mixin(FolderNavExplorer.prototype, /** @lends orion.FolderNavExplorer.prototype */ {
 		loadRoot: function(root) {
 			if (root) {
-				this.load(root, "Loading " + root.Name).then(this.loaded.bind(this));
+				this.load(root, i18nUtil.formatMessage(navMessages["Loading ${0}"], root.Name)).then(this.loaded.bind(this));
 			} else {
 				this.loadResourceList(PageUtil.matchResourceParameters().resource + "?depth=1", false).then(this.loaded.bind(this)); //$NON-NLS-0$
 			}
