@@ -471,13 +471,7 @@ define([
 					if (!dropDown || dropDown.isDestroyed()) {
 						dropDown = settingsCommand.settingsDropDown = new DropDownMenu(data.domNode.parentNode, data.domNode, {
 							noClick: true,
-							selectionClass: 'dropdownSelection', //$NON-NLS-0$
-							onShow: function() {
-								dropDown.focus();
-							},
-							onHide: function() {
-								that.editor.focus();
-							}
+							selectionClass: 'dropdownSelection' //$NON-NLS-0$
 						});
 						dropDown.updateContent = localSettings.show.bind(localSettings);
 						var menu = dropDown.getContentNode();

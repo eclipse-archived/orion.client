@@ -40,6 +40,7 @@ define({//Default message bundle
 	"FindFileNamed": "Find File in ${0}",
 	"FindFileGlobal": "Find File in any Project",
 	"Search": "Search",
+	"Folders": "Folders",
 	"FileName FolderName": "FileName FolderName(Optional)",
 	"Searching...": "Searching...",
 	"SearchOccurences": "Searching for occurrences of: \"${0}\"",

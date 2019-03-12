@@ -70,13 +70,16 @@ define(['orion/objects', 'orion/webui/littlelib'], function(objects, lib) {
 		click: function() {
 			if( this._dropdownMenu.style.display === 'none' ){ //$NON-NLS-0$
 				this.updateContent ( this.getContentNode() , function () {
+					this.previousActiveElement = document.activeElement;
 					lib.setFramesEnabled(false);
+					lib.trapTabs(this._dropdownMenu);
 					this._dropdownMenu.style.display = '';
 					this._positionDropdown();
 					if (this.selectionClass) {
 						this._triggerNode.classList.add(this.selectionClass);
 					}
 					this.handle = lib.addAutoDismiss( [ this._triggerNode, this._dropdownMenu], this.clearPanel.bind(this) );
+					this.focus();
 					if (this.options.onShow) {
 						this.options.onShow();
 					}
@@ -88,14 +91,16 @@ define(['orion/objects', 'orion/webui/littlelib'], function(objects, lib) {
 		
 		clearPanel: function(){
 			if (!this.isVisible()) { return; }
-			this._dropdownMenu.style.display = 'none'; //$NON-NLS-0$
-			lib.setFramesEnabled(true);
-			if (this.selectionClass) {
-				this._triggerNode.classList.remove(this.selectionClass);
-			}
-			if (this.options.onHide) {
-				this.options.onHide();
-			}
+			lib.returnFocus(this._dropdownMenu, this.previousActiveElement, function() {
+				this._dropdownMenu.style.display = 'none'; //$NON-NLS-0$
+				lib.setFramesEnabled(true);
+				if (this.selectionClass) {
+					this._triggerNode.classList.remove(this.selectionClass);
+				}
+				if (this.options.onHide) {
+					this.options.onHide();
+				}
+			}.bind(this));
 		},
 		
 		// Add content to the dropdown container

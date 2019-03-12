@@ -17,30 +17,33 @@
 @import "../css/theme.css";
 
 .outlinerWrapper {
-	height: 100%;
+	width: calc(100% - 12px);
+	height: calc(100% - 16px);
+	padding: 6px;
+	padding-top: 10px;
+	display: flex;
+	flex-direction: column;
 }
 
 .outlineNodeWrapper {
-	height: calc(100% - 22px);
-	overflow-x: hidden;
+	flex: 1 1 auto;
+	overflow-x: auto;
 	overflow-y: auto;
 }
 
 .outlineExplorer {
 	overflow-y: hidden;
 	white-space:nowrap;
-	width: 100%
 }
 
 .outlineFilterLabel {
-	margin: 3px 6px;
+	margin-bottom: 6px;
 }
 
 .outlineFilter {
 	border: 1px solid lightgrey;
-	margin: 3px 6px;
-	width: 95%; /* for older browsers */
-	width: calc(100% - 38px);
+	margin: 0;
+	margin-bottom: 6px;
 }
 
 .outlineRowMatchesFilter {

@@ -44,6 +44,21 @@ define([
 	OutlineRenderer.prototype.getLabelColumnIndex = function() {
 		return 0;
 	};
+	OutlineRenderer.prototype.getCellHeaderElement = function(col_no) {
+		var labelText = "";
+		switch (col_no) {
+		case 0:
+			labelText = messages["Outline"];
+			break;
+		default:
+			return null;
+		}
+		var th = document.createElement("th"); //$NON-NLS-0$
+		th.className = "visuallyhidden"; //$NON-NLS-0$
+		th.style.paddingTop = th.style.paddingLeft = "4px"; //$NON-NLS-0$
+		th.textContent = labelText;
+		return th;
+	};
 	OutlineRenderer.prototype.getCellElement = function(col_no, item, tableRow){
 		if (!item) {
 			return;
@@ -111,6 +126,7 @@ define([
 	
 	OutlineRenderer.prototype._createLink = function(contentsNode, href, parentNode) {
 		var link = document.createElement("a"); //$NON-NLS-0$
+		link.tabIndex = -1;
 		parentNode.appendChild(link);
 		
 		link.classList.add("navlinkonpage"); //$NON-NLS-0$
@@ -484,7 +500,12 @@ define([
 					this.explorer.destroy();
 				}
 				this.explorer = new OutlineExplorer(this._serviceRegistry, this._inputManager, title);
-				this.explorer.createTree(this._outlineNode, treeModel, {selectionPolicy: "cursorOnly", setFocus: false}); //$NON-NLS-1$ //$NON-NLS-0$
+				this.explorer.createTree(this._outlineNode, treeModel, {
+					role: "treegrid",
+					name: messages["Outline"],
+					selectionPolicy: "cursorOnly",
+					setFocus: false
+				}); //$NON-NLS-1$ //$NON-NLS-0$
 				treeModel.doExpansions(this.explorer.myTree);
 			}
 		},

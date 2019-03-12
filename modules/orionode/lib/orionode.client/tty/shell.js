@@ -132,15 +132,7 @@ define([
 				if (!dropDown || dropDown.isDestroyed()) {
 					dropDown = settingsCommand.settingsDropDown = new DropDownMenu(data.domNode.parentNode, data.domNode, {
 						noClick: true,
-						selectionClass: 'dropdownSelection', //$NON-NLS-0$
-						onShow: function() {
-							dropDown.focus();
-						},
-						onHide: function() {
-							if (that.editor) {
-								that.editor.focus();
-							}
-						}
+						selectionClass: 'dropdownSelection' //$NON-NLS-0$
 					});
 					var menu = dropDown.getContentNode();
 					var select = new SettingsSelect({

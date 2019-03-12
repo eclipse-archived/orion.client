@@ -130,7 +130,7 @@ define(['i18n!cfui/nls/messages', 'orion/uiUtils', 'orion/explorers/explorer', '
 		this.explorer = new mExplorer.Explorer(this._serviceRegistry, this.selection); //$NON-NLS-0$
 		this.explorer.renderer = new SelectAppDialogRenderer({checkbox: false, singleSelection: true, treeTableClass: "directoryPrompter" }, this.explorer);
 		
-		this.explorer.createTree(this.$appsTree.id, myTreeModel, {setFocus: true, selectionPolicy: this.explorer.renderer.selectionPolicy, onCollapse: function(model){if(self.getNavHandler()){self.getNavHandler().onCollapse(model);}}});
+		this.explorer.createTree(this.$appsTree.id, myTreeModel, {setFocus: true, selectionPolicy: this.explorer.renderer.selectionPolicy});
 	};
 	
 	SelectAppDialog.prototype.validate = function(){

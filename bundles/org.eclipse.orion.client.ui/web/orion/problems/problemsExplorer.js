@@ -59,23 +59,30 @@ define([
 	 * @param {Element} holderDiv The div to add the icon to
 	 * @param {Boolean} isError If the icon should be the error icon
 	 * @param {String} additionalCss The class name of any additional CSS to use
+	 * @param {Boolean} hidden whether the icon is aria-hidden
 	 */
-	function getDetailDecoratorIcon(holderDiv, severity, additionalCss){
+	function getDetailDecoratorIcon(holderDiv, severity, additionalCss, hidden){
 		var icon = document.createElement("span");
 		
 		icon.classList.add("problemsDecorator"); //$NON-NLS-1$
 		if(additionalCss) {
 			icon.classList.add(additionalCss);
 		}
+		var label;
 		if(severity === "error") {
-			icon.setAttribute("aria-label", messages.Error); //$NON-NLS-1$
+			label = messages.Error;
 			icon.classList.add("problemsError"); //$NON-NLS-1$
 		} else if(severity === "info") {
-			icon.setAttribute("aria-label", messages.Info); //$NON-NLS-1$
+			label = messages.Info;
 			icon.classList.add("problemsInfo"); //$NON-NLS-1$
 		} else {
-			icon.setAttribute("aria-label", messages.Warning); //$NON-NLS-1$
+			label = messages.Warning;
 			icon.classList.add("problemsWarning"); //$NON-NLS-1$
+		}
+		if (hidden) {
+			icon.setAttribute("aria-hidden", true); //$NON-NLS-1$
+		} else {
+			icon.setAttribute("aria-label", label); //$NON-NLS-1$
 		}
 		holderDiv.appendChild(icon);
 	}
@@ -670,6 +677,7 @@ define([
 	    	}
 	        this.createTree(this.parentId, model, {
 	            role: "treegrid",
+	            name: messages["Problems"],
 	            selectionPolicy: "singleSelection", //$NON-NLS-1$
 	            gridClickSelectionPolicy: "true", //$NON-NLS-1$
 	            indent: 18,
@@ -722,6 +730,22 @@ define([
 	        _place(document.createTextNode(item.line + ":"), spanHolder, "last"); //$NON-NLS-1$
 	    },
 	    /** @callback */
+		getCellHeaderElement: function(col_no) {
+			var labelText = "";
+			switch (col_no) {
+			case 0:
+				labelText = messages["Problems"];
+				break;
+			default:
+				return null;
+			}
+			var th = document.createElement("th"); //$NON-NLS-0$
+			th.className = "visuallyhidden"; //$NON-NLS-0$
+			th.style.paddingTop = th.style.paddingLeft = "4px"; //$NON-NLS-0$
+			th.textContent = labelText;
+			return th;
+		},
+	    /** @callback */
 		getCellElement: function(col_no, item, tableRow){
 			var div, td, itemLabel;
 			switch (col_no) {
@@ -732,7 +756,7 @@ define([
 					if (item.type === "category") {
 						td.classList.add("problemsDecoratorTDTitle"); //$NON-NLS-1$
 						this.getExpandImage(tableRow, div);
-						getDetailDecoratorIcon(div, cate2sevMap[item.location]);
+						getDetailDecoratorIcon(div, cate2sevMap[item.location], null, true);
 					} else if (item.type === "problem") {
  						td.classList.add("problemsDecoratorTD"); //$NON-NLS-1$
 						getDetailDecoratorIcon(div, item.severity);

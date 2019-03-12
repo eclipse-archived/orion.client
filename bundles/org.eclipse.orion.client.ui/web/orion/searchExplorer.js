@@ -1304,7 +1304,7 @@ function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, m
                     that._timer = null;
                 }, 500);
             }
-        } else if (currentModel.type === "detail") { //$NON-NLS-0$
+        } else if (currentModel && currentModel.type === "detail") { //$NON-NLS-0$
             if (this._popUpContext) {
                 this.popupContext(currentModel);
                 this.renderer.replaceDetailIcon(currentModel, "left"); //$NON-NLS-0$

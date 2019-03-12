@@ -12,10 +12,11 @@
 /*eslint-env browser, amd*/
 
 define([
+	'i18n!git/nls/gitmessages',
 	'orion/explorers/explorer',
 	'orion/explorers/explorer-table',
 	'orion/objects'
-], function(mExplorer, mExplorerTable, objects) {
+], function(messages, mExplorer, mExplorerTable, objects) {
 		
 	function GitFileListModel() {
 		mExplorerTable.FileModel.apply(this, arguments);
@@ -69,6 +70,21 @@ define([
 	}
 	GitFileListRenderer.prototype = Object.create(mExplorer.SelectionRenderer.prototype);
 	objects.mixin(GitFileListRenderer.prototype, {
+		getCellHeaderElement: function(col_no) {
+			var labelText = "";
+			switch (col_no) {
+			case 0:
+				labelText = messages["files"];
+				break;
+			default:
+				return null;
+			}
+			var th = document.createElement("th"); //$NON-NLS-0$
+			th.className = "visuallyhidden"; //$NON-NLS-0$
+			th.style.paddingTop = th.style.paddingLeft = "4px"; //$NON-NLS-0$
+			th.textContent = labelText;
+			return th;
+		},
 		getCellElement: function(col_no, item, tableRow){
 			if (col_no !== 0) {
 				return null;

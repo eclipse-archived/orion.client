@@ -169,6 +169,7 @@ function(messages, Deferred, lib, mContentTypes, i18nUtil, mExplorer, mCommands,
 			openWithCommands = mExtensionCommands.getOpenWithCommands(commandService);
 		}
 		link = document.createElement("a"); //$NON-NLS-0$
+		link.tabIndex = -1;
 		link.className= "navlink targetSelector"; //$NON-NLS-0$
 		if (linkProperties && typeof linkProperties === "object") { //$NON-NLS-0$
 			Object.keys(linkProperties).forEach(function(property) {
@@ -243,34 +244,6 @@ function(messages, Deferred, lib, mContentTypes, i18nUtil, mExplorer, mCommands,
     /*
      * End of APIs that the subclass of fileDetailRenderer has to override
      */
-    
-    // TODO:  this should be handled outside of here in a common select all command
-    // see https://bugs.eclipse.org/bugs/show_bug.cgi?id=339500
-    SearchResultRenderer.prototype.initCheckboxColumn = function(/*tableNode*/) {
-        if (this._useCheckboxSelection) {
-            var th = _createElement('th'); //$NON-NLS-1$
-            var check = _createElement("span", null, null, th); //$NON-NLS-1$
-            check.classList.add('selectionCheckmarkSprite'); //$NON-NLS-1$
-            check.classList.add('core-sprite-check'); //$NON-NLS-1$
-            if (this.getCheckedFunc) {
-                check.checked = this.getCheckedFunc(this.explorer.model.getListRoot());
-                check.classList.toggle("core-sprite-check_on"); //$NON-NLS-1$
-            }
-            _connect(check, "click", function(evt) { //$NON-NLS-1$
-                var newValue = evt.target.checked ? false : true;
-                this.onCheck(null, evt.target, newValue);
-            }.bind(this));
-            return th;
-        }
-    };
-    
-    SearchResultRenderer.prototype.getCheckboxColumn = function(item, tableRow){
-    	if (!this.enableCheckbox(item) || item.type === "file" || item.type === 'group') {
-    		return mExplorer.ExplorerRenderer.prototype.getCheckboxColumn.call(this, item, tableRow);
-    	} 
-		//detail row checkboxes should be placed in next column
-		return document.createElement('td'); //$NON-NLS-1$
-	};
 
     SearchResultRenderer.prototype.replaceFileElement = function(item) {
 		if(item.totalMatches) {
@@ -420,7 +393,8 @@ function(messages, Deferred, lib, mContentTypes, i18nUtil, mExplorer, mCommands,
 
     SearchReportExplorer.prototype.report = function() {
         this.createTree(this.parentId, new mExplorer.ExplorerFlatModel(null, null, this.reportList), {
-            role: "grid"
+            role: "grid",
+            name: messages["Search Results"],
         });
     };
 
@@ -757,6 +731,7 @@ function(messages, Deferred, lib, mContentTypes, i18nUtil, mExplorer, mCommands,
         var that = this;
         this.createTree(this.getParentDivId(), this.model, {
             role: "treegrid",
+            name: messages["Search Results"],
             selectionPolicy: "singleSelection", //$NON-NLS-1$
             indent: 0,
             setFocus: true,
@@ -1104,7 +1079,7 @@ function(messages, Deferred, lib, mContentTypes, i18nUtil, mExplorer, mCommands,
             	this._timer = null;
                 this.onReplaceCursorChanged(currentModel);
             }.bind(this), 200);
-        } else if (currentModel.type === "detail") {
+        } else if (currentModel && currentModel.type === "detail") {
             if (this._popUpContext) {
                 this.popupContext(currentModel);
                 this.renderer.replaceDetailIcon(currentModel, "left"); //$NON-NLS-1$
@@ -1144,6 +1119,7 @@ function(messages, Deferred, lib, mContentTypes, i18nUtil, mExplorer, mCommands,
             _empty(this.getParentDivId());
             this.createTree(this.getParentDivId(), this.model, {
                 role: "treegrid",
+                name: messages["Search Results"],
 				selectionPolicy: "singleSelection", //$NON-NLS-1$
                 indent: 0,
 				getChildrenFunc: function(model) {return this.model.getFilteredChildren(model);}.bind(this),
@@ -1174,6 +1150,7 @@ function(messages, Deferred, lib, mContentTypes, i18nUtil, mExplorer, mCommands,
         this.model.buildResultModel();
         this.createTree(this.getParentDivId(), this.model, {
             role: "treegrid",
+            name: messages["Search Results"],
             selectionPolicy: "singleSelection", //$NON-NLS-1$
             getChildrenFunc: function(model) {return this.model.getFilteredChildren(model);}.bind(this),
             indent: 0,

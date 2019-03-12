@@ -239,7 +239,7 @@ define([
 	       				searchParams = mSearchUtils.copySearchParams(this._filledResult.searchParams);
 	       				searchParams.replace = options.replace;
 					} else {
-						searchParams = mSearchUtils.getSearchParams(this._searcher, options.keyword, options);
+						searchParams = mSearchUtils.getSearchParams(this._searcher, options.keyword, options, this.getSearchScopeOption());
 						this._hideSearchOptions();
 					}
 					this._searchResultExplorer.runSearch(searchParams, this._searchResultsWrapperDiv, this._filledResult);
@@ -510,7 +510,7 @@ define([
 		},
 
 		_generateTooltips: function(node,message){
-			return new mTooltip.Tooltip({
+			return node.tooltip = new mTooltip.Tooltip({
 				node: node,
 				text: message,
 				position: ["below", "right", "above", "left"] //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$

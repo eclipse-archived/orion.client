@@ -422,6 +422,7 @@ define([
 				element.addEventListener("keydown", function(e) { //$NON-NLS-0$
 					if (e.keyCode === lib.KEY.ENTER || e.keyCode === lib.KEY.SPACE) {
 						element.click();
+						e.preventDefault();
 					}
 				}, false);
 				element.addEventListener("click", function(e) { //$NON-NLS-0$

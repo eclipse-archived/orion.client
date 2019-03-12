@@ -257,6 +257,7 @@ define([
 
 		this._contentParent = document.createElement("div"); //$NON-NLS-0$
 		this._contentParent.tabIndex = -1;
+		this._contentParent.style.outline = "none";
 		this._contentParent.id = this.id + "Content"; //$NON-NLS-0$
 		this._contentParent.classList.add("sectionTable"); //$NON-NLS-0$
 

@@ -341,6 +341,7 @@ define(['orion/EventTarget', 'orion/bidiUtils', 'orion/urlModifier'], function( 
 			}.bind(this);
 			listEle.className = "inputCompletionLINormal"; //$NON-NLS-0$
 			listEle.id = "inputCompletionItem_" + ITEM_ID++;
+			listEle.tabIndex = -1;
 			listEle.setAttribute("role", "option");
 			listEle.completionItem = category.item;
 			var deleteBtn;

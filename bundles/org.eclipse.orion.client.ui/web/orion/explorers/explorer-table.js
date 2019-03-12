@@ -1539,12 +1539,7 @@ define([
 						navHandlerFactory: self.navHandlerFactory,
 						showRoot: self.showRoot,
 						setFocus: typeof self.setFocus === "undefined" ? true : self.setFocus,
-						selectionPolicy: self.renderer.selectionPolicy,
-						onCollapse: function(model) {
-							if (self.getNavHandler()) {
-								self.getNavHandler().onCollapse(model);
-							}
-						}
+						selectionPolicy: self.renderer.selectionPolicy
 					});
 
 					return deferred.then(function() {

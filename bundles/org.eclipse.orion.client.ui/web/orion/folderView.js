@@ -10,7 +10,6 @@
 
 /*eslint-env browser, amd*/
 define([
-	'i18n!orion/navigate/nls/messages',
 	'i18n!orion/edit/nls/messages',
 	'orion/globalCommands',
 	'orion/explorers/explorer-table',
@@ -22,13 +21,12 @@ define([
 	'orion/URITemplate',
 	'orion/webui/littlelib',
 	'orion/objects',
-	'orion/util',
 	'orion/Deferred',
 	'orion/projects/projectView',
 	'orion/generalPreferences',
 	'orion/section'
-], function(messages, editMessages, mGlobalCommands, mExplorerTable, mNavigatorRenderer, FileCommands, mMarkdownView, mProjectEditor, PageUtil, 
-			URITemplate, lib, objects, util, Deferred, mProjectView, mGeneralPrefs, mSection) {
+], function(editMessages, mGlobalCommands, mExplorerTable, mNavigatorRenderer, FileCommands, mMarkdownView, mProjectEditor, PageUtil, 
+			URITemplate, lib, objects, Deferred, mProjectView, mGeneralPrefs, mSection) {
 
 	var ID_COUNT = 0;
 
@@ -57,29 +55,6 @@ define([
 			folderNode.classList.add("targetSelector"); //$NON-NLS-0$
 			folderNode.classList.remove("navlinkonpage"); //$NON-NLS-0$
 			return folderNode;
-		},
-		/**
-		 * override NavigatorRenderer's prototype
-		 */
-		getCellHeaderElement: function(col_no) {
-			var labelText = "";
-			switch (col_no) {
-			case 0:
-				labelText = messages["Name"];
-				break;
-			case 1:
-				labelText = messages["Date Modified"];
-				break;
-			case 2:
-				labelText = messages["Size"];
-				break;
-			default:
-				return null;
-			}
-			var th = document.createElement("th"); //$NON-NLS-0$
-			th.style.paddingTop = th.style.paddingLeft = "4px"; //$NON-NLS-0$
-			th.textContent = labelText;
-			return th;
 		},
 		/**
 		 * override NavigatorRenderer's prototype

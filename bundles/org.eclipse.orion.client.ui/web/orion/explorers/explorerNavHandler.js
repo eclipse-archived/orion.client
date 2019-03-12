@@ -75,9 +75,6 @@ exports.ExplorerNavHandler = (function() {
 		});
 		this._init(options);
 		
-		if(!options || options.setFocus !== false){
-			this.focus();
-		}
 		var keyListener = function (e) { 
 			if(UiUtils.isFormElement(e.target)) {
 				// Not for us
@@ -113,24 +110,32 @@ exports.ExplorerNavHandler = (function() {
 		};
 		parentDiv.addEventListener("mousedown", mouseListener, false); //$NON-NLS-0$
 		this._listeners.push({type: "mousedown", listener: mouseListener}); //$NON-NLS-0$
+		var offsetParent = lib.getOffsetParent(this._parentDiv);
+		var scrollListener = function() {
+			self._scrollTop = offsetParent ? offsetParent.scrollTop : 0;
+		};
+		offsetParent.addEventListener("scroll", scrollListener);
+		this._listeners.push({type: "scroll", listener: scrollListener}); //$NON-NLS-0$
 		var l1 = this._blurListener = function (e) { 
+			self.toggleCursor(null, false, e);
 			if(self.explorer.onFocus){
 				self.explorer.onFocus(false);
-			} else {
-				self.toggleCursor(null, false, e);
 			}
 		};
 		parentDiv.addEventListener("blur", l1, false); //$NON-NLS-0$
 		this._listeners.push({type: "blur", listener: l1}); //$NON-NLS-0$
-		var l2 = this._focusListener = function (e) { 
+		var l2 = this._focusListener = function (e) {
+			offsetParent.scrollTop = self._scrollTop;
+			self.toggleCursor(null, true, e);
 			if(self.explorer.onFocus){
 				self.explorer.onFocus(true);
-			} else {
-				self.toggleCursor(null, true, e);
 			}
 		};
 		parentDiv.addEventListener("focus", l2, false); //$NON-NLS-0$
 		this._listeners.push({type: "focus", listener: l2}); //$NON-NLS-0$
+		if(!options || options.setFocus !== false){
+			this.focus();
+		}
 	}
 	
 	ExplorerNavHandler.prototype = /** @lends orion.explorerNavHandler.ExplorerNavHandler.prototype */ {
@@ -282,6 +287,7 @@ exports.ExplorerNavHandler = (function() {
 			if(this._selectionPolicy === "cursorOnly"){ //$NON-NLS-0$
 				if(toggling && this.explorer.renderer._useCheckboxSelection){
 					this._checkRow(model,true);
+					return true;
 				}
 				return false;
 			}
@@ -372,19 +378,6 @@ exports.ExplorerNavHandler = (function() {
 			return null;
 		},
 
-		/**
-		 * @returns {Element} The ancestor element of <code>node</code> that provides grid/tree/treegrid behavior,
-		 * or <code>null</code> if no such node was found.
-		 */
-		getAriaContainerElement: function(node) {
-			var stop = this._parentDiv, role;
-			while (node && node !== stop &&
-					(role = node.getAttribute("role")) !== "grid" && role !== "tree" && role !== "treegrid") {//$NON-NLS-3$//$NON-NLS-2$//$NON-NLS-1$//$NON-NLS-0$
-				node = node.parentNode;
-			}
-			return node === stop ? null : node;
-		},
-
 		getFocusableElems: function(root) {
 			var nodeList = root.querySelectorAll('a,button,input,select,textarea,div[tabIndex]');
 			return Array.prototype.slice.call(nodeList);
@@ -399,7 +392,11 @@ exports.ExplorerNavHandler = (function() {
 			this.getAllRows().forEach(function(row) {
 				var model = this._modelIterator.cursor();
 				if (!model) {
-					this._modelIterator.setCursor(row._item);
+					model = row._item;
+					this._modelIterator.setCursor(model);
+					if (this._parentDiv === document.activeElement) {
+						this.toggleCursor(model, true);
+					}
 				} 
 				if (!row._focusListener) {
 					row._focusListener = this._focusListener;
@@ -442,9 +439,10 @@ exports.ExplorerNavHandler = (function() {
 								}
 								element.tabIndex = 0;
 							});
-							this._parentDiv.tabIndex = "-1";
+							this._parentDiv.removeAttribute("tabindex");
 							if (!(evt && evt.target !== this._parentDiv)) {
 								currentRow.focus();
+								this.scroll();
 							}
 						}
 					} else {
@@ -456,8 +454,8 @@ exports.ExplorerNavHandler = (function() {
 			}.bind(this);
 			if(currentgrid) {
 				handleRow("treeIterationCursorRow"); //$NON-NLS-0$
-				if(currentgrid.domNode){
-					var ariaElement = this.getAriaContainerElement(currentgrid.domNode);
+				if(currentgrid.domNode && currentgrid.domNode.tabIndex !== -1){
+					var ariaElement = currentRow;
 					if (on) {
 						currentgrid.domNode.classList.add("treeIterationCursor"); //$NON-NLS-0$
 						if (ariaElement) {
@@ -475,6 +473,47 @@ exports.ExplorerNavHandler = (function() {
 		
 		currentModel: function(){
 			return this._modelIterator.cursor();
+		},
+		
+		getScrollParent: function(node) {
+			if (!node) {
+				return null;
+			}
+			var overflow = window.getComputedStyle(node).overflowY;
+			if (!(overflow === "visible" || overflow === "hidden")) {
+				return node;
+			}
+			return this.getScrollParent(node.parentNode);
+		},
+		
+		scroll: function(next) {
+			var currentRowDiv = this.getRowDiv();
+			if(currentRowDiv) {
+				var offsetParent = lib.getOffsetParent(currentRowDiv);
+				if (offsetParent) {
+					var visible = true;
+					var offset = this.getScrollParent(currentRowDiv) !== this._parentDiv ? this._parentDiv.offsetTop : 0;
+					var rowTop = offset + currentRowDiv.offsetTop;
+					var clientHeight = offsetParent.clientHeight;
+					if(rowTop <= offsetParent.scrollTop){
+						visible = false;
+						if(next === undefined){
+							next = false;
+						}
+					}else if((rowTop + currentRowDiv.offsetHeight) >= (offsetParent.scrollTop + offsetParent.clientHeight)){
+						visible = false;
+						if(next === undefined){
+							next = true;
+						}
+					}
+					if(!visible){
+						var scrollTop = offset + currentRowDiv.offsetTop - (next ? clientHeight * 3 / 4 : clientHeight / 4);
+						this._scrollTop = scrollTop;
+						offsetParent.scrollTop = scrollTop; 
+						//currentRowDiv.scrollIntoView(!next);
+					}
+				}
+			}
 		},
 		
 		cursorOn: function(model, force, next, noScroll){
@@ -499,27 +538,8 @@ exports.ExplorerNavHandler = (function() {
 			}
 			this.moveColumn(null, 0);
 			this.toggleCursor(currentModel, true);
-			var currentRowDiv = this.getRowDiv();
-			if(currentRowDiv && !noScroll) {
-				var offsetParent = lib.getOffsetParent(currentRowDiv);
-				if (offsetParent) {
-					var visible = true;
-					if(currentRowDiv.offsetTop <= offsetParent.scrollTop){
-						visible = false;
-						if(next === undefined){
-							next = false;
-						}
-					}else if((currentRowDiv.offsetTop + currentRowDiv.offsetHeight) >= (offsetParent.scrollTop + offsetParent.clientHeight)){
-						visible = false;
-						if(next === undefined){
-							next = true;
-						}
-					}
-					if(!visible){
-						offsetParent.scrollTop = currentRowDiv.offsetTop - (next ? offsetParent.clientHeight * 3 / 4: offsetParent.clientHeight / 4); 
-						//currentRowDiv.scrollIntoView(!next);
-					}
-				}
+			if(!noScroll) {
+				this.scroll(next);
 			}
 			if(this.explorer.onCursorChanged){
 				this.explorer.onCursorChanged(previousModel, currentModel);
@@ -692,7 +712,7 @@ exports.ExplorerNavHandler = (function() {
 		
 		onCollapse: function(model)	{
 			if(this._modelIterator.collapse(model)){
-				this.cursorOn();
+				this.cursorOn(model);
 			}
 		},
 		

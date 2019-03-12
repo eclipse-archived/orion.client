@@ -30,7 +30,8 @@ define([
 		
 		var node = document.createElement('div'); //$NON-NLS-0$
 		node.classList.add('setting-row'); //$NON-NLS-0$
-		var headerId = this.headerId = 'setting-header-' + sectionName.replace(/\s/g, ''); //$NON-NLS-0$
+		var _id = sectionName.replace(/\s/g, '');
+		var headerId = this.headerId = 'setting-header-' + _id; //$NON-NLS-0$
 		var titleNode = this.titleNode = document.createElement('div'); //$NON-NLS-0$
 		titleNode.classList.add('setting-header'); //$NON-NLS-0$
 		node.setAttribute("role", "group");
@@ -41,6 +42,7 @@ define([
 		titleNode.id = headerId;
 		titleNode.textContent = sectionName;
 		var content = document.createElement('div'); //$NON-NLS-0$
+		content.id = "setting-content-" + _id;
 		content.classList.add('setting-content'); //$NON-NLS-0$
 		node.appendChild(titleNode);
 		node.appendChild(content);
@@ -53,17 +55,18 @@ define([
 			var that = this;
 			this.titleNode.style.cursor = "pointer"; //$NON-NLS-0$
 			this.titleNode.tabIndex = 0; //$NON-NLS-0$
+			this.titleNode.setAttribute("role", "button");
+			this.titleNode.setAttribute("aria-expanded", false);
+			this.titleNode.setAttribute("aria-controls", content.id);
 			this.titleNode.addEventListener("click", function(evt) { //$NON-NLS-0$
 				that.setHidden(!that.hidden);
 			}, false);
 			this.titleNode.addEventListener("keydown", function(evt) { //$NON-NLS-0$
 				if (evt.target === that.titleNode) {
-					if(evt.keyCode === lib.KEY.ENTER) {
+					if(evt.keyCode === lib.KEY.ENTER || evt.keyCode === lib.KEY.SPACE) {
 						that.setHidden(!that.hidden);
-					} else if(evt.keyCode === lib.KEY.ESCAPE) {
-						that.setHidden(true);
+						evt.stopPropagation();
 					}
-					evt.stopPropagation();
 				}
 			}, false);
 			this.setHidden("true" === localStorage.getItem(headerId +"/hidden"));
@@ -73,8 +76,10 @@ define([
 		this.hidden = hidden;
 		localStorage.setItem(this.headerId +"/hidden", hidden);
 		if (this.hidden) {
+			this.titleNode.setAttribute("aria-expanded", false);
 			this.subsectionContent.style.display = "none";
 		} else {
+			this.titleNode.setAttribute("aria-expanded", true);
 			this.subsectionContent.style.display = "";
 		}
 	};

@@ -223,7 +223,8 @@ exports.Explorer = (function() {
 				this.selection.setSelections([]);
 			}
 			if(this.getNavHandler()){
-				this.getNavHandler()._clearSelection();
+				this.getNavHandler().destroy();
+				this._navHandler = null;
 			}
 			var treeId = parentId + "innerTree"; //$NON-NLS-0$
 			var existing = lib.node(treeId);
@@ -263,7 +264,12 @@ exports.Explorer = (function() {
 				showRoot: options ? !!options.showRoot : false,  
 				indent: options ? options.indent: undefined,
 				preCollapse: options ? options.preCollapse: undefined,
-				onCollapse: options ? options.onCollapse: undefined,
+				onCollapse: options && options.onCollapse ? options.onCollapse : function(model) {
+					var navHandler = this.getNavHandler();
+					if (navHandler) {
+						navHandler.onCollapse(model);
+					}
+				}.bind(this),
 				navHandlerFactory: options ? options.navHandlerFactory: undefined,
 				tableElement: options ? options.tableElement : undefined,
 				tableBodyElement: options ? options.tableBodyElement : undefined,
@@ -550,6 +556,9 @@ exports.ExplorerRenderer = (function() {
 		initTable: function (tableNode, tableTree) {
 			this.tableTree = tableTree;
 			this.tableNode = tableNode;
+			if (!this.selectionPolicy && this.role) {
+				this.tableNode.setAttribute("aria-multiselectable", true);
+			}
 			lib.empty(tableNode);
 			if (this._treeTableClass) {
 				tableNode.classList.add(this._treeTableClass); 
@@ -631,6 +640,7 @@ exports.ExplorerRenderer = (function() {
 				check.rowId = tableRow.id;
 				if(this.getCheckedFunc){
 					check.checked = this.getCheckedFunc(item);
+					tableRow.setAttribute("aria-selected", check.checked);
 					if (check.checked) {
 						if(this._highlightSelection){
 							tableRow.classList.add("checkedRow"); //$NON-NLS-0$
@@ -647,6 +657,7 @@ exports.ExplorerRenderer = (function() {
 				var self = this;
 				check.addEventListener("mousedown", function(evt) { //$NON-NLS-0$
 					var newValue = evt.target.checked ? false : true;
+					tableRow.setAttribute("aria-selected", newValue);
 					self.onCheck(tableRow, evt.target, newValue, true, false, item);
 					lib.stop(evt);
 				}, false);
@@ -867,6 +878,8 @@ exports.ExplorerRenderer = (function() {
 	return ExplorerRenderer;
 }());
 
+var CHECK_COLUMN_ID = 0;
+
 /**
  * @name orion.explorer.SelectionRenderer
  * @class This  renderer renders a tree table and installs a selection and cursoring model to
@@ -889,25 +902,34 @@ exports.SelectionRenderer = (function(){
 
 	SelectionRenderer.prototype.renderTableHeader = function(tableNode){
 		var thead = document.createElement('thead'); //$NON-NLS-0$
-		var row = document.createElement('tr'); //$NON-NLS-0$
-		row.setAttribute("role", "row"); //$NON-NLS-1$ //$NON-NLS-0$
 		thead.classList.add("navTableHeading"); //$NON-NLS-0$
-		if (this._useCheckboxSelection) {
-			row.appendChild(this.initCheckboxColumn(tableNode));
-		}
-		
-		var i = 0;
-		var cell = this.getCellHeaderElement(i);
-		while(cell){
-			if (cell.innerHTML.length > 0) {
-				cell.classList.add("navColumn"); //$NON-NLS-0$
+		var rowCount = this.getHeaderRowCount ? this.getHeaderRowCount() : 1;
+		var empty = rowCount === 1;
+		for (var r=0; r<rowCount; r++) {
+			var row = document.createElement('tr'); //$NON-NLS-0$
+			row.setAttribute("role", "row"); //$NON-NLS-1$ //$NON-NLS-0$
+			if (this._useCheckboxSelection) {
+				var col = this.initCheckboxColumn(tableNode);
+				col.id = this._checkColumnId = "checkColumn_" + CHECK_COLUMN_ID++;
+				row.appendChild(col);
 			}
-			cell.setAttribute("role", "columnheader"); //$NON-NLS-1$ //$NON-NLS-0$
-			row.appendChild(cell);			
-			cell = this.getCellHeaderElement(++i);
+			
+			var i = 0;
+			var cell = this.getCellHeaderElement(i, r);
+			while(cell){
+				if (cell.innerHTML.length > 0 && !this.getPrimColumnStyle) {
+					cell.classList.add("navColumn"); //$NON-NLS-0$
+				}
+				cell.setAttribute("role", "columnheader"); //$NON-NLS-1$ //$NON-NLS-0$
+				row.appendChild(cell);			
+				cell = this.getCellHeaderElement(++i, r);
+			}
+			thead.appendChild(row);
+			if (i > 0 && empty) {
+				empty = false;
+			}
 		}
-		thead.appendChild(row);
-		if (i > 0) {
+		if (!empty) {
 			tableNode.appendChild(thead);
 		}
 	};
@@ -940,12 +962,17 @@ exports.SelectionRenderer = (function(){
 			
 			navDict.addRow(item, tableRow);
 		}
-		if (item.selectable === undefined || item.selectable) {
-			var checkColumn = this.getCheckboxColumn(item, tableRow);
-			if(checkColumn) {
-				checkColumn.classList.add('checkColumn'); //$NON-NLS-0$
-				tableRow.appendChild(checkColumn);
+		var checkColumn = this.getCheckboxColumn(item, tableRow);
+		if(checkColumn) {
+			if (this._checkColumnId) {
+				checkColumn.setAttribute("headers", this._checkColumnId);
 			}
+			if (item.selectable !== undefined && !item.selectable) {
+				checkColumn.style.opacity = 0;
+				checkColumn.setAttribute("aria-hidden", true);
+			}
+			checkColumn.classList.add('checkColumn'); //$NON-NLS-0$
+			tableRow.appendChild(checkColumn);
 		}
 
 		var i = 0;

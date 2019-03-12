@@ -21,6 +21,23 @@ function(messages, dialog, mFileUtils, mSelection, mExplorer, mExplorerTable, bi
 	DirectoryPrompterRenderer.prototype.getLabelColumnIndex = function() {
 		return 0;
 	};
+	
+	DirectoryPrompterRenderer.prototype.getCellHeaderElement = function(col_no) {
+		var labelText = "";
+		switch (col_no) {
+		case 0:
+			labelText = messages["Folders"];
+			break;
+		default:
+			return null;
+		}
+		var th = document.createElement("th"); //$NON-NLS-0$
+		th.className = "visuallyhidden"; //$NON-NLS-0$
+		th.style.paddingTop = th.style.paddingLeft = "4px"; //$NON-NLS-0$
+		th.textContent = labelText;
+		return th;
+	};
+		
 	DirectoryPrompterRenderer.prototype.getCellElement = function(col_no, item, tableRow){
 		var col = document.createElement("td"); //$NON-NLS-0$
 		tableRow.appendChild(col);
@@ -90,10 +107,22 @@ function(messages, dialog, mFileUtils, mSelection, mExplorer, mExplorerTable, bi
 		}
 		this.selection = new mSelection.Selection(this._serviceRegistry, "orion.directoryPrompter.selection"); //$NON-NLS-0$
 
-		this.explorer = new mExplorerTable.FileExplorer({treeRoot: {children:[]}, selection: this.selection, serviceRegistry: this._serviceRegistry,
-				fileClient: this._fileClient, parentId: "directoryTree", excludeFiles: true, rendererFactory: function(explorer) {  //$NON-NLS-0$
-					return new DirectoryPrompterRenderer({checkbox: false, singleSelection: true, treeTableClass: "directoryPrompter" }, explorer);   //$NON-NLS-0$
-				}}); //$NON-NLS-0$
+		this.explorer = new mExplorerTable.FileExplorer({
+			name: messages["Folders"],
+			treeRoot: {children:[]},
+			selection: this.selection,
+			serviceRegistry: this._serviceRegistry,
+			fileClient: this._fileClient,
+			parentId: "directoryTree",
+			excludeFiles: true,
+			rendererFactory: function(explorer) {  //$NON-NLS-0$
+				return new DirectoryPrompterRenderer({
+					checkbox: false,
+					singleSelection: true,
+					treeTableClass: "directoryPrompter"
+				}, explorer);   //$NON-NLS-0$
+			}
+		}); //$NON-NLS-0$
 		this.explorer.loadResourceList(path, true, null).then(function() {
 			if(this._targetFolder) {
 				this.explorer.reveal(this._targetFolder);

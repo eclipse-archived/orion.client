@@ -95,6 +95,7 @@ define({//Default message bundle
 	"Sample Orion Plugin": "Sample Orion Plug-in",
 	"Generate a sample plugin for integrating with Orion.": "Generate a sample plug-in for integrating with Orion.",
 	"Browser": "Web Browser",
+	"Outline": "Outline",
 	"OutlineProgress": "Getting outline for ${0} from ${1}",
 	"FormatProgress" : "Formatting ${0} from ${1}",
 	"outlineTimeout": "Outline service timed out. Try reloading the page and opening the outline again.",
