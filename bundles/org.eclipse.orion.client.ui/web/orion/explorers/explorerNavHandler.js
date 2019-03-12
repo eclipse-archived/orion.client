@@ -440,7 +440,7 @@ exports.ExplorerNavHandler = (function() {
 								element.tabIndex = 0;
 							});
 							this._parentDiv.removeAttribute("tabindex");
-							if (!(evt && evt.target !== this._parentDiv)) {
+							if (!(evt && evt.target !== this._parentDiv) && document.activeElement !== currentRow) {
 								currentRow.focus();
 								this.scroll();
 							}
