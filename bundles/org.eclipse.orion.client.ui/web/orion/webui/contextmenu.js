@@ -45,6 +45,9 @@ define([
 				this._dropdownNode.dropdown = this;
 			}
 			
+			this._dropdownNode.classList.add("contextMenu");
+			this._dropdownNode.triggerNode = this._triggerNode;
+			
 			//add context menu event handlers
 			this._boundcontextmenuEventHandler = this._contextmenuEventHandler.bind(this);
 			this._boundContextMenuCloser = this._contextMenuCloser.bind(this);

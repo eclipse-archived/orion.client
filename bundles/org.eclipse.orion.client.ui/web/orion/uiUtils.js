@@ -169,7 +169,7 @@ define([
 		var selectTo = options.selectTo;
 		var isInitialValid = options.isInitialValid;
 		var insertAsChild = options.insertAsChild;
-		var previousActiveElement;
+		var previousActiveElement = document.activeElement;
 		
 		var done = false;
 		var handler = function(isKeyEvent) {
@@ -229,7 +229,6 @@ define([
 		editBox.addEventListener("keydown", handler(true), false); //$NON-NLS-0$
 		editBox.addEventListener("blur", handler(false), false); //$NON-NLS-0$
 		window.setTimeout(function() {
-			previousActiveElement = document.activeElement;
 			editBox.focus(); 
 			if (initialText) {
 				var box = lib.node(id);

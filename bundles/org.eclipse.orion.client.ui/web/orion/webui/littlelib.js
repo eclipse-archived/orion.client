@@ -502,6 +502,13 @@ define(["orion/util"], function(util) {
 						break;
 					}
 				}
+				if (temp.classList.contains("contextMenu")) {
+					if (temp.triggerNode) {
+						temp = temp.triggerNode;
+						continue;
+					}
+					break;
+				}
 				temp = temp.parentNode;
 			}
 			if (temp) {
