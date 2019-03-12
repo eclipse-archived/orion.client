@@ -169,7 +169,7 @@ define([
 		var selectTo = options.selectTo;
 		var isInitialValid = options.isInitialValid;
 		var insertAsChild = options.insertAsChild;
-		var previousActiveElement = refNode;
+		var previousActiveElement = document.activeElement;
 		
 		var done = false;
 		var handler = function(isKeyEvent) {
