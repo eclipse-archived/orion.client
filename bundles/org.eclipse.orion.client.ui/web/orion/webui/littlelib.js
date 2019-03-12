@@ -180,8 +180,9 @@ define(["orion/util"], function(util) {
 	/* 
 	 * Inspired by http://brianwhitmer.blogspot.com/2009/05/jquery-ui-tabbable-what.html
 	 */
-	function firstTabbable(node) {
-		if (_getTabIndex(node) >= 0 && !node.disabled && node.offsetParent) {
+	function firstTabbable(node, allowFocusable) {
+		var tabIndex = _getTabIndex(node);
+		if ((tabIndex >= 0 || allowFocusable && tabIndex >= -1) && !node.disabled && node.offsetParent) {
 			return node;
 		}
 		if (node.hasChildNodes()) {
@@ -495,7 +496,7 @@ define(["orion/util"], function(util) {
 		if (hasFocus) {
 			while (temp && temp !== document.body) {
 				if (document.compareDocumentPosition(temp) !== 1 && temp.offsetParent) {
-					var tabbable = firstTabbable(temp);
+					var tabbable = firstTabbable(temp, previousActiveElement === temp);
 					if (tabbable) {
 						temp = tabbable;
 						break;
