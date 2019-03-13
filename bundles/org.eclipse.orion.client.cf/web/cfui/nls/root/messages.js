@@ -220,7 +220,7 @@ define({//Default message bundle
 	"leaveBlankForDefault": "Leave blank for default ${0}",
 	"createNew": "Create Cloud Foundry Configuration",
 	"createNewTooltip": "Create a new launch configuration",
-	"manifestOverride": "Shaded boxes indicate modified fields, which will override manifest file settings.",
+	"manifestOverride": "Shaded boxes indicate modified fields that will override manifest file settings.",
 	"requiredField": "* Denotes required field.",
 	"Add": "Add",
 	"Remove": "Remove",
