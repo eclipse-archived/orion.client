@@ -80,7 +80,7 @@ define([
 	ContextMenu.prototype.close = function(restoreFocus) {
 		this._triggerNode.removeEventListener("click",  this._boundContextMenuCloser, false); //$NON-NLS-0$
 		
-		return Dropdown.prototype.close.call(this, restoreFocus); //call function in super class
+		return Dropdown.prototype.close.call(this, true); //call function in super class
 	};
 	
 	// overrides Dropdown.protoype._positionDropdown
