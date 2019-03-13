@@ -45,6 +45,9 @@ define([
 				this._dropdownNode.dropdown = this;
 			}
 			
+			this._dropdownNode.classList.add("contextMenu");
+			this._dropdownNode.triggerNode = this._triggerNode;
+			
 			//add context menu event handlers
 			this._boundcontextmenuEventHandler = this._contextmenuEventHandler.bind(this);
 			this._boundContextMenuCloser = this._contextMenuCloser.bind(this);
@@ -77,7 +80,7 @@ define([
 	ContextMenu.prototype.close = function(restoreFocus) {
 		this._triggerNode.removeEventListener("click",  this._boundContextMenuCloser, false); //$NON-NLS-0$
 		
-		return Dropdown.prototype.close.call(this, restoreFocus); //call function in super class
+		return Dropdown.prototype.close.call(this, true); //call function in super class
 	};
 	
 	// overrides Dropdown.protoype._positionDropdown

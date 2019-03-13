@@ -169,6 +169,7 @@ define([
 		var selectTo = options.selectTo;
 		var isInitialValid = options.isInitialValid;
 		var insertAsChild = options.insertAsChild;
+		var previousActiveElement = document.activeElement;
 		
 		var done = false;
 		var handler = function(isKeyEvent) {
@@ -181,38 +182,33 @@ define([
 				if (!editBox) {
 					return;
 				}
-				if (isKeyEvent && event.keyCode === lib.KEY.ESCAPE) {
-					if (hideRefNode) {
-						refNode.style.display = "";
-					}
+				function hide() {
 					done = true;
-					editBox.parentNode.removeChild(editBox);
+					lib.returnFocus(editBox, previousActiveElement, function() {
+						if (hideRefNode) {
+							refNode.style.display = "";
+						}
+					});
+					// some clients remove temporary dom structures in the onComplete processing, so check that we are still in DOM
+					if (editBox.parentNode) {
+						editBox.parentNode.removeChild(editBox);
+					}
 					if (onEditDestroy) {
 						onEditDestroy();
 					}
+				}
+				if (isKeyEvent && event.keyCode === lib.KEY.ESCAPE) {
+					hide();
 					return;
 				}
 				if (isKeyEvent && event.keyCode !== lib.KEY.ENTER) {
 					return;
 				} else if (newValue.length === 0 || (!isInitialValid && newValue === initialText)) {
-					if (hideRefNode) {
-						refNode.style.display = "";
-					}
-					done = true;
+					// Do nothing
 				} else {
 					onComplete(newValue);
-					if (hideRefNode && refNode.parentNode) {
-						refNode.style.display = "";
-					}
-					done = true;
 				}
-				// some clients remove temporary dom structures in the onComplete processing, so check that we are still in DOM
-				if (editBox.parentNode) {
-					editBox.parentNode.removeChild(editBox);
-				}
-				if (onEditDestroy) {
-					onEditDestroy();
-				}
+				hide();
 			};
 		};
 	
@@ -232,7 +228,7 @@ define([
 		bidiUtils.initInputField(editBox);
 		editBox.addEventListener("keydown", handler(true), false); //$NON-NLS-0$
 		editBox.addEventListener("blur", handler(false), false); //$NON-NLS-0$
-		window.setTimeout(function() { 
+		window.setTimeout(function() {
 			editBox.focus(); 
 			if (initialText) {
 				var box = lib.node(id);
