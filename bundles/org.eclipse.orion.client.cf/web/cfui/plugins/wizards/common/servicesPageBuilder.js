@@ -64,6 +64,7 @@ define([
 			return new mWizard.WizardPage({
 				
 				template:'<table class="formTable" role="presentation">'+ //$NON-NLS-0$
+					'<col style="width:46%"><col style="width:8%"><col style="width:46%">' + //$NON-NLS-0$
 					'<tr class="rowSeparator">' + //$NON-NLS-0$
 						'<td colspan="3"><div class="wiz-hr"><span id="servicesManifestSettings"></span></div></td>' + //$NON-NLS-0$
 					'</tr>' + //$NON-NLS-0$
@@ -116,14 +117,17 @@ define([
 				    	addButton.appendChild(document.createTextNode(">")); //$NON-NLS-0$
 				    	addButton.className = "orionButton commandButton"; //$NON-NLS-0$
 				    	addButton.setAttribute("aria-label", messages["Add"]); //$NON-NLS-0$
+				    	new Tooltip({node: addButton, text: messages["AddButtonTooltip"], position: ["above", "right", "left", "below"]});
 				    	
 				    	var removeButton = document.createElement("button"); //$NON-NLS-0$
 				    	removeButton.className = "orionButton commandButton"; //$NON-NLS-0$
 				    	removeButton.appendChild(document.createTextNode("<")); //$NON-NLS-0$
 				    	removeButton.setAttribute("aria-label", messages["Remove"]); //$NON-NLS-0$
+				    	new Tooltip({node: removeButton, text: messages["RemoveButtonTooltip"], position: ["below", "left", "right", "above"]});
 				    	
-				    	document.getElementById("servicesAddRemoveButtonsCol").appendChild(removeButton); //$NON-NLS-0$
-				    	document.getElementById("servicesAddRemoveButtonsCol").appendChild(addButton); //$NON-NLS-0$
+				    	var addRemoveButtonsCol = document.getElementById("servicesAddRemoveButtonsCol"); //$NON-NLS-0$
+				    	addRemoveButtonsCol.appendChild(addButton);
+				    	addRemoveButtonsCol.appendChild(removeButton);
 				    	
 				    	addButton.addEventListener('click', function(){ //$NON-NLS-0$
 				    		for(var i=self._servicesDropdown.options.length-1; i>=0; i--){

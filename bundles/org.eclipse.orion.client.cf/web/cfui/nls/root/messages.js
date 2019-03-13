@@ -224,6 +224,8 @@ define({//Default message bundle
 	"requiredField": "* Denotes required field.",
 	"Add": "Add",
 	"Remove": "Remove",
+	"AddButtonTooltip": "Add selected services to deploy list",
+	"RemoveButtonTooltip": "Remove selected services from deploy list",
 	"noManifest": "No manifest found at /manifest.yml",
 	"refreshLogsPage": "[ Refresh the page to get the latest logs... ]"
 });
