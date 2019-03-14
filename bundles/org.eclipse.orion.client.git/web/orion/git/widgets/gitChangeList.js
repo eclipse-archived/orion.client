@@ -672,13 +672,16 @@ define([
 			explorer.persistCheck = createInput(persistCheckDiv, "persitCheck", "Save", null, null, true); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 
 			var more;
+			explorer.updateCommitConfig = function() {
+				var config = commitLogic.getGitCloneConfig(explorer.model && explorer.model.status && explorer.model.status.Clone && explorer.model.status.Clone.Config || {});
+				explorer.authorNameInput.value = config.AuthorName || "";
+				explorer.authorEmailInput.value = config.AuthorEmail || "";
+				explorer.committerNameInput.value = config.CommitterName || "";
+				explorer.committerEmailInput.value = config.CommitterEmail || "";
+			};
 			explorer.setMoreVisible = function (visible) {
 				if (visible) {
-					var config = commitLogic.getGitCloneConfig(explorer.model && explorer.model.status && explorer.model.status.Clone && explorer.model.status.Clone.Config || {});
-					explorer.authorNameInput.value = config.AuthorName || "";
-					explorer.authorEmailInput.value = config.AuthorEmail || "";
-					explorer.committerNameInput.value = config.CommitterName || "";
-					explorer.committerEmailInput.value = config.CommitterEmail || "";
+					explorer.updateCommitConfig();
 					moreDiv.style.display = "block"; //$NON-NLS-0$
 					more.textContent = messages["less"];
 				} else {
@@ -701,6 +704,7 @@ define([
 				return true;
 			}
 			explorer.getCommitInfo = function (check) {
+				explorer.updateCommitConfig();
 				if (!checkParam(check,explorer.messageTextArea, explorer.messageTextArea.parentNode)) return null;
 				if (!checkParam(check,explorer.authorNameInput, null, true)) return null;
 				if (!checkParam(check,explorer.authorEmailInput, null, true)) return null;
