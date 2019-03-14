@@ -21,7 +21,7 @@
 </head>
 <body id="deployBody" class="dialogFrame lightPage">
 
-	<div role="dialog" aria-modal="true" aria-labelledby="title" aria-describedby="messageText">
+	<div id="dialog" role="dialog" aria-modal="true" aria-labelledby="title">
 		<div class="dialogTitle" id="titleBar">
 			<span id="title" class="dialogTitleText layoutLeft">
 			</span>
@@ -30,7 +30,12 @@
 		</div>
 		
 		<div>
-			<div id="messageContainer" class="messageContainer"><span id="messageLabel" class="messageLabel"><span id="messageText" style="float:left;"></span><span id="messageButton"></span></span></div>
+			<div id="messageContainer" class="messageContainer" role="status">
+				<span id="messageLabel" class="messageLabel">
+					<span id="messageText" style="float:left;"></span>
+					<span id="messageButton"></span>
+				</span>
+			</div>
 			<div id="wizard"></div>
 		</div>
 	</div>

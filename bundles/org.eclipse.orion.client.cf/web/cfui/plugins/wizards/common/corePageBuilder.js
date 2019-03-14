@@ -308,6 +308,8 @@ define(['i18n!cfui/nls/messages', 'orion/selection', 'orion/widgets/input/ComboT
 
 				if(!self._manifestInputWrapper.classList.contains("correctPath")){
 					self._manifestInputWrapper.classList.add("correctPath");
+					self._manifestInput.removeAttribute("aria-invalid"); //$NON-NLS-0$
+					self._manifestInput.removeAttribute("aria-errormessage"); //$NON-NLS-0$
 					if (self._manifestInputWrapper.tooltip) {
 						self._manifestInputWrapper.tooltip.destroy();
 					}
@@ -325,6 +327,9 @@ define(['i18n!cfui/nls/messages', 'orion/selection', 'orion/widgets/input/ComboT
 						trigger: "mouseover", //$NON-NLS-0$
 						position: ["above"] //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 					});
+					var tipContainer = self._manifestInputWrapper.tooltip.contentContainer(); // force tooltip creation to get the id
+					self._manifestInput.setAttribute("aria-invalid", "true"); //$NON-NLS-1$ //$NON-NLS-0$
+					self._manifestInput.setAttribute("aria-errormessage", tipContainer.id); //$NON-NLS-0$
 				}
 			}
 		},
@@ -351,7 +356,7 @@ define(['i18n!cfui/nls/messages', 'orion/selection', 'orion/widgets/input/ComboT
 				this._initManifestPath = manifestPath;
 				return deferred;
 			}
-			return plan;
+			return plan || new Deferred().resolve(null);
 		},
 		
 		build : function(){
@@ -671,9 +676,9 @@ define(['i18n!cfui/nls/messages', 'orion/selection', 'orion/widgets/input/ComboT
 						var selectedCloud = self._clouds[self._clouds.length > 1 ? self._cloudsDropdown.selectedIndex : 0];
 						self._loadTargets(selectedCloud);
 						
-						self._launchConfInput.focus();
 						setRendered(true);
 					}
+					self._launchConfInput.focus();
 			    },
 			    
 			    validate: function(setValid) {

@@ -191,7 +191,7 @@ define({//Default message bundle
 	"Dialog": "Dialog",
 	"configureApplicationDeployment": "Edit Launch Configuration",
 	"saveToManifestFile:": "Save to manifest file: ",
-	"bindServicesFromTheList.": "Bind services from the list.",
+	"bindServicesFromTheList": "Select which services to bind on deploy.",
 	"availableServices:": "Available services:",
 	"boundServices:": "Services to bind on deploy:",
 	"convertMyManifest.ymlFileTo": "Convert my manifest.yml file to v6",
@@ -220,10 +220,12 @@ define({//Default message bundle
 	"leaveBlankForDefault": "Leave blank for default ${0}",
 	"createNew": "Create Cloud Foundry Configuration",
 	"createNewTooltip": "Create a new launch configuration",
-	"manifestOverride": "Shaded boxes indicate modified fields, which will override manifest file settings.",
+	"manifestOverride": "Shaded boxes indicate modified fields that will override manifest file settings.",
 	"requiredField": "* Denotes required field.",
 	"Add": "Add",
 	"Remove": "Remove",
+	"AddButtonTooltip": "Add selected services to deploy list",
+	"RemoveButtonTooltip": "Remove selected services from deploy list",
 	"noManifest": "No manifest found at /manifest.yml",
 	"refreshLogsPage": "[ Refresh the page to get the latest logs... ]"
 });

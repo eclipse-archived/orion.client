@@ -182,7 +182,7 @@ define(["orion/util"], function(util) {
 	 */
 	function firstTabbable(node, allowFocusable) {
 		var tabIndex = _getTabIndex(node);
-		if ((tabIndex >= 0 || allowFocusable && tabIndex >= -1) && !node.disabled && node.offsetParent) {
+		if ((tabIndex >= 0 || allowFocusable && tabIndex >= -1) && !node.disabled && node.offsetParent && window.getComputedStyle(node).visibility === "visible") {
 			return node;
 		}
 		if (node.hasChildNodes()) {
@@ -205,7 +205,7 @@ define(["orion/util"], function(util) {
 				}
 			}
 		}
-		if (_getTabIndex(node) >= 0 && !node.disabled && node.offsetParent) {
+		if (_getTabIndex(node) >= 0 && !node.disabled && node.offsetParent && window.getComputedStyle(node).visibility === "visible") {
 			return node;
 		}
 		return null;
