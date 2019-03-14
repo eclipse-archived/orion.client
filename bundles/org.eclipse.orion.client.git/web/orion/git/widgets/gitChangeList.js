@@ -674,10 +674,10 @@ define([
 			var more;
 			explorer.updateCommitConfig = function() {
 				var config = commitLogic.getGitCloneConfig(explorer.model && explorer.model.status && explorer.model.status.Clone && explorer.model.status.Clone.Config || {});
-				explorer.authorNameInput.value = config.AuthorName || "";
-				explorer.authorEmailInput.value = config.AuthorEmail || "";
-				explorer.committerNameInput.value = config.CommitterName || "";
-				explorer.committerEmailInput.value = config.CommitterEmail || "";
+				if (!explorer.authorNameInput.value) explorer.authorNameInput.value = config.AuthorName || "";
+				if (!explorer.authorEmailInput.value) explorer.authorEmailInput.value = config.AuthorEmail || "";
+				if (!explorer.committerNameInput.value) explorer.committerNameInput.value = config.CommitterName || "";
+				if (!explorer.committerEmailInput.value) explorer.committerEmailInput.value = config.CommitterEmail || "";
 			};
 			explorer.setMoreVisible = function (visible) {
 				if (visible) {
