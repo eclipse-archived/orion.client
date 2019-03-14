@@ -191,7 +191,7 @@ define({//Default message bundle
 	"Dialog": "Dialog",
 	"configureApplicationDeployment": "Edit Launch Configuration",
 	"saveToManifestFile:": "Save to manifest file: ",
-	"bindServicesFromTheList.": "Bind services from the list.",
+	"bindServicesFromTheList": "Select which services to bind on deploy.",
 	"availableServices:": "Available services:",
 	"boundServices:": "Services to bind on deploy:",
 	"convertMyManifest.ymlFileTo": "Convert my manifest.yml file to v6",

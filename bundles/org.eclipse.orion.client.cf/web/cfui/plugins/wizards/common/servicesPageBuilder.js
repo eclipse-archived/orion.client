@@ -90,7 +90,8 @@ define([
 
 					if(!isRendered()){
 						document.getElementById("servicesManifestSettings").textContent = messages["manifestSettings"]; //$NON-NLS-0$
-			    		document.getElementById("allServicesLabel").appendChild(document.createTextNode(messages["bindServicesFromTheList."])); //$NON-NLS-0$
+			    		document.getElementById("allServicesLabel").appendChild(document.createTextNode(messages["bindServicesFromTheList"])); //$NON-NLS-0$
+						document.getElementById("dialog").setAttribute("aria-describedby", "allServicesLabel");
 			    		var label = document.getElementById("servicesLabel"); //$NON-NLS-0$
 			    		label.appendChild(document.createTextNode(messages["availableServices:"]));
 			    		label.htmlFor = "servicesDropdownField"; //$NON-NLS-0$
@@ -302,6 +303,7 @@ define([
 							self._initManifestPath = self._getUserPath();
 						});
 					}
+					self._servicesDropdown.focus();
 			    },
 			    
 			    getResults: function(){

@@ -676,9 +676,9 @@ define(['i18n!cfui/nls/messages', 'orion/selection', 'orion/widgets/input/ComboT
 						var selectedCloud = self._clouds[self._clouds.length > 1 ? self._cloudsDropdown.selectedIndex : 0];
 						self._loadTargets(selectedCloud);
 						
-						self._launchConfInput.focus();
 						setRendered(true);
 					}
+					self._launchConfInput.focus();
 			    },
 			    
 			    validate: function(setValid) {

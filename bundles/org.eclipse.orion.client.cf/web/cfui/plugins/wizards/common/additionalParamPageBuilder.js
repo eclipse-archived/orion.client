@@ -227,7 +227,7 @@ define(['i18n!cfui/nls/messages', 'orion/webui/Wizard'], function(messages, mWiz
 							self._initManifestPath = self._getUserPath();
 						});
 					}
-					
+				    self._command.focus();
 			    },
 			    
 			    getResults: function(){
