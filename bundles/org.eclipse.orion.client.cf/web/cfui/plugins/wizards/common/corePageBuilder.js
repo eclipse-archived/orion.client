@@ -356,7 +356,7 @@ define(['i18n!cfui/nls/messages', 'orion/selection', 'orion/widgets/input/ComboT
 				this._initManifestPath = manifestPath;
 				return deferred;
 			}
-			return plan;
+			return plan || new Deferred().resolve(null);
 		},
 		
 		build : function(){

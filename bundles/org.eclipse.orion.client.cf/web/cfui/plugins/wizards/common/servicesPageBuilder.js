@@ -258,7 +258,7 @@ define([
 								self._servicesDropdown.appendChild(serviceOption);
 					    	});
 					    	
-					    	services.every(function(serviceName){
+					    	(services || []).every(function(serviceName){
 					    		if( availableServices.indexOf(serviceName) === -1 ){
 					    			var errMessage = i18nUtil.formatMessage(messages["service${0}NotFoundsetUpYourService.Go${1}"], serviceName, self._targetSelection.ManageUrl);
 					    			self._showError(errMessage);
