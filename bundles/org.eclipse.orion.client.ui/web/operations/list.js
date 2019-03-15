@@ -37,9 +37,9 @@ define(['i18n!orion/operations/nls/messages', 'orion/bootstrap', 'orion/commandR
 		
 		commandRegistry.registerCommandContribution("pageActions", "eclipse.removeCompletedOperations", 1, "eclipse.taskGroup.unlabeled"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		commandRegistry.registerCommandContribution("operationItems", "eclipse.removeOperation", 1); //$NON-NLS-1$ //$NON-NLS-0$
-		commandRegistry.registerCommandContribution("selectionTools", "eclipse.removeOperation", 1, "eclipse.selectionGroup"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		commandRegistry.registerCommandContribution("selectionTools", "eclipse.removeOperation", 1); //$NON-NLS-1$ //$NON-NLS-0$
 		commandRegistry.registerCommandContribution("operationItems", "eclipse.cancelOperation", 2); //$NON-NLS-1$ //$NON-NLS-0$
-		commandRegistry.registerCommandContribution("selectionTools", "eclipse.cancelOperation", 2, "eclipse.selectionGroup"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		commandRegistry.registerCommandContribution("selectionTools", "eclipse.cancelOperation", 2); //$NON-NLS-1$ //$NON-NLS-0$
 		
 		operationsTable.loadOperations.bind(operationsTable)();
 		

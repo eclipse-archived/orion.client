@@ -10,6 +10,7 @@
  ******************************************************************************/
 
 /*eslint-env browser, amd*/
+/*eslint-disable no-extra-parens */
 define(['i18n!orion/operations/nls/messages', 'orion/webui/littlelib', 'orion/commands'], 
         function(messages, lib, mCommands) {
 	/**
@@ -82,7 +83,7 @@ define(['i18n!orion/operations/nls/messages', 'orion/webui/littlelib', 'orion/co
 			commandService.addCommand(removeCompletedOperationsCommand);
 			
 			var removeOperationCommand = new mCommands.Command({
-				name : messages["Remove"],
+				name : messages["Remove Selected"],
 				tooltip : messages["rmFromOpList"],
 				imageClass: "core-sprite-delete", //$NON-NLS-0$
 				id : "eclipse.removeOperation", //$NON-NLS-0$
