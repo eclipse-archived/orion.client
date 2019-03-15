@@ -66,9 +66,7 @@
 .core-sprite-go-down{ background-position: 0 -311px; width: 16px; height: 16px; } 
 .core-sprite-information{ background-position: 0 -365px; width: 16px; height: 16px; } 
 .core-sprite-initproject{ background-position: 0 -383px; width: 16px; height: 16px; } 
-.core-sprite-link{ background-position: 0 -419px; width: 16px; height: 16px; } 
 .core-sprite-none{ background-position: 0 -491px; width: 16px; height: 16px; } 
-.core-sprite-ok{ background-position: 0 -509px; width: 16px; height: 16px; } 
 .core-sprite-orion-logo{ background-position: 0 -545px; width: 36px; height: 25px; } 
 .core-sprite-replaceAll{ background-position: 0 -608px; width: 16px; height: 16px; } 
 .core-sprite-sep{ background-position: 0 -644px; width: 1px; height: 16px; } 
@@ -97,6 +95,8 @@
 	height: 12px; 
 }
 
+.core-sprite-ok,
+.core-sprite-link,
 .core-sprite-hamburger,
 .core-sprite-silhouette,
 .core-sprite-addcontent,
@@ -270,6 +270,16 @@
 	font-size: 20px;
 }
 
+.core-sprite-ok {
+	padding: 0;
+	padding-left: 3px;
+	padding-right: 3px;
+}
+
+.core-sprite-link {
+	padding: 2px;
+}
+
 .core-sprite-page,
 .core-sprite-horizontal,
 .core-sprite-vertical,
@@ -278,6 +288,8 @@
 	padding-top: 0;
 }
 
+.core-sprite-ok:before{ content:'\2714' }
+.core-sprite-link:before{ content:'\1F517' }
 .core-sprite-hamburger:before{ content:'\E000'; }
 .core-sprite-gear:before{ content:'\E001'; }
 .core-sprite-silhouette:before{ content:'\E003'; float: right;}
