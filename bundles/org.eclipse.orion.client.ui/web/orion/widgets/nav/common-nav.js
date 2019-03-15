@@ -237,7 +237,7 @@ define([
 			var viewActionsScope = this.viewActionsScope;
 			var contextMenuActionsScope = this.contextMenuActionsScope;
 
-			var renameBinding = new KeyBinding(113, true); // F2
+			var renameBinding = new KeyBinding(113); // F2
 			var delBinding = new KeyBinding(46); // Delete
 			var cutBinding = new KeyBinding('x', true); /* Ctrl+X */ //$NON-NLS-0$
 			var copySelections = new KeyBinding('c', true); /* Ctrl+C */ //$NON-NLS-0$
