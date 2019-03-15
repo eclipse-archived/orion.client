@@ -33,7 +33,6 @@ define(['i18n!orion/operations/nls/messages', 'orion/bootstrap', 'orion/commandR
 		mOperationsCommands.createOperationsCommands(commandRegistry, operationsTable, operationsClient);
 		
 		commandRegistry.addCommandGroup("pageActions", "eclipse.taskGroup.unlabeled", 100); //$NON-NLS-1$ //$NON-NLS-0$
-		commandRegistry.addCommandGroup("selectionTools", "eclipse.selectionGroup", 500, messages["More"]); //$NON-NLS-1$ //$NON-NLS-0$
 		
 		commandRegistry.registerCommandContribution("pageActions", "eclipse.removeCompletedOperations", 1, "eclipse.taskGroup.unlabeled"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		commandRegistry.registerCommandContribution("operationItems", "eclipse.removeOperation", 1); //$NON-NLS-1$ //$NON-NLS-0$
