@@ -80,7 +80,7 @@ define(['i18n!orion/operations/nls/messages', 'orion/webui/littlelib', 'orion/co
 		commandService.addCommand(removeCompletedOperationsCommand);
 		
 		var removeOperationCommand = new mCommands.Command({
-			name : messages["Remove Selected"],
+			name : messages["Remove"],
 			tooltip : messages["rmFromOpList"],
 			imageClass: "core-sprite-delete", //$NON-NLS-0$
 			id : "eclipse.removeOperation", //$NON-NLS-0$
