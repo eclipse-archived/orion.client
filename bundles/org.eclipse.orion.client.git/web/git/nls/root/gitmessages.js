@@ -410,6 +410,7 @@ define({//Default message bundle
 	"Push Git Repository": "Push Git Repository", //$NON-NLS-0$  //$NON-NLS-1$
 	"Key:": "Key:", //$NON-NLS-0$  //$NON-NLS-1$
 	"Value:": "Value:", //$NON-NLS-0$  //$NON-NLS-1$
+	"ValueFor:": "Value for ${0}:", //$NON-NLS-0$  //$NON-NLS-1$
 	"New Configuration Entry": "New Configuration Entry", //$NON-NLS-0$  //$NON-NLS-1$
 	"Edit": "Edit", //$NON-NLS-0$  //$NON-NLS-1$
 	"Edit the configuration entry": "Edit the configuration entry", //$NON-NLS-0$  //$NON-NLS-1$
