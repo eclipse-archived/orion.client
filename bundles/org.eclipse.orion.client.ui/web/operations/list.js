@@ -10,9 +10,21 @@
  ******************************************************************************/
 
 /*eslint-env browser, amd*/
-define(['i18n!orion/operations/nls/messages', 'orion/bootstrap', 'orion/commandRegistry', 'orion/selection', 'orion/fileClient', 'orion/searchClient', 'orion/operationsClient', 'orion/status', 'orion/progress', 'orion/globalCommands',
-        'orion/operationsTable', 'orion/operationsCommands'], 
-		function(messages, mBootstrap, mCommandRegistry, mSelection, mFileClient, mSearchClient, mOperationsClient, mStatus, mProgress, mGlobalCommands, mOperationsTable, mOperationsCommands) {
+define([
+	'i18n!orion/operations/nls/messages', 
+	'orion/keyBinding',
+	'orion/bootstrap',
+	'orion/commandRegistry',
+	'orion/selection',
+	'orion/fileClient',
+	'orion/searchClient',
+	'orion/operationsClient',
+	'orion/status',
+	'orion/progress',
+	'orion/globalCommands',
+	'orion/operationsTable',
+	'orion/operationsCommands'
+], function(messages, mKeyBinding, mBootstrap, mCommandRegistry, mSelection, mFileClient, mSearchClient, mOperationsClient, mStatus, mProgress, mGlobalCommands, mOperationsTable, mOperationsCommands) {
 
 	mBootstrap.startup().then(function(core) {
 		var serviceRegistry = core.serviceRegistry;
@@ -33,13 +45,12 @@ define(['i18n!orion/operations/nls/messages', 'orion/bootstrap', 'orion/commandR
 		mOperationsCommands.createOperationsCommands(commandRegistry, operationsTable, operationsClient);
 		
 		commandRegistry.addCommandGroup("pageActions", "eclipse.taskGroup.unlabeled", 100); //$NON-NLS-1$ //$NON-NLS-0$
-		commandRegistry.addCommandGroup("selectionTools", "eclipse.selectionGroup", 500, messages["More"]); //$NON-NLS-1$ //$NON-NLS-0$
 		
 		commandRegistry.registerCommandContribution("pageActions", "eclipse.removeCompletedOperations", 1, "eclipse.taskGroup.unlabeled"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-		commandRegistry.registerCommandContribution("operationItems", "eclipse.removeOperation", 1); //$NON-NLS-1$ //$NON-NLS-0$
-		commandRegistry.registerCommandContribution("selectionTools", "eclipse.removeOperation", 1, "eclipse.selectionGroup"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		commandRegistry.registerCommandContribution("operationItems", "eclipse.removeOperation", 1, null, false, new mKeyBinding.KeyBinding(46)); //$NON-NLS-1$ //$NON-NLS-0$
+		commandRegistry.registerCommandContribution("selectionTools", "eclipse.removeOperation", 1); //$NON-NLS-1$ //$NON-NLS-0$
 		commandRegistry.registerCommandContribution("operationItems", "eclipse.cancelOperation", 2); //$NON-NLS-1$ //$NON-NLS-0$
-		commandRegistry.registerCommandContribution("selectionTools", "eclipse.cancelOperation", 2, "eclipse.selectionGroup"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		commandRegistry.registerCommandContribution("selectionTools", "eclipse.cancelOperation", 2); //$NON-NLS-1$ //$NON-NLS-0$
 		
 		operationsTable.loadOperations.bind(operationsTable)();
 		

@@ -2142,7 +2142,7 @@ objects.mixin(EditorSetup.prototype, {
 			if (toolbar) {
 				commandRegistry.destroy(toolbar);
 				if (metadata) {
-					commandRegistry.renderCommands(toolbar.id, toolbar, metadata, editor, "button"); //$NON-NLS-0$
+					commandRegistry.renderCommands(toolbar.id, toolbar, metadata, editor, "tool"); //$NON-NLS-0$
 				}
 			}
 		});
