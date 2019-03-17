@@ -397,9 +397,9 @@ define([
 	    /** @callback */
 	    refreshCommands:function() {
 	        this.commandService.destroy("problemsViewActionsContainerLeft"); //$NON-NLS-1$
-	        this.commandService.renderCommands("problemsViewActions", "problemsViewActionsContainerLeft", this, this, "button"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-3$
+	        this.commandService.renderCommands("problemsViewActions", "problemsViewActionsContainerLeft", this, this, "tool"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-3$
 	        this.commandService.destroy("problemsViewActionsContainerRight"); //$NON-NLS-1$
-	        this.commandService.renderCommands("problemsViewActionsRight", "problemsViewActionsContainerRight", this, this, "button"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-3$
+	        this.commandService.renderCommands("problemsViewActionsRight", "problemsViewActionsContainerRight", this, this, "tool"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-3$
 	    },
 	    /** @callback */
 	    getItemCount: function() {

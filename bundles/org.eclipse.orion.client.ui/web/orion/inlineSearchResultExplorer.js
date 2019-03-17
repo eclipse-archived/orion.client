@@ -904,10 +904,10 @@ function(messages, Deferred, lib, mContentTypes, i18nUtil, mExplorer, mCommands,
        	this._commandService.destroy("searchPageActions"); //$NON-NLS-1$
         this._commandService.destroy("searchPageActionsRight"); //$NON-NLS-1$
         if(this._cacheSearchResult) {
-	        this._commandService.renderCommands("searchPageActions", "searchPageActions", that, that, "button"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-3$
-	        this._commandService.renderCommands("searchPageActionsRight", "searchPageActionsRight", that, that, "button"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-3$
+	        this._commandService.renderCommands("searchPageActions", "searchPageActions", that, that, "tool"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-3$
+	        this._commandService.renderCommands("searchPageActionsRight", "searchPageActionsRight", that, that, "tool"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-3$
         } else {
-	        this._commandService.renderCommands("searchPageActionsRight", "searchPageActions", that, that, "button"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-3$
+	        this._commandService.renderCommands("searchPageActionsRight", "searchPageActions", that, that, "tool"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-3$
         }
     };
 
