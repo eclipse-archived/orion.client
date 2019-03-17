@@ -915,7 +915,7 @@ define([
 			node = lib.node(explorerSelectionScope);
 			if (node) {
 				this.commandService.destroy(node);
-				this.commandService.renderCommands(explorerSelectionScope, explorerSelectionScope, this, this, "button"); //$NON-NLS-0$	
+				this.commandService.renderCommands(explorerSelectionScope, explorerSelectionScope, this, this, "tool"); //$NON-NLS-0$	
 			}
 		},
 		updateSelectionStatus: function(selections) {
