@@ -24,7 +24,7 @@ define({//Default message bundle
 	"Spacer": "Spacer",
 	"Command": "Command",
 	"Key Bindings": "Key Bindings",
-	"Key Binding": "Key Binding",
+	"Key Binding": "Key",
 	"Filter bindings:": "Filter bindings:",
 	"Filter bindings": "Type characters to filter by name or key combination",
 	"BindingPrompt": "Enter the new binding",

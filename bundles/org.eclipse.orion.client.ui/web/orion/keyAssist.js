@@ -137,7 +137,7 @@ define([
 			var thead = document.createElement('thead'); //$NON-NLS-0$
 			var row = document.createElement('tr'); //$NON-NLS-0$
 			row.setAttribute("role", "row"); //$NON-NLS-1$ //$NON-NLS-0$
-			[messages["Spacer"], messages["Command"], messages["Key Binding"], messages["Edit"]].forEach(function(name) {
+			[messages["Spacer"], messages["Command"], messages["Key"], messages["Edit"]].forEach(function(name) {
 				var cell = document.createElement('th'); //$NON-NLS-0$
 				cell.classList.add("navColumn"); //$NON-NLS-0$
 				cell.setAttribute("role", "columnheader"); //$NON-NLS-1$ //$NON-NLS-0$
@@ -197,7 +197,7 @@ define([
 			
 			column = row.insertCell(-1);
 			column.classList.add("keyAssistAccel"); //$NON-NLS-1$
-			column.headers = this._lastHeader + " " + "Key Binding"; //$NON-NLS-0$
+			column.headers = this._lastHeader + " " + "Key"; //$NON-NLS-0$
 			column.setAttribute("role", "gridcell"); //$NON-NLS-1$ //$NON-NLS-0$
 			var bindingSpan = document.createElement("span"); //$NON-NLS-1$
 			bindingSpan.textContent = bindingString;
