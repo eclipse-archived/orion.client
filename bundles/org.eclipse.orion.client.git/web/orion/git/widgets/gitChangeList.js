@@ -1123,7 +1123,7 @@ define([
 						if (titleTools) {
 							commandService.destroy(titleTools);
 						}
-						commandService.renderCommands(titleTools.id, titleTools, that, that, "button"); //$NON-NLS-0$
+						commandService.renderCommands(titleTools.id, titleTools, that, that, "tool"); //$NON-NLS-0$
 					}
 					if (that.explorerSelectionStatus) {
 						that.updateSelectionStatus(event.selections);
@@ -1245,7 +1245,7 @@ define([
 						actionsArea.className = "layoutRight commandList"; //$NON-NLS-0$
 						actionsArea.id = explorer.explorerSelectionScope;
 						div.appendChild(actionsArea);
-						explorer.commandService.renderCommands(actionsArea.id, actionsArea, explorer, explorer, "button"); //$NON-NLS-0$	
+						explorer.commandService.renderCommands(actionsArea.id, actionsArea, explorer, explorer, "tool"); //$NON-NLS-0$	
 					} else {
 						
 						// render the compare widget
