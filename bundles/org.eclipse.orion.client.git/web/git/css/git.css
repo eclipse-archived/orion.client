@@ -230,6 +230,7 @@ html[dir="rtl"] .mainToolbar .sectionWrapper { /* ACGC */
 
 .commitFilterLabelColumn {
 	text-align: right;
+	width: 15%;
 }
 
 .commitFilterInputColumn {
