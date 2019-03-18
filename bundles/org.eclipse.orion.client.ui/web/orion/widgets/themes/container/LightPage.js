@@ -36,11 +36,6 @@ define({
 				"border-color": "#FFFFFF",
 				"color": "#FFFFFF"
 			},
-			".commandButton:not(.primaryButton):focus": {
-				"background": "rgba(60, 113, 179, 0.50)",
-				"box-shadow": "0 1px 2px 0 rgb(60, 113, 179)",
-				"color": "#000000"
-			},
 			".commandButton:not(.primaryButton):not([disabled]):hover": {
 				"background": "rgba(60, 113, 179, 0.50)",
 				"box-shadow": "0 1px 2px 0 rgb(60, 113, 179)",
@@ -79,11 +74,6 @@ define({
 			".commandButton.orionButton.dropdownTrigger:hover": {
 				"background-color": "rgba(196, 197, 200, 0.25)",
 			}
-		},
-		".commandButton:not(.primaryButton):focus": {
-			"background-color": "rgba(60, 113, 179, 0.25)",
-			"box-shadow": "0 1px 2px 0 rgb(60, 113, 179)",
-			"color": "#000000"
 		},
 		".commandButton:not(.primaryButton):not([disabled]):hover": {
 			"background-color": "rgba(60, 113, 179, 0.25)",

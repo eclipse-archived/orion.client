@@ -236,15 +236,13 @@
 	margin-bottom: 2px;
 }
 
-.lightPage .commandButton:not(.primaryButton):not([disabled]):hover,
-.lightPage .commandButton:not(.primaryButton):focus {
+.lightPage .commandButton:not(.primaryButton):not([disabled]):hover {
 	color: black;
 	background-color: rgba(60, 113, 179, 0.25);
 	box-shadow: 0 1px 2px 0 rgb(60, 113, 179);
 }
 
-.lightPage .checkedRow .commandButton:not(.primaryButton):not([disabled]):hover,
-.lightPage .checkedRow .commandButton:not(.primaryButton):focus {
+.lightPage .checkedRow .commandButton:not(.primaryButton):not([disabled]):hover {
 	color: black;
 	background: rgba(255, 255, 255, 0.50);
 	box-shadow: 0 1px 2px 0 rgb(60, 113, 179);
