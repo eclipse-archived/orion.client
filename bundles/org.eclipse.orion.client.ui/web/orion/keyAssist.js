@@ -185,19 +185,19 @@ define([
 			
 			var column = row.insertCell(-1);
 			column.classList.add("keyAssistSpacer"); //$NON-NLS-1$
-			column.headers = this._lastHeader + "Spacer"; //$NON-NLS-0$
+			column.headers = this._lastHeader + " " + Spacer"; //$NON-NLS-0$
 			column.appendChild(document.createElement("div")); //$NON-NLS-1$
 			column.setAttribute("role", "gridcell"); //$NON-NLS-1$ //$NON-NLS-0$
 			
 			column = row.insertCell(-1);
 			column.classList.add("keyAssistName"); //$NON-NLS-1$
-			column.headers = this._lastHeader + "Command"; //$NON-NLS-0$
+			column.headers = this._lastHeader + " " + "Command"; //$NON-NLS-0$
 			column.setAttribute("role", "gridcell"); //$NON-NLS-1$ //$NON-NLS-0$
 			column.appendChild(document.createTextNode(name));
 			
 			column = row.insertCell(-1);
 			column.classList.add("keyAssistAccel"); //$NON-NLS-1$
-			column.headers = this._lastHeader + "Key Binding"; //$NON-NLS-0$
+			column.headers = this._lastHeader + " " + "Key Binding"; //$NON-NLS-0$
 			column.setAttribute("role", "gridcell"); //$NON-NLS-1$ //$NON-NLS-0$
 			var bindingSpan = document.createElement("span"); //$NON-NLS-1$
 			bindingSpan.textContent = bindingString;
@@ -205,7 +205,7 @@ define([
 			
 			column = row.insertCell(-1);
 			column.classList.add("keyAssistActions"); //$NON-NLS-1$
-			column.headers = this._lastHeader + "Edit"; //$NON-NLS-0$
+			column.headers = this._lastHeader + " " + "Edit"; //$NON-NLS-0$
 			column.setAttribute("role", "gridcell"); //$NON-NLS-1$ //$NON-NLS-0$
 			var eb = document.createElement("button"); //$NON-NLS-1$
 			eb.tabIndex = -1;
