@@ -185,7 +185,7 @@ define([
 			
 			var column = row.insertCell(-1);
 			column.classList.add("keyAssistSpacer"); //$NON-NLS-1$
-			column.headers = this._lastHeader + " " + Spacer"; //$NON-NLS-0$
+			column.headers = this._lastHeader + " " + "Spacer"; //$NON-NLS-0$
 			column.appendChild(document.createElement("div")); //$NON-NLS-1$
 			column.setAttribute("role", "gridcell"); //$NON-NLS-1$ //$NON-NLS-0$
 			
