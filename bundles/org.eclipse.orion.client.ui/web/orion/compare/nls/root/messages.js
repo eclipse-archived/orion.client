@@ -33,7 +33,7 @@ define({//Default message bundle
 	"n of t files changed": "${0} of ${1} files changed",//n and t are numbers
 	"Location": "Location",
 	"Options": "Options",
-	"Sort by folders": "Sort by folders",
+	"Sort by folders": "Sort by folders:",
 	"Line 0 : Col 0": "Line 0 : Col 0",
 	"newContents": "New ${0} contents",
 	"oldContents": "Old ${0} contents",
