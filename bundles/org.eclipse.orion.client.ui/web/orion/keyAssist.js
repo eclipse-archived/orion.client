@@ -37,14 +37,24 @@ define([
 			keyAssistDiv.id = "keyAssist"; //$NON-NLS-1$
 			keyAssistDiv.style.display = "none"; //$NON-NLS-1$
 			keyAssistDiv.classList.add("keyAssistFloat"); //$NON-NLS-1$
-			keyAssistDiv.setAttribute("role", "menu"); //$NON-NLS-2$ //$NON-NLS-1$
+			keyAssistDiv.setAttribute("role", "dialog"); //$NON-NLS-2$ //$NON-NLS-1$
+			keyAssistDiv.setAttribute("aria-modal", "true"); //$NON-NLS-2$ //$NON-NLS-1$
+			keyAssistDiv.setAttribute("aria-label", messages["Key Bindings"]); //$NON-NLS-2$ //$NON-NLS-1$
+
+			var keyAssistCombo = document.createElement("div"); //$NON-NLS-1$
+			keyAssistCombo.setAttribute("role", "combobox"); //$NON-NLS-1$ //$NON-NLS-0$
+			keyAssistCombo.setAttribute("aria-haspopup", "grid"); //$NON-NLS-1$ //$NON-NLS-0$
+			keyAssistCombo.setAttribute("aria-owns", "keyAssistList"); //$NON-NLS-1$ //$NON-NLS-0$
+			keyAssistCombo.setAttribute("aria-expanded", "true"); //$NON-NLS-1$ //$NON-NLS-0$
 			var keyAssistInput = this._keyAssistInput = document.createElement("input"); //$NON-NLS-1$
 			keyAssistInput.classList.add("keyAssistInput"); //$NON-NLS-1$
 			keyAssistInput.type = "text"; //$NON-NLS-1$
-			keyAssistInput.setAttribute("aria-label", "Filter bindings:");
+			keyAssistInput.setAttribute("aria-label", "Filter bindings:"); //$NON-NLS-1$ //$NON-NLS-0$
 			keyAssistInput.placeholder = messages["Filter bindings"]; //$NON-NLS-1$
 			keyAssistInput.setAttribute("aria-autocomplete", "list"); //$NON-NLS-1$ //$NON-NLS-0$
-			keyAssistDiv.appendChild(keyAssistInput);
+			keyAssistInput.setAttribute("aria-controls", "keyAssistList"); //$NON-NLS-1$ //$NON-NLS-0$
+			keyAssistCombo.appendChild(keyAssistInput);
+			keyAssistDiv.appendChild(keyAssistCombo);
 
 			var keyAssistContents = this._keyAssistContents = document.createElement("div"); //$NON-NLS-1$
 			keyAssistContents.classList.add("keyAssistContents"); //$NON-NLS-1$
@@ -53,7 +63,8 @@ define([
 			}
 			keyAssistDiv.appendChild(keyAssistContents);
 			var keyAssistTable = this._keyAssistTable = document.createElement('table'); //$NON-NLS-1$
-			keyAssistTable.setAttribute("role", "presentation");
+			keyAssistTable.setAttribute("role", "grid"); //$NON-NLS-1$ //$NON-NLS-0$
+			keyAssistTable.id = "keyAssistList"; //$NON-NLS-1$
 			keyAssistTable.tabIndex = 0;
 			keyAssistTable.classList.add("keyAssistList"); //$NON-NLS-1$
 			keyAssistContents.appendChild(keyAssistTable);
@@ -122,6 +133,23 @@ define([
 			this.createHeader(messages["Global"]);
 			this.commandRegistry.showKeyBindings(this);
 		},
+		createHeaders: function () {
+			var thead = document.createElement('thead'); //$NON-NLS-0$
+			var row = document.createElement('tr'); //$NON-NLS-0$
+			row.setAttribute("role", "row"); //$NON-NLS-1$ //$NON-NLS-0$
+			[messages["Spacer"], messages["Command"], messages["Key Binding"], messages["Edit"]].forEach(function(name) {
+				var cell = document.createElement('th'); //$NON-NLS-0$
+				cell.classList.add("navColumn"); //$NON-NLS-0$
+				cell.setAttribute("role", "columnheader"); //$NON-NLS-1$ //$NON-NLS-0$
+				cell.id = name;
+				if (name === messages["Command"] || name === messages["Key Binding"]) {
+					cell.textContent = name;
+				}
+				row.appendChild(cell);
+			});
+			thead.appendChild(row);
+			this._keyAssistTable.appendChild(thead);	
+		},
 		createItem: function (binding, name, cmdID, execute) {
 			var bindingString = binding ? UIUtil.getUserKeyString(binding) : messages["NoBinding"];
 			if (this._filterString) {
@@ -143,7 +171,7 @@ define([
 			}
 			var row = this._keyAssistTable.insertRow(-1);
 			row.id = "keyAssist-keyBinding-" + this._idCount++; //$NON-NLS-1$
-			row.setAttribute("role", "menuitem"); //$NON-NLS-2$ //$NON-NLS-1$
+			row.setAttribute("role", "row"); //$NON-NLS-2$ //$NON-NLS-1$
 			row.tabIndex = -1;
 			row.cmdID = cmdID;
 			row._execute = execute;
@@ -157,20 +185,28 @@ define([
 			
 			var column = row.insertCell(-1);
 			column.classList.add("keyAssistSpacer"); //$NON-NLS-1$
+			column.headers = this._lastHeader + "Spacer"; //$NON-NLS-0$
 			column.appendChild(document.createElement("div")); //$NON-NLS-1$
+			column.setAttribute("role", "gridcell"); //$NON-NLS-1$ //$NON-NLS-0$
 			
-			var column = row.insertCell(-1);
+			column = row.insertCell(-1);
 			column.classList.add("keyAssistName"); //$NON-NLS-1$
+			column.headers = this._lastHeader + "Command"; //$NON-NLS-0$
+			column.setAttribute("role", "gridcell"); //$NON-NLS-1$ //$NON-NLS-0$
 			column.appendChild(document.createTextNode(name));
 			
 			column = row.insertCell(-1);
 			column.classList.add("keyAssistAccel"); //$NON-NLS-1$
+			column.headers = this._lastHeader + "Key Binding"; //$NON-NLS-0$
+			column.setAttribute("role", "gridcell"); //$NON-NLS-1$ //$NON-NLS-0$
 			var bindingSpan = document.createElement("span"); //$NON-NLS-1$
 			bindingSpan.textContent = bindingString;
 			column.appendChild(bindingSpan);
 			
 			column = row.insertCell(-1);
 			column.classList.add("keyAssistActions"); //$NON-NLS-1$
+			column.headers = this._lastHeader + "Edit"; //$NON-NLS-0$
+			column.setAttribute("role", "gridcell"); //$NON-NLS-1$ //$NON-NLS-0$
 			var eb = document.createElement("button"); //$NON-NLS-1$
 			eb.tabIndex = -1;
 			eb.classList.add("keyAssistEditButton"); //$NON-NLS-1$
@@ -287,12 +323,16 @@ define([
 		createHeader: function (name) {
 			this._lastHeader = name;
 			var row = this._keyAssistTable.insertRow(-1);
-			row.classList.add("keyAssistSection"); //$NON-NLS-1$
-			var column = row.insertCell(-1);
+			row.classList.add("keyAssistSection"); //$NON-NLS-0$
+			var column = document.createElement('th'); //$NON-NLS-0$
+			column.id = name + "Bindings"; //$NON-NLS-0$
 			column.colSpan = 4;
-			var heading = document.createElement("h2"); //$NON-NLS-1$
+			column.scope = "colgroup"; //$NON-NLS-0$
+			var heading = document.createElement("h2"); //$NON-NLS-0$
+			heading.setAttribute("role", "presentation"); //$NON-NLS-1$ //$NON-NLS-0$
 			heading.appendChild(document.createTextNode(name));
 			column.appendChild(heading);
+			row.appendChild(column);
 		},
 		execute: function () {
 			window.setTimeout(function () {
@@ -378,6 +418,7 @@ define([
 					editButton.classList.add("keyAssistEditButtonVisible"); //$NON-NLS-1$
 					editButton.tabIndex = 0;
 				}
+				this._keyAssistInput.setAttribute("aria-activedescendant", row.id); //$NON-NLS-1$
 				this._keyAssistTable.setAttribute("aria-activedescendant", row.id); //$NON-NLS-1$
 				this._keyAssistTable.focus();
 				var rowRect = row.getBoundingClientRect();
