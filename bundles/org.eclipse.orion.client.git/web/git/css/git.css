@@ -308,6 +308,7 @@ html[dir="rtl"] .mainToolbar .gitFilterBox input { /* ACGC */
 	float: right;
 	padding: 0 1px 4px 1px;
 	border: 1px solid transparent;
+	margin-right: 0;
 	height: 18px;
 }
 
