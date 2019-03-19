@@ -333,7 +333,7 @@ define(['orion/webui/littlelib', 'orion/EventTarget'], function(lib, EventTarget
 				this._dropdownNode.classList.remove("dropdownMenuOpen"); //$NON-NLS-0$
 				lib.setFramesEnabled(true);
 				if (restoreFocus) {
-					this._triggerNode.focus();
+					lib.returnFocus(this._dropdownNode, this._triggerNode);
 				}
 				
 				this._isVisible = false;
@@ -469,7 +469,7 @@ define(['orion/webui/littlelib', 'orion/EventTarget'], function(lib, EventTarget
 								} else {
 									this._selectedItem.click();
 									// click handling auto closes menus without restoring focus to trigger, so need to restore here
-									this._triggerNode.focus();
+									lib.returnFocus(this._dropdownNode, this._triggerNode);
 								}
 							}
 						}
