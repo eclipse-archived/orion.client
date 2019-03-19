@@ -95,6 +95,8 @@ exports.ExplorerNavHandler = (function() {
 				return self.onSpace(e);
 			} else if(e.keyCode === lib.KEY.ENTER) {
 				return self.onEnter(e);
+			} else if (e.keyCode === lib.KEY.TAB && e.shiftKey) {
+				parentDiv.tabIndex = -1;
 			}
 		};
 		parentDiv.addEventListener("keydown", keyListener, false); //$NON-NLS-0$
