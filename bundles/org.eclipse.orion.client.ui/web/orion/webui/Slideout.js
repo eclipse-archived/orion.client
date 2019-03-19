@@ -115,7 +115,10 @@ define([
 			this._wrapperNode.classList.remove("slideoutNoVisibility"); //$NON-NLS-0$
 			
 			// step 2: add CSS class to position slideout within visible range
-			this._wrapperNode.classList.add("slideoutWrapperVisible"); //$NON-NLS-0$
+			// done in a timeout for the trasition animation to work
+			setTimeout(function() {
+				this._wrapperNode.classList.add("slideoutWrapperVisible"); //$NON-NLS-0$
+			}.bind(this), 0);
 		},
 		
 		/**

@@ -27,7 +27,7 @@ html[dir="rtl"] .slideoutWrapper { /* BDL */
 }
 
 .slideoutNoVisibility {
-	visibility: hidden !important; /* this class is separate because it is applied after the transition duration */
+	display: none; /* this class is separate because it is applied after the transition duration */
 }
 
 .slideoutWrapper > .slideoutDismissButton {
