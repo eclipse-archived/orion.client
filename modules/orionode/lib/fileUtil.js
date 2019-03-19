@@ -23,6 +23,8 @@ var ETag = require('./util/etag'),
 	
 var ISFS_CASE_INSENSITIVE;
 
+var isWin = /^win/.test(process.platform);
+
 var ChangeType = module.exports.ChangeType = Object.freeze({
 	/**
 	 * Copy of a file/folder to a new location.
@@ -429,12 +431,14 @@ function fileJSON(store, fileRoot, workspaceRoot, file, stats, depth, metadataMi
 			Directory: isDir,
 			LocalTimeStamp: stats.mtime.getTime(),
 			Length: stats.size,
-			Parents: getParents(fileRoot, wwwpath),
-			Attributes: {
+			Parents: getParents(fileRoot, wwwpath)
+		};
+		if (!isWin) {
+			result.Attributes = {
 				ReadOnly: !((stats.mode & constants.S_IWUSR) === constants.S_IWUSR),
 				Executable: (stats.mode & constants.S_IXUSR) === constants.S_IXUSR
-			}
-		};
+			};
+		}
 		if (metadataMixins) {
 			Object.keys(metadataMixins).forEach(function(property) {
 				result[property] = metadataMixins[property];
