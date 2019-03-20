@@ -8,11 +8,7 @@
 	overflow-y: hidden;
 	position: absolute;
 	top: 0;
-	-webkit-transform: translateX(-100%);		/* Safari */
-	transform: translateX(-100%);
-	transition: -webkit-transform 0.2s ease; 	/* Safari*/
-	transition: transform 0.2s ease;
-	visibility: visible;
+	display: none;
 	width: calc(100% - 2px);
 	z-index: 100;
 }
@@ -22,12 +18,47 @@ html[dir="rtl"] .slideoutWrapper { /* BDL */
 }
 
 .slideoutWrapperVisible {
-	-webkit-transform: translateX(0);	/* Safari */
-	transform: translateX(0);
+	-webkit-animation: slide-in .2s ease;
+	-moz-animation: slide-in .2s ease;
+	-ms-animation: slide-in .2s ease;
+	animation: slide-in .2s ease;
+	
+	display: block;
 }
 
-.slideoutNoVisibility {
-	display: none; /* this class is separate because it is applied after the transition duration */
+.slideoutWrapperHiding {
+	-webkit-animation: slide-out .2s ease;
+	-moz-animation: slide-out .2s ease;
+	-ms-animation: slide-out .2s ease;
+	animation: slide-out .2s ease;
+	
+	display: block;
+}
+
+@-webkit-keyframes slide-in {
+	from { -webkit-transform: translateX(-100%); }   
+	to { -webkit-transform: translateX(0); }
+}
+@-moz-keyframes slide-in {
+	from { -moz-transform: translateX(-100%); }   
+	to { -moz-transform: translateX(0); }
+}
+@keyframes slide-in {
+	from { transform: translateX(-100%); }   
+	to { transform: translateX(0); }
+}
+
+@-webkit-keyframes slide-out {
+	from { -webkit-transform: translateX(0); }   
+	to { -webkit-transform: translateX(-100%); }
+}
+@-moz-keyframes slide-out {
+	from { -moz-transform: translateX(0); }   
+	to { -moz-transform: translateX(-100%); }
+}
+@keyframes slide-out {
+	from { transform: translateX(0); }   
+	to { transform: translateX(-100%); }
 }
 
 .slideoutWrapper > .slideoutDismissButton {
