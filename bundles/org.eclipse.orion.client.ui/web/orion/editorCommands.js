@@ -445,7 +445,7 @@ define([
 				}
 				for (var scopedBinding in scopes) {
 					if (scopes[scopedBinding].length) {
-						keyAssist.createHeader(scopedBinding, scopedBinding.replace(/\s/g, '') + "Scope"); //$NON-NLS-0$
+						keyAssist.createHeader(scopedBinding, lib.validId(scopedBinding) + "Scope"); //$NON-NLS-0$
 						for (var k = 0; k < scopes[scopedBinding].length; k++) {
 							binding = scopes[scopedBinding][k];
 							keyAssist.createItem(binding.binding, binding.name, binding.name, binding.execute);
