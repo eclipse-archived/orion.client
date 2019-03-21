@@ -733,6 +733,10 @@ html[dir="rtl"] .keyAssistFloat { /* ACGC */
 	min-width: 150px;
 }
 
+.keyAssistItem.selected .keyAssistAccel {
+    color: black;
+}
+
 .inputCompletionContainer {
 	border-radius:1px;
 	color: black;
