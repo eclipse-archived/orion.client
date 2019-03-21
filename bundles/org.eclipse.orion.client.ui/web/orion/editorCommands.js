@@ -415,7 +415,7 @@ define([
 				editorActions.sort(function (a, b) {
 					return textView.getActionDescription(a).name.localeCompare(textView.getActionDescription(b).name);
 				});
-				keyAssist.createHeader(messages["Editor"]);
+				keyAssist.createHeader(messages["Editor"], "EditorScope"); //$NON-NLS-0$
 				var execute = function (actionID) {
 					return function () {
 						textView.focus();
@@ -445,7 +445,7 @@ define([
 				}
 				for (var scopedBinding in scopes) {
 					if (scopes[scopedBinding].length) {
-						keyAssist.createHeader(scopedBinding);
+						keyAssist.createHeader(scopedBinding, lib.validId(scopedBinding) + "Scope"); //$NON-NLS-0$
 						for (var k = 0; k < scopes[scopedBinding].length; k++) {
 							binding = scopes[scopedBinding][k];
 							keyAssist.createItem(binding.binding, binding.name, binding.name, binding.execute);
