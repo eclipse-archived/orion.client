@@ -665,6 +665,10 @@ html[dir="rtl"] .keyAssistFloat { /* ACGC */
 	outline: none;
 }
 
+.keyAssistSection th {
+	text-align: start;
+}
+
 .keyAssistItem {
 }
 

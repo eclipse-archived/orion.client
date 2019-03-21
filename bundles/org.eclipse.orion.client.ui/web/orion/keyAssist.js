@@ -127,23 +127,24 @@ define([
 			this._selectedRow = null;
 			this._keyAssistContents.scrollTop = 0;
 			this._idCount = 0;
+			this.createHeaders();
 			for (var i=0; i<this._providers.length; i++) {
 				this._providers[i].showKeyBindings(this);
 			}
-			this.createHeader(messages["Global"]);
+			this.createHeader(messages["Global"], "GlobalScope"); //$NON-NLS-0$
 			this.commandRegistry.showKeyBindings(this);
 		},
 		createHeaders: function () {
 			var thead = document.createElement('thead'); //$NON-NLS-0$
 			var row = document.createElement('tr'); //$NON-NLS-0$
 			row.setAttribute("role", "row"); //$NON-NLS-1$ //$NON-NLS-0$
-			[messages["Spacer"], messages["Command"], messages["Key"], messages["Edit"]].forEach(function(name) {
+			["SpacerCol", "CommandCol", "KeyBindingCol", "EditCol"].forEach(function(id) { //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 				var cell = document.createElement('th'); //$NON-NLS-0$
-				cell.classList.add("navColumn"); //$NON-NLS-0$
+				cell.classList.add("visuallyhidden"); //$NON-NLS-0$
 				cell.setAttribute("role", "columnheader"); //$NON-NLS-1$ //$NON-NLS-0$
-				cell.id = name;
-				if (name === messages["Command"] || name === messages["Key Binding"]) {
-					cell.textContent = name;
+				cell.id = id;
+				if (id === "CommandCol" || id === "KeyBindingCol") { //$NON-NLS-1$ //$NON-NLS-0$
+					cell.textContent = messages[id];
 				}
 				row.appendChild(cell);
 			});
@@ -185,19 +186,18 @@ define([
 			
 			var column = row.insertCell(-1);
 			column.classList.add("keyAssistSpacer"); //$NON-NLS-1$
-			column.headers = this._lastHeader + " " + "Spacer"; //$NON-NLS-0$
+			column.headers = this._lastHeaderID + " " + "SpacerCol"; //$NON-NLS-0$
 			column.appendChild(document.createElement("div")); //$NON-NLS-1$
-			column.setAttribute("role", "gridcell"); //$NON-NLS-1$ //$NON-NLS-0$
 			
 			column = row.insertCell(-1);
 			column.classList.add("keyAssistName"); //$NON-NLS-1$
-			column.headers = this._lastHeader + " " + "Command"; //$NON-NLS-0$
+			column.headers = this._lastHeaderID + " " + "CommandCol"; //$NON-NLS-0$
 			column.setAttribute("role", "gridcell"); //$NON-NLS-1$ //$NON-NLS-0$
 			column.appendChild(document.createTextNode(name));
 			
 			column = row.insertCell(-1);
 			column.classList.add("keyAssistAccel"); //$NON-NLS-1$
-			column.headers = this._lastHeader + " " + "Key"; //$NON-NLS-0$
+			column.headers = this._lastHeaderID + " " + "KeyBindingCol"; //$NON-NLS-0$
 			column.setAttribute("role", "gridcell"); //$NON-NLS-1$ //$NON-NLS-0$
 			var bindingSpan = document.createElement("span"); //$NON-NLS-1$
 			bindingSpan.textContent = bindingString;
@@ -205,8 +205,7 @@ define([
 			
 			column = row.insertCell(-1);
 			column.classList.add("keyAssistActions"); //$NON-NLS-1$
-			column.headers = this._lastHeader + " " + "Edit"; //$NON-NLS-0$
-			column.setAttribute("role", "gridcell"); //$NON-NLS-1$ //$NON-NLS-0$
+			column.headers = this._lastHeaderID + " " + "EditCol"; //$NON-NLS-0$
 			var eb = document.createElement("button"); //$NON-NLS-1$
 			eb.tabIndex = -1;
 			eb.classList.add("keyAssistEditButton"); //$NON-NLS-1$
@@ -320,14 +319,17 @@ define([
 			keyAssistKBEdit.focus();
 			this._editingABinding = true;
 		},
-		createHeader: function (name) {
+		createHeader: function (name, id) {
 			this._lastHeader = name;
-			var row = this._keyAssistTable.insertRow(-1);
+			this._lastHeaderID = id;
+			var rowgroup = document.createElement("tbody");
+			this._keyAssistTable.appendChild(rowgroup);
+			var row = rowgroup.insertRow(-1);
 			row.classList.add("keyAssistSection"); //$NON-NLS-0$
 			var column = document.createElement('th'); //$NON-NLS-0$
-			column.id = name + "Bindings"; //$NON-NLS-0$
+			column.id = id;
 			column.colSpan = 4;
-			column.scope = "colgroup"; //$NON-NLS-0$
+			column.scope = "rowgroup"; //$NON-NLS-0$
 			var heading = document.createElement("h2"); //$NON-NLS-0$
 			heading.setAttribute("role", "presentation"); //$NON-NLS-1$ //$NON-NLS-0$
 			heading.appendChild(document.createTextNode(name));

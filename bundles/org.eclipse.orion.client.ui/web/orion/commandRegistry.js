@@ -542,7 +542,7 @@ define([
 			}
 			for (var scopedBinding in scopes) {
 				if (scopes[scopedBinding].length && scopes[scopedBinding].length > 0) {
-					keyAssist.createHeader(scopedBinding);
+					keyAssist.createHeader(scopedBinding, scopedBinding.replace(/\s/g, '') + "Scope"); //$NON-NLS-0$
 					scopes[scopedBinding].forEach(function(binding) {
 						keyAssist.createItem(binding.keyBinding, binding.command.name || binding.command.tooltip, binding.command.id, execute(binding));
 					});
