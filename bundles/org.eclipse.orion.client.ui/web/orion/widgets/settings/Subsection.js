@@ -30,7 +30,7 @@ define([
 		
 		var node = document.createElement('div'); //$NON-NLS-0$
 		node.classList.add('setting-row'); //$NON-NLS-0$
-		var _id = sectionName.replace(/\s/g, '');
+		var _id = lib.validId(sectionName);
 		var headerId = this.headerId = 'setting-header-' + _id; //$NON-NLS-0$
 		var titleNode = this.titleNode = document.createElement('div'); //$NON-NLS-0$
 		titleNode.classList.add('setting-header'); //$NON-NLS-0$
