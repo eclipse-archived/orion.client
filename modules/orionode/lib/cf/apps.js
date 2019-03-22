@@ -71,7 +71,7 @@ function getapps(req, res){
 function respondAppGetRequest(resp,task){
 	if(!resp){
 		var errorStatus = new Error("Application not found");
-		errorStatus.code = "404";
+		errorStatus.code = 404;
 		return Promise.reject(errorStatus);
 	}
 	task.done({
