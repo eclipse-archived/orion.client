@@ -973,6 +973,9 @@ define([
 				this._stopStatusPolling();
 				return;
 			}
+			if (launchConfiguration.status && launchConfiguration.status.State === "PROGRESS") {
+				return;
+			}
 			var startTime = Date.now();
 			if (this._pendingCheckStatus) {
 				return;
