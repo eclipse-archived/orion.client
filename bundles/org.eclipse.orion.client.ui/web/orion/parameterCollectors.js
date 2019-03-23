@@ -109,6 +109,16 @@ define(['i18n!orion/nls/messages', 'orion/webui/littlelib', 'orion/bidiUtils', '
 						self.close();
 					}, false);
 				}
+				// ESC closes slideout if it has focus
+				this._activeElements.slideContainer.tabIndex = -1;
+				this._activeElements.slideContainer.style.outline = "none";
+				this._activeElements.slideContainer.addEventListener("keydown", function(event) {
+					if (event.keyCode === lib.KEY.ESCAPE) {
+						self.close();
+						lib.stop(event);
+					}
+				});
+				
 				// all parameters have been generated.  Activate the area.
 				this._activeElements.slideContainer.classList.add("slideContainerActive"); //$NON-NLS-0$
 				this._toolbarLayoutFunction(this._activeElements);
