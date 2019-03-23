@@ -73,6 +73,8 @@ define(['i18n!orion/nls/messages', 'orion/webui/littlelib', 'orion/uiUtils'],
 			var frameFragment = range.createContextualFragment(this.CONTAINERTEMPLATE);
 			parent.appendChild(frameFragment);
 			this.$frame = parent.lastChild;
+			this.$frame.tabIndex = -1;
+			this.$frame.style.outline = "none";
 //			this.handle = lib.addAutoDismiss([this.$frame], this.hide.bind(this));
 			if (this.title) {
 				lib.$(".dialogTitleText", this.$frame).appendChild(document.createTextNode(this.title)); //$NON-NLS-0$
