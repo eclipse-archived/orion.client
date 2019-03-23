@@ -716,7 +716,7 @@ and (max-device-width : 1024px)  {
 	z-index: 0;
 }
 
-.sideMenu-withFooter {
+.sideMenu.content-fixedHeight-withFooter {
 	/* bottom: 36px; $FooterHeight + footer border (1px) */   
     bottom: 35px;
 }
