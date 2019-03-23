@@ -96,7 +96,9 @@ exports.ExplorerNavHandler = (function() {
 			} else if(e.keyCode === lib.KEY.ENTER) {
 				return self.onEnter(e);
 			} else if (e.keyCode === lib.KEY.TAB && e.shiftKey) {
-				parentDiv.tabIndex = -1;
+				if (document.activeElement.classList.contains("treeTableRow")) {
+					parentDiv.tabIndex = -1;
+				}
 			}
 		};
 		parentDiv.addEventListener("keydown", keyListener, false); //$NON-NLS-0$
