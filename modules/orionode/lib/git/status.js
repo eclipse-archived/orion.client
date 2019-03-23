@@ -58,7 +58,7 @@ function router(options) {
 							"DiffLocation": gitRoot + "/diff/" + diffType + orionFilePath,
 							"IndexLocation": gitRoot + "/index" + orionFilePath
 						},
-						"Location": orionFilePath,
+						"Location": contextPath + orionFilePath,
 						"Name": file.path(),
 						"Path": file.path()
 					};

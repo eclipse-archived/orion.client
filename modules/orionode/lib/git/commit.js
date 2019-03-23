@@ -697,7 +697,7 @@ function getDiff(repo, commit, fileDir) {
 			var path1 = type !== "Deleted" ? newFilePath : oldFilePath;
 			return {
 				"ChangeType": type,
-				"ContentLocation": fileDir + "/" + path1,
+				"ContentLocation": contextPath + fileDir + "/" + path1,
 				"DiffLocation": gitRoot + "/diff/" + range + fileDir + "/" + path1,
 				"NewPath": newFilePath,
 				"OldPath": oldFilePath,
