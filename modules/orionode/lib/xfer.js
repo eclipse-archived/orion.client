@@ -361,7 +361,11 @@ function zipPath(pathToZip, options){
 			.then(function() {
 				if(options.additionalData && options.additionalData.length > 0){
 					options.additionalData.forEach(function(data){
-						zip.append(data.content, data.filename);
+						if (data.content !== undefined) {
+							zip.append(data.content, data.filename);
+						} else if (data.dir) {
+							zip.directory(data.dir, false);
+						}
 					});
 				}
 				zip.finalize();
