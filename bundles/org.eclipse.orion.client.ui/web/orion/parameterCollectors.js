@@ -114,8 +114,8 @@ define(['i18n!orion/nls/messages', 'orion/webui/littlelib', 'orion/bidiUtils', '
 				this._activeElements.slideContainer.style.outline = "none";
 				this._activeElements.slideContainer.addEventListener("keydown", function(event) {
 					if (event.keyCode === lib.KEY.ESCAPE) {
-						if (typeof self.cancelFunction === 'function') self.cancelFunction();
-						if (typeof self.closeFunction === 'function') self.closeFunction();
+						if (typeof self._cancelFunction === 'function') self._cancelFunction();
+						if (typeof self._closeFunction === 'function') self._closeFunction();
 						self.close();
 						lib.stop(event);
 					}
@@ -217,8 +217,8 @@ define(['i18n!orion/nls/messages', 'orion/webui/littlelib', 'orion/bidiUtils', '
 		
 		getFillFunction: function(commandInvocation, closeFunction, cancelFunction) {
 			var self = this;
-			this.closeFunction = closeFunction;
-			this.cancelFunction = cancelFunction;
+			this._closeFunction = closeFunction;
+			this._cancelFunction = cancelFunction;
 			return function(parameterArea, dismissArea) {
 				var first = null;
 				var localClose = function() {
