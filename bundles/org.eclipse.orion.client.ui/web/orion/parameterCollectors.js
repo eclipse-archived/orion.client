@@ -90,6 +90,7 @@ define(['i18n!orion/nls/messages', 'orion/webui/littlelib', 'orion/bidiUtils', '
 					return false;
 				}
 				this._activeElements.focusNode = focusNode;
+				var self = this;
 				var close = lib.$$array("#closebox", this._activeElements.dismissArea || this._activeElements.parameterArea); //$NON-NLS-0$
 				if (close.length === 0) {
 					// add the close button if the fill function did not.
@@ -104,7 +105,6 @@ define(['i18n!orion/nls/messages', 'orion/webui/littlelib', 'orion/bidiUtils', '
 							position: ["right", "below", "above", "left"] //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 					});
 					dismiss.appendChild(close);
-					var self = this;
 					close.addEventListener("click", function(event) { //$NON-NLS-0$
 						self.close();
 					}, false);
@@ -114,6 +114,8 @@ define(['i18n!orion/nls/messages', 'orion/webui/littlelib', 'orion/bidiUtils', '
 				this._activeElements.slideContainer.style.outline = "none";
 				this._activeElements.slideContainer.addEventListener("keydown", function(event) {
 					if (event.keyCode === lib.KEY.ESCAPE) {
+						if (typeof self.cancelFunction === 'function') self.cancelFunction();
+						if (typeof self.closeFunction === 'function') self.closeFunction();
 						self.close();
 						lib.stop(event);
 					}
@@ -215,6 +217,8 @@ define(['i18n!orion/nls/messages', 'orion/webui/littlelib', 'orion/bidiUtils', '
 		
 		getFillFunction: function(commandInvocation, closeFunction, cancelFunction) {
 			var self = this;
+			this.closeFunction = closeFunction;
+			this.cancelFunction = cancelFunction;
 			return function(parameterArea, dismissArea) {
 				var first = null;
 				var localClose = function() {
