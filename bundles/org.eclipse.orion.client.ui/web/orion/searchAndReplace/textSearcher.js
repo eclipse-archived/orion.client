@@ -108,7 +108,12 @@ define([
 		},
 		_createActionTable: function() {
 			var that = this;
-			this._commandService.openParameterCollector("pageNavigationActions", function(parentDiv) { //$NON-NLS-0$
+			this._commandService.openParameterCollector("pageNavigationActions", function(parentDiv, dismissArea, containerArea) { //$NON-NLS-0$
+				if (containerArea) {
+					containerArea.onkeydown = function(evt){
+						return that._handleKeyDown(evt);
+					};
+				}
 	
 				// create the input box for searchTerm
 				var searchStringInput = document.createElement('input'); //$NON-NLS-0$

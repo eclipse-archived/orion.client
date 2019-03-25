@@ -57,6 +57,8 @@ define([
 			explorerParentNode.id = "problemsExplorerParent_id"; //$NON-NLS-0$
 			explorerParentNode.classList.add("problemsExplorerNodeWrapper"); //$NON-NLS-0$
 			this._inner_node.appendChild(explorerParentNode);
+			this._inner_node.tabIndex = -1;
+			this._inner_node.style.outline = "none";
 			this._inner_node.addEventListener("keydown", function(e) { //$NON-NLS-0$
 				if(e.defaultPrevented){// If the key event was handled by other listeners and preventDefault was set on(e.g. input completion handled ENTER), we do not handle it here
 					return;

@@ -84,12 +84,13 @@ define(['i18n!orion/nls/messages', 'orion/webui/littlelib', 'orion/bidiUtils', '
 			this._activeElements = this._getElementsFunction(commandNode);
 			if (this._activeElements && this._activeElements.parameterArea && this._activeElements.slideContainer) {
 				this._activeElements.onClose = onClose;
-				var focusNode = fillFunction(this._activeElements.parameterArea, this._activeElements.dismissArea);
+				var focusNode = fillFunction(this._activeElements.parameterArea, this._activeElements.dismissArea, this._activeElements.slideContainer);
 				if (!focusNode) {
 					// no parameters were generated.  
 					return false;
 				}
 				this._activeElements.focusNode = focusNode;
+				var self = this;
 				var close = lib.$$array("#closebox", this._activeElements.dismissArea || this._activeElements.parameterArea); //$NON-NLS-0$
 				if (close.length === 0) {
 					// add the close button if the fill function did not.
@@ -104,11 +105,14 @@ define(['i18n!orion/nls/messages', 'orion/webui/littlelib', 'orion/bidiUtils', '
 							position: ["right", "below", "above", "left"] //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 					});
 					dismiss.appendChild(close);
-					var self = this;
 					close.addEventListener("click", function(event) { //$NON-NLS-0$
 						self.close();
 					}, false);
 				}
+				// ESC closes slideout if it has focus
+				this._activeElements.slideContainer.tabIndex = -1;
+				this._activeElements.slideContainer.style.outline = "none";
+				
 				// all parameters have been generated.  Activate the area.
 				this._activeElements.slideContainer.classList.add("slideContainerActive"); //$NON-NLS-0$
 				this._toolbarLayoutFunction(this._activeElements);
@@ -205,7 +209,7 @@ define(['i18n!orion/nls/messages', 'orion/webui/littlelib', 'orion/bidiUtils', '
 		
 		getFillFunction: function(commandInvocation, closeFunction, cancelFunction) {
 			var self = this;
-			return function(parameterArea, dismissArea) {
+			return function(parameterArea, dismissArea, containerArea) {
 				var first = null;
 				var localClose = function() {
 					if (closeFunction) {
@@ -226,6 +230,10 @@ define(['i18n!orion/nls/messages', 'orion/webui/littlelib', 'orion/bidiUtils', '
 						lib.stop(event);
 					}
 				};
+				
+				if (containerArea) {
+					containerArea.addEventListener("keydown", keyHandler, false); //$NON-NLS-0$
+				}
 
 				var makeButton = function(text, parent) {
 					var button = document.createElement("button"); //$NON-NLS-0$
