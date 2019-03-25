@@ -143,7 +143,7 @@ define("orion/editor/actions", [ //$NON-NLS-0$
 
 			textView.setAction("tab", function() { //$NON-NLS-0$
 				return this.indentLines();
-			}.bind(this));
+			}.bind(this), {name: messages.indentLines});
 
 			textView.setAction("shiftTab", function() { //$NON-NLS-0$
 				return this.unindentLines();
