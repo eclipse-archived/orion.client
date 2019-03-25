@@ -109,6 +109,7 @@ module.exports = function(grunt) {
 					return {
 						expand: true,
 						cwd: modulePath,
+						dot: true,
 						src: SOURCE_GLOB,
 						dest: _path.join('lib', _path.basename(modulePath))
 					};
