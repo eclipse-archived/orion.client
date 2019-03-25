@@ -395,7 +395,9 @@ define([
 			
 			this._outlineNode = document.createElement("div"); //$NON-NLS-0$
 			this._outlineNode.classList.add("outlineNodeWrapper"); //$NON-NLS-0$
-			this._outlineNode.addEventListener("keydown", function(e){
+			this._wrapperNode.tabIndex = -1;
+			this._wrapperNode.style.outline = "none";
+			this._wrapperNode.addEventListener("keydown", function(e){
 				if (e.keyCode === lib.KEY.ESCAPE || e.keyCode === lib.KEY.ENTER) {
 					if (this._slideout.getPreviousActiveElement()) {
 						this.hide();

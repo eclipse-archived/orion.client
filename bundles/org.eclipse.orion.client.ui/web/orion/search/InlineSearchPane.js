@@ -315,6 +315,8 @@ define([
 			
 			this._searchBox.getRecentEntryButton().setAttribute("aria-label", messages["Show previous search terms"]); //$NON-NLS-0$
 			
+			this._searchWrapper.tabIndex = -1;
+			this._searchWrapper.style.outline = "none";
 			this._searchWrapper.addEventListener("keydown", function(e) { //$NON-NLS-0$
 				if(e.defaultPrevented){// If the key event was handled by other listeners and preventDefault was set on(e.g. input completion handled ENTER), we do not handle it here
 					return;
