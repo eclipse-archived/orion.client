@@ -84,7 +84,7 @@ define(['i18n!orion/nls/messages', 'orion/webui/littlelib', 'orion/bidiUtils', '
 			this._activeElements = this._getElementsFunction(commandNode);
 			if (this._activeElements && this._activeElements.parameterArea && this._activeElements.slideContainer) {
 				this._activeElements.onClose = onClose;
-				var focusNode = fillFunction(this._activeElements.parameterArea, this._activeElements.dismissArea);
+				var focusNode = fillFunction(this._activeElements.parameterArea, this._activeElements.dismissArea, this._activeElements.slideContainer);
 				if (!focusNode) {
 					// no parameters were generated.  
 					return false;
@@ -112,14 +112,6 @@ define(['i18n!orion/nls/messages', 'orion/webui/littlelib', 'orion/bidiUtils', '
 				// ESC closes slideout if it has focus
 				this._activeElements.slideContainer.tabIndex = -1;
 				this._activeElements.slideContainer.style.outline = "none";
-				this._activeElements.slideContainer.addEventListener("keydown", function(event) {
-					if (event.keyCode === lib.KEY.ESCAPE) {
-						if (typeof self._cancelFunction === 'function') self._cancelFunction();
-						if (typeof self._closeFunction === 'function') self._closeFunction();
-						self.close();
-						lib.stop(event);
-					}
-				});
 				
 				// all parameters have been generated.  Activate the area.
 				this._activeElements.slideContainer.classList.add("slideContainerActive"); //$NON-NLS-0$
@@ -217,9 +209,7 @@ define(['i18n!orion/nls/messages', 'orion/webui/littlelib', 'orion/bidiUtils', '
 		
 		getFillFunction: function(commandInvocation, closeFunction, cancelFunction) {
 			var self = this;
-			this._closeFunction = closeFunction;
-			this._cancelFunction = cancelFunction;
-			return function(parameterArea, dismissArea) {
+			return function(parameterArea, dismissArea, containerArea) {
 				var first = null;
 				var localClose = function() {
 					if (closeFunction) {
@@ -240,6 +230,10 @@ define(['i18n!orion/nls/messages', 'orion/webui/littlelib', 'orion/bidiUtils', '
 						lib.stop(event);
 					}
 				};
+				
+				if (containerArea) {
+					containerArea.addEventListener("keydown", keyHandler, false); //$NON-NLS-0$
+				}
 
 				var makeButton = function(text, parent) {
 					var button = document.createElement("button"); //$NON-NLS-0$
