@@ -1087,7 +1087,8 @@ a.breadcrumb.currentLocation {
 }
 
 .dialogTitle > .dismissButton {
-	margin-right: 0;	
+    margin-right: 5px;
+    padding-right: 0;
 }
 
 .dialogTitleText {
@@ -1108,7 +1109,7 @@ a.breadcrumb.currentLocation {
 	cursor: pointer;
 }
 
-.parameterPopup .dismissButton:hover, .dialogTitle .dismissButton:hover {
+.parameterPopup .dismissButton:hover, .dialogTitle .dismissButton:hover, .dialogTitle .dismissButton:focus {
 	color: white;
 }
 
