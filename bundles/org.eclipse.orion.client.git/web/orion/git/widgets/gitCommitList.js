@@ -613,6 +613,8 @@ define([
 					content.setAttribute("role", "dialog");
 					content.setAttribute("aria-modal", "true");
 					content.setAttribute("aria-label", messages.FilterCommits);
+					content.tabIndex = -1;
+					content.style.outline = "none";
 					content.addEventListener("keydown", escHandler);
 					lib.trapTabs(content);
 					lib.addAutoDismiss([content], function() {
