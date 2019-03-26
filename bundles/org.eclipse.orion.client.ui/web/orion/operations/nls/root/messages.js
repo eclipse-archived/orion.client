@@ -15,7 +15,7 @@ define({//Default message bundle
 	"Remove Completed": "Remove Completed",
 	"rmCompleted": "Remove all completed operations",
 	"Remove": "Remove",
-	"rmFromOpList": "Remove operations from the operations list.",
+	"rmFromOpList": "Remove selected operations from the operations list.",
 	"Cancel": "Cancel",
 	"CancelOp": "Cancel operations from the operations list.",
 	"OpWarning": "Operation resulted in a warning.",
