@@ -665,7 +665,9 @@ function Tooltip (view, editor) {
 			var toFocus = lib.firstTabbable(tooltipDiv);
 			if (toFocus) {
 				toFocus.focus();
+				return;
 			}
+			tooltipDiv.focus();
 		},
 		_isInRect: function(rect, x, y) {
 			if (!rect){
@@ -785,8 +787,6 @@ function Tooltip (view, editor) {
 					case 'markdown': {
 						if (this.hover.renderMarkDown) {
 							contentDiv.innerHTML = this.hover.renderMarkDown(data.content);
-							contentDiv.tabIndex = 0;
-							contentDiv.style.outline = "none";
 						}
 						break;
 					}
