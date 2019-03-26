@@ -5034,6 +5034,9 @@ define("orion/editor/textView", [
 			if (selections.length > 1) {
 				this._setSelection(selections[0], true);
 			}
+			if (this._tooltip) {
+				this._tooltip.hide();
+			}
 			return true;
 		},
 		_doHome: function (args) {

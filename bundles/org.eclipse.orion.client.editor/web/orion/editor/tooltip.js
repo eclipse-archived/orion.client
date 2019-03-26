@@ -785,6 +785,8 @@ function Tooltip (view, editor) {
 					case 'markdown': {
 						if (this.hover.renderMarkDown) {
 							contentDiv.innerHTML = this.hover.renderMarkDown(data.content);
+							contentDiv.tabIndex = 0;
+							contentDiv.style.outline = "none";
 						}
 						break;
 					}
