@@ -819,7 +819,7 @@ define([
 						tooltip = domFocus.commandTooltip ? domFocus.commandTooltip : domFocus.tooltip;
 						tooltip._showByKB = true;
 						tooltip.show(0);
-					} else if (domFocus.id && (label = document.querySelector("label[for=" + domFocus.id + "]")) && label.tooltip) {
+					} else if (domFocus.id && (label = document.querySelector("label[for=" + domFocus.id.replace(/./g, "\\.") + "]")) && label.tooltip) {
 						tooltip = label.tooltip;
 						tooltip._showByKB = true;
 						tooltip.show(0);

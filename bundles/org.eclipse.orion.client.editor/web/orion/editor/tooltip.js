@@ -665,7 +665,9 @@ function Tooltip (view, editor) {
 			var toFocus = lib.firstTabbable(tooltipDiv);
 			if (toFocus) {
 				toFocus.focus();
+				return;
 			}
+			tooltipDiv.focus();
 		},
 		_isInRect: function(rect, x, y) {
 			if (!rect){
