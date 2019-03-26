@@ -364,7 +364,7 @@ function zipPath(pathToZip, options){
 						if (data.content !== undefined) {
 							zip.append(data.content, data.filename);
 						} else if (data.dir) {
-							zip.directory(data.dir, false);
+							zip.directory(data.dir, data.destdir, data.data);
 						}
 					});
 				}
