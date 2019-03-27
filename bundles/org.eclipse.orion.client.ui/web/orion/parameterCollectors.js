@@ -232,8 +232,14 @@ define(['i18n!orion/nls/messages', 'orion/webui/littlelib', 'orion/bidiUtils', '
 				};
 				
 				if (containerArea) {
-					containerArea.addEventListener("keydown", keyHandler, false); //$NON-NLS-0$
-				}
+                    containerArea.addEventListener("keydown", function(event) { //$NON-NLS-0$
+                        if (event.keyCode === lib.KEY.ESCAPE) {
+                            if (typeof(cancelFunction) === 'function') cancelFunction(); //$NON-NLS-0$
+                            localClose();
+                            lib.stop(event);
+                        }
+                    }, false);
+                }
 
 				var makeButton = function(text, parent) {
 					var button = document.createElement("button"); //$NON-NLS-0$
