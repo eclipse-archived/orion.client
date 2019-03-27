@@ -159,10 +159,11 @@ function Tooltip (view, editor) {
 		 */
 		show: function(tooltipInfo, locked, giveFocus) {
 			this._locked = locked;
-			this._giveFocus = giveFocus;
 			this._topPixel = this._view.getTopPixel();
 			this._leftPixel = this._view.getHorizontalPixel();
-			this._processInfo(tooltipInfo.getTooltipInfo());
+			var info = tooltipInfo.getTooltipInfo();
+			info.giveFocus = giveFocus;
+			this._processInfo(info);
 		},
 		
 		/**
@@ -409,9 +410,8 @@ function Tooltip (view, editor) {
 			this._tooltipDiv.style.visibility = "visible"; //$NON-NLS-0$
 			this._tipShowing = true;
 			
-			if (this._giveFocus) {
+			if (info.giveFocus) {
 				this._setInitialFocus(this._tooltipDiv);
-				this._giveFocus = undefined;
 			}
 		},
 		
