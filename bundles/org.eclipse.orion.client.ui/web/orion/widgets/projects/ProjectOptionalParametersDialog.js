@@ -28,7 +28,6 @@ function(messages, lib, dialog){
 		this._idPrefix = "ParamInput_";
 		this.modal = true;
 		this.buttons = [{text: messages['OK'], isDefault: true, callback: this.done.bind(this)}]; 
-		this.customFocus = true;
 		this._func = options.func;
 		this._initialize();
 	};
@@ -39,7 +38,6 @@ function(messages, lib, dialog){
 		} else {
 			this.$message.style.display = "none"; //$NON-NLS-0$
 		}
-		var isFirst = true;
 		if(this._data.parameters)
 		for (var paramId in this._data.parameters.parameterTable) {
 			var param = this._data.parameters.parameterNamed(paramId);
@@ -65,10 +63,6 @@ function(messages, lib, dialog){
 			tr.appendChild(td);
 			
 			this.$paramsTable.appendChild(tr);
-			if(isFirst){
-				input.focus();
-				isFirst = false;			
-			}
 		}
 		
 		if(this._data.parameters._options.optionalParams)
