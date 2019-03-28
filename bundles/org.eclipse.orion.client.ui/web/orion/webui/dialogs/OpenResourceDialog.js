@@ -375,6 +375,7 @@ define([
 		
 		var titleDiv = lib.$("span", this.$frame); //$NON-NLS-1$
 		titleDiv.textContent = newTitle;
+		this.$frame.setAttribute("aria-label", newTitle); //$NON-NLS-0$
 		
 		// Hide the checkbox if this search must be global
 		if (this.forcedGlobalSearch()) {
