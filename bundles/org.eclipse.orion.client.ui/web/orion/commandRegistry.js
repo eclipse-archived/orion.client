@@ -452,6 +452,12 @@ define([
 							});
 							var parameterArea = tooltip.contentContainer();
 							parameterArea.classList.add("parameterPopup"); //$NON-NLS-0$
+							var parent = parameterArea.parentNode;
+							parent.setAttribute("role", "dialog"); //$NON-NLS-1$ //$NON-NLS-0$
+							parent.setAttribute("aria-modal", "true"); //$NON-NLS-1$ //$NON-NLS-0$
+							if (commandInvocation.domNode && commandInvocation.domNode.textContent) {
+								parent.setAttribute("aria-label", commandInvocation.domNode.textContent); //$NON-NLS-0$
+							}
 							var originalFocusNode = window.document.activeElement;
 							var focusNode = this._parameterCollector.getFillFunction(commandInvocation, function() {
 								lib.returnFocus(parameterArea, originalFocusNode);
