@@ -157,6 +157,8 @@ define(['i18n!orion/nls/messages', 'orion/webui/littlelib', 'orion/PageUtil', 'o
 				this._topScrollButton.classList.add("sideMenuScrollButton"); //$NON-NLS-0$
 				this._topScrollButton.classList.add("sideMenuTopScrollButton"); //$NON-NLS-0$
 				this._topScrollButton.classList.add("core-sprite-openarrow"); //$NON-NLS-0$
+				this._topScrollButton.setAttribute("aria-label", messages["Up"]); //$NON-NLS-0$
+				this._topScrollButton.tabIndex = -1;
 								
 				this._topScrollButton.addEventListener("mousedown", function(){ //$NON-NLS-0$
 					if (this._activeScrollInterval) {
@@ -176,6 +178,8 @@ define(['i18n!orion/nls/messages', 'orion/webui/littlelib', 'orion/PageUtil', 'o
 				this._bottomScrollButton.classList.add("sideMenuScrollButton"); //$NON-NLS-0$
 				this._bottomScrollButton.classList.add("sideMenuBottomScrollButton"); //$NON-NLS-0$
 				this._bottomScrollButton.classList.add("core-sprite-openarrow"); //$NON-NLS-0$
+				this._bottomScrollButton.setAttribute("aria-label", messages["Down"]); //$NON-NLS-0$
+				this._bottomScrollButton.tabIndex = -1;
 				
 				this._bottomScrollButton.addEventListener("mousedown", function(){ //$NON-NLS-0$
 					if (this._activeScrollInterval) {

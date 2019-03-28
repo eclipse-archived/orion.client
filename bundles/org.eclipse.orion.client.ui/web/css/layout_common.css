@@ -772,6 +772,7 @@ and (max-device-width : 1024px)  {
 	position: absolute;
 	width: 100%;
 	z-index: 100;
+	outline:none;
 }
 
 .sideMenuScrollButton.visible {

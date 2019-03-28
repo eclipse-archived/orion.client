@@ -180,5 +180,7 @@ define({//Default message bundle
 	"fixAll": "Fix all",
 	"nextSplitter" : "Next Splitter",
 	"nextSplitterTooltip": "Move focus through the available splitters",
-	"Confirm": "Confirm"
+	"Confirm": "Confirm",
+	"Up": "Up",
+	"Down": "Down"
 });
