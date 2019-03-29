@@ -121,8 +121,8 @@ define([
 				searchStringInput.name = messages["Find:"];
 				searchStringInput.className = "parameterInput"; //$NON-NLS-0$
 				searchStringInput.id = "localSearchFindWith"; //$NON-NLS-0$
-				searchStringInput.placeholder = messages["Find With"];
-				searchStringInput.setAttribute("aria-label", messages["Find With"]); //$NON-NLS-0$
+				searchStringInput.placeholder = messages["FindWhat"];
+				searchStringInput.setAttribute("aria-label", messages["FindWhat"]); //$NON-NLS-0$
 				searchStringInput.oninput = function(evt){
 					return that._handleInput(evt);
 				};

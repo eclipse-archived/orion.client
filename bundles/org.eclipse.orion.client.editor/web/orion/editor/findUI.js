@@ -95,7 +95,7 @@ define([
 			findInput.className = "textViewFindInput"; //$NON-NLS-0$
 			this._findInput = findInput;
 			findInput.type = "text"; //$NON-NLS-0$
-			findInput.placeholder = messages.findWith;
+			findInput.placeholder = messages.findWhat;
 			textUtil.addEventListener(findInput, "input", function(evt) { //$NON-NLS-0$
 				return that._handleInput(evt);
 			});

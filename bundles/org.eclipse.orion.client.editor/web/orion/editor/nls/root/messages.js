@@ -196,7 +196,7 @@ define({//Default message bundle
 	"previous": "Previous", //$NON-NLS-1$ //$NON-NLS-0$
 	"replace": "Replace", //$NON-NLS-1$ //$NON-NLS-0$
 	"replaceAll": "Replace All", //$NON-NLS-1$ //$NON-NLS-0$
-	"findWith": "Find With", //$NON-NLS-1$ //$NON-NLS-0$
+	"findWhat": "Find What", //$NON-NLS-1$ //$NON-NLS-0$
 	"replaceWith": "Replace With", //$NON-NLS-1$ //$NON-NLS-0$
 	"caseInsensitive": "Aa", //$NON-NLS-1$ //$NON-NLS-0$
 	"selectedLines": "Sel", //$NON-NLS-1$ //$NON-NLS-0$
