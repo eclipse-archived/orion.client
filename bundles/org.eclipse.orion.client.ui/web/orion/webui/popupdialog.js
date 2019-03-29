@@ -57,6 +57,7 @@ define(['i18n!orion/widgets/nls/messages', 'orion/webui/littlelib', 'orion/webui
 			});
 			this.$parent = this._tooltip.contentContainer();
 			this.$parent.setAttribute("role", "dialog"); //$NON-NLS-2$ //$NON-NLS-1$
+			this.$parent.setAttribute("aria-modal", "true"); //$NON-NLS-1$ //$NON-NLS-0$
 			var range = document.createRange();
 			range.selectNode(this.$parent);
 			var contentFragment = range.createContextualFragment(this.TEMPLATE);

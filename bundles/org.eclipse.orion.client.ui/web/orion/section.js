@@ -265,6 +265,7 @@ define([
 		if (options.dropdown) {
 			this._contentParent.classList.add("sectionDropdown");
 			this._contentParent.setAttribute("role", "dialog"); //$NON-NLS-1$ //$NON-NLS-0$
+			this._contentParent.setAttribute("aria-modal", "true"); //$NON-NLS-1$ //$NON-NLS-0$
 			this._contentParent.setAttribute("aria-labelledby", this.titleNode.id); //$NON-NLS-0$
 			this.domNode.setAttribute("aria-owns", this._contentParent.id); //$NON-NLS-0$
 		} else {
