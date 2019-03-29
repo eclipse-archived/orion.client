@@ -241,7 +241,8 @@ define([
 					
 				return searchStringInput;
 			},
-			function(){that.hide();});
+			function(){that.hide();},
+			messages["Find"]);
 		},
 		postSelectedLines: function(/*selectedLines*/) {
 			if(this._selectedLinesUI) {

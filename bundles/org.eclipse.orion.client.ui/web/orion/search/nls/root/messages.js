@@ -9,6 +9,7 @@
  ******************************************************************************/
 /*eslint-env amd */
 define({
+	"Find": "Find",
 	"Find:": "Find:",
 	"FindWhat": "Find what",
 	"ReplaceWith:": "ReplaceWith:",

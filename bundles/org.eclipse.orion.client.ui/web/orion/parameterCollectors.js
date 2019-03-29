@@ -67,7 +67,7 @@ define(['i18n!orion/nls/messages', 'orion/webui/littlelib', 'orion/bidiUtils', '
 			this._activeElements = null;
 		},
 		
-		open: function(commandNode, fillFunction, onClose) {
+		open: function(commandNode, fillFunction, onClose, name) {
 			if (typeof commandNode === "string") { //$NON-NLS-0$
 				commandNode = lib.node(commandNode);
 			}
@@ -114,6 +114,10 @@ define(['i18n!orion/nls/messages', 'orion/webui/littlelib', 'orion/bidiUtils', '
 				this._activeElements.slideContainer.style.outline = "none";
 				
 				// all parameters have been generated.  Activate the area.
+				this._activeElements.slideContainer.setAttribute("role", "dialog");
+				if (name) {
+					this._activeElements.slideContainer.setAttribute("aria-label", name);
+				}
 				this._activeElements.slideContainer.classList.add("slideContainerActive"); //$NON-NLS-0$
 				this._toolbarLayoutFunction(this._activeElements);
 
@@ -197,12 +201,12 @@ define(['i18n!orion/nls/messages', 'orion/webui/littlelib', 'orion/bidiUtils', '
 			return true;
 		},
 		
-		collectParameters: function(commandInvocation,cancelCallback) {
+		collectParameters: function(commandInvocation, cancelCallback, name) {
 			if (commandInvocation.parameters) {
 				if (commandInvocation.domNode) {
 					commandInvocation.domNode.classList.add("commandMarker"); //$NON-NLS-0$
 				}
-				return this.open(commandInvocation.domNode || commandInvocation.domParent, this.getFillFunction(commandInvocation,null,cancelCallback));
+				return this.open(commandInvocation.domNode || commandInvocation.domParent, this.getFillFunction(commandInvocation,null,cancelCallback), null, name);
 			}
 			return false;
 		},
