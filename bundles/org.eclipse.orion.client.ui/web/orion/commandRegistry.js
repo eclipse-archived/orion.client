@@ -466,9 +466,7 @@ define([
 							var parent = parameterArea.parentNode;
 							parent.setAttribute("role", "dialog"); //$NON-NLS-1$ //$NON-NLS-0$
 							parent.setAttribute("aria-modal", "true"); //$NON-NLS-1$ //$NON-NLS-0$
-							if (commandInvocation.domNode && commandInvocation.domNode.textContent) {
-								parent.setAttribute("aria-label", dialogName); //$NON-NLS-0$
-							}
+							parent.setAttribute("aria-label", dialogName); //$NON-NLS-0$
 							var originalFocusNode = window.document.activeElement;
 							var focusNode = this._parameterCollector.getFillFunction(commandInvocation, function() {
 								lib.returnFocus(parameterArea, originalFocusNode);
