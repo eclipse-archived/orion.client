@@ -788,7 +788,7 @@ function revert(req, res, commitToRevert) {
 	})
 	.then(function() {
 		return git.Reflog.read(theRepo, "HEAD").then(function(reflog) {
-			replaceMostRecentRefLogMessageHeaderfromCommit("revert", reflog, theRepo);
+			return replaceMostRecentRefLogMessageHeaderfromCommit("revert", reflog, theRepo);
 		});
 	})
 	.catch(function(err) {
@@ -833,7 +833,7 @@ function cherryPick(req, res, commitToCherrypick) {
 	})
 	.then(function() {
 		return git.Reflog.read(theRepo, "HEAD").then(function(reflog) {
-			replaceMostRecentRefLogMessageHeaderfromCommit("cherrypick", reflog, theRepo);
+			return replaceMostRecentRefLogMessageHeaderfromCommit("cherrypick", reflog, theRepo);
 		});
 	})
 	.catch(function(err) {
@@ -860,7 +860,7 @@ function replaceMostRecentRefLogMessageHeaderfromCommit (toHeader,reflog, repo )
 			targetMessage = targetMessage.replace(/^commit(:\s)/,  toHeader+"$1");
 			reflog.drop(0, 1);
 			reflog.append(targetOID, clone.getSignature(repo),targetMessage);
-			reflog.write();
+			return reflog.write();
 		}
 	}
 }

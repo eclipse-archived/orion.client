@@ -143,7 +143,7 @@ function getRepo(req) {
 }
 
 function freeRepo(repo) {
-	if (repo) {
+	if (repo && repo.free) {
 		repo.free();
 	}
 }
