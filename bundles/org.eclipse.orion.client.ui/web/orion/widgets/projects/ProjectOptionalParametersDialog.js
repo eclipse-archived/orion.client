@@ -21,7 +21,7 @@ function(messages, lib, dialog){
 
 	ProjectOptionalParametersDialog.prototype.TEMPLATE = 
 		'<div id="message" style="width: 25em; padding-bottom: 5px;"></div>' + //$NON-NLS-0$
-		'<div id="paramsArea"><table id="paramsTable"></table></div>'; //$NON-NLS-0$
+		'<div id="paramsArea"><table id="paramsTable" role="presentation"></table></div>'; //$NON-NLS-0$
 	ProjectOptionalParametersDialog.prototype._init = function(options) {
 		this.title = options.title;
 		this._data = options.data;
@@ -44,7 +44,7 @@ function(messages, lib, dialog){
 			var tr = document.createElement("tr");
 			var td = document.createElement("td");
 			var label = document.createElement("label");
-			label['for'] = paramId;
+			label.htmlFor = this._idPrefix + paramId;
 			label.appendChild(document.createTextNode(param.label));
 			td.appendChild(label);
 			tr.appendChild(td);
@@ -71,7 +71,7 @@ function(messages, lib, dialog){
 			var tr = document.createElement("tr");
 			var td = document.createElement("td");
 			var label = document.createElement("label");
-			label['for'] = this._idPrefix + param.id;
+			label.htmlFor = this._idPrefix + param.id;
 			label.appendChild(document.createTextNode(param.name));
 			td.appendChild(label);
 			tr.appendChild(td);
