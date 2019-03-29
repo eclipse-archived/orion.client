@@ -818,6 +818,7 @@ exports.ExplorerNavHandler = (function() {
 
 		//Space key toggles the check box on the current row if the renderer uses check box
 		onSpace: function(e) {
+			if (!e.target.classList.contains("treeTableRow")) return;
 			if(this.setSelection(this.currentModel(), true, true)) {
 				e.preventDefault();
 			}
