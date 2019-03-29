@@ -181,6 +181,9 @@ define({//Default message bundle
 	"nextSplitter" : "Next Splitter",
 	"nextSplitterTooltip": "Move focus through the available splitters",
 	"Confirm": "Confirm",
+	"CONFIRM": "Confirm",
+	"PROMPT": "Prompt",
+	"ALERT": "Alert",
 	"Up": "Up",
 	"Down": "Down"
 });

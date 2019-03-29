@@ -11,6 +11,7 @@
 /*eslint-env browser, amd*/
  
 define([
+	'i18n!orion/nls/messages',
 	'orion/commands',
 	'orion/keyBinding',
 	'orion/explorers/navigationUtils',
@@ -24,7 +25,7 @@ define([
 	'orion/metrics',
 	'orion/Deferred',
 	'orion/EventTarget'
-], function(Commands, mKeyBinding, mNavUtils, bidiUtils, PageUtil, UIUtil, lib, mDropdown, mTooltip, SubMenuButtonFragment, mMetrics, mDeferred, mEventTarget) {
+], function(messages, Commands, mKeyBinding, mNavUtils, bidiUtils, PageUtil, UIUtil, lib, mDropdown, mTooltip, SubMenuButtonFragment, mMetrics, mDeferred, mEventTarget) {
 
 	/**
 	 * Constructs a new command registry with the given options.
@@ -220,11 +221,12 @@ define([
 		 * @param {DOMElement} node the dom node that is displaying the command, or a node in the parameter collector area
 		 * @param {Function} fillFunction a function that will fill the parameter area
 		 * @param {Function} onClose a function that will be called when the user closes the collector
+		 * @param {String} name the label that will be used for the dialog title
 		 */
-		openParameterCollector: function(node, fillFunction, onClose) {
+		openParameterCollector: function(node, fillFunction, onClose, name) {
 			if (this._parameterCollector) {
 				this._parameterCollector.close();
-				this._parameterCollector.open(node, fillFunction, onClose);
+				this._parameterCollector.open(node, fillFunction, onClose, name);
 			}
 		},
 		
@@ -260,18 +262,18 @@ define([
 		 * Open a parameter collector to confirm a command or collect user input.
 		 *
 		 * @param {Boolean} modal indicates whether the confirmation prompt should be modal.
-		 * @param {String}  determinds the popup dialog's type, could be "PROMPT" or "CONFIRM"
+		 * @param {String}  determines the popup dialog's type, could be "PROMPT", "CONFIRM" or "ALERT"
 		 * @param {DOMElement} node the dom node that is displaying the command
 		 * @param {String} message the message to show when confirming the command
 		 * @param {Array} an array of button label, callback, type objects; if the type is "yes", either input.value or true will be passed to callback depends on the dialog's type
 		 * @param {String} default message in the input box.
-		 * @param [Optional]{String} postion of the popupDialog if specified, postion of the popupDialog if specified, have to be one of "below", "right"
+		 * @param [Optional]{String} postion of the popupDialog if specified, have to be one of "below", "right"
 		 */
 		_popupDialog: function(modal, style, node, message, buttonStringCallList, defaultInput, positionString) {
 			var result;
 			if (this._parameterCollector && !modal) {
 				var self = this;
-				var closeFunction = function(){self._parameterCollector.close();}
+				var closeFunction = function(){self._parameterCollector.close();};
 				var fillFunction = function(parent, buttonParent) {
 					var label = document.createElement("span"); //$NON-NLS-0$
 					label.classList.add("parameterPrompt"); //$NON-NLS-0$
@@ -317,7 +319,7 @@ define([
 				this._parameterCollector.close();
 				if(!node){
 					// Do this if this is a confirm or if this is a prompt but without node specified.
-					var opened = this._parameterCollector.open(node, fillFunction, function(){});
+					var opened = this._parameterCollector.open(node, fillFunction, function(){}, messages[style]);
 				}
 				if (!opened) {
 					var tooltip = new mTooltip.Tooltip({
@@ -330,6 +332,11 @@ define([
 					});
 					var parameterArea = tooltip.contentContainer();
 					parameterArea.classList.add("parameterPopup"); //$NON-NLS-0$
+					var parent = parameterArea.parentNode;
+					parent.setAttribute("role", "dialog"); //$NON-NLS-1$ //$NON-NLS-0$
+					parent.setAttribute("aria-modal", "true"); //$NON-NLS-1$ //$NON-NLS-0$
+					var dialogName = node.getAttribute("aria-label") || node.textContent || messages[style] || messages["Command"];
+					parent.setAttribute("aria-label", dialogName); //$NON-NLS-0$
 					var originalFocusNode = window.document.activeElement;
 					closeFunction = function() {
 						lib.returnFocus(parameterArea, originalFocusNode);
@@ -438,7 +445,11 @@ define([
 					// Consult shouldCollectParameters() again to verify we still need collection. Due to updateParameters(), the CommandInvocation
 					// could have dynamically set its parameters to null (meaning no collection should be done).
 					if (commandInvocation.parameters.shouldCollectParameters()) {
-						collecting = this._parameterCollector.collectParameters(commandInvocation,cancelCallback);
+						var dialogName = messages["Command"]; // default name
+						if (commandInvocation.domNode && commandInvocation.domNode.textContent) {
+							dialogName = commandInvocation.domNode.textContent;
+						}
+						collecting = this._parameterCollector.collectParameters(commandInvocation,cancelCallback, dialogName);
 						// The parameter collector cannot collect.  We will do a default implementation using a popup.
 						if (!collecting) {
 							var tooltip = new mTooltip.Tooltip({
@@ -455,9 +466,7 @@ define([
 							var parent = parameterArea.parentNode;
 							parent.setAttribute("role", "dialog"); //$NON-NLS-1$ //$NON-NLS-0$
 							parent.setAttribute("aria-modal", "true"); //$NON-NLS-1$ //$NON-NLS-0$
-							if (commandInvocation.domNode && commandInvocation.domNode.textContent) {
-								parent.setAttribute("aria-label", commandInvocation.domNode.textContent); //$NON-NLS-0$
-							}
+							parent.setAttribute("aria-label", dialogName); //$NON-NLS-0$
 							var originalFocusNode = window.document.activeElement;
 							var focusNode = this._parameterCollector.getFillFunction(commandInvocation, function() {
 								lib.returnFocus(parameterArea, originalFocusNode);
