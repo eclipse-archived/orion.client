@@ -138,12 +138,12 @@ define([
 			var thead = document.createElement('thead'); //$NON-NLS-0$
 			var row = document.createElement('tr'); //$NON-NLS-0$
 			row.setAttribute("role", "row"); //$NON-NLS-1$ //$NON-NLS-0$
-			["SpacerCol", "CommandCol", "KeyBindingCol", "EditCol"].forEach(function(id) { //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			["Spacer", "Command", "KeyBinding", "Edit"].forEach(function(id) { //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 				var cell = document.createElement('th'); //$NON-NLS-0$
 				cell.classList.add("visuallyhidden"); //$NON-NLS-0$
 				cell.setAttribute("role", "columnheader"); //$NON-NLS-1$ //$NON-NLS-0$
-				cell.id = id;
-				if (id === "CommandCol" || id === "KeyBindingCol") { //$NON-NLS-1$ //$NON-NLS-0$
+				cell.id = id + "Col";
+				if (id === "Command" || id === "KeyBinding") { //$NON-NLS-1$ //$NON-NLS-0$
 					cell.textContent = messages[id];
 				}
 				row.appendChild(cell);
