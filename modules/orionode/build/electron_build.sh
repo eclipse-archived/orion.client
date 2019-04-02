@@ -90,6 +90,7 @@ rm -rf target
 
 # Install electron builder and electron-builder-squirrel-windows for Squirrel.Window app
 npm install -g electron-builder@20.39.0
+npm install -g app-builder-lib@20.39.0
 npm install -g electron-builder-squirrel-windows@20.39.0
 
 # Build mac dmg, etc
