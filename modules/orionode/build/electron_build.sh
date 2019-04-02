@@ -13,9 +13,9 @@
 #
 
 # Need node 6.11.1
-if [ "v6.11.1" != `node --version` ]; then
+if [ "v10.15.2" != `node --version` ]; then
 	echo -----------------------------------
-	echo Warning: node version is not v6.11.1
+	echo Warning: node version is not v10.15.2
 	echo -----------------------------------
 	exit 1
 fi
