@@ -13,9 +13,9 @@
 #
 
 # Need node 6.11.1
-if [ "v10.15.2" != `node --version` ]; then
+if [ "v6.11.1" != `node --version` ]; then
 	echo -----------------------------------
-	echo Warning: node version is not v10.15.2
+	echo Warning: node version is not v6.11.1
 	echo -----------------------------------
 	exit 1
 fi
@@ -89,9 +89,8 @@ find node_modules/nodegit/build/Release/ -mindepth 1 ! -name '*.node' -exec rm -
 rm -rf target
 
 # Install electron builder and electron-builder-squirrel-windows for Squirrel.Window app
-npm install -g electron-builder@20.39.0
-npm install -g app-builder-lib@20.39.0
-npm install -g electron-builder-squirrel-windows@20.39.0
+npm install -g electron-builder@19.16.0
+npm install -g electron-builder-squirrel-windows@19.16.0
 
 # Build mac dmg, etc
 nodegit_lib=${NODEGIT_DIR}/v${nodegit_version}/electron/v${electron_version}/mac/nodegit.node

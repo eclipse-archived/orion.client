@@ -107,7 +107,7 @@
   "build": {
     "appId": "org.eclipse.orion",
     "asar": true,
-    "electronVersion": "4.1.1",
+    "electronVersion": "1.4.10",
     "productName": "orion",
     "nodeGypRebuild": "false",
     "npmRebuild": "false",
