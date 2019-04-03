@@ -14,8 +14,12 @@ rm -rf ../node_modules
 (npm install --no-optional) || die "Failed to install dependencies, consult the npm log to find out why."
 (../node_modules/.bin/grunt ${GRUNT_TASK}) || die "Failed to minify client code."
 (npm prune --production) || die "Failed to install dependencies, consult the npm log to find out why."
-if [ -f "${DOWNLOADS}/orion/orionode/nodegit/${NODEGIT_VERSION}/linux/nodegit.node" ]; then
-	cp ${DOWNLOADS}/orion/orionode/nodegit/${NODEGIT_VERSION}/linux/nodegit.node ../node_modules/nodegit/build/Release
+if [ -d "$DOWNLOADS" ]; then
+	if [ -f "${DOWNLOADS}/orion/orionode/nodegit/${NODEGIT_VERSION}/linux/nodegit.node" ]; then
+		cp ${DOWNLOADS}/orion/orionode/nodegit/${NODEGIT_VERSION}/linux/nodegit.node ../node_modules/nodegit/build/Release
+	fi
+else
+	scp genie.orion@projects-storage.eclipse.org:${DOWNLOADS}/orion/orionode/nodegit/${NODEGIT_VERSION}/linux/nodegit.node ../node_modules/nodegit/build/Release
 fi
 rm -rf ../node_modules/node-pty
 rm -rf ../node_modules/nodegit/vendor
@@ -28,4 +32,8 @@ sed -i "s/orion\.buildId\=/orion\.buildId\=${1}/" orionode/orion.conf
 sed -i "s/var BUILD_ID \= \"unknown\"\;/var BUILD_ID \= \"${1}\"\;/" orionode/lib/version.js
 
 tar -czf "orionode_$1.tar.gz" orionode/
-cp "orionode_$1.tar.gz" ${DOWNLOADS}/orion/orionode/
+if [ -d "$DOWNLOADS" ]; then
+	cp "orionode_$1.tar.gz" ${DOWNLOADS}/orion/orionode/
+else
+	scp "orionode_$1.tar.gz" genie.orion@projects-storage.eclipse.org:${DOWNLOADS}/orion/orionode/
+fi
