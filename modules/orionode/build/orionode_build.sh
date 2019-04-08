@@ -11,7 +11,7 @@ fi
 
 NODEGIT_VERSION=v0.19.0
 rm -rf ../node_modules
-(npm install --no-optional) || die "Failed to install dependencies, consult the npm log to find out why."
+($NPM_ARGS npm install --no-optional) || die "Failed to install dependencies, consult the npm log to find out why."
 (../node_modules/.bin/grunt ${GRUNT_TASK}) || die "Failed to minify client code."
 (npm prune --production) || die "Failed to install dependencies, consult the npm log to find out why."
 if [ -d "$DOWNLOADS" ]; then
