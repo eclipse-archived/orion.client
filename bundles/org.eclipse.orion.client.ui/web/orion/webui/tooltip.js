@@ -404,6 +404,7 @@ define(['orion/webui/littlelib'], function(lib) {
 				this._tail = null;
 			}
 			if (this._node) {
+				this._node.removeAttribute("aria-describedby"); //$NON-NLS-0$
 				this._node.removeEventListener("click", this._clickHandler, false); //$NON-NLS-0$
 				this._node.removeEventListener("mouseover", this._mouseoverHandler, false); //$NON-NLS-0$
 				this._node.removeEventListener("focus", this._focusHandler, false); //$NON-NLS-0$
