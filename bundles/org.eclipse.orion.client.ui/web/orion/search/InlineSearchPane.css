@@ -624,6 +624,12 @@
     justify-content: flex-start;
     width: calc(100% - 30px);
 }
+.searchOptionControlButton.toggleReplaceLink:after{
+	content:"a\002192C";
+	font-size: 12px;
+    line-height: 3px;
+    position: relative;
+}
 .searchOptionControlButton.advSearchCaseSensitive:after{
 	content:"Aa";
 	font-size: 12px;
