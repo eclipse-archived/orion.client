@@ -311,8 +311,11 @@ function(messages, i18nUtil, mCommands, mCommandRegistry, lib, mTooltip, colors,
 		}
 		for (i = 0; i < scopeList.length; i++){
 			var element = document.getElementById(scopeList[i].id);
-			element.value = scopeList[i].value; // updates the input[type=color] with correct color
-			makeTooltip(element, scopeList[i]);
+			element.value = scopeList[i].value; // updates the select or input[type=color] with correct value
+			if (element.type === "color") { //$NON-NLS-0$
+				// make the color value available in a tooltip and aria-label
+				makeTooltip(element, scopeList[i]);
+			}
 		}
 		checkForChanges(); // checks if any value is changed
 	}
