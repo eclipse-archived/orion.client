@@ -749,6 +749,7 @@ define([
 				serviceRegistry: this.registry,
 				commandRegistry: this.commandService,
 				parentId: treeDiv,
+				name: messages["Filter path"],
 				setFocus: false,
 				repository: this.root.repository,
 				fileClient: this.fileClient,
