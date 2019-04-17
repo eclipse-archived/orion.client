@@ -908,6 +908,7 @@ exports.SelectionRenderer = (function(){
 		for (var r=0; r<rowCount; r++) {
 			var row = document.createElement('tr'); //$NON-NLS-0$
 			row.setAttribute("role", "row"); //$NON-NLS-1$ //$NON-NLS-0$
+			row.tabIndex = -1;
 			if (this._useCheckboxSelection) {
 				var col = this.initCheckboxColumn(tableNode);
 				col.id = this._checkColumnId = "checkColumn_" + CHECK_COLUMN_ID++;
