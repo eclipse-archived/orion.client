@@ -176,8 +176,6 @@ define([
 		
 		// if dropdown and not icon, mark up titleNode as textbox child of combo
 		if (options.dropdown && !options.iconClass) {
-			this.titleNode.setAttribute("role", "textbox"); //$NON-NLS-1$ //$NON-NLS-0$
-			this.titleNode.setAttribute("aria-readonly", "true"); //$NON-NLS-1$ //$NON-NLS-0$
 			this.domNode.setAttribute("aria-labelledby", this.titleNode.id); //$NON-NLS-1$ //$NON-NLS-0$
 		}
 		if (!options.dropdown && options.canHide) {
