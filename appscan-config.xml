@@ -1,0 +1,14 @@
+<Configuration>
+  <Targets>
+    <Target outputs-only="false" path=".">
+      <Exclude>test/</Exclude>
+      <Exclude>node_modules/node-gyp/</Exclude>
+      <Exclude>build/</Exclude>
+      <Exclude>electron.js</Exclude>
+      <Exclude>Gruntfile.js</Exclude>
+      <Exclude>lib/orionode.client/tty/</Exclude>
+      <Exclude>lib/tty_shell.js</Exclude>
+      <Exclude>node_modules/nodegit/vendor/libgit2/tests/</Exclude>
+    </Target>
+  </Targets>
+</Configuration>
