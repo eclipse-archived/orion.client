@@ -23,3 +23,7 @@ dist/
 .nyc_output/
 coverage/
 orion_client_coverage/
+
+# appscan
+otc-orion-client.irx
+otc-orion-client_logs.zip

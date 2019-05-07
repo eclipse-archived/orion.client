@@ -24,3 +24,7 @@ node_modules/
 
 # VS Code dev
 .vscode
+
+# appscan
+otc-orion-client-client.irx
+otc-orion-client-client_logs.zip
