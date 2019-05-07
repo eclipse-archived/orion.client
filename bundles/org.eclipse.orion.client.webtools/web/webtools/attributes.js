@@ -3,8 +3,8 @@
  * Copyright (c) 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
- * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
- * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html). 
+ * (https://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
+ * License v1.0 (https://www.eclipse.org/org/documents/edl-v10.html). 
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
@@ -323,37 +323,37 @@ define([
 		},
 		{
 			name: "ondrag",
-			url: "http://www.w3schools.com/tags/ev_ondrag.asp",
+			url: "https://www.w3schools.com/tags/ev_ondrag.asp",
 			doc: "The ondrag attribute fires when an element or text selection is being dragged."
 		},
 		{
 			name: "ondragend",
-			url: "http://www.w3schools.com/tags/ev_ondragend.asp",
+			url: "https://www.w3schools.com/tags/ev_ondragend.asp",
 			doc: "The ondragend attribute fires when the user has finished dragging an element or text selection."
 		},
 		{
 			name: "ondragenter",
-			url: "http://www.w3schools.com/tags/ev_ondragenter.asp",
+			url: "https://www.w3schools.com/tags/ev_ondragenter.asp",
 			doc: "The ondragenter attribute fires when a draggable element or text selection enters a valid drop target."
 		},
 		{
 			name: "ondragleave",
-			url: "http://www.w3schools.com/tags/ev_ondragleave.asp",
+			url: "https://www.w3schools.com/tags/ev_ondragleave.asp",
 			doc: "The ondragleave attribute fires when a draggable element or text selection leaves a valid drop target."
 		},
 		{
 			name: "ondragover",
-			url: "http://www.w3schools.com/tags/ev_ondragover.asp",
+			url: "https://www.w3schools.com/tags/ev_ondragover.asp",
 			doc: "The ondragover attribute fires when a draggable element or text selection is being dragged over a valid drop target."
 		},
 		{
 			name: "ondragstart",
-			url: "http://www.w3schools.com/tags/ev_ondragstart.asp",
+			url: "https://www.w3schools.com/tags/ev_ondragstart.asp",
 			doc: "The ondragstart attribute fires when the user starts to drag an element or text selection."
 		},
 		{
 			name: "ondrop",
-			url: "http://www.w3schools.com/tags/ev_ondrop.asp",
+			url: "https://www.w3schools.com/tags/ev_ondrop.asp",
 			doc: "The ondrop attribute fires when a draggable element or text selection is dropped on a valid drop target."
 		},
 		{
@@ -393,7 +393,7 @@ define([
 		},
 		{
 			name: "onwheel",
-			url: "http://www.w3schools.com/tags/ev_onwheel.asp",
+			url: "https://www.w3schools.com/tags/ev_onwheel.asp",
 			doc: "The onwheel attribute fires when the wheel of a pointing device is rolled up or down over an element."
 		}
 	];
@@ -447,7 +447,7 @@ define([
 		},
 		{
 			name: "type",
-			doc: "This attribute specifies the media type in the form of a MIME type for the link target. Generally, this is provided strictly as advisory information; however, in the future a browser might add a small icon for multimedia types. For example, a browser might add a small speaker icon when type is set to audio/wav. For a complete list of recognized MIME types, see http://www.w3.org/TR/html4/references.html#ref-MIMETYPES. Use this attribute only if the href attribute is present.",
+			doc: "This attribute specifies the media type in the form of a MIME type for the link target. Generally, this is provided strictly as advisory information; however, in the future a browser might add a small icon for multimedia types. For example, a browser might add a small speaker icon when type is set to audio/wav. For a complete list of recognized MIME types, see https://www.w3.org/TR/html4/references.html#ref-MIMETYPES. Use this attribute only if the href attribute is present.",
 			url: "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/a#attr-type"
 		}
 		// Obsolete attributes
@@ -953,7 +953,7 @@ define([
 		{
 			name: "xmlns",
 			url: "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/html#attr-xmlns",
-			doc: "Specifies the XML Namespace of the document. Default value is http://www.w3.org/1999/xhtml. This is required in XHTML, and optional in HTML5."
+			doc: "Specifies the XML Namespace of the document. Default value is https://www.w3.org/1999/xhtml. This is required in XHTML, and optional in HTML5."
 		}
 	];
 
@@ -1933,7 +1933,7 @@ define([
 				{name: "true", doc: "Assistive technologies will present the entire region as a whole."},
 				{name: "false", doc: "A change within the region may be processed by the assistive technologies on its own."}
 			],
-			url: "http://www.w3.org/TR/wai-aria/complete#aria-atomic"
+			url: "https://www.w3.org/TR/wai-aria/complete#aria-atomic"
 		},
 		{
 			name: "aria-busy",
@@ -1942,17 +1942,17 @@ define([
 				{name: "true", doc: "The live region is still being updated."},
 				{name: "false", doc: "There are no more expected updates for that live region."}
 			],
-			url: "http://www.w3.org/TR/wai-aria/complete#aria-busy"
+			url: "https://www.w3.org/TR/wai-aria/complete#aria-busy"
 		},
 		{
 			name: "aria-controls",
 			doc: "Identifies the element (or elements) whose contents or presence are controlled by the current element. See related aria-owns.",
-			url: "http://www.w3.org/TR/wai-aria/complete#aria-controls"
+			url: "https://www.w3.org/TR/wai-aria/complete#aria-controls"
 		},
 		{
 			name: "aria-describedby",
 			doc: "Identifies the element (or elements) that describes the object. See related aria-labelledby.",
-			url: "http://www.w3.org/TR/wai-aria/complete#aria-describedby"
+			url: "https://www.w3.org/TR/wai-aria/complete#aria-describedby"
 		},
 		{
 			name: "aria-disabled",
@@ -1961,7 +1961,7 @@ define([
 				{name: "true", doc: "The element and all focusable descendants are disabled and its value cannot be changed by the user."},
 				{name: "false", doc: "The element is enabled."}
 			],
-			url: "http://www.w3.org/TR/wai-aria/complete#aria-disabled"
+			url: "https://www.w3.org/TR/wai-aria/complete#aria-disabled"
 		},
 		{
 			name: "aria-dropeffect",
@@ -1974,12 +1974,12 @@ define([
 				{name: "popup", doc: "There is a popup menu or dialog that allows the user to choose one of the drag operations (copy, move, link, execute) and any other drag functionality, such as cancel."},
 				{name: "none", doc: "No operation can be performed; effectively cancels the drag operation if an attempt is made to drop on this object. Ignored if combined with any other token value. e.g. 'none copy' is equivalent to a 'copy' value."}
 			],
-			url: "http://www.w3.org/TR/wai-aria/complete#aria-dropeffect"
+			url: "https://www.w3.org/TR/wai-aria/complete#aria-dropeffect"
 		},
 		{
 			name: "aria-flowto",
 			doc: "Identifies the next element (or elements) in an alternate reading order of content which, at the user's discretion, allows assistive technology to override the general default of reading in document source order.",
-			url: "http://www.w3.org/TR/wai-aria/complete#aria-flowto"
+			url: "https://www.w3.org/TR/wai-aria/complete#aria-flowto"
 		},
 		{
 			name: "aria-grabbed",
@@ -1989,7 +1989,7 @@ define([
 				{name: "false", doc: "Indicates that the element supports being dragged."},
 				{name: "undefined", doc: "Indicates that the element does not support being dragged."}
 			],
-			url: "http://www.w3.org/TR/wai-aria/complete#aria-grabbed"
+			url: "https://www.w3.org/TR/wai-aria/complete#aria-grabbed"
 		},
 		{
 			name: "aria-haspopup",
@@ -1998,7 +1998,7 @@ define([
 				{name: "true", doc: "Indicates the object has a popup, either as a descendant or pointed to by aria-owns."},
 				{name: "false", doc: "The object has no popup."}
 			],
-			url: "http://www.w3.org/TR/wai-aria/complete#aria-haspopup"
+			url: "https://www.w3.org/TR/wai-aria/complete#aria-haspopup"
 		},
 		{
 			name: "aria-hidden",
@@ -2007,7 +2007,7 @@ define([
 				{name: "true", doc: "Indicates that this section of the document and its children are hidden from the rendered view."},
 				{name: "false", doc: "Indicates that this section of the document is rendered."}
 			],
-			url: "http://www.w3.org/TR/wai-aria/complete#aria-hidden"
+			url: "https://www.w3.org/TR/wai-aria/complete#aria-hidden"
 		},
 		{
 			name: "aria-invalid",
@@ -2018,17 +2018,17 @@ define([
 				{name: "spelling", doc: "A spelling error was detected."},
 				{name: "true", doc: "The value entered by the user has failed validation."}
 			],
-			url: "http://www.w3.org/TR/wai-aria/complete#aria-invalid"
+			url: "https://www.w3.org/TR/wai-aria/complete#aria-invalid"
 		},
 		{
 			name: "aria-label",
 			doc: "Defines a string value that labels the current element. See related aria-labelledby.",
-			url: "http://www.w3.org/TR/wai-aria/complete#aria-label"
+			url: "https://www.w3.org/TR/wai-aria/complete#aria-label"
 		},
 		{
 			name: "aria-labelledby",
 			doc: "Identifies the element (or elements) that labels the current element. See related aria-label and aria-describedby.",
-			url: "http://www.w3.org/TR/wai-aria/complete#aria-labelledby"
+			url: "https://www.w3.org/TR/wai-aria/complete#aria-labelledby"
 		},
 		{
 			name: "aria-live",
@@ -2038,12 +2038,12 @@ define([
 				{name: "polite", doc: "(Background change) Assistive technologies SHOULD announce updates at the next graceful opportunity, such as at the end of speaking the current sentence or when the user pauses typing."},
 				{name: "assertive", doc: "This information has the highest priority and assistive technologies SHOULD notify the user immediately. Because an interruption may disorient users or cause them to not complete their current task, authors SHOULD NOT use the assertive value unless the interruption is imperative."}
 			],
-			url: "http://www.w3.org/TR/wai-aria/complete#aria-live"
+			url: "https://www.w3.org/TR/wai-aria/complete#aria-live"
 		},
 		{
 			name: "aria-owns",
 			doc: "Identifies an element (or elements) in order to define a visual, functional, or contextual parent/child relationship between DOM elements where the DOM hierarchy cannot be used to represent the relationship. See related aria-controls.",
-			url: "http://www.w3.org/TR/wai-aria/complete#aria-owns"
+			url: "https://www.w3.org/TR/wai-aria/complete#aria-owns"
 		},
 		{
 			name: "aria-relevant",
@@ -2055,7 +2055,7 @@ define([
 				{name: "all", doc: "Equivalent to the combination of all values, 'additions removals text'."},
 				{name: "additions text", doc: "Equivalent to the combination of values, 'additions text'."}
 			],
-			url: "http://www.w3.org/TR/wai-aria/complete#aria-relevant"
+			url: "https://www.w3.org/TR/wai-aria/complete#aria-relevant"
 		}
 	];
 
@@ -2241,7 +2241,7 @@ define([
 	aria.attributes.activedescendant = {
 		name: "aria-activedescendant",
 		doc: "Identifies the currently active descendant of a composite widget.",
-		url: "http://www.w3.org/TR/wai-aria/complete#aria-activedescendant"
+		url: "https://www.w3.org/TR/wai-aria/complete#aria-activedescendant"
 	};
 	aria.attributes.autocomplete = {
 		name: "aria-autocomplete",
@@ -2252,7 +2252,7 @@ define([
 			{name: "both", doc: "A list of choices appears and the currently selected suggestion also appears inline."},
 			{name: "none", doc: "No input completion suggestions are provided."}
 		],
-		url: "http://www.w3.org/TR/wai-aria/complete#aria-autocomplete"
+		url: "https://www.w3.org/TR/wai-aria/complete#aria-autocomplete"
 	};
 	aria.attributes.checked = {
 		name: "aria-checked",
@@ -2263,7 +2263,7 @@ define([
 			{name: "mixed", doc: "Indicates a mixed mode value for a tri-state checkbox or menuitemcheckbox."},
 			{name: "undefined", doc: "The element does not support being checked."}
 		],
-		url: "http://www.w3.org/TR/wai-aria/complete#aria-checked"
+		url: "https://www.w3.org/TR/wai-aria/complete#aria-checked"
 	};
 	aria.attributes.expanded = {
 		name: "aria-expanded",
@@ -2273,12 +2273,12 @@ define([
 			{name: "false", doc: "The element, or another grouping element it controls, is collapsed."},
 			{name: "undefined", doc: "The element, or another grouping element it controls, is neither expandable nor collapsible; all its child elements are shown or there are no child elements."}
 		],
-		url: "http://www.w3.org/TR/wai-aria/complete#aria-expanded"
+		url: "https://www.w3.org/TR/wai-aria/complete#aria-expanded"
 	};
 	aria.attributes.level = {
 		name: "aria-level",
 		doc: "Defines the hierarchical level of an element within a structure.",
-		url: "http://www.w3.org/TR/wai-aria/complete#aria-level"
+		url: "https://www.w3.org/TR/wai-aria/complete#aria-level"
 	};
 	aria.attributes.multiline = {
 		name: "aria-multiline",
@@ -2287,7 +2287,7 @@ define([
 			{name: "true", doc: "This is a multi-line text box."},
 			{name: "false", doc: "This is a single-line text box."}
 		],
-		url: "http://www.w3.org/TR/wai-aria/complete#aria-multiline"
+		url: "https://www.w3.org/TR/wai-aria/complete#aria-multiline"
 	};
 	aria.attributes.multiselectable = {
 		name: "aria-multiselectable",
@@ -2296,7 +2296,7 @@ define([
 			{name: "true", doc: "More than one item in the widget may be selected at a time."},
 			{name: "false", doc: "Only one item can be selected."}
 		],
-		url: "http://www.w3.org/TR/wai-aria/complete#aria-multiselectable"
+		url: "https://www.w3.org/TR/wai-aria/complete#aria-multiselectable"
 	};
 	aria.attributes.orientation = {
 		name: "aria-orientation",
@@ -2305,12 +2305,12 @@ define([
 			{name: "vertical", doc: "The element is oriented vertically."},
 			{name: "horizontal", doc: "The element is oriented horizontally."}
 		],
-		url: "http://www.w3.org/TR/wai-aria/complete#aria-orientation"
+		url: "https://www.w3.org/TR/wai-aria/complete#aria-orientation"
 	};
 	aria.attributes.posinset = {
 		name: "aria-posinset",
 		doc: "Defines an element's number or position in the current set of listitems or treeitems. Not required if all elements in the set are present in the DOM. See related aria-setsize.",
-		url: "http://www.w3.org/TR/wai-aria/complete#aria-posinset"
+		url: "https://www.w3.org/TR/wai-aria/complete#aria-posinset"
 	};
 	aria.attributes.pressed = {
 		name: "aria-pressed",
@@ -2321,7 +2321,7 @@ define([
 			{name: "mixed", doc: "Indicates a mixed mode value for a tri-state toggle button."},
 			{name: "undefined", doc: "The element does not support being pressed."}
 		],
-		url: "http://www.w3.org/TR/wai-aria/complete#aria-pressed"
+		url: "https://www.w3.org/TR/wai-aria/complete#aria-pressed"
 	};
 	aria.attributes.readonly = {
 		name: "aria-readonly",
@@ -2330,7 +2330,7 @@ define([
 			{name: "true", doc: "The user cannot change the value of the element."},
 			{name: "false", doc: "The user can set the value of the element."}
 		],
-		url: "http://www.w3.org/TR/wai-aria/complete#aria-readonly"
+		url: "https://www.w3.org/TR/wai-aria/complete#aria-readonly"
 	};
 	aria.attributes.required = {
 		name: "aria-required",
@@ -2339,7 +2339,7 @@ define([
 			{name: "true", doc: "Users need to provide input on an element before a form is submitted."},
 			{name: "false", doc: "User input is not necessary to submit the form."}
 		],
-		url: "http://www.w3.org/TR/wai-aria/complete#aria-required"
+		url: "https://www.w3.org/TR/wai-aria/complete#aria-required"
 	};
 	aria.attributes.selected = {
 		name: "aria-selected",
@@ -2349,12 +2349,12 @@ define([
 			{name: "false", doc: "The selectable element is not selected."},
 			{name: "undefined", doc: "The element is not selectable."}
 		],
-		url: "http://www.w3.org/TR/wai-aria/complete#aria-selected"
+		url: "https://www.w3.org/TR/wai-aria/complete#aria-selected"
 	};
 	aria.attributes.setsize = {
 		name: "aria-setsize",
 		doc: "Defines the number of items in the current set of listitems or treeitems. Not required if all elements in the set are present in the DOM. See related aria-posinset.",
-		url: "http://www.w3.org/TR/wai-aria/complete#aria-setsize"
+		url: "https://www.w3.org/TR/wai-aria/complete#aria-setsize"
 	};
 	aria.attributes.sort = {
 		name: "aria-sort",
@@ -2365,27 +2365,27 @@ define([
 			{name: "none", doc: "There is no defined sort applied to the column."},
 			{name: "other", doc: "A sort algorithm other than ascending or descending has been applied."}
 		],
-		url: "http://www.w3.org/TR/wai-aria/complete#aria-sort"
+		url: "https://www.w3.org/TR/wai-aria/complete#aria-sort"
 	};
 	aria.attributes.valuemax = {
 		name: "aria-valuemax",
 		doc: "Defines the maximum allowed value for a range widget.",
-		url: "http://www.w3.org/TR/wai-aria/complete#aria-valuemax"
+		url: "https://www.w3.org/TR/wai-aria/complete#aria-valuemax"
 	};
 	aria.attributes.valuemin = {
 		name: "aria-valuemin",
 		doc: "Defines the minimum allowed value for a range widget.",
-		url: "http://www.w3.org/TR/wai-aria/complete#aria-valuemin"
+		url: "https://www.w3.org/TR/wai-aria/complete#aria-valuemin"
 	};
 	aria.attributes.valuenow = {
 		name: "aria-valuenow",
 		doc: "Defines the current value for a range widget. See related aria-valuetext.",
-		url: "http://www.w3.org/TR/wai-aria/complete#aria-valuenow"
+		url: "https://www.w3.org/TR/wai-aria/complete#aria-valuenow"
 	};
 	aria.attributes.valuetext = {
 		name: "aria-valuetext",
 		doc: "Defines the human readable text alternative of aria-valuenow for a range widget.",
-		url: "http://www.w3.org/TR/wai-aria/complete#aria-valuetext"
+		url: "https://www.w3.org/TR/wai-aria/complete#aria-valuetext"
 	};
 	aria.attributes.role = {
 		name: "role",
@@ -2453,7 +2453,7 @@ define([
 			{name: "treegrid", doc: "A grid whose rows can be expanded and collapsed in the same manner as for a tree.", url: "https://www.w3.org/TR/wai-aria/complete#treegrid"},
 			{name: "treeitem", doc: "An option item of a tree. This is an element within a tree that may be expanded or collapsed if it contains a sub-level group of treeitem elements.", url: "https://www.w3.org/TR/wai-aria/complete#treeitem"}
 		],
-		url: "http://www.w3.org/TR/role-attribute/"
+		url: "https://www.w3.org/TR/role-attribute/"
 	};
 
 	/**
