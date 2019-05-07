@@ -4,6 +4,8 @@
       <Exclude>bundles/org.eclipse.orion.client.core/web/js-tests/</Exclude>
       <Exclude>bundles/org.eclipse.orion.client.core/web/chai/</Exclude>
       <Exclude>bundles/org.eclipse.orion.client.core/web/mocha/</Exclude>
+      <Exclude>bundles/org.eclipse.orion.client.core/web/requirejs/almond.js</Exclude>
+      <Exclude>bundles/org.eclipse.orion.client.core/web/requirejs/require.min.js</Exclude>
       <Exclude>bundles/org.eclipse.orion.client.editor/web/js-tests/</Exclude>
       <Exclude>bundles/org.eclipse.orion.client.editor/web/examples/</Exclude>
       <Exclude>bundles/org.eclipse.orion.client.javascript/web/js-tests/</Exclude>
@@ -19,6 +21,7 @@
       <Exclude>bundles/org.eclipse.orion.client.ui/web/shell/</Exclude>
       <Exclude>bundles/org.eclipse.orion.client.ui/web/plugins/samples/</Exclude>
       <Exclude>bundles/org.eclipse.orion.client.ui/web/plugins/site/</Exclude>
+      <Exclude>bundles/org.eclipse.orion.client.ui/web/plugins/sampleCommandsPlugin.html</Exclude>
       <Exclude>bundles/org.eclipse.orion.client.webtools/web/js-tests/</Exclude>
       <Exclude>releng/org.eclipse.orion.client.releng/test/</Exclude>
       <Exclude>bundles/org.eclipse.orion.client.collab/</Exclude>
