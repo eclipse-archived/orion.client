@@ -875,22 +875,22 @@
       },
       "createdCallback": {
         "!type": "fn()",
-        "!url": "http://w3c.github.io/webcomponents/spec/custom/index.html#dfn-created-callback",
+        "!url": "https://w3c.github.io/webcomponents/spec/custom/index.html#dfn-created-callback",
         "!doc": "This callback is invoked after custom element instance is created and its definition is registered. The actual timing of this callback is defined further in this specification."
       },
       "attachedCallback": {
         "!type": "fn()",
-        "!url": "http://w3c.github.io/webcomponents/spec/custom/index.html#dfn-entered-view-callback",
+        "!url": "https://w3c.github.io/webcomponents/spec/custom/index.html#dfn-entered-view-callback",
         "!doc": "Unless specified otherwise, this callback must be enqueued whenever custom element is inserted into a document and this document has a browsing context."
       },
       "detachedCallback": {
         "!type": "fn()",
-        "!url": "http://w3c.github.io/webcomponents/spec/custom/index.html#dfn-left-view-callback",
+        "!url": "https://w3c.github.io/webcomponents/spec/custom/index.html#dfn-left-view-callback",
         "!doc": "Unless specified otherwise, this callback must be enqueued whenever custom element is removed from the document and this document has a browsing context."
       },
       "attributeChangedCallback": {
         "!type": "fn()",
-        "!url": "http://w3c.github.io/webcomponents/spec/custom/index.html#dfn-attribute-changed-callback",
+        "!url": "https://w3c.github.io/webcomponents/spec/custom/index.html#dfn-attribute-changed-callback",
         "!doc": "Unless specified otherwise, this callback must be enqueued whenever custom element's attribute is added, changed or removed."
       }
     },
@@ -1035,7 +1035,7 @@
         "createDocumentType": {
           "!type": "fn(qualifiedName: string, publicId: string, systemId: string) -> +Node",
           "!url": "https://developer.mozilla.org/en/docs/DOM/DOMImplementation.createDocumentType",
-          "!doc": "Returns a DocumentType object which can either be used with DOMImplementation.createDocument upon document creation or they can be put into the document via Node.insertBefore() or Node.replaceChild(): http://www.w3.org/TR/DOM-Level-3-Cor...l#ID-B63ED1A31 (less ideal due to features not likely being as accessible: http://www.w3.org/TR/DOM-Level-3-Cor...createDocument ). In any case, entity declarations and notations will not be available: http://www.w3.org/TR/DOM-Level-3-Cor...-createDocType   "
+          "!doc": "Returns a DocumentType object which can either be used with DOMImplementation.createDocument upon document creation or they can be put into the document via Node.insertBefore() or Node.replaceChild(): https://www.w3.org/TR/DOM-Level-3-Cor...l#ID-B63ED1A31 (less ideal due to features not likely being as accessible: https://www.w3.org/TR/DOM-Level-3-Cor...createDocument ). In any case, entity declarations and notations will not be available: https://www.w3.org/TR/DOM-Level-3-Cor...-createDocType   "
         },
         "createHTMLDocument": {
           "!type": "fn(title: string) -> +Document",
@@ -1272,7 +1272,7 @@
       },
       "registerElement": {
         "!type": "fn(type: string, options?: ?)",
-        "!url": "http://w3c.github.io/webcomponents/spec/custom/#extensions-to-document-interface-to-register",
+        "!url": "https://w3c.github.io/webcomponents/spec/custom/#extensions-to-document-interface-to-register",
         "!doc": "The registerElement method of the Document interface provides a way to register a custom element and returns its custom element constructor."
       },
       "getElementsByClassName": "Element.prototype.getElementsByClassName",

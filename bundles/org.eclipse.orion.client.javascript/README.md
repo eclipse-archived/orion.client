@@ -52,8 +52,8 @@ be found on the [Orion contributing code](https://wiki.eclipse.org/Orion/Contrib
 
 The Eclipse Foundation makes available all content in this plug-in (&quot;Content&quot;).  Unless otherwise 
 indicated below, the Content is provided to you under the terms and conditions of the
-[Eclipse Public License Version 1.0](http://www.eclipse.org/legal/epl-v10.html)
-(&quot;EPL&quot;), and the [Eclipse Distribution License Version 1.0](http://www.eclipse.org/org/documents/edl-v10.html) 
+[Eclipse Public License Version 1.0](https://www.eclipse.org/legal/epl-v10.html)
+(&quot;EPL&quot;), and the [Eclipse Distribution License Version 1.0](https://www.eclipse.org/org/documents/edl-v10.html) 
 (&quot;EDL&quot;). For purposes of the EPL and EDL, &quot;Program&quot; will mean the Content.
 		
 If you did not receive this Content directly from the Eclipse Foundation, the Content is 
@@ -61,4 +61,4 @@ being redistributed by another party (&quot;Redistributor&quot;) and different t
 apply to your use of any object code in the Content.  Check the Redistributor's license that was 
 provided with the Content.  If no such license exists, contact the Redistributor.  Unless otherwise
 indicated below, the terms and conditions of the EPL still apply to any source code in the Content
-and such source code may be obtained at [http://www.eclipse.org](http://www.eclipse.org/).
+and such source code may be obtained at [https://www.eclipse.org](https://www.eclipse.org/).

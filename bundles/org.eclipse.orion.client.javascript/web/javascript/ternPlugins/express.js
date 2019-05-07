@@ -3,8 +3,8 @@
  * Copyright (c) 2015, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
- * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
- * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html). 
+ * (https://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
+ * License v1.0 (https://www.eclipse.org/org/documents/edl-v10.html). 
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
@@ -27,7 +27,7 @@ define([
 			nodes: {top:true, member:false, prop:false},
 			template: "var ${app} = require('express');",
 			doc: Messages['expressrequire'],
-			url: "http://expressjs.com/en/4x/api.html"
+			url: "https://expressjs.com/en/4x/api.html"
 			
 		},
 		{
@@ -38,7 +38,7 @@ define([
 					  "${cursor}\n"+ 
 					  "app.listen(${timeout});\n",
 			doc: Messages['expressInstance'],
-			url: "http://expressjs.com/en/4x/api.html#app"
+			url: "https://expressjs.com/en/4x/api.html#app"
 		},
 		{
 			name: "express app get",
@@ -46,35 +46,35 @@ define([
 			template: "var value = app.get(${id}, function(request, result){\n" +
 					  "\t${cursor}\n});\n",
 			doc: Messages['expressGet'],
-			url: "http://expressjs.com/en/4x/api.html#app.get"
+			url: "https://expressjs.com/en/4x/api.html#app.get"
 		},
 		{
 			name: "express app set",
 			nodes: {top:true, member:false, prop:false},
 			template: "app.set(${id}, ${value});\n",
 			doc: Messages['expressSet'],
-			url: "http://expressjs.com/en/4x/api.html#app.set"
+			url: "https://expressjs.com/en/4x/api.html#app.set"
 		},
 		{
 			name: "express app use",
 			nodes: {top:true, member:false, prop:false},
 			template: "app.use(${fnOrObject});\n",
 			doc: Messages['expressUse'],
-			url: "http://expressjs.com/en/4x/api.html#app.use"
+			url: "https://expressjs.com/en/4x/api.html#app.use"
 		},
 		{
 			name: "express app engine",
 			nodes: {top:true, member:false, prop:false},
 			template: "app.engine(${fnOrObject});\n",
 			doc: Messages['expressEngine'],
-			url: "http://expressjs.com/en/4x/api.html#app.engine"
+			url: "https://expressjs.com/en/4x/api.html#app.engine"
 		},
 		{
 			name: "express app param",
 			nodes: {top:true, member:false, prop:false},
 			template: "app.param(${id}, ${value});\n",
 			doc: Messages['expressParam'],
-			url: "http://expressjs.com/en/4x/api.html#app.param"
+			url: "https://expressjs.com/en/4x/api.html#app.param"
 		},
 		{
 			name: "express app error use",
@@ -83,7 +83,7 @@ define([
   					  "\tresult.send(${code}, ${message});\n" + 
 					  "});\n",
 			doc: Messages['expressUseError'],
-			url: "http://expressjs.com/en/4x/api.html#app.use"
+			url: "https://expressjs.com/en/4x/api.html#app.use"
 		}
 		/* eslint-enable missing-nls */
 	];
@@ -140,7 +140,7 @@ define([
 		    		"!doc": "Built-in middleware function.  Pass the name of the directory that contains the static assets."
 		    	},
 	          "!type": "fn() -> app",
-	          "!url": "http://expressjs.com",
+	          "!url": "https://expressjs.com",
 	          "!doc": "Express is a minimal and flexible Node.js web application framework that provides a robust set of features for web and mobile applications."
           }
       },
@@ -589,7 +589,7 @@ define([
     },
     "links": {
       "!type": "fn(links: ?) -> ?",
-      "!doc": "Set Link header field with the given `links`.\n\nExamples:\n\n   res.links({\n     next: 'http://api.example.com/users?page=2',\n     last: 'http://api.example.com/users?page=5'\n   });\n\n@param {Object} links\n@return {ServerResponse}\n@public"
+      "!doc": "Set Link header field with the given `links`.\n\nExamples:\n\n   res.links({\n     next: 'https://api.example.com/users?page=2',\n     last: 'https://api.example.com/users?page=5'\n   });\n\n@param {Object} links\n@return {ServerResponse}\n@public"
     },
     "send": {
       "!type": "fn(body: ?) -> !this",
@@ -633,7 +633,7 @@ define([
     },
     "append": {
       "!type": "fn(field: string, val: string|[?]) -> ?",
-      "!doc": "Append additional header `field` with value `val`.\n\nExample:\n\n   res.append('Link', ['<http://localhost/>', '<http://localhost:3000/>']);\n   res.append('Set-Cookie', 'foo=bar; Path=/; HttpOnly');\n   res.append('Warning', '199 Miscellaneous warning');\n\n@param {String} field\n@param {String|Array} val\n@return {ServerResponse} for chaining\n@public"
+      "!doc": "Append additional header `field` with value `val`.\n\nExample:\n\n   res.append('Link', ['<https://localhost/>', '<https://localhost:3000/>']);\n   res.append('Set-Cookie', 'foo=bar; Path=/; HttpOnly');\n   res.append('Warning', '199 Miscellaneous warning');\n\n@param {String} field\n@param {String|Array} val\n@return {ServerResponse} for chaining\n@public"
     },
     "header": {
       "!type": "fn(field: ?, val: ?) -> !this",
@@ -653,11 +653,11 @@ define([
     },
     "location": {
       "!type": "fn(url: string) -> !this",
-      "!doc": "Set the location header to `url`.\n\nThe given `url` can also be \"back\", which redirects\nto the _Referrer_ or _Referer_ headers or \"/\".\n\nExamples:\n\n   res.location('/foo/bar').;\n   res.location('http://example.com');\n   res.location('../login');\n\n@param {String} url\n@return {ServerResponse} for chaining\n@public"
+      "!doc": "Set the location header to `url`.\n\nThe given `url` can also be \"back\", which redirects\nto the _Referrer_ or _Referer_ headers or \"/\".\n\nExamples:\n\n   res.location('/foo/bar').;\n   res.location('https://example.com');\n   res.location('../login');\n\n@param {String} url\n@return {ServerResponse} for chaining\n@public"
     },
     "redirect": {
       "!type": "fn(url: ?)",
-      "!doc": "Redirect to the given `url` with optional response `status`\ndefaulting to 302.\n\nThe resulting `url` is determined by `res.location()`, so\nit will play nicely with mounted apps, relative paths,\n`\"back\"` etc.\n\nExamples:\n\n   res.redirect('/foo/bar');\n   res.redirect('http://example.com');\n   res.redirect(301, 'http://example.com');\n   res.redirect('../login'); // /blog/post/1 -> /blog/login\n\n@public"
+      "!doc": "Redirect to the given `url` with optional response `status`\ndefaulting to 302.\n\nThe resulting `url` is determined by `res.location()`, so\nit will play nicely with mounted apps, relative paths,\n`\"back\"` etc.\n\nExamples:\n\n   res.redirect('/foo/bar');\n   res.redirect('https://example.com');\n   res.redirect(301, 'https://example.com');\n   res.redirect('../login'); // /blog/post/1 -> /blog/login\n\n@public"
     },
     "vary": {
       "!type": "fn(field: [?]|string) -> !this",

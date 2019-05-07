@@ -864,12 +864,12 @@ module.exports={
     {
       "name": "Yusuke Suzuki",
       "email": "utatane.tea@gmail.com",
-      "web": "http://github.com/Constellation"
+      "web": "https://github.com/Constellation"
     }
   ],
   "repository": {
     "type": "git",
-    "url": "http://github.com/estools/estraverse.git"
+    "url": "https://github.com/estools/estraverse.git"
   },
   "devDependencies": {
     "babel-preset-es2015": "^6.3.13",

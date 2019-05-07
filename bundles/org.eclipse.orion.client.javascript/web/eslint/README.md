@@ -7,7 +7,7 @@
 
 # ESLint
 
-[Website](http://eslint.org) | [Configuring](http://eslint.org/docs/user-guide/configuring) | [Rules](http://eslint.org/docs/rules/) | [Contributing](http://eslint.org/docs/developer-guide/contributing) | [Twitter](https://twitter.com/geteslint) | [Mailing List](https://groups.google.com/group/eslint)
+[Website](https://eslint.org) | [Configuring](https://eslint.org/docs/user-guide/configuring) | [Rules](https://eslint.org/docs/rules/) | [Contributing](https://eslint.org/docs/developer-guide/contributing) | [Twitter](https://twitter.com/geteslint) | [Mailing List](https://groups.google.com/group/eslint)
 
 ESLint is a tool for identifying and reporting on patterns found in ECMAScript/JavaScript code. In many ways, it is similar to JSLint and JSHint with a few exceptions:
 
@@ -44,13 +44,13 @@ After running `eslint --init`, you'll have a `.eslintrc` file in your directory.
 }
 ```
 
-The names `"semi"` and `"quotes"` are the names of [rules](http://eslint.org/docs/rules) in ESLint. The number is the error level of the rule and can be one of the three values:
+The names `"semi"` and `"quotes"` are the names of [rules](https://eslint.org/docs/rules) in ESLint. The number is the error level of the rule and can be one of the three values:
 
 * `0` - turn the rule off
 * `1` - turn the rule on as a warning (doesn't affect exit code)
 * `2` - turn the rule on as an error (exit code will be 1)
 
-The three error levels allow you fine-grained control over how ESLint applies rules (for more configuration options and details, see the [configuration docs](http://eslint.org/docs/user-guide/configuring)).
+The three error levels allow you fine-grained control over how ESLint applies rules (for more configuration options and details, see the [configuration docs](https://eslint.org/docs/user-guide/configuring)).
 
 ## Sponsors
 
@@ -101,11 +101,11 @@ ESLint does both traditional linting (looking for problematic patterns) and styl
 
 ### What about ECMAScript 6 support?
 
-ESLint has full support for ECMAScript 6. By default, this support is off. You can enable ECMAScript 6 support through [configuration](http://eslint.org/docs/user-guide/configuring).
+ESLint has full support for ECMAScript 6. By default, this support is off. You can enable ECMAScript 6 support through [configuration](https://eslint.org/docs/user-guide/configuring).
 
 ### Does ESLint support JSX?
 
-Yes, ESLint natively supports parsing JSX syntax (this must be enabled in [configuration](http://eslint.org/docs/user-guide/configuring).). Please note that supporting JSX syntax *is not* the same as supporting React. React applies specific semantics to JSX syntax that ESLint doesn't recognize. We recommend using [eslint-plugin-react](https://www.npmjs.com/package/eslint-plugin-react) if you are using React and want React semantics.
+Yes, ESLint natively supports parsing JSX syntax (this must be enabled in [configuration](https://eslint.org/docs/user-guide/configuring).). Please note that supporting JSX syntax *is not* the same as supporting React. React applies specific semantics to JSX syntax that ESLint doesn't recognize. We recommend using [eslint-plugin-react](https://www.npmjs.com/package/eslint-plugin-react) if you are using React and want React semantics.
 
 ### What about ECMAScript 7/2016 and experimental features?
 
@@ -122,5 +122,5 @@ Join our [Mailing List](https://groups.google.com/group/eslint) or [Chatroom](ht
 [travis-url]: https://travis-ci.org/eslint/eslint
 [coveralls-image]: https://img.shields.io/coveralls/eslint/eslint/master.svg?style=flat-square
 [coveralls-url]: https://coveralls.io/r/eslint/eslint?branch=master
-[downloads-image]: http://img.shields.io/npm/dm/eslint.svg?style=flat-square
+[downloads-image]: https://img.shields.io/npm/dm/eslint.svg?style=flat-square
 [downloads-url]: https://www.npmjs.com/package/eslint

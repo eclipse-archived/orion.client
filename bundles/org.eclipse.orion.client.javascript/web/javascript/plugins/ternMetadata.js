@@ -3,8 +3,8 @@
  * Copyright (c) 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License v1.0
- * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution
- * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html).
+ * (https://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution
+ * License v1.0 (https://www.eclipse.org/org/documents/edl-v10.html).
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
@@ -18,49 +18,49 @@ define([
 		definitions: Object.freeze({
 			ecma5: {
 				doc: Messages["ecma5"],
-				url: "http://ternjs.net/doc/manual.html#typedef"
+				url: "https://ternjs.net/doc/manual.html#typedef"
 			},
 			ecma6: {
 				doc: Messages["ecma6"],
-				url: "http://ternjs.net/doc/manual.html#typedef"
+				url: "https://ternjs.net/doc/manual.html#typedef"
 			},
 			ecma7: {
 				doc: Messages["ecma7"],
-				url: "http://ternjs.net/doc/manual.html#typedef"
+				url: "https://ternjs.net/doc/manual.html#typedef"
 			},
 			browser: {
 				doc: Messages["browserDef"],
-				url: "http://ternjs.net/doc/manual.html#typedef"
+				url: "https://ternjs.net/doc/manual.html#typedef"
 			},
 			chai: {
 				doc: Messages["chai"],
-				url: "http://ternjs.net/doc/manual.html#typedef"
+				url: "https://ternjs.net/doc/manual.html#typedef"
 			}
 		}),
 		attributes: Object.freeze({
 			dependencyBudget: {
 				doc: Messages["dependencyBudget"],
-				url: "http://ternjs.net/doc/manual.html#configuration"
+				url: "https://ternjs.net/doc/manual.html#configuration"
 			},
 			dontLoad: {
 				doc: Messages["dontLoad"],
-				url: "http://ternjs.net/doc/manual.html#configuration"
+				url: "https://ternjs.net/doc/manual.html#configuration"
 			},
 			ecmaVersion: {
 				doc: Messages["ecmaVersionDescription"],
-				url: "http://ternjs.net/doc/manual.html#configuration"
+				url: "https://ternjs.net/doc/manual.html#configuration"
 			},
 			libs: {
 				doc: Messages["libs"],
-				url: "http://ternjs.net/doc/manual.html#configuration"
+				url: "https://ternjs.net/doc/manual.html#configuration"
 			},
 			loadEagerly: {
 				doc: Messages["loadEagerly"],
-				url: "http://ternjs.net/doc/manual.html#configuration"
+				url: "https://ternjs.net/doc/manual.html#configuration"
 			},
 			plugins: {
 				doc: Messages["plugins"],
-				url: "http://ternjs.net/doc/manual.html#configuration"
+				url: "https://ternjs.net/doc/manual.html#configuration"
 			}
 		}),
 		plugins: Object.freeze({
@@ -73,7 +73,7 @@ define([
 				doc_comment: {
 					name: Messages["ternDocPluginName"],
 					description: Messages["ternDocPluginDescription"],
-					url: "http://ternjs.net/doc/manual.html#plugin_doc_comment",
+					url: "https://ternjs.net/doc/manual.html#plugin_doc_comment",
 					fullDocs: true,
 					version: "0.18.0"
 				},
@@ -153,19 +153,19 @@ define([
 				angular: {
 					name: Messages["orionAngularPluginName"],
 					description: Messages["orionAngularPluginDescription"],
-					url: "http://ternjs.net/doc/manual.html#plugin_angular",
+					url: "https://ternjs.net/doc/manual.html#plugin_angular",
 					version: "0.18.0"
 				},
 				commonjs: {
 					name: Messages['commonjsPluginName'],
 					description: Messages['commonjsPluginDescription'],
-					url: "http://ternjs.net/doc/manual.html#plugin_commonjs",
+					url: "https://ternjs.net/doc/manual.html#plugin_commonjs",
 					version: "0.18.0"
 				},
 				complete_strings: {
 					name: Messages['ternCompleteStringsPluginName'],
 					description: Messages['ternCompleteStringsPluginDescription'],
-					url: "http://ternjs.net/doc/manual.html#plugin_complete_strings",
+					url: "https://ternjs.net/doc/manual.html#plugin_complete_strings",
 					version: "0.18.0"
 				},
 				express: {
@@ -177,7 +177,7 @@ define([
 				es_modules: {
 					name: Messages["orionESModulesPluginName"],
 					description: Messages["orionESModulesPluginDescription"],
-					url: "http://ternjs.net/doc/manual.html#plugin_es_modules",
+					url: "https://ternjs.net/doc/manual.html#plugin_es_modules",
 					version: "0.18.0",
 				},
 				mongodb: {
@@ -195,7 +195,7 @@ define([
 				node: {
 					name: Messages["orionNodePluginName"],
 					description: Messages["orionNodePluginDescription"],
-					url: "http://ternjs.net/doc/manual.html#plugin_node",
+					url: "https://ternjs.net/doc/manual.html#plugin_node",
 					version: "0.18.0"
 				},
 				postgres: {
@@ -213,13 +213,13 @@ define([
 				requirejs: {
 					name: Messages["orionRequirePluginName"],
 					description: Messages["orionRequirePluginDescription"],
-					url: "http://ternjs.net/doc/manual.html#plugin_requirejs",
+					url: "https://ternjs.net/doc/manual.html#plugin_requirejs",
 					version: "0.18.0"
 				},
 				webpack: {
 					name: Messages["orionWebpackPluginName"],
 					description: Messages["orionWebpackPluginDescription"],
-					url: "http://ternjs.net/doc/manual.html#plugin_webpack",
+					url: "https://ternjs.net/doc/manual.html#plugin_webpack",
 					version: "0.18.0"
 				}
 			}

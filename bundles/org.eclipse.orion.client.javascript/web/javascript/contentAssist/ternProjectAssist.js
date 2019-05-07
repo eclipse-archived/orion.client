@@ -3,8 +3,8 @@
  * Copyright (c) 2016 IBM Corporation, Inc. and others.
  * All rights reserved. This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License v1.0
- * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution
- * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html).
+ * (https://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution
+ * License v1.0 (https://www.eclipse.org/org/documents/edl-v10.html).
  *
  * Contributors:
  *   IBM Corporation - Various improvements
@@ -48,7 +48,7 @@ define([
 							'\t"loadEagerly": [\n\t\t\n\t]\n'+ //$NON-NLS-1$
 					   '}',
 			doc: Messages['emptyFileTemplateDoc'],
-			url: "http://ternjs.net/doc/manual.html#configuration" //$NON-NLS-1$
+			url: "https://ternjs.net/doc/manual.html#configuration" //$NON-NLS-1$
 		}
 	];
 	

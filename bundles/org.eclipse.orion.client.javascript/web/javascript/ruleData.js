@@ -3,8 +3,8 @@
  * Copyright (c) 2015, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License v1.0
- * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution
- * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html).
+ * (https://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution
+ * License v1.0 (https://www.eclipse.org/org/documents/edl-v10.html).
  *
  * Contributors:
  *	 IBM Corporation - initial API and implementation
@@ -99,22 +99,22 @@ define([
 		metadata: {
 			"accessor-pairs" : {
 				description: Messages['accessor-pairs-description'],
-				url: 'http://eslint.org/docs/rules/accessor-pairs'
+				url: 'https://eslint.org/docs/rules/accessor-pairs'
 			},
 			"check-tern-plugin" : {
 				description: Messages['check-tern-plugin-description']
 			},
 			"curly" : {
 				description: Messages['curly-description'],
-				url: 'http://eslint.org/docs/rules/curly'
+				url: 'https://eslint.org/docs/rules/curly'
 			},
 			"eqeqeq": {
 				description: Messages['eqeqeq-description'],
-				url: "http://eslint.org/docs/rules/eqeqeq"
+				url: "https://eslint.org/docs/rules/eqeqeq"
 			},
 			"missing-doc" : {
 				description: Messages['missing-doc-description'],
-				url: 'http://eslint.org/docs/rules/valid-jsdoc'
+				url: 'https://eslint.org/docs/rules/valid-jsdoc'
 			},
 			"missing-nls" : {
 				description: Messages['missing-nls-description']
@@ -124,255 +124,255 @@ define([
 			},
 			"new-parens" : {
 				description: Messages['new-parens-description'],
-				url: 'http://eslint.org/docs/rules/new-parens'
+				url: 'https://eslint.org/docs/rules/new-parens'
 			},
 			"no-caller": {
 				description: Messages['no-caller-description'],
-				url: 'http://eslint.org/docs/rules/no-caller'
+				url: 'https://eslint.org/docs/rules/no-caller'
 			},
 			"no-comma-dangle" : {
 				description: Messages['no-comma-dangle-description'],
-				url: 'http://eslint.org/docs/rules/no-comma-dangle'
+				url: 'https://eslint.org/docs/rules/no-comma-dangle'
 			},
 			"no-cond-assign" : {
 				description: Messages['no-cond-assign-description'],
-				url: 'http://eslint.org/docs/rules/no-cond-assign'
+				url: 'https://eslint.org/docs/rules/no-cond-assign'
 			},
 			"no-console" : {
 				description: Messages['no-console-description'],
-				url: 'http://eslint.org/docs/rules/no-console'
+				url: 'https://eslint.org/docs/rules/no-console'
 			},
 			"no-constant-condition" : {
 				description: Messages['no-constant-condition-description'],
-				url: 'http://eslint.org/docs/rules/no-constant-condition'
+				url: 'https://eslint.org/docs/rules/no-constant-condition'
 			},
 			"no-const-assign" : {
 				description: Messages['no-const-assign-description'],
-				url: 'http://eslint.org/docs/rules/no-const-assign'
+				url: 'https://eslint.org/docs/rules/no-const-assign'
 			},
 			"no-control-regex" : {
 				description: Messages['no-control-regex-description'],
-				url: 'http://eslint.org/docs/rules/no-control-regex'
+				url: 'https://eslint.org/docs/rules/no-control-regex'
 			},
 			"no-debugger" : {
 				description: Messages['no-debugger-description'],
-				url: 'http://eslint.org/docs/rules/no-debugger'
+				url: 'https://eslint.org/docs/rules/no-debugger'
 			},
 			"no-dupe-keys" : {
 				description: Messages['no-dupe-keys-description'],
-				url: 'http://eslint.org/docs/rules/no-dupe-keys'
+				url: 'https://eslint.org/docs/rules/no-dupe-keys'
 			},
 			"no-duplicate-case": {
 				description: Messages['no-duplicate-case-description'],
-				url: 'http://eslint.org/docs/rules/no-duplicate-case'
+				url: 'https://eslint.org/docs/rules/no-duplicate-case'
 			},
 			"no-else-return" : {
 				description: Messages['no-else-return-description'],
-				url: 'http://eslint.org/docs/rules/no-else-return'
+				url: 'https://eslint.org/docs/rules/no-else-return'
 			},
 			"no-empty-block" : {
 				description: Messages['no-empty-block-description'],
-				url: 'http://eslint.org/docs/rules/no-empty'
+				url: 'https://eslint.org/docs/rules/no-empty'
 			},
 			"no-empty-character-class" : {
 				description: Messages['no-empty-character-class-description'],
-				url: 'http://eslint.org/docs/rules/no-empty-character-class'
+				url: 'https://eslint.org/docs/rules/no-empty-character-class'
 			},
 			"no-empty-label" : {
 				description: Messages['no-empty-label-description'],
-				url: 'http://eslint.org/docs/rules/no-empty-label'
+				url: 'https://eslint.org/docs/rules/no-empty-label'
 			},
 			"no-eq-null" : {
 				description: Messages['no-eq-null-description'],
-				url: 'http://eslint.org/docs/rules/no-eq-null'
+				url: 'https://eslint.org/docs/rules/no-eq-null'
 			},
 			"no-eval" : {
 				description: Messages['no-eval-description'],
-				url: 'http://eslint.org/docs/rules/no-eval'
+				url: 'https://eslint.org/docs/rules/no-eval'
 			},
 			"no-extend-native" : {
 				description: Messages['no-extend-native-description'],
-				url: 'http://eslint.org/docs/rules/no-extend-native'
+				url: 'https://eslint.org/docs/rules/no-extend-native'
 			},
 			"no-extra-bind" : {
 				description: Messages['no-extra-bind-description'],
-				url: 'http://eslint.org/docs/rules/no-extra-bind'
+				url: 'https://eslint.org/docs/rules/no-extra-bind'
 			},
 			"no-extra-boolean-cast" : {
 				description: Messages['no-extra-boolean-cast-description'],
-				url: 'http://eslint.org/docs/rules/no-extra-boolean-cast'
+				url: 'https://eslint.org/docs/rules/no-extra-boolean-cast'
 			},
 			"no-extra-parens" : {
 				description: Messages['no-extra-parens-description'],
-				url: 'http://eslint.org/docs/rules/no-extra-parens'
+				url: 'https://eslint.org/docs/rules/no-extra-parens'
 			},
 			"no-extra-semi": {
 				description: Messages['no-extra-semi-description'],
-				url: 'http://eslint.org/docs/rules/no-extra-semi'
+				url: 'https://eslint.org/docs/rules/no-extra-semi'
 			},
 			"no-fallthrough" : {
 				description: Messages['no-fallthrough-description'],
-				url: 'http://eslint.org/docs/rules/no-fallthrough'
+				url: 'https://eslint.org/docs/rules/no-fallthrough'
 			},
 			"no-implicit-coercion" : {
 				description: Messages['no-implicit-coercion-description'],
-				url: 'http://eslint.org/docs/rules/no-implicit-coercion'
+				url: 'https://eslint.org/docs/rules/no-implicit-coercion'
 			},
 			"no-implied-eval" : {
 				description: Messages['no-implied-eval-description'],
-				url: 'http://eslint.org/docs/rules/no-implied-eval'
+				url: 'https://eslint.org/docs/rules/no-implied-eval'
 			},
 			"no-invalid-regexp": {
 				description: Messages['no-invalid-regexp-description'],
-				url: 'http://eslint.org/docs/rules/no-invalid-regexp'
+				url: 'https://eslint.org/docs/rules/no-invalid-regexp'
 			},
 			"no-invalid-this": {
 				description: Messages['no-invalid-this-description'],
-				url: 'http://eslint.org/docs/rules/no-invalid-this'
+				url: 'https://eslint.org/docs/rules/no-invalid-this'
 			},
 			"no-irregular-whitespace" : {
 				description: Messages['no-irregular-whitespace-description'],
-				url: 'http://eslint.org/docs/rules/no-irregular-whitespace'
+				url: 'https://eslint.org/docs/rules/no-irregular-whitespace'
 			},
 			"no-iterator": {
 				description: Messages['no-iterator-description'],
-				url: 'http://eslint.org/docs/rules/no-iterator'
+				url: 'https://eslint.org/docs/rules/no-iterator'
 			},
 			"no-jslint" : {
 				description: Messages['no-jslint-description']
 			},
 			"no-native-reassign" : {
 				description: Messages['no-native-reassign-description'],
-				url: 'http://eslint.org/docs/rules/no-native-reassign'
+				url: 'https://eslint.org/docs/rules/no-native-reassign'
 			},
 			"no-lone-blocks" : {
 				description: Messages['no-lone-blocks-description'],
-				url: 'http://eslint.org/docs/rules/no-lone-blocks'
+				url: 'https://eslint.org/docs/rules/no-lone-blocks'
 			},
 			"no-mixed-spaces-and-tabs" : {
 				description: Messages['no-mixed-spaces-and-tabs-description'],
-				url: 'http://eslint.org/docs/rules/no-mixed-spaces-and-tabs'
+				url: 'https://eslint.org/docs/rules/no-mixed-spaces-and-tabs'
 			},
 			"no-negated-in-lhs" : {
 				description: Messages['no-negated-in-lhs-description'],
-				url: 'http://eslint.org/docs/rules/no-negated-in-lhs'
+				url: 'https://eslint.org/docs/rules/no-negated-in-lhs'
 			},
 			"no-new-array": {
 				description: Messages['no-new-array-description'],
-				url: 'http://eslint.org/docs/rules/no-array-constructor'
+				url: 'https://eslint.org/docs/rules/no-array-constructor'
 			},
 			"no-new-func" : {
 				description: Messages['no-new-func-description'],
-				url: 'http://eslint.org/docs/rules/no-new-func'
+				url: 'https://eslint.org/docs/rules/no-new-func'
 			},
 			"no-new-object" : {
 				description: Messages['no-new-object-description'],
-				url: 'http://eslint.org/docs/rules/no-new-object'
+				url: 'https://eslint.org/docs/rules/no-new-object'
 			},
 			"no-new-wrappers" : {
 				description: Messages['no-new-wrappers-description'],
-				url: 'http://eslint.org/docs/rules/no-new-wrappers'
+				url: 'https://eslint.org/docs/rules/no-new-wrappers'
 			},
 			"no-obj-calls" : {
 				description: Messages['no-obj-calls-description'],
-				url: 'http://eslint.org/docs/rules/no-obj-calls'
+				url: 'https://eslint.org/docs/rules/no-obj-calls'
 			},
 			"no-param-reassign" : {
 				description: Messages['no-param-reassign-description'],
-				url: 'http://eslint.org/docs/rules/no-param-reassign'
+				url: 'https://eslint.org/docs/rules/no-param-reassign'
 			},
 			"no-proto" : {
 				description: Messages['no-proto-description'],
-				url: 'http://eslint.org/docs/rules/no-proto'
+				url: 'https://eslint.org/docs/rules/no-proto'
 			},
 			"no-redeclare" : {
 				description: Messages['no-redeclare-description'],
-				url: 'http://eslint.org/docs/rules/no-redeclare'
+				url: 'https://eslint.org/docs/rules/no-redeclare'
 			},
 			"no-regex-spaces" : {
 				description: Messages['no-regex-spaces-description'],
-				url: 'http://eslint.org/docs/rules/no-regex-spaces'
+				url: 'https://eslint.org/docs/rules/no-regex-spaces'
 			},
 			"no-reserved-keys" : {
 				description: Messages['no-reserved-keys-description'],
-				url: 'http://eslint.org/docs/rules/no-reserved-keys'
+				url: 'https://eslint.org/docs/rules/no-reserved-keys'
 			},
 			"no-self-compare" : {
 				description: Messages['no-self-compare-description'],
-				url: 'http://eslint.org/docs/rules/no-self-compare'
+				url: 'https://eslint.org/docs/rules/no-self-compare'
 			},
 			"no-self-assign" : {
 				description: Messages['no-self-assign-description'],
-				url: 'http://eslint.org/docs/rules/no-self-assign'
+				url: 'https://eslint.org/docs/rules/no-self-assign'
 			},
 			"no-shadow" : {
 				description: Messages['no-shadow-description'],
-				url: 'http://eslint.org/docs/rules/no-shadow'
+				url: 'https://eslint.org/docs/rules/no-shadow'
 			},
 			"no-shadow-global" : {
 				description: Messages['no-shadow-global-description']
 			},
 			"no-sparse-arrays" : {
 				description: Messages['no-sparse-arrays-description'],
-				url: 'http://eslint.org/docs/rules/no-sparse-arrays'
+				url: 'https://eslint.org/docs/rules/no-sparse-arrays'
 			},
 			"no-throw-literal" : {
 				description: Messages['no-throw-literal-description'],
-				url: 'http://eslint.org/docs/rules/no-throw-literal'
+				url: 'https://eslint.org/docs/rules/no-throw-literal'
 			},
 			"no-trailing-spaces" : {
 				description: Messages['no-trailing-spaces-description'],
-				url: 'http://eslint.org/docs/rules/no-trailing-spaces'
+				url: 'https://eslint.org/docs/rules/no-trailing-spaces'
 			},
 			"no-undef" : {
 				description: Messages['no-undef-description'],
-				url: 'http://eslint.org/docs/rules/no-undef'
+				url: 'https://eslint.org/docs/rules/no-undef'
 			},
 			"no-undef-expression" : {
 				description: Messages['no-undef-expression-description']
 			},
 			"no-undef-init" : {
 				description: Messages['no-undef-init-description'],
-				url: 'http://eslint.org/docs/rules/no-undef-init'
+				url: 'https://eslint.org/docs/rules/no-undef-init'
 			},
 			"no-unreachable" : {
 				description: Messages['no-unreachable-description'],
-				url: 'http://eslint.org/docs/rules/no-unreachable'
+				url: 'https://eslint.org/docs/rules/no-unreachable'
 			},
 			"no-unused-expressions" : {
 				description: Messages['no-unused-expressions-description'],
-				url: 'http://eslint.org/docs/rules/no-unused-expressions'
+				url: 'https://eslint.org/docs/rules/no-unused-expressions'
 			},
 			"no-unused-params" : {
 				description: Messages['no-unused-params-description']
 			},
 			"no-unused-vars" : {
 				description: Messages['no-unused-vars-description'],
-				url: 'http://eslint.org/docs/rules/no-unused-vars'
+				url: 'https://eslint.org/docs/rules/no-unused-vars'
 			},
 			"no-use-before-define" : {
 				description: Messages['no-use-before-define-description'],
-				url: 'http://eslint.org/docs/rules/no-use-before-define'
+				url: 'https://eslint.org/docs/rules/no-use-before-define'
 			},
 			"no-void" : {
 				description: Messages['no-void-description'],
-				url: 'http://eslint.org/docs/rules/no-void'
+				url: 'https://eslint.org/docs/rules/no-void'
 			},
 			"no-with" : {
 				description: Messages['no-with-description'],
-				url: 'http://eslint.org/docs/rules/no-with'
+				url: 'https://eslint.org/docs/rules/no-with'
 			},
 			"quotes" : {
 				description: Messages['quotes-description'],
-				url: 'http://eslint.org/docs/rules/quotes'
+				url: 'https://eslint.org/docs/rules/quotes'
 			},
 			"radix" : {
 				description: Messages['radix-description'],
-				url: 'http://eslint.org/docs/rules/radix'
+				url: 'https://eslint.org/docs/rules/radix'
 			},
 			"semi" : {
 				description: Messages['semi-description'],
-				url: 'http://eslint.org/docs/rules/semi'
+				url: 'https://eslint.org/docs/rules/semi'
 			},
 			"unknown-require" : {
 				description: Messages['unknown-require-description']
@@ -382,18 +382,18 @@ define([
 			},
 			"use-isnan" : {
 				description: Messages['use-isnan-description'],
-				url: 'http://eslint.org/docs/rules/use-isnan'
+				url: 'https://eslint.org/docs/rules/use-isnan'
 			},
 			"valid-typeof" : {
 				description: Messages['valid-typeof-description'],
-				url: 'http://eslint.org/docs/rules/valid-typeof'
+				url: 'https://eslint.org/docs/rules/valid-typeof'
 			},
 			"type-checked-consistent-return" : {
 				description: Messages['type-checked-consistent-return-description']
 			},
 			"yoda" : {
 				description: Messages['yoda-description'],
-				url: 'http://eslint.org/docs/rules/yoda'
+				url: 'https://eslint.org/docs/rules/yoda'
 			}
 		}
 	};

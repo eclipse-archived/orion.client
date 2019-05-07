@@ -3,8 +3,8 @@
  * Copyright (c) 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License v1.0
- * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution
- * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html).
+ * (https://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution
+ * License v1.0 (https://www.eclipse.org/org/documents/edl-v10.html).
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
@@ -25,63 +25,63 @@ define([
 		rootItems = Object.freeze({
 			ecmaFeatures_experimentalObjectRestSpread: {
 				doc: Messages.eslintObjectSpread,
-				url: "http://eslint.org/docs/user-guide/configuring#specifying-parser-options"
+				url: "https://eslint.org/docs/user-guide/configuring#specifying-parser-options"
 			},
 			ecmaFeatures_globalReturn: {
 				doc: Messages.eslintGlobalReturn,
-				url: "http://eslint.org/docs/user-guide/configuring#specifying-parser-options"
+				url: "https://eslint.org/docs/user-guide/configuring#specifying-parser-options"
 			},
 			ecmaFeatures_impliedStrict: {
 				doc: Messages.eslintImpliedStrict,
-				url: "http://eslint.org/docs/user-guide/configuring#specifying-parser-options"
+				url: "https://eslint.org/docs/user-guide/configuring#specifying-parser-options"
 			},
 			ecmaFeatures_jsx: {
 				doc: Messages.eslintJSX,
-				url: "http://eslint.org/docs/user-guide/configuring#specifying-parser-options"
+				url: "https://eslint.org/docs/user-guide/configuring#specifying-parser-options"
 			},
 			env: {
 				doc: Messages.envDoc,
-				url: "http://eslint.org/docs/user-guide/configuring#specifying-environments"
+				url: "https://eslint.org/docs/user-guide/configuring#specifying-environments"
 			},
 			"extends": {
 				doc: Messages.eslintExtendsDoc,
-				url: "http://eslint.org/docs/user-guide/configuring#extending-configuration-files"
+				url: "https://eslint.org/docs/user-guide/configuring#extending-configuration-files"
 			},
 			globals: {
 				doc: Messages.eslintGlobalsDoc,
-				url: "http://eslint.org/docs/user-guide/configuring#specifying-globals"
+				url: "https://eslint.org/docs/user-guide/configuring#specifying-globals"
 			},
 			parser: {
 				doc: Messages.eslintParserDoc,
-				url: "http://eslint.org/docs/user-guide/configuring#specifying-parser"
+				url: "https://eslint.org/docs/user-guide/configuring#specifying-parser"
 			},
 			parserOptions: {
 				doc: Messages.eslintParserOptionsDoc,
-				url: "http://eslint.org/docs/user-guide/configuring#specifying-parser-options"
+				url: "https://eslint.org/docs/user-guide/configuring#specifying-parser-options"
 			},
 			parserOptions_ecmaVersion: {
 				doc: Messages.eslintEcmaVersion,
-				url: "http://eslint.org/docs/user-guide/configuring#specifying-parser-options"
+				url: "https://eslint.org/docs/user-guide/configuring#specifying-parser-options"
 			},
 			parserOptions_sourceType: {
 				doc: Messages.eslintSourceType,
-				url: "http://eslint.org/docs/user-guide/configuring#specifying-parser-options"
+				url: "https://eslint.org/docs/user-guide/configuring#specifying-parser-options"
 			},
 			parserOptions_ecmaFeatures: {
 				doc: Messages.eslintParserOptionsDoc,
-				url: "http://eslint.org/docs/user-guide/configuring#specifying-parser-options"
+				url: "https://eslint.org/docs/user-guide/configuring#specifying-parser-options"
 			},
 			plugins: {
 				doc: Messages.eslintPluginsDoc,
-				url: "http://eslint.org/docs/user-guide/configuring#configuring-plugins"
+				url: "https://eslint.org/docs/user-guide/configuring#configuring-plugins"
 			},
 			rules: {
 				doc: Messages.rulesDoc,
-				url: "http://eslint.org/docs/user-guide/configuring#configuring-rules"
+				url: "https://eslint.org/docs/user-guide/configuring#configuring-rules"
 			},
 			settings: {
 				doc: Messages.eslintSettingsDoc,
-				url: "http://eslint.org/docs/user-guide/configuring#adding-shared-settings"
+				url: "https://eslint.org/docs/user-guide/configuring#adding-shared-settings"
 			}
 		});
 	

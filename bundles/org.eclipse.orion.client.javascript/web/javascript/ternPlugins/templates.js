@@ -3,8 +3,8 @@
  * Copyright (c) 2016, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
- * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
- * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html). 
+ * (https://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
+ * License v1.0 (https://www.eclipse.org/org/documents/edl-v10.html). 
  *
  * Contributors:
  *     IBM Corporation - Allow original requirejs plugin to find files in Orion workspace
@@ -156,7 +156,7 @@ define([
 			name: "eslint", //$NON-NLS-1$
 			nodes: {top:true, member:false, prop:false, doc:false, jsdoc:false},
 			template: "/* eslint ${rule-id}:${0/1}*/", //$NON-NLS-1$
-			url: "http://eslint.org/docs/user-guide/configuring.html#configuring-rules", //$NON-NLS-1$
+			url: "https://eslint.org/docs/user-guide/configuring.html#configuring-rules", //$NON-NLS-1$
 			doc: Messages['eslintRuleEnableDisable'],
 			ecma: 5
 		},
@@ -165,7 +165,7 @@ define([
 			name: "eslint-env", //$NON-NLS-1$
 			nodes: {top:true, member:false, prop:false, doc:false, jsdoc:false},
 			template: "/* eslint-env ${library}*/", //$NON-NLS-1$
-			url: "http://eslint.org/docs/user-guide/configuring.html#specifying-environments", //$NON-NLS-1$
+			url: "https://eslint.org/docs/user-guide/configuring.html#specifying-environments", //$NON-NLS-1$
 			doc: Messages['eslintEnvDirective'],
 			ecma: 5
 		},
@@ -174,7 +174,7 @@ define([
 			name: "eslint-enable", //$NON-NLS-1$
 			nodes: {top:true, member:false, prop:false, doc:false, jsdoc:false},
 			template: "/* eslint-enable ${rule-id} */", //$NON-NLS-1$
-			url: "http://eslint.org/docs/user-guide/configuring.html#configuring-rule", //$NON-NLS-1$
+			url: "https://eslint.org/docs/user-guide/configuring.html#configuring-rule", //$NON-NLS-1$
 			doc: Messages['eslintRuleEnable'],
 			ecma: 5
 		},
@@ -183,7 +183,7 @@ define([
 			name: "eslint-disable", //$NON-NLS-1$
 			nodes: {top:true, member:false, prop:false, doc:false, jsdoc:false},
 			template: "/* eslint-disable ${rule-id} */", //$NON-NLS-1$
-			url: "http://eslint.org/docs/user-guide/configuring.html#configuring-rules", //$NON-NLS-1$
+			url: "https://eslint.org/docs/user-guide/configuring.html#configuring-rules", //$NON-NLS-1$
 			doc: Messages['eslintRuleDisable'],
 			ecma: 5
 		},
@@ -295,7 +295,7 @@ define([
 					  "], function(${importname}) {\n"+  //$NON-NLS-1$
 					  "\t${cursor}\n"+  //$NON-NLS-1$
 					  "});", //$NON-NLS-1$
-			url: "http://requirejs.org/docs/api.html#deffunc", 
+			url: "https://requirejs.org/docs/api.html#deffunc", 
 			doc: Messages['defineSimple'],
 			ecma: 5
 		},

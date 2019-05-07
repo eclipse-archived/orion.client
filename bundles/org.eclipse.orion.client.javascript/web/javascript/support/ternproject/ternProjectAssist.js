@@ -3,8 +3,8 @@
  * Copyright (c) 2016, 2017 IBM Corporation, Inc. and others.
  * All rights reserved. This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License v1.0
- * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution
- * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html).
+ * (https://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution
+ * License v1.0 (https://www.eclipse.org/org/documents/edl-v10.html).
  *
  * Contributors:
  *   IBM Corporation - Various improvements
@@ -31,7 +31,7 @@ define([
 			'\t"loadEagerly": [\n\t\t\n\t]\n' + //$NON-NLS-1$
 			'}',
 		doc: Messages['emptyFileTemplateDoc'],
-		url: "http://ternjs.net/doc/manual.html#configuration" //$NON-NLS-1$
+		url: "https://ternjs.net/doc/manual.html#configuration" //$NON-NLS-1$
 	}];
 
 	var astManager;
@@ -115,32 +115,32 @@ define([
 		"dependencyBudget": {
 			proposal: '\"dependencyBudget\"',
 			doc: "To configure the amount of work Tern is prepared to do to load a single dependency, the dependencyBudget option can be added to a project file. The default value is 20000.\n\nThis property should be used with care.",
-			url: "http://ternjs.net/doc/manual.html#configuration"
+			url: "https://ternjs.net/doc/manual.html#configuration"
 		},
 		"dontLoad": {
 			proposal: '\"dontLoad\"',
 			doc: "The dontLoad option can be used to prevent Tern from loading certain files. It also takes an array of file names.",
-			url: "http://ternjs.net/doc/manual.html#configuration"
+			url: "https://ternjs.net/doc/manual.html#configuration"
 		},
 		"ecmaVersion": {
 			proposal: '\"ecmaVersion\"',
 			doc: "You can specify an ecmaVersion field to configure the version of ECMAScript that Tern parses. The default is 6.",
-			url: "http://ternjs.net/doc/manual.html#configuration"
+			url: "https://ternjs.net/doc/manual.html#configuration"
 		},
 		"libs": {
 			proposal: '\"libs\"',
 			doc: "The libs property refers to the JSON type descriptions that should be loaded into the environment for this project.",
-			url: "http://ternjs.net/doc/manual.html#configuration"
+			url: "https://ternjs.net/doc/manual.html#configuration"
 		},
 		"loadEagerly": {
 			proposal: '\"loadEagerly\"',
 			doc: "loadEagerly allows you to force some files to always be loaded, it must be an array of filenames.",
-			url: "http://ternjs.net/doc/manual.html#configuration"
+			url: "https://ternjs.net/doc/manual.html#configuration"
 		},
 		"plugins": {
 			proposal: '\"plugins\"',
 			doc: "The plugins field may hold object used to load and configure Tern plugins.",
-			url: "http://ternjs.net/doc/manual.html#configuration"
+			url: "https://ternjs.net/doc/manual.html#configuration"
 		}
 	};
 

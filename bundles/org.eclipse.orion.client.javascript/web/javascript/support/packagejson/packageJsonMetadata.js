@@ -3,8 +3,8 @@
  * Copyright (c) 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License v1.0
- * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution
- * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html).
+ * (https://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution
+ * License v1.0 (https://www.eclipse.org/org/documents/edl-v10.html).
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
@@ -92,7 +92,7 @@ define([
 		},
 		eslintConfig: {
 			doc: Messages.packageEslintConfigDoc,
-			url: "http://eslint.org/docs/user-guide/configuring#configuration-file-formats"
+			url: "https://eslint.org/docs/user-guide/configuring#configuration-file-formats"
 		},
 		files: {
 			doc: Messages.packageFilesDoc,
