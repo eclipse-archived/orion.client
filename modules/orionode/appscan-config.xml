@@ -2,6 +2,7 @@
   <Targets>
     <Target outputs-only="false" path=".">
       <Exclude>test/</Exclude>
+      <Exclude>.vscode/</Exclude>
       <Exclude>node_modules/node-gyp/</Exclude>
       <Exclude>build/</Exclude>
       <Exclude>electron.js</Exclude>

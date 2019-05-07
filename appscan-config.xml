@@ -1,0 +1,17 @@
+<Configuration>
+  <Targets>
+    <Target outputs-only="false" path=".">
+      <Exclude>bundles/org.eclipse.orion.client.core/web/js-tests/</Exclude>
+      <Exclude>bundles/org.eclipse.orion.client.editor/web/js-tests/</Exclude>
+      <Exclude>bundles/org.eclipse.orion.client.javascript/web/js-tests/</Exclude>
+      <Exclude>bundles/org.eclipse.orion.client.ui/web/js-tests/</Exclude>
+      <Exclude>bundles/org.eclipse.orion.client.webtools/web/js-tests/</Exclude>
+      <Exclude>releng/org.eclipse.orion.client.releng/test/</Exclude>
+      <Exclude>bundles/org.eclipse.orion.client.collab/</Exclude>
+      <Exclude>bundles/org.eclipse.orion.client.git.greasemonkey/</Exclude>
+      <Exclude>bundles/org.eclipse.orion.client.help/</Exclude>
+      <Exclude>bundles/org.eclipse.orion.client.jsdoc/</Exclude>
+      <Exclude>modules/</Exclude>
+    </Target>
+  </Targets>
+</Configuration>
