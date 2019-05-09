@@ -36,7 +36,7 @@ define(function() {
 		return msg.replace(/\$\{([^\}]+)\}/g, function(str, index) { return args[(index << 0) + 1]; });
 	}
 	
-	var XHTML = "https://www.w3.org/1999/xhtml"; //$NON-NLS-0$
+	var XHTML = "http://www.w3.org/1999/xhtml"; //$NON-NLS-0$
 	function createElement(document, tagName) {
 		if (document.createElementNS) {
 			return document.createElementNS(XHTML, tagName);
