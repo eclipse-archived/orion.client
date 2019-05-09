@@ -119,6 +119,7 @@ define({
 	"Format" : "Format Code",
 	"FormatTooltip":"Format editor contents",
 	"fileContents":"${0} contents",
+	"fileContentsSplit":"${0} contents split",
 	"References" : "References",
 	"ReferencesTooltip":"Find references in project",
 	"FindReferences": "Finding references",

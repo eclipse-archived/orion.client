@@ -1367,6 +1367,7 @@ objects.mixin(EditorViewer.prototype, {
 			preferences: this.preferences,
 			searcher: this.searcher,
 			selection: this.selection,
+			viewerID: this.id,
 			problemsServiceID: this.problemsServiceID,
 			editContextServiceID: this.editContextServiceID,
 			fileService: this.fileClient,

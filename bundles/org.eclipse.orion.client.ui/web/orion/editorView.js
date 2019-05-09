@@ -92,6 +92,7 @@ define([
 			this._parent = document.getElementById(options.parent);
 		}
 		this.id = options.id || "";
+		this.viewerID = options.viewerID;
 		this.activateContext = options.activateContext;
 		this.renderToolbars = options.renderToolbars;
 		this.serviceRegistry = options.serviceRegistry;
@@ -214,8 +215,13 @@ define([
 			if (prefs.wordWrap) {
 				wrapOffset = marginOffset;
 			}
+			var labelMessage = messages.fileContents;
+			if (this.viewerID && this.viewerID === "1") {
+				labelMessage = messages.fileContentsSplit;
+			}
+
 			return {
-				label: i18nUtil.formatMessage(messages.fileContents, this.inputManager.getFileMetadata().Name),
+				label: i18nUtil.formatMessage(labelMessage, this.inputManager.getFileMetadata().Name),
 				readonly: this.readonly || this.inputManager.getReadOnly(),
 				singleMode: this.singleMode,
 				tabSize: prefs.tabSize || 4,
