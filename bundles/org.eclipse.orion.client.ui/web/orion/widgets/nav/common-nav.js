@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2013, 2016 IBM Corporation and others.
+ * Copyright (c) 2013, 2019 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License v1.0
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution
@@ -69,7 +69,7 @@ define([
 		this._parentNode = lib.node(this.parentId);
 		this._sidebarContextMenuNode = document.createElement("ul");
 		this._sidebarContextMenuNode.className = "dropdownMenu"; //$NON-NLS-0$
-		this._sidebarContextMenuNode.setAttribute("role", "menu"); //$NON-NLS-1$ //$NON-NLS-0$
+		lib.setSafeAttribute(this._sidebarContextMenuNode, "role", "menu");
 		this._sidebarContextMenuNode.id = this.parentId + "ContextMenu"; //$NON-NLS-0$
 
 		this._parentNode.parentNode.insertBefore(this._sidebarContextMenuNode, this._parentNode);

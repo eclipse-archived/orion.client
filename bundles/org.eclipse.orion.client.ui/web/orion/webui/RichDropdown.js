@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2014 IBM Corporation and others. 
+ * Copyright (c) 2014, 2019 IBM Corporation and others. 
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -58,10 +58,10 @@ define([
 			} else {
 				this._dropdownButtonArrow = dropdownArrow;
 			}
-			this._dropdownTriggerButton.setAttribute("aria-haspopup", "menu"); //$NON-NLS-1$ //$NON-NLS-0$
-			this._dropdownTriggerButton.setAttribute("aria-expanded", "false"); //$NON-NLS-1$ //$NON-NLS-0$
-			this._dropdownTriggerButton.setAttribute("aria-controls", this._dropdownNode.id); //$NON-NLS-0$
-			this._dropdownNode.setAttribute("role", "menu"); //$NON-NLS-1$ //$NON-NLS-0$
+			lib.setSafeAttribute(this._dropdownTriggerButton, "aria-haspopup", "menu");
+			lib.setSafeAttribute(this._dropdownTriggerButton, "aria-expanded", "false");
+			lib.setSafeAttribute(this._dropdownTriggerButton, "aria-controls", this._dropdownNode.id);
+			lib.setSafeAttribute(this._dropdownNode, "role", "menu");
 						
 			this._parentNode.appendChild(this._dropdownTriggerButton);
 			this._parentNode.appendChild(this._dropdownNode);

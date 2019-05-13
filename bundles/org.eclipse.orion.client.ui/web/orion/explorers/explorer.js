@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2011, 2014 IBM Corporation and others.
+ * Copyright (c) 2011, 2019 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -557,7 +557,7 @@ exports.ExplorerRenderer = (function() {
 			this.tableTree = tableTree;
 			this.tableNode = tableNode;
 			if (!this.selectionPolicy && this.role) {
-				this.tableNode.setAttribute("aria-multiselectable", true);
+				lib.setSafeAttribute(this.tableNode, "aria-multiselectable", true);
 			}
 			lib.empty(tableNode);
 			if (this._treeTableClass) {
@@ -640,7 +640,7 @@ exports.ExplorerRenderer = (function() {
 				check.rowId = tableRow.id;
 				if(this.getCheckedFunc){
 					check.checked = this.getCheckedFunc(item);
-					tableRow.setAttribute("aria-selected", check.checked);
+					lib.setSafeAttribute(tableRow, "aria-selected", check.checked);
 					if (check.checked) {
 						if(this._highlightSelection){
 							tableRow.classList.add("checkedRow"); //$NON-NLS-0$
@@ -657,7 +657,7 @@ exports.ExplorerRenderer = (function() {
 				var self = this;
 				check.addEventListener("mousedown", function(evt) { //$NON-NLS-0$
 					var newValue = evt.target.checked ? false : true;
-					tableRow.setAttribute("aria-selected", newValue);
+					lib.setSafeAttribute(tableRow, "aria-selected", newValue);
 					self.onCheck(tableRow, evt.target, newValue, true, false, item);
 					lib.stop(evt);
 				}, false);
@@ -808,7 +808,7 @@ exports.ExplorerRenderer = (function() {
 			placeHolder.appendChild(expandImage);
 			expandImage.classList.add(this._twistieSpriteClass);
 			expandImage.classList.add(this._collapseImageClass);
-			tableRow.setAttribute("aria-expanded", false);
+			lib.setSafeAttribute(tableRow, "aria-expanded", false);
 			if (decorateImageClass) {
 				var decorateImage = document.createElement("span"); //$NON-NLS-0$
 				placeHolder.appendChild(decorateImage);
@@ -907,7 +907,7 @@ exports.SelectionRenderer = (function(){
 		var empty = rowCount === 1;
 		for (var r=0; r<rowCount; r++) {
 			var row = document.createElement('tr'); //$NON-NLS-0$
-			row.setAttribute("role", "row"); //$NON-NLS-1$ //$NON-NLS-0$
+			lib.setSafeAttribute(row, "role", "row");
 			row.tabIndex = -1;
 			if (this._useCheckboxSelection) {
 				var col = this.initCheckboxColumn(tableNode);
@@ -921,7 +921,7 @@ exports.SelectionRenderer = (function(){
 				if (cell.innerHTML.length > 0 && !this.getPrimColumnStyle) {
 					cell.classList.add("navColumn"); //$NON-NLS-0$
 				}
-				cell.setAttribute("role", "columnheader"); //$NON-NLS-1$ //$NON-NLS-0$
+				lib.setSafeAttribute(cell, "role", "columnheader");
 				row.appendChild(cell);			
 				cell = this.getCellHeaderElement(++i, r);
 			}
@@ -966,11 +966,11 @@ exports.SelectionRenderer = (function(){
 		var checkColumn = this.getCheckboxColumn(item, tableRow);
 		if(checkColumn) {
 			if (this._checkColumnId) {
-				checkColumn.setAttribute("headers", this._checkColumnId);
+				lib.setSafeAttribute(checkColumn, "headers", this._checkColumnId);
 			}
 			if (item.selectable !== undefined && !item.selectable) {
 				checkColumn.style.opacity = 0;
-				checkColumn.setAttribute("aria-hidden", true);
+				lib.setSafeAttribute(checkColumn, "aria-hidden", true);
 			}
 			checkColumn.classList.add('checkColumn'); //$NON-NLS-0$
 			tableRow.appendChild(checkColumn);
@@ -980,7 +980,7 @@ exports.SelectionRenderer = (function(){
 		var cell = this.getCellElement(i, item, tableRow);
 		while(cell){
 			if (tableRow.getAttribute("role") === "row") {
-				cell.setAttribute("role", "gridcell");
+				lib.setSafeAttribute(cell, "role", "gridcell");
 			}
 			tableRow.appendChild(cell);
 			if (i===0) {

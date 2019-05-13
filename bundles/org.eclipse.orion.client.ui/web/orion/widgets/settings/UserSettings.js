@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2012, 2014 IBM Corporation and others.
+ * Copyright (c) 2012, 2019 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -42,8 +42,8 @@ define([
 			this.node.innerHTML = this.templateString;
 			lib.processTextNodes(this.node, messages);
 			
-			this.node.setAttribute("role", "region");
-			this.node.setAttribute("aria-labelledby", "userProfileTitle");
+			lib.setSafeAttribute(this.node, "role", "region");
+			lib.setSafeAttribute(this.node, "aria-labelledby", "userProfileTitle");
 			
 			this.sections = lib.$('.sections', this.node);  //$NON-NLS-0$
 			

@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2012, 2017 IBM Corporation and others.
+ * Copyright (c) 2012, 2019 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -134,12 +134,12 @@ define(['orion/webui/littlelib'], function(lib) {
 				}, false);
 
 				if (this._trigger === "mouseover") { //$NON-NLS-0$
-					this._tipInner.setAttribute("role", "tooltip"); //$NON-NLS-2$ //$NON-NLS-1$
+					lib.setSafeAttribute(this._tipInner, "role", "tooltip");
 					// if we are in an iframe dialog, need to use a different ID string to ensure unique id
 					this._tipInner.id = "tooltip-" + RANDOM + "-" + ID_INDEX++; //$NON-NLS-1$ //$NON-NLS-0$
 					var label = this._node.getAttribute("aria-label");
 					if (this._text !== label) {
-						this._node.setAttribute("aria-describedby", this._tipInner.id); //$NON-NLS-0$
+						lib.setSafeAttribute(this._node, "aria-describedby", this._tipInner.id);
 				 	}
 
 					// see https://bugs.eclipse.org/bugs/show_bug.cgi?id=398960

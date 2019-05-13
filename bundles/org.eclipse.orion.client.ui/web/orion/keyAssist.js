@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2013 IBM Corporation and others.
+ * Copyright (c) 2013, 2019 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -37,22 +37,22 @@ define([
 			keyAssistDiv.id = "keyAssist"; //$NON-NLS-1$
 			keyAssistDiv.style.display = "none"; //$NON-NLS-1$
 			keyAssistDiv.classList.add("keyAssistFloat"); //$NON-NLS-1$
-			keyAssistDiv.setAttribute("role", "dialog"); //$NON-NLS-2$ //$NON-NLS-1$
-			keyAssistDiv.setAttribute("aria-modal", "true"); //$NON-NLS-2$ //$NON-NLS-1$
-			keyAssistDiv.setAttribute("aria-label", messages["Key Bindings"]); //$NON-NLS-2$ //$NON-NLS-1$
+			lib.setSafeAttribute(keyAssistDiv, "role", "dialog");
+			lib.setSafeAttribute(keyAssistDiv, "aria-modal", "true");
+			lib.setSafeAttribute(keyAssistDiv, "aria-label", messages["Key Bindings"]);
 
 			var keyAssistCombo = document.createElement("div"); //$NON-NLS-1$
-			keyAssistCombo.setAttribute("role", "combobox"); //$NON-NLS-1$ //$NON-NLS-0$
-			keyAssistCombo.setAttribute("aria-haspopup", "grid"); //$NON-NLS-1$ //$NON-NLS-0$
-			keyAssistCombo.setAttribute("aria-owns", "keyAssistList"); //$NON-NLS-1$ //$NON-NLS-0$
-			keyAssistCombo.setAttribute("aria-expanded", "true"); //$NON-NLS-1$ //$NON-NLS-0$
+			lib.setSafeAttribute(keyAssistCombo, "role", "combobox");
+			lib.setSafeAttribute(keyAssistCombo, "aria-haspopup", "grid");
+			lib.setSafeAttribute(keyAssistCombo, "aria-owns", "keyAssistList");
+			lib.setSafeAttribute(keyAssistCombo, "aria-expanded", "true");
 			var keyAssistInput = this._keyAssistInput = document.createElement("input"); //$NON-NLS-1$
 			keyAssistInput.classList.add("keyAssistInput"); //$NON-NLS-1$
 			keyAssistInput.type = "text"; //$NON-NLS-1$
-			keyAssistInput.setAttribute("aria-label", "Filter bindings:"); //$NON-NLS-1$ //$NON-NLS-0$
+			lib.setSafeAttribute(keyAssistInput, "aria-label", "Filter bindings:");
 			keyAssistInput.placeholder = messages["Filter bindings"]; //$NON-NLS-1$
-			keyAssistInput.setAttribute("aria-autocomplete", "list"); //$NON-NLS-1$ //$NON-NLS-0$
-			keyAssistInput.setAttribute("aria-controls", "keyAssistList"); //$NON-NLS-1$ //$NON-NLS-0$
+			lib.setSafeAttribute(keyAssistInput, "aria-autocomplete", "list");
+			lib.setSafeAttribute(keyAssistInput, "aria-controls", "keyAssistList");
 			keyAssistCombo.appendChild(keyAssistInput);
 			keyAssistDiv.appendChild(keyAssistCombo);
 
@@ -63,7 +63,7 @@ define([
 			}
 			keyAssistDiv.appendChild(keyAssistContents);
 			var keyAssistTable = this._keyAssistTable = document.createElement('table'); //$NON-NLS-1$
-			keyAssistTable.setAttribute("role", "grid"); //$NON-NLS-1$ //$NON-NLS-0$
+			lib.setSafeAttribute(keyAssistTable, "role", "grid");
 			keyAssistTable.id = "keyAssistList"; //$NON-NLS-1$
 			keyAssistTable.tabIndex = 0;
 			keyAssistTable.classList.add("keyAssistList"); //$NON-NLS-1$
@@ -137,11 +137,11 @@ define([
 		createHeaders: function () {
 			var thead = document.createElement('thead'); //$NON-NLS-0$
 			var row = document.createElement('tr'); //$NON-NLS-0$
-			row.setAttribute("role", "row"); //$NON-NLS-1$ //$NON-NLS-0$
+			lib.setSafeAttribute(row, "role", "row");
 			["Spacer", "Command", "KeyBinding", "Edit"].forEach(function(id) { //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 				var cell = document.createElement('th'); //$NON-NLS-0$
 				cell.classList.add("visuallyhidden"); //$NON-NLS-0$
-				cell.setAttribute("role", "columnheader"); //$NON-NLS-1$ //$NON-NLS-0$
+				lib.setSafeAttribute(cell, "role", "columnheader");
 				cell.id = id + "Col";
 				if (id === "Command" || id === "KeyBinding") { //$NON-NLS-1$ //$NON-NLS-0$
 					cell.textContent = messages[id];
@@ -172,7 +172,7 @@ define([
 			}
 			var row = this._keyAssistTable.insertRow(-1);
 			row.id = "keyAssist-keyBinding-" + this._idCount++; //$NON-NLS-1$
-			row.setAttribute("role", "row"); //$NON-NLS-2$ //$NON-NLS-1$
+			lib.setSafeAttribute(row, "role", "row");
 			row.tabIndex = -1;
 			row.cmdID = cmdID;
 			row._execute = execute;
@@ -192,13 +192,13 @@ define([
 			column = row.insertCell(-1);
 			column.classList.add("keyAssistName"); //$NON-NLS-1$
 			column.headers = this._lastHeaderID + " " + "CommandCol"; //$NON-NLS-0$
-			column.setAttribute("role", "gridcell"); //$NON-NLS-1$ //$NON-NLS-0$
+			lib.setSafeAttribute(column, "role", "gridcell");
 			column.appendChild(document.createTextNode(name));
 			
 			column = row.insertCell(-1);
 			column.classList.add("keyAssistAccel"); //$NON-NLS-1$
 			column.headers = this._lastHeaderID + " " + "KeyBindingCol"; //$NON-NLS-0$
-			column.setAttribute("role", "gridcell"); //$NON-NLS-1$ //$NON-NLS-0$
+			lib.setSafeAttribute(column, "role", "gridcell");
 			var bindingSpan = document.createElement("span"); //$NON-NLS-1$
 			bindingSpan.textContent = bindingString;
 			column.appendChild(bindingSpan);
@@ -214,7 +214,7 @@ define([
 			var span = document.createElement("span"); //$NON-NLS-0$
 			span.classList.add("core-sprite-edit"); //$NON-NLS-1$
 			eb.appendChild(span);
-			eb.setAttribute("aria-label", messages["Edit"]); //$NON-NLS-1$
+			lib.setSafeAttribute(eb, "aria-label", messages["Edit"]);
 			//eb.textContent = "E"; //$NON-NLS-1$
 			eb.addEventListener("click", function(evt) {
 				lib.stop(evt);
@@ -331,7 +331,7 @@ define([
 			column.colSpan = 4;
 			column.scope = "rowgroup"; //$NON-NLS-0$
 			var heading = document.createElement("h2"); //$NON-NLS-0$
-			heading.setAttribute("role", "presentation"); //$NON-NLS-1$ //$NON-NLS-0$
+			lib.setSafeAttribute(heading, "role", "presentation");
 			heading.appendChild(document.createTextNode(name));
 			column.appendChild(heading);
 			row.appendChild(column);
@@ -420,8 +420,8 @@ define([
 					editButton.classList.add("keyAssistEditButtonVisible"); //$NON-NLS-1$
 					editButton.tabIndex = 0;
 				}
-				this._keyAssistInput.setAttribute("aria-activedescendant", row.id); //$NON-NLS-1$
-				this._keyAssistTable.setAttribute("aria-activedescendant", row.id); //$NON-NLS-1$
+				lib.setSafeAttribute(this._keyAssistInput, "aria-activedescendant", row.id);
+				lib.setSafeAttribute(this._keyAssistTable, "aria-activedescendant", row.id);
 				this._keyAssistTable.focus();
 				var rowRect = row.getBoundingClientRect();
 				var parent = this._keyAssistContents;

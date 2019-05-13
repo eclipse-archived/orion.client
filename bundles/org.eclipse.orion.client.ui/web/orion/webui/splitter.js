@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2012, 2013 IBM Corporation and others.
+ * Copyright (c) 2012, 2019 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License v1.0
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution
@@ -93,7 +93,7 @@ define([
 			}
 
 			this.$splitter.classList.add("split"); //$NON-NLS-0$
-			this.$splitter.setAttribute("role", "separator"); //$NON-NLS-1$ //$NON-NLS-0$
+			lib.setSafeAttribute(this.$splitter, "role", "separator");
 			
 			// Initialize for the current orientation / collapse direction
 			var orientationStr = localStorage.getItem(this._prefix+"/orientation"); //$NON-NLS-0$
@@ -105,7 +105,7 @@ define([
 			this.setOrientation(orientation);
 			
 			// aria defines orientation as attribute of splitter itself (i.e. opposite of direction of movement)
-			this.$splitter.setAttribute("aria-orientation", orientation === ORIENTATION_VERTICAL ? "horizontal" : "vertical"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			lib.setSafeAttribute(this.$splitter, "aria-orientation", orientation === ORIENTATION_VERTICAL ? "horizontal" : "vertical");
 			
 			if (util.isIOS || util.isAndroid) {
 				this.$splitter.addEventListener("touchstart", this._touchStart.bind(this), false); //$NON-NLS-0$
@@ -406,7 +406,7 @@ define([
 				var parentRect = lib.bounds(this.$splitter.parentNode);
 				pct = this._offset / parentRect[this._widthHeight];
 			}
-			this.$splitter.setAttribute("aria-valuenow", Math.round(pct*100));
+			lib.setSafeAttribute(this.$splitter, "aria-valuenow", Math.round(pct*100));
 		},
 
 		_resize: function() {

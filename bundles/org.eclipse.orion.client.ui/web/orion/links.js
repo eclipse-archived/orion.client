@@ -10,7 +10,7 @@
  *******************************************************************************/
 
 /*eslint-env browser, amd*/
-define([], function(){
+define(['orion/webui/littlelib'], function(lib){
 
 	/**
 	 * Instantiates the text link service. Clients should obtain the 
@@ -52,7 +52,7 @@ define([], function(){
 				for (var i = 0; i < words; i++) {
 					href = href.replace('%'+(i+1), segments[i]); //$NON-NLS-0$
 				}
-				link.setAttribute('href', href); //$NON-NLS-0$
+				lib.setSafeAttribute(link, 'href', href);
 				link.textContent = match;
 				result.appendChild(link);
 				text = remainder;

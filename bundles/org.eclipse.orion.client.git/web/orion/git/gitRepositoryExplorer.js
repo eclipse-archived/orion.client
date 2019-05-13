@@ -1,6 +1,6 @@
 /******************************************************************************* 
  * @license
- * Copyright (c) 2011, 2017 IBM Corporation and others.
+ * Copyright (c) 2011, 2019 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -526,8 +526,7 @@ define([
 			noTwistie: true,
 			preferenceService: this.preferencesService
 		});
-		section.getHeaderElement().setAttribute("aria-labelledby", this.repositoriesLabel.id + " " + section.getTitleElement().id); //$NON-NLS-1$ //$NON-NLS-0$
-		
+		lib.setSafeAttribute(section.getHeaderElement(), "aria-labelledby", this.repositoriesLabel.id + " " + section.getTitleElement().id);
 		var selection = this.repositoriesSelection = new mSelection.Selection(this.registry, "orion.selection.repo"); //$NON-NLS-0$
 		selection.addEventListener("selectionChanged", function(e) { //$NON-NLS-0$
 			var selected = e.selection;
@@ -586,8 +585,8 @@ define([
 			noTwistie: true,
 			preferenceService: this.preferencesService
 		});
-		section.getHeaderElement().setAttribute("aria-labelledby", this.branchesLabel.id + " " + section.getTitleElement().id); //$NON-NLS-1$ //$NON-NLS-0$
-
+    lib.setSafeAttribute(section.getHeaderElement(), "aria-labelledby", this.branchesLabel.id + " " + section.getTitleElement().id);
+		
 		var selection = this.branchesSelection = new mSelection.Selection(this.registry, "orion.selection.ref"); //$NON-NLS-0$
 		selection.addEventListener("selectionChanged", function(e) { //$NON-NLS-0$
 			var selected = e.selection;

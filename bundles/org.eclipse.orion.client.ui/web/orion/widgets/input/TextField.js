@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2012 IBM Corporation and others.
+ * Copyright (c) 2012, 2019 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -67,7 +67,7 @@ define(['orion/objects', 'orion/webui/littlelib'], function(objects, lib) {
             }
             
             if( this.editmode && this.editmode === 'readonly' ){ //$NON-NLS-0$
-				this.textfield.setAttribute("readonly", "true"); //$NON-NLS-1$ //$NON-NLS-0$
+				lib.setSafeAttribute(this.textfield, "readonly", "true");
             }
         },
 		

@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2009, 2012 IBM Corporation and others.
+ * Copyright (c) 2009, 2019 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -113,17 +113,17 @@ function(messages, lib, mOperationsDialog, Tooltip, Deferred) {
 				switch(status){
 				case "running": //$NON-NLS-0$
 					this._makeTooltip(messages["Operations running"]); //$NON-NLS-0$
-					this._progressPane.setAttribute("aria-valuetext", messages['Operations running']); //$NON-NLS-0$
+					lib.setSafeAttribute(this._progressPane, "aria-valuetext", messages['Operations running']);
 					this._switchIconTo("running"); //$NON-NLS-0$
 					break;
 				case "warning": //$NON-NLS-0$
 					this._makeTooltip(messages["SomeOpWarning"]); //$NON-NLS-0$
-					this._progressPane.setAttribute("aria-valuetext", messages['SomeOpWarning']); //$NON-NLS-0$
+					lib.setSafeAttribute(this._progressPane, "aria-valuetext", messages['SomeOpWarning']);
 					this._switchIconTo("warning"); //$NON-NLS-0$
 					break;
 				case "error": //$NON-NLS-0$
 					this._makeTooltip(messages["SomeOpErr"]); //$NON-NLS-0$
-					this._progressPane.setAttribute("aria-valuetext", messages['SomeOpErr']); //$NON-NLS-0$
+					lib.setSafeAttribute(this._progressPane, "aria-valuetext", messages['SomeOpErr']);
 					this._switchIconTo("error"); //$NON-NLS-0$
 					break;
 				default:

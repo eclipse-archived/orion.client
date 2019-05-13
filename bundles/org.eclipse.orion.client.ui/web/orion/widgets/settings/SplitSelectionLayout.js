@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2012 IBM Corporation and others.
+ * Copyright (c) 2012, 2019 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -74,15 +74,15 @@ define(['orion/webui/littlelib', 'orion/objects'], function(lib, objects) {
 			index = (typeof index === "undefined") ? 0 : index; //$NON-NLS-0$
 			var li = document.createElement("li"); //$NON-NLS-0$
 			li.classList.add('navbar-item'); //$NON-NLS-0$
-			li.setAttribute('role', 'tab'); //$NON-NLS-1$ //$NON-NLS-0$
-			li.setAttribute('aria-selected', 'false'); //$NON-NLS-1$ //$NON-NLS-0$
+			lib.setSafeAttribute(li, 'role', 'tab');
+			lib.setSafeAttribute(li, 'aria-selected', 'false');
 			li.tabIndex = -1;
 			li.textContent = item.textContent;
 			Object.keys(item).forEach(function(property) {
 				if (property === 'show' || property === 'onclick') {
 					li.addEventListener('click', item[property]);
 				} else {
-					li.setAttribute(property, item[property]);
+					lib.setSafeAttribute(li, property, item[property]);
 				}
 			});
 			this.navbar.appendChild(li);
@@ -94,7 +94,7 @@ define(['orion/webui/littlelib', 'orion/objects'], function(lib, objects) {
 
 			if (this.selectedCategory) {
 				this.selectedCategory.classList.remove("navbar-item-selected"); //$NON-NLS-0$
-				this.selectedCategory.setAttribute("aria-selected", "false"); //$NON-NLS-1$ //$NON-NLS-0$
+				lib.setSafeAttribute(this.selectedCategory, "aria-selected", "false");
 				this.selectedCategory.removeAttribute("aria-controls"); //$NON-NLS-0$
 				this.selectedCategory.tabIndex = -1;
 			}
@@ -104,9 +104,9 @@ define(['orion/webui/littlelib', 'orion/objects'], function(lib, objects) {
 			}
 
 			this.selectedCategory.classList.add("navbar-item-selected"); //$NON-NLS-0$
-			this.selectedCategory.setAttribute("aria-selected", "true"); //$NON-NLS-1$ //$NON-NLS-0$
-			this.selectedCategory.setAttribute("aria-controls", "settings"); //$NON-NLS-1$ //$NON-NLS-0$
-			this.contentNode.setAttribute("aria-labelledby", this.selectedCategory.id); //$NON-NLS-0$
+			lib.setSafeAttribute(this.selectedCategory, "aria-selected", "true");
+			lib.setSafeAttribute(this.selectedCategory, "aria-controls", "settings");
+			lib.setSafeAttribute(this.contentNode, "aria-labelledby", this.selectedCategory.id);
 			this.selectedCategory.tabIndex = 0;
 			this.selectedCategory.focus();
 		},

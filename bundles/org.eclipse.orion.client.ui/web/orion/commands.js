@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2010,2012 IBM Corporation and others.
+ * Copyright (c) 2010, 2019 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -184,11 +184,11 @@ define([
 			parentNode = parentNode.parentNode;
 		}
 		if (inMenubar) {
-			trigger.setAttribute("role", "menuitem");
+			lib.setSafeAttribute(trigger, "role", "menuitem");
 		} else {
 			// menu button
 			if (trigger.tagName.toLowerCase() !== "button") {
-				trigger.setAttribute("role", "button");
+				lib.setSafeAttribute(trigger, "role", "button");
 			}
 		}
 
@@ -214,7 +214,7 @@ define([
 		if (buttonIconClass) {
 			if(!showName) {
 				menuButton.textContent = ""; //$NON-NLS-0$
-				menuButton.setAttribute("aria-label", name); //$NON-NLS-0$
+				lib.setSafeAttribute(menuButton, "aria-label", name);
 			}
 			_addImageToElement({ spriteClass: "commandSprite", imageClass: buttonIconClass }, menuButton, name); //$NON-NLS-0$
 			menuButton.classList.add("orionButton"); //$NON-NLS-0$
@@ -245,7 +245,7 @@ define([
 		var itemParent = parent.lastChild;
 		var checkbox = lib.$(".checkedMenuItem", itemParent); //$NON-NLS-0$
 		checkbox.checked = checked;
-		checkbox.setAttribute("aria-checked", checked);
+		lib.setSafeAttribute(checkbox, "aria-checked", checked);
 		checkbox.addEventListener("change", onChange, false); //$NON-NLS-0$
 		return checkbox;
 	}
@@ -313,7 +313,7 @@ define([
 		}
 		if (parentElement.nodeName.toLowerCase() === "ul") {
 			var li = document.createElement("li");
-			li.setAttribute("role", "none");
+			lib.setSafeAttribute(li, "role", "none");
 			parentElement.appendChild(li);
 			parentElement = li;
 		} else {
@@ -362,7 +362,7 @@ define([
 						_addImageToElement(command, element, id);
 						// ensure there is accessible text describing this image
 						if (command.name) {
-							element.setAttribute("aria-label", command.name); //$NON-NLS-0$
+							lib.setSafeAttribute(element, "aria-label", command.name);
 						}
 					} else {
 						element.classList.add("commandButton"); //$NON-NLS-0$
@@ -383,7 +383,7 @@ define([
 				_addImageToElement(command, element, id);
 				// ensure there is accessible text describing this image
 				if (command.name) {
-					element.setAttribute("aria-label", command.name); //$NON-NLS-0$
+					lib.setSafeAttribute(element, "aria-label", command.name);
 				}
 			} else {
 				element.className = "commandLink"; //$NON-NLS-0$
@@ -405,13 +405,13 @@ define([
 		} else {
 			if (command.type === "switch") { //$NON-NLS-0$
 				element = clickTarget = document.createElement("div"); //$NON-NLS-0$
-				element.setAttribute("role", "button"); //$NON-NLS-0$ //$NON-NLS-1$
+				lib.setSafeAttribute(element, "role", "button");
 				element.tabIndex = 0;
 				element.className = "orionSwitch"; //$NON-NLS-0$
 				if (command.name) {
-					element.setAttribute("aria-label", command.name); //$NON-NLS-0$
+					lib.setSafeAttribute(element, "aria-label", command.name);
 				}
-				element.setAttribute("aria-pressed", command.checked ? "true" : "false"); //$NON-NLS-0$ //$NON-NLS-1$ //$NON-NLS-2$
+				lib.setSafeAttribute(element, "aria-pressed", command.checked ? "true" : "false");
 				var span1 = document.createElement("span"); //$NON-NLS-0$
 				span1.className = "orionSwitchInner"; //$NON-NLS-0$
 				span1.classList.add(command.imageClass);
@@ -499,7 +499,7 @@ define([
 		}
 		if (parent.nodeName.toLowerCase() === "ul") { //$NON-NLS-0$
 			var li = document.createElement("li"); //$NON-NLS-0$
-			li.setAttribute("role", "none");
+			lib.setSafeAttribute(li, "role", "none");
 			parent.appendChild(li);
 			parent = li;
 		} else {
@@ -521,9 +521,9 @@ define([
 	
 	function toggleSwitch(element) {
 		if (element.getAttribute("aria-pressed") === "true") { //$NON-NLS-0$ //$NON-NLS-1$
-			element.setAttribute("aria-pressed", "false"); //$NON-NLS-0$ //$NON-NLS-1$
+			lib.setSafeAttribute(element, "aria-pressed", "false");
 		} else {
-			element.setAttribute("aria-pressed", "true"); //$NON-NLS-0$ //$NON-NLS-1$
+			lib.setSafeAttribute(element, "aria-pressed", "true");
 		}
 	}
 
@@ -762,23 +762,23 @@ define([
 			choices.forEach(function(choice) {
 				if (choice.name) {
 					var itemNode = document.createElement("li"); //$NON-NLS-0$
-					itemNode.setAttribute("role", "none"); //$NON-NLS-0$ //$NON-NLS-1$
+					lib.setSafeAttribute(itemNode, "role", "none");
 					parent.appendChild(itemNode);
 					var node = document.createElement("span"); //$NON-NLS-0$
 					node.tabIndex = -1; 
 					node.classList.add("dropdownMenuItem"); //$NON-NLS-0$
 					node.style.outline = "none";
 					if (addCheck) {
-						node.setAttribute("role", "menuitemradio");  //$NON-NLS-1$ //$NON-NLS-0$
-						node.setAttribute("aria-checked", choice.checked ? "true" : "false"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+						lib.setSafeAttribute(node, "role", "menuitemradio");
+						lib.setSafeAttribute(node, "aria-checked", choice.checked ? "true" : "false");
 						var check = document.createElement("span"); //$NON-NLS-0$
 						check.classList.add("check"); //$NON-NLS-0$
-						check.setAttribute("role", "none"); //$NON-NLS-0$ //$NON-NLS-1$
-						check.setAttribute("aria-hidden", "true");  //$NON-NLS-1$ //$NON-NLS-0$
+						lib.setSafeAttribute(check, "role", "none");
+						lib.setSafeAttribute(check, "aria-hidden", "true");
 						check.appendChild(document.createTextNode(choice.checked ? "\u25CF" : "")); //$NON-NLS-1$ //$NON-NLS-0$
 						node.appendChild(check);
 					} else {
-						node.setAttribute("role", "menuitem");  //$NON-NLS-1$ //$NON-NLS-0$
+						lib.setSafeAttribute(node, "role", "menuitem");
 					}
 					if (choice.imageClass) {
 						var image = document.createElement("span"); //$NON-NLS-0$

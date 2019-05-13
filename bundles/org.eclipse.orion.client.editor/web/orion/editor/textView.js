@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2010, 2017 IBM Corporation and others.
+ * Copyright (c) 2010, 2019 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -21,8 +21,9 @@ define("orion/editor/textView", [
 	'orion/editor/util',
 	'orion/util',
 	'orion/bidiUtils',
+	'orion/webui/littlelib',
 	'orion/metrics'
-], function(messages, mTextModel, mKeyModes, mEventTarget, mTextTheme, textUtil, util, bidiUtils, mMetrics) {
+], function(messages, mTextModel, mKeyModes, mEventTarget, mTextTheme, textUtil, util, bidiUtils, lib, mMetrics) {
 
 	/** @private */
 	function getWindow(doc) {
@@ -62,7 +63,7 @@ define("orion/editor/textView", [
 		if (attributes) {
 			for (var a in attributes) {
 				if (attributes.hasOwnProperty(a)) {
-					node.setAttribute(a, attributes[a]);
+					lib.setSafeAttribute(node, a, attributes[a]);
 				}
 			}
 		}
@@ -5690,7 +5691,7 @@ define("orion/editor/textView", [
 			div.style.bottom = "0px"; //$NON-NLS-1$
 			div.style.cursor = "default"; //$NON-NLS-1$
 			div.style.display = "none"; //$NON-NLS-1$
-			div.setAttribute("aria-hidden", "true"); //$NON-NLS-1$ //$NON-NLS-2$
+			lib.setSafeAttribute(div, "aria-hidden", "true");
 			this._rootDiv.appendChild(div);
 			return div;
 		},
@@ -5820,7 +5821,7 @@ define("orion/editor/textView", [
 			clientDiv.style.outline = "none"; //$NON-NLS-1$
 			clientDiv.style.zIndex = "1"; //$NON-NLS-1$
 			clientDiv.style.WebkitUserSelect = "text"; //$NON-NLS-1$
-			clientDiv.setAttribute("spellcheck", "false"); //$NON-NLS-1$ //$NON-NLS-2$
+			lib.setSafeAttribute(clientDiv, "spellcheck", "false");
 			if (util.isIOS || util.isAndroid) {
 				clientDiv.style.WebkitTapHighlightColor = "transparent"; //$NON-NLS-1$
 			}
@@ -7122,10 +7123,10 @@ define("orion/editor/textView", [
 		},
 		_setLabel: function(label) {
 			if (label === "__hidden__" ) {
-				this._rootDiv.setAttribute("aria-hidden", "true"); //$NON-NLS-1$
+				lib.setSafeAttribute(this._rootDiv, "aria-hidden", "true");
 			} else {
-				this._rootDiv.setAttribute("role", "application"); //$NON-NLS-1$ //$NON-NLS-2$
-				this._rootDiv.setAttribute("aria-label", label); //$NON-NLS-1$
+				lib.setSafeAttribute(this._rootDiv, "role", "application");
+				lib.setSafeAttribute(this._rootDiv, "aria-label", label);
 			}
 		},
 		_setMarginOffset: function(marginOffset, init) {

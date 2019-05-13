@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2013 IBM Corporation and others.
+ * Copyright (c) 2013, 2019 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License v1.0
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution
@@ -84,7 +84,7 @@ define([
 
 				var urlInput = document.createElement("input");
 				urlInput.classList.add("discreetInputHidden"); //$NON-NLS-0$
-				urlInput.setAttribute("aria-labelledby", labelID);
+				lib.setSafeAttribute(urlInput, "aria-labelledby", labelID);
 
 				var urlSelector = document.createElement("div");
 				urlSelector.classList.add("discreetInput"); //$NON-NLS-0$
@@ -125,7 +125,7 @@ define([
 			}
 			td = document.createElement("td");
 			var input = item.id==="Description" ? document.createElement("textArea") : document.createElement("input");
-			input.setAttribute("aria-labelledby", labelID);
+			lib.setSafeAttribute(input, "aria-labelledby", labelID);
 			this.projectEditor._renderEditableFields(input, item.id, item.no, null);
 			td.appendChild(input);
 			return td;
@@ -197,7 +197,7 @@ define([
 			} else {
 				td.appendChild(document.createTextNode(item.Value || " "));
 			}
-			td.setAttribute("aria-labelledby", labelID);
+			lib.setSafeAttribute(td, "aria-labelledby", labelID);
 			return td;
 		}
 

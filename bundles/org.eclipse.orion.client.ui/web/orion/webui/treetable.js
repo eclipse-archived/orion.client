@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2010, 2014, 2017 IBM Corporation and others.
+ * Copyright (c) 2010, 2019 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -112,9 +112,9 @@ define(['i18n!orion/nls/messages', 'orion/webui/littlelib', 'orion/Deferred'], f
 				this._renderer.tableCallback(table);
 			}
 			table.id = this._id;
-			table.setAttribute("role", this._role || "presentation"); //$NON-NLS-0$
+			lib.setSafeAttribute(table, "role", this._role || "presentation");
 			if (this._name) {
-				table.setAttribute("aria-label", this._name); //$NON-NLS-0$
+				lib.setSafeAttribute(table, "aria-label", this._name);
 			}
 			if (this._tableStyle) {
 				table.classList.add(this._tableStyle);
@@ -145,17 +145,17 @@ define(['i18n!orion/nls/messages', 'orion/webui/littlelib', 'orion/Deferred'], f
 			for (var i=0; i<children.length; i++) {
 				var row = document.createElement(this._tableRowElement); //$NON-NLS-0$
 				if (this._role === "treegrid") {
-					row.setAttribute("role", "row");
-					row.setAttribute("aria-level", indentLevel + 1);
-					row.setAttribute("aria-setsize", children.length);
-					row.setAttribute("aria-posinset", i + 1);
+					lib.setSafeAttribute(row, "role", "row");
+					lib.setSafeAttribute(row, "aria-level", indentLevel + 1);
+					lib.setSafeAttribute(row, "aria-setsize", children.length);
+					lib.setSafeAttribute(row, "aria-posinset", i + 1);
 				} else if (this._role === "tree") {
-					row.setAttribute("role", "treeitem");
-					row.setAttribute("aria-level", indentLevel + 1);
-					row.setAttribute("aria-setsize", children.length);
-					row.setAttribute("aria-posinset", i + 1);
+					lib.setSafeAttribute(row, "role", "treeitem");
+					lib.setSafeAttribute(row, "aria-level", indentLevel + 1);
+					lib.setSafeAttribute(row, "aria-setsize", children.length);
+					lib.setSafeAttribute(row, "aria-posinset", i + 1);
 				} else if (this._role === "grid") {
-					row.setAttribute("role", "row");
+					lib.setSafeAttribute(row, "role", "row");
 				}
 				if(this._renderer && typeof this._renderer.initSelectableRow === "function") { //$NON-NLS-0$
 					this._renderer.initSelectableRow(children[i], row);
@@ -427,7 +427,7 @@ define(['i18n!orion/nls/messages', 'orion/webui/littlelib', 'orion/Deferred'], f
 			var id = typeof(itemOrId) === "string" ? itemOrId : this._treeModel.getId(itemOrId); //$NON-NLS-0$
 			var row = lib.node(id);
 			if (row) {
-				row.setAttribute("aria-expanded", true);
+				lib.setSafeAttribute(row, "aria-expanded", true);
 				var tree = this;
 				if (row._expanded) {
 					if (postExpandFunc) {
@@ -522,7 +522,7 @@ define(['i18n!orion/nls/messages', 'orion/webui/littlelib', 'orion/Deferred'], f
 			var id = typeof(itemOrId) === "string" ? itemOrId : this._treeModel.getId(itemOrId); //$NON-NLS-0$
 			var row = lib.node(id);
 			if (row) {
-				row.setAttribute("aria-expanded", false);
+				lib.setSafeAttribute(row, "aria-expanded", false);
 				if (!row._expanded) {
 					return;
 				}

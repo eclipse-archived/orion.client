@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2012 IBM Corporation and others.
+ * Copyright (c) 2012, 2019 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -78,10 +78,10 @@ define(['i18n!orion/nls/messages', 'orion/webui/littlelib', 'orion/uiUtils'],
 //			this.handle = lib.addAutoDismiss([this.$frame], this.hide.bind(this));
 			if (this.title) {
 				lib.$(".dialogTitleText", this.$frame).appendChild(document.createTextNode(this.title)); //$NON-NLS-0$
-				this.$frame.setAttribute("aria-label", this.title); //$NON-NLS-0$
+				lib.setSafeAttribute(this.$frame, "aria-label", this.title);
 			}
 			this.$close = lib.$(".closeDialog", this.$frame);//$NON-NLS-0$
-			this.$close.setAttribute("aria-label", containerMessages["Close"]); //$NON-NLS-0$
+			lib.setSafeAttribute(this.$close, "aria-label", containerMessages["Close"]);
 			var self = this;
 			this.$close.addEventListener("click", function(event) { //$NON-NLS-0$
 				self.hide();
@@ -188,7 +188,7 @@ define(['i18n!orion/nls/messages', 'orion/webui/littlelib', 'orion/uiUtils'],
 			// When tabbing out of the dialog, using the above technique (restore to last focus) will put the focus on the last element, but
 			// we want it on the first element, so let's prevent the user from tabbing out of the dialog.
 			lib.trapTabs(this.$frame);
-			this.$frame.setAttribute("aria-modal", "true");
+			lib.setSafeAttribute(this.$frame, "aria-modal", "true");
 		},
 		
 		_addChildDialog: function(dialog) {

@@ -51,6 +51,7 @@ define([
 	'orion/formatter',
 	'orion/references',
 	'orion/openDeclaration',
+	'orion/webui/littlelib',
 	'lsp/languageServerRegistry',
 	'lsp/utils'
 ], function(
@@ -62,7 +63,7 @@ define([
 	mMarkOccurrences, mSyntaxchecker, LiveEditSession,
 	mProblems, mBlamer, mDiffer,
 	mKeyBinding, util, Deferred, mContextMenu, mMetrics, mCommonPreferences, memoryFileSysConst, objects, mFormatter, mReferences,
-	mOpenDecl, mLanguageServerRegistry, lspUtils
+	mOpenDecl, lib, mLanguageServerRegistry, lspUtils
 ) {
 	var inMemoryFilePattern = memoryFileSysConst.MEMORY_FILE_PATTERN;
 	var Dispatcher = mDispatcher.Dispatcher;
@@ -767,7 +768,7 @@ define([
 			// Create the context menu element (TBD: re0use a single Node for all context Menus ??)
 			this._editorContextMenuNode = document.createElement("ul"); //$NON-NLS-0$
 			this._editorContextMenuNode.className = "dropdownMenu"; //$NON-NLS-0$
-			this._editorContextMenuNode.setAttribute("role", "menu"); //$NON-NLS-1$ //$NON-NLS-2$
+			lib.setSafeAttribute(this._editorContextMenuNode, "role", "menu");
 			this._parent.parentNode.appendChild(this._editorContextMenuNode);
 			
 			// Hook the context menu to the textView's content node

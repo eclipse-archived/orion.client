@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2012 IBM Corporation and others.
+ * Copyright (c) 2012, 2019 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -73,7 +73,7 @@ define(['i18n!orion/nls/messages', 'orion/webui/littlelib', 'orion/section'], fu
 					contentDiv.appendChild(p);
 				}
 				var taskTable = document.createElement("table"); //$NON-NLS-0$
-				taskTable.setAttribute("role", "presentation"); //$NON-NLS-2$ //$NON-NLS-1$
+				lib.setSafeAttribute(taskTable, "role", "presentation");
 				contentDiv.appendChild(taskTable);
 				for (var i=0; i<this._tasks.length; i++) {
 					var row = document.createElement("tr"); //$NON-NLS-0$

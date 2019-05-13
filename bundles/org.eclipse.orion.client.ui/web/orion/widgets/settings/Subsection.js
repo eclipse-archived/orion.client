@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2012 IBM Corporation and others.
+ * Copyright (c) 2012, 2019 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -14,7 +14,7 @@
 // TODO convert to orion/section
 
 define([
-	'orion/webui/littlelib', //$NON-NLS-0$
+	'orion/webui/littlelib' //$NON-NLS-0$
 ], function(lib) {
 
 	/**
@@ -34,8 +34,8 @@ define([
 		var headerId = this.headerId = 'setting-header-' + _id; //$NON-NLS-0$
 		var titleNode = this.titleNode = document.createElement('div'); //$NON-NLS-0$
 		titleNode.classList.add('setting-header'); //$NON-NLS-0$
-		node.setAttribute("role", "group");
-		node.setAttribute("aria-labelledby", headerId);
+		lib.setSafeAttribute(node, "role", "group");
+		lib.setSafeAttribute(node, "aria-labelledby", headerId);
 		if(options.additionalCssClass) {
 			titleNode.classList.add(options.additionalCssClass); //$NON-NLS-0$
 		}
@@ -55,9 +55,9 @@ define([
 			var that = this;
 			this.titleNode.style.cursor = "pointer"; //$NON-NLS-0$
 			this.titleNode.tabIndex = 0; //$NON-NLS-0$
-			this.titleNode.setAttribute("role", "button");
-			this.titleNode.setAttribute("aria-expanded", false);
-			this.titleNode.setAttribute("aria-controls", content.id);
+			lib.setSafeAttribute(this.titleNode, "role", "button");
+			lib.setSafeAttribute(this.titleNode, "aria-expanded", false);
+			lib.setSafeAttribute(this.titleNode, "aria-controls", content.id);
 			this.titleNode.addEventListener("click", function(evt) { //$NON-NLS-0$
 				that.setHidden(!that.hidden);
 			}, false);
@@ -76,10 +76,10 @@ define([
 		this.hidden = hidden;
 		localStorage.setItem(this.headerId +"/hidden", hidden);
 		if (this.hidden) {
-			this.titleNode.setAttribute("aria-expanded", false);
+			lib.setSafeAttribute(this.titleNode, "aria-expanded", false);
 			this.subsectionContent.style.display = "none";
 		} else {
-			this.titleNode.setAttribute("aria-expanded", true);
+			lib.setSafeAttribute(this.titleNode, "aria-expanded", true);
 			this.subsectionContent.style.display = "";
 		}
 	};

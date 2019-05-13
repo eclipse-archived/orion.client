@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2012 IBM Corporation and others.
+ * Copyright (c) 2012, 2019 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -56,8 +56,8 @@ define(['i18n!orion/widgets/nls/messages', 'orion/webui/littlelib', 'orion/webui
 				trigger: trigger ? trigger : "click" //$NON-NLS-0$
 			});
 			this.$parent = this._tooltip.contentContainer();
-			this.$parent.setAttribute("role", "dialog"); //$NON-NLS-2$ //$NON-NLS-1$
-			this.$parent.setAttribute("aria-modal", "true"); //$NON-NLS-1$ //$NON-NLS-0$
+			lib.setSafeAttribute(this.$parent, "role", "dialog");
+			lib.setSafeAttribute(this.$parent, "aria-modal", "true");
 			var range = document.createRange();
 			range.selectNode(this.$parent);
 			var contentFragment = range.createContextualFragment(this.TEMPLATE);
@@ -73,7 +73,7 @@ define(['i18n!orion/widgets/nls/messages', 'orion/webui/littlelib', 'orion/webui
 			}, false);
 
 			this._bindElements(this.$parent);
-			this.$parent.setAttribute("aria-labelledby", this.$DialogTitle.id); //$NON-NLS-2$ //$NON-NLS-1$
+			lib.setSafeAttribute(this.$parent, "aria-labelledby", this.$DialogTitle.id);
 			if (typeof this._bindToDom === "function") { //$NON-NLS-0$
 				this._bindToDom(this.$parent);
 			}

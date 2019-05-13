@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2012, 2013 IBM Corporation and others.
+ * Copyright (c) 2012, 2019 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -129,20 +129,20 @@ define([
 			// if dropdown, mark up domNode as either combo or dialog button
 			if (options.dropdown) {
 				if (options.iconClass) {
-					this.domNode.setAttribute("role", "button"); //$NON-NLS-1$ //$NON-NLS-0$
+					lib.setSafeAttribute(this.domNode, "role", "button");
 					// ensure there is accessible text describing this image
 					if (options.name) {
-						this.domNode.setAttribute("aria-label", options.name); //$NON-NLS-0$
+						lib.setSafeAttribute(this.domNode, "aria-label", options.name);
 					} else if (options.tooltip) {
-						this.domNode.setAttribute("aria-label", options.tooltip); //$NON-NLS-0$
+						lib.setSafeAttribute(this.domNode, "aria-label", options.tooltip);
 					}
 				} else {
-					this.domNode.setAttribute("role", "combobox"); //$NON-NLS-1$ //$NON-NLS-0$
-					this.domNode.setAttribute("aria-readonly", "true"); //$NON-NLS-1$ //$NON-NLS-0$
+					lib.setSafeAttribute(this.domNode, "role", "combobox");
+					lib.setSafeAttribute(this.domNode, "aria-readonly", "true");
 				}
-				this.domNode.setAttribute("aria-haspopup", "dialog"); //$NON-NLS-1$ //$NON-NLS-0$
+				lib.setSafeAttribute(this.domNode, "aria-haspopup", "dialog");
 			}
-			this.domNode.setAttribute("aria-expanded", "false"); //$NON-NLS-1$ //$NON-NLS-0$
+			lib.setSafeAttribute(this.domNode, "aria-expanded", "false");
 		}
 		var classes;
 		if(options.iconClass){
@@ -176,11 +176,11 @@ define([
 		
 		// if dropdown and not icon, mark up titleNode as textbox child of combo
 		if (options.dropdown && !options.iconClass) {
-			this.domNode.setAttribute("aria-labelledby", this.titleNode.id); //$NON-NLS-1$ //$NON-NLS-0$
+			lib.setSafeAttribute(this.domNode, "aria-labelledby", this.titleNode.id);
 		}
 		if (!options.dropdown && options.canHide) {
-			this.domNode.setAttribute("role", "button"); //$NON-NLS-1$ //$NON-NLS-0$
-			this.domNode.setAttribute("aria-labelledby", this.titleNode.id); //$NON-NLS-1$ //$NON-NLS-0$
+			lib.setSafeAttribute(this.domNode, "role", "button");
+			lib.setSafeAttribute(this.domNode, "aria-labelledby", this.titleNode.id);
 		}
 
 		this.domNode.appendChild(this.titleNode);
@@ -262,16 +262,16 @@ define([
 		// if dropdown, mark up _contentParent as combo's dropdown or dialog button's popup
 		if (options.dropdown) {
 			this._contentParent.classList.add("sectionDropdown");
-			this._contentParent.setAttribute("role", "dialog"); //$NON-NLS-1$ //$NON-NLS-0$
-			this._contentParent.setAttribute("aria-modal", "true"); //$NON-NLS-1$ //$NON-NLS-0$
-			this._contentParent.setAttribute("aria-labelledby", this.titleNode.id); //$NON-NLS-0$
-			this.domNode.setAttribute("aria-owns", this._contentParent.id); //$NON-NLS-0$
+			lib.setSafeAttribute(this._contentParent, "role", "dialog");
+			lib.setSafeAttribute(this._contentParent, "aria-modal", "true");
+			lib.setSafeAttribute(this._contentParent, "aria-labelledby", this.titleNode.id);
+			lib.setSafeAttribute(this.domNode, "aria-owns", this._contentParent.id);
 		} else {
 			// if not dropdown, mark up _sectionContainer as region landmark
-			this._sectionContainer.setAttribute("role", "region"); //$NON-NLS-1$ //$NON-NLS-0$
-			this._sectionContainer.setAttribute("aria-labelledby", this.titleNode.id); //$NON-NLS-0$
+			lib.setSafeAttribute(this._sectionContainer, "role", "region");
+			lib.setSafeAttribute(this._sectionContainer, "aria-labelledby", this.titleNode.id);
 			if (options.canHide) {
-				this.domNode.setAttribute("aria-controls", this._contentParent.id); //$NON-NLS-0$
+				lib.setSafeAttribute(this.domNode, "aria-controls", this._contentParent.id);
 			}
 		}
 		
@@ -624,10 +624,10 @@ define([
 				this.domNode.classList.remove("sectionClosed"); //$NON-NLS-0$
 				this.domNode.classList.add("sectionOpened"); //$NON-NLS-0$
 				if (this._contentParent && this.domNode.getAttribute("role") !== "button") {
-					this.domNode.setAttribute("aria-owns", this._contentParent.id); //$NON-NLS-0$
+					lib.setSafeAttribute(this.domNode, "aria-owns", this._contentParent.id);
 				}
 				if (this.canHide) {
-					this.domNode.setAttribute("aria-expanded", "true"); //$NON-NLS-1$ //$NON-NLS-0$
+					lib.setSafeAttribute(this.domNode, "aria-expanded", "true");
 				}
 			}
 			this.hidden = false;
@@ -671,7 +671,7 @@ define([
 					this.domNode.classList.remove("sectionOpened"); //$NON-NLS-0$
 					this.domNode.removeAttribute("aria-owns"); //$NON-NLS-0$
 					if (this.canHide) {
-						this.domNode.setAttribute("aria-expanded", "false"); //$NON-NLS-1$ //$NON-NLS-0$
+						lib.setSafeAttribute(this.domNode, "aria-expanded", "false");
 					}
 				}
 			}.bind(this));

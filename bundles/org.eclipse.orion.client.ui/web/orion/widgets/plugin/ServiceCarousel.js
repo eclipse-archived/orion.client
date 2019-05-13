@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2012, 2015 IBM Corporation and others.
+ * Copyright (c) 2012, 2019 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -53,7 +53,7 @@ define(['i18n!orion/settings/nls/messages', 'orion/objects', 'orion/webui/little
 			var label = this.serviceLabel = lib.$('.serviceContainerClosed', this.node); //$NON-NLS-0$
 			this.serviceCount = lib.$('.serviceCount', this.node); //$NON-NLS-0$
 			var rails = this.rails = lib.$('.serviceRails', this.node); //$NON-NLS-0$
-			rails.setAttribute("aria-label", messages['Services']);
+			lib.setSafeAttribute(rails, "aria-label", messages['Services']);
 			this.leftbutton = lib.$('.leftButton', this.node); //$NON-NLS-0$
 			this.listContainer = lib.$('.listContainer', this.node); //$NON-NLS-0$
 			this.testlist = lib.$('.serviceList', this.node); //$NON-NLS-0$
@@ -94,14 +94,14 @@ define(['i18n!orion/settings/nls/messages', 'orion/objects', 'orion/webui/little
 			this.rails.classList.add( "serviceRailsVisible" ); //$NON-NLS-0$
 			this.serviceLabel.classList.remove( "serviceContainerClosed" ); //$NON-NLS-0$
 			this.serviceLabel.classList.add( "serviceContainerOpen" ); //$NON-NLS-0$
-			this.serviceLabel.setAttribute("aria-pressed", "true");
+			lib.setSafeAttribute(this.serviceLabel, "aria-pressed", "true");
 			this.serviceState = true; 
 		},
 		
 		collapse: function(){
 			this.serviceLabel.classList.remove( "serviceContainerOpen" ); //$NON-NLS-0$
 			this.serviceLabel.classList.add( "serviceContainerClosed" ); //$NON-NLS-0$
-			this.serviceLabel.setAttribute("aria-pressed", "false");
+			lib.setSafeAttribute(this.serviceLabel, "aria-pressed", "false");
 			this.rails.classList.remove( "serviceRailsVisible" ); //$NON-NLS-0$
 			this.rails.classList.add( "serviceRailsHidden" ); //$NON-NLS-0$
 			this.serviceState = false; 
@@ -128,9 +128,9 @@ define(['i18n!orion/settings/nls/messages', 'orion/objects', 'orion/webui/little
 			if( evt.keyCode === lib.KEY.ENTER || evt.charCode === lib.KEY.SPACE ) {
 				this.showServices();
 				if( this.serviceState === false ){
-					evt.target.setAttribute("aria-pressed", "true"); //$NON-NLS-1$ //$NON-NLS-0$
+					lib.setSafeAttribute(evt.target, "aria-pressed", "true");
 				}else{
-					evt.target.setAttribute("aria-pressed", "false"); //$NON-NLS-1$ //$NON-NLS-0$
+					lib.setSafeAttribute(evt.target, "aria-pressed", "false");
 				}
 				evt.preventDefault();
 			}
@@ -207,7 +207,7 @@ define(['i18n!orion/settings/nls/messages', 'orion/objects', 'orion/webui/little
 
 			var listItem = document.createElement("li"); //$NON-NLS-0$
 			listItem.classList.add("serviceData"); //$NON-NLS-0$
-			listItem.setAttribute("aria-label", data.service);
+			lib.setSafeAttribute(listItem, "aria-label", data.service);
 			location.appendChild(listItem);
 
 			var entry = document.createElement("div"); //$NON-NLS-0$

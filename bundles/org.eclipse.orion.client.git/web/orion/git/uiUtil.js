@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2012, 2013 IBM Corporation and others.
+ * Copyright (c) 2012, 2019 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -31,7 +31,7 @@ define([
 		var id = lib.validId(msgKey);
 		var label = document.createElement("label");
 		label.textContent = messages["Filter:"];
-		label.setAttribute("for", id);
+		lib.setSafeAttribute(label, "for", id);
 		filterDiv.appendChild(label);
 
 		var msg = messages[msgKey];
@@ -51,7 +51,7 @@ define([
 		};
 		
 		var button = document.createElement("button"); //$NON-NLS-0$
-		button.setAttribute("aria-label", messages["Filter"]); //$NON-NLS-1$
+		lib.setSafeAttribute(button, "aria-label", messages["Filter"]);
 		button.className = "core-sprite-filter searchButton"; //$NON-NLS-0$
 		var commandTooltip = createTooltip(button);
 		filterDiv.appendChild(button);
@@ -240,7 +240,7 @@ define([
 		var makeSVG = function(tag, attrs) {
 			var el = document.createElementNS('http://www.w3.org/2000/svg', tag);
 			for (var k in attrs)
-				el.setAttribute(k, attrs[k]);
+				lib.setSafeAttribute(el, k, attrs[k]);
 			return el;
 		};
 
@@ -428,16 +428,16 @@ define([
 			}
 			
 
-			linesSvg.setAttribute("width", newWidth + "px");
+			lib.setSafeAttribute(linesSvg, "width", newWidth + "px");
 			//svg.setAttribute("height","100%");
-			linesSvg.setAttribute("preserveAspectRatio", "none");
-			linesSvg.setAttribute("viewBox","0 0 "+newWidth+" "+COLUMN_LENGTH);
-			svgDiv.setAttribute("class","commitSvgGraph"); 
+			lib.setSafeAttribute(linesSvg, "preserveAspectRatio", "none");
+			lib.setSafeAttribute(linesSvg, "viewBox","0 0 "+newWidth+" "+COLUMN_LENGTH);
+			lib.setSafeAttribute(svgDiv, "class","commitSvgGraph");
 			svgDiv.style.width =  newWidth + "px";
 			svgDiv.appendChild(linesSvg);
 			if (columnIndex > -1) {
-				nodeSvg.setAttribute("width", newWidth + "px");
-				nodeSvg.setAttribute("height", NODE_SIZE*2 + "px");
+				lib.setSafeAttribute(nodeSvg, "width", newWidth + "px");
+				lib.setSafeAttribute(nodeSvg, "height", NODE_SIZE*2 + "px");
 				svgDiv.appendChild(nodeSvg);
 			}
 			commits[i].graphSvg = svgDiv;

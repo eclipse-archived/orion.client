@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2012, 2016 IBM Corporation and others.
+ * Copyright (c) 2012, 2019 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License v1.0
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution
@@ -38,7 +38,7 @@ define("orion/widgets/settings/EditorSettings", //$NON-NLS-0$
 		if (!options.local) {
 			var indicator = document.createElement("span"); //$NON-NLS-0$
 			indicator.tabIndex = 0;
-			indicator.setAttribute("role", "button");
+			lib.setSafeAttribute(indicator, "role", "button");
 			var checked = prefs[property + "LocalVisible"];
 			indicator.classList.add(localIndicatorClass);
 			toggleIndicatorSwitch(indicator, property, checked);
@@ -66,13 +66,13 @@ define("orion/widgets/settings/EditorSettings", //$NON-NLS-0$
 		if (checked) {
 			indicator.classList.add(on);
 			indicator.classList.remove(off);
-			indicator.setAttribute("aria-pressed", "true"); //$NON-NLS-0$ //$NON-NLS-1$
+			lib.setSafeAttribute(indicator, "aria-pressed", "true");
 		} else {
 			indicator.classList.add(off);
 			indicator.classList.remove(on);
-			indicator.setAttribute("aria-pressed", "false"); //$NON-NLS-0$ //$NON-NLS-1$
+			lib.setSafeAttribute(indicator, "aria-pressed", "false");
 		}
-		indicator.setAttribute("aria-label", i18nUtil.formatMessage(messages.localSettings, messages[property])); //$NON-NLS-0$
+		lib.setSafeAttribute(indicator, "aria-label", i18nUtil.formatMessage(messages.localSettings, messages[property]));
 		if (editorSettings) editorSettings.update();
 	}
 
@@ -324,16 +324,16 @@ define("orion/widgets/settings/EditorSettings", //$NON-NLS-0$
 						var onIcon = document.createElement("span"); //$NON-NLS-0$
 						onIcon.classList.add(localIndicatorClass);
 						onIcon.classList.add(on);
-						onIcon.setAttribute("role", "img"); //$NON-NLS-1$ //$NON-NLS-0$
-						onIcon.setAttribute("aria-label", messages["localSettingsButton"]); //$NON-NLS-0$
+						lib.setSafeAttribute(onIcon, "role", "img");
+						lib.setSafeAttribute(onIcon, "aria-label", messages["localSettingsButton"]);
 						var wrenchIcon = document.createElement("span"); //$NON-NLS-0$
 						wrenchIcon.classList.add("core-sprite-wrench"); //$NON-NLS-0$
 						wrenchIcon.classList.add("icon-inline"); //$NON-NLS-0$
 						wrenchIcon.classList.add("imageSprite"); //$NON-NLS-0$
-						wrenchIcon.setAttribute("aria-hidden", "true"); //$NON-NLS-1$ //$NON-NLS-0$
+						lib.setSafeAttribute(wrenchIcon, "aria-hidden", "true");
 						lib.processDOMNodes(infoText, [onIcon, wrenchIcon]);
 						sectionWidget.getContentElement().appendChild(infoText);
-						sectionWidget.getContentElement().parentElement.setAttribute("aria-describedby", infoText.id); //$NON-NLS-0$
+						lib.setSafeAttribute(sectionWidget.getContentElement().parentElement, "aria-describedby", infoText.id);
 					}
 					for (var subsection in sections[section]) {
 						if (sections[section].hasOwnProperty(subsection)) {
