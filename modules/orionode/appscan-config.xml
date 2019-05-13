@@ -9,6 +9,7 @@
       <Exclude>Gruntfile.js</Exclude>
       <Exclude>lib/orionode.client/tty/</Exclude>
       <Exclude>lib/tty_shell.js</Exclude>
+      <Exclude>lib/main.js</Exclude>
       <Exclude>node_modules/nodegit/vendor/libgit2/tests/</Exclude>
     </Target>
   </Targets>
