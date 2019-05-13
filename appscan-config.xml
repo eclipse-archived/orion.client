@@ -4,11 +4,12 @@
       <Exclude>bundles/org.eclipse.orion.client.core/web/js-tests/</Exclude>
       <Exclude>bundles/org.eclipse.orion.client.core/web/chai/</Exclude>
       <Exclude>bundles/org.eclipse.orion.client.core/web/mocha/</Exclude>
-      <Exclude>bundles/org.eclipse.orion.client.core/web/requirejs/almond.js</Exclude>
-      <Exclude>bundles/org.eclipse.orion.client.core/web/requirejs/require.min.js</Exclude>
+      <Exclude>bundles/org.eclipse.orion.client.core/web/requirejs/</Exclude>
+      <Exclude>bundles/org.eclipse.orion.client.core/web/socketio/</Exclude>
       <Exclude>bundles/org.eclipse.orion.client.editor/web/js-tests/</Exclude>
       <Exclude>bundles/org.eclipse.orion.client.editor/web/examples/</Exclude>
       <Exclude>bundles/org.eclipse.orion.client.javascript/web/js-tests/</Exclude>
+      <Exclude>bundles/org.eclipse.orion.client.javascript/web/tern/defs/</Exclude>
       <Exclude>bundles/org.eclipse.orion.client.ui/web/embeddedEditor/</Exclude>
       <Exclude>bundles/org.eclipse.orion.client.ui/web/examplePages/</Exclude>
       <Exclude>bundles/org.eclipse.orion.client.ui/web/gcli/</Exclude>
@@ -28,6 +29,7 @@
       <Exclude>bundles/org.eclipse.orion.client.git.greasemonkey/</Exclude>
       <Exclude>bundles/org.eclipse.orion.client.help/</Exclude>
       <Exclude>bundles/org.eclipse.orion.client.jsdoc/</Exclude>
+      <Exclude>lib/orion.client/</Exclude>
       <Exclude>modules/</Exclude>
       <Exclude>modules/orionode/node_modules/nodegit/</Exclude>
     </Target>
