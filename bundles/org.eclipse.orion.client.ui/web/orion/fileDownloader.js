@@ -18,7 +18,7 @@ define([
 	'orion/URL-shim'
 ], function(messages, i18nUtil, Deferred) {
 
-	var orion_download_initiator = document.createElementNS("http://www.w3.org/1999/xhtml", "a");
+	var orion_download_initiator = document.createElementNS("https://www.w3.org/1999/xhtml", "a");
 	
 	function downloadSupported() {
 		return (typeof orion_download_initiator.download !== "undefined") || (typeof window.navigator !== "undefined" && window.navigator.msSaveBlob);
@@ -123,7 +123,7 @@ define([
 			}
 			var cType = (contentType && contentType.id) ? contentType.id : "application/octet-stream";
 			var blobObj = new Blob([blobContents],{type: cType}); 
-			var downloadLink = createLink ? document.createElementNS("http://www.w3.org/1999/xhtml", "a") : document.createElement("a"); //$NON-NLS-1$ //$NON-NLS-0$
+			var downloadLink = createLink ? document.createElementNS("https://www.w3.org/1999/xhtml", "a") : document.createElement("a"); //$NON-NLS-1$ //$NON-NLS-0$
 			if(typeof downloadLink.download !== "undefined") {//Chrome and FireFox
 				var objectURLLink = URL.createObjectURL(blobObj);
 				downloadLink.href = objectURLLink;

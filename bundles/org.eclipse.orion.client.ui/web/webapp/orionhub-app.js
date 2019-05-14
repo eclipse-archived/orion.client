@@ -31,7 +31,7 @@ window.onload = function() {
 		installApp.addEventListener("click", function() {
 			var mozApps = navigator.mozApps;
 			if (mozApps) {
-				var installing = navigator.mozApps.install("http://orionhub.org/webapp/orionhub-manifest.webapp");
+				var installing = navigator.mozApps.install("https://orionhub.org/webapp/orionhub-manifest.webapp");
 				installing.onsuccess = function(e) {
 					var installApp = document.getElementById("install-app");
 					installApp.textContent = "OrionHub App Already Installed";

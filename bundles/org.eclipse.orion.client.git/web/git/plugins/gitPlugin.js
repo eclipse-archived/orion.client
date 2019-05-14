@@ -316,7 +316,7 @@ define([
 		{source: "Type", match: "Commit"},
 		{source: "Name", variableName: "commitName"}
 		],
-		uriTemplate: "http://git.eclipse.org/c{+EclipseGitLocation}/commit/?id={+commitName}"
+		uriTemplate: "https://git.eclipse.org/c{+EclipseGitLocation}/commit/?id={+commitName}"
 	});
 	
 	var tryParentRelative = true;
@@ -325,9 +325,8 @@ define([
 			try {
 				if (window.location.host === parent.location.host && window.location.protocol === parent.location.protocol) {
 					return location.substring(parent.location.href.indexOf(parent.location.host) + parent.location.host.length);
-				} else {
-					tryParentRelative = false;
 				}
+				tryParentRelative = false;
 			} catch (e) {
 				tryParentRelative = false;
 			}

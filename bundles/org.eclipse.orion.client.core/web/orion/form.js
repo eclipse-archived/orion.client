@@ -38,7 +38,7 @@ define([], function() {
 			return buf.join('&'); //$NON-NLS-0$
 		},
 		/**
-		 * Encodes a string into an <a href="http://tools.ietf.org/html/rfc5023#section-9.7.1">RFC 5023</a>-compliant
+		 * Encodes a string into an <a href="https://tools.ietf.org/html/rfc5023#section-9.7.1">RFC 5023</a>-compliant
 		 * <tt>Slug</tt> header.
 		 * @static
 		 * @param {String} s The string to encode.
