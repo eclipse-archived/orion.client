@@ -711,7 +711,7 @@ define("orion/editor/textView", [
 			var span, style, oldSpan, oldStyle, text, oldText, end = 0, oldEnd = 0, next, i;
 			if (util.isFirefox && lineText.length > 2000) {
 				if (div) {
-					lineDiv.innerHTML = "";
+					lib.setSafeInnerHTML(lineDiv, "");
 					div.lineWidth = undefined;
 				}
 				var frag = doc.createDocumentFragment();
@@ -887,7 +887,7 @@ define("orion/editor/textView", [
 			var child = util.createElement(_parent.ownerDocument, tagName);
 			child.appendChild(doc.createTextNode(style && style.text ? style.text : text));
 			if (style && style.html) {
-				child.innerHTML = style.html;
+				lib.setSafeInnerHTML(child, style.html);
 				child.ignore = true;
 			} else if (style && style.node) {
 				if (this.drawing) {
@@ -966,7 +966,7 @@ define("orion/editor/textView", [
 							lineChild.appendChild(span);
 							lineChild.appendChild(doc.createTextNode(text.substring(index + 1)));
 							result = new TextRect(span.getBoundingClientRect());
-							lineChild.innerHTML = "";
+							lib.setSafeInnerHTML(lineChild, "");
 							lineChild.appendChild(textNode);
 							if (!this._createdDiv) {
 								/*
@@ -1345,7 +1345,7 @@ define("orion/editor/textView", [
 						}
 						newText.push("</span>"); //$NON-NLS-1$
 					}
-					lineChild.innerHTML = newText.join("");
+					lib.setSafeInnerHTML(lineChild, newText.join(""));
 					var rangeChild = lineChild.firstChild;
 					while (rangeChild) {
 						rect = rangeChild.getBoundingClientRect();
@@ -1362,7 +1362,7 @@ define("orion/editor/textView", [
 						rangeChild = rangeChild.nextSibling;
 					}
 					if (!that._createdDiv) {
-						lineChild.innerHTML = "";
+						lib.setSafeInnerHTML(lineChild, "");
 						lineChild.appendChild(textNode);
 						/*
 						 * Removing the element node that holds the selection start or end
@@ -5539,14 +5539,14 @@ define("orion/editor/textView", [
 				div1.style.position = "fixed"; //$NON-NLS-1$
 				div1.style.left = "-1000px"; //$NON-NLS-1$
 				_parent.appendChild(div1);
-				div1.innerHTML = newArray(2).join("a"); //$NON-NLS-1$
+				lib.setSafeInnerHTML(div1, newArray(2).join("a"));
 				rect1 = div1.getBoundingClientRect();
 				charWidth = Math.ceil(rect1.right - rect1.left);
 				if (this._wrapOffset || this._marginOffset) {
-					div1.innerHTML = newArray(this._wrapOffset + 1 + (util.isWebkit ? 0 : 1)).join(" "); //$NON-NLS-1$
+					lib.setSafeInnerHTML(div1, newArray(this._wrapOffset + 1 + (util.isWebkit ? 0 : 1)).join(" "));
 					rect1 = div1.getBoundingClientRect();
 					wrapWidth = Math.ceil(rect1.right - rect1.left);
-					div1.innerHTML = newArray(this._marginOffset + 1).join(" "); //$NON-NLS-1$
+					lib.setSafeInnerHTML(div1, newArray(this._marginOffset + 1).join(" "));
 					rect2 = div1.getBoundingClientRect();
 					marginWidth = Math.ceil(rect2.right - rect2.left);
 				}
@@ -6124,12 +6124,12 @@ define("orion/editor/textView", [
 					clipboardDiv.style.left = "-1000px"; //$NON-NLS-1$
 					this._rootDiv.appendChild(clipboardDiv);
 				}
-				clipboardDiv.innerHTML = "<pre contenteditable=''></pre>"; //$NON-NLS-1$
+				lib.setSafeInnerHTML(clipboardDiv, "<pre contenteditable=''></pre>");
 				clipboardDiv.firstChild.focus();
 				var that = this;
 				var _getText = function() {
 					var noteText = that._getTextFromElement(clipboardDiv);
-					clipboardDiv.innerHTML = "";
+					lib.setSafeInnerHTML(clipboardDiv, "");
 					return convert(noteText);
 				};
 				
@@ -7110,7 +7110,7 @@ define("orion/editor/textView", [
 					cursorDiv.style.color = "transparent"; //$NON-NLS-1$
 					cursorDiv.style.position = "absolute"; //$NON-NLS-1$
 					cursorDiv.style.pointerEvents = "none"; //$NON-NLS-1$
-					cursorDiv.innerHTML = "&nbsp;"; //$NON-NLS-1$
+					lib.setSafeInnerHTML(cursorDiv, "&nbsp;");
 					viewDiv.appendChild(cursorDiv);
 					this._updateDOMSelection();
 				}
@@ -7846,7 +7846,7 @@ define("orion/editor/textView", [
 						if (annotation) {
 							applyStyle(annotation.style, widthDiv);
 							if (annotation.html) {
-								widthDiv.innerHTML = annotation.html;
+								lib.setSafeInnerHTML(widthDiv, annotation.html);
 							}
 						}
 						widthDiv.lineIndex = lineIndex;
@@ -7874,7 +7874,7 @@ define("orion/editor/textView", [
 							if (annotation) {
 								applyStyle(annotation.style, lineDiv);
 								if (annotation.html) {
-									lineDiv.innerHTML = annotation.html;
+									lib.setSafeInnerHTML(lineDiv, annotation.html);
 								}
 								lineDiv.annotation = annotation;
 							}
@@ -7922,7 +7922,7 @@ define("orion/editor/textView", [
 							lineDiv.style.position = "absolute"; //$NON-NLS-1$
 							lineDiv.style.top = arrowWidth + lineHeight + Math.floor(lineIndex * divHeight) + "px"; //$NON-NLS-1$
 							if (annotation.html) {
-								lineDiv.innerHTML = annotation.html;
+								lib.setSafeInnerHTML(lineDiv, annotation.html);
 							}
 							lineDiv.annotation = annotation;
 							lineDiv.lineIndex = lineIndex;

@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2014 IBM Corporation and others.
+ * Copyright (c) 2014, 2019 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -55,7 +55,7 @@ define(['i18n!cfui/nls/messages', 'orion/Deferred', 'cfui/cfUtil',  'orion/urlUt
 			if (msg.HTML) {
 				// msg is HTML to be inserted directly
 				var span = document.createElement("span");
-				span.innerHTML = msg.Message;
+				lib.setSafeInnerHTML(span, msg.Message);
 				return span;
 			}
 			msg = msg.Message || msg;

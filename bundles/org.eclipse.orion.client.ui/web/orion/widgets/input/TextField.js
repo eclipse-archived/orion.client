@@ -13,7 +13,7 @@ define(['orion/objects', 'orion/webui/littlelib'], function(objects, lib) {
 	function TextField(options, node) {
 		objects.mixin(this, options);
 		this.node = node || document.createElement("div"); //$NON-NLS-0$
-		this.node.innerHTML = this.templateString;
+		lib.setSafeInnerHTML(this.node, this.templateString);
 		this.textfield = lib.$(".setting-control", this.node); //$NON-NLS-0$
 	}
 	objects.mixin(TextField.prototype, {

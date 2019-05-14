@@ -230,14 +230,14 @@ define("orion/widgets/settings/EditorSettings", //$NON-NLS-0$
 					'<div id="editorCommands" class="layoutRight sectionActions"></div>' + //$NON-NLS-0$
 				'</div>', //$NON-NLS-0$
 		createElements: function() {
-			this.node.innerHTML = this.templateString;
+			lib.setSafeInnerHTML(this.node, this.templateString);
 			this.sections = lib.$('.sections', this.node); //$NON-NLS-0$
 			this.createSections();
 			if (this.local) {
 				this.sections.classList.add("local"); //$NON-NLS-0$
 			} else {
 				var commandArea = document.getElementById( 'pageActions' ); //$NON-NLS-0$
-				commandArea.innerHTML = this.commandTemplate;
+				lib.setSafeInnerHTML(commandArea, this.commandTemplate);
 				this.createToolbar();
 			}
 		},

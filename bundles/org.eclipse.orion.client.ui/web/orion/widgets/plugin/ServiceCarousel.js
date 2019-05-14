@@ -48,7 +48,7 @@ define(['i18n!orion/settings/nls/messages', 'orion/objects', 'orion/webui/little
 		               '</div></div>', //$NON-NLS-0$
 
 		createElements: function() {
-			this.node.innerHTML = this.templateString;
+			lib.setSafeInnerHTML(this.node, this.templateString);
 			lib.processTextNodes(this.node, messages);
 			var label = this.serviceLabel = lib.$('.serviceContainerClosed', this.node); //$NON-NLS-0$
 			this.serviceCount = lib.$('.serviceCount', this.node); //$NON-NLS-0$
@@ -222,7 +222,7 @@ define(['i18n!orion/settings/nls/messages', 'orion/objects', 'orion/webui/little
 			tableContainer.classList.add("serviceTable"); //$NON-NLS-0$
 			tableContainer.appendChild(table);
 
-			table.innerHTML = '<thead><tr><th scope="col">${Item}</th><th scope="col">${Value}</th></tr></thead>'; //$NON-NLS-0$
+			lib.setSafeInnerHTML(table, '<thead><tr><th scope="col">${Item}</th><th scope="col">${Value}</th></tr></thead>');
 			lib.processTextNodes(table, messages);
 			var tablebody = document.createElement( "tbody" ); //$NON-NLS-0$
 			table.appendChild(tablebody);

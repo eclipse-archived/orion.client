@@ -1267,7 +1267,7 @@ define([
 					if (explorer.slideout) {
 						var slideoutFragment = mHTMLFragments.slideoutHTMLFragment(actionsArea.id);
 						var slideoutDiv = document.createElement("div"); //$NON-NLS-0$
-						slideoutDiv.innerHTML = slideoutFragment;
+						lib.setSafeInnerHTML(slideoutDiv, slideoutFragment);
 						horizontalBox.appendChild(slideoutDiv);
 					}
 				} else {

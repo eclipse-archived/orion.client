@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2013 IBM Corporation and others.
+ * Copyright (c) 2013, 2019 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License v1.0
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution
@@ -807,7 +807,7 @@ define([
 				 */
 				var parseTokens = block.tokens.slice();
 				parseTokens.links = this._linkDefs;
-				rootElement.innerHTML = marked.Parser.parse(parseTokens, markedOptions);
+				lib.setSafeInnerHTML(rootElement, marked.Parser.parse(parseTokens, markedOptions));
 				return;
 			}
 
@@ -819,7 +819,7 @@ define([
 
 			parseTokens = [block.startToken, block.endToken];
 			parseTokens.links = this._linkDefs;
-			rootElement.innerHTML = marked.Parser.parse(parseTokens, markedOptions);
+			lib.setSafeInnerHTML(rootElement, marked.Parser.parse(parseTokens, markedOptions));
 
 			var processParentTokens = function(parentTokens) {
 				/*
@@ -829,7 +829,7 @@ define([
 				parseTokens = [block.startToken].concat(parentTokens).concat(block.endToken);
 				parseTokens.links = this._linkDefs;
 				var tempElement = document.createElement("div"); //$NON-NLS-0$
-				tempElement.innerHTML = marked.Parser.parse(parseTokens, markedOptions);
+				lib.setSafeInnerHTML(tempElement, marked.Parser.parse(parseTokens, markedOptions));
 				var createdNodes = tempElement.children[0].childNodes;
 				while (createdNodes.length) {
 					rootElement.children[0].appendChild(createdNodes[0]);

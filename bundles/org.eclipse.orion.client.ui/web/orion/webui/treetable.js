@@ -273,12 +273,12 @@ define(['i18n!orion/nls/messages', 'orion/webui/littlelib', 'orion/Deferred'], f
 									//tree.tooltip.remove();
 								}
 								var tooltip = document.createElement('div');
-								tooltip.innerHTML = html.annotation.getDescription();
+								lib.setSafeInnerHTML(tooltip, html.annotation.getDescription());
 								tooltip.classList.add("treetable-tooltip");
 								tooltip.style.left = e.clientX + 'px';
 								tooltip.style.top = e.clientY + 'px';
 								var cross = document.createElement('div');
-								cross.innerHTML = '×';
+								lib.setSafeInnerHTML(cross, '×');
 								cross.classList.add("cross");
 								tooltip.appendChild(cross);
 								document.body.appendChild(tooltip);

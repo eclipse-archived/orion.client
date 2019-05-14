@@ -592,7 +592,7 @@ define([
 		if (toolbar) {
 			lib.setSafeAttribute(toolbar, "aria-label", messages.toolbar);
 			toolbar.classList.add("toolbarLayout"); //$NON-NLS-0$
-			toolbar.innerHTML = ToolbarTemplate + commonHTML.slideoutHTMLFragment("mainToolbar"); //$NON-NLS-0$
+			lib.setSafeInnerHTML(toolbar, ToolbarTemplate + commonHTML.slideoutHTMLFragment("mainToolbar"));
 		}
 		var closeNotification = lib.node("closeNotifications"); //$NON-NLS-0$
 		if (closeNotification) {
@@ -610,7 +610,7 @@ define([
 
 		var footer = lib.node("footer"); //$NON-NLS-0$
 		if (footer && FooterTemplate) {
-			footer.innerHTML = FooterTemplate;
+			lib.setSafeInnerHTML(footer, FooterTemplate);
 			// do the i18n string substitutions
 			lib.processTextNodes(footer, messages);
 			var sideMenuNode = lib.node("sideMenu"); //$NON-NLS-0$

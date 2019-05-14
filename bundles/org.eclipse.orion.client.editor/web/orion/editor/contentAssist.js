@@ -1525,7 +1525,7 @@ define("orion/editor/contentAssist", [
 			if (proposals.length === 0) {
 				this.hide();
 			} else {
-				this.parentNode.innerHTML = "";
+				lib.setSafeInnerHTML(this.parentNode, "");
 				for (var i = 0; i < proposals.length; i++) {
 					this.createDiv(proposals[i], this.parentNode, i);
 				}

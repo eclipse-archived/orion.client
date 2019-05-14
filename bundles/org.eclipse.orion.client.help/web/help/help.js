@@ -574,8 +574,7 @@ define(["require", "i18n!orion/help/nls/messages", "orion/bootstrap", "orion/com
 			outputDocument.body.scrollTop = 0;
 			outputDocument.body.style = "";
 			/* it's safe to use innerHTML here because the HTML content was generated from sanitized markdown */
-			outputDocument.childNodes[0].innerHTML = item.content.documentElement.innerHTML;
-
+			lib.setSafeInnerHTML(outputDocument.childNodes[0], item.content.documentElement.innerHTML);
 			var link = outputDocument.createElement("link"); //$NON-NLS-0$
 			link.href = require.toUrl("help/help.css"); //$NON-NLS-0$
 			link.rel = "stylesheet"; //$NON-NLS-0$
@@ -730,7 +729,7 @@ define(["require", "i18n!orion/help/nls/messages", "orion/bootstrap", "orion/com
 						var html = "<html><body>" + marked(content, markedOptions) + "</body></html>"; //$NON-NLS-1$ //$NON-NLS-0$
 			            content = document.implementation.createHTMLDocument("");
 						/* it's safe to use innerHTML here because the HTML content was generated from sanitized markdown */
-			            content.documentElement.innerHTML = html;
+						lib.setSafeInnerHTML(content.documentElement, html);
 						result.resolve(content);
 					}.bind(this),
 					result.reject
@@ -870,7 +869,7 @@ define(["require", "i18n!orion/help/nls/messages", "orion/bootstrap", "orion/com
 				link.onload = function() {
 					link.onload = null;
 					/* it's safe to use innerHTML here because the HTML content was generated from sanitized markdown */
-					outputDocument.body.innerHTML = html;
+					lib.setSafeInnerHTML(outputDocument.body, html);
 				};
 				outputDocument.body.classList.add("orionMarkdown"); //$NON-NLS-0$
 				outputDocument.head.appendChild(link);

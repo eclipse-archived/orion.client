@@ -308,7 +308,7 @@ function Tooltip (view, editor) {
 			
 			var newTooltipContents;
 			if (update && this._tooltipContents) {
-				this._tooltipContents.innerHTML = "";
+				lib.setSafeInnerHTML(this._tooltipContents, "");
 				newTooltipContents = this._tooltipContents;
 			} else {
  				newTooltipContents = util.createElement(this._tooltipDiv.ownerDocument, "div"); //$NON-NLS-0$
@@ -741,7 +741,7 @@ function Tooltip (view, editor) {
 			if (data.title && !data.hiddenTitle) {
 				var titleDiv = util.createElement(document, "div"); //$NON-NLS-0$;
 				if (this.hover.renderMarkDown) {
-					titleDiv.innerHTML = this.hover.renderMarkDown(data.title);
+					lib.setSafeInnerHTML(titleDiv, this.hover.renderMarkDown(data.title));
 				} else {
 					titleDiv.textContent = data.title;
 				}
@@ -786,7 +786,7 @@ function Tooltip (view, editor) {
 					}
 					case 'markdown': {
 						if (this.hover.renderMarkDown) {
-							contentDiv.innerHTML = this.hover.renderMarkDown(data.content);
+							lib.setSafeInnerHTML(contentDiv, this.hover.renderMarkDown(data.content));
 						}
 						break;
 					}
@@ -948,7 +948,7 @@ function Tooltip (view, editor) {
 				if (annotation.html) {
 					var htmlHolder = util.createElement(document, "div"); //$NON-NLS-0$
 					htmlHolder.className = "tooltipImage"; //$NON-NLS-0$
-					htmlHolder.innerHTML = annotation.html;
+					lib.setSafeInnerHTML(htmlHolder, annotation.html);
 					if (htmlHolder.lastChild) {
 						textUtil.addEventListener(htmlHolder.lastChild, "click", function() {
 							var start = annotation.start, end = annotation.end;
