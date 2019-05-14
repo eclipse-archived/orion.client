@@ -238,7 +238,7 @@ define([
 
 
 		var makeSVG = function(tag, attrs) {
-			var el = document.createElementNS('http://www.w3.org/2000/svg', tag);
+			var el = document.createElementNS('https://www.w3.org/2000/svg', tag);
 			for (var k in attrs)
 				lib.setSafeAttribute(el, k, attrs[k]);
 			return el;

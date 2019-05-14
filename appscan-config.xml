@@ -14,6 +14,7 @@
       <Exclude>bundles/org.eclipse.orion.client.ui/web/examplePages/</Exclude>
       <Exclude>bundles/org.eclipse.orion.client.ui/web/gcli/</Exclude>
       <Exclude>bundles/org.eclipse.orion.client.ui/web/js-tests/</Exclude>
+      <Exclude>bundles/org.eclipse.orion.client.ui/web/marked/</Exclude>
       <Exclude>bundles/org.eclipse.orion.client.ui/web/mixloginstatic/</Exclude>
       <Exclude>bundles/org.eclipse.orion.client.ui/web/orion/compare/examples/</Exclude>
       <Exclude>bundles/org.eclipse.orion.client.ui/web/orion/sites/</Exclude>
