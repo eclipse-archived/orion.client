@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2014 IBM Corporation and others. All rights reserved.
+ * Copyright (c) 2014, 2019 IBM Corporation and others. All rights reserved.
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution
@@ -15,8 +15,9 @@ define([
 	'orion/editor/find',
 	'orion/objects',
 	'orion/editor/util',
-	'orion/util', 
-], function(messages, mFind, objects, textUtil, util) {
+	'orion/util',
+	'orion/webui/littlelib'
+], function(messages, mFind, objects, textUtil, util, lib) {
 	
 	function FindUI(editor, undoStack, options) {
 		mFind.Find.call(this, editor, undoStack, options);
@@ -84,8 +85,8 @@ define([
 			root.className = "textViewFind"; //$NON-NLS-0$
 			textUtil.addEventListener(root, "keydown", function(e) { that._handleKeyDown(e); }); //$NON-NLS-0$
 			this._rootDiv = root;
-			root.setAttribute("role", "dialog");
-			root.setAttribute("aria-label", messages.findReplace);
+			lib.setSafeAttribute(root, "role", "dialog");
+			lib.setSafeAttribute(root, "aria-label", messages.findReplace);
 			this._createContents(document, root);
 			view._rootDiv.insertBefore(root, view._rootDiv.firstChild);
 		},
@@ -143,7 +144,7 @@ define([
 				button.appendChild(document.createTextNode(text)); //$NON-NLS-0$
 			}
 			if (ariaLabel) {
-				button.setAttribute("aria-label", ariaLabel);
+				lib.setSafeAttribute(button, "aria-label", ariaLabel);
 			}
 			parentDom.appendChild(button);
 			return button;

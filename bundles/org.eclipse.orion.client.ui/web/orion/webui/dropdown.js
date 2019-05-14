@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2012 IBM Corporation and others.
+ * Copyright (c) 2012, 2019 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -55,7 +55,7 @@ define(['orion/webui/littlelib', 'orion/EventTarget'], function(lib, EventTarget
 			this._dropdownNode = lib.node(options.dropdown);
 			if (!this._dropdownNode) { throw "no dom node for dropdown found"; } //$NON-NLS-0$
 			if (options.name) {
-				this._dropdownNode.setAttribute("aria-label", options.name);
+				lib.setSafeAttribute(this._dropdownNode, "aria-label", options.name);
 			}
 			this._populate = options.populate;
 			this._selectionClass = options.selectionClass;
@@ -212,7 +212,7 @@ define(['orion/webui/littlelib', 'orion/EventTarget'], function(lib, EventTarget
 					this._boundAutoDismiss = this._autoDismiss.bind(this);
 
 					this._triggerNode.classList.add("dropdownTriggerOpen"); //$NON-NLS-0$
-					this._triggerNode.setAttribute("aria-expanded", "true"); //$NON-NLS-1$ //$NON-NLS-0$
+					lib.setSafeAttribute(this._triggerNode, "aria-expanded", "true");
 					if (this._selectionClass) {
 						this._triggerNode.classList.add(this._selectionClass);
 					}
@@ -326,7 +326,7 @@ define(['orion/webui/littlelib', 'orion/EventTarget'], function(lib, EventTarget
 			var actionTaken = false;
 			if (this.isVisible()) {
 				this._triggerNode.classList.remove("dropdownTriggerOpen"); //$NON-NLS-0$
-				this._triggerNode.setAttribute("aria-expanded", "false"); //$NON-NLS-1$ //$NON-NLS-0$
+				lib.setSafeAttribute(this._triggerNode, "aria-expanded", "false");
 				if (this._selectionClass) {
 					this._triggerNode.classList.remove(this._selectionClass);
 				}
@@ -630,7 +630,7 @@ define(['orion/webui/littlelib', 'orion/EventTarget'], function(lib, EventTarget
 	 	
 	 	var element = document.createElement(innerNodeType); //$NON-NLS-0$
 		element.className = "dropdownMenuItem"; //$NON-NLS-0$
-		element.setAttribute("role", "menuitem");  //$NON-NLS-0$ //$NON-NLS-1$
+		lib.setSafeAttribute(element, "role", "menuitem");
 		element.tabIndex = -1;
 		element.style.outline = "none";
 		
@@ -642,7 +642,7 @@ define(['orion/webui/littlelib', 'orion/EventTarget'], function(lib, EventTarget
 		}
 	 	
 	 	var li = document.createElement("li"); //$NON-NLS-0$
-	 	li.setAttribute("role", "none"); //$NON-NLS-0$ //$NON-NLS-1$
+		lib.setSafeAttribute(li, "role", "none");
 	 	li.appendChild(element); //$NON-NLS-0$
 		
 		return li;

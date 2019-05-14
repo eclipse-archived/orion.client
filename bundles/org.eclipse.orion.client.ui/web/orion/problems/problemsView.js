@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2013 IBM Corporation and others.
+ * Copyright (c) 2013, 2019 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -90,8 +90,7 @@ define([
 			var label = document.createElement("label"); //$NON-NLS-0$
  			label.textContent = messages["Filter problems:"];
  			label.classList.add("problemsFilterLabel"); //$NON-NLS-0$
- 			label.setAttribute("for", "problemsFilterText"); //$NON-NLS-0$
- 
+			lib.setSafeAttribute(label, "for", "problemsFilterText");
  			var input = document.createElement("input"); //$NON-NLS-0$
  			input.id = "problemsFilterText"; //$NON-NLS-0$
 			input.classList.add("problemsFilter"); //$NON-NLS-0$

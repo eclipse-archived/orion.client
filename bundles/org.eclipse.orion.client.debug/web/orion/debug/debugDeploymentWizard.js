@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2017 IBM Corporation and others.
+ * Copyright (c) 2017, 2019 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License v1.0
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution
@@ -50,7 +50,7 @@ define([
 
         /* allow the frame to be closed */
         var closeButton = document.getElementById('closeDialog');
-        closeButton.setAttribute('aria-label', messages["Close"]);
+        lib.setSafeAttribute(closeButton, 'aria-label', messages["Close"]);
         closeButton.addEventListener('click', closeFrame);
 
         /* allow frame to be dragged by title bar */
@@ -228,7 +228,7 @@ define([
         remoteCheckbox.checked = confParams.remote;
         var serverInput = lib.$('#debug-server-input');
         if (forceRemote) {
-            remoteCheckbox.setAttribute('disabled', 'disabled');
+            lib.setSafeAttribute(remoteCheckbox, 'disabled', 'disabled');
         }
         var remoteInput = lib.$('#remote-root-input');
         if (confParams.remote) {
@@ -253,7 +253,7 @@ define([
         var templateButton = lib.$('#template-button');
         templateButton.addEventListener('click', function(e) {
             if (typeSelect.value && !serverInput.classList.contains('invalid')) {
-                templateButton.setAttribute('disabled', 'disabled');
+                lib.setSafeAttribute(templateButton, 'disabled', 'disabled');
                 templateButton.classList.add('disabled');
                 xhr('GET', new URL('debug/templates/' + typeSelect.value, serverInput.value).href, {
                     timeout: TIMEOUT
@@ -323,7 +323,7 @@ define([
         if (!newConf) {
             // Disable adapter and template selection when editing a config
             typeSelect.classList.add('disabled');
-            typeSelect.setAttribute('disabled', 'disabled');
+            lib.setSafeAttribute(typeSelect, 'disabled', 'disabled');
             templateButton.classList.add('hidden');
         }
     }
@@ -357,8 +357,8 @@ define([
             var debugServerUrl = new URL('../../', location.href);
             debugServerUrl.hash = '';
             debugServerInput.value = debugServerUrl.href;
-            debugServerInput.setAttribute('disabled', 'disabled');
-            lib.$('#remote-root-input').setAttribute('disabled', 'disabled');
+            lib.setSafeAttribute(debugServerInput, 'disabled', 'disabled');
+            lib.setSafeAttribute(lib.$('#remote-root-input'), 'disabled', 'disabled');
 
             xhr('GET', new URL('debug/workspacePath', debugServerUrl.href).href, {
                 timeout: TIMEOUT
@@ -368,14 +368,14 @@ define([
                         lib.$('#remote-root-input').value = result.response.replace(/\/$/, '') + (result.response.charAt(0) === '/' ? '/' : '\\') + projName;
                     } else {
                         forceRemote = true;
-                        remoteCheckbox.setAttribute('disabled', 'disabled');
+                        lib.setSafeAttribute(remoteCheckbox, 'disabled', 'disabled');
                     }
                 }
                 wizard.validate();
             }, function(result) {
                 forceRemote = true;
                 remoteCheckbox.checked = true;
-                remoteCheckbox.setAttribute('disabled', 'disabled');
+                lib.setSafeAttribute(remoteCheckbox, 'disabled', 'disabled');
             });
         }
     }

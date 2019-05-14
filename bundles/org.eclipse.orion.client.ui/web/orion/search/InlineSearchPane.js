@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2014 IBM Corporation and others. 
+ * Copyright (c) 2014, 2019 IBM Corporation and others. 
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -72,7 +72,7 @@ define([
 			this._searchResultsTitle = lib.$(".searchResultsTitle", this._searchWrapper); //$NON-NLS-0$
 			this._searchResultsWrapperDiv = lib.$(".searchResultsWrapperDiv", this._searchWrapper); //$NON-NLS-0$
 			this._searchResultsWrapperDiv.id = "inlineSearchResultsWrapper";
-			this._searchResultsWrapperDiv.setAttribute("aria-labelledby", "searchResultsTitle");
+			lib.setSafeAttribute(this._searchResultsWrapperDiv, "aria-labelledby", "searchResultsTitle");
 			
 			this._replaceCompareTitleDiv = lib.node("replaceCompareTitleDiv"); //$NON-NLS-0$
 			this._replaceCompareDiv = lib.node("replaceCompareDiv"); //$NON-NLS-0$
@@ -307,14 +307,13 @@ define([
 			
 			this._searchButton = this._searchBox.getButton();
 			this._searchButton.classList.add("searchButton"); //$NON-NLS-0$
-			this._searchButton.setAttribute("aria-label", messages["Search"]); //$NON-NLS-1$ //$NON-NLS-0$
+			lib.setSafeAttribute(this._searchButton, "aria-label", messages["Search"]);
 			this._searchButton.appendChild(searchButtonSpan);
 			
 			this._searchTextInputBox = this._searchBox.getTextInputNode();
 			this._searchTextInputBox.placeholder = messages["Type a search term"]; //$NON-NLS-1$ //$NON-NLS-0$
 			
-			this._searchBox.getRecentEntryButton().setAttribute("aria-label", messages["Show previous search terms"]); //$NON-NLS-0$
-			
+			lib.setSafeAttribute(this._searchBox.getRecentEntryButton(), "aria-label", messages["Show previous search terms"]);
 			this._searchWrapper.tabIndex = -1;
 			this._searchWrapper.style.outline = "none";
 			this._searchWrapper.addEventListener("keydown", function(e) { //$NON-NLS-0$
@@ -354,17 +353,16 @@ define([
 			
 			this._replaceTextInputBox = this._replaceBox.getTextInputNode();
 			this._replaceTextInputBox.placeholder = messages["Replace With"]; //$NON-NLS-0$
-			this._replaceTextInputBox.setAttribute("aria-label", messages["Replace With"]); //$NON-NLS-1$ //$NON-NLS-0$
+			lib.setSafeAttribute(this._replaceTextInputBox, "aria-label", messages["Replace With"]);
 
 			this._previewButtonSpan = document.createElement("span"); //$NON-NLS-0$
 			this._previewButtonSpan.classList.add("core-sprite-search");
 			this._replaceButton = this._replaceBox.getButton();
 			this._replaceButton.classList.add("searchButton"); //$NON-NLS-0$
-			this._replaceButton.setAttribute("aria-label", messages["Preview Replace"]); //$NON-NLS-1$ //$NON-NLS-0$
+			lib.setSafeAttribute(this._replaceButton, "aria-label", messages["Preview Replace"]);
 			this._replaceButton.appendChild(this._previewButtonSpan);
 	
-			this._replaceBox.getRecentEntryButton().setAttribute("aria-label", messages["Show previous replace terms"]); //$NON-NLS-0$
-			
+			lib.setSafeAttribute(this._replaceBox.getRecentEntryButton(), "aria-label", messages["Show previous replace terms"]);
 			this._replaceTextInputBox.addEventListener("keydown", function(e) { //$NON-NLS-0$
 				var keyCode= e.charCode || e.keyCode;
 				if (keyCode === lib.KEY.ENTER) {
@@ -393,8 +391,7 @@ define([
 			this._fileNamePatternsTextInput.placeholder = "*.*"; //$NON-NLS-0$
 			lib.empty(this._fileNamePatternsHint);
 			this._fileNamePatternsHint.appendChild(document.createTextNode(messages["(* = any string, ? = any character)"])); //$NON-NLS-0$
-			this._fileNamePatternsTextInput.setAttribute("aria-describedby", "fileNamePatternsHint");  //$NON-NLS-1$  //$NON-NLS-0$
-			
+			lib.setSafeAttribute(this._fileNamePatternsTextInput, "aria-describedby", "fileNamePatternsHint");
 			this._fileNamePatternsTextInput.addEventListener("focus", function(){ //$NON-NLS-0$
 				this._fileNamePatternsHint.classList.add("fileNamePatternsHintVisible"); //$NON-NLS-0$
 			}.bind(this));
@@ -439,7 +436,7 @@ define([
 						var excludeFilesFromSetting = prefs.filteredResources || "";
 					}
 					this._excludeFilesHint.textContent = messages["(* = any string, ? = any character)"] + "\n" + messages["The following files are excluded from general setting"] + "\n" + excludeFilesFromSetting; //$NON-NLS-0$
-					this._excludeFilesTextInput.setAttribute("aria-describedby", "excludeFilesHint");  //$NON-NLS-1$  //$NON-NLS-0$
+					lib.setSafeAttribute(this._excludeFilesTextInput, "aria-describedby", "excludeFilesHint");
 				}.bind(this));
 				this._excludeFilesHint.classList.add("fileNamePatternsHintVisible"); //$NON-NLS-0$
 			}.bind(this));
@@ -466,7 +463,7 @@ define([
 			this._toggleSearchOptionsLink = lib.$("#toggleSearchOptionsLink", this._searchWrapper); //$NON-NLS-0$
 			this._toggleSearchOptionsLink.addEventListener("click", this.showSearchOptions.bind(this)); //$NON-NLS-0$
 			var span = document.createElement("span"); //$NON-NLS-0$
-			span.setAttribute("aria-hidden", "true"); //$NON-NLS-1$ //$NON-NLS-0$
+			lib.setSafeAttribute(span, "aria-hidden", "true");
 			span.textContent = "^ "; //$NON-NLS-0$
 			this._toggleSearchOptionsLink.appendChild(span);
 			span = document.createElement("span"); //$NON-NLS-0$
@@ -485,16 +482,16 @@ define([
 		_initHTMLLabelsAndTooltips: function(){
 			var label = lib.$("#searchLabel", this._searchWrapper);
 			label.appendChild(document.createTextNode(messages["Search Label"])); //$NON-NLS-1$ //$NON-NLS-0$
-			label.setAttribute("for", "advSearchInputcomboTextInputField"); //$NON-NLS-1$ //$NON-NLS-0$
+			lib.setSafeAttribute(label, "for", "advSearchInputcomboTextInputField");
 			label = lib.$("#searchScopeLabel", this._searchWrapper);
 			label.appendChild(document.createTextNode(messages["Scope"])); //$NON-NLS-1$ //$NON-NLS-0$
 			label = lib.$("#fileNamePatternsLabel", this._searchWrapper);
 			label.appendChild(document.createTextNode(messages["File name patterns (comma-separated)"])); //$NON-NLS-1$ //$NON-NLS-0$
-			label.setAttribute("for", "fileNamePatternsInputcomboTextInputField"); //$NON-NLS-1$ //$NON-NLS-0$
+			lib.setSafeAttribute(label, "for", "fileNamePatternsInputcomboTextInputField");
 			this._generateTooltips(label,messages["File Patterns Box Tooltip"]);
 			label = lib.$("#excludeFilesLabel", this._searchWrapper);
 			label.appendChild(document.createTextNode(messages["Exclude Files"]));
-			label.setAttribute("for", "excludeFilesInputcomboTextInputField"); //$NON-NLS-1$ //$NON-NLS-0$
+			lib.setSafeAttribute(label, "for", "excludeFilesInputcomboTextInputField");
 			this._generateTooltips(label,messages["Exclude Files Box Tooltip"]);
 
 			this._generateTooltips(this._searchButton,messages["Search"]);
@@ -680,11 +677,11 @@ define([
 			if(this._caseSensitive){
 				this._caseSensitive = false;
 				this._caseSensitiveButton.classList.remove("checkedSearchOptionButton");
-				this._caseSensitiveButton.setAttribute("aria-pressed", "false");  //$NON-NLS-1$  //$NON-NLS-0$
+				lib.setSafeAttribute(this._caseSensitiveButton, "aria-pressed", "false");
 			}else{
 				this._caseSensitive = true;
 				this._caseSensitiveButton.classList.add("checkedSearchOptionButton");
-				this._caseSensitiveButton.setAttribute("aria-pressed", "true");  //$NON-NLS-1$  //$NON-NLS-0$
+				lib.setSafeAttribute(this._caseSensitiveButton, "aria-pressed", "true");
 			}
 		},
 		
@@ -692,11 +689,11 @@ define([
 			if(this._wholeWord){
 				this._wholeWord = false;
 				this._wholeWordButton.classList.remove("checkedSearchOptionButton");
-				this._wholeWordButton.setAttribute("aria-pressed", "false");  //$NON-NLS-1$  //$NON-NLS-0$
+				lib.setSafeAttribute(this._wholeWordButton, "aria-pressed", "false");
 			}else{
 				this._wholeWord = true;
 				this._wholeWordButton.classList.add("checkedSearchOptionButton");
-				this._wholeWordButton.setAttribute("aria-pressed", "true");  //$NON-NLS-1$  //$NON-NLS-0$
+				lib.setSafeAttribute(this._wholeWordButton, "aria-pressed", "true");
 			}
 		},
 		
@@ -704,11 +701,11 @@ define([
 			if(this._regEx){
 				this._regEx = false;
 				this._regExButton.classList.remove("checkedSearchOptionButton");
-				this._regExButton.setAttribute("aria-pressed", "false");  //$NON-NLS-1$  //$NON-NLS-0$
+				lib.setSafeAttribute(this._regExButton, "aria-pressed", "false");
 			}else{
 				this._regEx = true;
 				this._regExButton.classList.add("checkedSearchOptionButton");
-				this._regExButton.setAttribute("aria-pressed", "true");  //$NON-NLS-1$  //$NON-NLS-0$
+				lib.setSafeAttribute(this._regExButton, "aria-pressed", "true");
 			}
 		},
 		
@@ -739,7 +736,7 @@ define([
 			this._replaceWrapper.classList.remove("replaceWrapperHidden"); //$NON-NLS-0$
 			this._searchWrapper.classList.add("replaceModeActive"); //$NON-NLS-0$
 			this._toggleReplaceLink.classList.add("checkedSearchOptionButton");
-			this._toggleReplaceLink.setAttribute("aria-pressed", "true");  //$NON-NLS-1$  //$NON-NLS-0$
+			lib.setSafeAttribute(this._toggleReplaceLink, "aria-pressed", "true");
 			this._replaceModeToolTip && this._replaceModeToolTip.destroy();
 			this._replaceModeToolTip = this._generateTooltips(this._toggleReplaceLink,messages["To Search Mode Tooltip"]);
 		},
@@ -749,7 +746,7 @@ define([
 			this._replaceWrapper.classList.add("replaceWrapperHidden"); //$NON-NLS-0$
 			this._searchWrapper.classList.remove("replaceModeActive"); //$NON-NLS-0$
 			this._toggleReplaceLink.classList.remove("checkedSearchOptionButton");
-			this._toggleReplaceLink.setAttribute("aria-pressed", "false");  //$NON-NLS-1$  //$NON-NLS-0$
+			lib.setSafeAttribute(this._toggleReplaceLink, "aria-pressed", "false");
 			this._replaceModeToolTip && this._replaceModeToolTip.destroy();
 			this._replaceModeToolTip = this._generateTooltips(this._toggleReplaceLink,messages["To Replace Mode Tooltip"]);
 			this.hideReplacePreview();

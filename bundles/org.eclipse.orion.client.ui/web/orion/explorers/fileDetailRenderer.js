@@ -1,5 +1,5 @@
 /*******************************************************************************
- * @license Copyright (c) 2014, 2017 IBM Corporation and others. All rights
+ * @license Copyright (c) 2014, 2019 IBM Corporation and others. All rights
  *          reserved. This program and the accompanying materials are made
  *          available under the terms of the Eclipse Public License v1.0
  *          (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse
@@ -387,7 +387,7 @@ define([
 			th.rowSpan = rowspan;
 			th.colSpan = colspan;
 			if (headers) {
-				th.setAttribute("headers", headers);
+				lib.setSafeAttribute(th, "headers", headers);
 			}
 			th.style.textAlign = "left";
 			th.className = "visuallyhidden"; //$NON-NLS-0$
@@ -403,7 +403,7 @@ define([
 					col = _createElement('td'); //$NON-NLS-0$
 					if (item.type === "file") { //$NON-NLS-0$
 						col.colSpan = 2;
-						col.setAttribute("headers", "searchResultItemColumn"); //$NON-NLS-1$ //$NON-NLS-0$
+						lib.setSafeAttribute(col, "headers", "searchResultItemColumn");
 						if(typeof this.explorer.model.disableExpand === "function" && this.explorer.model.disableExpand(item)){ //$NON-NLS-0$
 							//var decorateImage = _createSpan(null, null, col, null);
 							//decorateImage.classList.add('imageSprite'); //$NON-NLS-0$
@@ -418,20 +418,20 @@ define([
 						this.generateBreadCrumb(tableRow, this.generateFileMetaForBreadCrumb(item), this.explorer._shouldShowFullPath);
 					} else if (item.type === "group") { //$NON-NLS-0$
 						col.colSpan = 2;
-						col.setAttribute("headers", "searchResultItemColumn"); //$NON-NLS-1$ //$NON-NLS-0$
+						lib.setSafeAttribute(col, "headers", "searchResultItemColumn");
 						this.getExpandImage(tableRow, _createSpan(null, null, col, null)); //$NON-NLS-0$
 						span = _createSpan(null, null, col, null);
 						this.renderGroupElement(item, span, this.explorer.model);
 						this.generateBreadCrumb(tableRow, item.name);
 					} else {
-						col.setAttribute("headers", "searchResultLineColumn"); //$NON-NLS-1$ //$NON-NLS-0$
+						lib.setSafeAttribute(col, "headers", "searchResultLineColumn");
 						this.renderDetailLineNumber(item, col, item.parent.type === "group");
 					}
 					break;
 				case 1: 
 					if (item.type !== "file" && item.type !== "group") { //$NON-NLS-0$
 						col = _createElement('td'); //$NON-NLS-0$
-						col.setAttribute("headers", "searchResultLineDetails"); //$NON-NLS-1$ //$NON-NLS-0$
+						lib.setSafeAttribute(col, "headers", "searchResultLineDetails");
 	 					this.renderDetailElement(item, col);
 					}
 					break;

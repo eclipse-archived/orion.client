@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2011, 2012 IBM Corporation and others.
+ * Copyright (c) 2011, 2019 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -98,7 +98,7 @@ define(['i18n!orion/nls/messages', 'orion/webui/littlelib', 'orion/bidiUtils', '
 					close = document.createElement("button"); //$NON-NLS-0$
 					close.id = "closebox"; //$NON-NLS-0$
 					close.className ="imageSprite core-sprite-close dismissButton"; //$NON-NLS-0$
-					close.setAttribute("aria-label", messages['Close']); //$NON-NLS-0$
+					lib.setSafeAttribute(close, "aria-label", messages['Close']);
 					this._activeElements.closeTooltip = new mTooltip.Tooltip({
 							node: close,
 							text: messages['Close'],
@@ -114,9 +114,9 @@ define(['i18n!orion/nls/messages', 'orion/webui/littlelib', 'orion/bidiUtils', '
 				this._activeElements.slideContainer.style.outline = "none";
 				
 				// all parameters have been generated.  Activate the area.
-				this._activeElements.slideContainer.setAttribute("role", "dialog");
+				lib.setSafeAttribute(this._activeElements.slideContainer, "role", "dialog");
 				if (name) {
-					this._activeElements.slideContainer.setAttribute("aria-label", name);
+					lib.setSafeAttribute(this._activeElements.slideContainer, "aria-label", name);
 				}
 				this._activeElements.slideContainer.classList.add("slideContainerActive"); //$NON-NLS-0$
 				this._toolbarLayoutFunction(this._activeElements);
@@ -270,7 +270,7 @@ define(['i18n!orion/nls/messages', 'orion/webui/littlelib', 'orion/bidiUtils', '
 					if (!field && parm.label) {
 						label = document.createElement("label"); //$NON-NLS-0$
 						label.classList.add("parameterInput"); //$NON-NLS-0$
-						label.setAttribute("for", parm.name + "parameterCollector"); //$NON-NLS-1$ //$NON-NLS-0$
+						lib.setSafeAttribute(label, "for", parm.name + "parameterCollector");
 						if (parm.type !== "boolean") {
 							label.textContent = parm.label;
 						}
@@ -334,8 +334,8 @@ define(['i18n!orion/nls/messages', 'orion/webui/littlelib', 'orion/bidiUtils', '
 					}
 					field.classList.add("parameterInput"); //$NON-NLS-0$
 					// for fun
-					field.setAttribute("speech", "speech"); //$NON-NLS-1$ //$NON-NLS-0$
-					field.setAttribute("x-webkit-speech", "x-webkit-speech"); //$NON-NLS-1$ //$NON-NLS-0$
+					lib.setSafeAttribute(field, "speech", "speech");
+					lib.setSafeAttribute(field, "x-webkit-speech", "x-webkit-speech");
 					field.parameterName = parm.name;
 					if (!first) {
 						first = field;
@@ -387,7 +387,7 @@ define(['i18n!orion/nls/messages', 'orion/webui/littlelib', 'orion/bidiUtils', '
 				if (!name) {				
 					close.classList.add("imageSprite"); //$NON-NLS-0$
 					close.classList.add("core-sprite-close"); //$NON-NLS-0$
-					close.setAttribute("aria-label", messages['Close']); //$NON-NLS-0$
+					lib.setSafeAttribute(close, "aria-label", messages['Close']);
 					self._activeElements.closeTooltip = new mTooltip.Tooltip({
 							node: close,
 							text: messages['Close'],

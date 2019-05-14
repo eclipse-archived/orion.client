@@ -1,5 +1,5 @@
 /*******************************************************************************
- * @license Copyright (c) 2014 IBM Corporation and others. All rights
+ * @license Copyright (c) 2014, 2019 IBM Corporation and others. All rights
  *          reserved. This program and the accompanying materials are made
  *          available under the terms of the Eclipse Public License v1.0
  *          (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse
@@ -12,6 +12,7 @@
 /*eslint-env browser, amd*/
 
 define([
+  'orion/webui/littlelib',
 	'i18n!git/nls/gitmessages',
 	'orion/bidiUtils',
 	'orion/explorers/explorer',
@@ -20,7 +21,7 @@ define([
 	'orion/i18nUtil',
 	'orion/git/uiUtil',
 	'orion/objects'
-], function(messages, bidiUtils, mExplorer, Deferred, mGitCommands, i18nUtil, uiUtil, objects) {
+], function(lib, messages, bidiUtils, mExplorer, Deferred, mGitCommands, i18nUtil, uiUtil, objects) {
 
 	function GitConfigListModel(options) {
 		this.root = options.root;
@@ -251,10 +252,10 @@ define([
 					div.appendChild(valueNode);
 					break;
 				case 1:
-					td.setAttribute("aria-label", messages["Actions"]);
+					lib.setSafeAttribute(td, "aria-label", messages["Actions"]);
 					var actionsArea = document.createElement("ul"); //$NON-NLS-0$
 					actionsArea.className = "sectionTableItemActions layoutRight commandList toolComposite"; //$NON-NLS-0$
-					actionsArea.setAttribute("role", "none"); //$NON-NLS-1$ //$NON-NLS-0$
+					lib.setSafeAttribute(actionsArea, "role", "none");
 					div.appendChild(actionsArea);
 					this.commandService.renderCommands(this.actionScopeId, actionsArea, item, this.explorer, "tool"); //$NON-NLS-0$
 					break;

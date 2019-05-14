@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2009, 2017 IBM Corporation and others.
+ * Copyright (c) 2009, 2019 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License v1.0
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution
@@ -125,12 +125,14 @@ define([
 				// this is kind of a hack; when there is good screen reader support for aria-busy,
 				// this should be done by toggling that instead
 				var readSetting = node.getAttribute("aria-live"); //$NON-NLS-0$
-				node.setAttribute("aria-live", isAccessible ? "polite" : "off"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-3$
+				lib.setSafeAttribute(node, "aria-live", isAccessible ? "polite" : "off");
 				window.setTimeout(function() {
 					if (msg === this.statusMessage) {
 						lib.empty(node);
 						node.appendChild(document.createTextNode(msg));
-						window.setTimeout(function() { node.setAttribute("aria-live", readSetting); }, 100); //$NON-NLS-0$
+						window.setTimeout(function() { 
+							lib.setSafeAttribute(node, "aria-live", readSetting);
+						}, 100); //$NON-NLS-0$
 					}
 				}.bind(this), 100);
 			}

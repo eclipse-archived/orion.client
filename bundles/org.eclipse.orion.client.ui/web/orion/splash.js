@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2015 IBM Corporation and others.
+ * Copyright (c) 2015, 2019 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License v1.0
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution
@@ -10,7 +10,7 @@
  ******************************************************************************/
 
 /*eslint-env amd, browser*/
-define(['module', 'i18n!orion/nls/messages', 'orion/i18nUtil', 'orion/banner/banner'], function(module, messages, i18nUtil, Banner) {
+define(['module', 'i18n!orion/nls/messages', 'orion/i18nUtil', 'orion/banner/banner', 'orion/webui/littlelib'], function(module, messages, i18nUtil, Banner, lib) {
 	
 var pageLoader;
 
@@ -343,7 +343,7 @@ function start() {
 	// Mark all elements behind the splash as "busy" until splash is torn down so screen readers don't go there.
 	for(var child = document.body.firstElementChild; child !== null; child = child.nextElementSibling) {
 		if (child !== splash && child.tagName !== "SCRIPT") {
-			child.setAttribute("aria-busy", "true");
+			lib.setSafeAttribute(child, "aria-busy", "true");
 		}
 	}
 	

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * @license Copyright (c) 2014 IBM Corporation and others. All rights
+ * @license Copyright (c) 2014, 2019 IBM Corporation and others. All rights
  *          reserved. This program and the accompanying materials are made
  *          available under the terms of the Eclipse Public License v1.0
  *          (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse
@@ -581,7 +581,7 @@ define([
 				section.appendChild(inputCol);
 				
 				var label = document.createElement("label");
-				label.setAttribute("for", commitFilterSectionId); //$NON-NLS-0$
+				lib.setSafeAttribute(label, "for", commitFilterSectionId);
 				label.textContent = title;
 				
 				var filter = document.createElement("input"); //$NON-NLS-0$
@@ -610,9 +610,9 @@ define([
 					this.sibling = parent.firstChild;
 					parent.insertBefore(content, parent.firstChild);
 					content.classList.add("commitFilterPanel");
-					content.setAttribute("role", "dialog");
-					content.setAttribute("aria-modal", "true");
-					content.setAttribute("aria-label", messages.FilterCommits);
+					lib.setSafeAttribute(content, "role", "dialog");
+					lib.setSafeAttribute(content, "aria-modal", "true");
+					lib.setSafeAttribute(content, "aria-label", messages.FilterCommits);
 					content.tabIndex = -1;
 					content.style.outline = "none";
 					content.addEventListener("keydown", escHandler);
@@ -626,16 +626,16 @@ define([
 					if (this.hidden === hidden) return;
 					this.hidden = hidden;
 					if (that._filterButton) {
-						that._filterButton.setAttribute("aria-expanded", !hidden); //$NON-NLS-0$
+						lib.setSafeAttribute(that._filterButton, "aria-expanded", !hidden);
 					}
 					if (hidden) {
-						this.sibling.setAttribute("aria-hidden", false);
+						lib.setSafeAttribute(this.sibling, "aria-hidden", false);
 						lib.returnFocus(this.content, this.originalFocus, function() {
 							this.content.style.display = "none";
 						}.bind(this));
 					} else {
 						// Hide sibling to work around JAWS bug https://github.com/FreedomScientific/VFO-standards-support/issues/91
-						this.sibling.setAttribute("aria-hidden", true);
+						lib.setSafeAttribute(this.sibling, name, "aria-hidden", true);
 						sections.forEach(function(s) {
 							var field = lib.$(".gitFilterInput", s); //$NON-NLS-0$
 							var result = s.query.getValue ? s.query.getValue() : s.query.value;
@@ -717,7 +717,7 @@ define([
 			
 			var contentTable = document.createElement("table"); //$NON-NLS-0$
 			contentTable.className = "filterSections";
-			contentTable.setAttribute("role", "presentation"); //$NON-NLS-1$ //$NON-NLS-0$
+			lib.setSafeAttribute(contentTable, "role", "presentation");
 			var contentTbody = document.createElement("tbody"); //$NON-NLS-0$
 			contentTable.appendChild(contentTbody);
 			mainSection.content.appendChild(contentTable);
@@ -773,7 +773,7 @@ define([
 			var commitFilterScope = "commitFilterActions"; //$NON-NLS-0$
 			var actionsArea = document.createElement("ul"); //$NON-NLS-0$
 			actionsArea.className = "layoutRight commandList"; //$NON-NLS-0$
-			actionsArea.setAttribute("role", "none"); //$NON-NLS-1$ //$NON-NLS-0$
+			lib.setSafeAttribute(actionsArea, "role", "none");
 			filterActions.appendChild(actionsArea);
 			this.commandService.registerCommandContribution(commitFilterScope, "eclipse.orion.git.commit.clearFilter", 300); //$NON-NLS-0$
 			this.commandService.registerCommandContribution(commitFilterScope, "eclipse.orion.git.commit.performFilter", 400); //$NON-NLS-0$
@@ -1000,7 +1000,7 @@ define([
 				if (node) {
 					commandService.destroy(actionsNodeScope);
 				}
-				node.setAttribute("role", "none"); //$NON-NLS-1$ //$NON-NLS-0$
+				lib.setSafeAttribute(node, "role", "none");
 				var itemActionScope = "itemLevelCommands";
 				commandService.registerCommandContribution(itemActionScope, "eclipse.checkoutCommit", 1); //$NON-NLS-1$ //$NON-NLS-0$
 				commandService.registerCommandContribution(itemActionScope, "eclipse.orion.git.undoCommit", 2); //$NON-NLS-1$ //$NON-NLS-0$
@@ -1064,8 +1064,8 @@ define([
 				
 				var filterButton = this._filterButton = node.querySelector(".filterButton");
 				if (filterButton) {
-					filterButton.setAttribute("aria-haspopup", "dialog");
-					filterButton.setAttribute("aria-expanded", "false");
+					lib.setSafeAttribute(filterButton, "aria-haspopup", "dialog");
+					lib.setSafeAttribute(filterButton, "aria-expanded", "false");
 				}
 			}.bind(this));
 		}
@@ -1260,7 +1260,7 @@ define([
 					if (item.Type !== "NoCommits") { //$NON-NLS-0$
 						actionsArea.id = item.Type + "Actions";
 					}
-					actionsArea.setAttribute("role", "none"); //$NON-NLS-1$ //$NON-NLS-0$
+					lib.setSafeAttribute(actionsArea, "role", "none");
 					horizontalBox.appendChild(actionsArea);
 					
 					horizontalBox.classList.add("toolComposite"); //$NON-NLS-0$
@@ -1310,7 +1310,7 @@ define([
 					var itemActionScope = "itemLevelCommands"; //$NON-NLS-0$
 					actionsArea = document.createElement("ul"); //$NON-NLS-0$
 					actionsArea.className = "layoutLeft commandList toolComposite commitActions"; //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0
-					actionsArea.setAttribute("role", "none"); //$NON-NLS-1$ //$NON-NLS-0$
+					lib.setSafeAttribute(actionsArea, "role", "none");
 					var moreDiv = commitInfo.moreButton.parentNode;
 					moreDiv.appendChild(actionsArea);
 					

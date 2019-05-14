@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2014, 2015 IBM Corporation and others.
+ * Copyright (c) 2014, 2019 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License v1.0
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution
@@ -40,7 +40,7 @@ define(['i18n!cfui/nls/messages', "orion/bootstrap", "orion/webui/littlelib", 'o
 		/* allow the frame to be closed */
 		var button = document.getElementById('closeDialog'); //$NON-NLS-0$
 		button.addEventListener('click', closeFrame); //$NON-NLS-0$
-		button.setAttribute("aria-label", messages["Close"]); //$NON-NLS-0$
+		lib.setSafeAttribute(button, "aria-label", messages["Close"]);
 
 		/* allow frame to be dragged by title bar */
 		mWizardUtils.makeDraggable(this);

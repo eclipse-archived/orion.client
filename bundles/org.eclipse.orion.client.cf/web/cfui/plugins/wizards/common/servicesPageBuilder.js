@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2014, 2015 IBM Corporation and others.
+ * Copyright (c) 2014, 2019 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -91,7 +91,7 @@ define([
 					if(!isRendered()){
 						document.getElementById("servicesManifestSettings").textContent = messages["manifestSettings"]; //$NON-NLS-0$
 			    		document.getElementById("allServicesLabel").appendChild(document.createTextNode(messages["bindServicesFromTheList"])); //$NON-NLS-0$
-						document.getElementById("dialog").setAttribute("aria-describedby", "allServicesLabel");
+						  lib.setSafeAttribute(document.getElementById("dialog"), "aria-describedby", "allServicesLabel");
 			    		var label = document.getElementById("servicesLabel"); //$NON-NLS-0$
 			    		label.appendChild(document.createTextNode(messages["availableServices:"]));
 			    		label.htmlFor = "servicesDropdownField"; //$NON-NLS-0$
@@ -117,13 +117,13 @@ define([
 				    	var addButton = document.createElement("button"); //$NON-NLS-0$
 				    	addButton.appendChild(document.createTextNode(">")); //$NON-NLS-0$
 				    	addButton.className = "orionButton commandButton"; //$NON-NLS-0$
-				    	addButton.setAttribute("aria-label", messages["Add"]); //$NON-NLS-0$
+				    	lib.setSafeAttribute(addButton, "aria-label", messages["Add"]);
 				    	new Tooltip({node: addButton, text: messages["AddButtonTooltip"], position: ["above", "right", "left", "below"]});
 				    	
 				    	var removeButton = document.createElement("button"); //$NON-NLS-0$
 				    	removeButton.className = "orionButton commandButton"; //$NON-NLS-0$
 				    	removeButton.appendChild(document.createTextNode("<")); //$NON-NLS-0$
-				    	removeButton.setAttribute("aria-label", messages["Remove"]); //$NON-NLS-0$
+				    	lib.setSafeAttribute(removeButton, "aria-label", messages["Remove"]);
 				    	new Tooltip({node: removeButton, text: messages["RemoveButtonTooltip"], position: ["below", "left", "right", "above"]});
 				    	
 				    	var addRemoveButtonsCol = document.getElementById("servicesAddRemoveButtonsCol"); //$NON-NLS-0$

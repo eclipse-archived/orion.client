@@ -1,6 +1,6 @@
 /******************************************************************************* 
  * @license
- * Copyright (c) 2014, 2015 IBM Corporation and others.
+ * Copyright (c) 2014, 2019 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -234,7 +234,7 @@ define([
 							this._commandRegistry.registerCommandContribution(createNewItem.id, defaultDeployCommands[0].id, 1);
 							this._commandRegistry.renderCommands(createNewItem.id, dropdownMenuItemSpan, this._project, this, "button", null, domNodeWrapperList);
 							domNodeWrapperList[0].domNode.textContent = "+";
-							domNodeWrapperList[0].domNode.setAttribute("aria-label", defaultDeployCommands[0].name);
+							lib.setSafeAttribute(domNodeWrapperList[0].domNode, "aria-label", defaultDeployCommands[0].name);
 							this._setNodeTooltip(domNodeWrapperList[0].domNode, defaultDeployCommands[0].tooltip);
 						} else {
 							this._commandRegistry.addCommandGroup(createNewItem.id, "orion.deployServiceGroup", 1000, "+", null, null, null, "+", null, true);
@@ -258,10 +258,10 @@ define([
 			this._launchConfigurationsDropdownTriggerButton = this._launchConfigurationsDropdown.getDropdownTriggerButton();
 			this._launchConfigurationsDropdownTriggerButton.classList.remove("dropdownDefaultButton"); //$NON-NLS-0$
 			this._launchConfigurationsDropdownTriggerButton.classList.add("launchConfigurationsButton"); //$NON-NLS-0$
-			this._launchConfigurationsDropdownTriggerButton.setAttribute("aria-label", messages["launchConfiguration"]); //$NON-NLS-0$
-			this._launchConfigurationsDropdownTriggerButton.setAttribute("aria-labelledby", "launchConfigButton launchConfigLabel"); //$NON-NLS-1$ //$NON-NLS-0$
+			lib.setSafeAttribute(this._launchConfigurationsDropdownTriggerButton, "aria-label", messages["launchConfiguration"]);
+			lib.setSafeAttribute(this._launchConfigurationsDropdownTriggerButton, "aria-labelledby", "launchConfigButton launchConfigLabel");
 			var dropdownNode = this._launchConfigurationsDropdown.getDropdownNode();
-			dropdownNode.setAttribute("aria-label", messages["launchConfigurations"]); //$NON-NLS-0$
+			lib.setSafeAttribute(dropdownNode, "aria-label", messages["launchConfigurations"]);
 			
 			this._disableLaunchConfigurationsDropdown(); // start with control greyed out until launch configs are set
 			
@@ -767,8 +767,8 @@ define([
 		
 		_disableControl: function(domNode) {
 			domNode.classList.add("disabled"); //$NON-NLS-0$
-			domNode.setAttribute("disabled", "true"); //$NON-NLS-0$ //$NON-NLS-1$
-			domNode.setAttribute("aria-disabled", "true"); //$NON-NLS-0$ //$NON-NLS-1$
+			lib.setSafeAttribute(domNode, "disabled", "true");
+			lib.setSafeAttribute(domNode, "aria-disabled", "true");
 		},
 		
 		_isEnabled: function(domNode) {
@@ -789,7 +789,7 @@ define([
 			
 			var switchNode = lib.$("div.orionSwitch", wrapperNode); //$NON-NLS-0$
 			if (switchNode) {
-				switchNode.setAttribute("tabindex", "0"); //$NON-NLS-0$ //$NON-NLS-1$
+				lib.setSafeAttribute(switchNode, "tabindex", "0");
 			}
 		},
 		
@@ -816,7 +816,7 @@ define([
 		},
 		
 		_setNodeName: function(domNode, text) {
-			domNode.setAttribute("aria-label", text);  //$NON-NLS-0$
+			lib.setSafeAttribute(domNode, "aria-label", text);
 		},
 		
 		_setNodeTooltip: function(domNode, text) {

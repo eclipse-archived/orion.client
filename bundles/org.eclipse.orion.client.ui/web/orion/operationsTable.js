@@ -1,5 +1,5 @@
 /*******************************************************************************
- * @license Copyright (c) 2011, 2016 IBM Corporation and others. All rights reserved.
+ * @license Copyright (c) 2011, 2019 IBM Corporation and others. All rights reserved.
  *          This program and the accompanying materials are made available under
  *          the terms of the Eclipse Public License v1.0
  *          (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse
@@ -10,7 +10,7 @@
  ******************************************************************************/
 /*eslint-env browser, amd*/
 define(['i18n!orion/operations/nls/messages', 'orion/Deferred', 'orion/webui/littlelib', 'orion/explorers/explorer', 'orion/operationsCommands', 'orion/metrics'
-	], function(messages, Deferred, lib,	mExplorer, mOperationsCommands, mMetrics) {
+	], function(messages, Deferred, lib, mExplorer, mOperationsCommands, mMetrics) {
 	
 	var exports = {};
 
@@ -244,7 +244,7 @@ define(['i18n!orion/operations/nls/messages', 'orion/Deferred', 'orion/webui/lit
 				return col;
 			case 1:
 				col = this.getActionsColumn(item, tableRow);
-				col.setAttribute("aria-label", messages["Actions"]);
+				lib.setSafeAttribute(col, "aria-label", messages["Actions"]);
 				return col;
 			case 2:
 				var message = "";

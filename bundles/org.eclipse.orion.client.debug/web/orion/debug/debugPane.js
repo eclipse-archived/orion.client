@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2017 IBM Corporation and others.
+ * Copyright (c) 2017, 2019 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License v1.0
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution
@@ -165,7 +165,7 @@ define([
         var input = document.createElement('div');
         input.classList.add('replInput');
         var inputBox = document.createElement('input');
-        inputBox.setAttribute('type', 'text');
+        lib.setSafeAttribute(inputBox, 'type', 'text');
         input.appendChild(inputBox);
         inputOutputWrapper.appendChild(input);
         var outputSection = new mSection.Section(sectionContainer, {
@@ -237,9 +237,9 @@ define([
         // Default breakpoints
         var exceptionBreakpointAll = document.createElement('div');
         exceptionBreakpointAll.classList.add('exceptionBreakpoint');
-        exceptionBreakpointAll.setAttribute('extype', 'all');
+        lib.setSafeAttribute(exceptionBreakpointAll, 'extype', 'all');
         var exceptionBreakpointAllCheckbox = document.createElement('input');
-        exceptionBreakpointAllCheckbox.setAttribute('type', 'checkbox');
+        lib.setSafeAttribute(exceptionBreakpointAllCheckbox, 'type', 'checkbox');
         exceptionBreakpointAll.appendChild(exceptionBreakpointAllCheckbox);
         var exceptionBreakpointAllLabel = document.createElement('span');
         exceptionBreakpointAllLabel.innerText = messages['AllExceptions'];
@@ -247,10 +247,10 @@ define([
         breakpointsWrapper.appendChild(exceptionBreakpointAll);
         var exceptionBreakpointUncaught = document.createElement('div');
         exceptionBreakpointUncaught.classList.add('exceptionBreakpoint');
-        exceptionBreakpointUncaught.setAttribute('extype', 'uncaught');
+        lib.setSafeAttribute(exceptionBreakpointUncaught, 'extype', 'uncaught');
         var exceptionBreakpointUncaughtCheckbox = document.createElement('input');
         exceptionBreakpointUncaughtCheckbox.checked = true;
-        exceptionBreakpointUncaughtCheckbox.setAttribute('type', 'checkbox');
+        lib.setSafeAttribute(exceptionBreakpointUncaughtCheckbox, 'type', 'checkbox');
         exceptionBreakpointUncaught.appendChild(exceptionBreakpointUncaughtCheckbox);
         var exceptionBreakpointUncaughtLabel = document.createElement('span');
         exceptionBreakpointUncaughtLabel.innerText = messages['UncaughtExceptions'];
@@ -285,7 +285,7 @@ define([
         button.classList.add(className);
         if (disabled) {
             button.classList.add('disabled');
-            button.setAttribute('disabled', 'disabled');
+            lib.setSafeAttribute(button, 'disabled', 'disabled')
         }
         if (hideOnDisabled) {
             button.classList.add('autoHide');
@@ -323,7 +323,7 @@ define([
         var i, buttons = lib.$$array('.debugButtons button', this._domNode);
         if (e.status === e.STATUS.IDLE) {
             for (i = 0; i < buttons.length; i++) {
-                buttons[i].setAttribute('disabled', 'disabled');
+                lib.setSafeAttribute(buttons[i], 'disabled', 'disabled');
                 buttons[i].classList.add('disabled');
             }
             this.clear();
@@ -466,7 +466,7 @@ define([
             watches.forEach(function(watch) {
                 var watchElement = document.createElement('div');
                 watchElement.classList.add('watch');
-                watchElement.setAttribute('expr', watch);
+                lib.setSafeAttribute(watchElement, 'expr', watch);
                 var nameElement = document.createElement('span');
                 nameElement.classList.add('name');
                 nameElement.innerText = watch;
@@ -508,7 +508,7 @@ define([
                     var breakpointElement = document.createElement('div');
                     breakpointElement.classList.add('sourceBreakpoint');
                     var breakpointCheckbox = document.createElement('input');
-                    breakpointCheckbox.setAttribute('type', 'checkbox');
+                    lib.setSafeAttribute(breakpointCheckbox, 'type', 'checkbox');
                     breakpointCheckbox.checked = breakpoint.enabled;
                     var nameElement = document.createElement('span');
                     nameElement.classList.add('name');
@@ -781,7 +781,7 @@ define([
         threadName = threadName || 'Thread ' + threadId;
         var threadStack = document.createElement('div');
         threadStack.classList.add('thread');
-        threadStack.setAttribute('threadId', threadId);
+        lib.setSafeAttribute(threadStack, 'threadId', threadId);
         var threadDescription = document.createElement('div');
         threadDescription.classList.add('threadDescription');
         threadStack.appendChild(threadDescription);
@@ -924,7 +924,7 @@ define([
                 var frame = response.body.stackFrames[i];
                 var frameElement = document.createElement('div');
                 frameElement.classList.add('stackFrame');
-                frameElement.setAttribute('frameId', frame.id);
+                lib.setSafeAttribute(frameElement, 'frameId', frame.id);
                 var nameElement = document.createElement('div');
                 nameElement.classList.add('stackName');
                 nameElement.innerText = frame.name;
@@ -934,9 +934,9 @@ define([
                     sourceElement.classList.add('stackSource');
                     var sourceLink = document.createElement('a');
                     sourceLink.innerText = frame.source.name + ':' + (frame.line + 1) + ':' + (frame.column + 1);
-                    sourceLink.setAttribute('alt', frame.source.path);
+                    lib.setSafeAttribute(sourceLink, 'alt', frame.source.path);
                     var projectLocation = this._getSourceProjectPath(frame.source);
-                    sourceLink.setAttribute('href', '#' + projectLocation);
+                    lib.setSafeAttribute(sourceLink, 'href', '#' + projectLocation);
                     sourceElement.appendChild(sourceLink);
                     frameElement.appendChild(sourceElement);
 

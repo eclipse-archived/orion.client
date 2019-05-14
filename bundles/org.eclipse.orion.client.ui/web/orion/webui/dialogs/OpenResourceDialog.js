@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2010, 2016 IBM Corporation and others.
+ * Copyright (c) 2010, 2019 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -112,7 +112,7 @@ define([
 				lib.empty(resultsNode);
 				if (resources && resources.length > 0) {
 					var table = document.createElement('table'); //$NON-NLS-0$
-					table.setAttribute('role', 'presentation'); //$NON-NLS-1$ //$NON-NLS-0$
+					lib.setSafeAttribute(table, 'role', 'presentation');
 					for (var i=0; i < resources.length; i++) {
 						var resource = resources[i];
 						var col;
@@ -258,9 +258,9 @@ define([
 		
 		self.$crawlingProgress.style.display = "none"; //$NON-NLS-0$
 		if(this._nameSearch) {
-			this.$fileName.setAttribute("placeholder", messages["FileName FolderName"]);  //$NON-NLS-0$
+			lib.setSafeAttribute(this.$fileName, "placeholder", messages["FileName FolderName"]);
 		} else {
-			this.$fileName.setAttribute("placeholder", messages["Search"]);  //$NON-NLS-0$
+			lib.setSafeAttribute(this.$fileName, "placeholder", messages["Search"]);
 		}
 		bidiUtils.initInputField(this.$fileName);
 		this.$fileName.addEventListener("input", function(evt) { //$NON-NLS-0$
@@ -375,7 +375,7 @@ define([
 		
 		var titleDiv = lib.$("span", this.$frame); //$NON-NLS-1$
 		titleDiv.textContent = newTitle;
-		this.$frame.setAttribute("aria-label", newTitle); //$NON-NLS-0$
+		lib.setSafeAttribute(this.$frame, "aria-label", newTitle);
 		
 		// Hide the checkbox if this search must be global
 		if (this.forcedGlobalSearch()) {

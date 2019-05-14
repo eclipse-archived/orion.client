@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2011, 2012 IBM Corporation and others.
+ * Copyright (c) 2011, 2019 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -470,7 +470,7 @@ exports.ExplorerNavHandler = (function() {
 						currentgrid.domNode.classList.add("treeIterationCursor"); //$NON-NLS-0$
 						if (ariaElement) {
 							var activeDescendantId = currentgrid.domNode.id;
-							ariaElement.setAttribute("aria-activedescendant", activeDescendantId); //$NON-NLS-0$
+							lib.setSafeAttribute(ariaElement, "aria-activedescendant", activeDescendantId);
 						}
 					} else {
 						currentgrid.domNode.classList.remove("treeIterationCursor"); //$NON-NLS-0$
@@ -663,10 +663,10 @@ exports.ExplorerNavHandler = (function() {
 			var rowDiv = this.getRowDiv(model);
 			if(rowDiv){
 				if (this._inSelection(model) < 0) {
-					rowDiv.setAttribute("aria-selected", true);
+					lib.setSafeAttribute(rowDiv, "aria-selected", true);
 					rowDiv.classList.add("checkedRow"); //$NON-NLS-0$
 				} else {
-					rowDiv.setAttribute("aria-selected", false);
+					lib.setSafeAttribute(rowDiv, "aria-selected", false);
 					rowDiv.classList.remove("checkedRow"); //$NON-NLS-0$
 				}
 			}

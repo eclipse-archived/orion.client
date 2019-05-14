@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2016 - 2017 IBM Corporation and others.
+ * Copyright (c) 2016, 2019 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License v1.0
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution
@@ -136,10 +136,10 @@ function(messages, i18nUtil, mCommands, mCommandRegistry, lib, mTooltip, colors,
 			}
 			for (var i =0; i < themeStyles.styles.length; i++) {
 				var option = document.createElement('option');
-				option.setAttribute('value', themeStyles.styles[i].name);
+				lib.setSafeAttribute(option, 'value', themeStyles.styles[i].name);
 				//checks if a theme is the current theme 
 				if (themeStyles.styles[i].name === themeStyles.style.name){
-					option.setAttribute('selected', 'true');
+					lib.setSafeAttribute(option, 'selected', 'true');
 				}
 				option.appendChild(document.createTextNode(themeStyles.styles[i].name));
 				selectElement.appendChild(option);
@@ -404,7 +404,7 @@ function(messages, i18nUtil, mCommands, mCommandRegistry, lib, mTooltip, colors,
 		if (scope.tooltip) {
 			scope.tooltip.destroy();
 		}
-		element.setAttribute("aria-label", scope.value);
+		lib.setSafeAttribute(element, "aria-label", scope.value);
 		scope.tooltip = element.tooltip = new mTooltip.Tooltip({
 			node: element,
 			text: scope.value,
@@ -438,7 +438,7 @@ function(messages, i18nUtil, mCommands, mCommandRegistry, lib, mTooltip, colors,
 		revertBtn = document.getElementById("editorThemeRevert");
 		revertBtn.onclick = this.revertTheme.bind(this);
 		var revertThemeLabel = messages['Revert Theme']; //$NON-NLS-1$
-		revertBtn.setAttribute("aria-label", revertThemeLabel); //$NON-NLS-1$
+		lib.setSafeAttribute(revertBtn, "aria-label", revertThemeLabel);
 		new mTooltip.Tooltip({
 			node: revertBtn,
 			text: revertThemeLabel,
@@ -448,7 +448,7 @@ function(messages, i18nUtil, mCommands, mCommandRegistry, lib, mTooltip, colors,
 		deleteBtn = document.getElementById("editorThemeDelete");
 		deleteBtn.onclick = this.deleteTheme.bind(this);
 		var deleteThemeLabel = messages['Delete Theme']; //$NON-NLS-1$
-		deleteBtn.setAttribute("aria-label", deleteThemeLabel); //$NON-NLS-1$
+		lib.setSafeAttribute(deleteBtn, "aria-label", deleteThemeLabel);
 		new mTooltip.Tooltip({
 			node: deleteBtn,
 			text: deleteThemeLabel,
@@ -458,7 +458,7 @@ function(messages, i18nUtil, mCommands, mCommandRegistry, lib, mTooltip, colors,
 		saveBtn = document.getElementById("editorThemeSave");
 		saveBtn.onclick = this.saveTheme.bind(this);
 		var saveThemeLabel = messages['Save Theme']; //$NON-NLS-1$
-		saveBtn.setAttribute("aria-label", saveThemeLabel); //$NON-NLS-1$
+		lib.setSafeAttribute(saveBtn, "aria-label", saveThemeLabel);
 		new mTooltip.Tooltip({
 			node: saveBtn,
 			text: saveThemeLabel,
@@ -578,8 +578,8 @@ function(messages, i18nUtil, mCommands, mCommandRegistry, lib, mTooltip, colors,
 				link = document.createElement("a");
 
 			// Set the attributes for the link and append it (Firefox requires the element to actually be in the DOM)
-			link.setAttribute("href", "data:application/other;charset=utf-8," + encodedUri);
-			link.setAttribute("download", currentTheme.name + ".json");
+			lib.setSafeAttribute(link, "href", "data:application/other;charset=utf-8," + encodedUri);
+			lib.setSafeAttribute(link, "download", currentTheme.name + ".json");
 			document.body.appendChild(link);
 
 			// Simulate the click event

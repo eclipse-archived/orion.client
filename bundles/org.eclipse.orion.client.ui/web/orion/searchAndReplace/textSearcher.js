@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2010, 2014 IBM Corporation and others. All rights reserved.
+ * Copyright (c) 2010, 2019 IBM Corporation and others. All rights reserved.
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution
@@ -92,11 +92,11 @@ define([
 			if(this._regex) {
 				this._replaceInfo.src = "data:image/gif;base64,R0lGODlhBwAIAMQAAMzX6cbT5kh4qFiIuKC40FCIuGSXwmWZw2SaxGacxmadxmWcxbPM4GigyJW92JzC26DI0P///////wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACH5BAEAABIALAAAAAAHAAgAAAUmoEQUQkFI0PBEz5A2yII0w9AwkUPbRpTsjUNEQUsFIgCXiGSShAAAOw==";//$NON-NLS-0$
 				infoText = messages["regexOptionOn"];
-				this._replaceInfo.setAttribute("aria-pressed", "true");
+				lib.setSafeAttribute(this._replaceInfo, "aria-pressed", "true");
 			} else {
 				this._replaceInfo.src ="data:image/gif;base64,R0lGODlhBwAIAEAAACH5BAEAABIALAAAAAAHAAgAhwAAAAAAMwAAZgAAmQAAzAAA/wArAAArMwArZgArmQArzAAr/wBVAABVMwBVZgBVmQBVzABV/wCAAACAMwCAZgCAmQCAzACA/wCqAACqMwCqZgCqmQCqzACq/wDVAADVMwDVZgDVmQDVzADV/wD/AAD/MwD/ZgD/mQD/zAD//zMAADMAMzMAZjMAmTMAzDMA/zMrADMrMzMrZjMrmTMrzDMr/zNVADNVMzNVZjNVmTNVzDNV/zOAADOAMzOAZjOAmTOAzDOA/zOqADOqMzOqZjOqmTOqzDOq/zPVADPVMzPVZjPVmTPVzDPV/zP/ADP/MzP/ZjP/mTP/zDP//2YAAGYAM2YAZmYAmWYAzGYA/2YrAGYrM2YrZmYrmWYrzGYr/2ZVAGZVM2ZVZmZVmWZVzGZV/2aAAGaAM2aAZmaAmWaAzGaA/2aqAGaqM2aqZmaqmWaqzGaq/2bVAGbVM2bVZmbVmWbVzGbV/2b/AGb/M2b/Zmb/mWb/zGb//5kAAJkAM5kAZpkAmZkAzJkA/5krAJkrM5krZpkrmZkrzJkr/5lVAJlVM5lVZplVmZlVzJlV/5mAAJmAM5mAZpmAmZmAzJmA/5mqAJmqM5mqZpmqmZmqzJmq/5nVAJnVM5nVZpnVmZnVzJnV/5n/AJn/M5n/Zpn/mZn/zJn//8wAAMwAM8wAZswAmcwAzMwA/8wrAMwrM8wrZswrmcwrzMwr/8xVAMxVM8xVZsxVmcxVzMxV/8yAAMyAM8yAZsyAmcyAzMyA/8yqAMyqM8yqZsyqmcyqzMyq/8zVAMzVM8zVZszVmczVzMzV/8z/AMz/M8z/Zsz/mcz/zMz///8AAP8AM/8AZv8Amf8AzP8A//8rAP8rM/8rZv8rmf8rzP8r//9VAP9VM/9VZv9Vmf9VzP9V//+AAP+AM/+AZv+Amf+AzP+A//+qAP+qM/+qZv+qmf+qzP+q///VAP/VM//VZv/Vmf/VzP/V////AP//M///Zv//mf//zP///wAAAAAAAAAAAAAAAAgsAPcpQzMJjbJ9xNAQQ6hwUqaHDws+3PeQoMN9DiUuzFRQ2ZiDyyYdHFhwYUAAOw==";
 				infoText = messages["regexOptionOff"];
-				this._replaceInfo.setAttribute("aria-pressed", "false");
+				lib.setSafeAttribute(this._replaceInfo, "aria-pressed", "false");
 			}
 			this._replaceInfo.alt = messages["Regular expression"];
 			this._replaceInfo.style.display = "";
@@ -122,7 +122,7 @@ define([
 				searchStringInput.className = "parameterInput"; //$NON-NLS-0$
 				searchStringInput.id = "localSearchFindWith"; //$NON-NLS-0$
 				searchStringInput.placeholder = messages["FindWhat"];
-				searchStringInput.setAttribute("aria-label", messages["FindWhat"]); //$NON-NLS-0$
+				lib.setSafeAttribute(searchStringInput, "aria-label", messages["FindWhat"]);
 				searchStringInput.oninput = function(evt){
 					return that._handleInput(evt);
 				};
@@ -149,7 +149,7 @@ define([
 					replaceStringInput.className = "parameterInput"; //$NON-NLS-0$
 					replaceStringInput.id = "localSearchReplaceWith"; //$NON-NLS-0$
 					replaceStringInput.placeholder = messages["Replace With"];
-					replaceStringInput.setAttribute("aria-label", messages["Replace With"]); //$NON-NLS-0$
+					lib.setSafeAttribute(replaceStringInput, "aria-label", messages["Replace With"]);
 					replaceStringInput.onkeydown = function(evt){
 						return that._handleKeyDown(evt);
 					};
@@ -169,7 +169,7 @@ define([
 				mCommands.createCheckedMenuItem(optionMenu.menu, messages["Show all"], that._showAll,
 					function(event) {
 						var checked = event.target.checked;
-						event.target.setAttribute("aria-checked", checked);
+						lib.setSafeAttribute(event.target, "aria-checked", checked);
 						that.setOptions({showAll: checked});
 						optionMenu.dropdown.close(true);
 					});
@@ -177,7 +177,7 @@ define([
 				that._selectedLinesUI = mCommands.createCheckedMenuItem(optionMenu.menu, messages["Selected Lines"], that._selectedLines,
 					function(event) {
 						var checked = event.target.checked;
-						event.target.setAttribute("aria-checked", checked);
+						lib.setSafeAttribute(event.target, "aria-checked", checked);
 						that.setOptions({selectedLines: checked});
 						optionMenu.dropdown.close(true);
 					});
@@ -185,7 +185,7 @@ define([
 				mCommands.createCheckedMenuItem(optionMenu.menu, messages["Case sensitive"], !that._caseInsensitive,
 					function(event) {
 						var checked = event.target.checked;
-						event.target.setAttribute("aria-checked", checked);
+						lib.setSafeAttribute(event.target, "aria-checked", checked);
 						that.setOptions({caseInsensitive: !checked});
 						optionMenu.dropdown.close(true);
 						that.find(true);
@@ -194,7 +194,7 @@ define([
 				mCommands.createCheckedMenuItem(optionMenu.menu,  messages["Wrap search"], that._wrap,
 					function(event) {
 						var checked = event.target.checked;
-						event.target.setAttribute("aria-checked", checked);
+						lib.setSafeAttribute(event.target, "aria-checked", checked);
 						that.setOptions({wrap: checked});
 						optionMenu.dropdown.close(true);
 					});
@@ -204,7 +204,7 @@ define([
 					mCommands.createCheckedMenuItem(optionMenu.menu,  messages["Incremental search"], that._incremental,
 						function(event) {
 							var checked = event.target.checked;
-							event.target.setAttribute("aria-checked", checked);
+							lib.setSafeAttribute(event.target, "aria-checked", checked);
 							that.setOptions({incremental: checked});
 							optionMenu.dropdown.close(true);
 						});
@@ -213,7 +213,7 @@ define([
 				mCommands.createCheckedMenuItem(optionMenu.menu,  messages["Whole Word"], that._wholeWord,
 					function(event) {
 						var checked = event.target.checked;
-						event.target.setAttribute("aria-checked", checked);
+						lib.setSafeAttribute(event.target, "aria-checked", checked);
 						that.setOptions({wholeWord: checked});
 						optionMenu.dropdown.close(true);
 						that.find(true);
@@ -222,7 +222,7 @@ define([
 				that._regExBox = mCommands.createCheckedMenuItem(optionMenu.menu,  messages["Regular expression"], that._regex,
 					function(event) {
 						var checked = event.target.checked;
-						event.target.setAttribute("aria-checked", checked);
+						lib.setSafeAttribute(event.target, "aria-checked", checked);
 						that.setOptions({regex: checked});
 						optionMenu.dropdown.close(true);
 						that.find(true);
@@ -233,7 +233,7 @@ define([
 					mCommands.createCheckedMenuItem(optionMenu.menu,  messages["Find after replace"], that._findAfterReplace,
 						function(event) {
 							var checked = event.target.checked;
-							event.target.setAttribute("aria-checked", checked);
+							lib.setSafeAttribute(event.target, "aria-checked", checked);
 							that.setOptions({findAfterReplace: checked});
 							optionMenu.dropdown.close(true);
 						});
@@ -363,7 +363,7 @@ define([
 		},
 		_createInfoImage: function(text, parent, callback) {
 			var image = document.createElement("img"); //$NON-NLS-0$
-			image.setAttribute("role", "button");
+			lib.setSafeAttribute(image, "role", "button");
 			image.classList.add("replaceInfo"); //$NON-NLS-0$
 			image.tabIndex = 0;
 			var that = this;

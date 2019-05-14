@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2014, 2015 IBM Corporation and others.
+ * Copyright (c) 2014, 2019 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -328,8 +328,8 @@ define(['i18n!cfui/nls/messages', 'orion/selection', 'orion/widgets/input/ComboT
 						position: ["above"] //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 					});
 					var tipContainer = self._manifestInputWrapper.tooltip.contentContainer(); // force tooltip creation to get the id
-					self._manifestInput.setAttribute("aria-invalid", "true"); //$NON-NLS-1$ //$NON-NLS-0$
-					self._manifestInput.setAttribute("aria-errormessage", tipContainer.id); //$NON-NLS-0$
+					lib.setSafeAttribute(self._manifestInput, "aria-invalid", "true");
+					lib.setSafeAttribute(self._manifestInput, "aria-errormessage", tipContainer.id);
 				}
 			}
 		},
@@ -474,7 +474,7 @@ define(['i18n!cfui/nls/messages', 'orion/selection', 'orion/widgets/input/ComboT
 						} else {
 							document.getElementById("cloudsLabel").appendChild(document.createTextNode(messages["target:"])); //$NON-NLS-0$
 							var span = document.createElement("span"); //$NON-NLS-0$
-							span.setAttribute("aria-labelledby", "cloudsLabel"); //$NON-NLS-1$ //$NON-NLS-0$
+							lib.setSafeAttribute(span, "aria-labelledby", "cloudsLabel");
 							span.textContent = self._clouds[0].Name || self._clouds[0].Url;
 							document.getElementById("clouds").appendChild(span); //$NON-NLS-0$
 						}
@@ -530,7 +530,7 @@ define(['i18n!cfui/nls/messages', 'orion/selection', 'orion/widgets/input/ComboT
 						self._manifestInput.id = "manifestField"; //$NON-NLS-0$
 						self._manifestInput.value = (self._initManifestPath == "") ? "manifest.yml" : self._initManifestPath;
 						self._manifestInput.readOnly = false; // TODO should be editable
-						self._manifestInput.setAttribute("spellcheck", "false");
+						lib.setSafeAttribute(self._manifestInput, "spellcheck", "false");
 						self._manifestInputWrapper = document.getElementById("manifest"); //$NON-NLS-0$
 						self._manifestInputWrapper.appendChild(self._manifestInput);
 						

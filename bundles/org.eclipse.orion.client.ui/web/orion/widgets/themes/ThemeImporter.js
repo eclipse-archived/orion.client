@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2012, 2014 IBM Corporation and others.
+ * Copyright (c) 2012, 2019 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License v1.0
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution
@@ -128,8 +128,7 @@ define([
             _bindToDom: function() {
                 this.$importButton = this.$buttonContainer.firstChild;
                 this.$importButton.classList.add("disabled"); //$NON-NLS-0$
-                this.$importButton.setAttribute("disabled", "disabled"); //$NON-NLS-1$ //$NON-NLS-0$
-
+                lib.setSafeAttribute(this.$importButton, "disabled", "disabled");
                 this.appendThemeList();
             },
             appendThemeList: function() {
@@ -158,7 +157,7 @@ define([
 
                 dropZone.className = "drop-zone"; //$NON-NLS-0$
                 dropZone.id = "dropZone"; //$NON-NLS-0$
-                dropZone.setAttribute("aria-label", messages["Drop Theme File:"]); //$NON-NLS-0$
+                lib.setSafeAttribute(dropZone, "aria-label", messages["Drop Theme File:"]);
                 dropZone.textContent = messages["dndTheme"];
                 docFragment.appendChild(dropZone);
 
@@ -169,7 +168,7 @@ define([
 
                 textBox.rows = "4"; //$NON-NLS-0$
                 textBox.cols = "35"; //$NON-NLS-0$
-                textBox.setAttribute("aria-label", messages["Paste Theme:"]); //$NON-NLS-0$
+                lib.setSafeAttribute(textBox, "aria-label", messages["Paste Theme:"]);
                 textBox.placeholder = messages["textTheme"];
                 textBox.id = "themeText"; //$NON-NLS-0$
                 textBox.addEventListener("input", this.watchTextarea.bind(this)); //$NON-NLS-0$
@@ -177,7 +176,7 @@ define([
                 docFragment.appendChild(textBox);
                 this.$importThemeMessage.innerHTML = messages["ImportThemeDialogMessage"];
                 this.$importThemeContainer.appendChild(docFragment, null);
-                this.$frame.setAttribute("aria-describedby", "importThemeMessage"); //$NON-NLS-1$ //$NON-NLS-0$
+                lib.setSafeAttribute(this.$frame, "aria-describedby", "importThemeMessage");
             },
             watchTextarea: function() {
                 var textArea = document.getElementById("themeText"); //$NON-NLS-0$
@@ -186,7 +185,7 @@ define([
 	                this.$importButton.removeAttribute("disabled"); //$NON-NLS-0$
                 } else {
                     this.$importButton.classList.add("disabled"); //$NON-NLS-0$
-	                this.$importButton.setAttribute("disabled", "disabled"); //$NON-NLS-1$ //$NON-NLS-0$
+                    lib.setSafeAttribute(this.$importButton, "disabled", "disabled");
                 }
             },
             dragEnter: function(e) {

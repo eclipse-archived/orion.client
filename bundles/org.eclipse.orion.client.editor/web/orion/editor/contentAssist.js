@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2011, 2018 IBM Corporation and others.
+ * Copyright (c) 2011, 2019 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -1212,7 +1212,7 @@ define("orion/editor/contentAssist", [
 			var document = parent.ownerDocument;
 			var div = util.createElement(document, "div"); //$NON-NLS-0$
 			div.id = "contentoption" + itemIndex; //$NON-NLS-0$
-			div.setAttribute("role", "option"); //$NON-NLS-1$ //$NON-NLS-2$
+			lib.setSafeAttribute(div, "role", "option");
 			div.className = STYLES[proposal.style] ? STYLES[proposal.style] : STYLES.dfault;
 			var node;
 			if (proposal.style === "hr") {
@@ -1433,7 +1433,7 @@ define("orion/editor/contentAssist", [
 				node = this.parentNode.childNodes[nodeIndex];
 				if (node){
 					node.classList.add(STYLES.selected);
-					this.parentNode.setAttribute("aria-activedescendant", node.id); //$NON-NLS-0$
+					lib.setSafeAttribute(this.parentNode, "aria-activedescendant", node.id);
 					node.focus();
 					if (node.offsetTop < this.parentNode.scrollTop) {
 						node.scrollIntoView(true);
@@ -1457,7 +1457,7 @@ define("orion/editor/contentAssist", [
 						clone.classList.add("cloneProposal"); //$NON-NLS-0$
 						clone.style.top = parentTop + node.offsetTop - this.parentNode.scrollTop + "px"; //$NON-NLS-0$
 						clone.style.left = parentStyle.left;
-						clone.setAttribute("id", clone.id + "_clone"); //$NON-NLS-1$ //$NON-NLS-0$
+						lib.setSafeAttribute(clone, "id", clone.id + "_clone");
 						
 						// try to fit clone node on page horizontally
 						var viewportWidth = document.documentElement.clientWidth;

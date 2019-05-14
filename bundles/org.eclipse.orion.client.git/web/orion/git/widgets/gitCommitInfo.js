@@ -1,5 +1,5 @@
 /*******************************************************************************
- * @license Copyright (c) 2014 IBM Corporation and others. All rights
+ * @license Copyright (c) 2014, 2019 IBM Corporation and others. All rights
  *          reserved. This program and the accompanying materials are made
  *          available under the terms of the Eclipse Public License v1.0
  *          (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse
@@ -13,13 +13,14 @@
 
 define([
 	'require',
+	'orion/webui/littlelib',
 	'i18n!git/nls/gitmessages',
 	'orion/URITemplate',
 	'orion/i18nUtil',
 	'orion/git/util',
 	'orion/objects',
 	'orion/bidiUtils'
-], function(require, messages, URITemplate, i18nUtil, util, objects, bidiUtils) {
+], function(require, lib, messages, URITemplate, i18nUtil, util, objects, bidiUtils) {
 	
 	var commitTemplate = new URITemplate("#{,resource,params*}?page=1"); //$NON-NLS-0$	
 	
@@ -89,7 +90,7 @@ define([
 			holderDiv.className = "commitInfoHolder"; //$NON-NLS-0$
 			var tableDiv = document.createElement("div"); //$NON-NLS-0$
 			var table = document.createElement("table"); //$NON-NLS-0$
-			table.setAttribute("role", "presentation"); // table element is only being used for row/column presentation
+			lib.setSafeAttribute(table, "role", "presentation"); // table element is only being used for row/column presentation
 			tableDiv.appendChild(table);
 			var tableBody = document.createElement("tbody"); //$NON-NLS-0$
 			var row = document.createElement("tr"); //$NON-NLS-0$

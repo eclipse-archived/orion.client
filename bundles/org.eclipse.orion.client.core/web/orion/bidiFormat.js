@@ -1,13 +1,13 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2011, 2013 IBM Corporation and others.
+ * Copyright (c) 2011, 2019 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
  * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html). 
  *
  *******************************************************************************/
-define ([], function() {
+define (['orion/webui/littlelib'], function(lib) {
 
     var TextSegment = (function() {
         var TextSegment = function (obj) {
@@ -36,19 +36,19 @@ define ([], function() {
             if (!bounds) {
                 return false;
             }
-            if (typeof(bounds.start) === "undefined") {
+            if (typeof bounds.start === "undefined") {
                 bounds.start = "";
             }
-            if (typeof(bounds.end) === "undefined") {
+            if (typeof bounds.end === "undefined") {
                 bounds.end = "";
             }
-            if (typeof(bounds.startAfter) !== "undefined") {
+            if (typeof bounds.startAfter !== "undefined") {
                 bounds.start = bounds.startAfter;
                 bounds.after = true;
             } else {
                 bounds.after = false;
             }
-            if (typeof(bounds.endBefore) !== "undefined") {
+            if (typeof bounds.endBefore !== "undefined") {
                 bounds.end = bounds.endBefore;
                 bounds.before = true;
             } else {
@@ -66,7 +66,7 @@ define ([], function() {
             } else {
                 bounds.useLength = false;
             }
-            bounds.loops = typeof(bounds.loops) !== "undefined" ? !!bounds.loops : true;
+            bounds.loops = typeof bounds.loops !== "undefined" ? !!bounds.loops : true;
             return true;
         }
 
@@ -101,11 +101,11 @@ define ([], function() {
 
         return {
             handleSubcontents: function (segments, args, subs, origContent, locale) { // jshint unused: false
-                if (!subs.content || typeof(subs.content) !== "string" || subs.content.length === 0) {
+                if (!subs.content || typeof subs.content !== "string" || subs.content.length === 0) {
                     return segments;
                 }
                 var sLoops = true;
-                if (typeof(subs.loops) !== "undefined") {
+                if (typeof subs.loops !== "undefined") {
                     sLoops = !!subs.loops;
                 }
                 for (var j = 0; true; j++) {
@@ -238,7 +238,7 @@ define ([], function() {
                     }
                 }
                 for (var i =  0; i < cases.length; i++) {
-                    if (!cases[i].handler || typeof(cases[i].handler.handle) !== "function") {
+                    if (!cases[i].handler || typeof cases[i].handler.handle !== "function") {
                         cases[i].handler = args.commonHandler;
                     }
                     if (cases[i].args) {
@@ -316,15 +316,15 @@ define ([], function() {
                     cases = args.cases;
                 }
                 var points = [];
-                if (typeof(args.points) !== "undefined") {
+                if (typeof args.points !== "undefined") {
                     if (Array.isArray(args.points)) {
                         points = args.points;
-                    } else if (typeof(args.points) === "string") {
+                    } else if (typeof args.points === "string") {
                         points = args.points.split("");
                     }
                 }
                 var subs = {};
-                if (typeof(args.subs) === "object") {
+                if (typeof args.subs === "object") {
                     subs = args.subs;
                 }
                 var aBounds = [];
@@ -442,7 +442,7 @@ define ([], function() {
                         result += c;
                     }
                 }
-                var mark = typeof(guiDir) === "undefined" || !((/^(rtl|ltr)$/i).test(guiDir)) ? "" :
+                var mark = typeof guiDir === "undefined" || !((/^(rtl|ltr)$/i).test(guiDir)) ? "" :
                     guiDir === "rtl" ? RLO : LRO;
                 return mark + result + (mark === "" ? "" : PDF);
             },
@@ -492,7 +492,7 @@ define ([], function() {
             if (!fullCheck) {
                 return args;
             }
-            if (typeof(args.points) === "undefined") {
+            if (typeof args.points === "undefined") {
                 args.points = [];
             }
             if (!args.cases) {
@@ -517,7 +517,7 @@ define ([], function() {
                     localGui: args.dir
                 })];
             var parse = common.handle;
-            if (args.handler && typeof(args.handler) === "function") {
+            if (args.handler && typeof args.handler === "function") {
                 parse = args.handler.handle;
             }
             parse(content, segments, args, locale);
@@ -1167,7 +1167,7 @@ define ([], function() {
         checked.contentEditable = true;
         var isSupported = ("oninput" in checked);
         if (!isSupported) {
-          checked.setAttribute('oninput', 'return;');
+          lib.setSafeAttribute(checked, 'oninput', 'return;');
           isSupported = typeof checked['oninput'] == 'function';
         }
         checked = null;
@@ -1183,9 +1183,9 @@ define ([], function() {
             event = document.createEvent('Event');
             event.initEvent('TF', true, true);
         }
-        element.setAttribute("data-tf-type", type);
+        lib.setSafeAttribute(element, "data-tf-type", type);
         var sArgs = args === "undefined"? "{}" : JSON.stringify(Array.isArray(args)? args[0] : args);
-        element.setAttribute("data-tf-args", sArgs);
+        lib.setSafeAttribute(element, "data-tf-args", sArgs);
         var dir = "ltr";
         if (isRtl === "undefined") {
             if (element.dir) {
@@ -1196,8 +1196,8 @@ define ([], function() {
             }
             isRtl = dir.toLowerCase() === "rtl";
         }
-        element.setAttribute("data-tf-dir", isRtl);
-        element.setAttribute("data-tf-locale", misc.getLocaleDetails(locale).lang);
+        lib.setSafeAttribute(element, "data-tf-dir", isRtl);
+        lib.setSafeAttribute(element, "data-tf-locale", misc.getLocaleDetails(locale).lang);
         if (isInputEventSupported(element)) {
             var ehandler = element.oninput;
             element.oninput = function(event) {

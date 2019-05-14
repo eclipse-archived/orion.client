@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2010,2012 IBM Corporation and others.
+ * Copyright (c) 2010, 2019 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -281,7 +281,7 @@ define([
 					parent.appendChild(label);
 					if(style === "PROMPT"){
 						var input = document.createElement("input");
-						input.setAttribute("value", defaultInput);
+						lib.setSafeAttribute(input, "value", defaultInput);
 						input.classList.add("parameterInput");
 						bidiUtils.initInputField(input);
 						parent.appendChild(input);
@@ -333,10 +333,10 @@ define([
 					var parameterArea = tooltip.contentContainer();
 					parameterArea.classList.add("parameterPopup"); //$NON-NLS-0$
 					var parent = parameterArea.parentNode;
-					parent.setAttribute("role", "dialog"); //$NON-NLS-1$ //$NON-NLS-0$
-					parent.setAttribute("aria-modal", "true"); //$NON-NLS-1$ //$NON-NLS-0$
+					lib.setSafeAttribute(parent, "role", "dialog");
+					lib.setSafeAttribute(parent, "aria-modal", "true");
 					var dialogName = node.getAttribute("aria-label") || node.textContent || messages[style] || messages["Command"];
-					parent.setAttribute("aria-label", dialogName); //$NON-NLS-0$
+					lib.setSafeAttribute(parent, "aria-label", dialogName);
 					var originalFocusNode = window.document.activeElement;
 					closeFunction = function() {
 						lib.returnFocus(parameterArea, originalFocusNode);
@@ -464,9 +464,9 @@ define([
 							var parameterArea = tooltip.contentContainer();
 							parameterArea.classList.add("parameterPopup"); //$NON-NLS-0$
 							var parent = parameterArea.parentNode;
-							parent.setAttribute("role", "dialog"); //$NON-NLS-1$ //$NON-NLS-0$
-							parent.setAttribute("aria-modal", "true"); //$NON-NLS-1$ //$NON-NLS-0$
-							parent.setAttribute("aria-label", dialogName); //$NON-NLS-0$
+							lib.setSafeAttribute(parent, "role", "dialog");
+							lib.setSafeAttribute(parent, "aria-modal", "true");
+							lib.setSafeAttribute(parent, "aria-label", dialogName);
 							var originalFocusNode = window.document.activeElement;
 							var focusNode = this._parameterCollector.getFillFunction(commandInvocation, function() {
 								lib.returnFocus(parameterArea, originalFocusNode);
@@ -1298,7 +1298,7 @@ define([
 								nested = false;
 								if (parent.nodeName.toLowerCase() === "ul") { //$NON-NLS-0$
 									menuParent = document.createElement("li"); //$NON-NLS-0$
-									menuParent.setAttribute("role", "none");
+									lib.setSafeAttribute(menuParent, "role", "none");
 									parent.appendChild(menuParent);
 								}
 							} else {
@@ -1392,7 +1392,7 @@ define([
 			} else {
 				if (parent.nodeName.toLowerCase() === "ul") { //$NON-NLS-0$
 					menuParent = document.createElement("li"); //$NON-NLS-0$
-					menuParent.setAttribute("role", "none");
+					lib.setSafeAttribute(menuParent, "role", "none");
 					parent.appendChild(menuParent);
 					destroyButton = menuParent;
 				}
@@ -1450,10 +1450,10 @@ define([
 			if (!this._checkForTrailingSeparator(dropdown, "menu")) { //$NON-NLS-0$
 				var item = document.createElement("li"); //$NON-NLS-0$
 				item.classList.add("dropdownSeparator"); //$NON-NLS-0$
-				item.setAttribute("role", "none");
+				lib.setSafeAttribute(item, "role", "none");
 				var sep = document.createElement("span"); //$NON-NLS-0$
 				sep.classList.add("dropdownSeparator"); //$NON-NLS-0$
-				sep.setAttribute("role", "separator");
+				lib.setSafeAttribute(sep, "role", "separator");
 				item.appendChild(sep);
 				dropdown.appendChild(item);
 			}
@@ -1471,7 +1471,7 @@ define([
 			var sep;
 			if (parent.nodeName.toLowerCase() === "ul") { //$NON-NLS-0$
 				sep = document.createElement("li"); //$NON-NLS-0$
-				sep.setAttribute("role", "none");
+				lib.setSafeAttribute(sep, "role", "none");
 				parent.appendChild(sep);
 			} else {
 				sep = document.createElement("span"); //$NON-NLS-0$

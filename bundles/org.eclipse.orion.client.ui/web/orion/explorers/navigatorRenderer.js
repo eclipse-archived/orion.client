@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2009, 2013, 2017 IBM Corporation and others.
+ * Copyright (c) 2009, 2019 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -299,9 +299,9 @@ define([
 			var col = document.createElement('td'); //$NON-NLS-0$
 			var span = document.createElement("span"); //$NON-NLS-0$
 			span.id = tableRow.id+"MainCol"; //$NON-NLS-0$
-			span.setAttribute("role", "presentation"); //$NON-NLS-1$ //$NON-NLS-2$
+			lib.setSafeAttribute(span, "role", "presentation");
 			col.appendChild(span);
-			col.setAttribute("role", "presentation"); //$NON-NLS-1$ //$NON-NLS-2$
+			lib.setSafeAttribute(col, "role", "presentation");
 			span.className = "mainNavColumn"; //$NON-NLS-0$
 			// Append annotation container
 			var annotation = document.createElement("span"); //$NON-NLS-0$
@@ -330,7 +330,7 @@ define([
 				span.appendChild(itemNode); //$NON-NLS-0$
 			}
 			if(isDesktopMode){
-				span.setAttribute('draggable', true);
+				lib.setSafeAttribute(span, 'draggable', true);
 				this.explorer._makeDropTarget(item, span);
 				this.explorer._makeDropTarget(item, tableRow);
 			}
@@ -339,8 +339,8 @@ define([
 				itemNode.id = tableRow.id + "NameLink"; //$NON-NLS-0$
 				if (itemNode.nodeType === 1) {
 					mNavUtils.addNavGrid(this.explorer.getNavDict(), item, itemNode);
-					itemNode.setAttribute("role", "link"); //$NON-NLS-1$ //$NON-NLS-2$
-					itemNode.setAttribute("tabindex", "-1"); //$NON-NLS-1$ //$NON-NLS-2$
+					lib.setSafeAttribute(itemNode, "role", "link");
+					lib.setSafeAttribute(itemNode, "tabindex", "-1");
 				}
 			}
 			// render any inline commands that are present.

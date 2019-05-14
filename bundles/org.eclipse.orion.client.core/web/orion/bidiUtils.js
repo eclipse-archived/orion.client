@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2011, 2013 IBM Corporation and others.
+ * Copyright (c) 2011, 2019 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -8,10 +8,11 @@
  *
  *******************************************************************************/
 define ([
+  "orion/webui/littlelib",
 	"orion/util",
 	"orion/bidiFormat"
 ],
-function(util, bidiFormat) { /* BDL */
+function(lib, util, bidiFormat) { /* BDL */
 	
 	var bidiEnabledStorage = "/orion/preferences/bidi/bidiEnabled"; //$NON-NLS-0$
 	var bidiLayoutStorage = "/orion/preferences/bidi/bidiLayout"; //$NON-NLS-0$	
@@ -33,7 +34,7 @@ function(util, bidiFormat) { /* BDL */
 		if (isBidi && isBidiEnabled()) {
 			var htmlElement = document.getElementsByTagName("html")[0];
 			if (htmlElement){ //should be always true
-				htmlElement.setAttribute ("dir", "rtl");
+				lib.setSafeAttribute(htmlElement, "dir", "rtl");
 			}
 		}
 	}

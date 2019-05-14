@@ -1,5 +1,5 @@
 /*******************************************************************************
- * @license Copyright (c) 2016 IBM Corporation and others. All rights
+ * @license Copyright (c) 2016, 2019 IBM Corporation and others. All rights
  *          reserved. This program and the accompanying materials are made
  *          available under the terms of the Eclipse Public License v1.0
  *          (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse
@@ -523,8 +523,8 @@ define([
 			var outerDiv = document.createElement("div"); //$NON-NLS-0$
 			outerDiv.id = "gitCommitMessage"; //$NON-NLS-0$
 			outerDiv.className = "gitCommitMessage toolComposite"; //$NON-NLS-0$
-			outerDiv.setAttribute("role", "group"); //$NON-NLS-1$ //$NON-NLS-0$
-			outerDiv.setAttribute("aria-label", messages["CommitOptions"]); //$NON-NLS-0$
+			lib.setSafeAttribute(outerDiv, "role", "group");
+			lib.setSafeAttribute(outerDiv, "aria-label", messages["CommitOptions"]);
 
 			var label = document.createElement("label"); //$NON-NLS-0$
 			label.htmlFor = "commitMsgparameterCollector"; //$NON-NLS-0$
@@ -561,7 +561,7 @@ define([
 			function createInput(parent, id, key, placeholderKey, value, isCheck) {
 				var label = document.createElement("label"); //$NON-NLS-0$
 				label.classList.add(isCheck ? "gitChangeListCheckLabel" : "gitChangeListInputLabel"); //$NON-NLS-1$ //$NON-NLS-0$
-				label.setAttribute("for", id); //$NON-NLS-0$
+				lib.setSafeAttribute(label, "for", id);
 				label.textContent = messages[key];
 				var input = document.createElement("input"); //$NON-NLS-0$
 				if (isCheck) input.type = "checkbox"; //$NON-NLS-0$
@@ -590,8 +590,8 @@ define([
 			
 			function createGroup(parent, key) {
 				var div = document.createElement("div"); //$NON-NLS-0$
-				div.setAttribute("role", "group"); //$NON-NLS-1$ //$NON-NLS-0$
-				div.setAttribute("aria-labelledby", key); //$NON-NLS-0$
+				lib.setSafeAttribute(div, "role", "group");
+				lib.setSafeAttribute(div, "aria-labelledby", key);
 				div.classList.add("gitChangeListGroup"); //$NON-NLS-0$
 				var label = document.createElement("div"); //$NON-NLS-0$
 				label.id = key;
@@ -651,7 +651,7 @@ define([
 				
 			var div1Content = createGroup(moreDiv, "Author:"); //$NON-NLS-0$
 			var div1ContentTable = document.createElement("table"); //$NON-NLS-0$
-			div1ContentTable.setAttribute("role", "presentation"); //$NON-NLS-1$ //$NON-NLS-0$
+			lib.setSafeAttribute(div1ContentTable, "role", "presentation");
 			var div1ContentTbody = document.createElement("tbody"); //$NON-NLS-0$
 			div1ContentTable.appendChild(div1ContentTbody);
 			div1Content.appendChild(div1ContentTable);
@@ -660,7 +660,7 @@ define([
 
 			var div2Content = createGroup(moreDiv, "Committer:"); //$NON-NLS-0$
 			var div2ContentTable = document.createElement("table"); //$NON-NLS-0$
-			div2ContentTable.setAttribute("role", "presentation"); //$NON-NLS-1$ //$NON-NLS-0$
+			lib.setSafeAttribute(div2ContentTable, "role", "presentation");
 			var div2ContentTbody = document.createElement("tbody"); //$NON-NLS-0$
 			div2ContentTable.appendChild(div2ContentTbody);
 			div2Content.appendChild(div2ContentTable);
@@ -853,9 +853,9 @@ define([
 		updateCommands: function() {
 			mExplorer.createExplorerCommands(this.commandService);
 			var actionsNodeScope = this.section.selectionNode.id;
-			this.section.selectionNode.setAttribute("role", "none"); //$NON-NLS-1$ //$NON-NLS-0$
+			lib.setSafeAttribute(this.section.selectionNode, "role", "none");
 			var selectionNodeScope = this.section.actionsNode.id;
-			this.section.actionsNode.setAttribute("role", "none"); //$NON-NLS-1$ //$NON-NLS-0$
+			lib.setSafeAttribute(this.section.actionsNode, "role", "none");
 			
 			var commandRegistry = this.commandService;
 			var explorerSelectionScope = this.prefix === "all" || this.prefix === "diff" ? this.explorerSelectionScope : actionsNodeScope; //$NON-NLS-1$ //$NON-NLS-0$

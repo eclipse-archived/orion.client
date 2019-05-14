@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2011, 2016 IBM Corporation and others.
+ * Copyright (c) 2011, 2019 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License v1.0
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution
@@ -57,7 +57,7 @@ define([
 				serviceRegistry: serviceRegistry
 			});
 			var dropdownTrigger = lib.node("userTrigger"); //$NON-NLS-0$
-			dropdownTrigger.setAttribute("aria-label", optionsLabel);
+			lib.setSafeAttribute(dropdownTrigger, "aria-label", optionsLabel);
 
 			dropdownTrigger.tooltip = new mTooltip.Tooltip({
 				node: dropdownTrigger,
@@ -118,7 +118,7 @@ define([
 
 	function startProgressService(serviceRegistry) {
 		var progressPane = lib.node("progressPane"); //$NON-NLS-0$
-		progressPane.setAttribute("aria-label", messages['Operations']); //$NON-NLS-1$ //$NON-NLS-0$
+		lib.setSafeAttribute(progressPane, "aria-label", messages['Operations']);
 		var progressService = serviceRegistry.getService("orion.page.progress"); //$NON-NLS-0$
 		if (progressService) {
 			progressService.init.bind(progressService)("progressPane"); //$NON-NLS-0$
@@ -585,18 +585,18 @@ define([
 		var home = lib.node("home"); //$NON-NLS-0$
 		if (home) {
 			home.href = require.toUrl("edit/edit.html"); //$NON-NLS-0$
-			home.setAttribute("aria-label", messages['Orion Home']); //$NON-NLS-1$ //$NON-NLS-0$
+			lib.setSafeAttribute(home, "aria-label", messages['Orion Home']);
 		}
 
 		var toolbar = lib.node("pageToolbar"); //$NON-NLS-0$
 		if (toolbar) {
-			toolbar.setAttribute("aria-label", messages.toolbar); //$NON-NLS-1$
+			lib.setSafeAttribute(toolbar, "aria-label", messages.toolbar);
 			toolbar.classList.add("toolbarLayout"); //$NON-NLS-0$
 			toolbar.innerHTML = ToolbarTemplate + commonHTML.slideoutHTMLFragment("mainToolbar"); //$NON-NLS-0$
 		}
 		var closeNotification = lib.node("closeNotifications"); //$NON-NLS-0$
 		if (closeNotification) {
-			closeNotification.setAttribute("aria-label", messages['Close notification']); //$NON-NLS-1$ //$NON-NLS-0$
+			lib.setSafeAttribute(closeNotification, "aria-label", messages['Close notification']);
 		}
 
 		//Hack for FF17 Bug#415176
