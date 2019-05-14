@@ -147,7 +147,7 @@ define([
                 importLabel.id = "fileInputLabel";
                 importLabel.className = "orionButton commandButton";
                 importLabel.htmlFor = importInput.id;
-                importLabel.innerHTML = messages["importThemeButton"];
+                lib.setSafeInnerHTML(importLabel, messages["importThemeButton"]);
                 importLabel.addEventListener("keydown", function(e) { //$NON-NLS-0$
 					if (e.keyCode === lib.KEY.SPACE) {
 						importLabel.click();
@@ -174,7 +174,7 @@ define([
                 textBox.addEventListener("input", this.watchTextarea.bind(this)); //$NON-NLS-0$
 
                 docFragment.appendChild(textBox);
-                this.$importThemeMessage.innerHTML = messages["ImportThemeDialogMessage"];
+                lib.setSafeInnerHTML(this.$importThemeMessage, messages["ImportThemeDialogMessage"]);
                 this.$importThemeContainer.appendChild(docFragment, null);
                 lib.setSafeAttribute(this.$frame, "aria-describedby", "importThemeMessage");
             },

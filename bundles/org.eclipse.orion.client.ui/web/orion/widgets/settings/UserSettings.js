@@ -39,7 +39,7 @@ define([
 					'</div>', //$NON-NLS-0$
 
 		createElements: function() {
-			this.node.innerHTML = this.templateString;
+			lib.setSafeInnerHTML(this.node, this.templateString);
 			lib.processTextNodes(this.node, messages);
 			
 			lib.setSafeAttribute(this.node, "role", "region");

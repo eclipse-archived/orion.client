@@ -413,7 +413,7 @@ function(messages, i18nUtil, mCommands, mCommandRegistry, lib, mTooltip, colors,
 	}
 	
 	function renderData(anchor, state) {
-		anchor.innerHTML = this.template; // ok--this is a fixed value
+		lib.setSafeInnerHTML(anchor, this.template);
 		var previewNode = document.getElementById("previewWidget");
 		
 		if (this.previewWidget && this.previewWidget.renderData) {

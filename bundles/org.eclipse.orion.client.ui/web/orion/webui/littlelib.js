@@ -593,7 +593,7 @@ define(["orion/util"], function(util) {
 			parent = document.createElement("div"); //$NON-NLS-0$
 		}
 
-		parent.innerHTML = templateString;	
+		setSafeInnerHTML(parent, templateString);	
 		if (parent.children.length > 1) {
 			newNodes = parent.children;
 		} else {
@@ -604,7 +604,7 @@ define(["orion/util"], function(util) {
 	}
 
   /**
-   * @description This function is a delegate to set the attribute on a given node
+   * @description This function is a delegate to set the value of an attribute on a given node
    * @param {Element} node
    * @param {string} name
    * @param {?} value
@@ -614,6 +614,19 @@ define(["orion/util"], function(util) {
     if(node instanceof Element && name !== null && name !== undefined) {
 			//TODO - add more checks, this is not sufficient
       node.setAttribute(name, value);
+    }
+	}
+	
+	/**
+   * @description This function is a delegate to set the value of innerHTML on a given node
+   * @param {Element} node
+   * @param {string} value
+   * @since 20.0
+   */
+  function setSafeInnerHTML(node, value) {
+    if(node instanceof Element && (value instanceof String || typeof value === "string")) {
+			//TODO - we do not allow third party content, so not a problem currently
+      node.innerHTML = value;
     }
   }
 
@@ -642,6 +655,7 @@ define(["orion/util"], function(util) {
 		keyName: keyName,
 		KEY: KEY,
 		createNodes: createNodes,
-		setSafeAttribute: setSafeAttribute
+		setSafeAttribute: setSafeAttribute,
+		setSafeInnerHTML: setSafeInnerHTML
 	};
 });

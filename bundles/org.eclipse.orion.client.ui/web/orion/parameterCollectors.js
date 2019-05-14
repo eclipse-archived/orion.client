@@ -323,7 +323,7 @@ define(['i18n!orion/nls/messages', 'orion/webui/littlelib', 'orion/bidiUtils', '
 							if (!isSTT) {
 								field.value = parm.value;
 							} else {
-								field.innerHTML = bidiFormat.getHtml(parm.value, "url", {}, false, "en");								
+								lib.setSafeInnerHTML(field, bidiFormat.getHtml(parm.value, "url", {}, false, "en"));							
 							}
 						}					
 						(!isSTT ? bidiUtils.initInputField(field) : bidiFormat.attach(field, "url", {}, false, "en"));

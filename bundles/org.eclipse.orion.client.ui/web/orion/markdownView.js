@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2013 IBM Corporation and others.
+ * Copyright (c) 2013, 2019 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -92,7 +92,7 @@ define([
 	MarkdownView.prototype = {
 		display: function(node, markdown, resource, fileClient) {
 			node.classList.add("orionMarkdown"); //$NON-NLS-0$
-			node.innerHTML = createMarked(markdown, resource, fileClient);
+			lib.setSafeInnerHTML(node, createMarked(markdown, resource, fileClient));
 		},
 		displayContents: function(node, file) {
 			var location = file.Location || file;
@@ -137,13 +137,13 @@ define([
 			root.appendChild(div);
 			var parent = lib.node(this._domNode);
 			parent.appendChild(root);
-			this._contentDiv.innerHTML = this.createMarked(this.getModel().getText());
+			lib.setSafeInnerHTML(this._contentDiv, this.createMarked(this.getModel().getText()));
 			BaseEditor.prototype.install.call(this);
 		},
 		setInput: function(title, message, contents, contentsSaved) {
 			BaseEditor.prototype.setInput.call(this, title, message, contents, contentsSaved);
 			if (!message && !contentsSaved) {
-				this._contentDiv.innerHTML = this.createMarked(contents);
+				lib.setSafeInnerHTML(this._contentDiv, this.createMarked(contents));
 			}
 		},
 		uninstall: function() {

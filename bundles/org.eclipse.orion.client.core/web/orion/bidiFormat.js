@@ -1227,7 +1227,7 @@ define (['orion/webui/littlelib'], function(lib) {
         element.removeAttribute("data-tf-args");
         element.removeAttribute("data-tf-dir");
         element.removeAttribute("data-tf-locale");
-        element.innerHTML = element.textContent || "";
+        lib.setSafeInnerHTML(element, element.textContent || "");
     }
 
     // This function is called for each user's input into the attached editable html element
@@ -1260,10 +1260,10 @@ define (['orion/webui/littlelib'], function(lib) {
         var div = document.createElement('div');
         div.appendChild(tempRange.cloneContents());
         textOffset += div.textContent.length;
-
-        element.innerHTML = getHandler(element.getAttribute("data-tf-type")).
+        lib.setSafeInnerHTML(element,
+            getHandler(element.getAttribute("data-tf-type")).
             format(txt, JSON.parse(element.getAttribute("data-tf-args")), (element.getAttribute("data-tf-dir") === "true"? true : false),
-            true, element.getAttribute("data-tf-locale"));
+            true, element.getAttribute("data-tf-locale")));
         var parent = element;
         var node = element;
         var newOffset = 0;

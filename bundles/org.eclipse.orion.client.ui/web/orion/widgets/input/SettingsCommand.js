@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2012 IBM Corporation and others.
+ * Copyright (c) 2012, 2019 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -21,7 +21,7 @@ define(['orion/objects', 'orion/webui/littlelib'], function(objects, lib) {
 			'<span class="setting-command"></span>', //$NON-NLS-0$
 
 		show: function() {
-			this.node.innerHTML = this.templateString;
+			lib.setSafeInnerHTML(this.node, this.templateString);
 			this.mylabel = lib.$('.setting-repository-label', this.node); //$NON-NLS-0$
 			this.myCommand = lib.$('.setting-command', this.node); //$NON-NLS-0$
 			this.postCreate();

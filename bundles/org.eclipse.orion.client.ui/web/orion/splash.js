@@ -60,11 +60,11 @@ step.prototype.getStepNode = function() {
 	
 	var stepNode = document.createElement( 'div' );
 	stepNode.className = 'splashStep';
-	stepNode.innerHTML =  '<div class="splashVisual">' + 
+	var inner =  '<div class="splashVisual">' + 
 								'<div id="step' + this.order + '"></div>' +
 							'</div>' +
 							'<div class="splashVerbal">' + this.description + '</div>';
-	
+	lib.setSafeInnerHTML(stepNode, inner);
 	this.domNode = stepNode.firstChild.firstChild;
 	
 	if (this.state === this.HAPPENING) {
@@ -198,7 +198,7 @@ loader.prototype.nextStep = function(){
 
 loader.prototype.initialize = function(){
 	this.content = document.getElementById( this.domNode );
-	this.content.innerHTML = this.template;
+	lib.setSafeInnerHTML(this.content, this.template);
 	this.splashProgress = document.getElementById( "progressbar" );
 	this.stepMessages = document.getElementById( "stepMessages" );
 	this.splashProgress.value = 0;
@@ -269,7 +269,7 @@ loader.prototype.update = function(){
 		total += this.steps[s].total;
 	}
 	
-	this.stepMessages.innerHTML = "";
+	lib.setSafeInnerHTML(this.stepMessages, "");
 	var message = cs.message || "";
 	var detailedMessage = cs.detailedMessage || "";
 	if (!Array.isArray(message)) message = [message];

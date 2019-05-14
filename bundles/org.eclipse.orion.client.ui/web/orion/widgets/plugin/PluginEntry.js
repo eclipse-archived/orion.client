@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2012, 2014 IBM Corporation and others.
+ * Copyright (c) 2012, 2019 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -101,7 +101,7 @@ define(['i18n!orion/settings/nls/messages', 'orion/PageUtil', 'orion/objects', '
 		serviceDescriptions: null,
 
 		createElements: function() {
-			this.node.innerHTML = this.templateString;
+			lib.setSafeInnerHTML(this.node, this.templateString);
 			this.pluginTitle = lib.$(".plugin-title", this.node);  //$NON-NLS-0$ 
 			this.pluginStatus = lib.$(".plugin-status", this.node);  //$NON-NLS-0$ 
 			this.pluginDescription = lib.$(".plugin-description", this.node);  //$NON-NLS-0$ 

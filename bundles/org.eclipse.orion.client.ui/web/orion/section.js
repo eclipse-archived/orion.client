@@ -402,9 +402,9 @@ define([
 		 */
 		setContent: function(content){
 			if (typeof content === 'string') {  //$NON-NLS-0$
-				this._contentParent.innerHTML = content;
+				lib.setSafeInnerHTML(this._contentParent, content);
 			} else {
-				this._contentParent.innerHTML = ""; //NON-NLS-0$
+				lib.setSafeInnerHTML(this._contentParent, "");
 				this._contentParent.appendChild(content);
 			}
 		},
@@ -445,7 +445,7 @@ define([
 		},
 		
 		embedExplorer: function(explorer, parent, noSelection){
-			this._contentParent.innerHTML = ""; //NON-NLS-0$
+			lib.setSafeInnerHTML(this._contentParent, "");
 			if(!explorer.parent){
 				explorer.parent = parent;
 			}

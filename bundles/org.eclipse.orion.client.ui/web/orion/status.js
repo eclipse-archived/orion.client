@@ -92,7 +92,7 @@ define([
 			window.clearTimeout(this._timer);
 			var closeButton = lib.node(closeButtonDomId);
 			if(this._cancelMsg && this._cancelFunc && closeButton) {
-				closeButton.innerHTML = "";
+				lib.setSafeInnerHTML(closeButton, "");
 				closeButton.classList.remove("cancelButton"); //$NON-NLS-0$
 				closeButton.classList.add("dismissButton"); //$NON-NLS-0$
 				closeButton.classList.add("core-sprite-close"); //$NON-NLS-0$
@@ -328,7 +328,7 @@ define([
 					closeButton.classList.remove("imageSprite"); //$NON-NLS-0$
 					closeButton.textContent = this._cancelMsg;
 				} else {
-					closeButton.innerHTML = "";
+					lib.setSafeInnerHTML(closeButton, "");
 					closeButton.classList.remove("cancelButton"); //$NON-NLS-0$
 					closeButton.classList.add("dismissButton"); //$NON-NLS-0$
 					closeButton.classList.add("core-sprite-close"); //$NON-NLS-0$
@@ -348,7 +348,7 @@ define([
 			if (_status.HTML) {
 				// msg is HTML to be inserted directly
 				var span = document.createElement("span");
-				span.innerHTML = msg;
+				lib.setSafeInnerHTML(span, msg);
 				return span;
 			}
 			// Check for Markdown
@@ -372,7 +372,7 @@ define([
 			var msgNode, links = [];
 			if (html) {
 				msgNode = document.createElement("div");
-				msgNode.innerHTML = html;
+				lib.setSafeInnerHTML(msgNode, html);
 				// All status links open in new window
 				links = lib.$$("a", msgNode); //$NON-NLS-0$
 				if(!_status.stayOnTarget) {

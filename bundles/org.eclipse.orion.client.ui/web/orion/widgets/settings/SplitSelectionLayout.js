@@ -28,8 +28,8 @@ define(['orion/webui/littlelib', 'orion/objects'], function(lib, objects) {
 		this.itemToIndexMap = null;
 		this.toolbar = lib.node( this.pageActions );
 
-		this.selectionNode.innerHTML = this.categoriesTemplateString;
-		this.contentNode.innerHTML = this.contentTemplateString;
+		lib.setSafeInnerHTML(this.selectionNode, this.categoriesTemplateString);
+		lib.setSafeInnerHTML(this.contentNode, this.contentTemplateString);
 		this.contentNode.tabIndex = -1;
 		this.navbar = lib.$('.navbar', this.selectionNode);
 		this.table = lib.$('.split-selection-table', this.contentNode);
