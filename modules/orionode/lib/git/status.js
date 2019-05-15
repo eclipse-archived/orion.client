@@ -13,6 +13,7 @@ var api = require('../api'), writeError = api.writeError, writeResponse = api.wr
 	git = require('nodegit'),
 	clone = require('./clone'),
 	express = require('express'),
+	tasks = require('../tasks'),
 	responseTime = require('response-time');
 
 function router(options) {
@@ -30,6 +31,7 @@ function router(options) {
 	.get('*', getStatus);
 	
 	function getStatus(req, res) {
+		var task = new tasks.Task(res,false,false,0,false);
 		var theRepo;
 		return clone.getRepo(req)
 		.then(function(repo) {
@@ -112,7 +114,7 @@ function router(options) {
 					repoState = "CHERRY_PICKING";
 				}
 				
-				writeResponse(200, res, null, {
+				var result = {
 					"Added": added,
 					"Changed": changed,
 					"CloneLocation": gitRoot + "/clone" + fileDir,
@@ -126,11 +128,20 @@ function router(options) {
 					"RepositoryState": repoState,
 					"Type": "Status",
 					"Untracked": untracked   
-				}, true);
+				};
+				task.done({
+					HttpCode: 200,
+					Code: 0,
+					DetailedMessage: "OK",
+					Message: "OK",
+					Severity: "Ok",
+					JsonData: result
+				});
 			});
 		})
 		.catch(function(err) {
-			writeError(400, res, err);
+			err.code = 400;
+			clone.handleRemoteError(task, err);
 		})
 		.finally(function() {
 			clone.freeRepo(theRepo);
