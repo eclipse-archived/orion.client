@@ -453,6 +453,7 @@ define([
 			case "cherrypick": //$NON-NLS-0$
 				this.changedItem();
 				break;
+			case "refreshStatus":  //$NON-NLS-0$
 			case "applyPatch":  //$NON-NLS-0$
 			case "stage": //$NON-NLS-0$
 			case "unstage": //$NON-NLS-0$
@@ -460,11 +461,11 @@ define([
 			case "popStash": //$NON-NLS-0$
 			case "applyStash": //$NON-NLS-0$
 			case "checkoutFile": //$NON-NLS-0$
-			    var that = this;
-			    var theRepo = this.model.root.repository;
-			    // if the status is an object here, we delete it. Because we only expect a Deferred status here if some changes happended in gitChangeList.js
-			    if(!(theRepo.status instanceof Deferred)) {
-				 	delete theRepo.status;
+				var that = this;
+				var theRepo = this.model.root.repository;
+				// if the status is an object here, we delete it. Because we only expect a Deferred status here if some changes happended in gitChangeList.js
+				if(!(theRepo.status instanceof Deferred)) {
+					delete theRepo.status;
 				}
 				Deferred.when(theRepo.status || (theRepo.status = that.progressService.progress(that.gitClient.getGitStatus(theRepo.StatusLocation), messages["Getting changes"])),  function(theStatus) {
 					theStatus.parent = this.model.root;
@@ -817,6 +818,7 @@ define([
 				selectionPolicy: this.selectionPolicy,
 				onComplete: function() {
 					that.status = model.status;
+					that.updateCommands();
 					var fetched = function(result) {
 						if (result) {
 							deferred.resolve(model.log);
@@ -951,7 +953,20 @@ define([
 				type: "toggle" //$NON-NLS-0$		
 			});
 			commandService.addCommand(graphCommand);
-			
+
+			var refreshStatusCommand = new mCommands.Command({
+				id: "eclipse.orion.git.commit.refreshStatus", //$NON-NLS-0$
+				callback: function() {
+					mGitCommands.getModelEventDispatcher().dispatchEvent({type: "modelChanged", action: "refreshStatus"});
+				},
+				visibleWhen: function(item){
+					return item.Type === "Status"; //$NON-NLS-0$
+				},
+				name: messages["RefreshStatus"],
+				tooltip: messages["RefreshStatusTooltip"],
+				spriteClass: "gitCommandSprite", //$NON-NLS-0$
+			});
+			commandService.addCommand(refreshStatusCommand);
 		},
 		fetch: function() {
 			var model = this.model;
@@ -1010,7 +1025,7 @@ define([
 				commandService.registerCommandContribution(itemActionScope, "eclipse.orion.git.revert", 6); //$NON-NLS-1$ //$NON-NLS-0$
 				commandService.registerCommandContribution(itemActionScope, "eclipse.openGitCommit", 7); //$NON-NLS-1$ //$NON-NLS-0$
 				commandService.registerCommandContribution(itemActionScope, "eclipse.orion.git.showCommitPatchCommand", 8); //$NON-NLS-1$ //$NON-NLS-0$
-									
+				commandService.registerCommandContribution(itemActionScope, "eclipse.orion.git.commit.refreshStatus", 9); //$NON-NLS-0$
 	
 				if (model.isRebasing()) {
 					commandService.registerCommandContribution(actionsNodeScope, "eclipse.orion.git.commit.toggleFilter", 100, null, false, new KeyBinding.KeyBinding('h', true, true)); //$NON-NLS-1$ //$NON-NLS-0$
@@ -1221,6 +1236,13 @@ define([
 							? i18nUtil.formatMessage(messages["FilesChangedVsReadyToCommit"], changed, messages[changed === 1 ? "file" : "files"], staged, messages[staged === 1 ? "file" : "files"])
 							: messages["Nothing to commit."];
 					detailsView.appendChild(description);
+					
+					actionsArea = document.createElement("ul"); //$NON-NLS-0$
+					actionsArea.className = "layoutLeft commandList toolComposite commitActions"; //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0
+					actionsArea.setAttribute("role", "none"); //$NON-NLS-1$ //$NON-NLS-0$
+					horizontalBox.appendChild(actionsArea);
+					console.log("hre1")
+					explorer.commandService.renderCommands("itemLevelCommands", actionsArea, item, explorer, "tool"); //$NON-NLS-0$
 				} else if (item.Type !== "Commit" && item.Type !== "StashCommit") { //$NON-NLS-1$ //$NON-NLS-0$
 					if (item.Type !== "NoCommits") { //$NON-NLS-0$
 						sectionItem.className = "gitCommitSectionTableItem"; //$NON-NLS-0$

@@ -361,6 +361,7 @@ define([
 				if (this.messageTextArea) {
 					this.messageTextArea.value = ""; //$FALLTHROUGH$
 				}
+			case "refreshStatus": //$NON-NLS-0$
 			case "reset": //$NON-NLS-0$
 			case "applyPatch":  //$NON-NLS-0$
 			case "stage": //$NON-NLS-0$
@@ -382,6 +383,7 @@ define([
 		}.bind(this));
 		mGitCommands.getModelEventDispatcher().addEventListener("stateChanging", this._modelChangingListener = function(event) { //$NON-NLS-0$
 			switch (event.action) {
+			case "refreshStatus": //$NON-NLS-0$
 			case "commit": //$NON-NLS-0$
 			case "stash": //$NON-NLS-0$
 			case "reset": //$NON-NLS-0$
