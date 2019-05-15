@@ -1241,7 +1241,6 @@ define([
 					actionsArea.className = "layoutLeft commandList toolComposite commitActions"; //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0
 					actionsArea.setAttribute("role", "none"); //$NON-NLS-1$ //$NON-NLS-0$
 					horizontalBox.appendChild(actionsArea);
-					console.log("hre1")
 					explorer.commandService.renderCommands("itemLevelCommands", actionsArea, item, explorer, "tool"); //$NON-NLS-0$
 				} else if (item.Type !== "Commit" && item.Type !== "StashCommit") { //$NON-NLS-1$ //$NON-NLS-0$
 					if (item.Type !== "NoCommits") { //$NON-NLS-0$
