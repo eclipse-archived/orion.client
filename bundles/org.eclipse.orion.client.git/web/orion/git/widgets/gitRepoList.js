@@ -64,7 +64,7 @@ define([
 						return deferred.resolve();
 					}
 					
-					Deferred.when(repository.status || (repository.status = that.progressService.progress(that.gitClient.getGitStatus(repository.StatusLocation), messages['Getting changes'])), function(resp) {
+					Deferred.when(repository.status || (repository.status = that.progressService.showWhile(that.gitClient.getGitStatus(repository.StatusLocation), messages['Getting changes'])), function(resp) {
 						try{
 							repository.status = resp;
 							var currentBranchMsg = i18nUtil.formatMessage(messages['GettingCurrentBranch'], repository.Name);

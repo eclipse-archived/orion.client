@@ -159,7 +159,7 @@ define([
 				progress.begin(messages["Getting changes"]);
 				thelocation = repository.StatusLocation;
 				// The status maybe an object in this case, if nothing changed but getChildren get called. Or it will be undefined or Deferred when something changed.
-				Deferred.when(repository.status || (repository.status = progressService.progress(gitClient.getGitStatus(thelocation), messages["Getting changes"])), function(resp) {//$NON-NLS-0$
+				Deferred.when(repository.status || (repository.status = progressService.showWhile(gitClient.getGitStatus(thelocation), messages["Getting changes"])), function(resp) {//$NON-NLS-0$
 					var status = that.status = that.items = resp;
 					Deferred.when(that.repository || progressService.progress(gitClient.getGitClone(status.CloneLocation), messages["Getting git repository details"]), function(resp) {
 						var repository = (resp.Children&&resp.Type!=="Clone") ? resp.Children[0] : resp;//$NON-NLS-0$
@@ -361,6 +361,9 @@ define([
 				if (this.messageTextArea) {
 					this.messageTextArea.value = ""; //$FALLTHROUGH$
 				}
+			case "refreshStatus": //$NON-NLS-0$
+				if (options.prefix !== "all") break; //$NON-NLS-0$
+				//$FALLTHROUGH$
 			case "reset": //$NON-NLS-0$
 			case "applyPatch":  //$NON-NLS-0$
 			case "stage": //$NON-NLS-0$
@@ -382,6 +385,9 @@ define([
 		}.bind(this));
 		mGitCommands.getModelEventDispatcher().addEventListener("stateChanging", this._modelChangingListener = function(event) { //$NON-NLS-0$
 			switch (event.action) {
+			case "refreshStatus": //$NON-NLS-0$
+				if (options.prefix !== "all") break; //$NON-NLS-0$
+				//$FALLTHROUGH$
 			case "commit": //$NON-NLS-0$
 			case "stash": //$NON-NLS-0$
 			case "reset": //$NON-NLS-0$
