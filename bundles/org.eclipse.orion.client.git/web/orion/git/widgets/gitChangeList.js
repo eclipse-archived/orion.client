@@ -362,6 +362,8 @@ define([
 					this.messageTextArea.value = ""; //$FALLTHROUGH$
 				}
 			case "refreshStatus": //$NON-NLS-0$
+				if (options.prefix !== "all") break; //$NON-NLS-0$
+				//$FALLTHROUGH$
 			case "reset": //$NON-NLS-0$
 			case "applyPatch":  //$NON-NLS-0$
 			case "stage": //$NON-NLS-0$
