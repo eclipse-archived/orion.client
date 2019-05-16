@@ -384,6 +384,8 @@ define([
 		mGitCommands.getModelEventDispatcher().addEventListener("stateChanging", this._modelChangingListener = function(event) { //$NON-NLS-0$
 			switch (event.action) {
 			case "refreshStatus": //$NON-NLS-0$
+				if (options.prefix !== "all") break; //$NON-NLS-0$
+				//$FALLTHROUGH$
 			case "commit": //$NON-NLS-0$
 			case "stash": //$NON-NLS-0$
 			case "reset": //$NON-NLS-0$
