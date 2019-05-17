@@ -1095,8 +1095,8 @@ var exports = {};
 					display.Severity = "Info"; //$NON-NLS-0$
 					display.HTML = false;
 					display.Message = messages["OK"];
-					dispatchModelEventOn({type: "modelChanged", action: "reset", mode: mode}); //$NON-NLS-1$ //$NON-NLS-0$
 					progressService.setProgressResult(display);
+					dispatchModelEventOn({type: "modelChanged", action: "reset", mode: mode}); //$NON-NLS-1$ //$NON-NLS-0$
 				}, function (error){
 					var display = {};
 					display.Severity = "Error"; //$NON-NLS-0$
