@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2009, 2017 IBM Corporation and others.
+ * Copyright (c) 2009, 2019 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License v1.0
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution
@@ -1302,7 +1302,7 @@ define("orion/editor/editor", [
 				var lineIndex = model.getLineAtOffset(caretOffset);
 				var lineStart = model.getLineStart(lineIndex);
 				var offsetInLine = caretOffset - lineStart;
-				if (localStorage.languageTools){
+				if (util.readSetting("languageTools")) {
 					_status = util.formatMessage(messages.lineColumnOffset, lineIndex + 1, offsetInLine + 1, caretOffset);
 				} else {
 					_status = util.formatMessage(messages.lineColumn, lineIndex + 1, offsetInLine + 1);

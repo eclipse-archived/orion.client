@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2011, 2014 IBM Corporation and others.
+ * Copyright (c) 2011, 2019 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -10,18 +10,22 @@
  *******************************************************************************/
 
 /*eslint-env browser, amd*/
-define(['orion/objects', 'orion/commands', 'orion/outliner', 'orion/webui/littlelib',
-		'orion/widgets/nav/mini-nav',
-		'orion/widgets/nav/project-nav',
-		'orion/globalCommands',
-		'i18n!orion/edit/nls/messages',
-		'orion/search/InlineSearchPane',
-		'orion/keyBinding',
-		'orion/problems/problemsView',
-		'orion/keyBinding',
-		'orion/util',
-		'orion/webui/Slideout'],
-		function(objects, mCommands, mOutliner, lib, MiniNavViewMode, ProjectNavViewMode, mGlobalCommands, messages, InlineSearchPane, mKeyBinding, mProblemsView, KeyBinding, util, mSlideout) {
+define([
+	'orion/objects', 
+	'orion/commands', 
+	'orion/outliner', 
+	'orion/webui/littlelib',
+	'orion/widgets/nav/mini-nav',
+	'orion/widgets/nav/project-nav',
+	'orion/globalCommands',
+	'i18n!orion/edit/nls/messages',
+	'orion/search/InlineSearchPane',
+	'orion/keyBinding',
+	'orion/problems/problemsView',
+	'orion/keyBinding',
+	'orion/util',
+	'orion/webui/Slideout'
+],	function(objects, mCommands, mOutliner, lib, MiniNavViewMode, ProjectNavViewMode, mGlobalCommands, messages, InlineSearchPane, mKeyBinding, mProblemsView, KeyBinding, util, mSlideout) {
 
 	/**
 	 * @name orion.sidebar.Sidebar
@@ -107,7 +111,7 @@ define(['orion/objects', 'orion/commands', 'orion/outliner', 'orion/webui/little
 			return this.activeViewModeId;
 		},
 		getDefaultViewModeId: function() {
-			var id = localStorage.sidebarActiveViewModeId;
+			var id = util.readSetting("sidebarActiveViewModeId");
 			if (id && this.getViewMode(id)) {
 				return id;
 			}
@@ -139,7 +143,7 @@ define(['orion/objects', 'orion/commands', 'orion/outliner', 'orion/webui/little
 			delete this.viewModes[id];
 			if (this.getActiveViewModeId() === id) {
 				this.activeViewModeId = null;
-				delete localStorage.sidebarActiveViewModeId;
+				util.deleteSetting("sidebarActiveViewModeId");
 			}
 		},
 		/**
@@ -167,9 +171,9 @@ define(['orion/objects', 'orion/commands', 'orion/outliner', 'orion/webui/little
 			mode = this.activeViewMode = this.getViewMode(id);
 			this.activeViewModeId = mode ? id : null;
 			if (this.activeViewModeId) {
-				localStorage.sidebarActiveViewModeId = this.activeViewModeId;
+				util.saveSetting("sidebarActiveViewModeId", this.activeViewModeId);
 			} else {
-				delete localStorage.sidebarActiveViewModeId;
+				util.deleteSetting("sidebarActiveViewModeId");
 			}
 			if (mode && typeof mode.create === "function") { //$NON-NLS-0$
 				mode.create();

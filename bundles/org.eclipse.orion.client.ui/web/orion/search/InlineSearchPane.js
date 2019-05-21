@@ -11,6 +11,7 @@
 /*eslint-env browser, amd*/
 define([
 	'orion/objects',
+	'orion/util',
 	'orion/webui/littlelib',
 	'orion/bidiUtils',
 	'text!orion/search/InlineSearchPane.html',
@@ -24,7 +25,7 @@ define([
 	'orion/webui/tooltip',
 	'orion/webui/Slideout'
 ], function(
-	objects, lib, bidiUtils, InlineSearchPaneTemplate, InlineSearchResultExplorer, 
+	objects, util, lib, bidiUtils, InlineSearchPaneTemplate, InlineSearchResultExplorer, 
 	mSearchUtils, Deferred, DirectoryPrompterDialog, ComboTextInput, messages, mGeneralPreferences, mTooltip, mSlideout
 ) {
 	var SearchAnnoTypes = {};
@@ -520,8 +521,8 @@ define([
 			var otherLocationString = typeof scope === "string" ? scope : scope.Location;
 			this._searchScopeOther.checked = true;
 			this._searcher.setLocationOther(otherLocationString);
-			localStorage.setItem("/inlineSearchScopeOption", "other");
-			localStorage.setItem("/inlineSearchOtherScope", otherLocationString);
+			util.saveSetting("/inlineSearchScopeOption", "other");
+			util.saveSetting("/inlineSearchOtherScope", otherLocationString);
 			this._displaySelectedSearchScope([otherLocationString]);
 			this._searcher.addDisplaycallback(this._displaySelectedSearchScope.bind(this),"other");
 		},
@@ -552,7 +553,7 @@ define([
 		},
 		
 		getSearchScopeOption: function(){
-			return localStorage.getItem("/inlineSearchScopeOption") || "selected";
+			return util.readSetting("/inlineSearchScopeOption") || "selected";
 		},
 		
 		updateScopeOptions: function(scopeOption){
@@ -581,7 +582,7 @@ define([
 		},
 		
 		_getOtherScope: function(){
-			return localStorage.getItem("/inlineSearchOtherScope") || this._fileClient.fileServiceRootURL();
+			return util.readSetting("/inlineSearchOtherScope") || this._fileClient.fileServiceRootURL();
 		},
 		
 		_initSearchScope: function() {
@@ -647,7 +648,7 @@ define([
 		},
 		
 		_saveAndUpdateDisplayedScope: function(scope){
-			localStorage.setItem("/inlineSearchScopeOption", scope);
+			util.saveSetting("/inlineSearchScopeOption", scope);
 			while (this._searchScopeElementWrapper.firstChild) {
 			    this._searchScopeElementWrapper.removeChild(this._searchScopeElementWrapper.firstChild);
 			}

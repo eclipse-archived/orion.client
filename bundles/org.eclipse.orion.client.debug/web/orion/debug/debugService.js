@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2017 IBM Corporation and others.
+ * Copyright (c) 2017, 2019 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License v1.0
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution
@@ -12,8 +12,9 @@
 define([
     'orion/Deferred',
     'orion/EventTarget',
-    'orion/debug/breakpoint'
-], function(Deferred, EventTarget, mBreakpoint) {
+    'orion/debug/breakpoint',
+    'orion/util'
+], function(Deferred, EventTarget, mBreakpoint, util) {
 
     'use strict';
 
@@ -127,7 +128,7 @@ define([
      * @return {Deferred.<string>}
      */
     DebugService.prototype._storageGetItem = function(key) {
-        return new Deferred().resolve(localStorage.getItem(key));
+        return new Deferred().resolve(util.readSetting(key));
     };
 
     /**
@@ -138,7 +139,7 @@ define([
      * @return {Deferred}
      */
     DebugService.prototype._storageSetItem = function(key, value) {
-        localStorage.setItem(key, value);
+        util.saveSetting(key, value);
         return new Deferred().resolve();
     };
 

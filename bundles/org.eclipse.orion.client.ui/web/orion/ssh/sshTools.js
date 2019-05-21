@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2011, 2013 IBM Corporation and others.
+ * Copyright (c) 2011, 2019 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -9,7 +9,11 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 /*eslint-env browser, amd*/
-define(['orion/Deferred', 'orion/xhr'], function(Deferred, xhr){
+define([
+	'orion/Deferred', 
+	'orion/xhr',
+	'orion/util'
+], function(Deferred, xhr, util){
 
 	var eclipse = eclipse || {};
 	eclipse.SshService = (function() {
@@ -74,7 +78,7 @@ define(['orion/Deferred', 'orion/xhr'], function(Deferred, xhr){
 				}
 					
 				this._authService.getUser().then(function(user){
-					var currKnownHosts = localStorage.getItem(user.login + "/" + self.KNOWN_HOSTS); //$NON-NLS-0$
+					var currKnownHosts = util.readSetting(user.login + "/" + self.KNOWN_HOSTS); //$NON-NLS-0$
 					currKnownHosts = currKnownHosts ? JSON.parse(currKnownHosts) : [];
 					
 					for(var i=0; i<currKnownHosts.length; ++i){
@@ -96,7 +100,7 @@ define(['orion/Deferred', 'orion/xhr'], function(Deferred, xhr){
 					
 					/* flush to ls */
 					currKnownHosts.push(entry);
-					localStorage.setItem(user.login + "/" + self.KNOWN_HOSTS, JSON.stringify(currKnownHosts));
+					util.saveSetting(user.login + "/" + self.KNOWN_HOSTS, JSON.stringify(currKnownHosts));
 					deferred.resolve(entry.host + " " + entry.keyType + " " + entry.hostKey);
 					
 				}, function(error){
@@ -111,10 +115,10 @@ define(['orion/Deferred', 'orion/xhr'], function(Deferred, xhr){
 				var self = this;
 				
 				this._authService.getUser().then(function(user){
-					var currKnownHosts = localStorage.getItem(user.login + "/" + self.KNOWN_HOSTS); //$NON-NLS-0$
+					var currKnownHosts = util.readSetting(user.login + "/" + self.KNOWN_HOSTS); //$NON-NLS-0$
 					currKnownHosts = currKnownHosts ? JSON.parse(currKnownHosts) : [];
 					
-					localStorage.removeItem(user.login + "/" + self.KNOWN_HOSTS); //$NON-NLS-0$
+					util.deleteSetting(user.login + "/" + self.KNOWN_HOSTS); //$NON-NLS-0$
 					deferred.resolve(currKnownHosts);
 				}, function(error){
 					deferred.reject(error);
@@ -137,7 +141,7 @@ define(['orion/Deferred', 'orion/xhr'], function(Deferred, xhr){
 				}
 				
 				this._authService.getUser().then(function(user){
-					var currKnownHosts = localStorage.getItem(user.login + "/" + self.KNOWN_HOSTS); //$NON-NLS-0$
+					var currKnownHosts = util.readSetting(user.login + "/" + self.KNOWN_HOSTS); //$NON-NLS-0$
 					currKnownHosts = currKnownHosts ? JSON.parse(currKnownHosts) : [];
 					
 					for(var i=0; i<currKnownHosts.length; ++i){

@@ -250,7 +250,7 @@ define([
 		this.updateTitle();
 		this.$searchScope.addEventListener("click", function(e) {
 			mMetrics.logEvent("preferenceChange", "searchScope", null, this.$searchScope.checked ? 0 : 1); //$NON-NLS-1$ //$NON-NLS-2$
-			localStorage.setItem("/searchScope", this.$searchScope.checked); //$NON-NLS-1$
+			util.saveSetting("/searchScope", this.$searchScope.checked); //$NON-NLS-1$
 			
 			this.updateTitle();
 			this.doSearch();
@@ -402,7 +402,7 @@ define([
 		if (this.forcedGlobalSearch())
 			return true;
 			
-		var globalSearch = localStorage.getItem("/searchScope") === 'true'; //$NON-NLS-0$
+		var globalSearch = util.readSettings("/searchScope") === 'true'; //$NON-NLS-0$
 		return globalSearch;
 	};
 

@@ -2397,7 +2397,7 @@ exports.getEditorViewers = function() {
 };
 
 exports.setUpEditor = function(serviceRegistry, pluginRegistry, preferences, readonly) {
-	enableSplitEditor = localStorage.enableSplitEditor !== "false"; //$NON-NLS-0$
+	enableSplitEditor = util.readSetting("enableSplitEditor") !== "false"; //$NON-NLS-0$
 	
 	setup = new EditorSetup(serviceRegistry, pluginRegistry, preferences, readonly);
 	Deferred.when(setup.createBanner(), function(result) {

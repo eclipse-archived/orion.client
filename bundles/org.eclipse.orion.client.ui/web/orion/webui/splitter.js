@@ -96,7 +96,7 @@ define([
 			lib.setSafeAttribute(this.$splitter, "role", "separator");
 			
 			// Initialize for the current orientation / collapse direction
-			var orientationStr = localStorage.getItem(this._prefix+"/orientation"); //$NON-NLS-0$
+			var orientationStr = util.readSetting(this._prefix+"/orientation"); //$NON-NLS-0$
 			if (orientationStr) {
 				var orientation = orientationStr === "vertical" ? ORIENTATION_VERTICAL : ORIENTATION_HORIZONTAL; //$NON-NLS-0$
 			} else {
@@ -141,7 +141,7 @@ define([
 
 			// Store the orientation
 			var orientationStr = this._vertical ? "vertical" : "horizontal"; //$NON-NLS-1$ //$NON-NLS-0$
-			localStorage.setItem(this._prefix+"/orientation", orientationStr); //$NON-NLS-0$
+			util.saveSetting(this._prefix+"/orientation", orientationStr); //$NON-NLS-0$
 
 			// Set up the CSS styling
 			this.$splitter.style.position = "absolute"; //$NON-NLS-0$
@@ -296,7 +296,7 @@ define([
 		 * We use local storage vs. prefs because we don't presume the user wants the same window positioning across browsers and devices.
 		 */
 		_initializeFromStoredSettings: function() {
-			var closedState = localStorage.getItem(this._prefix+"/toggleState"); //$NON-NLS-0$
+			var closedState = util.readSetting(this._prefix+"/toggleState"); //$NON-NLS-0$
 			if (typeof closedState === "string") { //$NON-NLS-0$
 				this._closed = closedState === "closed"; //$NON-NLS-0$
 			} else {
@@ -306,7 +306,7 @@ define([
 			// Set the initial value for the splitter's width/height
 			this._adjustSplitterSize();
 
-			var pos = localStorage.getItem(this._prefix+this._offsetStorageLabel);
+			var pos = util.readSetting(this._prefix+this._offsetStorageLabel);
 			if (pos) {
 				this._offset = parseInt(pos, 10);
 				if (this._proportional) {
@@ -435,11 +435,11 @@ define([
 			}
 
 			if (this._closed) {
-				var pos = localStorage.getItem(this._prefix+this._offsetStorageLabel);
+				var pos = util.readSetting(this._prefix+this._offsetStorageLabel);
 				this._offset = pos ? parseInt(pos, 10) : 350;
 				this._closed = false;
 			} else {
-				localStorage.setItem(this._prefix+this._offsetStorageLabel, this._offset);
+				util.saveSetting(this._prefix+this._offsetStorageLabel, this._offset);
 				this._offset = 0;
 				this._closed = true;
 			}
@@ -450,7 +450,7 @@ define([
 				this._removeAnimation();
 			}
 			if (!noUpdateStorage) {
-				localStorage.setItem(this._prefix+"/toggleState", this._closed ? "closed" : null);  //$NON-NLS-1$  //$NON-NLS-0$
+				util.saveSetting(this._prefix+"/toggleState", this._closed ? "closed" : null);  //$NON-NLS-1$  //$NON-NLS-0$
 				metrics.logEvent("preferenceChange", "splitterClosed", this._prefix, this._closed ? 0 : 1);
 			}
 		},
@@ -507,7 +507,7 @@ define([
 			// if the user dragged the splitter closed or open capture this
 			if (this._offset > 0) {
 				// Store the current position
-				localStorage.setItem(this._prefix+this._offsetStorageLabel, this._offset);
+				util.saveSetting(this._prefix+this._offsetStorageLabel, this._offset);
 				this._closed = false;
 			} else {
 				this._closed = true;
@@ -515,7 +515,7 @@ define([
 			
 			// Update the state if necessary
 			if (curState !== this._closed) {
-				localStorage.setItem(this._prefix+"/toggleState", this._closed ? "closed" : null);  //$NON-NLS-1$  //$NON-NLS-0$
+				util.saveSetting(this._prefix+"/toggleState", this._closed ? "closed" : null);  //$NON-NLS-1$  //$NON-NLS-0$
 				metrics.logEvent("preferenceChange", "splitterClosed", this._prefix, this._closed ? 0 : 1);
 			}
 		},

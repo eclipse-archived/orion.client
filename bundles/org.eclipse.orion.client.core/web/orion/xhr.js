@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2012 IBM Corporation and others.
+ * Copyright (c) 2012, 2019 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -17,10 +17,11 @@
  */
 define([
 	'orion/Deferred',
+	'orion/util',
 	'orion/xsrfUtils',
 	'orion/urlModifier',
 	'orion/URL-shim', // no exports, must come last
-], function(Deferred, xsrfUtils, urlModifier) {
+], function(Deferred, util, xsrfUtils, urlModifier) {
 
 	/**
 	 * @name orion.xhr.Result
@@ -158,7 +159,7 @@ define([
 			if (typeof options.responseType === 'string') { //$NON-NLS-0$
 				xhr.responseType = options.responseType;
 			}
-			if (typeof options.timeout === 'number' && localStorage.noTimeout !== "true") { //$NON-NLS-0$
+			if (typeof options.timeout === 'number' && util.readSetting("noTimeout") !== "true") {
 				if (typeof xhr.timeout === 'number') { //$NON-NLS-0$
 					// Browser supports XHR timeout
 					xhr.timeout = options.timeout;

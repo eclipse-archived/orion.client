@@ -89,12 +89,12 @@ define([
 					var element = this._makeMenuItem(messages["Sign Out"], function() {
 						authService.logout().then(function(){
 							_self.addUserItem(key, authService, _self.authenticatedServices[key].label);
-							localStorage.removeItem(key);
+							util.deleteSetting(key);
 							//TODO: Bug 368481 - Re-examine localStorage caching and lifecycle
 							for (var i = localStorage.length - 1; i >= 0; i--) {
 								var name = localStorage.key(i);
 								if (name && name.indexOf("/orion/preferences/user") === 0) { //$NON-NLS-0$
-									localStorage.removeItem(name);
+									util.deleteSetting(name);
 								}
 							}
 							authService.getAuthForm(PageLinks.getOrionHome()).then(function(formURL) {
@@ -192,7 +192,7 @@ define([
 				}
 
 				if (util.isElectron) {
-					var clearLocalStorage = this._makeMenuItem(messages["Clear Local Storage"], function() { localStorage.clear(); });
+					var clearLocalStorage = this._makeMenuItem(messages["Clear Local Storage"], function() { util.clearSettings(); });
 					getCategory(0).appendChild(clearLocalStorage.parentNode);
 					var about = this._makeMenuItem(messages["About"], function() {
 						var newDialog = new dialog.Dialog();

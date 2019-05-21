@@ -14,8 +14,9 @@
 // TODO convert to orion/section
 
 define([
-	'orion/webui/littlelib' //$NON-NLS-0$
-], function(lib) {
+	'orion/webui/littlelib',
+	'orion/util'
+], function(lib, util) {
 
 	/**
 	 * @param options
@@ -69,12 +70,12 @@ define([
 					}
 				}
 			}, false);
-			this.setHidden("true" === localStorage.getItem(headerId +"/hidden"));
+			this.setHidden("true" === util.readSetting(headerId +"/hidden"));
 		}
 	}
 	Subsection.prototype.setHidden = function(hidden){
 		this.hidden = hidden;
-		localStorage.setItem(this.headerId +"/hidden", hidden);
+		util.saveSetting(this.headerId +"/hidden", hidden);
 		if (this.hidden) {
 			lib.setSafeAttribute(this.titleNode, "aria-expanded", false);
 			this.subsectionContent.style.display = "none";

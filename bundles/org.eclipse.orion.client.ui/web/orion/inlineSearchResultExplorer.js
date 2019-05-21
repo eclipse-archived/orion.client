@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2009, 2015 IBM Corporation and others.
+ * Copyright (c) 2009, 2019 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -9,19 +9,32 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 /*eslint-env browser, amd*/
-define(['i18n!orion/search/nls/messages', 'orion/Deferred', 'orion/webui/littlelib', 'orion/contentTypes', 'orion/i18nUtil', 'orion/explorers/explorer', 
-	'orion/commands', 'orion/searchUtils', 'orion/compare/compareView', 
-	'orion/highlight', 'orion/webui/tooltip', 'orion/explorers/navigatorRenderer', 'orion/extensionCommands',
-	'orion/searchModel', 'orion/explorers/fileDetailRenderer',
+define([
+    'i18n!orion/search/nls/messages', 
+    'orion/Deferred', 
+    'orion/webui/littlelib', 
+    'orion/contentTypes', 
+    'orion/i18nUtil', 
+    'orion/explorers/explorer', 
+    'orion/commands', 
+    'orion/searchUtils', 
+    'orion/compare/compareView', 
+    'orion/highlight', 
+    'orion/webui/tooltip', 
+    'orion/explorers/navigatorRenderer', 
+    'orion/extensionCommands',
+    'orion/searchModel', 
+    'orion/explorers/fileDetailRenderer',
 	'orion/extensionCommands',
 	'orion/objects',
-	'orion/bidiUtils', 'orion/urlModifier'
-],
-function(messages, Deferred, lib, mContentTypes, i18nUtil, mExplorer, mCommands, 
+    'orion/bidiUtils', 
+    'orion/urlModifier',
+    'orion/util'
+], function(messages, Deferred, lib, mContentTypes, i18nUtil, mExplorer, mCommands, 
 	mSearchUtils, mCompareView, mHighlight, mTooltip, 
 	navigatorRenderer, extensionCommands, mSearchModel, mFileDetailRenderer,
-	mExtensionCommands, objects, bidiUtils, urlModifier
-) {
+	mExtensionCommands, objects, bidiUtils, urlModifier, util) {
+
 	var isMac = window.navigator.platform.indexOf("Mac") !== -1; //$NON-NLS-0$
     /* Internal wrapper functions*/
     function _empty(nodeToEmpty) {
@@ -578,7 +591,7 @@ function(messages, Deferred, lib, mContentTypes, i18nUtil, mExplorer, mCommands,
             groupId: "orion.searchGroup", //$NON-NLS-1$
 			type: "toggle", //$NON-NLS-1$
 			visibleWhen: function(/*item*/) {
-				if (!localStorage.showSearchFilters) return false;
+				if (!util.readSetting("showSearchFilters")) return false;
 				var show = !this._matchFilter["hidePerfectMatch"].flag;
 				togglePerfectMatchCommand.checked = show;
 				togglePerfectMatchCommand.tooltip = show ? messages["hidePerfectMatch"] : messages["showPerfectMatch"];
@@ -597,7 +610,7 @@ function(messages, Deferred, lib, mContentTypes, i18nUtil, mExplorer, mCommands,
             groupId: "orion.searchGroup", //$NON-NLS-1$
 			type: "toggle", //$NON-NLS-1$
 			visibleWhen: function(/*item*/) {
-				if (!localStorage.showSearchFilters) return false;
+				if (!util.readSetting("showSearchFilters")) return false;
 				var show = !this._matchFilter["hideNonMatch"].flag;
 				toggleNonMatchCommand.checked = show;
 				toggleNonMatchCommand.tooltip = show ? messages["hideNonMatch"] : messages["showNonMatch"];
@@ -616,7 +629,7 @@ function(messages, Deferred, lib, mContentTypes, i18nUtil, mExplorer, mCommands,
             groupId: "orion.searchGroup", //$NON-NLS-1$
 			type: "toggle", //$NON-NLS-1$
 			visibleWhen: function(/*item*/) {
-				if (!localStorage.showSearchFilters) return false;
+				if (!util.readSetting("showSearchFilters")) return false;
 				var show = !this._matchFilter["hidePossibleMatch"].flag;
 				togglePossibleMatchCommand.checked = show;
 				togglePossibleMatchCommand.tooltip = show ? messages["hidePossibleMatch"] : messages["showPossibleMatch"];
