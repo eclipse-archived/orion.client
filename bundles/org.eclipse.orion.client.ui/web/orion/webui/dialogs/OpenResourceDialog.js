@@ -402,7 +402,7 @@ define([
 		if (this.forcedGlobalSearch())
 			return true;
 			
-		var globalSearch = util.readSettings("/searchScope") === 'true'; //$NON-NLS-0$
+		var globalSearch = util.readSetting("/searchScope") === 'true'; //$NON-NLS-0$
 		return globalSearch;
 	};
 

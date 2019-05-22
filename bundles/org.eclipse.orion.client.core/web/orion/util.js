@@ -72,7 +72,7 @@ define(function() {
 	}
 
 	/**
-	 * @description Retrieve the setting to persistent storage.
+	 * @description Retrieve the setting from persistent storage.
 	 * 
 	 * Currently this function reads from localStorage
 	 * @param {string} key 
@@ -84,7 +84,7 @@ define(function() {
 	}
 
 	/**
-	 * @description Remove the setting to persistent storage.
+	 * @description Remove the setting from persistent storage.
 	 * 
 	 * Currently this function removes from localStorage
 	 * @param {string} key 
