@@ -64,11 +64,13 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/commands', 'orion/
 			this.gitFields = [
 				new SettingsTextfield( 
 					{	fieldlabel:messages['Git Email Address'],
+						fieldAutocomplete: "email", //$NON-NLS-0$
 						postChange: this.update.bind(this)
 					} 
 				),
 				new SettingsTextfield( 
 					{	fieldlabel:messages['Git Username'],
+						fieldAutocomplete: "name", //$NON-NLS-0$
 						postChange: this.update.bind(this)
 					} 
 				)
