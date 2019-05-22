@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2010, 2016 IBM Corporation and others.
+ * Copyright (c) 2010, 2019 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -10,7 +10,13 @@
  ******************************************************************************/
 
 /*eslint-env browser, amd*/
-define(['require', 'orion/Deferred', 'orion/EventTarget', 'orion/xhr'], function(require, Deferred, _EventTarget, xhr){
+define([
+	'require', 
+	'orion/Deferred', 
+	'orion/EventTarget', 
+	'orion/xhr',
+	'orion/util'], 
+function(require, Deferred, _EventTarget, xhr, util) {
 	
 	function _mixin(target/*, source..*/) {
 		var hasOwn = Object.prototype.hasOwnProperty;
@@ -32,7 +38,7 @@ define(['require', 'orion/Deferred', 'orion/EventTarget', 'orion/xhr'], function
 					return null;
 				}
 				
-				var item = localStorage.getItem(prefix + namespace);
+				var item = util.readSetting(prefix + namespace);
 				if (item === null) {
 					return null;
 				}
@@ -45,7 +51,7 @@ define(['require', 'orion/Deferred', 'orion/EventTarget', 'orion/xhr'], function
 					}
 				} catch (e) {
 					//invalid value; remove from cache.
-					localStorage.removeItem(prefix + namespace);
+					util.deleteSetting(prefix + namespace);
 				}
 				
 				return null;
@@ -59,15 +65,15 @@ define(['require', 'orion/Deferred', 'orion/EventTarget', 'orion/xhr'], function
 					data._expires = Date.now() + 1000 * expiresSeconds;
 				}
 				if (Object.keys(data).length === 0) {
-					localStorage.removeItem(prefix + namespace);
+					util.deleteSetting(prefix + namespace);
 				} else {
 					var jsonData = JSON.stringify(data);
-					localStorage.setItem(prefix + namespace, jsonData);
+					util.saveSetting(prefix + namespace, jsonData);
 					delete data._expires;
 				}
 			},
 			remove: function(namespace) {
-				localStorage.removeItem(prefix + namespace);
+				util.deleteSetting(prefix + namespace);
 			}
 		};
 	}

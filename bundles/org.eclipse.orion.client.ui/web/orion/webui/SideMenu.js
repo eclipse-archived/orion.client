@@ -10,7 +10,15 @@
  ******************************************************************************/
 /*eslint-env browser, amd*/
 /*global URL*/
-define(['i18n!orion/nls/messages', 'orion/webui/littlelib', 'orion/PageUtil', 'orion/webui/tooltip', 'orion/util', 'orion/URL-shim'], function(messages, lib, PageUtil, mTooltip, util) {
+define([
+	'i18n!orion/nls/messages', 
+	'orion/webui/littlelib', 
+	'orion/PageUtil', 
+	'orion/webui/tooltip', 
+	'orion/util', 
+	'orion/URL-shim'
+], function(messages, lib, PageUtil, mTooltip, util) {
+
 	var LOCAL_STORAGE_NAME = "sideMenuNavigation";
 	var OPEN_STATE = "open";
 	var CLOSED_STATE = "closed";
@@ -29,7 +37,7 @@ define(['i18n!orion/nls/messages', 'orion/webui/littlelib', 'orion/PageUtil', 'o
 		this._categorizedRelatedLinks = {};
 
 		this._categorizedAnchors = null;
-		this._state = localStorage.getItem(LOCAL_STORAGE_NAME) || DEFAULT_STATE;
+		this._state = util.readSetting(LOCAL_STORAGE_NAME) || DEFAULT_STATE;
 		this._currentCategory = "";
 		this._notificationTimeout = null;
 		this._renderTimeout = null;
@@ -271,7 +279,7 @@ define(['i18n!orion/nls/messages', 'orion/webui/littlelib', 'orion/PageUtil', 'o
 			this._updateScrollButtonVisibility();
 		},
 		hide: function() {
-			localStorage.setItem(LOCAL_STORAGE_NAME, CLOSED_STATE);
+			util.saveSetting(LOCAL_STORAGE_NAME, CLOSED_STATE);
 			this._parentNode.classList.add("sideMenu-closed"); //$NON-NLS-0$
 			this._contentNode.classList.add("content-sideMenu-closed"); //$NON-NLS-0$
 		},
@@ -289,9 +297,9 @@ define(['i18n!orion/nls/messages', 'orion/webui/littlelib', 'orion/PageUtil', 'o
 			}
 
 			if (this._state === DEFAULT_STATE) {
-				localStorage.removeItem(LOCAL_STORAGE_NAME);
+				util.deleteSetting(LOCAL_STORAGE_NAME);
 			} else {
-				localStorage.setItem(LOCAL_STORAGE_NAME, this._state);
+				util.saveSetting(LOCAL_STORAGE_NAME, this._state);
 			}
 			this.render();
 		},

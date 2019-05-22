@@ -11,12 +11,13 @@
 /*eslint-env browser, amd*/
 define([
 	'orion/objects',
+	'orion/util',
 	'orion/webui/littlelib',
 	'text!orion/widgets/input/ComboTextInput.html',
 	'i18n!orion/widgets/nls/messages',
 	'orion/inputCompletion/inputCompletion',
 	'orion/bidiUtils'
-], function(objects, lib, ComboTextInputTemplate, messages, InputCompletion, bidiUtils) {
+], function(objects, util, lib, ComboTextInputTemplate, messages, InputCompletion, bidiUtils) {
 
 	/**
 	 * Creates a text input box combined with:
@@ -311,7 +312,7 @@ define([
 			var recentEntryArray = null;
 
 			if (this._localStorageKey) {
-				var recentEntryString = localStorage.getItem(this._localStorageKey);
+				var recentEntryString = util.readSetting(this._localStorageKey);
 				if (recentEntryString) {
 					recentEntryArray = JSON.parse(recentEntryString);
 				}
@@ -326,7 +327,7 @@ define([
 		 */
 		_storeRecentEntryArray: function(recentEntryArray) {
 			var recentEntryString = JSON.stringify(recentEntryArray);
-			localStorage.setItem(this._localStorageKey, recentEntryString);
+			util.saveSetting(this._localStorageKey, recentEntryString);
 		},
 		
 		_showRecentEntryButton: function() {

@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2011, 2016 IBM Corporation and others.
+ * Copyright (c) 2011, 2019 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -13,14 +13,14 @@
 /* eslint-disable missing-nls */
 (function(root, factory) { // UMD
     if (typeof define === "function" && define.amd) {
-        define(["orion/Deferred", "orion/EventTarget"], factory);
+        define(["orion/Deferred", "orion/util", "orion/EventTarget"], factory);
     } else if (typeof exports === "object") {
-        module.exports = factory(require("orion/Deferred"), require("orion/EventTarget"));
+        module.exports = factory(require("orion/Deferred"), require("orion/util"), require("orion/EventTarget"));
     } else {
         root.orion = root.orion || {};
-        root.orion.PluginProvider = factory(root.orion.Deferred, root.orion.EventTarget);
+        root.orion.PluginProvider = factory(root.orion.Deferred, root.orion.util, root.orion.EventTarget);
     }
-}(this, function(Deferred, EventTarget) {
+}(this, function(Deferred, util, EventTarget) {
 
     function _equal(obj1, obj2) {
         var keys1 = Object.keys(obj1);
@@ -108,7 +108,7 @@
         var lastHeartbeat;
         var startTime = Date.now();
         function log(state) {
-            if (typeof(localStorage) !== "undefined" && localStorage.pluginLogging) {
+            if (typeof localStorage !== "undefined" && util.readSetting("pluginLogging")) {
             	console.log(state + "(" + (Date.now() - startTime) + "ms)=" + self.location);
         	}
         }

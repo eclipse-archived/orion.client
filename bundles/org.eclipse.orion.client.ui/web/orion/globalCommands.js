@@ -11,15 +11,38 @@
  *******************************************************************************/
 /*eslint-env browser, amd*/
 define([
-		'i18n!orion/nls/messages', 'i18n!orion/widgets/nls/messages', 'i18n!orion/edit/nls/messages',  'require', 'orion/commonHTMLFragments', 'orion/keyBinding', 'orion/EventTarget', 'orion/commands',
-		'orion/parameterCollectors', 'orion/extensionCommands', 'orion/webui/littlelib', 'orion/i18nUtil',
-		'orion/webui/splitter', 'orion/webui/dropdown', 'orion/webui/tooltip', 'orion/contentTypes', 'orion/keyAssist',
-		'orion/widgets/themes/ThemePreferences', 'orion/widgets/themes/container/ThemeData', 'orion/Deferred',
-		'orion/widgets/UserMenu', 'orion/PageLinks', 'orion/webui/dialogs/OpenResourceDialog', '!orion/banner/banner',
-		'text!orion/banner/footer.html', 'text!orion/banner/toolbar.html',
-		'orion/util', 'orion/customGlobalCommands', 'orion/webui/SideMenu', 'orion/objects', "orion/metrics"
-	],
-	function (messages, widgetMessages, editMessages, require, commonHTML, KeyBinding, EventTarget, mCommands, mParameterCollectors, mExtensionCommands,
+	'i18n!orion/nls/messages', 
+	'i18n!orion/widgets/nls/messages', 
+	'i18n!orion/edit/nls/messages',  
+	'require', 
+	'orion/commonHTMLFragments', 
+	'orion/keyBinding', 
+	'orion/EventTarget', 
+	'orion/commands',
+	'orion/parameterCollectors', 
+	'orion/extensionCommands', 
+	'orion/webui/littlelib', 
+	'orion/i18nUtil',
+	'orion/webui/splitter', 
+	'orion/webui/dropdown', 
+	'orion/webui/tooltip', 
+	'orion/contentTypes', 
+	'orion/keyAssist',
+	'orion/widgets/themes/ThemePreferences', 
+	'orion/widgets/themes/container/ThemeData', 
+	'orion/Deferred',
+	'orion/widgets/UserMenu',
+	'orion/PageLinks', 
+	'orion/webui/dialogs/OpenResourceDialog', 
+	'!orion/banner/banner',
+	'text!orion/banner/footer.html', 
+	'text!orion/banner/toolbar.html',
+	'orion/util', 
+	'orion/customGlobalCommands', 
+	'orion/webui/SideMenu', 
+	'orion/objects', 
+	"orion/metrics"
+], function (messages, widgetMessages, editMessages, require, commonHTML, KeyBinding, EventTarget, mCommands, mParameterCollectors, mExtensionCommands,
 		lib, i18nUtil, mSplitter, mDropdown, mTooltip, mContentTypes, mKeyAssist, mThemePreferences, mThemeData, Deferred,
 		mUserMenu, PageLinks, openResource, Banner, FooterTemplate, ToolbarTemplate, util, mCustomGlobalCommands, SideMenu, objects, mMetrics) {
 	/**
@@ -160,11 +183,11 @@ define([
 							menuGenerator.addUserItem(key, authService, label, jsonData);
 						});
 						window.addEventListener("storage", function (e) {
-							if (authRendered[key] === localStorage.getItem(key)) {
+							if (authRendered[key] === util.readSetting(key)) {
 								return;
 							}
 
-							authRendered[key] = localStorage.getItem(key);
+							authRendered[key] = util.readSetting(key);
 
 							authService.getUser().then(function (jsonData) {
 								menuGenerator.addUserItem(key, authService, label, jsonData);
@@ -527,7 +550,7 @@ define([
 					var pageLoader = require.defined("orion/splash") && require("orion/splash").getPageLoader();
 					if (pageLoader) pageLoader.takeDown();
 				}
-				if (localStorage.consoleMetrics) {
+				if (util.readSetting("consoleMetrics")) {
 					window.console.log(timingCategory + " " + timingVar + " " + timingValue + " " + timingLabel);
 				}
 			},
@@ -558,7 +581,7 @@ define([
 			}
 		});
 
-		var themeVal = localStorage.getItem("pageTheme");
+		var themeVal = util.readSetting("pageTheme");
 		if (themeVal && typeof themeVal === "string" || themeVal instanceof String && themeVal.length > 0) {
 			themeVal.split(" ").forEach(function(clazz) {
 				if (!document.body.classList.contains(clazz)) {
@@ -751,7 +774,7 @@ define([
 		};
 
 
-		var noTrim = window.orionNoTrim || localStorage.orionNoTrim || false;
+		var noTrim = window.orionNoTrim || util.readSetting("orionNoTrim") || false;
 		if (noTrim) {
 			toggleBannerFunc();
 			noBanner = true;

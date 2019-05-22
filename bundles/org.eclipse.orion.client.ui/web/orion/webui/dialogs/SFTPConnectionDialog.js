@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2011, 2012 IBM Corporation and others.
+ * Copyright (c) 2011, 2019 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -9,15 +9,21 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 /*eslint-env browser, amd*/
-define(['i18n!orion/widgets/nls/messages', 'orion/webui/littlelib', 'orion/webui/popupdialog', 'orion/webui/dialog'], function(messages, lib, popupdialog, dialog) {
+define([
+	'i18n!orion/widgets/nls/messages', 
+	'orion/webui/littlelib', 
+	'orion/webui/popupdialog', 
+	'orion/webui/dialog',
+	'orion.util'
+], function(messages, lib, popupdialog, dialog, util) {
 
-	if (!localStorage.getItem("orion.sftpConnections")) { //$NON-NLS-0$
+	if (!util.readSetting("orion.sftpConnections")) { //$NON-NLS-0$
 		var defaultItems = { 
 			identifier: 'name', //$NON-NLS-0$
 			label: messages['name'],
 			items: []
 		};
-		localStorage.setItem("orion.sftpConnections", JSON.stringify(defaultItems)); //$NON-NLS-0$
+		util.saveSetting("orion.sftpConnections", JSON.stringify(defaultItems)); //$NON-NLS-0$
 	}
 	
 	/* Internal */
@@ -91,7 +97,7 @@ define(['i18n!orion/widgets/nls/messages', 'orion/webui/littlelib', 'orion/webui
 		this.messages = messages;
 		this.modal = true;
 		this.buttons = [{text: messages['Start Transfer'], callback: this.done.bind(this)}]; 
-		this.sftpConnectionStoreData = JSON.parse(localStorage.getItem("orion.sftpConnections")); //$NON-NLS-0$
+		this.sftpConnectionStoreData = JSON.parse(util.readSetting("orion.sftpConnections")); //$NON-NLS-0$
 		this._func = options.func;
 		this._initialize();
 	};
@@ -179,7 +185,7 @@ define(['i18n!orion/widgets/nls/messages', 'orion/webui/littlelib', 'orion/webui
 		//if we have a new value, add it to the list and to the storage
 		if (!found) {
 			this.sftpConnectionStoreData.items.unshift(newConnection);
-			localStorage.setItem("orion.sftpConnections", JSON.stringify(this.sftpConnectionStoreData)); //$NON-NLS-0$
+			util.saveSetting("orion.sftpConnections", JSON.stringify(this.sftpConnectionStoreData)); //$NON-NLS-0$
 			this._populateSelect();
 			this.$sftpConnectionList.value = newConnection.name;
 		}

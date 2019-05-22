@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2011, 2017 IBM Corporation and others.
+ * Copyright (c) 2011, 2019 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License v1.0
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution
@@ -701,7 +701,7 @@ define([
 					window.__electron.remote.dialog.showOpenDialog({properties: ['openDirectory']}, function(result) {
 						if (!result) return;
 						that.fileClient.changeWorkspace(result[0]).then(function() {
-							localStorage.removeItem("/inlineSearchOtherScope");
+							util.deleteSetting("/inlineSearchOtherScope");
 							var searchClient = that.serviceRegistry.getService("orion.core.search.client");
 							if (searchClient) {
 								searchClient.setLocationOther(null);
@@ -732,7 +732,7 @@ define([
 									name: folderLocation,
 									callback: function() {
 										that.fileClient.changeWorkspace(folderLocation).then(function() {
-											localStorage.removeItem("/inlineSearchOtherScope");
+											util.deleteSetting("/inlineSearchOtherScope");
 											var searchClient = that.serviceRegistry.getService("orion.core.search.client");
 											if (searchClient) {
 												searchClient.setLocationOther(null);

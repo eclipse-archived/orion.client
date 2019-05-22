@@ -10,7 +10,14 @@
  ******************************************************************************/
 
 /*eslint-env amd, browser*/
-define(['module', 'i18n!orion/nls/messages', 'orion/i18nUtil', 'orion/banner/banner', 'orion/webui/littlelib'], function(module, messages, i18nUtil, Banner, lib) {
+define([
+	'module', 
+	'i18n!orion/nls/messages', 
+	'orion/i18nUtil', 
+	'orion/banner/banner', 
+	'orion/webui/littlelib',
+	'orion/util'
+], function(module, messages, i18nUtil, Banner, lib, util) {
 	
 var pageLoader;
 
@@ -348,9 +355,10 @@ function start() {
 	}
 	
 	var showTimeout = 3000;
-	if (localStorage.showSplashTimeout) {
+	var splashTimout = util.readSetting("showSplashTimeout");
+	if (splashTimout) {
 		try {
-			showTimeout = parseInt(localStorage.showSplashTimeout, 10);
+			showTimeout = parseInt(splashTimout, 10);
 		} catch (ex) {}
 	}
 	setTimeout(function() {

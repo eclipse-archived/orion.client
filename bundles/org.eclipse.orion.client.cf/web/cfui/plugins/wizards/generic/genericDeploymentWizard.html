@@ -1,7 +1,7 @@
 <html lang="en">
 <head id="deployHead">
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-	<meta name="copyright" content="Copyright (c) IBM Corporation and others 2012, 2017." >
+	<meta name="copyright" content="Copyright (c) IBM Corporation and others 2012, 2019." >
 	<meta http-equiv="Content-Language" content="en-us">
     <link rel="stylesheet" type="text/css" href="genericDeploymentWizard.css" />
 	<script src="../../../../requirejs/require.js"></script>
@@ -41,14 +41,14 @@
 	</div>
 	
 		<script>
-			var themeVal = localStorage.getItem("pageTheme");
-			if (themeVal && typeof themeVal === "string" || themeVal instanceof String && themeVal.length > 0) {
-				themeVal.split(" ").forEach(function(clazz) {
-					if (!document.body.classList.contains(clazz)) {
-						document.body.classList.add(clazz);
-					}
-				});
-			}
+				var themeVal = localStorage.getItem("pageTheme");
+				if (themeVal && typeof themeVal === "string" || themeVal instanceof String && themeVal.length > 0) {
+					themeVal.split(" ").forEach(function(clazz) {
+						if (!document.body.classList.contains(clazz)) {
+							document.body.classList.add(clazz);
+						}
+					});
+				}
 		</script>
 </body>
 </html>

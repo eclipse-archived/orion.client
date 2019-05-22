@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2012 IBM Corporation and others.
+ * Copyright (c) 2012, 2019 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -58,7 +58,59 @@ define(function() {
 		});
 	}
 
+	/**
+	 * @description Save the setting to persistent storage.
+	 * 
+	 * Currently this function saves to localStorage
+	 * @param {string} key 
+	 * @param {string} value
+	 * @since 20.0
+	 */
+	function saveSetting(key, value) {
+		//TODO make this pluggable to not only work with localStorage
+		localStorage.setItem(key, value);
+	}
+
+	/**
+	 * @description Retrieve the setting from persistent storage.
+	 * 
+	 * Currently this function reads from localStorage
+	 * @param {string} key 
+	 * @since 20.0
+	 */
+	function readSetting(key) {
+		//TODO make this pluggable to not only work with localStorage
+		return localStorage.getItem(key);
+	}
+
+	/**
+	 * @description Remove the setting from persistent storage.
+	 * 
+	 * Currently this function removes from localStorage
+	 * @param {string} key 
+	 * @since 20.0
+	 */
+	function deleteSetting(key) {
+		//TODO make this pluggable to not only work with localStorage
+		localStorage.removeItem(key);
+	}
+
+	/**
+	 * @description Clears out the saved settings from persistent storage
+	 * 
+	 * @since 20.0
+	 */
+	function clearSettings() {
+		//TODO make this pluggable to not only work with localStorage
+		localStorage.clear();
+	}
+
 	return {
+		readSetting: readSetting,
+		saveSetting: saveSetting,
+		deleteSetting: deleteSetting,
+		clearSettings: clearSettings,
+
 		formatMessage: formatMessage,
 		
 		createElement: createElement,

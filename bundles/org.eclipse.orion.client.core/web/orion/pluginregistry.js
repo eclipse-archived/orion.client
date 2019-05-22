@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2010, 2016 IBM Corporation and others.
+ * Copyright (c) 2010, 2019 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -12,7 +12,13 @@
 /* eslint-disable missing-nls */
 /*eslint-env browser, amd*/
 /*global URL*/
-define(["orion/Deferred", "orion/EventTarget", "orion/urlModifier", "orion/URL-shim"], function(Deferred, EventTarget, urlModifier) {
+define([
+    "orion/Deferred",
+    "orion/util",
+    "orion/EventTarget", 
+    "orion/urlModifier", 
+    "orion/URL-shim"
+], function(Deferred, util, EventTarget, urlModifier) {
     
     function _equal(obj1, obj2) {
         var keys1 = Object.keys(obj1);
@@ -1053,7 +1059,9 @@ define(["orion/Deferred", "orion/EventTarget", "orion/urlModifier", "orion/URL-s
                 };
 
                 function log(state) {
-                    if (localStorage.pluginLogging) console.log(state + "(" + (Date.now() - channel._startTime) + "ms)=" + url); //$NON-NLS-1$ //$NON-NLS-0$
+                    if (util.readSetting("pluginLogging")) {
+                        console.log(state + "(" + (Date.now() - channel._startTime) + "ms)=" + url);
+                    }
                 }
 
                 function sendTimeout(message) {
@@ -1093,11 +1101,11 @@ define(["orion/Deferred", "orion/EventTarget", "orion/urlModifier", "orion/URL-s
 
                 var isWorker = !!(url.match(workerRegex) && typeof(Worker) !== "undefined");
                 var isSharedWorker = !!(url.match(sharedWorkerRegex) && typeof(SharedWorker) !== "undefined");
-                if ((!localStorage.useSharedWorkers || !isSharedWorker) && url.match(sharedWorkerRegex)) {
+                if ((!util.readSetting("useSharedWorkers") || !isSharedWorker) && url.match(sharedWorkerRegex)) {
                     url = url.replace(sharedWorkerRegex, workerJS);
                     isSharedWorker = false;
                 }
-                if ((!localStorage.useWorkers || !isWorker) && url.match(workerRegex)) {
+                if ((!util.readSetting("useWorkers") || !isWorker) && url.match(workerRegex)) {
                     url = url.replace(workerRegex, pluginHtml);
                     isWorker = isSharedWorker = false;
                 }               

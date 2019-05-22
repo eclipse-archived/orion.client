@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2012 IBM Corporation and others.
+ * Copyright (c) 2012, 2019 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License v1.0
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution
@@ -12,9 +12,10 @@
 define([
 	"orion/xhr",
 	"orion/plugin",
+	"orion/util",
 	"plugins/authForm",
 	"domReady!"
-], function(xhr, PluginProvider, authForm) {
+], function(xhr, PluginProvider, util, authForm) {
 	
 	function connect() {
 		var headers = {
@@ -52,7 +53,7 @@ define([
 				}).then(function(result) {
 					loginData = result.response ? parseJSON(result.response) : null;
 					if (loginData) {
-						localStorage.setItem('orion.user', JSON.stringify(loginData))
+						util.saveSetting('orion.user', JSON.stringify(loginData));
 					}
 					return loginData;
 				}, function(error) {
@@ -66,7 +67,7 @@ define([
 			},
 			logout: function() { /* don't wait for the login response, notify anyway */
 				loginData = null;
-				localStorage.removeItem('orion.user')
+				util.deleteSetting('orion.user');
 				return xhr("POST", "../logout", { //$NON-NLS-0$
 					headers: {
 						"Orion-Version": "1" //$NON-NLS-0$

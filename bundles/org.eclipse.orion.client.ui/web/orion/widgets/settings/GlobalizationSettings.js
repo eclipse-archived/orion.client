@@ -1,11 +1,23 @@
+/*******************************************************************************
+ * @license
+ * Copyright (c) 2014, 2019 IBM Corporation and others.
+ * All rights reserved. This program and the accompanying materials are made 
+ * available under the terms of the Eclipse Public License v1.0 
+ * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
+ * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html). 
+ *
+ * Contributors:
+ *     IBM Corporation - initial API and implementation
+ *******************************************************************************/
 define([
-	'i18n!orion/settings/nls/messages', //$NON-NLS-0$ 
-	'orion/section', //$NON-NLS-0$
-	'orion/webui/littlelib', //$NON-NLS-0$
-	'orion/objects', //$NON-NLS-0$
-	'orion/widgets/input/SettingsCheckbox', //$NON-NLS-0$
-	'orion/widgets/input/SettingsSelect' //$NON-NLS-0$
-	], function(messages, mSection, lib, objects, SettingsCheckbox, SettingsSelect) {
+	'i18n!orion/settings/nls/messages',
+	'orion/section',
+	'orion/webui/littlelib', 
+	'orion/objects',
+	'orion/util',
+	'orion/widgets/input/SettingsCheckbox',
+	'orion/widgets/input/SettingsSelect'
+	], function(messages, mSection, lib, objects, util, SettingsCheckbox, SettingsSelect) {
 
 	var BIDI_MODES = [
 	         		{value: "ltr", label: messages["Left-To-Right"]}, //$NON-NLS-1$ //$NON-NLS-0$
@@ -55,7 +67,7 @@ define([
 							})						    
 				];
 				//initiate  CheckBox value from cookie
-				var selectedVal = (localStorage.getItem(bidiStoragePrefix + bidiEnabled) === "true"); //$NON-NLS-0$
+				var selectedVal = (util.readSetting(bidiStoragePrefix + bidiEnabled) === "true"); //$NON-NLS-0$
 				this.bidiFields[0].setSelection(selectedVal);
 				// set bidiFields according to Enable bidi support checkbox value
 				this.setBidiFields();
@@ -84,7 +96,7 @@ define([
 								value: selectValues[i].value,
 								label: selectValues[i].label
 							};								
-						if( selectValues[i].value === localStorage.getItem(bidiStoragePrefix + property)){
+						if( selectValues[i].value === util.readSetting(bidiStoragePrefix + property)){
 							set.selected = true;
 						}
 						keys.push(set);
@@ -98,22 +110,22 @@ define([
 				var bidiLayoutVal = this.bidiFields[1].getSelected();
 				var calendarTypeVal = this.bidiFields[2].getSelected();
 				
-				localStorage.setItem(bidiStoragePrefix + bidiEnabled, bidiEnabledVal);
-				localStorage.setItem(bidiStoragePrefix + bidiLayout, bidiLayoutVal);
-				localStorage.setItem(bidiStoragePrefix + calendarType, calendarTypeVal);
+				util.saveSetting(bidiStoragePrefix + bidiEnabled, bidiEnabledVal);
+				util.saveSetting(bidiStoragePrefix + bidiLayout, bidiLayoutVal);
+				util.saveSetting(bidiStoragePrefix + calendarType, calendarTypeVal);
 			},
 
 			setBidiFields: function() {
 				var selectedVal = this.bidiFields[0].getSelection();
 				if (selectedVal) {
-					localStorage.setItem(bidiStoragePrefix + bidiEnabled, "true"); //$NON-NLS-0$
+					util.saveSetting(bidiStoragePrefix + bidiEnabled, "true"); //$NON-NLS-0$
 		        	this.bidiFields[1].select.disabled = false;
 		        	this.bidiFields[2].select.disabled = false;
 				}
 				else {
-					localStorage.setItem(bidiStoragePrefix + bidiEnabled, "false"); //$NON-NLS-0$
-					localStorage.setItem(bidiStoragePrefix + bidiLayout, "ltr" ); //$NON-NLS-0$
-					localStorage.setItem(bidiStoragePrefix + calendarType, messages.Gregorian);
+					util.saveSetting(bidiStoragePrefix + bidiEnabled, "false"); //$NON-NLS-0$
+					util.saveSetting(bidiStoragePrefix + bidiLayout, "ltr" ); //$NON-NLS-0$
+					util.saveSetting(bidiStoragePrefix + calendarType, messages.Gregorian);
 		        	this.bidiFields[1].select.disabled = true;
 		        	this.bidiFields[2].select.disabled = true;						
 				}

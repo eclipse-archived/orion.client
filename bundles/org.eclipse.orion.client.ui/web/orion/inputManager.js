@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2010, 2018 IBM Corporation and others.
+ * Copyright (c) 2010, 2019 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License v1.0
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution
@@ -22,8 +22,9 @@ define([
 	'orion/editor/textModelFactory',
 	'orion/formatter',
 	'lsp/languageServerRegistry',
-	'orion/metrics'
-], function(messages, mNavigatorRenderer, i18nUtil, Deferred, EventTarget, objects, PageUtil, mTextModelFactory, mFormatter, mLanguageServerRegistry, mMetrics) {
+	'orion/metrics',
+	'orion/util'
+], function(messages, mNavigatorRenderer, i18nUtil, Deferred, EventTarget, objects, PageUtil, mTextModelFactory, mFormatter, mLanguageServerRegistry, mMetrics, util) {
 
 	function Idle(options){
 		this._document = options.document || document;
@@ -276,7 +277,8 @@ define([
 				this._acceptPatch = null;
 				if (!this._isSameParent(metadataURI)) {
 					var uri = new URL(metadataURI);
-					uri.query.set("tree", localStorage.useCompressedTree ? "compressed" : "decorated"); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$
+					var treeType = util.readSetting("useCompressedTree")
+					uri.query.set("tree", treeType ? "compressed" : "decorated"); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$
 					metadataURI = uri.href;
 				}
 				progress(this._read(metadataURI, true), messages.ReadingMetadata, resource).then(function(metadata) {

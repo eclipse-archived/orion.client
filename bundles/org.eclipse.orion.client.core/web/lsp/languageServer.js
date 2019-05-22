@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2016, 2017 IBM Corporation and others.
+ * Copyright (c) 2016, 2019 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License v1.0
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution
@@ -13,12 +13,13 @@
 define([
 	"orion/Deferred",
 	"lsp/ipc",
-	"lsp/utils"
-], function(Deferred, IPC, Utils) {
+	"lsp/utils",
+	"orion/util"
+], function(Deferred, IPC, Utils, util) {
 	var
-		LOG_ERRORS = localStorage.getItem('java.langserver.logmessage.error') === 'true',
-		LOG_WARNINGS = localStorage.getItem('java.langserver.logmessage.warn') === 'true',
-		LOG_INFO = localStorage.getItem('java.langserver.logmessage.error.info') === 'true';
+		LOG_ERRORS = util.readSetting('java.langserver.logmessage.error') === 'true',
+		LOG_WARNINGS = util.readSetting('java.langserver.logmessage.warn') === 'true',
+		LOG_INFO = util.readSetting('java.langserver.logmessage.error.info') === 'true';
 
 	/**
 	 * @name LanguageServer

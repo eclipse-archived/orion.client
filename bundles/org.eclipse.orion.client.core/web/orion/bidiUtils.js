@@ -48,7 +48,7 @@ function(lib, util, bidiFormat) { /* BDL */
 	 * @returns {Boolean} true if globalization settings exist and bidi is enabled.
 	 */		
 	function isBidiEnabled() {
-		var bidiEnabled = localStorage.getItem(bidiEnabledStorage);
+		var bidiEnabled = util.readSetting(bidiEnabledStorage);
 		if (bidiEnabled && bidiEnabled === "true") {		//$NON-NLS-0$
 			return true;
 		}
@@ -60,7 +60,7 @@ function(lib, util, bidiFormat) { /* BDL */
 	 * @returns {String} text direction.
 	 */	
 	function getBidiLayout() {
-		var _bidiLayout = localStorage.getItem(bidiLayoutStorage);
+		var _bidiLayout = util.readSetting(bidiLayoutStorage);
 		if (_bidiLayout && (_bidiLayout === "rtl" || _bidiLayout === "ltr" || _bidiLayout === "auto")) {	//$NON-NLS-0$ //$NON-NLS-1$ //$NON-NLS-2$
 			return _bidiLayout;
 		}
