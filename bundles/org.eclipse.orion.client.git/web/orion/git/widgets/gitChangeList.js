@@ -571,7 +571,7 @@ define([
 				label.textContent = messages[key];
 				var input = document.createElement("input"); //$NON-NLS-0$
 				if (isCheck) input.type = "checkbox"; //$NON-NLS-0$
-				else if (autocomplete) input.autocomplete = autocomplete;
+				if (autocomplete) input.autocomplete = autocomplete;
 				if (value) input.value = value;
 				input.classList.add(isCheck ? "gitChangeListCheck" : "gitChangeListInput"); //$NON-NLS-1$ //$NON-NLS-0$
 				if (placeholderKey) input.placeholder = messages[placeholderKey];
