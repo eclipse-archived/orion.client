@@ -52,8 +52,7 @@
 			</div>
 		</div>
 		<script>
-			require(["../orion/util"], function(util) {
-				var themeVal = util.readSetting("pageTheme");
+				var themeVal = localStorage.getItem("pageTheme");
 				if (themeVal && typeof themeVal === "string" || themeVal instanceof String && themeVal.length > 0) {
 					themeVal.split(" ").forEach(function(clazz) {
 						if (!document.body.classList.contains(clazz)) {
@@ -61,7 +60,6 @@
 						}
 					});
 				}
-			});
 		</script>
 	</body>
 </html>
