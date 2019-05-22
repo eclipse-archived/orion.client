@@ -71,6 +71,9 @@ define(['orion/objects', 'orion/webui/littlelib', 'orion/widgets/input/TextField
 				if(this.fieldType) {
 					this.textfield.type = this.fieldType;
 				}
+				if(this.fieldAutocomplete) {
+					this.textfield.autocomplete = this.fieldAutocomplete;
+				}
 				if(this.fieldMin !== undefined) {
 					this.textfield.min = this.fieldMin;
 				}
