@@ -211,6 +211,10 @@ html[dir="rtl"] .setting-row { /* ACGC */
 	min-width: 230px;
 }
 
+.accessibility-setting-header {
+	width: 25%;
+}
+
 .setting-header-generated {
 	width: 10px;
 	min-width: 5px;

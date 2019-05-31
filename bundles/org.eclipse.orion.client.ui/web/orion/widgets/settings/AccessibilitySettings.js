@@ -46,6 +46,7 @@ define([
 
 				var visualizationSubsection = new Subsection({
 					sectionName: messages["Visualizations"],
+					additionalCssClass: 'accessibility-setting-header',
 					parentNode: settingsContentElement,
 					children: [this.disableCodeFoldingCheckbox, this.hideCodeMapCheckbox]
 				});
@@ -57,6 +58,7 @@ define([
 				
 				var keyboardSubsection = new Subsection({
 					sectionName: messages["Keyboard"],
+					additionalCssClass: 'accessibility-setting-header',
 					parentNode: settingsContentElement,
 					children: [shortcutInfo]
 				});
@@ -68,6 +70,7 @@ define([
 				
 				var themeSubsection = new Subsection({
 					sectionName: messages["Themes"],
+					additionalCssClass: 'accessibility-setting-header',
 					parentNode: settingsContentElement,
 					children: [themeInfo]
 				});
@@ -79,6 +82,7 @@ define([
 				
 				var srSubsection = new Subsection({
 					sectionName: messages["ScreenReaders"],
+					additionalCssClass: 'accessibility-setting-header',
 					parentNode: settingsContentElement,
 					children: [srInfo]
 				});
@@ -95,6 +99,7 @@ define([
 					});
 					var documentationSubsection = new Subsection({
 						sectionName: messages["Documentation"],
+						additionalCssClass: 'accessibility-setting-header',
 						parentNode: settingsContentElement,
 						children: [docInfo]
 					});
