@@ -63,7 +63,7 @@ define([
 				this._hookedClose = true;
 				var container = lib.node(this.notificationContainerDomId);
 				lib.addAutoDismiss([container],  function(){
-					if(this._clickToDisMiss) {
+					if(!this._clickToDisMiss) {
 						this.close();
 					}
 				}.bind(this));
