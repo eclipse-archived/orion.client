@@ -649,23 +649,30 @@ define([
 					this._setNoInput("");
 				}
 			}.bind(this);
-			if (editor && editor.isDirty() && !this.isEditorTabsEnabled) {
+			if (editor && editor.isDirty()) {
 				var oldLocation = this._location;
 				var oldResource = oldInput.resource;
 				var newResource = input.resource;
-				if (oldResource !== newResource || encodingChanged) {
-					if (this._autoSaveEnabled) {
-						this.save();
-						afterConfirm();
-					} else if(this.syncEnabled && this.isUnsavedWarningNeeed()) {
-						var cancelCallback = function() {
-							window.location.hash = oldLocation;
-							this.reveal(this.getFileMetadata());
-							return;
-						}.bind(this);
-						this.confirmUnsavedChanges(afterConfirm, cancelCallback);
-					}else{
-						afterConfirm();
+				if (this._errorSaving && (oldResource !== newResource || encodingChanged)) {
+					window.location.hash = oldLocation;
+					this.reveal(this.getFileMetadata());
+					return;
+				}
+				if (!this.isEditorTabsEnabled) {
+					if (oldResource !== newResource || encodingChanged) {
+						if (this._autoSaveEnabled) {
+							this.save();
+							afterConfirm();
+						} else if(this.syncEnabled && this.isUnsavedWarningNeeed()) {
+							var cancelCallback = function() {
+								window.location.hash = oldLocation;
+								this.reveal(this.getFileMetadata());
+								return;
+							}.bind(this);
+							this.confirmUnsavedChanges(afterConfirm, cancelCallback);
+						}else{
+							afterConfirm();
+						}
 					}
 				}
 			}else{
