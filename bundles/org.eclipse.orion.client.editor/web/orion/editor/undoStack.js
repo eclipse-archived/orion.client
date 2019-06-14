@@ -252,10 +252,27 @@ define("orion/editor/undoStack", [], function() { //$NON-NLS-0$
 		 */
 		markClean: function() {
 			this._commitUndo();
+			var previousState = {
+				cleanChange: this.cleanChange,
+			};
 			this.cleanChange = this.stack[this.index - 1];
 			if (this.cleanChange) {
 				this.cleanChange.type = 2;
 			}
+			return previousState;
+		},
+		/** 
+		 * Reverts the clean state of the stack to a previous state.
+		 *
+		 * <p>
+		 * This function is typically called when the content of view associated with the stack failed to saved.
+		 * </p>
+		 *
+		 * @see orion.editor.UndoStack#isClean
+		 * @see orion.editor.UndoStack#markClean
+		 */
+		markUnclean: function(previousState) {
+			this.cleanChange = previousState.cleanChange;
 		},
 		/**
 		 * Returns true if current state of stack is the same

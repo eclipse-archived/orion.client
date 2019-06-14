@@ -416,7 +416,7 @@ define([
 			this.dispatchEvent({ type: "Saving", inputManager: this}); //$NON-NLS-0$
 
 			function _save(that) {
-				editor.markClean();
+				var previousUndoState = editor.markClean();
 				var contents = editor.getText();
 				var data = contents;
 				if (that._getSaveDiffsEnabled() && !that._errorSaving) {
@@ -472,6 +472,7 @@ define([
 					that.reportStatus("");
 					var errorMsg = handleError(statusService, error);
 					mMetrics.logEvent("status", "exception", (that._autoSaveActive ? "Auto-save: " : "Save: ") + errorMsg.Message); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+					editor.markUnclean(previousUndoState);
 					that._errorSaving = true;
 					return done();
 				}

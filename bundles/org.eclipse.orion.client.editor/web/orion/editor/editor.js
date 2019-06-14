@@ -131,8 +131,16 @@ define("orion/editor/editor", [
 		 * Marks the current state of the editor as clean. Meaning there are no unsaved modifications.
 		 */
 		markClean: function() {
-			this.getUndoStack().markClean();
+			var previousState = this.getUndoStack().markClean();
 			this.setDirty(false);
+			return previousState;
+		},
+		/**
+		 * Marks the current state of the editor as unclean. Usually called when saving changes failed.
+		 */
+		markUnclean: function(previousState) {
+			this.getUndoStack().markUnclean(previousState);
+			this.setDirty(true);
 		},
 		/**
 		 * Called when the dirty state of the editor changes.
