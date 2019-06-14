@@ -636,7 +636,7 @@ define([
 						}.bind(this));
 					} else {
 						// Hide sibling to work around JAWS bug https://github.com/FreedomScientific/VFO-standards-support/issues/91
-						lib.setSafeAttribute(this.sibling, name, "aria-hidden", true);
+						lib.setSafeAttribute(this.sibling, "aria-hidden", true);
 						sections.forEach(function(s) {
 							var field = lib.$(".gitFilterInput", s); //$NON-NLS-0$
 							var result = s.query.getValue ? s.query.getValue() : s.query.value;
