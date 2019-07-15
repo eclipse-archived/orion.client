@@ -121,7 +121,7 @@ define([
                     { text: messages["Import"], isDefault: true, callback: this.importFromTextarea.bind(this), id: "textAreaImportBtn" } //$NON-NLS-1$
                 ];
                 this.modal = true;
-                this.firstFocus = "fileInput"; //$NON-NLS-0$
+                this.firstFocus = "fileInputLabel"; //$NON-NLS-0$
 
                 this._initialize();
             },
@@ -141,11 +141,13 @@ define([
                 importInput.id = "fileInput";
                 importInput.className = "visuallyhidden"; //$NON-NLS-0$
                 importInput.type = "file";
+                importInput.tabIndex = -1;
                 importInput.addEventListener("change", this.importOnSelect.bind(this));
                 docFragment.appendChild(importInput);
 
                 importLabel.id = "fileInputLabel";
                 importLabel.className = "orionButton commandButton";
+                importLabel.tabIndex = 0;
                 importLabel.htmlFor = importInput.id;
                 lib.setSafeInnerHTML(importLabel, messages["importThemeButton"]);
                 importLabel.addEventListener("keydown", function(e) { //$NON-NLS-0$
