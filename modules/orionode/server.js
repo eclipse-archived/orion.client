@@ -193,11 +193,14 @@ function startServer(cb) {
 		}
 	});
 	server.on('error', function(err) {
+		logger.error(err);
 		if (err.code === "EADDRINUSE") {
 			port = Math.floor(Math.random() * (PORT_HIGH - PORT_LOW) + PORT_LOW);
+			logger.info("About to listen on: " + port);
 			server.listen(port);
 		}
 	});
+	logger.info("About to listen on: " + port);
 	server.listen(port);
 	var shutdownTimeout = configParams.get("shutdown.timeout");
 	new graceful.GracefulServer({
