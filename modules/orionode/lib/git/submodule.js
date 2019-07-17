@@ -89,8 +89,13 @@ function postSubmodule(req, res) {
 		})
 		.then(function(commit) {
 			var branch = "master";
+			var checkOptions = {
+				checkoutStrategy: git.Checkout.STRATEGY.SAFE,
+				fileMode: 0664,
+				dirMode: 0775
+			};
 			return git.Branch.create(subrepo, branch, commit, 0).then(function() {
-				return subrepo.checkoutBranch(branch, {});
+				return subrepo.checkoutBranch(branch, checkOptions);
 			});
 		})
 		.then(function() {

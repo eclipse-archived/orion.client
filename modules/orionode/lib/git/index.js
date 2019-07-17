@@ -168,7 +168,11 @@ function postIndex(req, res) {
 					reset_type = git.Reset.TYPE.SOFT;
 					break;
 			}
-			return git.Reset.reset(repo, commit, reset_type, {});
+			return git.Reset.reset(repo, commit, reset_type, {
+				checkoutStrategy: git.Checkout.STRATEGY.SAFE,
+				dirMode: 0775,
+				fileMode: 0664
+			});
 		} 
 			
 		return git.Reset.default(repo, commit, [filePath]);
