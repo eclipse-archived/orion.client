@@ -195,7 +195,7 @@ FileLocker.prototype._acquireLock = function(shared) {
 					}
 					this._fd = fd;
 					logger.debug("FD set=" + fd + " count=" + this._counter + " path=" + this._pathame + " pid=" + process.pid);
-					fs.chmod(this._pathame, "600", function() {
+					fs.chmod(this._pathame, "660", function() {
 						//ignore errors
 						lock();
 					});
