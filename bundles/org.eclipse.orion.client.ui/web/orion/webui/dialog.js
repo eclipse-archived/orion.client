@@ -103,8 +103,10 @@ define(['i18n!orion/nls/messages', 'orion/webui/littlelib', 'orion/uiUtils'],
 			this.$frame.addEventListener("keydown", function (e) { //$NON-NLS-0$
 				if(e.keyCode === lib.KEY.ESCAPE) {
 					self.hide();
+					e.preventDefault();
 				} else if (e.keyCode === lib.KEY.ENTER && (typeof self._defaultCallback) === "function") { //$NON-NLS-0$
 					self._defaultCallback();
+					e.preventDefault();
 				}
 			}, false);
 			

@@ -439,11 +439,10 @@ define([
 				var _self = this;
 				dialog.addEventListener("dismiss", function(event) {
 					if (event.value) {
-					    if(data.items) {
-						    _self.restore(data.items.pid);
-						} else {
-						    _self.restore();
-						}
+						var previousActiveElement = document.activeElement;
+						lib.returnFocus(_self.parent, previousActiveElement, function() {
+							return _self.restore(data.items ? data.items.pid : undefined);
+						});
 					}
 				});
 			}.bind(this)
@@ -581,13 +580,13 @@ define([
 				}
 			}
 			if(deferreds.length > 0) { 
-				Deferred.all(deferreds, function(err) { return err; }).then(function() {
+				return Deferred.all(deferreds, function(err) { return err; }).then(function() {
 					lib.setSafeInnerHTML(this.parent, "");
-
 					this.render(this.parent, this.serviceRegistry, this.settings, this.title);
 					this.serviceRegistry.getService("orion.page.message").setProgressResult(messages["settingsRestored"]); //$NON-NLS-1$
 				}.bind(this));
 			}
+			return new Deferred().resolve();
 		},
 		render: function(parent, serviceRegistry, settings, categoryTitle) {
 			var pageParams = PageUtil.matchResourceParameters();
