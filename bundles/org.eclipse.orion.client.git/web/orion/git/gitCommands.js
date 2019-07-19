@@ -1710,7 +1710,6 @@ var exports = {};
 				var gitService = serviceRegistry.getService("orion.git.provider"); //$NON-NLS-0$
 				var progress = serviceRegistry.getService("orion.page.progress"); //$NON-NLS-0$
 				var initRepositoryFunction = function(gitUrl, path, name) {
-					
 					item.GitUrl = gitUrl;
 					exports.getDefaultSshOptions(serviceRegistry, item).then(function func(options){
 						var gitConfigPreference = new GitConfigPreference(serviceRegistry);

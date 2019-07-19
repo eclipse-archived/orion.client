@@ -77,6 +77,7 @@ define([ 'i18n!git/nls/gitmessages', 'orion/bidiUtils',
 				if (that.okbutton.disabled)
 					return; // don't run if dialog is not valid
 
+				that.hide();
 				that.destroy();
 				that._execute();
 			},
