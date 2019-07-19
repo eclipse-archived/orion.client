@@ -513,15 +513,18 @@ define([
 			if (progress) progress.begin(messages["Getting git log"]);
 			model.getChildren(item, function(children) {
 				item.removeAll = true;
-				that.myTree.refresh.bind(that.myTree)(item, children, false);
-				if (item.Type === "CommitRoot") { //$NON-NLS-0$
-					that.expandSections(children);
-				}
-				if (item.Type !== "Synchronized") { //$NON-NLS-0$
-					that.updateCommands();
-				}
-				if (progress) progress.done();
-				deferred.resolve(children);
+				lib.returnFocus(lib.node(that.parentId), document.activeElement, function() {
+					that.myTree.refresh.bind(that.myTree)(item, children, false);
+					if (item.Type === "CommitRoot") { //$NON-NLS-0$
+						that.expandSections(children);
+					}
+					if (item.Type !== "Synchronized") { //$NON-NLS-0$
+						that.updateCommands();
+					}
+					if (progress) progress.done();
+					deferred.resolve(children);
+					return deferred;
+				});
 			});
 			return deferred;
 		},
