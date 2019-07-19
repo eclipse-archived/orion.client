@@ -488,9 +488,9 @@ define(["orion/util"], function(util) {
 		for (var i= 0; i < siblings.length; i++) {
 			var sibling = siblings[i];
 			if (sibling === element) {
-				return getPathTo(element.parentNode)+'/'+element.tagName+'['+(ix+1)+']';
+				return getPathTo(element.parentNode)+ '/'+ element.tagName+'['+(ix+1)+']';
 			}
-			if (sibling.nodeType === 1 && sibling.tagName === element.tagName) {
+			if (sibling.nodeType === Node.ELEMENT_NODE && sibling.tagName === element.tagName) {
 				ix++;
 			}
 		}
