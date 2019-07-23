@@ -90,7 +90,7 @@ function hasAccess(access, res, err, next, uri){
 	if(access) {
 		next();
 	} else {
-		api.writeError(403, res, "You are not authorized to access: " + uri);
+		api.writeError(403, res, "You cannot access: " + uri);
 	}
 }
 
