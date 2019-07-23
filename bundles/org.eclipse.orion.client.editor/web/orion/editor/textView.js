@@ -3796,16 +3796,14 @@ define("orion/editor/textView", [
 				var startIME = true;
 				
 				/*
-				* Bug in Safari. Some Control+key combinations send key events
+				* Bug in Safari. Some key combinations send key events
 				* with keyCode equals to 229. This is unexpected and causes the
 				* view to start an IME composition. The fix is to ignore these
 				* events.
 				*/
 				if (util.isSafari && util.isMac) {
-					if (e.ctrlKey) {
-						startIME = false;
-						e.keyCode = 0x81;
-					}
+					startIME = false;
+					e.keyCode = 0x81;
 				}
 				if (startIME) {
 					this._startIME();
