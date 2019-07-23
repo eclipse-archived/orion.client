@@ -16,7 +16,6 @@ var api = require('../api'), writeError = api.writeError, writeResponse = api.wr
 	git = require('nodegit'),
 	url = require('url'),
 	crypto = require('crypto'),
-	chmodr = require('chmodr'),
 	async = require('async'),
 	express = require('express'),
 	remotes = require('./remotes'),
@@ -896,9 +895,7 @@ function rebase(req, res, commitToRebase, rebaseOperation) {
 					checkoutStrategy:
 						git.Checkout.STRATEGY.FORCE |
 						git.Checkout.STRATEGY.RECREATE_MISSING |
-						git.Checkout.STRATEGY.REMOVE_UNTRACKED,
-					dirMode: 0775,
-					fileMode: 0664
+						git.Checkout.STRATEGY.REMOVE_UNTRACKED
 				})
 				.then(function() {
 					return git.Rebase.open(repo, {});
@@ -916,14 +913,7 @@ function rebase(req, res, commitToRebase, rebaseOperation) {
 				});
 				
 			default:
-				var rebaseOpts = {};
-				rebaseOpts.checkoutOptions = {
-					checkoutStrategy: git.Checkout.STRATEGY.SAFE,
-					dirMode: 0775,
-					fileMode: 0664
-				};
-				console.log(JSON.stringify(rebaseOpts))
-				work = repo.rebaseBranches("HEAD", commitToRebase, null, null, null, null, rebaseOpts);
+				work = repo.rebaseBranches("HEAD", commitToRebase, null, null, null);
 		}
 		return work
 		.then(function(_oid) {
@@ -941,17 +931,8 @@ function rebase(req, res, commitToRebase, rebaseOperation) {
 			});
 			return git.Checkout.index(repo, index, {
 				checkoutStrategy: git.Checkout.STRATEGY.ALLOW_CONFLICTS,
-				dirMode: 0775,
-				fileMode: 0664,
 				ourLabel: "HEAD",
 				theirLabel: commit.sha()
-			});
-		});
-	})
-	.then(function() {
-		return new Promise(function(resolve) {
-			chmodr(repo.workdir(), 0664, function() {
-				resolve();
 			});
 		});
 	})
@@ -1035,9 +1016,7 @@ function merge(req, res, branchToMerge, squash) {
 						paths = undefined;
 						// checkout the merged index
 						return git.Checkout.index(repo, mergeIndex, {
-							checkoutStrategy: git.Checkout.STRATEGY.FORCE,
-							dirMode: 0775,
-							fileMode: 0664
+							checkoutStrategy: git.Checkout.STRATEGY.FORCE
 						});
 					}
 				});

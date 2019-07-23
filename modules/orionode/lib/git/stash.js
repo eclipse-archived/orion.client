@@ -12,7 +12,6 @@
 var api = require('../api'), writeError = api.writeError, writeResponse = api.writeResponse,
 	git = require('nodegit'),
 	mCommit = require('./commit'),
-	chmodr = require('chmodr'),
 	clone = require('./clone'),
 	express = require('express'),
 	responseTime = require('response-time');
@@ -108,27 +107,13 @@ function putStash(req, res) {
 				} else if (index === -1) {
 					return "Invalid stash reference " + stashRev + ".";
 				}
-				return git.Stash.apply(repo, index, {
-					flags: git.Stash.APPLY_FLAGS.APPLY_REINSTATE_INDEX,
-					checkoutOptions: {
-						checkoutStrategy: git.Checkout.STRATEGY.SAFE,
-						dirMode: 0775,
-						fileMode: 0664
-					}
-				})
+				return git.Stash.apply(repo, index, git.Stash.APPLY_FLAGS.APPLY_REINSTATE_INDEX)
 				.then(function() {
 					return null;
 				});
 			});
 		}
-		return git.Stash.pop(repo, 0, {
-			flags: git.Stash.APPLY_FLAGS.APPLY_REINSTATE_INDEX,
-			checkoutOptions: {
-				checkoutStrategy: git.Checkout.STRATEGY.SAFE,
-				dirMode: 0775,
-				fileMode: 0664
-			}
-		})
+		return git.Stash.pop(repo, 0, git.Stash.APPLY_FLAGS.APPLY_REINSTATE_INDEX)
 		.then(function() {
 			return null;
 		});
@@ -212,13 +197,6 @@ function postStash(req, res) {
 	.then(function(_repo) {
 		repo = _repo;
 		return git.Stash.save(repo, clone.getSignature(repo), message, flags);
-	})
-	.then(function() {
-		return new Promise(function(resolve) {
-			chmodr(repo.workdir(), 0664, function() {
-				resolve();
-			});
-		});
 	})
 	.then(function() {
 		writeResponse(200, res);

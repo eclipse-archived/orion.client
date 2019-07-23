@@ -496,8 +496,6 @@ function putClone(req, res) {
 	var theRepo, theCommit;
 	var checkOptions = {
 		checkoutStrategy: git.Checkout.STRATEGY.SAFE,
-		fileMode: 0664,
-		dirMode: 0775
 	};
 	getRepo(req)
 	.then(function(repo) {
@@ -765,30 +763,12 @@ function postClone(req, res) {
 	var credsCopy = Object.assign({}, req.body);
 	var task = new tasks.Task(res, false, true, 0, true);
 	return git.Clone.clone(cloneUrl, file.path, {
-		checkoutOpts: new git.CheckoutOptions({
-			checkoutStrategy: git.Checkout.STRATEGY.SAFE,
-			dirMode: 0775,
-			fileMode: 0664
-		}),
 		fetchOpts: {
 			callbacks: getRemoteCallbacks(req.body, req.user.username, task)
 		}
 	})
 	.then(function(_repo) {
 		repo = _repo;
-		return git.AnnotatedCommit.fromRevspec(repo, "HEAD");
-	})
-	.then(function(commit) {
-		return repo.getCommit(commit.id());
-	})
-	.then(function(commit) {
-		return git.Reset.reset(repo, commit, git.Reset.TYPE.HARD, {
-			checkoutStrategy: git.Checkout.STRATEGY.SAFE,
-			dirMode: 0775,
-			fileMode: 0664
-		});
-	})
-	.then(function() {
 		return configRepo(repo, req.body.GitName, req.body.GitMail);
 	})
 	.then(function() {
