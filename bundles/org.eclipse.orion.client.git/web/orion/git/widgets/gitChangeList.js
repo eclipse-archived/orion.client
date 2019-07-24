@@ -420,6 +420,7 @@ define([
 				var navHandler = this.getNavHandler();
 				var index = -1;
 				var rowDiv = navHandler.getRowDiv(navHandler.currentModel());
+				var hasFocus = rowDiv === document.activeElement;
 				if (rowDiv) {
 					var nodes = rowDiv.parentNode.childNodes;
 					for (index=0; index<nodes.length; index++) {
@@ -431,21 +432,26 @@ define([
 				parent.children = parent.Children = null;
 				this.model.getChildren(parent, function(children) {
 					parent.removeAll = true;
-					that.myTree.refresh.bind(that.myTree)(parent, children, false);
-					var selection = children.filter(function(item) {
-						return mGitUtil.isStaged(item);
+					lib.returnFocus(lib.node(that.parentId), document.activeElement, function() {
+						that.myTree.refresh.bind(that.myTree)(parent, children, false);
+						var selection = children.filter(function(item) {
+							return mGitUtil.isStaged(item);
+						});
+						that.selection.setSelections(selection);
+						that.setMoreVisible(moreVisible);
+						that.setCommitInfo(commitInfo);
+	
+						navHandler.refreshModel(that.getNavDict(), that.model, children);
+						if (hasFocus) {
+							navHandler.focus();
+						}
+						if (index !== -1) {
+							navHandler.cursorOn(children[index], true);
+						}
+	
+						deferred.resolve(children);
+						return deferred;
 					});
-					that.selection.setSelections(selection);
-					that.setMoreVisible(moreVisible);
-					that.setCommitInfo(commitInfo);
-
-					navHandler.refreshModel(that.getNavDict(), that.model, children);
-					navHandler.focus();
-					if (index !== -1) {
-						navHandler.cursorOn(children[index], true);
-					}
-
-					deferred.resolve(children);
 				});
 			} else if (this.prefix === "diff") { //$NON-NLS-0$
 				var model = this.model;
@@ -874,56 +880,60 @@ define([
 			if (node) {
 				this.commandService.destroy(node);
 			}
-			node = lib.node(selectionNodeScope);
-			if (node) {
-				this.commandService.destroy(node);
-			}
-
-			commandRegistry.registerCommandContribution("itemLevelCommands", "eclipse.openGitDiff", 2000); //$NON-NLS-1$ //$NON-NLS-0$
-			commandRegistry.registerCommandContribution("itemLevelCommands", "eclipse.orion.git.diff.showCurrent", 1000); //$NON-NLS-1$ //$NON-NLS-0$
-
-			if (this.prefix === "staged") { //$NON-NLS-0$
-				commandRegistry.registerCommandContribution(actionsNodeScope, "eclipse.orion.git.commitAndPushCommand", 200, "eclipse.gitCommitGroup"); //$NON-NLS-1$ //$NON-NLS-0$ 
-				commandRegistry.registerCommandContribution(selectionNodeScope, "eclipse.orion.git.unstageCommand", 100); //$NON-NLS-0$
-				commandRegistry.registerCommandContribution("DefaultActionWrapper", "eclipse.orion.git.unstageCommand", 100); //$NON-NLS-1$ //$NON-NLS-0$
-			} else if (this.prefix === "unstaged") { //$NON-NLS-0$
-				commandRegistry.registerCommandContribution(selectionNodeScope, "eclipse.orion.git.showPatchCommand", 100); //$NON-NLS-0$
-				commandRegistry.registerCommandContribution(selectionNodeScope, "eclipse.orion.git.stageCommand", 200); //$NON-NLS-0$
-				commandRegistry.registerCommandContribution(selectionNodeScope, "eclipse.orion.git.checkoutCommand", 300); //$NON-NLS-0$
-				commandRegistry.registerCommandContribution("DefaultActionWrapper", "eclipse.orion.git.stageCommand", 100); //$NON-NLS-1$ //$NON-NLS-0$
-			}  else if (this.prefix === "all") { //$NON-NLS-0$
-				if (!this.isRebasing()) {
-					commandRegistry.registerCommandContribution(actionsNodeScope, "eclipse.orion.git.applyPatch", 300); //$NON-NLS-1$ //$NON-NLS-0$
-					commandRegistry.registerCommandContribution(actionsNodeScope, "eclipse.orion.git.popStash", 100); //$NON-NLS-1$ //$NON-NLS-0$
-					commandRegistry.registerCommandContribution(actionsNodeScope, "eclipse.orion.git.precreateStashCommand", 200); //$NON-NLS-0$
-	
-					commandRegistry.registerCommandContribution(selectionNodeScope, "eclipse.orion.git.showStagedPatchCommand", 100); //$NON-NLS-0$
-					commandRegistry.registerCommandContribution(selectionNodeScope, "eclipse.orion.git.checkoutStagedCommand", 200); //$NON-NLS-0$
-					
-	//				commandRegistry.addCommandGroup(selectionNodeScope, "eclipse.gitCommitGroup", 1000, "Commit", null, null, null, "Commit", null, "eclipse.orion.git.precommitCommand", "primaryButton"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$ 	549
-	//				commandRegistry.registerCommandContribution(selectionNodeScope, "eclipse.orion.git.precommitAndPushCommand", 200, "eclipse.gitCommitGroup"); //$NON-NLS-0$
-					commandRegistry.registerCommandContribution(selectionNodeScope, "eclipse.orion.git.precommitCommand", 400); //$NON-NLS-0$
-	
-					commandRegistry.renderCommands(selectionNodeScope, selectionNodeScope, [], this, "tool", {Clone : this.model.repository}); //$NON-NLS-1$ //$NON-NLS-0$
-					commandRegistry.renderCommands(actionsNodeScope, actionsNodeScope, this.model ? this.model.repository : this, this, "tool"); //$NON-NLS-0$	
+			lib.returnFocus(node, document.activeElement, function() {
+				node = lib.node(selectionNodeScope);
+				if (node) {
+					this.commandService.destroy(node);
 				}
-			} else if (this.prefix === "diff" && this.commit) { //$NON-NLS-0$
-				commandRegistry.registerCommandContribution(actionsNodeScope, "eclipse.checkoutCommit", 1); //$NON-NLS-1$ //$NON-NLS-0$
-				commandRegistry.registerCommandContribution(actionsNodeScope, "eclipse.orion.git.undoCommit", 2); //$NON-NLS-1$ //$NON-NLS-0$
-				commandRegistry.registerCommandContribution(actionsNodeScope, "eclipse.orion.git.resetIndex", 3); //$NON-NLS-0$
-				commandRegistry.registerCommandContribution(actionsNodeScope, "eclipse.orion.git.addTag", 4); //$NON-NLS-1$ //$NON-NLS-0$
-				commandRegistry.registerCommandContribution(actionsNodeScope, "eclipse.orion.git.cherryPick", 5); //$NON-NLS-1$ //$NON-NLS-0$
-				commandRegistry.registerCommandContribution(actionsNodeScope, "eclipse.orion.git.revert", 6); //$NON-NLS-1$ //$NON-NLS-0$
-				commandRegistry.registerCommandContribution(actionsNodeScope, "eclipse.openGitCommit", 7); //$NON-NLS-1$ //$NON-NLS-0$
-				commandRegistry.registerCommandContribution(actionsNodeScope, "eclipse.orion.git.showCommitPatchCommand", 8); //$NON-NLS-1$ //$NON-NLS-0$
-
-				commandRegistry.renderCommands(actionsNodeScope, actionsNodeScope, this.commit, this, "tool"); //$NON-NLS-0$
-			}
-			node = lib.node(explorerSelectionScope);
-			if (node) {
-				this.commandService.destroy(node);
-				this.commandService.renderCommands(explorerSelectionScope, explorerSelectionScope, this, this, "tool"); //$NON-NLS-0$	
-			}
+				lib.returnFocus(node, document.activeElement, function() {
+	
+					commandRegistry.registerCommandContribution("itemLevelCommands", "eclipse.openGitDiff", 2000); //$NON-NLS-1$ //$NON-NLS-0$
+					commandRegistry.registerCommandContribution("itemLevelCommands", "eclipse.orion.git.diff.showCurrent", 1000); //$NON-NLS-1$ //$NON-NLS-0$
+		
+					if (this.prefix === "staged") { //$NON-NLS-0$
+						commandRegistry.registerCommandContribution(actionsNodeScope, "eclipse.orion.git.commitAndPushCommand", 200, "eclipse.gitCommitGroup"); //$NON-NLS-1$ //$NON-NLS-0$ 
+						commandRegistry.registerCommandContribution(selectionNodeScope, "eclipse.orion.git.unstageCommand", 100); //$NON-NLS-0$
+						commandRegistry.registerCommandContribution("DefaultActionWrapper", "eclipse.orion.git.unstageCommand", 100); //$NON-NLS-1$ //$NON-NLS-0$
+					} else if (this.prefix === "unstaged") { //$NON-NLS-0$
+						commandRegistry.registerCommandContribution(selectionNodeScope, "eclipse.orion.git.showPatchCommand", 100); //$NON-NLS-0$
+						commandRegistry.registerCommandContribution(selectionNodeScope, "eclipse.orion.git.stageCommand", 200); //$NON-NLS-0$
+						commandRegistry.registerCommandContribution(selectionNodeScope, "eclipse.orion.git.checkoutCommand", 300); //$NON-NLS-0$
+						commandRegistry.registerCommandContribution("DefaultActionWrapper", "eclipse.orion.git.stageCommand", 100); //$NON-NLS-1$ //$NON-NLS-0$
+					}  else if (this.prefix === "all") { //$NON-NLS-0$
+						if (!this.isRebasing()) {
+							commandRegistry.registerCommandContribution(actionsNodeScope, "eclipse.orion.git.applyPatch", 300); //$NON-NLS-1$ //$NON-NLS-0$
+							commandRegistry.registerCommandContribution(actionsNodeScope, "eclipse.orion.git.popStash", 100); //$NON-NLS-1$ //$NON-NLS-0$
+							commandRegistry.registerCommandContribution(actionsNodeScope, "eclipse.orion.git.precreateStashCommand", 200); //$NON-NLS-0$
+			
+							commandRegistry.registerCommandContribution(selectionNodeScope, "eclipse.orion.git.showStagedPatchCommand", 100); //$NON-NLS-0$
+							commandRegistry.registerCommandContribution(selectionNodeScope, "eclipse.orion.git.checkoutStagedCommand", 200); //$NON-NLS-0$
+							
+			//				commandRegistry.addCommandGroup(selectionNodeScope, "eclipse.gitCommitGroup", 1000, "Commit", null, null, null, "Commit", null, "eclipse.orion.git.precommitCommand", "primaryButton"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$ 	549
+			//				commandRegistry.registerCommandContribution(selectionNodeScope, "eclipse.orion.git.precommitAndPushCommand", 200, "eclipse.gitCommitGroup"); //$NON-NLS-0$
+							commandRegistry.registerCommandContribution(selectionNodeScope, "eclipse.orion.git.precommitCommand", 400); //$NON-NLS-0$
+			
+							commandRegistry.renderCommands(selectionNodeScope, selectionNodeScope, [], this, "tool", {Clone : this.model.repository}); //$NON-NLS-1$ //$NON-NLS-0$
+							commandRegistry.renderCommands(actionsNodeScope, actionsNodeScope, this.model ? this.model.repository : this, this, "tool"); //$NON-NLS-0$	
+						}
+					} else if (this.prefix === "diff" && this.commit) { //$NON-NLS-0$
+						commandRegistry.registerCommandContribution(actionsNodeScope, "eclipse.checkoutCommit", 1); //$NON-NLS-1$ //$NON-NLS-0$
+						commandRegistry.registerCommandContribution(actionsNodeScope, "eclipse.orion.git.undoCommit", 2); //$NON-NLS-1$ //$NON-NLS-0$
+						commandRegistry.registerCommandContribution(actionsNodeScope, "eclipse.orion.git.resetIndex", 3); //$NON-NLS-0$
+						commandRegistry.registerCommandContribution(actionsNodeScope, "eclipse.orion.git.addTag", 4); //$NON-NLS-1$ //$NON-NLS-0$
+						commandRegistry.registerCommandContribution(actionsNodeScope, "eclipse.orion.git.cherryPick", 5); //$NON-NLS-1$ //$NON-NLS-0$
+						commandRegistry.registerCommandContribution(actionsNodeScope, "eclipse.orion.git.revert", 6); //$NON-NLS-1$ //$NON-NLS-0$
+						commandRegistry.registerCommandContribution(actionsNodeScope, "eclipse.openGitCommit", 7); //$NON-NLS-1$ //$NON-NLS-0$
+						commandRegistry.registerCommandContribution(actionsNodeScope, "eclipse.orion.git.showCommitPatchCommand", 8); //$NON-NLS-1$ //$NON-NLS-0$
+		
+						commandRegistry.renderCommands(actionsNodeScope, actionsNodeScope, this.commit, this, "tool"); //$NON-NLS-0$
+					}
+					node = lib.node(explorerSelectionScope);
+					if (node) {
+						this.commandService.destroy(node);
+						this.commandService.renderCommands(explorerSelectionScope, explorerSelectionScope, this, this, "tool"); //$NON-NLS-0$	
+					}
+				}.bind(this));
+			}.bind(this));
 		},
 		updateSelectionStatus: function(selections) {
 			if (!this.explorerSelectionStatus) return;

@@ -1014,7 +1014,7 @@ define([
 			if (!section) return;
 			var actionsNodeScope = section.actionsNode.id;
 			var node = lib.node(actionsNodeScope);
-			lib.returnFocus(node, node, function() {
+			lib.returnFocus(node, document.activeElement, function() {
 				if (node) {
 					commandService.destroy(actionsNodeScope);
 				}
