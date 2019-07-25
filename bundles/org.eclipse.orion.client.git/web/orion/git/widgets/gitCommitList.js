@@ -470,7 +470,9 @@ define([
 				Deferred.when(theRepo.status || (theRepo.status = that.progressService.showWhile(that.gitClient.getGitStatus(theRepo.StatusLocation), messages["Getting changes"])),  function(theStatus) {
 					theStatus.parent = this.model.root;
 					this.model.root.children[0] = theStatus;
-					this.myTree.redraw(theStatus);
+					lib.returnFocus(lib.node(this.parentId), document.activeElement, function() {
+						this.myTree.redraw(theStatus);
+					}.bind(this));
 				}.bind(this));
 				break;
 			}
