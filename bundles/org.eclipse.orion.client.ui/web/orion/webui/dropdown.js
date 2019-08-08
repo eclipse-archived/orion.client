@@ -460,9 +460,9 @@ define(['orion/webui/littlelib', 'orion/EventTarget'], function(lib, EventTarget
 									}
 								}
 							} else if (event.keyCode === lib.KEY.ENTER || event.keyCode === lib.KEY.SPACE) {
-							 	if (!(event.target === this._dropdownNode || event.target.getAttribute("role") === "menuitem")) {
-							 		return;
-						 		}
+								if (!(event.target === this._dropdownNode || event.target.getAttribute("role") === "menuitem")) {
+									return;
+								}
 								if (this._selectedItem.classList.contains("dropdownTrigger") && this._selectedItem.dropdown) { //$NON-NLS-0$
 									this._selectedItem.dropdown.open();
 									this._selectedItem.dropdown._selectItem(); // select first item in submenu
@@ -480,6 +480,11 @@ define(['orion/webui/littlelib', 'orion/EventTarget'], function(lib, EventTarget
 							this._closeThenOpen(this._triggerNode, event.keyCode, false);
 						} else {
 							// DOWN, ENTER, or SPACE: select first item in menu
+							if (event.keyCode === lib.KEY.ENTER || event.keyCode === lib.KEY.SPACE) {
+								if (!(event.target === this._dropdownNode || event.target.getAttribute("role") === "menuitem")) {
+									return;
+								}
+							}
 							this._selectItem(items[0]);
 						}
 					}
