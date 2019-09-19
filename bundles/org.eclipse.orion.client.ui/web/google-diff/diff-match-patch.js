@@ -463,13 +463,20 @@ diff_match_patch.prototype.diff_bisectSplit_ = function(text1, text2, x, y,
  *     The zeroth element of the array of unique strings is intentionally blank.
  * @private
  */
-diff_match_patch.prototype.diff_linesToChars_ = function(text1, text2) {
+diff_match_patch.prototype.diff_linesToChars_ = function(text1, text2, word) {
   var lineArray = [];  // e.g. lineArray[4] == 'Hello\n'
   var lineHash = {};   // e.g. lineHash['Hello\n'] == 4
 
   // '\x00' is a valid character, but various debuggers don't like it.
   // So we'll insert a junk entry to avoid generating a null character.
   lineArray[0] = '';
+  
+  
+  function regexIndexOf_(text, regex, startpos) {
+  	//var matches = text.substring(startpos || 0).match(regex);
+    var indexOf = text.substring(startpos || 0).search(regex);
+    return (indexOf >= 0) ? (indexOf + (startpos || 0)) : indexOf;
+}
 
   /**
    * Split a text into an array of strings.  Reduce the texts to a string of
@@ -479,7 +486,7 @@ diff_match_patch.prototype.diff_linesToChars_ = function(text1, text2) {
    * @return {string} Encoded string.
    * @private
    */
-  function diff_linesToCharsMunge_(text) {
+  function diff_linesToCharsMunge_(text, word) {
     var chars = '';
     // Walk the text, pulling out a substring for each line.
     // text.split('\n') would would temporarily double our memory footprint.
@@ -489,7 +496,13 @@ diff_match_patch.prototype.diff_linesToChars_ = function(text1, text2) {
     // Keeping our own length variable is faster than looking it up.
     var lineArrayLength = lineArray.length;
     while (lineEnd < text.length - 1) {
-      lineEnd = text.indexOf('\n', lineStart);
+      if (word) {
+      	var regex = /[^\w]/;
+      	lineEnd = regexIndexOf_(text, regex, lineStart);
+      } else {
+      	lineEnd = text.indexOf('\n', lineStart);
+      }
+      
       if (lineEnd == -1) {
         lineEnd = text.length - 1;
       }
@@ -515,9 +528,9 @@ diff_match_patch.prototype.diff_linesToChars_ = function(text1, text2) {
   }
   // Allocate 2/3rds of the space for text1, the rest for text2.
   var maxLines = 40000;
-  var chars1 = diff_linesToCharsMunge_(text1);
+  var chars1 = diff_linesToCharsMunge_(text1, word);
   maxLines = 65535;
-  var chars2 = diff_linesToCharsMunge_(text2);
+  var chars2 = diff_linesToCharsMunge_(text2, word);
   return {chars1: chars1, chars2: chars2, lineArray: lineArray};
 };
 
@@ -2234,3 +2247,16 @@ this['DIFF_DELETE'] = DIFF_DELETE;
 this['DIFF_INSERT'] = DIFF_INSERT;
 /** @suppress {globalThis} */
 this['DIFF_EQUAL'] = DIFF_EQUAL;
+
+
+if (typeof module !== "undefined") {
+    module.exports = diff_match_patch;
+}
+
+//define an AMD module if module loader is available
+/*eslint-env amd, node*/
+if (typeof define === 'function' && define.amd) {
+	define(function() {
+		return diff_match_patch;
+	});
+}

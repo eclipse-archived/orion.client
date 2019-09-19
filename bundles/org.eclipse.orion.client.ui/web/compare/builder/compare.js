@@ -108,6 +108,7 @@ define([
 	 * @param {String} [viewType="twoWay"] optional. The type of the compare view. Can be either "twoWay" or "inline". Id not defined default is "twoWay".
 	 * "twoWay" represents a side by side comapre editor while "inline" represents a unified comapre view.
 	 * @param {Boolean} [toggleable=false] optional. Weather or not the compare view is toggleable. A toggleable comapre view provides a toggle button which toggles between the "twoWay" and "inline" view.
+	 * @param {Boolean} [fastDiff=false] optional. Weather or not to use high performance diff engine(google diff-match-patch)
 	 * @param {String} toggleCommandSpanId Optional. The dom element id to render the toggle command. If this is defined the toggle command will be rendered in this DIV rather than the commandSpanId.
 	 */
     function compare(viewOptions, commandSpanId, viewType, toggleable, toggleCommandSpanId){
@@ -125,6 +126,11 @@ define([
 			var cmdProvider = new mCompareCommands.CompareCommandFactory({commandService: commandService, commandSpanId: _convertCommandId(commandSpanId), toggleCommandSpanId: _convertCommandId(toggleCommandSpanId)});
 			vOptions.commandProvider = cmdProvider;
 		}
+		
+		if(vOptions.fastDiff === undefined){
+			vOptions.fastDiff = true;
+		}
+		
 		var vType = (viewType === "inline") ? "inline" : "twoWay"; //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		if(toggleable) {
 			this.compareView = new mCompareView.toggleableCompareView(vType, vOptions);

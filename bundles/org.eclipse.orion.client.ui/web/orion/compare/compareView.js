@@ -25,9 +25,10 @@ define(['i18n!orion/compare/nls/messages',
         'orion/compare/compareUIFactory',
         'orion/compare/compareUtils',
         'orion/compare/jsdiffAdapter',
+        'orion/compare/jsdiffAdapter-google',
         'orion/compare/diffTreeNavigator'],
 function(messages, Deferred, mEventTarget, i18nUtil, lib, mDiffParser, mCompareRulers, mEditor, mEditorFeatures, mKeyBinding, mTextTheme, mTextView,
-		 mCompareUIFactory, mCompareUtils, mJSDiffAdapter, mDiffTreeNavigator,  mTextMateStyler, mHtmlGrammar, mTextStyler) {
+		 mCompareUIFactory, mCompareUtils, mJSDiffAdapter, mJSDiffAdapterFast, mDiffTreeNavigator, mTextMateStyler, mHtmlGrammar, mTextStyler) {
 var exports = {};
 /**
  * @class An abstract comapre view class that holds all the common functions for both "side by side" and "unified" view.
@@ -72,7 +73,7 @@ exports.CompareView = (function() {
 				return {delim:delim , mapper:this.options.mapper, output: this.options.newFile.Content, diffArray:this.options.diffArray};
 			}
 			if(!diff && typeof output === "string" && typeof input === "string"){ //$NON-NLS-1$ //$NON-NLS-0$
-				var adapter = new mJSDiffAdapter.JSDiffAdapter(this.isWhitespaceIgnored());
+				var adapter = this.options.fastDiff ?  new mJSDiffAdapterFast.JSDiffAdapter(this.isWhitespaceIgnored()) : new mJSDiffAdapter.JSDiffAdapter(this.isWhitespaceIgnored());
 				var maps = adapter.adapt(input, output, delim);
 				if(this.options.toggler){
 					this.options.mapper = maps.mapper;
@@ -618,7 +619,7 @@ exports.TwoWayCompareView = (function() {
 		
 		var rFeeder = new mDiffTreeNavigator.TwoWayDiffBlockFeeder(this._editors[0].getTextView().getModel(), result.mapper, 1, this.options.newFileOnRight);
 		var lFeeder = new mDiffTreeNavigator.TwoWayDiffBlockFeeder(this._editors[1].getTextView().getModel(), result.mapper, 0, this.options.newFileOnRight);
-		this._diffNavigator.initAll(this.options.charDiff ? "char" : "word", this._editors[0], this._editors[1], rFeeder, lFeeder, this._overviewRuler, this._curveRuler); //$NON-NLS-1$ //$NON-NLS-0$
+		this._diffNavigator.initAll(this.options.charDiff ? "char" : "word", this._editors[0], this._editors[1], rFeeder, lFeeder, this._overviewRuler, this._curveRuler, this.options.fastDiff); //$NON-NLS-1$ //$NON-NLS-0$
 		this._curveRuler.init(result.mapper ,this._editors[1], this._editors[0], this._diffNavigator);
 		if(refreshEditors) {
 			if(typeof refreshingEditorIndex === "number") {
@@ -919,7 +920,7 @@ exports.InlineCompareView = (function() {
 			mCompareUtils.mergeDiffBlocks(this._textView.getModel(), lFeeder.getDiffBlocks(), result.mapper, result.diffArray.array, result.diffArray.index, this._diffParser._lineDelimiter);
 			rFeeder.setModel(this._textView.getModel());
 			lFeeder.setModel(this._textView.getModel());
-			this._diffNavigator.initAll(this.options.charDiff ? "char" : "word", this._editor, this._editor, rFeeder, lFeeder, this._overviewRuler); //$NON-NLS-1$ //$NON-NLS-0$
+			this._diffNavigator.initAll(this.options.charDiff ? "char" : "word", this._editor, this._editor, rFeeder, lFeeder, this._overviewRuler, this.options.fastDiff); //$NON-NLS-1$ //$NON-NLS-0$
 			
 			this._initSyntaxHighlighter([{fileName: this.options.oldFile.Name, contentType: this.options.oldFile.Type, editor: this._editor}]);
 			this._highlightSyntax();

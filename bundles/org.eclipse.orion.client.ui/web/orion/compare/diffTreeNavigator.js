@@ -9,7 +9,13 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 /*eslint-env browser, amd*/
-define(['i18n!orion/compare/nls/messages', 'orion/treeModelIterator', 'orion/compare/compareUtils', 'orion/editor/annotations', 'orion/compare/jsdiffAdapter'], function(messages, mTreeModelIterator, mCompareUtils, mAnnotations, mJSDiffAdapter){
+define(['i18n!orion/compare/nls/messages', 
+'orion/treeModelIterator', 
+'orion/compare/compareUtils', 
+'orion/editor/annotations', 
+'orion/compare/jsdiffAdapter', 
+'orion/compare/jsdiffAdapter-google'], 
+function(messages, mTreeModelIterator, mCompareUtils, mAnnotations, mJSDiffAdapter, mJSDiffAdapterFast){
 
 var exports = {};
 
@@ -26,10 +32,10 @@ exports.DiffTreeNavigator = (function() {
 	 * @param {list} firstLevelChildren The first level children of the tree root, each item has children and parent property recursively.
 	 * @param {Object} options The options object which provides iterate patterns and all call back functions when iteration happens.
 	 */
-	function DiffTreeNavigator(charOrWordDiff, oldEditor, newEditor, oldDiffBlockFeeder, newDiffBlockFeeder, curveRuler) {
+	function DiffTreeNavigator(charOrWordDiff, oldEditor, newEditor, oldDiffBlockFeeder, newDiffBlockFeeder, curveRuler, fastDiff) {
 		this._root = {type: "root", children: []}; //$NON-NLS-0$
-		this._initialized = false;
-		this.initAll(charOrWordDiff, oldEditor, newEditor, oldDiffBlockFeeder, newDiffBlockFeeder, curveRuler);
+		this._initialized = false; 
+		this.initAll(charOrWordDiff, oldEditor, newEditor, oldDiffBlockFeeder, newDiffBlockFeeder, curveRuler, fastDiff);
 	}
 	
 	/**
@@ -209,7 +215,7 @@ exports.DiffTreeNavigator = (function() {
 	
 	DiffTreeNavigator.prototype = /** @lends orion.DiffTreeNavigator.DiffTreeNavigator.prototype */ {
 		
-		initAll: function(charOrWordDiff, oldEditor, newEditor, oldDiffBlockFeeder, newDiffBlockFeeder, overviewRuler, curveRuler){
+		initAll: function(charOrWordDiff, oldEditor, newEditor, oldDiffBlockFeeder, newDiffBlockFeeder, overviewRuler, curveRuler, fastDiff){
 			if(!charOrWordDiff){
 				this._charOrWordDiff = "word"; //$NON-NLS-0$
 			} else {
@@ -221,6 +227,7 @@ exports.DiffTreeNavigator = (function() {
 			this.editorWrapper = [{editor: oldEditor, diffFeeder: oldDiffBlockFeeder},
 			                      {editor: newEditor, diffFeeder: newDiffBlockFeeder}];
 			this._curveRuler = curveRuler;
+			this.fastDiff = fastDiff;
 			this._overviewRuler = overviewRuler;
 			if(this._overviewRuler){
 				this._overviewRuler.setDiffNavigator(this);
@@ -268,7 +275,8 @@ exports.DiffTreeNavigator = (function() {
 				this.replaceAllAnnotations(true, 1, "word", true, []); //$NON-NLS-0$
 				return;
 			}
-			var adapter = new mJSDiffAdapter.JSDiffAdapter(ignoreWhitespace);
+			
+			var adapter = this.fastDiff ?  new mJSDiffAdapterFast.JSDiffAdapter(ignoreWhitespace) : new mJSDiffAdapter.JSDiffAdapter(ignoreWhitespace);
 			for(i = 0; i < oldDiffBlocks.length; i++){
 				var diffBlockModel = this.generatePairBlockAnnotations(this._root, i);
 				this._root.children.push(diffBlockModel);
@@ -531,7 +539,7 @@ exports.DiffTreeNavigator = (function() {
 			//Given that a diff block with moret than 5000 charactors has very less meaning of indicating all the char level diff, we are disabling the char diff.
 			//Only diff blocks with less than 5000 charactors on both side will get char level diff.
 			//See https://bugs.eclipse.org/bugs/show_bug.cgi?id=399500.
-			if(textOld && textNew && textOld.text && textNew.text && textOld.text.length <= MAX_CHAR_DIFF_CHARS_PER_BLOCK && textNew.text.length <= MAX_CHAR_DIFF_CHARS_PER_BLOCK){
+			if(textOld && textNew && textOld.text && textNew.text && (this.fastDiff || (textOld.text.length <= MAX_CHAR_DIFF_CHARS_PER_BLOCK && textNew.text.length <= MAX_CHAR_DIFF_CHARS_PER_BLOCK))){
 				charDiffMap = jsDiffAdapter.adaptCharDiff(textOld.text, textNew.text, this._charOrWordDiff === "word"); //$NON-NLS-0$
 				startNew = textNew.start;
 				startOld = textOld.start;
