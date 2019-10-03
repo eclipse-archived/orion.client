@@ -484,7 +484,7 @@ define(["orion/util"], function(util) {
 			return element.tagName;
 		}
 		var ix= 0;
-		var siblings = element.parentNode.childNodes;
+		var siblings = element.parentNode && element.parentNode.childNodes || [];
 		for (var i= 0; i < siblings.length; i++) {
 			var sibling = siblings[i];
 			if (sibling === element) {
