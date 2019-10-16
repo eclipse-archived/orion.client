@@ -11,6 +11,7 @@
  *******************************************************************************/
 /*eslint-env browser, amd*/
 define([
+	'module',
 	'i18n!orion/nls/messages', 
 	'i18n!orion/widgets/nls/messages', 
 	'i18n!orion/edit/nls/messages',  
@@ -42,7 +43,7 @@ define([
 	'orion/webui/SideMenu', 
 	'orion/objects', 
 	"orion/metrics"
-], function (messages, widgetMessages, editMessages, require, commonHTML, KeyBinding, EventTarget, mCommands, mParameterCollectors, mExtensionCommands,
+], function (module, messages, widgetMessages, editMessages, require, commonHTML, KeyBinding, EventTarget, mCommands, mParameterCollectors, mExtensionCommands,
 		lib, i18nUtil, mSplitter, mDropdown, mTooltip, mContentTypes, mKeyAssist, mThemePreferences, mThemeData, Deferred,
 		mUserMenu, PageLinks, openResource, Banner, FooterTemplate, ToolbarTemplate, util, mCustomGlobalCommands, SideMenu, objects, mMetrics) {
 	/**
@@ -635,6 +636,12 @@ define([
 		if (footer && FooterTemplate) {
 			lib.setSafeInnerHTML(footer, FooterTemplate);
 			// do the i18n string substitutions
+			var config = module.config && module.config() || {};
+			if (config.ShutdownDate) {
+				messages.ShutdownWarning = i18nUtil.formatMessage(messages.ShutdownWarning, config.ShutdownDate);
+			} else {
+				messages.ShutdownWarning = " ";
+			}
 			lib.processTextNodes(footer, messages);
 			var sideMenuNode = lib.node("sideMenu"); //$NON-NLS-0$
 			if (sideMenuNode) {

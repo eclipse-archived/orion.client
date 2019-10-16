@@ -112,6 +112,7 @@ define({//Default message bundle
 	"Wrote: ${0}": "Wrote: ${0}",
 	"GenerateHTML": "Generate HTML file",
 	"GenerateHTMLTooltip": "Write an HTML file generated from the current Markdown editor content",
+	"ShutdownWarning": "WARNING: This service will be shutdown permanently on ${0}.",
 	"alt text": "alt text",
 	"blockquote": "blockquote",
 	"code": "code",

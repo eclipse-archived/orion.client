@@ -191,6 +191,11 @@ hard-coded numbers elsewhere.
 	font-weight: bold;
 }
 
+.footerBlockShutdown {
+	color: red;
+	font-size: 10pt;
+}
+
 .footerRightBlock {
 	float: right;
 	margin: 8px 8px 0 4px;
