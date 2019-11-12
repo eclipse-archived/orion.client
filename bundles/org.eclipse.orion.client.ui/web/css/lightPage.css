@@ -222,6 +222,7 @@
 
 .lightPage .commandButton.disabled {
 	color: #cdcdcd;
+	border-color: #cdcdcd;
 }
 
 .lightPage .textviewTooltip {

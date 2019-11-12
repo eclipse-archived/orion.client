@@ -421,6 +421,7 @@ a.breadcrumb.currentLocation {
 
 .commandButton.disabled {
 	color: #cdcdcd;
+	border-color: #cdcdcd;
 }
 
 .primaryButton{

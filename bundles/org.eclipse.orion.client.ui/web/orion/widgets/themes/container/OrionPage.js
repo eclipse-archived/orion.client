@@ -65,7 +65,8 @@ define({
 			"color": "#106A5B"
 		},
 		".commandButton.disabled": {
-			"color": "#cdcdcd"
+			"color": "#cdcdcd",
+			"border-color": "#cdcdcd"
 		},
 		".commandButton.orionButton.dropdownTrigger:hover": {
 			"border-color": "#ccc"

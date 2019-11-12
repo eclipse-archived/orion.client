@@ -61,8 +61,10 @@ define([ 'i18n!git/nls/gitmessages', 'orion/webui/dialog', 'orion/xsrfUtils', 'o
 		var updateOkEnablement = function() {
 			if ((this.$fileRadio.checked && this.$selectedFile.value) || (this.$urlRadio.checked && this.$patchurl.value)) {
 				this.$okButton.classList.remove(this.DISABLED);
+				this.$okButton.disabled = false;
 			} else {
 				this.$okButton.classList.add(this.DISABLED);
+				this.$okButton.disabled = true;
 			}
 		}.bind(this);
 
@@ -89,6 +91,7 @@ define([ 'i18n!git/nls/gitmessages', 'orion/webui/dialog', 'orion/xsrfUtils', 'o
 		}.bind(this);
 
 		this.$okButton.classList.add(this.DISABLED);
+		this.$okButton.disabled = true;
 
 		window.setTimeout(
 			function() {
