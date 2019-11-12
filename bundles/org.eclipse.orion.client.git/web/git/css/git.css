@@ -607,6 +607,10 @@ _:-moz-tree-row(hover), .gitChangeListCheck { /* Firefox  HACK */
 	background-color: #ebf2f5;
 }
 
+.gitStatusSection:not(.checkedRow) .commandButton {
+    background-color: #ebf2f5;
+}
+
 .gitListCell {
 	display: flex;
 	display: -ms-flexbox;
