@@ -583,7 +583,7 @@ define(["orion/util"], function(util) {
 	 * @returns A valid html id string
 	 */
 	function validId(str) {
-		return str.replace(/\s/, '-').replace(/[^A-Za-z0-9_.-]/, '.');
+		return str.replace(/\s/g, '-').replace(/[^A-Za-z0-9_.-]/g, '.');
 	}
 	
 	/**

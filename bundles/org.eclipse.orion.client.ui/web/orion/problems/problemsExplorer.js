@@ -229,8 +229,8 @@ define([
 	            result = this.rootId;
 	        } else {
 	            result = item.location;
-	            // remove all non valid chars to make a dom id. 
-	            result = result.replace(/[^\.\:\-\_0-9A-Za-z]/g, "");
+	            // remove all non valid chars to make a dom id.
+	            result = lib.validId(result);
 	        }
 	        return result;
 		}
