@@ -79,10 +79,16 @@ define([
 			label = messages.Warning;
 			icon.classList.add("problemsWarning"); //$NON-NLS-1$
 		}
-		if (hidden) {
+		var parent = holderDiv.parentElement;
+		if (parent.nodeName === "TD") { // gridcell
+			lib.setSafeAttribute(parent, "aria-label", hidden ? messages["Category"] : label);
 			lib.setSafeAttribute(icon, "aria-hidden", true);
 		} else {
-			lib.setSafeAttribute(icon, "aria-label", label);
+			if (hidden) {
+				lib.setSafeAttribute(icon, "aria-hidden", true);
+			} else {
+				lib.setSafeAttribute(icon, "aria-label", label);
+			}
 		}
 		holderDiv.appendChild(icon);
 	}
@@ -119,7 +125,7 @@ define([
 			child.fileName = fileItem.name;
 			child.filePath = fileItem.path;
 			child.fileLocation = fileItem.location;
-			child.location = fileItem.location + child.description + child.start + child.end;
+			child.location = lib.validId(fileItem.location + child.description + child.start + child.end);
 			totalProblems.push(child);
 		});
 	}

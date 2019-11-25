@@ -13,6 +13,7 @@ define({//Default message bundle
 	"ProblemsFilter": "Type characters (* = any string, ? = any character)", //$NON-NLS-1$ //$NON-NLS-0$
 	"computeCancelled": "Problems computation cancelled by user", //$NON-NLS-1$ //$NON-NLS-0$
 	"computingProblems": "Computing problems...", //$NON-NLS-1$ //$NON-NLS-0$
+	"Category": "Category", //$NON-NLS-1$ //$NON-NLS-0$
 	"Problems": "Problems", //$NON-NLS-1$ //$NON-NLS-0$
 	"Errors": "Errors", //$NON-NLS-1$ //$NON-NLS-0$
 	"Info": "Information", //$NON-NLS-1$ //$NON-NLS-0$
