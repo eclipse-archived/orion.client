@@ -80,7 +80,7 @@ define([
 			icon.classList.add("problemsWarning"); //$NON-NLS-1$
 		}
 		var parent = holderDiv.parentElement;
-		if (parent.nodeName === "TD") { // gridcell
+		if (parent !== null && parent.nodeName === "TD") { // gridcell
 			lib.setSafeAttribute(parent, "aria-label", hidden ? messages["Category"] : label);
 			lib.setSafeAttribute(icon, "aria-hidden", true);
 		} else {
