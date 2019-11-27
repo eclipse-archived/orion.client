@@ -4166,7 +4166,7 @@ maybeDescribe("git", function() {
 					assert.equal(index.Added.length, 1);
 					assert.equal(index.Added[0].Name, "a%b.txt");
 					assert.equal(index.Added[0].Path, "a%b.txt");
-					assert.equal(index.Added[0].Location,  FILE_ROOT + "bug512285/" + "a%b.txt".replace(/\%/g, "%25"));
+					assert.equal(index.Added[0].Location,  CONTEXT_PATH + FILE_ROOT + "bug512285/" + "a%b.txt".replace(/\%/g, "%25"));
 					assert.equal(index.Untracked.length, 0);
 					finished();
 				})
