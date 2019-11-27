@@ -47,7 +47,7 @@ function checkUserAccess(req, res, next){
 	// import/export rights depend on access to the file content
 	if (uri.startsWith("/xfer/export/")){
 		if (path.extname(uri) !== ".zip") {
-			return writeError(400, res, "Export is not a zip");
+			return writeError(4007, res, "Export is not a zip");
 		}
 		uri = "/file/" + uri.substring("/xfer/export/".length, uri.length - 4) + '/';
 	} else if (uri.startsWith("/xfer/import/")) {
@@ -98,7 +98,7 @@ function reportTransferFailure(res, err) {
 	if (err.message) {
 		message += ": " + err.message;
 	}
-	return writeResponse(400, res, null, {
+	return writeResponse(4001, res, null, {
 				Severity: "Error",
 				HttpCode: 400,
 				Code: 0,
@@ -127,7 +127,7 @@ function postImportXferTo(req, res, file) {
 		}
 	}
 	if (!fileName) {
-		return writeError(400, res, "Transfer request must indicate target filename");
+		return writeError(4002, res, "Transfer request must indicate target filename");
 	}
 	function upload(request) {
 		var tempFile = path.join(UPLOADS_FOLDER, Date.now() + fileName);
@@ -150,7 +150,7 @@ function postImportXferTo(req, res, file) {
 				rerr = err;
 		})
 		if(rerr) {
-			return writeError(400, res, rerr.message);
+			return writeError(4003, res, rerr.message);
 		}
 		return upload(newreq);
 	}
@@ -191,7 +191,7 @@ function excluded(excludes, rootName, outputName) {
 function completeTransfer(req, res, tempFile, file, fileName, xferOptions, shouldUnzip) {
 	var overwrite = xferOptions.indexOf("overwrite-older") !== -1;
 	function overrideError(files) {
-		writeResponse(400, res, null, {
+		writeResponse(4004, res, null, {
 			Severity: "Error",
 			HttpCode:400,
 			Code: 0,
@@ -213,7 +213,7 @@ function completeTransfer(req, res, tempFile, file, fileName, xferOptions, shoul
 			validateEntrySizes: true
 		}, function(err, zipfile) {
 			if (err) {
-				return writeError(400, res, err.message);
+				return writeError(4006, res, err.message);
 			}
 			zipfile.readEntry();
 			zipfile.on("close", function() {
@@ -229,7 +229,7 @@ function completeTransfer(req, res, tempFile, file, fileName, xferOptions, shoul
 			});
 			zipfile.on("error",function(err){
 				if (res) {
-					return writeError(400, res, "Failed during file unzip: " + err.message);
+					return writeError(4008, res, "Failed during file unzip: " + err.message);
 				}
 			});
 			zipfile.on("entry", function(entry) {
@@ -280,7 +280,7 @@ function completeTransfer(req, res, tempFile, file, fileName, xferOptions, shoul
 		}
 		fs.rename(tempFile, newFile, function(err) {
 			if (err) {
-				return writeError(400, res, "Transfer failed");
+				return writeError(4005, res, "Transfer failed");
 			}
 			res.setHeader("Location", fileUtil.encodeSlug(api.join(fileRoot, file.workspaceId, file.path.substring(file.workspaceDir.length+1))));
 			writeResponse(201, res);
