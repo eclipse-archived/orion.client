@@ -240,11 +240,13 @@ GitClient.prototype = {
 		this.tasks.push(function(resolve) {
 			request()
 			.get(api.encodeStringLocation(GIT_ROOT + "/status" + FILE_ROOT + api.encodeURIComponent(client.getName())))
-			.expect(200)
+			.expect(202)
 			.end(function(err, res) {
 				assert.ifError(err);
-				assert.equal(state, res.body.RepositoryState);
-				client.next(resolve, res.body);
+				getGitResponse(res).then(function(res2) {
+					assert.equal(state, res2.JsonData.RepositoryState);
+					client.next(resolve, res2.JsonData);
+				});
 			});
 		});
 	},
@@ -798,11 +800,13 @@ maybeDescribe("git", function() {
 			it('GET status (check status for git repo)', function(finished) {
 				request()
 				.get(GIT_ROOT + "/status"+FILE_ROOT+ TEST_REPO_NAME + "/")
-				.expect(200)
+				.expect(202)
 				.end(function(err, res) {
 					assert.ifError(err);
-					assert.equal(res.body.Added[0].Name, filename);
-					finished();
+					getGitResponse(res).then(function(res2) {
+						assert.equal(res2.JsonData.Added[0].Name, filename);
+						finished();
+					});
 				});
 			});
 		});

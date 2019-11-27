@@ -709,7 +709,7 @@ function getRemoteCallbacks(creds, username, task) {
 function handleRemoteError(task, err, cloneUrl) {
 	var code = err.code || 500;
 	var jsonData, message = err.message;
-	if (err.message && ["credentials", "authentication", "401"].some(function(s) { return err.message.indexOf(s) !== -1; })) {
+	if (err.message && ["credentials", "authenticat", "401"].some(function(s) { return err.message.indexOf(s) !== -1; })) {
 		code = 401;
 		if (cloneUrl) {
 			jsonData = {"Url": cloneUrl};

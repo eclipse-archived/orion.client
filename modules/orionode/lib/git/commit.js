@@ -1073,7 +1073,7 @@ function merge(req, res, branchToMerge, squash) {
 }
 
 /**
- * Force a merge from the specified comment onto HEAD. This may leave
+ * Force a merge from the specified commit onto HEAD. This may leave
  * the repository in a conflicted state. If there are no conflits, a
  * merge commit will be created to complete the merge.
  * 
@@ -1089,22 +1089,22 @@ function merge(req, res, branchToMerge, squash) {
 function forceMerge(repo, head, commit, branchToMerge, createMergeCommit, conflictingPathsCallback) {
 	return git.AnnotatedCommit.lookup(repo, commit.id())
 	.then(function(annotated) {
-		var retCode = git.Merge.merge(repo, annotated, null, null);
-		if (retCode === git.Error.CODE.ECONFLICT) {
-			// checkout failed due to a conflict
+		return git.Merge.merge(repo, annotated, null, null).then(function() {
+			if (repo.state() !== git.Repository.STATE.MERGE) {
+				throw new Error("Internal merge failure ");
+			}
+	
+			if (createMergeCommit) {
+				var signature = repo.defaultSignature();
+				var message = "Merged branch '" + branchToMerge + "'"; 
+				return createCommit(repo,
+					signature.name(), signature.email(),
+					signature.name(), signature.email(),
+					message, false, false);
+			}
+		}).catch (function(err) {
 			return getConflictingPaths(repo, head, commit).then(conflictingPathsCallback);
-		} else if (retCode !== git.Error.CODE.OK) {
-			throw new Error("Internal merge failure (error code " + retCode + ")");
-		}
-
-		if (createMergeCommit) {
-			var signature = repo.defaultSignature();
-			var message = "Merged branch '" + branchToMerge + "'"; 
-			return createCommit(repo,
-				signature.name(), signature.email(),
-				signature.name(), signature.email(),
-				message, false, false);
-		}
+		});
 	});
 }
 
