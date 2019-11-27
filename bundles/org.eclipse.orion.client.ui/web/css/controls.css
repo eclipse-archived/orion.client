@@ -646,6 +646,10 @@ html[dir="rtl"] .keyAssistFloat { /* ACGC */
 	padding-right: 0;
 }
 
+.keyAssistInput::placeholder {
+	color: #b4a454;
+}
+
 .keyAssistBindingInput {
 	font-size: 10pt;
 	font-weight: bold;

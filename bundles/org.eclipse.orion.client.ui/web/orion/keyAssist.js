@@ -41,20 +41,17 @@ define([
 			lib.setSafeAttribute(keyAssistDiv, "aria-modal", "true");
 			lib.setSafeAttribute(keyAssistDiv, "aria-label", messages["Key Bindings"]);
 
-			var keyAssistCombo = document.createElement("div"); //$NON-NLS-1$
-			lib.setSafeAttribute(keyAssistCombo, "role", "combobox");
-			lib.setSafeAttribute(keyAssistCombo, "aria-haspopup", "grid");
-			lib.setSafeAttribute(keyAssistCombo, "aria-owns", "keyAssistList");
-			lib.setSafeAttribute(keyAssistCombo, "aria-expanded", "true");
 			var keyAssistInput = this._keyAssistInput = document.createElement("input"); //$NON-NLS-1$
 			keyAssistInput.classList.add("keyAssistInput"); //$NON-NLS-1$
 			keyAssistInput.type = "text"; //$NON-NLS-1$
 			lib.setSafeAttribute(keyAssistInput, "aria-label", "Filter bindings:");
 			keyAssistInput.placeholder = messages["Filter bindings"]; //$NON-NLS-1$
+			lib.setSafeAttribute(keyAssistInput, "role", "combobox");
+			lib.setSafeAttribute(keyAssistInput, "aria-haspopup", "grid");
+			lib.setSafeAttribute(keyAssistInput, "aria-expanded", "true");
 			lib.setSafeAttribute(keyAssistInput, "aria-autocomplete", "list");
 			lib.setSafeAttribute(keyAssistInput, "aria-controls", "keyAssistList");
-			keyAssistCombo.appendChild(keyAssistInput);
-			keyAssistDiv.appendChild(keyAssistCombo);
+			keyAssistDiv.appendChild(keyAssistInput);
 
 			var keyAssistContents = this._keyAssistContents = document.createElement("div"); //$NON-NLS-1$
 			keyAssistContents.classList.add("keyAssistContents"); //$NON-NLS-1$
@@ -402,6 +399,7 @@ define([
 			if (this._selectedIndex !== -1) {
 				row = rows[this._selectedIndex];
 				row.classList.remove("selected"); //$NON-NLS-1$
+				lib.setSafeAttribute(this._keyAssistTable, "aria-selected", "false");
 				editButton = row.querySelector(".keyAssistEditButton");
 				if (editButton) {
 					editButton.classList.remove("keyAssistEditButtonVisible"); //$NON-NLS-1$
@@ -415,13 +413,13 @@ define([
 				this._selectedRow = rows[this._selectedIndex];
 				row = this._selectedRow;
 				row.classList.add("selected"); //$NON-NLS-1$
+				lib.setSafeAttribute(this._keyAssistTable, "aria-selected", "true");
 				editButton = row.querySelector(".keyAssistEditButton");
 				if (editButton) {
 					editButton.classList.add("keyAssistEditButtonVisible"); //$NON-NLS-1$
 					editButton.tabIndex = 0;
 				}
 				lib.setSafeAttribute(this._keyAssistInput, "aria-activedescendant", row.id);
-				lib.setSafeAttribute(this._keyAssistTable, "aria-activedescendant", row.id);
 				this._keyAssistTable.focus();
 				var rowRect = row.getBoundingClientRect();
 				var parent = this._keyAssistContents;
