@@ -444,7 +444,7 @@ describe("Search endpoint", function() {
 			}
 			request()
 				.get(PREFIX)
-				.query('sort=NameLower%20asc&rows=100&start=0&q=NameLower:fizz.txt*+Location:/file*')
+				.query('sort=NameLower%20asc&rows=100&start=0&q=NameLower:fizz.txt*+Location:' + CONTEXT_PATH + '/file*')
 				.expect(200)
 				.end(function(err, res) {
 					testHelper.throwIfError(err);
