@@ -150,8 +150,6 @@ function postImportXferTo(req, res, file) {
 				rerr = err;
 		})
 		if(rerr) {
-			console.log(rerr)
-			console.log(rerr.message)
 			return writeError(400, res, rerr.message);
 		}
 		return upload(newreq);
