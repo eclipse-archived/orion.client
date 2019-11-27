@@ -127,7 +127,6 @@ function postImportXferTo(req, res, file) {
 		}
 	}
 	if (!fileName) {
-			console.log("No FILENAME")
 		return writeError(400, res, "Transfer request must indicate target filename");
 	}
 	function upload(request) {
