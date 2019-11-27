@@ -9,8 +9,8 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 
-var path = require('path'),
-	fs = require('fs');
+const path = require('path'),
+	    fs = require('fs');
 
  /**
   * The server context path, default value is the empty string
@@ -18,15 +18,20 @@ var path = require('path'),
   */
 exports.CONTEXT_PATH = CONTEXT_PATH = process.env.CONTEXT_PATH || '';
 /**
+ * The proxy URL to run the test through
+ * @since 21.0
+ */
+exports.TEST_PROXY = process.env.http_proxy || '';
+/**
  * The absolute path to the test workspace. Default value is __dirname + .test_workspace
  * @since 16.0
  */
-exports.WORKSPACE = WORKSPACE = path.join(__dirname, '.test_workspace');
+exports.WORKSPACE = path.join(__dirname, '.test_workspace');
 /**
  * The absolute path to the test metadata. Default value is __dirname + .test_metadata
  * @since 16.0
  */
-exports.METADATA = METADATA = path.join(__dirname, '.test_metadata');
+exports.METADATA = path.join(__dirname, '.test_metadata');
 /**
  * The id of the test workspace. Value is orionode
  * @since 16.0
@@ -36,7 +41,7 @@ exports.WORKSPACE_ID = WORKSPACE_ID = "anonymous-OrionContent";
  * The user's name. Value is anonymous
  * @since 16.0
  */
-exports.USERNAME = USERNAME = "anonymous";
+exports.USERNAME = "anonymous";
 /**
  * The path of the file endpoint, including the CONTEXT_PATH. Default value is /file
  * @since 16.0
@@ -46,7 +51,7 @@ exports.FILE_PATH = FILE_PATH = CONTEXT_PATH + '/file';
  * The path to the workspace endpoint
  * @since 16.0
  */
-exports.WORKSPACE_PATH = WORKSPACE_PATH = CONTEXT_PATH + '/workspace';
+exports.WORKSPACE_PATH = CONTEXT_PATH + '/workspace';
 
 /**
  * The complete file enpoint prefix. Default value is FILE_PATH + / + WORKSPACE_ID

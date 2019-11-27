@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017 IBM Corporation and others.
+ * Copyright (c) 2017, 2019 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -9,7 +9,7 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 /*eslint-env mocha */
-var assert = require('assert'),
+const assert = require('assert'),
 	nodeUtil = require('util'),
 	path = require('path'),
 	stream = require('stream'),
@@ -84,21 +84,24 @@ describe('File endpoint', function() {
 		});
 		it('write file contents to directory', function(done) {
 			request()
-				.post(PREFIX + '/project')
+        .post(PREFIX + '/project')
+        .proxy(testHelper.TEST_PROXY)
 				.type('json')
 				.send({Name: 'testDir', Directory: true})
 				.expect(201)
 				.end(function(err, res) {
 					testHelper.throwIfError(err);
 					request()
-						.put(res.body.Location)
+            .put(res.body.Location)
+            .proxy(testHelper.TEST_PROXY)
 						.send('directory contents')
 						.expect(400, done);
 				})
 		});
 		it("testPostFileNoName", function(done) {
 			request()
-				.post(path.join(PREFIX, '/project'))
+        .post(path.join(PREFIX, '/project'))
+        .proxy(testHelper.TEST_PROXY)
 				.type('json')
 				.send({})
 				.expect(400, done);
@@ -108,7 +111,8 @@ describe('File endpoint', function() {
 		 */
 		it('GET file contents path too long', function(done) {
 			request()
-			.get(PREFIX + '/path_name_exceeds_4096_characters/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/fizz.txt')
+      .get(PREFIX + '/path_name_exceeds_4096_characters/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/fizz.txt')
+      .proxy(testHelper.TEST_PROXY)
 			.expect(400, done);
 		});
 		/**
@@ -117,7 +121,8 @@ describe('File endpoint', function() {
 		it('GET metadata file contents path too long', function(done) {
 			request()
 			.get(PREFIX + '/path_name_exceeds_4096_characters/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/fizz.txt')
-			.query({parts: 'meta'})
+      .proxy(testHelper.TEST_PROXY)
+      .query({parts: 'meta'})
 			.expect(400, done);
 		});
 		/**
@@ -126,7 +131,8 @@ describe('File endpoint', function() {
 		it('PUT file contents path too long', function(done) {
 			request()
 			.put(PREFIX + '/path_name_exceeds_4096_characters/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/fizz.txt')
-			.send("some fun text")
+      .proxy(testHelper.TEST_PROXY)
+      .send("some fun text")
 			.expect(400, done);
 		});
 		/**
@@ -135,7 +141,8 @@ describe('File endpoint', function() {
 		it('DEL file contents path too long', function(done) {
 			request()
 			.del(PREFIX + '/path_name_exceeds_4096_characters/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/fizz.txt')
-			.expect(400, done);
+      .proxy(testHelper.TEST_PROXY)
+      .expect(400, done);
 		});
 		/**
 		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=528269
@@ -143,7 +150,8 @@ describe('File endpoint', function() {
 		it('GET folder path too long', function(done) {
 			request()
 			.get(PREFIX + '/path_name_exceeds_4096_characters/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/')
-			.expect(400, done);
+      .proxy(testHelper.TEST_PROXY)
+      .expect(400, done);
 		});
 		/**
 		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=528269
@@ -151,7 +159,8 @@ describe('File endpoint', function() {
 		it('GET folder metadata path too long', function(done) {
 			request()
 			.get(PREFIX + '/path_name_exceeds_4096_characters/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/')
-			.query({parts: 'meta'})
+      .proxy(testHelper.TEST_PROXY)
+      .query({parts: 'meta'})
 			.expect(400, done);
 		});
 		/**
@@ -160,7 +169,8 @@ describe('File endpoint', function() {
 		it('PUT folder path too long', function(done) {
 			request()
 			.put(PREFIX + '/path_name_exceeds_4096_characters/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/')
-			.expect(400, done);
+      .proxy(testHelper.TEST_PROXY)
+      .expect(400, done);
 		});
 		/**
 		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=528269
@@ -168,7 +178,8 @@ describe('File endpoint', function() {
 		it('DEL folder path too long', function(done) {
 			request()
 			.del(PREFIX + '/path_name_exceeds_4096_characters/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/subdirectory/')
-			.expect(400, done);
+      .proxy(testHelper.TEST_PROXY)
+      .expect(400, done);
 		});
 		/**
 		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=528420
@@ -177,7 +188,8 @@ describe('File endpoint', function() {
 			testHelper.createFile(request, '/project', '/fooFile.txt')
 			.then(function(res) {
 				request()
-					.get(PREFIX + '/project/fooFile.txt/\'bad00001')
+          .get(PREFIX + '/project/fooFile.txt/\'bad00001')
+          .proxy(testHelper.TEST_PROXY)
 					.expect(400, done);
 			});
 		});
@@ -188,7 +200,8 @@ describe('File endpoint', function() {
 			testHelper.createFile(request, '/project', '/fooFile.txt')
 			.then(function(res) {
 				request()
-					.get(PREFIX + '/project/fooFile.txt/bad00002')
+          .get(PREFIX + '/project/fooFile.txt/bad00002')
+          .proxy(testHelper.TEST_PROXY)
 					.expect(400, done);
 			});
 		});
@@ -199,7 +212,8 @@ describe('File endpoint', function() {
 			testHelper.createFile(request, '/project', '/fooFile.txt')
 			.then(function(res) {
 				request()
-					.get(PREFIX + '/project/fooFile.txt/"bad00003')
+          .get(PREFIX + '/project/fooFile.txt/"bad00003')
+          .proxy(testHelper.TEST_PROXY)
 					.expect(400, done);
 			});
 		});
@@ -208,7 +222,8 @@ describe('File endpoint', function() {
 		 */
 		it('POST file - bad double quoted folder after file', function(done) {
 			request()
-				.post(PREFIX + '/project/fooFiletxt/"bad00003')
+        .post(PREFIX + '/project/fooFiletxt/"bad00003')
+        .proxy(testHelper.TEST_PROXY)
 				.type('json')
 				.send({Location: '"bad00003', Directory: true})
 				.expect(400, done);
@@ -220,7 +235,8 @@ describe('File endpoint', function() {
 			testHelper.createFile(request, '/project', '/fooFile.txt')
 			.then(function(res) {
 				request()
-					.put(PREFIX + '/project/fooFile.txt/"bad00003')
+          .put(PREFIX + '/project/fooFile.txt/"bad00003')
+          .proxy(testHelper.TEST_PROXY)
 					.send("Hello!")
 					.expect(400, done);
 			});
@@ -232,7 +248,8 @@ describe('File endpoint', function() {
 			testHelper.createFile(request, '/project', '/fooFile.txt')
 			.then(function(res) {
 				request()
-					.del(PREFIX + '/project/fooFile.txt/"bad00003')
+          .del(PREFIX + '/project/fooFile.txt/"bad00003')
+          .proxy(testHelper.TEST_PROXY)
 					.expect(400, done);
 			});
 		});
@@ -246,12 +263,14 @@ describe('File endpoint', function() {
 				testHelper.createFile(request, '/project', '/fooFile.txt')
 				.then(function(res) {
 					request()
-						.get(PREFIX + '/project/fooFile.txt')
+            .get(PREFIX + '/project/fooFile.txt')
+            .proxy(testHelper.TEST_PROXY)
 						.expect(200)
 						.end(function(err, res) {
 							testHelper.throwIfError(err);
 							request()
-								.get(PREFIX) //no file context - expect null returned
+                .get(PREFIX) //no file context - expect null returned
+                .proxy(testHelper.TEST_PROXY)
 								.query({project: true, names: 'package.json,.tern-project'})
 								.expect(204)
 								.end(function(err, res) {
@@ -267,12 +286,14 @@ describe('File endpoint', function() {
 				.then(function(res) {
 					var f = path.join(PREFIX, '/project', 'foo2File.txt');
 					request()
-						.get(f)
+            .get(f)
+            .proxy(testHelper.TEST_PROXY)
 						.expect(200)
 						.end(function(err, res) {
 							testHelper.throwIfError(err);
 							request()
-								.get(f) //file context with no matching "project-like" names - expect null returned
+                .get(f) //file context with no matching "project-like" names - expect null returned
+                .proxy(testHelper.TEST_PROXY)
 								.query({project: true, names: 'package.json,.tern-project'})
 								.expect(204)
 								.end(function(err, res) {
@@ -288,12 +309,14 @@ describe('File endpoint', function() {
 				.then(function(res) {
 					var f = path.join(PREFIX, '/project', 'foo3File.txt');
 					request()
-						.get(f)
+            .get(f)
+            .proxy(testHelper.TEST_PROXY)
 						.expect(200)
 						.end(function(err, res) {
 							testHelper.throwIfError(err);
 							request()
-								.get(f) //file context with no matching "project-like" names - expect null returned
+                .get(f) //file context with no matching "project-like" names - expect null returned
+                .proxy(testHelper.TEST_PROXY)
 								.query({project: true, names: 'project'}) // still null, only file names can be passed in
 								.expect(204)
 								.end(function(err, res) {
@@ -313,12 +336,14 @@ describe('File endpoint', function() {
 						.then(function(res) {
 							var f = path.join(PREFIX, '/project', '/subDir', 'foo4File.txt');
 							request()
-								.get(f)
+                .get(f)
+                .proxy(testHelper.TEST_PROXY)
 								.expect(200)
 								.end(function(err, res) {
 									testHelper.throwIfError(err);
 									request()
-										.get(f)
+                    .get(f)
+                    .proxy(testHelper.TEST_PROXY)
 										.query({project: true, names: '.tern-project'})
 										.expect(200)
 										.end(function(err, res) {
@@ -339,12 +364,14 @@ describe('File endpoint', function() {
 						.then(function(res) {
 							var f = path.join(PREFIX, '/project', 'foo5File.txt');
 							request()
-								.get(f)
+                .get(f)
+                .proxy(testHelper.TEST_PROXY)
 								.expect(200)
 								.end(function(err, res) {
 									testHelper.throwIfError(err);
 									request()
-										.get(f)
+                    .get(f)
+                    .proxy(testHelper.TEST_PROXY)
 										.query({project: true})
 										.expect(200)
 										.end(function(err, res) {
@@ -364,12 +391,14 @@ describe('File endpoint', function() {
 						.then(function(res) {
 							var f = path.join(PREFIX, '/project', 'foo5File.txt');
 							request()
-								.get(f)
+                .get(f)
+                .proxy(testHelper.TEST_PROXY)
 								.expect(200)
 								.end(function(err, res) {
 									testHelper.throwIfError(err);
 									request()
-										.get(f)
+                    .get(f)
+                    .proxy(testHelper.TEST_PROXY)
 										.query({project: true})
 										.expect(200)
 										.end(function(err, res) {
@@ -386,7 +415,8 @@ describe('File endpoint', function() {
 				testHelper.createFile(request, '/project', '/genericFileHandler.txt', 'Tests the generic file handler')
 					.then(function(res) {
 						request()
-							.get(PREFIX + '/project/genericFileHandler.txt')
+              .get(PREFIX + '/project/genericFileHandler.txt')
+              .proxy(testHelper.TEST_PROXY)
 							.expect(200, '', done); // Creating a file and providing contents is not currently supported in a single request. The client must first create a file with a POST as in the previous section, and then perform a PUT on the location specified in the POST response to provide file contents.
 					});
 			});
@@ -395,23 +425,27 @@ describe('File endpoint', function() {
 			 */
 			it("get file/ root", function(done) {
 				request()
-					.get(CONTEXT_PATH + '/file/')
+          .get(CONTEXT_PATH + '/file/')
+          .proxy(testHelper.TEST_PROXY)
 					.expect(403, done);
 			});
 			it("read workspace.json", function(done) { 
 				request()
-					.get(PREFIX + '/workspace.json')
+          .get(PREFIX + '/workspace.json')
+          .proxy(testHelper.TEST_PROXY)
 					.expect(200, done);
 			});
 			it("testGetFile - readIfExists header", function(done) {
 				request()
-					.get(path.join(PREFIX, '/project', 'doesNotExist.txt'))
+          .get(path.join(PREFIX, '/project', 'doesNotExist.txt'))
+          .proxy(testHelper.TEST_PROXY)
 					.set('read-if-exists', true)
 					.expect(204, done);
 			});
 			it("testGetFile - readIfExists query param", function(done) {
 				request()
-					.get(path.join(PREFIX, '/project', 'doesNotExist.txt'))
+          .get(path.join(PREFIX, '/project', 'doesNotExist.txt'))
+          .proxy(testHelper.TEST_PROXY)
 					.query({readIfExists: true})
 					.expect(404, done);
 			});
@@ -420,7 +454,8 @@ describe('File endpoint', function() {
 				testHelper.createFile(request, '/project', fileName, 'Odd contents')
 					.then(function(res) {
 						request()
-							.get(PREFIX + '/project/'+encodeURIComponent(fileName)+'?parts=meta')
+              .get(PREFIX + '/project/'+encodeURIComponent(fileName)+'?parts=meta')
+              .proxy(testHelper.TEST_PROXY)
 							.set('Charset', 'UTF-8')
 							.set('Content-Type', 'text/plain')
 							.end(function(err, res) {
@@ -435,17 +470,20 @@ describe('File endpoint', function() {
 			});
 			it("get file that does not exist", function(done) {
 				request()
-					.get(PREFIX + '/project/i-dont-exist.jpg')
+          .get(PREFIX + '/project/i-dont-exist.jpg')
+          .proxy(testHelper.TEST_PROXY)
 					.expect(404, done);
 			});
 			it('get file contents', function(done) {
 				request()
-				.get(PREFIX + '/project/fizz.txt')
+        .get(PREFIX + '/project/fizz.txt')
+        .proxy(testHelper.TEST_PROXY)
 				.expect(200, 'hello world', done);
 			});
 			it('file contents has ETag header', function(done) {
 				request()
-				.get(PREFIX + '/project/fizz.txt')
+        .get(PREFIX + '/project/fizz.txt')
+        .proxy(testHelper.TEST_PROXY)
 				.end(function(err, res) {
 					testHelper.throwIfError(err);
 					assert.notEqual(res.headers.etag, null);
@@ -465,7 +503,8 @@ describe('File endpoint', function() {
 							}
 						});
 						request()
-							.put(PREFIX + '/project/fileWriteListener.txt')
+              .put(PREFIX + '/project/fileWriteListener.txt')
+              .proxy(testHelper.TEST_PROXY)
 							.send('Listen for me listener!')
 							.end(function(err, res) {
 								fileUtil.removeFileModificationListener("testListenerWriteFile");
@@ -486,7 +525,8 @@ describe('File endpoint', function() {
 							}
 						});
 						request()
-							.put(PREFIX + '/project/fileWriteListener.txt')
+              .put(PREFIX + '/project/fileWriteListener.txt')
+              .proxy(testHelper.TEST_PROXY)
 							.send('Listen for me listener!')
 							.end(function(err, res) {
 								fileUtil.removeFileModificationListener();
@@ -500,14 +540,16 @@ describe('File endpoint', function() {
 						assert(res.statusCode === 201);
 						var bytes = new Buffer([0, 0xC0, 0xC1, 0xF5, 0xF6, 0xF7, 0xF8, 0xF9, 0xFA, 0xFB, 0xFC, 0xFD, 0xFE, 0xFF]);
 						request()
-							.put(PREFIX + '/project/badutf8.binary')
+              .put(PREFIX + '/project/badutf8.binary')
+              .proxy(testHelper.TEST_PROXY)
 							.send(bytes)
 							.expect(200)
 							.end(function(err, res) {
 								testHelper.throwIfError(err)
 								var bs = new BufStream();
 								var r = request()
-									.get(PREFIX + '/project/badutf8.binary')
+                  .get(PREFIX + '/project/badutf8.binary')
+                  .proxy(testHelper.TEST_PROXY)
 									.pipe(bs);
 								r.on('finish', function() {
 									var data = bs.data();
@@ -520,21 +562,24 @@ describe('File endpoint', function() {
 			});
 			it("testFileWriteBOM", function(done) {
 				request()
-					.post(PREFIX + '/project')
+          .post(PREFIX + '/project')
+          .proxy(testHelper.TEST_PROXY)
 					.type('json')
 					.send({"Name": "testBomFEFF.txt"})
 					.expect(201)
 					.end(function(err, res) {
 						testHelper.throwIfError(err);
 						request()
-							.put(res.body.Location)
+              .put(res.body.Location)
+              .proxy(testHelper.TEST_PROXY)
 							.send(String.fromCharCode(0xFEFF) + 'content with BOM of 0xFEFF')
 							.expect(200, done);
 					});
 			});
 			it("testWriteFileFromURL", function(done) {
 				request()
-					.post(PREFIX + '/project')
+          .post(PREFIX + '/project')
+          .proxy(testHelper.TEST_PROXY)
 					.type('json')
 					.send({"Name": "testWriteFileFromURL.txt"})
 					.expect(201)
@@ -542,12 +587,14 @@ describe('File endpoint', function() {
 						testHelper.throwIfError(err);
 						request()
 							.put(PREFIX + '/project/testWriteFileFromURL.txt?source=http://eclipse.org/eclipse/project-info/home-page-one-liner.html')
-							.type('text')
+              .proxy(testHelper.TEST_PROXY)
+              .type('text')
 							.expect(200)
 							.end(function(err, res) {
 								testHelper.throwIfError(err);
 								request()
-									.get(PREFIX + '/project/testWriteFileFromURL.txt')
+                  .get(PREFIX + '/project/testWriteFileFromURL.txt')
+                  .proxy(testHelper.TEST_PROXY)
 									.type('text')
 									.expect(200)
 									.end(function(err, res) {
@@ -560,7 +607,8 @@ describe('File endpoint', function() {
 			});
 			it("testWriteImageFromURL", function(done) {
 				request()
-					.post(PREFIX + '/project')
+          .post(PREFIX + '/project')
+          .proxy(testHelper.TEST_PROXY)
 					.type('json')
 					.send({"Name": "testWriteGif.gif"})
 					.expect(201)
@@ -568,12 +616,14 @@ describe('File endpoint', function() {
 						testHelper.throwIfError(err);
 						request()
 							.put(PREFIX + '/project/testWriteGif.gif?source=http://eclipse.org/eclipse/development/images/Adarrow.gif')
-							.set("content-type", 'image/gif')
+              .proxy(testHelper.TEST_PROXY)
+              .set("content-type", 'image/gif')
 							.expect(200)
 							.end(function(err, res) {
 								testHelper.throwIfError(err);
 								request()
-									.get(PREFIX + '/project/testWriteGif.gif')
+                  .get(PREFIX + '/project/testWriteGif.gif')
+                  .proxy(testHelper.TEST_PROXY)
 									.set("content-type", 'image/gif')
 									.expect(200)
 									.end(function(err, res) {
@@ -587,7 +637,8 @@ describe('File endpoint', function() {
 			it('put file contents', function(done) {
 				var newContents = 'The time is now ' + Date.now();
 				request()
-					.put(PREFIX + '/project/fizz.txt')
+          .put(PREFIX + '/project/fizz.txt')
+          .proxy(testHelper.TEST_PROXY)
 					.send(newContents)
 					.expect(200)
 					.end(function(err, res) {
@@ -603,7 +654,8 @@ describe('File endpoint', function() {
 			it('put binary file', function(done) {
 				var newContents = new Buffer([0x42, 0xff]); // this is an invalid UTF-8 sequence
 				request()
-					.put(PREFIX + '/project/fizz.raw')
+          .put(PREFIX + '/project/fizz.raw')
+          .proxy(testHelper.TEST_PROXY)
 					.type('application/octet-stream')
 					.send(newContents)
 					.expect(200)
@@ -617,7 +669,8 @@ describe('File endpoint', function() {
 						// GET the file and ensure its contents are what was sent
 						var bufStream = new BufStream();
 						var req = request()
-						.get(body.Location)
+            .get(body.Location)
+            .proxy(testHelper.TEST_PROXY)
 						.pipe(bufStream);
 						req.on("finish", function() {
 							var data = bufStream.data();
@@ -631,20 +684,23 @@ describe('File endpoint', function() {
 			it('conditionally overwrite contents using If-Match', function(done) {
 				var url = PREFIX + '/project/fizz.txt';
 				request()
-					.get(url)
+          .get(url)
+          .proxy(testHelper.TEST_PROXY)
 					.query({ parts: 'meta' })
 					.end(function(err, res) {
 						testHelper.throwIfError(err);
 						var etag = res.body.ETag;
 						assert.notEqual(res.body.ETag, null);
 						request()
-						.put(url)
+            .put(url)
+            .proxy(testHelper.TEST_PROXY)
 						.set('If-Match', etag + '_blort')
 						.expect(412)
 						.end(/* @callback */ function(err, res) {
 							testHelper.throwIfError(err, "Failed to PUT " + url);
 							request(url)
-							.put(url)
+              .put(url)
+              .proxy(testHelper.TEST_PROXY)
 							.set('If-Match', etag)
 							.expect(200)
 							.end(done);
@@ -658,7 +714,8 @@ describe('File endpoint', function() {
 					.then(function(res) {
 						var url = PREFIX + '/project/testPatchEmptyFile.txt';
 						request()
-							.post(url)
+              .post(url)
+              .proxy(testHelper.TEST_PROXY)
 							.set('X-HTTP-Method-Override', 'PATCH')
 							.type('json')
 							.send({ diff: [{ start: 0, end: 0, text: "Hi!" }] })
@@ -666,7 +723,8 @@ describe('File endpoint', function() {
 							.end(/* @callback */ function(err, res) {
 								testHelper.throwIfError(err);
 								request()
-									.get(url)
+                  .get(url)
+                  .proxy(testHelper.TEST_PROXY)
 									.expect(200, 'Hi!', done);
 							});
 					});
@@ -676,7 +734,8 @@ describe('File endpoint', function() {
 					.then(function(res) {
 						var url = PREFIX + '/project/testPatchEmptyFileBadEndRange.txt';
 						request()
-							.post(url)
+              .post(url)
+              .proxy(testHelper.TEST_PROXY)
 							.set('X-HTTP-Method-Override', 'PATCH')
 							.type('json')
 							.send({ diff: [{ start: 0, end: 11, text: "Hi!" }] })
@@ -687,7 +746,8 @@ describe('File endpoint', function() {
 			it('applies a patch with JSON Content-Type', function(done) {
 				var url = PREFIX + '/project/fizz.txt';
 				request()
-					.post(url)
+          .post(url)
+          .proxy(testHelper.TEST_PROXY)
 					.set('X-HTTP-Method-Override', 'PATCH')
 					.type('json')
 					.send({ diff: [{ start: 0, end: 1, text: "j" }] })
@@ -700,7 +760,8 @@ describe('File endpoint', function() {
 			it('applies a patch with JSON + charset Content-Type', function(done) {
 				var url = PREFIX + '/project/fizz.txt';
 				request()
-				.post(url)
+        .post(url)
+        .proxy(testHelper.TEST_PROXY)
 				.set('X-HTTP-Method-Override', 'PATCH')
 				.type('application/json;charset=UTF-8')
 				.send({ diff: [{ start: 0, end: 1, text: "j" }] })
@@ -713,7 +774,8 @@ describe('File endpoint', function() {
 			it('tolerates an empty patch', function(done) {
 				var url = PREFIX + '/project/fizz.txt';
 				request()
-				.post(url)
+        .post(url)
+        .proxy(testHelper.TEST_PROXY)
 				.set('X-HTTP-Method-Override', 'PATCH')
 				.type('text')
 				.send(JSON.stringify({}))
@@ -726,7 +788,8 @@ describe('File endpoint', function() {
 			it('gives consistent ETag between POST and GET', function(done) {
 				var url = PREFIX + '/project/fizz.txt';
 				request()
-				.post(url)
+        .post(url)
+        .proxy(testHelper.TEST_PROXY)
 				.set('X-HTTP-Method-Override', 'PATCH')
 				.type('text')
 				.send(JSON.stringify({
@@ -742,7 +805,8 @@ describe('File endpoint', function() {
 					testHelper.throwIfError(err);
 					var etag = res.headers.etag;
 					request()
-					.get(url)
+          .get(url)
+          .proxy(testHelper.TEST_PROXY)
 					.query({ parts: 'meta' })
 					.expect(200)
 					.end(function(err, res) {
@@ -758,7 +822,8 @@ describe('File endpoint', function() {
 				testHelper.createFile(request, '/project', 'someMetaFile.txt')
 				.then(function(res) {
 					request()
-						.put(res.body.Location)
+            .put(res.body.Location)
+            .proxy(testHelper.TEST_PROXY)
 						.query({parts: 'meta'})
 						.expect(501, done);
 				});
@@ -768,7 +833,8 @@ describe('File endpoint', function() {
 					.then(function(res) {
 						var url = PREFIX + '/project/testETagPutNotMatch.txt';
 						request()
-							.get(url)
+              .get(url)
+              .proxy(testHelper.TEST_PROXY)
 							.query({parts: 'meta'})
 							.expect(200)
 							.end(function(err, res) {
@@ -779,7 +845,8 @@ describe('File endpoint', function() {
 								fs.writeFileSync(path.join(WORKSPACE, 'project/testETagPutNotMatch.txt'), "changed");
 								//now a put should fail since the etags don't match
 								request()
-									.put(url)
+                  .put(url)
+                  .proxy(testHelper.TEST_PROXY)
 									.set("If-Match", etag)
 									.send("new contents")
 									.expect(412)
@@ -795,13 +862,15 @@ describe('File endpoint', function() {
 					.then(function(res) {
 						var url = PREFIX + '/project/testMetadataHandling.txt';
 						request()
-							.get(url)
+              .get(url)
+              .proxy(testHelper.TEST_PROXY)
 							.query({parts: 'meta'})
 							.expect(200)
 							.end(function(err, res) {
 								testHelper.throwIfError(err);
 								request()
-									.put(url)
+                  .put(url)
+                  .proxy(testHelper.TEST_PROXY)
 									.query({parts: 'meta'})
 									.type('json')
 									.send({Attributes: {ReadOnly: true, Executable: true}})
@@ -809,7 +878,8 @@ describe('File endpoint', function() {
 									.end(function(err, res) {
 										testHelper.throwIfError(err);
 										request()
-											.get(url)
+                      .get(url)
+                      .proxy(testHelper.TEST_PROXY)
 											.query({parts: 'meta'})
 											.expect(200)
 											.end(function(err, res) {
@@ -834,7 +904,8 @@ describe('File endpoint', function() {
 				.then(function(res) {
 					var url = PREFIX + '/project/testETagDeletedFile.txt';
 					request()
-						.get(url)
+            .get(url)
+            .proxy(testHelper.TEST_PROXY)
 						.query({parts: 'meta'})
 						.expect(200)
 						.end(function(err, res) {
@@ -843,12 +914,14 @@ describe('File endpoint', function() {
 							assert(etag, "There should be an etag");
 							//delete the file
 							request()
-								.del(url)
+                .del(url)
+                .proxy(testHelper.TEST_PROXY)
 								.expect(200)
 								.end(function(err, res) {
 									//now a put should fail since the etags don't match
 									request()
-										.put(url)
+                    .put(url)
+                    .proxy(testHelper.TEST_PROXY)
 										.set("If-Match", etag)
 										.send("new contents")
 										.expect(412)
@@ -862,7 +935,8 @@ describe('File endpoint', function() {
 					.then(function(res) {
 						var url = PREFIX + '/project/testETagHandling.txt';
 						request()
-							.get(url)
+              .get(url)
+              .proxy(testHelper.TEST_PROXY)
 							.query({parts: 'meta'})
 							.expect(200)
 							.end(function(err, res) {
@@ -872,7 +946,8 @@ describe('File endpoint', function() {
 								assert.equal(etag1, res.body.ETag, "The body and header etags do not match");
 								//modify and re-check
 								request()
-									.put(url)
+                  .put(url)
+                  .proxy(testHelper.TEST_PROXY)
 									.set("If-Match", etag1)
 									.type("text/plain;charset=UTF-8")
 									.send("new contents for you")
@@ -903,7 +978,8 @@ describe('File endpoint', function() {
 						});
 						var url = PREFIX + '/project/testListenerMetadataHandling.txt';
 						request()
-							.put(url)
+              .put(url)
+              .proxy(testHelper.TEST_PROXY)
 							.query({parts: 'meta'})
 							.expect(204)
 							.end(function(err, res) {
@@ -914,7 +990,8 @@ describe('File endpoint', function() {
 			});
 			it('get file metadata', function(done) {
 				request()
-				.get(PREFIX + '/project/fizz.txt')
+        .get(PREFIX + '/project/fizz.txt')
+        .proxy(testHelper.TEST_PROXY)
 				.query({ parts: 'meta' })
 				.expect(200)
 				.end(function(err, res) {
@@ -937,7 +1014,8 @@ describe('File endpoint', function() {
 			});
 			it('file metadata has ETag header', function(done) {
 				request()
-				.get(PREFIX + '/project/fizz.txt')
+        .get(PREFIX + '/project/fizz.txt')
+        .proxy(testHelper.TEST_PROXY)
 				.query({ parts: 'meta' })
 				.end(function(err, res) {
 					testHelper.throwIfError(err);
@@ -947,7 +1025,8 @@ describe('File endpoint', function() {
 			});
 			it('has a correct "Parents" field', function(done) {
 				request()
-				.get(PREFIX + '/project/my%20folder/my%20subfolder/quux.txt')
+        .get(PREFIX + '/project/my%20folder/my%20subfolder/quux.txt')
+        .proxy(testHelper.TEST_PROXY)
 				.query({ parts: 'meta' })
 				.expect(200)
 				.end(function(err, res) {
@@ -969,7 +1048,8 @@ describe('File endpoint', function() {
 		describe('creating', function() {
 			it("testCreateEmptyFile", function(done) {
 				request()
-					.post(PREFIX + '/project')
+          .post(PREFIX + '/project')
+          .proxy(testHelper.TEST_PROXY)
 					.type('json')
 					.send({Name: 'newEmptyFile.txt'})
 					.expect(201)
@@ -978,7 +1058,8 @@ describe('File endpoint', function() {
 			it("testCreateFileEncodedName", function(done) {
 				var fileName = "http%2525253A%2525252F%2525252Fwww.example.org%2525252Fwinery%2525252FTEST%2525252Fjclouds1";
 				request()
-					.post(PREFIX + '/project')
+          .post(PREFIX + '/project')
+          .proxy(testHelper.TEST_PROXY)
 					.type('json')
 					.send({Name: encodeURIComponent(fileName)})
 					.expect(201)
@@ -987,7 +1068,8 @@ describe('File endpoint', function() {
 			it("testCreateFileEncodedNameSlug", function(done) {
 				var fileName = "http%2525253A%2525252F%2525252Fwww.example.org%2525252Fwinery%2525252FTEST%2525252Fjclouds1";
 				request()
-					.post(PREFIX + '/project')
+          .post(PREFIX + '/project')
+          .proxy(testHelper.TEST_PROXY)
 					.set('Slug', encodeURIComponent(fileName))
 					.expect(201)
 					.end(done)
@@ -995,7 +1077,8 @@ describe('File endpoint', function() {
 			it("testCreateFileDBCSName", function(done) {
 				var fileName = "\u4f60\u597d\u4e16\u754c";
 				request()
-					.post(PREFIX + '/project')
+          .post(PREFIX + '/project')
+          .proxy(testHelper.TEST_PROXY)
 					.type('json')
 					.send({Name: encodeURIComponent(fileName)})
 					.expect(201)
@@ -1004,7 +1087,8 @@ describe('File endpoint', function() {
 			it("testCreateFileDBCSSlugName", function(done) {
 				var fileName = "\u4f60\u597d\u4e16\u754c";
 				request()
-					.post(PREFIX + '/project')
+          .post(PREFIX + '/project')
+          .proxy(testHelper.TEST_PROXY)
 					.set('Slug', encodeURIComponent(fileName))
 					.expect(201)
 					.end(done)
@@ -1013,13 +1097,15 @@ describe('File endpoint', function() {
 				testHelper.createFile(request, '/project', 'testCreateFileOverwrite.txt')
 					.then(function(res) {
 						request()
-							.post(PREFIX + '/project')
+              .post(PREFIX + '/project')
+              .proxy(testHelper.TEST_PROXY)
 							.set('Slug', 'testCreateFileOverwrite.txt')
 							.expect(200)
 							.end(function(err, res) {
 								testHelper.throwIfError(err);
 								request()
-									.post(PREFIX + '/project')
+                  .post(PREFIX + '/project')
+                  .proxy(testHelper.TEST_PROXY)
 									.set('X-Create-Options', 'no-overwrite')
 									.set('Slug', 'testCreateFileOverwrite.txt')
 									.expect(412)
@@ -1029,7 +1115,8 @@ describe('File endpoint', function() {
 			});
 			it("testCreateTopLevelFile", function(done) {
 				request()
-				.post(PREFIX)
+        .post(PREFIX)
+        .proxy(testHelper.TEST_PROXY)
 				.type('json')
 				.set('Slug', 'topLevelFile.txt')
 				.send({Name: 'topLevelFile.txt', Directory: false})
@@ -1043,7 +1130,8 @@ describe('File endpoint', function() {
 			});
 			it('works with Slug header', function(done) {
 				request()
-				.post(PREFIX + '/project')
+        .post(PREFIX + '/project')
+        .proxy(testHelper.TEST_PROXY)
 				.set('Slug', 'newfile.txt')
 				.expect(201)
 				.end(function(err, res) {
@@ -1055,7 +1143,8 @@ describe('File endpoint', function() {
 			});
 			it('works with "Name" field', function(done) {
 				request()
-				.post(PREFIX + '/project')
+        .post(PREFIX + '/project')
+        .proxy(testHelper.TEST_PROXY)
 				.send({ Name: 'newfile.txt' })
 				.expect(201)
 				.end(function(err, res) {
@@ -1079,7 +1168,8 @@ describe('File endpoint', function() {
 		describe('metadata', function() {
 			it('get directory metadata', function(done) {
 				request()
-				.get(PREFIX + '/project/my%20folder')
+        .get(PREFIX + '/project/my%20folder')
+        .proxy(testHelper.TEST_PROXY)
 				.expect(200)
 				.end(function(err, res) {
 					testHelper.throwIfError(err);
@@ -1094,7 +1184,8 @@ describe('File endpoint', function() {
 			});
 			it('has a correct "Parents" field', function(done) {
 				request()
-				.get(PREFIX + '/project/my%20folder/my%20subfolder')
+        .get(PREFIX + '/project/my%20folder/my%20subfolder')
+        .proxy(testHelper.TEST_PROXY)
 				.expect(200)
 				.end(function(err, res) {
 					testHelper.throwIfError(err);
@@ -1113,7 +1204,8 @@ describe('File endpoint', function() {
 			it("testDirectoryDepth", function(done) {
 				testHelper.mkdirp(WORKSPACE, 'project/testDirectoryDepth/d1/d2/d3');
 				request()
-					.get(PREFIX + '/project/testDirectoryDepth')
+          .get(PREFIX + '/project/testDirectoryDepth')
+          .proxy(testHelper.TEST_PROXY)
 					.query({depth: 1})
 					.expect(200)
 					.end(function(err, res) {
@@ -1126,7 +1218,8 @@ describe('File endpoint', function() {
 			});
 			it("testReadDirectory", function(done) {
 				request()
-					.get(PREFIX + '/project/my%20folder')
+          .get(PREFIX + '/project/my%20folder')
+          .proxy(testHelper.TEST_PROXY)
 					.query({ depth: 0 })
 					.expect(200)
 					.end(function(err, res) {
@@ -1139,7 +1232,8 @@ describe('File endpoint', function() {
 			});
 			it('get directory contents', function(done) {
 				request()
-				.get(PREFIX + '/project/my%20folder')
+        .get(PREFIX + '/project/my%20folder')
+        .proxy(testHelper.TEST_PROXY)
 				.query({ depth: 1 })
 				.expect(200)
 				.end(function(err, res) {
@@ -1178,7 +1272,8 @@ describe('File endpoint', function() {
 					}
 				});
 				request()
-					.post(PREFIX + '/project')
+          .post(PREFIX + '/project')
+          .proxy(testHelper.TEST_PROXY)
 					.type('json')
 					.send({Name: 'testListenerCreateDirectory', Directory: true})
 					.expect(201)
@@ -1199,7 +1294,8 @@ describe('File endpoint', function() {
 					}
 				});
 				request()
-					.post(PREFIX + '/project')
+          .post(PREFIX + '/project')
+          .proxy(testHelper.TEST_PROXY)
 					.type('json')
 					.send({Name: 'testListenerCreateDirectory', Directory: true})
 					.expect(201)
@@ -1215,14 +1311,16 @@ describe('File endpoint', function() {
 			it("testFolderWithIPv6Name", function(done) {
 				var folderName = "[bork]";
 				request()
-					.post(PREFIX + '/project')
+          .post(PREFIX + '/project')
+          .proxy(testHelper.TEST_PROXY)
 					.type('json')
 					.send({Name: folderName, Directory: true})
 					.expect(201)
 					.end(function(err, res) {
 						testHelper.throwIfError(err);
 						request()
-						.post(res.body.Location)
+            .post(res.body.Location)
+            .proxy(testHelper.TEST_PROXY)
 						.type('json')
 						.set('Slug', 'test.txt')
 						.send({"Name":"test.txt","Directory":false})
@@ -1230,7 +1328,8 @@ describe('File endpoint', function() {
 							.end(function(err, res) {
 								testHelper.throwIfError(err);
 								request()
-									.get(res.body.Location)
+                  .get(res.body.Location)
+                  .proxy(testHelper.TEST_PROXY)
 									.query({parts: 'meta'})
 									.expect(200)
 									.end(done);
@@ -1239,7 +1338,8 @@ describe('File endpoint', function() {
 			});
 			it('works with Slug header', function(done) {
 				request()
-				.post(PREFIX + '/project')
+        .post(PREFIX + '/project')
+        .proxy(testHelper.TEST_PROXY)
 				.type('json')
 				.set('Slug', 'new directory')
 				.send({ Directory: true })
@@ -1254,7 +1354,8 @@ describe('File endpoint', function() {
 			});
 			it('works with "Name" field', function(done) {
 				request()
-				.post(PREFIX + '/project')
+        .post(PREFIX + '/project')
+        .proxy(testHelper.TEST_PROXY)
 				.type('json')
 				.send({ Name: 'new directory', Directory: true })
 				.expect(201)
@@ -1268,7 +1369,8 @@ describe('File endpoint', function() {
 			});
 			it('works when a string-typed Directory "true" is provided', function(done) {
 				request()
-				.post(PREFIX + '/project')
+        .post(PREFIX + '/project')
+        .proxy(testHelper.TEST_PROXY)
 				.type('json')
 				.send({ Name: 'new directory', Directory: 'true' }) //only works because of the truthy value of a non-empty string
 				.expect(201)
@@ -1282,7 +1384,8 @@ describe('File endpoint', function() {
 			});
 			it('works when a string-typed Directory "false" is provided', function(done) {
 				request()
-				.post(PREFIX + '/project')
+        .post(PREFIX + '/project')
+        .proxy(testHelper.TEST_PROXY)
 				.type('json')
 				.set('Slug', 'Not a directory')
 				.send({ Directory: false })
@@ -1308,12 +1411,14 @@ describe('File endpoint', function() {
 			testHelper.createDir(request, "/project", "testDeleteEmptyDir")
 				.then(function(res) {
 					request()
-						.del(PREFIX + '/project/testDeleteEmptyDir')
+            .del(PREFIX + '/project/testDeleteEmptyDir')
+            .proxy(testHelper.TEST_PROXY)
 						.expect(204)
 						.end(function(err, res) {
 							testHelper.throwIfError(err);
 							request()
-								.get(PREFIX + '/project/testDeleteEmptyDir')
+                .get(PREFIX + '/project/testDeleteEmptyDir')
+                .proxy(testHelper.TEST_PROXY)
 								.expect(404)
 								.end(done);
 						});
@@ -1329,12 +1434,14 @@ describe('File endpoint', function() {
 					}
 				});
 				request()
-					.del(PREFIX + '/project/testDeleteEmptyDir')
+          .del(PREFIX + '/project/testDeleteEmptyDir')
+          .proxy(testHelper.TEST_PROXY)
 					.expect(204)
 					.end(function(err, res) {
 						testHelper.throwIfError(err);
 						request()
-							.get(PREFIX + '/project/testDeleteEmptyDir')
+              .get(PREFIX + '/project/testDeleteEmptyDir')
+              .proxy(testHelper.TEST_PROXY)
 							.expect(404)
 							.end(function(err, res) {
 								fileUtil.removeFileModificationListener("testListenerDeleteEmptyDir");
@@ -1347,13 +1454,15 @@ describe('File endpoint', function() {
 			testHelper.createFile(request, "/project", "testDeleteFile.bmp")
 				.then(function(res) { 
 					request()
-					.del(PREFIX + '/project/testDeleteFile.bmp')
+          .del(PREFIX + '/project/testDeleteFile.bmp')
+          .proxy(testHelper.TEST_PROXY)
 					.expect(204)
 					.end(/* @callback */ function(err, res) {
 						testHelper.throwIfError(err, "failed to DELETE file");
 						// subsequent requests should 404
 						request()
-							.get(PREFIX + '/project/testDeleteFile.bmp')
+              .get(PREFIX + '/project/testDeleteFile.bmp')
+              .proxy(testHelper.TEST_PROXY)
 							.expect(404)
 							.end(done);
 					});
@@ -1369,12 +1478,14 @@ describe('File endpoint', function() {
 						}
 					});
 					request()
-						.del(PREFIX + '/project/testDeleteFileListener.txt')
+            .del(PREFIX + '/project/testDeleteFileListener.txt')
+            .proxy(testHelper.TEST_PROXY)
 						.expect(204)
 						.end(function(err, res) {
 							testHelper.throwIfError(err);
 							request()
-								.get(PREFIX + '/project/testDeleteFileListener.txt')
+                .get(PREFIX + '/project/testDeleteFileListener.txt')
+                .proxy(testHelper.TEST_PROXY)
 								.expect(404)
 								.end(function(err, res) {
 									fileUtil.removeFileModificationListener("testListenerDeleteFile");
@@ -1389,12 +1500,14 @@ describe('File endpoint', function() {
 					testHelper.createFile(request, "/project/testDeleteNonEmptyDirectory", "file.txt")
 						.then(function(res) {
 							request()
-							.del(PREFIX + '/project/testDeleteNonEmptyDirectory')
+              .del(PREFIX + '/project/testDeleteNonEmptyDirectory')
+              .proxy(testHelper.TEST_PROXY)
 							.expect(204)
 							.end(function(err, res) {
 								testHelper.throwIfError(err);
 								request()
-									.get(PREFIX + '/project/testDeleteNonEmptyDirectory')
+                  .get(PREFIX + '/project/testDeleteNonEmptyDirectory')
+                  .proxy(testHelper.TEST_PROXY)
 									.expect(404)
 									.end(done);
 							});
@@ -1413,12 +1526,14 @@ describe('File endpoint', function() {
 								}
 							});
 							request()
-							.del(PREFIX + '/project/testListenerDeleteNonEmptyDirectory')
+              .del(PREFIX + '/project/testListenerDeleteNonEmptyDirectory')
+              .proxy(testHelper.TEST_PROXY)
 							.expect(204)
 							.end(function(err, res) {
 								testHelper.throwIfError(err);
 								request()
-									.get(PREFIX + '/project/testListenerDeleteNonEmptyDirectory')
+                  .get(PREFIX + '/project/testListenerDeleteNonEmptyDirectory')
+                  .proxy(testHelper.TEST_PROXY)
 									.expect(404)
 									.end(function(err, res) {
 										fileUtil.removeFileModificationListener("testListenerDeleteNonEmptyDirectory");
@@ -1430,32 +1545,37 @@ describe('File endpoint', function() {
 		});
 		it('delete a file', function(done) {
 			request()
-			.del(PREFIX + '/project/my%20folder/buzz.txt')
+      .del(PREFIX + '/project/my%20folder/buzz.txt')
+      .proxy(testHelper.TEST_PROXY)
 			.expect(204)
 			.end(/* @callback */ function(err, res) {
 				testHelper.throwIfError(err, "failed to DELETE file");
 				// subsequent requests should 404
 				request()
-				.get(PREFIX + '/project/my%20folder/buzz.txt')
+        .get(PREFIX + '/project/my%20folder/buzz.txt')
+        .proxy(testHelper.TEST_PROXY)
 				.expect(404)
 				.end(done);
 			});
 		});
 		it('delete a directory', function(done) {
 			request()
-			.del(PREFIX + '/project/my%20folder')
+      .del(PREFIX + '/project/my%20folder')
+      .proxy(testHelper.TEST_PROXY)
 			.expect(204)
 			.end(/* @callback */ function(err, res) {
 				testHelper.throwIfError(err, "Failed to DELETE folder");
 				// the directory is gone:
 				request()
-				.get(PREFIX + '/project/my%20folder')
+        .get(PREFIX + '/project/my%20folder')
+        .proxy(testHelper.TEST_PROXY)
 				.expect(404)
 				.end(/* @callback */ function(err, res) {
 					testHelper.throwIfError(err);
 					// and its contents are gone:
 					request()
-					.get(PREFIX + '/project/my%20folder/buzz.txt')
+          .get(PREFIX + '/project/my%20folder/buzz.txt')
+          .proxy(testHelper.TEST_PROXY)
 					.expect(404)
 					.end(done);
 				});
@@ -1464,20 +1584,23 @@ describe('File endpoint', function() {
 		it('conditional delete using If-Match', function(done) {
 			var url = PREFIX + '/project/fizz.txt';
 			request()
-			.get(url)
+      .get(url)
+      .proxy(testHelper.TEST_PROXY)
 			.query({ parts: 'meta' })
 			.end(function(err, res) {
 				testHelper.throwIfError(err, "Failed to get folder");
 				var etag = res.body.ETag;
 				assert.notEqual(res.body.ETag, null);
 				request()
-				.del(url)
+        .del(url)
+        .proxy(testHelper.TEST_PROXY)
 				.set('If-Match', etag + '_blort')
 				.expect(412)
 				.end(/* @callback */ function(err, res) {
 					testHelper.throwIfError(err, "Expected precondition to fail");
 					request(url)
-					.del(url)
+          .del(url)
+          .proxy(testHelper.TEST_PROXY)
 					.set('If-Match', etag)
 					.expect(204)
 					.end(done);
@@ -1497,7 +1620,8 @@ describe('File endpoint', function() {
 					assert(res.statusCode === 201);
 					var url = PREFIX + '/project/someFileThatDoesNotExist.txt'
 					request()
-						.post(PREFIX + '/project/testCopyFileInvalidSource')
+            .post(PREFIX + '/project/testCopyFileInvalidSource')
+            .proxy(testHelper.TEST_PROXY)
 						.set('X-Create-Options', 'copy')
 						.set('Slug', 'someFileThatDoesNotExist.txt')
 						.send({Location: url})
@@ -1513,7 +1637,8 @@ describe('File endpoint', function() {
 							assert(res.statusCode === 201);
 							var url = PREFIX + '/project/copyNoOverwrite.txt'
 							request()
-								.post(PREFIX + '/project/testCopyFileNoOverwrite')
+                .post(PREFIX + '/project/testCopyFileNoOverwrite')
+                .proxy(testHelper.TEST_PROXY)
 								.set('Slug', 'copyNO2.txt')
 								.set('X-Create-Options', 'copy')
 								.send({Location: url})
@@ -1541,7 +1666,8 @@ describe('File endpoint', function() {
 						});
 						var url = PREFIX + '/project/copyListener.txt'
 						request()
-							.post(PREFIX + '/project/testListenerCopyFile')
+              .post(PREFIX + '/project/testListenerCopyFile')
+              .proxy(testHelper.TEST_PROXY)
 							.set('Slug', 'copyListener2.txt')
 							.set('X-Create-Options', 'copy')
 							.send({Location: url})
@@ -1555,13 +1681,15 @@ describe('File endpoint', function() {
 		});
 		it("testCopyFileOverwrite", function(done) {
 			request()
-				.post(PREFIX + '/project/my%20folder') //create a file will will overwrite
+        .post(PREFIX + '/project/my%20folder') //create a file will will overwrite
+        .proxy(testHelper.TEST_PROXY)
 				.set('Slug', 'fizz2.txt')
 				.expect(201)
 				.end(function(err, res) {
 					testHelper.throwIfError(err);
 					request()
-						.post(PREFIX + '/project/my%20folder')
+            .post(PREFIX + '/project/my%20folder')
+            .proxy(testHelper.TEST_PROXY)
 						.set('Slug', 'fizz2.txt')
 						.set('X-Create-Options', 'copy,overwrite')
 						.send({ Location: PREFIX + '/project/fizz.txt' })
@@ -1574,7 +1702,8 @@ describe('File endpoint', function() {
 		});
 		it('copy a file', function(done) {
 			request()
-			.post(PREFIX + '/project/my%20folder')
+      .post(PREFIX + '/project/my%20folder')
+      .proxy(testHelper.TEST_PROXY)
 			.set('Slug', 'copy_of_fizz.txt')
 			.set('X-Create-Options', 'copy')
 			.send({ Location: PREFIX + '/project/fizz.txt' })
@@ -1588,7 +1717,8 @@ describe('File endpoint', function() {
 		it('copy a file overwrites when "no-overwrite" is not set', function(done) {
 			// cp project/fizz.txt "project/my folder/buzz.txt"
 			request()
-			.post(PREFIX + '/project/my%20folder')
+      .post(PREFIX + '/project/my%20folder')
+      .proxy(testHelper.TEST_PROXY)
 			.set('Slug', 'buzz.txt')
 			.set('X-Create-Options', 'copy')
 			.send({ Location: PREFIX + '/project/fizz.txt' })
@@ -1606,7 +1736,8 @@ describe('File endpoint', function() {
 		});
 		it('copy a directory', function(done) {
 			request()
-			.post(PREFIX + '/project/')
+      .post(PREFIX + '/project/')
+      .proxy(testHelper.TEST_PROXY)
 			.set('Slug', 'copy_of_my_folder')
 			.set('X-Create-Options', 'copy')
 			.send({ Location: PREFIX + '/project/my folder' })
@@ -1616,7 +1747,8 @@ describe('File endpoint', function() {
 				// Ensure the copy has the expected children
 				assert.ok(res.body.ChildrenLocation);
 				request()
-				.get(res.body.ChildrenLocation)
+        .get(res.body.ChildrenLocation)
+        .proxy(testHelper.TEST_PROXY)
 				.expect(200)
 				.end(function(err, res) {
 					testHelper.throwIfError(err);
@@ -1636,7 +1768,8 @@ describe('File endpoint', function() {
 			 testHelper.createDir(request, '/project', '/moveToFolder')
 				.then(function(res) {
 					request()
-						.post(PREFIX + '/project/moveToFolder') //move it to
+            .post(PREFIX + '/project/moveToFolder') //move it to
+            .proxy(testHelper.TEST_PROXY)
 						.set('X-Create-Options', 'move')
 						.set('Slug', 'fizz.txt')
 						.send({Location: PREFIX + '/project/fizz.txt'})
@@ -1653,7 +1786,8 @@ describe('File endpoint', function() {
 				   testHelper.createFile(request, "/project/moveToFolder", "fizz.txt")
 				   	.then(function(res) {
 						request()
-						.post(PREFIX + '/project/moveToFolder') //move it to
+            .post(PREFIX + '/project/moveToFolder') //move it to
+            .proxy(testHelper.TEST_PROXY)
 						.set('X-Create-Options', 'move')
 						.set('Slug', 'fizz.txt')
 						.send({Location: PREFIX + '/project/fizz.txt'})
@@ -1669,7 +1803,8 @@ describe('File endpoint', function() {
 			testHelper.createDir(request, '/project', '/moveToFolder2')
 				.then(function(res) {
 					request()
-						.post(PREFIX + '/project/moveToFolder2') //move it to
+            .post(PREFIX + '/project/moveToFolder2') //move it to
+            .proxy(testHelper.TEST_PROXY)
 						.set('X-Create-Options', 'copy,no-overwrite')
 						.set('Slug', 'fizz.txt')
 						.send({Location: PREFIX + '/project/fizz.txt'})
@@ -1693,7 +1828,8 @@ describe('File endpoint', function() {
 			testHelper.createDir(request, '/project', '/moveToFolder3')
 				.then(function(res) {
 					request()
-						.post(PREFIX + '/project/moveToFolder3') //move it to
+            .post(PREFIX + '/project/moveToFolder3') //move it to
+            .proxy(testHelper.TEST_PROXY)
 						.set('X-Create-Options', 'move')
 						.set('Slug', 'fizz.txt')
 						.send({Location: PREFIX + '/project/fizz.txt'})
@@ -1715,7 +1851,8 @@ describe('File endpoint', function() {
 						}
 					})
 					request()
-						.post(PREFIX + '/project/moveToFolder4') //move it to
+            .post(PREFIX + '/project/moveToFolder4') //move it to
+            .proxy(testHelper.TEST_PROXY)
 						.set('X-Create-Options', 'copy,no-overwrite')
 						.set('Slug', 'fizz.txt')
 						.send({Location: PREFIX + '/project/fizz.txt'})
@@ -1736,7 +1873,8 @@ describe('File endpoint', function() {
 						.then(function(res) {
 							// Try rename testrenamefilechangecase to testRenameFileChangeCase
 							request()
-							.post(PREFIX + '/project/')
+              .post(PREFIX + '/project/')
+              .proxy(testHelper.TEST_PROXY)
 							.set('Slug', fileNameUpperCase)
 							.set('X-Create-Options', 'move,no-overwrite')
 							.send({ Location: PREFIX + '/project/' + fileNameLowerCase})
@@ -1746,7 +1884,8 @@ describe('File endpoint', function() {
 								assert.equal(res.body.Name, fileNameUpperCase);
 								// Try rename testRenameFileChangeCase to testrenamefilechangecase2
 								request()
-								.post(PREFIX + '/project/')
+                .post(PREFIX + '/project/')
+                .proxy(testHelper.TEST_PROXY)
 								.set('Slug', fileNameLowerCase2)
 								.set('X-Create-Options', 'move,no-overwrite')
 								.send({ Location: PREFIX + '/project/' + fileNameUpperCase})
@@ -1757,7 +1896,8 @@ describe('File endpoint', function() {
 		});
 		it('move & rename a file', function(done) {
 			request()
-				.post(PREFIX + '/project/my%20folder')
+        .post(PREFIX + '/project/my%20folder')
+        .proxy(testHelper.TEST_PROXY)
 				.set('Slug', 'fizz_moved.txt')
 				.set('X-Create-Options', 'move')
 				.send({ Location: PREFIX + '/project/fizz.txt' })
@@ -1770,7 +1910,8 @@ describe('File endpoint', function() {
 		});
 		it('move & rename a directory', function(done) {
 			request()
-				.post(PREFIX + '/project/my%20folder')
+        .post(PREFIX + '/project/my%20folder')
+        .proxy(testHelper.TEST_PROXY)
 				.set('Slug', 'fizz_moved.txt')
 				.set('X-Create-Options', 'move')
 				.send({ Location: PREFIX + '/project/fizz.txt' })
@@ -1787,7 +1928,8 @@ describe('File endpoint', function() {
 				   testHelper.createFile(request, "/project/moveTo,Folder", "fizz.txt")
 				   	.then(function(res) {
 						request()
-						.post(PREFIX + '/project/moveTo%2CFolder') //move it to
+            .post(PREFIX + '/project/moveTo%2CFolder') //move it to
+            .proxy(testHelper.TEST_PROXY)
 						.set('X-Create-Options', 'move')
 						.set('Slug', 'fizz1.txt')
 						.send({Location: PREFIX + '/project/moveTo%2CFolder/fizz.txt'})

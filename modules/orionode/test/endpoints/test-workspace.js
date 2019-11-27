@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017 IBM Corporation and others.
+ * Copyright (c) 2017, 2019 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -9,10 +9,10 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 /*eslint-env mocha */
-var assert = require('assert'),
-	path = require('path'),
-	testData = require('../support/test_data'),
-	testHelper = require('../support/testHelper');
+const assert = require('assert'),
+	    path = require('path'),
+	    testData = require('../support/test_data'),
+	    testHelper = require('../support/testHelper');
 
 var CONTEXT_PATH = testHelper.CONTEXT_PATH,
 	WORKSPACE = testHelper.WORKSPACE,
@@ -31,7 +31,8 @@ function byName(a, b) {
 // Retrieves the 0th Workspace in the list and invoke the callback
 function withDefaultWorkspace(callback) {
 	request()
-		.get(PREFIX + '/' + WORKSPACE_ID)
+    .get(PREFIX + '/' + WORKSPACE_ID)
+    .proxy(testHelper.TEST_PROXY)
 		.end(function(err, res) {
 			testHelper.throwIfError(err);
 			callback(res.body);
@@ -58,7 +59,8 @@ describe("Workspace endpoint", function() {
 	it("testCreateProject", function(done) {
 		withDefaultWorkspace(function(ws) {
 			request()
-				.post(ws.Location)
+        .post(ws.Location)
+        .proxy(testHelper.TEST_PROXY)
 				.set('Slug', 'testCreateProject')
 				.expect(201)
 				.end(done);
@@ -78,13 +80,15 @@ describe("Workspace endpoint", function() {
 	it("testMoveBadRequest", function(done) {
 		withDefaultWorkspace(function(ws) {
 			request()
-				.post(ws.Location)
+        .post(ws.Location)
+        .proxy(testHelper.TEST_PROXY)
 				.set('Slug', 'testMoveBadRequest')
 				.expect(201)
 				.end(function(err, res) {
 					testHelper.throwIfError(err);
 					request()
-						.post(ws.Location)
+            .post(ws.Location)
+            .proxy(testHelper.TEST_PROXY)
 						.type('json')
 						.set('Slug', 'testMoveBadRequest23')
 						.set('Orion-Version', 1)
@@ -98,7 +102,8 @@ describe("Workspace endpoint", function() {
 	it("testMoveFolderToProject", function(done) {
 		withDefaultWorkspace(function(ws) {
 			request()
-				.post(ws.Location)
+        .post(ws.Location)
+        .proxy(testHelper.TEST_PROXY)
 				.set('Slug', 'testMoveFolderToProjectSrc')
 				.send({Location: 'testMoveFolderToProjectSrc', Directory: true})
 				.expect(201)
@@ -109,7 +114,8 @@ describe("Workspace endpoint", function() {
 							testHelper.throwIfError(err);
 							var fLoc = res.body.Location;
 							request()
-								.post(ws.Location)
+                .post(ws.Location)
+                .proxy(testHelper.TEST_PROXY)
 								.type('json')
 								.set('Slug', 'testMoveFolderToProjectDest')
 								.set('Orion-Version', 1)
@@ -128,7 +134,8 @@ describe("Workspace endpoint", function() {
 		var oldProjectLocation = PREFIX_FILE + '/' + WORKSPACE_ID + '/project';
 		withDefaultWorkspace(function(workspace) {
 			request()
-				.post(workspace.Location)
+        .post(workspace.Location)
+        .proxy(testHelper.TEST_PROXY)
 					.set('X-Create-Options', 'move')
 					.send({Location: oldProjectLocation, Name: 'project_renamed'})
 					.expect(201)
@@ -138,14 +145,16 @@ describe("Workspace endpoint", function() {
 
 						// GETting the new ContentLocation should return the project metadata
 						request()
-							.get(res.body.ContentLocation)
+              .get(res.body.ContentLocation)
+              .proxy(testHelper.TEST_PROXY)
 							.expect(200)
 							.end(function(err, res) {
 								testHelper.throwIfError(err, "Failed to get ContentLocation");
 
 								// and GETting the ChildrenLocation should return the children
 								request()
-									.get(res.body.ChildrenLocation)
+                  .get(res.body.ChildrenLocation)
+                  .proxy(testHelper.TEST_PROXY)
 										.expect(200)
 										.end(/* @callback */ function(err, res){
 											assert.ok(Array.isArray(res.body.Children), "has children");
@@ -162,14 +171,16 @@ describe("Workspace endpoint", function() {
 	it("testMoveProject", function(done) {
 		withDefaultWorkspace(function(ws) {
 			request()
-				.post(ws.Location)
+        .post(ws.Location)
+        .proxy(testHelper.TEST_PROXY)
 				.set('Slug', 'testMoveProject')
 				.expect(201)
 				.end(function(err, res) {
 					testHelper.throwIfError(err);
 					var pLoc = res.body.Location;
 					request()
-						.post(ws.Location)
+            .post(ws.Location)
+            .proxy(testHelper.TEST_PROXY)
 						.type('json')
 						.set('X-Create-Options', "move")
 						.set('Slug', 'testMOVEDProject')
@@ -184,7 +195,8 @@ describe("Workspace endpoint", function() {
 	it("testMoveProjectToProject", function(done) {
 		withDefaultWorkspace(function(ws) {
 			request()
-				.post(ws.Location)
+        .post(ws.Location)
+        .proxy(testHelper.TEST_PROXY)
 				.set('Slug', 'testMoveProjectToFolderSrc')
 				.send({Location: 'testMoveProjectToFolderSrc', Directory: true})
 				.expect(201)
@@ -192,14 +204,16 @@ describe("Workspace endpoint", function() {
 					testHelper.throwIfError(err);
 					var pLoc = res.body.Location;
 					request()
-						.post(ws.Location)
+            .post(ws.Location)
+            .proxy(testHelper.TEST_PROXY)
 						.set('Slug', 'someFolder')
 						.send({Location: 'someFolder', Directory: true})
 						.expect(201)
 						.end(function(err, res) {
 							testHelper.throwIfError(err);
 							request()
-								.post(ws.Location)
+                .post(ws.Location)
+                .proxy(testHelper.TEST_PROXY)
 								.type('json')
 								.set('X-Create-Options', "move")
 								.set('Slug', 'someFolder')
@@ -216,7 +230,8 @@ describe("Workspace endpoint", function() {
 				testHelper.throwIfError(err);
 				var wLoc = res.body.Location;
 				request()
-					.post(wLoc)
+          .post(wLoc)
+          .proxy(testHelper.TEST_PROXY)
 					.set('Slug', 'testMoveProjectToFolderSrc') // create the project to move
 					.send({Location: 'testMoveProjectToFolderSrc', Directory: true})
 					.expect(201)
@@ -224,7 +239,8 @@ describe("Workspace endpoint", function() {
 						testHelper.throwIfError(err);
 						var pLoc = res.body.Location;
 						request()
-							.post(wLoc)
+              .post(wLoc)
+              .proxy(testHelper.TEST_PROXY)
 							.set('Slug', 'someOtherProject') //create the other project to move to 
 							.send({Location: 'someOtherProject', Directory: true})
 							.expect(201)
@@ -232,14 +248,16 @@ describe("Workspace endpoint", function() {
 								testHelper.throwIfError(err);
 								var spLoc = res.body.Location;
 								request()
-									.post(spLoc)
+                  .post(spLoc)
+                  .proxy(testHelper.TEST_PROXY)
 									.type('json')
 									.send({Name: 'someSubFolder', Directory: true})
 									.expect(201)
 									.end(function(err, res) {
 										testHelper.throwIfError(err);
 										request()
-											.post(res.body.Location)
+                      .post(res.body.Location)
+                      .proxy(testHelper.TEST_PROXY)
 											.type('json')
 											.set('X-Create-Options', "move")
 											.set('Slug', 'someSubFolder')
@@ -255,7 +273,8 @@ describe("Workspace endpoint", function() {
 	it.skip("testCopyFolderToProject", function(done) {
 		withDefaultWorkspace(function(ws) {
 			request()
-				.post(ws.Location)
+        .post(ws.Location)
+        .proxy(testHelper.TEST_PROXY)
 				.set('Slug', 'testCopyFolderToProject')
 				.expect(201)
 				.end(function(err, res) {
@@ -265,7 +284,8 @@ describe("Workspace endpoint", function() {
 							testHelper.throwIfError(err);
 							var fLoc = res.body.Location;
 							request()
-								.post(ws.Location)
+                .post(ws.Location)
+                .proxy(testHelper.TEST_PROXY)
 								.type('json')
 								.set('Slug', 'destinationProject')
 								.set('X-Create-Options', "copy")
@@ -284,7 +304,8 @@ describe("Workspace endpoint", function() {
 	it("testCopyProject", function(done) {
 		withDefaultWorkspace(function(ws) {
 			request()
-				.post(ws.Location)
+        .post(ws.Location)
+        .proxy(testHelper.TEST_PROXY)
 				.set('Slug', 'testCopyProject')
 				.expect(201)
 				.end(function(err, res) {
@@ -297,7 +318,8 @@ describe("Workspace endpoint", function() {
 	it("testCreateProjectBadName - space", function(done) {
 		withDefaultWorkspace(function(ws) {
 			request()
-				.post(ws.Location)
+        .post(ws.Location)
+        .proxy(testHelper.TEST_PROXY)
 				.set('Slug', ' ')
 				.expect(400)
 				.end(done);
@@ -306,7 +328,8 @@ describe("Workspace endpoint", function() {
 	it("testCreateProjectBadName - empty string", function(done) {
 		withDefaultWorkspace(function(ws) {
 			request()
-				.post(ws.Location)
+        .post(ws.Location)
+        .proxy(testHelper.TEST_PROXY)
 				.set('Slug', '')
 				.expect(400)
 				.end(done);
@@ -315,7 +338,8 @@ describe("Workspace endpoint", function() {
 	it("testCreateProjectBadName - slash", function(done) {
 		withDefaultWorkspace(function(ws) {
 			request()
-				.post(ws.Location)
+        .post(ws.Location)
+        .proxy(testHelper.TEST_PROXY)
 				.set('Orion-Version', 1)
 				.set('Slug', '/')
 				.expect(400)
@@ -326,30 +350,34 @@ describe("Workspace endpoint", function() {
 		// Node server currently does not provide the ability to create folder outside default workspace.ss
 		withDefaultWorkspace(function(ws) {
 			request()
-				.post(ws.Location)
+        .post(ws.Location)
+        .proxy(testHelper.TEST_PROXY)
 				.set('Slug', 'testCrseateProjectNonDefaultLocation')
 				.send({"ContentLocation": METADATA})
 				.expect(403)
 				.end(done);
 		});
 	});
-	it("testCreateWorkspace", function(done) {
+	it("testCreateWorkspace", async () => {
 		// This test should only run against multiuser case, and assuming the user is not authenticated, 
 		//otherwise used is allowed to create workspace
-		request()
-			.post(PREFIX)
+		let res = await request()
+      .post(PREFIX)
+      .proxy(testHelper.TEST_PROXY)
 			.set('Slug', 'whatever')
-			.expect(201, done);
+			.expect(201);
 	});
-	it("testCreateWorkspaceNullName", function(done) {
-		request()
-			.post(PREFIX)
-			.expect(400, done);
+	it("testCreateWorkspaceNullName", async () => {
+		let res = await request()
+      .post(PREFIX)
+      .proxy(testHelper.TEST_PROXY)
+      .expect(400);
 	});
 	it("testGetWorkspaceMetadata", function(done) {
 		withDefaultWorkspace(function(workspace) {
 			request()
-				.get(workspace.Location)
+        .get(workspace.Location)
+        .proxy(testHelper.TEST_PROXY)
 				.expect(200)
 				.end(function(e, res) {
 					testHelper.throwIfError(e, "Failed to get metadata from " + workspace.Location);
@@ -365,7 +393,8 @@ describe("Workspace endpoint", function() {
 					assert.ok(childrenLoc);
 					// Ensure that GET ChildrenLocation returns the child File objects.. mini /file test
 					request()
-						.get(childrenLoc)
+            .get(childrenLoc)
+            .proxy(testHelper.TEST_PROXY)
 						.expect(200)
 						.end(function(err, res) {
 							testHelper.throwIfError(err, "Failed to get ChildrenLocation: " + childrenLoc);
@@ -382,7 +411,8 @@ describe("Workspace endpoint", function() {
 	it("testChangeWorkspaceMetadata", function(done) {
 		withDefaultWorkspace(function(workspace) {
 			request()
-				.put(workspace.Location)
+        .put(workspace.Location)
+        .proxy(testHelper.TEST_PROXY)
 				.send({ Name: 'fizz buzz' })
 				.expect(403, done);
 		});
@@ -390,14 +420,16 @@ describe("Workspace endpoint", function() {
 	it("testGetProjectMetadata", function(done) {
 		withDefaultWorkspace(function(ws) {
 			request()
-				.post(ws.Location)
+        .post(ws.Location)
+        .proxy(testHelper.TEST_PROXY)
 				.set('Slug', 'testGetProjectMetadata')
 				.send({Location: 'testGetProjectMetadata', Directory: true})
 				.expect(201)
 				.end(function(err, res) {
 					testHelper.throwIfError(err);
 					request()
-						.get(res.body.Location)
+            .get(res.body.Location)
+            .proxy(testHelper.TEST_PROXY)
 						.expect(200)
 						.end(function(err, res) {
 							testHelper.throwIfError(err);
@@ -410,20 +442,23 @@ describe("Workspace endpoint", function() {
 	it("testDeleteProject", function(done) {
 		withDefaultWorkspace(function(ws) {
 			request()
-				.post(ws.Location)
+        .post(ws.Location)
+        .proxy(testHelper.TEST_PROXY)
 				.set('Slug', 'testDeleteProject')
 				.expect(201)
 				.end(function(err, res) {
 					testHelper.throwIfError(err);
 					var _loc = res.body.Location;
 					request()
-						.delete(_loc)
+            .delete(_loc)
+            .proxy(testHelper.TEST_PROXY)
 						.expect(204)
 						.end(function(err, res) {
 							testHelper.throwIfError(err);
 							//now try to fetch it, should 404
 							request()
-								.get(_loc)
+                .get(_loc)
+                .proxy(testHelper.TEST_PROXY)
 								.expect(404)
 								.end(done);
 						});
@@ -433,10 +468,12 @@ describe("Workspace endpoint", function() {
 	it("testDeleteWorkspace", function(done) {
 		withDefaultWorkspace(function(workspace) {
 			request()
-				.del(workspace.Location)
+        .del(workspace.Location)
+        .proxy(testHelper.TEST_PROXY)
 				.expect(204, function(){
 					request()
-					.get(PREFIX)
+          .get(PREFIX)
+          .proxy(testHelper.TEST_PROXY)
 					.expect(200)
 					.end(function(e, res) {
 						testHelper.throwIfError(e, "Failed to get workspace");
@@ -448,20 +485,17 @@ describe("Workspace endpoint", function() {
 				});
 		});
 	});
-	it("testGetWorkspaces", function(done) {
-		request()
-			.get(PREFIX)
-			.expect(200)
-			.end(function(e, res) {
-				testHelper.throwIfError(e, "Failed to get workspace");
-				assert.ok(Array.isArray(res.body.Workspaces));
-				// In Orionode, we have just a single workspace.
-				assert.equal(res.body.Workspaces.length, 1);
-				assert.ok(res.body.Workspaces[0].Id);
-				assert.ok(res.body.Workspaces[0].Location);
-				assert.equal(res.body.Workspaces[0].Location, PREFIX + '/' + WORKSPACE_ID);
-				assert.equal(res.body.Workspaces[0].Name, TEST_WORKSPACE_NAME);
-				done();
-			});
+	it("testGetWorkspaces", async () => {
+		let res = await request()
+      .get(PREFIX)
+      .proxy(testHelper.TEST_PROXY)
+			.expect(200);
+    assert.ok(Array.isArray(res.body.Workspaces));
+    // In Orionode, we have just a single workspace.
+    assert.equal(res.body.Workspaces.length, 1);
+    assert.ok(res.body.Workspaces[0].Id);
+    assert.ok(res.body.Workspaces[0].Location);
+    assert.equal(res.body.Workspaces[0].Location, PREFIX + '/' + WORKSPACE_ID);
+    assert.equal(res.body.Workspaces[0].Name, TEST_WORKSPACE_NAME);
 	});
 });

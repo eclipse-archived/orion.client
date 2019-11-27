@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2013, 2017 IBM Corporation and others.
+ * Copyright (c) 2013, 2019 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -10,7 +10,7 @@
  *******************************************************************************/
 /*eslint-env node, mocha*/
 /*eslint-disable no-shadow, no-sync*/
-var assert = require('assert'),
+const assert = require('assert'),
 	path = require('path'),
 	testData = require('../support/test_data'),
 	testHelper = require('../support/testHelper'),
@@ -55,7 +55,8 @@ function getGitResponse(res2) {
 			if (res.statusCode === 202 || !res.body.Result) {
 				return setTimeout(function() {
 					request()
-					.get(res2.body.Location)
+          .get(res2.body.Location)
+          .proxy(testHelper.TEST_PROXY)
 					.end(function(err, res1) {
 						if (err) {
 							return reject(err);
@@ -102,7 +103,8 @@ GitClient.prototype = {
 		var client = this;
 		this.tasks.push(function(resolve) {
 			request()
-			.post(GIT_ROOT + "/clone/")
+      .post(GIT_ROOT + "/clone/")
+      .proxy(testHelper.TEST_PROXY)
 			.send({
 				"Name":  client.getName(),
 				"Location": '/workspace/' + WORKSPACE_ID,
@@ -149,7 +151,8 @@ GitClient.prototype = {
 		var client = this;
 		this.tasks.push(function(resolve) {
 			request()
-			.delete(CONTEXT_PATH +  FILE_ROOT + client.getName() + "/" + encodeURIComponent(path))
+      .delete(CONTEXT_PATH +  FILE_ROOT + client.getName() + "/" + encodeURIComponent(path))
+      .proxy(testHelper.TEST_PROXY)
 			.expect(204)
 			.end(function(err, res) {
 				assert.ifError(err);
@@ -162,7 +165,8 @@ GitClient.prototype = {
 		var client = this;
 		this.tasks.push(function(resolve) {
 			request()
-			.post(GIT_ROOT + "/clone/")
+      .post(GIT_ROOT + "/clone/")
+      .proxy(testHelper.TEST_PROXY)
 			.send({
 				GitUrl: url,
 				Location: FILE_ROOT,
@@ -188,7 +192,8 @@ GitClient.prototype = {
 		var client = this;
 		this.tasks.push(function(resolve) {
 			request()
-			.get(GIT_ROOT + "/clone/workspace/" + WORKSPACE_ID)
+      .get(GIT_ROOT + "/clone/workspace/" + WORKSPACE_ID)
+      .proxy(testHelper.TEST_PROXY)
 			// .send({
 			// 	GitUrl: url,
 			// 	Location: FILE_ROOT,
@@ -206,7 +211,8 @@ GitClient.prototype = {
 		var client = this;
 		this.tasks.push(function(resolve) {
 			request()
-			.post(GIT_ROOT + "/commit/HEAD" + FILE_ROOT + client.getName())
+      .post(GIT_ROOT + "/commit/HEAD" + FILE_ROOT + client.getName())
+      .proxy(testHelper.TEST_PROXY)
 			.send({
 				Message: "Test commit at " + Date.now(),
 				AuthorName: "test",
@@ -226,7 +232,8 @@ GitClient.prototype = {
 		var client = this;
 		this.tasks.push(function(resolve) {
 			request()
-			.put(GIT_ROOT + "/index" + FILE_ROOT + client.getName() + "/" + name.replace(/\%/g, "%25"))
+      .put(GIT_ROOT + "/index" + FILE_ROOT + client.getName() + "/" + name.replace(/\%/g, "%25"))
+      .proxy(testHelper.TEST_PROXY)
 			.expect(200)
 			.end(function(err, res) {
 				assert.ifError(err);
@@ -239,7 +246,8 @@ GitClient.prototype = {
 		var client = this;
 		this.tasks.push(function(resolve) {
 			request()
-			.get(api.encodeStringLocation(GIT_ROOT + "/status" + FILE_ROOT + api.encodeURIComponent(client.getName())))
+      .get(api.encodeStringLocation(GIT_ROOT + "/status" + FILE_ROOT + api.encodeURIComponent(client.getName())))
+      .proxy(testHelper.TEST_PROXY)
 			.expect(202)
 			.end(function(err, res) {
 				assert.ifError(err);
@@ -255,7 +263,8 @@ GitClient.prototype = {
 		var client = this;
 		this.tasks.push(function(resolve) {
 			request()
-			.post(GIT_ROOT + "/branch" + FILE_ROOT + client.getName())
+      .post(GIT_ROOT + "/branch" + FILE_ROOT + client.getName())
+      .proxy(testHelper.TEST_PROXY)
 			.send({
 				Name: branchName
 			})
@@ -275,7 +284,8 @@ GitClient.prototype = {
 		var client = this;
 		this.tasks.push(function(resolve) {
 			request()
-			.put(GIT_ROOT + "/clone" + FILE_ROOT + client.getName())
+      .put(GIT_ROOT + "/clone" + FILE_ROOT + client.getName())
+      .proxy(testHelper.TEST_PROXY)
 			.send({
 				Branch: branchName
 			})
@@ -291,7 +301,8 @@ GitClient.prototype = {
 		var client = this;
 		this.tasks.push(function(resolve) {
 			request()
-			.delete(api.encodeStringLocation(GIT_ROOT + "/branch/" + api.encodeURIComponent(branchName) + FILE_ROOT + client.getName()))
+      .delete(api.encodeStringLocation(GIT_ROOT + "/branch/" + api.encodeURIComponent(branchName) + FILE_ROOT + client.getName()))
+      .proxy(testHelper.TEST_PROXY)
 			.expect(200)
 			.end(function(err, res) {
 				assert.ifError(err);
@@ -304,7 +315,8 @@ GitClient.prototype = {
 		var client = this;
 		this.tasks.push(function(resolve) {
 			request()
-			.get(GIT_ROOT + "/branch" + FILE_ROOT + client.getName())
+      .get(GIT_ROOT + "/branch" + FILE_ROOT + client.getName())
+      .proxy(testHelper.TEST_PROXY)
 			.expect(200)
 			.end(function(err, res) {
 				assert.ifError(err);
@@ -322,7 +334,8 @@ GitClient.prototype = {
 		var client = this;
 		this.tasks.push(function(resolve) {
 			request()
-			.put(GIT_ROOT + "/commit/" + commitSHA + FILE_ROOT + client.getName())
+      .put(GIT_ROOT + "/commit/" + commitSHA + FILE_ROOT + client.getName())
+      .proxy(testHelper.TEST_PROXY)
 			.send({
 				Name: tagName,
 				Annotated: annotated,
@@ -340,7 +353,8 @@ GitClient.prototype = {
 		var client = this;
 		this.tasks.push(function(resolve) {
 			request()
-			.put(GIT_ROOT + "/clone" + FILE_ROOT + client.getName())
+      .put(GIT_ROOT + "/clone" + FILE_ROOT + client.getName())
+      .proxy(testHelper.TEST_PROXY)
 			.send({
 				Tag: tagName,
 				Branch: branchName
@@ -357,7 +371,8 @@ GitClient.prototype = {
 		var client = this;
 		this.tasks.push(function(resolve) {
 			request()
-			.delete(api.encodeStringLocation(GIT_ROOT + "/tag/" + api.encodeURIComponent(tagName) + FILE_ROOT + client.getName()))
+      .delete(api.encodeStringLocation(GIT_ROOT + "/tag/" + api.encodeURIComponent(tagName) + FILE_ROOT + client.getName()))
+      .proxy(testHelper.TEST_PROXY)
 			.expect(200)
 			.end(function(err, res) {
 				assert.ifError(err);
@@ -370,7 +385,8 @@ GitClient.prototype = {
 		var client = this;
 		this.tasks.push(function(resolve) {
 			request()
-			.get(GIT_ROOT + "/tag/" + tagName + FILE_ROOT + client.getName())
+      .get(GIT_ROOT + "/tag/" + tagName + FILE_ROOT + client.getName())
+      .proxy(testHelper.TEST_PROXY)
 			.expect(200)
 			.end(function(err, res) {
 				assert.ifError(err);
@@ -390,7 +406,8 @@ GitClient.prototype = {
 		var client = this;
 		this.tasks.push(function(resolve) {
 			request()
-			.get(GIT_ROOT + "/tag" + FILE_ROOT + client.getName())
+      .get(GIT_ROOT + "/tag" + FILE_ROOT + client.getName())
+      .proxy(testHelper.TEST_PROXY)
 			.expect(200)
 			.end(function(err, res) {
 				assert.ifError(err);
@@ -408,7 +425,8 @@ GitClient.prototype = {
 		var client = this;
 		this.tasks.push(function(resolve) {
 			request()
-			.post(GIT_ROOT + "/stash" + FILE_ROOT + client.getName())
+      .post(GIT_ROOT + "/stash" + FILE_ROOT + client.getName())
+      .proxy(testHelper.TEST_PROXY)
 			.send({
 				IncludeUntracked: includeUntracked,
 			})
@@ -454,7 +472,8 @@ GitClient.prototype = {
 		var client = this;
 		this.tasks.push(function(resolve) {
 			request()
-			.put(GIT_ROOT + "/stash" + revision + FILE_ROOT + client.getName())
+      .put(GIT_ROOT + "/stash" + revision + FILE_ROOT + client.getName())
+      .proxy(testHelper.TEST_PROXY)
 			.expect(statusCode)
 			.end(function(err, res) {
 				assert.ifError(err);
@@ -480,7 +499,8 @@ GitClient.prototype = {
 		var client = this;
 		this.tasks.push(function(resolve) {
 			request()
-			.get(GIT_ROOT + "/stash" + FILE_ROOT + client.getName())
+      .get(GIT_ROOT + "/stash" + FILE_ROOT + client.getName())
+      .proxy(testHelper.TEST_PROXY)
 			.expect(200)
 			.end(function(err, res) {
 				assert.ifError(err);
@@ -504,7 +524,8 @@ GitClient.prototype = {
 		var client = this;
 		this.tasks.push(function(resolve) {
 			request()
-			.delete(GIT_ROOT + "/stash/" + revision + FILE_ROOT + client.getName())
+      .delete(GIT_ROOT + "/stash/" + revision + FILE_ROOT + client.getName())
+      .proxy(testHelper.TEST_PROXY)
 			.expect(statusCode)
 			.end(function(err, res) {
 				assert.ifError(err);
@@ -520,7 +541,8 @@ GitClient.prototype = {
 		var client = this;
 		this.tasks.push(function(resolve) {
 			request()
-			.post(GIT_ROOT + "/index" + FILE_ROOT + client.getName())
+      .post(GIT_ROOT + "/index" + FILE_ROOT + client.getName())
+      .proxy(testHelper.TEST_PROXY)
 			.send({
 				"Reset": type,
 				"Commit": id
@@ -537,7 +559,8 @@ GitClient.prototype = {
 		var client = this;
 		this.tasks.push(function(resolve) {
 			request()
-			.post(GIT_ROOT + "/commit/HEAD" + FILE_ROOT + client.getName())
+      .post(GIT_ROOT + "/commit/HEAD" + FILE_ROOT + client.getName())
+      .proxy(testHelper.TEST_PROXY)
 			.send({
 				Rebase: branchToRebase,
 				Operation: operation
@@ -554,7 +577,8 @@ GitClient.prototype = {
 		var client = this;
 		this.tasks.push(function(resolve) {
 			request()
-			.post(GIT_ROOT + "/commit/HEAD" + FILE_ROOT + client.getName())
+      .post(GIT_ROOT + "/commit/HEAD" + FILE_ROOT + client.getName())
+      .proxy(testHelper.TEST_PROXY)
 			.send({
 				Merge: branchToMerge,
 				Squash: squash
@@ -571,7 +595,8 @@ GitClient.prototype = {
 		var client = this;
 		this.tasks.push(function(resolve) {
 			request()
-			.post(GIT_ROOT + "/commit/HEAD" + FILE_ROOT + client.getName())
+      .post(GIT_ROOT + "/commit/HEAD" + FILE_ROOT + client.getName())
+      .proxy(testHelper.TEST_PROXY)
 			.send({
 				"Cherry-Pick": commitSHA
 			})
@@ -590,7 +615,8 @@ GitClient.prototype = {
 			target = api.encodeURIComponent(target);
 
 			request()
-			.get(api.encodeStringLocation(GIT_ROOT + "/commit/" + target + ".." + source + FILE_ROOT + client.getName()))
+      .get(api.encodeStringLocation(GIT_ROOT + "/commit/" + target + ".." + source + FILE_ROOT + client.getName()))
+      .proxy(testHelper.TEST_PROXY)
 			.query(parameters)
 			.expect(202)
 			.end(function(err, res) {
@@ -627,7 +653,8 @@ GitClient.prototype = {
 		var client = this;
 		this.tasks.push(function(resolve) {
 			request()
-			.get(api.encodeStringLocation(GIT_ROOT + '/commit/' + api.encodeURIComponent(branch) + FILE_ROOT + client.getName() + "/" + path))
+      .get(api.encodeStringLocation(GIT_ROOT + '/commit/' + api.encodeURIComponent(branch) + FILE_ROOT + client.getName() + "/" + path))
+      .proxy(testHelper.TEST_PROXY)
 			.expect(202)
 			.query(parameters)
 			.end(function(err, res) {
@@ -659,7 +686,8 @@ GitClient.prototype = {
 		var client = this;
 		this.tasks.push(function(resolve) {
 			request()
-			.get(api.encodeStringLocation(GIT_ROOT + "/config/clone" + FILE_ROOT + api.encodeURIComponent(client.getName())))
+      .get(api.encodeStringLocation(GIT_ROOT + "/config/clone" + FILE_ROOT + api.encodeURIComponent(client.getName())))
+      .proxy(testHelper.TEST_PROXY)
 			.expect(200)
 			.end(function(err, res) {
 				assert.ifError(err);
@@ -674,13 +702,15 @@ GitClient.prototype = {
 		var client = this;
 		this.tasks.push(function(resolve) {
 			request()
-			.get(api.encodeStringLocation(GIT_ROOT + "/tree" + FILE_ROOT + api.encodeURIComponent(client.getName())+ "/" + api.encodeURIComponent("refs/heads/master") + "?parts=meta"))
+      .get(api.encodeStringLocation(GIT_ROOT + "/tree" + FILE_ROOT + api.encodeURIComponent(client.getName())+ "/" + api.encodeURIComponent("refs/heads/master") + "?parts=meta"))
+      .proxy(testHelper.TEST_PROXY)
 			.expect(200)
 			.end(function(err, res) {
 				assert.ifError(err);
 				assert.ok(res.body.Children.length === 1);
 				request()
-				.get(res.body.Children[0].Location)
+        .get(res.body.Children[0].Location)
+        .proxy(testHelper.TEST_PROXY)
 				.expect(200)
 				.end(function(err, res) {
 					assert.ifError(err);
@@ -694,7 +724,8 @@ GitClient.prototype = {
 		var client = this;
 		this.tasks.push(function(resolve) {
 			request()
-			.get(api.encodeStringLocation(GIT_ROOT + "/diff/Default" + FILE_ROOT + path.join(api.encodeURIComponent(client.getName()), fileName) + "?parts=uris"))
+      .get(api.encodeStringLocation(GIT_ROOT + "/diff/Default" + FILE_ROOT + path.join(api.encodeURIComponent(client.getName()), fileName) + "?parts=uris"))
+      .proxy(testHelper.TEST_PROXY)
 			.expect(200)
 			.end(function(err, res) {
 				assert.ifError(err);
@@ -741,7 +772,8 @@ maybeDescribe("git", function() {
 		describe('Creates a new directory and init repository', function() {
 			it('GET clone (initializes a git repo)', function(finished) {
 				request()
-				.post(GIT_ROOT + "/clone/")
+        .post(GIT_ROOT + "/clone/")
+        .proxy(testHelper.TEST_PROXY)
 				.send({
 					"Name":  TEST_REPO_NAME,
 					"Location": '/workspace/' + WORKSPACE_ID,
@@ -790,7 +822,8 @@ maybeDescribe("git", function() {
 
 			it('PUT index (staging a file)', function(finished) {
 				request()
-				.put(GIT_ROOT + "/index"+ FILE_ROOT + TEST_REPO_NAME + "/" + filename)
+        .put(GIT_ROOT + "/index"+ FILE_ROOT + TEST_REPO_NAME + "/" + filename)
+        .proxy(testHelper.TEST_PROXY)
 				.expect(200)
 				.end(function() {
 					finished();
@@ -799,7 +832,8 @@ maybeDescribe("git", function() {
 
 			it('GET status (check status for git repo)', function(finished) {
 				request()
-				.get(GIT_ROOT + "/status"+FILE_ROOT+ TEST_REPO_NAME + "/")
+        .get(GIT_ROOT + "/status"+FILE_ROOT+ TEST_REPO_NAME + "/")
+        .proxy(testHelper.TEST_PROXY)
 				.expect(202)
 				.end(function(err, res) {
 					assert.ifError(err);
@@ -820,7 +854,8 @@ maybeDescribe("git", function() {
 
 			it('POST commit (committing all files in the index)', function(finished) {
 				request()
-				.post(GIT_ROOT + "/commit/HEAD" + FILE_ROOT + TEST_REPO_NAME)
+        .post(GIT_ROOT + "/commit/HEAD" + FILE_ROOT + TEST_REPO_NAME)
+        .proxy(testHelper.TEST_PROXY)
 				.send({
 					Message: message,
 					AuthorName: author,
@@ -841,7 +876,8 @@ maybeDescribe("git", function() {
 
 			it('GET commit (listing commits revision)', function(finished) {
 				request()
-				.get(GIT_ROOT + '/commit/master%5E..master' + FILE_ROOT + TEST_REPO_NAME)
+        .get(GIT_ROOT + '/commit/master%5E..master' + FILE_ROOT + TEST_REPO_NAME)
+        .proxy(testHelper.TEST_PROXY)
 				.expect(202)
 				.end(function(err, res) {
 					assert.ifError(err);
@@ -880,7 +916,8 @@ maybeDescribe("git", function() {
 
 			it('POST remote (adding a new remote)', function(finished) {
 				request()
-				.post(GIT_ROOT + "/remote" + FILE_ROOT + TEST_REPO_NAME)
+        .post(GIT_ROOT + "/remote" + FILE_ROOT + TEST_REPO_NAME)
+        .proxy(testHelper.TEST_PROXY)
 				.send({
 					Remote: remoteName,
 					RemoteURI: remoteURI
@@ -899,7 +936,8 @@ maybeDescribe("git", function() {
 
 			it('GET remote (getting the list of remotes)', function(finished) {
 				request()
-				.get(GIT_ROOT + "/remote" + FILE_ROOT + TEST_REPO_NAME)
+        .get(GIT_ROOT + "/remote" + FILE_ROOT + TEST_REPO_NAME)
+        .proxy(testHelper.TEST_PROXY)
 				.expect(200)
 				.end(function(err, res) {
 					assert.ifError(err);
@@ -932,7 +970,8 @@ maybeDescribe("git", function() {
 			it('POST remote (fetching changes from a remote)', function(finished) {
 				this.timeout(20000); // increase timeout for fetching from remote
 				request()
-				.post(GIT_ROOT + "/remote/" + remoteName + FILE_ROOT + TEST_REPO_NAME)
+        .post(GIT_ROOT + "/remote/" + remoteName + FILE_ROOT + TEST_REPO_NAME)
+        .proxy(testHelper.TEST_PROXY)
 				.send({
 					Fetch: "true"
 				})
@@ -954,7 +993,8 @@ maybeDescribe("git", function() {
 
 			it('DELETE remote (removing a remote)', function(finished) {
 				request()
-				.delete(GIT_ROOT + "/remote/" + remoteName + FILE_ROOT + TEST_REPO_NAME)
+        .delete(GIT_ROOT + "/remote/" + remoteName + FILE_ROOT + TEST_REPO_NAME)
+        .proxy(testHelper.TEST_PROXY)
 				.expect(200)
 				.end(finished);
 			});
@@ -987,7 +1027,8 @@ maybeDescribe("git", function() {
 
 			it('POST remote (adding a new remote)', function(finished) {
 				request()
-				.post(GIT_ROOT + "/remote" + FILE_ROOT + TEST_REPO_NAME)
+        .post(GIT_ROOT + "/remote" + FILE_ROOT + TEST_REPO_NAME)
+        .proxy(testHelper.TEST_PROXY)
 				.send({
 					Remote: remoteName,
 					RemoteURI: remoteURI
@@ -1005,7 +1046,8 @@ maybeDescribe("git", function() {
 				this.timeout(7000);
 
 				request()
-				.post(GIT_ROOT + "/remote/" + remoteName + "/" + branchName + FILE_ROOT + TEST_REPO_NAME)
+        .post(GIT_ROOT + "/remote/" + remoteName + "/" + branchName + FILE_ROOT + TEST_REPO_NAME)
+        .proxy(testHelper.TEST_PROXY)
 				.send({
 					Force: true, // force push so it doesn't matter what's on the repo.
 					GitSshUsername: username,
@@ -1031,7 +1073,8 @@ maybeDescribe("git", function() {
 
 			it('DELETE clone (delete a repository)', function(finished) {
 				request()
-				.delete(GIT_ROOT + "/clone" + FILE_ROOT + TEST_REPO_NAME)
+        .delete(GIT_ROOT + "/clone" + FILE_ROOT + TEST_REPO_NAME)
+        .proxy(testHelper.TEST_PROXY)
 				.expect(200)
 				.end(finished);
 			});
@@ -1064,7 +1107,8 @@ maybeDescribe("git", function() {
 				var gitURL = "https://github.com/eclipse/sketch.git";
 				this.timeout(20000); // increase timeout for cloning from repo
 				request()
-				.post(GIT_ROOT + "/clone/")
+        .post(GIT_ROOT + "/clone/")
+        .proxy(testHelper.TEST_PROXY)
 				.send({
 					GitUrl: gitURL,
 					Location: FILE_ROOT
@@ -1094,7 +1138,8 @@ maybeDescribe("git", function() {
 			it('GET tag (listing tags)', function(finished) {
 				this.timeout(20000);
 				request()
-				.get(GIT_ROOT + "/tag" + FILE_ROOT + "sketch")
+        .get(GIT_ROOT + "/tag" + FILE_ROOT + "sketch")
+        .proxy(testHelper.TEST_PROXY)
 				.expect(200)
 				.end(function(err, res) {
 					assert.ifError(err);
@@ -1111,7 +1156,8 @@ maybeDescribe("git", function() {
 				var gitURL = "https://github.com/eclipse/sketch.git";
 				this.timeout(20000); // increase timeout for cloning from repo
 				request()
-				.post(GIT_ROOT + "/clone/")
+        .post(GIT_ROOT + "/clone/")
+        .proxy(testHelper.TEST_PROXY)
 				.send({
 					GitUrl: gitURL,
 					Location: FILE_ROOT
@@ -1140,7 +1186,8 @@ maybeDescribe("git", function() {
 
 			it('DELETE clone (delete a repository)', function(finished) {
 				request()
-				.delete(GIT_ROOT + "/clone" + FILE_ROOT + TEST_REPO_NAME)
+        .delete(GIT_ROOT + "/clone" + FILE_ROOT + TEST_REPO_NAME)
+        .proxy(testHelper.TEST_PROXY)
 				.expect(200)
 				.end(finished);
 			});
@@ -1171,7 +1218,8 @@ maybeDescribe("git", function() {
 		describe('Creates a new directory and init repository', function() {
 			it('GET clone (initializes a git repo)', function(finished) {
 				request()
-				.post(GIT_ROOT + "/clone/")
+        .post(GIT_ROOT + "/clone/")
+        .proxy(testHelper.TEST_PROXY)
 				.send({
 					"Name":  TEST_REPO_NAME,
 					"Location": '/workspace/' + WORKSPACE_ID,
@@ -1215,7 +1263,8 @@ maybeDescribe("git", function() {
 
 			it('POST remote (adding a new remote)', function(finished) {
 				request()
-				.post(GIT_ROOT + "/remote" + FILE_ROOT + TEST_REPO_NAME)
+        .post(GIT_ROOT + "/remote" + FILE_ROOT + TEST_REPO_NAME)
+        .proxy(testHelper.TEST_PROXY)
 				.send({
 					Remote: remoteName,
 					RemoteURI: remoteURI
@@ -1235,7 +1284,8 @@ maybeDescribe("git", function() {
 
 			it('POST branch (creating a branch)', function(finished) {
 				request()
-				.post(GIT_ROOT + "/branch" + FILE_ROOT + TEST_REPO_NAME)
+        .post(GIT_ROOT + "/branch" + FILE_ROOT + TEST_REPO_NAME)
+        .proxy(testHelper.TEST_PROXY)
 				.send({
 					Name: branchName
 				})
@@ -1269,7 +1319,8 @@ maybeDescribe("git", function() {
 
 			it('GET branch (listing branches)', function(finished) {
 				request()
-				.get(GIT_ROOT + "/branch" + FILE_ROOT + TEST_REPO_NAME)
+        .get(GIT_ROOT + "/branch" + FILE_ROOT + TEST_REPO_NAME)
+        .proxy(testHelper.TEST_PROXY)
 				.expect(200)
 				.end(function(err, res) {
 					assert.ifError(err);
@@ -1284,7 +1335,8 @@ maybeDescribe("git", function() {
 
 			it('DELETE branch (removing a branch)', function(finished) {
 				request()
-				.delete(GIT_ROOT + "/branch/" + branchName + FILE_ROOT + TEST_REPO_NAME)
+        .delete(GIT_ROOT + "/branch/" + branchName + FILE_ROOT + TEST_REPO_NAME)
+        .proxy(testHelper.TEST_PROXY)
 				.expect(200)
 				.end(finished);
 			});
@@ -1308,7 +1360,8 @@ maybeDescribe("git", function() {
 
 			it('DELETE clone (delete a repository)', function(finished) {
 				request()
-				.delete(GIT_ROOT + "/clone" + FILE_ROOT + TEST_REPO_NAME)
+        .delete(GIT_ROOT + "/clone" + FILE_ROOT + TEST_REPO_NAME)
+        .proxy(testHelper.TEST_PROXY)
 				.expect(200)
 				.end(finished);
 			});
@@ -1339,7 +1392,8 @@ maybeDescribe("git", function() {
 		describe('Creates a new directory using orion file api and init repository of the existing folder', function() {
 			it('GET clone (initializes a git repo)', function(finished) {
 				request()
-				.post(WORKSPACE_ROOT)
+        .post(WORKSPACE_ROOT)
+        .proxy(testHelper.TEST_PROXY)
 				.send({
 					"Name":  ParentFolder,
 					Directory: true
@@ -1347,7 +1401,8 @@ maybeDescribe("git", function() {
 				.expect(201)
 				.end(function(err, res){
 					request()
-					.post(GIT_ROOT + "/clone/")
+          .post(GIT_ROOT + "/clone/")
+          .proxy(testHelper.TEST_PROXY)
 					.send({
 						"Name":  ParentFolder,
 						"Location": '/workspace/' + WORKSPACE_ID,
@@ -1390,7 +1445,8 @@ maybeDescribe("git", function() {
 			it('GET clone (initializes a git repo)', function(finished) {
 				var childFolderFileRoot = FILE_ROOT + ParentFolder + "/" + ChildFolder + "/";
 				request()
-				.post(CONTEXT_PATH + FILE_ROOT + ParentFolder)
+        .post(CONTEXT_PATH + FILE_ROOT + ParentFolder)
+        .proxy(testHelper.TEST_PROXY)
 				.send({
 					"Name":  ChildFolder,
 					"Directory": true,
@@ -1399,7 +1455,8 @@ maybeDescribe("git", function() {
 				.expect(201)
 				.end(function(err, res){
 					request()
-					.post(GIT_ROOT + "/clone/")
+          .post(GIT_ROOT + "/clone/")
+          .proxy(testHelper.TEST_PROXY)
 					.send({
 						"Location": '/workspace/' + WORKSPACE_ID,
 						"GitName": "test",
@@ -1457,7 +1514,8 @@ maybeDescribe("git", function() {
 		// Temporarily disabled because auth is failing
 		it.skip('Clone parent repo with submodules', function(finished) {
 			request()
-			.post(GIT_ROOT + "/clone")
+      .post(GIT_ROOT + "/clone")
+      .proxy(testHelper.TEST_PROXY)
 			.send({
 				"GitUrl": remoteURI,	
 				"Location": '/workspace/' + WORKSPACE_ID,
@@ -1469,7 +1527,8 @@ maybeDescribe("git", function() {
 					assert.equal(result.HttpCode, 401);
 					assert.equal(result.DetailedMessage, "callback returned unsupported credentials type");
 					request()
-					.post(GIT_ROOT + "/clone")
+          .post(GIT_ROOT + "/clone")
+          .proxy(testHelper.TEST_PROXY)
 					.send({
 						"GitUrl": remoteURI,	
 						"Location": '/workspace/' + WORKSPACE_ID,
@@ -1491,7 +1550,8 @@ maybeDescribe("git", function() {
 							assert(statChild.isDirectory());
 							var childchildPath = PARENT_REPO_NAME + "/" + CHILD1_REPO_NAME + "/" + CHILD_CHILD_REPO_NAME;
 							request()
-							.get(GIT_ROOT + "/branch" + FILE_ROOT + childchildPath)
+              .get(GIT_ROOT + "/branch" + FILE_ROOT + childchildPath)
+              .proxy(testHelper.TEST_PROXY)
 							.expect(200)
 							.end(function(err, res) {
 								assert.ifError(err);
@@ -1504,7 +1564,8 @@ maybeDescribe("git", function() {
 								// Add another submodule child3 to parent
 								var childChildRemoteURI = "git@github.com:oriongittester/orion-test-submodule-child3.git";
 								request()
-								.post(GIT_ROOT + "/submodule" + FILE_ROOT + PARENT_REPO_NAME)
+                .post(GIT_ROOT + "/submodule" + FILE_ROOT + PARENT_REPO_NAME)
+                .proxy(testHelper.TEST_PROXY)
 								.send({
 									"GitUrl": childChildRemoteURI,	
 									"Location": '/workspace/' + WORKSPACE_ID,
@@ -1516,7 +1577,8 @@ maybeDescribe("git", function() {
 										assert.equal(result.HttpCode, 401);
 										assert.equal(result.DetailedMessage, "callback returned unsupported credentials type");
 										request()
-										.post(GIT_ROOT + "/submodule" + FILE_ROOT + PARENT_REPO_NAME)
+                    .post(GIT_ROOT + "/submodule" + FILE_ROOT + PARENT_REPO_NAME)
+                    .proxy(testHelper.TEST_PROXY)
 										.send({
 											"GitUrl": childChildRemoteURI,	
 											"Location": '/workspace/' + WORKSPACE_ID,
@@ -1533,7 +1595,8 @@ maybeDescribe("git", function() {
 												var stat = fs.statSync(CHILD3RepoPath);
 												assert(stat.isDirectory());
 												request()
-												.put(GIT_ROOT + "/submodule" + FILE_ROOT + PARENT_REPO_NAME)
+                        .put(GIT_ROOT + "/submodule" + FILE_ROOT + PARENT_REPO_NAME)
+                        .proxy(testHelper.TEST_PROXY)
 												.send({
 													"Operation": "sync",	
 												})
@@ -1541,7 +1604,8 @@ maybeDescribe("git", function() {
 												.end(function(err, res) {
 													assert.ifError(err);
 													request()
-													.put(GIT_ROOT + "/submodule" + FILE_ROOT + PARENT_REPO_NAME)
+                          .put(GIT_ROOT + "/submodule" + FILE_ROOT + PARENT_REPO_NAME)
+                          .proxy(testHelper.TEST_PROXY)
 													.send({
 														"Operation": "update",	
 													})
@@ -1588,7 +1652,8 @@ maybeDescribe("git", function() {
 	
 		it('Clone repo which has more then 40 commits, and test more commits', function(finished) {
 			request()
-			.post(GIT_ROOT + "/clone")
+      .post(GIT_ROOT + "/clone")
+      .proxy(testHelper.TEST_PROXY)
 			.send({
 				"GitUrl": remoteURI,	
 				"Location": '/workspace/' + WORKSPACE_ID,
@@ -1603,7 +1668,8 @@ maybeDescribe("git", function() {
 					assert.equal(result.Message, "OK");
 					// Get the default page of commits
 					request()
-					.get(api.encodeStringLocation(GIT_ROOT + "/commit/" + api.encodeURIComponent("refs/remotes/origin/master") + ".." + api.encodeURIComponent("master") + FILE_ROOT + repoName + "?page=1&pageSize=20&mergeBase=true"))
+          .get(api.encodeStringLocation(GIT_ROOT + "/commit/" + api.encodeURIComponent("refs/remotes/origin/master") + ".." + api.encodeURIComponent("master") + FILE_ROOT + repoName + "?page=1&pageSize=20&mergeBase=true"))
+          .proxy(testHelper.TEST_PROXY)
 					.expect(202)
 					.end(function(err, res) {
 						getGitResponse(res).then(function(result) {
@@ -1613,7 +1679,8 @@ maybeDescribe("git", function() {
 							var nextLocation = result.JsonData.NextLocation;
 							// Get the second page of commits
 							request()
-							.get(nextLocation)
+              .get(nextLocation)
+              .proxy(testHelper.TEST_PROXY)
 							.expect(202)
 							.end(function(err, res) {
 								getGitResponse(res).then(function(result) {
@@ -1622,7 +1689,8 @@ maybeDescribe("git", function() {
 									assert.equal(result.JsonData.Children.length, 20); // The second page should be full of 20 commits;
 									var nextLocation = result.JsonData.NextLocation;
 									request()
-									.get(nextLocation)
+                  .get(nextLocation)
+                  .proxy(testHelper.TEST_PROXY)
 									.expect(202)
 									.end(function(err, res) {
 										getGitResponse(res).then(function(result) {
@@ -1662,7 +1730,8 @@ maybeDescribe("git", function() {
 	
 		it('Clone repo which has more then 40 tags, and test more commits', function(finished) {
 			request()
-			.post(GIT_ROOT + "/clone")
+      .post(GIT_ROOT + "/clone")
+      .proxy(testHelper.TEST_PROXY)
 			.send({
 				"GitUrl": remoteURI,	
 				"Location": '/workspace/' + WORKSPACE_ID,
@@ -1677,7 +1746,8 @@ maybeDescribe("git", function() {
 					assert.equal(result.Message, "OK");
 					// Get the 20 tags
 					request()
-					.get(api.encodeStringLocation(GIT_ROOT + "/tag" + FILE_ROOT + repoName + "?commits=0&page=1&pageSize=20"))
+          .get(api.encodeStringLocation(GIT_ROOT + "/tag" + FILE_ROOT + repoName + "?commits=0&page=1&pageSize=20"))
+          .proxy(testHelper.TEST_PROXY)
 					.expect(200)
 					.end(function(err, res) {
 						assert.ifError(err);
@@ -1685,7 +1755,8 @@ maybeDescribe("git", function() {
 						var nextLocation = res.body.NextLocation;
 						// Get the rest of tags
 						request()
-						.get(nextLocation)
+            .get(nextLocation)
+            .proxy(testHelper.TEST_PROXY)
 						.expect(200)
 						.end(function(err, res) {
 							assert.ifError(err);
@@ -1693,7 +1764,8 @@ maybeDescribe("git", function() {
 							var nextLocation2 = res.body.NextLocation;
 							// Get the rest of tags
 							request()
-							.get(nextLocation2)
+              .get(nextLocation2)
+              .proxy(testHelper.TEST_PROXY)
 							.expect(200)
 							.end(function(err, res) {
 								assert.ifError(err);

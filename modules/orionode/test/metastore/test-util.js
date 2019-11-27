@@ -9,16 +9,10 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 /*eslint-env mocha */
-var assert = require("assert"),
-	path = require("path"),
-	testData = require('../support/test_data'),
-	testHelper = require('../support/testHelper');
-
-
-var WORKSPACE = testHelper.WORKSPACE;
+const testData = require('../support/test_data'),
+	    testHelper = require('../support/testHelper');
 
 var request = testData.setupOrionServer();
-
 
 describe("Orion metadata utils", function() {
 	/**

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017 IBM Corporation and others.
+ * Copyright (c) 2017, 2019 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -9,7 +9,7 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 /*eslint-env mocha */
-var	assert = require('assert'),
+const	assert = require('assert'),
 	path = require("path"),
 	testData = require("../support/test_data"),
 	testHelper = require('../support/testHelper');
@@ -54,7 +54,8 @@ describe("Search endpoint", function() {
 					sLoc = res.body.Projects[0].Location;
 				}
 				request()
-					.get(PREFIX)
+          .get(PREFIX)
+          .proxy(testHelper.TEST_PROXY)
 					.query('Path%20asc&rows=5&start=0&q=hello+Location:'+sLoc)
 					.expect(200)
 					.end(function(err, res) {
@@ -75,7 +76,8 @@ describe("Search endpoint", function() {
 					sLoc = res.body.Projects[0].Location;
 				}
 				request()
-					.get(PREFIX)
+          .get(PREFIX)
+          .proxy(testHelper.TEST_PROXY)
 					.query('Path%20asc&rows=5&start=0&q=hello+Something:foo+Location:'+sLoc)
 					.expect(200)
 					.end(function(err, res) {
@@ -96,7 +98,8 @@ describe("Search endpoint", function() {
 					sLoc = res.body.Projects[0].Location;
 				}
 				request()
-					.get(PREFIX)
+          .get(PREFIX)
+          .proxy(testHelper.TEST_PROXY)
 					.query('Path%20asc&rows=5&start=0&q=hello+Location:'+sLoc+'+Something:foo')
 					.expect(200)
 					.end(function(err, res) {
@@ -113,7 +116,8 @@ describe("Search endpoint", function() {
 			.end(function(err, res) {
 				testHelper.throwIfError(err);
 				request()
-					.get(PREFIX)
+          .get(PREFIX)
+          .proxy(testHelper.TEST_PROXY)
 					.query('Path%20asc&rows=5&start=0&q=project+Location:'+res.body.Location+'+Something:foo+Exclude:one,two,three')
 					.expect(200)
 					.end(done);
@@ -128,7 +132,8 @@ describe("Search endpoint", function() {
 				sLoc = res.body.Projects[0].Location;
 			}
 			request()
-				.get(PREFIX)
+        .get(PREFIX)
+        .proxy(testHelper.TEST_PROXY)
 				.query('Path%20asc&rows=5&start=0&q=*hel+Location:'+sLoc)
 				.expect(200)
 				.end(function(err, res) {
@@ -149,7 +154,8 @@ describe("Search endpoint", function() {
 				sLoc = res.body.Projects[0].Location;
 			}
 			request()
-				.get(PREFIX)
+        .get(PREFIX)
+        .proxy(testHelper.TEST_PROXY)
 				.query('Path%20asc&rows=5&start=0&q=hello%20world+Location:'+sLoc)
 				.expect(200)
 				.end(function(err, res) {
@@ -170,7 +176,8 @@ describe("Search endpoint", function() {
 				sLoc = res.body.Projects[0].Location;
 			}
 			request()
-				.get(PREFIX)
+        .get(PREFIX)
+        .proxy(testHelper.TEST_PROXY)
 				.query('Path%20asc&rows=5&start=0&q=helLo%20worLd+Location:'+sLoc)
 				.expect(200)
 				.end(function(err, res) {
@@ -191,7 +198,8 @@ describe("Search endpoint", function() {
 				sLoc = res.body.Projects[0].Location;
 			}
 			request()
-				.get(PREFIX)
+        .get(PREFIX)
+        .proxy(testHelper.TEST_PROXY)
 				.query('Path%20asc&rows=5&start=0&q=helLo%20worLd+Location:'+sLoc+'+CaseSensitive:true')
 				.expect(200)
 				.end(function(err, res) {
@@ -212,7 +220,8 @@ describe("Search endpoint", function() {
 				sLoc = res.body.Projects[0].Location;
 			}
 			request()
-				.get(PREFIX)
+        .get(PREFIX)
+        .proxy(testHelper.TEST_PROXY)
 				.query('Path%20asc&rows=5&start=0&q=hello+Location:'+sLoc+'+WholeWord:true')
 				.expect(200)
 				.end(function(err, res) {
@@ -233,7 +242,8 @@ describe("Search endpoint", function() {
 				sLoc = res.body.Projects[0].Location;
 			}
 			request()
-				.get(PREFIX)
+        .get(PREFIX)
+        .proxy(testHelper.TEST_PROXY)
 				.query('Path%20asc&rows=5&start=0&q=hel+Location:'+sLoc+'+WholeWord:true')
 				.expect(200)
 				.end(function(err, res) {
@@ -254,7 +264,8 @@ describe("Search endpoint", function() {
 				sLoc = res.body.Projects[0].Location;
 			}
 			request()
-				.get(PREFIX)
+        .get(PREFIX)
+        .proxy(testHelper.TEST_PROXY)
 				.query('Path%20asc&rows=5&start=0&q=hel*+Location:'+sLoc+'+Exclude:fizz.txt')
 				.expect(200)
 				.end(function(err, res) {
@@ -275,7 +286,8 @@ describe("Search endpoint", function() {
 				sLoc = res.body.Projects[0].Location;
 			}
 			request()
-				.get(PREFIX)
+        .get(PREFIX)
+        .proxy(testHelper.TEST_PROXY)
 				.query('Path%20asc&rows=5&start=0&q=hel*+Location:'+sLoc+'+Name:fizz.txt')
 				.expect(200)
 				.end(function(err, res) {
@@ -296,7 +308,8 @@ describe("Search endpoint", function() {
 				sLoc = res.body.Projects[0].Location;
 			}
 			request()
-				.get(PREFIX)
+        .get(PREFIX)
+        .proxy(testHelper.TEST_PROXY)
 				.query('Path%20asc&rows=5&start=0&q=hel*+Location:'+sLoc+'+Name:buzz.txt')
 				.expect(200)
 				.end(function(err, res) {
@@ -317,7 +330,8 @@ describe("Search endpoint", function() {
 				sLoc = res.body.Projects[0].Location;
 			}
 			request()
-				.get(PREFIX)
+        .get(PREFIX)
+        .proxy(testHelper.TEST_PROXY)
 				.query('Path%20asc&rows=5&start=0&q=hel*+Location:'+sLoc+'+RegEx:true')
 				.expect(200)
 				.end(function(err, res) {
@@ -338,7 +352,8 @@ describe("Search endpoint", function() {
 				sLoc = res.body.Projects[0].Location;
 			}
 			request()
-				.get(PREFIX)
+        .get(PREFIX)
+        .proxy(testHelper.TEST_PROXY)
 				.query('Path%20asc&rows=5&start=0&q=hello+Location:'+sLoc+'+CaseSensitive:true')
 				.expect(200)
 				.end(function(err, res) {
@@ -359,7 +374,8 @@ describe("Search endpoint", function() {
 				sLoc = res.body.Projects[0].Location;
 			}
 			request()
-				.get(PREFIX)
+        .get(PREFIX)
+        .proxy(testHelper.TEST_PROXY)
 				.query('Path%20asc&rows=5&start=0&q=Hello+Location:'+sLoc+'+CaseSensitive:true')
 				.expect(200)
 				.end(function(err, res) {
@@ -380,7 +396,8 @@ describe("Search endpoint", function() {
 				sLoc = res.body.Projects[0].Location;
 			}
 			request()
-				.get(PREFIX)
+        .get(PREFIX)
+        .proxy(testHelper.TEST_PROXY)
 				.query('Path%20asc&rows=5&start=0&q=%3Chtml%3E+Location:'+sLoc)
 				.expect(200)
 				.end(function(err, res) {
@@ -401,7 +418,8 @@ describe("Search endpoint", function() {
 				sLoc = res.body.Projects[0].Location;
 			}
 			request()
-				.get(PREFIX)
+        .get(PREFIX)
+        .proxy(testHelper.TEST_PROXY)
 				.query('Path%20asc&rows=5&start=0&q=myFunc(one+Location:'+sLoc)
 				.expect(200)
 				.end(function(err, res) {
@@ -422,7 +440,8 @@ describe("Search endpoint", function() {
 				sLoc = res.body.Projects[0].Location;
 			}
 			request()
-				.get(PREFIX)
+        .get(PREFIX)
+        .proxy(testHelper.TEST_PROXY)
 				.query('Path%20asc&rows=5&start=0&q=amber%26sand+Location:'+sLoc)
 				.expect(200)
 				.end(function(err, res) {
@@ -443,7 +462,8 @@ describe("Search endpoint", function() {
 				sLoc = res.body.Projects[0].Location;
 			}
 			request()
-				.get(PREFIX)
+        .get(PREFIX)
+        .proxy(testHelper.TEST_PROXY)
 				.query('sort=NameLower%20asc&rows=100&start=0&q=NameLower:fizz.txt*+Location:' + CONTEXT_PATH + '/file*')
 				.expect(200)
 				.end(function(err, res) {
@@ -464,7 +484,8 @@ describe("Search endpoint", function() {
 				sLoc = res.body.Projects[0].Location;
 			}
 			request()
-				.get(PREFIX)
+        .get(PREFIX)
+        .proxy(testHelper.TEST_PROXY)
 				.query('sort=Name%20asc&rows=30&start=0&q=NameLower:api.js?onload=loadPicker*+CaseSensitive:true+WholeWord:true+Location:/myserver/prefix/file/foobar@gmail.com-sha1024/javascript/*+Exclude:node_modules&some_extras=one:two:three')
 				.expect(400, done);
 		});

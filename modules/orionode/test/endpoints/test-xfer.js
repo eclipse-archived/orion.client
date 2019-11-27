@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017 IBM Corporation and others.
+ * Copyright (c) 2017, 2019 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -10,13 +10,12 @@
  * 	   Remy Suen - initial API and implementation
  *******************************************************************************/
 /*eslint-env mocha */
-var assert = require("assert"),
-	path = require("path"),
-	fs = require('fs'),
-	testData = require('../support/test_data'),
-	testHelper = require('../support/testHelper');
-	
-	
+const assert = require("assert"),
+	    path = require("path"),
+	    fs = require('fs'),
+	    testData = require('../support/test_data'),
+	    testHelper = require('../support/testHelper');
+
 var CONTEXT_PATH = testHelper.CONTEXT_PATH,
 	WORKSPACE = testHelper.WORKSPACE,
 	METADATA =  testHelper.METADATA,
@@ -51,7 +50,8 @@ describe("XFER endpoint", function() {
 		assert.equal(fs.existsSync(WORKSPACE + "/donotexist"), false);
 		// ask the server to export the non-existent folder
 		request()
-			.get(EXPORT_PATH + '/' + WORKSPACE_ID + "/donotexist.zip")
+      .get(EXPORT_PATH + '/' + WORKSPACE_ID + "/donotexist.zip")
+      .proxy(testHelper.TEST_PROXY)
 			.expect(404)
 			.end(function(err, res) {
 				testHelper.throwIfError(err)
@@ -71,12 +71,14 @@ describe("XFER endpoint", function() {
 							.end(function(err, res) {
 								testHelper.throwIfError(err);
 								request()
-									.get(EXPORT_PATH + '/' + WORKSPACE_ID + '/project/exportSample.zip')
+                  .get(EXPORT_PATH + '/' + WORKSPACE_ID + '/project/exportSample.zip')
+                  .proxy(testHelper.TEST_PROXY)
 									.expect(200)
 									.end(function(err,res){
 										testHelper.throwIfError(err);
 										request()
-										.get(EXPORT_PATH + '/' + WORKSPACE_ID + '/project/exportSample/')
+                    .get(EXPORT_PATH + '/' + WORKSPACE_ID + '/project/exportSample/')
+                    .proxy(testHelper.TEST_PROXY)
 										.expect(400)
 										.end(function(err, res){
 											testHelper.throwIfError(err);
@@ -95,7 +97,8 @@ describe("XFER endpoint", function() {
 			.end(function(err, res) {
 				testHelper.throwIfError(err);
 				request()
-					.post(IMPORT_PATH + '/' + WORKSPACE_ID + '/project/importFromUrlRaw?source=' + encodeURIComponent(url))
+          .post(IMPORT_PATH + '/' + WORKSPACE_ID + '/project/importFromUrlRaw?source=' + encodeURIComponent(url))
+          .proxy(testHelper.TEST_PROXY)
 					.set('X-Xfer-Options', 'raw')
 					.expect(201)
 					.end(function(err, res) {
@@ -116,7 +119,8 @@ describe("XFER endpoint", function() {
 			.end(function(err, res) {
 				testHelper.throwIfError(err);
 				request()
-					.post(IMPORT_PATH + '/' + WORKSPACE_ID + '/project/importFromUrlNoHeader?source=' + encodeURIComponent(url))
+          .post(IMPORT_PATH + '/' + WORKSPACE_ID + '/project/importFromUrlNoHeader?source=' + encodeURIComponent(url))
+          .proxy(testHelper.TEST_PROXY)
 					.expect(201)
 					.end(function(err, res) {
 						testHelper.throwIfError(err);
@@ -133,7 +137,8 @@ describe("XFER endpoint", function() {
 			.end(function(err, res) {
 				testHelper.throwIfError(err);
 				request()
-					.post(IMPORT_PATH + '/' + WORKSPACE_ID + '/project/importFromUrlAutoExtracted?source=' + encodeURIComponent(url))
+          .post(IMPORT_PATH + '/' + WORKSPACE_ID + '/project/importFromUrlAutoExtracted?source=' + encodeURIComponent(url))
+          .proxy(testHelper.TEST_PROXY)
 					.set('X-Xfer-Options', 'unzip')
 					.expect(201)
 					.end(function(err, res) {
@@ -151,7 +156,8 @@ describe("XFER endpoint", function() {
 			.end(function(err, res) {
 				testHelper.throwIfError(err);
 				request()
-					.post(IMPORT_PATH + '/' + WORKSPACE_ID + '/project/importFromUrlAutoExtractedNonArchive?source=' + encodeURIComponent(url))
+          .post(IMPORT_PATH + '/' + WORKSPACE_ID + '/project/importFromUrlAutoExtractedNonArchive?source=' + encodeURIComponent(url))
+          .proxy(testHelper.TEST_PROXY)
 					.set('X-Xfer-Options', 'unzip')
 					.expect(400)
 					.end(done);
@@ -162,7 +168,8 @@ describe("XFER endpoint", function() {
 			.end(function(err, res) {
 				testHelper.throwIfError(err);
 				request()
-					.post(IMPORT_PATH + '/' + WORKSPACE_ID + '/project/importMalformedUrl?source=pumpkins')
+          .post(IMPORT_PATH + '/' + WORKSPACE_ID + '/project/importMalformedUrl?source=pumpkins')
+          .proxy(testHelper.TEST_PROXY)
 					.set('X-Xfer-Options', 'unzip')
 					.expect(400)
 					.end(done);
@@ -181,7 +188,8 @@ describe("XFER endpoint", function() {
 				assert(stats, "Could not get the file information for: "+fname);
 				lngth = stats.size;
 				request()
-					.post(IMPORT_PATH + '/' + WORKSPACE_ID + '/project/testImportFile')
+          .post(IMPORT_PATH + '/' + WORKSPACE_ID + '/project/testImportFile')
+          .proxy(testHelper.TEST_PROXY)
 					.set('Content-Type', 'application/octet-stream')
 					.set('Content-Length', lngth)
 					.set('Slug', 'client.zip')
@@ -207,7 +215,8 @@ describe("XFER endpoint", function() {
 				lngth = -1,
 				stats = fs.statSync(fname);
 				request()
-					.post(IMPORT_PATH + '/' + WORKSPACE_ID + '/project/testImportFile')
+          .post(IMPORT_PATH + '/' + WORKSPACE_ID + '/project/testImportFile')
+          .proxy(testHelper.TEST_PROXY)
 					.set('X-Xfer-Options', 'raw,no-overwrite')
 					.set('Content-Type', 'application/octet-stream')
 					.set('Slug', 'client.zip')
@@ -230,7 +239,8 @@ describe("XFER endpoint", function() {
 			fileContents = 'Emoji characters: \ud83d\ude0a\ud83d\udc31\ud83d\udc35';
 		fs.writeFileSync(tempdir+'/'+fileName, fileContents);
 		request()
-			.post(IMPORT_PATH + '/' + WORKSPACE_ID + tempdir)
+      .post(IMPORT_PATH + '/' + WORKSPACE_ID + tempdir)
+      .proxy(testHelper.TEST_PROXY)
 			.set('X-Xfer-Content-Length', fileContents.length)
 			.set('X-Xfer-Options', 'raw')
 			.set('Slug', fileName)
@@ -255,7 +265,8 @@ describe("XFER endpoint", function() {
 						lgth = stats.size;
 					}
 			request()
-				.post(IMPORT_PATH + '/' + WORKSPACE_ID + '/project/testImportEmojiFilename')
+        .post(IMPORT_PATH + '/' + WORKSPACE_ID + '/project/testImportEmojiFilename')
+        .proxy(testHelper.TEST_PROXY)
 				.set('X-Xfer-Content-Length', lgth)
 				.set('X-Xfer-Options', 'raw')
 				.set('Slug', fileName)

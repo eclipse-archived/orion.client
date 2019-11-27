@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017 IBM Corporation and others.
+ * Copyright (c) 2017, 2019 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -19,39 +19,31 @@ var CONTEXT_PATH = testHelper.CONTEXT_PATH,
 var request = testData.setupOrionServer();
 
 describe("About endpoint", function() {
-    it("testAbout", function(done) {
-        request()
+    it("testAbout", async () => {
+        const res = await request()
             .get(PREFIX)
-            .expect(200)
-            .end(function(err, res) {
-                testHelper.throwIfError(err);
-                assert(res.body, "There sould be a body in the response.");
-                done();
-            });
+            .proxy(testHelper.TEST_PROXY)
+            .expect(200);
+        assert(res.body, "There sould be a body in the response.");
     });
-    it("testAbout/about", function(done) {
-        request()
+    it("testAbout/about", async () => {
+        const res = await request()
             .get(PREFIX+PREFIX)
-            .expect(200)
-            .end(function(err, res) {
-                testHelper.throwIfError(err);
-                assert(res.body, "There sould be a body in the response.");
-                done();
-            });
+            .proxy(testHelper.TEST_PROXY)
+            .expect(200);
+        assert(res.body, "There sould be a body in the response.");
     });
-    it("testAbout.html", function(done) {
-        request()
+    it("testAbout.html", async () => {
+        const res = await request()
             .get(PREFIX+'.html')
-            .expect(404, done);
+            .proxy(testHelper.TEST_PROXY)
+            .expect(404);
     });
-    it("testAbout/about.html", function(done) {
-        request()
+    it("testAbout/about.html", async () => {
+        const res = await request()
             .get(PREFIX+PREFIX+'/html')
-            .expect(200)
-            .end(function(err, res) {
-                testHelper.throwIfError(err);
-                assert(res.body, "There sould be a body in the response.");
-                done();
-            });
+            .proxy(testHelper.TEST_PROXY)
+            .expect(200);
+        assert(res.body, "There sould be a body in the response.");
     });
 });

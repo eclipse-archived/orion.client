@@ -89,6 +89,7 @@
     "nyc": "^13.3.0",
     "requirejs": "^2.3.3",
     "superagent": "^3.5.1",
+    "supertest-with-proxy": "^5.0.1",
     "supertest": "^3.0.0"
   },
   "engines": {

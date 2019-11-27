@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017 IBM Corporation and others.
+ * Copyright (c) 2017, 2019 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -9,10 +9,10 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 /*eslint-env mocha */
-var assert = require('assert'),
-	path = require('path'),
-	testData = require('../support/test_data'),
-	testHelper = require('../support/testHelper');
+const assert = require('assert'),
+	    path = require('path'),
+	    testData = require('../support/test_data'),
+	    testHelper = require('../support/testHelper');
 
 var CONTEXT_PATH = testHelper.CONTEXT_PATH,
 	WORKSPACE = testHelper.WORKSPACE,
@@ -49,7 +49,8 @@ describe("Orion metastore", function() {
 				testHelper.throwIfError(err);
 				assert(res.body, "There must be a workspace");
 				request()
-					.post(res.body.Location)
+          .post(res.body.Location)
+          .proxy(testHelper.TEST_PROXY)
 					.set('Slug', WORKSPACE_ID)
 					.expect(400)
 					.end(done);
@@ -61,7 +62,8 @@ describe("Orion metastore", function() {
 				testHelper.throwIfError(err);
 				assert(res.body, "There must be a workspace");
 				request()
-					.post(res.body.Location)
+          .post(res.body.Location)
+          .proxy(testHelper.TEST_PROXY)
 					.set('Slug', 'OrionContent')
 					.expect(201)
 					.end(done);
@@ -73,7 +75,8 @@ describe("Orion metastore", function() {
 				testHelper.throwIfError(err);
 				assert(res.body, "There must be a workspace");
 				request()
-					.post(res.body.Location)
+          .post(res.body.Location)
+          .proxy(testHelper.TEST_PROXY)
 					.set('Slug', 'user')
 					.expect(400)
 					.end(done);
@@ -85,7 +88,8 @@ describe("Orion metastore", function() {
 				testHelper.throwIfError(err);
 				assert(res.body, "There must be a workspace");
 				request()
-					.post(res.body.Location)
+          .post(res.body.Location)
+          .proxy(testHelper.TEST_PROXY)
 					.set('Slug', 'Orion Content')
 					.expect(201)
 					.end(done);
@@ -97,7 +101,8 @@ describe("Orion metastore", function() {
 				testHelper.throwIfError(err);
 				assert(res.body, "There must be a workspace");
 				request()
-					.post(res.body.Location)
+          .post(res.body.Location)
+          .proxy(testHelper.TEST_PROXY)
 					.set('Slug', 'testCreateProjectUsingFileAPI')
 					.expect(201)
 					.end(done);
@@ -109,7 +114,8 @@ describe("Orion metastore", function() {
 				testHelper.throwIfError(err);
 				assert(res.body, "There must be a workspace");
 				request()
-					.post(PREFIX + '/77')
+          .post(PREFIX + '/77')
+          .proxy(testHelper.TEST_PROXY)
 					.set('Slug', 'testCreateProjectWithAnInvalidWorkspaceId')
 					.expect(403)
 					.end(done);
@@ -121,7 +127,8 @@ describe("Orion metastore", function() {
 				testHelper.throwIfError(err);
 				assert(res.body, "There must be a workspace");
 				request()
-					.post(res.body.Location)
+          .post(res.body.Location)
+          .proxy(testHelper.TEST_PROXY)
 					.set('Slug', 'testCreateProjectWith|InName')
 					.expect(201)
 					.end(done);
@@ -134,13 +141,15 @@ describe("Orion metastore", function() {
 				assert(res.body, "There must be a workspace");
 				var ws = res.body.Location;
 				request()
-					.post(ws)
+          .post(ws)
+          .proxy(testHelper.TEST_PROXY)
 					.set('Slug', 'testCreateProjectWithDuplicateProjectName')
 					.expect(201)
 					.end(function(err, res) {
 						testHelper.throwIfError(err);
 						request()
-							.post(ws)
+              .post(ws)
+              .proxy(testHelper.TEST_PROXY)
 							.set('Slug', 'testCreateProjectWithDuplicateProjectName')
 							.expect(200)
 							.end(done);
@@ -154,7 +163,8 @@ describe("Orion metastore", function() {
 				testHelper.throwIfError(err);
 				assert(res.body, "There must be a workspace");
 				request()
-					.post(res.body.Location)
+          .post(res.body.Location)
+          .proxy(testHelper.TEST_PROXY)
 					.set("Content-Type","text/html; charset=UTF-8")
 					.set('Slug', emoji)
 					.expect(201)
@@ -164,7 +174,8 @@ describe("Orion metastore", function() {
 	it.skip("testCreateProjectWithNoWorkspaceId", function(done) {
 		// Skip because there's no way to test create Project without workspace ID throught Server Rest APIs(Java eqivalent test is call method directely)
 		request()
-			.post(PREFIX)
+      .post(PREFIX)
+      .proxy(testHelper.TEST_PROXY)
 			.set('Slug', 'testCreateProjectWithNoWorkspaceId')
 			.expect(400)
 			.end(done);
@@ -175,7 +186,8 @@ describe("Orion metastore", function() {
 				testHelper.throwIfError(err);
 				assert(res.body, "There must be a workspace");
 				request()
-					.post(res.body.Location)
+          .post(res.body.Location)
+          .proxy(testHelper.TEST_PROXY)
 					.set('Slug', 'http://orion.eclipse.org/')
 					.expect(400)
 					.end(done);
@@ -183,7 +195,8 @@ describe("Orion metastore", function() {
 	});
 	it("testCreateSecondWorkspace", function(done) {
 		request()
-			.post(PREFIX)
+      .post(PREFIX)
+      .proxy(testHelper.TEST_PROXY)
 			.type('json')
 			.send({Name: 'Orion sandbox'})
 			.set('Slug', 'Orion sandbox')
@@ -199,13 +212,15 @@ describe("Orion metastore", function() {
 			.end(function(err, res) {
 				testHelper.throwIfError(err);
 				request()
-					.post(PREFIX)
+          .post(PREFIX)
+          .proxy(testHelper.TEST_PROXY)
 					.set('Slug', 'Orion ws')
 					.expect(201)
 					.end(function(err, res) {
 						testHelper.throwIfError(err);
 						request()
-							.post(PREFIX)
+              .post(PREFIX)
+              .proxy(testHelper.TEST_PROXY)
 							.set('Slug', 'Orion ws')
 							.expect(201)
 							.end(done);
@@ -216,7 +231,8 @@ describe("Orion metastore", function() {
 	it.skip("testCreateWorkspaceWithNoUserId");
 	it("testCreateWorkspaceWithNoWorkspaceName", function(done) {
 		request()
-			.post(PREFIX)
+      .post(PREFIX)
+      .proxy(testHelper.TEST_PROXY)
 			//.set('Slug', 'Orion workspace test')
 			.expect(400)
 			.end(done);
@@ -226,7 +242,8 @@ describe("Orion metastore", function() {
 			.end(function(err, res) {
 				testHelper.throwIfError(err);
 				request()
-					.post(res.body.Location)
+          .post(res.body.Location)
+          .proxy(testHelper.TEST_PROXY)
 					.type('json')
 					.send({Name: 'testDeleteSimpleProject'})
 					.expect(201)
@@ -234,12 +251,14 @@ describe("Orion metastore", function() {
 						testHelper.throwIfError(err);
 						var pLoc = res.body.Location;
 						request()
-							.delete(pLoc)
+              .delete(pLoc)
+              .proxy(testHelper.TEST_PROXY)
 							.expect(204)
 							.end(function(err, res) {
 								testHelper.throwIfError(err);
 								request()
-									.get(pLoc)
+                  .get(pLoc)
+                  .proxy(testHelper.TEST_PROXY)
 									.expect(404)
 									.end(done);
 							});
@@ -248,7 +267,8 @@ describe("Orion metastore", function() {
 	});
 	it("testDeleteSimpleWorkspace", function(done) {
 		request()
-			.post(PREFIX)
+      .post(PREFIX)
+      .proxy(testHelper.TEST_PROXY)
 			.set('Slug', 'Orion sandbox')
 			.expect(201)
 			.end(function(err, res) {
@@ -258,12 +278,14 @@ describe("Orion metastore", function() {
 						testHelper.throwIfError(err);
 						var wLoc = res.body.Location;
 						request()
-							.delete(wLoc)
+              .delete(wLoc)
+              .proxy(testHelper.TEST_PROXY)
 							.expect(204)
 							.end(function(err, res) {
 								testHelper.throwIfError(err);
 								request()
-									.get(wLoc)
+                  .get(wLoc)
+                  .proxy(testHelper.TEST_PROXY)
 									.expect(403)
 									.end(done);
 							});
@@ -272,7 +294,8 @@ describe("Orion metastore", function() {
 	});
 	it("testGetWorkspaces", function(done) {
 		request()
-			.get(PREFIX)
+      .get(PREFIX)
+      .proxy(testHelper.TEST_PROXY)
 			.expect(200)
 			.end(function(err, res) {
 				testHelper.throwIfError(err);
@@ -286,7 +309,8 @@ describe("Orion metastore", function() {
 				testHelper.throwIfError(err);
 				var ws = res.body.Location;
 				request()
-					.post(ws)
+          .post(ws)
+          .proxy(testHelper.TEST_PROXY)
 					.type('json')
 					.send({Name: 'testMoveProjectWith|InProjectName'})
 					.expect(201)
@@ -294,7 +318,8 @@ describe("Orion metastore", function() {
 						testHelper.throwIfError(err);
 						var pLoc = res.body.Location;
 						request()
-							.post(ws)
+              .post(ws)
+              .proxy(testHelper.TEST_PROXY)
 							.type('json')
 							.set('X-Create-Options', "move")
 							.set('Slug', 'testMoveProjectWith|InProjectNameMOVED')
@@ -303,7 +328,8 @@ describe("Orion metastore", function() {
 							.end(function(err, res) {
 								testHelper.throwIfError(err);
 								request()
-									.get(res.body.Location)
+                  .get(res.body.Location)
+                  .proxy(testHelper.TEST_PROXY)
 									.expect(200)
 									.end(done);
 							});
@@ -316,7 +342,8 @@ describe("Orion metastore", function() {
 				testHelper.throwIfError(err);
 				var ws = res.body.Location;
 				request()
-					.post(ws)
+          .post(ws)
+          .proxy(testHelper.TEST_PROXY)
 					.type('json')
 					.send({Name: 'testMoveSimpleProject'})
 					.expect(201)
@@ -324,7 +351,8 @@ describe("Orion metastore", function() {
 						testHelper.throwIfError(err);
 						var pLoc = res.body.Location;
 						request()
-							.post(ws)
+              .post(ws)
+              .proxy(testHelper.TEST_PROXY)
 							.type('json')
 							.set('X-Create-Options', "move")
 							.set('Slug', 'testMoveSimpleProjectMOVED')
@@ -332,7 +360,8 @@ describe("Orion metastore", function() {
 							.expect(201)
 							.end(function(err, res) {
 								request()
-									.get(res.body.Location)
+                  .get(res.body.Location)
+                  .proxy(testHelper.TEST_PROXY)
 									.expect(200)
 									.end(done);
 							});
@@ -348,14 +377,16 @@ describe("Orion metastore", function() {
 			.end(function(err, res) {
 				testHelper.throwIfError(err);
 				request()
-					.post(res.body.Location)
+          .post(res.body.Location)
+          .proxy(testHelper.TEST_PROXY)
 					.type('json')
 					.send({Name: 'testReadProject', Directory: true})
 					.expect(201)
 					.end(function(err, res) {
 						testHelper.throwIfError(err);
 						request()
-							.get(res.body.Location)
+              .get(res.body.Location)
+              .proxy(testHelper.TEST_PROXY)
 							.expect(200)
 							.end(function(err, res) {
 								assert(res.body && res.body.Name === 'testReadProject', "The new project was not found after creation")
@@ -369,7 +400,8 @@ describe("Orion metastore", function() {
 			.end(function(err, res) {
 				testHelper.throwIfError(err);
 				request()
-					.get(path.join(res.body.Location, '/projectThatDoesNotExist'))
+          .get(path.join(res.body.Location, '/projectThatDoesNotExist'))
+          .proxy(testHelper.TEST_PROXY)
 					.expect(404)
 					.end(done);
 			});
@@ -379,7 +411,8 @@ describe("Orion metastore", function() {
 			.end(function(err, res) {
 				testHelper.throwIfError(err);
 				request()
-					.get(path.join(path.dirname(res.body.Location), '/77', '/someProject'))
+          .get(path.join(path.dirname(res.body.Location), '/77', '/someProject'))
+          .proxy(testHelper.TEST_PROXY)
 					.expect(403)
 					.end(done);
 			});
@@ -394,7 +427,8 @@ describe("Orion metastore", function() {
 	});
 	it("testReadWorkspaceThatDoesNotExist", function(done) {
 		request()
-			.get(PREFIX + '/wsThatDoesNotExist')
+      .get(PREFIX + '/wsThatDoesNotExist')
+      .proxy(testHelper.TEST_PROXY)
 			.expect(403)
 			.end(done);
 	});

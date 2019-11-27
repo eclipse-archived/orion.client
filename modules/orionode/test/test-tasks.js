@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright (c) 2017 Remy Suen and others.
+ * Copyright (c) 2017, 2019 Remy Suen and others.
  * All rights reserved. This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License v1.0
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution
@@ -10,7 +10,7 @@
  *     IBM Corporation Inc. - additional tests
  *****************************************************************************/
 /*eslint-env node, mocha, assert, express*/
-var assert = require('assert'),
+const assert = require('assert'),
 	path = require("path"),
 	testData = require("./support/test_data"),
 	testHelper = require("./support/testHelper");
@@ -27,7 +27,8 @@ describe("Tasks API", function() {
 	beforeEach(function(done) {
 		//clean up done tasks before each test
 		request()
-			.del(CONTEXT_PATH + "/task")
+      .del(CONTEXT_PATH + "/task")
+      .proxy(testHelper.TEST_PROXY)
 			.expect(200)
 			.end(function(err, res) {
 				testData.setUp(WORKSPACE, function(){
@@ -48,20 +49,23 @@ describe("Tasks API", function() {
 	describe("task store tests", function() {
 		it("testRead", function(done) {
 			request()
-				.put(CONTEXT_PATH + "/taskHelper")
+        .put(CONTEXT_PATH + "/taskHelper")
+        .proxy(testHelper.TEST_PROXY)
 				.end(function(err, res) {
 					assert.ifError(err);
 					var taskLoc = res.body.Location;
 					//now fetch it
 					request()
-						.get(taskLoc)
+            .get(taskLoc)
+            .proxy(testHelper.TEST_PROXY)
 						.expect(200)
 						.end(function(err, res) {
 							testHelper.throwIfError(err);
 							assert(res.body && res.body.type === "loadstart", "We should have been able to fetch the created task.")
 							//mark the task done so it will be removed
 							request()
-								.post(path.join(CONTEXT_PATH, '/taskHelper', path.basename(taskLoc)))
+                .post(path.join(CONTEXT_PATH, '/taskHelper', path.basename(taskLoc)))
+                .proxy(testHelper.TEST_PROXY)
 								.expect(200)
 								.end(done)
 						});
@@ -70,25 +74,29 @@ describe("Tasks API", function() {
 		it("readAllTasksTest", function(done) {
 			//create a couple of tasks
 			request()
-				.put(CONTEXT_PATH + "/taskHelper")
+        .put(CONTEXT_PATH + "/taskHelper")
+        .proxy(testHelper.TEST_PROXY)
 				.end(function(err, res) {
 					assert.ifError(err);
 					//mark it done
 					var taskLoc1 = res.body.Location;
 					//create a second task
 					request()
-						.put(CONTEXT_PATH + "/taskHelper")
+            .put(CONTEXT_PATH + "/taskHelper")
+            .proxy(testHelper.TEST_PROXY)
 						.end(function(err, res) {
 							assert.ifError(err);
 							var taskLoc2 = res.body.Location;
 									//ask for all of them
 							request()
-								.post(path.join(CONTEXT_PATH, '/taskHelper', path.basename(taskLoc1)))
+                .post(path.join(CONTEXT_PATH, '/taskHelper', path.basename(taskLoc1)))
+                .proxy(testHelper.TEST_PROXY)
 								.expect(200)
 								.end(function(err, res) {
 									testHelper.throwIfError(err);
 									request()
-										.post(path.join(CONTEXT_PATH, '/taskHelper', path.basename(taskLoc2)))
+                    .post(path.join(CONTEXT_PATH, '/taskHelper', path.basename(taskLoc2)))
+                    .proxy(testHelper.TEST_PROXY)
 										.expect(200)
 										.end(done)
 								});
@@ -100,7 +108,8 @@ describe("Tasks API", function() {
 		it('no tasks at all', function(finished) {
 			// delete all the tasks
 			request()
-				.del(CONTEXT_PATH + "/task")
+        .del(CONTEXT_PATH + "/task")
+        .proxy(testHelper.TEST_PROXY)
 				.expect(200)
 				.end(function(err, res) {
 					assert.ifError(err);
@@ -113,13 +122,15 @@ describe("Tasks API", function() {
 		it('one running task', function(finished) {
 			// create a task
 			request()
-				.put(CONTEXT_PATH + "/taskHelper")
+        .put(CONTEXT_PATH + "/taskHelper")
+        .proxy(testHelper.TEST_PROXY)
 				.end(function(err, res) {
 					assert.ifError(err);
 					var location = res.body.Location;
 					// delete all completed tasks
 					request()
-						.del(CONTEXT_PATH + "/task")
+            .del(CONTEXT_PATH + "/task")
+            .proxy(testHelper.TEST_PROXY)
 						.expect(200)
 						.end(function(err, res) {
 							assert.ifError(err);
@@ -129,14 +140,16 @@ describe("Tasks API", function() {
 
 							// mark test task as completed
 							request()
-								.post(CONTEXT_PATH + "/taskHelper" + location.substr(5 + CONTEXT_PATH.length))
+                .post(CONTEXT_PATH + "/taskHelper" + location.substr(5 + CONTEXT_PATH.length))
+                .proxy(testHelper.TEST_PROXY)
 								.expect(200)
 								.end(function(err, res) {
 									assert.ifError(err);
 
 									// delete all completed tasks
 									request()
-										.del(CONTEXT_PATH + "/task")
+                    .del(CONTEXT_PATH + "/task")
+                    .proxy(testHelper.TEST_PROXY)
 										.expect(200)
 										.end(function(err, res) {
 											assert.ifError(err);
@@ -152,27 +165,31 @@ describe("Tasks API", function() {
 		it('one running task, one completed', function(finished) {
 			// spawn a running task
 			request()
-				.put(CONTEXT_PATH + "/taskHelper")
+        .put(CONTEXT_PATH + "/taskHelper")
+        .proxy(testHelper.TEST_PROXY)
 				.end(function(err, res) {
 					assert.ifError(err);
 					var location = res.body.Location;
 					taskIds.push(location);
 					// spawn a second running task
 					request()
-						.put(CONTEXT_PATH + "/taskHelper")
+            .put(CONTEXT_PATH + "/taskHelper")
+            .proxy(testHelper.TEST_PROXY)
 						.end(function(err, res) {
 							assert.ifError(err);
 							var location2 = res.body.Location;
 							taskIds.push(location2);
 							// mark the first one as completed
 							request()
-								.post(CONTEXT_PATH + "/taskHelper" + location.substr(5 + CONTEXT_PATH.length))
+                .post(CONTEXT_PATH + "/taskHelper" + location.substr(5 + CONTEXT_PATH.length))
+                .proxy(testHelper.TEST_PROXY)
 								.expect(200)
 								.end(function(err, res) {
 									assert.ifError(err);
 									// check that the second running task is still there after deletion
 									request()
-										.del(CONTEXT_PATH + "/task")
+                    .del(CONTEXT_PATH + "/task")
+                    .proxy(testHelper.TEST_PROXY)
 										.expect(200)
 										.end(function(err, res) {
 											assert.ifError(err);
@@ -188,32 +205,37 @@ describe("Tasks API", function() {
 		it('one running task, one canceled', function(finished) {
 			// spawn a running task
 			request()
-				.put(CONTEXT_PATH + "/taskHelper")
+        .put(CONTEXT_PATH + "/taskHelper")
+        .proxy(testHelper.TEST_PROXY)
 				.end(function(err, res) {
 					assert.ifError(err);
 					var location = res.body.Location;
 					taskIds.push(location);
 					// spawn a second running task
 					request()
-						.put(CONTEXT_PATH + "/taskHelper")
+            .put(CONTEXT_PATH + "/taskHelper")
+            .proxy(testHelper.TEST_PROXY)
 						.end(function(err, res) {
 							assert.ifError(err);
 							var location2 = res.body.Location;
 							taskIds.push(location2);
 							// mark the first one as completed
 							request()
-								.post(CONTEXT_PATH + "/taskHelper" + location.substr(5 + CONTEXT_PATH.length))
+                .post(CONTEXT_PATH + "/taskHelper" + location.substr(5 + CONTEXT_PATH.length))
+                .proxy(testHelper.TEST_PROXY)
 								.expect(200)
 								.end(function(err, res) {
 									assert.ifError(err);
 									// check that the second running task is still there after deletion
 									request()
-										.put(location2)
+                    .put(location2)
+                    .proxy(testHelper.TEST_PROXY)
 										.send({"abort": true})
 										.expect(200)
 										.end(function(err, res) {
 											request()
-											.get(location2)
+                      .get(location2)
+                      .proxy(testHelper.TEST_PROXY)
 											.expect(200)
 											.end(function(err, res) {
 												testHelper.throwIfError(err);

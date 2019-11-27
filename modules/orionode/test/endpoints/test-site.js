@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017 IBM Corporation and others.
+ * Copyright (c) 2017, 2019 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -9,7 +9,7 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 /*eslint-env mocha */
-var assert = require('assert'),
+const assert = require('assert'),
 	path = require('path'),
 	testData = require('../support/test_data'),
 	testHelper = require('../support/testHelper');
@@ -20,15 +20,6 @@ var CONTEXT_PATH = testHelper.CONTEXT_PATH,
 	WORKSPACE_ID = testHelper.WORKSPACE_ID;
 	
 var request = testData.setupOrionServer();
-
-/**
- * @description create a new mapping for a site configuration
- * @param {*} from Where the mapping originates from
- * @param {*} to Where the mapping should point to
- */
-function createMapping(from, to) {
-	return {Source: from, Target: to};
-}
 
 /**
  * @description Creates a group of mappings. The arrays must be the same length, or an excpetion is thrown
@@ -55,7 +46,8 @@ function createSite(siteName, mappings, hostHint, workspace) {
 	var ws = workspace === undefined ? WORKSPACE_ID : workspace
 	var json = {Workspace: ws, HostHint: hostHint, Mappings: mappings};
 	return request()
-		.post(CONTEXT_PATH + '/site')
+    .post(CONTEXT_PATH + '/site')
+    .proxy(testHelper.TEST_PROXY)
 		.set('Orion-Version', 1)
 		.set('Slug', siteName)
 		.type('json')
@@ -73,7 +65,7 @@ function createSite(siteName, mappings, hostHint, workspace) {
  */
 function updateSite(uri, siteName, mappings, hostHint, hostingStatus, user, pw) {
 	var json = {Name: siteName, Workspace: WORKSPACE_ID, Mappings: mappings, HostHint: hostHint, HostingStatus: hostingStatus};
-	var req = request().put(uri);
+	var req = request().put(uri).proxy(testHelper.TEST_PROXY);
 	if(user && pw) {
 		req.set('Authorization', 'Basic '+ String(user +':'+pw));
 	}
@@ -109,7 +101,7 @@ function stopSite(siteLocation, user, pw) {
  * @param {*} pw 
  */
 function deleteSite(siteLocation, user, pw) {
-	var req = request().delete(CONTEXT_PATH + siteLocation);
+	var req = request().delete(CONTEXT_PATH + siteLocation).proxy(testHelper.TEST_PROXY);
 	if(user && pw) {
 		req.set('Authorization', 'Basic '+ String(user +':'+pw));
 	}
@@ -123,7 +115,7 @@ function deleteSite(siteLocation, user, pw) {
  * @param {*} pw 
  */
 function getSite(siteName, user, pw) {
-	var req = request().get(CONTEXT_PATH + '/site/'+siteName);
+	var req = request().get(CONTEXT_PATH + '/site/'+siteName).proxy(testHelper.TEST_PROXY);
 	if(user && password) {
 		req.set('Authorization', 'Basic '+ String(user +':'+pw));
 	}
@@ -136,7 +128,7 @@ function getSite(siteName, user, pw) {
  * @param {*} pw 
  */
 function getAllSites(user, pw) {
-	var req = request().get(CONTEXT_PATH + '/site/');
+	var req = request().get(CONTEXT_PATH + '/site/').proxy(testHelper.TEST_PROXY);
 	if(user && password) {
 		req.set('Authorization', 'Basic '+ String(user +':'+pw));
 	}

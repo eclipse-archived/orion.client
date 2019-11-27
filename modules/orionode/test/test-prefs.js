@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016, 2017 IBM Corporation and others.
+ * Copyright (c) 2016, 2019 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -10,16 +10,14 @@
  *******************************************************************************/
 /*eslint-env node, mocha*/
 /*eslint-disable no-undef-expression */
-var chai = require('chai'),
+const chai = require('chai'),
     assert = require('assert'),
     nodePath = require('path'),
     Promise = require('bluebird'),
     testHelper = require('./support/testHelper'),
-    testData = require('./support/test_data');
-
-var expect = chai.expect,
-    fs = Promise.promisifyAll(require('fs'));
-
+    testData = require('./support/test_data'),
+    expect = chai.expect,
+    fs = Promise.promisifyAll(require('fs'))
 
 var CONTEXT_PATH = testHelper.CONTEXT_PATH,
 	WORKSPACE = testHelper.WORKSPACE,
@@ -60,52 +58,62 @@ describe('Orion preferences tests', function() {
 	 */
 	describe('Core pref tests', function() {
 		it('testBug409792', function() {
-			return request().put(PREFS_PREFIX + "/user/" + USERID + '/testBug409792')
+      return request().put(PREFS_PREFIX + "/user/" + USERID + '/testBug409792')
+        .proxy(testHelper.TEST_PROXY)
 				.type('json')
 				.send({ "http://127.0.0.2:8080/plugins/samplePlugin.html": true })
 				.expect(204);
 		});
 		it('testGetSingle', function() {
-			return request().get(PREFS_PREFIX + '/user/java?key=Name')
+      return request().get(PREFS_PREFIX + '/user/java?key=Name')
+          .proxy(testHelper.TEST_PROXY)
 					.expect(404)
 					.then(/* @callback */ function(res) {
-						return request().put(PREFS_PREFIX + '/user/java')
+            return request().put(PREFS_PREFIX + '/user/java')
+                .proxy(testHelper.TEST_PROXY)
 								.type('json')
 								.send({"Name": "Frodo"})
 								.expect(204)
 								.then(/* @callback */ function(res) {
-									return request().get(PREFS_PREFIX + '/user/java?key=Name')
+                  return request().get(PREFS_PREFIX + '/user/java?key=Name')
+                      .proxy(testHelper.TEST_PROXY)
 											.expect(200);
 								});
 					});
 		});
 		it('testPutSingleString', function() {
-			return request().put(PREFS_PREFIX + '/user/java')
+      return request().put(PREFS_PREFIX + '/user/java')
+          .proxy(testHelper.TEST_PROXY)
 					.type('json')
 					.send({"Name": "Frodo"})
 					.expect(204)
 					.then(/* @callback */ function(res) {
-						return request().get(PREFS_PREFIX + '/user/java?key=Name')
+            return request().get(PREFS_PREFIX + '/user/java?key=Name')
+              .proxy(testHelper.TEST_PROXY)
 							.expect(200);
 					});
 		});
 		it('testPutSingleEmpty', function() {
-			return request().put(PREFS_PREFIX + '/user/java')
+      return request().put(PREFS_PREFIX + '/user/java')
+          .proxy(testHelper.TEST_PROXY)
 					.type('json')
 					.send({"Name": ""})
 					.expect(204)
 					.then(/* @callback */ function(res) {
-						return request().get(PREFS_PREFIX + '/user/java?key=Name')
+            return request().get(PREFS_PREFIX + '/user/java?key=Name')
+                .proxy(testHelper.TEST_PROXY)
 								.expect(200);
 					});
 		});
 		it('testPutSingleIllegalEncodingChars', function() {
-			return request().put(PREFS_PREFIX + '/user/java')
+      return request().put(PREFS_PREFIX + '/user/java')
+          .proxy(testHelper.TEST_PROXY)
 					.type('json')
 					.send({"Na=me" : "Fr&do"})
 					.expect(204)
 					.then(/* @callback */ function(res) {
-						return request().get(PREFS_PREFIX + '/user/java?key=Na%3Dme')
+            return request().get(PREFS_PREFIX + '/user/java?key=Na%3Dme')
+                .proxy(testHelper.TEST_PROXY)
 								.expect(200)
 								.then(function(res) {
 									assert(res.text, "There was no text returned in the response");
@@ -117,12 +125,14 @@ describe('Orion preferences tests', function() {
 					});
 		});
 		it('testPutJSON', function() {
-			return request().put(PREFS_PREFIX + '/user/java')
+      return request().put(PREFS_PREFIX + '/user/java')
+          .proxy(testHelper.TEST_PROXY)
 					.type('json')
 					.send({"properties" : {"foo": true, "bar": false}})
 					.expect(204)
 					.then(/* @callback */ function(res) {
-						return request().get(PREFS_PREFIX + '/user/java?key=properties')
+            return request().get(PREFS_PREFIX + '/user/java?key=properties')
+                .proxy(testHelper.TEST_PROXY)
 								.expect(200)
 								.then(function(res) {
 									assert(res.text, "There was no text returned in the response");
@@ -135,24 +145,28 @@ describe('Orion preferences tests', function() {
 					});
 		});
 		it('testPutNode', function() {
-			return request().put(PREFS_PREFIX + '/user/java')
+      return request().put(PREFS_PREFIX + '/user/java')
+          .proxy(testHelper.TEST_PROXY)
 					.type('json')
 					.send({"Name" : "Frodo", "Address": "Bag End"})
 					.expect(204)
 					.then(function() {
-						return request().get(PREFS_PREFIX + '/user/java?key=Address')
+            return request().get(PREFS_PREFIX + '/user/java?key=Address')
+                .proxy(testHelper.TEST_PROXY)
 								.expect(200)
 								.then(function(res) {
 									assert(res.text, "There was no text in the response");
 									var o = JSON.parse(res.text);
 									assert(o, "The JSON parse resulted in nothing");
 									assert.equal(o["Address"], "Bag End", "The returned address does not match what was set");
-									return request().put(PREFS_PREFIX + '/user/java')
+                  return request().put(PREFS_PREFIX + '/user/java')
+                      .proxy(testHelper.TEST_PROXY)
 											.type('json')
 											.send({"Name" : "Barliman", "Occupation": "Barkeep"})
 											.expect(204)
 											.then(function() {
-												return request().get(PREFS_PREFIX + '/user/java')
+                        return request().get(PREFS_PREFIX + '/user/java')
+                            .proxy(testHelper.TEST_PROXY) 
 														.expect(200)
 														.then(function(res) {
 															assert(res.text, "There was no text returned in the response");
@@ -173,12 +187,14 @@ describe('Orion preferences tests', function() {
 			//skipped in Java tests as well
 		});
 		it('testValueWithSpaces', function(done) {
-			request().put(PREFS_PREFIX + '/user/java')
+      request().put(PREFS_PREFIX + '/user/java')
+        .proxy(testHelper.TEST_PROXY)
 				.type('json')
 				.send({"Name" : "Frodo Baggins"})
 				.expect(204)
 				.end(function(err, res) {
-					request().get(PREFS_PREFIX + '/user/java?key=Name')
+          request().get(PREFS_PREFIX + '/user/java?key=Name')
+            .proxy(testHelper.TEST_PROXY)
 						.expect(200)
 						.end(function(err, res) {
 							assert(res.text, "There was no text returned in the response");
@@ -191,10 +207,12 @@ describe('Orion preferences tests', function() {
 
 		});
 		it('testAccessingMetadata - prefs/', function(done) {
-			request().get(PREFS_PREFIX + '/')
+      request().get(PREFS_PREFIX + '/')
+        .proxy(testHelper.TEST_PROXY)
 				.expect(405)
 				.end(function(err, res) {
-					request().put(PREFS_PREFIX + '/')
+          request().put(PREFS_PREFIX + '/')
+            .proxy(testHelper.TEST_PROXY)
 						.type('json')
 						.send({"Name" : "Frodo Baggins"})
 						.expect(405)
@@ -202,10 +220,12 @@ describe('Orion preferences tests', function() {
 				});
 		});
 		it('testAccessingMetadata - prefs/Users', function(done) {
-			request().get(PREFS_PREFIX + '/Users')
+      request().get(PREFS_PREFIX + '/Users')
+        .proxy(testHelper.TEST_PROXY)
 				.expect(405)
 				.end(function(err, res) {
-					request().put(PREFS_PREFIX + '/Users')
+          request().put(PREFS_PREFIX + '/Users')
+            .proxy(testHelper.TEST_PROXY)
 						.type('json')
 						.send({"Name" : "Frodo Baggins"})
 						.expect(405)
@@ -213,10 +233,12 @@ describe('Orion preferences tests', function() {
 				});
 		});
 		it('testAccessingMetadata - prefs/user', function() {
-			return request().get(PREFS_PREFIX + '/user')
+      return request().get(PREFS_PREFIX + '/user')
+            .proxy(testHelper.TEST_PROXY)
 						.expect(405)
 						.then(function() {
-							return request().put(PREFS_PREFIX + '/user')
+              return request().put(PREFS_PREFIX + '/user')
+                  .proxy(testHelper.TEST_PROXY)
 									.type('json')
 									.send({"Name" : "Frodo Baggins"})
 									.expect(405);
@@ -224,40 +246,48 @@ describe('Orion preferences tests', function() {
 			
 		});
 		it('testAccessingMetadata - prefs/Workspaces', function() {
-			return request().get(PREFS_PREFIX + '/Workspaces')
+      return request().get(PREFS_PREFIX + '/Workspaces')
+            .proxy(testHelper.TEST_PROXY)
 						.expect(405)
 						.then(function() {
-							return request().put(PREFS_PREFIX + '/Workspaces')
+              return request().put(PREFS_PREFIX + '/Workspaces')
+                  .proxy(testHelper.TEST_PROXY)
 									.type('json')
 									.send({"Name" : "Frodo Baggins"})
 									.expect(405);
 						});
 		});
 		it('testAccessingMetadata - prefs/workspace', function() {
-			return request().get(PREFS_PREFIX + '/workspace')
+      return request().get(PREFS_PREFIX + '/workspace')
+            .proxy(testHelper.TEST_PROXY)
 						.expect(405)
 						.then(function() {
-							return request().put(PREFS_PREFIX + '/workspace')
+              return request().put(PREFS_PREFIX + '/workspace')
+                  .proxy(testHelper.TEST_PROXY)
 									.type('json')
 									.send({"Name" : "Frodo Baggins"})
 									.expect(405);
 						});
 		});
 		it('testAccessingMetadata - prefs/Projects', function() {
-			return request().get(PREFS_PREFIX + '/Projects')
+      return request().get(PREFS_PREFIX + '/Projects')
+            .proxy(testHelper.TEST_PROXY)
 						.expect(405)
 						.then(function() {
-							return request().put(PREFS_PREFIX + '/Projects')
+              return request().put(PREFS_PREFIX + '/Projects')
+                  .proxy(testHelper.TEST_PROXY)
 									.type('json')
 									.send({"Name" : "Frodo Baggins"})
 									.expect(405);
 						});
 		});
 		it('testAccessingMetadata - prefs/project', function() {
-			return request().get(PREFS_PREFIX + '/project')
+      return request().get(PREFS_PREFIX + '/project')
+            .proxy(testHelper.TEST_PROXY)
 						.expect(405)
 						.then(function() {
-							return request().put(PREFS_PREFIX + '/project')
+              return request().put(PREFS_PREFIX + '/project')
+                  .proxy(testHelper.TEST_PROXY)
 									.type('json')
 									.send({"Name" : "Frodo Baggins"})
 									.expect(405);
@@ -275,13 +305,15 @@ describe('Orion preferences tests', function() {
 		});
 		describe('and we GET a nonexistent single key', function() {
 			it('should receive 404', function() {
-				return request().get(PREFS_PREFIX + '/user/a/b/c?key=jsjsijf')
-				.expect(404);
+        return request().get(PREFS_PREFIX + '/user/a/b/c?key=jsjsijf')
+        .proxy(testHelper.TEST_PROXY)
+        .expect(404);
 			});
 		});
 		describe('and we GET a nonexistent node', function() {
 			it('should receive empty node', function() {
-				return request().get(PREFS_PREFIX + '/user/a/b/c')
+        return request().get(PREFS_PREFIX + '/user/a/b/c')
+        .proxy(testHelper.TEST_PROXY)
 				.expect(200)
 				.then(function(res) {
 					expect(res.body).to.deep.equal({ });
@@ -295,13 +327,15 @@ describe('Orion preferences tests', function() {
 
 		describe('and we GET a nonexistent single key', function() {
 			it('should receive 404', function() {
-				return request().get(PREFS_PREFIX + '/user/a/b/c?key=jsjsijf')
+        return request().get(PREFS_PREFIX + '/user/a/b/c?key=jsjsijf')
+        .proxy(testHelper.TEST_PROXY)
 				.expect(404);
 			});
 		});
 		describe('and we GET a nonexistent node', function() {
 			it('should receive empty node', function() {
-				return request().get(PREFS_PREFIX + '/user/a/b/c')
+        return request().get(PREFS_PREFIX + '/user/a/b/c')
+        .proxy(testHelper.TEST_PROXY)
 				.expect(200)
 				.then(function(res) {
 					expect(res.body).to.deep.equal({ });
@@ -311,7 +345,8 @@ describe('Orion preferences tests', function() {
 
 		describe('and we GET a single key', function() {
 			it('should receive just that property', function() {
-				return request().get(PREFS_PREFIX + '/user/foo?key=bar').expect(200)
+        return request().get(PREFS_PREFIX + '/user/foo?key=bar').expect(200)
+        .proxy(testHelper.TEST_PROXY)
 				.then(function(res) {
 					expect(res.body).to.deep.equal({ bar: 123 });
 				});
@@ -319,7 +354,8 @@ describe('Orion preferences tests', function() {
 		});
 		describe('and we GET a node', function() {
 			it('should receive the entire node', function() {
-				return request().get(PREFS_PREFIX + '/user/foo').expect(200)
+        return request().get(PREFS_PREFIX + '/user/foo').expect(200)
+        .proxy(testHelper.TEST_PROXY)
 				.then(function(res) {
 					expect(res.body).to.deep.equal({ bar: 123, qux: 'q' });
 				});
@@ -328,7 +364,8 @@ describe('Orion preferences tests', function() {
 
 		describe('and we PUT a single key', function() {
 			beforeEach(function() {
-				return request().put(PREFS_PREFIX + '/user/foo')
+        return request().put(PREFS_PREFIX + '/user/foo')
+        .proxy(testHelper.TEST_PROXY)
 				.type('form')
 				.send({ key: 'bar' }).send({ value: 'modified' })
 				.expect(204);
@@ -337,7 +374,9 @@ describe('Orion preferences tests', function() {
 			it('should update the value', function(finished) {
 				// Check the value
 				setTimeout(function() {
-					request().get(PREFS_PREFIX + '/user/foo').expect(200)
+          request().get(PREFS_PREFIX + '/user/foo')
+          .proxy(testHelper.TEST_PROXY)
+          .expect(200)
 					.then(function(res) {
 						expect(res.body).to.deep.equal({ bar: 'modified', qux: 'q' });
 						finished();
@@ -348,7 +387,8 @@ describe('Orion preferences tests', function() {
 
 		describe('and we PUT an entire node', function() {
 			beforeEach(function() {
-				return request().put(PREFS_PREFIX + '/user/foo')
+        return request().put(PREFS_PREFIX + '/user/foo')
+        .proxy(testHelper.TEST_PROXY)
 				.type('json')
 				.send({ howdy: 'partner' })
 				.expect(204);
@@ -356,7 +396,9 @@ describe('Orion preferences tests', function() {
 
 			it('should update the value', function(finished) {
 				setTimeout(function() {
-					request().get(PREFS_PREFIX + '/user/foo').expect(200)
+          request().get(PREFS_PREFIX + '/user/foo')
+          .proxy(testHelper.TEST_PROXY)
+          .expect(200)
 					.then(function(res) {
 						expect(res.body).to.deep.equal({howdy: 'partner'});
 						finished();
@@ -367,12 +409,14 @@ describe('Orion preferences tests', function() {
 
 		describe('and we DELETE a single key', function() {
 			beforeEach(function() {
-				return request().delete(PREFS_PREFIX + '/user/foo?key=bar')
+        return request().delete(PREFS_PREFIX + '/user/foo?key=bar')
+        .proxy(testHelper.TEST_PROXY)
 				.expect(204);
 			});
 			it('should not have the deleted key', function(finished) {
 				setTimeout(function() {
-					request().get(PREFS_PREFIX + '/user/foo?key=bar')
+          request().get(PREFS_PREFIX + '/user/foo?key=bar')
+          .proxy(testHelper.TEST_PROXY)
 					.expect(404).end(/* @callback */ function(err, res) {
 						assert.ifError(err);
 						finished();
@@ -383,14 +427,17 @@ describe('Orion preferences tests', function() {
 
 		describe('and we DELETE entire node', function() {
 			beforeEach(function() {
-				return request().delete(PREFS_PREFIX + '/user/foo')
+        return request().delete(PREFS_PREFIX + '/user/foo')
+        .proxy(testHelper.TEST_PROXY)
 				.expect(204);
 			});
 
 			it('should be empty', function(finished) {
 				setTimeout(function() {
 					// Node should be empty
-					request().get(PREFS_PREFIX + '/user/foo').expect(200)
+          request().get(PREFS_PREFIX + '/user/foo')
+          .proxy(testHelper.TEST_PROXY)
+          .expect(200)
 					.then(function(res) {
 						expect(res.body).to.deep.equal({});
 						finished();
@@ -401,7 +448,8 @@ describe('Orion preferences tests', function() {
 
 		describe('and we DELETE a non-existent node', function() {
 			it('should have no effect', function() {
-				return request().delete(PREFS_PREFIX + '/user/foo/asgjsgkjkjtiwujk')
+        return request().delete(PREFS_PREFIX + '/user/foo/asgjsgkjkjtiwujk')
+        .proxy(testHelper.TEST_PROXY)
 				.expect(204);		
 			});
 		});

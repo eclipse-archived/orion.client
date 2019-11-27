@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017 IBM Corporation and others.
+ * Copyright (c) 2017, 2019 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -9,7 +9,7 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 /*eslint-env mocha */
-var assert = require("assert"),
+const assert = require("assert"),
 	path = require("path"),
 	testData = require("../support/test_data"),
 	testHelper = require('../support/testHelper');
@@ -30,18 +30,18 @@ var request = testData.setupOrionServer();
  * @param {?} request The original request
  * @param {string} filePath The full /file path of the file to rename
  */
-function getTestFile(request, filePath) {
-	return request()
-		.post(path.dirname(filePath))
+async function getTestFile(request, filePath) {
+	let res = await request()
+    .post(path.dirname(filePath))
+    .proxy(testHelper.TEST_PROXY)
 		.type('json')
 		.set('X-Create-Options', "copy,overwrite")
 		.set('Slug', 'manifest.yml')
-		.send({Location: filePath})
-		.expect(function(res) {
-			if(res.statusCode !== 200 && res.statusCode !== 201) {
-				throw new Error("Test file was not moved successfully");
-			}
-		});
+    .send({Location: filePath});
+  if(res.statusCode !== 200 && res.statusCode !== 201) {
+    throw new Error("Test file was not moved successfully");
+  }
+	return res;
 }
 
 describe("CloudFoundry manifest", function() {
@@ -63,451 +63,269 @@ describe("CloudFoundry manifest", function() {
 	 * From: org.eclipse.orion.server.tests.cf.ManifestParserTest.java
 	 */
 	describe("Manifest parser tests", function() {
-		it("testSimpleTwoApps", function(done) {
-			testHelper.withWorkspace(request, testHelper.WORKSPACE_PATH, testHelper.WORKSPACE_ID)
-				.end(function(err, res) {
-					testHelper.throwIfError(err);
-					var wLoc = res.body.Location;
-					request()
-						.get(path.join(res.body.ContentLocation, "cftests", "simpleTwoApps.yml"))
-						.expect(200)
-						.query({parts: 'meta'})
-						.end(function(err, res) {
-							testHelper.throwIfError(err);
-							var fLoc = res.body.Location;
-							getTestFile(request, fLoc)
-							.end(function(err, res) {
-								testHelper.throwIfError(err);
-								request()
-									.get(path.join(PREFIX_MANIFESTS, res.body.Location))
-									.query({Strict: true})
-									.expect(200)
-									.end(function(err, res) {
-										testHelper.throwIfError(err);
-										assert(res.body.Contents);
-										assert.equal(res.body.Type, "Manifest", "The manifest should have been parsed as type 'Manifest'")
-										done();
-									});
-							});
-						})
-				});
+		it("testSimpleTwoApps", async () => {
+			let res = await testHelper.withWorkspace(request, testHelper.WORKSPACE_PATH, testHelper.WORKSPACE_ID);
+      res = await request()
+        .get(path.join(res.body.ContentLocation, "cftests", "simpleTwoApps.yml"))
+        .proxy(testHelper.TEST_PROXY)
+        .expect(200)
+        .query({parts: 'meta'});
+      var fLoc = res.body.Location;
+      res = await getTestFile(request, fLoc);
+      res = await request()
+          .get(path.join(PREFIX_MANIFESTS, res.body.Location))
+          .proxy(testHelper.TEST_PROXY)
+          .query({Strict: true})
+          .expect(200);
+      assert(res.body.Contents);
+      assert.equal(res.body.Type, "Manifest", "The manifest should have been parsed as type 'Manifest'")
 		});
-		it("testSimpleGlobalProps", function(done) {
-			testHelper.withWorkspace(request, testHelper.WORKSPACE_PATH, testHelper.WORKSPACE_ID)
-				.end(function(err, res) {
-					testHelper.throwIfError(err);
-					var wLoc = res.body.Location;
-					request()
-						.get(path.join(res.body.ContentLocation, "cftests", "simpleGlobalProps.yml"))
-						.expect(200)
-						.query({parts: 'meta'})
-						.end(function(err, res) {
-							testHelper.throwIfError(err);
-							var fLoc = res.body.Location;
-							getTestFile(request, fLoc)
-							.end(function(err, res) {
-								testHelper.throwIfError(err);
-								request()
-									.get(path.join(PREFIX_MANIFESTS, res.body.Location))
-									.query({Strict: true})
-									.expect(200)
-									.end(function(err, res) {
-										testHelper.throwIfError(err);
-										assert(res.body.Contents);
-										assert.equal(res.body.Type, "Manifest", "The manifest should have been parsed as type 'Manifest'")
-										done();
-									});
-							});
-						})
-				});
+		it("testSimpleGlobalProps", async () => {
+			let res = await testHelper.withWorkspace(request, testHelper.WORKSPACE_PATH, testHelper.WORKSPACE_ID);
+      res = await request()
+        .get(path.join(res.body.ContentLocation, "cftests", "simpleGlobalProps.yml"))
+        .proxy(testHelper.TEST_PROXY)
+        .expect(200)
+        .query({parts: 'meta'});
+      var fLoc = res.body.Location;
+      res = await getTestFile(request, fLoc);
+      res = await request()
+        .get(path.join(PREFIX_MANIFESTS, res.body.Location))
+        .proxy(testHelper.TEST_PROXY)
+        .query({Strict: true})
+        .expect(200);
+      assert(res.body.Contents);
+      assert.equal(res.body.Type, "Manifest", "The manifest should have been parsed as type 'Manifest'")
 		});
-		it("testAppCustomConfig", function(done) {
-			testHelper.withWorkspace(request, testHelper.WORKSPACE_PATH, testHelper.WORKSPACE_ID)
-				.end(function(err, res) {
-					testHelper.throwIfError(err);
-					var wLoc = res.body.Location;
-					request()
-						.get(path.join(res.body.ContentLocation, "cftests", "appCustomConfig.yml"))
-						.expect(200)
-						.query({parts: 'meta'})
-						.end(function(err, res) {
-							testHelper.throwIfError(err);
-							var fLoc = res.body.Location;
-							getTestFile(request, fLoc)
-							.end(function(err, res) {
-								testHelper.throwIfError(err);
-								request()
-									.get(path.join(PREFIX_MANIFESTS, res.body.Location))
-									.query({Strict: true})
-									.expect(200)
-									.end(function(err, res) {
-										testHelper.throwIfError(err);
-										assert(res.body.Contents);
-										assert.equal(res.body.Type, "Manifest", "The manifest should have been parsed as type 'Manifest'")
-										done();
-									});
-							});
-						})
-				});
+		it("testAppCustomConfig", async () => {
+			let res = await testHelper.withWorkspace(request, testHelper.WORKSPACE_PATH, testHelper.WORKSPACE_ID);
+      res = await request()
+        .get(path.join(res.body.ContentLocation, "cftests", "appCustomConfig.yml"))
+        .proxy(testHelper.TEST_PROXY)
+        .expect(200)
+        .query({parts: 'meta'});
+      var fLoc = res.body.Location;
+      res = await getTestFile(request, fLoc);
+      res = await request()
+        .get(path.join(PREFIX_MANIFESTS, res.body.Location))
+        .proxy(testHelper.TEST_PROXY)
+        .query({Strict: true})
+        .expect(200);
+      assert(res.body.Contents);
+      assert.equal(res.body.Type, "Manifest", "The manifest should have been parsed as type 'Manifest'")
 		});
-		it("testGlobalAndInherit", function(done) {
-			testHelper.withWorkspace(request, testHelper.WORKSPACE_PATH, testHelper.WORKSPACE_ID)
-				.end(function(err, res) {
-					testHelper.throwIfError(err);
-					var wLoc = res.body.Location;
-					request()
-						.get(path.join(res.body.ContentLocation, "cftests", "globalAndInherit.yml"))
-						.expect(200)
-						.query({parts: 'meta'})
-						.end(function(err, res) {
-							testHelper.throwIfError(err);
-							var fLoc = res.body.Location;
-							getTestFile(request, fLoc)
-							.end(function(err, res) {
-								testHelper.throwIfError(err);
-								request()
-									.get(path.join(PREFIX_MANIFESTS, res.body.Location))
-									.query({Strict: true})
-									.expect(200)
-									.end(function(err, res) {
-										testHelper.throwIfError(err);
-										assert(res.body.Contents);
-										assert.equal(res.body.Type, "Manifest", "The manifest should have been parsed as type 'Manifest'")
-										done();
-									});
-							});
-						})
-				});
+		it("testGlobalAndInherit", async () => {
+			let res = await testHelper.withWorkspace(request, testHelper.WORKSPACE_PATH, testHelper.WORKSPACE_ID);
+      res = await request()
+        .get(path.join(res.body.ContentLocation, "cftests", "globalAndInherit.yml"))
+        .proxy(testHelper.TEST_PROXY)
+        .expect(200)
+        .query({parts: 'meta'});
+      var fLoc = res.body.Location;
+      res = await getTestFile(request, fLoc);
+      res = await request()
+        .get(path.join(PREFIX_MANIFESTS, res.body.Location))
+        .proxy(testHelper.TEST_PROXY)
+        .query({Strict: true})
+        .expect(200);
+      assert(res.body.Contents);
+      assert.equal(res.body.Type, "Manifest", "The manifest should have been parsed as type 'Manifest'")
 		});
-		it("testSimpleGlobals", function(done) {
-			testHelper.withWorkspace(request, testHelper.WORKSPACE_PATH, testHelper.WORKSPACE_ID)
-				.end(function(err, res) {
-					testHelper.throwIfError(err);
-					var wLoc = res.body.Location;
-					request()
-						.get(path.join(res.body.ContentLocation, "cftests", "simpleGlobal.yml"))
-						.expect(200)
-						.query({parts: 'meta'})
-						.end(function(err, res) {
-							testHelper.throwIfError(err);
-							var fLoc = res.body.Location;
-							getTestFile(request, fLoc)
-							.end(function(err, res) {
-								testHelper.throwIfError(err);
-								request()
-									.get(path.join(PREFIX_MANIFESTS, res.body.Location))
-									.query({Strict: true})
-									.expect(200)
-									.end(function(err, res) {
-										testHelper.throwIfError(err);
-										assert(res.body.Contents);
-										assert.equal(res.body.Type, "Manifest", "The manifest should have been parsed as type 'Manifest'")
-										done();
-									});
-							});
-						})
-				});
+		it("testSimpleGlobals", async () => {
+			let res = await testHelper.withWorkspace(request, testHelper.WORKSPACE_PATH, testHelper.WORKSPACE_ID);
+      res = await request()
+        .get(path.join(res.body.ContentLocation, "cftests", "simpleGlobal.yml"))
+        .proxy(testHelper.TEST_PROXY)
+        .expect(200)
+        .query({parts: 'meta'});
+      var fLoc = res.body.Location;
+      res = await getTestFile(request, fLoc);
+      res = await request()
+        .get(path.join(PREFIX_MANIFESTS, res.body.Location))
+        .proxy(testHelper.TEST_PROXY)
+        .query({Strict: true})
+        .expect(200);
+      assert(res.body.Contents);
+      assert.equal(res.body.Type, "Manifest", "The manifest should have been parsed as type 'Manifest'")
 		});
-		it("testAppsWithNestedServices", function(done) {
-			testHelper.withWorkspace(request, testHelper.WORKSPACE_PATH, testHelper.WORKSPACE_ID)
-				.end(function(err, res) {
-					testHelper.throwIfError(err);
-					var wLoc = res.body.Location;
-					request()
-						.get(path.join(res.body.ContentLocation, "cftests", "appsNestedServices.yml"))
-						.expect(200)
-						.query({parts: 'meta'})
-						.end(function(err, res) {
-							testHelper.throwIfError(err);
-							var fLoc = res.body.Location;
-							getTestFile(request, fLoc)
-								.end(function(err, res) {
-									testHelper.throwIfError(err);
-									request()
-										.get(path.join(PREFIX_MANIFESTS, res.body.Location))
-										.query({Strict: true})
-										.expect(200)
-										.end(function(err, res) {
-											testHelper.throwIfError(err);
-											assert(res.body.Contents);
-											assert.equal(res.body.Type, "Manifest", "The manifest should have been parsed as type 'Manifest'")
-											done();
-										});
-								});
-						})
-				});
+		it("testAppsWithNestedServices", async () => {
+			let res = await testHelper.withWorkspace(request, testHelper.WORKSPACE_PATH, testHelper.WORKSPACE_ID);
+      res = await request()
+        .get(path.join(res.body.ContentLocation, "cftests", "appsNestedServices.yml"))
+        .proxy(testHelper.TEST_PROXY)
+        .expect(200)
+        .query({parts: 'meta'});
+      var fLoc = res.body.Location;
+      res = await getTestFile(request, fLoc);
+      res = await request()
+        .get(path.join(PREFIX_MANIFESTS, res.body.Location))
+        .proxy(testHelper.TEST_PROXY)
+        .query({Strict: true})
+        .expect(200);
+      assert(res.body.Contents);
+      assert.equal(res.body.Type, "Manifest", "The manifest should have been parsed as type 'Manifest'")
 		});
-		it("testMultiAppsWithNestedServices", function(done) {
-			testHelper.withWorkspace(request, testHelper.WORKSPACE_PATH, testHelper.WORKSPACE_ID)
-				.end(function(err, res) {
-					testHelper.throwIfError(err);
-					var wLoc = res.body.Location;
-					request()
-						.get(path.join(res.body.ContentLocation, "cftests", "multiAppsNestedServices.yml"))
-						.expect(200)
-						.query({parts: 'meta'})
-						.end(function(err, res) {
-							testHelper.throwIfError(err);
-							var fLoc = res.body.Location;
-							getTestFile(request, fLoc)
-							.end(function(err, res) {
-								testHelper.throwIfError(err);
-								request()
-									.get(path.join(PREFIX_MANIFESTS, res.body.Location))
-									.query({Strict: true})
-									.expect(200)
-									.end(function(err, res) {
-										testHelper.throwIfError(err);
-										assert(res.body.Contents);
-										assert.equal(res.body.Type, "Manifest", "The manifest should have been parsed as type 'Manifest'")
-										done();
-									});
-							});
-						})
-				});
+		it("testMultiAppsWithNestedServices", async () => {
+			let res = await testHelper.withWorkspace(request, testHelper.WORKSPACE_PATH, testHelper.WORKSPACE_ID);
+      res = await request()
+        .get(path.join(res.body.ContentLocation, "cftests", "multiAppsNestedServices.yml"))
+        .proxy(testHelper.TEST_PROXY)
+        .expect(200)
+        .query({parts: 'meta'});
+      var fLoc = res.body.Location;
+      res = await getTestFile(request, fLoc);
+      res = await request()
+        .get(path.join(PREFIX_MANIFESTS, res.body.Location))
+        .proxy(testHelper.TEST_PROXY)
+        .query({Strict: true})
+        .expect(200);
+      assert(res.body.Contents);
+      assert.equal(res.body.Type, "Manifest", "The manifest should have been parsed as type 'Manifest'")
 		});
-		it("testComplexEnvAndApps", function(done) {
-			testHelper.withWorkspace(request, testHelper.WORKSPACE_PATH, testHelper.WORKSPACE_ID)
-				.end(function(err, res) {
-					testHelper.throwIfError(err);
-					var wLoc = res.body.Location;
-					request()
-						.get(path.join(res.body.ContentLocation, "cftests", "complexEnvAndApps.yml"))
-						.expect(200)
-						.query({parts: 'meta'})
-						.end(function(err, res) {
-							testHelper.throwIfError(err);
-							var fLoc = res.body.Location;
-							getTestFile(request, fLoc)
-							.end(function(err, res) {
-								testHelper.throwIfError(err);
-								request()
-									.get(path.join(PREFIX_MANIFESTS, res.body.Location))
-									.query({Strict: true})
-									.expect(200)
-									.end(function(err, res) {
-										testHelper.throwIfError(err);
-										assert(res.body.Contents);
-										assert.equal(res.body.Type, "Manifest", "The manifest should have been parsed as type 'Manifest'")
-										done();
-									});
-							});
-						})
-				});
+		it("testComplexEnvAndApps", async () => {
+			let res = await testHelper.withWorkspace(request, testHelper.WORKSPACE_PATH, testHelper.WORKSPACE_ID);
+      res = await request()
+        .get(path.join(res.body.ContentLocation, "cftests", "complexEnvAndApps.yml"))
+        .proxy(testHelper.TEST_PROXY)
+        .expect(200)
+        .query({parts: 'meta'});
+      var fLoc = res.body.Location;
+      res = await getTestFile(request, fLoc);
+      res = await request()
+        .get(path.join(PREFIX_MANIFESTS, res.body.Location))
+        .proxy(testHelper.TEST_PROXY)
+        .query({Strict: true})
+        .expect(200);
+      assert(res.body.Contents);
+      assert.equal(res.body.Type, "Manifest", "The manifest should have been parsed as type 'Manifest'")
 		});
-		it("testInheritWithMultisections", function(done) {
-			testHelper.withWorkspace(request, testHelper.WORKSPACE_PATH, testHelper.WORKSPACE_ID)
-				.end(function(err, res) {
-					testHelper.throwIfError(err);
-					var wLoc = res.body.Location;
-					request()
-						.get(path.join(res.body.ContentLocation, "cftests", "inheritMultiSection.yml"))
-						.expect(200)
-						.query({parts: 'meta'})
-						.end(function(err, res) {
-							testHelper.throwIfError(err);
-							var fLoc = res.body.Location;
-							getTestFile(request, fLoc)
-							.end(function(err, res) {
-								testHelper.throwIfError(err);
-								request()
-									.get(path.join(PREFIX_MANIFESTS, res.body.Location))
-									.query({Strict: true})
-									.expect(200)
-									.end(function(err, res) {
-										testHelper.throwIfError(err);
-										assert(res.body.Contents);
-										assert.equal(res.body.Type, "Manifest", "The manifest should have been parsed as type 'Manifest'")
-										done();
-									});
-							});
-						})
-				});
+		it("testInheritWithMultisections", async () => {
+			let res = await testHelper.withWorkspace(request, testHelper.WORKSPACE_PATH, testHelper.WORKSPACE_ID);
+      res = await request()
+        .get(path.join(res.body.ContentLocation, "cftests", "inheritMultiSection.yml"))
+        .proxy(testHelper.TEST_PROXY)
+        .expect(200)
+        .query({parts: 'meta'});
+      var fLoc = res.body.Location;
+      res = await getTestFile(request, fLoc);
+      res = await request()
+        .get(path.join(PREFIX_MANIFESTS, res.body.Location))
+        .proxy(testHelper.TEST_PROXY)
+        .query({Strict: true})
+        .expect(200);
+      assert(res.body.Contents);
+      assert.equal(res.body.Type, "Manifest", "The manifest should have been parsed as type 'Manifest'")
 		});
-		it("testMultiEntriesWithComments", function(done) {
-			testHelper.withWorkspace(request, testHelper.WORKSPACE_PATH, testHelper.WORKSPACE_ID)
-				.end(function(err, res) {
-					testHelper.throwIfError(err);
-					var wLoc = res.body.Location;
-					request()
-						.get(path.join(res.body.ContentLocation, "cftests", "multiNestedComments.yml"))
-						.expect(200)
-						.query({parts: 'meta'})
-						.end(function(err, res) {
-							testHelper.throwIfError(err);
-							var fLoc = res.body.Location;
-							getTestFile(request, fLoc)
-							.end(function(err, res) {
-								testHelper.throwIfError(err);
-								request()
-									.get(path.join(PREFIX_MANIFESTS, res.body.Location))
-									.query({Strict: true})
-									.expect(200)
-									.end(function(err, res) {
-										testHelper.throwIfError(err);
-										assert(res.body.Contents);
-										assert.equal(res.body.Type, "Manifest", "The manifest should have been parsed as type 'Manifest'")
-										done();
-									});
-							});
-						})
-				});
+		it("testMultiEntriesWithComments", async () => {
+			let res = await testHelper.withWorkspace(request, testHelper.WORKSPACE_PATH, testHelper.WORKSPACE_ID);
+      res = await request()
+        .get(path.join(res.body.ContentLocation, "cftests", "multiNestedComments.yml"))
+        .proxy(testHelper.TEST_PROXY)
+        .expect(200)
+        .query({parts: 'meta'});
+      var fLoc = res.body.Location;
+      res = await getTestFile(request, fLoc);
+      res = await request()
+        .get(path.join(PREFIX_MANIFESTS, res.body.Location))
+        .proxy(testHelper.TEST_PROXY)
+        .query({Strict: true})
+        .expect(200);
+      assert(res.body.Contents);
+      assert.equal(res.body.Type, "Manifest", "The manifest should have been parsed as type 'Manifest'")
 		});
-		it("testArgReplace", function(done) {
-			testHelper.withWorkspace(request, testHelper.WORKSPACE_PATH, testHelper.WORKSPACE_ID)
-				.end(function(err, res) {
-					testHelper.throwIfError(err);
-					var wLoc = res.body.Location;
-					request()
-						.get(path.join(res.body.ContentLocation, "cftests", "argReplace.yml"))
-						.expect(200)
-						.query({parts: 'meta'})
-						.end(function(err, res) {
-							testHelper.throwIfError(err);
-							var fLoc = res.body.Location;
-							getTestFile(request, fLoc)
-							.end(function(err, res) {
-								testHelper.throwIfError(err);
-								request()
-									.get(path.join(PREFIX_MANIFESTS, res.body.Location))
-									.query({Strict: true})
-									.expect(200)
-									.end(function(err, res) {
-										testHelper.throwIfError(err);
-										assert(res.body.Contents);
-										assert.equal(res.body.Type, "Manifest", "The manifest should have been parsed as type 'Manifest'")
-										done();
-									});
-							});
-						})
-				});
+		it("testArgReplace", async () => {
+			let res = await testHelper.withWorkspace(request, testHelper.WORKSPACE_PATH, testHelper.WORKSPACE_ID);
+      res = await request()
+        .get(path.join(res.body.ContentLocation, "cftests", "argReplace.yml"))
+        .proxy(testHelper.TEST_PROXY)
+        .expect(200)
+        .query({parts: 'meta'});
+      var fLoc = res.body.Location;
+      res = await getTestFile(request, fLoc);
+      res = await request()
+        .get(path.join(PREFIX_MANIFESTS, res.body.Location))
+        .proxy(testHelper.TEST_PROXY)
+        .query({Strict: true})
+        .expect(200);
+      assert(res.body.Contents);
+      assert.equal(res.body.Type, "Manifest", "The manifest should have been parsed as type 'Manifest'")
 		});
-		it("testLongCommandString", function(done) {
-			testHelper.withWorkspace(request, testHelper.WORKSPACE_PATH, testHelper.WORKSPACE_ID)
-				.end(function(err, res) {
-					testHelper.throwIfError(err);
-					var wLoc = res.body.Location;
-					request()
-						.get(path.join(res.body.ContentLocation, "cftests", "longCommand.yml"))
-						.expect(200)
-						.query({parts: 'meta'})
-						.end(function(err, res) {
-							testHelper.throwIfError(err);
-							var fLoc = res.body.Location;
-							getTestFile(request, fLoc)
-							.end(function(err, res) {
-								testHelper.throwIfError(err);
-								request()
-									.get(path.join(PREFIX_MANIFESTS, res.body.Location))
-									.query({Strict: true})
-									.expect(200)
-									.end(function(err, res) {
-										testHelper.throwIfError(err);
-										assert(res.body.Contents);
-										assert.equal(res.body.Type, "Manifest", "The manifest should have been parsed as type 'Manifest'")
-										done();
-									});
-							});
-						})
-				});
+		it("testLongCommandString", async () => {
+			let res = await testHelper.withWorkspace(request, testHelper.WORKSPACE_PATH, testHelper.WORKSPACE_ID);
+      res = await request()
+        .get(path.join(res.body.ContentLocation, "cftests", "longCommand.yml"))
+        .proxy(testHelper.TEST_PROXY)
+        .expect(200)
+        .query({parts: 'meta'});
+      var fLoc = res.body.Location;
+      res = await getTestFile(request, fLoc);
+      res = await request()
+        .get(path.join(PREFIX_MANIFESTS, res.body.Location))
+        .proxy(testHelper.TEST_PROXY)
+        .query({Strict: true})
+        .expect(200);
+      assert(res.body.Contents);
+      assert.equal(res.body.Type, "Manifest", "The manifest should have been parsed as type 'Manifest'")
 		});
-		it("testMultiNestingNoSpacing", function(done) {
-			testHelper.withWorkspace(request, testHelper.WORKSPACE_PATH, testHelper.WORKSPACE_ID)
-				.end(function(err, res) {
-					testHelper.throwIfError(err);
-					var wLoc = res.body.Location;
-					request()
-						.get(path.join(res.body.ContentLocation, "cftests", "multiNestingNoSpacing.yml"))
-						.expect(200)
-						.query({parts: 'meta'})
-						.end(function(err, res) {
-							testHelper.throwIfError(err);
-							var fLoc = res.body.Location;
-							getTestFile(request, fLoc)
-							.end(function(err, res) {
-								testHelper.throwIfError(err);
-								request()
-									.get(path.join(PREFIX_MANIFESTS, res.body.Location))
-									.query({Strict: true})
-									.expect(200)
-									.end(function(err, res) {
-										testHelper.throwIfError(err);
-										assert(res.body.Contents);
-										assert.equal(res.body.Type, "Manifest", "The manifest should have been parsed as type 'Manifest'")
-										done();
-									});
-							});
-						})
-				});
+		it("testMultiNestingNoSpacing", async () => {
+			let res = await testHelper.withWorkspace(request, testHelper.WORKSPACE_PATH, testHelper.WORKSPACE_ID);
+      res = await request()
+        .get(path.join(res.body.ContentLocation, "cftests", "multiNestingNoSpacing.yml"))
+        .proxy(testHelper.TEST_PROXY)
+        .expect(200)
+        .query({parts: 'meta'});
+      var fLoc = res.body.Location;
+      res = await getTestFile(request, fLoc);
+      res = await request()
+        .get(path.join(PREFIX_MANIFESTS, res.body.Location))
+        .proxy(testHelper.TEST_PROXY)
+        .query({Strict: true})
+        .expect(200);
+      assert(res.body.Contents);
+      assert.equal(res.body.Type, "Manifest", "The manifest should have been parsed as type 'Manifest'")
 		});
-		it("testMultiNestingWithMultiComments", function(done) {
-			testHelper.withWorkspace(request, testHelper.WORKSPACE_PATH, testHelper.WORKSPACE_ID)
-				.end(function(err, res) {
-					testHelper.throwIfError(err);
-					var wLoc = res.body.Location;
-					request()
-						.get(path.join(res.body.ContentLocation, "cftests", "multiNestingComments.yml"))
-						.expect(200)
-						.query({parts: 'meta'})
-						.end(function(err, res) {
-							testHelper.throwIfError(err);
-							var fLoc = res.body.Location;
-							getTestFile(request, fLoc)
-							.end(function(err, res) {
-								testHelper.throwIfError(err);
-								request()
-									.get(path.join(PREFIX_MANIFESTS, res.body.Location))
-									.query({Strict: true})
-									.expect(200)
-									.end(function(err, res) {
-										testHelper.throwIfError(err);
-										assert(res.body.Contents);
-										assert.equal(res.body.Type, "Manifest", "The manifest should have been parsed as type 'Manifest'")
-										done();
-									});
-							});
-						})
-				});
+		it("testMultiNestingWithMultiComments", async () => {
+			let res = await testHelper.withWorkspace(request, testHelper.WORKSPACE_PATH, testHelper.WORKSPACE_ID);
+      res = await request()
+        .get(path.join(res.body.ContentLocation, "cftests", "multiNestingComments.yml"))
+        .proxy(testHelper.TEST_PROXY)
+        .expect(200)
+        .query({parts: 'meta'});
+      var fLoc = res.body.Location;
+      res = await getTestFile(request, fLoc);
+      res = await request()
+        .get(path.join(PREFIX_MANIFESTS, res.body.Location))
+        .proxy(testHelper.TEST_PROXY)
+        .query({Strict: true})
+        .expect(200);
+      assert(res.body.Contents);
+      assert.equal(res.body.Type, "Manifest", "The manifest should have been parsed as type 'Manifest'")
 		});
-		it("testParseNoFileAtRoot", function(done) {
-			testHelper.withWorkspace(request, testHelper.WORKSPACE_PATH, testHelper.WORKSPACE_ID)
-				.end(function(err, res) {
-					testHelper.throwIfError(err);
-					var wLoc = res.body.Location;
-					request()
-						.get(path.join(res.body.ContentLocation, "cftests", "simpleTwoApps.yml"))
-						.expect(200)
-						.query({parts: 'meta'})
-						.end(function(err, res) {
-							testHelper.throwIfError(err);
-							var fLoc = res.body.Location;
-							request()
-								.get(path.join(PREFIX_MANIFESTS, 'foobar'))
-								.query({Strict: true})
-								.expect(403)
-								.end(done);
-						})
-				});
+		it("testParseNoFileAtRoot", async () => {
+			let res = await testHelper.withWorkspace(request, testHelper.WORKSPACE_PATH, testHelper.WORKSPACE_ID);
+      res = await request()
+        .get(path.join(res.body.ContentLocation, "cftests", "simpleTwoApps.yml"))
+        .proxy(testHelper.TEST_PROXY)
+        .expect(200)
+        .query({parts: 'meta'});
+      res = await request()
+        .get(path.join(PREFIX_MANIFESTS, 'foobar'))
+        .proxy(testHelper.TEST_PROXY)
+        .query({Strict: true})
+        .expect(403);
 		});
-		it("testParseNoFileWithBareFilePath", function(done) {
-			testHelper.withWorkspace(request, testHelper.WORKSPACE_PATH, testHelper.WORKSPACE_ID)
-				.end(function(err, res) {
-					testHelper.throwIfError(err);
-					var wLoc = res.body.Location;
-					request()
-						.get(path.join(res.body.ContentLocation, "cftests", "simpleTwoApps.yml"))
-						.expect(200)
-						.query({parts: 'meta'})
-						.end(function(err, res) {
-							testHelper.throwIfError(err);
-							var fLoc = res.body.Location;
-							request()
-								.get(path.join(PREFIX_MANIFESTS, PREFIX_FILE, 'foobar'))
-								.query({Strict: true})
-								.expect(403)
-								.end(done);
-						})
-				});
+		it("testParseNoFileWithBareFilePath", async () => {
+			let res = await testHelper.withWorkspace(request, testHelper.WORKSPACE_PATH, testHelper.WORKSPACE_ID);
+      res = await request()
+        .get(path.join(res.body.ContentLocation, "cftests", "simpleTwoApps.yml"))
+        .proxy(testHelper.TEST_PROXY)
+        .expect(200)
+        .query({parts: 'meta'});
+      res = await request()
+        .get(path.join(PREFIX_MANIFESTS, PREFIX_FILE, 'foobar'))
+        .proxy(testHelper.TEST_PROXY)
+        .query({Strict: true})
+        .expect(403);
 		});
 		/**
 		 * This should likely return a 404 since the file does not exist
@@ -518,327 +336,211 @@ describe("CloudFoundry manifest", function() {
 					testHelper.throwIfError(err);
 					var wLoc = res.body.Location;
 					request()
-						.get(path.join(res.body.ContentLocation, "cftests", "simpleTwoApps.yml"))
+            .get(path.join(res.body.ContentLocation, "cftests", "simpleTwoApps.yml"))
+            .proxy(testHelper.TEST_PROXY)
 						.expect(200)
 						.query({parts: 'meta'})
 						.end(function(err, res) {
 							testHelper.throwIfError(err);
 							var fLoc = res.body.Location;
 							request()
-								.get(path.join(PREFIX_MANIFESTS, PREFIX_FILE, WORKSPACE_ID, "cftests", 'foobar'))
+                .get(path.join(PREFIX_MANIFESTS, PREFIX_FILE, WORKSPACE_ID, "cftests", 'foobar'))
+                .proxy(testHelper.TEST_PROXY)
 								.query({Strict: true})
 								.expect(404)
 								.end(done);
 						})
 				});
 		});
-		it("testQuotedManifestProperties", function(done) {
-			testHelper.withWorkspace(request, testHelper.WORKSPACE_PATH, testHelper.WORKSPACE_ID)
-			.end(function(err, res) {
-				testHelper.throwIfError(err);
-				var wLoc = res.body.Location;
-				request()
-					.get(path.join(res.body.ContentLocation, "cftests", "quotedPropertiesManifest.yml"))
-					.expect(200)
-					.query({parts: 'meta'})
-					.end(function(err, res) {
-						testHelper.throwIfError(err);
-						var fLoc = res.body.Location;
-						getTestFile(request, fLoc)
-						.end(function(err, res) {
-							testHelper.throwIfError(err);
-							request()
-								.get(path.join(PREFIX_MANIFESTS, res.body.Location))
-								.query({Strict: true})
-								.expect(200)
-								.end(function(err, res) {
-									testHelper.throwIfError(err);
-									assert(res.body.Contents);
-									assert.equal(res.body.Type, "Manifest", "The manifest should have been parsed as type 'Manifest'")
-									done();
-								});
-						});
-					})
-			});
+		it("testQuotedManifestProperties", async () => {
+			let res = await testHelper.withWorkspace(request, testHelper.WORKSPACE_PATH, testHelper.WORKSPACE_ID);
+      res = await request()
+        .get(path.join(res.body.ContentLocation, "cftests", "quotedPropertiesManifest.yml"))
+        .proxy(testHelper.TEST_PROXY)
+        .expect(200)
+        .query({parts: 'meta'});
+      var fLoc = res.body.Location;
+      res = await getTestFile(request, fLoc);
+      res = await request()
+        .get(path.join(PREFIX_MANIFESTS, res.body.Location))
+        .proxy(testHelper.TEST_PROXY)
+        .query({Strict: true})
+        .expect(200);
+      assert(res.body.Contents);
+      assert.equal(res.body.Type, "Manifest", "The manifest should have been parsed as type 'Manifest'")
 		});
-		it("testTargetBaseManifestProperties", function(done) {
-			testHelper.withWorkspace(request, testHelper.WORKSPACE_PATH, testHelper.WORKSPACE_ID)
-			.end(function(err, res) {
-				testHelper.throwIfError(err);
-				var wLoc = res.body.Location;
-				request()
-					.get(path.join(res.body.ContentLocation, "cftests", "targetBaseManifest.yml"))
-					.expect(200)
-					.query({parts: 'meta'})
-					.end(function(err, res) {
-						testHelper.throwIfError(err);
-						var fLoc = res.body.Location;
-						getTestFile(request, fLoc)
-						.end(function(err, res) {
-							testHelper.throwIfError(err);
-							request()
-								.get(path.join(PREFIX_MANIFESTS, res.body.Location))
-								.query({Strict: true})
-								.expect(200)
-								.end(function(err, res) {
-									testHelper.throwIfError(err);
-									assert(res.body.Contents);
-									assert.equal(res.body.Type, "Manifest", "The manifest should have been parsed as type 'Manifest'")
-									done();
-								});
-						});
-					})
-			});
+		it("testTargetBaseManifestProperties", async () => {
+			let res = await testHelper.withWorkspace(request, testHelper.WORKSPACE_PATH, testHelper.WORKSPACE_ID);
+      res = await request()
+        .get(path.join(res.body.ContentLocation, "cftests", "targetBaseManifest.yml"))
+        .proxy(testHelper.TEST_PROXY)
+        .expect(200)
+        .query({parts: 'meta'});
+      var fLoc = res.body.Location;
+      res = await getTestFile(request, fLoc);
+      res = await request()
+        .get(path.join(PREFIX_MANIFESTS, res.body.Location))
+        .proxy(testHelper.TEST_PROXY)
+        .query({Strict: true})
+        .expect(200);
+      assert(res.body.Contents);
+      assert.equal(res.body.Type, "Manifest", "The manifest should have been parsed as type 'Manifest'")
 		});
-		it("testServicesWithSpacesManifest", function(done) {
-			testHelper.withWorkspace(request, testHelper.WORKSPACE_PATH, testHelper.WORKSPACE_ID)
-			.end(function(err, res) {
-				testHelper.throwIfError(err);
-				var wLoc = res.body.Location;
-				request()
-					.get(path.join(res.body.ContentLocation, "cftests", "servicesWithSpaces.yml"))
-					.expect(200)
-					.query({parts: 'meta'})
-					.end(function(err, res) {
-						testHelper.throwIfError(err);
-						var fLoc = res.body.Location;
-						getTestFile(request, fLoc)
-						.end(function(err, res) {
-							testHelper.throwIfError(err);
-							request()
-								.get(path.join(PREFIX_MANIFESTS, res.body.Location))
-								.query({Strict: true})
-								.expect(200)
-								.end(function(err, res) {
-									testHelper.throwIfError(err);
-									assert(res.body.Contents);
-									assert.equal(res.body.Type, "Manifest", "The manifest should have been parsed as type 'Manifest'")
-									done();
-								});
-						});
-					})
-			});
+		it("testServicesWithSpacesManifest", async () => {
+			let res = await testHelper.withWorkspace(request, testHelper.WORKSPACE_PATH, testHelper.WORKSPACE_ID);
+      res = await request()
+        .get(path.join(res.body.ContentLocation, "cftests", "servicesWithSpaces.yml"))
+        .proxy(testHelper.TEST_PROXY)
+        .expect(200)
+        .query({parts: 'meta'});
+      var fLoc = res.body.Location;
+      res = await getTestFile(request, fLoc);
+      res = await request()
+        .get(path.join(PREFIX_MANIFESTS, res.body.Location))
+        .proxy(testHelper.TEST_PROXY)
+        .query({Strict: true})
+        .expect(200);
+      assert(res.body.Contents);
+      assert.equal(res.body.Type, "Manifest", "The manifest should have been parsed as type 'Manifest'")
 		});
-		it("testMissingPropertyName", function(done) {
-			testHelper.withWorkspace(request, testHelper.WORKSPACE_PATH, testHelper.WORKSPACE_ID)
-			.end(function(err, res) {
-				testHelper.throwIfError(err);
-				var wLoc = res.body.Location;
-				request()
-					.get(path.join(res.body.ContentLocation, "cftests", "missingPropertyName.yml"))
-					.expect(200)
-					.query({parts: 'meta'})
-					.end(function(err, res) {
-						testHelper.throwIfError(err);
-						var fLoc = res.body.Location;
-						getTestFile(request, fLoc)
-						.end(function(err, res) {
-							testHelper.throwIfError(err);
-							request()
-								.get(path.join(PREFIX_MANIFESTS, res.body.Location))
-								.query({Strict: true})
-								.expect(400)
-								.end(function(err, res) {
-									assert(res.body.Location);
-									assert(res.body.Location.startsWith(TASK_PREFIX));
-									done();
-								});
-						});
-					})
-			});
+		it("testMissingPropertyName", async () => {
+			let res = await testHelper.withWorkspace(request, testHelper.WORKSPACE_PATH, testHelper.WORKSPACE_ID);
+      res = await request()
+        .get(path.join(res.body.ContentLocation, "cftests", "missingPropertyName.yml"))
+        .proxy(testHelper.TEST_PROXY)
+        .expect(200)
+        .query({parts: 'meta'});
+      var fLoc = res.body.Location;
+      res = await getTestFile(request, fLoc);
+      res = await request()
+        .get(path.join(PREFIX_MANIFESTS, res.body.Location))
+        .proxy(testHelper.TEST_PROXY)
+        .query({Strict: true})
+        .expect(202);
+      assert(res.body.Location);
+      assert(res.body.Location.startsWith(TASK_PREFIX));
 		});
-		it("testMissingPropertyValue", function(done) {
-			testHelper.withWorkspace(request, testHelper.WORKSPACE_PATH, testHelper.WORKSPACE_ID)
-			.end(function(err, res) {
-				testHelper.throwIfError(err);
-				var wLoc = res.body.Location;
-				request()
-					.get(path.join(res.body.ContentLocation, "cftests", "missingPropertyValue.yml"))
-					.expect(200)
-					.query({parts: 'meta'})
-					.end(function(err, res) {
-						testHelper.throwIfError(err);
-						var fLoc = res.body.Location;
-						getTestFile(request, fLoc)
-						.end(function(err, res) {
-							testHelper.throwIfError(err);
-							request()
-								.get(path.join(PREFIX_MANIFESTS, res.body.Location))
-								.query({Strict: true})
-								.expect(202)
-								.end(function(err, res) {
-									testHelper.throwIfError(err);
-									assert(res.body.Location);
-									assert(res.body.Location.startsWith(TASK_PREFIX));
-									done();
-								});
-						});
-					})
-			});
+		it("testMissingPropertyValue", async () => {
+			let res = await testHelper.withWorkspace(request, testHelper.WORKSPACE_PATH, testHelper.WORKSPACE_ID);
+      res = await request()
+        .get(path.join(res.body.ContentLocation, "cftests", "missingPropertyValue.yml"))
+        .proxy(testHelper.TEST_PROXY)
+        .expect(200)
+        .query({parts: 'meta'});
+      var fLoc = res.body.Location;
+      res = await getTestFile(request, fLoc);
+      res = await request()
+        .get(path.join(PREFIX_MANIFESTS, res.body.Location))
+        .proxy(testHelper.TEST_PROXY)
+        .query({Strict: true})
+        .expect(202);
+      assert(res.body.Location);
+      assert(res.body.Location.startsWith(TASK_PREFIX));
 		});
-		it("testBadPropertyShape", function(done) {
-			testHelper.withWorkspace(request, testHelper.WORKSPACE_PATH, testHelper.WORKSPACE_ID)
-			.end(function(err, res) {
-				testHelper.throwIfError(err);
-				var wLoc = res.body.Location;
-				request()
-					.get(path.join(res.body.ContentLocation, "cftests", "badPropertyShape.yml"))
-					.expect(200)
-					.query({parts: 'meta'})
-					.end(function(err, res) {
-						testHelper.throwIfError(err);
-						var fLoc = res.body.Location;
-						getTestFile(request, fLoc)
-						.end(function(err, res) {
-							testHelper.throwIfError(err);
-							request()
-								.get(path.join(PREFIX_MANIFESTS, res.body.Location))
-								.query({Strict: true})
-								.expect(202)
-								.end(function(err, res) {
-									testHelper.throwIfError(err);
-									assert(res.body.Location);
-									assert(res.body.Location.startsWith(TASK_PREFIX));
-									done();
-								});
-						});
-					})
-			});
+		it("testBadPropertyShape", async () => {
+			let res = await testHelper.withWorkspace(request, testHelper.WORKSPACE_PATH, testHelper.WORKSPACE_ID);
+      res = await request()
+        .get(path.join(res.body.ContentLocation, "cftests", "badPropertyShape.yml"))
+        .proxy(testHelper.TEST_PROXY)
+        .expect(200)
+        .query({parts: 'meta'});
+      var fLoc = res.body.Location;
+      res = await getTestFile(request, fLoc);
+      res = await request()
+        .get(path.join(PREFIX_MANIFESTS, res.body.Location))
+        .proxy(testHelper.TEST_PROXY)
+        .query({Strict: true})
+        .expect(202);
+      assert(res.body.Location);
+      assert(res.body.Location.startsWith(TASK_PREFIX));
 		});
-		it("testBadIndent", function(done) {
-			testHelper.withWorkspace(request, testHelper.WORKSPACE_PATH, testHelper.WORKSPACE_ID)
-			.end(function(err, res) {
-				testHelper.throwIfError(err);
-				var wLoc = res.body.Location;
-				request()
-					.get(path.join(res.body.ContentLocation, "cftests", "badIndent.yml"))
-					.expect(200)
-					.query({parts: 'meta'})
-					.end(function(err, res) {
-						testHelper.throwIfError(err);
-						var fLoc = res.body.Location;
-						getTestFile(request, fLoc)
-						.end(function(err, res) {
-							testHelper.throwIfError(err);
-							request()
-								.get(path.join(PREFIX_MANIFESTS, res.body.Location))
-								.query({Strict: true})
-								.expect(202)
-								.end(function(err, res) {
-									testHelper.throwIfError(err);
-									assert(res.body.Location);
-									assert(res.body.Location.startsWith(TASK_PREFIX));
-									done();
-								});
-						});
-					})
-			});
+		it("testBadIndent", async () => {
+			let res = await testHelper.withWorkspace(request, testHelper.WORKSPACE_PATH, testHelper.WORKSPACE_ID);
+      res = await request()
+        .get(path.join(res.body.ContentLocation, "cftests", "badIndent.yml"))
+        .proxy(testHelper.TEST_PROXY)
+        .expect(200)
+        .query({parts: 'meta'});
+      var fLoc = res.body.Location;
+      res = await getTestFile(request, fLoc);
+      res = await request()
+        .get(path.join(PREFIX_MANIFESTS, res.body.Location))
+        .proxy(testHelper.TEST_PROXY)
+        .query({Strict: true})
+        .expect(202);
+      assert(res.body.Location);
+      assert(res.body.Location.startsWith(TASK_PREFIX));
 		});
 		/**
 		 * Even though this is asking the endpoint for a file that does not exist (using the /file endpoint)
 		 * we get back 200, due to the fact that we generate a default manifest for the user if there isn't one.
 		 */
-		it("testNonExistentFile", function(done) {
-			testHelper.withWorkspace(request, testHelper.WORKSPACE_PATH, testHelper.WORKSPACE_ID)
-			.end(function(err, res) {
-				testHelper.throwIfError(err);
-				var wLoc = res.body.Location;
-				request()
-					.get(path.join(res.body.ContentLocation, "cftests", "foo.yml"))
-					.expect(404)
-					.query({parts: 'meta'})
-					.end(function(err, res) {
-						testHelper.throwIfError(err);
-						var fLoc = res.body.Location;
-						request()
-							.get(path.join(PREFIX_MANIFESTS, '/cftests/foo.yml')) // no /file endpoint, 403 is returned
-							.query({Strict: true})
-							.expect(403)
-							.end(done);
-					})
-			});
+		it("testNonExistentFile", async () => {
+			let res = await testHelper.withWorkspace(request, testHelper.WORKSPACE_PATH, testHelper.WORKSPACE_ID);
+      res = await request()
+        .get(path.join(res.body.ContentLocation, "cftests", "foo.yml"))
+        .proxy(testHelper.TEST_PROXY)
+        .expect(404)
+        .query({parts: 'meta'});
+      res = await request()
+        .get(path.join(PREFIX_MANIFESTS, '/cftests/foo.yml')) // no /file endpoint, 403 is returned
+        .proxy(testHelper.TEST_PROXY)
+        .query({Strict: true})
+        .expect(403);
 		});
-		it("testNonExistentFileWithFileRoute", function(done) {
-			testHelper.withWorkspace(request, testHelper.WORKSPACE_PATH, testHelper.WORKSPACE_ID)
-			.end(function(err, res) {
-				testHelper.throwIfError(err);
-				var wLoc = res.body.Location,
-					wCL = res.body.ContentLocation;
-				request()
-					.get(path.join(wCL, "cftests", "foo.yml"))
-					.expect(404)
-					.query({parts: 'meta'})
-					.end(function(err, res) {
-						testHelper.throwIfError(err);
-						var fLoc = res.body.Location;
-						request()
-							.get(path.join(PREFIX_MANIFESTS, wCL, 'cftests', 'foo.yml'))
-							.query({Strict: true})
-							.expect(404)
-							.end(done);
-					})
-			});
+		it("testNonExistentFileWithFileRoute", async () => {
+			let res = await testHelper.withWorkspace(request, testHelper.WORKSPACE_PATH, testHelper.WORKSPACE_ID);
+      var wCL = res.body.ContentLocation;
+      res = await request()
+        .get(path.join(wCL, "cftests", "foo.yml"))
+        .proxy(testHelper.TEST_PROXY)
+        .expect(404)
+        .query({parts: 'meta'});
+      res = await request()
+        .get(path.join(PREFIX_MANIFESTS, wCL, 'cftests', 'foo.yml'))
+        .proxy(testHelper.TEST_PROXY)
+        .query({Strict: true})
+        .expect(404);
 		});
-		it("testNonExistentFileWithFileRouteNonStrict", function(done) {
-			testHelper.withWorkspace(request, testHelper.WORKSPACE_PATH, testHelper.WORKSPACE_ID)
-			.end(function(err, res) {
-				testHelper.throwIfError(err);
-				var wLoc = res.body.Location,
-					wCL = res.body.ContentLocation;
-				request()
-					.get(path.join(wCL, "cftests", "foo.yml"))
-					.expect(404)
-					.query({parts: 'meta'})
-					.end(function(err, res) {
-						testHelper.throwIfError(err);
-						var fLoc = res.body.Location;
-						request()
-							.get(path.join(PREFIX_MANIFESTS, wCL, 'cftests', 'foo.yml'))
-							//.query({Strict: true}) non-strict should look for a manifest.yml in the directory
-							.expect(200)
-							.end(done);
-					})
-			});
+		it("testNonExistentFileWithFileRouteNonStrict", async () => {
+			let res = await testHelper.withWorkspace(request, testHelper.WORKSPACE_PATH, testHelper.WORKSPACE_ID);
+			var wCL = res.body.ContentLocation;
+      res = await request()
+        .get(path.join(wCL, "cftests", "foo.yml"))
+        .proxy(testHelper.TEST_PROXY)
+        .expect(404)
+        .query({parts: 'meta'});
+      res = await request()
+        .get(path.join(PREFIX_MANIFESTS, wCL, 'cftests', 'foo.yml'))
+        .proxy(testHelper.TEST_PROXY)
+        //.query({Strict: true}) non-strict should look for a manifest.yml in the directory
+        .expect(200);
 		});
-		it("testEmptyFilePath", function(done) {
-			testHelper.withWorkspace(request, testHelper.WORKSPACE_PATH, testHelper.WORKSPACE_ID)
-			.end(function(err, res) {
-				testHelper.throwIfError(err);
-				var wLoc = res.body.Location;
-				request()
-					.get(path.join(res.body.ContentLocation, "cftests", "foo.yml"))
-					.expect(404)
-					.query({parts: 'meta'})
-					.end(function(err, res) {
-						testHelper.throwIfError(err);
-						var fLoc = res.body.Location;
-						request()
-							.get(path.join(PREFIX_MANIFESTS, ''))
-							.query({Strict: true})
-							.expect(403)
-							.end(done);
-					})
-			});
+		it("testEmptyFilePath", async () => {
+			let res = await testHelper.withWorkspace(request, testHelper.WORKSPACE_PATH, testHelper.WORKSPACE_ID);
+      res = await request()
+        .get(path.join(res.body.ContentLocation, "cftests", "foo.yml"))
+        .proxy(testHelper.TEST_PROXY)
+        .expect(404)
+        .query({parts: 'meta'});
+      res = await request()
+        .get(path.join(PREFIX_MANIFESTS, ''))
+        .proxy(testHelper.TEST_PROXY)
+        .query({Strict: true})
+        .expect(403);
 		});
-		it("testUndefinedFilePath", function(done) {
-			testHelper.withWorkspace(request, testHelper.WORKSPACE_PATH, testHelper.WORKSPACE_ID)
-			.end(function(err, res) {
-				testHelper.throwIfError(err);
-				var wLoc = res.body.Location;
-				request()
-					.get(path.join(res.body.ContentLocation, "cftests", "foo.yml"))
-					.expect(404)
-					.query({parts: 'meta'})
-					.end(function(err, res) {
-						testHelper.throwIfError(err);
-						var fLoc = res.body.Location;
-						request()
-							.get(PREFIX_MANIFESTS)
-							.query({Strict: true})
-							.expect(403)
-							.end(done);
-					})
-			});
+		it("testUndefinedFilePath", async () => {
+			let res = await testHelper.withWorkspace(request, testHelper.WORKSPACE_PATH, testHelper.WORKSPACE_ID);
+      res = await request()
+        .get(path.join(res.body.ContentLocation, "cftests", "foo.yml"))
+        .proxy(testHelper.TEST_PROXY)
+        .expect(404)
+        .query({parts: 'meta'});
+      res = await request()
+        .get(PREFIX_MANIFESTS)
+        .proxy(testHelper.TEST_PROXY)
+        .query({Strict: true})
+        .expect(403);
 		});
 		/**
 		 * TODO - this relies on the ManifestTransformator in Java, which we don't have in node

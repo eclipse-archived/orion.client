@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2013, 2018 IBM Corporation and others.
+ * Copyright (c) 2013, 2019 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -9,14 +9,13 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 /*eslint-env node*/
-var path = require('path'),
+const path = require('path'),
 	fs = require('fs'),
 	rimraf = require('rimraf'),
 	express = require('express'),
-	supertest = require('supertest'),
+  supertest = require('supertest-with-proxy'),
 	orionServer = require("../../index"),
 	checkRights = require('../../lib/accessRights').checkRights,
-	argslib = require('../../lib/args'),
 	testHelper = require('./testHelper'),
 	nconf = require("nconf"),
 	taskHelper = require('./task_helper'),
@@ -197,8 +196,8 @@ exports.setupOrionServer = function setupOrionServer(confOptions){
 			req.contextPath =  testHelper.CONTEXT_PATH;
 			next();
 		}, orion());
-		app.use(CONTEXT_PATH + '/taskHelper', taskHelper.router({root: '/taskHelper', metastore: app.locals.metastore}));
-		request = supertest.bind(null, app);
+    app.use(CONTEXT_PATH + '/taskHelper', taskHelper.router({root: '/taskHelper', metastore: app.locals.metastore}));
+    request = supertest.bind(null, app);
 	}
 	return request;
 };

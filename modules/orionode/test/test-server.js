@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2013 IBM Corporation and others.
+ * Copyright (c) 2013, 2019 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -11,13 +11,12 @@
 /*eslint-env node, mocha*/
 var assert = require("assert"),
 	express = require("express"),
-	supertest = require("supertest"),
+	supertest = require('supertest-with-proxy'),
 	orionMiddleware = require("../index"),
 	checkRights = require('../lib/accessRights').checkRights,
 	path = require("path"),
 	testHelper = require('./support/testHelper'),
  	testData = require("./support/test_data");
-
 
 var WORKSPACE = testHelper.WORKSPACE,
 	METADATA =  testHelper.METADATA;
@@ -79,7 +78,8 @@ describe("orion", function() {
 				maxAge: 31337 * 1000 // ms
 			}));
 			request()
-			.get("/index.html")
+      .get("/index.html")
+      .proxy(testHelper.TEST_PROXY)
 			.expect("cache-control", /max-age=31337/, done); //seconds
 		});
 	});
@@ -94,7 +94,8 @@ describe("orion", function() {
 		it("exports #createServer", function() {
 			app.use(orion({ }));
 			request()
-			.get("/workspace")
+      .get("/workspace")
+      .proxy(testHelper.TEST_PROXY)
 			.expect(200);
 		});
 
@@ -102,14 +103,16 @@ describe("orion", function() {
 		it("finds the orion.client code", function() {
 			app.use(orion({ }));
 			request()
-			.get("/index.html")
+      .get("/index.html")
+      .proxy(testHelper.TEST_PROXY)
 			.expect(200);
 		});
 
 		it("works at a non-server-root route", function(done) {
 			app.use("/wow/such/orion", orion({ }));
 			request()
-			.get("/wow/such/orion/index.html")
+      .get("/wow/such/orion/index.html")
+      .proxy(testHelper.TEST_PROXY)
 			.expect(200, done);
 		});
 	});

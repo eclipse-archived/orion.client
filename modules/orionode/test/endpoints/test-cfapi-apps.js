@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017 IBM Corporation and others.
+ * Copyright (c) 2017, 2019 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -9,7 +9,7 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 /*eslint-env mocha */
-var assert = require("assert"),
+const assert = require("assert"),
 	path = require("path"),
 	apps = require("../../lib/cf/apps"),
 	testData = require("../support/test_data"),
@@ -18,11 +18,7 @@ var assert = require("assert"),
 var CONTEXT_PATH = testHelper.CONTEXT_PATH,
 	WORKSPACE = testHelper.WORKSPACE,
 	MEATASTORE =  testHelper.METADATA,
-	PREFIX_CF = CONTEXT_PATH + "/cfapi",
-	MANIFESTS = "/manifests",
-	PREFIX_MANIFESTS = PREFIX_CF + MANIFESTS,
-	TASK_PREFIX = CONTEXT_PATH + '/task',
-	PREFIX_FILE = CONTEXT_PATH + '/file';
+	PREFIX_CF = CONTEXT_PATH + "/cfapi";
 
 var request = testData.setupOrionServer();
 
@@ -67,22 +63,17 @@ describe("CloudFoundry apps", function() {
 			assert.equal("options.fileRoot is required", err.message, "The fileRoot error mesaages are not the same");
 		}
 	});
-	it("testGetApp - name only", function(done) {
-		request()
-			.get(path.join(PREFIX_CF, "apps"))
+	it("testGetApp - name only", async () => {
+		let res = await request()
+      .get(path.join(PREFIX_CF, "apps"))
+      .proxy(testHelper.TEST_PROXY)
 			.query({Name: 'myapp'})
-			.expect(202)
-			.end(function(err, res) {
-				testHelper.throwIfError(err);
-				request()
-					.get(res.body.Location)
-					.expect(200)
-					.end(function(err, res) {
-						testHelper.throwIfError(err);
-						assert(res.body.Result, "There should have been a result");
-						assert.equal(res.body.Result.HttpCode, 500, "Should have gotten a 500");
-						done();
-					});
-			});
+			.expect(202);
+		res = await request()
+      .get(res.body.Location)
+      .proxy(testHelper.TEST_PROXY)
+      .expect(200);
+    assert(res.body.Result, "There should have been a result");
+    assert.equal(res.body.Result.HttpCode, 500, "Should have gotten a 500");
 	});
 });
