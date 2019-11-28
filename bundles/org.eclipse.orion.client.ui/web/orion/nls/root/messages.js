@@ -26,6 +26,7 @@ define({//Default message bundle
 	"Command": "Command",
 	"Filter bindings:": "Filter bindings:",
 	"Filter bindings": "Type characters to filter by name or key combination",
+	"Bindings": "Bindings",
 	"BindingPrompt": "Enter the new binding",
 	"NoBinding": "---",
 	"orionClientLabel": "Orion client repository",

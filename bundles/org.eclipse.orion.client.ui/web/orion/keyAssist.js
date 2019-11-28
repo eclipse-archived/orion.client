@@ -44,7 +44,7 @@ define([
 			var keyAssistInput = this._keyAssistInput = document.createElement("input"); //$NON-NLS-1$
 			keyAssistInput.classList.add("keyAssistInput"); //$NON-NLS-1$
 			keyAssistInput.type = "text"; //$NON-NLS-1$
-			lib.setSafeAttribute(keyAssistInput, "aria-label", "Filter bindings:");
+			lib.setSafeAttribute(keyAssistInput, "aria-label", messages["Filter bindings:"]);
 			keyAssistInput.placeholder = messages["Filter bindings"]; //$NON-NLS-1$
 			lib.setSafeAttribute(keyAssistInput, "role", "combobox");
 			lib.setSafeAttribute(keyAssistInput, "aria-haspopup", "grid");
@@ -61,8 +61,8 @@ define([
 			keyAssistDiv.appendChild(keyAssistContents);
 			var keyAssistTable = this._keyAssistTable = document.createElement('table'); //$NON-NLS-1$
 			lib.setSafeAttribute(keyAssistTable, "role", "grid");
+			lib.setSafeAttribute(keyAssistTable, "aria-label", messages["Bindings"]);
 			keyAssistTable.id = "keyAssistList"; //$NON-NLS-1$
-			keyAssistTable.tabIndex = 0;
 			keyAssistTable.classList.add("keyAssistList"); //$NON-NLS-1$
 			keyAssistContents.appendChild(keyAssistTable);
 			document.body.appendChild(keyAssistDiv);
@@ -112,7 +112,7 @@ define([
 				if (JSON.stringify(args.prevBinding) === JSON.stringify(row.curBinding)) {
 					// Update the binding showm in the table
 					var bindingStr = args.newBinding ? UIUtil.getUserKeyString(args.newBinding) : "---"; //$NON-NLS-1$
-					row.childNodes[2].firstChild.textContent = bindingStr;
+					row.childNodes[1].firstChild.textContent = bindingStr;
 					row.curBinding = args.newBinding;							
 				}
 			}
@@ -124,29 +124,12 @@ define([
 			this._selectedRow = null;
 			this._keyAssistContents.scrollTop = 0;
 			this._idCount = 0;
-			this.createHeaders();
+			lib.setSafeAttribute(this._keyAssistInput, "aria-activedescendant", "");
 			for (var i=0; i<this._providers.length; i++) {
 				this._providers[i].showKeyBindings(this);
 			}
 			this.createHeader(messages["Global"], "GlobalScope"); //$NON-NLS-0$
 			this.commandRegistry.showKeyBindings(this);
-		},
-		createHeaders: function () {
-			var thead = document.createElement('thead'); //$NON-NLS-0$
-			var row = document.createElement('tr'); //$NON-NLS-0$
-			lib.setSafeAttribute(row, "role", "row");
-			["Spacer", "Command", "KeyBinding", "Edit"].forEach(function(id) { //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-				var cell = document.createElement('th'); //$NON-NLS-0$
-				cell.classList.add("visuallyhidden"); //$NON-NLS-0$
-				lib.setSafeAttribute(cell, "role", "columnheader");
-				cell.id = id + "Col";
-				if (id === "Command" || id === "KeyBinding") { //$NON-NLS-1$ //$NON-NLS-0$
-					cell.textContent = messages[id];
-				}
-				row.appendChild(cell);
-			});
-			thead.appendChild(row);
-			this._keyAssistTable.appendChild(thead);	
 		},
 		createItem: function (binding, name, cmdID, execute) {
 			var bindingString = binding ? UIUtil.getUserKeyString(binding) : messages["NoBinding"];
@@ -170,7 +153,6 @@ define([
 			var row = this._keyAssistTable.insertRow(-1);
 			row.id = "keyAssist-keyBinding-" + this._idCount++; //$NON-NLS-1$
 			lib.setSafeAttribute(row, "role", "row");
-			row.tabIndex = -1;
 			row.cmdID = cmdID;
 			row._execute = execute;
 			row.curBinding = binding;
@@ -182,19 +164,14 @@ define([
 			}.bind(this));
 			
 			var column = row.insertCell(-1);
-			column.classList.add("keyAssistSpacer"); //$NON-NLS-1$
-			column.headers = this._lastHeaderID + " " + "SpacerCol"; //$NON-NLS-0$
-			column.appendChild(document.createElement("div")); //$NON-NLS-1$
-			
-			column = row.insertCell(-1);
 			column.classList.add("keyAssistName"); //$NON-NLS-1$
-			column.headers = this._lastHeaderID + " " + "CommandCol"; //$NON-NLS-0$
+			column.headers = this._lastHeaderID; //$NON-NLS-0$
 			lib.setSafeAttribute(column, "role", "gridcell");
 			column.appendChild(document.createTextNode(name));
 			
 			column = row.insertCell(-1);
 			column.classList.add("keyAssistAccel"); //$NON-NLS-1$
-			column.headers = this._lastHeaderID + " " + "KeyBindingCol"; //$NON-NLS-0$
+			column.headers = this._lastHeaderID; //$NON-NLS-0$
 			lib.setSafeAttribute(column, "role", "gridcell");
 			var bindingSpan = document.createElement("span"); //$NON-NLS-1$
 			bindingSpan.textContent = bindingString;
@@ -202,7 +179,7 @@ define([
 			
 			column = row.insertCell(-1);
 			column.classList.add("keyAssistActions"); //$NON-NLS-1$
-			column.headers = this._lastHeaderID + " " + "EditCol"; //$NON-NLS-0$
+			column.headers = this._lastHeaderID; //$NON-NLS-0$
 			var eb = document.createElement("button"); //$NON-NLS-1$
 			eb.tabIndex = -1;
 			eb.classList.add("keyAssistEditButton"); //$NON-NLS-1$
@@ -297,7 +274,7 @@ define([
 				lib.stop(e);
 			}.bind(this));
 			
-			var bindingField = this.bindingField = row.childNodes[2];
+			var bindingField = this.bindingField = row.childNodes[1];
 			bindingField.firstChild.style.display = "none"; //$NON-NLS-1$
 
 			// Make the edit control the correct width to avoid resizing the panel
@@ -325,7 +302,7 @@ define([
 			row.classList.add("keyAssistSection"); //$NON-NLS-0$
 			var column = document.createElement('th'); //$NON-NLS-0$
 			column.id = id;
-			column.colSpan = 4;
+			column.colSpan = 3;
 			column.scope = "rowgroup"; //$NON-NLS-0$
 			var heading = document.createElement("h2"); //$NON-NLS-0$
 			lib.setSafeAttribute(heading, "role", "presentation");
@@ -399,7 +376,7 @@ define([
 			if (this._selectedIndex !== -1) {
 				row = rows[this._selectedIndex];
 				row.classList.remove("selected"); //$NON-NLS-1$
-				lib.setSafeAttribute(this._keyAssistTable, "aria-selected", "false");
+				lib.setSafeAttribute(row, "aria-selected", "false");
 				editButton = row.querySelector(".keyAssistEditButton");
 				if (editButton) {
 					editButton.classList.remove("keyAssistEditButtonVisible"); //$NON-NLS-1$
@@ -413,7 +390,7 @@ define([
 				this._selectedRow = rows[this._selectedIndex];
 				row = this._selectedRow;
 				row.classList.add("selected"); //$NON-NLS-1$
-				lib.setSafeAttribute(this._keyAssistTable, "aria-selected", "true");
+				lib.setSafeAttribute(row, "aria-selected", "true");
 				editButton = row.querySelector(".keyAssistEditButton");
 				if (editButton) {
 					editButton.classList.add("keyAssistEditButtonVisible"); //$NON-NLS-1$
@@ -441,12 +418,12 @@ define([
 			}
 			lib.trapTabs(this._keyAssistDiv);
 			this._previousActiveElement = document.activeElement;
+			this._filterString = "";
 			this.createContents();
 			this._keyAssistContents.style.height = Math.floor(this._keyAssistDiv.parentNode.clientHeight * 0.75) + "px"; //$NON-NLS-1$
 			this._keyAssistDiv.style.display = "block"; //$NON-NLS-1$
 			this._keyAssistInput.value = this._filterString;
 			this._keyAssistInput.focus();
-			this._keyAssistInput.select();
 			
 			metrics.logEvent("KeyBinding", "Panel", "Opened"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		},
