@@ -86,11 +86,11 @@
     "karma-requirejs": "^1.1.0",
     "mocha": "^4.0.0",
     "nodemon": "^1.11.0",
-    "nyc": "^13.3.0",
+    "nyc": "^15.0.0",
     "requirejs": "^2.3.3",
     "superagent": "^3.5.1",
-    "supertest-with-proxy": "^5.0.1",
-    "supertest": "^3.0.0"
+    "supertest": "^3.0.0",
+    "supertest-with-proxy": "^5.0.1"
   },
   "engines": {
     "node": "^10.16.3"
