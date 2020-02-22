@@ -904,7 +904,7 @@ function rebase(req, res, commitToRebase, rebaseOperation) {
 				}).then(function(rebase) {
 					if (rebase.operationCurrent() === rebase.operationEntrycount() - 1) {
 						// if skipping the last operation, then we're done here
-						return repo.defaultSignature().then(function(sig) {
+						return clone.getSignature(repo).then(function(sig) {
 							rebase.finish(sig);
 							// return the commit that we're currently on
 							return head;
@@ -1099,7 +1099,7 @@ function forceMerge(repo, head, commit, branchToMerge, createMergeCommit, confli
 			}
 	
 			if (createMergeCommit) {
-				return repo.defaultSignature().then(function(signature) {
+				return clone.getSignature(repo).then(function(signature) {
 					var message = "Merged branch '" + branchToMerge + "'"; 
 					return createCommit(repo,
 						signature.name(), signature.email(),

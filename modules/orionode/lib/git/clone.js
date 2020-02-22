@@ -810,6 +810,9 @@ function postClone(req, res) {
 }
 
 function getSignature(repo){
-	return git.Signature.default(repo) || Promise.resolve(git.Signature.now("unknown", "unknown@example.com"));
+	return git.Signature.default(repo).then(function(sig) {
+		if (!sig) Promise.resolve(git.Signature.now("unknown", "unknown@example.com"));
+		return sig;
+	});
 }
 };

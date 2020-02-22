@@ -45,7 +45,7 @@
     "passport-local": "^1.0.0",
     "passport-local-mongoose": "^4.0.0",
     "passport-local-mongoose-email": "^0.1.2",
-    "request": "2.87.0",
+    "request": "^2.88.0",
     "response-time": "^2.3.2",
     "rimraf": "~2.2.6",
     "semver": "^5.3.0",
