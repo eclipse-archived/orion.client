@@ -11,16 +11,16 @@
 /*eslint-env node*/
 
 var isWin = /^win/.test(process.platform);
-var fs;
+var fs = require("fs");
+var fsext;
 if (!isWin) {
-	fs = require("fs-ext");
+	fsext = require("fs-ext");
 }
 var log4js = require("log4js");
 var logger = log4js.getLogger("locker");
 var nodePath = require("path");
 var Promise = require("bluebird");
 var mkdirpAsync = Promise.promisify(require("mkdirp"));
-var constants = require("constants");
 
 var APPEND = "a+";
 
@@ -160,7 +160,7 @@ FileLocker.prototype._acquireLock = function(shared) {
 		var lock = function() {
 			var startTime = Date.now();
 			var doit = function() {
-				fs.fcntl(this._fd, constants.F_SETLK, shared ? constants.F_RDLCK : constants.F_WRLCK, function(error) {
+				fsext.fcntl(this._fd, fsext.constants.F_SETLK, shared ? fsext.constants.F_RDLCK : fsext.constants.F_WRLCK, function(error) {
 					if (error && error.code === "EAGAIN") {
 						if (Date.now() - startTime <= 60000) { // 1 minute
 							setTimeout(doit, 1);
@@ -267,7 +267,7 @@ FileLocker.prototype._releaseLock = function() {
 			logger.error("FD is NULL count=" + this._counter + " path=" + this._pathame + " pid=" + process.pid);
 			return resolve();
 		}
-		fs.fcntl(this._fd, constants.F_SETLK, constants.F_UNLCK, function(error) {
+		fsext.fcntl(this._fd, fsext.constants.F_SETLK, fsext.constants.F_UNLCK, function(error) {
 			this._closeLockFile();
 
 			if (error) {

@@ -301,7 +301,7 @@ function getClones(req, res, callback) {
 	
 	function getURL(repo) {
 		return new Promise(function(fulfill) {
-			repo.getRemotes()
+			repo.getRemoteNames()
 			.then(function(remotes){
 				var url;
 				async.each(remotes, function(remote, callback) {
@@ -458,6 +458,12 @@ function initRepo(file, req, res){
 				return configRepo(repo, req.body.GitName, req.body.GitMail);
 			})
 			.then(function(){
+				return getSignature(theRepo);
+			})
+			.then(function(sig){
+				return author = committer = sig;
+			})
+			.then(function(){
 				return theRepo.refreshIndex();
 			})
 			.then(function(idx) {
@@ -465,9 +471,6 @@ function initRepo(file, req, res){
 				return index.writeTree();
 			})
 			.then(function(oid) {
-				author = getSignature(theRepo);	
-				committer = getSignature(theRepo);	
-
 				// Since we're creating an inital commit, it has no parents. Note that unlike
 				// normal we don't get the head either, because there isn't one yet.
 				return theRepo.createCommit("HEAD", author, committer, "Initial commit", oid, []);
@@ -807,6 +810,6 @@ function postClone(req, res) {
 }
 
 function getSignature(repo){
-	return git.Signature.default(repo) || git.Signature.now("unknown","unknown@example.com");
+	return git.Signature.default(repo) || Promise.resolve(git.Signature.now("unknown", "unknown@example.com"));
 }
 };

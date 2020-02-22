@@ -2070,6 +2070,7 @@ maybeDescribe("git", function() {
 				var initial, modify, extra, extra2;
 				var name = "test.txt";
 				var unrelated = "unrelated.txt";
+				var oid;
 
 				var client = new GitClient(testName);
 				client.init();
@@ -2091,11 +2092,15 @@ maybeDescribe("git", function() {
 					// get the oid of the current repository state
 					return index.writeTree();
 				})
-				.then(function(oid) {
+				.then(function(_oid) {
+					oid = _oid;
+					return git.Signature.default(repository);
+				})
+				.then(function(sig) {
 					// using that oid, create a commit in another branch with no parent commit
 					return repository.createCommit("refs/heads/other",
-						git.Signature.default(repository),
-						git.Signature.default(repository),
+						sig,
+						sig,
 							"unrelated", oid, [ ]);
 					})
 				.then(function() {
@@ -2126,6 +2131,7 @@ maybeDescribe("git", function() {
 				var initial, modify, extra, extra2;
 				var name = "test.txt";
 				var unrelated = "unrelated.txt";
+				var oid;
 
 				var client = new GitClient(testName);
 				client.init();
@@ -2151,11 +2157,15 @@ maybeDescribe("git", function() {
 					// get the oid of the current repository state
 					return index.writeTree();
 				})
-				.then(function(oid) {
+				.then(function(_oid) {
+					oid = _oid;
+					return git.Signature.default(repository);
+				})
+				.then(function(sig) {
 					// using that oid, create a commit in another branch with no parent commit
 					return repository.createCommit("refs/heads/other",
-						git.Signature.default(repository),
-						git.Signature.default(repository),
+						sig,
+						sig,
 							"unrelated", oid, [ ]);
 					})
 				.then(function() {
@@ -2184,6 +2194,7 @@ maybeDescribe("git", function() {
 				var initial, modify, extra, extra2;
 				var name = "test.txt";
 				var unrelated = "unrelated.txt";
+				var oid;
 
 				var client = new GitClient(testName);
 				client.init();
@@ -2209,11 +2220,15 @@ maybeDescribe("git", function() {
 					// get the oid of the current repository state
 					return index.writeTree();
 				})
-				.then(function(oid) {
+				.then(function(_oid) {
+					oid = _oid;
+					return git.Signature.default(repository);
+				})
+				.then(function(sig) {
 					// using that oid, create a commit in another branch with no parent commit
 					return repository.createCommit("refs/heads/other",
-						git.Signature.default(repository),
-						git.Signature.default(repository),
+						sig,
+						sig,
 							"unrelated", oid, [ ]);
 					})
 				.then(function() {
@@ -2919,6 +2934,7 @@ maybeDescribe("git", function() {
 				var initial, modify, extra, extra2;
 				var name = "test.txt";
 				var unrelated = "unrelated.txt";
+				var oid;
 
 				var client = new GitClient("Log-Compare-bug 515428");
 				client.init();
@@ -2940,11 +2956,15 @@ maybeDescribe("git", function() {
 					// get the oid of the current repository state
 					return index.writeTree();
 				})
-				.then(function(oid) {
+				.then(function(_oid) {
+					oid = _oid;
+					return git.Signature.default(repository);
+				})
+				.then(function(sig) {
 					// using that oid, create a commit in another branch with no parent commit
 					return repository.createCommit("refs/heads/other",
-						git.Signature.default(repository),
-						git.Signature.default(repository),
+						sig,
+						sig,
 							"unrelated", oid, [ ]);
 					})
 				.then(function() {
@@ -3895,8 +3915,9 @@ maybeDescribe("git", function() {
 			 */
 			it("unrelated identical content", function(finished) {
 				var repository;
-				var initial, indexOid;
+				var initial, indexOid, sig;
 				var name = "test.txt";
+				
 
 				var client = new GitClient("graph-unrelated-identical-content");
 				client.init();
@@ -3918,19 +3939,23 @@ maybeDescribe("git", function() {
 					// get the oid of the current repository state
 					return index.writeTree();
 				})
-				.then(function(oid) {
-					indexOid = oid;
+				.then(function(_oid) {
+					indexOid = _oid;
+					return git.Signature.default(repository);
+				})
+				.then(function(_sig) {
+					sig = _sig;
 					// using that oid, create a commit in another branch with no parent commit
 					return repository.createCommit("refs/heads/other",
-						git.Signature.default(repository),
-						git.Signature.default(repository),
+						sig,
+						sig,
 							"unrelated", indexOid, [ ]);
 				})
 				.then(function(commit) {
 					return repository.createCommit("refs/heads/other",
-						git.Signature.default(repository),
-						git.Signature.default(repository),
-							"unrelated", indexOid, [ commit ])
+						sig,
+						sig,
+							"unrelated", indexOid, [ commit ]);
 				})
 				.then(function() {
 					// merge in the branch with an unrelated history

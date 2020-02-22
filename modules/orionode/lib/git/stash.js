@@ -196,7 +196,10 @@ function postStash(req, res) {
 	return clone.getRepo(req)
 	.then(function(_repo) {
 		repo = _repo;
-		return git.Stash.save(repo, clone.getSignature(repo), message, flags);
+		return clone.getSignature(repo);
+	})
+	.then(function(sig) {
+		return git.Stash.save(repo, sig, message, flags);
 	})
 	.then(function() {
 		writeResponse(200, res);
