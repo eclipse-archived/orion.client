@@ -276,7 +276,7 @@ exports.DiffTreeNavigator = (function() {
 				return;
 			}
 			
-			var adapter = this.fastDiff ?  new mJSDiffAdapterFast.JSDiffAdapter(ignoreWhitespace) : new mJSDiffAdapter.JSDiffAdapter(ignoreWhitespace);
+			var adapter = this.fastDiff && !ignoreWhitespace ?  new mJSDiffAdapterFast.JSDiffAdapter(ignoreWhitespace) : new mJSDiffAdapter.JSDiffAdapter(ignoreWhitespace);
 			for(i = 0; i < oldDiffBlocks.length; i++){
 				var diffBlockModel = this.generatePairBlockAnnotations(this._root, i);
 				this._root.children.push(diffBlockModel);

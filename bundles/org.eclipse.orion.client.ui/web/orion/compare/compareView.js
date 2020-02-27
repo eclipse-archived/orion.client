@@ -73,7 +73,7 @@ exports.CompareView = (function() {
 				return {delim:delim , mapper:this.options.mapper, output: this.options.newFile.Content, diffArray:this.options.diffArray};
 			}
 			if(!diff && typeof output === "string" && typeof input === "string"){ //$NON-NLS-1$ //$NON-NLS-0$
-				var adapter = this.options.fastDiff ?  new mJSDiffAdapterFast.JSDiffAdapter(this.isWhitespaceIgnored()) : new mJSDiffAdapter.JSDiffAdapter(this.isWhitespaceIgnored());
+				var adapter = this.options.fastDiff && !this.isWhitespaceIgnored() ?  new mJSDiffAdapterFast.JSDiffAdapter(this.isWhitespaceIgnored()) : new mJSDiffAdapter.JSDiffAdapter(this.isWhitespaceIgnored());
 				var maps = adapter.adapt(input, output, delim);
 				if(this.options.toggler){
 					this.options.mapper = maps.mapper;
