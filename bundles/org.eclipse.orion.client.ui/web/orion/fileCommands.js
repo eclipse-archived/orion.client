@@ -884,7 +884,7 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/i18n
 											mMetrics.logAudit("delete", "orion-file", {id: id, isData: true});
 										} else {
 											/* workspace deletion */
-											mMetrics.logAudit("delete", "orion", {id: item.Name, isData: true});
+											mMetrics.logAudit("delete", "orion-workspace", {id: item.Name, isData: true});
 										}
 
 										// Remove deleted item from copy/paste buffer
@@ -900,7 +900,7 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/i18n
 											mMetrics.logAudit("delete", "orion-file", {id: id, isData: true}, error);
 										} else {
 											/* workspace deletion */
-											mMetrics.logAudit("delete", "orion", {id: item.Name, isData: true}, error);
+											mMetrics.logAudit("delete", "orion-workspace", {id: item.Name, isData: true}, error);
 										}
 										errorHandler(error);
 									}
