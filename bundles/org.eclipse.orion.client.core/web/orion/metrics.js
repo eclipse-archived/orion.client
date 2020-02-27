@@ -54,12 +54,23 @@ define([
 			current.logTiming(timingCategory, timingVar, timingValue, timingLabel);
 		});
 	}
+
+	/** @callback */
+	function _logAudit(action, type, value, error) {
+		_services.forEach(function(current) {
+			if (current.logAudit) {
+				current.logAudit(action, type, value, error);
+			}
+		});
+	}
+
 	/** @callback */
 	function _logEvent(category, action, label, value, details) {
 		_services.forEach(function(current) {
 			current.logEvent(category, action, label || "", value, details);
 		});
 	}
+
 	/** @callback */
 	function _logPageLoadTiming(timingVar, timingLabel) {
 		/* 
@@ -115,6 +126,16 @@ define([
 		 */
 		logPageLoadTiming: function(timingVar, timingLabel) {
 			_logPageLoadTiming(timingVar, timingLabel);
+		},
+		/**
+		 * @description Log an audit event
+		 * @function
+		 * @param {String} action The name of the action logged
+		 * @param {String} type The type of target acted upon
+		 * @param {String} value The event value to log
+		 */
+		logAudit: function(action, type, value, error) {
+			_logAudit(action, type, value, error);
 		}
 	};
 	
@@ -122,6 +143,7 @@ define([
 		Metrics: Metrics,
 		logTiming: _logTiming,
 		logEvent: _logEvent,
+		logAudit: _logAudit,
 		logPageLoadTiming: _logPageLoadTiming
 	};
 });

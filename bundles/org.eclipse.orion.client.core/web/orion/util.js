@@ -105,6 +105,13 @@ define(function() {
 		localStorage.clear();
 	}
 
+	function computeAuditId(fileClient, path, removeWorkspaceSegment) {
+		var rootUrl = fileClient.fileServiceRootURL(path);
+		var rootSegmentsCount = rootUrl.split('/').length;
+		var segmentsToRemove = rootSegmentsCount + (removeWorkspaceSegment ? 1 : 0);
+		return path.split('/').slice(segmentsToRemove).join('/');
+	}
+
 	return {
 		readSetting: readSetting,
 		saveSetting: saveSetting,
@@ -115,6 +122,8 @@ define(function() {
 		
 		createElement: createElement,
 		confineDialogTab: confineDialogTab,
+		
+		computeAuditId: computeAuditId,
 		
 		/** Browsers */
 		isIE: isIE,

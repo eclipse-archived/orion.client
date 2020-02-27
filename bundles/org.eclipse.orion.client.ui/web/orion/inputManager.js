@@ -232,10 +232,16 @@ define([
 						if (this._fileMetadata && !this._fileMetadata._saving && this._fileMetadata.Location === data.Location && this._fileMetadata.ETag !== data.ETag) {
 							this._fileMetadata = objects.mixin(this._fileMetadata, data);
 							var doSync = function(){
-								progress(fileClient.read(resource), messages.Reading, fileURI).then(function(contents) {
-									editor.setInput(fileURI, null, contents, null, nofocus);
-									this._clearUnsavedChanges();
-								}.bind(this));
+								progress(fileClient.read(resource), messages.Reading, fileURI).then(
+									function(contents) {
+										editor.setInput(fileURI, null, contents, null, nofocus);
+										this._clearUnsavedChanges();
+										mMetrics.logAudit("read", "orion-file", {id: util.computeAuditId(fileClient, resource), isData: true});
+									}.bind(this),
+									function(error) {
+										mMetrics.logAudit("read", "orion-file", {id: util.computeAuditId(fileClient, resource), isData: true}, error);
+									}
+								);
 							};
 							if (this.syncEnabled && !editor.isDirty()){
 								doSync();
@@ -303,28 +309,46 @@ define([
 							if(typeof textModelFactory.getDefaultReadOptions === "function") {
 								defaultReadOptions = textModelFactory.getDefaultReadOptions();
 							}
-							progress(fileClient.read(resource, false, true, defaultReadOptions), messages.Reading, fileURI).then(function(contents) {
-								clearProgressTimeout();
-								if (typeof contents !== "string") { //$NON-NLS-0$
-									this._acceptPatch = contents.acceptPatch;
-									contents = contents.result;
+							progress(fileClient.read(resource, false, true, defaultReadOptions), messages.Reading, fileURI).then(
+								function(contents) {
+									clearProgressTimeout();
+									if (typeof contents !== "string") { //$NON-NLS-0$
+										this._acceptPatch = contents.acceptPatch;
+										contents = contents.result;
+									}
+									this._setInputContents(this._parsedLocation, fileURI, contents, metadata);
+									mMetrics.logAudit("read", "orion-file", {id: util.computeAuditId(fileClient, resource), isData: true});
+								}.bind(this),
+								function(error) {
+									errorHandler(error);
+									mMetrics.logAudit("read", "orion-file", {id: util.computeAuditId(fileClient, resource), isData: true}, error);
 								}
-								this._setInputContents(this._parsedLocation, fileURI, contents, metadata);
-							}.bind(this), errorHandler);
+							);
 						} else {
-							progress(fileClient._getService(resource).readBlob(resource), messages.Reading, fileURI).then(function(contents) {
-								clearProgressTimeout();
-								if (isText) {
-									decode(contents, charset, function(result) {
-										this._setInputContents(this._parsedLocation, fileURI, result, metadata);
-									}.bind(this), errorHandler);
-									return;
+							progress(fileClient._getService(resource).readBlob(resource), messages.Reading, fileURI).then(
+								function(contents) {
+									clearProgressTimeout();
+									if (isText) {
+										decode(contents, charset, function(result) {
+											this._setInputContents(this._parsedLocation, fileURI, result, metadata);
+										}.bind(this), errorHandler);
+										return;
+									}
+									this._setInputContents(this._parsedLocation, fileURI, contents, metadata);
+									mMetrics.logAudit("read", "orion-file", {id: util.computeAuditId(fileClient, resource), isData: true});
+								}.bind(this),
+								function(error) {
+									errorHandler(error);
+									mMetrics.logAudit("read", "orion-file", {id: util.computeAuditId(fileClient, resource), isData: true}, error);
 								}
-								this._setInputContents(this._parsedLocation, fileURI, contents, metadata);
-							}.bind(this), errorHandler);
+							);
 						}
 					}
-				}.bind(this), errorHandler);
+				}.bind(this),
+				function(error) {
+					mMetrics.logAudit("read", "orion-file", {id: util.computeAuditId(fileClient, resource), isData: true}, error);
+					errorHandler(error);
+				});
 			}
 		},
 		processParameters: function(input) {
@@ -466,12 +490,14 @@ define([
 						var text = lspLanguageServer.includeTextOnSave() ? that.getEditor().getText() : undefined;
 						lspLanguageServer.didSave(that.getFileMetadata().Location, text);
 					}
+					mMetrics.logAudit("update", "orion-file", {id: util.computeAuditId(that.fileClient, resource), isData: true, requestData: {updateType: "Content Change"}});
 					return done(result);
 				}
 				function errorHandler(error) {
 					that.reportStatus("");
 					var errorMsg = handleError(statusService, error);
 					mMetrics.logEvent("status", "exception", (that._autoSaveActive ? "Auto-save: " : "Save: ") + errorMsg.Message); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+					mMetrics.logAudit("update", "orion-file", {id: util.computeAuditId(that.fileClient, resource), isData: true, requestData: {updateType: "Content Change"}}, error);
 					editor.markUnclean(previousUndoState);
 					that._errorSaving = true;
 					return done();

@@ -23,8 +23,9 @@ define([
 	'orion/objects',
 	'orion/util',
 	'orion/generalPreferences',
-	'orion/urlModifier'
-], function(messages, Deferred, lib, i18nUtil, mFileUtils, mExplorer, EventTarget, objects, util, mGeneralPrefs, urlModifier) {
+	'orion/urlModifier',
+	'orion/metrics'
+], function(messages, Deferred, lib, i18nUtil, mFileUtils, mExplorer, EventTarget, objects, util, mGeneralPrefs, urlModifier, mMetrics) {
 
 	var generalPreferences;
 	
@@ -1005,6 +1006,38 @@ define([
 					node.classList.remove("dragOver"); //$NON-NLS-0$
 					var currentSelections = this.selection.getSelections();
 					
+					function sendCopyOrMoveAuditEvent(isCopy, fileClient, source, destination, error) {
+						if (/\/$/.test(source) && !/\/$/.test(destination)) {
+							destination = destination + '/';
+						}
+						if (isCopy) {
+							var details = {
+								id: util.computeAuditId(fileClient, destination),
+								isData: true,
+								requestData: {
+									source: util.computeAuditId(fileClient, source, true),
+									trigger: "File copy"
+								}
+							};
+							mMetrics.logAudit("create", "orion-file", details, error);
+							if (!error) {
+								details.requestData.updateType = "Set Content";
+								mMetrics.logAudit("update", "orion-file", details);
+							}
+						} else { /* move */
+							var details = {
+								id: util.computeAuditId(fileClient, source),
+								isData: true,
+								requestData: {
+									updateType: "Path Change",
+									initialValue: util.computeAuditId(fileClient, source, true),
+									newValue: util.computeAuditId(fileClient, destination, true)
+								}
+							};
+							mMetrics.logAudit("update", "orion-file", details, error);
+						}		
+					}
+
 					function finishDrop(source){
 						var fileClient = explorer.fileClient;
 						var isCopy = dropEffect === "copy";
@@ -1022,7 +1055,10 @@ define([
 								newValue: result,
 								parent: item
 							});
+							sendCopyOrMoveAuditEvent(isCopy, fileClient, source.Location, result.Location);
 						}, function(error) {
+							var destination = item.Location + (/\/$/.test(item.Location) ? "" : "/") + source.Name;
+							sendCopyOrMoveAuditEvent(isCopy, fileClient, source.Location, destination, error);
 							if (error.status === 400 || error.status === 412) {
 								var resp = error.responseText;
 								if (typeof resp === "string") {
