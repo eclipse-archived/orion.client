@@ -75,16 +75,16 @@ orion.LineNumberCompareRuler = (function() {
 			return "";
 		}
 		if (lineIndex === -1) {
-			return model.getLineCount();
+			return model.getLineCount().toString();
 		} else {
 			if( diffFeeder.getLineNumber){
 				var realIndex = diffFeeder.getLineNumber(lineIndex);
 				if(realIndex === -1){
 					return "";
 				}
-				return  realIndex + 1;
+				return  (realIndex + 1).toString();
 			} 
-			return lineIndex + 1;
+			return (lineIndex + 1).toString();
 		}
 	};
 	LineNumberCompareRuler.prototype._onModelChanged = function(e) {
