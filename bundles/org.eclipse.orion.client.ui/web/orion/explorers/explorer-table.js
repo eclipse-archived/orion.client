@@ -1006,7 +1006,7 @@ define([
 					node.classList.remove("dragOver"); //$NON-NLS-0$
 					var currentSelections = this.selection.getSelections();
 					
-					function sendCopyOrMoveAuditEvent(isCopy, fileClient, source, destination, error) {
+					function sendCopyOrMoveAuditEvent(isCopy, fileClient, source, destination, error, isDirectory) {
 						if (/\/$/.test(source) && !/\/$/.test(destination)) {
 							destination = destination + '/';
 						}
@@ -1020,9 +1020,8 @@ define([
 								}
 							};
 							mMetrics.logAudit("create", "orion-file", details, error);
-							if (!error) {
-								details.requestData.updateType = "Set Content";
-								mMetrics.logAudit("update", "orion-file", details);
+							if (!error && !isDirectory) {
+								mMetrics.logAudit("edit", "orion-file", details);
 							}
 						} else { /* move */
 							var details = {
@@ -1055,7 +1054,7 @@ define([
 								newValue: result,
 								parent: item
 							});
-							sendCopyOrMoveAuditEvent(isCopy, fileClient, source.Location, result.Location);
+							sendCopyOrMoveAuditEvent(isCopy, fileClient, source.Location, result.Location, null, result.Directory);
 						}, function(error) {
 							var destination = item.Location + (/\/$/.test(item.Location) ? "" : "/") + source.Name;
 							sendCopyOrMoveAuditEvent(isCopy, fileClient, source.Location, destination, error);

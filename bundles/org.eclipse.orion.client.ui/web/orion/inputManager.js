@@ -490,14 +490,14 @@ define([
 						var text = lspLanguageServer.includeTextOnSave() ? that.getEditor().getText() : undefined;
 						lspLanguageServer.didSave(that.getFileMetadata().Location, text);
 					}
-					mMetrics.logAudit("update", "orion-file", {id: util.computeAuditId(that.fileClient, resource), isData: true, requestData: {updateType: "Content Change"}});
+					mMetrics.logAudit("edit", "orion-file", {id: util.computeAuditId(that.fileClient, resource), isData: true});
 					return done(result);
 				}
 				function errorHandler(error) {
 					that.reportStatus("");
 					var errorMsg = handleError(statusService, error);
 					mMetrics.logEvent("status", "exception", (that._autoSaveActive ? "Auto-save: " : "Save: ") + errorMsg.Message); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-					mMetrics.logAudit("update", "orion-file", {id: util.computeAuditId(that.fileClient, resource), isData: true, requestData: {updateType: "Content Change"}}, error);
+					mMetrics.logAudit("edit", "orion-file", {id: util.computeAuditId(that.fileClient, resource), isData: true}, error);
 					editor.markUnclean(previousUndoState);
 					that._errorSaving = true;
 					return done();

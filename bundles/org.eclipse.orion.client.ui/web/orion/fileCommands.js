@@ -413,7 +413,7 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/i18n
 			}
 			return path;
 		}
-		
+
 		function canCreateProject(item) {
 			if (!explorer || !explorer.isCommandsVisible()) {
 				return false;
@@ -421,8 +421,8 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/i18n
 			item = forceSingleItem(item);
 			return item.Location && mFileUtils.isAtRoot(item.Location);
 		}
-		
-		function sendCopyOrMoveAuditEvent(isCopy, fileClient, source, destination, error) {
+
+		function sendCopyOrMoveAuditEvent(isCopy, fileClient, source, destination, error, isDirectory) {
 			if (/\/$/.test(source) && !/\/$/.test(destination)) {
 				destination = destination + '/';
 			}
@@ -436,9 +436,8 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/i18n
 					}
 				};
 				mMetrics.logAudit("create", "orion-file", details, error);
-				if (!error) {
-					details.requestData.updateType = "Set Content";
-					mMetrics.logAudit("update", "orion-file", details);
+				if (!error && !isDirectory) {
+					mMetrics.logAudit("edit", "orion-file", details);
 				}
 			} else { /* move */
 				var details = {
@@ -466,7 +465,7 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/i18n
 					var func = isCopy ? fileClient.copyFile : fileClient.moveFile;
 					deferreds.push(func.apply(fileClient, [item.Location, choice.path, item.Name]).then(
 						function(newItem) {
-							sendCopyOrMoveAuditEvent(isCopy, fileClient, item.Location, newItem.Location);
+							sendCopyOrMoveAuditEvent(isCopy, fileClient, item.Location, newItem.Location, null, newItem.Directory);
 						},
 						function(error) {
 							errorHandler(error);
@@ -500,7 +499,7 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/i18n
 										var deferred = func.apply(fileClient, [item.Location, targetFolder.Location, name]);
 										deferreds.push(progressService.showWhile(deferred, message).then(
 											function(result) {
-												sendCopyOrMoveAuditEvent(isCopy, fileClient, item.Location, result.Location);
+												sendCopyOrMoveAuditEvent(isCopy, fileClient, item.Location, result.Location, null, result.Directory);
 											},
 											function(error) {
 												errorHandler(error);
@@ -686,7 +685,7 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/i18n
 						if (!item.parent) {
 							item.parent = parent;
 						}
-						sendCopyOrMoveAuditEvent(false, fileClient, moveLocation, newItem.Location);
+						sendCopyOrMoveAuditEvent(false, fileClient, moveLocation, newItem.Location, null, newItem.Directory);
 					},
 					function(error) {
 						errorHandler(error);
@@ -1333,7 +1332,7 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/i18n
 										var messageKey1 = isCutInProgress ? "Moving ${0}": "Pasting ${0}"; //$NON-NLS-1$ //$NON-NLS-0$
 										deferreds.push(progressService.showWhile(deferred1, i18nUtil.formatMessage(messages[messageKey1], location)).then(
 											function(result) {
-												sendCopyOrMoveAuditEvent(!isCutInProgress, fileClient, location, result.Location);
+												sendCopyOrMoveAuditEvent(!isCutInProgress, fileClient, location, result.Location, null, result.Directory);
 											},
 											function(error) {
 												errorHandler(error);
