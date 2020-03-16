@@ -1016,7 +1016,7 @@ define([
 								isData: true,
 								requestData: {
 									source: util.computeAuditId(fileClient, source, true),
-									trigger: "File copy"
+									trigger: "File Copy"
 								}
 							};
 							mMetrics.logAudit("create", "orion-file", details, error);

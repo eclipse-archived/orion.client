@@ -432,7 +432,7 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/i18n
 					isData: true,
 					requestData: {
 						source: util.computeAuditId(fileClient, source, true),
-						trigger: "File copy"
+						trigger: "File Copy"
 					}
 				};
 				mMetrics.logAudit("create", "orion-file", details, error);
