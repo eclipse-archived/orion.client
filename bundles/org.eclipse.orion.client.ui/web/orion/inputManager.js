@@ -432,11 +432,6 @@ define([
 			var input = this.getInput();
 			this.reportStatus(messages['Saving...']);
 
-			if (!this._saveEventLogged) {
-				this._logMetrics("save"); //$NON-NLS-0$
-				this._saveEventLogged = true;
-			}
-
 			this.dispatchEvent({ type: "Saving", inputManager: this}); //$NON-NLS-0$
 
 			function _save(that) {
@@ -490,7 +485,13 @@ define([
 						var text = lspLanguageServer.includeTextOnSave() ? that.getEditor().getText() : undefined;
 						lspLanguageServer.didSave(that.getFileMetadata().Location, text);
 					}
-					mMetrics.logAudit("edit", "orion-file", {id: util.computeAuditId(that.fileClient, resource), isData: true});
+
+					if (!that._saveEventLogged) {
+						that._logMetrics("save"); //$NON-NLS-0$
+						mMetrics.logAudit("edit", "orion-file", {id: util.computeAuditId(that.fileClient, resource), isData: true});
+						that._saveEventLogged = true;
+					}
+
 					return done(result);
 				}
 				function errorHandler(error) {
