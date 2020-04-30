@@ -920,7 +920,7 @@ exports.InlineCompareView = (function() {
 			mCompareUtils.mergeDiffBlocks(this._textView.getModel(), lFeeder.getDiffBlocks(), result.mapper, result.diffArray.array, result.diffArray.index, this._diffParser._lineDelimiter);
 			rFeeder.setModel(this._textView.getModel());
 			lFeeder.setModel(this._textView.getModel());
-			this._diffNavigator.initAll(this.options.charDiff ? "char" : "word", this._editor, this._editor, rFeeder, lFeeder, this._overviewRuler, this.options.fastDiff); //$NON-NLS-1$ //$NON-NLS-0$
+			this._diffNavigator.initAll(this.options.charDiff ? "char" : "word", this._editor, this._editor, rFeeder, lFeeder, this._overviewRuler, undefined, this.options.fastDiff); //$NON-NLS-1$ //$NON-NLS-0$
 			
 			this._initSyntaxHighlighter([{fileName: this.options.oldFile.Name, contentType: this.options.oldFile.Type, editor: this._editor}]);
 			this._highlightSyntax();
