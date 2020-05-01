@@ -242,7 +242,8 @@ define([
 					}
 				}
 			}
-			throw new Error(i18nUtil.formatMessage(messages['NoFileSrv'], itemLocation));
+			return -1;
+			//throw new Error(i18nUtil.formatMessage(messages['NoFileSrv'], itemLocation));
 		};
 		/**
 		 * Returns the file service managing this location
