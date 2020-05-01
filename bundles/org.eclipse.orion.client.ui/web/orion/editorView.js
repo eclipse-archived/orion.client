@@ -220,9 +220,9 @@ define([
 			if (this.viewerID && this.viewerID === "1") {
 				labelMessage = messages.fileContentsSplit;
 			}
-
+			var metaData = this.inputManager.getFileMetadata();
 			return {
-				label: i18nUtil.formatMessage(labelMessage, this.inputManager.getFileMetadata().Name),
+				label: i18nUtil.formatMessage(labelMessage, metaData ? metaData.Name : ""),
 				readonly: this.readonly || this.inputManager.getReadOnly(),
 				singleMode: this.singleMode,
 				tabSize: prefs.tabSize || 4,
