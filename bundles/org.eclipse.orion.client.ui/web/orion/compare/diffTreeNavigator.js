@@ -601,7 +601,7 @@ exports.DiffTreeNavigator = (function() {
 		},
 		
 		_updateCurveRuler: function(){
-			if(this._curveRuler){
+			if(this._curveRuler && this._curveRuler.render){
 				this._curveRuler.render();
 			}
 		},
