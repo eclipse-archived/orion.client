@@ -493,7 +493,7 @@ exports.ExplorerNavHandler = (function() {
 			if (!(overflow === "visible" || overflow === "hidden")) {
 				return node;
 			}
-			return this.getScrollParent(node.parentNode);
+			return this.getScrollParent(node.parentElement);
 		},
 		
 		scroll: function(next) {
