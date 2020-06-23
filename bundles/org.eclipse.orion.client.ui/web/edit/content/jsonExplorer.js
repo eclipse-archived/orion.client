@@ -15,8 +15,9 @@ define([
 	'orion/objects',
 	'orion/uiUtils',
 	'orion/Deferred',
-	'orion/webui/littlelib'
-], function(mExplorer, objects, mUIUtils, Deferred, lib) {
+	'orion/webui/littlelib',
+	'i18n!orion/nls/messages'
+], function(mExplorer, objects, mUIUtils, Deferred, lib, messages) {
 	
 	function JSONModel(root) {
 		this._root = {key: "json", value: root, id: "json"}; //$NON-NLS-0$ //$NON-NLS-1$
@@ -84,7 +85,7 @@ define([
 						col.noWrap = true;
 						this.getExpandImage(tableRow, col); //$NON-NLS-0$
 	                } else {
-	                	var img = document.createElement("scan"); //$NON-NLS-0$
+	                	var img = document.createElement("span"); //$NON-NLS-0$
 	                	img.classList.add("typeimage"); //$NON-NLS-0$
 	                	if (typeof item.value === "number") { //$NON-NLS-0$
 							img.classList.add("numbertype"); //$NON-NLS-0$
@@ -208,9 +209,11 @@ define([
 	objects.mixin(JSONExplorer.prototype, {
 		display: function(json) {
 			this.json = json;
-			lib.empty(this.parentId);
+			lib.empty(lib.node(this.parentId));
 			this.renderer = new JSONRenderer({}, this);
 			this.createTree(this.parentId, new JSONModel(json || {}), {
+				name: messages["Orion JSON Editor"],
+				role: "treegrid",
 				selectionPolicy: "cursorOnly", //$NON-NLS-0$
 			});
 		},
