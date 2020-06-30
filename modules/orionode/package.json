@@ -93,7 +93,7 @@
     "supertest-with-proxy": "^5.0.1"
   },
   "engines": {
-    "node": "^12.16.1"
+    "node": "^12.18.2"
   },
   "main": "server.js",
   "scripts": {
