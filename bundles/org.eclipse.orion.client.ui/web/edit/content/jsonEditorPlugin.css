@@ -4,8 +4,7 @@
 @import "./../../css/lightPage.css";
 @import "./../../css/theme.css";
 .typeimage {
-	padding-top: 2px;
-	padding-bottom: 2px;
+	padding: 2px;
 	vertical-align: middle;
 	background-repeat: no-repeat;
 	background-position: center;
@@ -61,10 +60,12 @@ td {
 .jsonEditor-sprite-progress
 {
 	color: inherit;
-    font-size: 9px;
+    font-size: 10px;
     line-height: normal;
     vertical-align: middle;
-    padding: 0;
+    padding: 2px;
+    width: 12px;
+    height: 16px;
     background: none;
     border: none;
     -webkit-font-smoothing: antialiased;
@@ -73,5 +74,5 @@ td {
 {
 	margin: 0;
     font-size: 11px;
-    padding-right: 1px;
+    padding-right: 6px;
 }
