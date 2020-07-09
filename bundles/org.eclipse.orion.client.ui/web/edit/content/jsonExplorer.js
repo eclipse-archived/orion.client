@@ -177,6 +177,9 @@ define([
 							try {
 								newValue = parseInt(name);
 							} catch (e) {}
+							if (newValue.toString() !== name) {
+							  newValue = name;
+							}
 						} else if (name.charAt(0) === '"' || name.charAt(0) === "'") { //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 							newValue = name.substring(1, name.length - 1);
 						} else if (name.charAt(0) === '{' || name.charAt(0) === '[') { //$NON-NLS-1$ //$NON-NLS-0$
