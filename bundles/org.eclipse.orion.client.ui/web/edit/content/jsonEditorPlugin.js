@@ -38,7 +38,8 @@ define([
 			model.getText().then(function(text) {
 				json = {};
 				if (!explorer) {
-					explorer = new mJSONExplorer.JSONExplorer({parentId: document.body, update: updateModel});
+					document.body.id = "JSONEditor";
+					explorer = new mJSONExplorer.JSONExplorer({parentId: document.body.id, update: updateModel});
 				}
 				try {
 					json = JSON.parse(text);
