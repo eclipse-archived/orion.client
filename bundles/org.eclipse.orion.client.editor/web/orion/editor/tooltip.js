@@ -155,7 +155,7 @@ function Tooltip (view, editor) {
 		 * @param tooltipInfo a function that will return the tooltip contents (see _processInfo())
 		 * @param target The target through which the info is obtained
 		 * @param locked If true locks the tooltip (never hides unless 'hide' is called)
-		 * @param giveFocus If true forces the focus onto the tooltip (used for F2 processing)
+		 * @param giveFocus If true forces the focus onto the tooltip (used for Shift+F1 processing)
 		 */
 		show: function(tooltipInfo, locked, giveFocus) {
 			this._locked = locked;
