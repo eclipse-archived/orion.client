@@ -179,6 +179,7 @@ function setShouldAddStrictTransportHeaders(value) {
 function addStrictTransportHeaders(res) {
 	if (shouldAddStrictTransportHeaders) {
 		res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
+		res.setHeader('Referrer-Policy', 'no-referrer-when-downgrade');
 	}
 }
 
