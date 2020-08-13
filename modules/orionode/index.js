@@ -237,6 +237,7 @@ module.exports = function startServer(options) {
 	}
 	workspaceDir = options.workspaceDir;
 	const app = express();
+	app.disable('x-powered-by');
 	options.app = app;
 	options.basicMiddleware = [
 		bodyParser.json({limit: "10mb"}),

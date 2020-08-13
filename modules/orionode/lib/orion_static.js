@@ -40,6 +40,7 @@ exports = module.exports = function(options) {
 
 	// Handle the Orion IDE and Orion editor mappings:
 	var app = express();
+	app.disable('x-powered-by');
 	app.use(express.static(options.orionode_static));
 	var originalStaticAssets = 
 	[	'./bundles/org.eclipse.orion.client.core/web',
