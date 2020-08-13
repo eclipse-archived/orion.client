@@ -111,6 +111,7 @@ function startServer(cb) {
 	var server;
 	// create web server
 	var app = express();
+	app.disable('x-powered-by');
 	if (configParams.get("orion.https.key") && configParams.get("orion.https.cert")) {
 		server = https.createServer({
 			secureOptions: constants.SSL_OP_NO_TLSv1,
