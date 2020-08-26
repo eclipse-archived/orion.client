@@ -37,7 +37,7 @@
     "mongoose": "^5.9.1",
     "multiparty": "^4.1.2",
     "nconf": "^0.9.1",
-    "nodegit": "0.26.4",
+    "nodegit": "0.27.0",
     "nodemailer": "^6.0.0",
     "passport": "^0.3.2",
     "passport-github2": "^0.1.10",
