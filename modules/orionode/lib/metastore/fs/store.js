@@ -85,14 +85,14 @@ function getTaskRootLocation(options) {
 }
 
 function writeJSON(fileName, object) {
-	logger.info("write metadata " + fileName + " pid=" + process.pid);
+	logger.debug("write metadata " + fileName + " pid=" + process.pid);
 	return mkdirpAsync(nodePath.dirname(fileName)).then(function() {
 		return fs.writeFileAsync(fileName, JSON.stringify(object, null, 2) + "\n");
 	});
 }
 
 function readJSON(fileName) {
-	logger.info("read metadata " + fileName + " pid=" + process.pid);
+	logger.debug("read metadata " + fileName + " pid=" + process.pid);
 	return fs.readFileAsync(fileName, 'utf8')
 	.catchReturn({ code: 'ENOENT' }, null) // New file: suppress error
 	.then(function(metadata) {
