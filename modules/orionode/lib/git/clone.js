@@ -630,13 +630,12 @@ function foreachSubmodule(repo, operation, recursive, creds, username, task) {
 						});
 					})
 					.then(function() {
+						freeRepo(theSubmodule);
 						return cb();
 					})
 					.catch(function(err) {
-						return cb(err);
-					}).
-					done(function() {
 						freeRepo(theSubmodule);
+						return cb(err);
 					});
 				};
 			}), function(err) {
