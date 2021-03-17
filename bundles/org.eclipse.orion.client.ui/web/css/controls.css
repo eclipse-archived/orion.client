@@ -937,10 +937,6 @@ html[dir="rtl"] .checkColumn { /* ACGC */
   border-spacing: 0px 3px;
 }
 
-.treeIterationCursor {
-	border-radius:4px;
-}
-
 .lightSectionTreeTableRow {
 	background-color: #FFFFFF;
 }

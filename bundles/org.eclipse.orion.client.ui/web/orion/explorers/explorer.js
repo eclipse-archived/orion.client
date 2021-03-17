@@ -808,6 +808,7 @@ exports.ExplorerRenderer = (function() {
 			placeHolder.appendChild(expandImage);
 			expandImage.classList.add(this._twistieSpriteClass);
 			expandImage.classList.add(this._collapseImageClass);
+			lib.setSafeAttribute(expandImage, "aria-hidden", true);
 			lib.setSafeAttribute(tableRow, "aria-expanded", false);
 			if (decorateImageClass) {
 				var decorateImage = document.createElement("span"); //$NON-NLS-0$

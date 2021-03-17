@@ -17,11 +17,9 @@ define([], function() {
 	 * Generate a grid navigation item into a given array. A grid navigation item is presented by a wrapper object wrapping the domNode. 
 	 *
 	 * @param {Array} domNodeWrapperList the array that holds the grid navigation item. Normally the .gridChildren property from a row model.
-	 * @param {Element} element the html dom element representing a grid. Normally left or right arrow keys on the current row highlight the dom element.
+	 * @param {Element} domNode the html dom element representing a grid. Normally left or right arrow keys on the current row highlight the dom element.
 	 *        When a grid is rendered, the caller has to decide what dom element can be passed. 
 	 */
-	 
-	 
 	function generateNavGrid(domNodeWrapperList, domNode, widget, onClick, showOutline) {
 		if(isPad){
 			return;
@@ -30,6 +28,8 @@ define([], function() {
 			return;
 		}
 		domNodeWrapperList.push({domNode: domNode});
+		domNode.tabIndex = -1;
+		domNode.classList.add("treeTableGridCell"); //$NON-NLS-0$
 		if (!showOutline) {
 			domNode.style.outline = "none"; //$NON-NLS-0$
 		}
@@ -42,16 +42,17 @@ define([], function() {
 	 *
 	 * @param {ExplorerNavDict} navDict the dictionary that holds the info of all navigation info from model id.
 	 * @param {object} rowModel the row model from the {treeModelIterator}.
-	 * @param {Element} element the html dom element representing a grid. Normally left or right arrow keys on the current row highlight the dom element.
+	 * @param {Element} domNode the html dom element representing a grid. Normally left or right arrow keys on the current row highlight the dom element.
 	 *        When a grid is rendered, the caller has to decide what dom element can be passed. 
+	 * @param {Boolean} showOutline if true, the domNode will have an outline when focused.
 	 */
-	function addNavGrid(navDict, rowModel, domNode) {
+	function addNavGrid(navDict, rowModel, domNode, showOutline) {
 		if(!navDict){
 			return;
 		}
 		var navHolder = navDict.getGridNavHolder(rowModel, true);
 		if(navHolder){
-			generateNavGrid(navHolder, domNode);
+			generateNavGrid(navHolder, domNode, null, null, showOutline);
 		}
 	}
 	
