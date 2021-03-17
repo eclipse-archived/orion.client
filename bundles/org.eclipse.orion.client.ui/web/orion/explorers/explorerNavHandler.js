@@ -60,7 +60,6 @@ exports.ExplorerNavHandler = (function() {
 		var parentDiv = this._getEventListeningDiv();
 		this._parentDiv = parentDiv;
 		parentDiv.tabIndex = 0;
-		console.log(document.title + ": " + parentDiv + " tabindex=" + parentDiv.tabIndex);
 		parentDiv.classList.add("selectionModelContainer"); //$NON-NLS-0$
 		var self = this;
 		this._modelIterator = new mTreeModelIterator.TreeModelIterator([], {
@@ -100,7 +99,6 @@ exports.ExplorerNavHandler = (function() {
 				if (document.activeElement.classList.contains("treeTableRow")
 				  || document.activeElement.classList.contains("treeTableGridCell")) {
 					  parentDiv.tabIndex = -1;
-					  console.log(document.title + ": focus=" + document.activeElement + ", parent=" + parentDiv + " tabindex=" + parentDiv.tabIndex);
 				}
 			}
 		};
@@ -465,7 +463,6 @@ exports.ExplorerNavHandler = (function() {
 						this._parentDiv.tabIndex = "0";
 						currentRow.classList.remove(className);
 					}
-					console.log(document.title + ": focus=" + document.activeElement + ", parent=" + this._parentDiv + " tabindex=" + this._parentDiv.tabIndex + " (row=" + currentRow + (on ? " on)" : " off)"));
 				}
 			}.bind(this);
 			if(currentgrid) {
