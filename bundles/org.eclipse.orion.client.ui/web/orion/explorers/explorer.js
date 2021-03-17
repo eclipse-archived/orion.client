@@ -980,7 +980,7 @@ exports.SelectionRenderer = (function(){
 		var i = 0;
 		var cell = this.getCellElement(i, item, tableRow);
 		while(cell){
-			if (tableRow.getAttribute("role") === "row") {
+			if (tableRow.getAttribute("role") === "row" && cell.getAttribute("role") !== "none") {
 				lib.setSafeAttribute(cell, "role", "gridcell");
 			}
 			tableRow.appendChild(cell);

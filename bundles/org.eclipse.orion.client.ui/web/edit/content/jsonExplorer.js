@@ -107,6 +107,7 @@ define([
 	        switch (col_no) {
 				case 0:
 					col = document.createElement('td'); //$NON-NLS-0$
+					lib.setSafeAttribute(col, "role", "none");
 					if (Array.isArray(item.value) || typeof item.value === "object") { //$NON-NLS-0$
 						col.noWrap = true;
 						this.getExpandImage(tableRow, col); //$NON-NLS-0$
@@ -123,6 +124,7 @@ define([
 						col.appendChild(img);
 	                }
 					span = document.createElement("span"); //$NON-NLS-0$
+					lib.setSafeAttribute(span, "role", "gridcell");
 					col.appendChild(span);
 	                span.isKey = item.parent && !Array.isArray(item.parent.value);
 					span.appendChild(document.createTextNode(item.key));
@@ -131,7 +133,9 @@ define([
 	                return col;
 	            case 1:
 					col = document.createElement('td'); //$NON-NLS-0$
+					lib.setSafeAttribute(col, "role", "none");
 					span = document.createElement("span"); //$NON-NLS-0$
+					lib.setSafeAttribute(span, "role", "gridcell");
 					var t = "";
 					span.isValue = true;
 					if (item.value === null) {
@@ -156,7 +160,9 @@ define([
 	                return col;
 	            case 2:
 					col = document.createElement('td'); //$NON-NLS-0$
+					lib.setSafeAttribute(col, "role", "none");
 					span = document.createElement("span"); //$NON-NLS-0$
+					lib.setSafeAttribute(span, "role", "gridcell");
 					lib.setSafeAttribute(span, "aria-readonly", true);
 					var type = "object"; //$NON-NLS-0$
 					if (Array.isArray(item.value)) {
