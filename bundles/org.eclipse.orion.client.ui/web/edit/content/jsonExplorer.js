@@ -125,6 +125,10 @@ define([
 	                }
 					span = document.createElement("span"); //$NON-NLS-0$
 					lib.setSafeAttribute(span, "role", "gridcell");
+					if (tableRow.getAttribute("aria-expanded") === "false") {
+						// if navigating by gridcells, need expanded on gridcell
+						lib.setSafeAttribute(span, "aria-expanded", "false");
+				  	}
 					col.appendChild(span);
 	                span.isKey = item.parent && !Array.isArray(item.parent.value);
 					span.appendChild(document.createTextNode(item.key));
