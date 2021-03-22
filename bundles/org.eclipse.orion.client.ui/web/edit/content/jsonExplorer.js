@@ -81,14 +81,14 @@ define([
 			var labelText = "", paddingLeft = "4px"; //$NON-NLS-0$
 			switch (col_no) {
 			case 0:
-				labelText = "Key"; // messages["Key"];
+				labelText = messages["Key"];
   			paddingLeft = "24px"; //$NON-NLS-0$
 				break;
 			case 1:
-				labelText = "Value"; // messages["Value"];
+				labelText = messages["Value"];
 				break;
 			case 2:
-				labelText = "Type"; // messages["Type"];
+				labelText = messages["Type"];
 			  break;
 			default:
 				return null;
