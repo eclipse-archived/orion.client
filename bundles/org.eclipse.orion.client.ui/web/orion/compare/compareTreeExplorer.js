@@ -182,7 +182,7 @@ define([
 			linkRef = require.toUrl("edit/edit.html") + "#" + item.parentLocation; //$NON-NLS-1$ //$NON-NLS-0$
 			var fileService = this.explorer.getFileServiceName(item);
 			_place(document.createTextNode(fileService + "/" + item.fullPathName), span, "only"); //$NON-NLS-1$ //$NON-NLS-0$
-			mNavUtils.addNavGrid(this.explorer.getNavDict(), item, span);
+			//mNavUtils.addNavGrid(this.explorer.getNavDict(), item, span);
 			_connect(span, "click", function() { //$NON-NLS-0$
 				window.open(urlModifier(linkRef));
 			});
