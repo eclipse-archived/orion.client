@@ -96,8 +96,9 @@ exports.ExplorerNavHandler = (function() {
 			} else if(e.keyCode === lib.KEY.ENTER) {
 				return self.onEnter(e);
 			} else if (e.keyCode === lib.KEY.TAB && e.shiftKey) {
-				if (document.activeElement.classList.contains("treeTableRow")) {
-					parentDiv.tabIndex = -1;
+				if (document.activeElement.classList.contains("treeTableRow")
+				  || document.activeElement.classList.contains("treeTableGridCell")) {
+					  parentDiv.tabIndex = -1;
 				}
 			}
 		};
@@ -383,7 +384,7 @@ exports.ExplorerNavHandler = (function() {
 		},
 
 		getFocusableElems: function(root) {
-			var nodeList = root.querySelectorAll('a,button,input,select,textarea,div[tabIndex]');
+			var nodeList = root.querySelectorAll('a,button,input,select,textarea,[tabIndex]');
 			return Array.prototype.slice.call(nodeList);
 		},
 		
@@ -429,6 +430,7 @@ exports.ExplorerNavHandler = (function() {
 			}
 			var currentRow = this.getRowDiv(model);
 			var currentgrid = this.getCurrentGrid(model);
+			var gridChildren = this._getGridChildren(model);
 			if (on) {
 				this.getFocusableElems(this._parentDiv).forEach(function(element) {
 					if (element.savedTabIndex === undefined) {
@@ -440,7 +442,8 @@ exports.ExplorerNavHandler = (function() {
 			var handleRow = function (className) {
 				if(currentRow){
 					if (on) {
-						if (this._parentDiv === document.activeElement || document.activeElement.parentNode === currentRow.parentNode) {
+						if (this._parentDiv === document.activeElement || document.activeElement.parentNode === currentRow.parentNode
+						    || (currentgrid && document.activeElement.parentNode === currentRow)) {
 							currentRow.classList.add(className);
 							currentRow.tabIndex = "0";
 							this.getFocusableElems(currentRow).forEach(function(element) {
@@ -464,16 +467,14 @@ exports.ExplorerNavHandler = (function() {
 			}.bind(this);
 			if(currentgrid) {
 				handleRow("treeIterationCursorRow"); //$NON-NLS-0$
-				if(currentgrid.domNode && currentgrid.domNode.tabIndex !== -1){
-					var ariaElement = currentRow;
+				if(currentgrid.domNode && gridChildren.length > 1){
 					if (on) {
 						currentgrid.domNode.classList.add("treeIterationCursor"); //$NON-NLS-0$
-						if (ariaElement) {
-							var activeDescendantId = currentgrid.domNode.id;
-							lib.setSafeAttribute(ariaElement, "aria-activedescendant", activeDescendantId);
-						}
+						currentgrid.domNode.tabIndex = 0;
+						currentgrid.domNode.focus();
 					} else {
 						currentgrid.domNode.classList.remove("treeIterationCursor"); //$NON-NLS-0$
+						currentgrid.domNode.tabIndex = -1;
 					}
 				}
 			} else {
@@ -748,12 +749,14 @@ exports.ExplorerNavHandler = (function() {
 			return false;
 		},
 
-		_shouldMoveColumn: function(e){
+		_shouldMoveColumn: function(e, right){
 			var model = this.currentModel();
 			var gridChildren = this._getGridChildren(model);
 			if(gridChildren && gridChildren.length > 1){
-				if(this.isExpandable(model)){
-					return this._ctrlKeyOn(e);
+				if(this._currentColumn === 0){
+				  if (!right || (right && this.isExpandable(model) && !this.isExpanded(model))) {
+				    return this._ctrlKeyOn(e);
+				  }
 				}
 				return true;
 			} else {
@@ -791,7 +794,7 @@ exports.ExplorerNavHandler = (function() {
 		
 		//Right arrow key expands the current row if it is expandable and collapsed.
 		onRightArrow: function(e) {
-			if(this._shouldMoveColumn(e)){
+			if(this._shouldMoveColumn(e, true)){
 				this.moveColumn(null, 1);
 				e.preventDefault();
 				return true;

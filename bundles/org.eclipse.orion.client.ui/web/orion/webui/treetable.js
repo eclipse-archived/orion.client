@@ -428,6 +428,11 @@ define(['i18n!orion/nls/messages', 'orion/webui/littlelib', 'orion/Deferred'], f
 			var row = lib.node(id);
 			if (row) {
 				lib.setSafeAttribute(row, "aria-expanded", true);
+				var gridcell = row.querySelector('span[role="gridcell"]');
+				if (gridcell !== null) {
+					// if navigating by gridcells, need expanded on gridcell
+					lib.setSafeAttribute(gridcell, "aria-expanded", true);
+				}
 				var tree = this;
 				if (row._expanded) {
 					if (postExpandFunc) {
@@ -523,6 +528,11 @@ define(['i18n!orion/nls/messages', 'orion/webui/littlelib', 'orion/Deferred'], f
 			var row = lib.node(id);
 			if (row) {
 				lib.setSafeAttribute(row, "aria-expanded", false);
+				var gridcell = row.querySelector('span[role="gridcell"]');
+				if (gridcell !== null) {
+					// if navigating by gridcells, need expanded on gridcell
+					lib.setSafeAttribute(gridcell, "aria-expanded", false);
+				}
 				if (!row._expanded) {
 					return;
 				}

@@ -808,6 +808,7 @@ exports.ExplorerRenderer = (function() {
 			placeHolder.appendChild(expandImage);
 			expandImage.classList.add(this._twistieSpriteClass);
 			expandImage.classList.add(this._collapseImageClass);
+			lib.setSafeAttribute(expandImage, "aria-hidden", true);
 			lib.setSafeAttribute(tableRow, "aria-expanded", false);
 			if (decorateImageClass) {
 				var decorateImage = document.createElement("span"); //$NON-NLS-0$
@@ -979,7 +980,7 @@ exports.SelectionRenderer = (function(){
 		var i = 0;
 		var cell = this.getCellElement(i, item, tableRow);
 		while(cell){
-			if (tableRow.getAttribute("role") === "row") {
+			if (tableRow.getAttribute("role") === "row" && cell.getAttribute("role") !== "none") {
 				lib.setSafeAttribute(cell, "role", "gridcell");
 			}
 			tableRow.appendChild(cell);

@@ -21,8 +21,21 @@
 .numbertype {
 	background-image: url("images/number.png");
 }
+.treeIterationCursorRow, .treeTableRow:focus-within {
+	background-color: #3C71B3;
+	color: white;
+}
+.treeIterationCursorRow .secondaryColumn, .treeTableRow:focus-within .secondaryColumn {
+  color: white;
+}
+.treeIterationCursor, .treeTableGridCell:focus {
+  background-color: rgba(180,213,255,0.99);
+  color: black;
+}
 .tablelabel {
-	padding-left: 4px;
+	margin-left: 2px;
+	padding: 2px;
+	vertical-align: middle;
 }
 .secondaryColumn {
 	padding-top: 0;

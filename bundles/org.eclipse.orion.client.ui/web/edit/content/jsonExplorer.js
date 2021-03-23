@@ -12,12 +12,13 @@
 /*eslint-env browser, amd*/
 define([
 	'orion/explorers/explorer',
+	'orion/explorers/navigationUtils',
 	'orion/objects',
 	'orion/uiUtils',
 	'orion/Deferred',
 	'orion/webui/littlelib',
 	'i18n!orion/nls/messages'
-], function(mExplorer, objects, mUIUtils, Deferred, lib, messages) {
+], function(mExplorer, mNavUtils, objects, mUIUtils, Deferred, lib, messages) {
 	
 	function JSONModel(root) {
 		this._root = {key: "json", value: root, id: "json"}; //$NON-NLS-0$ //$NON-NLS-1$
@@ -61,7 +62,7 @@ define([
 	objects.mixin(JSONRenderer.prototype, {
 		_expandImageClass : "jsonEditor-sprite-openarrow", //$NON-NLS-0$
 		_collapseImageClass : "jsonEditor-sprite-closedarrow", //$NON-NLS-0$
-		_progressImageClass : "jsonEditor-sprite-progress", //$NON-NLS-0$,
+		_progressImageClass : "jsonEditor-sprite-progress", //$NON-NLS-0$
 		labelColumnIndex: 0,
 		emptyCallback: function(bodyElement) {
 			var msg = this.explorer.emptyMessage;
@@ -76,11 +77,37 @@ define([
 			tr.appendChild(td);
 			bodyElement.appendChild(tr);
 		},
+		getCellHeaderElement: function(col_no) {
+			var labelText = "", paddingLeft = "4px"; //$NON-NLS-0$
+			switch (col_no) {
+			case 0:
+				labelText = messages["Key"];
+  			paddingLeft = "24px"; //$NON-NLS-0$
+				break;
+			case 1:
+				labelText = messages["Value"];
+				break;
+			case 2:
+				labelText = messages["Type"];
+			  break;
+			default:
+				return null;
+			}
+			var th = document.createElement("th"); //$NON-NLS-0$
+			//th.className = "visuallyhidden"; //$NON-NLS-0$
+			th.scope = "col";
+			th.textContent = labelText;
+  		th.style.paddingLeft = paddingLeft;
+			th.style.paddingTop = "4px"; //$NON-NLS-0$
+			th.style.textAlign = "left"; //$NON-NLS-0$
+			return th;
+		},
 		getCellElement: function(col_no, item, tableRow) {
 			var col, span;
 	        switch (col_no) {
 				case 0:
 					col = document.createElement('td'); //$NON-NLS-0$
+					lib.setSafeAttribute(col, "role", "none");
 					if (Array.isArray(item.value) || typeof item.value === "object") { //$NON-NLS-0$
 						col.noWrap = true;
 						this.getExpandImage(tableRow, col); //$NON-NLS-0$
@@ -97,15 +124,24 @@ define([
 						col.appendChild(img);
 	                }
 					span = document.createElement("span"); //$NON-NLS-0$
+					lib.setSafeAttribute(span, "role", "gridcell");
+					if (tableRow.getAttribute("aria-expanded") === "false") {
+						// if navigating by gridcells, need expanded on gridcell
+						lib.setSafeAttribute(span, "aria-expanded", "false");
+				  	}
 					col.appendChild(span);
 	                span.isKey = item.parent && !Array.isArray(item.parent.value);
 					span.appendChild(document.createTextNode(item.key));
 					span.classList.add("tablelabel"); //$NON-NLS-0$
+					mNavUtils.addNavGrid(this.explorer.getNavDict(), item, span /*col*/, true);
 	                return col;
 	            case 1:
 					col = document.createElement('td'); //$NON-NLS-0$
+					lib.setSafeAttribute(col, "role", "none");
 					span = document.createElement("span"); //$NON-NLS-0$
+					lib.setSafeAttribute(span, "role", "gridcell");
 					var t = "";
+					span.isValue = true;
 					if (item.value === null) {
 						t = "null"; //$NON-NLS-0$
 					} else if (item.value === undefined) {
@@ -114,17 +150,24 @@ define([
 						t = item.value;
 					} else if (Array.isArray(item.value)) {
 						t = "[]"; //$NON-NLS-0$
+						span.isValue = false;
+						lib.setSafeAttribute(span, "aria-readonly", true);
 					} else if (typeof item.value === "object") { //$NON-NLS-0$
 						t = "{}"; //$NON-NLS-0$
+						span.isValue = false;
+						lib.setSafeAttribute(span, "aria-readonly", true);
 					}
-					span.isValue = true;
 					span.appendChild(document.createTextNode(t));
 					col.appendChild(span);
 					span.classList.add("tablelabel"); //$NON-NLS-0$
+					mNavUtils.addNavGrid(this.explorer.getNavDict(), item, span /*col*/, true);
 	                return col;
 	            case 2:
 					col = document.createElement('td'); //$NON-NLS-0$
+					lib.setSafeAttribute(col, "role", "none");
 					span = document.createElement("span"); //$NON-NLS-0$
+					lib.setSafeAttribute(span, "role", "gridcell");
+					lib.setSafeAttribute(span, "aria-readonly", true);
 					var type = "object"; //$NON-NLS-0$
 					if (Array.isArray(item.value)) {
 						type = "array"; //$NON-NLS-0$
@@ -137,6 +180,8 @@ define([
 					}
 					span.appendChild(document.createTextNode(type));
 					col.appendChild(span);
+					span.classList.add("tablelabel");
+					mNavUtils.addNavGrid(this.explorer.getNavDict(), item, span /*col*/, true);
 	                return col;
 			}
 		}
