@@ -24,14 +24,14 @@ describe("About endpoint", function() {
             .get(PREFIX)
             .proxy(testHelper.TEST_PROXY)
             .expect(200);
-        assert(res.body, "There sould be a body in the response.");
+        assert(res.body, "There should be a body in the response.");
     });
     it("testAbout/about", async () => {
         const res = await request()
             .get(PREFIX+PREFIX)
             .proxy(testHelper.TEST_PROXY)
             .expect(200);
-        assert(res.body, "There sould be a body in the response.");
+        assert(res.body, "There should be a body in the response.");
     });
     it("testAbout.html", async () => {
         const res = await request()
@@ -44,6 +44,6 @@ describe("About endpoint", function() {
             .get(PREFIX+PREFIX+'/html')
             .proxy(testHelper.TEST_PROXY)
             .expect(200);
-        assert(res.body, "There sould be a body in the response.");
+        assert(res.body, "There should be a body in the response.");
     });
 });

@@ -41,21 +41,7 @@ class About {
 			.use(responseTime({digits: 2, header: "X-About-Response-Time", suffix: true}))
 			.get('*', /* @callback */ function (req, res) {
 				var about = String(XHTML_1).concat("About").concat(XHTML_2);
-				var buildID = configParams.get("orion.buildId") || BUILD_ID;
-				if(buildID === "unknown" && pjson && typeof pjson.version === 'string') {
-					//for the NPM case we want to return the version published to NPM (from the package.json)
-					buildID = pjson.version;
-				}
-				about = about.concat("<table><tr><td><img src=\"../webapp/orion-96.png\"/></td><td><p>");
-				about = about.concat("Build Id: " + buildID + "<br/></p></td></tr></table>");
-				about = about.concat("<table>");
-				about = about.concat("<tr><th align=\"left\">Library</th><th align=\"center\">Version</th></tr>");
-				if(pjson.dependencies) {
-					Object.keys(pjson.dependencies).forEach(function(key) {
-						about = about.concat("<tr><td align=\"left\">"+key+"</td><td align=\"center\">"+pjson.dependencies[key]+"</td></tr>");
-					});
-				}
-				about = about.concat("</table>").concat(XHTML_3);
+				about = about.concat(XHTML_3);
 				res.contentType('html');
 				return api.writeResponse(200, res, null, about);
 			});
