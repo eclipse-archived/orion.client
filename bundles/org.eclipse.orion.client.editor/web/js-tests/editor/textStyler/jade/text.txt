@@ -43,6 +43,10 @@ a(class=classes)
 //- the class attribute may also be repeated to merge arrays
 a.bing(class=classes class=['bing'])
 
+- var currentUrl = '/about'
+a(class={active: currentUrl === '/'} href='/') Home
+a(class={active: currentUrl === '/about'} href='/about') About
+
 a.button
 
 .content
