@@ -9,10 +9,6 @@
             "module": "./lib/version"
         },
         {
-            "endpoint": "/about",
-            "module": "./lib/about"
-        },
-        {
             "module": "./lib/user",
             "checkCSRF": false
         },
