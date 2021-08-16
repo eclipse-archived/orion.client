@@ -37,6 +37,8 @@ define({//Default message bundle
 	"Toggle Banner and Footer": "Toggle Banner",
 	"ChooseFileOpenEditor": "Choose a file by name and open an editor on it",
 	"FindFile": "Open File...",
+	"System Configuration Details": "System Configuration Details",
+	"System Config Tooltip": "Go to the System Configuration Details page",
 	"Background Operations": "Background Operations",
 	"Background Operations Tooltip": "Go to the Background Operations page",
 	"Operation status is unknown": "Operation status is unknown",

@@ -797,6 +797,19 @@ define([
 			commandRegistry.addCommand(toggleBanner);
 			commandRegistry.registerCommandContribution("globalActions", "orion.toggleTrim", 100, null, true, new KeyBinding.KeyBinding("m", true, true)); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 
+			// Open configuration page, Ctrl+Shift+F1
+			var configDetailsCommand = new mCommands.Command({
+				name: messages["System Configuration Details"],
+				tooltip: messages["System Config Tooltip"],
+				id: "orion.configDetailsPage", //$NON-NLS-0$
+				hrefCallback: function () {
+					return require.toUrl("about/about.html"); //$NON-NLS-0$
+				}
+			});
+
+			commandRegistry.addCommand(configDetailsCommand);
+			commandRegistry.registerCommandContribution("globalActions", "orion.configDetailsPage", 100, null, true, new KeyBinding.KeyBinding(112, true, true, true)); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+
 			// Background Operations Page, Ctrl+Shift+O
 			var operationsCommand = new mCommands.Command({
 				name: messages["Background Operations"],
