@@ -138,7 +138,7 @@ define(['orion/EventTarget', 'orion/bidiUtils', 'orion/urlModifier', 'orion/webu
 		lib.setSafeAttribute(this._inputField, "role", "combobox");
 		lib.setSafeAttribute(this._inputField, "autocomplete", "off");
 		lib.setSafeAttribute(this._inputField, "aria-autocomplete", "list");
-		lib.setSafeAttribute(this._inputField, "aria-haspopup", true);
+		lib.setSafeAttribute(this._inputField, "aria-haspopup", "listbox");
 		lib.setSafeAttribute(this._inputField, "aria-expanded", false);
 		
 		var blurHanlder = function(e) {
