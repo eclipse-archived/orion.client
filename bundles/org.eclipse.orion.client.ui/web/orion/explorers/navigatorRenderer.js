@@ -301,7 +301,6 @@ define([
 			span.id = tableRow.id+"MainCol"; //$NON-NLS-0$
 			lib.setSafeAttribute(span, "role", "presentation");
 			col.appendChild(span);
-			lib.setSafeAttribute(col, "role", "presentation");
 			span.className = "mainNavColumn"; //$NON-NLS-0$
 			// Append annotation container
 			var annotation = document.createElement("span"); //$NON-NLS-0$
