@@ -145,17 +145,23 @@ define(['i18n!orion/nls/messages', 'orion/webui/littlelib', 'orion/Deferred'], f
 			for (var i=0; i<children.length; i++) {
 				var row = document.createElement(this._tableRowElement); //$NON-NLS-0$
 				if (this._role === "treegrid") {
-					lib.setSafeAttribute(row, "role", "row");
+					if (this._tableRowElement !== "tr") {
+						lib.setSafeAttribute(row, "role", "row");
+					}
 					lib.setSafeAttribute(row, "aria-level", indentLevel + 1);
 					lib.setSafeAttribute(row, "aria-setsize", children.length);
 					lib.setSafeAttribute(row, "aria-posinset", i + 1);
 				} else if (this._role === "tree") {
-					lib.setSafeAttribute(row, "role", "treeitem");
+					if (this._tableRowElement !== "tr") {
+						lib.setSafeAttribute(row, "role", "treeitem");
+					}
 					lib.setSafeAttribute(row, "aria-level", indentLevel + 1);
 					lib.setSafeAttribute(row, "aria-setsize", children.length);
 					lib.setSafeAttribute(row, "aria-posinset", i + 1);
 				} else if (this._role === "grid") {
-					lib.setSafeAttribute(row, "role", "row");
+					if (this._tableRowElement !== "tr") {
+						lib.setSafeAttribute(row, "role", "row");
+					}
 				}
 				if(this._renderer && typeof this._renderer.initSelectableRow === "function") { //$NON-NLS-0$
 					this._renderer.initSelectableRow(children[i], row);

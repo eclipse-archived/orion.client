@@ -908,7 +908,6 @@ exports.SelectionRenderer = (function(){
 		var empty = rowCount === 1;
 		for (var r=0; r<rowCount; r++) {
 			var row = document.createElement('tr'); //$NON-NLS-0$
-			lib.setSafeAttribute(row, "role", "row");
 			row.tabIndex = -1;
 			if (this._useCheckboxSelection) {
 				var col = this.initCheckboxColumn(tableNode);
@@ -922,7 +921,6 @@ exports.SelectionRenderer = (function(){
 				if (cell.innerHTML.length > 0 && !this.getPrimColumnStyle) {
 					cell.classList.add("navColumn"); //$NON-NLS-0$
 				}
-				lib.setSafeAttribute(cell, "role", "columnheader");
 				row.appendChild(cell);			
 				cell = this.getCellHeaderElement(++i, r);
 			}
