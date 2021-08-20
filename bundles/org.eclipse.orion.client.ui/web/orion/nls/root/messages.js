@@ -47,8 +47,6 @@ define({//Default message bundle
 	"Toggle Banner and Footer": "Toggle Banner and Footer",
 	"ChooseFileOpenEditor": "Choose a file by name and open an editor on it",
 	"FindFile": "Open File...",
-	"System Configuration Details": "System Configuration Details",
-	"System Config Tooltip": "Go to the System Configuration Details page",
 	"System Editor Tooltip": "Open this file type in the desktop's default manner",
 	"Background Operations": "Background Operations",
 	"Background Operations Tooltip": "Go to the Background Operations page",
