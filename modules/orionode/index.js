@@ -117,7 +117,7 @@ function tryLoadRouter(endpoint, options) {
 				var cookieOptions;
 				var cookiesPath = options.configParams.get("orion_cookies_path");
 				if (cookiesPath) {
-					cookieOptions = {path: cookiesPath};
+					cookieOptions = {path: cookiesPath, secure: true, httpOnly: true, sameSite: 'lax'};
 				}
 				res.cookie(tokenCookie, req.csrfToken(), cookieOptions);
 			}
@@ -276,7 +276,7 @@ module.exports = function startServer(options) {
 	if (options.configParams.get("orion.XSRFPreventionFilterEnabled")) {
 		var cookieKey = (options.configParams.get("orion_cookies_name_premable") || "") + '_csrf';
 		var cookiePath = options.configParams.get("orion_cookies_path") || '/';
-		csrf = csurf({cookie: {key: cookieKey, path: cookiePath }});
+		csrf = csurf({cookie: {key: cookieKey, path: cookiePath, secure: true, httpOnly: true, sameSite: 'lax'}});
 		options.CSRF = csrf;
 	} else {
 		/**
