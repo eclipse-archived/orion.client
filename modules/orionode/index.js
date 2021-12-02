@@ -110,19 +110,22 @@ function tryLoadRouter(endpoint, options) {
 	}
 	if (isEndpoint && csrf && (endpoint.checkCSRF === undefined || endpoint.checkCSRF)) { // perform CSRF by default
 		args.push(csrf);
-		args.push(function(req, res, next) {
-			var preamble = options.configParams.get("orion_cookies_name_premable") || "";
-			var tokenCookie = preamble + 'x-csrf-token';
-			if (!req.cookies[tokenCookie]) {
-				var cookieOptions;
-				var cookiesPath = options.configParams.get("orion_cookies_path");
-				if (cookiesPath) {
-					cookieOptions = {path: cookiesPath, secure: true, sameSite: true};
+		var use_csrf_cookie = options.configParams.get("orion_cookies_use_csrf") || "";
+		if (use_csrf_cookie !== "false") {
+			args.push(function(req, res, next) {
+				var preamble = options.configParams.get("orion_cookies_name_premable") || "";
+				var tokenCookie = preamble + 'x-csrf-token';
+				if (!req.cookies[tokenCookie]) {
+					var cookieOptions;
+					var cookiesPath = options.configParams.get("orion_cookies_path");
+					if (cookiesPath) {
+						cookieOptions = {path: cookiesPath, secure: true, sameSite: true};
+					}
+					res.cookie(tokenCookie, req.csrfToken(), cookieOptions);
 				}
-				res.cookie(tokenCookie, req.csrfToken(), cookieOptions);
-			}
-			next();
-		});
+				next();
+			});
+		}
 	}
 	if (endpoint.checkAccess) {
 		args.push(checkAccessRights);
