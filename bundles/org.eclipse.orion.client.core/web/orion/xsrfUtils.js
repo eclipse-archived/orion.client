@@ -8,7 +8,7 @@
  * Contributors:
  *     SAP AG - initial API and implementation
  *******************************************************************************/
-define([],function(){
+define(['orion/xsrfUtils'],function(config){
 	var XSRF_TOKEN = "x-csrf-token";//$NON-NLS-0$
 
 	/**
@@ -16,6 +16,11 @@ define([],function(){
 	 */
 	function getCSRFToken() {
 		if (typeof document === "undefined") return null;
+		
+		if (config && config.CSRF_TOKEN) {
+			return config.CSRF_TOKEN;
+		}
+		
 		var cookies = document.cookie.split(";");//$NON-NLS-0$
 
 		var i,n,v;
