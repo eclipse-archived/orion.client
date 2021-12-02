@@ -119,7 +119,7 @@ function tryLoadRouter(endpoint, options) {
 					var cookieOptions;
 					var cookiesPath = options.configParams.get("orion_cookies_path");
 					if (cookiesPath) {
-						cookieOptions = {path: cookiesPath, secure: true, sameSite: true};
+						cookieOptions = {path: cookiesPath, sameSite: true};
 					}
 					res.cookie(tokenCookie, req.csrfToken(), cookieOptions);
 				}
