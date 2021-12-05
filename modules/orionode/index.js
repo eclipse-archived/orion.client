@@ -308,6 +308,7 @@ module.exports = function startServer(options) {
 		debugServer.install(options, io);
 	}
 	// Static files
+	app.use.apply(app, options.basicMiddleware.concat(options.CSRF));
 	app.use('/xterm', express.static(path.join(path.dirname(path.dirname(require.resolve("xterm"))), 'dist')));
 
 	let staticCacheOption;
@@ -326,6 +327,10 @@ module.exports = function startServer(options) {
 				if (path.basename(path.dirname(urlPath)) === "requirejs") {
 					api.addStrictTransportHeaders(res);
 					res.setHeader("Cache-Control", _24_HOURS);
+				} else if (path.basename(urlPath) === "require-config.js") {
+					api.addStrictTransportHeaders(res);
+					// require-config.js must not be cached so that server can customize pages
+					res.setHeader("Cache-Control", _NO_CACHE);
 				} else if (EXT_CACHE_MAPPING[ext]) {
 					api.addStrictTransportHeaders(res);
 					res.setHeader("Cache-Control", EXT_CACHE_MAPPING[ext]);
