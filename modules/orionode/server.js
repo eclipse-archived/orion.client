@@ -163,6 +163,9 @@ function startServer(cb) {
 			logger.info("WARNING: http-proxy is not installed. Some features will be unavailable. Reason: " + e.message);
 		}
 	}
+	app.use(function(req, res, next) {
+		res.status(404).json({"error": "not found"});
+	});
 
 	//error handling
 	app.use(/* @callback */ function(err, req, res, next) { // 'next' has to be here, so that this callback works as a final error handler instead of a normal middleware
