@@ -164,7 +164,7 @@ function startServer(cb) {
 		}
 	}
 	app.use(function(req, res, next) {
-		res.status(404).json({"description": "not found"});
+		res.status(404).json({"error": "not found"});
 	});
 
 	//error handling
