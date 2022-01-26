@@ -17,10 +17,6 @@ module.exports = function(grunt) {
 	   // skipTest = grunt.option("skipTest") || false,
 	    skipMinify = grunt.option("skipMinify") || false;
 
-	var socketioPath =  grunt.file.exists('./node_modules/socket.io/node_modules/socket.io-client') ?
-			'../../node_modules/socket.io/node_modules/socket.io-client/dist/socket.io' :
-			'../../node_modules/socket.io-client/dist/socket.io';
-
 	var orionBuildConfig = util.loadBuildConfig(configPath),
 	    bundles = util.parseBundles(orionBuildConfig, {
 			buildDirectory: staging,
@@ -85,8 +81,8 @@ module.exports = function(grunt) {
 				name: "orion/debug/debugDeploymentWizard"
 			}
 		], {
-			"socket.io/socket.io": socketioPath,
-        	"xterm/xterm": '../../node_modules/xterm/dist/xterm',
+			"socket.io/socket.io": "../../node_modules/socket.io/client-dist",
+			"xterm/xterm": '../../node_modules/xterm/lib',
 		}),
 		checkDirs: {
 			orion: {
