@@ -295,7 +295,7 @@ module.exports = function startServer(options) {
 	}
 	loadEndpoints(endpoints, options, false);
 	loadEndpoints(endpoints, options, true);
-	const io = socketio.listen(options.server, {
+	const io = socketio(options.server, {
 		'log level': 1,
 		path: (listenContextPath ? contextPath : '') + '/socket.io'
 	});
