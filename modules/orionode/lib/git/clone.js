@@ -479,8 +479,8 @@ function initRepo(file, req, res){
 				fulfill();
 			}).catch(function(e){
 				return reject(e);
-			}).
-			done(function() {
+			})
+			.finally(function() {
 				freeRepo(theRepo);
 			});
 		});
