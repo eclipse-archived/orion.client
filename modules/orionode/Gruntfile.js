@@ -81,8 +81,8 @@ module.exports = function(grunt) {
 				name: "orion/debug/debugDeploymentWizard"
 			}
 		], {
-			"socket.io/socket.io": "../../node_modules/socket.io/client-dist",
-			"xterm/xterm": '../../node_modules/xterm/lib',
+			"socket.io/socket.io": "../../node_modules/socket.io/client-dist/socket.io",
+			"xterm/xterm": '../../node_modules/xterm/lib/xterm',
 		}),
 		checkDirs: {
 			orion: {
