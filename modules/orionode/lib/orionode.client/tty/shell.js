@@ -18,7 +18,7 @@ define([
 	'orion/commands',
 	"orion/PageUtil",
 	"xterm/xterm"
-], function(io, onReady, DropDownMenu, SettingsSelect, mCommands, PageUtil, Terminal) {
+], function(io, onReady, DropDownMenu, SettingsSelect, mCommands, PageUtil, xterm) {
 
 	var term, serviceRegistry;
 	var colorScheme = "Dark";
@@ -58,17 +58,17 @@ define([
 		});
 	
 		socket.on('ready', function() {
-			term = new Terminal({
+			term = new xterm.Terminal({
 				cols: cols,
 				rows: rows,
 				cursorBlink: true
 			});
 			
-			term.on('data', function(data) {
+			term.onData(function(data) {
 				socket.emit('data', data);
 			});
 
-			term.on('title', function(title) {
+			term.onTitleChange(function(title) {
 				document.title = title;
 			});
 			var termContainer = document.getElementById("terminalBox");

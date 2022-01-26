@@ -309,7 +309,8 @@ module.exports = function startServer(options) {
 	}
 	// Static files
 	app.use.apply(app, options.basicMiddleware.concat(options.CSRF));
-	app.use('/xterm', express.static(path.join(path.dirname(path.dirname(require.resolve("xterm"))), 'dist')));
+	app.use('/xterm/xterm.js', express.static(path.join(path.dirname(path.dirname(require.resolve("xterm"))), 'lib/xterm.js')));
+	app.use('/xterm/xterm.css', express.static(path.join(path.dirname(path.dirname(require.resolve("xterm"))), 'css/xterm.css')));
 
 	let staticCacheOption;
 	if (typeof options.maxAge !== "undefined") {
