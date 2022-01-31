@@ -41,6 +41,12 @@ define(['orion/plugin'], function(PluginProvider) {
 			category: "shell",
 			order: 5 // First link in Shell category
 		});
+		provider.registerService("orion.page.link.category", null, {
+			id: "shell",
+			name: "Console",
+			imageClass: "core-sprite-shell",
+			order: 50
+		});
 		provider.registerService("orion.page.link", {}, {
 			name: "Console",
 			id: "orion.console",

@@ -69,8 +69,8 @@ body {
 	align-items: center;
 	border: 1px solid #676f73;
 	border-right: none;
-	border-top-left-radius: 4px;
-	border-top-right-radius: 4px;
+	border-top-left-radius: 0px;
+	border-top-right-radius: 0px;
 	height: 27px;
 	padding: 0 5px 0 5px;
 	flex: 1 1 auto;
@@ -118,15 +118,16 @@ body {
 }
 .close {
 	margin-left: 3px;
-	border: 1px solid #676f73;
-	vertical-align: top;
+	border: 1px solid transparent;
+	vertical-align: middle;
 	border-radius: 10px;
-	padding-left: 3px;
-	padding-right: 3px;
+	padding-left: 2px;
+	padding-right: 2px;
+	padding-bottom: 1px;
 	box-sizing: border-box;
 	height: 13px;
-	font-size: 9px;
-	line-height: 10px;
+	font-size: 10px;
+	line-height: 11px;
 	display: inline-block;
 }
 .close:hover {
@@ -190,8 +191,8 @@ body {
 	border-left: 4px solid transparent;
 }
 .context-menu-items .context-menu-item-selected {
-	background-color: rgba(27,177,153, 0.1);
-	border-left-color: #1BB199;
+	background-color: rgba(60,113,179,0.1);
+	border-left-color: #3C71B3;
 }
 .openNewTab{
 	position: relative;
@@ -203,8 +204,8 @@ body {
     margin-top: 3px;
     text-align: center;
     width: 30px;
-    border-top-left-radius: 4px;
-    border-top-right-radius: 4px;
+    border-top-left-radius: 0px;
+    border-top-right-radius: 0px;
     padding: 2px 5px 0 5px;
     height: 27px;
     background: #3b4b54;
@@ -229,6 +230,7 @@ body {
 }
 .lightPage .tabs li{
 	border: 1px solid #c4c5c8;
+	padding-top: 1px;
 	border-right: none;
 	background: #f5f7fa;
 }
@@ -241,6 +243,8 @@ body {
 .lightPage .tabs li.active{
 	background: white;
 	border-right: 1px solid #c4c5c8;
+	padding-top: 0px;
+	border-top: 2px solid #3C71B3;
 	border-bottom-color: transparent;
 }
 .lightPage .close:hover,

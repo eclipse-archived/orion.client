@@ -12,8 +12,11 @@
 var fs = require('fs'),
 	os = require('os'),
 	api = require('./lib/api'),
+	remote = require('@electron/remote/main'),
 	path = require('path'),
 	prefs = require('./lib/prefs');
+	
+remote.initialize();
 
 module.exports.start = function(startServer, configParams) {
 	var electron = require('electron'),
@@ -281,13 +284,22 @@ module.exports.start = function(startServer, configParams) {
 			var windowOptions = allPrefs.windowBounds || {width: 1024, height: 800};
 			windowOptions.title = "Orion";
 			windowOptions.icon = "icon/256x256/orion.png";
+			windowOptions.webPreferences = {
+				nodeIntegration: true,
+				contextIsolation: false,
+				plugins: true,
+				backgroundThrottling: false,
+				nativeWindowOpen: true,
+				webSecurity: false 
+			};
 			var nextWindow = new electron.BrowserWindow(windowOptions);
+			remote.enable(nextWindow.webContents);
 			var ipcMain  = electron.ipcMain;
 			nextWindow.setMenuBarVisibility(false);	// This line only work for Window and Linux
 			if (windowOptions.maximized) {
 				nextWindow.maximize();
 			}
-			nextWindow.loadURL("file:///" + __dirname + "/lib/main.html#" + encodeURI(url));
+			nextWindow.loadURL("http://localhost:"  + configParams.get("port") + "/main.html#" + encodeURI(url));
 			nextWindow.webContents.on("new-window", /* @callback */ function(event, url, frameName, disposition, options){
 				event.preventDefault();
 				if (false === undefined) {// Always open new tabs for now

@@ -87,7 +87,7 @@ function startServer(cb) {
 	if (workspaceArg) {
 		workspaceDir = path.resolve(process.cwd(), workspaceArg);
 	} else if (configParams.get("isElectron")) {
-		workspaceDir =  path.join(homeDir, '.orion', '.workspace');
+		workspaceDir =  path.join(homeDir, 'git');
 	} else {
 		workspaceDir = path.join(__dirname, '.workspace');
 	}

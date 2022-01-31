@@ -10,12 +10,15 @@
  *******************************************************************************/
 /*eslint-env browser, node*/
 var electron = require('electron');
+var remote = require('@electron/remote');
 var nodeUrl = require('url');
 var dragSrcEl = null;
 var contextSrcEl = null;
 var activeIndex = 0;
 var isInitiatingWorkspace = false;
 var needToCleanFrames = [];
+
+electron.remote = remote;
 
 function redrawButtons() {
 	var bar = document.querySelector("#bar");
@@ -102,7 +105,7 @@ function addNewTab(id, iframe) {
 
 	var closeBt = document.createElement("span");
 	closeBt.classList.add("close");
-	closeBt.textContent = "x";
+	closeBt.textContent = "\u2715";
 	tab.appendChild(closeBt);
 	closeBt.addEventListener("click", function(evt) {
 		iframe.parentNode.removeChild(iframe);
@@ -274,9 +277,9 @@ function registerElectronMenu(pageControlCallbacks){
 		var previousTabButton = activeTab.previousSibling;
 		previousTabButton ? previousTabButton.click() : activeTab.parentNode.lastChild.click();
 	}
-	var Menu = electron.remote.Menu;
+	var Menu = remote.Menu;
 	var menu = Menu.getApplicationMenu();
-	menu.append(new electron.remote.MenuItem( // The main purpose of creating menu if for key binding
+	menu.append(new remote.MenuItem( // The main purpose of creating menu if for key binding
 		{
 			label: "Navigation",  
 			submenu: [
@@ -297,75 +300,71 @@ function bindfocus(){
 }
 
 function createTab(url) {
-	var iframes = document.querySelectorAll(".tabContent");
-	var urlSegs = url.split("#");
-	var potentialExsitingIframe = Array.prototype.find.call(iframes,function(iframe){
-		if(urlSegs[0].indexOf("/edit/edit.html") !== -1){
-			return iframe.contentWindow.location.href.indexOf(urlSegs[0]) === 0;  // Always open the Editor page in this case
-		}else if(urlSegs[0].indexOf("/git/git-repository.html") !== -1){
-			if(urlSegs[1] && urlSegs[1].indexOf("/gitapi/commit") !== -1){
-				return iframe.contentWindow.location.href === url;   // Find exactly the git page of the exact Commit or should open a new git tab
-			}else{ // For all the other cases
-				return iframe.contentWindow.location.href.indexOf(urlSegs[0]+"#/gitapi/clone") === 0  // Find a /clone git page, or should open a new git tab 
+	const unique = ["/edit/edit.html", "/settings/settings.html"];
+	const iframes = document.querySelectorAll(".tabContent");
+	let iframe = Array.prototype.find.call(iframes,function(iframe){
+			// Allow only one page if unique
+			const iframeUrl = iframe.contentWindow.location.href;
+			for (let i=0; i<unique.length; i++) {
+				if (url.indexOf(unique[i]) !== -1 && iframeUrl.indexOf(unique[i]) !== -1) {
+					return iframe;
+				}
 			}
-		}else{
-			return iframe.contentWindow.location.href.indexOf(urlSegs[0]) === 0;  // For all the other cases, open the same html page, like settings
+			if (iframeUrl === url) {
+				return iframe;
+			}
+	});
+	if (iframe) {
+		if (iframe.src !== url) {
+			iframe.src = url;
+		}
+		clickTab(iframe.id.substr(6));
+		return;
+	}
+	iframe = document.createElement("iframe");
+	iframe.frameBorder = "0";
+	iframe.classList.add("tabContent");
+	iframe.src = url;
+	var id = Date.now();
+	iframe.id = "iframe" + id;
+	iframe.addEventListener("load", function() {
+		iframe.contentWindow.confirm = window.confirm;
+		iframe.contentWindow.alert = window.alert;
+		iframe.contentWindow.__electron = electron;
+
+		var target = iframe.contentDocument.querySelector('head > title');
+		if (target) {
+			var observer = new window.WebKitMutationObserver(function(mutations) {
+				if (mutations) {
+					setTabLabel(id, iframe.contentDocument.title);
+					setTabIcon(id,iframe.contentDocument.head);
+				}
+			});
+			observer.observe(target, {
+				subtree: true,
+				characterData: true,
+				childList: true
+			});
+		}
+		setTabLabel(id, iframe.contentDocument.title);
+		setTabIcon(id, iframe.contentDocument.head);
+		iframe.contentWindow.addEventListener("click", function() {
+			var menu = document.querySelector("#context-menu");
+			var activeClassName = "context-menu-items-open";
+			menu.classList.remove(activeClassName);
+		});
+		if (isInitiatingWorkspace){
+			var tabbuttons = document.querySelectorAll(".tabItem");
+			tabbuttons[activeIndex] && tabbuttons[activeIndex].click();
+			isInitiatingWorkspace = false;
 		}
 	});
-	if(potentialExsitingIframe){
-		if(urlSegs[0].indexOf("/edit/edit.html") !== -1 && urlSegs[1] && urlSegs[1].split("/").length > 4){
-			potentialExsitingIframe.src = url; // Change the src only if it's edit page and the url is targeting some file inside the project folder 
-		}
-		if(urlSegs[1] && urlSegs[1].indexOf("/gitapi/clone") !== -1){
-			potentialExsitingIframe.contentWindow.location.reload();  // Refresh the git page in this case, to get the correct contents, otherwise user have to refresh the page themselves.
-		}
-		clickTab(potentialExsitingIframe.id.substr(6));
-	}else{
-		var iframe = document.createElement("iframe");
-		iframe.frameBorder = "0";
-		iframe.classList.add("tabContent");
-		iframe.src = url;
-		var id = Date.now();
-		iframe.id = "iframe" + id;
-		iframe.addEventListener("load", function() {
-			iframe.contentWindow.confirm = window.confirm;
-			iframe.contentWindow.alert = window.alert;
-			iframe.contentWindow.__electron = electron;
-	
-			var target = iframe.contentDocument.querySelector('head > title');
-			if (target) {
-				var observer = new window.WebKitMutationObserver(function(mutations) {
-					if (mutations) {
-						setTabLabel(id, iframe.contentDocument.title);
-						setTabIcon(id,iframe.contentDocument.head);
-					}
-				});
-				observer.observe(target, {
-					subtree: true,
-					characterData: true,
-					childList: true
-				});
-			}
-			setTabLabel(id, iframe.contentDocument.title);
-			setTabIcon(id, iframe.contentDocument.head);
-			iframe.contentWindow.addEventListener("click", function() {
-				var menu = document.querySelector("#context-menu");
-				var activeClassName = "context-menu-items-open";
-				menu.classList.remove(activeClassName);
-			});
-			if(isInitiatingWorkspace){
-				var tabbuttons = document.querySelectorAll(".tabItem");
-				tabbuttons[activeIndex] && tabbuttons[activeIndex].click();
-				isInitiatingWorkspace = false;
-			}
-		});
-		document.body.appendChild(iframe);
-		var srcUrl = nodeUrl.parse(url);
-		if(srcUrl.pathname === "/" || srcUrl.pathname.endsWith(".html")){
-			addNewTab(id, iframe).click();
-		}else{
-			needToCleanFrames.push(iframe);
-		}
+	document.body.appendChild(iframe);
+	var srcUrl = nodeUrl.parse(url);
+	if (srcUrl.pathname === "/" || srcUrl.pathname.endsWith(".html")){
+		addNewTab(id, iframe).click();
+	} else {
+		needToCleanFrames.push(iframe);
 	}
 }
 

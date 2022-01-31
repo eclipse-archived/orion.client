@@ -107,13 +107,13 @@ function putStash(req, res) {
 				} else if (index === -1) {
 					return "Invalid stash reference " + stashRev + ".";
 				}
-				return git.Stash.apply(repo, index, git.Stash.APPLY_FLAGS.APPLY_REINSTATE_INDEX)
+				return git.Stash.apply(repo, index, {flags: git.Stash.APPLY_FLAGS.APPLY_REINSTATE_INDEX})
 				.then(function() {
 					return null;
 				});
 			});
 		}
-		return git.Stash.pop(repo, 0, git.Stash.APPLY_FLAGS.APPLY_REINSTATE_INDEX)
+		return git.Stash.pop(repo, 0, {flags: git.Stash.APPLY_FLAGS.APPLY_REINSTATE_INDEX})
 		.then(function() {
 			return null;
 		});

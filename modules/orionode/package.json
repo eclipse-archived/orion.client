@@ -1,5 +1,6 @@
 {
   "name": "orion",
+  "productName": "Orion",
   "version": "22.0.0",
   "description": "An Eclipse Orion server written in Node.js.",
   "homepage": "http://eclipse.org/orion/",
@@ -97,9 +98,9 @@
   },
   "main": "server.js",
   "scripts": {
-    "dist:osx": "build --o --publish=never",
-    "dist:win": "build --w",
-    "dist:linux": "build --l",
+    "dist:osx": "electron-builder --o --publish=never",
+    "dist:win": "electron-builder --w",
+    "dist:linux": "electron-builder --l",
     "test": "grunt test_all",
     "report-coverage": "cat ./coverage/combined/lcov.info | coveralls",
     "optimize": "grunt",
@@ -108,16 +109,14 @@
   "build": {
     "appId": "org.eclipse.orion",
     "asar": true,
-    "electronVersion": "1.4.10",
-    "productName": "orion",
+    "electronVersion": "16.0.7",
     "nodeGypRebuild": "false",
     "npmRebuild": "false",
     "compression": "maximum",
     "mac": {
       "category": "public.app-category.developer-tools",
       "target": [
-        "dmg",
-        "zip"
+        "dmg"
       ],
       "icon": "build/icon.icns"
     },
