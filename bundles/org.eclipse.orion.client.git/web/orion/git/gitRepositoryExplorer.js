@@ -388,7 +388,7 @@ define([
 		}
 		if (changes && (0 === changes.length || changes.length > 2)) changes = null;
 		changes = changes || (this.repository.status ? [this.repository.status] : []);
-		if (this.changes && changes) {
+		if (this.changes && changes && lib.node('table').hasChildNodes()) {
 			if (this.changes.length === changes.length) {
 				var i;
 				for (i = 0; i < changes.length; i++) {
@@ -414,7 +414,6 @@ define([
 		} else if (changes.length === 1 && this.changes[0] && this.changes[0].Type === "Commit") { //$NON-NLS-0$
 			title = i18nUtil.formatMessage(messages[changes[0].Type + ' (${0})'], util.shortenRefName(changes[0])); //$NON-NLS-0$
 			this.displayDiffs(this.repository, changes[0], null, null, title);
-			this.statusDeferred = new Deferred().resolve(); //HACK
 			return;
 		}
 		this.statusDeferred = this.displayStatus(this.repository).then(function() {
@@ -761,7 +760,7 @@ define([
 			}
 		});
 		this.autoFetch = false;
-		return this.statusDeferred.then(function() {
+		return (this.statusDeferred || new Deferred().resolve()).then(function() {
 			mMetrics.logPageLoadTiming("interactive", window.location.pathname); //$NON-NLS-0$
 			return explorer.display().then(function() {
 				if (!this.reference) {
