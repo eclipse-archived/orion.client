@@ -64,6 +64,9 @@ function getplans(req, res){
 				filePath = path.dirname(filePath);
 			}
 			return manifests.retrieveManifestFile(req, res)
+			.catch(function(err){
+				return null;
+			})
 			.then(function(manifest){
 				var children = [];
 				function generatePlansforManifest(){
@@ -72,7 +75,7 @@ function getplans(req, res){
 					}
 					function generateNodePlan(){
 						if(checkFileExists(path.join(filePath, "package.json"))){
-							var applicationKeys = Object.keys(manifest.applications[0]);
+							var applicationKeys = Object.keys(manifest ? manifest.applications[0] : []);
 							var cloneManifest = { "applications": [{}] };
 							var required = [];
 							applicationKeys.forEach(function(key){
@@ -104,8 +107,6 @@ function getplans(req, res){
 				generatePlansforManifest();
 				var result =  {"Children": children};
 				writeResponse(200, res, null, result);
-			}).catch(function(err){
-				return writeError(404, res, err.message);
 			});
 		});
 	});
