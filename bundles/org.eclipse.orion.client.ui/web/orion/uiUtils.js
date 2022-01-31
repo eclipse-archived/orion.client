@@ -320,6 +320,9 @@ define([
 			case "select": //$NON-NLS-0$
 			case "textarea": //$NON-NLS-0$
 				return true;
+			case "div": //$NON-NLS-0$
+				if (element.contentEditable === "true")
+					return true;
 		}
 		if (element.parentNode === parentLimit) return false;
 		return element.parentNode && isFormElement(element.parentNode, parentLimit);
