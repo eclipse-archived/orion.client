@@ -674,7 +674,7 @@ function getRemoteCallbacks(creds, username, task, updates) {
 			if (isSsh && creds.GitSshPrivateKey) {
 				var privateKey = creds.GitSshPrivateKey;
 				var passphrase = creds.GitSshPassphrase;
-				return git.Cred.sshKeyMemoryNew(
+				return (git.Credential || git.Cred).sshKeyMemoryNew(
 					creds.GitSshUsername || urlUsername,
 					"",
 					privateKey,
@@ -688,23 +688,23 @@ function getRemoteCallbacks(creds, username, task, updates) {
 				/* clear username/password to avoid inifinite loop in nodegit */
 				delete creds.GitSshUsername;
 				delete creds.GitSshPassword;
-				return git.Cred.userpassPlaintextNew(
+				return (git.Credential || git.Cred).userpassPlaintextNew(
 					gitusername,
 					password || ""
 				);
 			}
 
 			if (isSsh) {
-				return git.Cred.defaultNew();
+				return (git.Credential || git.Cred).defaultNew();
 			}
 
 			return new Promise(function(resolve, reject) {
 				credentialsProvider.getCredentials(gitUrl, username).then(
 					function(result) {
-						resolve(git.Cred.userpassPlaintextNew(result.username, result.password));
+						resolve((git.Credential || git.Cred).userpassPlaintextNew(result.username, result.password));
 					},
 					function(error) {
-						resolve(git.Cred.defaultNew());
+						resolve((git.Credential || git.Cred).defaultNew());
 					}
 				);
 			});

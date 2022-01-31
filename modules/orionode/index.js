@@ -312,6 +312,10 @@ module.exports = function startServer(options) {
 	app.use('/xterm/xterm.js', express.static(path.join(path.dirname(path.dirname(require.resolve("xterm"))), 'lib/xterm.js')));
 	app.use('/xterm/xterm.css', express.static(path.join(path.dirname(path.dirname(require.resolve("xterm"))), 'css/xterm.css')));
 
+	if (options.configParams.get("isElectron")) {
+		app.use(express.static(path.normalize(path.join(__dirname, "lib/electron"))));
+	}
+
 	let staticCacheOption;
 	if (typeof options.maxAge !== "undefined") {
 		// It's dev time

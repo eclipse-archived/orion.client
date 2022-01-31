@@ -698,9 +698,9 @@ define([
 					return util.isElectron;
 				},
 				callback: function() {
-					window.__electron.remote.dialog.showOpenDialog({properties: ['openDirectory']}, function(result) {
-						if (!result) return;
-						that.fileClient.changeWorkspace(result[0]).then(function() {
+					window.__electron.remote.dialog.showOpenDialog({properties: ['openDirectory']}).then(function (response) {
+						if (!response || response.canceled) return;
+						that.fileClient.changeWorkspace(response.filePaths[0]).then(function() {
 							util.deleteSetting("/inlineSearchOtherScope");
 							var searchClient = that.serviceRegistry.getService("orion.core.search.client");
 							if (searchClient) {

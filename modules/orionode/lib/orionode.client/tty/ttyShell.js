@@ -18,8 +18,9 @@ define([
 	"orion/searchClient",
 	"orion/globalCommands",
 	'orion/webui/littlelib',
+	'orion/PageUtil',
 	"tty/shell"
-], function(messages, mBootstrap, mCommandRegistry, mFileClient, mSearchClient, mGlobalCommands, lib, shell) {
+], function(messages, mBootstrap, mCommandRegistry, mFileClient, mSearchClient, mGlobalCommands, lib, PageUtil, shell) {
 
 	mBootstrap.startup().then(function(core) {
 		var serviceRegistry = core.serviceRegistry;
@@ -29,7 +30,10 @@ define([
 		var fileClient = new mFileClient.FileClient(serviceRegistry);
 		var searcher = new mSearchClient.Searcher({serviceRegistry: serviceRegistry, commandService: commandRegistry, fileService: fileClient});
 		mGlobalCommands.generateBanner("orion-shellPage", serviceRegistry, commandRegistry, preferences, searcher); //$NON-NLS-0$
-		mGlobalCommands.setPageTarget({task: messages.Shell, serviceRegistry: serviceRegistry, commandService: commandRegistry});
+		var resource = PageUtil.matchResourceParameters(window.location.href);
+		fileClient.read(resource.resource, true).then(function(target) {
+			mGlobalCommands.setPageTarget({task: messages.Shell, target: target, serviceRegistry: serviceRegistry, commandService: commandRegistry});
+		});
 		
 		shell.createCommands(serviceRegistry, commandRegistry, preferences);
 		

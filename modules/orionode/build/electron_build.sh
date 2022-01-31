@@ -12,10 +12,10 @@
 #  For multi platform build: https://github.com/electron-userland/electron-builder/wiki/Multi-Platform-Build
 #
 
-# Need node 6.11.1
-if [ "v6.11.1" != `node --version` ]; then
+# Need node v14.17.5
+if [ "v14.17.5" != `node --version` ]; then
 	echo -----------------------------------
-	echo Warning: node version is not v6.11.1
+	echo Error: node version is not v14.17.5
 	echo -----------------------------------
 	exit 1
 fi
@@ -26,16 +26,17 @@ cd ..
 if [ ! -d "lib/orion.client" ]; then
 	rm -rf node_modules
 	npm install
+	npm install nodegit@v0.28.0-alpha.10 @electron/remote node-pty
 	./node_modules/.bin/grunt --skipTest
 fi
 
 # update orion.conf and package.json
 update_config_files() {
 	# determine build versions
-	name=$(jsawk -i package.json 'return this.name')
-	electron_version=$(jsawk -i package.json 'return this.build.electronVersion')
-	nodegit_version=$(jsawk -i package.json 'return this.dependencies.nodegit')
-	pkg_version=$(jsawk -i package.json 'return this.version')
+	name=$(jq -r '.name' package.json)
+	electron_version=$(jq -r '.build.electronVersion' package.json)
+	nodegit_version=$(jq '.dependencies.nodegit' package.json)
+	pkg_version=$(jq -r '.version' package.json)
 	
 	# remove multi-user dependencies from package.json
 	sed -i.bak -E '/(passport\-github2|passport\-google\-oauth20|passport\-local\-mongoose|passport\-local\-mongoose-email|mongoose|mongodb|connect-mongo)/d' package.json
@@ -52,6 +53,11 @@ update_config_files() {
 		pkg_version=`echo ${pkg_version} | sed 's/.0$/.'"${BUILD_NUMBER}"'/'`
 		sed -i .bak 's/\"version\": \"'"${old_version}"'\"/\"version\"\:\ \"'"${pkg_version}"'\"/' package.json
 	fi
+
+	# update plugins
+	PREFS="lib/orion.client/defaults.pref"
+	JSON=$(jq -c '.["/plugins"] += {"plugins/consolePlugin.html": true}' $PREFS)
+	echo "$JSON" | jq > $PREFS
 
 	# set udpate server
 	if [ ! -z "$UPDATE_SERVER" ]; then
@@ -71,51 +77,46 @@ if [ -z "$NODEGIT_DIR" ]; then
 	NODEGIT_DIR=~/downloads/orion/orionode/nodegit
 fi
 
-# target electron runtime when nodegit pre-compiled binary is not available. assume only nodegit has native code
+# Install electron builder and electron-builder-squirrel-windows for Squirrel.Window app
+npm install -g electron-builder
+npm install -g electron-builder-squirrel-windows
+
 if [ ! -d "$NODEGIT_DIR" ]; then
-	# Electron's version.
-	export npm_config_target=$electron_version
-	export npm_config_arch=x64
-	export npm_config_target_arch=x64
-	export npm_config_disturl=https://atom.io/download/electron
-	export npm_config_runtime=electron
+  npm install -g electron-rebuild
+  electron-rebuild
 fi
 
 # Install production modules and clean up some unecessary files to reduce size
 npm prune --production
-rm -rf node_modules/node-pty
 rm -rf node_modules/nodegit/vendor
 find node_modules/nodegit/build/Release/ -mindepth 1 ! -name '*.node' -exec rm -rf {} \;
 rm -rf target
 
-# Install electron builder and electron-builder-squirrel-windows for Squirrel.Window app
-npm install -g electron-builder@19.16.0
-npm install -g electron-builder-squirrel-windows@19.16.0
-
 # Build mac dmg, etc
-nodegit_lib=${NODEGIT_DIR}/v${nodegit_version}/electron/v${electron_version}/mac/nodegit.node
-if [ -f "$nodegit_lib" ]; then
-	cp $nodegit_lib ./node_modules/nodegit/build/Release
+if [ "$BUILD_MAC" == "true" ]; then
+  nodegit_lib=${NODEGIT_DIR}/v${nodegit_version}/electron/v${electron_version}/mac/nodegit.node
+  if [ -f "$nodegit_lib" ]; then
+  	cp $nodegit_lib ./node_modules/nodegit/build/Release
+  fi
+  npm run dist:osx
 fi
-# Capitalize name in package.json
-sed -i .bak "s/\"name\": \"${name}\",/\"name\": \"Orion\",/" package.json
-sed -i .bak "s/\"productName\": \"${name}\",/\"productName\": \"Orion\",/" package.json
-npm run dist:osx
-sed -i .bak "s/\"name\": \"Orion\",/\"name\": \"${name}\",/" package.json
-sed -i .bak "s/\"productName\": \"Orion\",/\"productName\": \"${name}\",/" package.json
 
 # Build windows setup, etc
-nodegit_lib=${NODEGIT_DIR}/v${nodegit_version}/electron/v${electron_version}/windows/nodegit.node
-if [ -f "$nodegit_lib" ]; then
-	cp $nodegit_lib ./node_modules/nodegit/build/Release
+if [ "$BUILD_WIN" == "true" ]; then
+  nodegit_lib=${NODEGIT_DIR}/v${nodegit_version}/electron/v${electron_version}/windows/nodegit.node
+  if [ -f "$nodegit_lib" ]; then
+  	cp $nodegit_lib ./node_modules/nodegit/build/Release
+  fi
+  npm run dist:win
+  #mv "dist/${name} Setup ${pkg_version}.exe" "dist/${name}-${pkg_version}-nsis-setup.exe" /this is for nsis package
+  mv "dist/win/${name} Setup ${pkg_version}.exe" "dist/win/${name}-${pkg_version}-setup.exe"
 fi
-npm run dist:win
-#mv "dist/${name} Setup ${pkg_version}.exe" "dist/${name}-${pkg_version}-nsis-setup.exe" /this is for nsis package
-mv "dist/win/${name} Setup ${pkg_version}.exe" "dist/win/${name}-${pkg_version}-setup.exe"
 
 # Build linux packages, etc
-nodegit_lib=${NODEGIT_DIR}/v${nodegit_version}/electron/v${electron_version}/linux/nodegit.node
-if [ -f "$nodegit_lib" ]; then
-	cp $nodegit_lib ./node_modules/nodegit/build/Release
+if [ "$BUILD_LINUX" == "true" ]; then
+  nodegit_lib=${NODEGIT_DIR}/v${nodegit_version}/electron/v${electron_version}/linux/nodegit.node
+  if [ -f "$nodegit_lib" ]; then
+  	cp $nodegit_lib ./node_modules/nodegit/build/Release
+  fi
+  npm run dist:linux
 fi
-npm run dist:linux
