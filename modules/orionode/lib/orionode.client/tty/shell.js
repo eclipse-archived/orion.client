@@ -101,11 +101,47 @@ define([
 		return result.length > 0 ? result : null;
 	}
 
+	var schemes = {
+		"Light": {
+			cursor: "#000",
+			cursorAccent: "#000",
+			selection: "#3C71B3",
+			background: "#FFF",
+			foreground: "#000"
+		},
+		"Dark": {
+			cursor: "#FFF",
+			cursorAccent: "#FFF",
+			selection: "dardkgray",
+			background: "#000",
+			foreground: "#FFF"
+		},
+		"Solarized": {
+			cursor: "#839496",
+			cursorAccent: "#839496",
+			selection: "dardkgray",
+			background: "#002b36",
+			foreground: "#839496"
+		},
+		"Sky": {
+			cursor: "lightgray",
+			cursorAccent: "lightgray",
+			selection: "lightgray",
+			background: "#2c67c7",
+			foreground: "white"
+		},
+		"Sand": {
+			cursor: "lightgray",
+			cursorAccent: "lightgray",
+			selection: "lightgray",
+			background: "#fef59b",
+			foreground: "black"
+		}
+	};
+
 	function changeScheme(schemeName) {
-		var t;
 		if (term !== null) {
-			t = document.querySelector('.terminal');
-			t.setAttribute('scheme', schemeName);
+			term.setOption("theme", schemes[schemeName]);
 		}
 		if (serviceRegistry) {
 			serviceRegistry.getService("orion.core.preference").put("/orion/console", {"colorScheme": schemeName});
@@ -136,7 +172,7 @@ define([
 					});
 					var menu = dropDown.getContentNode();
 					var select = new SettingsSelect({
-						options: ["Dark", "Light", "Solarized"].map(function(l) {
+						options: Object.keys(schemes).map(function(l) {
 							return {label: l, value: l, selected: colorScheme === l};
 						}),
 						fieldlabel: "Color Scheme:",
