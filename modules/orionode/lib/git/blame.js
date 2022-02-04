@@ -39,7 +39,7 @@ function getBlame(req, res) {
 		blamerepo = repo;
 		fileDir = clone.getfileDir(repo,req);
 		fileRelativePath = clone.getfileRelativePath(repo,req);
-		return git.Blame.file(repo,fileRelativePath, git.Blame.FLAG.NORMAL);
+		return git.Blame.file(repo,fileRelativePath, {flags: git.Blame.FLAG.NORMAL});
 	})
 	.then(function(blame){
 		var hunkNum = blame.getHunkCount(); 
