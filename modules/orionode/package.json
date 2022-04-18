@@ -37,7 +37,7 @@
     "mongodb": "^3.5.3",
     "mongoose": "^5.9.1",
     "multiparty": "^4.1.2",
-    "nconf": "^0.9.1",
+    "nconf": "^0.12.0",
     "nodegit": "0.27.0",
     "nodemailer": "^6.0.0",
     "passport": "^0.3.2",
