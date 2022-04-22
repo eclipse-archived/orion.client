@@ -70,8 +70,10 @@ function commitJSON(commit, fileDir, diffs, parents) {
 function getCommit(req, res) {
 	if (req.query.parts === "body") {
 		getCommitBody(req, res);
-	} else {
+	} else if (req.query.parts === "meta" || !req.query.parts) {
 		getCommitLog(req, res);
+	} else {
+		writeError(400, res, "parts value must be either 'body' or 'meta'");
 	}
 }
 
