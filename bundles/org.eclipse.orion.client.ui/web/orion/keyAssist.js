@@ -152,7 +152,6 @@ define([
 			}
 			var row = this._keyAssistTable.insertRow(-1);
 			row.id = "keyAssist-keyBinding-" + this._idCount++; //$NON-NLS-1$
-			lib.setSafeAttribute(row, "role", "row");
 			row.cmdID = cmdID;
 			row._execute = execute;
 			row.curBinding = binding;
@@ -166,13 +165,11 @@ define([
 			var column = row.insertCell(-1);
 			column.classList.add("keyAssistName"); //$NON-NLS-1$
 			column.headers = this._lastHeaderID; //$NON-NLS-0$
-			lib.setSafeAttribute(column, "role", "gridcell");
 			column.appendChild(document.createTextNode(name));
 			
 			column = row.insertCell(-1);
 			column.classList.add("keyAssistAccel"); //$NON-NLS-1$
 			column.headers = this._lastHeaderID; //$NON-NLS-0$
-			lib.setSafeAttribute(column, "role", "gridcell");
 			var bindingSpan = document.createElement("span"); //$NON-NLS-1$
 			bindingSpan.textContent = bindingString;
 			column.appendChild(bindingSpan);
