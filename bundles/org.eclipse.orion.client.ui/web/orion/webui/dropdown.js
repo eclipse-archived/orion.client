@@ -393,19 +393,19 @@ define(['orion/webui/littlelib', 'orion/EventTarget'], function(lib, EventTarget
 		/**
 		 * A key is down in the dropdown node
 		 */
-		 _dropdownKeyDown: function(event) {
-		 	if (event.keyCode === lib.KEY.TAB && !this._trapTabs) {
-		 		if (this._selectedItem || this._isVisible) {
-		 			var keepIterating = true;
-		 			while (keepIterating) {
+		_dropdownKeyDown: function(event) {
+			if (event.keyCode === lib.KEY.TAB && !this._trapTabs) {
+				if (this._selectedItem || this._isVisible) {
+					var keepIterating = true;
+					while (keepIterating) {
 						keepIterating = this.close(true);
 						if (this._parentDropdown && keepIterating) {
 							this._parentDropdown._dropdownNode.focus();
 						}
 					}
-		 		}
-		 		return;  // Allow the TAB to propagate
-		 	}
+				}
+				return;  // Allow the TAB to propagate
+			}
 			if (event.keyCode === lib.KEY.UP || event.keyCode === lib.KEY.DOWN || event.keyCode === lib.KEY.RIGHT || event.keyCode === lib.KEY.LEFT || event.keyCode === lib.KEY.ENTER || event.keyCode === lib.KEY.SPACE) {
 				var items = this.getItems();
 				var isMenuBar = this._dropdownNode.getAttribute("role") === "menubar";
@@ -536,47 +536,64 @@ define(['orion/webui/littlelib', 'orion/EventTarget'], function(lib, EventTarget
 				}
 
 			}
-		 },
-		 
-		 /**
-		  * Selects the specified dropdown menu item or the first
-		  * dropdown menu item if none is specified.
-		  * @param {Object} item The dropdown menu item that should be selected. See @ref getItems() for details. Optional.
-		  */
-		 _selectItem: function(item) {
-		 	var itemToSelect = item || this.getItems()[0];
-		 	if (itemToSelect) {
-		 		if (this._selectedItem) {
-		 			this._selectedItem.classList.remove("dropdownMenuItemSelected"); //$NON-NLS-0$
-			 	}
-			 	this._selectedItem = itemToSelect;
-			 	this._selectedItem.classList.add("dropdownMenuItemSelected"); //$NON-NLS-0$	
-			 	this._selectedItem.focus();
-			 	if (this._buttonsAdded) {
-			 		var itemBounds = this._selectedItem.getBoundingClientRect();
-			 		var menuBounds = this._dropdownNode.getBoundingClientRect();
-			 		if (this._selectedItem.offsetTop < this._dropdownNode.scrollTop) {
-		 				this._selectedItem.scrollIntoView(true);
-		 				if (this._dropdownNode.scrollTop < 5) {
-		 					this._dropdownNode.scrollTop = 0;
-		 				}
-		 			}
-		 			else if (itemBounds.bottom > menuBounds.bottom) {
-		 				this._selectedItem.scrollIntoView(false);
-		 				if ((this._dropdownNode.scrollHeight - this._dropdownNode.scrollTop - this._dropdownNode.clientHeight) < 5) {
-		 					this._dropdownNode.scrollTop = this._dropdownNode.scrollHeight - this._dropdownNode.clientHeight;
-		 				}
-		 			}
-		 			updateScrollButtonVisibility.call(this);
+		},
+		
+		_getFocusableElems: function(root) {
+			var nodeList = root.querySelectorAll('a,button,input,select,textarea,[tabIndex]');
+			return Array.prototype.slice.call(nodeList);
+		},
+		
+		/**
+		 * Selects the specified dropdown menu item or the first
+		 * dropdown menu item if none is specified.
+		 * @param {Object} item The dropdown menu item that should be selected. See @ref getItems() for details. Optional.
+		 */
+		_selectItem: function(item) {
+			var itemToSelect = item || this.getItems()[0];
+			if (itemToSelect) {
+				if (this._selectedItem) {
+					this._selectedItem.classList.remove("dropdownMenuItemSelected"); //$NON-NLS-0$
+					this._getFocusableElems(this._selectedItem).forEach(function(element) {
+						if (element.savedTabIndex === undefined) {
+							element.savedTabIndex = element.tabIndex;
+						}
+						element.tabIndex = -1;
+					});
 				}
-		 	}
-		 },
-		 
-		 /**
-		  * Closes this._selectedSubmenu, and its children, if it is open.
-		  * Sets the this._selectedSubmenu to the one that's passed in.
-		  * @param submenu The submenu that was opened and should be set as the next this._selectedSubmenu
-		  */
+				this._selectedItem = itemToSelect;
+				this._selectedItem.classList.add("dropdownMenuItemSelected"); //$NON-NLS-0$
+				this._getFocusableElems(this._selectedItem).forEach(function(element) {
+					if (element.savedTabIndex === -1) {
+						return;
+					}
+					element.tabIndex = 0;
+				});
+				this._selectedItem.focus();
+				if (this._buttonsAdded) {
+					var itemBounds = this._selectedItem.getBoundingClientRect();
+					var menuBounds = this._dropdownNode.getBoundingClientRect();
+					if (this._selectedItem.offsetTop < this._dropdownNode.scrollTop) {
+						this._selectedItem.scrollIntoView(true);
+						if (this._dropdownNode.scrollTop < 5) {
+							this._dropdownNode.scrollTop = 0;
+						}
+					}
+					else if (itemBounds.bottom > menuBounds.bottom) {
+						this._selectedItem.scrollIntoView(false);
+						if ((this._dropdownNode.scrollHeight - this._dropdownNode.scrollTop - this._dropdownNode.clientHeight) < 5) {
+							this._dropdownNode.scrollTop = this._dropdownNode.scrollHeight - this._dropdownNode.clientHeight;
+						}
+					}
+					updateScrollButtonVisibility.call(this);
+				}
+			}
+		},
+		
+		/**
+		 * Closes this._selectedSubmenu, and its children, if it is open.
+		 * Sets the this._selectedSubmenu to the one that's passed in.
+		 * @param submenu The submenu that was opened and should be set as the next this._selectedSubmenu
+		 */
 		submenuOpen: function(submenu) {
 			if (submenu !== this._selectedSubmenu) {
 				//close the current menu and all its children
@@ -591,8 +608,8 @@ define(['orion/webui/littlelib', 'orion/EventTarget'], function(lib, EventTarget
 				currentSubmenu.close();
 				currentSubmenu = currentSubmenu._selectedSubmenu;
 			}
-		 },
-		 
+		},
+		
 		destroy: function() {
 			this.empty();
 			if (this._boundAutoDismiss) {
@@ -632,8 +649,8 @@ define(['orion/webui/littlelib', 'orion/EventTarget'], function(lib, EventTarget
 	 */
 	function createMenuItem(text, innerNodeType) {
 		innerNodeType = innerNodeType === undefined ? "span" : innerNodeType; //$NON-NLS-0$
-	 	
-	 	var element = document.createElement(innerNodeType); //$NON-NLS-0$
+		
+		var element = document.createElement(innerNodeType); //$NON-NLS-0$
 		element.className = "dropdownMenuItem"; //$NON-NLS-0$
 		lib.setSafeAttribute(element, "role", "menuitem");
 		element.tabIndex = -1;
@@ -645,10 +662,10 @@ define(['orion/webui/littlelib', 'orion/EventTarget'], function(lib, EventTarget
 			span.classList.add("dropdownCommandName"); //$NON-NLS-0$
 			element.appendChild(span);
 		}
-	 	
-	 	var li = document.createElement("li"); //$NON-NLS-0$
+		
+		var li = document.createElement("li"); //$NON-NLS-0$
 		lib.setSafeAttribute(li, "role", "none");
-	 	li.appendChild(element); //$NON-NLS-0$
+		li.appendChild(element); //$NON-NLS-0$
 		
 		return li;
 	}
