@@ -110,6 +110,18 @@ define([
 			}
 			return this._notifierElements;
 		},
+		
+		_changeProgress: function(contents) {
+			var node = lib.node(this.progressDomId);
+			lib.empty(node);
+			node.appendChild(contents);
+			// Ensure that the live region is dynamic for screen readers.
+			var parentNode = node.parentNode;
+			var sibling = node.nextSibling || null;
+			parentNode.removeChild(node);
+			parentNode.insertBefore(node, sibling);
+		},
+		
 		/**
 		 * Displays a status message to the user.
 		 * @param {String} msg Message to display.
@@ -222,9 +234,7 @@ define([
 				}
 			}
 
-			var node = lib.node(this.progressDomId);
-			lib.empty(node);
-			node.appendChild(document.createTextNode(message));
+			this._changeProgress(document.createTextNode(message));
 
 			var container = lib.node(this.notificationContainerDomId);
 			container.classList.remove("notificationHide"); //$NON-NLS-0$
@@ -278,9 +288,7 @@ define([
 				// Last ditch effort to prevent user from seeing meaningless "[object Object]" message
 				msg = messages.UnknownError;
 			}
-			var node = lib.node(this.progressDomId);
-			lib.empty(node);
-			node.appendChild(this.createMessage(_status, msg));
+			this._changeProgress(this.createMessage(_status, msg));
 
 			// Given the severity, add/remove the appropriate classes from the notificationContainerDomId
 			var extraClass = "progressNormal"; //$NON-NLS-0$
