@@ -112,27 +112,10 @@ define([
 		},
 		
 		_changeProgress: function(contents, liveAttribute) {
-			this._progressContents = contents;
 			var node = lib.node(this.progressDomId);
-			if(typeof liveAttribute === "string") {
-				// this is kind of a hack; when there is good screen reader support for aria-busy,
-				// this should be done by toggling that instead
-				var readSetting = node.getAttribute("aria-live"); //$NON-NLS-0$
-				lib.setSafeAttribute(node, "aria-live", liveAttribute);
-				window.setTimeout(function() {
-					if (contents === this._progressContents) {
-						lib.empty(node);
-						node.appendChild(contents);
-						window.setTimeout(function() { 
-							lib.setSafeAttribute(node, "aria-live", readSetting);
-						}, 100); //$NON-NLS-0$
-					}
-				}.bind(this), 100);
-			}
-			else {
-				lib.empty(node);
-				node.appendChild(contents);
-			}
+			lib.setSafeAttribute(node, "aria-live", liveAttribute);
+			lib.empty(node);
+			node.appendChild(contents);
 		},
 		
 		/**
