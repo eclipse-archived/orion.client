@@ -111,15 +111,28 @@ define([
 			return this._notifierElements;
 		},
 		
-		_changeProgress: function(contents) {
+		_changeProgress: function(contents, liveAttribute) {
+			this._progressContents = contents;
 			var node = lib.node(this.progressDomId);
-			lib.empty(node);
-			node.appendChild(contents);
-			// Ensure that the live region is dynamic for screen readers.
-			var parentNode = node.parentNode;
-			var sibling = node.nextSibling || null;
-			parentNode.removeChild(node);
-			parentNode.insertBefore(node, sibling);
+			if(typeof liveAttribute === "string") {
+				// this is kind of a hack; when there is good screen reader support for aria-busy,
+				// this should be done by toggling that instead
+				var readSetting = node.getAttribute("aria-live"); //$NON-NLS-0$
+				lib.setSafeAttribute(node, "aria-live", liveAttribute);
+				window.setTimeout(function() {
+					if (contents === this._progressContents) {
+						lib.empty(node);
+						node.appendChild(contents);
+						window.setTimeout(function() { 
+							lib.setSafeAttribute(node, "aria-live", readSetting);
+						}, 100); //$NON-NLS-0$
+					}
+				}.bind(this), 100);
+			}
+			else {
+				lib.empty(node);
+				node.appendChild(contents);
+			}
 		},
 		
 		/**
@@ -234,7 +247,7 @@ define([
 				}
 			}
 
-			this._changeProgress(document.createTextNode(message));
+			this._changeProgress(document.createTextNode(message), "polite");
 
 			var container = lib.node(this.notificationContainerDomId);
 			container.classList.remove("notificationHide"); //$NON-NLS-0$
@@ -288,7 +301,7 @@ define([
 				// Last ditch effort to prevent user from seeing meaningless "[object Object]" message
 				msg = messages.UnknownError;
 			}
-			this._changeProgress(this.createMessage(_status, msg));
+			this._changeProgress(this.createMessage(_status, msg), "assertive");
 
 			// Given the severity, add/remove the appropriate classes from the notificationContainerDomId
 			var extraClass = "progressNormal"; //$NON-NLS-0$
