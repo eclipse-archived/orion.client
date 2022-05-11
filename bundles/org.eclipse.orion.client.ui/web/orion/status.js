@@ -111,15 +111,11 @@ define([
 			return this._notifierElements;
 		},
 		
-		_changeProgress: function(contents) {
+		_changeProgress: function(contents, liveAttribute) {
 			var node = lib.node(this.progressDomId);
+			lib.setSafeAttribute(node, "aria-live", liveAttribute);
 			lib.empty(node);
 			node.appendChild(contents);
-			// Ensure that the live region is dynamic for screen readers.
-			var parentNode = node.parentNode;
-			var sibling = node.nextSibling || null;
-			parentNode.removeChild(node);
-			parentNode.insertBefore(node, sibling);
 		},
 		
 		/**
@@ -234,7 +230,7 @@ define([
 				}
 			}
 
-			this._changeProgress(document.createTextNode(message));
+			this._changeProgress(document.createTextNode(message), "polite");
 
 			var container = lib.node(this.notificationContainerDomId);
 			container.classList.remove("notificationHide"); //$NON-NLS-0$
@@ -288,7 +284,7 @@ define([
 				// Last ditch effort to prevent user from seeing meaningless "[object Object]" message
 				msg = messages.UnknownError;
 			}
-			this._changeProgress(this.createMessage(_status, msg));
+			this._changeProgress(this.createMessage(_status, msg), "assertive");
 
 			// Given the severity, add/remove the appropriate classes from the notificationContainerDomId
 			var extraClass = "progressNormal"; //$NON-NLS-0$
